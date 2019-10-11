@@ -1527,8 +1527,8 @@ int mbsys_kmbes_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 int mbsys_kmbes_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
 int mbsys_kmbes_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
 int mbsys_kmbes_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
-// int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
-//        void *platform_ptr, void *preprocess_pars_ptr, int *error);
+int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
+                            void *platform_ptr, void *preprocess_pars_ptr, int *error);
 // int mbsys_kmbes_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 //		int *kind, void **platform_ptr, int *error);
 int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,

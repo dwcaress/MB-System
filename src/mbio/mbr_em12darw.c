@@ -62,9 +62,9 @@ int mbr_info_em12darw(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -280,7 +280,7 @@ int mbr_rt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* get data type */
 	kind = MB_DATA_NONE;
 	if (status == MB_SUCCESS) {
-		mb_get_binary_short(MB_NO, &line[0], &(data->func));
+		mb_get_binary_short(false, &line[0], &(data->func));
 	}
 
 	/* deal with comment */
@@ -295,66 +295,66 @@ int mbr_rt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		kind = MB_DATA_DATA;
 
 		index = 2;
-		mb_get_binary_short(MB_NO, &line[index], &(data->year));
+		mb_get_binary_short(false, &line[index], &(data->year));
 		index += 2;
-		mb_get_binary_short(MB_NO, &line[index], &(data->jday));
+		mb_get_binary_short(false, &line[index], &(data->jday));
 		index += 2;
-		mb_get_binary_short(MB_NO, &line[index], &(data->minute));
+		mb_get_binary_short(false, &line[index], &(data->minute));
 		index += 2;
-		mb_get_binary_short(MB_NO, &line[index], &(data->secs));
+		mb_get_binary_short(false, &line[index], &(data->secs));
 		index += 8;
-		mb_get_binary_double(MB_NO, &line[index], &(data->latitude));
+		mb_get_binary_double(false, &line[index], &(data->latitude));
 		index += 8;
-		mb_get_binary_double(MB_NO, &line[index], &(data->longitude));
+		mb_get_binary_double(false, &line[index], &(data->longitude));
 		index += 8;
-		mb_get_binary_short(MB_NO, &line[index], &(data->corflag));
+		mb_get_binary_short(false, &line[index], &(data->corflag));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->utm_merd));
+		mb_get_binary_float(false, &line[index], &(data->utm_merd));
 		index += 4;
-		mb_get_binary_short(MB_NO, &line[index], &(data->utm_zone));
+		mb_get_binary_short(false, &line[index], &(data->utm_zone));
 		index += 2;
-		mb_get_binary_short(MB_NO, &line[index], &(data->posq));
+		mb_get_binary_short(false, &line[index], &(data->posq));
 		index += 2;
-		mb_get_binary_int(MB_NO, &line[index], &(data->pingno));
+		mb_get_binary_int(false, &line[index], &(data->pingno));
 		index += 4;
-		mb_get_binary_short(MB_NO, &line[index], &(data->mode));
+		mb_get_binary_short(false, &line[index], &(data->mode));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->depthl));
+		mb_get_binary_float(false, &line[index], &(data->depthl));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->speed));
+		mb_get_binary_float(false, &line[index], &(data->speed));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->gyro));
+		mb_get_binary_float(false, &line[index], &(data->gyro));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->roll));
+		mb_get_binary_float(false, &line[index], &(data->roll));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->pitch));
+		mb_get_binary_float(false, &line[index], &(data->pitch));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->heave));
+		mb_get_binary_float(false, &line[index], &(data->heave));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->sndval));
+		mb_get_binary_float(false, &line[index], &(data->sndval));
 		index += 4;
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_get_binary_short(MB_NO, &line[index], &(data->depth[i]));
+			mb_get_binary_short(false, &line[index], &(data->depth[i]));
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_get_binary_short(MB_NO, &line[index], &(data->distacr[i]));
+			mb_get_binary_short(false, &line[index], &(data->distacr[i]));
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_get_binary_short(MB_NO, &line[index], &(data->distalo[i]));
+			mb_get_binary_short(false, &line[index], &(data->distalo[i]));
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_get_binary_short(MB_NO, &line[index], &(data->range[i]));
+			mb_get_binary_short(false, &line[index], &(data->range[i]));
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_get_binary_short(MB_NO, &line[index], &(data->refl[i]));
+			mb_get_binary_short(false, &line[index], &(data->refl[i]));
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_get_binary_short(MB_NO, &line[index], &(data->beamq[i]));
+			mb_get_binary_short(false, &line[index], &(data->beamq[i]));
 			index += 2;
 		}
 
@@ -670,7 +670,7 @@ int mbr_wt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index = 0;
 		for (int i = 0; i < MBF_EM12DARW_RECORD_LENGTH; i++)
 			line[i] = 0;
-		mb_put_binary_short(MB_NO, data->func, &line[0]);
+		mb_put_binary_short(false, data->func, &line[0]);
 		index += 2;
 		strncpy(datacomment, store->comment, MBSYS_SIMRAD_COMMENT_LENGTH);
 	}
@@ -678,68 +678,68 @@ int mbr_wt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* deal with data */
 	else if (store->kind == MB_DATA_DATA) {
 		index = 0;
-		mb_put_binary_short(MB_NO, data->func, &line[0]);
+		mb_put_binary_short(false, data->func, &line[0]);
 		index += 2;
-		mb_put_binary_short(MB_NO, data->year, &line[index]);
+		mb_put_binary_short(false, data->year, &line[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, data->jday, &line[index]);
+		mb_put_binary_short(false, data->jday, &line[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, data->minute, &line[index]);
+		mb_put_binary_short(false, data->minute, &line[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, data->secs, &line[index]);
+		mb_put_binary_short(false, data->secs, &line[index]);
 		index += 8;
-		mb_put_binary_double(MB_NO, data->latitude, &line[index]);
+		mb_put_binary_double(false, data->latitude, &line[index]);
 		index += 8;
-		mb_put_binary_double(MB_NO, data->longitude, &line[index]);
+		mb_put_binary_double(false, data->longitude, &line[index]);
 		index += 8;
-		mb_put_binary_short(MB_NO, data->corflag, &line[index]);
+		mb_put_binary_short(false, data->corflag, &line[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, data->utm_merd, &line[index]);
+		mb_put_binary_float(false, data->utm_merd, &line[index]);
 		index += 4;
-		mb_put_binary_short(MB_NO, data->utm_zone, &line[index]);
+		mb_put_binary_short(false, data->utm_zone, &line[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, data->posq, &line[index]);
+		mb_put_binary_short(false, data->posq, &line[index]);
 		index += 2;
-		mb_put_binary_int(MB_NO, data->pingno, &line[index]);
+		mb_put_binary_int(false, data->pingno, &line[index]);
 		index += 4;
-		mb_put_binary_short(MB_NO, data->mode, &line[index]);
+		mb_put_binary_short(false, data->mode, &line[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, data->depthl, &line[index]);
+		mb_put_binary_float(false, data->depthl, &line[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, data->speed, &line[index]);
+		mb_put_binary_float(false, data->speed, &line[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, data->gyro, &line[index]);
+		mb_put_binary_float(false, data->gyro, &line[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, data->roll, &line[index]);
+		mb_put_binary_float(false, data->roll, &line[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, data->pitch, &line[index]);
+		mb_put_binary_float(false, data->pitch, &line[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, data->heave, &line[index]);
+		mb_put_binary_float(false, data->heave, &line[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, data->sndval, &line[index]);
+		mb_put_binary_float(false, data->sndval, &line[index]);
 		index += 4;
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_put_binary_short(MB_NO, data->depth[i], &line[index]);
+			mb_put_binary_short(false, data->depth[i], &line[index]);
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_put_binary_short(MB_NO, data->distacr[i], &line[index]);
+			mb_put_binary_short(false, data->distacr[i], &line[index]);
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_put_binary_short(MB_NO, data->distalo[i], &line[index]);
+			mb_put_binary_short(false, data->distalo[i], &line[index]);
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_put_binary_short(MB_NO, data->range[i], &line[index]);
+			mb_put_binary_short(false, data->range[i], &line[index]);
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_put_binary_short(MB_NO, data->refl[i], &line[index]);
+			mb_put_binary_short(false, data->refl[i], &line[index]);
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_put_binary_short(MB_NO, data->beamq[i], &line[index]);
+			mb_put_binary_short(false, data->beamq[i], &line[index]);
 			index += 2;
 		}
 	}

@@ -166,9 +166,9 @@ int main(int argc, char **argv) {
 
 	/* control parameters */
 	double areabounds[4];
-	int areaboundsset = MB_NO;
+	int areaboundsset = false;
 	double binsize = 0.0;
-	int binsizeset = MB_NO;
+	int binsizeset = false;
 	double mtodeglon;
 	double mtodeglat;
 	double dx, dy;
@@ -249,12 +249,12 @@ int main(int argc, char **argv) {
 			case 'R':
 			case 'r':
 				mb_get_bounds(optarg, areabounds);
-				areaboundsset = MB_YES;
+				areaboundsset = true;
 				break;
 			case 'S':
 			case 's':
 				sscanf(optarg, "%lf", &binsize);
-				binsizeset = MB_YES;
+				binsizeset = true;
 				break;
 			case '?':
 				errflg = true;
@@ -317,7 +317,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* if bounds not set get bounds of input data */
-	if (areaboundsset == MB_NO) {
+	if (areaboundsset == false) {
 		formatread = format;
 		status = mb_get_info_datalist(verbose, read_file, &formatread, &mb_info, lonflip, &error);
 
@@ -326,7 +326,7 @@ int main(int argc, char **argv) {
 		areabounds[2] = mb_info.lat_min;
 		areabounds[3] = mb_info.lat_max;
 
-		if (binsizeset == MB_NO)
+		if (binsizeset == false)
 			binsize = 0.2 * mb_info.altitude_max;
 	}
 
@@ -393,18 +393,18 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(swathfile, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data == true) {
 		/* check format and get format flags */
 		if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
 			mb_error(verbose, error, &message);
@@ -528,8 +528,8 @@ int main(int argc, char **argv) {
 		}
 
 		/* read the pings into memory */
-		done = MB_NO;
-		while (done == MB_NO) {
+		done = false;
+		while (done == false) {
 			if (verbose > 1)
 				fprintf(stderr, "\n");
 
@@ -539,7 +539,7 @@ int main(int argc, char **argv) {
 			                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 			                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 			if (status == MB_FAILURE && error > MB_ERROR_NO_ERROR)
-				done = MB_YES;
+				done = true;
 			if (verbose >= 2) {
 				fprintf(stderr, "\ndbg2  current data status:\n");
 				fprintf(stderr, "dbg2    kind:       %d\n", kind);
@@ -663,12 +663,12 @@ int main(int argc, char **argv) {
 		/* figure out whether and what to read next */
 		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 	}
 

@@ -65,9 +65,9 @@ int mbr_info_elmk2unb(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_NAV;
 	*sensordepth_source = MB_DATA_DATA;
@@ -936,10 +936,10 @@ int mbr_elmk2unb_rd_data(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	int status = MB_SUCCESS;
-	int done = MB_NO;
+	int done = false;
 	type = (short int *)label;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == MB_NO) {
+	while (done == false) {
 		/* get next record label */
 		if ((status = fread(&label[0], 1, 1, mb_io_ptr->mbfp)) != 1) {
 			status = MB_FAILURE;
@@ -958,40 +958,40 @@ int mbr_elmk2unb_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE) {
-			done = MB_YES;
+			done = true;
 		}
 		else if (*type == ELACMK2_COMMENT) {
 			status = mbr_elmk2unb_rd_comment(verbose, mbfp, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_COMMENT;
 			}
 		}
 		else if (*type == ELACMK2_PARAMETER) {
 			status = mbr_elmk2unb_rd_parameter(verbose, mbfp, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_PARAMETER;
 			}
 		}
 		else if (*type == ELACMK2_POS) {
 			status = mbr_elmk2unb_rd_pos(verbose, mbfp, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_NAV;
 			}
 		}
 		else if (*type == ELACMK2_SVP) {
 			status = mbr_elmk2unb_rd_svp(verbose, mbfp, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
 			}
 		}
 		else if (*type == ELACMK2_BATHGEN) {
 			status = mbr_elmk2unb_rd_bathgen(verbose, mbfp, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_DATA;
 			}
 		}
@@ -1002,7 +1002,7 @@ int mbr_elmk2unb_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* bail out if there is an error */
 		if (status == MB_FAILURE)
-			done = MB_YES;
+			done = true;
 	}
 
 	/* get file position */

@@ -85,8 +85,8 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 		}
 
 		/* set asciiheader and fileheader flags */
-		mb_segyio_ptr->asciiheader_set = MB_NO;
-		mb_segyio_ptr->fileheader_set = MB_NO;
+		mb_segyio_ptr->asciiheader_set = false;
+		mb_segyio_ptr->fileheader_set = false;
 	}
 
 	/* if ok then read file headers */
@@ -97,7 +97,7 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 			*error = MB_ERROR_EOF;
 		}
 		else
-			mb_segyio_ptr->asciiheader_set = MB_YES;
+			mb_segyio_ptr->asciiheader_set = true;
 
 		/* read file header */
 		if (fread(mb_segyio_ptr->buffer, 1, MB_SEGY_FILEHEADER_LENGTH, mb_segyio_ptr->fp) != MB_SEGY_FILEHEADER_LENGTH) {
@@ -105,77 +105,77 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 			*error = MB_ERROR_EOF;
 		}
 		else
-			mb_segyio_ptr->fileheader_set = MB_YES;
+			mb_segyio_ptr->fileheader_set = true;
 
 		/* extract file header data */
 		if (status == MB_SUCCESS) {
 			int index = 0;
 			char *buffer = mb_segyio_ptr->buffer;
-			mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(fileheader->jobid));
+			mb_get_binary_int(false, (void *)&(buffer[index]), &(fileheader->jobid));
 			index += 4;
-			mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(fileheader->line));
+			mb_get_binary_int(false, (void *)&(buffer[index]), &(fileheader->line));
 			index += 4;
-			mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(fileheader->reel));
+			mb_get_binary_int(false, (void *)&(buffer[index]), &(fileheader->reel));
 			index += 4;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->channels));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->channels));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->aux_channels));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->aux_channels));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->sample_interval));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->sample_interval));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->sample_interval_org));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->sample_interval_org));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->number_samples));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->number_samples));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->number_samples_org));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->number_samples_org));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->format));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->format));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->cdp_fold));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->cdp_fold));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->trace_sort));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->trace_sort));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->vertical_sum));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->vertical_sum));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->sweep_start));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->sweep_start));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->sweep_end));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->sweep_end));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->sweep_length));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->sweep_length));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->sweep_type));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->sweep_type));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->sweep_trace));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->sweep_trace));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->sweep_taper_start));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->sweep_taper_start));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->sweep_taper_end));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->sweep_taper_end));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->sweep_taper));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->sweep_taper));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->correlated));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->correlated));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->binary_gain));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->binary_gain));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->amplitude));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->amplitude));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->units));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->units));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->impulse_polarity));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->impulse_polarity));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->vibrate_polarity));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->vibrate_polarity));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->domain));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->domain));
 			index += 2;
 			for (int i = 0; i < 238; i++) {
 				fileheader->extra[i] = buffer[index];
 				index++;
 			}
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->rev));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->rev));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->fixed_length));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->fixed_length));
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->num_ext_headers));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(fileheader->num_ext_headers));
 			index += 2;
 			for (int i = 0; i < 94; i++) {
 				fileheader->extra[i] = buffer[index];
@@ -330,8 +330,8 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 		}
 
 		/* set asciiheader and fileheader flags */
-		mb_segyio_ptr->asciiheader_set = MB_NO;
-		mb_segyio_ptr->fileheader_set = MB_NO;
+		mb_segyio_ptr->asciiheader_set = false;
+		mb_segyio_ptr->fileheader_set = false;
 	}
 
 	/* handle the asciiheader structure */
@@ -345,7 +345,7 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 			*error = MB_ERROR_WRITE_FAIL;
 		}
 		else
-			mb_segyio_ptr->asciiheader_set = MB_YES;
+			mb_segyio_ptr->asciiheader_set = true;
 	}
 
 	/* handle the fileheader structure */
@@ -356,61 +356,61 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 		/* insert file header */
 		int index = 0;
 		char *buffer = mb_segyio_ptr->buffer;
-		mb_put_binary_int(MB_NO, fileheader->jobid, (void *)&(buffer[index]));
+		mb_put_binary_int(false, fileheader->jobid, (void *)&(buffer[index]));
 		index += 4;
-		mb_put_binary_int(MB_NO, fileheader->line, (void *)&(buffer[index]));
+		mb_put_binary_int(false, fileheader->line, (void *)&(buffer[index]));
 		index += 4;
-		mb_put_binary_int(MB_NO, fileheader->reel, (void *)&(buffer[index]));
+		mb_put_binary_int(false, fileheader->reel, (void *)&(buffer[index]));
 		index += 4;
-		mb_put_binary_short(MB_NO, fileheader->channels, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->channels, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->aux_channels, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->aux_channels, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sample_interval, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sample_interval, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sample_interval_org, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sample_interval_org, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->number_samples, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->number_samples, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->number_samples_org, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->number_samples_org, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->format, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->format, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->cdp_fold, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->cdp_fold, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->trace_sort, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->trace_sort, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->vertical_sum, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->vertical_sum, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_start, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_start, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_end, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_end, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_length, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_length, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_type, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_type, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_trace, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_trace, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_taper_start, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_taper_start, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_taper_end, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_taper_end, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_taper, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_taper, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->correlated, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->correlated, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->binary_gain, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->binary_gain, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->amplitude, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->amplitude, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->units, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->units, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->impulse_polarity, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->impulse_polarity, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->vibrate_polarity, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->vibrate_polarity, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->domain, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->domain, (void *)&(buffer[index]));
 		index += 2;
 		for (int i = 0; i < 338; i++) {
 			buffer[index] = fileheader->extra[i];
@@ -423,7 +423,7 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 			*error = MB_ERROR_WRITE_FAIL;
 		}
 		else
-			mb_segyio_ptr->fileheader_set = MB_YES;
+			mb_segyio_ptr->fileheader_set = true;
 	}
 
 	if (verbose >= 2) {
@@ -524,135 +524,135 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 
 	/* extract trace header data */
 	if (status == MB_SUCCESS) {
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->seq_num));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->seq_num));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->seq_reel));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->seq_reel));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->shot_num));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->shot_num));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->shot_tr));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->shot_tr));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->espn));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->espn));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->rp_num));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->rp_num));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->rp_tr));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->rp_tr));
 		index += 4;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->trc_id));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->trc_id));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->num_vstk));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->num_vstk));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->cdp_fold));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->cdp_fold));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->use));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->use));
 		index += 2;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->range));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->range));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->grp_elev));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->grp_elev));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->src_elev));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->src_elev));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->src_depth));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->src_depth));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->grp_datum));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->grp_datum));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->src_datum));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->src_datum));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->src_wbd));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->src_wbd));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->grp_wbd));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->grp_wbd));
 		index += 4;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->elev_scalar));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->elev_scalar));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->coord_scalar));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->coord_scalar));
 		index += 2;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->src_long));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->src_long));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->src_lat));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->src_lat));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->grp_long));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->grp_long));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->grp_lat));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->grp_lat));
 		index += 4;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->coord_units));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->coord_units));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->wvel));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->wvel));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->sbvel));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->sbvel));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->src_up_vel));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->src_up_vel));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->grp_up_vel));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->grp_up_vel));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->src_static));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->src_static));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->grp_static));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->grp_static));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->tot_static));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->tot_static));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->laga));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->laga));
 		index += 2;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->delay_mils));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->delay_mils));
 		index += 4;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->smute_mils));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->smute_mils));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->emute_mils));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->emute_mils));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->nsamps));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->nsamps));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->si_micros));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->si_micros));
 		index += 2;
 		for (int i = 0; i < 19; i++) {
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->other_1[i]));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->other_1[i]));
 			index += 2;
 		}
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->year));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->year));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->day_of_yr));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->day_of_yr));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->hour));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->hour));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->min));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->min));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->sec));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->sec));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->mils));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->mils));
 		index += 2;
-		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->tr_weight));
+		mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->tr_weight));
 		index += 2;
 		for (int i = 0; i < 5; i++) {
-			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->other_2[i]));
+			mb_get_binary_short(false, (void *)&(buffer[index]), &(traceheader->other_2[i]));
 			index += 2;
 		}
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->delay));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->delay));
 		index += 4;
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->smute_sec));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->smute_sec));
 		index += 4;
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->emute_sec));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->emute_sec));
 		index += 4;
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->si_secs));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->si_secs));
 		index += 4;
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->wbt_secs));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->wbt_secs));
 		index += 4;
-		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->end_of_rp));
+		mb_get_binary_int(false, (void *)&(buffer[index]), &(traceheader->end_of_rp));
 		index += 4;
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->dummy1));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->dummy1));
 		index += 4;
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->dummy2));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->dummy2));
 		index += 4;
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->dummy3));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->dummy3));
 		index += 4;
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->dummy4));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->dummy4));
 		index += 4;
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->soundspeed));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->soundspeed));
 		index += 4;
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->distance));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->distance));
 		index += 4;
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->roll));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->roll));
 		index += 4;
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->pitch));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->pitch));
 		index += 4;
-		mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(traceheader->heading));
+		mb_get_binary_float(false, (void *)&(buffer[index]), &(traceheader->heading));
 		index += 4;
 	}
 
@@ -718,22 +718,22 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 		index = 0;
 		for (int i = 0; i < traceheader->nsamps; i++) {
 			if (fileheader->format == 5 || fileheader->format == 6 || fileheader->format == 1) {
-				mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(trace[i]));
+				mb_get_binary_float(false, (void *)&(buffer[index]), &(trace[i]));
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 11) {
-				mb_get_binary_float(MB_YES, (void *)&(buffer[index]), &(trace[i]));
+				mb_get_binary_float(true, (void *)&(buffer[index]), &(trace[i]));
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 2) {
 				int intval;
-				mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(intval));
+				mb_get_binary_int(false, (void *)&(buffer[index]), &(intval));
 				trace[i] = (float)intval;
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 3) {
 				short shortval;
-				mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(shortval));
+				mb_get_binary_short(false, (void *)&(buffer[index]), &(shortval));
 				trace[i] = (float)shortval;
 				index += bytes_per_sample;
 			}
@@ -920,20 +920,20 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 	int status = MB_SUCCESS;
 
 	/* if asciiheader has not yet been written, write it */
-	if (mb_segyio_ptr->asciiheader_set == MB_NO) {
+	if (mb_segyio_ptr->asciiheader_set == false) {
 		if (fwrite(asciiheader, 1, MB_SEGY_ASCIIHEADER_LENGTH, mb_segyio_ptr->fp) != MB_SEGY_ASCIIHEADER_LENGTH) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_WRITE_FAIL;
 		}
 		else
-			mb_segyio_ptr->asciiheader_set = MB_YES;
+			mb_segyio_ptr->asciiheader_set = true;
 	}
 
 	char *buffer = NULL;
 	int index;
 
 	/* if fileheader has not yet been written, write it */
-	if (mb_segyio_ptr->fileheader_set == MB_NO) {
+	if (mb_segyio_ptr->fileheader_set == false) {
 		/* make sure there is adequate memory in the buffer */
 		if (mb_segyio_ptr->bufferalloc < MB_SEGY_FILEHEADER_LENGTH) {
 			/* allocate buffer memory */
@@ -947,61 +947,61 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 
 		index = 0;
 		buffer = mb_segyio_ptr->buffer;
-		mb_put_binary_int(MB_NO, fileheader->jobid, (void *)&(buffer[index]));
+		mb_put_binary_int(false, fileheader->jobid, (void *)&(buffer[index]));
 		index += 4;
-		mb_put_binary_int(MB_NO, fileheader->line, (void *)&(buffer[index]));
+		mb_put_binary_int(false, fileheader->line, (void *)&(buffer[index]));
 		index += 4;
-		mb_put_binary_int(MB_NO, fileheader->reel, (void *)&(buffer[index]));
+		mb_put_binary_int(false, fileheader->reel, (void *)&(buffer[index]));
 		index += 4;
-		mb_put_binary_short(MB_NO, fileheader->channels, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->channels, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->aux_channels, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->aux_channels, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sample_interval, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sample_interval, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sample_interval_org, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sample_interval_org, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->number_samples, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->number_samples, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->number_samples_org, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->number_samples_org, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->format, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->format, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->cdp_fold, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->cdp_fold, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->trace_sort, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->trace_sort, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->vertical_sum, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->vertical_sum, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_start, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_start, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_end, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_end, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_length, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_length, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_type, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_type, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_trace, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_trace, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_taper_start, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_taper_start, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_taper_end, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_taper_end, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->sweep_taper, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->sweep_taper, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->correlated, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->correlated, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->binary_gain, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->binary_gain, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->amplitude, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->amplitude, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->units, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->units, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->impulse_polarity, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->impulse_polarity, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->vibrate_polarity, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->vibrate_polarity, (void *)&(buffer[index]));
 		index += 2;
-		mb_put_binary_short(MB_NO, fileheader->domain, (void *)&(buffer[index]));
+		mb_put_binary_short(false, fileheader->domain, (void *)&(buffer[index]));
 		index += 2;
 		for (int i = 0; i < 338; i++) {
 			buffer[index] = fileheader->extra[i];
@@ -1012,7 +1012,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 			*error = MB_ERROR_WRITE_FAIL;
 		}
 		else
-			mb_segyio_ptr->fileheader_set = MB_YES;
+			mb_segyio_ptr->fileheader_set = true;
 	}
 
 	/* make sure there is adequate memory in the buffer */
@@ -1059,135 +1059,135 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 	if (status == MB_SUCCESS) {
 		index = 0;
 		buffer = mb_segyio_ptr->buffer;
-		mb_put_binary_int(MB_NO, traceheader->seq_num, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->seq_num, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->seq_reel, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->seq_reel, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->shot_num, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->shot_num, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->shot_tr, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->shot_tr, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->espn, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->espn, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->rp_num, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->rp_num, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->rp_tr, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->rp_tr, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_short(MB_NO, traceheader->trc_id, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->trc_id, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->num_vstk, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->num_vstk, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->cdp_fold, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->cdp_fold, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->use, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->use, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_int(MB_NO, traceheader->range, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->range, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->grp_elev, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->grp_elev, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->src_elev, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->src_elev, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->src_depth, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->src_depth, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->grp_datum, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->grp_datum, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->src_datum, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->src_datum, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->src_wbd, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->src_wbd, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->grp_wbd, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->grp_wbd, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_short(MB_NO, traceheader->elev_scalar, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->elev_scalar, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->coord_scalar, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->coord_scalar, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_int(MB_NO, traceheader->src_long, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->src_long, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->src_lat, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->src_lat, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->grp_long, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->grp_long, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->grp_lat, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->grp_lat, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_short(MB_NO, traceheader->coord_units, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->coord_units, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->wvel, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->wvel, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->sbvel, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->sbvel, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->src_up_vel, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->src_up_vel, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->grp_up_vel, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->grp_up_vel, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->src_static, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->src_static, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->grp_static, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->grp_static, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->tot_static, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->tot_static, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->laga, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->laga, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_int(MB_NO, traceheader->delay_mils, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->delay_mils, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_short(MB_NO, traceheader->smute_mils, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->smute_mils, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->emute_mils, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->emute_mils, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->nsamps, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->nsamps, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->si_micros, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->si_micros, (void *)&buffer[index]);
 		index += 2;
 		for (int i = 0; i < 19; i++) {
-			mb_put_binary_short(MB_NO, traceheader->other_1[i], (void *)&buffer[index]);
+			mb_put_binary_short(false, traceheader->other_1[i], (void *)&buffer[index]);
 			index += 2;
 		}
-		mb_put_binary_short(MB_NO, traceheader->year, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->year, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->day_of_yr, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->day_of_yr, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->hour, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->hour, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->min, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->min, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->sec, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->sec, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->mils, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->mils, (void *)&buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, traceheader->tr_weight, (void *)&buffer[index]);
+		mb_put_binary_short(false, traceheader->tr_weight, (void *)&buffer[index]);
 		index += 2;
 		for (int i = 0; i < 5; i++) {
-			mb_put_binary_short(MB_NO, traceheader->other_2[i], (void *)&buffer[index]);
+			mb_put_binary_short(false, traceheader->other_2[i], (void *)&buffer[index]);
 			index += 2;
 		}
-		mb_put_binary_float(MB_NO, traceheader->delay, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->delay, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, traceheader->smute_sec, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->smute_sec, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, traceheader->emute_sec, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->emute_sec, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, traceheader->si_secs, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->si_secs, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, traceheader->wbt_secs, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->wbt_secs, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, traceheader->end_of_rp, (void *)&buffer[index]);
+		mb_put_binary_int(false, traceheader->end_of_rp, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, traceheader->dummy1, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->dummy1, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, traceheader->dummy2, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->dummy2, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, traceheader->dummy3, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->dummy3, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, traceheader->dummy4, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->dummy4, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, traceheader->soundspeed, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->soundspeed, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, traceheader->distance, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->distance, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, traceheader->roll, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->roll, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, traceheader->pitch, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->pitch, (void *)&buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, traceheader->heading, (void *)&buffer[index]);
+		mb_put_binary_float(false, traceheader->heading, (void *)&buffer[index]);
 		index += 4;
 
 		/* write trace header */
@@ -1203,22 +1203,22 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 		buffer = mb_segyio_ptr->buffer;
 		for (int i = 0; i < traceheader->nsamps; i++) {
 			if (fileheader->format == 5 || fileheader->format == 6) {
-				mb_put_binary_float(MB_NO, trace[i], (void *)&buffer[index]);
+				mb_put_binary_float(false, trace[i], (void *)&buffer[index]);
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 11) {
-				mb_put_binary_float(MB_YES, trace[i], (void *)&buffer[index]);
+				mb_put_binary_float(false, trace[i], (void *)&buffer[index]);
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 2) {
 				int intval;
 				intval = (int)trace[i];
-				mb_put_binary_int(MB_NO, intval, (void *)&buffer[index]);
+				mb_put_binary_int(false, intval, (void *)&buffer[index]);
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 3) {
 				short shortval = (short)trace[i];
-				mb_put_binary_short(MB_NO, shortval, (void *)&buffer[index]);
+				mb_put_binary_short(false, shortval, (void *)&buffer[index]);
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 8) {

@@ -181,29 +181,29 @@ int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int us
 	}
 
 	/* check if beam and pixel range is ok */
-	if ((use_bath == MB_YES && *beam_end >= *beam_start) && beams_bath <= 0) {
+	if ((use_bath == true && *beam_end >= *beam_start) && beams_bath <= 0) {
 		fprintf(stderr, "\nBathymetry data not available\n");
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_USAGE;
 	}
-	else if (use_bath == MB_YES && *beam_end >= *beam_start && (*beam_start < 0 || *beam_end >= beams_bath)) {
+	else if (use_bath == true && *beam_end >= *beam_start && (*beam_start < 0 || *beam_end >= beams_bath)) {
 		fprintf(stderr, "\nBeam range %d to %d exceeds available beams 0 to %d\n", *beam_start, *beam_end, beams_bath - 1);
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_USAGE;
 	}
-	if (*error == MB_ERROR_NO_ERROR && use_amp == MB_YES && beams_amp <= 0) {
+	if (*error == MB_ERROR_NO_ERROR && use_amp == true && beams_amp <= 0) {
 		fprintf(stderr, "\nAmplitude data not available\n");
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_USAGE;
 	}
-	else if (*error == MB_ERROR_NO_ERROR && *beam_end >= *beam_start && use_amp == MB_YES &&
+	else if (*error == MB_ERROR_NO_ERROR && *beam_end >= *beam_start && use_amp == true &&
 	         (*beam_start < 0 || *beam_end >= beams_amp)) {
 		fprintf(stderr, "\nAmplitude beam range %d to %d exceeds available beams 0 to %d\n", *beam_start, *beam_end,
 		        beams_amp - 1);
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_USAGE;
 	}
-	if (*error == MB_ERROR_NO_ERROR && (use_ss == MB_YES || *pixel_end >= *pixel_start) && pixels_ss <= 0) {
+	if (*error == MB_ERROR_NO_ERROR && (use_ss == true || *pixel_end >= *pixel_start) && pixels_ss <= 0) {
 		fprintf(stderr, "\nSidescan data not available\n");
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_USAGE;
@@ -387,7 +387,7 @@ int printsimplevalue(int verbose, FILE *output, double value, int width, int pre
 
 	/* make print format */
 	format[0] = '%';
-	if (*invert == MB_YES)
+	if (*invert == true)
 		strcpy(format, "%g");
 	else if (width > 0)
 		sprintf(&format[1], "%d.%df", width, precision);
@@ -395,20 +395,20 @@ int printsimplevalue(int verbose, FILE *output, double value, int width, int pre
 		sprintf(&format[1], ".%df", precision);
 
 	/* invert value if desired */
-	if (*invert == MB_YES) {
-		*invert = MB_NO;
+	if (*invert == true) {
+		*invert = false;
 		if (value != 0.0)
 			value = 1.0 / value;
 	}
 
 	/* flip sign value if desired */
-	if (*flipsign == MB_YES) {
-		*flipsign = MB_NO;
+	if (*flipsign == true) {
+		*flipsign = false;
 		value = -value;
 	}
 
 	/* print value */
-	if (ascii == MB_YES)
+	if (ascii == true)
 		fprintf(output, format, value);
 	else
 		fwrite(&value, sizeof(double), 1, output);
@@ -438,15 +438,15 @@ int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, i
 	}
 
 	/* reset invert flag */
-	if (*invert == MB_YES)
-		*invert = MB_NO;
+	if (*invert == true)
+		*invert = false;
 
 	/* reset flipsign flag */
-	if (*flipsign == MB_YES)
-		*flipsign = MB_NO;
+	if (*flipsign == true)
+		*flipsign = false;
 
 	/* print value */
-	if (ascii == MB_YES)
+	if (ascii == true)
 		fprintf(output, "NaN");
 	else
 		fwrite(&NaN, sizeof(double), 1, output);
@@ -795,35 +795,35 @@ int main(int argc, char **argv) {
 	int beam_status = MB_SUCCESS;
 	int pixel_status = MB_SUCCESS;
 	int time_j[5];
-	int use_bath = MB_NO;
-	int use_amp = MB_NO;
-	int use_ss = MB_NO;
-	int use_slope = MB_NO;
-	int use_attitude = MB_NO;
-	int use_nav = MB_NO;
-	int use_gains = MB_NO;
-	int use_detects = MB_YES;
-	int use_pingnumber = MB_NO;
+	int use_bath = false;
+	int use_amp = false;
+	int use_ss = false;
+	int use_slope = false;
+	int use_attitude = false;
+	int use_nav = false;
+	int use_gains = false;
+	int use_detects = true;
+	int use_pingnumber = false;
 	int check_values = MBLIST_CHECK_ON;
-	int check_nav = MB_NO;
-	int check_bath = MB_NO;
-	int check_amp = MB_NO;
-	int check_ss = MB_NO;
-	int invert_next_value = MB_NO;
-	int signflip_next_value = MB_NO;
-	int raw_next_value = MB_NO;
-	int port_next_value = MB_NO;
-	int stbd_next_value = MB_NO;
-	int sensornav_next_value = MB_NO;
-	int sensorrelative_next_value = MB_NO;
-	int projectednav_next_value = MB_NO;
-	int use_raw = MB_NO;
-	int special_character = MB_NO;
-	int first = MB_YES;
-	int ascii = MB_YES;
-	int netcdf = MB_NO;
-	int netcdf_cdl = MB_YES;
-	int segment = MB_NO;
+	int check_nav = false;
+	int check_bath = false;
+	int check_amp = false;
+	int check_ss = false;
+	int invert_next_value = false;
+	int signflip_next_value = false;
+	int raw_next_value = false;
+	int port_next_value = false;
+	int stbd_next_value = false;
+	int sensornav_next_value = false;
+	int sensorrelative_next_value = false;
+	int projectednav_next_value = false;
+	int use_raw = false;
+	int special_character = false;
+	int first = true;
+	int ascii = true;
+	int netcdf = false;
+	int netcdf_cdl = true;
+	int segment = false;
 	int segment_mode = MBLIST_SEGMENT_MODE_NONE;
 	char segment_tag[MB_PATH_MAXLINE];
 	char delimiter[MB_PATH_MAXLINE];
@@ -859,9 +859,9 @@ int main(int argc, char **argv) {
 	unsigned int pingnumber;
 
 	/* additional time variables */
-	int first_m = MB_YES;
+	int first_m = true;
 	double time_d_ref;
-	int first_u = MB_YES;
+	int first_u = true;
 	time_t time_u;
 	time_t time_u_ref;
 	double seconds;
@@ -879,8 +879,8 @@ int main(int argc, char **argv) {
 	double *slopeacrosstrack = NULL;
 
 	/* course calculation variables */
-	int use_course = MB_NO;
-	int use_time_interval = MB_NO;
+	int use_course = false;
+	int use_time_interval = false;
 	double course, course_old;
 	double time_d_old, dt;
 	double time_interval;
@@ -894,12 +894,12 @@ int main(int argc, char **argv) {
 	double headingx, headingy, mtodeglon, mtodeglat;
 
 	/* swathbounds variables */
-	int use_swathbounds = MB_NO;
+	int use_swathbounds = false;
 	int beam_port, beam_stbd;
 	int pixel_port, pixel_stbd;
 
 	/* projected coordinate system */
-	int use_projection = MB_NO;
+	int use_projection = false;
 	char projection_pars[MB_PATH_MAXLINE];
 	char projection_id[MB_PATH_MAXLINE];
 	int proj_status;
@@ -909,7 +909,7 @@ int main(int argc, char **argv) {
 	double naveasting, navnorthing, deasting, dnorthing;
 
 	/* bathymetry feet flag */
-	int bathy_in_feet = MB_NO;
+	int bathy_in_feet = false;
 	double bathy_scale;
 
 	/* raw data values */
@@ -1009,8 +1009,8 @@ int main(int argc, char **argv) {
 				break;
 			case 'A':
 			case 'a':
-				ascii = MB_NO;
-				netcdf_cdl = MB_NO;
+				ascii = false;
+				netcdf_cdl = false;
 				break;
 			case 'B':
 			case 'b':
@@ -1019,7 +1019,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'C':
 			case 'c':
-				netcdf = MB_YES;
+				netcdf = true;
 				break;
 			case 'D':
 			case 'd':
@@ -1053,7 +1053,7 @@ int main(int argc, char **argv) {
 			case 'J':
 			case 'j':
 				sscanf(optarg, "%s", projection_pars);
-				use_projection = MB_YES;
+				use_projection = true;
 				break;
 			case 'K':
 			case 'k':
@@ -1093,7 +1093,7 @@ int main(int argc, char **argv) {
 					if (n_list < MAX_OPTIONS) {
 						list[n_list] = optarg[j];
 						if (list[n_list] == '^')
-							use_projection = MB_YES;
+							use_projection = true;
 					}
 				break;
 			case 'P':
@@ -1119,7 +1119,7 @@ int main(int argc, char **argv) {
 			case 'U':
 			case 'u':
 				if (optarg[0] == 'N')
-					check_nav = MB_YES;
+					check_nav = true;
 				else {
 					sscanf(optarg, "%d", &check_values);
 					if (check_values < MBLIST_CHECK_ON || check_values > MBLIST_CHECK_OFF_FLAGNAN)
@@ -1128,7 +1128,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'W':
 			case 'w':
-				bathy_in_feet = MB_YES;
+				bathy_in_feet = true;
 				break;
 			case 'X':
 			case 'x':
@@ -1136,7 +1136,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'Z':
 			case 'z':
-				segment = MB_YES;
+				segment = true;
 				sscanf(optarg, "%s", segment_tag);
 				if (strcmp(segment_tag, "swathfile") == 0)
 					segment_mode = MBLIST_SEGMENT_MODE_SWATHFILE;
@@ -1229,7 +1229,7 @@ int main(int argc, char **argv) {
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* set bathymetry scaling */
-	if (bathy_in_feet == MB_YES)
+	if (bathy_in_feet == true)
 		bathy_scale = 1.0 / 0.3048;
 	else
 		bathy_scale = 1.0;
@@ -1245,14 +1245,14 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(file, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* set the initial along track distance here so */
@@ -1262,7 +1262,7 @@ int main(int argc, char **argv) {
 	/* initialize output files */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, n_list * sizeof(FILE *), (void **)&output, &error);
 
-	if (netcdf == MB_NO) {
+	if (netcdf == false) {
 		/* open output file */
 		if (0 == strncmp("-", output_file, 2))
 			outfile = stdout;
@@ -1279,18 +1279,18 @@ int main(int argc, char **argv) {
 	}
 	else {
 		/* netcdf must be ascii and must not be segmented */
-		ascii = MB_YES;
-		segment = MB_NO;
+		ascii = true;
+		segment = false;
 
 		/* open CDL file */
-		if (0 == strncmp("-", output_file, 2) && netcdf_cdl == MB_NO)
+		if (0 == strncmp("-", output_file, 2) && netcdf_cdl == false)
 			strcpy(output_file, "mblist.nc");
 		if (0 == strncmp("-", output_file, 2)) {
 			outfile = stdout;
 		}
 		else {
 			strncpy(output_file_temp, output_file, MB_PATH_MAXLINE - 5);
-			if (netcdf_cdl == MB_NO)
+			if (netcdf_cdl == false)
 				strcat(output_file_temp, ".cdl");
 			outfile = fopen(output_file_temp, "w+");
 			if (outfile == NULL) {
@@ -1308,19 +1308,19 @@ int main(int argc, char **argv) {
 		fprintf(outfile, "timefields_J = 6,  timefields_j = 5, timefields_t = 7, latm = 13, \n\t");
 
 		/* find dimensions in format list */
-		raw_next_value = MB_NO;
+		raw_next_value = false;
 		for (int i = 0; i < n_list; i++)
 			if (list[i] == '/' || list[i] == '-' || list[i] == '=' || list[i] == '+') {
 				// ignore
 			}
-			else if (raw_next_value == MB_NO) {
+			else if (raw_next_value == false) {
 				if (list[i] == '.')
-					raw_next_value = MB_YES;
+					raw_next_value = true;
 			}
 			else if (list[i] >= '0' && list[i] <= '9')
 				count = count * 10 + list[i] - '0';
 			else {
-				raw_next_value = MB_NO;
+				raw_next_value = false;
 				if (count > 0) {
 					fprintf(outfile, "%c = %d,  ", list[i], count);
 					count = 0;
@@ -1356,32 +1356,32 @@ int main(int argc, char **argv) {
 				exit(1);
 			}
 
-			if (raw_next_value == MB_NO) {
+			if (raw_next_value == false) {
 				switch (list[i]) {
 				case '/': /* Inverts next simple value */
-					invert_next_value = MB_YES;
+					invert_next_value = true;
 					break;
 
 				case '-': /* Flip sign on next simple value */
-					signflip_next_value = MB_YES;
+					signflip_next_value = true;
 					break;
 
 				case '_': /* Print sensor position rather than beam or pixel position - applies to XxYy */
-					sensornav_next_value = MB_YES;
+					sensornav_next_value = true;
 					break;
 
 				case '@': /* Print beam or pixel position and depth values relative to sensor - applies to XYZz */
-					sensorrelative_next_value = MB_YES;
+					sensorrelative_next_value = true;
 					break;
 
 				case '^': /* Print position values in projected coordinates
 				           * - easting northing rather than lon lat
 				           * - applies to XY */
-					projectednav_next_value = MB_YES;
+					projectednav_next_value = true;
 					break;
 
 				case '.': /* Raw value next field */
-					raw_next_value = MB_YES;
+					raw_next_value = true;
 					break;
 
 				case '=': /* Port-most value next field -ignored here */
@@ -1392,9 +1392,9 @@ int main(int argc, char **argv) {
 
 				case 'A': /* Average seafloor crosstrack slope */
 					strcpy(variable, "aslope");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1402,22 +1402,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Average seafloor crosstrack slope\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "tangent of angle from seafloor to vertical\";\n");
 					else
 						fprintf(outfile, "tangent of angle from seafloor to horizontal\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'a': /* Per-beam seafloor crosstrack slope */
 					strcpy(variable, "bslope");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1425,22 +1425,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Per-beam seafloor crosstrack slope\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "tangent of angle from seafloor to vertical\";\n");
 					else
 						fprintf(outfile, "tangent of angle from seafloor to horizontal\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'B': /* amplitude */
 					strcpy(variable, "amplitude");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1448,25 +1448,25 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Amplitude\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					if (format == MBF_EM300RAW || format == MBF_EM300MBA)
 						fprintf(outfile, "dB + 64\";\n");
 					else
 						fprintf(outfile, "backscatter\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 
 					break;
 
 				case 'b': /* sidescan */
 					strcpy(variable, "sidescan");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1474,25 +1474,25 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"sidescan\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					if (format == MBF_EM300RAW || format == MBF_EM300MBA)
 						fprintf(outfile, "dB + 64\";\n");
 					else
 						fprintf(outfile, "backscatter\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 
 					break;
 
 				case 'C': /* Sonar altitude (m) */
 					strcpy(variable, "altitude");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1500,22 +1500,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Sonar altitude\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "m\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 
 					break;
 
 				case 'c': /* Sonar transducer depth (m) */
 					strcpy(variable, "transducer");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1523,22 +1523,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Sonar transducer depth\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "m\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'D': /* acrosstrack dist. */
 				case 'd':
 					strcpy(variable, "acrosstrack");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1546,25 +1546,25 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Acrosstrack distance\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
-					if (bathy_in_feet == MB_YES)
+					if (bathy_in_feet == true)
 						fprintf(outfile, "f\";\n");
 					else
 						fprintf(outfile, "m\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'E': /* alongtrack dist. */
 				case 'e':
 					strcpy(variable, "alongtrack");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1572,26 +1572,26 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Alongtrack distance\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
-					if (bathy_in_feet == MB_YES)
+					if (bathy_in_feet == true)
 						fprintf(outfile, "f\";\n");
 					else
 						fprintf(outfile, "m\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 
 					break;
 
 				case 'F': /* beamflag (numeric only for netcdf) */
 				case 'f':
 					strcpy(variable, "beamflag");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1599,25 +1599,25 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Beamflag\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
-					if (bathy_in_feet == MB_YES)
+					if (bathy_in_feet == true)
 						fprintf(outfile, "f\";\n");
 					else
 						fprintf(outfile, "m\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 
 					break;
 
 				case 'G': /* flat bottom grazing angle */
 					strcpy(variable, "flatgrazing");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1625,22 +1625,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Flat bottom grazing angle\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "tangent of angle from beam to vertical\";\n");
 					else
 						fprintf(outfile, "tangent of angle from beam to horizontal\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'g': /* grazing angle using slope */
 					strcpy(variable, "grazing");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1648,22 +1648,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Grazing angle using slope\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "tangent of angle from beam to perpendicular to seafloor\";\n");
 					else
 						fprintf(outfile, "tangent of angle from beam to seafloor\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'H': /* heading */
 					strcpy(variable, "heading");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1671,21 +1671,21 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Heading\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "degrees true\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'h': /* course */
 					strcpy(variable, "course");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1693,14 +1693,14 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Course\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "degrees true\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'J': /* time string */
@@ -1730,9 +1730,9 @@ int main(int argc, char **argv) {
 
 				case 'L': /* along-track distance (km) */
 					strcpy(variable, "along_track");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1740,22 +1740,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Alongtrack distance\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "km\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 
 					break;
 
 				case 'l': /* along-track distance (m) */
 					strcpy(variable, "along_track_m");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1763,22 +1763,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Alongtrack distance\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "m\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'M': /* Decimal unix seconds since
 				              1/1/70 00:00:00 */
 					strcpy(variable, "unix_time");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1786,23 +1786,23 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tdouble %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Seconds since 1/1/70 00:00:00\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "s\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'm': /* time in decimal seconds since
 				              first record */
 
 					strcpy(variable, "survey_time");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1810,14 +1810,14 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tdouble %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Seconds since first record\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "s\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'N': /* ping counter */
@@ -1833,9 +1833,9 @@ int main(int argc, char **argv) {
 
 				case 'P': /* pitch */
 					strcpy(variable, "pitch");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1843,21 +1843,21 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Pitch\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "degrees from horizontal\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'p': /* draft */
 					strcpy(variable, "draft");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1865,14 +1865,14 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Draft\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "m\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'q': /* bottom detect type */
@@ -1889,9 +1889,9 @@ int main(int argc, char **argv) {
 
 				case 'R': /* roll */
 					strcpy(variable, "roll");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1899,21 +1899,21 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Roll\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "degrees from horizontal\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'r': /* heave */
 					strcpy(variable, "heave");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1921,21 +1921,21 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Heave\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "m\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'S': /* speed */
 					strcpy(variable, "speed");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1943,21 +1943,21 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Speed\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "km/hr\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 's': /* speed made good */
 					strcpy(variable, "speed_made_good");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -1965,14 +1965,14 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Speed made good\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "km/hr\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
@@ -2035,9 +2035,9 @@ int main(int argc, char **argv) {
 
 				case 'X': /* longitude decimal degrees */
 					strcpy(variable, "longitude");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2045,14 +2045,14 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tdouble %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Longitude\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "degrees\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'x': /* longitude degress + decimal minutes */
@@ -2069,9 +2069,9 @@ int main(int argc, char **argv) {
 
 				case 'Y': /* latitude decimal degrees */
 					strcpy(variable, "latitude");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2079,14 +2079,14 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tdouble %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Latitude\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "degrees\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'y': /* latitude degrees + decimal minutes */
@@ -2103,9 +2103,9 @@ int main(int argc, char **argv) {
 
 				case 'Z': /* topography */
 					strcpy(variable, "topography");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2113,24 +2113,24 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Topography\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
-					if (bathy_in_feet == MB_YES)
+					if (bathy_in_feet == true)
 						fprintf(outfile, "f\";\n");
 					else
 						fprintf(outfile, "m\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case 'z': /* depth */
 					strcpy(variable, "depth");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2138,17 +2138,17 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Depth\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
-					if (bathy_in_feet == MB_YES)
+					if (bathy_in_feet == true)
 						fprintf(outfile, "f\";\n");
 					else
 						fprintf(outfile, "m\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
 					break;
 
 				case '#': /* beam number */
@@ -2166,29 +2166,29 @@ int main(int argc, char **argv) {
 			else {
 				switch (list[i]) {
 				case '/': /* Inverts next simple value */
-					invert_next_value = MB_YES;
+					invert_next_value = true;
 					break;
 
 				case '-': /* Flip sign on next simple value */
-					signflip_next_value = MB_YES;
+					signflip_next_value = true;
 					break;
 
 				case '_': /* Print sensor position rather than beam or pixel position - applies to XxYy */
-					sensornav_next_value = MB_YES;
+					sensornav_next_value = true;
 					break;
 
 				case '@': /* Print beam or pixel position and depth values relative to sensor - applies to XYZz */
-					sensorrelative_next_value = MB_YES;
+					sensorrelative_next_value = true;
 					break;
 
 				case '^': /* Print position values in projected coordinates
 				           * - easting northing rather than lon lat
 				           * - applies to XY */
-					projectednav_next_value = MB_YES;
+					projectednav_next_value = true;
 					break;
 
 				case '.': /* Raw value next field */
-					raw_next_value = MB_YES;
+					raw_next_value = true;
 					count = 0;
 					break;
 
@@ -2213,9 +2213,9 @@ int main(int argc, char **argv) {
 
 				case 'A': /* backscatter */
 					strcpy(variable, "backscatter");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2223,22 +2223,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Backscatter\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "dB\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'a': /* absorption */
 					strcpy(variable, "absorption");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2246,22 +2246,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Mean absorption\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "dB/km\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'B': /* BSN - Normal incidence backscatter */
 					strcpy(variable, "bsn");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2269,22 +2269,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Normal incidence backscatter\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "dB\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'b': /* BSO - Oblique backscatter */
 					strcpy(variable, "bso");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2292,22 +2292,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Oblique backscatter\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "dB\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'c': /* mean backscatter */
 					strcpy(variable, "mback");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2315,25 +2315,25 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Mean backscatter\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					if (format == MBF_EM300RAW || format == MBF_EM300MBA)
 						fprintf(outfile, "dB + 64\";\n");
 					else
 						fprintf(outfile, "backscatter\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'd': /* beam depression angle */
 					strcpy(variable, "depression");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2341,15 +2341,15 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Beam depression angle\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "degrees\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'F': /* filename */
@@ -2363,9 +2363,9 @@ int main(int argc, char **argv) {
 
 					fprintf(outfile, "file name\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'f': /* format */
@@ -2379,16 +2379,16 @@ int main(int argc, char **argv) {
 
 					fprintf(outfile, "see mbformat\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'G': /* TVG start */
 					strcpy(variable, "tvg_start");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2396,22 +2396,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Start range of TVG ramp\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "samples\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'g': /* TVG stop */
 					strcpy(variable, "tvg_stop");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2419,15 +2419,15 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Stop range of TVG ramp\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "samples\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'L': /* Pulse length */
@@ -2440,16 +2440,16 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\t\t%s:units = \"", variable);
 					fprintf(outfile, "us");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'l': /* Transmit pulse length */
 					strcpy(variable, "pulse_length");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2457,15 +2457,15 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Pulse length\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "seconds\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'M': /* Mode */
@@ -2478,9 +2478,9 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\t\t%s:units = \"", variable);
 					fprintf(outfile, "0=very shallow,1=shallow,2=medium,3=deep,4=very deep,5=extra deep\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'N': /* Ping number */
@@ -2493,16 +2493,16 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\t\t%s:units = \"", variable);
 					fprintf(outfile, "pings\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'p': /* sidescan pixel */
 					strcpy(variable, "sidescan");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2514,22 +2514,22 @@ int main(int argc, char **argv) {
 
 					fprintf(outfile, "\t\t%s:long_name = \"Raw sidescan pixels\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "dB\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'R': /* range */
 					strcpy(variable, "range");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2537,22 +2537,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Range \";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "samples\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'r': /* Sample rate */
 					strcpy(variable, "sample_rate");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2560,22 +2560,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Sample Rate\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "Hertz\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'S': /* Sidescan pixels */
 					strcpy(variable, "pixels");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2583,22 +2583,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Total sidescan pixels \";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "pixels\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 's': /* Sidescan pixels per beam */
 					strcpy(variable, "beam_pixels");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2606,22 +2606,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Sidescan pixels per beam\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "pixels\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 'T': /* Transmit gain */
 					strcpy(variable, "transmit_gain");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2629,22 +2629,22 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Transmit gain\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "dB\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				case 't': /* Receive gain */
 					strcpy(variable, "receive_gain");
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						strcat(variable, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						strcat(variable, "_");
 
 					fprintf(output[i], "\t%s = ", variable);
@@ -2652,19 +2652,19 @@ int main(int argc, char **argv) {
 					fprintf(outfile, "\tfloat %s(data);\n", variable);
 					fprintf(outfile, "\t\t%s:long_name = \"Receive gain\";\n", variable);
 					fprintf(outfile, "\t\t%s:units = \"", variable);
-					if (signflip_next_value == MB_YES)
+					if (signflip_next_value == true)
 						fprintf(outfile, "-");
-					if (invert_next_value == MB_YES)
+					if (invert_next_value == true)
 						fprintf(outfile, "1/");
 					fprintf(outfile, "dB\";\n");
 
-					signflip_next_value = MB_NO;
-					invert_next_value = MB_NO;
-					raw_next_value = MB_NO;
+					signflip_next_value = false;
+					invert_next_value = false;
+					raw_next_value = false;
 					break;
 
 				default:
-					raw_next_value = MB_NO;
+					raw_next_value = false;
 					break;
 				}
 			}
@@ -2673,7 +2673,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data == true) {
 
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
@@ -2687,66 +2687,66 @@ int main(int argc, char **argv) {
 
 		/* figure out whether bath, amp, or ss will be used */
 		if (dump_mode == DUMP_MODE_BATH || dump_mode == DUMP_MODE_TOPO)
-			use_bath = MB_YES;
+			use_bath = true;
 		else if (dump_mode == DUMP_MODE_AMP)
-			use_amp = MB_YES;
+			use_amp = true;
 		else if (dump_mode == DUMP_MODE_SS)
-			use_ss = MB_YES;
+			use_ss = true;
 		else
 			for (int i = 0; i < n_list; i++) {
-				if (raw_next_value == MB_NO) {
+				if (raw_next_value == false) {
 					if (list[i] == 'Z' || list[i] == 'z' || list[i] == 'A' || list[i] == 'a' || list[i] == 'Q' || list[i] == 'q')
-						use_bath = MB_YES;
+						use_bath = true;
 					if (list[i] == 'B')
-						use_amp = MB_YES;
+						use_amp = true;
 					if (list[i] == 'b')
-						use_ss = MB_YES;
+						use_ss = true;
 					if (list[i] == 'h')
-						use_course = MB_YES;
+						use_course = true;
 					if (list[i] == 's')
-						use_course = MB_YES;
+						use_course = true;
 					if (list[i] == 'V' || list[i] == 'v')
-						use_time_interval = MB_YES;
+						use_time_interval = true;
 					if (list[i] == 'A' || list[i] == 'a' || list[i] == 'G' || list[i] == 'g')
-						use_slope = MB_YES;
+						use_slope = true;
 					if (list[i] == 'P' || list[i] == 'p' || list[i] == 'R' || list[i] == 'r')
-						use_attitude = MB_YES;
+						use_attitude = true;
 					if (list[i] == 'Q' || list[i] == 'q')
-						use_detects = MB_YES;
+						use_detects = true;
 					if (list[i] == 'N' || list[i] == 'n')
-						use_pingnumber = MB_YES;
+						use_pingnumber = true;
 					if (list[i] == 'X' || list[i] == 'x' || list[i] == 'Y' || list[i] == 'y')
-						use_nav = MB_YES;
+						use_nav = true;
 					if (list[i] == '.')
-						raw_next_value = MB_YES;
+						raw_next_value = true;
 					if (list[i] == '=')
-						use_swathbounds = MB_YES;
+						use_swathbounds = true;
 					if (list[i] == '+')
-						use_swathbounds = MB_YES;
+						use_swathbounds = true;
 				}
 				else {
 					if (list[i] == 'T' || list[i] == 't' || list[i] == 'U' || list[i] == 'l')
-						use_gains = MB_YES;
+						use_gains = true;
 					else if (list[i] == 'F' || list[i] == 'f')
 						; // ignore
 					else {
-						use_raw = MB_YES;
+						use_raw = true;
 						if (list[i] == 'R' || list[i] == 'd')
-							use_bath = MB_YES;
+							use_bath = true;
 						if (list[i] == 'B' || list[i] == 'b' || list[i] == 'c')
-							use_amp = MB_YES;
+							use_amp = true;
 					}
 					if (list[i] != '/' && list[i] != '-' && list[i] != '.')
-						raw_next_value = MB_NO;
+						raw_next_value = false;
 				}
 			}
 		if (check_values == MBLIST_CHECK_ON || check_values == MBLIST_CHECK_ON_NULL) {
-			if (use_bath == MB_YES)
-				check_bath = MB_YES;
-			if (use_amp == MB_YES)
-				check_amp = MB_YES;
-			if (use_ss == MB_YES)
-				check_ss = MB_YES;
+			if (use_bath == true)
+				check_bath = true;
+			if (use_amp == true)
+				check_amp = true;
+			if (use_ss == true)
+				check_ss = true;
 		}
 
 		/* allocate memory for data arrays */
@@ -2780,7 +2780,7 @@ int main(int argc, char **argv) {
 			                           &error);
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 2 * sizeof(int), (void **)&detect, &error);
-		if (use_raw == MB_YES) {
+		if (use_raw == true) {
 			if (error == MB_ERROR_NO_ERROR)
 				status =
 				    mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), (void **)&beam_samples, &error);
@@ -2807,7 +2807,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* output separator for GMT style segment file output */
-		if (segment == MB_YES && ascii == MB_YES && netcdf == MB_NO) {
+		if (segment == true && ascii == true && netcdf == false) {
 			if (segment_mode == MBLIST_SEGMENT_MODE_TAG)
 				fprintf(output[0], "%s\n", segment_tag);
 			else if (segment_mode == MBLIST_SEGMENT_MODE_SWATHFILE)
@@ -2818,13 +2818,13 @@ int main(int argc, char **argv) {
 
 		/* read and print data */
 		nread = 0;
-		first = MB_YES;
+		first = true;
 		while (error <= MB_ERROR_NO_ERROR) {
 			/* reset error */
 			error = MB_ERROR_NO_ERROR;
 
 			/* read a ping of data */
-			if (pings == 1 || use_attitude == MB_YES || use_detects == MB_YES || use_pingnumber == MB_YES) {
+			if (pings == 1 || use_attitude == true || use_detects == true || use_pingnumber == true) {
 				/* read next data record */
 				status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
 				                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
@@ -2870,13 +2870,13 @@ int main(int argc, char **argv) {
 			/* increment counter and set cumulative distance */
 			if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
 				nread++;
-				if (use_pingnumber == MB_NO)
+				if (use_pingnumber == false)
 					pingnumber = nread;
 				distance_total += distance;
 			}
 
 			/* get projected navigation if needed */
-			if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && use_projection == MB_YES) {
+			if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && use_projection == true) {
 				/* set up projection if this is the first data */
 				if (pjptr == NULL) {
 					/* Default projection is UTM */
@@ -2937,7 +2937,7 @@ int main(int argc, char **argv) {
 			if (error == MB_ERROR_NO_ERROR) {
 				/* find vertical-most non-null beam
 				    and port and starboard-most good beams */
-				status = mb_swathbounds(verbose, MB_YES, navlon, navlat, heading, beams_bath, pixels_ss, beamflag, bath,
+				status = mb_swathbounds(verbose, true, navlon, navlat, heading, beams_bath, pixels_ss, beamflag, bath,
 				                        bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, &beam_port,
 				                        &beam_vertical, &beam_stbd, &pixel_port, &pixel_vertical, &pixel_stbd, &error);
 
@@ -2981,7 +2981,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* get time interval since last ping */
-			if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && first == MB_YES) {
+			if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && first == true) {
 				time_interval = 0.0;
 			}
 			else if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
@@ -2989,8 +2989,8 @@ int main(int argc, char **argv) {
 			}
 
 			/* calculate course made good */
-			if (error == MB_ERROR_NO_ERROR && use_course == MB_YES) {
-				if (first == MB_YES) {
+			if (error == MB_ERROR_NO_ERROR && use_course == true) {
+				if (first == true) {
 					course = heading;
 					speed_made_good = speed;
 					course_old = heading;
@@ -3015,7 +3015,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* calculate slopes if required */
-			if (error == MB_ERROR_NO_ERROR && use_slope == MB_YES) {
+			if (error == MB_ERROR_NO_ERROR && use_slope == true) {
 				/* get average slope */
 				ns = 0;
 				sx = 0.0;
@@ -3054,14 +3054,14 @@ int main(int argc, char **argv) {
 			}
 
 			/* get raw values if required */
-			if (error == MB_ERROR_NO_ERROR && use_raw == MB_YES) {
+			if (error == MB_ERROR_NO_ERROR && use_raw == true) {
 				status = mb_get_raw(verbose, mbio_ptr, &mode, &ipulse_length, &png_count, &sample_rate, &absorption, &max_range,
 				                    &r_zero, &r_zero_corr, &tvg_start, &tvg_stop, &bsn, &bso, &tx, &tvg_crossover, &nbeams_ss,
 				                    &npixels, beam_samples, start_sample, range, depression, bs, ss_pixels, &error);
 			}
 
 			/* get gains values if required */
-			if (error == MB_ERROR_NO_ERROR && use_gains == MB_YES) {
+			if (error == MB_ERROR_NO_ERROR && use_gains == true) {
 				status = mb_gains(verbose, mbio_ptr, store_ptr, &kind, &transmit_gain, &pulse_length, &receive_gain, &error);
 			}
 
@@ -3070,84 +3070,84 @@ int main(int argc, char **argv) {
 				for (int j = beam_start; j <= beam_end; j++) {
 					/* check beam status */
 					beam_status = MB_SUCCESS;
-					if (check_bath == MB_YES && check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[j]))
+					if (check_bath == true && check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[j]))
 						beam_status = MB_FAILURE;
-					else if (check_bath == MB_YES && check_values == MBLIST_CHECK_ON_NULL && beamflag[j] == MB_FLAG_NULL)
+					else if (check_bath == true && check_values == MBLIST_CHECK_ON_NULL && beamflag[j] == MB_FLAG_NULL)
 						beam_status = MB_FAILURE;
-					if (check_amp == MB_YES && check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[j]))
+					if (check_amp == true && check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[j]))
 						beam_status = MB_FAILURE;
-					else if (check_amp == MB_YES && check_values == MBLIST_CHECK_ON_NULL && beamflag[j] == MB_FLAG_NULL)
+					else if (check_amp == true && check_values == MBLIST_CHECK_ON_NULL && beamflag[j] == MB_FLAG_NULL)
 						beam_status = MB_FAILURE;
-					if (check_ss == MB_YES && j != beam_vertical)
+					if (check_ss == true && j != beam_vertical)
 						beam_status = MB_FAILURE;
-					else if (check_ss == MB_YES && j == beam_vertical)
+					else if (check_ss == true && j == beam_vertical)
 						if (ss[pixel_vertical] <= MB_SIDESCAN_NULL)
 							beam_status = MB_FAILURE;
-					if (use_time_interval == MB_YES && first == MB_YES)
+					if (use_time_interval == true && first == true)
 						beam_status = MB_FAILURE;
-					if (check_nav == MB_YES && (navlon == 0.0 || navlon == 0.0))
+					if (check_nav == true && (navlon == 0.0 || navlon == 0.0))
 						beam_status = MB_FAILURE;
 
 					/* print out good beams */
 					if (beam_status == MB_SUCCESS) {
-						signflip_next_value = MB_NO;
-						invert_next_value = MB_NO;
-						raw_next_value = MB_NO;
-						sensornav_next_value = MB_NO;
-						sensorrelative_next_value = MB_NO;
-						projectednav_next_value = MB_NO;
-						special_character = MB_NO;
+						signflip_next_value = false;
+						invert_next_value = false;
+						raw_next_value = false;
+						sensornav_next_value = false;
+						sensorrelative_next_value = false;
+						projectednav_next_value = false;
+						special_character = false;
 						for (int i = 0; i < n_list; i++) {
-							if (netcdf == MB_YES && lcount > 0)
+							if (netcdf == true && lcount > 0)
 								fprintf(output[i], ", ");
 							int k;
-							if (port_next_value == MB_YES) {
+							if (port_next_value == true) {
 								k = beam_port;
-								port_next_value = MB_NO;
+								port_next_value = false;
 							}
-							else if (stbd_next_value == MB_YES) {
+							else if (stbd_next_value == true) {
 								k = beam_stbd;
-								stbd_next_value = MB_NO;
+								stbd_next_value = false;
 							}
 							else
 								k = j;
 
-							if (raw_next_value == MB_NO) {
+							if (raw_next_value == false) {
 								switch (list[i]) {
 								case '/': /* Inverts next simple value */
-									invert_next_value = MB_YES;
-									special_character = MB_YES;
+									invert_next_value = true;
+									special_character = true;
 									break;
 								case '-': /* Flip sign on next simple value */
-									signflip_next_value = MB_YES;
-									special_character = MB_YES;
+									signflip_next_value = true;
+									special_character = true;
 									break;
 								case '_': /* Print sensor position rather than beam or pixel position - applies to XxYy */
-									sensornav_next_value = MB_YES;
-									special_character = MB_YES;
+									sensornav_next_value = true;
+									special_character = true;
 									break;
 								case '@': /* Print beam or pixel position and depth values relative to sensor - applies to XYZz */
-									sensorrelative_next_value = MB_YES;
-									special_character = MB_YES;
+									sensorrelative_next_value = true;
+									special_character = true;
 									break;
 								case '^': /* Print position values in projected coordinates
 								           * - easting northing rather than lon lat
 								           * - applies to XY */
-									projectednav_next_value = MB_YES;
-									special_character = MB_YES;
+									projectednav_next_value = true;
+									special_character = true;
 									break;
 								case '.': /* Raw value next field */
-									raw_next_value = MB_YES;
-									special_character = MB_YES;
+									raw_next_value = true;
+									special_character = true;
 									count = 0;
 									break;
 								case '=': /* Port-most value next field -ignored here */
-									port_next_value = MB_YES;
-									special_character = MB_YES;
+									port_next_value = true;
+									special_character = true;
 									break;
 								case '+': /* Starboard-most value next field - ignored here*/
-									stbd_next_value = MB_YES;
-									special_character = MB_YES;
+									stbd_next_value = true;
+									special_character = true;
 									break;
 								case 'A': /* Average seafloor crosstrack slope */
 									printsimplevalue(verbose, output[i], avgslope, 0, 4, ascii, &invert_next_value,
@@ -3224,8 +3224,8 @@ int main(int argc, char **argv) {
 									}
 									break;
 								case 'F': /* Beamflag numeric value */
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "%u", beamflag[k]);
 										else
 											fprintf(output[i], "%u", beamflag[k]);
@@ -3236,8 +3236,8 @@ int main(int argc, char **argv) {
 									}
 									break;
 								case 'f': /* Beamflag character value (ascii only) */
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "%u", beamflag[k]);
 										else {
 											if (mb_beam_check_flag_unusable(beamflag[k]))
@@ -3304,8 +3304,8 @@ int main(int argc, char **argv) {
 								case 'J': /* time string */
 									mb_get_jtime(verbose, time_i, time_j);
 									seconds = time_i[5] + 1e-6 * time_i[6];
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "%d, %d, %d, %d, %d, %d", time_j[0], time_j[1], time_i[3],
 											        time_i[4], time_i[5], time_i[6]);
 										else
@@ -3330,8 +3330,8 @@ int main(int argc, char **argv) {
 								case 'j': /* time string */
 									mb_get_jtime(verbose, time_i, time_j);
 									seconds = time_i[5] + 1e-6 * time_i[6];
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "%d, %d, %d, %d, %d", time_j[0], time_j[1], time_j[2], time_j[3],
 											        time_j[4]);
 										else
@@ -3365,16 +3365,16 @@ int main(int argc, char **argv) {
 									break;
 								case 'm': /* time in decimal seconds since
 								        first record */
-									if (first_m == MB_YES) {
+									if (first_m == true) {
 										time_d_ref = time_d;
-										first_m = MB_NO;
+										first_m = false;
 									}
 									b = time_d - time_d_ref;
 									printsimplevalue(verbose, output[i], b, 0, 6, ascii, &invert_next_value, &signflip_next_value,
 									                 &error);
 									break;
 								case 'N': /* ping counter */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", pingnumber);
 									else {
 										b = pingnumber;
@@ -3390,12 +3390,12 @@ int main(int argc, char **argv) {
 									                 &signflip_next_value, &error);
 									break;
 								case 'q': /* bottom detection type */
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 
 										fprintf(output[i], "%d", detect[k]);
-										if (netcdf == MB_YES)
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 									}
 									else {
@@ -3404,8 +3404,8 @@ int main(int argc, char **argv) {
 									}
 									break;
 								case 'Q': /* bottom detection type */
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES) {
+									if (ascii == true) {
+										if (netcdf == true) {
 											fprintf(output[i], "\"");
 											fprintf(output[i], "%d", detect[k]);
 											fprintf(output[i], "\"");
@@ -3442,13 +3442,13 @@ int main(int argc, char **argv) {
 									break;
 								case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 									seconds = time_i[5] + 1e-6 * time_i[6];
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 
 										fprintf(output[i], "%.4d/%.2d/%.2d/%.2d/%.2d/%09.6f", time_i[0], time_i[1], time_i[2],
 										        time_i[3], time_i[4], seconds);
-										if (netcdf == MB_YES)
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 									}
 									else {
@@ -3468,8 +3468,8 @@ int main(int argc, char **argv) {
 									break;
 								case 't': /* yyyy mm dd hh mm ss time string */
 									seconds = time_i[5] + 1e-6 * time_i[6];
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "%d, %d, %d, %d, %d, %d, %d", time_i[0], time_i[1], time_i[2],
 											        time_i[3], time_i[4], time_i[5], time_i[6]);
 										else
@@ -3493,7 +3493,7 @@ int main(int argc, char **argv) {
 									break;
 								case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 									time_u = (int)time_d;
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%ld", time_u);
 									else {
 										b = time_u;
@@ -3502,11 +3502,11 @@ int main(int argc, char **argv) {
 									break;
 								case 'u': /* time in seconds since first record */
 									time_u = (int)time_d;
-									if (first_u == MB_YES) {
+									if (first_u == true) {
 										time_u_ref = time_u;
-										first_u = MB_NO;
+										first_u = false;
 									}
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%ld", time_u - time_u_ref);
 									else {
 										b = time_u - time_u_ref;
@@ -3515,7 +3515,7 @@ int main(int argc, char **argv) {
 									break;
 								case 'V': /* time in seconds since last ping */
 								case 'v':
-									if (ascii == MB_YES) {
+									if (ascii == true) {
 										if (fabs(time_interval) > 100.)
 											fprintf(output[i], "%g", time_interval);
 										else
@@ -3526,34 +3526,34 @@ int main(int argc, char **argv) {
 									}
 									break;
 								case 'X': /* longitude decimal degrees */
-									if (projectednav_next_value == MB_NO) {
-										if (sensorrelative_next_value == MB_YES)
+									if (projectednav_next_value == false) {
+										if (sensorrelative_next_value == true)
 											dlon = 0.0;
 										else
 											dlon = navlon;
-										if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
+										if (sensornav_next_value == false && (beam_set != MBLIST_SET_OFF || k != j))
 											dlon += headingy * mtodeglon * bathacrosstrack[k] +
 											        headingx * mtodeglon * bathalongtrack[k];
 										printsimplevalue(verbose, output[i], dlon, 15, 10, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 									}
 									else {
-										if (sensorrelative_next_value == MB_YES)
+										if (sensorrelative_next_value == true)
 											deasting = 0.0;
 										else
 											deasting = naveasting;
-										if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
+										if (sensornav_next_value == false && (beam_set != MBLIST_SET_OFF || k != j))
 											deasting += headingy * bathacrosstrack[k] + headingx * bathalongtrack[k];
 										printsimplevalue(verbose, output[i], deasting, 15, 3, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 									}
-									sensornav_next_value = MB_NO;
-									sensorrelative_next_value = MB_NO;
-									projectednav_next_value = MB_NO;
+									sensornav_next_value = false;
+									sensorrelative_next_value = false;
+									projectednav_next_value = false;
 									break;
 								case 'x': /* longitude degress + decimal minutes */
 									dlon = navlon;
-									if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
+									if (sensornav_next_value == false && (beam_set != MBLIST_SET_OFF || k != j))
 										dlon +=
 										    headingy * mtodeglon * bathacrosstrack[k] + headingx * mtodeglon * bathalongtrack[k];
 									if (dlon < 0.0) {
@@ -3564,11 +3564,11 @@ int main(int argc, char **argv) {
 										hemi = 'E';
 									degrees = (int)dlon;
 									minutes = 60.0 * (dlon - degrees);
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 										fprintf(output[i], "%3d %11.8f%c", degrees, minutes, hemi);
-										if (netcdf == MB_YES)
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 									}
 									else {
@@ -3579,38 +3579,38 @@ int main(int argc, char **argv) {
 										b = minutes;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									sensornav_next_value = MB_NO;
+									sensornav_next_value = false;
 									break;
 								case 'Y': /* latitude decimal degrees */
-									if (projectednav_next_value == MB_NO) {
-										if (sensorrelative_next_value == MB_YES)
+									if (projectednav_next_value == false) {
+										if (sensorrelative_next_value == true)
 											dlat = 0.0;
 										else
 											dlat = navlat;
-										if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
+										if (sensornav_next_value == false && (beam_set != MBLIST_SET_OFF || k != j))
 											dlat += -headingx * mtodeglat * bathacrosstrack[k] +
 											        headingy * mtodeglat * bathalongtrack[k];
 										printsimplevalue(verbose, output[i], dlat, 15, 10, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
-										sensornav_next_value = MB_NO;
+										sensornav_next_value = false;
 									}
 									else {
-										if (sensorrelative_next_value == MB_YES)
+										if (sensorrelative_next_value == true)
 											dnorthing = 0.0;
 										else
 											dnorthing = navnorthing;
-										if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
+										if (sensornav_next_value == false && (beam_set != MBLIST_SET_OFF || k != j))
 											dnorthing += -headingx * bathacrosstrack[k] + headingy * bathalongtrack[k];
 										printsimplevalue(verbose, output[i], dnorthing, 15, 3, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 									}
-									sensornav_next_value = MB_NO;
-									sensorrelative_next_value = MB_NO;
-									projectednav_next_value = MB_NO;
+									sensornav_next_value = false;
+									sensorrelative_next_value = false;
+									projectednav_next_value = false;
 									break;
 								case 'y': /* latitude degrees + decimal minutes */
 									dlat = navlat;
-									if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
+									if (sensornav_next_value == false && (beam_set != MBLIST_SET_OFF || k != j))
 										dlat +=
 										    -headingx * mtodeglat * bathacrosstrack[k] + headingy * mtodeglat * bathalongtrack[k];
 									if (dlat < 0.0) {
@@ -3621,11 +3621,11 @@ int main(int argc, char **argv) {
 										hemi = 'N';
 									degrees = (int)dlat;
 									minutes = 60.0 * (dlat - degrees);
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 										fprintf(output[i], "%3d %11.8f%c", degrees, minutes, hemi);
-										if (netcdf == MB_YES)
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 									}
 									else {
@@ -3636,7 +3636,7 @@ int main(int argc, char **argv) {
 										b = minutes;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									sensornav_next_value = MB_NO;
+									sensornav_next_value = false;
 									break;
 								case 'Z': /* topography */
 									if (beamflag[k] == MB_FLAG_NULL &&
@@ -3648,13 +3648,13 @@ int main(int argc, char **argv) {
 									}
 									else {
 										b = -bathy_scale * bath[k];
-										if (sensorrelative_next_value == MB_YES)
+										if (sensorrelative_next_value == true)
 											b -= -bathy_scale * sonardepth;
 										printsimplevalue(verbose, output[i], b, 0, 4, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 									}
-									sensornav_next_value = MB_NO;
-									sensorrelative_next_value = MB_NO;
+									sensornav_next_value = false;
+									sensorrelative_next_value = false;
 									break;
 								case 'z': /* depth */
 									if (beamflag[k] == MB_FLAG_NULL &&
@@ -3666,16 +3666,16 @@ int main(int argc, char **argv) {
 									}
 									else {
 										b = bathy_scale * bath[k];
-										if (sensorrelative_next_value == MB_YES)
+										if (sensorrelative_next_value == true)
 											b -= bathy_scale * sonardepth;
 										printsimplevalue(verbose, output[i], b, 0, 4, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 									}
-									sensornav_next_value = MB_NO;
-									sensorrelative_next_value = MB_NO;
+									sensornav_next_value = false;
+									sensorrelative_next_value = false;
 									break;
 								case '#': /* beam number */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", k);
 									else {
 										b = k;
@@ -3683,7 +3683,7 @@ int main(int argc, char **argv) {
 									}
 									break;
 								default:
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "<Invalid Option: %c>", list[i]);
 									break;
 								}
@@ -3692,39 +3692,39 @@ int main(int argc, char **argv) {
 							{
 								switch (list[i]) {
 								case '/': /* Inverts next simple value */
-									invert_next_value = MB_YES;
-									special_character = MB_YES;
+									invert_next_value = true;
+									special_character = true;
 									break;
 								case '-': /* Flip sign on next simple value */
-									signflip_next_value = MB_YES;
-									special_character = MB_YES;
+									signflip_next_value = true;
+									special_character = true;
 									break;
 								case '_': /* Print sensor position rather than beam or pixel position - applies to XxYy */
-									sensornav_next_value = MB_YES;
-									special_character = MB_YES;
+									sensornav_next_value = true;
+									special_character = true;
 									break;
 								case '@': /* Print beam or pixel position and depth values relative to sensor - applies to XYZz */
-									sensorrelative_next_value = MB_YES;
-									special_character = MB_YES;
+									sensorrelative_next_value = true;
+									special_character = true;
 									break;
 								case '^': /* Print position values in projected coordinates
 								           * - easting northing rather than lon lat
 								           * - applies to XY */
-									projectednav_next_value = MB_YES;
-									special_character = MB_YES;
+									projectednav_next_value = true;
+									special_character = true;
 									break;
 								case '.': /* Raw value next field */
-									raw_next_value = MB_YES;
-									special_character = MB_YES;
+									raw_next_value = true;
+									special_character = true;
 									count = 0;
 									break;
 								case '=': /* Port-most value next field -ignored here */
-									port_next_value = MB_YES;
-									special_character = MB_YES;
+									port_next_value = true;
+									special_character = true;
 									break;
 								case '+': /* Starboard-most value next field - ignored here*/
-									stbd_next_value = MB_YES;
-									special_character = MB_YES;
+									stbd_next_value = true;
+									special_character = true;
 									break;
 
 								case '0':
@@ -3752,22 +3752,22 @@ int main(int argc, char **argv) {
 										printsimplevalue(verbose, output[i], bs[k], 5, 1, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'a': /* absorption */
 									printsimplevalue(verbose, output[i], absorption, 5, 2, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'B': /* BSN - Normal incidence backscatter */
 									printsimplevalue(verbose, output[i], bsn, 5, 2, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'b': /* BSO - Oblique backscatter */
 									printsimplevalue(verbose, output[i], bso, 5, 2, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'c': /* Mean backscatter */
 									mback = 0;
@@ -3780,7 +3780,7 @@ int main(int argc, char **argv) {
 									}
 									printsimplevalue(verbose, output[i], mback / nback, 5, 2, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'd': /* beam depression angle */
 									if (beamflag[k] == MB_FLAG_NULL &&
@@ -3794,84 +3794,84 @@ int main(int argc, char **argv) {
 										printsimplevalue(verbose, output[i], depression[k], 5, 2, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 
 								case 'F': /* filename */
-									if (netcdf == MB_YES)
+									if (netcdf == true)
 										fprintf(output[i], "\"");
 									fprintf(output[i], "%s", file);
 
-									if (netcdf == MB_YES)
+									if (netcdf == true)
 										fprintf(output[i], "\"");
 
-									if (ascii == MB_NO)
+									if (ascii == false)
 										for (k = strlen(file); k < MB_PATH_MAXLINE; k++)
 											fwrite(&file[strlen(file)], sizeof(char), 1, outfile);
 
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 
 								case 'f': /* format */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", format);
 									else {
 										b = format;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 
 									break;
 								case 'G': /* TVG start */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", tvg_start);
 									else {
 										b = tvg_start;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'g': /* TVG stop */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", tvg_stop);
 									else {
 										b = tvg_stop;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'L': /* Pulse length */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", ipulse_length);
 									else {
 										b = ipulse_length;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'l': /* Transmit pulse length (sec) */
 									printsimplevalue(verbose, output[i], pulse_length, 9, 6, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'M': /* mode */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%4d", mode);
 									else {
 										b = mode;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'N': /* ping counter */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", png_count);
 									else {
 										b = png_count;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'p': /* sidescan */
 									invert = invert_next_value;
@@ -3881,9 +3881,9 @@ int main(int argc, char **argv) {
 									if (count > 0) {
 										int m = 1;
 										for (; m < count && m < beam_samples[k]; m++) {
-											if (netcdf == MB_YES)
+											if (netcdf == true)
 												fprintf(output[i], ", ");
-											if (ascii == MB_YES)
+											if (ascii == true)
 												fprintf(output[i], "%s", delimiter);
 											invert_next_value = invert;
 											signflip_next_value = flip;
@@ -3892,77 +3892,77 @@ int main(int argc, char **argv) {
 											                 &invert_next_value, &signflip_next_value, &error);
 										}
 										for (; m < count; m++) {
-											if (netcdf == MB_YES)
+											if (netcdf == true)
 												fprintf(output[i], ", ");
-											if (ascii == MB_YES)
+											if (ascii == true)
 												fprintf(output[i], "%s", delimiter);
 											printNaN(verbose, output[i], ascii, &invert_next_value, &signflip_next_value, &error);
 										}
 									}
 
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'R': /* range */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", range[k]);
 									else {
 										b = range[k];
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'r': /* Sample rate */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", sample_rate);
 									else {
 										b = sample_rate;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'S': /* Sidescan pixels */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", npixels);
 									else {
 										b = npixels;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 's': /* Sidescan pixels per beam */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", beam_samples[k]);
 									else {
 										b = beam_samples[k];
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'T': /* Transmit gain (dB) */
 									printsimplevalue(verbose, output[i], transmit_gain, 5, 1, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 't': /* Receive gain (dB) */
 									printsimplevalue(verbose, output[i], receive_gain, 5, 1, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 
 								default:
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "<Invalid Option: %c>", list[i]);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								}
 							}
-							if (ascii == MB_YES) {
+							if (ascii == true) {
 								if (i < (n_list - 1)) {
-									if (special_character == MB_NO) {
+									if (special_character == false) {
 										fprintf(output[i], "%s", delimiter);
 									}
 									else {
-										special_character = MB_NO;
+										special_character = false;
 									}
 								}
 								else
@@ -3977,88 +3977,88 @@ int main(int argc, char **argv) {
 				for (int j = pixel_start; j <= pixel_end; j++) {
 					/* check pixel status */
 					pixel_status = MB_SUCCESS;
-					if (check_bath == MB_YES && j != pixel_vertical)
+					if (check_bath == true && j != pixel_vertical)
 						pixel_status = MB_FAILURE;
-					else if (check_bath == MB_YES && j == pixel_vertical) {
+					else if (check_bath == true && j == pixel_vertical) {
 						if (check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[beam_vertical]))
 							pixel_status = MB_FAILURE;
 						else if (check_values == MBLIST_CHECK_ON_NULL && beamflag[beam_vertical] == MB_FLAG_NULL)
 							pixel_status = MB_FAILURE;
 					}
-					if (check_amp == MB_YES && j != pixel_vertical)
+					if (check_amp == true && j != pixel_vertical)
 						pixel_status = MB_FAILURE;
-					else if (check_amp == MB_YES && j == pixel_vertical) {
+					else if (check_amp == true && j == pixel_vertical) {
 						if (check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[beam_vertical]))
 							pixel_status = MB_FAILURE;
 						else if (check_values == MBLIST_CHECK_ON_NULL && beamflag[beam_vertical] == MB_FLAG_NULL)
 							pixel_status = MB_FAILURE;
 					}
-					if (check_ss == MB_YES && ss[j] <= MB_SIDESCAN_NULL)
+					if (check_ss == true && ss[j] <= MB_SIDESCAN_NULL)
 						pixel_status = MB_FAILURE;
-					if (use_time_interval == MB_YES && first == MB_YES)
+					if (use_time_interval == true && first == true)
 						pixel_status = MB_FAILURE;
-					if (check_nav == MB_YES && (navlon == 0.0 || navlon == 0.0))
+					if (check_nav == true && (navlon == 0.0 || navlon == 0.0))
 						pixel_status = MB_FAILURE;
 
 					/* print out good pixels */
 					if (pixel_status == MB_SUCCESS) {
-						signflip_next_value = MB_NO;
-						invert_next_value = MB_NO;
-						raw_next_value = MB_NO;
-						sensornav_next_value = MB_NO;
-						projectednav_next_value = MB_NO;
-						special_character = MB_NO;
+						signflip_next_value = false;
+						invert_next_value = false;
+						raw_next_value = false;
+						sensornav_next_value = false;
+						projectednav_next_value = false;
+						special_character = false;
 						for (int i = 0; i < n_list; i++) {
-							if (netcdf == MB_YES && lcount > 0)
+							if (netcdf == true && lcount > 0)
 								fprintf(output[i], ", ");
 							int k;
-							if (port_next_value == MB_YES) {
+							if (port_next_value == true) {
 								k = pixel_port;
-								port_next_value = MB_NO;
+								port_next_value = false;
 							}
-							else if (stbd_next_value == MB_YES) {
+							else if (stbd_next_value == true) {
 								k = pixel_stbd;
-								stbd_next_value = MB_NO;
+								stbd_next_value = false;
 							}
 							else
 								k = j;
 
-							if (raw_next_value == MB_NO) {
+							if (raw_next_value == false) {
 								switch (list[i]) {
 								case '/': /* Inverts next simple value */
-									invert_next_value = MB_YES;
-									special_character = MB_YES;
+									invert_next_value = true;
+									special_character = true;
 									break;
 								case '-': /* Flip sign on next simple value */
-									signflip_next_value = MB_YES;
-									special_character = MB_YES;
+									signflip_next_value = true;
+									special_character = true;
 									break;
 								case '_': /* Print sensor position rather than beam or pixel position - applies to XxYy */
-									sensornav_next_value = MB_YES;
-									special_character = MB_YES;
+									sensornav_next_value = true;
+									special_character = true;
 									break;
 								case '@': /* Print beam or pixel position and depth values relative to sensor - applies to XYZz */
-									sensorrelative_next_value = MB_YES;
-									special_character = MB_YES;
+									sensorrelative_next_value = true;
+									special_character = true;
 									break;
 								case '^': /* Print position values in projected coordinates
 								           * - easting northing rather than lon lat
 								           * - applies to XY */
-									projectednav_next_value = MB_YES;
-									special_character = MB_YES;
+									projectednav_next_value = true;
+									special_character = true;
 									break;
 								case '.': /* Raw value next field */
-									raw_next_value = MB_YES;
+									raw_next_value = true;
 									count = 0;
-									special_character = MB_YES;
+									special_character = true;
 									break;
 								case '=': /* Port-most value next field -ignored here */
-									port_next_value = MB_YES;
-									special_character = MB_YES;
+									port_next_value = true;
+									special_character = true;
 									break;
 								case '+': /* Starboard-most value next field - ignored here*/
-									stbd_next_value = MB_YES;
-									special_character = MB_YES;
+									stbd_next_value = true;
+									special_character = true;
 									break;
 								case 'A': /* Average seafloor crosstrack slope */
 									printsimplevalue(verbose, output[i], avgslope, 0, 4, ascii, &invert_next_value,
@@ -4123,8 +4123,8 @@ int main(int argc, char **argv) {
 								case 'J': /* time string */
 									mb_get_jtime(verbose, time_i, time_j);
 									seconds = time_i[5] + 1e-6 * time_i[6];
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "%d, %d, %d, %d, %d, %d", time_j[0], time_j[1], time_i[3],
 											        time_i[4], time_i[5], time_i[6]);
 										else
@@ -4149,8 +4149,8 @@ int main(int argc, char **argv) {
 								case 'j': /* time string */
 									mb_get_jtime(verbose, time_i, time_j);
 									seconds = time_i[5] + 1e-6 * time_i[6];
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "%d, %d, %d, %d, %d", time_j[0], time_j[1], time_j[2], time_j[3],
 											        time_j[4]);
 										else
@@ -4184,16 +4184,16 @@ int main(int argc, char **argv) {
 									break;
 								case 'm': /* time in decimal seconds since
 								        first record */
-									if (first_m == MB_YES) {
+									if (first_m == true) {
 										time_d_ref = time_d;
-										first_m = MB_NO;
+										first_m = false;
 									}
 									b = time_d - time_d_ref;
 									printsimplevalue(verbose, output[i], b, 0, 6, ascii, &invert_next_value, &signflip_next_value,
 									                 &error);
 									break;
 								case 'N': /* ping counter */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", pingnumber);
 									else {
 										b = pingnumber;
@@ -4209,12 +4209,12 @@ int main(int argc, char **argv) {
 									                 &signflip_next_value, &error);
 									break;
 								case 'Q': /* bottom detection type */
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 
 										fprintf(output[i], "%d", MB_DETECT_UNKNOWN);
-										if (netcdf == MB_YES)
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 									}
 									else {
@@ -4240,12 +4240,12 @@ int main(int argc, char **argv) {
 									break;
 								case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 									seconds = time_i[5] + 1e-6 * time_i[6];
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 										fprintf(output[i], "%.4d/%.2d/%.2d/%.2d/%.2d/%09.6f", time_i[0], time_i[1], time_i[2],
 										        time_i[3], time_i[4], seconds);
-										if (netcdf == MB_YES)
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 									}
 									else {
@@ -4265,8 +4265,8 @@ int main(int argc, char **argv) {
 									break;
 								case 't': /* yyyy mm dd hh mm ss time string */
 									seconds = time_i[5] + 1e-6 * time_i[6];
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "%d, %d, %d, %d, %d, %d, %d", time_i[0], time_i[1], time_i[2],
 											        time_i[3], time_i[4], time_i[5], time_i[6]);
 										else
@@ -4290,7 +4290,7 @@ int main(int argc, char **argv) {
 									break;
 								case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 									time_u = (int)time_d;
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%ld", time_u);
 									else {
 										b = time_u;
@@ -4299,11 +4299,11 @@ int main(int argc, char **argv) {
 									break;
 								case 'u': /* time in seconds since first record */
 									time_u = (int)time_d;
-									if (first_u == MB_YES) {
+									if (first_u == true) {
 										time_u_ref = time_u;
-										first_u = MB_NO;
+										first_u = false;
 									}
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%ld", time_u - time_u_ref);
 									else {
 										b = time_u - time_u_ref;
@@ -4312,7 +4312,7 @@ int main(int argc, char **argv) {
 									break;
 								case 'V': /* time in seconds since last ping */
 								case 'v':
-									if (ascii == MB_YES) {
+									if (ascii == true) {
 										if (fabs(time_interval) > 100.)
 											fprintf(output[i], "%g", time_interval);
 										else
@@ -4323,34 +4323,34 @@ int main(int argc, char **argv) {
 									}
 									break;
 								case 'X': /* longitude decimal degrees */
-									if (projectednav_next_value == MB_NO) {
-										if (sensorrelative_next_value == MB_YES)
+									if (projectednav_next_value == false) {
+										if (sensorrelative_next_value == true)
 											dlon = 0.0;
 										else
 											dlon = navlon;
-										if (sensornav_next_value == MB_NO && (pixel_set != MBLIST_SET_OFF || k != j))
+										if (sensornav_next_value == false && (pixel_set != MBLIST_SET_OFF || k != j))
 											dlon +=
 											    headingy * mtodeglon * ssacrosstrack[k] + headingx * mtodeglon * ssalongtrack[k];
 										printsimplevalue(verbose, output[i], dlon, 15, 10, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 									}
 									else {
-										if (sensorrelative_next_value == MB_YES)
+										if (sensorrelative_next_value == true)
 											deasting = 0.0;
 										else
 											deasting = naveasting;
-										if (sensornav_next_value == MB_NO && (pixel_set != MBLIST_SET_OFF || k != j))
+										if (sensornav_next_value == false && (pixel_set != MBLIST_SET_OFF || k != j))
 											deasting += headingy * ssacrosstrack[k] + headingx * ssalongtrack[k];
 										printsimplevalue(verbose, output[i], deasting, 15, 3, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 									}
-									sensornav_next_value = MB_NO;
-									sensorrelative_next_value = MB_NO;
-									projectednav_next_value = MB_NO;
+									sensornav_next_value = false;
+									sensorrelative_next_value = false;
+									projectednav_next_value = false;
 									break;
 								case 'x': /* longitude degress + decimal minutes */
 									dlon = navlon;
-									if (sensornav_next_value == MB_NO && (pixel_set != MBLIST_SET_OFF || k != j))
+									if (sensornav_next_value == false && (pixel_set != MBLIST_SET_OFF || k != j))
 										dlon += headingy * mtodeglon * ssacrosstrack[k] + headingx * mtodeglon * ssalongtrack[k];
 									if (dlon < 0.0) {
 										hemi = 'W';
@@ -4360,11 +4360,11 @@ int main(int argc, char **argv) {
 										hemi = 'E';
 									degrees = (int)dlon;
 									minutes = 60.0 * (dlon - degrees);
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 										fprintf(output[i], "%3d %11.8f%c", degrees, minutes, hemi);
-										if (netcdf == MB_YES)
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 									}
 									else {
@@ -4375,37 +4375,37 @@ int main(int argc, char **argv) {
 										b = minutes;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									sensornav_next_value = MB_NO;
+									sensornav_next_value = false;
 									break;
 								case 'Y': /* latitude decimal degrees */
-									if (projectednav_next_value == MB_NO) {
-										if (sensorrelative_next_value == MB_YES)
+									if (projectednav_next_value == false) {
+										if (sensorrelative_next_value == true)
 											dlat = 0.0;
 										else
 											dlat = navlat;
-										if (sensornav_next_value == MB_NO && (pixel_set != MBLIST_SET_OFF || k != j))
+										if (sensornav_next_value == false && (pixel_set != MBLIST_SET_OFF || k != j))
 											dlat +=
 											    -headingx * mtodeglat * ssacrosstrack[k] + headingy * mtodeglat * ssalongtrack[k];
 										printsimplevalue(verbose, output[i], dlat, 15, 10, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 									}
 									else {
-										if (sensorrelative_next_value == MB_YES)
+										if (sensorrelative_next_value == true)
 											dnorthing = 0.0;
 										else
 											dnorthing = navnorthing;
-										if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
+										if (sensornav_next_value == false && (beam_set != MBLIST_SET_OFF || k != j))
 											dnorthing += -headingx * ssacrosstrack[k] + headingy * ssalongtrack[k];
 										printsimplevalue(verbose, output[i], dnorthing, 15, 3, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 									}
-									sensornav_next_value = MB_NO;
-									sensorrelative_next_value = MB_NO;
-									projectednav_next_value = MB_NO;
+									sensornav_next_value = false;
+									sensorrelative_next_value = false;
+									projectednav_next_value = false;
 									break;
 								case 'y': /* latitude degrees + decimal minutes */
 									dlat = navlat;
-									if (sensornav_next_value == MB_NO && (pixel_set != MBLIST_SET_OFF || k != j))
+									if (sensornav_next_value == false && (pixel_set != MBLIST_SET_OFF || k != j))
 										dlat += -headingx * mtodeglat * ssacrosstrack[k] + headingy * mtodeglat * ssalongtrack[k];
 									if (dlat < 0.0) {
 										hemi = 'S';
@@ -4415,11 +4415,11 @@ int main(int argc, char **argv) {
 										hemi = 'N';
 									degrees = (int)dlat;
 									minutes = 60.0 * (dlat - degrees);
-									if (ascii == MB_YES) {
-										if (netcdf == MB_YES)
+									if (ascii == true) {
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 										fprintf(output[i], "%3d %11.8f%c", degrees, minutes, hemi);
-										if (netcdf == MB_YES)
+										if (netcdf == true)
 											fprintf(output[i], "\"");
 									}
 									else {
@@ -4430,7 +4430,7 @@ int main(int argc, char **argv) {
 										b = minutes;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									sensornav_next_value = MB_NO;
+									sensornav_next_value = false;
 									break;
 								case 'Z': /* topography */
 									if (beamflag[beam_vertical] == MB_FLAG_NULL &&
@@ -4442,13 +4442,13 @@ int main(int argc, char **argv) {
 									}
 									else {
 										b = -bathy_scale * bath[beam_vertical];
-										if (sensorrelative_next_value == MB_YES)
+										if (sensorrelative_next_value == true)
 											b -= -bathy_scale * sonardepth;
 										printsimplevalue(verbose, output[i], b, 0, 4, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 									}
-									sensornav_next_value = MB_NO;
-									sensorrelative_next_value = MB_NO;
+									sensornav_next_value = false;
+									sensorrelative_next_value = false;
 									break;
 								case 'z': /* depth */
 									if (beamflag[beam_vertical] == MB_FLAG_NULL &&
@@ -4460,16 +4460,16 @@ int main(int argc, char **argv) {
 									}
 									else {
 										b = bathy_scale * bath[beam_vertical];
-										if (sensorrelative_next_value == MB_YES)
+										if (sensorrelative_next_value == true)
 											b -= bathy_scale * sonardepth;
 										printsimplevalue(verbose, output[i], b, 0, 4, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
 									}
-									sensornav_next_value = MB_NO;
-									sensorrelative_next_value = MB_NO;
+									sensornav_next_value = false;
+									sensorrelative_next_value = false;
 									break;
 								case '#': /* pixel number */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", k);
 									else {
 										b = k;
@@ -4485,39 +4485,39 @@ int main(int argc, char **argv) {
 							{
 								switch (list[i]) {
 								case '/': /* Inverts next simple value */
-									invert_next_value = MB_YES;
-									special_character = MB_YES;
+									invert_next_value = true;
+									special_character = true;
 									break;
 								case '-': /* Flip sign on next simple value */
-									signflip_next_value = MB_YES;
-									special_character = MB_YES;
+									signflip_next_value = true;
+									special_character = true;
 									break;
 								case '_': /* Print sensor position rather than beam or pixel position - applies to XxYy */
-									sensornav_next_value = MB_YES;
-									special_character = MB_YES;
+									sensornav_next_value = true;
+									special_character = true;
 									break;
 								case '@': /* Print beam or pixel position and depth values relative to sensor - applies to XYZz */
-									sensorrelative_next_value = MB_YES;
-									special_character = MB_YES;
+									sensorrelative_next_value = true;
+									special_character = true;
 									break;
 								case '^': /* Print position values in projected coordinates
 								           * - easting northing rather than lon lat
 								           * - applies to XY */
-									projectednav_next_value = MB_YES;
-									special_character = MB_YES;
+									projectednav_next_value = true;
+									special_character = true;
 									break;
 								case '.': /* Raw value next field */
-									raw_next_value = MB_YES;
+									raw_next_value = true;
 									count = 0;
-									special_character = MB_YES;
+									special_character = true;
 									break;
 								case '=': /* Port-most value next field -ignored here */
-									port_next_value = MB_YES;
-									special_character = MB_YES;
+									port_next_value = true;
+									special_character = true;
 									break;
 								case '+': /* Starboard-most value next field - ignored here*/
-									stbd_next_value = MB_YES;
-									special_character = MB_YES;
+									stbd_next_value = true;
+									special_character = true;
 									break;
 
 								case '0':
@@ -4536,22 +4536,22 @@ int main(int argc, char **argv) {
 								case 'A': /* backscatter */
 									printsimplevalue(verbose, output[i], bs[beam_vertical], 5, 1, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'a': /* absorption */
 									printsimplevalue(verbose, output[i], absorption, 5, 2, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'B': /* BSN - Normal incidence backscatter */
 									printsimplevalue(verbose, output[i], bsn, 5, 2, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'b': /* BSO - Oblique backscatter */
 									printsimplevalue(verbose, output[i], bso, 5, 2, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'c': /* Mean backscatter */
 									mback = 0;
@@ -4564,86 +4564,86 @@ int main(int argc, char **argv) {
 									}
 									printsimplevalue(verbose, output[i], mback / nback, 5, 2, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'd': /* beam depression angle */
 									printsimplevalue(verbose, output[i], depression[beam_vertical], 5, 2, ascii,
 									                 &invert_next_value, &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'F': /* filename */
-									if (netcdf == MB_YES)
+									if (netcdf == true)
 										fprintf(output[i], "\"");
 									fprintf(output[i], "%s", file);
-									if (netcdf == MB_YES)
+									if (netcdf == true)
 										fprintf(output[i], "\"");
 
-									if (ascii == MB_NO)
+									if (ascii == false)
 										for (k = strlen(file); k < MB_PATH_MAXLINE; k++)
 											fwrite(&file[strlen(file)], sizeof(char), 1, outfile);
 
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 
 								case 'f': /* format */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", format);
 									else {
 										b = format;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 
 								case 'G': /* TVG start */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", tvg_start);
 									else {
 										b = tvg_start;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'g': /* TVG stop */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", tvg_stop);
 									else {
 										b = tvg_stop;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'L': /* Pulse length */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", ipulse_length);
 									else {
 										b = ipulse_length;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'l': /* Transmit pulse length (sec) */
 									printsimplevalue(verbose, output[i], pulse_length, 9, 6, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'M': /* mode */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%4d", mode);
 									else {
 										b = mode;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'N': /* ping counter */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", png_count);
 									else {
 										b = png_count;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'p': /* sidescan */
 									invert = invert_next_value;
@@ -4653,9 +4653,9 @@ int main(int argc, char **argv) {
 									if (count > 0) {
 										int m = 1;
 										for (; m < count && m < beam_samples[beam_vertical]; m++) {
-											if (netcdf == MB_YES)
+											if (netcdf == true)
 												fprintf(output[i], ", ");
-											if (ascii == MB_YES)
+											if (ascii == true)
 												fprintf(output[i], "%s", delimiter);
 											invert_next_value = invert;
 											signflip_next_value = flip;
@@ -4664,80 +4664,80 @@ int main(int argc, char **argv) {
 											                 ascii, &invert_next_value, &signflip_next_value, &error);
 										}
 										for (; m < count; m++) {
-											if (netcdf == MB_YES)
+											if (netcdf == true)
 												fprintf(output[i], ", ");
-											if (ascii == MB_YES)
+											if (ascii == true)
 												fprintf(output[i], "%s", delimiter);
 											printNaN(verbose, output[i], ascii, &invert_next_value, &signflip_next_value, &error);
 										}
 									}
 
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 
 								case 'R': /* range */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", range[beam_vertical]);
 									else {
 										b = range[beam_vertical];
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 
 								case 'r': /* Sample rate */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", sample_rate);
 									else {
 										b = sample_rate;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 
 								case 'S': /* Sidescan pixels */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", npixels);
 									else {
 										b = npixels;
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 's': /* Sidescan pixels per beam */
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "%6d", beam_samples[beam_vertical]);
 									else {
 										b = beam_samples[beam_vertical];
 										fwrite(&b, sizeof(double), 1, outfile);
 									}
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 'T': /* Transmit gain (dB) */
 									printsimplevalue(verbose, output[i], transmit_gain, 5, 1, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								case 't': /* Receive gain (dB) */
 									printsimplevalue(verbose, output[i], receive_gain, 5, 1, ascii, &invert_next_value,
 									                 &signflip_next_value, &error);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 
 								default:
-									if (ascii == MB_YES)
+									if (ascii == true)
 										fprintf(output[i], "<Invalid Option: %c>", list[i]);
-									raw_next_value = MB_NO;
+									raw_next_value = false;
 									break;
 								}
 							}
-							if (ascii == MB_YES) {
+							if (ascii == true) {
 								if (i < (n_list - 1)) {
-									if (special_character == MB_NO) {
+									if (special_character == false) {
 										fprintf(output[i], "%s", delimiter);
 									}
 									else {
-										special_character = MB_NO;
+										special_character = false;
 									}
 								}
 								else
@@ -4748,8 +4748,8 @@ int main(int argc, char **argv) {
 				}
 
 			/* reset first flag */
-			if (error == MB_ERROR_NO_ERROR && first == MB_YES) {
-				first = MB_NO;
+			if (error == MB_ERROR_NO_ERROR && first == true) {
+				first = false;
 			}
 		}
 
@@ -4757,19 +4757,19 @@ int main(int argc, char **argv) {
 		status = mb_close(verbose, &mbio_ptr, &error);
 
 		/* deallocate memory used for data arrays */
-		if (use_raw == MB_YES) {
+		if (use_raw == true) {
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&ss_pixels, &error);
 		}
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
@@ -4778,7 +4778,7 @@ int main(int argc, char **argv) {
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* compile CDL file */
-	if (netcdf == MB_YES) {
+	if (netcdf == true) {
 		for (int i = 0; i < n_list; i++) {
 			if (list[i] != '/' && list[i] != '-' && list[i] != '.' && !(list[i] >= '0' && list[i] <= '9')) {
 				fprintf(output[i], " ;\n\n");
@@ -4800,7 +4800,7 @@ int main(int argc, char **argv) {
 		fclose(outfile);
 
 		/* convert cdl to netcdf */
-		if (netcdf_cdl == MB_NO) {
+		if (netcdf_cdl == false) {
 			sprintf(output_file_temp, "ncgen -o %s %s.cdl", output_file, output_file);
 			shellstatus = system(output_file_temp);
 			if (shellstatus == 0) {

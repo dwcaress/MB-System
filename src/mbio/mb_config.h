@@ -71,10 +71,10 @@
 #define MBSYSTEM_INSTALL_PREFIX "/usr/local"
 
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
-#define MBSYSTEM_OTPS_LOCATION "/usr/local/opt/otps"
+#define MBSYSTEM_OTPS_LOCATION "/usr/local/src/OTPS2"
 
 /* Build libmbtnav */
-/* #undef MBTNAV_ENABLED */
+#define MBTNAV_ENABLED 1
 
 /* Build libmbtrn and mbtrnpreprocess */
 #define MBTRN_ENABLED 1
@@ -92,7 +92,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.7.6beta13"
+#define PACKAGE_STRING "mbsystem 5.7.6beta15"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -101,7 +101,7 @@
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.7.6beta13"
+#define PACKAGE_VERSION "5.7.6beta15"
 
 /* Build tools using PCL */
 /* #undef PCLTOOLS_ENABLED */
@@ -113,10 +113,10 @@
 /* #undef TEST_ENABLED */
 
 /* Version number of package */
-#define VERSION "5.7.6beta13"
+#define VERSION "5.7.6beta15"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "7 October 2019"
+#define VERSION_DATE "10 October 2019"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

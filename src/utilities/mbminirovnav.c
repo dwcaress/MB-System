@@ -67,13 +67,13 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
   /* ROV dive time start and end */
-  int rov_dive_start_time_set = MB_NO;
+  int rov_dive_start_time_set = false;
   double rov_dive_start_time_d;
   int rov_dive_start_time_i[7];
-  int rov_dive_end_time_set = MB_NO;
+  int rov_dive_end_time_set = false;
   double rov_dive_end_time_d;
   int rov_dive_end_time_i[7];
-  int interpolate_position = MB_NO;
+  int interpolate_position = false;
 
   /* MBIO status variables */
   int verbose = 0;
@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
   double rawlat, rawlon, dummydouble, ldegrees, lminutes;
   double reference_lon = 0.0;
   double reference_lat = 0.0;
-  int utm_zone_set = MB_NO;
+  int utm_zone_set = false;
   int  utm_zone = 0;
   mb_path projection_id;
   void *pjptr = NULL;
@@ -210,7 +210,7 @@ int main(int argc, char **argv) {
 
       /* help */
       else if (strcmp("help", options[option_index].name) == 0) {
-        help = MB_YES;
+        help = true;
       }
 
       /*-------------------------------------------------------
@@ -260,7 +260,7 @@ int main(int argc, char **argv) {
         if (nscan == 6) {
           rov_dive_start_time_i[6] = 0;
           mb_get_time(verbose, rov_dive_start_time_i, &rov_dive_start_time_d);
-          rov_dive_start_time_set = MB_YES;
+          rov_dive_start_time_set = true;
         }
         else {
           fprintf(stderr,"Program %s command error: %s %s\n",
@@ -277,7 +277,7 @@ int main(int argc, char **argv) {
         if (nscan == 6) {
           rov_dive_end_time_i[6] = 0;
           mb_get_time(verbose, rov_dive_end_time_i, &rov_dive_end_time_d);
-          rov_dive_end_time_set = MB_YES;
+          rov_dive_end_time_set = true;
         }
         else {
           fprintf(stderr,"Program %s command error: %s %s\n",
@@ -291,7 +291,7 @@ int main(int argc, char **argv) {
         if (nscan < 2)
           nscan = sscanf(optarg, "%d%c", &utm_zone, &NorS);
         if (nscan == 2) {
-          utm_zone_set = MB_YES;
+          utm_zone_set = true;
           if (NorS == 'N' || NorS == 'n')
             sprintf(projection_id, "UTM%2.2dN", utm_zone);
           else if (NorS == 'S' || NorS == 's')
@@ -307,7 +307,7 @@ int main(int argc, char **argv) {
 
       /* interpolate position over gaps in USBL fixes (rather than repeat position values) */
       else if (strcmp("interpolate-position", options[option_index].name) == 0) {
-        interpolate_position = MB_YES;
+        interpolate_position = true;
       }
 
       /*----------------------------------------------------------------*/
@@ -338,19 +338,19 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       output_file:                  %s\n", output_file);
     fprintf(stderr, "dbg2       output time interval:         %f\n", interval);
     fprintf(stderr, "dbg2       rov_dive_start_time_set:      %d\n", rov_dive_start_time_set);
-    if (rov_dive_start_time_set == MB_YES)
+    if (rov_dive_start_time_set == true)
       fprintf(stderr, "dbg2       rov_dive_start_time_i:        %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
           rov_dive_start_time_i[0], rov_dive_start_time_i[1], rov_dive_start_time_i[2],
           rov_dive_start_time_i[3], rov_dive_start_time_i[4], rov_dive_start_time_i[5],
           rov_dive_start_time_i[6]);
     fprintf(stderr, "dbg2       rov_dive_end_time_set:        %d\n", rov_dive_end_time_set);
-    if (rov_dive_end_time_set == MB_YES)
+    if (rov_dive_end_time_set == true)
       fprintf(stderr, "dbg2       rov_dive_end_time_i:          %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
           rov_dive_end_time_i[0], rov_dive_end_time_i[1], rov_dive_end_time_i[2],
           rov_dive_end_time_i[3], rov_dive_end_time_i[4], rov_dive_end_time_i[5],
           rov_dive_end_time_i[6]);
     fprintf(stderr, "dbg2       utm_zone_set:                 %d\n", utm_zone_set);
-    if (utm_zone_set == MB_YES) {
+    if (utm_zone_set == true) {
       fprintf(stderr, "dbg2       utm_zone:                     %d\n", utm_zone);
       fprintf(stderr, "dbg2       projection_id:                %s\n", projection_id);
     }
@@ -386,19 +386,19 @@ int main(int argc, char **argv) {
     fprintf(stdout, "\toutput_file:                  %s\n", output_file);
     fprintf(stdout, "\toutput time interval:         %f\n", interval);
     fprintf(stdout, "\trov_dive_start_time_set:      %d\n", rov_dive_start_time_set);
-    if (rov_dive_start_time_set == MB_YES)
+    if (rov_dive_start_time_set == true)
       fprintf(stdout, "\trov_dive_start_time_i:        %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
           rov_dive_start_time_i[0], rov_dive_start_time_i[1], rov_dive_start_time_i[2],
           rov_dive_start_time_i[3], rov_dive_start_time_i[4], rov_dive_start_time_i[5],
           rov_dive_start_time_i[6]);
     fprintf(stdout, "\trov_dive_end_time_set:        %d\n", rov_dive_end_time_set);
-    if (rov_dive_end_time_set == MB_YES)
+    if (rov_dive_end_time_set == true)
       fprintf(stdout, "\trov_dive_end_time_i:          %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
           rov_dive_end_time_i[0], rov_dive_end_time_i[1], rov_dive_end_time_i[2],
           rov_dive_end_time_i[3], rov_dive_end_time_i[4], rov_dive_end_time_i[5],
           rov_dive_end_time_i[6]);
     fprintf(stdout, "\tutm_zone_set:                 %d\n", utm_zone_set);
-    if (utm_zone_set == MB_YES) {
+    if (utm_zone_set == true) {
       fprintf(stdout, "\tutm_zone:                     %d\n", utm_zone);
       fprintf(stdout, "\tprojection_id:                %s\n", projection_id);
     }
@@ -472,7 +472,7 @@ int main(int argc, char **argv) {
             nav_lon[num_nav] *= -1;
 
           if ((num_nav < num_nav_alloc)
-              && (interpolate_position == MB_NO
+              && (interpolate_position == false
                   || num_nav <= 1
                   || nav_lon[num_nav] != nav_lon[num_nav-1]
                   || nav_lat[num_nav] != nav_lat[num_nav-1])) {
@@ -718,10 +718,10 @@ int main(int argc, char **argv) {
 
   /* get time range of output based on max bounds of any input data
     or use the specified time interval */
-  if (rov_dive_start_time_set == MB_YES) {
+  if (rov_dive_start_time_set == true) {
     start_time_d = rov_dive_start_time_d;
   }
-  if (rov_dive_end_time_set == MB_YES) {
+  if (rov_dive_end_time_set == true) {
     end_time_d = rov_dive_end_time_d;
   }
   start_time_d = floor(start_time_d);
@@ -729,7 +729,7 @@ int main(int argc, char **argv) {
   end_time_d = start_time_d + num_output * interval;
 
   /* get UTM projection for easting and northing fields */
-  if (utm_zone_set == MB_YES) {
+  if (utm_zone_set == true) {
     if (utm_zone < 0)
       sprintf(projection_id, "UTM%2.2dS", abs(utm_zone));
     else
@@ -769,11 +769,11 @@ int main(int argc, char **argv) {
         onav_jday = onav_time_j[1];
 
         /* interpolate values onto the target time */
-        onav_position_flag = MB_NO;
-        onav_pressure_flag = MB_NO;
-        onav_heading_flag = MB_NO;
-        onav_altitude_flag = MB_NO;
-        onav_attitude_flag = MB_NO;
+        onav_position_flag = false;
+        onav_pressure_flag = false;
+        onav_heading_flag = false;
+        onav_altitude_flag = false;
+        onav_attitude_flag = false;
         onav_lon = 0.0;
         onav_lat = 0.0;
         onav_easting = 0.0;
@@ -789,38 +789,38 @@ int main(int argc, char **argv) {
           // if not interpolating navigation, then actually use the most recent
           // navigation values even if those are repeated, as identified by the
           // jnav value returned by the interpolation function
-          if (interpolate_position == MB_YES) {
+          if (interpolate_position == true) {
             onav_lon = nav_lon[jnav-1];
             onav_lat = nav_lat[jnav-1];
           }
 
           if (onav_lon != 0.0 && onav_lat != 0.0) {
-            onav_position_flag = MB_YES;
+            onav_position_flag = true;
             mb_proj_forward(verbose, pjptr, onav_lon, onav_lat, &onav_easting, &onav_northing, &error);
           }
         }
         if (num_ctd > 0) {
           interp_status = mb_linear_interp(verbose, ctd_time_d - 1, ctd_depth - 1, num_ctd, onav_time_d, &onav_depth, &jctd, &interp_error);
           if (onav_depth != 0.0) {
-            onav_pressure_flag = MB_YES;
+            onav_pressure_flag = true;
             onav_pressure = onav_depth * (1.0052405 * (1 + 5.28E-3 * sin(DTR * onav_lat) * sin(DTR * onav_lat)));
           }
         }
         if (num_dvl > 0) {
           interp_status = mb_linear_interp(verbose, dvl_time_d - 1, dvl_altitude - 1, num_dvl, onav_time_d, &onav_altitude, &jdvl, &interp_error);
           if (onav_altitude != 0.0) {
-            onav_altitude_flag = MB_YES;
+            onav_altitude_flag = true;
           }
         }
         if (num_rov > 0) {
           interp_status = mb_linear_interp_heading(verbose, rov_time_d - 1, rov_heading - 1, num_rov, onav_time_d, &onav_heading, &jrov, &interp_error);
           if (onav_heading != 0.0) {
-            onav_heading_flag = MB_YES;
+            onav_heading_flag = true;
           }
           interp_status = mb_linear_interp(verbose, rov_time_d - 1, rov_roll - 1, num_rov, onav_time_d, &onav_roll, &jrov, &interp_error);
           interp_status = mb_linear_interp(verbose, rov_time_d - 1, rov_pitch - 1, num_rov, onav_time_d, &onav_pitch, &jrov, &interp_error);
           if (onav_roll != 0.0 && onav_pitch != 0.0) {
-            onav_attitude_flag = MB_YES;
+            onav_attitude_flag = true;
           }
         }
 

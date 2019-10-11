@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 	/* MBIO read control parameters */
 	mb_path read_file = "";
 	mb_path output_file = "";
-	int output_file_set = MB_NO;
+	int output_file_set = false;
 	void *datalist = NULL;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight = 1.0;
@@ -121,14 +121,14 @@ int main(int argc, char **argv) {
 
 	/* route and auto-line data */
 	mb_path timelist_file = "";
-	int timelist_file_set = MB_NO;
+	int timelist_file_set = false;
 	int ntimepoint = 0;
 	int ntimepointalloc = 0;
 	double *routetime_d = NULL;
 	mb_path route_file = "";
-	int route_file_set = MB_NO;
-	int checkroutebearing = MB_NO;
-	int rawroutefile = MB_NO;
+	int route_file_set = false;
+	int checkroutebearing = false;
+	int rawroutefile = false;
 	mb_path lineroot = "";
 	int nroutepoint = 0;
 	int nroutepointalloc = 0;
@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
 	/* auto plotting */
 	FILE *sfp = NULL;
 	mb_path scriptfile = "";
-	int recalculatesweep = MB_NO;
+	int recalculatesweep = false;
 	double seafloordepthmin = -1.0;
 	double seafloordepthmax = -1.0;
 	double seafloordepthminplot[MBES_NUM_PLOT_MAX];
@@ -287,22 +287,22 @@ int main(int argc, char **argv) {
 				break;
 			case 'M':
 			case 'm':
-				checkroutebearing = MB_YES;
+				checkroutebearing = true;
 				break;
 			case 'O':
 			case 'o':
 				sscanf(optarg, "%s", output_file);
-				output_file_set = MB_YES;
+				output_file_set = true;
 				break;
 			case 'Q':
 			case 'q':
 				sscanf(optarg, "%s", timelist_file);
-				timelist_file_set = MB_YES;
+				timelist_file_set = true;
 				break;
 			case 'R':
 			case 'r':
 				sscanf(optarg, "%s", route_file);
-				route_file_set = MB_YES;
+				route_file_set = true;
 				break;
 			case 'S':
 			case 's':
@@ -396,7 +396,7 @@ int main(int argc, char **argv) {
 	nshotmax = (int)(maxwidth / xscale);
 
 	/* if specified read route time list file */
-	if (timelist_file_set == MB_YES) {
+	if (timelist_file_set == true) {
 		/* open the input file */
 		if ((fp = fopen(timelist_file, "r")) == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
@@ -404,7 +404,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nUnable to open time list file <%s> for reading\n", timelist_file);
 			exit(status);
 		}
-		rawroutefile = MB_NO;
+		rawroutefile = false;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] != '#') {
 				int i;
@@ -460,7 +460,7 @@ int main(int argc, char **argv) {
 			seafloordepthmaxplot[i] = -1;
 		}
 		oktowrite = 0;
-		rangeok = MB_NO;
+		rangeok = false;
 
 		/* output status */
 		if (verbose > 0) {
@@ -470,7 +470,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* if specified read route file */
-	else if (route_file_set == MB_YES) {
+	else if (route_file_set == true) {
 		/* open the input file */
 		if ((fp = fopen(route_file, "r")) == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
@@ -478,11 +478,11 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
 			exit(status);
 		}
-		rawroutefile = MB_NO;
+		rawroutefile = false;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] == '#') {
 				if (strncmp(comment, "## Route File Version", 21) == 0) {
-					rawroutefile = MB_NO;
+					rawroutefile = false;
 				}
 			}
 			else {
@@ -490,17 +490,17 @@ int main(int argc, char **argv) {
 				if (comment[0] == '#') {
 					fprintf(stderr, "buffer:%s", comment);
 					if (strncmp(comment, "## Route File Version", 21) == 0) {
-						rawroutefile = MB_NO;
+						rawroutefile = false;
 					}
 				}
-				if ((rawroutefile == MB_YES && nget >= 2) ||
-				    (rawroutefile == MB_NO && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_NONE))
-					point_ok = MB_YES;
+				if ((rawroutefile == true && nget >= 2) ||
+				    (rawroutefile == false && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_NONE))
+					point_ok = true;
 				else
-					point_ok = MB_NO;
+					point_ok = false;
 
 				/* if good data check for need to allocate more space */
-				if (point_ok == MB_YES && nroutepoint + 1 > nroutepointalloc) {
+				if (point_ok == true && nroutepoint + 1 > nroutepointalloc) {
 					nroutepointalloc += MBES_ALLOC_NUM;
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
@@ -520,7 +520,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* add good point to route */
-				if (point_ok == MB_YES && nroutepointalloc > nroutepoint + 1) {
+				if (point_ok == true && nroutepointalloc > nroutepoint + 1) {
 					routelon[nroutepoint] = lon;
 					routelat[nroutepoint] = lat;
 					routeheading[nroutepoint] = heading;
@@ -546,7 +546,7 @@ int main(int argc, char **argv) {
 			seafloordepthmaxplot[i] = -1;
 		}
 		oktowrite = 0;
-		rangeok = MB_NO;
+		rangeok = false;
 
 		/* output status */
 		if (verbose > 0) {
@@ -582,21 +582,21 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(file, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* set up plotting script file */
-	if ((route_file_set == MB_YES && nroutepoint > 1) || (timelist_file_set == MB_YES && ntimepoint > 1)) {
+	if ((route_file_set == true && nroutepoint > 1) || (timelist_file_set == true && ntimepoint > 1)) {
 		sprintf(scriptfile, "%s_section.cmd", lineroot);
 	}
-	else if (output_file_set == MB_NO || read_datalist) {
+	else if (output_file_set == false || read_datalist) {
 		sprintf(scriptfile, "%s_section.cmd", read_file);
 	}
 	else {
@@ -610,7 +610,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data == true) {
 
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
@@ -654,7 +654,7 @@ int main(int argc, char **argv) {
 
 		/* read and print data */
 		nread = 0;
-		first = MB_YES;
+		first = true;
 		lastlon = 0.0;
 		lastlat = 0.0;
 		lastheading = 0.0;
@@ -677,7 +677,7 @@ int main(int argc, char **argv) {
 			/* deal with nav and time from survey data only - not nav, sidescan, or subbottom */
 			if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
 				/* reset output flag */
-				linechange = MB_NO;
+				linechange = false;
 
 				/* get nav data */
 				status = mb_extract_nav(verbose, mbio_ptr, store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
@@ -699,7 +699,7 @@ int main(int argc, char **argv) {
 					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 					range = sqrt(dx * dx + dy * dy);
 					if (time_d >= routetime_d[activewaypoint] && activewaypoint < ntimepoint) {
-						linechange = MB_YES;
+						linechange = true;
 					}
 				}
 
@@ -709,14 +709,14 @@ int main(int argc, char **argv) {
 					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 					range = sqrt(dx * dx + dy * dy);
 					if (range < rangethreshold)
-						rangeok = MB_YES;
-					if (rangeok == MB_YES && (activewaypoint == 0 || range > rangelast) && activewaypoint < nroutepoint - 1) {
-						linechange = MB_YES;
+						rangeok = true;
+					if (rangeok == true && (activewaypoint == 0 || range > rangelast) && activewaypoint < nroutepoint - 1) {
+						linechange = true;
 					}
 				}
 
 				/* apply line change */
-				if (linechange == MB_YES) {
+				if (linechange == true) {
 					/* close current output file */
 					if (fp != NULL) {
 						fclose(fp);
@@ -759,9 +759,9 @@ int main(int argc, char **argv) {
 						endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
 						sweep = endofdata - delay;
 						if (sweep > MBES_MAX_SWEEP)
-							recalculatesweep = MB_YES;
+							recalculatesweep = true;
 						else
-							recalculatesweep = MB_NO;
+							recalculatesweep = false;
 
 						fprintf(sfp, "# Generate %d section plot(s) of segy file: %s\n", nplot, output_file);
 						fprintf(sfp, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
@@ -774,7 +774,7 @@ int main(int argc, char **argv) {
 						fprintf(stderr, "#   Section length: %f km\n", linedistance);
 						fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
 						for (int i = 0; i < nplot; i++) {
-							if (recalculatesweep == MB_YES) {
+							if (recalculatesweep == true) {
 								seafloordepthmin = seafloordepthminplot[i];
 								seafloordepthmax = seafloordepthmaxplot[i];
 								delay = seafloordepthmin / 750.0;
@@ -831,7 +831,7 @@ int main(int argc, char **argv) {
 					activewaypoint++;
 				}
 
-				if (linechange == MB_YES) {
+				if (linechange == true) {
 					mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
 					rangelast = 1000 * rangethreshold;
 					seafloordepthmin = -1.0;
@@ -842,7 +842,7 @@ int main(int argc, char **argv) {
 						seafloordepthmaxplot[i] = -1;
 					}
 					oktowrite = 0;
-					rangeok = MB_NO;
+					rangeok = false;
 				}
 				else
 					rangelast = range;
@@ -914,7 +914,7 @@ int main(int argc, char **argv) {
 				/* if following a route check that the vehicle has come on line
 				    (within MBES_ONLINE_THRESHOLD degrees)
 				    before writing any data */
-				if (activewaypoint > 0 && checkroutebearing == MB_YES && nroutepoint > 1) {
+				if (activewaypoint > 0 && checkroutebearing == true && nroutepoint > 1) {
 					headingdiff = fabs(routeheading[activewaypoint - 1] - segytraceheader.heading);
 					if (headingdiff > 180.0)
 						headingdiff = 360.0 - headingdiff;
@@ -931,7 +931,7 @@ int main(int argc, char **argv) {
 				/* open output segy file if needed */
 				if (fp == NULL && oktowrite > 0) {
 					/* set up output filename */
-					if (output_file_set == MB_NO) {
+					if (output_file_set == false) {
 						if (nroutepoint > 1 || ntimepoint > 1) {
 							sprintf(output_file, "%s_%4.4d.segy", lineroot, linenumber);
 						}
@@ -1303,16 +1303,16 @@ int main(int argc, char **argv) {
 		/* figure out whether and what to read next */
 		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* close output file if conditions warrant */
-		if (read_data == MB_NO || (output_file_set == MB_NO && nroutepoint < 2 && ntimepoint < 2)) {
+		if (read_data == false || (output_file_set == false && nroutepoint < 2 && ntimepoint < 2)) {
 			/* close current output file */
 			if (fp != NULL) {
 				fclose(fp);
@@ -1355,9 +1355,9 @@ int main(int argc, char **argv) {
 				endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
 				sweep = endofdata - delay;
 				if (sweep > MBES_MAX_SWEEP)
-					recalculatesweep = MB_YES;
+					recalculatesweep = true;
 				else {
-					recalculatesweep = MB_NO;
+					recalculatesweep = false;
 				}
 
 				fprintf(sfp, "# Generate %d section plot(s) of segy file: %s\n", nplot, output_file);
@@ -1371,7 +1371,7 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "#   Section length: %f km\n", linedistance);
 				fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
 				for (int i = 0; i < nplot; i++) {
-					if (recalculatesweep == MB_YES) {
+					if (recalculatesweep == true) {
 						seafloordepthmin = seafloordepthminplot[i];
 						seafloordepthmax = seafloordepthmaxplot[i];
 						delay = seafloordepthmin / 750.0;
@@ -1439,7 +1439,7 @@ int main(int argc, char **argv) {
 	shellstatus = system(command);
 
 	/* deallocate route arrays */
-	if (route_file_set == MB_YES) {
+	if (route_file_set == true) {
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);

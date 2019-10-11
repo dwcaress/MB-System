@@ -64,9 +64,9 @@ int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_YES;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = false;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -132,10 +132,10 @@ int mbr_alm_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	/* set file header read flag */
 	int *file_header_readwritten = (int *)&mb_io_ptr->save1;
 	/* TODO(schwehr): Why is this file_header_readwritten immediately overwritten? */
-	*file_header_readwritten = MB_NO;
+	*file_header_readwritten = false;
 
 	/* set saved bytes flag */
-	mb_io_ptr->save2 = MB_NO;
+	mb_io_ptr->save2 = false;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -202,19 +202,19 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* set status */
 	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
-	int done = MB_NO;
+	int done = false;
 	size_t index = 0;
 	char buffer[MBF_3DDEPTHP_BUFFER_SIZE];
 
 	/* if first read then read 2 byte magic number at start of file */
-	if (*file_header_readwritten == MB_NO) {
+	if (*file_header_readwritten == false) {
 		/* read and check the first two bytes */
 		size_t read_len = (size_t)2;
 		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
 		unsigned short magic_number = 0;
 		if (status == MB_SUCCESS) {
 			index = 0;
-			mb_get_binary_short(MB_YES, (void *)&buffer[index], &(magic_number));
+			mb_get_binary_short(true, (void *)&buffer[index], &(magic_number));
 			index += 2;
 		}
 
@@ -222,7 +222,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (status == MB_SUCCESS && magic_number == MBF_3DDEPTHP_MAGICNUMBER) {
 			store->file_version = 1;
 			store->sub_version = 1;
-			*file_header_readwritten = MB_YES;
+			*file_header_readwritten = true;
 		}
 
 		/* if ok and magic_number == 0x3D07 then this is the obsolete version 1.0
@@ -236,31 +236,31 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (status == MB_SUCCESS) {
 				index = 0;
 				store->record_id = MBF_3DDEPTHP_RECORD_PARAMETER;
-				mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->file_version));
+				mb_get_binary_short(true, (void *)&buffer[index], &(store->file_version));
 				index += 2;
-				mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->sub_version));
+				mb_get_binary_short(true, (void *)&buffer[index], &(store->sub_version));
 				index += 2;
-				mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->scan_type));
+				mb_get_binary_short(true, (void *)&buffer[index], &(store->scan_type));
 				index += 2;
-				mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->cross_track_angle_start));
+				mb_get_binary_float(true, (void *)&buffer[index], &(store->cross_track_angle_start));
 				index += 4;
-				mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->cross_track_angle_end));
+				mb_get_binary_float(true, (void *)&buffer[index], &(store->cross_track_angle_end));
 				index += 4;
-				mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->forward_track_angle_start));
+				mb_get_binary_float(true, (void *)&buffer[index], &(store->forward_track_angle_start));
 				index += 4;
-				mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->forward_track_angle_end));
+				mb_get_binary_float(true, (void *)&buffer[index], &(store->forward_track_angle_end));
 				index += 4;
-				mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->counts_per_scan));
+				mb_get_binary_short(true, (void *)&buffer[index], &(store->counts_per_scan));
 				index += 2;
-				mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->counts_per_cross_track));
+				mb_get_binary_short(true, (void *)&buffer[index], &(store->counts_per_cross_track));
 				index += 2;
-				mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->counts_per_forward_track));
+				mb_get_binary_short(true, (void *)&buffer[index], &(store->counts_per_forward_track));
 				index += 2;
-				mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->scanner_efficiency));
+				mb_get_binary_short(true, (void *)&buffer[index], &(store->scanner_efficiency));
 				index += 2;
-				mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->scans_per_file));
+				mb_get_binary_short(true, (void *)&buffer[index], &(store->scans_per_file));
 				index += 2;
-				mb_get_binary_int(MB_YES, (void *)&buffer[index], &(store->scan_count));
+				mb_get_binary_int(true, (void *)&buffer[index], &(store->scan_count));
 				index += 4;
 				store->current_scan = -1;
 
@@ -285,9 +285,9 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* success */
 				if (status == MB_SUCCESS) {
-					*file_header_readwritten = MB_YES;
+					*file_header_readwritten = true;
 					store->kind = MB_DATA_PARAMETER;
-					done = MB_YES;
+					done = true;
 				}
 			}
 		}
@@ -296,12 +296,12 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			done = MB_YES;
+			done = true;
 		}
 	}
 
 	/* read next record in format version 1.1 */
-	if (status == MB_SUCCESS && done == MB_NO && store->file_version == 1 && store->sub_version == 1) {
+	if (status == MB_SUCCESS && done == false && store->file_version == 1 && store->sub_version == 1) {
 
 		/* read the next record header */
 		size_t read_len = (size_t)sizeof(short);
@@ -314,14 +314,14 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				    store->record_id == MBF_3DDEPTHP_RECORD_POSITION || store->record_id == MBF_3DDEPTHP_RECORD_ATTITUDE ||
 				    store->record_id == MBF_3DDEPTHP_RECORD_HEADING || store->record_id == MBF_3DDEPTHP_RECORD_SENSORDEPTH ||
 				    store->record_id == MBF_3DDEPTHP_RECORD_RAWLIDAR || store->record_id == MBF_3DDEPTHP_RECORD_LIDAR) {
-					valid_id = MB_YES;
+					valid_id = true;
 				}
 				else {
-					valid_id = MB_NO;
+					valid_id = false;
 					skip++;
 				}
 			}
-		} while (status == MB_SUCCESS && valid_id == MB_NO);
+		} while (status == MB_SUCCESS && valid_id == false);
 
 		/* read the full record */
 		if (status == MB_SUCCESS) {
@@ -334,31 +334,31 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				/* if read ok then get values */
 				if (status == MB_SUCCESS) {
 					index = 0;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->file_version));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->file_version));
 					index += 2;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->sub_version));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->sub_version));
 					index += 2;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->scan_type));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->scan_type));
 					index += 2;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->cross_track_angle_start));
+					mb_get_binary_float(true, (void *)&buffer[index], &(store->cross_track_angle_start));
 					index += 4;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->cross_track_angle_end));
+					mb_get_binary_float(true, (void *)&buffer[index], &(store->cross_track_angle_end));
 					index += 4;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->forward_track_angle_start));
+					mb_get_binary_float(true, (void *)&buffer[index], &(store->forward_track_angle_start));
 					index += 4;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->forward_track_angle_end));
+					mb_get_binary_float(true, (void *)&buffer[index], &(store->forward_track_angle_end));
 					index += 4;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->counts_per_scan));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->counts_per_scan));
 					index += 2;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->counts_per_cross_track));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->counts_per_cross_track));
 					index += 2;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->counts_per_forward_track));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->counts_per_forward_track));
 					index += 2;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->scanner_efficiency));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->scanner_efficiency));
 					index += 2;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->scans_per_file));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->scans_per_file));
 					index += 2;
-					mb_get_binary_int(MB_YES, (void *)&buffer[index], &(store->scan_count));
+					mb_get_binary_int(true, (void *)&buffer[index], &(store->scan_count));
 					index += 4;
 					store->current_scan = -1;
 
@@ -383,7 +383,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 					/* success */
 					if (status == MB_SUCCESS) {
-						*file_header_readwritten = MB_YES;
+						*file_header_readwritten = true;
 						store->kind = MB_DATA_PARAMETER;
 					}
 				}
@@ -411,11 +411,11 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				/* decode the data */
 				if (status == MB_SUCCESS) {
 					index = 0;
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->pos_time_d));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->pos_time_d));
 					index += sizeof(double);
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->pos_longitude));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->pos_longitude));
 					index += sizeof(double);
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->pos_latitude));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->pos_latitude));
 					index += sizeof(double);
 
 					store->kind = MB_DATA_NAV;
@@ -431,13 +431,13 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				/* decode the data */
 				if (status == MB_SUCCESS) {
 					index = 0;
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->att_time_d));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->att_time_d));
 					index += sizeof(double);
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->att_roll));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->att_roll));
 					index += sizeof(double);
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->att_pitch));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->att_pitch));
 					index += sizeof(double);
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->att_heave));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->att_heave));
 					index += sizeof(double);
 
 					store->kind = MB_DATA_ATTITUDE;
@@ -453,9 +453,9 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				/* decode the data */
 				if (status == MB_SUCCESS) {
 					index = 0;
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->hdg_time_d));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->hdg_time_d));
 					index += sizeof(double);
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->hdg_heading));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->hdg_heading));
 					index += sizeof(double);
 
 					store->kind = MB_DATA_HEADING;
@@ -471,9 +471,9 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				/* decode the data */
 				if (status == MB_SUCCESS) {
 					index = 0;
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->sdp_time_d));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->sdp_time_d));
 					index += sizeof(double);
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->sdp_sensordepth));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->sdp_sensordepth));
 					index += sizeof(double);
 
 					store->kind = MB_DATA_SONARDEPTH;
@@ -490,25 +490,25 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				if (status == MB_SUCCESS) {
 					store->current_scan++;
 					index = 0;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->year));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->year));
 					index += 2;
 					store->month = (mb_u_char)buffer[index];
 					index++;
 					store->day = (mb_u_char)buffer[index];
 					index++;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->days_since_jan_1));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->days_since_jan_1));
 					index += 2;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->hour));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->hour));
 					index += 2;
 					store->minutes = (mb_u_char)buffer[index];
 					index++;
 					store->seconds = (mb_u_char)buffer[index];
 					index++;
-					mb_get_binary_int(MB_YES, (void *)&buffer[index], &(store->nanoseconds));
+					mb_get_binary_int(true, (void *)&buffer[index], &(store->nanoseconds));
 					index += 4;
-					mb_get_binary_int(MB_YES, (void *)&buffer[index], &(store->num_pulses));
+					mb_get_binary_int(true, (void *)&buffer[index], &(store->num_pulses));
 					index += 4;
-					store->bathymetry_calculated = MB_NO;
+					store->bathymetry_calculated = false;
 
 					/* get time_d timestamp */
 					int time_i[7];
@@ -539,21 +539,21 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						if (status == MB_SUCCESS) {
 							struct mbsys_3datdepthlidar_pulse_struct *pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 							index = 0;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->range));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->range));
 							index += 4;
-							mb_get_binary_short(MB_YES, (void *)&buffer[index], &(pulse->amplitude));
+							mb_get_binary_short(true, (void *)&buffer[index], &(pulse->amplitude));
 							index += 2;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->snr));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->snr));
 							index += 4;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->cross_track_angle));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->cross_track_angle));
 							index += 4;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->forward_track_angle));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->forward_track_angle));
 							index += 4;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->cross_track_offset));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->cross_track_offset));
 							index += 4;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->forward_track_offset));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->forward_track_offset));
 							index += 4;
-							mb_get_binary_int(MB_YES, (void *)&buffer[index], &(pulse->pulse_time_offset));
+							mb_get_binary_int(true, (void *)&buffer[index], &(pulse->pulse_time_offset));
 							index += 4;
 							pulse->saturated = buffer[index];
 							index++;
@@ -609,41 +609,41 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				if (status == MB_SUCCESS) {
 					store->current_scan++;
 					index = 0;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->year));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->year));
 					index += 2;
 					store->month = (mb_u_char)buffer[index];
 					index++;
 					store->day = (mb_u_char)buffer[index];
 					index++;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->days_since_jan_1));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->days_since_jan_1));
 					index += 2;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->hour));
+					mb_get_binary_short(true, (void *)&buffer[index], &(store->hour));
 					index += 2;
 					store->minutes = (mb_u_char)buffer[index];
 					index++;
 					store->seconds = (mb_u_char)buffer[index];
 					index++;
-					mb_get_binary_int(MB_YES, (void *)&buffer[index], &(store->nanoseconds));
+					mb_get_binary_int(true, (void *)&buffer[index], &(store->nanoseconds));
 					index += 4;
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->time_d));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->time_d));
 					index += 8;
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->navlon));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->navlon));
 					index += 8;
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->navlat));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->navlat));
 					index += 8;
-					mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->sensordepth));
+					mb_get_binary_double(true, (void *)&buffer[index], &(store->sensordepth));
 					index += 8;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->heading));
+					mb_get_binary_float(true, (void *)&buffer[index], &(store->heading));
 					index += 4;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->roll));
+					mb_get_binary_float(true, (void *)&buffer[index], &(store->roll));
 					index += 4;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->pitch));
+					mb_get_binary_float(true, (void *)&buffer[index], &(store->pitch));
 					index += 4;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->speed));
+					mb_get_binary_float(true, (void *)&buffer[index], &(store->speed));
 					index += 4;
-					mb_get_binary_int(MB_YES, (void *)&buffer[index], &(store->num_pulses));
+					mb_get_binary_int(true, (void *)&buffer[index], &(store->num_pulses));
 					index += 4;
-					store->bathymetry_calculated = MB_YES;
+					store->bathymetry_calculated = true;
 				}
 
 				/* read all of the pulses */
@@ -657,45 +657,45 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						if (status == MB_SUCCESS) {
 							struct mbsys_3datdepthlidar_pulse_struct *pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 							index = 0;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->range));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->range));
 							index += 4;
-							mb_get_binary_short(MB_YES, (void *)&buffer[index], &(pulse->amplitude));
+							mb_get_binary_short(true, (void *)&buffer[index], &(pulse->amplitude));
 							index += 2;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->snr));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->snr));
 							index += 4;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->cross_track_angle));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->cross_track_angle));
 							index += 4;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->forward_track_angle));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->forward_track_angle));
 							index += 4;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->cross_track_offset));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->cross_track_offset));
 							index += 4;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->forward_track_offset));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->forward_track_offset));
 							index += 4;
-							mb_get_binary_int(MB_YES, (void *)&buffer[index], &(pulse->pulse_time_offset));
+							mb_get_binary_int(true, (void *)&buffer[index], &(pulse->pulse_time_offset));
 							index += 4;
 							pulse->saturated = buffer[index];
 							index++;
-							mb_get_binary_double(MB_YES, (void *)&buffer[index], &(pulse->time_d));
+							mb_get_binary_double(true, (void *)&buffer[index], &(pulse->time_d));
 							index += 8;
 							pulse->beamflag = buffer[index];
 							index++;
-							mb_get_binary_double(MB_YES, (void *)&buffer[index], &(pulse->acrosstrack));
+							mb_get_binary_double(true, (void *)&buffer[index], &(pulse->acrosstrack));
 							index += 8;
-							mb_get_binary_double(MB_YES, (void *)&buffer[index], &(pulse->alongtrack));
+							mb_get_binary_double(true, (void *)&buffer[index], &(pulse->alongtrack));
 							index += 8;
-							mb_get_binary_double(MB_YES, (void *)&buffer[index], &(pulse->depth));
+							mb_get_binary_double(true, (void *)&buffer[index], &(pulse->depth));
 							index += 8;
-							mb_get_binary_double(MB_YES, (void *)&buffer[index], &(pulse->navlon));
+							mb_get_binary_double(true, (void *)&buffer[index], &(pulse->navlon));
 							index += 8;
-							mb_get_binary_double(MB_YES, (void *)&buffer[index], &(pulse->navlat));
+							mb_get_binary_double(true, (void *)&buffer[index], &(pulse->navlat));
 							index += 8;
-							mb_get_binary_double(MB_YES, (void *)&buffer[index], &(pulse->sensordepth));
+							mb_get_binary_double(true, (void *)&buffer[index], &(pulse->sensordepth));
 							index += 8;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->heading));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->heading));
 							index += 4;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->roll));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->roll));
 							index += 4;
-							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->pitch));
+							mb_get_binary_float(true, (void *)&buffer[index], &(pulse->pitch));
 							index += 4;
 						}
 					}
@@ -738,9 +738,9 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* else read next record in the obsolete format version 1.0
 	        - LIDAR scans only with no record id's */
-	else if (status == MB_SUCCESS && done == MB_NO && store->file_version == 1 && store->sub_version == 0) {
+	else if (status == MB_SUCCESS && done == false && store->file_version == 1 && store->sub_version == 0) {
 		/* read the next scan header */
-		if (mb_io_ptr->save2 == MB_NO) {
+		if (mb_io_ptr->save2 == false) {
 			size_t read_len = (size_t)MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE;
 			status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
 		}
@@ -749,7 +749,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				buffer[i] = mb_io_ptr->save_label[i];
 			size_t read_len = (size_t)(MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE - 4);
 			status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[4], &read_len, error);
-			mb_io_ptr->save2 = MB_NO;
+			mb_io_ptr->save2 = false;
 		}
 
 		unsigned int newscancheckvalue = 0;
@@ -762,23 +762,23 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			store->current_scan++;
 			index = 0;
 			store->record_id = MBF_3DDEPTHP_RECORD_RAWLIDAR;
-			mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->year));
+			mb_get_binary_short(true, (void *)&buffer[index], &(store->year));
 			index += 2;
 			store->month = (mb_u_char)buffer[index];
 			index++;
 			store->day = (mb_u_char)buffer[index];
 			index++;
-			mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->days_since_jan_1));
+			mb_get_binary_short(true, (void *)&buffer[index], &(store->days_since_jan_1));
 			index += 2;
-			mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->hour));
+			mb_get_binary_short(true, (void *)&buffer[index], &(store->hour));
 			index += 2;
 			store->minutes = (mb_u_char)buffer[index];
 			index++;
 			store->seconds = (mb_u_char)buffer[index];
 			index++;
-			mb_get_binary_int(MB_YES, (void *)&buffer[index], &(store->nanoseconds));
+			mb_get_binary_int(true, (void *)&buffer[index], &(store->nanoseconds));
 			index += 4;
-			store->bathymetry_calculated = MB_NO;
+			store->bathymetry_calculated = false;
 
 			/* fix timestamp problem with the original data files */
 			if (store->year < 2000) {
@@ -809,8 +809,8 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		/* read all of the pulses */
 		if (status == MB_SUCCESS) {
 			store->num_pulses = 0;
-			done = MB_NO;
-			while (done == MB_NO) {
+			done = false;
+			while (done == false) {
 				/* read the next four bytes */
 				size_t read_len = (size_t)4;
 				status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
@@ -820,13 +820,13 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				   by checking the first four bytes */
 				unsigned int *newscancheck = (unsigned int *)buffer;
 				if (status == MB_FAILURE) {
-					done = MB_YES;
+					done = true;
 					status = MB_SUCCESS;
 					*error = MB_ERROR_NO_ERROR;
 				}
 				else if (*newscancheck == newscancheckvalue) {
-					done = MB_YES;
-					mb_io_ptr->save2 = MB_YES;
+					done = true;
+					mb_io_ptr->save2 = true;
 					for (int i = 0; i < 4; i++)
 						mb_io_ptr->save_label[i] = buffer[i];
 				}
@@ -834,28 +834,28 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					read_len = (size_t)(MBF_3DDEPTHP_VERSION_1_0_PULSE_SIZE - 4);
 					status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[4], &read_len, error);
 					if (status == MB_FAILURE)
-						done = MB_YES;
+						done = true;
 				}
 
 				/* if read ok and consistent with new pulse then get values */
-				if (status == MB_SUCCESS && done == MB_NO) {
+				if (status == MB_SUCCESS && done == false) {
 					struct mbsys_3datdepthlidar_pulse_struct *pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[store->num_pulses];
 					index = 0;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->range));
+					mb_get_binary_float(true, (void *)&buffer[index], &(pulse->range));
 					index += 4;
-					mb_get_binary_short(MB_YES, (void *)&buffer[index], &(pulse->amplitude));
+					mb_get_binary_short(true, (void *)&buffer[index], &(pulse->amplitude));
 					index += 2;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->snr));
+					mb_get_binary_float(true, (void *)&buffer[index], &(pulse->snr));
 					index += 4;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->cross_track_angle));
+					mb_get_binary_float(true, (void *)&buffer[index], &(pulse->cross_track_angle));
 					index += 4;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->forward_track_angle));
+					mb_get_binary_float(true, (void *)&buffer[index], &(pulse->forward_track_angle));
 					index += 4;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->cross_track_offset));
+					mb_get_binary_float(true, (void *)&buffer[index], &(pulse->cross_track_offset));
 					index += 4;
-					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->forward_track_offset));
+					mb_get_binary_float(true, (void *)&buffer[index], &(pulse->forward_track_offset));
 					index += 4;
-					mb_get_binary_int(MB_YES, (void *)&buffer[index], &(pulse->pulse_time_offset));
+					mb_get_binary_int(true, (void *)&buffer[index], &(pulse->pulse_time_offset));
 					index += 4;
 					pulse->saturated = buffer[index];
 					index++;
@@ -874,7 +874,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 					store->num_pulses++;
 					if (store->num_pulses >= store->counts_per_scan)
-						done = MB_YES;
+						done = true;
 				}
 			}
 			for (int i = store->num_pulses; i < store->counts_per_scan; i++) {
@@ -948,7 +948,7 @@ int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	const int status = mbr_3ddepthp_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* if needed calculate bathymetry */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->bathymetry_calculated == MB_NO) {
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->bathymetry_calculated == false) {
 		mbsys_3datdepthlidar_calculatebathymetry(verbose, mbio_ptr, store_ptr, error);
 	}
 
@@ -1005,11 +1005,11 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char buffer[MBF_3DDEPTHP_BUFFER_SIZE];
 
 	/* if first write then write the magic number file header */
-	if (*file_header_readwritten == MB_NO) {
+	if (*file_header_readwritten == false) {
 		/* encode the header data */
 		index = 0;
 		const unsigned short magic_number = MBF_3DDEPTHP_MAGICNUMBER;
-		mb_put_binary_short(MB_YES, magic_number, &buffer[index]);
+		mb_put_binary_short(false, magic_number, &buffer[index]);
 		index += 2;
 
 		/* write file header from buffer */
@@ -1017,7 +1017,7 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		status = mb_fileio_put(verbose, mbio_ptr, (void *)buffer, &write_len, error);
 
 		/* set that header has been written */
-		*file_header_readwritten = MB_YES;
+		*file_header_readwritten = true;
 	}
 
 	/* write next record */
@@ -1027,35 +1027,35 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* encode the data */
 			index = 0;
 			const unsigned short record_id = MBF_3DDEPTHP_RECORD_PARAMETER;
-			mb_put_binary_short(MB_YES, record_id, &buffer[index]);
+			mb_put_binary_short(false, record_id, &buffer[index]);
 			index += 2;
 			const unsigned short file_version = 1;
-			mb_put_binary_short(MB_YES, file_version, &buffer[index]);
+			mb_put_binary_short(false, file_version, &buffer[index]);
 			index += 2;
 			const unsigned short sub_version = 1;
-			mb_put_binary_short(MB_YES, sub_version, &buffer[index]);
+			mb_put_binary_short(false, sub_version, &buffer[index]);
 			index += 2;
-			mb_put_binary_short(MB_YES, store->scan_type, &buffer[index]);
+			mb_put_binary_short(false, store->scan_type, &buffer[index]);
 			index += 2;
-			mb_put_binary_float(MB_YES, store->cross_track_angle_start, &buffer[index]);
+			mb_put_binary_float(false, store->cross_track_angle_start, &buffer[index]);
 			index += 4;
-			mb_put_binary_float(MB_YES, store->cross_track_angle_end, &buffer[index]);
+			mb_put_binary_float(false, store->cross_track_angle_end, &buffer[index]);
 			index += 4;
-			mb_put_binary_float(MB_YES, store->forward_track_angle_start, &buffer[index]);
+			mb_put_binary_float(false, store->forward_track_angle_start, &buffer[index]);
 			index += 4;
-			mb_put_binary_float(MB_YES, store->forward_track_angle_end, &buffer[index]);
+			mb_put_binary_float(false, store->forward_track_angle_end, &buffer[index]);
 			index += 4;
-			mb_put_binary_short(MB_YES, store->counts_per_scan, &buffer[index]);
+			mb_put_binary_short(false, store->counts_per_scan, &buffer[index]);
 			index += 2;
-			mb_put_binary_short(MB_YES, store->counts_per_cross_track, &buffer[index]);
+			mb_put_binary_short(false, store->counts_per_cross_track, &buffer[index]);
 			index += 2;
-			mb_put_binary_short(MB_YES, store->counts_per_forward_track, &buffer[index]);
+			mb_put_binary_short(false, store->counts_per_forward_track, &buffer[index]);
 			index += 2;
-			mb_put_binary_short(MB_YES, store->scanner_efficiency, &buffer[index]);
+			mb_put_binary_short(false, store->scanner_efficiency, &buffer[index]);
 			index += 2;
-			mb_put_binary_short(MB_YES, store->scans_per_file, &buffer[index]);
+			mb_put_binary_short(false, store->scans_per_file, &buffer[index]);
 			index += 2;
-			mb_put_binary_int(MB_YES, store->scan_count, &buffer[index]);
+			mb_put_binary_int(false, store->scan_count, &buffer[index]);
 			index += 4;
 
 			/* write file header from buffer */
@@ -1068,9 +1068,9 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* encode the data */
 			index = 0;
 			store->record_id = MBF_3DDEPTHP_RECORD_COMMENT;
-			mb_put_binary_short(MB_YES, store->record_id, &buffer[index]);
+			mb_put_binary_short(false, store->record_id, &buffer[index]);
 			index += 2;
-			mb_put_binary_short(MB_YES, store->comment_len, &buffer[index]);
+			mb_put_binary_short(false, store->comment_len, &buffer[index]);
 			index += 2;
 
 			/* write comment record */
@@ -1085,13 +1085,13 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* encode the data */
 			index = 0;
 			store->record_id = MBF_3DDEPTHP_RECORD_POSITION;
-			mb_put_binary_short(MB_YES, store->record_id, &buffer[index]);
+			mb_put_binary_short(false, store->record_id, &buffer[index]);
 			index += 2;
-			mb_put_binary_double(MB_YES, store->pos_time_d, &buffer[index]);
+			mb_put_binary_double(false, store->pos_time_d, &buffer[index]);
 			index += sizeof(double);
-			mb_put_binary_double(MB_YES, store->pos_longitude, &buffer[index]);
+			mb_put_binary_double(false, store->pos_longitude, &buffer[index]);
 			index += sizeof(double);
-			mb_put_binary_double(MB_YES, store->pos_latitude, &buffer[index]);
+			mb_put_binary_double(false, store->pos_latitude, &buffer[index]);
 			index += sizeof(double);
 
 			/* write position record */
@@ -1104,15 +1104,15 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* encode the data */
 			index = 0;
 			store->record_id = MBF_3DDEPTHP_RECORD_ATTITUDE;
-			mb_put_binary_short(MB_YES, store->record_id, &buffer[index]);
+			mb_put_binary_short(false, store->record_id, &buffer[index]);
 			index += 2;
-			mb_put_binary_double(MB_YES, store->att_time_d, &buffer[index]);
+			mb_put_binary_double(false, store->att_time_d, &buffer[index]);
 			index += sizeof(double);
-			mb_put_binary_double(MB_YES, store->att_roll, &buffer[index]);
+			mb_put_binary_double(false, store->att_roll, &buffer[index]);
 			index += sizeof(double);
-			mb_put_binary_double(MB_YES, store->att_pitch, &buffer[index]);
+			mb_put_binary_double(false, store->att_pitch, &buffer[index]);
 			index += sizeof(double);
-			mb_put_binary_double(MB_YES, store->att_heave, &buffer[index]);
+			mb_put_binary_double(false, store->att_heave, &buffer[index]);
 			index += sizeof(double);
 
 			/* write attitude record */
@@ -1125,11 +1125,11 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* encode the data */
 			index = 0;
 			store->record_id = MBF_3DDEPTHP_RECORD_HEADING;
-			mb_put_binary_short(MB_YES, store->record_id, &buffer[index]);
+			mb_put_binary_short(false, store->record_id, &buffer[index]);
 			index += 2;
-			mb_put_binary_double(MB_YES, store->hdg_time_d, &buffer[index]);
+			mb_put_binary_double(false, store->hdg_time_d, &buffer[index]);
 			index += sizeof(double);
-			mb_put_binary_double(MB_YES, store->hdg_heading, &buffer[index]);
+			mb_put_binary_double(false, store->hdg_heading, &buffer[index]);
 			index += sizeof(double);
 
 			/* write heading record */
@@ -1142,11 +1142,11 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* encode the data */
 			index = 0;
 			store->record_id = MBF_3DDEPTHP_RECORD_SENSORDEPTH;
-			mb_put_binary_short(MB_YES, store->record_id, &buffer[index]);
+			mb_put_binary_short(false, store->record_id, &buffer[index]);
 			index += 2;
-			mb_put_binary_double(MB_YES, store->sdp_time_d, &buffer[index]);
+			mb_put_binary_double(false, store->sdp_time_d, &buffer[index]);
 			index += sizeof(double);
-			mb_put_binary_double(MB_YES, store->sdp_sensordepth, &buffer[index]);
+			mb_put_binary_double(false, store->sdp_sensordepth, &buffer[index]);
 			index += sizeof(double);
 
 			/* write sensordepth record */
@@ -1159,41 +1159,41 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* encode the data */
 			index = 0;
 			store->record_id = MBF_3DDEPTHP_RECORD_LIDAR;
-			mb_put_binary_short(MB_YES, store->record_id, &buffer[index]);
+			mb_put_binary_short(false, store->record_id, &buffer[index]);
 			index += 2;
-			mb_put_binary_short(MB_YES, store->year, &buffer[index]);
+			mb_put_binary_short(false, store->year, &buffer[index]);
 			index += 2;
 			buffer[index] = (mb_u_char)store->month;
 			index++;
 			buffer[index] = (mb_u_char)store->day;
 			index++;
-			mb_put_binary_short(MB_YES, store->days_since_jan_1, &buffer[index]);
+			mb_put_binary_short(false, store->days_since_jan_1, &buffer[index]);
 			index += 2;
-			mb_put_binary_short(MB_YES, store->hour, &buffer[index]);
+			mb_put_binary_short(false, store->hour, &buffer[index]);
 			index += 2;
 			buffer[index] = (mb_u_char)store->minutes;
 			index++;
 			buffer[index] = (mb_u_char)store->seconds;
 			index++;
-			mb_put_binary_int(MB_YES, store->nanoseconds, &buffer[index]);
+			mb_put_binary_int(false, store->nanoseconds, &buffer[index]);
 			index += 4;
-			mb_put_binary_double(MB_YES, store->time_d, &buffer[index]);
+			mb_put_binary_double(false, store->time_d, &buffer[index]);
 			index += 8;
-			mb_put_binary_double(MB_YES, store->navlon, &buffer[index]);
+			mb_put_binary_double(false, store->navlon, &buffer[index]);
 			index += 8;
-			mb_put_binary_double(MB_YES, store->navlat, &buffer[index]);
+			mb_put_binary_double(false, store->navlat, &buffer[index]);
 			index += 8;
-			mb_put_binary_double(MB_YES, store->sensordepth, &buffer[index]);
+			mb_put_binary_double(false, store->sensordepth, &buffer[index]);
 			index += 8;
-			mb_put_binary_float(MB_YES, store->heading, &buffer[index]);
+			mb_put_binary_float(false, store->heading, &buffer[index]);
 			index += 4;
-			mb_put_binary_float(MB_YES, store->roll, &buffer[index]);
+			mb_put_binary_float(false, store->roll, &buffer[index]);
 			index += 4;
-			mb_put_binary_float(MB_YES, store->pitch, &buffer[index]);
+			mb_put_binary_float(false, store->pitch, &buffer[index]);
 			index += 4;
-			mb_put_binary_float(MB_YES, store->speed, &buffer[index]);
+			mb_put_binary_float(false, store->speed, &buffer[index]);
 			index += 4;
-			mb_put_binary_int(MB_YES, store->num_pulses, &buffer[index]);
+			mb_put_binary_int(false, store->num_pulses, &buffer[index]);
 			index += 4;
 
 			/* write LIDAR scan record header */
@@ -1206,45 +1206,45 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* encode the data */
 					struct mbsys_3datdepthlidar_pulse_struct *pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 					index = 0;
-					mb_put_binary_float(MB_YES, pulse->range, &buffer[index]);
+					mb_put_binary_float(false, pulse->range, &buffer[index]);
 					index += 4;
-					mb_put_binary_short(MB_YES, pulse->amplitude, &buffer[index]);
+					mb_put_binary_short(false, pulse->amplitude, &buffer[index]);
 					index += 2;
-					mb_put_binary_float(MB_YES, pulse->snr, &buffer[index]);
+					mb_put_binary_float(false, pulse->snr, &buffer[index]);
 					index += 4;
-					mb_put_binary_float(MB_YES, pulse->cross_track_angle, &buffer[index]);
+					mb_put_binary_float(false, pulse->cross_track_angle, &buffer[index]);
 					index += 4;
-					mb_put_binary_float(MB_YES, pulse->forward_track_angle, &buffer[index]);
+					mb_put_binary_float(false, pulse->forward_track_angle, &buffer[index]);
 					index += 4;
-					mb_put_binary_float(MB_YES, pulse->cross_track_offset, &buffer[index]);
+					mb_put_binary_float(false, pulse->cross_track_offset, &buffer[index]);
 					index += 4;
-					mb_put_binary_float(MB_YES, pulse->forward_track_offset, &buffer[index]);
+					mb_put_binary_float(false, pulse->forward_track_offset, &buffer[index]);
 					index += 4;
-					mb_put_binary_int(MB_YES, pulse->pulse_time_offset, &buffer[index]);
+					mb_put_binary_int(false, pulse->pulse_time_offset, &buffer[index]);
 					index += 4;
 					buffer[index] = pulse->saturated;
 					index++;
-					mb_put_binary_double(MB_YES, pulse->time_d, &buffer[index]);
+					mb_put_binary_double(false, pulse->time_d, &buffer[index]);
 					index += 8;
 					buffer[index] = pulse->beamflag;
 					index++;
-					mb_put_binary_double(MB_YES, pulse->acrosstrack, &buffer[index]);
+					mb_put_binary_double(false, pulse->acrosstrack, &buffer[index]);
 					index += 8;
-					mb_put_binary_double(MB_YES, pulse->alongtrack, &buffer[index]);
+					mb_put_binary_double(false, pulse->alongtrack, &buffer[index]);
 					index += 8;
-					mb_put_binary_double(MB_YES, pulse->depth, &buffer[index]);
+					mb_put_binary_double(false, pulse->depth, &buffer[index]);
 					index += 8;
-					mb_put_binary_double(MB_YES, pulse->navlon, &buffer[index]);
+					mb_put_binary_double(false, pulse->navlon, &buffer[index]);
 					index += 8;
-					mb_put_binary_double(MB_YES, pulse->navlat, &buffer[index]);
+					mb_put_binary_double(false, pulse->navlat, &buffer[index]);
 					index += 8;
-					mb_put_binary_double(MB_YES, pulse->sensordepth, &buffer[index]);
+					mb_put_binary_double(false, pulse->sensordepth, &buffer[index]);
 					index += 8;
-					mb_put_binary_float(MB_YES, pulse->heading, &buffer[index]);
+					mb_put_binary_float(false, pulse->heading, &buffer[index]);
 					index += 4;
-					mb_put_binary_float(MB_YES, pulse->roll, &buffer[index]);
+					mb_put_binary_float(false, pulse->roll, &buffer[index]);
 					index += 4;
-					mb_put_binary_float(MB_YES, pulse->pitch, &buffer[index]);
+					mb_put_binary_float(false, pulse->pitch, &buffer[index]);
 					index += 4;
 
 					/* write LIDAR scan pulse record */

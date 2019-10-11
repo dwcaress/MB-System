@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
 	int navformat = 9;
 	int usblformat = 165;
 
-	int useaverage = MB_NO;
+	int useaverage = false;
 	int error = MB_ERROR_NO_ERROR;
 
 	/* process argument list */
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'A':
 			case 'a':
-				useaverage = MB_YES;
+				useaverage = true;
 				break;
 			case 'F':
 			case 'f':
@@ -267,16 +267,16 @@ int main(int argc, char **argv) {
 	strncpy(buffer, "\0", sizeof(buffer));
 	int nget = 0;
 	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer) {
-		nav_ok = MB_NO;
+		nav_ok = false;
 
 		nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0], &time_i[1], &time_i[2],
 		              &time_i[3], &time_i[4], &sec, &ntime[nnav], &nlon[nnav], &nlat[nnav], &nheading[nnav], &nspeed[nnav],
 		              &nsonardepth[nnav], &nroll[nnav], &npitch[nnav], &nheave[nnav]);
 		if (nget >= 12)
-			nav_ok = MB_YES;
+			nav_ok = true;
 
 		/* make sure longitude is defined according to lonflip */
-		if (nav_ok == MB_YES) {
+		if (nav_ok == true) {
 			if (lonflip == -1 && nlon[nnav] > 0.0)
 				nlon[nnav] = nlon[nnav] - 360.0;
 			else if (lonflip == 0 && nlon[nnav] < -180.0)
@@ -288,7 +288,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* output some debug values */
-		if (verbose >= 5 && nav_ok == MB_YES) {
+		if (verbose >= 5 && nav_ok == true) {
 			fprintf(stderr, "\ndbg5  New navigation point read in program <%s>\n", program_name);
 			fprintf(stderr, "dbg5       nav[%d]: %f %f %f\n", nnav, ntime[nnav], nlon[nnav], nlat[nnav]);
 		}
@@ -298,7 +298,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* check for reverses or repeats in time */
-		if (nav_ok == MB_YES) {
+		if (nav_ok == true) {
 			if (nnav == 0)
 				nnav++;
 			else if (ntime[nnav] > ntime[nnav - 1])
@@ -355,7 +355,7 @@ int main(int argc, char **argv) {
 	}
 	strncpy(buffer, "\0", sizeof(buffer));
 	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer) {
-		nav_ok = MB_NO;
+		nav_ok = false;
 
 		/* ignore comments */
 		if (buffer[0] == '#') {
@@ -373,10 +373,10 @@ int main(int argc, char **argv) {
 			              &attitude_flag);
 		}
 		if (nget == 18)
-			nav_ok = MB_YES;
+			nav_ok = true;
 
 		/* make sure longitude is defined according to lonflip */
-		if (nav_ok == MB_YES) {
+		if (nav_ok == true) {
 			if (lonflip == -1 && ulon[nusbl] > 0.0)
 				ulon[nusbl] = ulon[nusbl] - 360.0;
 			else if (lonflip == 0 && ulon[nusbl] < -180.0)
@@ -388,7 +388,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* output some debug values */
-		if (verbose >= 5 && nav_ok == MB_YES) {
+		if (verbose >= 5 && nav_ok == true) {
 			fprintf(stderr, "\ndbg5  New USBL navigation point read in program <%s>\n", program_name);
 			fprintf(stderr, "dbg5       usbl[%d]: %f %f %f\n", nusbl, utime[nusbl], ulon[nusbl], ulat[nusbl]);
 		}
@@ -398,7 +398,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* check for reverses or repeats in time */
-		if (nav_ok == MB_YES) {
+		if (nav_ok == true) {
 			if (nusbl == 0)
 				nusbl++;
 			else if (utime[nusbl] > utime[nusbl - 1])
@@ -496,7 +496,7 @@ int main(int argc, char **argv) {
 	/* now loop over nav data applying adjustments */
 	for (int i = 0; i < nnav; i++) {
 		/* interpolate adjustment */
-		if (useaverage == MB_NO) {
+		if (useaverage == false) {
 			/* get adjustment by interpolation */
 			int j;
 			/* intstat = */ mb_linear_interp(verbose, ttime - 1, tlon - 1, ntie, ntime[i], &navlon, &j, &error);

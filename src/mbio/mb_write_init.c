@@ -167,13 +167,13 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	mb_io_ptr->new_ss_alongtrack = NULL;
 
 	/* initialize projection parameters */
-	mb_io_ptr->projection_initialized = MB_NO;
+	mb_io_ptr->projection_initialized = false;
 	mb_io_ptr->pjptr = NULL;
 
 	/* initialize ancillary variables used
 	    to save information in certain cases */
-	mb_io_ptr->save_flag = MB_NO;
-	mb_io_ptr->save_label_flag = MB_NO;
+	mb_io_ptr->save_flag = false;
+	mb_io_ptr->save_label_flag = false;
 	mb_io_ptr->save1 = 0;
 	mb_io_ptr->save2 = 0;
 	mb_io_ptr->save3 = 0;
@@ -531,7 +531,7 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 		mb_io_ptr->ss_alongtrack[i] = 0.0;
 		mb_io_ptr->ss_num[i] = 0;
 	}
-	mb_io_ptr->need_new_ping = MB_YES;
+	mb_io_ptr->need_new_ping = true;
 
 	/* initialize variables for interpolating asynchronous data */
 	mb_io_ptr->nfix = 0;

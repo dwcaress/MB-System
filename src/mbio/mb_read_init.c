@@ -192,14 +192,14 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	mb_io_ptr->new_ss_alongtrack = NULL;
 
 	/* initialize projection parameters */
-	mb_io_ptr->projection_initialized = MB_NO;
+	mb_io_ptr->projection_initialized = false;
 	mb_io_ptr->projection_id[0] = '\0';
 	mb_io_ptr->pjptr = NULL;
 
 	/* initialize ancillary variables used
 	    to save information in certain cases */
-	mb_io_ptr->save_flag = MB_NO;
-	mb_io_ptr->save_label_flag = MB_NO;
+	mb_io_ptr->save_flag = false;
+	mb_io_ptr->save_label_flag = false;
 	mb_io_ptr->save1 = 0;
 	mb_io_ptr->save2 = 0;
 	mb_io_ptr->save3 = 0;
@@ -568,7 +568,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 		mb_io_ptr->ss_alongtrack[i] = 0.0;
 		mb_io_ptr->ss_num[i] = 0;
 	}
-	mb_io_ptr->need_new_ping = MB_YES;
+	mb_io_ptr->need_new_ping = true;
 
 	/* initialize variables for interpolating asynchronous data */
 	mb_io_ptr->nfix = 0;
@@ -605,7 +605,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 		/* const int nscan = */ fscanf(pfp, "%s", projection_id);
 		const int proj_status = mb_proj_init(verbose, projection_id, &(mb_io_ptr->pjptr), error);
 		if (proj_status == MB_SUCCESS) {
-			mb_io_ptr->projection_initialized = MB_YES;
+			mb_io_ptr->projection_initialized = true;
 			strcpy(mb_io_ptr->projection_id, projection_id);
 		}
 		else {
@@ -650,47 +650,47 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_input_init(int verbose, char *file, int format,
+int mb_input_init(int verbose, char *socket_definition, int format,
                 int pings, int lonflip, double bounds[4],
                 int btime_i[7], int etime_i[7],
                 double speedmin, double timegap,
                 void **mbio_ptr, double *btime_d, double *etime_d,
                 int *beams_bath, int *beams_amp, int *pixels_ss,
-                int (*input_open)(int verbose, void *mbio_ptr, char *path, int *error),
-                int (*input_read)(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error),
+                int (*input_open)(int verbose, void *mbio_ptr, char *definition, int *error),
+                int (*input_read)(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error),
                 int (*input_close)(int verbose, void *mbio_ptr, int *error),
                 int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       file:            %s\n", file);
-		fprintf(stderr, "dbg2       format:          %d\n", format);
-		fprintf(stderr, "dbg2       pings:           %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:         %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:       %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:       %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:       %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:       %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:      %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:      %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:      %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:      %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:      %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:      %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:      %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:      %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:      %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:      %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:      %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:      %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:      %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:      %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:        %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:         %f\n", timegap);
-		fprintf(stderr, "dbg2       input_open():    %p\n", input_open);
-		fprintf(stderr, "dbg2       input_read():    %p\n", input_open);
-		fprintf(stderr, "dbg2       input_close():   %p\n", input_open);
+		fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
+		fprintf(stderr, "dbg2       socket_definition:  %s\n", socket_definition);
+		fprintf(stderr, "dbg2       format:             %d\n", format);
+		fprintf(stderr, "dbg2       pings:              %d\n", pings);
+		fprintf(stderr, "dbg2       lonflip:            %d\n", lonflip);
+		fprintf(stderr, "dbg2       bounds[0]:          %f\n", bounds[0]);
+		fprintf(stderr, "dbg2       bounds[1]:          %f\n", bounds[1]);
+		fprintf(stderr, "dbg2       bounds[2]:          %f\n", bounds[2]);
+		fprintf(stderr, "dbg2       bounds[3]:          %f\n", bounds[3]);
+		fprintf(stderr, "dbg2       btime_i[0]:         %d\n", btime_i[0]);
+		fprintf(stderr, "dbg2       btime_i[1]:         %d\n", btime_i[1]);
+		fprintf(stderr, "dbg2       btime_i[2]:         %d\n", btime_i[2]);
+		fprintf(stderr, "dbg2       btime_i[3]:         %d\n", btime_i[3]);
+		fprintf(stderr, "dbg2       btime_i[4]:         %d\n", btime_i[4]);
+		fprintf(stderr, "dbg2       btime_i[5]:         %d\n", btime_i[5]);
+		fprintf(stderr, "dbg2       btime_i[6]:         %d\n", btime_i[6]);
+		fprintf(stderr, "dbg2       etime_i[0]:         %d\n", etime_i[0]);
+		fprintf(stderr, "dbg2       etime_i[1]:         %d\n", etime_i[1]);
+		fprintf(stderr, "dbg2       etime_i[2]:         %d\n", etime_i[2]);
+		fprintf(stderr, "dbg2       etime_i[3]:         %d\n", etime_i[3]);
+		fprintf(stderr, "dbg2       etime_i[4]:         %d\n", etime_i[4]);
+		fprintf(stderr, "dbg2       etime_i[5]:         %d\n", etime_i[5]);
+		fprintf(stderr, "dbg2       etime_i[6]:         %d\n", etime_i[6]);
+		fprintf(stderr, "dbg2       speedmin:           %f\n", speedmin);
+		fprintf(stderr, "dbg2       timegap:            %f\n", timegap);
+		fprintf(stderr, "dbg2       input_open():       %p\n", input_open);
+		fprintf(stderr, "dbg2       input_read():       %p\n", input_read);
+		fprintf(stderr, "dbg2       input_close():      %p\n", input_close);
 	}
 
 	/* allocate memory for mbio descriptor */
@@ -738,7 +738,7 @@ int mb_input_init(int verbose, char *file, int format,
 	/* initialize file access for the mbio descriptor */
 	mb_io_ptr->filemode = MB_FILEMODE_READ;
 	mb_io_ptr->mbfp = NULL;
-	strcpy(mb_io_ptr->file, file);
+	strcpy(mb_io_ptr->file, socket_definition);
 	mb_io_ptr->file_pos = 0;
 	mb_io_ptr->file_bytes = 0;
 	mb_io_ptr->mbfp2 = NULL;
@@ -812,14 +812,14 @@ int mb_input_init(int verbose, char *file, int format,
 	mb_io_ptr->new_ss_alongtrack = NULL;
 
 	/* initialize projection parameters */
-	mb_io_ptr->projection_initialized = MB_NO;
+	mb_io_ptr->projection_initialized = false;
 	mb_io_ptr->projection_id[0] = '\0';
 	mb_io_ptr->pjptr = NULL;
 
 	/* initialize ancillary variables used
 	    to save information in certain cases */
-	mb_io_ptr->save_flag = MB_NO;
-	mb_io_ptr->save_label_flag = MB_NO;
+	mb_io_ptr->save_flag = false;
+	mb_io_ptr->save_label_flag = false;
 	mb_io_ptr->save1 = 0;
 	mb_io_ptr->save2 = 0;
 	mb_io_ptr->save3 = 0;
@@ -928,12 +928,11 @@ int mb_input_init(int verbose, char *file, int format,
 	}
 
 	/* open the input */
-    mb_io_ptr->mb_io_input_open = input_open;
-    mb_io_ptr->mb_io_input_read = input_read;
-    mb_io_ptr->mb_io_input_close = input_close;
+  mb_io_ptr->mb_io_input_open = input_open;
+  mb_io_ptr->mb_io_input_read = input_read;
+  mb_io_ptr->mb_io_input_close = input_close;
 	mb_io_ptr->filetype = MB_FILETYPE_INPUT;
-	char path[MB_PATH_MAXLINE];
-    status = (mb_io_ptr->mb_io_input_open)(verbose, *mbio_ptr, path, error);
+  status = (mb_io_ptr->mb_io_input_open)(verbose, *mbio_ptr, socket_definition, error);
 
 	/* if error terminate */
 	if (status == MB_FAILURE) {
@@ -1019,7 +1018,7 @@ int mb_input_init(int verbose, char *file, int format,
 		mb_io_ptr->ss_alongtrack[i] = 0.0;
 		mb_io_ptr->ss_num[i] = 0;
 	}
-	mb_io_ptr->need_new_ping = MB_YES;
+	mb_io_ptr->need_new_ping = true;
 
 	/* initialize variables for interpolating asynchronous data */
 	mb_io_ptr->nfix = 0;
@@ -1046,28 +1045,6 @@ int mb_input_init(int verbose, char *file, int format,
 	/* initialize notices */
 	for (int i = 0; i < MB_NOTICE_MAX; i++)
 		mb_io_ptr->notice_list[i] = 0;
-
-	/* check for projection specification file */
-	char prjfile[MB_PATH_MAXLINE];
-	sprintf(prjfile, "%s.prj", file);
-	FILE *pfp = fopen(prjfile, "r");
-	if (pfp != NULL) {
-		char projection_id[MB_NAME_LENGTH];
-		/* const int nscan = */ fscanf(pfp, "%s", projection_id);
-		const int proj_status = mb_proj_init(verbose, projection_id, &(mb_io_ptr->pjptr), error);
-		if (proj_status == MB_SUCCESS) {
-			mb_io_ptr->projection_initialized = MB_YES;
-			strcpy(mb_io_ptr->projection_id, projection_id);
-		}
-		else {
-			fprintf(stderr, "Unable to initialize projection %s from file %s\n\n", projection_id, prjfile);
-		}
-		fclose(pfp);
-	}
-	else {
-		*error = MB_ERROR_OPEN_FAIL;
-		status = MB_FAILURE;
-	}
 
 	/* set error and status (if you got here you succeeded */
 	*error = MB_ERROR_NO_ERROR;

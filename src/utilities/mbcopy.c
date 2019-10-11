@@ -220,48 +220,48 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
 
     /* survey depth (multibeam frames) */
     if (ostore->kind == MB_DATA_DATA) {
-      ostore->mul_frame = MB_YES;             /* boolean flag - multibeam frame read */
-      ostore->mul_group_beam = MB_NO;         /* boolean flag - beam group read */
-      ostore->mul_group_tt = MB_YES;          /* boolean flag - tt group read */
-      ostore->mul_group_quality = MB_YES;     /* boolean flag - quality group read */
-      ostore->mul_group_amp = MB_YES;         /* boolean flag - amp group read */
-      ostore->mul_group_delay = MB_YES;       /* boolean flag - delay group read */
-      ostore->mul_group_lateral = MB_YES;     /* boolean flag - lateral group read */
-      ostore->mul_group_along = MB_YES;       /* boolean flag - along group read */
-      ostore->mul_group_depth = MB_YES;       /* boolean flag - depth group read */
-      ostore->mul_group_angle = MB_YES;       /* boolean flag - angle group read */
-      ostore->mul_group_heave = MB_YES;       /* boolean flag - heave group read */
-      ostore->mul_group_roll = MB_YES;        /* boolean flag - roll group read */
-      ostore->mul_group_pitch = MB_YES;       /* boolean flag - pitch group read */
-      ostore->mul_group_gates = MB_NO;        /* boolean flag - gates group read */
-      ostore->mul_group_noise = MB_NO;        /* boolean flag - noise group read */
-      ostore->mul_group_length = MB_NO;       /* boolean flag - length group read */
-      ostore->mul_group_hits = MB_NO;         /* boolean flag - hits group read */
-      ostore->mul_group_heavereceive = MB_NO; /* boolean flag - heavereceive group read */
-      ostore->mul_group_azimuth = MB_NO;      /* boolean flag - azimuth group read */
-      ostore->mul_group_mbsystemnav = MB_YES; /* boolean flag - mbsystemnav group read */
+      ostore->mul_frame = true;             /* boolean flag - multibeam frame read */
+      ostore->mul_group_beam = false;         /* boolean flag - beam group read */
+      ostore->mul_group_tt = true;          /* boolean flag - tt group read */
+      ostore->mul_group_quality = true;     /* boolean flag - quality group read */
+      ostore->mul_group_amp = true;         /* boolean flag - amp group read */
+      ostore->mul_group_delay = true;       /* boolean flag - delay group read */
+      ostore->mul_group_lateral = true;     /* boolean flag - lateral group read */
+      ostore->mul_group_along = true;       /* boolean flag - along group read */
+      ostore->mul_group_depth = true;       /* boolean flag - depth group read */
+      ostore->mul_group_angle = true;       /* boolean flag - angle group read */
+      ostore->mul_group_heave = true;       /* boolean flag - heave group read */
+      ostore->mul_group_roll = true;        /* boolean flag - roll group read */
+      ostore->mul_group_pitch = true;       /* boolean flag - pitch group read */
+      ostore->mul_group_gates = false;        /* boolean flag - gates group read */
+      ostore->mul_group_noise = false;        /* boolean flag - noise group read */
+      ostore->mul_group_length = false;       /* boolean flag - length group read */
+      ostore->mul_group_hits = false;         /* boolean flag - hits group read */
+      ostore->mul_group_heavereceive = false; /* boolean flag - heavereceive group read */
+      ostore->mul_group_azimuth = false;      /* boolean flag - azimuth group read */
+      ostore->mul_group_mbsystemnav = true; /* boolean flag - mbsystemnav group read */
     }
     else {
-      ostore->mul_frame = MB_NO;              /* boolean flag - multibeam frame read */
-      ostore->mul_group_beam = MB_NO;         /* boolean flag - beam group read */
-      ostore->mul_group_tt = MB_NO;           /* boolean flag - tt group read */
-      ostore->mul_group_quality = MB_NO;      /* boolean flag - quality group read */
-      ostore->mul_group_amp = MB_NO;          /* boolean flag - amp group read */
-      ostore->mul_group_delay = MB_NO;        /* boolean flag - delay group read */
-      ostore->mul_group_lateral = MB_NO;      /* boolean flag - lateral group read */
-      ostore->mul_group_along = MB_NO;        /* boolean flag - along group read */
-      ostore->mul_group_depth = MB_NO;        /* boolean flag - depth group read */
-      ostore->mul_group_angle = MB_NO;        /* boolean flag - angle group read */
-      ostore->mul_group_heave = MB_NO;        /* boolean flag - heave group read */
-      ostore->mul_group_roll = MB_NO;         /* boolean flag - roll group read */
-      ostore->mul_group_pitch = MB_NO;        /* boolean flag - pitch group read */
-      ostore->mul_group_gates = MB_NO;        /* boolean flag - gates group read */
-      ostore->mul_group_noise = MB_NO;        /* boolean flag - noise group read */
-      ostore->mul_group_length = MB_NO;       /* boolean flag - length group read */
-      ostore->mul_group_hits = MB_NO;         /* boolean flag - hits group read */
-      ostore->mul_group_heavereceive = MB_NO; /* boolean flag - heavereceive group read */
-      ostore->mul_group_azimuth = MB_NO;      /* boolean flag - azimuth group read */
-      ostore->mul_group_mbsystemnav = MB_NO;  /* boolean flag - mbsystemnav group read */
+      ostore->mul_frame = false;              /* boolean flag - multibeam frame read */
+      ostore->mul_group_beam = false;         /* boolean flag - beam group read */
+      ostore->mul_group_tt = false;           /* boolean flag - tt group read */
+      ostore->mul_group_quality = false;      /* boolean flag - quality group read */
+      ostore->mul_group_amp = false;          /* boolean flag - amp group read */
+      ostore->mul_group_delay = false;        /* boolean flag - delay group read */
+      ostore->mul_group_lateral = false;      /* boolean flag - lateral group read */
+      ostore->mul_group_along = false;        /* boolean flag - along group read */
+      ostore->mul_group_depth = false;        /* boolean flag - depth group read */
+      ostore->mul_group_angle = false;        /* boolean flag - angle group read */
+      ostore->mul_group_heave = false;        /* boolean flag - heave group read */
+      ostore->mul_group_roll = false;         /* boolean flag - roll group read */
+      ostore->mul_group_pitch = false;        /* boolean flag - pitch group read */
+      ostore->mul_group_gates = false;        /* boolean flag - gates group read */
+      ostore->mul_group_noise = false;        /* boolean flag - noise group read */
+      ostore->mul_group_length = false;       /* boolean flag - length group read */
+      ostore->mul_group_hits = false;         /* boolean flag - hits group read */
+      ostore->mul_group_heavereceive = false; /* boolean flag - heavereceive group read */
+      ostore->mul_group_azimuth = false;      /* boolean flag - azimuth group read */
+      ostore->mul_group_mbsystemnav = false;  /* boolean flag - mbsystemnav group read */
     }
     ostore->mul_source = 0; /* sensor id */
     mb_fix_y2k(verbose, istore->pos_year, &time_i[0]);
@@ -303,15 +303,15 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
     }
 
     /* survey sidescan (sidescan frames) */
-    ostore->sid_frame = MB_NO;           /* boolean flag - sidescan frame read */
-    ostore->sid_group_avt = MB_NO;       /* boolean flag - amp vs time group read */
-    ostore->sid_group_pvt = MB_NO;       /* boolean flag - phase vs time group read */
-    ostore->sid_group_avl = MB_NO;       /* boolean flag - amp vs lateral group read */
-    ostore->sid_group_pvl = MB_NO;       /* boolean flag - phase vs lateral group read */
-    ostore->sid_group_signal = MB_NO;    /* boolean flag - phase vs lateral group read */
-    ostore->sid_group_ping = MB_NO;      /* boolean flag - phase vs lateral group read */
-    ostore->sid_group_complex = MB_NO;   /* boolean flag - phase vs lateral group read */
-    ostore->sid_group_weighting = MB_NO; /* boolean flag - phase vs lateral group read */
+    ostore->sid_frame = false;           /* boolean flag - sidescan frame read */
+    ostore->sid_group_avt = false;       /* boolean flag - amp vs time group read */
+    ostore->sid_group_pvt = false;       /* boolean flag - phase vs time group read */
+    ostore->sid_group_avl = false;       /* boolean flag - amp vs lateral group read */
+    ostore->sid_group_pvl = false;       /* boolean flag - phase vs lateral group read */
+    ostore->sid_group_signal = false;    /* boolean flag - phase vs lateral group read */
+    ostore->sid_group_ping = false;      /* boolean flag - phase vs lateral group read */
+    ostore->sid_group_complex = false;   /* boolean flag - phase vs lateral group read */
+    ostore->sid_group_weighting = false; /* boolean flag - phase vs lateral group read */
     ostore->sid_source = 0;              /* sensor id */
     ostore->sid_sec = 0;                 /* sec since 1/1/1901 00:00 */
     ostore->sid_usec = 0;                /* microseconds */
@@ -1045,59 +1045,59 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
       }
 
       /* get angles */
-      interleave = MB_NO;
+      interleave = false;
       if (istore->sonar == MBSYS_SIMRAD_EM1000) {
         if (iping->bath_mode == 1) {
           angles_simrad = angles_EM1000_ISO_ANG_60_2_MS_48_FAIS;
-          interleave = MB_NO;
+          interleave = false;
         }
         else if (iping->bath_mode == 2) {
           angles_simrad = angles_EM1000_ISO_ANG_120_07_MS_48_FAIS;
-          interleave = MB_YES;
+          interleave = true;
         }
         else if (iping->bath_mode == 3) {
           angles_simrad = angles_EM1000_ISO_ANG_150_02_MS_60_FAIS;
-          interleave = MB_YES;
+          interleave = true;
         }
         else if (iping->bath_mode == 4) {
           angles_simrad = angles_EM1000_CHANNEL_02_MS_60_FAIS;
-          interleave = MB_YES;
+          interleave = true;
         }
         else if (iping->bath_mode == 5) {
           angles_simrad = angles_EM1000_150_02_MS_60_FAIS;
-          interleave = MB_YES;
+          interleave = true;
         }
         else if (iping->bath_mode == 6) {
           angles_simrad = angles_EM1000_140_02_MS_60_FAIS;
-          interleave = MB_YES;
+          interleave = true;
         }
         else if (iping->bath_mode == 7) {
           angles_simrad = angles_EM1000_128_02_MS_60_FAIS;
-          interleave = MB_YES;
+          interleave = true;
         }
         else if (iping->bath_mode == 8) {
           angles_simrad = angles_EM1000_120_07_MS_48_FAIS;
-          interleave = MB_YES;
+          interleave = true;
         }
         else if (iping->bath_mode == 9) {
           angles_simrad = angles_EM1000_104_07_MS_48_FAIS;
-          interleave = MB_YES;
+          interleave = true;
         }
         else if (iping->bath_mode == 10) {
           angles_simrad = angles_EM1000_88_07_MS_48_FAIS;
-          interleave = MB_YES;
+          interleave = true;
         }
         else if (iping->bath_mode == 11) {
           angles_simrad = angles_EM1000_70_2_MS_48_FAIS;
-          interleave = MB_NO;
+          interleave = false;
         }
         else if (iping->bath_mode == 12) {
           angles_simrad = angles_EM1000_BERGE_02_MS_60_FAIS;
-          interleave = MB_YES;
+          interleave = true;
         }
         else if (iping->bath_mode == 13) {
           angles_simrad = angles_EM1000_BERGE_02_MS_60_FAIS;
-          interleave = MB_YES;
+          interleave = true;
         }
       }
       else if (istore->sonar == MBSYS_SIMRAD_EM12S) {
@@ -1152,7 +1152,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
       }
 
       /* if interleaved get center beam */
-      if (interleave == MB_YES) {
+      if (interleave == true) {
         if (iping->bath_mode == 12 && abs(iping->bath_acrosstrack[28]) < abs(iping->bath_acrosstrack[29]))
           istep = 1;
         else if (iping->bath_mode == 13 && abs(iping->bath_acrosstrack[31]) < abs(iping->bath_acrosstrack[30]))
@@ -1179,7 +1179,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
         if (istore->sonar == MBSYS_SIMRAD_EM1000 && iping->bath_mode == 13) {
           beta = 90.0 - angles_simrad[oping->png_nbeams - 1 - (2 * i + istep)];
         }
-        else if (istore->sonar == MBSYS_SIMRAD_EM1000 && interleave == MB_YES) {
+        else if (istore->sonar == MBSYS_SIMRAD_EM1000 && interleave == true) {
           beta = 90.0 + angles_simrad[2 * i + istep];
         }
         else if (istore->sonar == MBSYS_SIMRAD_EM1000) {
@@ -1219,17 +1219,17 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
       }
 
       /* raw travel time and angle data */
-      oping->png_raw1_read = MB_NO; /* flag indicating actual reading of rawbeam1 record */
-      oping->png_raw2_read = MB_NO; /* flag indicating actual reading of rawbeam2 record */
+      oping->png_raw1_read = false; /* flag indicating actual reading of rawbeam1 record */
+      oping->png_raw2_read = false; /* flag indicating actual reading of rawbeam2 record */
       oping->png_raw_nbeams = 0; /* number of raw travel times and angles
              - nonzero only if raw beam record read */
                                  /* number of valid beams */
 
       /* get raw pixel size to be stored in oping->png_max_range */
       if (iping->pixels_ssraw > 0)
-        oping->png_ss_read = MB_YES; /* flag indicating actual reading of sidescan record */
+        oping->png_ss_read = true; /* flag indicating actual reading of sidescan record */
       else
-        oping->png_ss_read = MB_NO;       /* flag indicating actual reading of sidescan record */
+        oping->png_ss_read = false;       /* flag indicating actual reading of sidescan record */
       oping->png_ss_date = oping->png_date; /* date = year*10000 + month*100 + day
             Feb 26, 1995 = 19950226 */
       oping->png_ss_msec = oping->png_msec; /* time since midnight in msec
@@ -1531,7 +1531,7 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
       /* get navigation, applying inverse projection if defined */
       mb_ping->longitude = istore->png_longitude;
       mb_ping->latitude = istore->png_latitude;
-      if (imb_io_ptr->projection_initialized == MB_YES) {
+      if (imb_io_ptr->projection_initialized == true) {
         mb_proj_inverse(verbose, imb_io_ptr->pjptr, mb_ping->longitude, mb_ping->latitude, &(mb_ping->longitude),
                         &(mb_ping->latitude), error);
       }
@@ -1684,7 +1684,7 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
           (double)istore->beam_width_num / (double)istore->beam_width_denom;
 
       /* set the GSF scale factors for this ping */
-      status = mbsys_gsf_setscalefactors(verbose, MB_YES, mb_ping, error);
+      status = mbsys_gsf_setscalefactors(verbose, true, mb_ping, error);
     }
 
     /* insert comment in structure */
@@ -1753,7 +1753,7 @@ int main(int argc, char **argv) {
   void *ombio_ptr = NULL;
 
   /* MBIO merge control parameters */
-  int merge = MB_NO;
+  int merge = false;
   int mformat = 0;
   char mfile[MB_PATH_MAXLINE];
   int mbeams_bath;
@@ -1835,13 +1835,13 @@ int main(int argc, char **argv) {
   int istart_amp, iend_amp, offset_amp;
   int istart_ss, iend_ss, offset_ss;
   char comment[MB_COMMENT_MAXLINE];
-  int insertcomments = MB_NO;
-  int bathonly = MB_NO;
+  int insertcomments = false;
+  int bathonly = false;
   char commentfile[MB_PATH_MAXLINE];
   int stripmode = MBCOPY_STRIPMODE_NONE;
   int copymode = MBCOPY_PARTIAL;
-  int use_sleep = MB_NO;
-  int inbounds = MB_YES;
+  int use_sleep = false;
+  int inbounds = true;
 
   /* sleep variable */
   double sleep_factor = 1.0;
@@ -1885,11 +1885,11 @@ int main(int argc, char **argv) {
       case 'C':
       case 'c':
         sscanf(optarg, "%s", commentfile);
-        insertcomments = MB_YES;
+        insertcomments = true;
         break;
       case 'D':
       case 'd':
-        bathonly = MB_YES;
+        bathonly = true;
         break;
       case 'E':
       case 'e':
@@ -1922,7 +1922,7 @@ int main(int argc, char **argv) {
       {
         const int i = sscanf(optarg, "%s", mfile);
         if (i == 1)
-          merge = MB_YES;
+          merge = true;
         break;
       }
       case 'N':
@@ -1940,7 +1940,7 @@ int main(int argc, char **argv) {
       case 'Q':
       case 'q':
         sscanf(optarg, "%lf", &sleep_factor);
-        use_sleep = MB_YES;
+        use_sleep = true;
         break;
       case 'R':
       case 'r':
@@ -2035,7 +2035,7 @@ int main(int argc, char **argv) {
   else if (iformat > 0 && oformat <= 0)
     oformat = iformat;
 
-  if (merge == MB_YES && mformat <= 0)
+  if (merge == true && mformat <= 0)
     mb_get_format(verbose, mfile, NULL, &mformat, &error);
 
   /* obtain format array locations - format ids will
@@ -2052,7 +2052,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
     exit(error);
   }
-  if (merge == MB_YES && (status = mb_format(verbose, &mformat, &error)) != MB_SUCCESS) {
+  if (merge == true && (status = mb_format(verbose, &mformat, &error)) != MB_SUCCESS) {
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding merge format %d:\n%s\n", mformat, message);
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2071,7 +2071,7 @@ int main(int argc, char **argv) {
   imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
 
   /* initialize reading the merge swath sonar file */
-  if (merge == MB_YES &&
+  if (merge == true &&
       (status = mb_read_init(verbose, mfile, mformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mmbio_ptr,
                              &btime_d, &etime_d, &mbeams_bath, &mbeams_amp, &mpixels_ss, &error)) != MB_SUCCESS) {
     mb_error(verbose, error, &message);
@@ -2093,8 +2093,8 @@ int main(int argc, char **argv) {
   omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
 
   /* bathonly mode works only if output format is mbldeoih */
-  if (bathonly == MB_YES && oformat != MBF_MBLDEOIH) {
-    bathonly = MB_NO;
+  if (bathonly == true && oformat != MBF_MBLDEOIH) {
+    bathonly = false;
     if (verbose > 0) {
       fprintf(stderr, "\nThe -D option (strip amplitude and sidescan) is only valid for output format %d\n", MBF_MBLDEOIH);
       fprintf(stderr, "Program %s is ignoring the -D argument\n", program_name);
@@ -2105,13 +2105,13 @@ int main(int argc, char **argv) {
       - set the format to use - this allows user to set use of old format
       in .mbio_defaults file - purpose is to keep compatibility with
       Fledermaus */
-  if (bathonly == MB_YES && oformat == MBF_MBLDEOIH) {
+  if (bathonly == true && oformat == MBF_MBLDEOIH) {
     omb_io_ptr->save1 = fbtversion;
   }
 
     /* if stripmode set to more than strip comments, then set flag in imb_io_ptr */
     if (stripmode > MBCOPY_STRIPMODE_COMMENTS) {
-        omb_io_ptr->save15 = MB_YES;
+        omb_io_ptr->save15 = true;
     }
 
   /* determine if full or partial copies will be made */
@@ -2189,7 +2189,7 @@ int main(int argc, char **argv) {
   if (error == MB_ERROR_NO_ERROR)
     status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ossalongtrack, &error);
 
-  if (MB_YES == merge) {
+  if (true == merge) {
     if (error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&mbeamflag, &error);
     if (error == MB_ERROR_NO_ERROR)
@@ -2220,18 +2220,18 @@ int main(int argc, char **argv) {
   }
 
   /* set up transfer rules */
-  if (omb_io_ptr->variable_beams == MB_YES && obeams_bath != ibeams_bath)
+  if (omb_io_ptr->variable_beams == true && obeams_bath != ibeams_bath)
     obeams_bath = ibeams_bath;
-  if (omb_io_ptr->variable_beams == MB_YES && obeams_amp != ibeams_amp)
+  if (omb_io_ptr->variable_beams == true && obeams_amp != ibeams_amp)
     obeams_amp = ibeams_amp;
-  if (omb_io_ptr->variable_beams == MB_YES && opixels_ss != ipixels_ss)
+  if (omb_io_ptr->variable_beams == true && opixels_ss != ipixels_ss)
     opixels_ss = ipixels_ss;
   setup_transfer_rules(verbose, ibeams_bath, obeams_bath, &istart_bath, &iend_bath, &offset_bath, &error);
   setup_transfer_rules(verbose, ibeams_amp, obeams_amp, &istart_amp, &iend_amp, &offset_amp, &error);
   setup_transfer_rules(verbose, ipixels_ss, opixels_ss, &istart_ss, &iend_ss, &offset_ss, &error);
 
   /* insert comments from file into output */
-  if (insertcomments == MB_YES) {
+  if (insertcomments == true) {
     /* open file */
     if ((fp = fopen(commentfile, "r")) == NULL) {
       fprintf(stderr, "\nUnable to Open Comment File <%s> for reading\n", commentfile);
@@ -2296,7 +2296,7 @@ int main(int argc, char **argv) {
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    if (merge == MB_YES) {
+    if (merge == true) {
       strncpy(comment, "\0", 256);
       sprintf(comment, "  Merge file:         %s", mfile);
       status = mb_put_comment(verbose, ombio_ptr, comment, &error);
@@ -2368,7 +2368,7 @@ int main(int argc, char **argv) {
   }
 
   /* start expecting data to be in time and space bounds */
-  inbounds = MB_YES;
+  inbounds = true;
 
   /* read and write */
   while (error <= MB_ERROR_NO_ERROR) {
@@ -2376,7 +2376,7 @@ int main(int argc, char **argv) {
     /* read some data */
     error = MB_ERROR_NO_ERROR;
     status = MB_SUCCESS;
-    inbounds = MB_YES;
+    inbounds = true;
     if (copymode != MBCOPY_PARTIAL) {
       status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
                           &distance, &altitude, &sonardepth, &nbath, &namp, &nss, ibeamflag, ibath, iamp, ibathacrosstrack,
@@ -2403,12 +2403,12 @@ int main(int argc, char **argv) {
     /* check for survey data in or out of bounds */
     if (kind == MB_DATA_DATA) {
       if (error == MB_ERROR_NO_ERROR)
-        inbounds = MB_YES;
+        inbounds = true;
       else if (error == MB_ERROR_OUT_BOUNDS || error == MB_ERROR_OUT_TIME)
-        inbounds = MB_NO;
+        inbounds = false;
     }
 
-    if (merge == MB_YES && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && inbounds == MB_YES) {
+    if (merge == true && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && inbounds == true) {
       while (merror <= MB_ERROR_NO_ERROR && (mkind != MB_DATA_DATA || time_d - .001 > mtime_d)) {
         /* find merge record */
 
@@ -2418,26 +2418,26 @@ int main(int argc, char **argv) {
       }
 
       if (time_d + .001 < mtime_d || merror > 0) {
-        inbounds = MB_NO;
+        inbounds = false;
       }
     }
 
     /* check numbers of input and output beams */
     if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && nbath != ibeams_bath) {
       ibeams_bath = nbath;
-      if (omb_io_ptr->variable_beams == MB_YES)
+      if (omb_io_ptr->variable_beams == true)
         obeams_bath = ibeams_bath;
       setup_transfer_rules(verbose, ibeams_bath, obeams_bath, &istart_bath, &iend_bath, &offset_bath, &error);
     }
     if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && namp != ibeams_amp) {
       ibeams_amp = namp;
-      if (omb_io_ptr->variable_beams == MB_YES)
+      if (omb_io_ptr->variable_beams == true)
         obeams_amp = ibeams_amp;
       setup_transfer_rules(verbose, ibeams_amp, obeams_amp, &istart_amp, &iend_amp, &offset_amp, &error);
     }
     if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && nss != ipixels_ss) {
       ipixels_ss = nss;
-      if (omb_io_ptr->variable_beams == MB_YES)
+      if (omb_io_ptr->variable_beams == true)
         opixels_ss = ipixels_ss;
       setup_transfer_rules(verbose, ipixels_ss, opixels_ss, &istart_ss, &iend_ss, &offset_ss, &error);
     }
@@ -2470,10 +2470,10 @@ int main(int argc, char **argv) {
     }
 
     /* do sleep if required */
-    if (use_sleep == MB_YES && kind == MB_DATA_DATA && error <= MB_ERROR_NO_ERROR && idata == 1) {
+    if (use_sleep == true && kind == MB_DATA_DATA && error <= MB_ERROR_NO_ERROR && idata == 1) {
       time_d_last = time_d;
     }
-    else if (use_sleep == MB_YES && kind == MB_DATA_DATA && error <= MB_ERROR_NO_ERROR && idata > 1) {
+    else if (use_sleep == true && kind == MB_DATA_DATA && error <= MB_ERROR_NO_ERROR && idata > 1) {
       sleep_time = (unsigned int)(sleep_factor * (time_d - time_d_last));
       sleep(sleep_time);
       time_d_last = time_d;
@@ -2490,7 +2490,7 @@ int main(int argc, char **argv) {
       }
 
       /* do bathymetry */
-      if (merge == MB_YES) {
+      if (merge == true) {
         /* merge data */
         for (int i = istart_bath; i < iend_bath; i++) {
           const int j = i + offset_bath;
@@ -2580,13 +2580,13 @@ int main(int argc, char **argv) {
       ostore_ptr = omb_io_ptr->store_data;
       if (kind == MB_DATA_DATA || kind == MB_DATA_COMMENT) {
         /* strip amplitude and sidescan if requested */
-        if (bathonly == MB_YES) {
+        if (bathonly == true) {
           namp = 0;
           nss = 0;
         }
 
         /* copy the data to mbldeoih */
-        if (merge == MB_YES) {
+        if (merge == true) {
           status =
               mbcopy_any_to_mbldeoih(verbose, kind, sensorhead, sensortype,
                                                time_i, time_d, navlon, navlat, speed, heading, draft, altitude,
@@ -2624,7 +2624,7 @@ int main(int argc, char **argv) {
       }
     }
 
-    if (merge == MB_YES && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR) {
+    if (merge == true && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR) {
       switch (copymode) {
       case MBCOPY_PARTIAL:
       case MBCOPY_ANY_TO_MBLDEOIH:
@@ -2645,10 +2645,10 @@ int main(int argc, char **argv) {
     }
 
     /* write some data */
-    if ((kind != MB_DATA_COMMENT && error == MB_ERROR_NO_ERROR && inbounds == MB_YES) ||
+    if ((kind != MB_DATA_COMMENT && error == MB_ERROR_NO_ERROR && inbounds == true) ||
         (kind == MB_DATA_COMMENT && stripmode == MBCOPY_STRIPMODE_NONE)) {
       error = MB_ERROR_NO_ERROR;
-      status = mb_put_all(verbose, ombio_ptr, ostore_ptr, MB_NO, kind, time_i, time_d, navlon, navlat, speed, heading,
+      status = mb_put_all(verbose, ombio_ptr, ostore_ptr, false, kind, time_i, time_d, navlon, navlat, speed, heading,
                           obeams_bath, obeams_amp, opixels_ss, obeamflag, obath, oamp, obathacrosstrack, obathalongtrack,
                           oss, ossacrosstrack, ossalongtrack, comment, &error);
       if (status == MB_SUCCESS) {

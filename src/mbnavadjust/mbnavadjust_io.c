@@ -91,7 +91,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
   }
 
   /* if project structure holds an open project close it first */
-  if (project->open == MB_YES)
+  if (project->open == true)
     status = mbnavadjust_close_project(verbose, project, error);
 
   /* check path to see if new project can be created */
@@ -143,7 +143,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
     /* initialize new project */
     if (status == MB_SUCCESS) {
       /* set values */
-      project->open = MB_YES;
+      project->open = true;
       project->num_files = 0;
       project->num_files_alloc = 0;
       project->files = NULL;
@@ -170,9 +170,9 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
       project->zoffsetwidth = zoffsetwidth;
       project->inversion_status = MBNA_INVERSION_NONE;
       project->grid_status = MBNA_GRID_NONE;
-      project->modelplot = MB_NO;
+      project->modelplot = false;
       project->modelplot_style = MBNA_MODELPLOT_TIMESERIES;
-            project->modelplot_uptodate = MB_NO;
+            project->modelplot_uptodate = false;
       project->logfp = NULL;
       project->precision = SIGMA_MINIMUM;
       project->smoothing = MBNA_SMOOTHING_DEFAULT;
@@ -256,7 +256,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
   }
 
   /* if project structure holds an open project close it first */
-  if (project->open == MB_YES)
+  if (project->open == true)
     status = mbnavadjust_close_project(verbose, project, error);
 
   /* check path to see if project exists */
@@ -652,7 +652,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               fprintf(stderr, "read failed on section: %s\n", buffer);
             }
             if (nscan < 15)
-              section->contoursuptodate = MB_NO;
+              section->contoursuptodate = false;
             for (k = MBNA_MASK_DIM - 1; k >= 0; k--) {
               if (status == MB_SUCCESS)
                 result = fgets(buffer, BUFFER_MAX, hfp);
@@ -785,7 +785,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         /* set project bounds and scaling */
-        first = MB_YES;
+        first = true;
         for (i = 0; i < project->num_files; i++) {
           file = &project->files[i];
           if (file->status != MBNA_FILE_FIXEDNAV) {
@@ -793,12 +793,12 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               section = &file->sections[j];
               if (!(check_fnan(section->lonmin) || check_fnan(section->lonmax) || check_fnan(section->latmin) ||
                     check_fnan(section->latmax))) {
-                if (first == MB_YES) {
+                if (first == true) {
                   project->lon_min = section->lonmin;
                   project->lon_max = section->lonmax;
                   project->lat_min = section->latmin;
                   project->lat_max = section->latmax;
-                  first = MB_NO;
+                  first = false;
                 }
                 else {
                   project->lon_min = MIN(project->lon_min, section->lonmin);
@@ -825,7 +825,7 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
           project->num_blocks = 0;
           for (i = 0; i < project->num_files; i++) {
             file = &project->files[i];
-            if (i == 0 || file->sections[0].continuity == MB_NO) {
+            if (i == 0 || file->sections[0].continuity == false) {
               project->num_blocks++;
             }
             file->block = project->num_blocks - 1;
@@ -894,7 +894,7 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
             }
           }
           else if (status == MB_SUCCESS) {
-            crossing->truecrossing = MB_NO;
+            crossing->truecrossing = false;
             crossing->overlap = 0;
             if (status == MB_SUCCESS &&
                 ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
@@ -907,7 +907,7 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
           }
           if (status == MB_SUCCESS && crossing->status != MBNA_CROSSING_STATUS_NONE)
             project->num_crossings_analyzed++;
-          if (status == MB_SUCCESS && crossing->truecrossing == MB_YES) {
+          if (status == MB_SUCCESS && crossing->truecrossing == true) {
             project->num_truecrossings++;
             if (crossing->status != MBNA_CROSSING_STATUS_NONE)
               project->num_truecrossings_analyzed++;
@@ -1150,7 +1150,7 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
 
         /* set project status flag */
         if (status == MB_SUCCESS)
-          project->open = MB_YES;
+          project->open = true;
         else {
           for (i = 0; i < project->num_files; i++) {
             file = &project->files[i];
@@ -1161,7 +1161,7 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
             free(project->files);
           if (project->crossings != NULL)
             free(project->crossings);
-          project->open = MB_NO;
+          project->open = false;
           memset(project->name, 0, STRING_MAX);
           strcpy(project->name, "None");
           memset(project->path, 0, STRING_MAX);
@@ -1181,7 +1181,7 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
         }
 
         /* recalculate crossing overlap values if not already set */
-        if (project->open == MB_YES) {
+        if (project->open == true) {
           for (i = 0; i < project->num_crossings; i++) {
             crossing = &(project->crossings[i]);
             if (crossing->overlap <= 0) {
@@ -1265,7 +1265,7 @@ int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *er
   }
 
   /* reset values */
-  project->open = MB_NO;
+  project->open = false;
   memset(project->name, 0, STRING_MAX);
   strcpy(project->name, "None");
   memset(project->path, 0, STRING_MAX);
@@ -1483,7 +1483,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
         project->files[crossing->file_id_2].status == MBNA_FILE_FIXEDNAV)
       ncrossings_fixed++;
     else {
-      if (crossing->truecrossing == MB_YES)
+      if (crossing->truecrossing == true)
         ncrossings_true++;
       else if (crossing->overlap >= 50)
         ncrossings_gt50++;
@@ -1535,7 +1535,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
       crossing = &project->crossings[i];
 
       /* output only unfixed true crossings */
-      if (crossing->truecrossing == MB_YES && !(project->files[crossing->file_id_1].status == MBNA_FILE_FIXEDNAV ||
+      if (crossing->truecrossing == true && !(project->files[crossing->file_id_1].status == MBNA_FILE_FIXEDNAV ||
                                                 project->files[crossing->file_id_2].status == MBNA_FILE_FIXEDNAV)) {
         file_1 = (struct mbna_file *)&project->files[crossing->file_id_1];
         file_2 = (struct mbna_file *)&project->files[crossing->file_id_2];
@@ -1559,7 +1559,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
           status_char = '-';
           routecolor = ROUTE_COLOR_RED;
         }
-        if (crossing->truecrossing == MB_NO)
+        if (crossing->truecrossing == false)
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
@@ -1570,7 +1570,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
         fprintf(hfp, "## ROUTESIZE %d\n", 1);
         fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
         fprintf(hfp, "## ROUTEPOINTS %d\n", 2);
-        fprintf(hfp, "## ROUTEEDITMODE %d\n", MB_NO);
+        fprintf(hfp, "## ROUTEEDITMODE %d\n", false);
         fprintf(hfp, "> ## STARTROUTE\n");
         fprintf(hfp, "%.10f %.10f 0.00 1\n%.10f %.10f 0.00 1\n>\n", navlon1, navlat1, navlon2, navlat2);
         nroute++;
@@ -1636,7 +1636,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
           status_char = '-';
           routecolor = ROUTE_COLOR_RED;
         }
-        if (crossing->truecrossing == MB_NO)
+        if (crossing->truecrossing == false)
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
@@ -1647,7 +1647,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
         fprintf(hfp, "## ROUTESIZE %d\n", 1);
         fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
         fprintf(hfp, "## ROUTEPOINTS %d\n", 2);
-        fprintf(hfp, "## ROUTEEDITMODE %d\n", MB_NO);
+        fprintf(hfp, "## ROUTEEDITMODE %d\n", false);
         fprintf(hfp, "> ## STARTROUTE\n");
         fprintf(hfp, "%.10f %.10f 0.00 1\n%.10f %.10f 0.00 1\n>\n", navlon1, navlat1, navlon2, navlat2);
         nroute++;
@@ -1714,7 +1714,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
           status_char = '-';
           routecolor = ROUTE_COLOR_RED;
         }
-        if (crossing->truecrossing == MB_NO)
+        if (crossing->truecrossing == false)
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
@@ -1725,7 +1725,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
         fprintf(hfp, "## ROUTESIZE %d\n", 1);
         fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
         fprintf(hfp, "## ROUTEPOINTS %d\n", 2);
-        fprintf(hfp, "## ROUTEEDITMODE %d\n", MB_NO);
+        fprintf(hfp, "## ROUTEEDITMODE %d\n", false);
         fprintf(hfp, "> ## STARTROUTE\n");
         fprintf(hfp, "%.10f %.10f 0.00 1\n%.10f %.10f 0.00 1\n>\n", navlon1, navlat1, navlon2, navlat2);
         nroute++;
@@ -1792,7 +1792,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
           status_char = '-';
           routecolor = ROUTE_COLOR_RED;
         }
-        if (crossing->truecrossing == MB_NO)
+        if (crossing->truecrossing == false)
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
@@ -1803,7 +1803,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
         fprintf(hfp, "## ROUTESIZE %d\n", 1);
         fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
         fprintf(hfp, "## ROUTEPOINTS %d\n", 2);
-        fprintf(hfp, "## ROUTEEDITMODE %d\n", MB_NO);
+        fprintf(hfp, "## ROUTEEDITMODE %d\n", false);
         fprintf(hfp, "> ## STARTROUTE\n");
         fprintf(hfp, "%.10f %.10f 0.00 1\n%.10f %.10f 0.00 1\n>\n", navlon1, navlat1, navlon2, navlat2);
         nroute++;
@@ -1869,7 +1869,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
           status_char = '-';
           routecolor = ROUTE_COLOR_RED;
         }
-        if (crossing->truecrossing == MB_NO)
+        if (crossing->truecrossing == false)
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
@@ -1880,7 +1880,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
         fprintf(hfp, "## ROUTESIZE %d\n", 1);
         fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
         fprintf(hfp, "## ROUTEPOINTS %d\n", 2);
-        fprintf(hfp, "## ROUTEEDITMODE %d\n", MB_NO);
+        fprintf(hfp, "## ROUTEEDITMODE %d\n", false);
         fprintf(hfp, "> ## STARTROUTE\n");
         fprintf(hfp, "%.10f %.10f 0.00 1\n%.10f %.10f 0.00 1\n>\n", navlon1, navlat1, navlon2, navlat2);
         nroute++;
@@ -1944,7 +1944,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
             status_char = '*';
           else
             status_char = '-';
-          if (crossing->truecrossing == MB_NO)
+          if (crossing->truecrossing == false)
             truecrossing_char = ' ';
           else
             truecrossing_char = 'X';
@@ -1955,7 +1955,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
           fprintf(hfp, "## ROUTESIZE %d\n", 1);
           fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
           fprintf(hfp, "## ROUTEPOINTS %d\n", 2);
-          fprintf(hfp, "## ROUTEEDITMODE %d\n", MB_NO);
+          fprintf(hfp, "## ROUTEEDITMODE %d\n", false);
           fprintf(hfp, "> ## STARTROUTE\n");
           fprintf(hfp, "%.10f %.10f 0.00 1\n%.10f %.10f 0.00 1\n>\n", navlon1, navlat1, navlon2, navlat2);
           nroute++;
@@ -2020,7 +2020,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
             status_char = '*';
           else
             status_char = '-';
-          if (crossing->truecrossing == MB_NO)
+          if (crossing->truecrossing == false)
             truecrossing_char = ' ';
           else
             truecrossing_char = 'X';
@@ -2031,7 +2031,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
           fprintf(hfp, "## ROUTESIZE %d\n", 1);
           fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
           fprintf(hfp, "## ROUTEPOINTS %d\n", 2);
-          fprintf(hfp, "## ROUTEEDITMODE %d\n", MB_NO);
+          fprintf(hfp, "## ROUTEEDITMODE %d\n", false);
           fprintf(hfp, "> ## STARTROUTE\n");
           fprintf(hfp, "%.10f %.10f 0.00 1\n%.10f %.10f 0.00 1\n>\n", navlon1, navlat1, navlon2, navlat2);
           nroute++;
@@ -2133,7 +2133,7 @@ int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int 
   }
 
   /* check coverage masks for overlap */
-  first = MB_YES;
+  first = true;
   dx1 = (section1->lonmax - section1->lonmin) / MBNA_MASK_DIM;
   dy1 = (section1->latmax - section1->latmin) / MBNA_MASK_DIM;
   dx2 = (section2->lonmax - section2->lonmin) / MBNA_MASK_DIM;
@@ -2244,7 +2244,7 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
   }
 
   /* get overlap region bounds and focus point */
-  first = MB_YES;
+  first = true;
   *lonmin = 0.0;
   *lonmax = 0.0;
   *latmin = 0.0;
@@ -2272,14 +2272,14 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
               if ((lon1min < lon2max) && (lon1max > lon2min) && (lat1min < lat2max) && (lat1max > lat2min)) {
                 overlap1[kk1] = 1;
                 overlap2[kk2] = 1;
-                if (first == MB_NO) {
+                if (first == false) {
                   *lonmin = MIN(*lonmin, MAX(lon1min, lon2min));
                   *lonmax = MAX(*lonmax, MIN(lon1max, lon2max));
                   *latmin = MIN(*latmin, MAX(lat1min, lat2min));
                   *latmax = MAX(*latmax, MIN(lat1max, lat2max));
                 }
                 else {
-                  first = MB_NO;
+                  first = false;
                   *lonmin = MAX(lon1min, lon2min);
                   *lonmax = MIN(lon1max, lon2max);
                   *latmin = MAX(lat1min, lat2min);
@@ -2774,7 +2774,7 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
   }
 
   /* load specified section */
-  if (project->open == MB_YES && project->num_crossings > 0) {
+  if (project->open == true && project->num_crossings > 0) {
     /* set section format and path */
     sprintf(path, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file_id, section_id);
     sprintf(tpath, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
@@ -2849,7 +2849,7 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
       tick_len_map = MAX(section->lonmax - section->lonmin, section->latmax - section->latmin) / 500;
       label_hgt_map = MAX(section->lonmax - section->lonmin, section->latmax - section->latmin) / 100;
       status = mb_contour_init(verbose, (struct swath **)swath_ptr, num_pings, beams_bath, contour_algorithm,
-                               MB_YES, MB_NO, MB_NO, MB_NO, MB_NO, project->cont_int, project->col_int, project->tick_int,
+                               true, false, false, false, false, project->cont_int, project->col_int, project->tick_int,
                                project->label_int, tick_len_map, label_hgt_map, 0.0, contour_ncolor, 0, NULL, NULL, NULL, 0.0,
                                0.0, 0.0, 0.0, 0, 0, 0.0, 0.0,
                                      project->mbnavadjust_plot, project->mbnavadjust_newpen,
@@ -2872,8 +2872,8 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
 
     /* now read the data */
     if (status == MB_SUCCESS) {
-      done = MB_NO;
-      while (done == MB_NO) {
+      done = false;
+      while (done == false) {
         /* read the next ping */
         status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
                             &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
@@ -2916,7 +2916,7 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
           if (*error == MB_ERROR_NO_ERROR) {
             swathraw->npings++;
             if (swathraw->npings >= swathraw->npings_max)
-              done = MB_YES;
+              done = true;
 
             for (i = 0; i < 7; i++)
               pingraw->time_i[i] = time_i[i];
@@ -2979,7 +2979,7 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
         else if (*error > MB_ERROR_NO_ERROR) {
           status = MB_SUCCESS;
           *error = MB_ERROR_NO_ERROR;
-          done = MB_YES;
+          done = true;
         }
       }
 
@@ -3198,10 +3198,10 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
                 /* now read the data */
                 if (status == MB_SUCCESS) {
                     imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
-                    done = MB_NO;
+                    done = false;
                     isnav = 0;
                     num_pings = 0;
-                    while (done == MB_NO && isnav < section->num_snav) {
+                    while (done == false && isnav < section->num_snav) {
                         /* read the next ping */
                         status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
                                             &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
@@ -3221,7 +3221,7 @@ time_d, section->snav_time_d[isnav], (section->snav_time_d[isnav]-time_d));
                         else if (*error > MB_ERROR_NO_ERROR) {
                             status = MB_SUCCESS;
                             *error = MB_ERROR_NO_ERROR;
-                            done = MB_YES;
+                            done = true;
                         }
                     }
 
@@ -3273,7 +3273,7 @@ int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
   // translate soundings from the raw swath form to the structure used for
   // contouring, including applying a depth offset and any heading or roll bias
   // applied to the source data on a file by file basis
-  if (project != NULL && swathraw_ptr != NULL && swath_ptr != NULL && project->open == MB_YES) {
+  if (project != NULL && swathraw_ptr != NULL && swath_ptr != NULL && project->open == true) {
     swathraw = (struct mbna_swathraw *)swathraw_ptr;
     swath = (struct swath *)swath_ptr;
     swath->npings = 0;
@@ -3392,7 +3392,7 @@ int mbnavadjust_section_contour(int verbose, struct mbna_project *project,
     status = mb_contour(verbose, swath, error);
 
     /* set contours up to date flag */
-    project->files[fileid].sections[sectionid].contoursuptodate = MB_YES;
+    project->files[fileid].sections[sectionid].contoursuptodate = true;
   }
 
   /* print output debug statements */

@@ -974,9 +974,9 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 		        MB_DESCRIPTION_LENGTH);
 		*numfile = 0;
 		*filetype = 0;
-		*variable_beams = MB_NO;
-		*traveltime = MB_NO;
-		*beam_flagging = MB_NO;
+		*variable_beams = false;
+		*traveltime = false;
+		*beam_flagging = false;
 		*platform_source = MB_DATA_NONE;
 		*nav_source = MB_DATA_NONE;
 		*sensordepth_source = MB_DATA_NONE;
@@ -999,9 +999,9 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 		format_description[0] = '\0';
 		*numfile = 0;
 		*filetype = 0;
-		*variable_beams = MB_NO;
-		*traveltime = MB_NO;
-		*beam_flagging = MB_NO;
+		*variable_beams = false;
+		*traveltime = false;
+		*beam_flagging = false;
 		*platform_source = MB_DATA_NONE;
 		*nav_source = MB_DATA_NONE;
 		*sensordepth_source = MB_DATA_NONE;
@@ -1283,9 +1283,9 @@ int mb_format_flags(int verbose, int *format, int *variable_beams, int *travelti
 	                        &nav_source, &sensordepth_source, &heading_source, &attitude_source, &svp_source, &beamwidth_xtrack,
 	                        &beamwidth_ltrack, error);
 	if (status == MB_FAILURE) {
-		*variable_beams = MB_NO;
-		*traveltime = MB_NO;
-		*beam_flagging = MB_NO;
+		*variable_beams = false;
+		*traveltime = false;
+		*beam_flagging = false;
 	}
 
 	if (verbose >= 2) {
@@ -1423,14 +1423,14 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 	}
 
 	/* set format not found */
-	int found = MB_NO;
+	int found = false;
 	*format = 0;
 
 	char *suffix;
 	int suffix_len;
 
 	/* first look for MB suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 6)
 			i = strlen(filename) - 6;
@@ -1444,13 +1444,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				if (sscanf(suffix, ".mb%d", format) > 0 || sscanf(suffix, ".MB%d", format) > 0)
-					found = MB_YES;
+					found = true;
 			}
 		}
 	}
 
 	/* look for mbnavedit navigation suffix */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
@@ -1464,13 +1464,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				*format = MBF_MBPRONAV;
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for mbnavadjust navigation suffixes */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
@@ -1484,13 +1484,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				*format = MBF_MBPRONAV;
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for "fast bath" or .fbt suffix */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
@@ -1504,13 +1504,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				*format = MBF_MBLDEOIH;
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for "fast filtered bath" or .ffb suffix */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
@@ -1524,13 +1524,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				*format = MBF_MBLDEOIH;
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for "fast filtered amplitude" or .ffa suffix */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
@@ -1544,13 +1544,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				*format = MBF_MBLDEOIH;
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for "fast filtered sidescan" or .ffs suffix */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
@@ -1564,13 +1564,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				*format = MBF_MBLDEOIH;
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for "fast nav" or .fnv suffix */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
@@ -1584,13 +1584,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				*format = MBF_MBPRONAV;
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for datalist suffixes */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
@@ -1604,13 +1604,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				*format = -1;
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for SeaBeam suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
@@ -1624,13 +1624,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				*format = MBF_SB2100RW;
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for L3 XSE suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
@@ -1644,7 +1644,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				*format = MBF_L3XSERAW;
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
@@ -1668,7 +1668,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 	int done;
 
 	/* look for old Simrad Mermaid suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 8)
 			i = strlen(filename) - 8;
@@ -1735,13 +1735,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					strncpy(fileroot, filename, strlen(filename) - suffix_len);
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for newer Simrad Mermaid suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
@@ -1807,13 +1807,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					strncpy(fileroot, filename, strlen(filename) - suffix_len);
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for Kongsberg multibeam *.kmall format suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 6)
 			i = strlen(filename) - 6;
@@ -1827,13 +1827,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				*format = MBF_KEMKMALL;
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for JHC format suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 7)
 			i = strlen(filename) - 7;
@@ -1847,13 +1847,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				*format = MBF_OMGHDCSJ;
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for Hypac format suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
@@ -1867,13 +1867,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
 				*format = MBF_HYPC8101;
-				found = MB_YES;
+				found = true;
 			}
 		}
 	}
 
 	/* look for MBARI format suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 18)
 			i = strlen(filename) - 8;
@@ -1897,12 +1897,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_MBARIROV;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for MBARI edited format suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 24)
 			i = strlen(filename) - 14;
@@ -1926,12 +1926,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_MBARIROV;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for NIO Hydrosweep DS raw format suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 4)
 			i = strlen(filename) - 3;
@@ -1947,12 +1947,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_HSATLRAW;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for STN Atlas raw format suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -1968,12 +1968,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_HSDS2RAW;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for Triton-ELics XTF format suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -1989,12 +1989,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_XTFR8101;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for MGD77 suffix conventions */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 7)
 			i = strlen(filename) - 6;
@@ -2010,12 +2010,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_MGD77DAT;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for MGD77 suffix conventions */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2031,12 +2031,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_MGD77TXT;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for MGD77T suffix conventions */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 6)
 			i = strlen(filename) - 5;
@@ -2052,12 +2052,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_PHOTGRAM;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for segy suffix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 6)
 			i = strlen(filename) - 5;
@@ -2073,10 +2073,10 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_SEGYSEGY;
-			found = MB_YES;
+			found = true;
 		}
 	}
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2092,12 +2092,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_SEGYSEGY;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for IFREMER Trismus format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 4)
 			i = strlen(filename) - 3;
@@ -2113,12 +2113,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_EM12IFRM;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for IFREMER netCDF format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2134,12 +2134,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_MBNETCDF;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for IFREMER netCDF format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2155,12 +2155,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_MBNETCDF;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for IFREMER netCDF navigation format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2176,12 +2176,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_NVNETCDF;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for SAME SURF format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2203,12 +2203,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_SAMESURF;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for xyz sounding format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2226,12 +2226,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_ASCIIXYZ;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for yxz sounding format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2249,12 +2249,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_ASCIIYXZ;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for xyt sounding format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2272,12 +2272,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_ASCIIXYT;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for yxt sounding format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2295,12 +2295,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_ASCIIYXT;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for binary HYDRO93 sounding format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2318,23 +2318,23 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_HYDROB93;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for SIO SB2000 prefix convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		if (strlen(filename) > 6 && strncmp(filename, "SSmed.", 6) == 0) {
 			if (fileroot != NULL) {
 				strcpy(fileroot, filename);
 			}
 			*format = MBF_SB2000SS;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for Marine Sonic MSTIFF format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2352,12 +2352,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_MSTIFFSS;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for Edgetech Jstar format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2375,7 +2375,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_EDGJSTAR;
-			found = MB_YES;
+			found = true;
 
 			/* examine the file to determine if sidescan data is
 			    high frequency (*format = MBF_EDGJSTR2 = 133) rather than
@@ -2384,11 +2384,11 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 			        as low frequency */
 			if ((checkfp = fopen(filename, "r")) != NULL) {
 				/* loop over reading data until four full sidescan sonar records are read */
-				done = MB_NO;
+				done = false;
 				nsonar = 0;
 				nlow = 0;
 				nhigh = 0;
-				while (done == MB_NO) {
+				while (done == false) {
 					/* read message header */
 					if (fread(buffer, MBSYS_JSTAR_MESSAGE_SIZE, 1, checkfp) == 1) {
 						/* extract and check the subsystem value from the message header */
@@ -2401,21 +2401,21 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 						if (subsystem == 21)
 							nhigh++;
 						if (nsonar >= 4)
-							done = MB_YES;
+							done = true;
 
 						/* read and discard the rest of the record */
-						if (done == MB_NO) {
-							mb_get_binary_int(MB_YES, &buffer[12], &size);
+						if (done == false) {
+							mb_get_binary_int(true, &buffer[12], &size);
 							for (i = 0; i < size; i++) {
 								if (fread(buffer, 1, 1, checkfp) != 1)
-									done = MB_YES;
+									done = true;
 							}
 						}
 					}
 
 					/* end of file */
 					else {
-						done = MB_YES;
+						done = true;
 					}
 				}
 				fclose(checkfp);
@@ -2428,7 +2428,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 	}
 
 	/* look for HMRG MR1 and BS format conventions */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 6)
 			i = strlen(filename) - 5;
@@ -2446,10 +2446,10 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_MR1PRVR2;
-			found = MB_YES;
+			found = true;
 		}
 	}
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 7)
 			i = strlen(filename) - 6;
@@ -2467,10 +2467,10 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_MR1PRVR2;
-			found = MB_YES;
+			found = true;
 		}
 	}
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 12)
 			i = strlen(filename) - 11;
@@ -2488,10 +2488,10 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_MR1PRVR2;
-			found = MB_YES;
+			found = true;
 		}
 	}
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 7)
 			i = strlen(filename) - 6;
@@ -2509,12 +2509,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_MR1PRVR2;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for a CARIS GSF export *.gsf format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2532,12 +2532,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_GSFGENMB;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for a SAIC GSF *.d0X format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2553,12 +2553,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_GSFGENMB;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for a Reson 7K multibeam *.s7k format convention */
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2580,12 +2580,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_RESON7K3;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for a Imagex multibeam .83p format convention*/
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2603,12 +2603,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_IMAGE83P;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for an R2R navigation format convention*/
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 8)
 			i = strlen(filename) - 7;
@@ -2626,12 +2626,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_HIR2RNAV;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for a HYSWEEP *.HSX file format convention*/
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2649,12 +2649,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_HYSWEEP1;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for a SEA SWATHplus *.sxi file format convention*/
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2672,12 +2672,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_SWPLSSXI;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for a SEA SWATHplus *.sxp file format convention*/
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2695,12 +2695,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_SWPLSSXP;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for a 3DatDepth *.raa file format convention*/
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2737,12 +2737,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
                 strncpy(fileroot, filename, strlen(filename) - suffix_len);
                 fileroot[strlen(filename) - suffix_len] = '\0';
             }
-            found = MB_YES;
+            found = true;
         }
 	}
 
 	/* look for a WASSP *.000 file format convention*/
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
@@ -2758,12 +2758,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_WASSPENL;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
 	/* look for a WASSP *.nwsf file format convention*/
-	if (found == MB_NO) {
+	if (found == false) {
 		int i;
 		if (strlen(filename) >= 6)
 			i = strlen(filename) - 5;
@@ -2779,7 +2779,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
 			*format = MBF_WASSPENL;
-			found = MB_YES;
+			found = true;
 		}
 	}
 
@@ -2798,10 +2798,10 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 						sscanf(buffer, "%s %d", dummy, &pformat);
 						if (pformat != 0) {
 							*format = pformat;
-							if (found == MB_NO) {
+							if (found == false) {
 								if (fileroot != NULL)
 									strcpy(fileroot, filename);
-								found = MB_YES;
+								found = true;
 							}
 						}
 					}
@@ -2812,7 +2812,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 	}
 
 	/* check for old format id and provide alias if needed */
-	if (found == MB_YES && *format > 0 && (*format < 10 || *format == 44 || *format == 52 || *format == 55)) {
+	if (found == true && *format > 0 && (*format < 10 || *format == 44 || *format == 52 || *format == 55)) {
 		int i;
 		/* replace original mbio id's */
 		if (*format < 10)
@@ -2841,7 +2841,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 	int status = MB_SUCCESS;
 
 	/* set error if needed */
-	if (found == MB_NO) {
+	if (found == false) {
 		*error = MB_ERROR_BAD_FORMAT;
 		status = MB_FAILURE;
 		*format = 0;
@@ -2882,12 +2882,12 @@ int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_proc
 		/* get datalist pointer */
 		datalist = (struct mb_datalist_struct *)*datalist_ptr;
 		strcpy(datalist->path, "");
-		datalist->printed = MB_NO;
-		datalist->open = MB_NO;
+		datalist->printed = false;
+		datalist->open = false;
 		datalist->recursion = 0;
 		datalist->look_processed = look_processed;
-		datalist->local_weight = MB_YES;
-		datalist->weight_set = MB_NO;
+		datalist->local_weight = true;
+		datalist->weight_set = false;
 		datalist->weight = 0.0;
 		datalist->datalist = NULL;
 
@@ -2898,7 +2898,7 @@ int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_proc
 		}
 		else {
 			strcpy(datalist->path, path);
-			datalist->open = MB_YES;
+			datalist->open = true;
 		}
 	}
 
@@ -2937,7 +2937,7 @@ int mb_datalist_close(int verbose, void **datalist_ptr, int *error) {
 		struct mb_datalist_struct *datalist = (struct mb_datalist_struct *)*datalist_ptr;
 
 		/* close file */
-		if (datalist->open == MB_YES) {
+		if (datalist->open == true) {
 			fclose(datalist->fp);
 		}
 	}
@@ -3098,27 +3098,27 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 	struct stat file_status;
 	int fstat;
 	int file_ok;
-	int rawspecified = MB_NO;
-	int processedspecified = MB_NO;
+	int rawspecified = false;
+	int processedspecified = false;
 	int istart;
 
 	/* loop over reading from datalist_ptr */
-	int done = MB_NO;
-	if (datalist->open == MB_YES && done == MB_NO) {
-		while (done == MB_NO) {
+	int done = false;
+	if (datalist->open == true && done == false) {
+		while (done == false) {
 			/* copy current datalist path */
 			strcpy(dpath, datalist->path);
 
 			/* if recursive datalist closed read current datalist */
 			if (datalist->datalist == NULL) {
-				rdone = MB_NO;
-				while (rdone == MB_NO) {
+				rdone = false;
+				while (rdone == false) {
 					buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, datalist->fp);
 
 					/* deal with end of datalist file */
 					if (buffer_ptr != buffer) {
-						rdone = MB_YES;
-						done = MB_YES;
+						rdone = true;
+						done = true;
 						*pstatus = MB_PROCESSED_NONE;
 						status = MB_FAILURE;
 						*error = MB_ERROR_EOF;
@@ -3138,7 +3138,7 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 
 					/* look for special $NOLOCALWEIGHT command */
 					else if (strncmp(buffer, "$NOLOCALWEIGHT", 14) == 0) {
-						datalist->local_weight = MB_NO;
+						datalist->local_weight = false;
 					}
 
 					/* get filename */
@@ -3152,11 +3152,11 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 						if (buffer[1] == ':') {
 							if (strncmp(buffer, "R:", 2) == 0) {
 								istart = 2;
-								rawspecified = MB_YES;
+								rawspecified = true;
 							}
 							else if (strncmp(buffer, "P:", 2) == 0) {
 								istart = 2;
-								processedspecified = MB_YES;
+								processedspecified = true;
 							}
 							else
 								istart = 0;
@@ -3191,10 +3191,10 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 						if (nscan >= 2) {
 							fstat = stat(path, &file_status);
 							if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
-								file_ok = MB_YES;
+								file_ok = true;
 							}
 							else {
-								file_ok = MB_NO;
+								file_ok = false;
 								/* print warning if verbose > 0 */
 								if (verbose > 0) {
 									fprintf(stderr, "MBIO Warning: Datalist entry skipped because it could not be opened!\n");
@@ -3207,7 +3207,7 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 						/* check for processed file */
 						*pstatus = MB_PROCESSED_NONE;
 						pfile[0] = '\0';
-						if (file_ok == MB_YES) {
+						if (file_ok == true) {
 							mb_pr_get_ofile(verbose, path, &pfile_specified, pfile, error);
 							if (strlen(pfile) > 0 && pfile[0] != '/' && strrchr(path, '/') != NULL &&
 							    (len = strrchr(path, '/') - path + 1) > 1) {
@@ -3217,7 +3217,7 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 								strcat(pfile, tmpstr);
 							}
 
-							if (pfile_specified == MB_YES) {
+							if (pfile_specified == true) {
 								if ((fstat = stat(pfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
 								    file_status.st_size > 0) {
 									strcpy(ppath, pfile);
@@ -3229,17 +3229,17 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 							}
 
 							/* apply processed or raw prefixes */
-							if (*pstatus == MB_PROCESSED_EXIST && processedspecified == MB_YES)
+							if (*pstatus == MB_PROCESSED_EXIST && processedspecified == true)
 								*pstatus = MB_PROCESSED_USE;
-							else if (*pstatus == MB_PROCESSED_USE && rawspecified == MB_YES)
+							else if (*pstatus == MB_PROCESSED_USE && rawspecified == true)
 								*pstatus = MB_PROCESSED_EXIST;
 						}
 
 						/* set weight value - recursive weight from above
-						   overrides local weight as long as local_weight == MB_YES */
-						if (nscan >= 2 && file_ok == MB_YES) {
+						   overrides local weight as long as local_weight == true */
+						if (nscan >= 2 && file_ok == true) {
 							/* use recursive weight from above unless prohibited */
-							if (datalist->weight_set == MB_YES && (datalist->local_weight == MB_NO || nscan != 3))
+							if (datalist->weight_set == true && (datalist->local_weight == false || nscan != 3))
 								*weight = datalist->weight;
 
 							/* else if weight not locally specified set to 1.0 */
@@ -3248,37 +3248,37 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 						}
 
 						/* deal with file */
-						if (nscan >= 2 && file_ok == MB_YES && *format >= 0) {
+						if (nscan >= 2 && file_ok == true && *format >= 0) {
 							/* set done */
-							done = MB_YES;
-							rdone = MB_YES;
+							done = true;
+							rdone = true;
 						}
 
 						/* deal with recursive datalist */
-						else if (nscan >= 2 && file_ok == MB_YES && *format == -1 &&
+						else if (nscan >= 2 && file_ok == true && *format == -1 &&
 						         datalist->recursion < MB_DATALIST_RECURSION_MAX) {
 							if ((status = mb_datalist_open(verbose, (void **)&(datalist->datalist), path,
 							                               datalist->look_processed, error)) == MB_SUCCESS) {
 								datalist2 = datalist->datalist;
 								datalist2->recursion = datalist->recursion + 1;
 								datalist2->local_weight = datalist->local_weight;
-								rdone = MB_YES;
+								rdone = true;
 
 								/* set weight to recursive value if available */
-								if (nscan >= 3 && (datalist->weight_set == MB_NO || datalist->local_weight == MB_YES)) {
-									datalist2->weight_set = MB_YES;
+								if (nscan >= 3 && (datalist->weight_set == false || datalist->local_weight == true)) {
+									datalist2->weight_set = true;
 									datalist2->weight = *weight;
 								}
 
-								else if (datalist->weight_set == MB_YES) {
-									datalist2->weight_set = MB_YES;
+								else if (datalist->weight_set == true) {
+									datalist2->weight_set = true;
 									datalist2->weight = datalist->weight;
 								}
 
 								/* else set weight to local value if available */
 								/* else do not set weight */
 								else {
-									datalist2->weight_set = MB_NO;
+									datalist2->weight_set = false;
 									datalist2->weight = 0.0;
 								}
 							}
@@ -3292,9 +3292,9 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 			}
 
 			/* if open read next entry from recursive datalist */
-			if (done == MB_NO && datalist->open == MB_YES && datalist->datalist != NULL) {
+			if (done == false && datalist->open == true && datalist->datalist != NULL) {
 				datalist2 = (struct mb_datalist_struct *)datalist->datalist;
-				if (datalist2->open == MB_YES) {
+				if (datalist2->open == true) {
 					/* recursively call mb_read_datalist */
 					status = mb_datalist_read2(verbose, (void *)datalist->datalist, pstatus, path, ppath, dpath, format, weight,
 					                           error);
@@ -3304,7 +3304,7 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 						status = mb_datalist_close(verbose, (void **)&(datalist->datalist), error);
 					}
 					else {
-						done = MB_YES;
+						done = true;
 					}
 				}
 			}
@@ -3344,12 +3344,12 @@ int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recur
 	if (datalist_ptr != NULL) {
 		struct mb_datalist_struct *datalist = (struct mb_datalist_struct *)datalist_ptr;
 		*recursion = datalist->recursion;
-		if (print == MB_YES && datalist->printed == MB_NO) {
+		if (print == true && datalist->printed == false) {
 			fprintf(stderr, "<%2.2d> ", *recursion);
 			for (int i = 0; i < *recursion; i++)
 				fprintf(stderr, "\t");
 			fprintf(stderr, "%s\n", datalist->path);
-			datalist->printed = MB_YES;
+			datalist->printed = true;
 		}
 
 		/* descend through the recursive datalist structures to the lowest current
@@ -3357,12 +3357,12 @@ int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recur
 		while (datalist->datalist != NULL) {
 			datalist = datalist->datalist;
 			*recursion = datalist->recursion;
-			if (print == MB_YES && datalist->printed == MB_NO) {
+			if (print == true && datalist->printed == false) {
 				fprintf(stderr, "<%2.2d> ", *recursion);
 				for (int i = 0; i < *recursion; i++)
 					fprintf(stderr, "\t");
 				fprintf(stderr, "%s\n", datalist->path);
-				datalist->printed = MB_YES;
+				datalist->printed = true;
 			}
 		}
 	}
@@ -3398,10 +3398,10 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
 	    MB_SUCCESS) {
 		/* get imagelist pointer */
 		imagelist = (struct mb_imagelist_struct *)*imagelist_ptr;
-		imagelist->open = MB_NO;
+		imagelist->open = false;
 		imagelist->recursion = 0;
     imagelist->leftrightstereo = MB_IMAGESTATUS_NONE;
-		imagelist->printed = MB_NO;
+		imagelist->printed = false;
 		strcpy(imagelist->path, "");
 		imagelist->imagelist = NULL;
 
@@ -3412,7 +3412,7 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
 		}
 		else {
 			strcpy(imagelist->path, path);
-			imagelist->open = MB_YES;
+			imagelist->open = true;
 		}
 	}
 
@@ -3453,7 +3453,7 @@ int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error) {
 		struct mb_imagelist_struct *imagelist = (struct mb_imagelist_struct *)*imagelist_ptr;
 
 		/* close file */
-		if (imagelist->open == MB_YES) {
+		if (imagelist->open == true) {
 			fclose(imagelist->fp);
 		}
 	}
@@ -3507,16 +3507,16 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 	int fstat;
 
 	/* loop over reading from imagelist_ptr */
-	int done = MB_NO;
-	if (imagelist->open == MB_YES && done == MB_NO) {
-		while (done == MB_NO) {
+	int done = false;
+	if (imagelist->open == true && done == false) {
+		while (done == false) {
 			/* copy current imagelist path */
 			strcpy(dpath, imagelist->path);
 
 			/* if recursive imagelist closed read current imagelist */
 			if (imagelist->imagelist == NULL) {
-				rdone = MB_NO;
-				while (rdone == MB_NO) {
+				rdone = false;
+				while (rdone == false) {
                     *imagestatus = MB_IMAGESTATUS_NONE;
                     *time_d = 0.0;
                     *dtime_d = 0.0;
@@ -3524,8 +3524,8 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 
 					/* deal with end of imagelist file */
 					if (buffer_ptr != buffer) {
-						rdone = MB_YES;
-						done = MB_YES;
+						rdone = true;
+						done = true;
 						status = MB_FAILURE;
 						*error = MB_ERROR_EOF;
 					}
@@ -3677,8 +3677,8 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 						/* deal with file */
 						if (*imagestatus != MB_IMAGESTATUS_NONE && *imagestatus != MB_IMAGESTATUS_IMAGELIST) {
 							/* set done */
-							done = MB_YES;
-							rdone = MB_YES;
+							done = true;
+							rdone = true;
 						}
 
 						/* deal with recursive imagelist */
@@ -3688,7 +3688,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 							                               error)) == MB_SUCCESS) {
 								imagelist2 = imagelist->imagelist;
 								imagelist2->recursion = imagelist->recursion + 1;
-								rdone = MB_YES;
+								rdone = true;
 							}
 							else {
 								status = MB_SUCCESS;
@@ -3700,9 +3700,9 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 			}
 
 			/* if open read next entry from recursive imagelist */
-			if (done == MB_NO && imagelist->open == MB_YES && imagelist->imagelist != NULL) {
+			if (done == false && imagelist->open == true && imagelist->imagelist != NULL) {
 				imagelist2 = (struct mb_imagelist_struct *)imagelist->imagelist;
-				if (imagelist2->open == MB_YES) {
+				if (imagelist2->open == true) {
 					/* recursively call mb_read_imagelist */
 					status = mb_imagelist_read(verbose, (void *)imagelist->imagelist, imagestatus, path0, path1, dpath, time_d, dtime_d,
 					                           error);
@@ -3712,7 +3712,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 						status = mb_imagelist_close(verbose, (void **)&(imagelist->imagelist), error);
 					}
 					else {
-						done = MB_YES;
+						done = true;
 					}
 				}
 			}
@@ -3841,9 +3841,9 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 	/* try to get best relative path */
 	if (pathlen > 0 && pwdlen > 0) {
 		/* look for last identical slash-terminated section */
-		same = MB_YES;
+		same = true;
 		isame = 0;
-		for (int i = 0; i < MIN(pathlen, pwdlen) && same == MB_YES; i++) {
+		for (int i = 0; i < MIN(pathlen, pwdlen) && same == true; i++) {
 			if (path[i] == pwd[i]) {
 				if (path[i] == '/')
 					isame = i;
@@ -3851,7 +3851,7 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 					isame = i + 1;
 			}
 			else {
-				same = MB_NO;
+				same = false;
 			}
 		}
 
@@ -3922,10 +3922,10 @@ int mb_get_shortest_path(int verbose, char *path, int *error) {
 	char lasttoken[MB_PATH_MAXLINE];
 
 	/* loop until no changes are made */
-	int done = MB_NO;
-	while (done == MB_NO) {
+	int done = false;
+	while (done == false) {
 		/* set no change made */
-		int change = MB_NO;
+		int change = false;
 
 		/* copy the path */
 		char tmppath[MB_PATH_MAXLINE];
@@ -3936,35 +3936,35 @@ int mb_get_shortest_path(int verbose, char *path, int *error) {
 		if (tmppath[0] == '/')
 			strcpy(path, "/");
 		char *result = strtok(tmppath, "/");
-		int lasttokenordinary = MB_NO;
+		int lasttokenordinary = false;
 		while (result != NULL) {
 			if (strcmp("..", result) == 0) {
-				if (lasttokenordinary == MB_NO) {
+				if (lasttokenordinary == false) {
 					strcat(path, "../");
 				}
 				else {
-					change = MB_YES;
+					change = true;
 				}
-				lasttokenordinary = MB_NO;
+				lasttokenordinary = false;
 			}
 			else if (strcmp(".", result) == 0) {
 			}
 			else {
-				if (lasttokenordinary == MB_YES) {
+				if (lasttokenordinary == true) {
 					strcat(path, lasttoken);
 					strcat(path, "/");
 				}
-				lasttokenordinary = MB_YES;
+				lasttokenordinary = true;
 				strcpy(lasttoken, result);
 			}
 			result = strtok(NULL, "/");
 		}
-		if (lasttokenordinary == MB_YES)
+		if (lasttokenordinary == true)
 			strcat(path, lasttoken);
 
-		/* if change not made set done = MB_YES */
-		if (change == MB_NO)
-			done = MB_YES;
+		/* if change not made set done = true */
+		if (change == false)
+			done = true;
 	}
 
 	/* no error even if no path */

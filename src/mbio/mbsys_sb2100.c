@@ -438,18 +438,18 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		for (int i = 0; i < namp; i++)
 			store->beams[i].amplitude = 4.0 * (amp[i] + gain_db);
 		if (store->pixel_size <= 0.0)
-			set_pixel_size = MB_YES;
+			set_pixel_size = true;
 		else
-			set_pixel_size = MB_NO;
+			set_pixel_size = false;
 		for (int i = 0; i < nss; i++) {
 			if (ss[i] > MB_SIDESCAN_NULL)
 				store->pixels[i].amplitude = gain_factor * ss[i];
 			else
 				store->pixels[i].amplitude = 0;
 			store->pixels[i].alongtrack = ssalongtrack[i];
-			if (set_pixel_size == MB_YES && ssacrosstrack[i] > 0) {
+			if (set_pixel_size == true && ssacrosstrack[i] > 0) {
 				store->pixel_size = ssacrosstrack[i] / (i - center_pixel);
-				set_pixel_size = MB_NO;
+				set_pixel_size = false;
 			}
 		}
 	}

@@ -74,9 +74,9 @@ int mbr_info_image83p(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = false;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -173,7 +173,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
 	int done;
 	int index;
-	int swap = MB_NO;
+	int swap = false;
 	short short_val;
 	int int_val;
 	int numberbytes, seconds_hundredths;
@@ -199,20 +199,20 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read next record header from file */
-	done = MB_NO;
+	done = false;
 	for (int i = 0; i < MBF_IMAGE83P_BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	int status = MB_SUCCESS;
 	if ((status = fread(buffer, 1, 6, mb_io_ptr->mbfp)) == 6) {
 		/* check for valid header */
 		if (strncmp(buffer, "83P", 3) == 0) {
-			done = MB_YES;
+			done = true;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 		}
 		else {
 			/* loop over reading bytes until valid header is found */
-			while (done == MB_NO) {
+			while (done == false) {
 				for (int i = 0; i < 5; i++)
 					buffer[i] = buffer[i + 1];
 				status = fread(&buffer[5], 1, 1, mb_io_ptr->mbfp);
@@ -220,10 +220,10 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					mb_io_ptr->file_bytes += status;
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
-					done = MB_YES;
+					done = true;
 				}
 				else if (strncmp(buffer, "83P", 3) == 0) {
-					done = MB_YES;
+					done = true;
 				}
 			}
 		}
@@ -552,7 +552,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
-	int swap = MB_NO;
+	int swap = false;
 	int seconds_hundredths;
 	int degrees;
 	double minutes;

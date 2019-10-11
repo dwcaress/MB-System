@@ -155,16 +155,16 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 	    (fabs(data->secondary_xmax - data->primary_xmax) < 0.1 * data->primary_dx) &&
 	    (fabs(data->secondary_ymin - data->primary_ymin) < 0.1 * data->primary_dy) &&
 	    (fabs(data->secondary_ymax - data->primary_ymax) < 0.1 * data->primary_dy))
-		data->secondary_sameas_primary = MB_YES;
+		data->secondary_sameas_primary = true;
 	else
-		data->secondary_sameas_primary = MB_NO;
+		data->secondary_sameas_primary = false;
 
 	/* set projection for secondary grid if needed */
 	if (data->secondary_nxy > 0 && data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED) {
 		/* set projection for getting lon lat */
 		proj_status = mb_proj_init(mbv_verbose, data->secondary_grid_projection_id, &(view->secondary_pjptr), error);
 		if (proj_status == MB_SUCCESS)
-			view->secondary_pj_init = MB_YES;
+			view->secondary_pj_init = true;
 		/*fprintf(stderr,"SECONDARY GRID PROJECTION:%d %p %s\n",
 		view->secondary_pj_init,view->secondary_pjptr,data->secondary_grid_projection_id);*/
 
@@ -179,7 +179,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 	}
 
 	/* reset histogram flag */
-	view->secondary_histogram_set = MB_NO;
+	view->secondary_histogram_set = false;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -223,13 +223,13 @@ int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_n_col
 
 	/* set value */
 	if (secondary_n_columns == data->secondary_n_columns && secondary_n_rows == data->secondary_n_rows) {
-		first = MB_YES;
+		first = true;
 		for (k = 0; k < data->secondary_n_columns * data->secondary_n_rows; k++) {
 			data->secondary_data[k] = secondary_data[k];
-			if (first == MB_YES && secondary_data[k] != data->secondary_nodatavalue) {
+			if (first == true && secondary_data[k] != data->secondary_nodatavalue) {
 				data->secondary_min = data->secondary_data[k];
 				data->secondary_max = data->secondary_data[k];
-				first = MB_NO;
+				first = false;
 			}
 			else if (secondary_data[k] != data->secondary_nodatavalue) {
 				data->secondary_min = MIN(data->secondary_min, data->secondary_data[k]);
@@ -244,7 +244,7 @@ int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_n_col
 	mbview_colorclear(instance);
 
 	/* reset histogram flag */
-	view->secondary_histogram_set = MB_NO;
+	view->secondary_histogram_set = false;
 
 	/* print output debug statements */
 	if (verbose >= 2) {

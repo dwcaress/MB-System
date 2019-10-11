@@ -194,12 +194,12 @@ int main(int argc, char **argv) {
     double voxel_size_xy = 0.05;
     double voxel_size_z = 0.05;
     int occupy_threshold = 5;
-    int count_flagged = MB_NO;
+    int count_flagged = false;
     int empty_mode = MBVC_EMPTY_FLAG;
     int occupied_mode = MBVC_OCCUPIED_IGNORE;
-    int apply_range_minimum = MB_NO;
+    int apply_range_minimum = false;
     double range_minimum = 0.0;
-    int apply_range_maximum = MB_NO;
+    int apply_range_maximum = false;
     double range_maximum = 0.0;
 
     /* swath data storage */
@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
     int action;
 
 	/* save file control variables */
-	int esffile_open = MB_NO;
+	int esffile_open = false;
 	char esffile[MB_PATH_MAXLINE];
 	struct mb_esf_struct esf;
 
@@ -250,7 +250,7 @@ int main(int argc, char **argv) {
 	int prstatus = MB_PR_FILE_UP_TO_DATE;
 	int lock_status = MB_SUCCESS;
 	int lock_error = MB_ERROR_NO_ERROR;
-	int locked = MB_NO;
+	int locked = false;
 	int lock_purpose = 0;
 	mb_path lock_program = "";
 	mb_path lock_cpu = "";
@@ -263,8 +263,8 @@ int main(int argc, char **argv) {
 	FILE *outfp, *fp;
 
     int nscan = 0;
-    int oktoprocess = MB_NO;
-    int uselockfiles = MB_YES;
+    int oktoprocess = false;
+    int uselockfiles = true;
     double mtodeglon, mtodeglat;
     double headingx, headingy;
     double sensorx, sensory, sensorz;
@@ -313,7 +313,7 @@ int main(int argc, char **argv) {
 					verbose++;
 				}
 				else if (strcmp("help", options[option_index].name) == 0) {
-					help = MB_YES;
+					help = true;
 				}
 				else if (strcmp("input", options[option_index].name) == 0) {
 					sscanf(optarg, "%s", read_file);
@@ -336,7 +336,7 @@ int main(int argc, char **argv) {
 					sscanf(optarg, "%d", &occupy_threshold);
 				}
 				else if (strcmp("count-flagged", options[option_index].name) == 0) {
-					count_flagged = MB_YES;
+					count_flagged = true;
 				}
 				else if (strcmp("flag-empty", options[option_index].name) == 0) {
 					empty_mode = MBVC_EMPTY_FLAG;
@@ -351,11 +351,11 @@ int main(int argc, char **argv) {
 					occupied_mode = MBVC_OCCUPIED_IGNORE;
 				}
 				else if (strcmp("range-minimum", options[option_index].name) == 0) {
-					apply_range_minimum = MB_YES;
+					apply_range_minimum = true;
 					sscanf(optarg, "%lf", &range_minimum);
 				}
 				else if (strcmp("range-maximum", options[option_index].name) == 0) {
-					apply_range_maximum = MB_YES;
+					apply_range_maximum = true;
 					sscanf(optarg, "%lf", &range_maximum);
 				}
 
@@ -441,19 +441,19 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(swathfile, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
-		oktoprocess = MB_YES;
+	while (read_data == true) {
+		oktoprocess = true;
 
 		/* check format and get format flags */
 		if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
@@ -461,13 +461,13 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n", format,
 			        message);
 			fprintf(stderr, "\nFile <%s> skipped by program <%s>\n", swathfile, program_name);
-			oktoprocess = MB_NO;
+			oktoprocess = false;
 			status = MB_SUCCESS;
 			error = MB_ERROR_NO_ERROR;
 		}
 
 		/* warn if beam flagging not supported for the current data format */
-		if (beam_flagging == MB_NO) {
+		if (beam_flagging == false) {
 			fprintf(stderr, "\nWarning:\nMBIO format %d does not allow flagging of bad bathymetry data.\n", format);
 			fprintf(stderr,
 			        "\nWhen mbprocess applies edits to file:\n\t%s\nthe soundings will be nulled (zeroed) rather than flagged.\n",
@@ -475,7 +475,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* try to lock file */
-		if (uselockfiles == MB_YES)
+		if (uselockfiles == true)
 			status = mb_pr_lockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
 		else {
 			lock_status =
@@ -512,13 +512,13 @@ int main(int argc, char **argv) {
 			}
 
 			/* reset error and status */
-			oktoprocess = MB_NO;
+			oktoprocess = false;
 			status = MB_SUCCESS;
 			error = MB_ERROR_NO_ERROR;
 		}
 
 		/* proceed if file locked and format ok */
-		if (oktoprocess == MB_YES) {
+		if (oktoprocess == true) {
             /* check for *inf file, create if necessary, and load metadata */
             status = mb_get_info_datalist(verbose, swathfile, &formatread, &mb_info, lonflip, &error);
 
@@ -650,15 +650,15 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "\tOpening edit save file...\n");
 
 				/* handle esf edits */
-				status = mb_esf_load(verbose, program_name, swathfile, MB_YES, MB_YES, esffile, &esf, &error);
+				status = mb_esf_load(verbose, program_name, swathfile, true, true, esffile, &esf, &error);
 				if (status == MB_SUCCESS && esf.esffp != NULL)
-					esffile_open = MB_YES;
+					esffile_open = true;
 				if (status == MB_FAILURE && error == MB_ERROR_OPEN_FAIL) {
-					esffile_open = MB_NO;
+					esffile_open = false;
 					fprintf(stderr, "\nUnable to open new edit save file %s\n", esf.esffile);
 				}
 				else if (status == MB_FAILURE && error == MB_ERROR_MEMORY_FAIL) {
-					esffile_open = MB_NO;
+					esffile_open = false;
 					fprintf(stderr, "\nUnable to allocate memory for edits in esf file %s\n", esf.esffile);
 				}
 				/* reset message */
@@ -668,9 +668,9 @@ int main(int argc, char **argv) {
 			}
 
 			/* read */
-			done = MB_NO;
-            first = MB_YES;
-			while (done == MB_NO) {
+			done = false;
+            first = true;
+			while (done == false) {
 				if (verbose > 1)
 					fprintf(stderr, "\n");
 
@@ -755,14 +755,14 @@ int main(int argc, char **argv) {
                                                             * (pings[n_pings].bathy[j] - sensory)
                                                            + (pings[n_pings].bathz[j] - sensorz)
                                                             * (pings[n_pings].bathz[j] - sensorz));
-                            if (first == MB_YES) {
+                            if (first == true) {
                                 x_min = pings[n_pings].bathx[j];
                                 x_max = pings[n_pings].bathx[j];
                                 y_min = pings[n_pings].bathy[j];
                                 y_max = pings[n_pings].bathy[j];
                                 z_min = pings[n_pings].bathz[j];
                                 z_max = pings[n_pings].bathz[j];
-                                first = MB_NO;
+                                first = false;
                             } else {
                                 x_min = MIN(x_min, pings[n_pings].bathx[j]);
                                 x_max = MAX(x_max, pings[n_pings].bathx[j]);
@@ -824,7 +824,7 @@ int main(int argc, char **argv) {
 
 				}
 				else if (error > MB_ERROR_NO_ERROR) {
-					done = MB_YES;
+					done = true;
 				}
 			}
 
@@ -896,7 +896,7 @@ int main(int argc, char **argv) {
                         iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
                         iz = (pings[i].bathz[j] - z_min) / voxel_size_z;
                         kk = (ix * n_voxel_y + iy) * n_voxel_z + iz;
-                        if (mb_beam_ok(pings[i].beamflag[j]) || count_flagged == MB_YES) {
+                        if (mb_beam_ok(pings[i].beamflag[j]) || count_flagged == true) {
                             voxel_count[kk] = MIN(voxel_count[kk] + 1, (unsigned char) 255);
                         }
                     }
@@ -906,9 +906,9 @@ int main(int argc, char **argv) {
             /* apply threshold to generate binary mask of occupied voxels */
             for (kk=0; kk < n_voxel; kk++) {
                 if (voxel_count[kk] >= occupy_threshold) {
-                    voxel_count[kk] = MB_YES;
+                    voxel_count[kk] = true;
                 } else {
-                    voxel_count[kk] = MB_NO;
+                    voxel_count[kk] = false;
                 }
             }
 
@@ -922,7 +922,7 @@ int main(int argc, char **argv) {
                             iz = (pings[i].bathz[j] - z_min) / voxel_size_z;
                             kk = (ix * n_voxel_y + iy) * n_voxel_z + iz;
                             if (occupied_mode == MBVC_OCCUPIED_UNFLAG
-                                && voxel_count[kk] == MB_YES
+                                && voxel_count[kk] == true
                                 && !mb_beam_ok(pings[i].beamflag[j])) {
                                 pings[i].beamflag[j] = MB_FLAG_NONE;
                                 action = MBP_EDIT_UNFLAG;
@@ -932,7 +932,7 @@ int main(int argc, char **argv) {
                                 n_density_unflag++;
                             }
                             if (empty_mode == MBVC_EMPTY_FLAG
-                                && voxel_count[kk] == MB_NO
+                                && voxel_count[kk] == false
                                 && mb_beam_ok(pings[i].beamflag[j])) {
                                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                                 action = MBP_EDIT_FILTER;
@@ -947,11 +947,11 @@ int main(int argc, char **argv) {
             }
 
             /* apply range filter to the soundings */
-            if (apply_range_minimum == MB_YES || apply_range_maximum == MB_YES) {
+            if (apply_range_minimum == true || apply_range_maximum == true) {
                 for (int i = 0; i < n_pings; i++) {
                     for (int j = 0; j< pings[i].beams_bath; j++) {
                         if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
-                            if (apply_range_minimum == MB_YES
+                            if (apply_range_minimum == true
                                 && mb_beam_ok(pings[i].beamflag[j])
                                 && pings[i].bathr[j] < range_minimum) {
                                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
@@ -960,7 +960,7 @@ int main(int argc, char **argv) {
                                             j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                                             action, &error);
                                 n_density_flag++;
-                            } else if (apply_range_maximum == MB_YES
+                            } else if (apply_range_maximum == true
                                 && mb_beam_ok(pings[i].beamflag[j])
                                 && pings[i].bathr[j] > range_maximum) {
                                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
@@ -979,14 +979,14 @@ int main(int argc, char **argv) {
 			status = mb_esf_close(verbose, &esf, &error);
 
 			/* update mbprocess parameter file */
-			if (esffile_open == MB_YES) {
+			if (esffile_open == true) {
 				/* update mbprocess parameter file */
-				status = mb_pr_update_format(verbose, swathfile, MB_YES, format, &error);
+				status = mb_pr_update_format(verbose, swathfile, true, format, &error);
 				status = mb_pr_update_edit(verbose, swathfile, MBP_EDIT_ON, esffile, &error);
 			}
 
 			/* unlock the raw swath file */
-			if (uselockfiles == MB_YES)
+			if (uselockfiles == true)
 				status = mb_pr_unlockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
 
 			/* check memory */
@@ -1023,12 +1023,12 @@ int main(int argc, char **argv) {
 		/* figure out whether and what to read next */
 		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */

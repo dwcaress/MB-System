@@ -67,9 +67,9 @@ int mbr_info_sb2100rw(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -312,7 +312,7 @@ int mbr_sb2100rw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 	}
 
 	/* read next good line in file */
-	done = MB_NO;
+	done = false;
 	do {
 		/* read next line in file */
 		strncpy(line, "\0", MBF_SB2100RW_MAXLINE);
@@ -324,12 +324,12 @@ int mbr_sb2100rw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 		/* check for eof */
 		if (result == line) {
 			if (nchars >= minimum_size)
-				done = MB_YES;
+				done = true;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
 		else {
-			done = MB_YES;
+			done = true;
 			*error = MB_ERROR_EOF;
 			status = MB_FAILURE;
 		}
@@ -340,7 +340,7 @@ int mbr_sb2100rw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 			fprintf(stderr, "dbg5       chars:      %d\n", nchars);
 		}
 
-	} while (done == MB_NO);
+	} while (done == false);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -883,7 +883,7 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
-	static int line_save_flag = MB_NO;
+	static int line_save_flag = false;
 	static char raw_line[MBF_SB2100RW_MAXLINE] = "\0";
 	static int type = MBF_SB2100RW_NONE;
 
@@ -909,12 +909,12 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	int status = MB_SUCCESS;
-	int done = MB_NO;
+	int done = false;
 	int expect = MBF_SB2100RW_NONE;
-	while (done == MB_NO) {
+	while (done == false) {
 
 		/* get next record label */
-		if (line_save_flag == MB_NO) {
+		if (line_save_flag == false) {
 			/* save position in file */
 			mb_io_ptr->file_bytes = ftell(mbfp);
 
@@ -922,28 +922,28 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_sb2100rw_rd_label(verbose, mbfp, raw_line, &type, error);
 		}
 		else
-			line_save_flag = MB_NO;
+			line_save_flag = false;
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE && expect == MBF_SB2100RW_NONE) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			done = MB_YES;
+			done = true;
 		}
 		else if (status == MB_FAILURE && expect != MBF_SB2100RW_NONE) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			done = MB_YES;
+			done = true;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
 		else if (expect != MBF_SB2100RW_NONE && expect != type) {
-			done = MB_YES;
+			done = true;
 			expect = MBF_SB2100RW_NONE;
-			line_save_flag = MB_YES;
+			line_save_flag = true;
 		}
 		else if (type == MBF_SB2100RW_RAW_LINE) {
 			strcpy(data->comment, raw_line);
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			done = MB_YES;
+			done = true;
 			data->kind = MB_DATA_RAW_LINE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			status = MB_FAILURE;
@@ -952,7 +952,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_sb2100rw_rd_pr(verbose, mbfp, data, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
 			}
 		}
@@ -960,7 +960,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_sb2100rw_rd_tr(verbose, mbfp, data, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_COMMENT;
 			}
 		}
@@ -968,7 +968,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_sb2100rw_rd_dr(verbose, mbfp, data, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
-				done = MB_NO;
+				done = false;
 				data->kind = MB_DATA_DATA;
 				expect = MBF_SB2100RW_SS;
 			}
@@ -977,10 +977,10 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_sb2100rw_rd_ss(verbose, mbfp, data, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS && expect == MBF_SB2100RW_SS) {
-				done = MB_YES;
+				done = true;
 			}
 			else if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				expect = MBF_SB2100RW_NONE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
 				status = MB_FAILURE;
@@ -988,7 +988,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else if (status == MB_FAILURE && *error == MB_ERROR_UNINTELLIGIBLE && expect == MBF_SB2100RW_SS) {
 				/* this preserves the bathymetry
 				   that has already been read */
-				done = MB_YES;
+				done = true;
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
 			}

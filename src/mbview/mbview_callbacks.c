@@ -278,8 +278,8 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error) {
 	app_context = app;
 
 	/* set global work function parameters */
-	work_function_enabled = MB_YES;
-	work_function_set = MB_NO;
+	work_function_enabled = true;
+	work_function_set = false;
 	timer_timeout_time = 100;
 	timer_timeout_count = 10;
 	timer_count = 0;
@@ -288,7 +288,7 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error) {
 	mbv_ninstance = 0;
 
 	/* initialize shared data */
-	mbview_reset_shared(MB_YES);
+	mbview_reset_shared(true);
 
 	/* initialize windows */
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
@@ -380,7 +380,7 @@ int mbview_reset_shared(int mode) {
 		fprintf(stderr, "dbg2       mode:                    %d\n", mode);
 	}
 
-	if (mode == MB_YES) {
+	if (mode == true) {
 		shared.init_sitelist = MBV_WINDOW_NULL;
 		shared.topLevelShell_sitelist = NULL;
 		shared.mainWindow_sitelist = NULL;
@@ -518,7 +518,7 @@ int mbview_reset(size_t instance) {
 		data->mbview_sensitivity_notify = NULL;
 
 		/* initialize data structure */
-		data->active = MB_NO;
+		data->active = false;
 
 		/* initialize mbview data */
 		strcpy(data->title, "MB3DView - MBgrdviz");
@@ -537,9 +537,9 @@ int mbview_reset(size_t instance) {
 		data->grid_mode = MBV_GRID_VIEW_PRIMARY;
 		data->grid_contour_mode = MBV_VIEW_OFF;
 
-		data->primary_histogram = MB_NO;
-		data->primaryslope_histogram = MB_NO;
-		data->secondary_histogram = MB_NO;
+		data->primary_histogram = false;
+		data->primaryslope_histogram = false;
+		data->secondary_histogram = false;
 
 		data->primary_colortable = MBV_COLORTABLE_HAXBY;
 		data->primary_colortable_mode = MBV_COLORTABLE_NORMAL;
@@ -614,7 +614,7 @@ int mbview_reset(size_t instance) {
 		data->primary_b = NULL;
 		data->primary_stat_color = NULL;
 		data->primary_stat_z = NULL;
-		data->secondary_sameas_primary = MB_NO;
+		data->secondary_sameas_primary = false;
 		data->secondary_nodatavalue = MBV_DEFAULT_NODATA;
 		data->secondary_nxy = 0;
 		data->secondary_n_columns = 0;
@@ -763,12 +763,12 @@ int mbview_reset(size_t instance) {
 		view->glwmda = NULL;
 		view->prglwmda = NULL;
 		view->dpy = NULL;
-		view->glx_init = MB_NO;
-		view->prglx_init = MB_NO;
-		view->message_on = MB_NO;
+		view->glx_init = false;
+		view->prglx_init = false;
+		view->message_on = false;
 		view->plot_recursion = 0;
-		view->plot_done = MB_NO;
-		view->plot_interrupt_allowed = MB_YES;
+		view->plot_done = false;
+		view->plot_interrupt_allowed = true;
 		view->naction = 0;
 		for (i = 0; i < MBV_NUM_ACTIONS; i++) {
 			view->actionsensitive[i] = 0;
@@ -778,19 +778,19 @@ int mbview_reset(size_t instance) {
 		/* drawing variables */
 		view->gl_width = 0;
 		view->gl_height = 0;
-		view->projected = MB_NO;
-		view->globalprojected = MB_NO;
+		view->projected = false;
+		view->globalprojected = false;
 		view->lastdrawrez = MBV_REZ_NONE;
 		view->viewboundscount = MBV_BOUNDSFREQUENCY;
 		mbview_zscaleclear(instance);
 		mbview_setcolorparms(instance);
 		mbview_colorclear(instance);
-		view->contourlorez = MB_NO;
-		view->contourhirez = MB_NO;
-		view->contourfullrez = MB_NO;
-		view->primary_histogram_set = MB_NO;
-		view->primaryslope_histogram_set = MB_NO;
-		view->secondary_histogram_set = MB_NO;
+		view->contourlorez = false;
+		view->contourhirez = false;
+		view->contourfullrez = false;
+		view->primary_histogram_set = false;
+		view->primaryslope_histogram_set = false;
+		view->secondary_histogram_set = false;
 
 		/* grid display bounds */
 		view->xmin = 0.0;
@@ -1572,11 +1572,11 @@ int mbview_setviewcontrols(int verbose, size_t instance, int display_mode, int m
 	strcpy(data->display_projection_id, display_projection_id);
 
 	/* set widgets */
-	if (data->active == MB_YES)
+	if (data->active == true)
 		mbview_set_widgets(verbose, instance, error);
 
 	/* set widget sensitivity */
-	if (data->active == MB_YES)
+	if (data->active == true)
 		mbview_update_sensitivity(verbose, instance, error);
 
 	/* print output debug statements */
@@ -1884,7 +1884,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 	}
 
 	/* set active */
-	data->active = MB_YES;
+	data->active = true;
 
 	/* if not yet created then create the MB3DView class in
 	    a topLevelShell as a child of Widget parent */
@@ -2205,19 +2205,19 @@ int mbview_open(int verbose, size_t instance, int *error) {
 	}
 
 	/* make sure some key parameters are set */
-	view->projected = MB_NO;
-	view->globalprojected = MB_NO;
+	view->projected = false;
+	view->globalprojected = false;
 	view->lastdrawrez = MBV_REZ_NONE;
 	view->viewboundscount = MBV_BOUNDSFREQUENCY;
 	mbview_zscaleclear(instance);
 	mbview_setcolorparms(instance);
 	mbview_colorclear(instance);
-	view->contourlorez = MB_NO;
-	view->contourhirez = MB_NO;
-	view->contourfullrez = MB_NO;
-	view->primary_histogram_set = MB_NO;
-	view->primaryslope_histogram_set = MB_NO;
-	view->secondary_histogram_set = MB_NO;
+	view->contourlorez = false;
+	view->contourhirez = false;
+	view->contourfullrez = false;
+	view->primary_histogram_set = false;
+	view->primaryslope_histogram_set = false;
+	view->secondary_histogram_set = false;
 	if (data->primary_colortable_max <= data->primary_colortable_min) {
 		data->primary_colortable_min = data->primary_min - 0.01 * (data->primary_max - data->primary_min);
 		data->primary_colortable_max = data->primary_max + 0.01 * (data->primary_max - data->primary_min);
@@ -2276,19 +2276,19 @@ int mbview_update(int verbose, size_t instance, int *error) {
 	data = &(view->data);
 
 	/* make sure some key parameters are set */
-	/*view->projected = MB_NO;*/
-	/*view->globalprojected = MB_NO;*/
+	/*view->projected = false;*/
+	/*view->globalprojected = false;*/
 	view->lastdrawrez = MBV_REZ_NONE;
 	view->viewboundscount = MBV_BOUNDSFREQUENCY;
 	mbview_zscaleclear(instance);
 	mbview_setcolorparms(instance);
 	mbview_colorclear(instance);
-	view->contourlorez = MB_NO;
-	view->contourhirez = MB_NO;
-	view->contourfullrez = MB_NO;
-	view->primary_histogram_set = MB_NO;
-	view->primaryslope_histogram_set = MB_NO;
-	view->secondary_histogram_set = MB_NO;
+	view->contourlorez = false;
+	view->contourhirez = false;
+	view->contourfullrez = false;
+	view->primary_histogram_set = false;
+	view->primaryslope_histogram_set = false;
+	view->secondary_histogram_set = false;
 	if (data->primary_nxy > 0 && data->primary_colortable_max <= data->primary_colortable_min) {
 		data->primary_colortable_min = data->primary_min - 0.01 * (data->primary_max - data->primary_min);
 		data->primary_colortable_max = data->primary_max + 0.01 * (data->primary_max - data->primary_min);
@@ -2301,11 +2301,11 @@ int mbview_update(int verbose, size_t instance, int *error) {
 	}
 
 	/* set widgets */
-	if (data->active == MB_YES)
+	if (data->active == true)
 		mbview_set_widgets(verbose, instance, error);
 
 	/* set widget sensitivity */
-	if (data->active == MB_YES)
+	if (data->active == true)
 		mbview_update_sensitivity(verbose, instance, error);
 
 	/* draw */
@@ -2580,7 +2580,7 @@ int mbview_action_sensitivityall() {
 		data = &(view->data);
 
 		/* if instance active reset action sensitivity */
-		if (data->active == MB_YES)
+		if (data->active == true)
 			mbview_action_sensitivity(instance);
 	}
 
@@ -2614,10 +2614,10 @@ int mbview_action_sensitivity(size_t instance) {
 	}
 
 	/* check if all available instances are active */
-	mbview_allactive = MB_YES;
+	mbview_allactive = true;
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (mbviews[i].data.active == MB_NO)
-			mbview_allactive = MB_NO;
+		if (mbviews[i].data.active == false)
+			mbview_allactive = false;
 	}
 
 	/* get view */
@@ -2668,7 +2668,7 @@ int mbview_action_sensitivity(size_t instance) {
 			else if (view->actionsensitive[i] & MBV_EXISTMASK_ROUTE && shared.shareddata.nroute > 0) {
 				XtSetArg(args[ac], XmNsensitive, True);
 			}
-			if (view->actionsensitive[i] & MBV_PICKMASK_NEWINSTANCE && mbview_allactive == MB_YES) {
+			if (view->actionsensitive[i] & MBV_PICKMASK_NEWINSTANCE && mbview_allactive == true) {
 				XtSetArg(args[ac], XmNsensitive, False);
 			}
 			ac++;
@@ -3279,9 +3279,9 @@ void do_mbview_display_spheroid(Widget w, XtPointer client_data, XtPointer call_
 	/* reproject as spheroid if the togglebutton has been set */
 	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_spheroid)) {
 		data->display_projection_mode = MBV_PROJECTION_SPHEROID;
-		view->plot_done = MB_NO;
-		view->projected = MB_NO;
-		view->globalprojected = MB_NO;
+		view->plot_done = false;
+		view->projected = false;
+		view->globalprojected = false;
 		view->viewboundscount = MBV_BOUNDSFREQUENCY;
 
 		/* set label */
@@ -3322,9 +3322,9 @@ void do_mbview_display_geographic(Widget w, XtPointer client_data, XtPointer cal
 	/* reproject as geographic if the togglebutton has been set */
 	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_geographic)) {
 		data->display_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
-		view->plot_done = MB_NO;
-		view->projected = MB_NO;
-		view->globalprojected = MB_NO;
+		view->plot_done = false;
+		view->projected = false;
+		view->globalprojected = false;
 		view->viewboundscount = MBV_BOUNDSFREQUENCY;
 
 		/* set label */
@@ -3368,9 +3368,9 @@ void do_mbview_display_utm(Widget w, XtPointer client_data, XtPointer call_data)
 	/* reproject as utm if the togglebutton has been set */
 	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_utm)) {
 		data->display_projection_mode = MBV_PROJECTION_PROJECTED;
-		view->plot_done = MB_NO;
-		view->projected = MB_NO;
-		view->globalprojected = MB_NO;
+		view->plot_done = false;
+		view->projected = false;
+		view->globalprojected = false;
 		view->viewboundscount = MBV_BOUNDSFREQUENCY;
 
 		mbview_projectgrid2ll(instance, 0.5 * (data->primary_xmin + data->primary_xmax),
@@ -3510,11 +3510,11 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	/* set replotall to MB_NO */
-	replotall = MB_NO;
+	/* set replotall to false */
+	replotall = false;
 
-	/* set replotprofile to MB_NO */
-	replotprofile = MB_NO;
+	/* set replotprofile to false */
+	replotprofile = false;
 
 	/* get event */
 	acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
@@ -3538,7 +3538,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			/* If left mouse button is pushed */
 			if (event->xbutton.button == 1) {
 				/* set button1down flag */
-				view->button1down = MB_YES;
+				view->button1down = true;
 
 				/* handle move */
 				if (data->mouse_mode == MBV_MOUSE_MOVE || data->mouse_mode == MBV_MOUSE_ROTATE ||
@@ -3551,7 +3551,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					mbview_pick(instance, MBV_PICK_DOWN, view->button_down_x, data->height - view->button_down_y);
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -3578,7 +3578,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					mbview_pick_site_select(instance, MBV_PICK_DOWN, view->button_down_x, data->height - view->button_down_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -3594,10 +3594,10 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					                         data->height - view->button_down_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -3608,7 +3608,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			/* If middle mouse button is pushed */
 			else if (event->xbutton.button == 2) {
 				/* set button2down flag */
-				view->button2down = MB_YES;
+				view->button2down = true;
 
 				/* handle move */
 				if (data->mouse_mode == MBV_MOUSE_MOVE) {
@@ -3697,7 +3697,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					mbview_pick_site_add(instance, MBV_PICK_DOWN, view->button_down_x, data->height - view->button_down_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -3713,10 +3713,10 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					                      data->height - view->button_down_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -3728,11 +3728,11 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
 
 					/* process nav select */
-					mbview_pick_nav_select(instance, MB_YES, MBV_PICK_DOWN, view->button_down_x,
+					mbview_pick_nav_select(instance, true, MBV_PICK_DOWN, view->button_down_x,
 					                       data->height - view->button_down_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -3743,7 +3743,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			/* If right mouse button is pushed */
 			else if (event->xbutton.button == 3) {
 				/* set button3down flag */
-				view->button3down = MB_YES;
+				view->button3down = true;
 
 				/* change the map scaling */
 				if (data->mouse_mode == MBV_MOUSE_MOVE) {
@@ -3834,7 +3834,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					mbview_pick_site_delete(instance, view->button_down_x, data->height - view->button_down_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -3849,10 +3849,10 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					mbview_pick_route_delete(mbv_verbose, instance, view->button_down_x, data->height - view->button_down_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -3864,11 +3864,11 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
 
 					/* process nav deselect */
-					mbview_pick_nav_select(instance, MB_NO, MBV_PICK_DOWN, view->button_down_x,
+					mbview_pick_nav_select(instance, false, MBV_PICK_DOWN, view->button_down_x,
 					                       data->height - view->button_down_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -3877,7 +3877,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			} /* end of right button events */
 
 			/* if needed replot all active instances */
-			if (replotall == MB_YES) {
+			if (replotall == true) {
 				mbview_plotlowall(instance);
 			}
 
@@ -3889,14 +3889,14 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 
 			/* prohibit event interruption of plotting */
-			view->plot_interrupt_allowed = MB_NO;
+			view->plot_interrupt_allowed = false;
 
 			/* save location */
 			view->button_move_x = event->xmotion.x;
 			view->button_move_y = event->xmotion.y;
 
 			/* If left mouse button is dragged */
-			if (view->button1down == MB_YES) {
+			if (view->button1down == true) {
 
 				/* set cursor for drag */
 				XDefineCursor(view->dpy, view->xid, view->FleurRedCursor);
@@ -3909,7 +3909,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					mbview_pick(instance, MBV_PICK_MOVE, view->button_move_x, data->height - view->button_move_y);
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -3936,7 +3936,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					mbview_pick_site_select(instance, MBV_PICK_MOVE, view->button_move_x, data->height - view->button_move_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -3952,10 +3952,10 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					                         data->height - view->button_move_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -3964,7 +3964,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			} /* end of left button events */
 
 			/* If middle mouse button is dragged */
-			else if (view->button2down == MB_YES) {
+			else if (view->button2down == true) {
 				/* handle move */
 				if (data->mouse_mode == MBV_MOUSE_MOVE) {
 					/* set cursor for move */
@@ -4113,7 +4113,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					mbview_pick_site_add(instance, MBV_PICK_MOVE, view->button_move_x, data->height - view->button_move_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -4129,10 +4129,10 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					                      data->height - view->button_move_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -4144,11 +4144,11 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
 
 					/* process nav select */
-					mbview_pick_nav_select(instance, MB_YES, MBV_PICK_MOVE, view->button_move_x,
+					mbview_pick_nav_select(instance, true, MBV_PICK_MOVE, view->button_move_x,
 					                       data->height - view->button_move_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -4157,7 +4157,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			} /* end of middle button events */
 
 			/* If right mouse button is dragged */
-			else if (view->button3down == MB_YES) {
+			else if (view->button3down == true) {
 
 				/* change the map scaling */
 				if (data->mouse_mode == MBV_MOUSE_MOVE) {
@@ -4209,9 +4209,9 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 
 					/* reset flags */
 					mbview_zscaleclear(instance);
-					view->contourlorez = MB_NO;
-					view->contourhirez = MB_NO;
-					view->contourfullrez = MB_NO;
+					view->contourlorez = false;
+					view->contourhirez = false;
+					view->contourfullrez = false;
 
 					/* rescale data other than the grid */
 					mbview_zscale(instance);
@@ -4355,7 +4355,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -4367,10 +4367,10 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -4382,11 +4382,11 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
 
 					/* process nav deselect */
-					mbview_pick_nav_select(instance, MB_NO, MBV_PICK_MOVE, view->button_move_x,
+					mbview_pick_nav_select(instance, false, MBV_PICK_MOVE, view->button_move_x,
 					                       data->height - view->button_move_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -4395,7 +4395,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			} /* end of right button events */
 
 			/* if needed replot all active instances */
-			if (replotall == MB_YES) {
+			if (replotall == true) {
 				mbview_plotlowall(instance);
 			}
 
@@ -4411,7 +4411,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			view->button_up_y = event->xbutton.y;
 
 			/* If left mouse button is released */
-			if (view->button1down == MB_YES) {
+			if (view->button1down == true) {
 
 				/* handle move */
 				if ((data->mouse_mode == MBV_MOUSE_MOVE || data->mouse_mode == MBV_MOUSE_ROTATE ||
@@ -4424,7 +4424,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					mbview_pick(instance, MBV_PICK_UP, view->button_up_x, data->height - view->button_up_y);
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -4437,27 +4437,27 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					mbview_region(instance, MBV_REGION_UP, view->button_up_x, data->height - view->button_up_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 				}
 
 				/* handle editing sites */
 				else if (data->mouse_mode == MBV_MOUSE_SITE) {
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 				}
 
 				/* handle editing routes */
 				else if (data->mouse_mode == MBV_MOUSE_ROUTE) {
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 				}
 			}
 
 			/* If middle mouse button is released */
-			else if (view->button2down == MB_YES) {
+			else if (view->button2down == true) {
 				/* handle move */
 				if (data->mouse_mode == MBV_MOUSE_MOVE) {
 					/* set flag to reset view bounds */
@@ -4483,35 +4483,35 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					mbview_area(instance, MBV_AREALENGTH_UP, view->button_up_x, data->height - view->button_up_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 				}
 
 				/* handle editing sites */
 				else if (data->mouse_mode == MBV_MOUSE_SITE) {
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 				}
 
 				/* handle editing routes */
 				else if (data->mouse_mode == MBV_MOUSE_ROUTE) {
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 				}
 
 				/* handle selecting navigation */
 				else if (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE) {
 					/* process nav select */
-					mbview_pick_nav_select(instance, MB_YES, MBV_PICK_UP, view->button_move_x,
+					mbview_pick_nav_select(instance, true, MBV_PICK_UP, view->button_move_x,
 					                       data->height - view->button_move_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -4519,7 +4519,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			} /* end of middle button events */
 
 			/* If right mouse button is released */
-			else if (view->button3down == MB_YES) {
+			else if (view->button3down == true) {
 				/* change the map scaling */
 				if (data->mouse_mode == MBV_MOUSE_MOVE) {
 					/* set flag to reset view bounds */
@@ -4545,34 +4545,34 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					mbview_area(instance, MBV_AREAASPECT_UP, view->button_up_x, data->height - view->button_up_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 				}
 
 				/* handle editing sites */
 				else if (data->mouse_mode == MBV_MOUSE_SITE) {
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 				}
 
 				/* handle editing routes */
 				else if (data->mouse_mode == MBV_MOUSE_ROUTE) {
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 				}
 
 				/* handle deselecting navigation */
 				if (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE) {
 					/* process nav deselect */
-					mbview_pick_nav_select(instance, MB_NO, MBV_PICK_UP, view->button_move_x, data->height - view->button_move_y);
+					mbview_pick_nav_select(instance, false, MBV_PICK_UP, view->button_move_x, data->height - view->button_move_y);
 
 					/* set replotall */
-					replotall = MB_YES;
+					replotall = true;
 
 					/* set replotprofile */
-					replotprofile = MB_YES;
+					replotprofile = true;
 
 					/* replot */
 					mbview_plotlow(instance);
@@ -4580,9 +4580,9 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			} /* end of right button events */
 
 			/* unset all buttondown flags */
-			view->button1down = MB_NO;
-			view->button2down = MB_NO;
-			view->button3down = MB_NO;
+			view->button1down = false;
+			view->button2down = false;
+			view->button3down = false;
 
 			/* replot in high rez if last draw was low rez */
 			if (view->lastdrawrez == MBV_REZ_LOW) {
@@ -4591,7 +4591,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			}
 
 			/* if needed replot all active instances */
-			if (replotall == MB_YES) {
+			if (replotall == true) {
 				mbview_plothighall(instance);
 			}
 
@@ -4599,7 +4599,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			XDefineCursor(view->dpy, view->xid, view->TargetBlackCursor);
 
 			/* allow event interruption of plotting */
-			view->plot_interrupt_allowed = MB_YES;
+			view->plot_interrupt_allowed = true;
 		} /* end of button release events */
 
 		/* Deal with KeyPress events */
@@ -4621,7 +4621,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 		} /* end of key press events */
 
 		/* if needed replot profile */
-		if (replotprofile == MB_YES) {
+		if (replotprofile == true) {
 			/* extract profile if pick is right type */
 			if (data->pickinfo_mode == MBV_PICK_TWOPOINT)
 				mbview_extract_pick_profile(instance);
@@ -4665,8 +4665,8 @@ void do_mbview_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
 	data = &(view->data);
 
 	/* destroy the widgets for this instance  */
-	if (data->active == MB_YES)
-		mbview_destroy(mbv_verbose, instance, MB_YES, &error);
+	if (data->active == true)
+		mbview_destroy(mbv_verbose, instance, true, &error);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -4690,8 +4690,8 @@ void do_mbview_goaway(Widget w, XtPointer client_data, XtPointer call_data) {
 	data = &(view->data);
 
 	/* destroy the widgets for this instance  */
-	if (data->active == MB_YES)
-		mbview_destroy(mbv_verbose, instance, MB_NO, &error);
+	if (data->active == true)
+		mbview_destroy(mbv_verbose, instance, false, &error);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -4717,11 +4717,11 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 	data = &(view->data);
 
 	/* handle destruction if not already handled */
-	if (data->active == MB_YES) {
+	if (data->active == true) {
 		/* destroy the widgets */
-		if (destroywidgets == MB_YES) {
+		if (destroywidgets == true) {
 			/* delete old glx_context if it exists */
-			if (view->prglx_init == MB_YES) {
+			if (view->prglx_init == true) {
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
 				fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
@@ -4738,7 +4738,7 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 				        view->dpy, view->prglx_context);
 #endif
 				glXDestroyContext(view->dpy, view->prglx_context);
-				view->prglx_init = MB_NO;
+				view->prglx_init = false;
 
 #ifdef MBV_GET_GLX_ERRORS
 				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
@@ -4746,7 +4746,7 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 			}
 
 			/* delete old glx_context if it exists */
-			if (view->glx_init == MB_YES) {
+			if (view->glx_init == true) {
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
 				fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
@@ -4763,7 +4763,7 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 				        view->dpy, view->glx_context);
 #endif
 				glXDestroyContext(view->dpy, view->glx_context);
-				view->glx_init = MB_NO;
+				view->glx_init = false;
 
 #ifdef MBV_GET_GLX_ERRORS
 				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
@@ -4782,7 +4782,7 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 #endif
 		}
 
-		data->active = MB_NO;
+		data->active = false;
 		view->init = MBV_WINDOW_NULL;
 		mbv_ninstance--;
 
@@ -4908,7 +4908,7 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 
 		/* if no more active instances reset shared data */
 		if (mbv_ninstance <= 0)
-			mbview_reset_shared(MB_NO);
+			mbview_reset_shared(false);
 
 		/* initialize view for next use */
 		mbview_reset(instance);
@@ -4954,8 +4954,8 @@ int mbview_quit(int verbose, int *error) {
 
 	/* loope over all possible instances and dismiss anything that's up */
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (mbviews[i].init == MB_YES)
-			mbview_destroy(verbose, i, MB_YES, error);
+		if (mbviews[i].init == true)
+			mbview_destroy(verbose, i, true, error);
 	}
 
 	/* print output debug statements */
@@ -5001,9 +5001,9 @@ void do_mbview_display_2D(Widget w, XtPointer client_data, XtPointer call_data) 
 		fprintf(stderr, "do_mbview_display_2d instance:%zu mode:%d\n", instance, data->display_mode);
 
 	/* set contour flags */
-	view->contourlorez = MB_NO;
-	view->contourhirez = MB_NO;
-	view->contourfullrez = MB_NO;
+	view->contourlorez = false;
+	view->contourhirez = false;
+	view->contourfullrez = false;
 
 	/* set flag to reset view bounds */
 	view->viewboundscount = MBV_BOUNDSFREQUENCY;
@@ -5043,9 +5043,9 @@ void do_mbview_display_3D(Widget w, XtPointer client_data, XtPointer call_data) 
 		fprintf(stderr, "do_mbview_display_3d instance:%zu mode:%d\n", instance, data->display_mode);
 
 	/* set contour flags */
-	view->contourlorez = MB_NO;
-	view->contourhirez = MB_NO;
-	view->contourfullrez = MB_NO;
+	view->contourlorez = false;
+	view->contourhirez = false;
+	view->contourfullrez = false;
 
 	/* set flag to reset view bounds */
 	view->viewboundscount = MBV_BOUNDSFREQUENCY;
@@ -5201,9 +5201,9 @@ void do_mbview_histogram(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	/* get histogram value */
 	if (XmToggleButtonGetState(w))
-		value = MB_YES;
+		value = true;
 	else
-		value = MB_NO;
+		value = false;
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
 		data->primary_histogram = value;
 	}
@@ -6010,7 +6010,7 @@ void do_mbview_mouse_rmode(Widget w, XtPointer client_data, XtPointer call_data)
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
-	int replot = MB_NO;
+	int replot = false;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_mouse_rmode: \n");
@@ -6046,25 +6046,25 @@ void do_mbview_mouse_rmode(Widget w, XtPointer client_data, XtPointer call_data)
 			data->mouse_mode = MBV_MOUSE_SITE;
 			data->site_view_mode = MBV_VIEW_ON;
 			set_mbview_site_view_mode(instance, data->site_view_mode);
-			replot = MB_YES;
+			replot = true;
 		}
 		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rroute)) {
 			data->mouse_mode = MBV_MOUSE_ROUTE;
 			data->route_view_mode = MBV_VIEW_ON;
 			set_mbview_route_view_mode(instance, data->route_view_mode);
-			replot = MB_YES;
+			replot = true;
 		}
 		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rnav)) {
 			data->mouse_mode = MBV_MOUSE_NAV;
 			if (data->display_mode == MBV_DISPLAY_3D) {
 				data->navdrape_view_mode = MBV_VIEW_ON;
 				set_mbview_navdrape_view_mode(instance, data->navdrape_view_mode);
-				replot = MB_YES;
+				replot = true;
 			}
 			else {
 				data->nav_view_mode = MBV_VIEW_ON;
 				set_mbview_nav_view_mode(instance, data->nav_view_mode);
-				replot = MB_YES;
+				replot = true;
 			}
 		}
 		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rnavfile)) {
@@ -6072,12 +6072,12 @@ void do_mbview_mouse_rmode(Widget w, XtPointer client_data, XtPointer call_data)
 			if (data->display_mode == MBV_DISPLAY_3D) {
 				data->navdrape_view_mode = MBV_VIEW_ON;
 				set_mbview_navdrape_view_mode(instance, data->navdrape_view_mode);
-				replot = MB_YES;
+				replot = true;
 			}
 			else {
 				data->nav_view_mode = MBV_VIEW_ON;
 				set_mbview_nav_view_mode(instance, data->nav_view_mode);
-				replot = MB_YES;
+				replot = true;
 			}
 		}
 
@@ -6085,21 +6085,21 @@ void do_mbview_mouse_rmode(Widget w, XtPointer client_data, XtPointer call_data)
 		if (data->mouse_mode != MBV_MOUSE_SITE && shared.shareddata.site_selected != MBV_SELECT_NONE) {
 			shared.shareddata.site_selected = MBV_SELECT_NONE;
 			data->pickinfo_mode = data->pick_type;
-			replot = MB_YES;
+			replot = true;
 		}
 		if (data->mouse_mode != MBV_MOUSE_ROUTE && shared.shareddata.route_selected != MBV_SELECT_NONE &&
 		    shared.shareddata.route_mode != MBV_ROUTE_NAVADJUST) {
 			shared.shareddata.route_selected = MBV_SELECT_NONE;
 			shared.shareddata.route_point_selected = MBV_SELECT_NONE;
 			data->pickinfo_mode = data->pick_type;
-			replot = MB_YES;
+			replot = true;
 		}
 
 		/* set mouse togglebuttons */
 		set_mbview_mouse_mode(instance, data->mouse_mode);
 
 		/* replot if necessary */
-		if (replot == MB_YES) {
+		if (replot == true) {
 			/* set pick annotation */
 			mbview_pick_text(instance);
 
@@ -6119,7 +6119,7 @@ void do_mbview_mouse_mode(Widget w, XtPointer client_data, XtPointer call_data) 
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
-	int replot = MB_NO;
+	int replot = false;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_mouse_mode: \n");
@@ -6189,21 +6189,21 @@ void do_mbview_mouse_mode(Widget w, XtPointer client_data, XtPointer call_data) 
 		if (data->mouse_mode != MBV_MOUSE_SITE && shared.shareddata.site_selected != MBV_SELECT_NONE) {
 			shared.shareddata.site_selected = MBV_SELECT_NONE;
 			data->pickinfo_mode = data->pick_type;
-			replot = MB_YES;
+			replot = true;
 		}
 		if (data->mouse_mode != MBV_MOUSE_ROUTE && shared.shareddata.route_selected != MBV_SELECT_NONE &&
 		    shared.shareddata.route_mode != MBV_ROUTE_NAVADJUST) {
 			shared.shareddata.route_selected = MBV_SELECT_NONE;
 			shared.shareddata.route_point_selected = MBV_SELECT_NONE;
 			data->pickinfo_mode = data->pick_type;
-			replot = MB_YES;
+			replot = true;
 		}
 
 		/* set mouse togglebuttons */
 		set_mbview_mouse_mode(instance, data->mouse_mode);
 
 		/* replot if necessary */
-		if (replot == MB_YES) {
+		if (replot == true) {
 			/* set pick annotation */
 			mbview_pick_text(instance);
 
@@ -6378,7 +6378,7 @@ void set_mbview_histogram_mode(size_t instance, int mode) {
 	data = &(view->data);
 
 	mb3dviewptr = &(view->mb3dview);
-	if (mode == MB_YES)
+	if (mode == true)
 		value = True;
 	else
 		value = False;
@@ -6816,14 +6816,14 @@ void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_
 
 	/* get values of widgets */
 
-	change = MB_NO;
+	change = false;
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_datamin, value_text);
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != data->primary_colortable_min) {
 		data->primary_colortable_min = dvalue;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
-			change = MB_YES;
+			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_datamax, value_text);
@@ -6831,28 +6831,28 @@ void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_
 	if (dvalue != data->primary_colortable_max) {
 		data->primary_colortable_max = dvalue;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
-			change = MB_YES;
+			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_contours, value_text);
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != data->contour_interval) {
 		data->contour_interval = dvalue;
-		view->contourlorez = MB_NO;
-		view->contourhirez = MB_NO;
-		view->contourfullrez = MB_NO;
-		view->primary_histogram_set = MB_NO;
-		view->primaryslope_histogram_set = MB_NO;
-		view->secondary_histogram_set = MB_NO;
+		view->contourlorez = false;
+		view->contourhirez = false;
+		view->contourfullrez = false;
+		view->primary_histogram_set = false;
+		view->primaryslope_histogram_set = false;
+		view->secondary_histogram_set = false;
 		if (data->grid_contour_mode == MBV_VIEW_ON)
-			change = MB_YES;
+			change = true;
 	}
 
 	ivalue = XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_data_htoc);
 	if (ivalue != data->primary_colortable_mode) {
 		data->primary_colortable_mode = ivalue;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
-			change = MB_YES;
+			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_slopemin, value_text);
@@ -6860,7 +6860,7 @@ void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_
 	if (dvalue != data->slope_colortable_min) {
 		data->slope_colortable_min = dvalue;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
-			change = MB_YES;
+			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_slopemax, value_text);
@@ -6868,14 +6868,14 @@ void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_
 	if (dvalue != data->slope_colortable_max) {
 		data->slope_colortable_max = dvalue;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
-			change = MB_YES;
+			change = true;
 	}
 
 	ivalue = XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_slope_htoc);
 	if (ivalue != data->slope_colortable_mode) {
 		data->slope_colortable_mode = ivalue;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
-			change = MB_YES;
+			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_overlaymin, value_text);
@@ -6883,7 +6883,7 @@ void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_
 	if (dvalue != data->secondary_colortable_min) {
 		data->secondary_colortable_min = dvalue;
 		if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
-			change = MB_YES;
+			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_overlaymax, value_text);
@@ -6891,18 +6891,18 @@ void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_
 	if (dvalue != data->secondary_colortable_max) {
 		data->secondary_colortable_max = dvalue;
 		if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
-			change = MB_YES;
+			change = true;
 	}
 
 	ivalue = XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_overlay_htoc);
 	if (ivalue != data->secondary_colortable_mode) {
 		data->secondary_colortable_mode = ivalue;
 		if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
-			change = MB_YES;
+			change = true;
 	}
 
 	/* clear color status array */
-	if (change == MB_YES) {
+	if (change == true) {
 		view->lastdrawrez = MBV_REZ_NONE;
 		mbview_setcolorparms(instance);
 		mbview_colorclear(instance);
@@ -7018,14 +7018,14 @@ void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_d
 	/* get values of widgets */
 
 	/* handle illumination */
-	change = MB_NO;
+	change = false;
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_illum_amp, value_text);
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != data->illuminate_magnitude) {
 		data->illuminate_magnitude = dvalue;
 		if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
-			change = MB_YES;
+			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_illum_azi, value_text);
@@ -7033,7 +7033,7 @@ void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_d
 	if (dvalue != data->illuminate_azimuth) {
 		data->illuminate_azimuth = dvalue;
 		if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
-			change = MB_YES;
+			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_illum_elev, value_text);
@@ -7041,7 +7041,7 @@ void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_d
 	if (dvalue != data->illuminate_elevation) {
 		data->illuminate_elevation = dvalue;
 		if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
-			change = MB_YES;
+			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_slope_amp, value_text);
@@ -7049,7 +7049,7 @@ void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_d
 	if (dvalue != data->slope_magnitude) {
 		data->slope_magnitude = dvalue;
 		if (shade_mode == MBV_SHADE_VIEW_SLOPE)
-			change = MB_YES;
+			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_overlay_amp, value_text);
@@ -7057,7 +7057,7 @@ void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_d
 	if (dvalue != data->overlay_shade_magnitude) {
 		data->overlay_shade_magnitude = dvalue;
 		if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
-			change = MB_YES;
+			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_overlay_center, value_text);
@@ -7065,18 +7065,18 @@ void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_d
 	if (dvalue != data->overlay_shade_center) {
 		data->overlay_shade_center = dvalue;
 		if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
-			change = MB_YES;
+			change = true;
 	}
 
 	ivalue = XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_overlay_shade_ctoh);
 	if (ivalue != data->overlay_shade_mode) {
 		data->overlay_shade_mode = ivalue;
 		if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
-			change = MB_YES;
+			change = true;
 	}
 
 	/* clear color status array */
-	if (change == MB_YES) {
+	if (change == true) {
 		view->lastdrawrez = MBV_REZ_NONE;
 		mbview_setcolorparms(instance);
 		mbview_colorclear(instance);
@@ -7199,34 +7199,34 @@ void do_mbview_3dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 
 	/* get values of widgets */
 
-	change = MB_NO;
+	change = false;
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_model_azimuth, value_text);
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != data->modelazimuth3d) {
 		data->modelazimuth3d = dvalue;
-		change = MB_YES;
+		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_model_elevation, value_text);
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != data->modelelevation3d) {
 		data->modelelevation3d = dvalue;
-		change = MB_YES;
+		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_azimuth, value_text);
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != data->viewazimuth3d) {
 		data->viewazimuth3d = dvalue;
-		change = MB_YES;
+		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_elevation, value_text);
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != data->viewelevation3d) {
 		data->viewelevation3d = dvalue;
-		change = MB_YES;
+		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_exageration, value_text);
@@ -7236,12 +7236,12 @@ void do_mbview_3dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 		if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
 			view->zorigin = data->exageration * 0.5 * (data->primary_min + data->primary_max);
 		}
-		change = MB_YES;
+		change = true;
 
 		mbview_zscaleclear(instance);
-		view->contourlorez = MB_NO;
-		view->contourhirez = MB_NO;
-		view->contourfullrez = MB_NO;
+		view->contourlorez = false;
+		view->contourhirez = false;
+		view->contourfullrez = false;
 
 		/* rescale data other than the grid */
 		mbview_zscale(instance);
@@ -7254,32 +7254,32 @@ void do_mbview_3dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != view->offset3d_x) {
 		view->offset3d_x = dvalue;
-		change = MB_YES;
+		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_3doffsety, value_text);
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != view->offset3d_y) {
 		view->offset3d_y = dvalue;
-		change = MB_YES;
+		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_model_3dzoom, value_text);
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != view->offset3d_z) {
 		view->offset3d_z = dvalue;
-		change = MB_YES;
+		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_3dzoom, value_text);
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != view->viewoffset3d_z) {
 		view->viewoffset3d_z = dvalue;
-		change = MB_YES;
+		change = true;
 	}
 
 	/* clear color status array */
-	if (change == MB_YES && data->display_mode == MBV_DISPLAY_3D) {
+	if (change == true && data->display_mode == MBV_DISPLAY_3D) {
 		view->lastdrawrez = MBV_REZ_NONE;
 		mbview_setcolorparms(instance);
 		mbview_colorclear(instance);
@@ -7393,31 +7393,31 @@ void do_mbview_2dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 
 	/* get values of widgets */
 
-	change = MB_NO;
+	change = false;
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_2doffsetx, value_text);
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != view->offset2d_x) {
 		view->offset2d_x = dvalue;
-		change = MB_YES;
+		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_2doffsety, value_text);
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != view->offset2d_y) {
 		view->offset2d_y = dvalue;
-		change = MB_YES;
+		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_2dzoom, value_text);
 	sscanf(value_text, "%lf", &dvalue);
 	if (dvalue != view->size2d) {
 		view->size2d = dvalue;
-		change = MB_YES;
+		change = true;
 	}
 
 	/* clear color status array */
-	if (change == MB_YES && data->display_mode == MBV_DISPLAY_2D) {
+	if (change == true && data->display_mode == MBV_DISPLAY_2D) {
 		view->lastdrawrez = MBV_REZ_NONE;
 		mbview_setcolorparms(instance);
 		mbview_colorclear(instance);
@@ -7535,9 +7535,9 @@ void do_mbview_resolutionchange(Widget w, XtPointer client_data, XtPointer call_
 	mbview_setcolorparms(instance);
 	mbview_colorclear(instance);
 	mbview_zscaleclear(instance);
-	view->contourlorez = MB_NO;
-	view->contourhirez = MB_NO;
-	view->contourfullrez = MB_NO;
+	view->contourlorez = false;
+	view->contourhirez = false;
+	view->contourfullrez = false;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_resolutionchange instance:%zu resolutions: %d %d decimations: %d %d\n", instance,
@@ -7638,7 +7638,7 @@ void do_mbview_sitelistselect(Widget w, XtPointer client_data, XtPointer call_da
 	/* redraw valid instances */
 	instance = MBV_NO_WINDOW;
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (mbviews[i].data.active == MB_YES) {
+		if (mbviews[i].data.active == true) {
 			/* set instance to first good instance */
 			if (instance == MBV_NO_WINDOW)
 				instance = i;
@@ -7738,7 +7738,7 @@ void do_mbview_routelistselect(Widget w, XtPointer client_data, XtPointer call_d
 	/* redraw valid instances */
 	instance = MBV_NO_WINDOW;
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (mbviews[i].data.active == MB_YES) {
+		if (mbviews[i].data.active == true) {
 			/* set instance to first good instance */
 			if (instance == MBV_NO_WINDOW)
 				instance = i;
@@ -7787,7 +7787,7 @@ void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_dat
 	for (inav = 0; inav < shared.shareddata.nnav; inav++) {
 		shared.shareddata.navs[inav].nselected = 0;
 		for (jpt = 0; jpt < shared.shareddata.navs[inav].npoints; jpt++) {
-			shared.shareddata.navs[inav].navpts[jpt].selected = MB_NO;
+			shared.shareddata.navs[inav].navpts[jpt].selected = false;
 		}
 	}
 
@@ -7798,7 +7798,7 @@ void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_dat
 
 			/* Select all nav points in inav */
 			for (jpt = 0; jpt < shared.shareddata.navs[inav].npoints; jpt++) {
-				shared.shareddata.navs[inav].navpts[jpt].selected = MB_YES;
+				shared.shareddata.navs[inav].navpts[jpt].selected = true;
 				shared.shareddata.navs[inav].nselected++;
 			}
 
@@ -7829,7 +7829,7 @@ void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_dat
 	/* redraw valid instances */
 	instance = MBV_NO_WINDOW;
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (mbviews[i].data.active == MB_YES) {
+		if (mbviews[i].data.active == true) {
 			/* set instance to first good instance */
 			if (instance == MBV_NO_WINDOW)
 				instance = i;
@@ -7887,7 +7887,7 @@ void do_mbview_sitelist_delete(Widget w, XtPointer client_data, XtPointer call_d
 	/* get first valid instance */
 	instance = MBV_NO_WINDOW;
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (instance == MBV_NO_WINDOW && mbviews[i].data.active == MB_YES)
+		if (instance == MBV_NO_WINDOW && mbviews[i].data.active == true)
 			instance = i;
 	}
 
@@ -7900,7 +7900,7 @@ void do_mbview_sitelist_delete(Widget w, XtPointer client_data, XtPointer call_d
 	/* reset pick annotation */
 	if (position_count > 0) {
 		for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-			if (mbviews[i].data.active == MB_YES) {
+			if (mbviews[i].data.active == true) {
 				/* set pick annotation */
 				if (mbviews[i].data.pickinfo_mode == MBV_PICK_SITE)
 					mbviews[i].data.pickinfo_mode = MBV_PICK_NONE;
@@ -7951,7 +7951,7 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 	/* get first valid instance */
 	instance = MBV_NO_WINDOW;
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (instance == MBV_NO_WINDOW && mbviews[i].data.active == MB_YES)
+		if (instance == MBV_NO_WINDOW && mbviews[i].data.active == true)
 			instance = i;
 	}
 
@@ -7960,8 +7960,8 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 	    values to MBV_ROUTE_WAYPOINT_DELETEFLAG */
 	for (i = 0; i < position_count; i++) {
 		iposition = 0;
-		done = MB_NO;
-		for (iroute = 0; iroute < shared.shareddata.nroute && done == MB_NO; iroute++) {
+		done = false;
+		for (iroute = 0; iroute < shared.shareddata.nroute && done == false; iroute++) {
 			iposition++;
 
 			/* delete entire route */
@@ -7969,16 +7969,16 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 				for (jwaypoint = 0; jwaypoint < shared.shareddata.routes[iroute].npoints; jwaypoint++) {
 					shared.shareddata.routes[iroute].waypoint[jwaypoint] = MBV_ROUTE_WAYPOINT_DELETEFLAG;
 				}
-				done = MB_YES;
+				done = true;
 			}
 
 			/* else check waypoints */
 			else {
-				for (jwaypoint = 0; jwaypoint < shared.shareddata.routes[iroute].npoints && done == MB_NO; jwaypoint++) {
+				for (jwaypoint = 0; jwaypoint < shared.shareddata.routes[iroute].npoints && done == false; jwaypoint++) {
 					iposition++;
 					if (iposition == position_list[i]) {
 						shared.shareddata.routes[iroute].waypoint[jwaypoint] = MBV_ROUTE_WAYPOINT_DELETEFLAG;
-						done = MB_YES;
+						done = true;
 					}
 				}
 			}
@@ -7996,7 +7996,7 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 	/* reset pick annotation */
 	if (position_count > 0) {
 		for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-			if (mbviews[i].data.active == MB_YES) {
+			if (mbviews[i].data.active == true) {
 				/* set pick annotation */
 				if (mbviews[i].data.pickinfo_mode == MBV_PICK_ROUTE)
 					mbviews[i].data.pickinfo_mode = MBV_PICK_NONE;
@@ -8050,7 +8050,7 @@ void do_mbview_navlist_delete(Widget w, XtPointer client_data, XtPointer call_da
 	/* get first valid instance */
 	instance = MBV_NO_WINDOW;
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (instance == MBV_NO_WINDOW && mbviews[i].data.active == MB_YES)
+		if (instance == MBV_NO_WINDOW && mbviews[i].data.active == true)
 			instance = i;
 	}
 
@@ -8063,7 +8063,7 @@ void do_mbview_navlist_delete(Widget w, XtPointer client_data, XtPointer call_da
 	/* reset pick annotation */
 	if (position_count > 0) {
 		for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-			if (mbviews[i].data.active == MB_YES) {
+			if (mbviews[i].data.active == true) {
 				/* set pick annotation */
 				if (mbviews[i].data.pickinfo_mode == MBV_PICK_NAV)
 					mbviews[i].data.pickinfo_mode = MBV_PICK_NONE;
@@ -8498,7 +8498,7 @@ int do_mbview_status(char *message, size_t instance) {
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	view->message_on = MB_YES;
+	view->message_on = true;
 
 	set_mbview_label_string(view->mb3dview.mbview_label_status, message);
 
@@ -8519,7 +8519,7 @@ int do_mbview_message_on(char *message, size_t instance) {
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	view->message_on = MB_YES;
+	view->message_on = true;
 
 	set_mbview_label_string(view->mb3dview.mbview_label_message, message);
 	XtManageChild(view->mb3dview.mbview_bulletinBoard_message);
@@ -8636,10 +8636,10 @@ int do_mbview_setbackgroundwork(size_t instance) {
 	data = &(view->data);
 
 	/* set work function if none set for this instance */
-	if (work_function_set == MB_NO) {
+	if (work_function_set == false) {
 		id = XtAppAddWorkProc(app_context, (XtWorkProc)do_mbview_workfunction, (XtPointer)instance);
 		if (id > 0)
-			work_function_set = MB_YES;
+			work_function_set = true;
 		else
 			status = MB_FAILURE;
 		/*fprintf(stderr,"do_mbview_setbackgroundwork: instance:%zu id:%d\n",
@@ -8659,11 +8659,11 @@ int do_mbview_settimer() {
 	int id;
 
 	/* set timer function if none set for this instance */
-	if (work_function_set == MB_NO) {
+	if (work_function_set == false) {
 		id = XtAppAddTimeOut(app_context, (unsigned long)timer_timeout_time, (XtTimerCallbackProc)do_mbview_workfunction,
 		                     (XtPointer)-1);
 		if (id > 0)
-			work_function_set = MB_YES;
+			work_function_set = true;
 		else
 			status = MB_FAILURE;
 		/*fprintf(stderr,"do_mbview_settimer: \n");*/
@@ -8692,65 +8692,65 @@ int do_mbview_workfunction(XtPointer client_data) {
 
 	/* set starting values */
 	instance = (size_t)client_data;
-	plotting = MB_NO;
-	found = MB_NO;
+	plotting = false;
+	found = false;
 	mode = MBV_BACKGROUND_NONE;
 
 	/*fprintf(stderr,"\ndo_mbview_workfunction called: instance:%zu timer_count:%d\n", instance, timer_count);*/
 
 	/* first make sure no plotting is active */
-	for (i = 0; i < MBV_MAX_WINDOWS && plotting == MB_NO; i++) {
+	for (i = 0; i < MBV_MAX_WINDOWS && plotting == false; i++) {
 		/* get view */
 		view = &(mbviews[i]);
 		data = &(view->data);
 
 		/* check it if nothing already found */
 		if (data->primary_nxy > 0 &&
-		    (view->plot_recursion > 0 || view->plot_interrupt_allowed == MB_NO || view->button1down == MB_YES ||
-		     view->button2down == MB_YES || view->button3down == MB_YES)) {
-			plotting = MB_YES;
+		    (view->plot_recursion > 0 || view->plot_interrupt_allowed == false || view->button1down == true ||
+		     view->button2down == true || view->button3down == true)) {
+			plotting = true;
 		}
 	}
 
 	/* first see if possible to work with instance value */
-	if (plotting == MB_NO && instance != MBV_NO_WINDOW && instance < MBV_MAX_WINDOWS && data->primary_nxy > 0) {
+	if (plotting == false && instance != MBV_NO_WINDOW && instance < MBV_MAX_WINDOWS && data->primary_nxy > 0) {
 		/* get view */
 		view = &(mbviews[instance]);
 		data = &(view->data);
 
 		if (view->zscaledonecount < data->primary_nxy - 1) {
 			/* set found */
-			found = MB_YES;
+			found = true;
 			mode = MBV_BACKGROUND_ZSCALE;
 		}
 
 		/* then work on color */
 		else if (view->colordonecount < data->primary_nxy - 1) {
 			/* set found */
-			found = MB_YES;
+			found = true;
 			mode = MBV_BACKGROUND_COLOR;
 		}
 
 		/* finally do the full rez plot */
 		else if (view->lastdrawrez != MBV_REZ_FULL && timer_count > timer_timeout_count) {
 			/* set found */
-			found = MB_YES;
+			found = true;
 			mode = MBV_BACKGROUND_FULLPLOT;
 		}
 	}
 
 	/* if not found check all possible instances */
-	if (plotting == MB_NO && found == MB_NO) {
+	if (plotting == false && found == false) {
 		for (i = 0; i < MBV_MAX_WINDOWS; i++) {
 			/* get view */
 			view = &(mbviews[i]);
 			data = &(view->data);
 
 			/* check it if nothing already found */
-			if (found == MB_NO && data->primary_nxy > 0) {
+			if (found == false && data->primary_nxy > 0) {
 				if (view->zscaledonecount < data->primary_nxy - 1) {
 					/* set found */
-					found = MB_YES;
+					found = true;
 					mode = MBV_BACKGROUND_ZSCALE;
 					instance = i;
 				}
@@ -8758,7 +8758,7 @@ int do_mbview_workfunction(XtPointer client_data) {
 				/* then work on color */
 				else if (view->colordonecount < data->primary_nxy - 1) {
 					/* set found */
-					found = MB_YES;
+					found = true;
 					mode = MBV_BACKGROUND_COLOR;
 					instance = i;
 				}
@@ -8766,7 +8766,7 @@ int do_mbview_workfunction(XtPointer client_data) {
 				/* finally do the full rez plot */
 				else if (view->lastdrawrez != MBV_REZ_FULL && timer_count > timer_timeout_count) {
 					/* set found */
-					found = MB_YES;
+					found = true;
 					mode = MBV_BACKGROUND_FULLPLOT;
 					instance = i;
 				}
@@ -8777,7 +8777,7 @@ int do_mbview_workfunction(XtPointer client_data) {
 	plotting,found,instance,mode);*/
 
 	/* do the work if instance found */
-	if (plotting == MB_NO && found == MB_YES) {
+	if (plotting == false && found == true) {
 		/* get view */
 		view = &(mbviews[instance]);
 		data = &(view->data);
@@ -8803,17 +8803,17 @@ int do_mbview_workfunction(XtPointer client_data) {
 			view->colordonecount,data->primary_nxy);*/
 
 			/* use histogram equalization if needed */
-			use_histogram = MB_NO;
-			if (data->grid_mode == MBV_GRID_VIEW_PRIMARY && data->primary_histogram == MB_YES) {
-				use_histogram = MB_YES;
+			use_histogram = false;
+			if (data->grid_mode == MBV_GRID_VIEW_PRIMARY && data->primary_histogram == true) {
+				use_histogram = true;
 				histogram = view->primary_histogram;
 			}
-			else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && data->primaryslope_histogram == MB_YES) {
-				use_histogram = MB_YES;
+			else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && data->primaryslope_histogram == true) {
+				use_histogram = true;
 				histogram = view->primaryslope_histogram;
 			}
-			else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY && data->secondary_histogram == MB_YES) {
-				use_histogram = MB_YES;
+			else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY && data->secondary_histogram == true) {
+				use_histogram = true;
 				histogram = view->secondary_histogram;
 			}
 
@@ -8823,7 +8823,7 @@ int do_mbview_workfunction(XtPointer client_data) {
 				if (!(data->primary_stat_color[k / 8] & statmask[k % 8])) {
 					i = k / data->primary_n_columns;
 					j = k % data->primary_n_rows;
-					if (use_histogram == MB_NO)
+					if (use_histogram == false)
 						mbview_colorpoint(view, data, i, j, k);
 					else
 						mbview_colorpoint_histogram(view, data, histogram, i, j, k);
@@ -8842,14 +8842,14 @@ int do_mbview_workfunction(XtPointer client_data) {
 	}
 
 	/* reset the work function as either background or timed */
-	work_function_set = MB_NO;
-	if (found == MB_YES) {
+	work_function_set = false;
+	if (found == true) {
 		do_mbview_setbackgroundwork(instance);
 		timer_count = 0;
 	}
 	else {
 		do_mbview_settimer();
-		if (plotting == MB_YES)
+		if (plotting == true)
 			timer_count = 0;
 		else
 			timer_count++;

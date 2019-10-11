@@ -64,9 +64,9 @@ int mbr_info_samesurf(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_SURF;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -203,7 +203,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* read global info if the structure is blank (usually first time through) */
-	if (store->initialized == MB_NO) {
+	if (store->initialized == false) {
 		strncpy(store->NameOfShip, SAPI_getNameOfShip(), LABEL_SIZE);
 		strncpy(store->NameOfSounder, SAPI_getNameOfSounder(), LABEL_SIZE);
 		strncpy(store->TypeOfSounder, SAPI_getTypeOfSounder(), LABEL_SIZE);
@@ -224,13 +224,13 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		/* initialize UTM projection if required */
-		if (store->GlobalData.presentationOfPosition == 'X' && mb_io_ptr->projection_initialized == MB_NO) {
+		if (store->GlobalData.presentationOfPosition == 'X' && mb_io_ptr->projection_initialized == false) {
 			/* initialize UTM projection */
 			utm_zone = (int)(((RTD * store->GlobalData.referenceMeridian + 183.0) / 6.0) + 0.5);
 			sprintf(projection, "UTM%2.2dN", utm_zone);
 			mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
 			store->GlobalData.presentationOfPosition = 'E';
-			mb_io_ptr->projection_initialized = MB_YES;
+			mb_io_ptr->projection_initialized = true;
 
 			/* Set reference longitude and latitude */
 			easting = store->GlobalData.referenceOfPositionX;
@@ -256,7 +256,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->Statistics.maxNorthing = DTR * lat;
 		}
 
-		store->initialized = MB_YES;
+		store->initialized = true;
 	}
 
 	/* else get access to next sounding */
@@ -305,7 +305,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 				/* convert position from UTM easting and northing
 				    to lon lat if necessary */
-				if (mb_io_ptr->projection_initialized == MB_YES) {
+				if (mb_io_ptr->projection_initialized == true) {
 					easting = store->CenterPosition[i].centerPositionX + *refeasting;
 					northing = store->CenterPosition[i].centerPositionY + *refnorthing;
 					mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, &lon, &lat, error);

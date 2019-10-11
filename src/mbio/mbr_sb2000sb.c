@@ -91,9 +91,9 @@ int mbr_info_sb2000sb(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = false;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -216,7 +216,7 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* read next header record from file */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 	skip = 0;
-	found = MB_NO;
+	found = false;
 	int status = MB_SUCCESS;
 	if ((status = fread(buffer, 1, MBSYS_SB2000_HEADER_SIZE, mb_io_ptr->mbfp)) == MBSYS_SB2000_HEADER_SIZE) {
 		mb_io_ptr->file_bytes += status;
@@ -227,10 +227,10 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if (strncmp(&buffer[34], "SR", 2) == 0 || strncmp(&buffer[34], "RS", 2) == 0 || strncmp(&buffer[34], "SP", 2) == 0 ||
 		    strncmp(&buffer[34], "TR", 2) == 0 || strncmp(&buffer[34], "IR", 2) == 0 || strncmp(&buffer[34], "AT", 2) == 0 ||
 		    strncmp(&buffer[34], "SC", 2) == 0) {
-			mb_get_binary_short(MB_NO, &buffer[26], &test_sensor_size);
-			mb_get_binary_short(MB_NO, &buffer[28], &test_data_size);
+			mb_get_binary_short(false, &buffer[26], &test_sensor_size);
+			mb_get_binary_short(false, &buffer[28], &test_data_size);
 			if (test_sensor_size <= 32 && test_data_size <= 2 * MBSYS_SB2000_PIXELS + 4)
-				found = MB_YES;
+				found = true;
 		}
 	}
 	else {
@@ -240,7 +240,7 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* if not a good header search through file to find one */
-	while (status == MB_SUCCESS && found == MB_NO) {
+	while (status == MB_SUCCESS && found == false) {
 		/* shift bytes by one */
 		for (int i = 0; i < MBSYS_SB2000_HEADER_SIZE - 1; i++)
 			buffer[i] = buffer[i + 1];
@@ -256,14 +256,14 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (strncmp(&buffer[34], "SR", 2) == 0 || strncmp(&buffer[34], "RS", 2) == 0 || strncmp(&buffer[34], "SP", 2) == 0 ||
 			    strncmp(&buffer[34], "TR", 2) == 0 || strncmp(&buffer[34], "IR", 2) == 0 || strncmp(&buffer[34], "AT", 2) == 0 ||
 			    strncmp(&buffer[34], "SC", 2) == 0) {
-				mb_get_binary_short(MB_NO, &buffer[26], &test_sensor_size);
-				mb_get_binary_short(MB_NO, &buffer[28], &test_data_size);
+				mb_get_binary_short(false, &buffer[26], &test_sensor_size);
+				mb_get_binary_short(false, &buffer[28], &test_data_size);
 				if (test_sensor_size <= 32 && test_data_size <= 2 * MBSYS_SB2000_PIXELS + 4)
-					found = MB_YES;
+					found = true;
 			}
 		}
 		else {
-			found = MB_YES;
+			found = true;
 			mb_io_ptr->file_bytes += status;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
@@ -275,19 +275,19 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "\ndgb2           DATA SKIPPED: %d bytes\n", skip);
 
 	/* get header values */
-	mb_get_binary_short(MB_NO, &buffer[0], &store->year);
-	mb_get_binary_short(MB_NO, &buffer[2], &store->day);
-	mb_get_binary_short(MB_NO, &buffer[4], &store->min);
-	mb_get_binary_short(MB_NO, &buffer[6], &store->sec);
-	mb_get_binary_int(MB_NO, &buffer[8], &store->lat);
-	mb_get_binary_int(MB_NO, &buffer[12], &store->lon);
-	mb_get_binary_short(MB_NO, &buffer[16], &store->heading);
-	mb_get_binary_short(MB_NO, &buffer[18], &store->course);
-	mb_get_binary_short(MB_NO, &buffer[20], &store->speed);
-	mb_get_binary_short(MB_NO, &buffer[22], &store->speed_ps);
-	mb_get_binary_short(MB_NO, &buffer[24], &store->quality);
-	mb_get_binary_short(MB_NO, &buffer[26], (short *)&store->sensor_size);
-	mb_get_binary_short(MB_NO, &buffer[28], (short *)&store->data_size);
+	mb_get_binary_short(false, &buffer[0], &store->year);
+	mb_get_binary_short(false, &buffer[2], &store->day);
+	mb_get_binary_short(false, &buffer[4], &store->min);
+	mb_get_binary_short(false, &buffer[6], &store->sec);
+	mb_get_binary_int(false, &buffer[8], &store->lat);
+	mb_get_binary_int(false, &buffer[12], &store->lon);
+	mb_get_binary_short(false, &buffer[16], &store->heading);
+	mb_get_binary_short(false, &buffer[18], &store->course);
+	mb_get_binary_short(false, &buffer[20], &store->speed);
+	mb_get_binary_short(false, &buffer[22], &store->speed_ps);
+	mb_get_binary_short(false, &buffer[24], &store->quality);
+	mb_get_binary_short(false, &buffer[26], (short *)&store->sensor_size);
+	mb_get_binary_short(false, &buffer[28], (short *)&store->data_size);
 	store->speed_ref[0] = buffer[30];
 	store->speed_ref[1] = buffer[31];
 	store->sensor_type[0] = buffer[32];
@@ -364,16 +364,16 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* extract sensor data */
 	if (status == MB_SUCCESS && store->sensor_size > 0) {
 		/* extract the values */
-		mb_get_binary_short(MB_NO, &buffer[0], &store->pitch);
-		mb_get_binary_short(MB_NO, &buffer[2], &store->roll);
-		mb_get_binary_short(MB_NO, &buffer[4], &store->gain);
-		mb_get_binary_short(MB_NO, &buffer[6], &store->correction);
-		mb_get_binary_short(MB_NO, &buffer[8], &store->surface_vel);
-		mb_get_binary_short(MB_NO, &buffer[10], &store->pulse_width);
-		mb_get_binary_short(MB_NO, &buffer[12], &store->attenuation);
-		mb_get_binary_short(MB_NO, &buffer[14], &store->spare1);
+		mb_get_binary_short(false, &buffer[0], &store->pitch);
+		mb_get_binary_short(false, &buffer[2], &store->roll);
+		mb_get_binary_short(false, &buffer[4], &store->gain);
+		mb_get_binary_short(false, &buffer[6], &store->correction);
+		mb_get_binary_short(false, &buffer[8], &store->surface_vel);
+		mb_get_binary_short(false, &buffer[10], &store->pulse_width);
+		mb_get_binary_short(false, &buffer[12], &store->attenuation);
+		mb_get_binary_short(false, &buffer[14], &store->spare1);
 		if (store->sensor_size >= 18)
-			mb_get_binary_short(MB_NO, &buffer[16], &store->spare2);
+			mb_get_binary_short(false, &buffer[16], &store->spare2);
 		if (store->sensor_size >= 20) {
 			store->mode[0] = buffer[18];
 			store->mode[1] = buffer[19];
@@ -422,8 +422,8 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* extract survey data */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
 		/* extract the beams_bath and scale_factor values */
-		mb_get_binary_short(MB_NO, &buffer[0], &store->beams_bath);
-		mb_get_binary_short(MB_NO, &buffer[2], &store->scale_factor);
+		mb_get_binary_short(false, &buffer[0], &store->beams_bath);
+		mb_get_binary_short(false, &buffer[2], &store->scale_factor);
 
 		/* check for unreasonable beams_bath */
 		if (store->beams_bath > (store->data_size - 4) / 4) {
@@ -432,8 +432,8 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* extract the values */
 		for (int i = 0; i < store->beams_bath; i++) {
-			mb_get_binary_short(MB_NO, &buffer[4 + i * 4], &store->bath[i]);
-			mb_get_binary_short(MB_NO, &buffer[6 + i * 4], &store->bath_acrosstrack[i]);
+			mb_get_binary_short(false, &buffer[4 + i * 4], &store->bath[i]);
+			mb_get_binary_short(false, &buffer[6 + i * 4], &store->bath_acrosstrack[i]);
 		}
 
 		if (verbose >= 5) {
@@ -450,21 +450,21 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* extract velocity profile record */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_VELOCITY_PROFILE) {
 		/* extract the values */
-		mb_get_binary_int(MB_NO, &buffer[0], &store->svp_mean);
-		mb_get_binary_short(MB_NO, &buffer[4], &store->svp_number);
-		mb_get_binary_short(MB_NO, &buffer[6], &store->svp_spare);
+		mb_get_binary_int(false, &buffer[0], &store->svp_mean);
+		mb_get_binary_short(false, &buffer[4], &store->svp_number);
+		mb_get_binary_short(false, &buffer[6], &store->svp_spare);
 		for (int i = 0; i < MIN(store->svp_number, 30); i++) {
-			mb_get_binary_short(MB_NO, &buffer[8 + i * 4], &store->svp_depth[i]);
-			mb_get_binary_short(MB_NO, &buffer[10 + i * 4], &store->svp_vel[i]);
+			mb_get_binary_short(false, &buffer[8 + i * 4], &store->svp_depth[i]);
+			mb_get_binary_short(false, &buffer[10 + i * 4], &store->svp_vel[i]);
 		}
-		mb_get_binary_short(MB_NO, &buffer[128], &store->vru1);
-		mb_get_binary_short(MB_NO, &buffer[130], &store->vru1_port);
-		mb_get_binary_short(MB_NO, &buffer[132], &store->vru1_forward);
-		mb_get_binary_short(MB_NO, &buffer[134], &store->vru1_vert);
-		mb_get_binary_short(MB_NO, &buffer[136], &store->vru2);
-		mb_get_binary_short(MB_NO, &buffer[138], &store->vru2_port);
-		mb_get_binary_short(MB_NO, &buffer[140], &store->vru2_forward);
-		mb_get_binary_short(MB_NO, &buffer[142], &store->vru2_vert);
+		mb_get_binary_short(false, &buffer[128], &store->vru1);
+		mb_get_binary_short(false, &buffer[130], &store->vru1_port);
+		mb_get_binary_short(false, &buffer[132], &store->vru1_forward);
+		mb_get_binary_short(false, &buffer[134], &store->vru1_vert);
+		mb_get_binary_short(false, &buffer[136], &store->vru2);
+		mb_get_binary_short(false, &buffer[138], &store->vru2_port);
+		mb_get_binary_short(false, &buffer[140], &store->vru2_forward);
+		mb_get_binary_short(false, &buffer[142], &store->vru2_vert);
 
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg5  New svp record read by MBIO function <%s>\n", __func__);
@@ -619,19 +619,19 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* put header values */
 	if (status == MB_SUCCESS) {
 		/* put header values */
-		mb_put_binary_short(MB_NO, store->year, &buffer[0]);
-		mb_put_binary_short(MB_NO, store->day, &buffer[2]);
-		mb_put_binary_short(MB_NO, store->min, &buffer[4]);
-		mb_put_binary_short(MB_NO, store->sec, &buffer[6]);
-		mb_put_binary_int(MB_NO, store->lat, &buffer[8]);
-		mb_put_binary_int(MB_NO, store->lon, &buffer[12]);
-		mb_put_binary_short(MB_NO, store->heading, &buffer[16]);
-		mb_put_binary_short(MB_NO, store->course, &buffer[18]);
-		mb_put_binary_short(MB_NO, store->speed, &buffer[20]);
-		mb_put_binary_short(MB_NO, store->speed_ps, &buffer[22]);
-		mb_put_binary_short(MB_NO, store->quality, &buffer[24]);
-		mb_put_binary_short(MB_NO, store->sensor_size, &buffer[26]);
-		mb_put_binary_short(MB_NO, store->data_size, &buffer[28]);
+		mb_put_binary_short(false, store->year, &buffer[0]);
+		mb_put_binary_short(false, store->day, &buffer[2]);
+		mb_put_binary_short(false, store->min, &buffer[4]);
+		mb_put_binary_short(false, store->sec, &buffer[6]);
+		mb_put_binary_int(false, store->lat, &buffer[8]);
+		mb_put_binary_int(false, store->lon, &buffer[12]);
+		mb_put_binary_short(false, store->heading, &buffer[16]);
+		mb_put_binary_short(false, store->course, &buffer[18]);
+		mb_put_binary_short(false, store->speed, &buffer[20]);
+		mb_put_binary_short(false, store->speed_ps, &buffer[22]);
+		mb_put_binary_short(false, store->quality, &buffer[24]);
+		mb_put_binary_short(false, store->sensor_size, &buffer[26]);
+		mb_put_binary_short(false, store->data_size, &buffer[28]);
 		buffer[30] = store->speed_ref[0];
 		buffer[31] = store->speed_ref[1];
 		buffer[32] = store->sensor_type[0];
@@ -653,15 +653,15 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* put sensor data */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->sensor_size > 0) {
 		/* put sensor values */
-		mb_put_binary_short(MB_NO, store->pitch, &buffer[0]);
-		mb_put_binary_short(MB_NO, store->roll, &buffer[2]);
-		mb_put_binary_short(MB_NO, store->gain, &buffer[4]);
-		mb_put_binary_short(MB_NO, store->correction, &buffer[6]);
-		mb_put_binary_short(MB_NO, store->surface_vel, &buffer[8]);
-		mb_put_binary_short(MB_NO, store->pulse_width, &buffer[10]);
-		mb_put_binary_short(MB_NO, store->attenuation, &buffer[12]);
-		mb_put_binary_short(MB_NO, store->spare1, &buffer[14]);
-		mb_put_binary_short(MB_NO, store->spare2, &buffer[16]);
+		mb_put_binary_short(false, store->pitch, &buffer[0]);
+		mb_put_binary_short(false, store->roll, &buffer[2]);
+		mb_put_binary_short(false, store->gain, &buffer[4]);
+		mb_put_binary_short(false, store->correction, &buffer[6]);
+		mb_put_binary_short(false, store->surface_vel, &buffer[8]);
+		mb_put_binary_short(false, store->pulse_width, &buffer[10]);
+		mb_put_binary_short(false, store->attenuation, &buffer[12]);
+		mb_put_binary_short(false, store->spare1, &buffer[14]);
+		mb_put_binary_short(false, store->spare2, &buffer[16]);
 		store->mode[0] = buffer[18];
 		store->mode[1] = buffer[19];
 		store->data_correction[0] = buffer[20];
@@ -682,21 +682,21 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	if (status == MB_SUCCESS && store->kind == MB_DATA_VELOCITY_PROFILE && store->data_size > 0) {
 		/* extract the values */
-		mb_put_binary_int(MB_NO, store->svp_mean, &buffer[0]);
-		mb_put_binary_short(MB_NO, store->svp_number, &buffer[4]);
-		mb_put_binary_short(MB_NO, store->svp_spare, &buffer[6]);
+		mb_put_binary_int(false, store->svp_mean, &buffer[0]);
+		mb_put_binary_short(false, store->svp_number, &buffer[4]);
+		mb_put_binary_short(false, store->svp_spare, &buffer[6]);
 		for (int i = 0; i < MIN(store->svp_number, 30); i++) {
-			mb_put_binary_short(MB_NO, store->svp_depth[i], &buffer[8 + i * 4]);
-			mb_put_binary_short(MB_NO, store->svp_vel[i], &buffer[10 + i * 4]);
+			mb_put_binary_short(false, store->svp_depth[i], &buffer[8 + i * 4]);
+			mb_put_binary_short(false, store->svp_vel[i], &buffer[10 + i * 4]);
 		}
-		mb_put_binary_short(MB_NO, store->vru1, &buffer[128]);
-		mb_put_binary_short(MB_NO, store->vru1_port, &buffer[130]);
-		mb_put_binary_short(MB_NO, store->vru1_forward, &buffer[132]);
-		mb_put_binary_short(MB_NO, store->vru1_vert, &buffer[134]);
-		mb_put_binary_short(MB_NO, store->vru2, &buffer[136]);
-		mb_put_binary_short(MB_NO, store->vru2_port, &buffer[138]);
-		mb_put_binary_short(MB_NO, store->vru2_forward, &buffer[140]);
-		mb_put_binary_short(MB_NO, store->vru2_vert, &buffer[142]);
+		mb_put_binary_short(false, store->vru1, &buffer[128]);
+		mb_put_binary_short(false, store->vru1_port, &buffer[130]);
+		mb_put_binary_short(false, store->vru1_forward, &buffer[132]);
+		mb_put_binary_short(false, store->vru1_vert, &buffer[134]);
+		mb_put_binary_short(false, store->vru2, &buffer[136]);
+		mb_put_binary_short(false, store->vru2_port, &buffer[138]);
+		mb_put_binary_short(false, store->vru2_forward, &buffer[140]);
+		mb_put_binary_short(false, store->vru2_vert, &buffer[142]);
 
 		/* write svp profile */
 		if ((status = fwrite(buffer, 1, store->data_size, mb_io_ptr->mbfp)) == store->data_size) {
@@ -711,11 +711,11 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->data_size > 0) {
 		/* put the values */
-		mb_put_binary_short(MB_NO, store->beams_bath, &buffer[0]);
-		mb_put_binary_short(MB_NO, store->scale_factor, &buffer[2]);
+		mb_put_binary_short(false, store->beams_bath, &buffer[0]);
+		mb_put_binary_short(false, store->scale_factor, &buffer[2]);
 		for (int i = 0; i < store->beams_bath; i++) {
-			mb_put_binary_short(MB_NO, store->bath[i], &buffer[4 + i * 4]);
-			mb_put_binary_short(MB_NO, store->bath_acrosstrack[i], &buffer[6 + i * 4]);
+			mb_put_binary_short(false, store->bath[i], &buffer[4 + i * 4]);
+			mb_put_binary_short(false, store->bath_acrosstrack[i], &buffer[6 + i * 4]);
 		}
 
 		/* write survey data */

@@ -374,20 +374,20 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 			fprintf(stderr, "dbg2       point:%d time_d:%f lon:%f lat:%f z:%f heading:%f zpeed:%f\n", i, time_d[i], navlon[i],
 			        navlat[i], navz[i], heading[i], speed[i]);
 		}
-		if (navswathbounds == MB_YES)
+		if (navswathbounds == true)
 			for (i = 0; i < npoint; i++) {
 				fprintf(stderr, "dbg2       point:%d port: lon:%f lat:%f  stbd: lon:%f lat:%f\n", i, navportlon[i], navportlat[i],
 				        navstbdlon[i], navstbdlat[i]);
 			}
-		if (navline == MB_YES)
+		if (navline == true)
 			for (i = 0; i < npoint; i++) {
 				fprintf(stderr, "dbg2       point:%d line:%d\n", i, line[i]);
 			}
-		if (navshot == MB_YES)
+		if (navshot == true)
 			for (i = 0; i < npoint; i++) {
 				fprintf(stderr, "dbg2       point:%d shot:%d\n", i, shot[i]);
 			}
-		if (navcdp == MB_YES)
+		if (navcdp == true)
 			for (i = 0; i < npoint; i++) {
 				fprintf(stderr, "dbg2       point:%d cdp: %d\n", i, cdp[i]);
 			}
@@ -437,11 +437,11 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 				shared.shareddata.navs[i].pathraw[0] = '\0';
 				shared.shareddata.navs[i].pathprocessed[0] = '\0';
 				shared.shareddata.navs[i].format = 0;
-				shared.shareddata.navs[i].swathbounds = MB_NO;
-				shared.shareddata.navs[i].line = MB_NO;
-				shared.shareddata.navs[i].shot = MB_NO;
-				shared.shareddata.navs[i].cdp = MB_NO;
-				shared.shareddata.navs[i].decimation = MB_NO;
+				shared.shareddata.navs[i].swathbounds = false;
+				shared.shareddata.navs[i].line = false;
+				shared.shareddata.navs[i].shot = false;
+				shared.shareddata.navs[i].cdp = false;
+				shared.shareddata.navs[i].decimation = false;
 				shared.shareddata.navs[i].npoints = 0;
 				shared.shareddata.navs[i].npoints_alloc = 0;
 				shared.shareddata.navs[i].nselected = 0;
@@ -492,18 +492,18 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 		shared.shareddata.navs[inav].npoints = npoint;
 		for (i = 0; i < npoint; i++) {
 			/* set status values */
-			shared.shareddata.navs[inav].navpts[i].draped = MB_NO;
-			shared.shareddata.navs[inav].navpts[i].selected = MB_NO;
+			shared.shareddata.navs[inav].navpts[i].draped = false;
+			shared.shareddata.navs[inav].navpts[i].selected = false;
 
 			/* set time and shot info */
 			shared.shareddata.navs[inav].navpts[i].time_d = time_d[i];
 			shared.shareddata.navs[inav].navpts[i].heading = heading[i];
 			shared.shareddata.navs[inav].navpts[i].speed = speed[i];
-			if (shared.shareddata.navs[inav].line == MB_YES)
+			if (shared.shareddata.navs[inav].line == true)
 				shared.shareddata.navs[inav].navpts[i].line = line[i];
-			if (shared.shareddata.navs[inav].shot == MB_YES)
+			if (shared.shareddata.navs[inav].shot == true)
 				shared.shareddata.navs[inav].navpts[i].shot = shot[i];
-			if (shared.shareddata.navs[inav].cdp == MB_YES)
+			if (shared.shareddata.navs[inav].cdp == true)
 				shared.shareddata.navs[inav].navpts[i].cdp = cdp[i];
 
 			/* ************************************************* */
@@ -767,7 +767,7 @@ int mbview_enableviewnavs(int verbose, size_t instance, int *error)
 		data = &(view->data);
 
 		/* if instance active reset action sensitivity */
-		if (data->active == MB_YES)
+		if (data->active == true)
 			mbview_update_sensitivity(verbose, instance, error);
 	}
 
@@ -812,7 +812,7 @@ int mbview_enableadjustnavs(int verbose, size_t instance, int *error)
 		data = &(view->data);
 
 		/* if instance active reset action sensitivity */
-		if (data->active == MB_YES)
+		if (data->active == true)
 			mbview_update_sensitivity(verbose, instance, error);
 	}
 
@@ -1047,7 +1047,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 							}
 							shared.shareddata.navs[inav].nselected = 0;
 							for (jpt = 0; jpt < shared.shareddata.navs[inav].npoints; jpt++) {
-								if (shared.shareddata.navs[inav].navpts[jpt].selected == MB_YES)
+								if (shared.shareddata.navs[inav].navpts[jpt].selected == true)
 									shared.shareddata.navs[inav].nselected++;
 							}
 						}
@@ -1060,7 +1060,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 						shared.shareddata.navs[inav].navpts[jpt].selected = select;
 						shared.shareddata.navs[inav].nselected = 0;
 						for (jpt = 0; jpt < shared.shareddata.navs[inav].npoints; jpt++) {
-							if (shared.shareddata.navs[inav].navpts[jpt].selected == MB_YES)
+							if (shared.shareddata.navs[inav].navpts[jpt].selected == true)
 								shared.shareddata.navs[inav].nselected++;
 						}
 					}
@@ -1088,7 +1088,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 							}
 							shared.shareddata.navs[inav].nselected = 0;
 							for (jpt = 0; jpt < shared.shareddata.navs[inav].npoints; jpt++) {
-								if (shared.shareddata.navs[inav].navpts[jpt].selected == MB_YES)
+								if (shared.shareddata.navs[inav].navpts[jpt].selected == true)
 									shared.shareddata.navs[inav].nselected++;
 							}
 						}
@@ -1113,7 +1113,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 				shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
 				for (i = 0; i < shared.shareddata.nnav; i++) {
 					for (j = 0; j < shared.shareddata.navs[i].npoints; j++) {
-						shared.shareddata.navs[i].navpts[j].selected = MB_NO;
+						shared.shareddata.navs[i].navpts[j].selected = false;
 					}
 				}
 
@@ -1280,7 +1280,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 					/* clear all previous selection */
 					for (i = 0; i < shared.shareddata.nnav; i++) {
 						for (j = 0; j < shared.shareddata.navs[i].npoints; j++) {
-							shared.shareddata.navs[i].navpts[j].selected = MB_NO;
+							shared.shareddata.navs[i].navpts[j].selected = false;
 						}
 					}
 
@@ -1404,7 +1404,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 		XBell(view->dpy, 100);
 		for (i = 0; i < shared.shareddata.nnav; i++) {
 			for (j = 0; j < shared.shareddata.navs[i].npoints; j++) {
-				shared.shareddata.navs[i].navpts[j].selected = MB_NO;
+				shared.shareddata.navs[i].navpts[j].selected = false;
 			}
 		}
 	}
@@ -1579,7 +1579,7 @@ int mbview_extract_nav_profile(size_t instance) {
 		nprpoints = 0;
 		for (i = 0; i < shared.shareddata.nnav; i++) {
 			for (j = 0; j < shared.shareddata.navs[i].npoints; j++) {
-				if (shared.shareddata.navs[i].navpts[j].selected == MB_YES) {
+				if (shared.shareddata.navs[i].navpts[j].selected == true) {
 					nprpoints++;
 				}
 			}
@@ -1602,10 +1602,10 @@ int mbview_extract_nav_profile(size_t instance) {
 			for (i = 0; i < shared.shareddata.nnav; i++) {
 				firstj = -1;
 				for (j = 0; j < shared.shareddata.navs[i].npoints; j++) {
-					if (shared.shareddata.navs[i].navpts[j].selected == MB_YES) {
-						data->profile.points[data->profile.npoints].boundary = MB_YES;
+					if (shared.shareddata.navs[i].navpts[j].selected == true) {
+						data->profile.points[data->profile.npoints].boundary = true;
 						if (data->profile.npoints > 0 && i == lasti && j > 1 && lastj == j - 1 && j > 0 && firstj != j - 1)
-							data->profile.points[data->profile.npoints - 1].boundary = MB_NO;
+							data->profile.points[data->profile.npoints - 1].boundary = false;
 						lasti = i;
 						lastj = j;
 						if (firstj == -1)
@@ -1766,10 +1766,10 @@ int mbview_nav_delete(size_t instance, int inav) {
 		shared.shareddata.navs[shared.shareddata.nnav - 1].pathraw[0] = '\0';
 		shared.shareddata.navs[shared.shareddata.nnav - 1].pathprocessed[0] = '\0';
 		shared.shareddata.navs[shared.shareddata.nnav - 1].format = 0;
-		shared.shareddata.navs[shared.shareddata.nnav - 1].swathbounds = MB_NO;
-		shared.shareddata.navs[shared.shareddata.nnav - 1].line = MB_NO;
-		shared.shareddata.navs[shared.shareddata.nnav - 1].shot = MB_NO;
-		shared.shareddata.navs[shared.shareddata.nnav - 1].cdp = MB_NO;
+		shared.shareddata.navs[shared.shareddata.nnav - 1].swathbounds = false;
+		shared.shareddata.navs[shared.shareddata.nnav - 1].line = false;
+		shared.shareddata.navs[shared.shareddata.nnav - 1].shot = false;
+		shared.shareddata.navs[shared.shareddata.nnav - 1].cdp = false;
 		shared.shareddata.navs[shared.shareddata.nnav - 1].decimation = 1;
 		shared.shareddata.navs[shared.shareddata.nnav - 1].npoints = 0;
 		shared.shareddata.navs[shared.shareddata.nnav - 1].npoints_alloc = 0;
@@ -1853,14 +1853,14 @@ int mbview_navpicksize(size_t instance) {
 		    shared.shareddata.navpick.endpoints[0].ydisplay[instance] + xlength * (headingx - headingy);
 		for (i = 0; i < 4; i++) {
 			mbview_projectinverse(
-			    instance, MB_YES, shared.shareddata.navpick.xpoints[i].xdisplay[instance],
+			    instance, true, shared.shareddata.navpick.xpoints[i].xdisplay[instance],
 			    shared.shareddata.navpick.xpoints[i].ydisplay[instance], shared.shareddata.navpick.xpoints[i].zdisplay[instance],
 			    &shared.shareddata.navpick.xpoints[i].xlon, &shared.shareddata.navpick.xpoints[i].ylat,
 			    &shared.shareddata.navpick.xpoints[i].xgrid[instance], &shared.shareddata.navpick.xpoints[i].ygrid[instance]);
 			mbview_getzdata(instance, shared.shareddata.navpick.xpoints[i].xgrid[instance],
 			                shared.shareddata.navpick.xpoints[i].ygrid[instance], &found,
 			                &shared.shareddata.navpick.xpoints[i].zdata);
-			if (found == MB_NO)
+			if (found == false)
 				shared.shareddata.navpick.xpoints[i].zdata = shared.shareddata.navpick.endpoints[0].zdata;
 			mbview_projectll2display(instance, shared.shareddata.navpick.xpoints[i].xlon,
 			                         shared.shareddata.navpick.xpoints[i].ylat, shared.shareddata.navpick.xpoints[i].zdata,
@@ -1899,14 +1899,14 @@ int mbview_navpicksize(size_t instance) {
 		    shared.shareddata.navpick.endpoints[1].ydisplay[instance] + xlength * (headingx - headingy);
 		for (i = 4; i < 8; i++) {
 			mbview_projectinverse(
-			    instance, MB_YES, shared.shareddata.navpick.xpoints[i].xdisplay[instance],
+			    instance, true, shared.shareddata.navpick.xpoints[i].xdisplay[instance],
 			    shared.shareddata.navpick.xpoints[i].ydisplay[instance], shared.shareddata.navpick.xpoints[i].zdisplay[instance],
 			    &shared.shareddata.navpick.xpoints[i].xlon, &shared.shareddata.navpick.xpoints[i].ylat,
 			    &shared.shareddata.navpick.xpoints[i].xgrid[instance], &shared.shareddata.navpick.xpoints[i].ygrid[instance]);
 			mbview_getzdata(instance, shared.shareddata.navpick.xpoints[i].xgrid[instance],
 			                shared.shareddata.navpick.xpoints[i].ygrid[instance], &found,
 			                &shared.shareddata.navpick.xpoints[i].zdata);
-			if (found == MB_NO)
+			if (found == false)
 				shared.shareddata.navpick.xpoints[i].zdata = shared.shareddata.navpick.endpoints[1].zdata;
 			shared.shareddata.navpick.xpoints[i].zdisplay[instance] =
 			    view->scale * (data->exageration * shared.shareddata.navpick.xpoints[i].zdata - view->zorigin);
@@ -2146,9 +2146,9 @@ int mbview_drawnav(size_t instance, int rez) {
 			glBegin(GL_LINE_STRIP);
 			for (jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints; jpoint += stride) {
 				/* set size and color */
-				if (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES ||
+				if (shared.shareddata.navs[inav].navpts[jpoint].selected == true ||
 				    (jpoint < shared.shareddata.navs[inav].npoints - 1 &&
-				     shared.shareddata.navs[inav].navpts[jpoint + 1].selected == MB_YES)) {
+				     shared.shareddata.navs[inav].navpts[jpoint + 1].selected == true)) {
 					glColor3f(colortable_object_red[MBV_COLOR_RED], colortable_object_green[MBV_COLOR_RED],
 					          colortable_object_blue[MBV_COLOR_RED]);
 				}
@@ -2174,8 +2174,8 @@ int mbview_drawnav(size_t instance, int rez) {
 			glBegin(GL_LINE_STRIP);
 			for (jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints - stride; jpoint += stride) {
 				/* set size and color */
-				if (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES ||
-				    shared.shareddata.navs[inav].navpts[jpoint + stride].selected == MB_YES) {
+				if (shared.shareddata.navs[inav].navpts[jpoint].selected == true ||
+				    shared.shareddata.navs[inav].navpts[jpoint + stride].selected == true) {
 					glColor3f(colortable_object_red[MBV_COLOR_RED], colortable_object_green[MBV_COLOR_RED],
 					          colortable_object_blue[MBV_COLOR_RED]);
 				}
@@ -2221,17 +2221,17 @@ int mbview_drawnav(size_t instance, int rez) {
 		/* loop over the navs plotting swathbounds */
 		for (inav = 0; inav < shared.shareddata.nnav; inav++) {
 			timegapuse = 60.0 * shared.shareddata.navs[inav].decimation * view->timegap;
-			if (shared.shareddata.navs[inav].swathbounds == MB_YES && shared.shareddata.navs[inav].nselected > 0) {
+			if (shared.shareddata.navs[inav].swathbounds == true && shared.shareddata.navs[inav].nselected > 0) {
 				glColor3f(colortable_object_red[MBV_COLOR_YELLOW], colortable_object_green[MBV_COLOR_YELLOW],
 				          colortable_object_blue[MBV_COLOR_YELLOW]);
 				glLineWidth((float)(shared.shareddata.navs[inav].size));
 
 				/* draw port side of swath */
-				swathbounds_on = MB_NO;
+				swathbounds_on = false;
 				for (jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints; jpoint++) {
 					/* draw from center at start of selected data */
-					if (swathbounds_on == MB_NO && shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES) {
-						swathbounds_on = MB_YES;
+					if (swathbounds_on == false && shared.shareddata.navs[inav].navpts[jpoint].selected == true) {
+						swathbounds_on = true;
 						glBegin(GL_LINE_STRIP);
 
 						if (data->display_mode == MBV_DISPLAY_3D && stride == 1) {
@@ -2255,15 +2255,15 @@ int mbview_drawnav(size_t instance, int rez) {
 					}
 
 					/* draw during selected data */
-					if (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES) {
+					if (shared.shareddata.navs[inav].navpts[jpoint].selected == true) {
 						glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointport.xdisplay[instance]),
 						           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointport.ydisplay[instance]),
 						           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointport.zdisplay[instance]));
 					}
 
 					/* draw to center at end of selected data */
-					if (swathbounds_on == MB_YES &&
-					    (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_NO ||
+					if (swathbounds_on == true &&
+					    (shared.shareddata.navs[inav].navpts[jpoint].selected == false ||
 					     jpoint >= shared.shareddata.navs[inav].npoints - 1 ||
 					     (jpoint > 0 && (shared.shareddata.navs[inav].navpts[jpoint].time_d -
 					                     shared.shareddata.navs[inav].navpts[jpoint - 1].time_d) > timegapuse))) {
@@ -2286,17 +2286,17 @@ int mbview_drawnav(size_t instance, int rez) {
 							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.zdisplay[instance]));
 						}
 
-						swathbounds_on = MB_NO;
+						swathbounds_on = false;
 						glEnd();
 					}
 				}
 
 				/* draw starboard side of swath */
-				swathbounds_on = MB_NO;
+				swathbounds_on = false;
 				for (jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints; jpoint++) {
 					/* draw from center at start of selected data */
-					if (swathbounds_on == MB_NO && shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES) {
-						swathbounds_on = MB_YES;
+					if (swathbounds_on == false && shared.shareddata.navs[inav].navpts[jpoint].selected == true) {
+						swathbounds_on = true;
 						glBegin(GL_LINE_STRIP);
 
 						if (data->display_mode == MBV_DISPLAY_3D && stride == 1) {
@@ -2320,15 +2320,15 @@ int mbview_drawnav(size_t instance, int rez) {
 					}
 
 					/* draw during selected data */
-					if (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES) {
+					if (shared.shareddata.navs[inav].navpts[jpoint].selected == true) {
 						glVertex3f((float)(shared.shareddata.navs[inav].navpts[jpoint].pointstbd.xdisplay[instance]),
 						           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointstbd.ydisplay[instance]),
 						           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointstbd.zdisplay[instance]));
 					}
 
 					/* draw to center at end of selected data */
-					if (swathbounds_on == MB_YES &&
-					    (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_NO ||
+					if (swathbounds_on == true &&
+					    (shared.shareddata.navs[inav].navpts[jpoint].selected == false ||
 					     jpoint >= shared.shareddata.navs[inav].npoints - 1 ||
 					     (jpoint > 0 && (shared.shareddata.navs[inav].navpts[jpoint].time_d -
 					                     shared.shareddata.navs[inav].navpts[jpoint - 1].time_d) > timegapuse))) {
@@ -2351,7 +2351,7 @@ int mbview_drawnav(size_t instance, int rez) {
 							           (float)(shared.shareddata.navs[inav].navpts[jpoint].pointcntr.zdisplay[instance]));
 						}
 
-						swathbounds_on = MB_NO;
+						swathbounds_on = false;
 						glEnd();
 					}
 				}
@@ -2485,11 +2485,11 @@ int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error) {
 	// fprintf(stderr,"mbview_picknavbyname:%s\n",name);
 
 	/* find and select the navigation associated with name */
-	found = MB_NO;
+	found = false;
 	if (shared.shareddata.nav_mode != MBV_NAV_OFF && shared.shareddata.nnav > 0) {
-		for (inav = 0; inav < shared.shareddata.nnav && found == MB_NO; inav++) {
+		for (inav = 0; inav < shared.shareddata.nnav && found == false; inav++) {
 			if (strcmp(shared.shareddata.navs[inav].name, name) == 0) {
-				found = MB_YES;
+				found = true;
 				shared.shareddata.navpick_type = MBV_PICK_TWOPOINT;
 				shared.shareddata.nav_selected[0] = inav;
 				shared.shareddata.nav_point_selected[0] = 0;
@@ -2499,11 +2499,11 @@ int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error) {
 				shared.shareddata.nav_selected_mbnavadjust[0] = MBV_SELECT_NONE;
 				shared.shareddata.nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
 				for (jpt = 0; jpt < shared.shareddata.navs[inav].npoints; jpt++) {
-					shared.shareddata.navs[inav].navpts[jpt].selected = MB_YES;
+					shared.shareddata.navs[inav].navpts[jpt].selected = true;
 				}
 			}
 		}
-		// if (found == MB_YES) fprintf(stderr,"FILE FOUND: %s\n",name);
+		// if (found == true) fprintf(stderr,"FILE FOUND: %s\n",name);
 	}
 
 	/* else beep */
@@ -2518,7 +2518,7 @@ int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error) {
 		XBell(view->dpy, 100);
 		for (i = 0; i < shared.shareddata.nnav; i++) {
 			for (j = 0; j < shared.shareddata.navs[i].npoints; j++) {
-				shared.shareddata.navs[i].navpts[j].selected = MB_NO;
+				shared.shareddata.navs[i].navpts[j].selected = false;
 			}
 		}
 	}

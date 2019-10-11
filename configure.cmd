@@ -386,9 +386,10 @@ LDFLAGS="-L/opt/X11/lib" CFLAGS="-g -I/opt/X11/include" CXXFLAGS="-std=c++11" \
     --with-fftw-lib=/usr/local/lib \
     --with-motif-include=/usr/local/include \
     --with-motif-lib=/usr/local/lib \
-    --with-otps-dir=/usr/local/opt/otps \
+    --with-otps-dir=/usr/local/src/OTPS2 \
     --enable-hardening \
-    --enable-mbtrn
+    --enable-mbtrn \
+    --enable-mbtnav
     #--enable-test
     #--enable-pcltools
 

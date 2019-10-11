@@ -794,7 +794,7 @@ int main(int argc, char **argv) {
 		/* now deal with old edit save file */
 		if (status == MB_SUCCESS) {
 			/* handle esf edits */
-			status = mb_esf_load(verbose, (char *)program_name, swathfile, MB_YES, MB_NO, esffile, &esf, &error);
+			status = mb_esf_load(verbose, (char *)program_name, swathfile, true, false, esffile, &esf, &error);
 		}
 
 		/* read */
@@ -1132,7 +1132,7 @@ int main(int argc, char **argv) {
 	/* loop over files checking for changed soundings */
 	for (int i = 0; i < nfile; i++) {
 		/* open esf file */
-		status = mb_esf_load(verbose, (char *)program_name, files[i].filelist, MB_NO, MB_YES, esffile, &esf, &error);
+		status = mb_esf_load(verbose, (char *)program_name, files[i].filelist, false, true, esffile, &esf, &error);
 		bool esffile_open = false;
 		if (status == MB_SUCCESS && esf.esffp != NULL)
 			esffile_open = true;
@@ -1167,7 +1167,7 @@ int main(int argc, char **argv) {
 		/* update mbprocess parameter file */
 		if (esffile_open) {
 			/* update mbprocess parameter file */
-			status = mb_pr_update_format(verbose, files[i].filelist, MB_YES, files[i].file_format, &error);
+			status = mb_pr_update_format(verbose, files[i].filelist, true, files[i].file_format, &error);
 			status = mb_pr_update_edit(verbose, files[i].filelist, MBP_EDIT_ON, esffile, &error);
 		}
 	}

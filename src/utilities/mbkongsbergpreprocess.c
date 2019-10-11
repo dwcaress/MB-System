@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 	char *message;
 
 	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
+	int read_datalist = false;
 	char read_file[MB_PATH_MAXLINE] = "";
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -109,9 +109,9 @@ int main(int argc, char **argv) {
 	char ifile[MB_PATH_MAXLINE] = "";
 	char dfile[MB_PATH_MAXLINE] = "";
 	char ofile[MB_PATH_MAXLINE] = "";
-	int ofile_set = MB_NO;
+	int ofile_set = false;
 	char odir[MB_PATH_MAXLINE] = "";
-	int odir_set = MB_NO;
+	int odir_set = false;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -160,7 +160,7 @@ int main(int argc, char **argv) {
 	int sonardepth_source = MB_DATA_DATA;
 
 	/* counting variables file */
-	int output_counts = MB_NO;
+	int output_counts = false;
 	int nfile_read = 0;
 	int nfile_write = 0;
 	int nrec_0x30_pu_id = 0;
@@ -242,7 +242,7 @@ int main(int argc, char **argv) {
 
 	/* merge sonardepth from separate parosci pressure sensor data file */
 	char sonardepthfile[MB_PATH_MAXLINE] = "";
-	int sonardepthdata = MB_NO;
+	int sonardepthdata = false;
 	int nsonardepth = 0;
 	double *sonardepth_time_d = NULL;
 	double *sonardepth_sonardepth = NULL;
@@ -288,7 +288,7 @@ int main(int argc, char **argv) {
 	double sonardepthfilterdepth = 20.0;
 
 	/* depth sensor offset and lever arm parameters */
-	int sonardepthlever = MB_NO;
+	int sonardepthlever = false;
 	double sonardepthoffset = 0.0; /* depth sensor offset (+ makes vehicle deeper) */
 	double depthsensoroffx = 0.0;
 	double depthsensoroffy = 0.0;
@@ -405,12 +405,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'C':
 			case 'c':
-				output_counts = MB_YES;
+				output_counts = true;
 				break;
 			case 'D':
 			case 'd':
 				sscanf(optarg, "%s", odir);
-				odir_set = MB_YES;
+				odir_set = true;
 				break;
 			case 'E':
 			case 'e':
@@ -436,7 +436,7 @@ int main(int argc, char **argv) {
 					}
 				}
 				if (nscan > 0)
-					sonardepthlever = MB_YES;
+					sonardepthlever = true;
 				break;
 			case 'F':
 			case 'f':
@@ -453,13 +453,13 @@ int main(int argc, char **argv) {
 			case 'O':
 			case 'o':
 				sscanf(optarg, "%s", ofile);
-				ofile_set = MB_YES;
+				ofile_set = true;
 				break;
 			case 'P':
 			case 'p':
 				sscanf(optarg, "%s", buffer);
 				if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-					sonardepthdata = MB_YES;
+					sonardepthdata = true;
 					strcpy(sonardepthfile, buffer);
 				}
 				else if (optarg[0] == 'F' || optarg[0] == 'f') {
@@ -590,7 +590,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* read sonardepth data from file if specified */
-	if (sonardepthdata == MB_YES) {
+	if (sonardepthdata == true) {
 		/* count the data points in the auv log file */
 		if ((tfp = fopen(sonardepthfile, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open sonardepth data file <%s> for reading\n", sonardepthfile);
@@ -720,7 +720,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
-		read_datalist = MB_YES;
+		read_datalist = true;
 
 	/* open file list */
 	if (read_datalist) {
@@ -730,18 +730,18 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(ifile, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES &&
+	while (read_data == true &&
 	       (format == MBF_EM300RAW || format == MBF_EM300MBA || format == MBF_EM710RAW || format == MBF_EM710MBA)) {
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
@@ -856,34 +856,34 @@ int main(int argc, char **argv) {
 
 				if (format == MBF_EM300RAW) {
 					nrec_0x58_bathymetry2++;
-					if (ping->png_raw_read == MB_YES)
+					if (ping->png_raw_read == true)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == MB_YES)
+					if (ping->png_ss_read == true)
 						nrec_0x59_sidescan2++;
 				}
 				else if (format == MBF_EM300MBA) {
 					nrec_0xE5_bathymetry_mbari59++;
-					if (ping->png_raw_read == MB_YES)
+					if (ping->png_raw_read == true)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == MB_YES)
+					if (ping->png_ss_read == true)
 						nrec_0x59_sidescan2++;
 				}
 				else if (format == MBF_EM710RAW) {
 					nrec_0x58_bathymetry2++;
-					if (ping->png_raw_read == MB_YES)
+					if (ping->png_raw_read == true)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == MB_YES)
+					if (ping->png_ss_read == true)
 						nrec_0x59_sidescan2++;
-					if (ping->png_quality_read == MB_YES)
+					if (ping->png_quality_read == true)
 						nrec_0x4F_quality++;
 				}
 				else if (format == MBF_EM710MBA) {
 					nrec_0xE5_bathymetry_mbari59++;
-					if (ping->png_raw_read == MB_YES)
+					if (ping->png_raw_read == true)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == MB_YES)
+					if (ping->png_ss_read == true)
 						nrec_0x59_sidescan2++;
-					if (ping->png_quality_read == MB_YES)
+					if (ping->png_quality_read == true)
 						nrec_0x4F_quality++;
 				}
 			}
@@ -1435,7 +1435,7 @@ int main(int argc, char **argv) {
 		status = mb_close(verbose, &imbio_ptr, &error);
 
 		/* output counts */
-		if (output_counts == MB_YES) {
+		if (output_counts == true) {
 			fprintf(stdout, "\nData records read from: %s\n", ifile);
 			fprintf(stdout, "     nrec_0x30_pu_id:         %d\n", nrec_0x30_pu_id);
 			fprintf(stdout, "     nrec_0x31_pu_status:          %d\n", nrec_0x31_pu_status);
@@ -1517,12 +1517,12 @@ int main(int argc, char **argv) {
 		/* figure out whether and what to read next */
 		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
@@ -1687,7 +1687,7 @@ int main(int argc, char **argv) {
 		}
 
 	/* output counts */
-	if (output_counts == MB_YES) {
+	if (output_counts == true) {
 		fprintf(stdout, "\nTotal data records read from: %s\n", read_file);
 		fprintf(stdout, "     nrec_0x30_pu_id_tot:     %d\n", nrec_0x30_pu_id_tot);
 		fprintf(stdout, "     nrec_0x31_pu_status_tot:      %d\n", nrec_0x31_pu_status_tot);
@@ -1778,20 +1778,20 @@ int main(int argc, char **argv) {
 				exit(MB_ERROR_OPEN_FAIL);
 			}
 			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		/* else copy single filename to be read */
 		else {
 			strcpy(ifile, read_file);
-			read_data = MB_YES;
+			read_data = true;
 		}
 
 		/* loop over all files to be read */
-		while (read_data == MB_YES && (format == MBF_EM710RAW || format == MBF_EM710MBA)) {
+		while (read_data == true && (format == MBF_EM710RAW || format == MBF_EM710MBA)) {
 			/* figure out the output file name if not specified */
-			if (ofile_set == MB_NO) {
+			if (ofile_set == false) {
 				status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
 				if (format == MBF_EM710MBA && strncmp(".mb59", &ifile[strlen(ifile) - 5], 5) == 0)
 					sprintf(ofile, "%sf.mb%d", fileroot, MBF_EM710MBA);
@@ -1800,7 +1800,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* if output directory was set by user, reset file path */
-			if (odir_set == MB_YES) {
+			if (odir_set == true) {
 				strcpy(buffer, odir);
 				if (buffer[strlen(odir) - 1] != '/')
 					strcat(buffer, "/");
@@ -1826,7 +1826,7 @@ int main(int argc, char **argv) {
 
 			/* if ofile has been set then there is only one output file, otherwise there
 			    is an output file for each input file */
-			if (ofile_set == MB_NO || nfile_write == 0) {
+			if (ofile_set == false || nfile_write == 0) {
 				/* initialize writing the output swath sonar file */
 				if ((status = mb_write_init(verbose, ofile, MBF_EM710MBA, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
 				                            &error)) != MB_SUCCESS) {
@@ -1967,11 +1967,11 @@ int main(int argc, char **argv) {
 					ping = (struct mbsys_simrad3_ping_struct *)&(istore->pings[istore->ping_index]);
 
 					nrec_0xE5_bathymetry_mbari59++;
-					if (ping->png_raw_read == MB_YES)
+					if (ping->png_raw_read == true)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == MB_YES)
+					if (ping->png_ss_read == true)
 						nrec_0x59_sidescan2++;
-					if (ping->png_quality_read == MB_YES)
+					if (ping->png_quality_read == true)
 						nrec_0x4F_quality++;
 				}
 				else if (status == MB_SUCCESS) {
@@ -2167,7 +2167,7 @@ int main(int argc, char **argv) {
 						else
 							depthsensor_mode = MBKONSBERGPREPROCESS_ZMODE_USE_HEAVE_ONLY;
 					}
-					if (sonardepthlever == MB_NO) {
+					if (sonardepthlever == false) {
 						depth_off_x = istore->par_dsx;
 						depth_off_y = istore->par_dsy;
 						depth_off_z = istore->par_dsz;
@@ -2533,7 +2533,7 @@ int main(int argc, char **argv) {
 					ping->png_pixel_size = 0;
 					ping->png_pixels_ss = 0;
 					status =
-					    mbsys_simrad3_makess(verbose, imbio_ptr, istore_ptr, MB_NO, pixel_size, MB_NO, swath_width, 1, &error);
+					    mbsys_simrad3_makess(verbose, imbio_ptr, istore_ptr, false, pixel_size, false, swath_width, 1, &error);
 				}
 
 				/* handle unknown data */
@@ -2557,7 +2557,7 @@ int main(int argc, char **argv) {
 
 				/* write some data */
 				if (error == MB_ERROR_NO_ERROR) {
-					status = mb_put_all(verbose, ombio_ptr, istore_ptr, MB_NO, kind, time_i, time_d, navlon, navlat, speed,
+					status = mb_put_all(verbose, ombio_ptr, istore_ptr, false, kind, time_i, time_d, navlon, navlat, speed,
 					                    heading, obeams_bath, obeams_amp, opixels_ss, beamflag, bath, amp, bathacrosstrack,
 					                    bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 					if (status != MB_SUCCESS) {
@@ -2571,7 +2571,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* output counts */
-			if (output_counts == MB_YES) {
+			if (output_counts == true) {
 				fprintf(stdout, "\nData records written to: %s\n", ofile);
 				fprintf(stdout, "     nrec_0x30_pu_id:         %d\n", nrec_0x30_pu_id);
 				fprintf(stdout, "     nrec_0x31_pu_status:          %d\n", nrec_0x31_pu_status);
@@ -2653,19 +2653,19 @@ int main(int argc, char **argv) {
 			/* figure out whether and what to read next */
 			if (read_datalist) {
 				if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-					read_data = MB_YES;
+					read_data = true;
 				else
-					read_data = MB_NO;
+					read_data = false;
 			}
 			else {
-				read_data = MB_NO;
+				read_data = false;
 			}
 
 			/* close the input swath file */
 			status = mb_close(verbose, &imbio_ptr, &error);
 
 			/* close the output swath file if necessary */
-			if (ofile_set == MB_NO || read_data == MB_NO) {
+			if (ofile_set == false || read_data == false) {
 				status = mb_close(verbose, &ombio_ptr, &error);
 
 				/* open up start and end times by two minutes */
@@ -2722,7 +2722,7 @@ int main(int argc, char **argv) {
 
 				/* generate inf fnv and fbt files */
 				if (status == MB_SUCCESS) {
-					status = mb_make_info(verbose, MB_YES, ofile, MBF_EM710MBA, &error);
+					status = mb_make_info(verbose, true, ofile, MBF_EM710MBA, &error);
 				}
 			}
 
@@ -2732,7 +2732,7 @@ int main(int argc, char **argv) {
 			mb_datalist_close(verbose, &datalist, &error);
 
 		/* output counts */
-		if (output_counts == MB_YES) {
+		if (output_counts == true) {
 			fprintf(stdout, "\nTotal files read:  %d\n", nfile_read);
 			fprintf(stdout, "Total files written: %d\n", nfile_write);
 			fprintf(stdout, "\nTotal data records written from: %s\n", read_file);

@@ -712,9 +712,9 @@ int mbr_info_mgd77tab(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_NO;
+	*variable_beams = false;
+	*traveltime = true;
+	*beam_flagging = false;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -903,10 +903,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			data->last_field_defined = 0;
 			int ifield = 0;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_survey_id = MB_NO;
+				data->defined_survey_id = false;
 				const int nscan = sscanf(fields[ifield], "%s", data->survey_id);
 				if (nscan == 1) {
-					data->defined_survey_id = MB_YES;
+					data->defined_survey_id = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -914,10 +914,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 1 of the 26 expected fields */
 			ifield = 1;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_timezone = MB_NO;
+				data->defined_timezone = false;
 				const int nscan = sscanf(fields[ifield], "%f", &data->timezone);
 				if (nscan == 1) {
-					data->defined_timezone = MB_YES;
+					data->defined_timezone = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -925,10 +925,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 2 of the 26 expected fields */
 			ifield = 2;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_date = MB_NO;
+				data->defined_date = false;
 				const int nscan = sscanf(fields[ifield], "%d", &data->date);
 				if (nscan == 1) {
-					data->defined_date = MB_YES;
+					data->defined_date = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -936,10 +936,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 3 of the 26 expected fields */
 			ifield = 3;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_time = MB_NO;
+				data->defined_time = false;
 				const int nscan = sscanf(fields[ifield], "%f", &data->time);
 				if (nscan == 1) {
-					data->defined_time = MB_YES;
+					data->defined_time = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -947,10 +947,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 4 of the 26 expected fields */
 			ifield = 4;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_lat = MB_NO;
+				data->defined_lat = false;
 				const int nscan = sscanf(fields[ifield], "%f", &data->lat);
 				if (nscan == 1) {
-					data->defined_lat = MB_YES;
+					data->defined_lat = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -958,10 +958,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 5 of the 26 expected fields */
 			ifield = 5;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_lon = MB_NO;
+				data->defined_lon = false;
 				const int nscan = sscanf(fields[ifield], "%f", &data->lon);
 				if (nscan == 1) {
-					data->defined_lon = MB_YES;
+					data->defined_lon = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -969,10 +969,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 6 of the 26 expected fields */
 			ifield = 6;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_pos_type = MB_NO;
+				data->defined_pos_type = false;
 				const int nscan = sscanf(fields[ifield], "%d", &data->pos_type);
 				if (nscan == 1) {
-					data->defined_pos_type = MB_YES;
+					data->defined_pos_type = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -980,10 +980,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 7 of the 26 expected fields */
 			ifield = 7;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_nav_qualco = MB_NO;
+				data->defined_nav_qualco = false;
 				const int nscan = sscanf(fields[ifield], "%d", &data->nav_qualco);
 				if (nscan == 1) {
-					data->defined_nav_qualco = MB_YES;
+					data->defined_nav_qualco = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -991,10 +991,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 8 of the 26 expected fields */
 			ifield = 8;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_bat_ttime = MB_NO;
+				data->defined_bat_ttime = false;
 				const int nscan = sscanf(fields[ifield], "%f", &data->bat_ttime);
 				if (nscan == 1) {
-					data->defined_bat_ttime = MB_YES;
+					data->defined_bat_ttime = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1002,10 +1002,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 9 of the 26 expected fields */
 			ifield = 9;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_corr_depth = MB_NO;
+				data->defined_corr_depth = false;
 				const int nscan = sscanf(fields[ifield], "%f", &data->corr_depth);
 				if (nscan == 1) {
-					data->defined_corr_depth = MB_YES;
+					data->defined_corr_depth = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1013,10 +1013,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 10 of the 26 expected fields */
 			ifield = 10;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_bat_cpco = MB_NO;
+				data->defined_bat_cpco = false;
 				const int nscan = sscanf(fields[ifield], "%d", &data->bat_cpco);
 				if (nscan == 1) {
-					data->defined_bat_cpco = MB_YES;
+					data->defined_bat_cpco = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1024,10 +1024,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 11 of the 26 expected fields */
 			ifield = 11;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_bat_typco = MB_NO;
+				data->defined_bat_typco = false;
 				const int nscan = sscanf(fields[ifield], "%d", &data->bat_typco);
 				if (nscan == 1) {
-					data->defined_bat_typco = MB_YES;
+					data->defined_bat_typco = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1035,10 +1035,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 12 of the 26 expected fields */
 			ifield = 12;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_bat_qualco = MB_NO;
+				data->defined_bat_qualco = false;
 				const int nscan = sscanf(fields[ifield], "%d", &data->bat_qualco);
 				if (nscan == 1) {
-					data->defined_bat_qualco = MB_YES;
+					data->defined_bat_qualco = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1046,10 +1046,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 13 of the 26 expected fields */
 			ifield = 13;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_mag_tot = MB_NO;
+				data->defined_mag_tot = false;
 				const int nscan = sscanf(fields[ifield], "%f", &data->mag_tot);
 				if (nscan == 1) {
-					data->defined_mag_tot = MB_YES;
+					data->defined_mag_tot = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1057,10 +1057,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 14 of the 26 expected fields */
 			ifield = 14;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_mag_tot2 = MB_NO;
+				data->defined_mag_tot2 = false;
 				const int nscan = sscanf(fields[ifield], "%f", &data->mag_tot2);
 				if (nscan == 1) {
-					data->defined_mag_tot2 = MB_YES;
+					data->defined_mag_tot2 = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1068,10 +1068,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 15 of the 26 expected fields */
 			ifield = 15;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_mag_res = MB_NO;
+				data->defined_mag_res = false;
 				const int nscan = sscanf(fields[ifield], "%f", &data->mag_res);
 				if (nscan == 1) {
-					data->defined_mag_res = MB_YES;
+					data->defined_mag_res = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1079,10 +1079,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 16 of the 26 expected fields */
 			ifield = 16;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_mag_ressen = MB_NO;
+				data->defined_mag_ressen = false;
 				const int nscan = sscanf(fields[ifield], "%d", &data->mag_ressen);
 				if (nscan == 1) {
-					data->defined_mag_ressen = MB_YES;
+					data->defined_mag_ressen = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1090,10 +1090,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 17 of the 26 expected fields */
 			ifield = 17;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_mag_dicorr = MB_NO;
+				data->defined_mag_dicorr = false;
 				const int nscan = sscanf(fields[ifield], "%f", &data->mag_dicorr);
 				if (nscan == 1) {
-					data->defined_mag_dicorr = MB_YES;
+					data->defined_mag_dicorr = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1101,10 +1101,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 18 of the 26 expected fields */
 			ifield = 18;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_mag_sdepth = MB_NO;
+				data->defined_mag_sdepth = false;
 				const int nscan = sscanf(fields[ifield], "%d", &data->mag_sdepth);
 				if (nscan == 1) {
-					data->defined_mag_sdepth = MB_YES;
+					data->defined_mag_sdepth = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1112,10 +1112,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 19 of the 26 expected fields */
 			ifield = 19;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_mag_qualco = MB_NO;
+				data->defined_mag_qualco = false;
 				const int nscan = sscanf(fields[ifield], "%d", &data->mag_qualco);
 				if (nscan == 1) {
-					data->defined_mag_qualco = MB_YES;
+					data->defined_mag_qualco = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1123,10 +1123,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 20 of the 26 expected fields */
 			ifield = 20;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_gra_obs = MB_NO;
+				data->defined_gra_obs = false;
 				const int nscan = sscanf(fields[ifield], "%f", &data->gra_obs);
 				if (nscan == 1) {
-					data->defined_gra_obs = MB_YES;
+					data->defined_gra_obs = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1134,10 +1134,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 21 of the 26 expected fields */
 			ifield = 21;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_eotvos = MB_NO;
+				data->defined_eotvos = false;
 				const int nscan = sscanf(fields[ifield], "%f", &data->eotvos);
 				if (nscan == 1) {
-					data->defined_eotvos = MB_YES;
+					data->defined_eotvos = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1145,10 +1145,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 22 of the 26 expected fields */
 			ifield = 22;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_freeair = MB_NO;
+				data->defined_freeair = false;
 				const int nscan = sscanf(fields[ifield], "%f", &data->freeair);
 				if (nscan == 1) {
-					data->defined_freeair = MB_YES;
+					data->defined_freeair = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1156,10 +1156,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 23 of the 26 expected fields */
 			ifield = 23;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_gra_qualco = MB_NO;
+				data->defined_gra_qualco = false;
 				const int nscan = sscanf(fields[ifield], "%d", &data->gra_qualco);
 				if (nscan == 1) {
-					data->defined_gra_qualco = MB_YES;
+					data->defined_gra_qualco = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1167,10 +1167,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 24 of the 26 expected fields */
 			ifield = 24;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_lineid = MB_NO;
+				data->defined_lineid = false;
 				const int nscan = sscanf(fields[ifield], "%d", &data->lineid);
 				if (nscan == 1) {
-					data->defined_lineid = MB_YES;
+					data->defined_lineid = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1178,10 +1178,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* now parse field 25 of the 26 expected fields */
 			ifield = 25;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
-				data->defined_pointid = MB_NO;
+				data->defined_pointid = false;
 				const int nscan = sscanf(fields[ifield], "%d", &data->pointid);
 				if (nscan == 1) {
-					data->defined_pointid = MB_YES;
+					data->defined_pointid = true;
 					data->last_field_defined = ifield;
 				}
 			}
@@ -1443,11 +1443,11 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 
 		/* write out each field */
 		int shift = 0;
-		if (data->defined_survey_id == MB_YES) {
+		if (data->defined_survey_id == true) {
 			sprintf(&line[shift], "%s", data->survey_id);
 			shift = strlen(line);
 		}
-		if (data->defined_timezone == MB_YES) {
+		if (data->defined_timezone == true) {
 			sprintf(&line[shift], "\t%f", data->timezone);
 			shift = strlen(line);
 		}
@@ -1455,7 +1455,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_date == MB_YES) {
+		if (data->defined_date == true) {
 			sprintf(&line[shift], "\t%d", data->date);
 			shift = strlen(line);
 		}
@@ -1463,7 +1463,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_time == MB_YES) {
+		if (data->defined_time == true) {
 			sprintf(&line[shift], "\t%f", data->time);
 			shift = strlen(line);
 		}
@@ -1471,7 +1471,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_lat == MB_YES) {
+		if (data->defined_lat == true) {
 			sprintf(&line[shift], "\t%f", data->lat);
 			shift = strlen(line);
 		}
@@ -1479,7 +1479,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_lon == MB_YES) {
+		if (data->defined_lon == true) {
 			sprintf(&line[shift], "\t%f", data->lon);
 			shift = strlen(line);
 		}
@@ -1487,7 +1487,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_pos_type == MB_YES) {
+		if (data->defined_pos_type == true) {
 			sprintf(&line[shift], "\t%d", data->pos_type);
 			shift = strlen(line);
 		}
@@ -1495,7 +1495,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_nav_qualco == MB_YES) {
+		if (data->defined_nav_qualco == true) {
 			sprintf(&line[shift], "\t%d", data->nav_qualco);
 			shift = strlen(line);
 		}
@@ -1503,7 +1503,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_bat_ttime == MB_YES) {
+		if (data->defined_bat_ttime == true) {
 			sprintf(&line[shift], "\t%f", data->bat_ttime);
 			shift = strlen(line);
 		}
@@ -1511,7 +1511,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_corr_depth == MB_YES) {
+		if (data->defined_corr_depth == true) {
 			sprintf(&line[shift], "\t%f", data->corr_depth);
 			shift = strlen(line);
 		}
@@ -1519,7 +1519,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_bat_cpco == MB_YES) {
+		if (data->defined_bat_cpco == true) {
 			sprintf(&line[shift], "\t%d", data->bat_cpco);
 			shift = strlen(line);
 		}
@@ -1527,7 +1527,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_bat_typco == MB_YES) {
+		if (data->defined_bat_typco == true) {
 			sprintf(&line[shift], "\t%d", data->bat_typco);
 			shift = strlen(line);
 		}
@@ -1535,7 +1535,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_bat_qualco == MB_YES) {
+		if (data->defined_bat_qualco == true) {
 			sprintf(&line[shift], "\t%d", data->bat_qualco);
 			shift = strlen(line);
 		}
@@ -1543,7 +1543,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_tot == MB_YES) {
+		if (data->defined_mag_tot == true) {
 			sprintf(&line[shift], "\t%f", data->mag_tot);
 			shift = strlen(line);
 		}
@@ -1551,7 +1551,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_tot2 == MB_YES) {
+		if (data->defined_mag_tot2 == true) {
 			sprintf(&line[shift], "\t%f", data->mag_tot2);
 			shift = strlen(line);
 		}
@@ -1559,7 +1559,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_res == MB_YES) {
+		if (data->defined_mag_res == true) {
 			sprintf(&line[shift], "\t%f", data->mag_res);
 			shift = strlen(line);
 		}
@@ -1567,7 +1567,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_ressen == MB_YES) {
+		if (data->defined_mag_ressen == true) {
 			sprintf(&line[shift], "\t%d", data->mag_ressen);
 			shift = strlen(line);
 		}
@@ -1575,7 +1575,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_dicorr == MB_YES) {
+		if (data->defined_mag_dicorr == true) {
 			sprintf(&line[shift], "\t%f", data->mag_dicorr);
 			shift = strlen(line);
 		}
@@ -1583,7 +1583,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_sdepth == MB_YES) {
+		if (data->defined_mag_sdepth == true) {
 			sprintf(&line[shift], "\t%d", data->mag_sdepth);
 			shift = strlen(line);
 		}
@@ -1591,7 +1591,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_qualco == MB_YES) {
+		if (data->defined_mag_qualco == true) {
 			sprintf(&line[shift], "\t%d", data->mag_qualco);
 			shift = strlen(line);
 		}
@@ -1599,7 +1599,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_gra_obs == MB_YES) {
+		if (data->defined_gra_obs == true) {
 			sprintf(&line[shift], "\t%f", data->gra_obs);
 			shift = strlen(line);
 		}
@@ -1607,7 +1607,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_eotvos == MB_YES) {
+		if (data->defined_eotvos == true) {
 			sprintf(&line[shift], "\t%f", data->eotvos);
 			shift = strlen(line);
 		}
@@ -1615,7 +1615,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_freeair == MB_YES) {
+		if (data->defined_freeair == true) {
 			sprintf(&line[shift], "\t%f", data->freeair);
 			shift = strlen(line);
 		}
@@ -1623,7 +1623,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_gra_qualco == MB_YES) {
+		if (data->defined_gra_qualco == true) {
 			sprintf(&line[shift], "\t%d", data->gra_qualco);
 			shift = strlen(line);
 		}
@@ -1631,7 +1631,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_lineid == MB_YES) {
+		if (data->defined_lineid == true) {
 			sprintf(&line[shift], "\t%d", data->lineid);
 			shift = strlen(line);
 		}
@@ -1639,7 +1639,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_pointid == MB_YES) {
+		if (data->defined_pointid == true) {
 			sprintf(&line[shift], "\t%d", data->pointid);
 			shift = strlen(line);
 		}
@@ -1752,107 +1752,107 @@ int mbr_wt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* check for valid fields */
 		data->last_field_defined = 0;
 		if (strlen(data->survey_id) > 0) {
-			data->defined_survey_id = MB_YES;
+			data->defined_survey_id = true;
 			data->last_field_defined = 0;
 		}
 		if (data->timezone != 0.0) {
-			data->defined_timezone = MB_YES;
+			data->defined_timezone = true;
 			data->last_field_defined = 1;
 		}
 		if (data->date != 0) {
-			data->defined_date = MB_YES;
+			data->defined_date = true;
 			data->last_field_defined = 2;
 		}
 		if (data->time != 0.0) {
-			data->defined_time = MB_YES;
+			data->defined_time = true;
 			data->last_field_defined = 3;
 		}
 		if (data->lat != 0.0) {
-			data->defined_lat = MB_YES;
+			data->defined_lat = true;
 			data->last_field_defined = 4;
 		}
 		if (data->lon != 0.0) {
-			data->defined_lon = MB_YES;
+			data->defined_lon = true;
 			data->last_field_defined = 5;
 		}
 		if (data->pos_type != 0) {
-			data->defined_pos_type = MB_YES;
+			data->defined_pos_type = true;
 			data->last_field_defined = 6;
 		}
 		if (data->nav_qualco != 0) {
-			data->defined_nav_qualco = MB_YES;
+			data->defined_nav_qualco = true;
 			data->last_field_defined = 7;
 		}
 		if (data->bat_ttime != 0.0) {
-			data->defined_bat_ttime = MB_YES;
+			data->defined_bat_ttime = true;
 			data->last_field_defined = 8;
 		}
 		if (data->corr_depth != 0.0) {
-			data->defined_corr_depth = MB_YES;
+			data->defined_corr_depth = true;
 			data->last_field_defined = 9;
 		}
 		if (data->bat_cpco != 0) {
-			data->defined_bat_cpco = MB_YES;
+			data->defined_bat_cpco = true;
 			data->last_field_defined = 10;
 		}
 		if (data->bat_typco != 0) {
-			data->defined_bat_typco = MB_YES;
+			data->defined_bat_typco = true;
 			data->last_field_defined = 11;
 		}
 		if (data->bat_qualco != 0) {
-			data->defined_bat_qualco = MB_YES;
+			data->defined_bat_qualco = true;
 			data->last_field_defined = 12;
 		}
 		if (data->mag_tot != 0.0) {
-			data->defined_mag_tot = MB_YES;
+			data->defined_mag_tot = true;
 			data->last_field_defined = 13;
 		}
 		if (data->mag_tot2 != 0.0) {
-			data->defined_mag_tot2 = MB_YES;
+			data->defined_mag_tot2 = true;
 			data->last_field_defined = 14;
 		}
 		if (data->mag_res != 0.0) {
-			data->defined_mag_res = MB_YES;
+			data->defined_mag_res = true;
 			data->last_field_defined = 15;
 		}
 		if (data->mag_ressen != 0) {
-			data->defined_mag_ressen = MB_YES;
+			data->defined_mag_ressen = true;
 			data->last_field_defined = 16;
 		}
 		if (data->mag_dicorr != 0.0) {
-			data->defined_mag_dicorr = MB_YES;
+			data->defined_mag_dicorr = true;
 			data->last_field_defined = 17;
 		}
 		if (data->mag_sdepth != 0) {
-			data->defined_mag_sdepth = MB_YES;
+			data->defined_mag_sdepth = true;
 			data->last_field_defined = 18;
 		}
 		if (data->mag_qualco != 0) {
-			data->defined_mag_qualco = MB_YES;
+			data->defined_mag_qualco = true;
 			data->last_field_defined = 19;
 		}
 		if (data->gra_obs != 0.0) {
-			data->defined_gra_obs = MB_YES;
+			data->defined_gra_obs = true;
 			data->last_field_defined = 20;
 		}
 		if (data->eotvos != 0.0) {
-			data->defined_eotvos = MB_YES;
+			data->defined_eotvos = true;
 			data->last_field_defined = 21;
 		}
 		if (data->freeair != 0.0) {
-			data->defined_freeair = MB_YES;
+			data->defined_freeair = true;
 			data->last_field_defined = 22;
 		}
 		if (data->gra_qualco != 0) {
-			data->defined_gra_qualco = MB_YES;
+			data->defined_gra_qualco = true;
 			data->last_field_defined = 23;
 		}
 		if (data->lineid != 0) {
-			data->defined_lineid = MB_YES;
+			data->defined_lineid = true;
 			data->last_field_defined = 24;
 		}
 		if (data->pointid != 0) {
-			data->defined_pointid = MB_YES;
+			data->defined_pointid = true;
 			data->last_field_defined = 25;
 		}
 	}

@@ -457,7 +457,7 @@ int mbview_enableviewsites(int verbose, size_t instance, int *error)
 		data = &(view->data);
 
 		/* if instance active reset action sensitivity */
-		if (data->active == MB_YES)
+		if (data->active == true)
 			mbview_update_sensitivity(verbose, instance, error);
 	}
 
@@ -500,7 +500,7 @@ int mbview_enableeditsites(int verbose, size_t instance, int *error)
 	shared.shareddata.site_mode = MBV_SITE_EDIT;
 
 	/* set widget sensitivity */
-	if (data->active == MB_YES)
+	if (data->active == true)
 		mbview_update_sensitivity(mbv_verbose, instance, error);
 
 	/* print output debug statements */
@@ -552,7 +552,7 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 		mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		/* look for nearest site */
-		if (found == MB_YES) {
+		if (found == true) {
 			/* first deselect previously selected site */
 			shared.shareddata.site_selected = MBV_SELECT_NONE;
 

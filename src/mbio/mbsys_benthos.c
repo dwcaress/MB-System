@@ -920,11 +920,11 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 
 		groundrange = sqrt(pow(store->ssrawslantrange, 2) - pow(store->bath[0], 2));
 
-		if (swath_width_set == MB_NO) {
+		if (swath_width_set == false) {
 			*swath_width = 2.0 * groundrange;
 		}
 
-		if (pixel_size_set == MB_NO) {
+		if (pixel_size_set == false) {
 			pixel_size_calc = groundrange / groundsamples;
 
 			if ((*pixel_size) <= 0.0)

@@ -66,9 +66,9 @@ int mbr_info_gsfgenmb(int verbose, int *system, int *beams_bath_max, int *beams_
 	        GSF_VERSION);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_GSF;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -130,7 +130,7 @@ int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 	status &= mbsys_gsf_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* set processing parameter output flag */
-	mb_io_ptr->save1 = MB_NO;
+	mb_io_ptr->save1 = false;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -469,7 +469,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS) {
 		/* if first survey ping and no processing parameters output,
 		    output the processing parameters */
-		if (data->kind == MB_DATA_DATA && mb_io_ptr->save1 == MB_NO) {
+		if (data->kind == MB_DATA_DATA && mb_io_ptr->save1 == false) {
 			/* write a processing parameter record */
 			dataID->recordID = GSF_RECORD_PROCESSING_PARAMETERS;
 			if (gsfWrite((int)mb_io_ptr->gsfid, dataID, records) < 0) {
@@ -477,12 +477,12 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				*error = MB_ERROR_WRITE_FAIL;
 			}
 			dataID->recordID = GSF_RECORD_SWATH_BATHYMETRY_PING;
-			mb_io_ptr->save1 = MB_YES;
+			mb_io_ptr->save1 = true;
 		}
 
 		/* if a processing parameter record is output, keep track of it */
 		else if (data->kind == MB_DATA_PROCESSING_PARAMETERS)
-			mb_io_ptr->save1 = MB_YES;
+			mb_io_ptr->save1 = true;
 
 		/* write the record */
 		if (gsfWrite((int)mb_io_ptr->gsfid, dataID, records) < 0) {

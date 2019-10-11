@@ -88,10 +88,10 @@ int main(int argc, char **argv) {
 	char read_file[MB_PATH_MAXLINE];
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
-	int look_bounds = MB_NO;
-	int copyfiles = MB_NO;
-	int reportdatalists = MB_NO;
-	int file_in_bounds = MB_NO;
+	int look_bounds = false;
+	int copyfiles = false;
+	int reportdatalists = false;
+	int file_in_bounds = false;
 	double file_weight = 1.0;
 	int format;
 	int pings;
@@ -109,23 +109,23 @@ int main(int argc, char **argv) {
 	char command[MB_PATH_MAXLINE];
 	char *filename;
 	int nfile = 0;
-	int make_inf = MB_NO;
-	int force_update = MB_NO;
-	int status_report = MB_NO;
-	int problem_report = MB_NO;
+	int make_inf = false;
+	int force_update = false;
+	int status_report = false;
+	int problem_report = false;
 	int nparproblem;
 	int ndataproblem;
 	int nparproblemtot = 0;
 	int ndataproblemtot = 0;
 	int nproblemfiles = 0;
-	int remove_locks = MB_NO;
-	int make_datalistp = MB_NO;
+	int remove_locks = false;
+	int make_datalistp = false;
 	int recursion = -1;
 
 	int prstatus = MB_PR_FILE_UP_TO_DATE;
 	int lock_status = MB_SUCCESS;
 	int lock_error = MB_ERROR_NO_ERROR;
-	int locked = MB_NO;
+	int locked = false;
 	int lock_purpose = 0;
 	mb_path lock_program = "";
 	mb_path lock_cpu = "";
@@ -161,13 +161,13 @@ int main(int argc, char **argv) {
 					verbose++;
 				}
 				else if (strcmp("help", options[option_index].name) == 0) {
-					help = MB_YES;
+					help = true;
 				}
 				else if (strcmp("copy", options[option_index].name) == 0) {
-					copyfiles = MB_YES;
+					copyfiles = true;
 				}
 				else if (strcmp("report", options[option_index].name) == 0) {
-					copyfiles = MB_YES;
+					copyfiles = true;
 				}
 				else if (strcmp("format", options[option_index].name) == 0) {
 					sscanf(optarg, "%d", &format);
@@ -176,33 +176,33 @@ int main(int argc, char **argv) {
 					sscanf(optarg, "%s", read_file);
 				}
 				else if (strcmp("make-ancilliary", options[option_index].name) == 0) {
-					force_update = MB_YES;
-					make_inf = MB_YES;
+					force_update = true;
+					make_inf = true;
 				}
 				else if (strcmp("update-ancilliary", options[option_index].name) == 0) {
-					make_inf = MB_YES;
+					make_inf = true;
 				}
 				else if (strcmp("processed", options[option_index].name) == 0) {
 					look_processed = MB_DATALIST_LOOK_YES;
 				}
 				else if (strcmp("problem", options[option_index].name) == 0) {
-					problem_report = MB_YES;
+					problem_report = true;
 				}
 				else if (strcmp("bounds", options[option_index].name) == 0) {
 					mb_get_bounds(optarg, bounds);
-					look_bounds = MB_YES;
+					look_bounds = true;
 				}
 				else if (strcmp("status", options[option_index].name) == 0) {
-					status_report = MB_YES;
+					status_report = true;
 				}
 				else if (strcmp("raw", options[option_index].name) == 0) {
 					look_processed = MB_DATALIST_LOOK_NO;
 				}
 				else if (strcmp("unlock", options[option_index].name) == 0) {
-					remove_locks = MB_YES;
+					remove_locks = true;
 				}
 				else if (strcmp("datalistp", options[option_index].name) == 0) {
-					make_datalistp = MB_YES;
+					make_datalistp = true;
 				}
 
 				break;
@@ -210,11 +210,11 @@ int main(int argc, char **argv) {
 			/* short options (deprecated) */
 			case 'C':
 			case 'c':
-				copyfiles = MB_YES;
+				copyfiles = true;
 				break;
 			case 'D':
 			case 'd':
-				reportdatalists = MB_YES;
+				reportdatalists = true;
 				break;
 			case 'F':
 			case 'f':
@@ -230,12 +230,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'N':
 			case 'n':
-				force_update = MB_YES;
-				make_inf = MB_YES;
+				force_update = true;
+				make_inf = true;
 				break;
 			case 'O':
 			case 'o':
-				make_inf = MB_YES;
+				make_inf = true;
 				break;
 			case 'P':
 			case 'p':
@@ -243,16 +243,16 @@ int main(int argc, char **argv) {
 				break;
 			case 'Q':
 			case 'q':
-				problem_report = MB_YES;
+				problem_report = true;
 				break;
 			case 'R':
 			case 'r':
 				mb_get_bounds(optarg, bounds);
-				look_bounds = MB_YES;
+				look_bounds = true;
 				break;
 			case 'S':
 			case 's':
-				status_report = MB_YES;
+				status_report = true;
 				break;
 			case 'U':
 			case 'u':
@@ -264,11 +264,11 @@ int main(int argc, char **argv) {
 				break;
 			case 'Y':
 			case 'y':
-				remove_locks = MB_YES;
+				remove_locks = true;
 				break;
 			case 'Z':
 			case 'z':
-				make_datalistp = MB_YES;
+				make_datalistp = true;
 				break;
 			case '?':
 				errflg = true;
@@ -356,7 +356,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "Convenience datalist file %s created...\n", file);
 
 		/* exit unless building ancillary files has also been requested */
-		if (make_inf == MB_NO)
+		if (make_inf == false)
 			exit(error);
 	}
 
@@ -368,10 +368,10 @@ int main(int argc, char **argv) {
 	if (format > 0) {
 		nfile++;
 
-		if (make_inf == MB_YES) {
+		if (make_inf == true) {
 			status = mb_make_info(verbose, force_update, read_file, format, &error);
 		}
-		else if (problem_report == MB_YES) {
+		else if (problem_report == true) {
 			status = mb_pr_check(verbose, read_file, &nparproblem, &ndataproblem, &error);
 			if (nparproblem + ndataproblem > 0)
 				nproblemfiles++;
@@ -380,24 +380,24 @@ int main(int argc, char **argv) {
 		}
 		else {
 			/* check for mbinfo file if bounds checking enabled */
-			if (look_bounds == MB_YES) {
+			if (look_bounds == true) {
 				status = mb_check_info(verbose, read_file, lonflip, bounds, &file_in_bounds, &error);
 				if (status == MB_FAILURE) {
-					file_in_bounds = MB_YES;
+					file_in_bounds = true;
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
 			}
 
 			/* ouput file if no bounds checking or in bounds */
-			if (look_bounds == MB_NO || file_in_bounds == MB_YES) {
+			if (look_bounds == false || file_in_bounds == true) {
 				if (verbose > 0)
 					fprintf(output, "%s %d %f\n", read_file, format, file_weight);
 				else
 					fprintf(output, "%s %d %f", read_file, format, file_weight);
 
 				/* check status if desired */
-				if (status_report == MB_YES) {
+				if (status_report == true) {
 					status = mb_pr_checkstatus(verbose, read_file, &prstatus, &error);
 					if (verbose > 0) {
 						if (prstatus == MB_PR_FILE_UP_TO_DATE)
@@ -422,17 +422,17 @@ int main(int argc, char **argv) {
 				}
 
 				/* check locks if desired */
-				if (status_report == MB_YES || remove_locks == MB_YES) {
+				if (status_report == true || remove_locks == true) {
 					lock_status = mb_pr_lockinfo(verbose, read_file, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
 					                             lock_date, &lock_error);
-					if (locked == MB_YES && status_report == MB_YES) {
+					if (locked == true && status_report == true) {
 						if (verbose > 0)
 							fprintf(output, "\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", lock_program, lock_user,
 							        lock_cpu, lock_date);
 						else
 							fprintf(output, "\t<Locked>");
 					}
-					if (locked == MB_YES && remove_locks == MB_YES) {
+					if (locked == true && remove_locks == true) {
 						sprintf(lockfile, "%s.lck", file);
 						sprintf(command, "/bin/rm -f %s", lockfile);
 					}
@@ -458,12 +458,12 @@ int main(int argc, char **argv) {
 			mb_get_relative_path(verbose, dfile, pwd, &error);
 
 			/* generate inf fnv fbt files */
-			if (make_inf == MB_YES) {
+			if (make_inf == true) {
 				status = mb_make_info(verbose, force_update, file, format, &error);
 			}
 
 			/* or generate problem reports */
-			else if (problem_report == MB_YES) {
+			else if (problem_report == true) {
 				status = mb_pr_check(verbose, file, &nparproblem, &ndataproblem, &error);
 				if (nparproblem + ndataproblem > 0)
 					nproblemfiles++;
@@ -472,19 +472,19 @@ int main(int argc, char **argv) {
 			}
 
 			/* or copy files */
-			else if (copyfiles == MB_YES) {
+			else if (copyfiles == true) {
 				/* check for mbinfo file if bounds checking enabled */
-				if (look_bounds == MB_YES) {
+				if (look_bounds == true) {
 					status = mb_check_info(verbose, file, lonflip, bounds, &file_in_bounds, &error);
 					if (status == MB_FAILURE) {
-						file_in_bounds = MB_YES;
+						file_in_bounds = true;
 						status = MB_SUCCESS;
 						error = MB_ERROR_NO_ERROR;
 					}
 				}
 
 				/* copy file if no bounds checking or in bounds */
-				if (look_bounds == MB_NO || file_in_bounds == MB_YES) {
+				if (look_bounds == false || file_in_bounds == true) {
 					fprintf(output, "Copying %s %d %f\n", file, format, file_weight);
 					sprintf(command, "cp %s* .", file);
 					shellstatus = system(command);
@@ -500,9 +500,9 @@ int main(int argc, char **argv) {
 			}
 
 			/* or list the datalists parsed through the recursive datalist structure */
-			else if (reportdatalists == MB_YES) {
+			else if (reportdatalists == true) {
 				if (strcmp(dfile, dfilelast) != 0)
-					status = mb_datalist_recursion(verbose, datalist, MB_YES, &recursion, &error);
+					status = mb_datalist_recursion(verbose, datalist, true, &recursion, &error);
 				strcpy(dfilelast, dfile);
 			}
 
@@ -510,24 +510,24 @@ int main(int argc, char **argv) {
 			    structure, with bounds checking if desired */
 			else {
 				/* check for mbinfo file if bounds checking enabled */
-				if (look_bounds == MB_YES) {
+				if (look_bounds == true) {
 					status = mb_check_info(verbose, file, lonflip, bounds, &file_in_bounds, &error);
 					if (status == MB_FAILURE) {
-						file_in_bounds = MB_YES;
+						file_in_bounds = true;
 						status = MB_SUCCESS;
 						error = MB_ERROR_NO_ERROR;
 					}
 				}
 
 				/* ouput file if no bounds checking or in bounds */
-				if (look_bounds == MB_NO || file_in_bounds == MB_YES) {
+				if (look_bounds == false || file_in_bounds == true) {
 					if (verbose > 0)
 						fprintf(output, "%s %d %f\n", file, format, file_weight);
 					else
 						fprintf(output, "%s %d %f", file, format, file_weight);
 
 					/* check status if desired */
-					if (status_report == MB_YES) {
+					if (status_report == true) {
 						status = mb_pr_checkstatus(verbose, file, &prstatus, &error);
 						if (verbose > 0) {
 							if (prstatus == MB_PR_FILE_UP_TO_DATE)
@@ -552,17 +552,17 @@ int main(int argc, char **argv) {
 					}
 
 					/* check locks if desired */
-					if (status_report == MB_YES || remove_locks == MB_YES) {
+					if (status_report == true || remove_locks == true) {
 						lock_status = mb_pr_lockinfo(verbose, file, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
 						                             lock_date, &lock_error);
-						if (locked == MB_YES && status_report == MB_YES) {
+						if (locked == true && status_report == true) {
 							if (verbose > 0)
 								fprintf(output, "\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", lock_program, lock_user,
 								        lock_cpu, lock_date);
 							else
 								fprintf(output, "\t<Locked>");
 						}
-						if (locked == MB_YES && remove_locks == MB_YES) {
+						if (locked == true && remove_locks == true) {
 							sprintf(lockfile, "%s.lck", file);
 							fprintf(output, "\tRemoving lock file %s\n", lockfile);
 							sprintf(command, "/bin/rm -f %s", lockfile);
@@ -584,7 +584,7 @@ int main(int argc, char **argv) {
 	/* output counts */
 	if (verbose > 0) {
 		fprintf(output, "\nTotal swath files:         %d\n", nfile);
-		if (problem_report == MB_YES) {
+		if (problem_report == true) {
 			fprintf(output, "Total files with problems: %d\n", nproblemfiles);
 			fprintf(output, "Total parameter problems:  %d\n", nparproblemtot);
 			fprintf(output, "Total data problems:       %d\n", ndataproblemtot);

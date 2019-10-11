@@ -1238,8 +1238,8 @@ int main(int argc, char **argv)
   char *message;
 
   /* MBIO read control parameters */
-  int read_data = MB_NO;
-  int read_socket = MB_NO;
+  int read_data = false;
+  int read_socket = false;
   mb_path input;
   void *datalist;
   int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -1274,7 +1274,7 @@ int main(int argc, char **argv)
 
   /* platform definition file */
   mb_path platform_file;
-  int use_platform_file = MB_NO;
+  int use_platform_file = false;
   struct mb_platform_struct *platform = NULL;
   struct mb_sensor_struct *sensor_bathymetry = NULL;
   struct mb_sensor_struct *sensor_backscatter = NULL;
@@ -1315,7 +1315,7 @@ int main(int argc, char **argv)
   double swath_width = 150.0;
   double tangent, threshold_tangent;
   int n_output_soundings = 101;
-  int median_filter = MB_NO;
+  int median_filter = false;
   int median_filter_n_across = 1;
   int median_filter_n_along = 1;
   int median_filter_n_total = 1;
@@ -1339,7 +1339,7 @@ int main(int argc, char **argv)
   unsigned int checksum;
 
   /* log file parameters */
-  int make_logs = MB_NO;
+  int make_logs = false;
   mb_path log_directory;
   FILE *logfp = NULL;
   mb_path log_message;
@@ -1466,7 +1466,7 @@ int main(int argc, char **argv)
           }
         else if (strcmp("help", options[option_index].name) == 0)
           {
-          help = MB_YES;
+          help = true;
           }
         /*-------------------------------------------------------
          * Define input file and format */
@@ -1544,7 +1544,7 @@ int main(int argc, char **argv)
           {
           n = sscanf(optarg, "%s", platform_file);
           if (n == 1)
-            use_platform_file = MB_YES;
+            use_platform_file = true;
           }
         else if (strcmp("platform-target-sensor", options[option_index].name) == 0)
           {
@@ -1566,17 +1566,17 @@ int main(int argc, char **argv)
           if (logd_status != 0)
             {
             fprintf(stderr, "\nSpecified log file directory %s does not exist...\n", log_directory);
-            make_logs = MB_NO;
+            make_logs = false;
             }
           else if ((logd_stat.st_mode & S_IFMT) != S_IFDIR)
             {
             fprintf(stderr, "\nSpecified log file directory %s is not a directory...\n",
               log_directory);
-            make_logs = MB_NO;
+            make_logs = false;
             }
           else
             {
-            make_logs = MB_YES;
+            make_logs = true;
             free(g_log_dir);
             g_log_dir=strdup(log_directory);
             fprintf(stderr, "\nusing log directory %s...\n", g_log_dir);
@@ -1599,7 +1599,7 @@ int main(int argc, char **argv)
             &median_filter_n_along);
           if (n == 3)
             {
-            median_filter = MB_YES;
+            median_filter = true;
             n_buffer_max = median_filter_n_along;
             }
           }
@@ -1694,7 +1694,7 @@ int main(int argc, char **argv)
   mbtrnpreprocess_init_debug(verbose);
 
   /* load platform definition if specified */
-  if (use_platform_file == MB_YES)
+  if (use_platform_file == true)
     {
     status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
     if (status == MB_FAILURE)
@@ -1768,7 +1768,7 @@ int main(int argc, char **argv)
     }
 
   /* get number of ping records to hold */
-  if (median_filter == MB_YES)
+  if (median_filter == true)
     {
     median_filter_n_total = median_filter_n_across * median_filter_n_along;
     median_filter_n_min = median_filter_n_total / 2;
@@ -1812,25 +1812,25 @@ int main(int argc, char **argv)
     if ((status =
       mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight,
         &error)) == MB_SUCCESS)
-      read_data = MB_YES;
+      read_data = true;
     else
-      read_data = MB_NO;
+      read_data = false;
     }
   /* else copy single filename to be read */
   else
     {
     strcpy(ifile, input);
-    read_data = MB_YES;
+    read_data = true;
     }
   /* kick off the first cycle here
      future cycles start and end in the stats update*/
   MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_CYCLE_XT], mtime_dtime());
   MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_STATS_XT], mtime_dtime());
   /* loop over all files to be read */
-  while (read_data == MB_YES)
+  while (read_data == true)
     {
     /* open log file if specified */
-    if (make_logs == MB_YES)
+    if (make_logs == true)
       {
       gettimeofday(&timeofday, &timezone);
       now_time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
@@ -2084,13 +2084,13 @@ int main(int argc, char **argv)
     int n_ping_count = 0;
 
     /* loop over reading data */
-    done = MB_NO;
+    done = false;
     idataread = 0;
 
     while (!done)
       {
       /* open new log file if it is time */
-      if (make_logs == MB_YES)
+      if (make_logs == true)
         {
         gettimeofday(&timeofday, &timezone);
         now_time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
@@ -2851,7 +2851,7 @@ int main(int argc, char **argv)
         else if (error > 0)
           {
           fprintf(stderr, "mbtrnpp: MB_FAILURE - error>0 : setting done flag\n");
-          done = MB_YES;
+          done = true;
           MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFAILURE]);
           }
         }
@@ -2862,7 +2862,7 @@ int main(int argc, char **argv)
     if (input_mode==INPUT_MODE_SOCKET)
       {
       fprintf(stderr, "socket input mode - continue (probably shouldn't be here)\n");
-      read_data = MB_YES;
+      read_data = true;
       }
     else
       {
@@ -2895,18 +2895,18 @@ int main(int argc, char **argv)
           {
           PMPRINT(MOD_MBTRNPP, MM_DEBUG,
             (stderr, "read_datalist status[%d] - continuing\n", status));
-          read_data = MB_YES;
+          read_data = true;
           }
         else
           {
           PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "read_datalist status[%d] - done\n", status));
-          read_data = MB_NO;
+          read_data = false;
           }
         }
       else
         {
         PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "read_datalist == NO\n"));
-        read_data = MB_NO;
+        read_data = false;
         }
       }
     /* end loop over files in list */

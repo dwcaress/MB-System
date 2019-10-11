@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
 	double *mRrateK = NULL;
 	double *utcTime = NULL;
 
-	int angles_in_degrees = MB_YES;
+	int angles_in_degrees = true;
 
 	int time_i[7];
 	int nrecord, irecord, nscan, ifield;
@@ -184,7 +184,7 @@ int main(int argc, char **argv) {
 
 				/* help */
 				else if (strcmp("help", options[option_index].name) == 0) {
-					help = MB_YES;
+					help = true;
 				}
 
 				/*-------------------------------------------------------
@@ -263,7 +263,7 @@ int main(int argc, char **argv) {
 			if (strcmp(type, "double") == 0) {
 				fields[nfields].type = TYPE_DOUBLE;
 				fields[nfields].size = 8;
-				if (angles_in_degrees == MB_YES &&
+				if (angles_in_degrees == true &&
 				    (strcmp(fields[nfields].name, "mLatK") == 0 || strcmp(fields[nfields].name, "mLonK") == 0 ||
 				     strcmp(fields[nfields].name, "mLatK") == 0 || strcmp(fields[nfields].name, "mRollK") == 0 ||
 				     strcmp(fields[nfields].name, "mPitchK") == 0 || strcmp(fields[nfields].name, "mHeadK") == 0 ||
@@ -291,7 +291,7 @@ int main(int argc, char **argv) {
 			else if (strcmp(type, "angle") == 0) {
 				fields[nfields].type = TYPE_ANGLE;
 				fields[nfields].size = 8;
-				if (angles_in_degrees == MB_YES &&
+				if (angles_in_degrees == true &&
 				    (strcmp(fields[nfields].name, "mRollCB") == 0 || strcmp(fields[nfields].name, "mOmega_xCB") == 0 ||
 				     strcmp(fields[nfields].name, "mPitchCB") == 0 || strcmp(fields[nfields].name, "mOmega_yCB") == 0 ||
 				     strcmp(fields[nfields].name, "mYawCB") == 0 || strcmp(fields[nfields].name, "mOmega_zCB") == 0))
@@ -374,10 +374,10 @@ int main(int argc, char **argv) {
 		/* loop over the fields in the record */
 		for (ifield = 0; ifield < nfields; ifield++) {
 			if (fields[ifield].type == TYPE_DOUBLE) {
-				mb_get_binary_double(MB_YES, &buffer[fields[ifield].index], &dvalue);
+				mb_get_binary_double(true, &buffer[fields[ifield].index], &dvalue);
 				dvalue *= fields[ifield].scale;
 				if ((strcmp(fields[ifield].name, "mHeadK") == 0 || strcmp(fields[ifield].name, "mYawK") == 0) &&
-				    angles_in_degrees == MB_YES && dvalue < 0.0)
+				    angles_in_degrees == true && dvalue < 0.0)
 					dvalue += 360.0;
 				if (strcmp(fields[ifield].name, "mLatK") == 0)
 					mLatK[irecord] = dvalue;
@@ -417,7 +417,7 @@ int main(int argc, char **argv) {
 					utcTime[irecord] = dvalue;
 			}
 			else if (fields[ifield].type == TYPE_INTEGER) {
-				mb_get_binary_int(MB_YES, &buffer[fields[ifield].index], &ivalue);
+				mb_get_binary_int(true, &buffer[fields[ifield].index], &ivalue);
 				if (strcmp(fields[ifield].name, "mCyclesK") == 0)
 					mCyclesK[irecord] = ivalue;
 				if (strcmp(fields[ifield].name, "mModeK") == 0)
@@ -426,14 +426,14 @@ int main(int argc, char **argv) {
 					mMonK[irecord] = ivalue;
 			}
 			else if (fields[ifield].type == TYPE_TIMETAG) {
-				mb_get_binary_double(MB_YES, &buffer[fields[ifield].index], &dvalue);
+				mb_get_binary_double(true, &buffer[fields[ifield].index], &dvalue);
 				if (strcmp(fields[ifield].name, "time") == 0)
 					time[irecord] = dvalue;
 			}
 			else if (fields[ifield].type == TYPE_ANGLE) {
-				mb_get_binary_double(MB_YES, &buffer[fields[ifield].index], &dvalue);
+				mb_get_binary_double(true, &buffer[fields[ifield].index], &dvalue);
 				dvalue *= fields[ifield].scale;
-				if (strcmp(fields[ifield].name, "mYawCB") == 0 && angles_in_degrees == MB_YES && dvalue < 0.0)
+				if (strcmp(fields[ifield].name, "mYawCB") == 0 && angles_in_degrees == true && dvalue < 0.0)
 					dvalue += 360.0;
 			}
 		}

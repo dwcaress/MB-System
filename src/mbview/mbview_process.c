@@ -106,17 +106,17 @@ int mbview_projectdata(size_t instance) {
 	data = &(view->data);
 
 	/* delete old projections if necessary */
-	if (view->primary_pj_init == MB_YES && view->primary_pjptr != NULL) {
+	if (view->primary_pj_init == true && view->primary_pjptr != NULL) {
 		mb_proj_free(mbv_verbose, &(view->primary_pjptr), &error);
-		view->primary_pj_init = MB_NO;
+		view->primary_pj_init = false;
 	}
-	if (view->secondary_pj_init == MB_YES && view->secondary_pjptr != NULL) {
+	if (view->secondary_pj_init == true && view->secondary_pjptr != NULL) {
 		mb_proj_free(mbv_verbose, &(view->secondary_pjptr), &error);
-		view->secondary_pj_init = MB_NO;
+		view->secondary_pj_init = false;
 	}
-	if (view->display_pj_init == MB_YES && view->display_pjptr != NULL) {
+	if (view->display_pj_init == true && view->display_pjptr != NULL) {
 		mb_proj_free(mbv_verbose, &(view->display_pjptr), &error);
-		view->display_pj_init = MB_NO;
+		view->display_pj_init = false;
 	}
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
 		data->primary_grid_projection_mode = MBV_PROJECTION_PROJECTED;
@@ -149,10 +149,10 @@ int mbview_projectdata(size_t instance) {
 		/* set projection for getting lon lat */
 		proj_status = mb_proj_init(mbv_verbose, data->primary_grid_projection_id, &(view->primary_pjptr), &error);
 		if (proj_status == MB_SUCCESS) {
-			view->primary_pj_init = MB_YES;
+			view->primary_pj_init = true;
 			proj_status = mb_proj_init(mbv_verbose, data->display_projection_id, &(view->display_pjptr), &error);
 			if (proj_status == MB_SUCCESS)
-				view->display_pj_init = MB_YES;
+				view->display_pj_init = true;
 		}
 
 		/* quit if projection fails */
@@ -172,7 +172,7 @@ int mbview_projectdata(size_t instance) {
 			/* set projection */
 			proj_status = mb_proj_init(mbv_verbose, data->primary_grid_projection_id, &(view->primary_pjptr), &error);
 			if (proj_status == MB_SUCCESS)
-				view->primary_pj_init = MB_YES;
+				view->primary_pj_init = true;
 
 			/* quit if projection fails */
 			if (proj_status != MB_SUCCESS) {
@@ -202,7 +202,7 @@ int mbview_projectdata(size_t instance) {
 			/* set projection */
 			proj_status = mb_proj_init(mbv_verbose, data->display_projection_id, &(view->display_pjptr), &error);
 			if (proj_status == MB_SUCCESS)
-				view->display_pj_init = MB_YES;
+				view->display_pj_init = true;
 
 			/* quit if projection fails */
 			if (proj_status != MB_SUCCESS) {
@@ -241,7 +241,7 @@ int mbview_projectdata(size_t instance) {
 			/* get bounds */
 			if (xlonmax - xlonmin >= 180.0 || ylatmax - ylatmin >= 90.0) {
 				/* setup spheroid 3D projection with view towards the center of the grid */
-				mbview_sphere_setup(instance, MB_YES, 0.5 * (xlonmin + xlonmax), 0.5 * (ylatmin + ylatmax));
+				mbview_sphere_setup(instance, true, 0.5 * (xlonmin + xlonmax), 0.5 * (ylatmin + ylatmax));
 
 				view->xmin = -MBV_SPHEROID_RADIUS;
 				view->xmax = MBV_SPHEROID_RADIUS;
@@ -260,7 +260,7 @@ int mbview_projectdata(size_t instance) {
 			}
 			else {
 				/* setup spheroid 3D projection with view towards the center of the grid */
-				mbview_sphere_setup(instance, MB_NO, 0.5 * (xlonmin + xlonmax), 0.5 * (ylatmin + ylatmax));
+				mbview_sphere_setup(instance, false, 0.5 * (xlonmin + xlonmax), 0.5 * (ylatmin + ylatmax));
 
 				/* get origin */
 				mbview_sphere_forward(instance, 0.5 * (xlonmin + xlonmax), 0.5 * (ylatmin + ylatmax), &view->sphere_refx,
@@ -308,7 +308,7 @@ int mbview_projectdata(size_t instance) {
 			ygrid = data->primary_ymin + j * data->primary_dy;
 
 			/* reproject positions into display coordinates */
-			mbview_projectforward(instance, MB_NO, xgrid, ygrid, data->primary_data[k], &xlon, &ylat, &xdisplay, &ydisplay,
+			mbview_projectforward(instance, false, xgrid, ygrid, data->primary_data[k], &xlon, &ylat, &xdisplay, &ydisplay,
 			                      &zdisplay);
 
 			/* insert into plotting arrays */
@@ -322,7 +322,7 @@ int mbview_projectdata(size_t instance) {
 			/* set projection for getting lon lat */
 			proj_status = mb_proj_init(mbv_verbose, data->secondary_grid_projection_id, &(view->secondary_pjptr), &error);
 			if (proj_status == MB_SUCCESS)
-				view->secondary_pj_init = MB_YES;
+				view->secondary_pj_init = true;
 
 			/* quit if projection fails */
 			if (proj_status != MB_SUCCESS) {
@@ -335,11 +335,11 @@ int mbview_projectdata(size_t instance) {
 		}
 
 		/* check for pending event */
-		if (view->plot_done == MB_NO && view->plot_interrupt_allowed == MB_YES && i % MBV_EVENTCHECKCOARSENESS == 0)
+		if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0)
 			do_mbview_xevents();
 
 		/* dump out of loop if plotting already done at a higher recursion */
-		if (view->plot_done == MB_YES)
+		if (view->plot_done == true)
 			i = data->primary_n_columns;
 	}
 
@@ -350,11 +350,11 @@ int mbview_projectdata(size_t instance) {
 		}
 
 		/* check for pending event */
-		if (view->plot_done == MB_NO && view->plot_interrupt_allowed == MB_YES && i % MBV_EVENTCHECKCOARSENESS == 0)
+		if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0)
 			do_mbview_xevents();
 
 		/* dump out of loop if plotting already done at a higher recursion */
-		if (view->plot_done == MB_YES)
+		if (view->plot_done == true)
 			i = data->primary_n_columns;
 	}
 
@@ -365,8 +365,8 @@ int mbview_projectdata(size_t instance) {
 	mbview_zscale(instance);
 
 	/* set projected flag only if plotting not done */
-	if (view->plot_done == MB_NO) {
-		view->projected = MB_YES;
+	if (view->plot_done == false) {
+		view->projected = true;
 	}
 
 	/* print output debug statements */
@@ -406,37 +406,37 @@ int mbview_derivative(size_t instance, int i, int j) {
 	data = &(view->data);
 
 	/* figure if x derivative can be calculated */
-	derivative_ok = MB_NO;
+	derivative_ok = false;
 	k = i * data->primary_n_rows + j;
 	if (i == 0) {
 		k1 = i * data->primary_n_rows + j;
 		k2 = (i + 1) * data->primary_n_rows + j;
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
+			derivative_ok = true;
 	}
 	else if (i == data->primary_n_columns - 1) {
 		k1 = (i - 1) * data->primary_n_rows + j;
 		k2 = i * data->primary_n_rows + j;
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
+			derivative_ok = true;
 	}
 	else {
 		k1 = (i - 1) * data->primary_n_rows + j;
 		k2 = (i + 1) * data->primary_n_rows + j;
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
+			derivative_ok = true;
 		else if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k] != data->primary_nodatavalue) {
-			derivative_ok = MB_YES;
+			derivative_ok = true;
 			k2 = k;
 		}
 		else if (data->primary_data[k] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue) {
-			derivative_ok = MB_YES;
+			derivative_ok = true;
 			k1 = k;
 		}
 	}
 
 	/* calculate x derivative */
-	if (derivative_ok == MB_YES) {
+	if (derivative_ok == true) {
 		dx = (data->primary_x[k2] - data->primary_x[k1]);
 		if (dx != 0.0)
 			data->primary_dzdx[k] = view->scale * (data->primary_data[k2] - data->primary_data[k1]) / dx;
@@ -447,37 +447,37 @@ int mbview_derivative(size_t instance, int i, int j) {
 		data->primary_dzdx[k] = 0.0;
 
 	/* figure if y derivative can be calculated */
-	derivative_ok = MB_NO;
+	derivative_ok = false;
 	if (j == 0) {
 		k1 = i * data->primary_n_rows + j;
 		k2 = i * data->primary_n_rows + (j + 1);
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
+			derivative_ok = true;
 	}
 	else if (i == data->primary_n_rows - 1) {
 		k1 = i * data->primary_n_rows + (j - 1);
 		k2 = i * data->primary_n_rows + j;
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
+			derivative_ok = true;
 	}
 	else {
 		k1 = i * data->primary_n_rows + (j - 1);
 		k = i * data->primary_n_rows + j;
 		k2 = i * data->primary_n_rows + (j + 1);
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
+			derivative_ok = true;
 		else if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k] != data->primary_nodatavalue) {
-			derivative_ok = MB_YES;
+			derivative_ok = true;
 			k2 = k;
 		}
 		else if (data->primary_data[k] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue) {
-			derivative_ok = MB_YES;
+			derivative_ok = true;
 			k1 = k;
 		}
 	}
 
 	/* calculate y derivative */
-	if (derivative_ok == MB_YES) {
+	if (derivative_ok == true) {
 		dy = (data->primary_y[k2] - data->primary_y[k1]);
 		if (dy != 0.0)
 			data->primary_dzdy[k] =
@@ -526,7 +526,7 @@ int mbview_projectglobaldata(size_t instance) {
 	data = &(view->data);
 
 	/* can only project if projections are set up */
-	if (view->projected == MB_YES) {
+	if (view->projected == true) {
 		/* handle navpicks */
 		if (shared.shareddata.navpick_type != MBV_PICK_NONE) {
 			pointw = &(shared.shareddata.navpick.endpoints[0]);
@@ -667,7 +667,7 @@ int mbview_projectglobaldata(size_t instance) {
 		}
 
 		/* set globalprojected flag */
-		view->globalprojected = MB_YES;
+		view->globalprojected = true;
 	}
 
 	/* print output debug statements */
@@ -721,7 +721,7 @@ int mbview_zscalegridpoint(size_t instance, int k) {
 		ygrid = data->primary_ymin + j * data->primary_dy;
 
 		/* reproject positions into display coordinates */
-		mbview_projectforward(instance, MB_NO, xgrid, ygrid, data->primary_data[k], &xlon, &ylat, &xdisplay, &ydisplay,
+		mbview_projectforward(instance, false, xgrid, ygrid, data->primary_data[k], &xlon, &ylat, &xdisplay, &ydisplay,
 		                      &zdisplay);
 
 		/* insert into plotting arrays */
@@ -774,10 +774,10 @@ int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, st
 	}
 	else {
 		/* reproject positions into display coordinates */
-		mbview_projectforward(instance, MB_NO, point->xgrid, point->ygrid, point->zdata, &point->xlon, &point->ylat,
+		mbview_projectforward(instance, false, point->xgrid, point->ygrid, point->zdata, &point->xlon, &point->ylat,
 		                      &point->xdisplay, &point->ydisplay, &point->zdisplay);
 
-		if (globalview == MB_NO) {
+		if (globalview == false) {
 			point->zdisplay += offset_factor;
 		}
 		else {
@@ -828,11 +828,11 @@ int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, s
 	}
 	else {
 		/* reproject positions into display coordinates */
-		mbview_projectforward(instance, MB_NO, pointw->xgrid[instance], pointw->ygrid[instance], pointw->zdata, &(pointw->xlon),
+		mbview_projectforward(instance, false, pointw->xgrid[instance], pointw->ygrid[instance], pointw->zdata, &(pointw->xlon),
 		                      &(pointw->ylat), &(pointw->xdisplay[instance]), &(pointw->ydisplay[instance]),
 		                      &(pointw->zdisplay[instance]));
 
-		if (globalview == MB_NO) {
+		if (globalview == false) {
 			pointw->zdisplay[instance] += offset_factor;
 		}
 		else {
@@ -957,11 +957,11 @@ int mbview_zscale(size_t instance) {
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
 	    view->sphere_refz == 0.0) {
-		globalview = MB_YES;
+		globalview = true;
 		offset_factor = 10.0 * MBV_OPENGL_3D_CONTOUR_OFFSET / (view->scale * MBV_SPHEROID_RADIUS);
 	}
 	else {
-		globalview = MB_NO;
+		globalview = false;
 		offset_factor = MBV_OPENGL_3D_CONTOUR_OFFSET;
 	}
 
@@ -1108,10 +1108,10 @@ int mbview_zscale(size_t instance) {
 	}
 
 	/* set rez flags only if plotting not done */
-	if (view->plot_done == MB_NO) {
-		view->contourlorez = MB_NO;
-		view->contourhirez = MB_NO;
-		view->contourfullrez = MB_NO;
+	if (view->plot_done == false) {
+		view->contourlorez = false;
+		view->contourhirez = false;
+		view->contourfullrez = false;
 	}
 
 	/* print output debug statements */
@@ -1151,7 +1151,7 @@ int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double 
 	data = &(view->data);
 
 	/* get positions into geographic coordinates if necessary */
-	if (needlonlat == MB_YES || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
+	if (needlonlat == true || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
 		status = mbview_projectgrid2ll(instance, xgrid, ygrid, xlon, ylat);
 	}
 
@@ -1211,7 +1211,7 @@ int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, doub
 	data = &(view->data);
 
 	/* get positions in geographic coordinates */
-	if (needlonlat == MB_YES || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
+	if (needlonlat == true || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
 		status = mbview_projectdisplay2ll(instance, xdisplay, ydisplay, zdisplay, xlon, ylat);
 	}
 
@@ -1802,7 +1802,7 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 	view->sphere_refx = 0.0;
 	view->sphere_refy = 0.0;
 	view->sphere_refz = 0.0;
-	if (earthcentered == MB_NO) {
+	if (earthcentered == false) {
 		mbview_sphere_forward(instance, xlon, ylat, &view->sphere_refx, &view->sphere_refy, &view->sphere_refz);
 	}
 
@@ -2495,20 +2495,20 @@ int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct
 		histogram = view->primary_histogram;
 		min = data->primary_colortable_min;
 		max = data->primary_colortable_max;
-		view->primary_histogram_set = MB_YES;
+		view->primary_histogram_set = true;
 	}
 	else if (which_data == MBV_DATA_PRIMARYSLOPE) {
 		histogram = view->primaryslope_histogram;
 		min = data->slope_colortable_min;
 		max = data->slope_colortable_max;
-		view->primaryslope_histogram_set = MB_YES;
+		view->primaryslope_histogram_set = true;
 	}
 	else /* if (which_data == MBV_DATA_SECONDARY) */
 	{
 		histogram = view->secondary_histogram;
 		min = data->secondary_colortable_min;
 		max = data->secondary_colortable_max;
-		view->secondary_histogram_set = MB_YES;
+		view->secondary_histogram_set = true;
 	}
 	dhist = (max - min) / (MBV_RAW_HISTOGRAM_DIM - 1);
 
@@ -2644,7 +2644,7 @@ int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *da
 	int status = MB_SUCCESS;
 	double value, svalue, dd;
 	double intensity;
-	int value_ok = MB_YES;
+	int value_ok = true;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
@@ -2666,17 +2666,17 @@ int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *da
 		value = sqrt(data->primary_dzdx[k] * data->primary_dzdx[k] + data->primary_dzdy[k] * data->primary_dzdy[k]);
 	}
 	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		if (data->secondary_sameas_primary == MB_YES)
+		if (data->secondary_sameas_primary == true)
 			value = data->secondary_data[k];
 		else {
 			mbview_getsecondaryvalue(view, data, i, j, &value);
 			if (value == data->secondary_nodatavalue)
-				value_ok = MB_NO;
+				value_ok = false;
 		}
 	}
 
 	/* get color */
-	if (value_ok == MB_YES) {
+	if (value_ok == true) {
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && view->colortable < MBV_COLORTABLE_SEALEVEL1) {
 			mbview_getcolor(value, view->min, view->max, view->colortable_mode, (float)0.0, (float)0.0, (float)1.0, (float)1.0,
 							(float)0.0, (float)0.0, view->colortable_red, view->colortable_green, view->colortable_blue,
@@ -2787,7 +2787,7 @@ int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *da
 				mbview_applyshade(intensity, &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
 			}
 			else if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY) {
-				if (data->secondary_sameas_primary == MB_YES)
+				if (data->secondary_sameas_primary == true)
 					svalue = data->secondary_data[k];
 				else
 					mbview_getsecondaryvalue(view, data, i, j, &svalue);
@@ -2842,7 +2842,7 @@ int mbview_colorpoint_histogram(struct mbview_world_struct *view, struct mbview_
 		value = sqrt(data->primary_dzdx[k] * data->primary_dzdx[k] + data->primary_dzdy[k] * data->primary_dzdy[k]);
 	}
 	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		if (data->secondary_sameas_primary == MB_YES)
+		if (data->secondary_sameas_primary == true)
 			value = data->secondary_data[k];
 		else
 			mbview_getsecondaryvalue(view, data, i, j, &value);
@@ -2964,7 +2964,7 @@ int mbview_colorpoint_histogram(struct mbview_world_struct *view, struct mbview_
 			mbview_applyshade(intensity, &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
 		}
 		else if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY) {
-			if (data->secondary_sameas_primary == MB_YES)
+			if (data->secondary_sameas_primary == true)
 				svalue = data->secondary_data[k];
 			else
 				mbview_getsecondaryvalue(view, data, i, j, &svalue);
@@ -3113,11 +3113,11 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
 	}
 	else {
 		/* find place in histogram */
-		found = MB_NO;
-		for (i = 0; i < MBV_NUM_COLORS - 1 && found == MB_NO; i++) {
+		found = false;
+		for (i = 0; i < MBV_NUM_COLORS - 1 && found == false; i++) {
 			if (value >= histogram[i] && value <= histogram[i + 1]) {
 				ii = i;
-				found = MB_YES;
+				found = true;
 			}
 		}
 
@@ -3411,11 +3411,11 @@ int mbview_contour(size_t instance, int rez) {
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
 	    view->sphere_refz == 0.0) {
-		global = MB_YES;
+		global = true;
 		contour_offset_factor = MBV_OPENGL_3D_CONTOUR_OFFSET / (view->scale * MBV_SPHEROID_RADIUS);
 	}
 	else {
-		global = MB_NO;
+		global = false;
 		contour_offset_factor = MBV_OPENGL_3D_CONTOUR_OFFSET;
 	}
 
@@ -3429,19 +3429,19 @@ int mbview_contour(size_t instance, int rez) {
 			vertex[3] = (i + stride) * data->primary_n_rows + j + stride;
 
 			/* check if either triangle can be contoured */
-			triangleA = MB_NO;
-			triangleB = MB_NO;
+			triangleA = false;
+			triangleB = false;
 			if (data->primary_data[vertex[0]] != data->primary_nodatavalue &&
 			    data->primary_data[vertex[1]] != data->primary_nodatavalue &&
 			    data->primary_data[vertex[2]] != data->primary_nodatavalue)
-				triangleA = MB_YES;
+				triangleA = true;
 			if (data->primary_data[vertex[1]] != data->primary_nodatavalue &&
 			    data->primary_data[vertex[3]] != data->primary_nodatavalue &&
 			    data->primary_data[vertex[2]] != data->primary_nodatavalue)
-				triangleB = MB_YES;
+				triangleB = true;
 
 			/* if at least one triangle is valid, contour it */
-			if (triangleA == MB_YES || triangleB == MB_YES) {
+			if (triangleA == true || triangleB == true) {
 				/* get min max values and number of contours */
 				nvertex = 0;
 				datamin = 0.0;
@@ -3474,7 +3474,7 @@ int mbview_contour(size_t instance, int rez) {
 						level_value = l * data->contour_interval;
 
 						/* deal with triangle A - vertexes 0, 1, and 2 */
-						if (triangleA == MB_YES) {
+						if (triangleA == true) {
 							nside = 0;
 							if ((data->primary_data[vertex[0]] > level_value && data->primary_data[vertex[1]] < level_value) ||
 							    (data->primary_data[vertex[0]] < level_value && data->primary_data[vertex[1]] > level_value)) {
@@ -3518,7 +3518,7 @@ int mbview_contour(size_t instance, int rez) {
 									zz[0] += contour_offset_factor;
 									zz[1] += contour_offset_factor;
 								}
-								else if (global == MB_YES) {
+								else if (global == true) {
 									xx[0] += xx[0] * contour_offset_factor;
 									yy[0] += yy[0] * contour_offset_factor;
 									zz[0] += zz[0] * contour_offset_factor;
@@ -3536,7 +3536,7 @@ int mbview_contour(size_t instance, int rez) {
 						}
 
 						/* deal with triangle B - vertexes 1, 3, and 2 */
-						if (triangleB == MB_YES) {
+						if (triangleB == true) {
 							nside = 0;
 							if ((data->primary_data[vertex[1]] > level_value && data->primary_data[vertex[3]] < level_value) ||
 							    (data->primary_data[vertex[1]] < level_value && data->primary_data[vertex[3]] > level_value)) {
@@ -3580,7 +3580,7 @@ int mbview_contour(size_t instance, int rez) {
 									zz[0] += contour_offset_factor;
 									zz[1] += contour_offset_factor;
 								}
-								else if (global == MB_YES) {
+								else if (global == true) {
 									xx[0] += xx[0] * contour_offset_factor;
 									yy[0] += yy[0] * contour_offset_factor;
 									zz[0] += zz[0] * contour_offset_factor;
@@ -3602,11 +3602,11 @@ int mbview_contour(size_t instance, int rez) {
 		}
 
 		/* check for pending event */
-		if (view->plot_done == MB_NO && view->plot_interrupt_allowed == MB_YES && i % MBV_EVENTCHECKCOARSENESS == 0)
+		if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0)
 			do_mbview_xevents();
 
 		/* dump out of loop if plotting already done at a higher recursion */
-		if (view->plot_done == MB_YES)
+		if (view->plot_done == true)
 			i = data->primary_n_columns;
 	}
 
@@ -3615,15 +3615,15 @@ int mbview_contour(size_t instance, int rez) {
 	glEndList();
 
 	/* set rez flag only if plotting not done */
-	if (view->plot_done == MB_NO) {
+	if (view->plot_done == false) {
 		if (rez == MBV_REZ_FULL) {
-			view->contourfullrez = MB_YES;
+			view->contourfullrez = true;
 		}
 		else if (rez == MBV_REZ_HIGH) {
-			view->contourhirez = MB_YES;
+			view->contourhirez = true;
 		}
 		else {
-			view->contourlorez = MB_YES;
+			view->contourlorez = true;
 		}
 	}
 
@@ -3668,7 +3668,7 @@ int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, dou
 
 	/* fail if outside grid */
 	if (i < 0 || i >= data->primary_n_columns - 1 || j < 0 || j >= data->primary_n_rows - 1) {
-		*found = MB_NO;
+		*found = false;
 		*zdata = 0.0;
 	}
 
@@ -3698,11 +3698,11 @@ int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, dou
 		}
 		if (nsum > 0) {
 			*zdata = zdatasum / nsum;
-			*found = MB_YES;
+			*found = true;
 		}
 		else {
 			*zdata = 0.0;
-			*found = MB_NO;
+			*found = false;
 		}
 	}
 

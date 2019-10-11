@@ -481,22 +481,22 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
 	buff = (struct mb_buffer_struct *)buff_ptr;
 
 	/* look for next survey data */
-	int found = MB_NO;
+	int found = false;
 	for (int i = start; i < buff->nbuffer; i++) {
-		if (found == MB_NO && buff->buffer_kind[i] == MB_DATA_DATA) {
+		if (found == false && buff->buffer_kind[i] == MB_DATA_DATA) {
 			*id = i;
-			found = MB_YES;
+			found = true;
 		}
 	}
 	int status = MB_SUCCESS;
-	if (found == MB_NO) {
+	if (found == false) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_NO_MORE_DATA;
 		*id = -1;
 	}
 
 	/* extract the data */
-	if (found == MB_YES) {
+	if (found == true) {
 		char comment[200];
 		int kind;
 		status = mb_buffer_extract(verbose, buff_ptr, mbio_ptr, *id, &kind, time_i, time_d, navlon, navlat, speed, heading, nbath,
@@ -570,22 +570,22 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr, int star
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* look for next data of the appropriate type */
-	int found = MB_NO;
+	int found = false;
 	for (int i = start; i < buff->nbuffer; i++) {
-		if (found == MB_NO && buff->buffer_kind[i] == mb_io_ptr->nav_source) {
+		if (found == false && buff->buffer_kind[i] == mb_io_ptr->nav_source) {
 			*id = i;
-			found = MB_YES;
+			found = true;
 		}
 	}
 	int status = MB_SUCCESS;
-	if (found == MB_NO) {
+	if (found == false) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_NO_MORE_DATA;
 		*id = -1;
 	}
 
 	/* extract the data */
-	if (found == MB_YES) {
+	if (found == true) {
 		int kind;
 		status = mb_buffer_extract_nav(verbose, buff_ptr, mbio_ptr, *id, &kind, time_i, time_d, navlon, navlat, speed, heading,
 		                               draft, roll, pitch, heave, error);

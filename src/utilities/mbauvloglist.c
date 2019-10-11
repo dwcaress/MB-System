@@ -789,13 +789,13 @@ int main(int argc, char **argv) {
         if (recalculate_ctd) {
             for (int ii = 0; ii < nfields; ii++) {
                 if (strcmp(fields[ii].name, "cond_frequency") == 0)
-                    mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &cond_frequency);
+                    mb_get_binary_double(true, &buffer[fields[ii].index], &cond_frequency);
                 else if (strcmp(fields[ii].name, "temp_counts") == 0)
-                    mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &temp_counts);
+                    mb_get_binary_double(true, &buffer[fields[ii].index], &temp_counts);
                 else if (strcmp(fields[ii].name, "pressure_counts") == 0)
-                    mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &pressure_counts);
+                    mb_get_binary_double(true, &buffer[fields[ii].index], &pressure_counts);
                 else if (strcmp(fields[ii].name, "pressure_temp_comp_voltage_reading") == 0)
-                    mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &thermistor);
+                    mb_get_binary_double(true, &buffer[fields[ii].index], &thermistor);
             }
             temperature_calc = calcTemp(&ctd_calibration, temp_counts);
             pressure_calc = calcPressure(&ctd_calibration, pressure_counts,
@@ -814,13 +814,13 @@ int main(int argc, char **argv) {
             /* else deal with existing values if available */
             for (int ii = 0; ii < nprintfields; ii++) {
 				if (strcmp(fields[ii].name, "temperature") == 0)
-						mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &temperature_calc);
+						mb_get_binary_double(true, &buffer[fields[ii].index], &temperature_calc);
 				else if (strcmp(fields[ii].name, "calculated_salinity") == 0)
-						mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &salinity_calc);
+						mb_get_binary_double(true, &buffer[fields[ii].index], &salinity_calc);
 				else if (strcmp(fields[ii].name, "conductivity") == 0)
-						mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &conductivity_calc);
+						mb_get_binary_double(true, &buffer[fields[ii].index], &conductivity_calc);
 				else if (strcmp(fields[ii].name, "pressure") == 0)
-						mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &pressure_calc);
+						mb_get_binary_double(true, &buffer[fields[ii].index], &pressure_calc);
 				}
             /* interp_status = */ mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
                                         salinity_calc, temperature_calc, pressure_calc,
@@ -838,11 +838,11 @@ int main(int argc, char **argv) {
             ktime_calc = 0.0;
             for (int ii = 0; ii < nfields; ii++) {
 				if (strcmp(fields[ii].name, "time") == 0) {
-                        mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &time_d);
+                        mb_get_binary_double(true, &buffer[fields[ii].index], &time_d);
                         startofday_time_d = MB_SECINDAY * floor(time_d / MB_SECINDAY);
 				}
 				else if (strcmp(fields[ii].name, "utcTime") == 0) {
-                        mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &ktime_calc);
+                        mb_get_binary_double(true, &buffer[fields[ii].index], &ktime_calc);
 				}
             }
             ktime_calc += startofday_time_d;
@@ -987,7 +987,7 @@ int main(int argc, char **argv) {
 					fprintf(stdout, printfields[i].format, ktime_calc);
 			}
 			else if (fields[index].type == TYPE_DOUBLE) {
-				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
+				mb_get_binary_double(true, &buffer[fields[index].index], &dvalue);
 				dvalue *= fields[index].scale;
 				if ((strcmp(fields[nfields].name, "mHeadK") == 0 || strcmp(fields[nfields].name, "mYawK") == 0) &&
 				    angles_in_degrees && dvalue < 0.0)
@@ -998,14 +998,14 @@ int main(int argc, char **argv) {
 					fprintf(stdout, printfields[i].format, dvalue);
 			}
 			else if (fields[index].type == TYPE_INTEGER) {
-				mb_get_binary_int(MB_YES, &buffer[fields[index].index], &ivalue);
+				mb_get_binary_int(true, &buffer[fields[index].index], &ivalue);
 				if (output_mode == OUTPUT_MODE_BINARY)
 					fwrite(&ivalue, sizeof(int), 1, stdout);
 				else
 					fprintf(stdout, printfields[i].format, ivalue);
 			}
 			else if (fields[index].type == TYPE_TIMETAG) {
-				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
+				mb_get_binary_double(true, &buffer[fields[index].index], &dvalue);
 				time_d = dvalue;
 				if (strcmp(printfields[i].format, "time_i") == 0) {
 					mb_get_date(verbose, time_d, time_i);
@@ -1041,7 +1041,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else if (fields[index].type == TYPE_ANGLE) {
-				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
+				mb_get_binary_double(true, &buffer[fields[index].index], &dvalue);
 				dvalue *= fields[index].scale;
 				if (strcmp(fields[index].name, "mYawCB") == 0 && angles_in_degrees && dvalue < 0.0)
 					dvalue += 360.0;

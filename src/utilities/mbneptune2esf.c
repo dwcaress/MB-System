@@ -171,7 +171,7 @@ int find_line(int verbose, char *line_name, struct neptune_line_tree **node, int
 	int comp;
 
 	if (NULL == *node) {
-		if (MB_NO == create)
+		if (false == create)
 			return MB_FAILURE;
 
 #ifdef USE_MB_MALLOC
@@ -205,7 +205,7 @@ int find_ping(int verbose, int ping, struct neptune_ping_tree **node, int create
 	int status = MB_SUCCESS;
 
 	if (NULL == *node) {
-		if (MB_NO == create)
+		if (false == create)
 			return MB_FAILURE;
 
 #ifdef USE_MB_MALLOC
@@ -391,12 +391,12 @@ int main(int argc, char **argv) {
 	struct neptune_beam_list *beam;
 	char *buffer_ptr;
 
-	int output_file_set = MB_NO;
+	int output_file_set = false;
 	char output_file[MB_PATH_MAXLINE];
 	FILE *output;
 
 	/* save file control variables */
-	int esffile_open = MB_NO;
+	int esffile_open = false;
 	char esffile[MB_PATH_MAXLINE];
 	struct mb_esf_struct esf;
 
@@ -467,7 +467,7 @@ int main(int argc, char **argv) {
 			case 'O':
 			case 'o':
 				sscanf(optarg, "%s", output_file);
-				output_file_set = MB_YES;
+				output_file_set = true;
 				break;
 			case 'R':
 			case 'r':
@@ -537,16 +537,16 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	rules_done = MB_NO;
-	usable_rule = MB_NO;
+	rules_done = false;
+	usable_rule = false;
 	rule_level = 0;
 	status = MB_SUCCESS;
-	while (MB_NO == rules_done) {
+	while (false == rules_done) {
 		/* skip till we find a rule */
-		while (MB_NO == rules_done && MB_NO == usable_rule) {
+		while (false == rules_done && false == usable_rule) {
 			buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, rules_fp);
 			if (buffer_ptr != buffer)
-				rules_done = MB_YES;
+				rules_done = true;
 			else {
 				nscan = sscanf(buffer, "%s", word);
 				if (1 == nscan && ')' == word[0])
@@ -556,17 +556,17 @@ int main(int argc, char **argv) {
 					if (2 == rule_level) {
 						nscan = sscanf(buffer, "%s %s", buff, word);
 						if (2 == nscan && 0 == strncmp(word, "LINES_PING_BEAM_RULE", 20))
-							usable_rule = MB_YES;
+							usable_rule = true;
 					}
 				}
 			}
 		}
 
 		/* read a rule */
-		if (MB_NO == rules_done) {
+		if (false == rules_done) {
 			buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, rules_fp);
 			if (buffer_ptr != buffer) {
-				rules_done = MB_YES;
+				rules_done = true;
 				status = MB_FAILURE;
 				error = MB_ERROR_EOF;
 			}
@@ -590,7 +590,7 @@ int main(int argc, char **argv) {
 							status = MB_FAILURE;
 
 						if (MB_SUCCESS == status)
-							status = find_line(verbose, line_name, &rule_lines, MB_YES, &line, &no_lines, &error);
+							status = find_line(verbose, line_name, &rule_lines, true, &line, &no_lines, &error);
 
 						if (buffer != fgets(buffer, MB_PATH_MAXLINE, rules_fp))
 							status = MB_FAILURE;
@@ -616,7 +616,7 @@ int main(int argc, char **argv) {
 									status = MB_FAILURE;
 
 								if (MB_SUCCESS == status)
-									status = find_ping(verbose, ping_no, &(line->pings), MB_YES, &ping, &error);
+									status = find_ping(verbose, ping_no, &(line->pings), true, &ping, &error);
 
 								beam = ping->beams;
 								if (NULL != beam) {
@@ -667,7 +667,7 @@ int main(int argc, char **argv) {
 	line_array(rule_lines, &lines, &i);
 
 	/* output rules found */
-	if (MB_YES == output_file_set) {
+	if (true == output_file_set) {
 		if (0 == strncmp("-", output_file, 2))
 			output = stdout;
 		else
@@ -695,20 +695,20 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(swathfile, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data == true) {
 
-		usable_rule = MB_NO;
+		usable_rule = false;
 		/* check if this file matches any lines */
 		if (MBF_EM300RAW == format || MBF_EM300MBA == format)
 			for (i = 0; i < no_lines; i++) {
@@ -717,14 +717,14 @@ int main(int argc, char **argv) {
 				slen = strlen(swathfile);
 				for (int j = 0; j <= slen - nlen; j++)
 					if (0 == strncmp(line_name, &swathfile[j], nlen)) {
-						usable_rule = MB_YES;
+						usable_rule = true;
 						line = lines[i];
 						j = slen;
 						i = no_lines;
 					}
 			}
 
-		if (MB_YES == usable_rule) {
+		if (true == usable_rule) {
 
 			/* check format and get format flags */
 			if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) !=
@@ -738,7 +738,7 @@ int main(int argc, char **argv) {
 
 			/* check that clean mode is allowed
 			    for the specified data format */
-			if (beam_flagging == MB_NO && mode <= 2) {
+			if (beam_flagging == false && mode <= 2) {
 				fprintf(stderr, "\nMBIO format %d does not allow flagging of bad data (specified by cleaning mode %d).\n", format,
 				        mode);
 				fprintf(stderr,
@@ -830,15 +830,15 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "Sorting old edits...\n");
 
 				/* handle esf edits */
-				status = mb_esf_load(verbose, program_name, swathfile, MB_YES, MB_YES, esffile, &esf, &error);
+				status = mb_esf_load(verbose, program_name, swathfile, true, true, esffile, &esf, &error);
 				if (status == MB_SUCCESS && esf.esffp != NULL)
-					esffile_open = MB_YES;
+					esffile_open = true;
 				if (status == MB_FAILURE && error == MB_ERROR_OPEN_FAIL) {
-					esffile_open = MB_NO;
+					esffile_open = false;
 					fprintf(stderr, "\nUnable to open new edit save file %s\n", esf.esffile);
 				}
 				else if (status == MB_FAILURE && error == MB_ERROR_MEMORY_FAIL) {
-					esffile_open = MB_NO;
+					esffile_open = false;
 					fprintf(stderr, "\nUnable to allocate memory for edits in esf file %s\n", esf.esffile);
 				}
 				/* reset message */
@@ -846,11 +846,11 @@ int main(int argc, char **argv) {
 			}
 
 			/* read */
-			done = MB_NO;
+			done = false;
 			start = 0;
 			time_d_lastping = 0.0;
 			fprintf(stderr, "Processing data...\n");
-			while (done == MB_NO) {
+			while (done == false) {
 				if (verbose > 1)
 					fprintf(stderr, "\n");
 
@@ -919,7 +919,7 @@ int main(int argc, char **argv) {
 					ping_no = sim_ping->png_count;
 
 					/* if ping in rules get it and flag beams */
-					if (MB_SUCCESS == find_ping(verbose, ping_no, &line->pings, MB_NO, &ping, &error)) {
+					if (MB_SUCCESS == find_ping(verbose, ping_no, &line->pings, false, &ping, &error)) {
 						beam = ping->beams;
 						while (NULL != beam) {
 							beam_no = beam->beam;
@@ -946,7 +946,7 @@ int main(int argc, char **argv) {
 						}
 
 						/* write out edits from completed pings */
-						if (status == MB_SUCCESS || done == MB_YES) {
+						if (status == MB_SUCCESS || done == true) {
 							for (i = 0; i < cur_ping.beams_bath; i++) {
 								if (cur_ping.beamflag[i] != cur_ping.beamflagorg[i]) {
 									if (mb_beam_ok(cur_ping.beamflag[i]))
@@ -967,7 +967,7 @@ int main(int argc, char **argv) {
 					}
 				}
 				else if (error > MB_ERROR_NO_ERROR) {
-					done = MB_YES;
+					done = true;
 				}
 			}
 
@@ -978,9 +978,9 @@ int main(int argc, char **argv) {
 			status = mb_esf_close(verbose, &esf, &error);
 
 			/* update mbprocess parameter file */
-			if (esffile_open == MB_YES) {
+			if (esffile_open == true) {
 				/* update mbprocess parameter file */
-				status = mb_pr_update_format(verbose, swathfile, MB_YES, format, &error);
+				status = mb_pr_update_format(verbose, swathfile, true, format, &error);
 				status = mb_pr_update_edit(verbose, swathfile, MBP_EDIT_ON, esffile, &error);
 			}
 
@@ -1014,12 +1014,12 @@ int main(int argc, char **argv) {
 		/* figure out whether and what to read next */
 		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */

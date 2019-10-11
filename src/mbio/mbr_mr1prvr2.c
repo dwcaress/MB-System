@@ -64,9 +64,9 @@ int mbr_info_mr1prvr2(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_XDR;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -129,7 +129,7 @@ int mbr_alm_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* initialize everything to zeros */
-	mb_io_ptr->fileheader = MB_NO;
+	mb_io_ptr->fileheader = false;
 	mb_io_ptr->hdr_comment_size = 0;
 	mb_io_ptr->hdr_comment = NULL;
 
@@ -195,11 +195,11 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* if first time through read file header */
-	if (mb_io_ptr->fileheader == MB_NO) {
+	if (mb_io_ptr->fileheader == false) {
 		/* read the header into memory */
 		bs_status = mbbs_rdbsfhdr(&(store->header), (XDR *)xdrs);
 		if (bs_status == BS_SUCCESS) {
-			mb_io_ptr->fileheader = MB_YES;
+			mb_io_ptr->fileheader = true;
 			status = MB_SUCCESS;
 		}
 		else {
@@ -639,7 +639,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* if comment and file header not written */
-	if (mb_io_ptr->fileheader == MB_NO && store->kind == MB_DATA_COMMENT) {
+	if (mb_io_ptr->fileheader == false && store->kind == MB_DATA_COMMENT) {
 		/* add comment to string mb_io_ptr->hdr_comment
 		    to be be written in file header */
 		mb_io_ptr->hdr_comment_size += strlen(store->comment) + 2;
@@ -649,7 +649,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	}
 
 	/* if data and file header not written */
-	else if (mb_io_ptr->fileheader == MB_NO && store->kind != MB_DATA_COMMENT) {
+	else if (mb_io_ptr->fileheader == false && store->kind != MB_DATA_COMMENT) {
 		/* insert new comments into file header */
 		mbbs_replacestr(&(store->header.bsf_log), mb_io_ptr->hdr_comment);
 
@@ -659,11 +659,11 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 			*error = MB_ERROR_WRITE_FAIL;
 		}
 		else
-			mb_io_ptr->fileheader = MB_YES;
+			mb_io_ptr->fileheader = true;
 	}
 
 	/* if data and file header written */
-	if (mb_io_ptr->fileheader == MB_YES && store->kind == MB_DATA_DATA) {
+	if (mb_io_ptr->fileheader == true && store->kind == MB_DATA_DATA) {
 		/* write data */
 		if ((bs_status = mbbs_wrpnghdr(&(store->ping), (XDR *)xdrs)) != BS_SUCCESS) {
 			status = MB_FAILURE;

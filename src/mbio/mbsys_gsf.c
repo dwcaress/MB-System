@@ -743,12 +743,12 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 		/* if ping flag set check for any unset
 		    beam flags - set or unset ping flag based on whether any
 		    unflagged beams are found */
-		int anyunflagged = MB_NO;
+		int anyunflagged = false;
 		for (int i = 0; i < nbath; i++) {
 			if (mb_beam_ok(beamflag[i]))
-				anyunflagged = MB_YES;
+				anyunflagged = true;
 		}
-		if (anyunflagged == MB_NO)
+		if (anyunflagged == false)
 			mb_ping->ping_flags = GSF_IGNORE_PING;
 		else
 			mb_ping->ping_flags = 0;
@@ -779,7 +779,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 			}
 
 		/* reset GSF scale factors if needed */
-		mbsys_gsf_setscalefactors(verbose, MB_NO, mb_ping, error);
+		mbsys_gsf_setscalefactors(verbose, false, mb_ping, error);
 	}
 
 	/* insert comment in structure */
@@ -2068,7 +2068,7 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 				multiplier_min = floor(min_scale_factor / (min + mb_ping->scaleFactors.scaleTable[id - 1].offset));
 			multiplier = MAX(MIN(multiplier_min, multiplier_max), 1.0);
 
-			if (reset_all == MB_YES || multiplier < mb_ping->scaleFactors.scaleTable[id - 1].multiplier) {
+			if (reset_all == true || multiplier < mb_ping->scaleFactors.scaleTable[id - 1].multiplier) {
 				mb_ping->scaleFactors.scaleTable[id - 1].multiplier = multiplier;
 				mb_ping->scaleFactors.scaleTable[id - 1].offset = offset;
 			}

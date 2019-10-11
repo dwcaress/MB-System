@@ -67,9 +67,9 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
           "                      binary datagrams, Kongsberg.\n", MB_DESCRIPTION_LENGTH);
   *numfile = 1;
   *filetype = MB_FILETYPE_SINGLE;
-  *variable_beams = MB_YES;
-  *traveltime = MB_YES;
-  *beam_flagging = MB_YES;
+  *variable_beams = true;
+  *traveltime = true;
+  *beam_flagging = true;
   *platform_source = MB_DATA_NONE;
   *nav_source = MB_DATA_DATA;
   *sensordepth_source = MB_DATA_DATA;
@@ -260,7 +260,7 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
   /* init internal data structure variables */
   mb_io_ptr->saveptr1 = (void *)dgm_index_table;
   mb_io_ptr->save1 = 0;     // most recently read entry in index table, after indexing
-  mb_io_ptr->save2 = MB_NO; // file has been indexed
+  mb_io_ptr->save2 = false; // file has been indexed
 
     if (verbose >= 2) {
         fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -459,7 +459,7 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
 
   /* extract the data */
   index = 0;
-  mb_get_binary_int(MB_YES, &buffer[index], &(header->numBytesDgm));
+  mb_get_binary_int(true, &buffer[index], &(header->numBytesDgm));
   index += 4;
   memcpy(&(header->dgmType), &buffer[index], sizeof(header->dgmType));
   index += 4;
@@ -467,11 +467,11 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
   index++;
   header->systemID = buffer[index];
   index++;
-  mb_get_binary_short(MB_YES, &buffer[index], &(header->echoSounderID));
+  mb_get_binary_short(true, &buffer[index], &(header->echoSounderID));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(header->time_sec));
+  mb_get_binary_int(true, &buffer[index], &(header->time_sec));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(header->time_nanosec));
+  mb_get_binary_int(true, &buffer[index], &(header->time_nanosec));
 
   /* identify the datagram type */
   if (strncmp((const char *)header->dgmType, MBSYS_KMBES_I_INSTALLATION_PARAM, 4) == 0 ) {
@@ -585,31 +585,31 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
   index = MBSYS_KMBES_HEADER_SIZE;
 
   /* common part */
-  mb_get_binary_short(MB_YES, &buffer[index], &(spo->cmnPart.numBytesCmnPart));
+  mb_get_binary_short(true, &buffer[index], &(spo->cmnPart.numBytesCmnPart));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(spo->cmnPart.sensorSystem));
+  mb_get_binary_short(true, &buffer[index], &(spo->cmnPart.sensorSystem));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(spo->cmnPart.sensorStatus));
+  mb_get_binary_short(true, &buffer[index], &(spo->cmnPart.sensorStatus));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(spo->cmnPart.padding));
+  mb_get_binary_short(true, &buffer[index], &(spo->cmnPart.padding));
   index += 2;
 
   /* sensor data block */
-  mb_get_binary_int(MB_YES, &buffer[index], &(spo->sensorData.timeFromSensor_sec));
+  mb_get_binary_int(true, &buffer[index], &(spo->sensorData.timeFromSensor_sec));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(spo->sensorData.timeFromSensor_nanosec));
+  mb_get_binary_int(true, &buffer[index], &(spo->sensorData.timeFromSensor_nanosec));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(spo->sensorData.posFixQuality_m));
+  mb_get_binary_float(true, &buffer[index], &(spo->sensorData.posFixQuality_m));
   index += 4;
-  mb_get_binary_double(MB_YES, &buffer[index], &(spo->sensorData.correctedLat_deg));
+  mb_get_binary_double(true, &buffer[index], &(spo->sensorData.correctedLat_deg));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(spo->sensorData.correctedLong_deg));
+  mb_get_binary_double(true, &buffer[index], &(spo->sensorData.correctedLong_deg));
   index += 8;
-  mb_get_binary_float(MB_YES, &buffer[index], &(spo->sensorData.speedOverGround_mPerSec));
+  mb_get_binary_float(true, &buffer[index], &(spo->sensorData.speedOverGround_mPerSec));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(spo->sensorData.courseOverGround_deg));
+  mb_get_binary_float(true, &buffer[index], &(spo->sensorData.courseOverGround_deg));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(spo->sensorData.ellipsoidHeightReRefPoint_m));
+  mb_get_binary_float(true, &buffer[index], &(spo->sensorData.ellipsoidHeightReRefPoint_m));
   index += 4;
   memcpy(&(spo->sensorData.posDataFromSensor), &buffer[index], numBytesRawSensorData);
 
@@ -672,7 +672,6 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   int index = 0;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -694,89 +693,89 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
   index = MBSYS_KMBES_HEADER_SIZE;
 
   /* info part */
-  mb_get_binary_short(MB_YES, &buffer[index], &(skm->infoPart.numBytesInfoPart));
+  mb_get_binary_short(true, &buffer[index], &(skm->infoPart.numBytesInfoPart));
   index += 2;
   skm->infoPart.sensorSystem = buffer[index];
   index++;
   skm->infoPart.sensorStatus = buffer[index];
   index++;
-  mb_get_binary_short(MB_YES, &buffer[index], &(skm->infoPart.sensorInputFormat));
+  mb_get_binary_short(true, &buffer[index], &(skm->infoPart.sensorInputFormat));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(skm->infoPart.numSamplesArray));
+  mb_get_binary_short(true, &buffer[index], &(skm->infoPart.numSamplesArray));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(skm->infoPart.numBytesPerSample));
+  mb_get_binary_short(true, &buffer[index], &(skm->infoPart.numBytesPerSample));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(skm->infoPart.sensorDataContents));
+  mb_get_binary_short(true, &buffer[index], &(skm->infoPart.sensorDataContents));
   index += 2;
 
-  for (i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
+  for (int i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
 
     /* KMbinary */
     memcpy(&(skm->sample[i].KMdefault.dgmType), &buffer[index], 4);
     index += 4;
-    mb_get_binary_short(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.numBytesDgm));
+    mb_get_binary_short(true, &buffer[index], &(skm->sample[i].KMdefault.numBytesDgm));
     index += 2;
-    mb_get_binary_short(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.dgmVersion));
+    mb_get_binary_short(true, &buffer[index], &(skm->sample[i].KMdefault.dgmVersion));
     index += 2;
-    mb_get_binary_int(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.time_sec));
+    mb_get_binary_int(true, &buffer[index], &(skm->sample[i].KMdefault.time_sec));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.time_nanosec));
+    mb_get_binary_int(true, &buffer[index], &(skm->sample[i].KMdefault.time_nanosec));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.status));
+    mb_get_binary_int(true, &buffer[index], &(skm->sample[i].KMdefault.status));
     index += 4;
-    mb_get_binary_double(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.latitude_deg));
+    mb_get_binary_double(true, &buffer[index], &(skm->sample[i].KMdefault.latitude_deg));
     index += 8;
-    mb_get_binary_double(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.longitude_deg));
+    mb_get_binary_double(true, &buffer[index], &(skm->sample[i].KMdefault.longitude_deg));
     index += 8;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.ellipsoidHeight_m));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.ellipsoidHeight_m));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.roll_deg));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.roll_deg));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.pitch_deg));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.pitch_deg));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.heading_deg));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.heading_deg));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.heave_m));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.heave_m));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.rollRate));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.rollRate));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.pitchRate));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.pitchRate));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.yawRate));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.yawRate));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.velNorth));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.velNorth));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.velEast));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.velEast));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.velDown));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.velDown));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.latitudeError_m));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.latitudeError_m));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.longitudeError_m));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.longitudeError_m));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.ellipsoidHeightError_m));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.ellipsoidHeightError_m));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.rollError_deg));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.rollError_deg));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.pitchError_deg));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.pitchError_deg));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.headingError_deg));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.headingError_deg));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.heaveError_m));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.heaveError_m));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.northAcceleration));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.northAcceleration));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.eastAcceleration));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.eastAcceleration));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.downAcceleration));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].KMdefault.downAcceleration));
     index += 4;
 
     /* KMdelayedHeave */
-    mb_get_binary_int(MB_YES, &buffer[index], &(skm->sample[i].delayedHeave.time_sec));
+    mb_get_binary_int(true, &buffer[index], &(skm->sample[i].delayedHeave.time_sec));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(skm->sample[i].delayedHeave.time_nanosec));
+    mb_get_binary_int(true, &buffer[index], &(skm->sample[i].delayedHeave.time_nanosec));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].delayedHeave.delayedHeave_m));
+    mb_get_binary_float(true, &buffer[index], &(skm->sample[i].delayedHeave.delayedHeave_m));
     index += 4;
   }
 
@@ -798,7 +797,7 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       numBytesPerSample:          %u\n", skm->infoPart.numBytesPerSample);
     fprintf(stderr, "dbg5       sensorDataContents:         %u\n", skm->infoPart.sensorDataContents);
 
-    for (i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
+    for (int i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
       fprintf(stderr, "dbg5       sample[%3d].KMdefault.dgmType:                %s\n", i, skm->sample[i].KMdefault.dgmType);
       fprintf(stderr, "dbg5       sample[%3d].KMdefault.numBytesDgm:            %u\n", i, skm->sample[i].KMdefault.numBytesDgm);
       fprintf(stderr, "dbg5       sample[%3d].KMdefault.dgmVersion:             %u\n", i, skm->sample[i].KMdefault.dgmVersion);
@@ -894,30 +893,30 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
   int index = MBSYS_KMBES_HEADER_SIZE;
 
   /* svp common part */
-  mb_get_binary_short(MB_YES, &buffer[index], &(svp->numBytesCmnPart));
+  mb_get_binary_short(true, &buffer[index], &(svp->numBytesCmnPart));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(svp->numSamples));
+  mb_get_binary_short(true, &buffer[index], &(svp->numSamples));
   index += 2;
   memcpy(&svp->sensorFormat, &buffer[index], 4);
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(svp->time_sec));
+  mb_get_binary_int(true, &buffer[index], &(svp->time_sec));
   index += 4;
-  mb_get_binary_double(MB_YES, &buffer[index], &(svp->latitude_deg));
+  mb_get_binary_double(true, &buffer[index], &(svp->latitude_deg));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(svp->longitude_deg));
+  mb_get_binary_double(true, &buffer[index], &(svp->longitude_deg));
   index += 8;
 
   /* svp data block */
   for (int i = 0; i < svp->numSamples; i++ ) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(svp->sensorData[i].depth_m));
+    mb_get_binary_float(true, &buffer[index], &(svp->sensorData[i].depth_m));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(svp->sensorData[i].soundVelocity_mPerSec));
+    mb_get_binary_float(true, &buffer[index], &(svp->sensorData[i].soundVelocity_mPerSec));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(svp->sensorData[i].padding));
+    mb_get_binary_int(true, &buffer[index], &(svp->sensorData[i].padding));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(svp->sensorData[i].temp_C));
+    mb_get_binary_float(true, &buffer[index], &(svp->sensorData[i].temp_C));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(svp->sensorData[i].salinity));
+    mb_get_binary_float(true, &buffer[index], &(svp->sensorData[i].salinity));
     index += 4;
   }
 
@@ -979,7 +978,6 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error){
   int index = 0;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1001,36 +999,36 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
   index = MBSYS_KMBES_HEADER_SIZE;
 
   /* svp info */
-  mb_get_binary_short(MB_YES, &buffer[index], &(svt->infoPart.numBytesInfoPart));
+  mb_get_binary_short(true, &buffer[index], &(svt->infoPart.numBytesInfoPart));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(svt->infoPart.sensorStatus));
+  mb_get_binary_short(true, &buffer[index], &(svt->infoPart.sensorStatus));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(svt->infoPart.sensorInputFormat));
+  mb_get_binary_short(true, &buffer[index], &(svt->infoPart.sensorInputFormat));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(svt->infoPart.numSamplesArray));
+  mb_get_binary_short(true, &buffer[index], &(svt->infoPart.numSamplesArray));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(svt->infoPart.numBytesPerSample));
+  mb_get_binary_short(true, &buffer[index], &(svt->infoPart.numBytesPerSample));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(svt->infoPart.sensorDataContents));
+  mb_get_binary_short(true, &buffer[index], &(svt->infoPart.sensorDataContents));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(svt->infoPart.filterTime_sec));
+  mb_get_binary_float(true, &buffer[index], &(svt->infoPart.filterTime_sec));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(svt->infoPart.soundVelocity_mPerSec_offset));
+  mb_get_binary_float(true, &buffer[index], &(svt->infoPart.soundVelocity_mPerSec_offset));
   index += 4;
 
   /* svt data blocks */
-  for (i=0; i<(svt->infoPart.numSamplesArray); i++ ) {
-    mb_get_binary_int(MB_YES, &buffer[index], &(svt->sensorData[i].time_sec));
+  for (int i=0; i<(svt->infoPart.numSamplesArray); i++ ) {
+    mb_get_binary_int(true, &buffer[index], &(svt->sensorData[i].time_sec));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(svt->sensorData[i].time_nanosec));
+    mb_get_binary_int(true, &buffer[index], &(svt->sensorData[i].time_nanosec));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(svt->sensorData[i].soundVelocity_mPerSec));
+    mb_get_binary_float(true, &buffer[index], &(svt->sensorData[i].soundVelocity_mPerSec));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(svt->sensorData[i].temp_C));
+    mb_get_binary_float(true, &buffer[index], &(svt->sensorData[i].temp_C));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(svt->sensorData[i].pressure_Pa));
+    mb_get_binary_float(true, &buffer[index], &(svt->sensorData[i].pressure_Pa));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(svt->sensorData[i].salinity));
+    mb_get_binary_float(true, &buffer[index], &(svt->sensorData[i].salinity));
     index += 4;
   }
 
@@ -1052,7 +1050,7 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       filterTime_sec:           %f\n", svt->infoPart.filterTime_sec);
     fprintf(stderr, "dbg5       soundVelocity_mPerSec_offset: %f\n", svt->infoPart.soundVelocity_mPerSec_offset);
 
-    for (i = 0; i < (svt->infoPart.numSamplesArray); i++) {
+    for (int i = 0; i < (svt->infoPart.numSamplesArray); i++) {
       fprintf(stderr, "dbg5       sensorData[%3d].time_sec:                     %u\n", i, svt->sensorData[i].time_sec);
       fprintf(stderr, "dbg5       sensorData[%3d].time_nanosec:                 %u\n", i, svt->sensorData[i].time_nanosec);
       fprintf(stderr, "dbg5       sensorData[%3d].soundVelocity_mPerSec:        %f\n", i, svt->sensorData[i].soundVelocity_mPerSec);
@@ -1119,19 +1117,19 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
   index = MBSYS_KMBES_HEADER_SIZE;
 
   // common part
-  mb_get_binary_short(MB_YES, &buffer[index], &(scl->cmnPart.numBytesCmnPart));
+  mb_get_binary_short(true, &buffer[index], &(scl->cmnPart.numBytesCmnPart));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(scl->cmnPart.sensorSystem));
+  mb_get_binary_short(true, &buffer[index], &(scl->cmnPart.sensorSystem));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(scl->cmnPart.sensorStatus));
+  mb_get_binary_short(true, &buffer[index], &(scl->cmnPart.sensorStatus));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(scl->cmnPart.padding));
+  mb_get_binary_short(true, &buffer[index], &(scl->cmnPart.padding));
   index += 2;
 
   // sensor data block
-  mb_get_binary_float(MB_YES, &buffer[index], &(scl->sensorData.offset_sec));
+  mb_get_binary_float(true, &buffer[index], &(scl->sensorData.offset_sec));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(scl->sensorData.clockDevPU_nanosec));
+  mb_get_binary_int(true, &buffer[index], &(scl->sensorData.clockDevPU_nanosec));
   index += 4;
   memcpy(&(scl->sensorData.dataFromSensor), &buffer[index], numBytesRawSensorData);
 
@@ -1209,25 +1207,25 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
   int index = MBSYS_KMBES_HEADER_SIZE;
 
   // common part
-  mb_get_binary_short(MB_YES, &buffer[index], &(sde->cmnPart.numBytesCmnPart));
+  mb_get_binary_short(true, &buffer[index], &(sde->cmnPart.numBytesCmnPart));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(sde->cmnPart.sensorSystem));
+  mb_get_binary_short(true, &buffer[index], &(sde->cmnPart.sensorSystem));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(sde->cmnPart.sensorStatus));
+  mb_get_binary_short(true, &buffer[index], &(sde->cmnPart.sensorStatus));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(sde->cmnPart.padding));
+  mb_get_binary_short(true, &buffer[index], &(sde->cmnPart.padding));
   index += 2;
 
   // sensor data block
-  mb_get_binary_float(MB_YES, &buffer[index], &(sde->sensorData.depthUsed_m));
+  mb_get_binary_float(true, &buffer[index], &(sde->sensorData.depthUsed_m));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(sde->sensorData.offset));
+  mb_get_binary_float(true, &buffer[index], &(sde->sensorData.offset));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(sde->sensorData.scale));
+  mb_get_binary_float(true, &buffer[index], &(sde->sensorData.scale));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(sde->sensorData.latitude_deg));
+  mb_get_binary_float(true, &buffer[index], &(sde->sensorData.latitude_deg));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(sde->sensorData.longitude_deg));
+  mb_get_binary_float(true, &buffer[index], &(sde->sensorData.longitude_deg));
   index += 4;
   memcpy(&(sde->sensorData.dataFromSensor), &buffer[index], numBytesRawSensorData);
 
@@ -1309,19 +1307,19 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
   int index = MBSYS_KMBES_HEADER_SIZE;
 
   // common part
-  mb_get_binary_short(MB_YES, &buffer[index], &(shi->cmnPart.numBytesCmnPart));
+  mb_get_binary_short(true, &buffer[index], &(shi->cmnPart.numBytesCmnPart));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(shi->cmnPart.sensorSystem));
+  mb_get_binary_short(true, &buffer[index], &(shi->cmnPart.sensorSystem));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(shi->cmnPart.sensorStatus));
+  mb_get_binary_short(true, &buffer[index], &(shi->cmnPart.sensorStatus));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(shi->cmnPart.padding));
+  mb_get_binary_short(true, &buffer[index], &(shi->cmnPart.padding));
   index += 2;
 
   // sensor data block
-  mb_get_binary_short(MB_YES, &buffer[index], &(shi->sensorData.sensorType));
+  mb_get_binary_short(true, &buffer[index], &(shi->sensorData.sensorType));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(shi->sensorData.heigthUsed_m));
+  mb_get_binary_float(true, &buffer[index], &(shi->sensorData.heigthUsed_m));
   index += 4;
   memcpy(&(shi->sensorData.dataFromSensor), &buffer[index], numBytesRawSensorData);
 
@@ -1398,30 +1396,30 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
   int index = MBSYS_KMBES_HEADER_SIZE;
 
   // common part
-  mb_get_binary_short(MB_YES, &buffer[index], &(sha->cmnPart.numBytesCmnPart));
+  mb_get_binary_short(true, &buffer[index], &(sha->cmnPart.numBytesCmnPart));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(sha->cmnPart.sensorSystem));
+  mb_get_binary_short(true, &buffer[index], &(sha->cmnPart.sensorSystem));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(sha->cmnPart.sensorStatus));
+  mb_get_binary_short(true, &buffer[index], &(sha->cmnPart.sensorStatus));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(sha->cmnPart.padding));
+  mb_get_binary_short(true, &buffer[index], &(sha->cmnPart.padding));
   index += 2;
 
   // sensor info
-  mb_get_binary_short(MB_YES, &buffer[index], &(sha->dataInfo.numBytesInfoPart));
+  mb_get_binary_short(true, &buffer[index], &(sha->dataInfo.numBytesInfoPart));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(sha->dataInfo.numSamplesArray));
+  mb_get_binary_short(true, &buffer[index], &(sha->dataInfo.numSamplesArray));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(sha->dataInfo.numBytesPerSample));
+  mb_get_binary_short(true, &buffer[index], &(sha->dataInfo.numBytesPerSample));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(sha->dataInfo.numBytesRawSensorData));
+  mb_get_binary_short(true, &buffer[index], &(sha->dataInfo.numBytesRawSensorData));
   index += 2;
 
   // sensor data blocks
   for (int i = 0; i < sha->dataInfo.numSamplesArray; i++) {
-    mb_get_binary_int(MB_YES, &buffer[index], &(sha->sensorData[i].timeSinceRecStart_nanosec));
+    mb_get_binary_int(true, &buffer[index], &(sha->sensorData[i].timeSinceRecStart_nanosec));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(sha->sensorData[i].headingCorrected_deg));
+    mb_get_binary_float(true, &buffer[index], &(sha->sensorData[i].headingCorrected_deg));
     index += 4;
     memcpy(&(sha->sensorData[i].dataFromSensor), &buffer[index], sha->dataInfo.numBytesRawSensorData);
     index += sha->dataInfo.numBytesRawSensorData;
@@ -1484,7 +1482,7 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
+int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *imrz, int *error) {
   struct mbsys_kmbes_mrz *mrz = NULL;
   struct mbsys_kmbes_m_partition partition;
   struct mbsys_kmbes_m_body cmnPart;
@@ -1507,9 +1505,9 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   int index = MBSYS_KMBES_HEADER_SIZE;
 
   /* EMdgmMpartition - data partition information */
-  mb_get_binary_short(MB_YES, &buffer[index], &(partition.numOfDgms));
+  mb_get_binary_short(true, &buffer[index], &(partition.numOfDgms));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(partition.dgmNum));
+  mb_get_binary_short(true, &buffer[index], &(partition.dgmNum));
   index += 2;
 
   if (verbose >= 5) {
@@ -1519,10 +1517,10 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
-  mb_get_binary_short(MB_YES, &buffer[index], &(cmnPart.numBytesCmnPart));
+  mb_get_binary_short(true, &buffer[index], &(cmnPart.numBytesCmnPart));
   index_EMdgmMbody = index;
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(cmnPart.pingCnt));
+  mb_get_binary_short(true, &buffer[index], &(cmnPart.pingCnt));
   index += 2;
   cmnPart.rxFansPerPing = buffer[index];
   index++;
@@ -1557,7 +1555,8 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
   /* now figure out which of the MRZ datagrams for this ping we are reading
     (cmnPart.rxFanIndex out of cmnPart.rxFansPerPing) */
-  mrz = &store->mrz[cmnPart.rxFanIndex];
+  *imrz = cmnPart.rxFanIndex;
+  mrz = &store->mrz[*imrz];
   mrz->header = *header;
   mrz->partition = partition;
   mrz->cmnPart = cmnPart;
@@ -1568,13 +1567,13 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   index = index_pingInfo;
 
   /* EMdgmMRZ_pingInfo - ping info */
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->pingInfo.numBytesInfoData));
+  mb_get_binary_short(true, &buffer[index], &(mrz->pingInfo.numBytesInfoData));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->pingInfo.padding0));
+  mb_get_binary_short(true, &buffer[index], &(mrz->pingInfo.padding0));
   index += 2;
 
   /* Ping info */
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.pingRate_Hz));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.pingRate_Hz));
   index += 4;
 
   mrz->pingInfo.beamSpacing = buffer[index];
@@ -1590,76 +1589,76 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   mrz->pingInfo.pulseForm = buffer[index];
   index++;
 
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->pingInfo.padding1));
+  mb_get_binary_short(true, &buffer[index], &(mrz->pingInfo.padding1));
   index += 2;
 
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.frequencyMode_Hz));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.frequencyMode_Hz));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.freqRangeLowLim_Hz));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.freqRangeLowLim_Hz));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.freqRangeHighLim_Hz));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.freqRangeHighLim_Hz));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.maxTotalTxPulseLength_sec));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.maxTotalTxPulseLength_sec));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.maxEffTxPulseLength_sec));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.maxEffTxPulseLength_sec));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.maxEffTxBandWidth_Hz));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.maxEffTxBandWidth_Hz));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.absCoeff_dBPerkm));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.absCoeff_dBPerkm));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.portSectorEdge_deg));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.portSectorEdge_deg));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.starbSectorEdge_deg));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.starbSectorEdge_deg));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.portMeanCov_deg));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.portMeanCov_deg));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.starbMeanCov_deg));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.starbMeanCov_deg));
   index += 4;
 
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->pingInfo.portMeanCov_m));
+  mb_get_binary_short(true, &buffer[index], &(mrz->pingInfo.portMeanCov_m));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->pingInfo.starbMeanCov_m));
+  mb_get_binary_short(true, &buffer[index], &(mrz->pingInfo.starbMeanCov_m));
   index += 2;
 
   mrz->pingInfo.modeAndStabilisation = buffer[index];
   index++;
   mrz->pingInfo.runtimeFilter1 = buffer[index];
   index++;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->pingInfo.runtimeFilter2));
+  mb_get_binary_short(true, &buffer[index], &(mrz->pingInfo.runtimeFilter2));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(mrz->pingInfo.pipeTrackingStatus));
+  mb_get_binary_int(true, &buffer[index], &(mrz->pingInfo.pipeTrackingStatus));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.transmitArraySizeUsed_deg));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.transmitArraySizeUsed_deg));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.receiveArraySizeUsed_deg));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.receiveArraySizeUsed_deg));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.transmitPower_dB));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.transmitPower_dB));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->pingInfo.SLrampUpTimeRemaining));
+  mb_get_binary_short(true, &buffer[index], &(mrz->pingInfo.SLrampUpTimeRemaining));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->pingInfo.padding2));
+  mb_get_binary_short(true, &buffer[index], &(mrz->pingInfo.padding2));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.yawAngle_deg));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.yawAngle_deg));
   index += 4;
 
   /* Info of tx sector data block, EMdgmMRZ_txSectorInfo */
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->pingInfo.numTxSectors));
+  mb_get_binary_short(true, &buffer[index], &(mrz->pingInfo.numTxSectors));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->pingInfo.numBytesPerTxSector));
+  mb_get_binary_short(true, &buffer[index], &(mrz->pingInfo.numBytesPerTxSector));
   index += 2;
 
   /* Info at time of midpoint of first tx pulse */
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.headingVessel_deg));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.headingVessel_deg));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.soundSpeedAtTxDepth_mPerSec));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.soundSpeedAtTxDepth_mPerSec));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.txTransducerDepth_m));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.txTransducerDepth_m));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.z_waterLevelReRefPoint_m));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.z_waterLevelReRefPoint_m));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.x_kmallToall_m));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.x_kmallToall_m));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.y_kmallToall_m));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.y_kmallToall_m));
   index += 4;
 
   mrz->pingInfo.latLongInfo = buffer[index];
@@ -1671,11 +1670,11 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   mrz->pingInfo.padding2 = buffer[index];
   index++;
 
-  mb_get_binary_double(MB_YES, &buffer[index], &(mrz->pingInfo.latitude_deg));
+  mb_get_binary_double(true, &buffer[index], &(mrz->pingInfo.latitude_deg));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(mrz->pingInfo.longitude_deg));
+  mb_get_binary_double(true, &buffer[index], &(mrz->pingInfo.longitude_deg));
   index += 8;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.ellipsoidHeightReRefPoint_m));
+  mb_get_binary_float(true, &buffer[index], &(mrz->pingInfo.ellipsoidHeightReRefPoint_m));
   index += 4;
 
   if (verbose >= 5) {
@@ -1747,25 +1746,25 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     index++;
     mrz->sectorInfo[i].padding0 = buffer[index];
     index++;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sectorInfo[i].sectorTransmitDelay_sec));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sectorInfo[i].sectorTransmitDelay_sec));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sectorInfo[i].tiltAngleReTx_deg));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sectorInfo[i].tiltAngleReTx_deg));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sectorInfo[i].txNominalSourceLevel_dB));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sectorInfo[i].txNominalSourceLevel_dB));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sectorInfo[i].txFocusRange_m));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sectorInfo[i].txFocusRange_m));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sectorInfo[i].centreFreq_Hz));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sectorInfo[i].centreFreq_Hz));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sectorInfo[i].signalBandWidth_Hz));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sectorInfo[i].signalBandWidth_Hz));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sectorInfo[i].totalSignalLength_sec));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sectorInfo[i].totalSignalLength_sec));
     index += 4;
     mrz->sectorInfo[i].pulseShading = buffer[index];
     index++;
     mrz->sectorInfo[i].signalWaveForm = buffer[index];
     index++;
-    mb_get_binary_short(MB_YES, &buffer[index], &(mrz->sectorInfo[i].padding1));
+    mb_get_binary_short(true, &buffer[index], &(mrz->sectorInfo[i].padding1));
     index += 2;
 
     if (verbose >= 5) {
@@ -1794,31 +1793,31 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   index = index_rxInfo;
 
   /* EMdgmMRZ_rxInfo - receiver specific info */
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->rxInfo.numBytesRxInfo));
+  mb_get_binary_short(true, &buffer[index], &(mrz->rxInfo.numBytesRxInfo));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->rxInfo.numSoundingsMaxMain));
+  mb_get_binary_short(true, &buffer[index], &(mrz->rxInfo.numSoundingsMaxMain));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->rxInfo.numSoundingsValidMain));
+  mb_get_binary_short(true, &buffer[index], &(mrz->rxInfo.numSoundingsValidMain));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->rxInfo.numBytesPerSounding));
+  mb_get_binary_short(true, &buffer[index], &(mrz->rxInfo.numBytesPerSounding));
   index += 2;
 
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->rxInfo.WCSampleRate));
+  mb_get_binary_float(true, &buffer[index], &(mrz->rxInfo.WCSampleRate));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->rxInfo.seabedImageSampleRate));
+  mb_get_binary_float(true, &buffer[index], &(mrz->rxInfo.seabedImageSampleRate));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->rxInfo.BSnormal_dB));
+  mb_get_binary_float(true, &buffer[index], &(mrz->rxInfo.BSnormal_dB));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mrz->rxInfo.BSoblique_dB));
+  mb_get_binary_float(true, &buffer[index], &(mrz->rxInfo.BSoblique_dB));
   index += 4;
 
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->rxInfo.extraDetectionAlarmFlag));
+  mb_get_binary_short(true, &buffer[index], &(mrz->rxInfo.extraDetectionAlarmFlag));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->rxInfo.numExtraDetections));
+  mb_get_binary_short(true, &buffer[index], &(mrz->rxInfo.numExtraDetections));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->rxInfo.numExtraDetectionClasses));
+  mb_get_binary_short(true, &buffer[index], &(mrz->rxInfo.numExtraDetectionClasses));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mrz->rxInfo.numBytesPerClass));
+  mb_get_binary_short(true, &buffer[index], &(mrz->rxInfo.numBytesPerClass));
   index += 2;
 
   if (verbose >= 5) {
@@ -1848,7 +1847,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
       - this avoids breaking the decoding if fields have been added to txSectorInfo */
     index = index_extraDetClassInfo + i * mrz->rxInfo.numBytesPerClass;
 
-    mb_get_binary_short(MB_YES, &buffer[index], &(mrz->extraDetClassInfo[i].numExtraDetInClass));
+    mb_get_binary_short(true, &buffer[index], &(mrz->extraDetClassInfo[i].numExtraDetInClass));
     index += 2;
     mrz->extraDetClassInfo[i].padding = buffer[index];
     index++;
@@ -1876,7 +1875,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
       - this avoids breaking the decoding if fields have been added to sounding */
     index = index_sounding + i * mrz->rxInfo.numBytesPerSounding;
 
-    mb_get_binary_short(MB_YES, &buffer[index], &(mrz->sounding[i].soundingIndex));
+    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].soundingIndex));
     index += 2;
     mrz->sounding[i].txSectorNumb = buffer[index];
     index++;
@@ -1899,81 +1898,81 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     /* These two bytes specified as padding in the Kongsberg specification but are
        here used for the MB-System beam flag - if the first mb_u_char == 1 then the
        second byte is an MB-System beamflag */
-    // mb_get_binary_short(MB_YES, &buffer[index], &(mrz->sounding[i].padding));
+    // mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].padding));
     // index += 2;
     mrz->sounding[i].beamflag_enabled = buffer[index];
     index++;
     mrz->sounding[i].beamflag = buffer[index];
     index++;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].rangeFactor));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].rangeFactor));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].qualityFactor));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].qualityFactor));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].detectionUncertaintyVer_m));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionUncertaintyVer_m));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].detectionUncertaintyHor_m));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionUncertaintyHor_m));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].detectionWindowLength_sec));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionWindowLength_sec));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].echoLength_sec));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].echoLength_sec));
     index += 4;
 
     /* Water column paramters. */
-    mb_get_binary_short(MB_YES, &buffer[index], &(mrz->sounding[i].WCBeamNumb));
+    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].WCBeamNumb));
     index += 2;
-    mb_get_binary_short(MB_YES, &buffer[index], &(mrz->sounding[i].WCrange_samples));
+    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].WCrange_samples));
     index += 2;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].WCNomBeamAngleAcross_deg));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].WCNomBeamAngleAcross_deg));
     index += 4;
 
     /* Reflectivity data (backscatter (BS) data). */
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].meanAbsCoeff_dBPerkm));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].meanAbsCoeff_dBPerkm));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].reflectivity1_dB));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].reflectivity1_dB));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].reflectivity2_dB));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].reflectivity2_dB));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].receiverSensitivityApplied_dB));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].receiverSensitivityApplied_dB));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].sourceLevelApplied_dB));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].sourceLevelApplied_dB));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].BScalibration_dB));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].BScalibration_dB));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].TVG_dB));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].TVG_dB));
     index += 4;
 
     /* Range and angle data. */
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].beamAngleReRx_deg));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamAngleReRx_deg));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].beamAngleCorrection_deg));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamAngleCorrection_deg));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].twoWayTravelTime_sec));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].twoWayTravelTime_sec));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].twoWayTravelTimeCorrection_sec));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].twoWayTravelTimeCorrection_sec));
     index += 4;
 
     /* Georeferenced depth points. */
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].deltaLatitude_deg));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].deltaLatitude_deg));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].deltaLongitude_deg));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].deltaLongitude_deg));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].z_reRefPoint_m));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].z_reRefPoint_m));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].y_reRefPoint_m));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].y_reRefPoint_m));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].x_reRefPoint_m));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].x_reRefPoint_m));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mrz->sounding[i].beamIncAngleAdj_deg));
+    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamIncAngleAdj_deg));
     index += 4;
-    mb_get_binary_short(MB_YES, &buffer[index], &(mrz->sounding[i].realTimeCleanInfo));
+    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].realTimeCleanInfo));
     index += 2;
 
     /* Seabed image. */
-    mb_get_binary_short(MB_YES, &buffer[index], &(mrz->sounding[i].SIstartRange_samples));
+    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SIstartRange_samples));
     index += 2;
-    mb_get_binary_short(MB_YES, &buffer[index], &(mrz->sounding[i].SIcentreSample));
+    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SIcentreSample));
     index += 2;
-    mb_get_binary_short(MB_YES, &buffer[index], &(mrz->sounding[i].SInumSamples));
+    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SInumSamples));
     index += 2;
 
     numSidescanSamples += mrz->sounding[i].SInumSamples;
@@ -2006,7 +2005,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
       fprintf(stderr, "dbg5       postProcessingInfo:              %d\n", mrz->sounding[i].postProcessingInfo);
       fprintf(stderr, "dbg5       detectionClass:                  %d\n", mrz->sounding[i].detectionClass);
       fprintf(stderr, "dbg5       detectionConfidenceLevel:        %d\n", mrz->sounding[i].detectionConfidenceLevel);
-      // Skip mrz->sounding[i].padding
+      // fprintf(stderr, "dbg5       padding:                        %d\n", mrz->sounding[i].padding);
       fprintf(stderr, "dbg5       beamflag_enabled:                %d\n", mrz->sounding[i].beamflag_enabled);
       fprintf(stderr, "dbg5       beamflag:                        %d\n", mrz->sounding[i].beamflag);
       fprintf(stderr, "dbg5       rangeFactor:                     %f\n", mrz->sounding[i].rangeFactor);
@@ -2054,7 +2053,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
   for (int i = 0; i<numSidescanSamples; i++)
   {
-    mb_get_binary_short(MB_YES, &buffer[index], &(mrz->SIsample_desidB[i]));
+    mb_get_binary_short(true, &buffer[index], &(mrz->SIsample_desidB[i]));
     index += 2;
   }
 
@@ -2112,9 +2111,9 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   int index = MBSYS_KMBES_HEADER_SIZE;
 
   /* EMdgmMpartition - data partition information */
-  mb_get_binary_short(MB_YES, &buffer[index], &(partition.numOfDgms));
+  mb_get_binary_short(true, &buffer[index], &(partition.numOfDgms));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(partition.dgmNum));
+  mb_get_binary_short(true, &buffer[index], &(partition.dgmNum));
   index += 2;
 
   if (verbose >= 5) {
@@ -2124,9 +2123,9 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
-  mb_get_binary_short(MB_YES, &buffer[index], &(cmnPart.numBytesCmnPart));
+  mb_get_binary_short(true, &buffer[index], &(cmnPart.numBytesCmnPart));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(cmnPart.pingCnt));
+  mb_get_binary_short(true, &buffer[index], &(cmnPart.pingCnt));
   index += 2;
   cmnPart.rxFansPerPing = buffer[index];
   index++;
@@ -2167,15 +2166,15 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   mwc->cmnPart = cmnPart;
 
   /* EMdgmMWCtxInfo - transmit sectors, general info for all sectors */
-  mb_get_binary_short(MB_YES, &buffer[index], &(mwc->txInfo.numBytesTxInfo));
+  mb_get_binary_short(true, &buffer[index], &(mwc->txInfo.numBytesTxInfo));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mwc->txInfo.numTxSectors));
+  mb_get_binary_short(true, &buffer[index], &(mwc->txInfo.numTxSectors));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mwc->txInfo.numBytesPerTxSector));
+  mb_get_binary_short(true, &buffer[index], &(mwc->txInfo.numBytesPerTxSector));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mwc->txInfo.padding));
+  mb_get_binary_short(true, &buffer[index], &(mwc->txInfo.padding));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mwc->txInfo.heave_m));
+  mb_get_binary_float(true, &buffer[index], &(mwc->txInfo.heave_m));
   index += 4;
 
   if (verbose >= 5) {
@@ -2188,16 +2187,16 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* EMdgmMWCtxSectorData - transmit sector data, loop for all i = numTxSectors */
-  for (i=0; i<(mwc->txInfo.numTxSectors); i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(mwc->sectorData[i].tiltAngleReTx_deg));
+  for (int i=0; i<(mwc->txInfo.numTxSectors); i++) {
+    mb_get_binary_float(true, &buffer[index], &(mwc->sectorData[i].tiltAngleReTx_deg));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mwc->sectorData[i].centreFreq_Hz));
+    mb_get_binary_float(true, &buffer[index], &(mwc->sectorData[i].centreFreq_Hz));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(mwc->sectorData[i].txBeamWidthAlong_deg));
+    mb_get_binary_float(true, &buffer[index], &(mwc->sectorData[i].txBeamWidthAlong_deg));
     index += 4;
-    mb_get_binary_short(MB_YES, &buffer[index], &(mwc->sectorData[i].txSectorNum));
+    mb_get_binary_short(true, &buffer[index], &(mwc->sectorData[i].txSectorNum));
     index += 2;
-    mb_get_binary_short(MB_YES, &buffer[index], &(mwc->sectorData[i].padding));
+    mb_get_binary_short(true, &buffer[index], &(mwc->sectorData[i].padding));
     index += 2;
 
     if (verbose >= 5) {
@@ -2212,9 +2211,9 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* EMdgmMWCrxInfo - receiver, general info */
-  mb_get_binary_short(MB_YES, &buffer[index], &(mwc->rxInfo.numBytesRxInfo));
+  mb_get_binary_short(true, &buffer[index], &(mwc->rxInfo.numBytesRxInfo));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(mwc->rxInfo.numBeams));
+  mb_get_binary_short(true, &buffer[index], &(mwc->rxInfo.numBeams));
   index += 2;
   mwc->rxInfo.numBytesPerBeamEntry = buffer[index];
   index ++;
@@ -2224,9 +2223,9 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   index ++;
   mwc->rxInfo.TVGoffset_dB = buffer[index];
   index ++;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mwc->rxInfo.sampleFreq_Hz));
+  mb_get_binary_float(true, &buffer[index], &(mwc->rxInfo.sampleFreq_Hz));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(mwc->rxInfo.soundVelocity_mPerSec));
+  mb_get_binary_float(true, &buffer[index], &(mwc->rxInfo.soundVelocity_mPerSec));
   index += 4;
 
   if (verbose >= 5) {
@@ -2256,16 +2255,16 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (status == MB_SUCCESS) {
-    for (i=0; i<(mwc->rxInfo.numBeams) && status == MB_SUCCESS; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(mwc->beamData_p[i].beamPointAngReVertical_deg));
+    for (int i=0; i<(mwc->rxInfo.numBeams) && status == MB_SUCCESS; i++) {
+      mb_get_binary_float(true, &buffer[index], &(mwc->beamData_p[i].beamPointAngReVertical_deg));
       index += 4;
-      mb_get_binary_short(MB_YES, &buffer[index], &(mwc->beamData_p[i].startRangeSampleNum));
+      mb_get_binary_short(true, &buffer[index], &(mwc->beamData_p[i].startRangeSampleNum));
       index += 2;
-      mb_get_binary_short(MB_YES, &buffer[index], &(mwc->beamData_p[i].detectedRangeInSamples));
+      mb_get_binary_short(true, &buffer[index], &(mwc->beamData_p[i].detectedRangeInSamples));
       index += 2;
-      mb_get_binary_short(MB_YES, &buffer[index], &(mwc->beamData_p[i].beamTxSectorNum));
+      mb_get_binary_short(true, &buffer[index], &(mwc->beamData_p[i].beamTxSectorNum));
       index += 2;
-      mb_get_binary_short(MB_YES, &buffer[index], &(mwc->beamData_p[i].numSampleData));
+      mb_get_binary_short(true, &buffer[index], &(mwc->beamData_p[i].numSampleData));
       index += 2;
 
       /* Allocate sample amplitude array. Sample amplitudes are in 0.5 dB resolution */
@@ -2326,7 +2325,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
             }
             if (status == MB_SUCCESS) {
               for (k=0;k<mwc->beamData_p[i].numSampleData;k++) {
-                mb_get_binary_short(MB_YES, &buffer[index], &(mwc->beamData_p[i].samplePhase16bit[k]));
+                mb_get_binary_short(true, &buffer[index], &(mwc->beamData_p[i].samplePhase16bit[k]));
                 index += 2;
               }
             }
@@ -2412,31 +2411,31 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
   int index = MBSYS_KMBES_HEADER_SIZE;
 
   // common part
-  mb_get_binary_short(MB_YES, &buffer[index], &(cpo->cmnPart.numBytesCmnPart));
+  mb_get_binary_short(true, &buffer[index], &(cpo->cmnPart.numBytesCmnPart));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(cpo->cmnPart.sensorSystem));
+  mb_get_binary_short(true, &buffer[index], &(cpo->cmnPart.sensorSystem));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(cpo->cmnPart.sensorStatus));
+  mb_get_binary_short(true, &buffer[index], &(cpo->cmnPart.sensorStatus));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(cpo->cmnPart.padding));
+  mb_get_binary_short(true, &buffer[index], &(cpo->cmnPart.padding));
   index += 2;
 
   // sensor data block
-  mb_get_binary_int(MB_YES, &buffer[index], &cpo->sensorData.timeFromSensor_sec);
+  mb_get_binary_int(true, &buffer[index], &cpo->sensorData.timeFromSensor_sec);
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &cpo->sensorData.timeFromSensor_nanosec);
+  mb_get_binary_int(true, &buffer[index], &cpo->sensorData.timeFromSensor_nanosec);
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &cpo->sensorData.posFixQuality_m);
+  mb_get_binary_float(true, &buffer[index], &cpo->sensorData.posFixQuality_m);
   index += 4;
-  mb_get_binary_double(MB_YES, &buffer[index], &cpo->sensorData.correctedLat_deg);
+  mb_get_binary_double(true, &buffer[index], &cpo->sensorData.correctedLat_deg);
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &cpo->sensorData.correctedLong_deg);
+  mb_get_binary_double(true, &buffer[index], &cpo->sensorData.correctedLong_deg);
   index += 8;
-  mb_get_binary_float(MB_YES, &buffer[index], &cpo->sensorData.speedOverGround_mPerSec);
+  mb_get_binary_float(true, &buffer[index], &cpo->sensorData.speedOverGround_mPerSec);
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &cpo->sensorData.courseOverGround_deg);
+  mb_get_binary_float(true, &buffer[index], &cpo->sensorData.courseOverGround_deg);
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &cpo->sensorData.ellipsoidHeightReRefPoint_m);
+  mb_get_binary_float(true, &buffer[index], &cpo->sensorData.ellipsoidHeightReRefPoint_m);
   index += 4;
   memcpy(&cpo->sensorData.posDataFromSensor, &buffer[index], numBytesRawSensorData);
   index += numBytesRawSensorData;
@@ -2529,9 +2528,9 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
-  mb_get_binary_short(MB_YES, &buffer[index], &(che->cmnPart.numBytesCmnPart));
+  mb_get_binary_short(true, &buffer[index], &(che->cmnPart.numBytesCmnPart));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(che->cmnPart.pingCnt));
+  mb_get_binary_short(true, &buffer[index], &(che->cmnPart.pingCnt));
   index += 2;
   che->cmnPart.rxFansPerPing = buffer[index];
   index++;
@@ -2564,7 +2563,7 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       algorithmType:        %d\n", che->cmnPart.algorithmType);
   }
 
-  mb_get_binary_float(MB_YES, &buffer[index], &che->data.heave_m);
+  mb_get_binary_float(true, &buffer[index], &che->data.heave_m);
   index += 4;
 
   if (verbose >= 5) {
@@ -2622,14 +2621,15 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
   /* extract the data */
   int index = MBSYS_KMBES_HEADER_SIZE;
 
-  mb_get_binary_short(MB_YES, &buffer[index], &iip->numBytesCmnPart);
+  mb_get_binary_short(true, &buffer[index], &iip->numBytesCmnPart);
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &iip->info);
+  mb_get_binary_short(true, &buffer[index], &iip->info);
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &iip->status);
+  mb_get_binary_short(true, &buffer[index], &iip->status);
   index += 2;
   size_t numBytesRawSensorData = iip->header.numBytesDgm - MBSYS_KMBES_IIP_VAR_OFFSET;
   memcpy(&iip->install_txt, &buffer[index], numBytesRawSensorData);
+//fprintf(stderr, "\niip->install_txt:\n%s\n", iip->install_txt);
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
@@ -2699,11 +2699,11 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
   /* extract the data */
   int index = MBSYS_KMBES_HEADER_SIZE;
 
-  mb_get_binary_short(MB_YES, &buffer[index], &iop->numBytesCmnPart);
+  mb_get_binary_short(true, &buffer[index], &iop->numBytesCmnPart);
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &iop->info);
+  mb_get_binary_short(true, &buffer[index], &iop->info);
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &iop->status);
+  mb_get_binary_short(true, &buffer[index], &iop->status);
   index += 2;
   memcpy(&iop->runtime_txt, &buffer[index], numBytesRawSensorData);
 
@@ -2775,7 +2775,7 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
   /* extract the data */
   int index = MBSYS_KMBES_HEADER_SIZE;
 
-  mb_get_binary_int(MB_YES, &buffer[index], &xmb->pseudosidescan_enabled);
+  mb_get_binary_int(true, &buffer[index], &xmb->pseudosidescan_enabled);
   index += 4;
   for (int i = 0; i < 28; i++) {
     xmb->unused[i] = buffer[index];
@@ -2908,7 +2908,6 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   size_t numBytes = 0;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2929,24 +2928,24 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
   /* extract the data */
   int index = MBSYS_KMBES_HEADER_SIZE;
 
-  mb_get_binary_short(MB_YES, &buffer[index], &xms->pingCnt);
+  mb_get_binary_short(true, &buffer[index], &xms->pingCnt);
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &xms->spare);
+  mb_get_binary_short(true, &buffer[index], &xms->spare);
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &xms->pixel_size);
+  mb_get_binary_float(true, &buffer[index], &xms->pixel_size);
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &xms->pixels_ss);
+  mb_get_binary_int(true, &buffer[index], &xms->pixels_ss);
   index += 4;
-  for (i=0;i<32;i++) {
+  for (int i=0;i<32;i++) {
     xms->unused[i] = buffer[index];
     index++;
   }
-  for (i=0;i<xms->pixels_ss;i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &xms->ss[i]);
+  for (int i=0;i<xms->pixels_ss;i++) {
+    mb_get_binary_float(true, &buffer[index], &xms->ss[i]);
     index += 4;
   }
-  for (i=0;i<xms->pixels_ss;i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &xms->ss_alongtrack[i]);
+  for (int i=0;i<xms->pixels_ss;i++) {
+    mb_get_binary_float(true, &buffer[index], &xms->ss_alongtrack[i]);
     index += 4;
   }
 
@@ -2964,9 +2963,9 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       spare:          %d\n", xms->spare);
     fprintf(stderr, "dbg5       pixel_size:     %f\n", xms->pixel_size);
     fprintf(stderr, "dbg5       pixels_ss:      %d\n", xms->pixels_ss);
-    for (i=0;i<32;i++)
+    for (int i=0;i<32;i++)
       fprintf(stderr, "dbg5       unused[%2d]:    %u\n", i, xms->unused[i]);
-    for (i=0;i<xms->pixels_ss;i++)
+    for (int i=0;i<xms->pixels_ss;i++)
       fprintf(stderr, "dbg5       ss[%2d]:        %f %f\n",
                       i, xms->ss[i], xms->ss_alongtrack[i]);
   }
@@ -3049,7 +3048,6 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   const int HEADER_SKIP = 8;
   unsigned short pingCnt;
   int time_i[7];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3078,7 +3076,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   dgm_id = (int *)&mb_io_ptr->save1;
   *dgm_id = 0;
   file_indexed = (int *)&mb_io_ptr->save2;
-  *file_indexed = MB_NO;
+  *file_indexed = false;
 
   /* set file position to the start */
   fseek(mb_io_ptr->mbfp, 0, SEEK_SET);
@@ -3087,7 +3085,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   /* set status */
   int status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
-  valid_id = MB_YES;
+  valid_id = true;
 
   while (*error <= MB_ERROR_NO_ERROR) {
 
@@ -3098,7 +3096,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
     status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
     status = mbr_kemkmall_rd_hdr(verbose, buffer, (void *)&header, (void *)&emdgm_type, error);
     while (status == MB_SUCCESS && emdgm_type == UNKNOWN) {
-      for (i=0;i<MBSYS_KMBES_HEADER_SIZE-1;i++) {
+      for (int i=0;i<MBSYS_KMBES_HEADER_SIZE-1;i++) {
         buffer[i] = buffer[i+1];
       }
       read_len = 1;
@@ -3138,7 +3136,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
       if (status == MB_SUCCESS) {
         /* Confirm that that byte count in the last int matches start int */
-        mb_get_binary_int(MB_YES, &buffer[0], &num_bytes_dgm_end);
+        mb_get_binary_int(true, &buffer[0], &num_bytes_dgm_end);
 
         if (header.numBytesDgm != num_bytes_dgm_end) {
           /* No match. Assume packet header was really corrupt, so reset
@@ -3152,7 +3150,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
           mb_io_ptr->file_pos += HEADER_SKIP;
           fseek(mb_io_ptr->mbfp, mb_io_ptr->file_pos, SEEK_SET);
           emdgm_type = UNKNOWN;
-          valid_id = MB_NO;
+          valid_id = false;
         }
       }
 
@@ -3181,9 +3179,9 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
               /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
               index = 0;
-              mb_get_binary_short(MB_YES, &buffer[index], &(cmnPart.numBytesCmnPart));
+              mb_get_binary_short(true, &buffer[index], &(cmnPart.numBytesCmnPart));
               index += 2;
-              mb_get_binary_short(MB_YES, &buffer[index], &(cmnPart.pingCnt));
+              mb_get_binary_short(true, &buffer[index], &(cmnPart.pingCnt));
               index += 2;
               cmnPart.rxFansPerPing = buffer[index];
               index++;
@@ -3247,7 +3245,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
               /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
               index = 0;
-              mb_get_binary_short(MB_YES, &buffer[index], &(pingCnt));
+              mb_get_binary_short(true, &buffer[index], &(pingCnt));
 
               /* populate the datagram index entry */
               dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
@@ -3316,7 +3314,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   }
 
   /* set indexed flag */
-  *file_indexed = MB_YES;
+  *file_indexed = true;
   *dgm_id = 0;
   if ((dgm_index_table->dgm_count > 0) && (*error = MB_ERROR_EOF)) {
     status = MB_SUCCESS;
@@ -3347,7 +3345,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
 #ifdef MBR_KEMKMALL_DEBUG
   fprintf(stderr, "\n\nIndexed %ld valid EM datagrams:\n", dgm_index_table->dgm_count);
-  for (i=0; i<dgm_index_table->dgm_count; i++)
+  for (int i=0; i<dgm_index_table->dgm_count; i++)
   {
     fprintf(stderr, "ID: %4d, ", i);
     fprintf(stderr, "file_pos: %8.zu, ", dgm_index_table->indextable[i].file_pos);
@@ -3382,13 +3380,15 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index *dgm_index = NULL;
+  struct mbsys_kmbes_header header;
+  struct mbsys_kmbes_header *header_ptr = NULL;
   size_t read_len = 0;
   char **bufferptr = NULL;
   char *buffer = NULL;
   int *bufferalloc = NULL;
   int *dgm_id = NULL;
-  int done = MB_NO;
-  int imrz, imwc, isounding;
+  int done = false;
+  int jmrz, isounding;
   int numSoundings, numBackscatterSamples;
 
   if (verbose >= 2) {
@@ -3406,6 +3406,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   bufferptr = (char **)&mb_io_ptr->raw_data;
   bufferalloc = (int *)&mb_io_ptr->structure_size;
   buffer = (char *)*bufferptr;
+  mbsys_kmbes_emdgm_type emdgm_type;
 
   /* get the datagram index table */
   dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
@@ -3415,146 +3416,197 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   int status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
 
   /* check index to see if more datagrams can be read */
-  if (*dgm_id < dgm_index_table->dgm_count) {
-    done = MB_NO;
-    *error = MB_ERROR_NO_ERROR;
-  }
-  else {
-    done = MB_YES;
-    *error = MB_ERROR_EOF;
-    status = MB_FAILURE;
+  if (mb_io_ptr->mbfp != NULL) {
+    if (*dgm_id < dgm_index_table->dgm_count) {
+      done = false;
+    }
+    else {
+      done = true;
+      *error = MB_ERROR_EOF;
+      status = MB_FAILURE;
+    }
   }
 
   /* if not done loop over reading data until a record is ready for return */
-  while (done == MB_NO) {
-    /* identify the next record in the index */
-    dgm_index = &(dgm_index_table->indextable[*dgm_id]);
-    store->time_d = dgm_index->time_d;
-    mb_get_date(verbose, store->time_d, store->time_i);
+  while (done == false) {
 
-    /* allocate memory to read the record if necessary */
-    read_len = (size_t)dgm_index->header.numBytesDgm;
-    if (*bufferalloc <= read_len) {
-      *bufferalloc = ((read_len / MBSYS_KMBES_START_BUFFER_SIZE) + 1) * MBSYS_KMBES_START_BUFFER_SIZE;
-      status = mb_reallocd(verbose, __FILE__, __LINE__, *bufferalloc, (void **)bufferptr, error);
-      if (status != MB_SUCCESS) {
-        *bufferalloc = 0;
-        done = MB_YES;
+    // if reading a file then use the index of datagrams
+    if (mb_io_ptr->mbfp != NULL) {
+      // identify the next record in the index
+      dgm_index = &(dgm_index_table->indextable[*dgm_id]);
+      header_ptr = &dgm_index->header;
+      store->time_d = dgm_index->time_d;
+      mb_get_date(verbose, store->time_d, store->time_i);
+      emdgm_type = dgm_index->emdgm_type;
+
+      /* allocate memory to read the record if necessary */
+      read_len = (size_t)dgm_index->header.numBytesDgm;
+  //fprintf(stderr, "\n----------->%s:%d READ dgm_index->header.numBytesDgm:%d\n", __FILE__, __LINE__, dgm_index->header.numBytesDgm);
+      if (*bufferalloc <= read_len) {
+        *bufferalloc = ((read_len / MBSYS_KMBES_START_BUFFER_SIZE) + 1) * MBSYS_KMBES_START_BUFFER_SIZE;
+  //fprintf(stderr, "\nAlloc more buffer: *bufferalloc:%d bufferptr:%p buffer:%p status:%d\n",
+  //*bufferalloc, bufferptr, buffer, status);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *bufferalloc, (void **)bufferptr, error);
+        if (status != MB_SUCCESS) {
+          *bufferalloc = 0;
+          done = true;
+        }
+        else {
+          buffer = (char *)*bufferptr;
+        }
+  //fprintf(stderr, "Realloc done: *bufferalloc:%d bufferptr:%p buffer:%p status:%d\n",
+  //*bufferalloc, bufferptr, buffer, status);
       }
-      else {
-        buffer = (char *)*bufferptr;
+
+      /* read the next datagram */
+      if (status == MB_SUCCESS) {
+//fprintf(stderr, "Reading datagram %c%c%c%c size:%d *bufferalloc:%d bufferptr:%p buffer:%p\n",
+//dgm_index->header.dgmType[0], dgm_index->header.dgmType[1],
+//dgm_index->header.dgmType[2], dgm_index->header.dgmType[3],
+//dgm_index->header.numBytesDgm, *bufferalloc, bufferptr, buffer);
+        fseek(mb_io_ptr->mbfp, dgm_index->file_pos, SEEK_SET);
+        status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
+        mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp);
+//fprintf(stderr, "Read %zu bytes status:%d\n", read_len, status);
       }
     }
 
-    /* read the next datagram */
-    if (status == MB_SUCCESS) {
-      fseek(mb_io_ptr->mbfp, dgm_index->file_pos, SEEK_SET);
-      status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
-      mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp);
+    // else if reading from a socket, read the entire next record at once
+    else {
+      // ensure buffer is large enough for the largest UDP packet (65507)
+
+      if (*bufferalloc <= MB_UDP_SIZE_MAX) {
+        status = mb_reallocd(verbose, __FILE__, __LINE__, MB_UDP_SIZE_MAX, (void **)bufferptr, error);
+        if (status != MB_SUCCESS) {
+          *bufferalloc = 0;
+          done = true;
+        }
+        else {
+          buffer = (char *)*bufferptr;
+          *bufferalloc = MB_UDP_SIZE_MAX;
+        }
+      }
+
+      /* read the next valid datagram */
+      read_len = *bufferalloc;
+      status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
+      if (status == MB_SUCCESS) {
+        mb_io_ptr->file_pos += read_len;
+        status = mbr_kemkmall_rd_hdr(verbose, buffer, (void *)buffer, (void *)&emdgm_type, error);
+        header_ptr = (struct mbsys_kmbes_header *) buffer;
+        store->time_d = ((double)header_ptr->time_sec) + MBSYS_KMBES_NANO * header_ptr->time_nanosec;
+        mb_get_date(verbose, store->time_d, store->time_i);
+      }
     }
 
-    /* if valid read the record type */
+    /* if valid parse the record type */
     if (status == MB_SUCCESS) {
 
-      switch (dgm_index->emdgm_type) {
+      switch (emdgm_type) {
 
         case IIP:
             /* #IIP - Info Installation PU */
-          status = mbr_kemkmall_rd_iip(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_iip(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case IOP:
             /* #IOP -  Runtime datagram */
-          status = mbr_kemkmall_rd_iop(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_iop(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SPO:
             /* #SPO - Sensor POsition data */
-          status = mbr_kemkmall_rd_spo(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_spo(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SKM:
             /* #SKM - KM binary sensor data */
-          status = mbr_kemkmall_rd_skm(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_skm(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SVP:
             /* #SVP - Sound Velocity Profile */
-          status = mbr_kemkmall_rd_svp(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_svp(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SVT:
           /* #SVP - Sensor sound Velocity measured at Transducer */
-          status = mbr_kemkmall_rd_svt(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_svt(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SCL:
             /* #SCL - Sensor CLock datagram */
-          status = mbr_kemkmall_rd_scl(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_scl(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SDE:
           /* #SDE - Sensor DEpth data */
-          status = mbr_kemkmall_rd_sde(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_sde(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SHI:
           /* #SHI - Sensor HeIght data */
-          status = mbr_kemkmall_rd_shi(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_shi(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SHA:
           /* #SHA - Sensor HeAding */
-          status = mbr_kemkmall_rd_sha(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_sha(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case MRZ:
           /* #MRZ - multibeam data for raw range, depth, reflectivity, seabed image(SI) etc. */
           /*        not done until all MRZ datagrams for a ping are read */
-          status = mbr_kemkmall_rd_mrz(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_mrz(verbose, buffer, store_ptr, (void *)header_ptr, &jmrz, error);
+//fprintf(stderr, "----------->%s:%d PARSE store->mrz[%d].header.numBytesDgm:%d \n",
+//__FILE__, __LINE__, jmrz, store->mrz[jmrz].header.numBytesDgm);
 
           /* check to see if done */
           if (status != MB_SUCCESS) {
-            done = MB_NO;
+            done = false;
           } else {
-            done = MB_YES;
+            done = true;
             store->n_mrz_read = 0;
-            store->n_mrz_needed = dgm_index->rx_per_ping;
-            for (imrz=0;imrz<dgm_index->rx_per_ping;imrz++) {
-              if (dgm_index->ping_num != store->mrz[imrz].cmnPart.pingCnt) {
-                done = MB_NO;
+            store->n_mrz_needed = store->mrz[jmrz].cmnPart.rxFansPerPing;
+            for (int imrz = 0; imrz < store->n_mrz_needed; imrz++) {
+              if (store->mrz[imrz].cmnPart.pingCnt != store->mrz[jmrz].cmnPart.pingCnt) {
+                done = false;
               } else {
                 store->n_mrz_read++;
               }
             }
+            if (store->n_mrz_read != store->n_mrz_needed)
+              done = false;
             store->num_soundings = 0;
             store->num_backscatter_samples = 0;
             store->num_pixels = 0;
-            if (done == MB_YES) {
-              for (imrz=0;imrz<dgm_index->rx_per_ping;imrz++) {
-                numSoundings = store->mrz[imrz].rxInfo.numSoundingsMaxMain + store->mrz[imrz].rxInfo.numExtraDetections;
+            if (done == true) {
+              for (int imrz=0;imrz<store->n_mrz_needed;imrz++) {
+                numSoundings = store->mrz[imrz].rxInfo.numSoundingsMaxMain
+                                + store->mrz[imrz].rxInfo.numExtraDetections;
                 numBackscatterSamples = 0;
                 for (isounding=0;isounding<numSoundings;isounding++) {
                   numBackscatterSamples += store->mrz[imrz].sounding[isounding].SInumSamples;
@@ -3566,24 +3618,24 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
           }
 
           /* if pseudosidescan is expected and XMS datagram not read, then not done yet */
-          if (done == MB_YES && store->xmb.pseudosidescan_enabled == MB_YES
-              && dgm_index->ping_num != store->xms.pingCnt) {
-            done = MB_NO;
+          if (done == true && store->xmb.pseudosidescan_enabled == true
+              && store->mrz[jmrz].cmnPart.pingCnt != store->xms.pingCnt) {
+            done = false;
           }
           break;
 
         case MWC:
           /* #MWC - multibeam water column datagram */
           /*        not done until all MRZ datagrams for a ping are read */
-          status = mbr_kemkmall_rd_mwc(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_mwc(verbose, buffer, store_ptr, (void *)header_ptr, error);
 
           /* check to see if done */
-          //done = MB_YES;
+          //done = true;
           store->n_mwc_read = 0;
           store->n_mwc_needed = dgm_index->rx_per_ping;
-          for (imwc=0;imwc<dgm_index->rx_per_ping;imwc++) {
-            if (dgm_index->ping_num != store->mwc[imwc].cmnPart.pingCnt) {
-              done = MB_NO;
+          for (int imwc=0;imwc<dgm_index->rx_per_ping;imwc++) {
+            if (store->mrz[0].cmnPart.pingCnt != store->mwc[imwc].cmnPart.pingCnt) {
+              done = false;
             } else {
               store->n_mwc_read++;
             }
@@ -3592,58 +3644,58 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
         case CPO:
           /* #CPO - Compatibility position sensor data */
-          status = mbr_kemkmall_rd_cpo(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_cpo(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case CHE:
           /* #CHE - Compatibility heave data */
-          status = mbr_kemkmall_rd_che(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_che(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case XMB:
           /* #XMB - Indicates these data were written by MB-System (MB-System only) */
-          status = mbr_kemkmall_rd_xmb(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_xmb(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case XMC:
           /* #XMC - Comment datagram (MB-System only) */
-          status = mbr_kemkmall_rd_xmc(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_xmc(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case XMS:
           /* #XMS - MB-System multibeam pseudosidescan */
-          status = mbr_kemkmall_rd_xms(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          status = mbr_kemkmall_rd_xms(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status != MB_SUCCESS) {
-            done = MB_NO;
+            done = false;
           } else {
             if (store->n_mrz_read > 0 && store->n_mrz_read == store->n_mrz_needed
                 && store->mrz[0].cmnPart.pingCnt == store->xms.pingCnt) {
-              done = MB_YES;
+              done = true;
             } else {
-              done = MB_NO;
+              done = false;
             }
           }
           break;
 
         case UNKNOWN:
           /* Unknown datagram format */
-          status = mbr_kemkmall_rd_unknown(verbose, buffer, store_ptr, (void *)&dgm_index->header, error); // TODO: implement!
+          status = mbr_kemkmall_rd_unknown(verbose, buffer, store_ptr, (void *)header_ptr, error); // TODO: implement!
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         default:
           /* should never get here */
           status = MB_FAILURE;
-          done = MB_YES;
+          done = true;
           break;
 
       }
@@ -3651,15 +3703,16 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
     /* set done if read failure */
     else {
-      done = MB_YES;
+      done = true;
     }
 
     /* increment the index counter */
-    (*dgm_id)++;
+    if (mb_io_ptr->mbfp != NULL)
+      (*dgm_id)++;
 
     /* if not done but no more data in index then done with error */
-    if (done == MB_NO && *dgm_id >= dgm_index_table->dgm_count) {
-      done = MB_YES;
+    if (done == false && mb_io_ptr->mbfp != NULL && *dgm_id >= dgm_index_table->dgm_count) {
+      done = true;
       *error = MB_ERROR_EOF;
       status = MB_FAILURE;
     }
@@ -3667,7 +3720,8 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   }
 
   /* get file position */
-  mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
+  if (mb_io_ptr->mbfp != NULL)
+    mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -3704,8 +3758,8 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
   int status = MB_SUCCESS;
 
-  /* if needed index the file */
-  if (*file_indexed == MB_NO) {
+  /* if reading from a file that has not been indexed, index the file */
+  if (*file_indexed == false && mb_io_ptr->mbfp != NULL) {
 #ifdef MBR_KEMKMALL_DEBUG
   fprintf(stderr, "About to call mbr_kemkmall_index_data...\n");
 #endif
@@ -3724,8 +3778,8 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
   /* if this is a ping and the first time read by MB-System generate pseudosidescan */
   if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
-    && store->xmb.pseudosidescan_enabled == MB_NO) {
-		status = mbsys_kmbes_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 0, error);
+    && store->xmb.pseudosidescan_enabled == false) {
+		status = mbsys_kmbes_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 0, error);
   }
 
   /* set error and kind in mb_io_ptr */
@@ -3785,7 +3839,7 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
     /* insert the data */
     index = 0;
 
-    mb_put_binary_int(MB_YES, header->numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, header->numBytesDgm, &buffer[index]);
     index += 4;
     memcpy(&buffer[index], &(header->dgmType), sizeof(header->dgmType));
     index += 4;
@@ -3793,11 +3847,11 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
     index++;
     buffer[index] = header->systemID;
     index++;
-    mb_put_binary_short(MB_YES, header->echoSounderID, &buffer[index]);
+    mb_put_binary_short(true, header->echoSounderID, &buffer[index]);
     index += 2;
-    mb_put_binary_int(MB_YES, header->time_sec, &buffer[index]);
+    mb_put_binary_int(true, header->time_sec, &buffer[index]);
     index += 4;
-    mb_put_binary_int(MB_YES, header->time_nanosec, &buffer[index]);
+    mb_put_binary_int(true, header->time_nanosec, &buffer[index]);
   }
 
   if (verbose >= 2) {
@@ -3888,31 +3942,31 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
     index = MBSYS_KMBES_HEADER_SIZE;
 
     /* common part */
-    mb_put_binary_short(MB_YES, spo->cmnPart.numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, spo->cmnPart.numBytesCmnPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, spo->cmnPart.sensorSystem, &buffer[index]);
+    mb_put_binary_short(true, spo->cmnPart.sensorSystem, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, spo->cmnPart.sensorStatus, &buffer[index]);
+    mb_put_binary_short(true, spo->cmnPart.sensorStatus, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, spo->cmnPart.padding, &buffer[index]);
+    mb_put_binary_short(true, spo->cmnPart.padding, &buffer[index]);
     index += 2;
 
     /* sensor data block */
-    mb_put_binary_int(MB_YES, spo->sensorData.timeFromSensor_sec, &buffer[index]);
+    mb_put_binary_int(true, spo->sensorData.timeFromSensor_sec, &buffer[index]);
     index += 4;
-    mb_put_binary_int(MB_YES, spo->sensorData.timeFromSensor_nanosec, &buffer[index]);
+    mb_put_binary_int(true, spo->sensorData.timeFromSensor_nanosec, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, spo->sensorData.posFixQuality_m, &buffer[index]);
+    mb_put_binary_float(true, spo->sensorData.posFixQuality_m, &buffer[index]);
     index += 4;
-    mb_put_binary_double(MB_YES, spo->sensorData.correctedLat_deg, &buffer[index]);
+    mb_put_binary_double(true, spo->sensorData.correctedLat_deg, &buffer[index]);
     index += 8;
-    mb_put_binary_double(MB_YES, spo->sensorData.correctedLong_deg, &buffer[index]);
+    mb_put_binary_double(true, spo->sensorData.correctedLong_deg, &buffer[index]);
     index += 8;
-    mb_put_binary_float(MB_YES, spo->sensorData.speedOverGround_mPerSec, &buffer[index]);
+    mb_put_binary_float(true, spo->sensorData.speedOverGround_mPerSec, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, spo->sensorData.courseOverGround_deg, &buffer[index]);
+    mb_put_binary_float(true, spo->sensorData.courseOverGround_deg, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, spo->sensorData.ellipsoidHeightReRefPoint_m, &buffer[index]);
+    mb_put_binary_float(true, spo->sensorData.ellipsoidHeightReRefPoint_m, &buffer[index]);
     index += 4;
 
     /* raw data msg from sensor */
@@ -3920,7 +3974,7 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
     index += numBytesRawSensorData;
 
     /* insert closing byte count */
-    mb_put_binary_int(MB_YES, spo->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, spo->header.numBytesDgm, &buffer[index]);
   }
 
   if (verbose >= 2) {
@@ -3945,7 +3999,6 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
 int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
   char *buffer = NULL;
   int index = 0;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3979,7 +4032,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg5       numBytesPerSample:          %u\n", skm->infoPart.numBytesPerSample);
     fprintf(stderr, "dbg5       sensorDataContents:         %u\n", skm->infoPart.sensorDataContents);
 
-    for (i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
+    for (int i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
       fprintf(stderr, "dbg5       sample[%3d].KMdefault.dgmType:                %s\n", i, skm->sample[i].KMdefault.dgmType);
       fprintf(stderr, "dbg5       sample[%3d].KMdefault.numBytesDgm:            %u\n", i, skm->sample[i].KMdefault.numBytesDgm);
       fprintf(stderr, "dbg5       sample[%3d].KMdefault.dgmVersion:             %u\n", i, skm->sample[i].KMdefault.dgmVersion);
@@ -4050,94 +4103,94 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
     index = MBSYS_KMBES_HEADER_SIZE;
 
     /* info part */
-    mb_put_binary_short(MB_YES, skm->infoPart.numBytesInfoPart, &buffer[index]);
+    mb_put_binary_short(true, skm->infoPart.numBytesInfoPart, &buffer[index]);
     index += 2;
     buffer[index] = skm->infoPart.sensorSystem;
     index++;
     buffer[index] = skm->infoPart.sensorStatus;
     index++;
-    mb_put_binary_short(MB_YES, skm->infoPart.sensorInputFormat, &buffer[index]);
+    mb_put_binary_short(true, skm->infoPart.sensorInputFormat, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, skm->infoPart.numSamplesArray, &buffer[index]);
+    mb_put_binary_short(true, skm->infoPart.numSamplesArray, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, skm->infoPart.numBytesPerSample, &buffer[index]);
+    mb_put_binary_short(true, skm->infoPart.numBytesPerSample, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, skm->infoPart.sensorDataContents, &buffer[index]);
+    mb_put_binary_short(true, skm->infoPart.sensorDataContents, &buffer[index]);
     index += 2;
 
-    for (i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
+    for (int i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
 
       /* KMbinary */
       memcpy(&buffer[index], &(skm->sample[i].KMdefault.dgmType), 4);
       index += 4;
-      mb_put_binary_short(MB_YES, skm->sample[i].KMdefault.numBytesDgm, &buffer[index]);
+      mb_put_binary_short(true, skm->sample[i].KMdefault.numBytesDgm, &buffer[index]);
       index += 2;
-      mb_put_binary_short(MB_YES, skm->sample[i].KMdefault.dgmVersion, &buffer[index]);
+      mb_put_binary_short(true, skm->sample[i].KMdefault.dgmVersion, &buffer[index]);
       index += 2;
-      mb_put_binary_int(MB_YES, skm->sample[i].KMdefault.time_sec, &buffer[index]);
+      mb_put_binary_int(true, skm->sample[i].KMdefault.time_sec, &buffer[index]);
       index += 4;
-      mb_put_binary_int(MB_YES, skm->sample[i].KMdefault.time_nanosec, &buffer[index]);
+      mb_put_binary_int(true, skm->sample[i].KMdefault.time_nanosec, &buffer[index]);
       index += 4;
-      mb_put_binary_int(MB_YES, skm->sample[i].KMdefault.status, &buffer[index]);
+      mb_put_binary_int(true, skm->sample[i].KMdefault.status, &buffer[index]);
       index += 4;
-      mb_put_binary_double(MB_YES, skm->sample[i].KMdefault.latitude_deg, &buffer[index]);
+      mb_put_binary_double(true, skm->sample[i].KMdefault.latitude_deg, &buffer[index]);
       index += 8;
-      mb_put_binary_double(MB_YES, skm->sample[i].KMdefault.longitude_deg, &buffer[index]);
+      mb_put_binary_double(true, skm->sample[i].KMdefault.longitude_deg, &buffer[index]);
       index += 8;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.ellipsoidHeight_m, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.ellipsoidHeight_m, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.roll_deg, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.roll_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.pitch_deg, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.pitch_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.heading_deg, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.heading_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.heave_m, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.heave_m, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.rollRate, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.rollRate, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.pitchRate, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.pitchRate, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.yawRate, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.yawRate, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.velNorth, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.velNorth, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.velEast, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.velEast, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.velDown, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.velDown, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.latitudeError_m, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.latitudeError_m, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.longitudeError_m, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.longitudeError_m, &buffer[index]);
       index += 4;
-            mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.ellipsoidHeightError_m, &buffer[index]);
+            mb_put_binary_float(true, skm->sample[i].KMdefault.ellipsoidHeightError_m, &buffer[index]);
             index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.rollError_deg, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.rollError_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.pitchError_deg, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.pitchError_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.headingError_deg, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.headingError_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.heaveError_m, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.heaveError_m, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.northAcceleration, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.northAcceleration, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.eastAcceleration, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.eastAcceleration, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.downAcceleration, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].KMdefault.downAcceleration, &buffer[index]);
       index += 4;
 
       /* KMdelayedHeave */
-      mb_put_binary_int(MB_YES, skm->sample[i].delayedHeave.time_sec, &buffer[index]);
+      mb_put_binary_int(true, skm->sample[i].delayedHeave.time_sec, &buffer[index]);
       index += 4;
-      mb_put_binary_int(MB_YES, skm->sample[i].delayedHeave.time_nanosec, &buffer[index]);
+      mb_put_binary_int(true, skm->sample[i].delayedHeave.time_nanosec, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, skm->sample[i].delayedHeave.delayedHeave_m, &buffer[index]);
+      mb_put_binary_float(true, skm->sample[i].delayedHeave.delayedHeave_m, &buffer[index]);
       index += 4;
     }
 
     /* insert closing byte count */
-    mb_put_binary_int(MB_YES, skm->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, skm->header.numBytesDgm, &buffer[index]);
   }
 
   if (verbose >= 2) {
@@ -4162,7 +4215,6 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4195,7 +4247,7 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg5       latitude_deg:     %f\n", svp->latitude_deg);
     fprintf(stderr, "dbg5       longitude_deg:    %f\n", svp->longitude_deg);
 
-    for (i = 0; i < (svp->numSamples); i++) {
+    for (int i = 0; i < (svp->numSamples); i++) {
       fprintf(stderr, "dbg5       sensorData[%3d].depth_m:                %f\n", i, svp->sensorData[i].depth_m);
       fprintf(stderr, "dbg5       sensorData[%3d].soundVelocity_mPerSec:  %f\n", i, svp->sensorData[i].soundVelocity_mPerSec);
       fprintf(stderr, "dbg5       sensorData[%3d].padding:                %d\n", i, svp->sensorData[i].padding);
@@ -4230,35 +4282,35 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
     index = MBSYS_KMBES_HEADER_SIZE;
 
     /* svp common part */
-    mb_put_binary_short(MB_YES, svp->numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, svp->numBytesCmnPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, svp->numSamples, &buffer[index]);
+    mb_put_binary_short(true, svp->numSamples, &buffer[index]);
     index += 2;
     memcpy(&buffer[index], &svp->sensorFormat, 4);
     index += 4;
-    mb_put_binary_int(MB_YES, svp->time_sec, &buffer[index]);
+    mb_put_binary_int(true, svp->time_sec, &buffer[index]);
     index += 4;
-    mb_put_binary_double(MB_YES, svp->latitude_deg, &buffer[index]);
+    mb_put_binary_double(true, svp->latitude_deg, &buffer[index]);
     index += 8;
-    mb_put_binary_double(MB_YES, svp->longitude_deg, &buffer[index]);
+    mb_put_binary_double(true, svp->longitude_deg, &buffer[index]);
     index += 8;
 
     /* svp data block */
-    for (i = 0; i < (svp->numSamples); i++) {
-      mb_put_binary_float(MB_YES, svp->sensorData[i].depth_m, &buffer[index]);
+    for (int i = 0; i < (svp->numSamples); i++) {
+      mb_put_binary_float(true, svp->sensorData[i].depth_m, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, svp->sensorData[i].soundVelocity_mPerSec, &buffer[index]);
+      mb_put_binary_float(true, svp->sensorData[i].soundVelocity_mPerSec, &buffer[index]);
       index += 4;
-      mb_put_binary_int(MB_YES, svp->sensorData[i].padding, &buffer[index]);
+      mb_put_binary_int(true, svp->sensorData[i].padding, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, svp->sensorData[i].temp_C, &buffer[index]);
+      mb_put_binary_float(true, svp->sensorData[i].temp_C, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, svp->sensorData[i].salinity, &buffer[index]);
+      mb_put_binary_float(true, svp->sensorData[i].salinity, &buffer[index]);
       index += 4;
     }
 
     /* insert closing byte count */
-    mb_put_binary_int(MB_YES, svp->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, svp->header.numBytesDgm, &buffer[index]);
   }
 
   if (verbose >= 2) {
@@ -4283,7 +4335,6 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4317,7 +4368,7 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg5       filterTime_sec:           %f\n", svt->infoPart.filterTime_sec);
     fprintf(stderr, "dbg5       soundVelocity_mPerSec_offset: %f\n", svt->infoPart.soundVelocity_mPerSec_offset);
 
-    for (i = 0; i < (svt->infoPart.numSamplesArray); i++) {
+    for (int i = 0; i < (svt->infoPart.numSamplesArray); i++) {
       fprintf(stderr, "dbg5       sensorData[%3d].time_sec:               %u\n", i, svt->sensorData[i].time_sec);
       fprintf(stderr, "dbg5       sensorData[%3d].time_nanosec:           %u\n", i, svt->sensorData[i].time_nanosec);
       fprintf(stderr, "dbg5       sensorData[%3d].soundVelocity_mPerSec:  %f\n", i, svt->sensorData[i].soundVelocity_mPerSec);
@@ -4353,40 +4404,42 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
     index = MBSYS_KMBES_HEADER_SIZE;
 
     /* svt common part */
-    mb_put_binary_short(MB_YES, svt->infoPart.numBytesInfoPart, &buffer[index]);
+    mb_put_binary_short(true, svt->infoPart.numBytesInfoPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, svt->infoPart.sensorStatus, &buffer[index]);
+    mb_put_binary_short(true, svt->infoPart.sensorStatus, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, svt->infoPart.sensorInputFormat, &buffer[index]);
+    mb_put_binary_short(true, svt->infoPart.sensorInputFormat, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, svt->infoPart.numSamplesArray, &buffer[index]);
+    mb_put_binary_short(true, svt->infoPart.numSamplesArray, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, svt->infoPart.sensorDataContents, &buffer[index]);
+    mb_put_binary_short(true, svt->infoPart.numBytesPerSample, &buffer[index]);
     index += 2;
-    mb_put_binary_float(MB_YES, svt->infoPart.filterTime_sec, &buffer[index]);
+    mb_put_binary_short(true, svt->infoPart.sensorDataContents, &buffer[index]);
+    index += 2;
+    mb_put_binary_float(true, svt->infoPart.filterTime_sec, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, svt->infoPart.soundVelocity_mPerSec_offset, &buffer[index]);
+    mb_put_binary_float(true, svt->infoPart.soundVelocity_mPerSec_offset, &buffer[index]);
     index += 4;
 
     /* svt data block */
-    for( i=0; i<svt->infoPart.numSamplesArray; i++ )
+    for (int i = 0; i<svt->infoPart.numSamplesArray; i++ )
     {
-      mb_put_binary_int(MB_YES, svt->sensorData[i].time_sec, &buffer[index]);
+      mb_put_binary_int(true, svt->sensorData[i].time_sec, &buffer[index]);
       index += 4;
-      mb_put_binary_int(MB_YES, svt->sensorData[i].time_nanosec, &buffer[index]);
+      mb_put_binary_int(true, svt->sensorData[i].time_nanosec, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, svt->sensorData[i].soundVelocity_mPerSec, &buffer[index]);
+      mb_put_binary_float(true, svt->sensorData[i].soundVelocity_mPerSec, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, svt->sensorData[i].temp_C, &buffer[index]);
+      mb_put_binary_float(true, svt->sensorData[i].temp_C, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, svt->sensorData[i].pressure_Pa, &buffer[index]);
+      mb_put_binary_float(true, svt->sensorData[i].pressure_Pa, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, svt->sensorData[i].salinity, &buffer[index]);
+      mb_put_binary_float(true, svt->sensorData[i].salinity, &buffer[index]);
       index += 4;
     }
 
     /* insert closing byte count */
-    mb_put_binary_int(MB_YES, svt->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, svt->header.numBytesDgm, &buffer[index]);
   }
 
   if (verbose >= 2) {
@@ -4477,25 +4530,25 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
     index = MBSYS_KMBES_HEADER_SIZE;
 
     /* common part */
-    mb_put_binary_short(MB_YES, scl->cmnPart.numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, scl->cmnPart.numBytesCmnPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, scl->cmnPart.sensorSystem, &buffer[index]);
+    mb_put_binary_short(true, scl->cmnPart.sensorSystem, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, scl->cmnPart.sensorStatus, &buffer[index]);
+    mb_put_binary_short(true, scl->cmnPart.sensorStatus, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, scl->cmnPart.padding, &buffer[index]);
+    mb_put_binary_short(true, scl->cmnPart.padding, &buffer[index]);
     index += 2;
 
     /* sensor data block */
-    mb_put_binary_float(MB_YES, scl->sensorData.offset_sec, &buffer[index]);
+    mb_put_binary_float(true, scl->sensorData.offset_sec, &buffer[index]);
     index += 4;
-    mb_put_binary_int(MB_YES, scl->sensorData.clockDevPU_nanosec, &buffer[index]);
+    mb_put_binary_int(true, scl->sensorData.clockDevPU_nanosec, &buffer[index]);
     index += 4;
     memcpy(&buffer[index], &(scl->sensorData.dataFromSensor), numBytesRawSensorData);
     index += numBytesRawSensorData;
 
     /* insert closing byte count */
-    mb_put_binary_int(MB_YES, scl->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, scl->header.numBytesDgm, &buffer[index]);
   }
 
   if (verbose >= 2) {
@@ -4588,31 +4641,31 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
     index = MBSYS_KMBES_HEADER_SIZE;
 
     /* common part */
-    mb_put_binary_short(MB_YES, sde->cmnPart.numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, sde->cmnPart.numBytesCmnPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, sde->cmnPart.sensorSystem, &buffer[index]);
+    mb_put_binary_short(true, sde->cmnPart.sensorSystem, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, sde->cmnPart.sensorStatus, &buffer[index]);
+    mb_put_binary_short(true, sde->cmnPart.sensorStatus, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, sde->cmnPart.padding, &buffer[index]);
+    mb_put_binary_short(true, sde->cmnPart.padding, &buffer[index]);
     index += 2;
 
     /* sensor data block */
-    mb_put_binary_float(MB_YES, sde->sensorData.depthUsed_m, &buffer[index]);
+    mb_put_binary_float(true, sde->sensorData.depthUsed_m, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, sde->sensorData.offset, &buffer[index]);
+    mb_put_binary_float(true, sde->sensorData.offset, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, sde->sensorData.scale, &buffer[index]);
+    mb_put_binary_float(true, sde->sensorData.scale, &buffer[index]);
     index += 4;
-    mb_put_binary_double(MB_YES, sde->sensorData.latitude_deg, &buffer[index]);
+    mb_put_binary_double(true, sde->sensorData.latitude_deg, &buffer[index]);
     index += 8;
-    mb_put_binary_double(MB_YES, sde->sensorData.longitude_deg, &buffer[index]);
+    mb_put_binary_double(true, sde->sensorData.longitude_deg, &buffer[index]);
     index += 8;
     memcpy(&(sde->sensorData.dataFromSensor), &buffer[index], numBytesRawSensorData);
     index += numBytesRawSensorData;
 
     /* insert closing byte count */
-    mb_put_binary_int(MB_YES, sde->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, sde->header.numBytesDgm, &buffer[index]);
   }
 
   if (verbose >= 2) {
@@ -4702,25 +4755,25 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
     index = MBSYS_KMBES_HEADER_SIZE;
 
     /* common part */
-    mb_put_binary_short(MB_YES, shi->cmnPart.numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, shi->cmnPart.numBytesCmnPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, shi->cmnPart.sensorSystem, &buffer[index]);
+    mb_put_binary_short(true, shi->cmnPart.sensorSystem, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, shi->cmnPart.sensorStatus, &buffer[index]);
+    mb_put_binary_short(true, shi->cmnPart.sensorStatus, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, shi->cmnPart.padding, &buffer[index]);
+    mb_put_binary_short(true, shi->cmnPart.padding, &buffer[index]);
     index += 2;
 
     /* sensor data block */
-    mb_put_binary_short(MB_YES, shi->sensorData.sensorType, &buffer[index]);
+    mb_put_binary_short(true, shi->sensorData.sensorType, &buffer[index]);
     index += 2;
-    mb_put_binary_float(MB_YES, shi->sensorData.heigthUsed_m, &buffer[index]);
+    mb_put_binary_float(true, shi->sensorData.heigthUsed_m, &buffer[index]);
     index += 4;
     memcpy(&buffer[index], &(shi->sensorData.dataFromSensor), numBytesRawSensorData);
     index += numBytesRawSensorData;
 
     /* insert closing byte count */
-    mb_put_binary_int(MB_YES, shi->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, shi->header.numBytesDgm, &buffer[index]);
   }
 
   if (verbose >= 2) {
@@ -4745,7 +4798,6 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
 int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4781,7 +4833,7 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg5       numBytesPerSample:      %u\n", sha->dataInfo.numBytesPerSample);
     fprintf(stderr, "dbg5       numBytesRawSensorData:  %u\n", sha->dataInfo.numBytesRawSensorData);
 
-    for (i = 0; i < (sha->dataInfo.numSamplesArray); i++) {
+    for (int i = 0; i < (sha->dataInfo.numSamplesArray); i++) {
       fprintf(stderr, "dbg5       sensorData[%3d].timeSinceRecStart_nanosec: %u\n", i, sha->sensorData[i].timeSinceRecStart_nanosec);
       fprintf(stderr, "dbg5       sensorData[%3d].headingCorrected_deg:      %f\n", i, sha->sensorData[i].headingCorrected_deg);
       fprintf(stderr, "dbg5       sensorData[%3d].dataFromSensor:            %s\n", i, sha->sensorData[i].dataFromSensor);
@@ -4814,37 +4866,37 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
     index = MBSYS_KMBES_HEADER_SIZE;
 
     /* common part */
-    mb_put_binary_short(MB_YES, sha->cmnPart.numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, sha->cmnPart.numBytesCmnPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, sha->cmnPart.sensorSystem, &buffer[index]);
+    mb_put_binary_short(true, sha->cmnPart.sensorSystem, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, sha->cmnPart.sensorStatus, &buffer[index]);
+    mb_put_binary_short(true, sha->cmnPart.sensorStatus, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, sha->cmnPart.padding, &buffer[index]);
+    mb_put_binary_short(true, sha->cmnPart.padding, &buffer[index]);
     index += 2;
 
     /* sensor info */
-    mb_put_binary_short(MB_YES, sha->dataInfo.numBytesInfoPart, &buffer[index]);
+    mb_put_binary_short(true, sha->dataInfo.numBytesInfoPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, sha->dataInfo.numSamplesArray, &buffer[index]);
+    mb_put_binary_short(true, sha->dataInfo.numSamplesArray, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, sha->dataInfo.numBytesPerSample, &buffer[index]);
+    mb_put_binary_short(true, sha->dataInfo.numBytesPerSample, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, sha->dataInfo.numBytesRawSensorData, &buffer[index]);
+    mb_put_binary_short(true, sha->dataInfo.numBytesRawSensorData, &buffer[index]);
     index += 2;
 
     /* sensor data blocks */
-    for (i = 0; i<(sha->dataInfo.numSamplesArray); i++) {
-      mb_put_binary_int(MB_YES, sha->sensorData[i].timeSinceRecStart_nanosec, &buffer[index]);
+    for (int i = 0; i<(sha->dataInfo.numSamplesArray); i++) {
+      mb_put_binary_int(true, sha->sensorData[i].timeSinceRecStart_nanosec, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, sha->sensorData[i].headingCorrected_deg, &buffer[index]);
+      mb_put_binary_float(true, sha->sensorData[i].headingCorrected_deg, &buffer[index]);
       index += 4;
       memcpy(&buffer[index], &(sha->sensorData[i].dataFromSensor), sha->dataInfo.numBytesRawSensorData);
       index += sha->dataInfo.numBytesRawSensorData;
     }
 
     /* insert closing byte count */
-    mb_put_binary_int(MB_YES, sha->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, sha->header.numBytesDgm, &buffer[index]);
   }
 
   if (verbose >= 2) {
@@ -4871,7 +4923,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
   int numSoundings = 0;
   int numSidescanSamples = 0;
   int index = 0;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4914,6 +4965,8 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
                             + MBSYS_KMBES_END_SIZE;
 
   *size = (size_t) mrz->header.numBytesDgm;
+//fprintf(stderr, "************>%s:%d WRITE mbr_kemkmall_wr_mrz mrz->header.numBytesDgm:%d\n",
+//__FILE__, __LINE__, mrz->header.numBytesDgm);
 
   int status = MB_SUCCESS;
 
@@ -4938,9 +4991,9 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     index = MBSYS_KMBES_HEADER_SIZE;
 
     /* EMdgmMpartition - data partition information */
-    mb_put_binary_short(MB_YES, mrz->partition.numOfDgms, &buffer[index]);
+    mb_put_binary_short(true, mrz->partition.numOfDgms, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mrz->partition.dgmNum, &buffer[index]);
+    mb_put_binary_short(true, mrz->partition.dgmNum, &buffer[index]);
     index += 2;
 
     if (verbose >= 5) {
@@ -4950,9 +5003,9 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
 
     /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
-    mb_put_binary_short(MB_YES, mrz->cmnPart.numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, mrz->cmnPart.numBytesCmnPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mrz->cmnPart.pingCnt, &buffer[index]);
+    mb_put_binary_short(true, mrz->cmnPart.pingCnt, &buffer[index]);
     index += 2;
     buffer[index] = mrz->cmnPart.rxFansPerPing;
     index++;
@@ -4986,13 +5039,13 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
 
     /* EMdgmMRZ_pingInfo - ping info */
-    mb_put_binary_short(MB_YES, mrz->pingInfo.numBytesInfoData, &buffer[index]);
+    mb_put_binary_short(true, mrz->pingInfo.numBytesInfoData, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mrz->pingInfo.padding0, &buffer[index]);
+    mb_put_binary_short(true, mrz->pingInfo.padding0, &buffer[index]);
     index += 2;
 
     /* ping info */
-    mb_put_binary_float(MB_YES, mrz->pingInfo.pingRate_Hz, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.pingRate_Hz, &buffer[index]);
     index += 4;
 
     buffer[index] = mrz->pingInfo.beamSpacing;
@@ -5008,33 +5061,33 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     buffer[index] = mrz->pingInfo.pulseForm;
     index++;
 
-    mb_put_binary_short(MB_YES, mrz->pingInfo.padding1, &buffer[index]);
+    mb_put_binary_short(true, mrz->pingInfo.padding1, &buffer[index]);
     index += 2;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.frequencyMode_Hz, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.frequencyMode_Hz, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.freqRangeLowLim_Hz, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.freqRangeLowLim_Hz, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.freqRangeHighLim_Hz, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.freqRangeHighLim_Hz, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.maxTotalTxPulseLength_sec, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.maxTotalTxPulseLength_sec, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.maxEffTxPulseLength_sec, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.maxEffTxPulseLength_sec, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.maxEffTxBandWidth_Hz, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.maxEffTxBandWidth_Hz, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.absCoeff_dBPerkm, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.absCoeff_dBPerkm, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.portSectorEdge_deg, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.portSectorEdge_deg, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.starbSectorEdge_deg, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.starbSectorEdge_deg, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.portMeanCov_deg, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.portMeanCov_deg, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.starbMeanCov_deg, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.starbMeanCov_deg, &buffer[index]);
     index += 4;
-    mb_put_binary_short(MB_YES, mrz->pingInfo.portMeanCov_m, &buffer[index]);
+    mb_put_binary_short(true, mrz->pingInfo.portMeanCov_m, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mrz->pingInfo.starbMeanCov_m, &buffer[index]);
+    mb_put_binary_short(true, mrz->pingInfo.starbMeanCov_m, &buffer[index]);
     index += 2;
 
     buffer[index] = mrz->pingInfo.modeAndStabilisation;
@@ -5042,41 +5095,41 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     buffer[index] = mrz->pingInfo.runtimeFilter1;
     index++;
 
-    mb_put_binary_short(MB_YES, mrz->pingInfo.runtimeFilter2, &buffer[index]);
+    mb_put_binary_short(true, mrz->pingInfo.runtimeFilter2, &buffer[index]);
     index += 2;
-    mb_put_binary_int(MB_YES, mrz->pingInfo.pipeTrackingStatus, &buffer[index]);
+    mb_put_binary_int(true, mrz->pingInfo.pipeTrackingStatus, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.transmitArraySizeUsed_deg, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.transmitArraySizeUsed_deg, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.receiveArraySizeUsed_deg, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.receiveArraySizeUsed_deg, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.transmitPower_dB, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.transmitPower_dB, &buffer[index]);
     index += 4;
-    mb_put_binary_short(MB_YES, mrz->pingInfo.SLrampUpTimeRemaining, &buffer[index]);
+    mb_put_binary_short(true, mrz->pingInfo.SLrampUpTimeRemaining, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mrz->pingInfo.padding2, &buffer[index]);
+    mb_put_binary_short(true, mrz->pingInfo.padding2, &buffer[index]);
     index += 2;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.yawAngle_deg, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.yawAngle_deg, &buffer[index]);
     index += 4;
 
     // Info of tx sector data block, EMdgmMRZ_txSectorInfo
-    mb_put_binary_short(MB_YES, mrz->pingInfo.numTxSectors, &buffer[index]);
+    mb_put_binary_short(true, mrz->pingInfo.numTxSectors, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mrz->pingInfo.numBytesPerTxSector, &buffer[index]);
+    mb_put_binary_short(true, mrz->pingInfo.numBytesPerTxSector, &buffer[index]);
     index += 2;
 
     // Info at time of midpoint of first tx pulse
-    mb_put_binary_float(MB_YES, mrz->pingInfo.headingVessel_deg, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.headingVessel_deg, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.soundSpeedAtTxDepth_mPerSec, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.soundSpeedAtTxDepth_mPerSec, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.txTransducerDepth_m, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.txTransducerDepth_m, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.z_waterLevelReRefPoint_m, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.z_waterLevelReRefPoint_m, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.x_kmallToall_m, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.x_kmallToall_m, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.y_kmallToall_m, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.y_kmallToall_m, &buffer[index]);
     index += 4;
 
     buffer[index] = mrz->pingInfo.latLongInfo;
@@ -5088,11 +5141,11 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     buffer[index] = mrz->pingInfo.padding3;
     index++;
 
-    mb_put_binary_double(MB_YES, mrz->pingInfo.latitude_deg, &buffer[index]);
+    mb_put_binary_double(true, mrz->pingInfo.latitude_deg, &buffer[index]);
     index += 8;
-    mb_put_binary_double(MB_YES, mrz->pingInfo.longitude_deg, &buffer[index]);
+    mb_put_binary_double(true, mrz->pingInfo.longitude_deg, &buffer[index]);
     index += 8;
-    mb_put_binary_float(MB_YES, mrz->pingInfo.ellipsoidHeightReRefPoint_m, &buffer[index]);
+    mb_put_binary_float(true, mrz->pingInfo.ellipsoidHeightReRefPoint_m, &buffer[index]);
     index += 4;
 
     if (verbose >= 5) {
@@ -5146,7 +5199,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
 
     /* EMdgmMRZ_txSectorInfo - sector information */
-    for (i = 0; i < (mrz->pingInfo.numTxSectors); i++) {
+    for (int i = 0; i < (mrz->pingInfo.numTxSectors); i++) {
       buffer[index] = mrz->sectorInfo[i].txSectorNumb;
       index++;
       buffer[index] = mrz->sectorInfo[i].txArrNumber;
@@ -5155,25 +5208,25 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
       index++;
       buffer[index] = mrz->sectorInfo[i].padding0;
       index++;
-      mb_put_binary_float(MB_YES, mrz->sectorInfo[i].sectorTransmitDelay_sec, &buffer[index]);
+      mb_put_binary_float(true, mrz->sectorInfo[i].sectorTransmitDelay_sec, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sectorInfo[i].tiltAngleReTx_deg, &buffer[index]);
+      mb_put_binary_float(true, mrz->sectorInfo[i].tiltAngleReTx_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sectorInfo[i].txNominalSourceLevel_dB, &buffer[index]);
+      mb_put_binary_float(true, mrz->sectorInfo[i].txNominalSourceLevel_dB, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sectorInfo[i].txFocusRange_m, &buffer[index]);
+      mb_put_binary_float(true, mrz->sectorInfo[i].txFocusRange_m, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sectorInfo[i].centreFreq_Hz, &buffer[index]);
+      mb_put_binary_float(true, mrz->sectorInfo[i].centreFreq_Hz, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sectorInfo[i].signalBandWidth_Hz, &buffer[index]);
+      mb_put_binary_float(true, mrz->sectorInfo[i].signalBandWidth_Hz, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sectorInfo[i].totalSignalLength_sec, &buffer[index]);
+      mb_put_binary_float(true, mrz->sectorInfo[i].totalSignalLength_sec, &buffer[index]);
       index += 4;
       buffer[index] = mrz->sectorInfo[i].pulseShading;
       index++;
       buffer[index] = mrz->sectorInfo[i].signalWaveForm;
       index++;
-      mb_put_binary_short(MB_YES, mrz->sectorInfo[i].padding1, &buffer[index]);
+      mb_put_binary_short(true, mrz->sectorInfo[i].padding1, &buffer[index]);
       index += 2;
 
       if (verbose >= 5) {
@@ -5197,31 +5250,31 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
 
     /* EMdgmMRZ_rxInfo - receiver specific info */
-    mb_put_binary_short(MB_YES, mrz->rxInfo.numBytesRxInfo, &buffer[index]);
+    mb_put_binary_short(true, mrz->rxInfo.numBytesRxInfo, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mrz->rxInfo.numSoundingsMaxMain, &buffer[index]);
+    mb_put_binary_short(true, mrz->rxInfo.numSoundingsMaxMain, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mrz->rxInfo.numSoundingsValidMain, &buffer[index]);
+    mb_put_binary_short(true, mrz->rxInfo.numSoundingsValidMain, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mrz->rxInfo.numBytesPerSounding, &buffer[index]);
+    mb_put_binary_short(true, mrz->rxInfo.numBytesPerSounding, &buffer[index]);
     index += 2;
 
-    mb_put_binary_float(MB_YES, mrz->rxInfo.WCSampleRate, &buffer[index]);
+    mb_put_binary_float(true, mrz->rxInfo.WCSampleRate, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->rxInfo.seabedImageSampleRate, &buffer[index]);
+    mb_put_binary_float(true, mrz->rxInfo.seabedImageSampleRate, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->rxInfo.BSnormal_dB, &buffer[index]);
+    mb_put_binary_float(true, mrz->rxInfo.BSnormal_dB, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mrz->rxInfo.BSoblique_dB, &buffer[index]);
+    mb_put_binary_float(true, mrz->rxInfo.BSoblique_dB, &buffer[index]);
     index += 4;
 
-    mb_put_binary_short(MB_YES, mrz->rxInfo.extraDetectionAlarmFlag, &buffer[index]);
+    mb_put_binary_short(true, mrz->rxInfo.extraDetectionAlarmFlag, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mrz->rxInfo.numExtraDetections, &buffer[index]);
+    mb_put_binary_short(true, mrz->rxInfo.numExtraDetections, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mrz->rxInfo.numExtraDetectionClasses, &buffer[index]);
+    mb_put_binary_short(true, mrz->rxInfo.numExtraDetectionClasses, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mrz->rxInfo.numBytesPerClass, &buffer[index]);
+    mb_put_binary_short(true, mrz->rxInfo.numBytesPerClass, &buffer[index]);
     index += 2;
 
     if (verbose >= 5) {
@@ -5241,8 +5294,8 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
 
     /* EMdgmMRZ_extraDetClassInfo -  Extra detection class info */
-    for (i = 0; i < (mrz->rxInfo.numExtraDetectionClasses); i++) {
-      mb_put_binary_short(MB_YES, mrz->extraDetClassInfo[i].numExtraDetInClass, &buffer[index]);
+    for (int i = 0; i < (mrz->rxInfo.numExtraDetectionClasses); i++) {
+      mb_put_binary_short(true, mrz->extraDetClassInfo[i].numExtraDetInClass, &buffer[index]);
       index += 2;
       buffer[index] = mrz->extraDetClassInfo[i].padding;
       index++;
@@ -5260,8 +5313,8 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* EMdgmMRZ_sounding - Data for each sounding */
     //numSidescanSamples = 0;
     //numSoundings = mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections;
-    for (i = 0; i < numSoundings; i++) {
-      mb_put_binary_short(MB_YES, mrz->sounding[i].soundingIndex, &buffer[index]);
+    for (int i = 0; i < numSoundings; i++) {
+      mb_put_binary_short(true, mrz->sounding[i].soundingIndex, &buffer[index]);
       index += 2;
       buffer[index] = mrz->sounding[i].txSectorNumb;
       index++;
@@ -5284,81 +5337,81 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* These two bytes specified as padding in the Kongsberg specification but are
        here used for the MB-System beam flag - if the first mb_u_char == 1 then the
        second byte is an MB-System beamflag */
-      // mb_put_binary_short(MB_YES, mrz->sounding[i].padding, &buffer[index]);
+      // mb_put_binary_short(true, mrz->sounding[i].padding, &buffer[index]);
       // index += 2;
       buffer[index] = mrz->sounding[i].beamflag_enabled;
       index++;
       buffer[index] = mrz->sounding[i].beamflag;
       index++;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].rangeFactor, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].rangeFactor, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].qualityFactor, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].qualityFactor, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].detectionUncertaintyVer_m, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].detectionUncertaintyVer_m, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].detectionUncertaintyHor_m, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].detectionUncertaintyHor_m, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].detectionWindowLength_sec, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].detectionWindowLength_sec, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].echoLength_sec, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].echoLength_sec, &buffer[index]);
       index += 4;
 
       /* Water column paramters */
-      mb_put_binary_short(MB_YES, mrz->sounding[i].WCBeamNumb, &buffer[index]);
+      mb_put_binary_short(true, mrz->sounding[i].WCBeamNumb, &buffer[index]);
       index += 2;
-      mb_put_binary_short(MB_YES, mrz->sounding[i].WCrange_samples, &buffer[index]);
+      mb_put_binary_short(true, mrz->sounding[i].WCrange_samples, &buffer[index]);
       index += 2;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].WCNomBeamAngleAcross_deg, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].WCNomBeamAngleAcross_deg, &buffer[index]);
       index += 4;
 
       /* Reflectivity data (backscatter (BS) data) */
-      mb_put_binary_float(MB_YES, mrz->sounding[i].meanAbsCoeff_dBPerkm, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].meanAbsCoeff_dBPerkm, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].reflectivity1_dB, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].reflectivity1_dB, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].reflectivity2_dB, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].reflectivity2_dB, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].receiverSensitivityApplied_dB, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].receiverSensitivityApplied_dB, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].sourceLevelApplied_dB, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].sourceLevelApplied_dB, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].BScalibration_dB, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].BScalibration_dB, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].TVG_dB, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].TVG_dB, &buffer[index]);
       index += 4;
 
       /* Range and angle data */
-      mb_put_binary_float(MB_YES, mrz->sounding[i].beamAngleReRx_deg, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].beamAngleReRx_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].beamAngleCorrection_deg, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].beamAngleCorrection_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].twoWayTravelTime_sec, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].twoWayTravelTime_sec, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].twoWayTravelTimeCorrection_sec, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].twoWayTravelTimeCorrection_sec, &buffer[index]);
       index += 4;
 
       /* Georeferenced depth points */
-      mb_put_binary_float(MB_YES, mrz->sounding[i].deltaLatitude_deg, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].deltaLatitude_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].deltaLongitude_deg, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].deltaLongitude_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].z_reRefPoint_m, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].z_reRefPoint_m, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].y_reRefPoint_m, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].y_reRefPoint_m, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].x_reRefPoint_m, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].x_reRefPoint_m, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mrz->sounding[i].beamIncAngleAdj_deg, &buffer[index]);
+      mb_put_binary_float(true, mrz->sounding[i].beamIncAngleAdj_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_short(MB_YES, mrz->sounding[i].realTimeCleanInfo, &buffer[index]);
+      mb_put_binary_short(true, mrz->sounding[i].realTimeCleanInfo, &buffer[index]);
       index += 2;
 
       /* Seabed image */
-      mb_put_binary_short(MB_YES, mrz->sounding[i].SIstartRange_samples, &buffer[index]);
+      mb_put_binary_short(true, mrz->sounding[i].SIstartRange_samples, &buffer[index]);
       index += 2;
-      mb_put_binary_short(MB_YES, mrz->sounding[i].SIcentreSample, &buffer[index]);
+      mb_put_binary_short(true, mrz->sounding[i].SIcentreSample, &buffer[index]);
       index += 2;
-      mb_put_binary_short(MB_YES, mrz->sounding[i].SInumSamples, &buffer[index]);
+      mb_put_binary_short(true, mrz->sounding[i].SInumSamples, &buffer[index]);
       index += 2;
 
       //numSidescanSamples += mrz->sounding[i].SInumSamples;
@@ -5374,7 +5427,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
         fprintf(stderr, "dbg5       postProcessingInfo:             %d\n", mrz->sounding[i].postProcessingInfo);
         fprintf(stderr, "dbg5       detectionClass:                 %d\n", mrz->sounding[i].detectionClass);
         fprintf(stderr, "dbg5       detectionConfidenceLevel        %d\n", mrz->sounding[i].detectionConfidenceLevel);
-        // Skip mrz->sounding[i].padding
+        // fprintf(stderr, "dbg5       padding:                       %d\n", mrz->sounding[i].padding);
         fprintf(stderr, "dbg5       beamflag_enabled:               %d\n", mrz->sounding[i].beamflag_enabled);
         fprintf(stderr, "dbg5       beamflag:                       %d\n", mrz->sounding[i].beamflag);
         fprintf(stderr, "dbg5       rangeFactor:                    %f\n", mrz->sounding[i].rangeFactor);
@@ -5410,13 +5463,13 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
       }
     }
 
-    for (i = 0; i < numSidescanSamples; i++) {
-      mb_put_binary_short(MB_YES, mrz->SIsample_desidB[i], &buffer[index]);
+    for (int i = 0; i < numSidescanSamples; i++) {
+      mb_put_binary_short(true, mrz->SIsample_desidB[i], &buffer[index]);
       index += 2;
     }
 
     /* Insert closing byte count */
-    mb_put_binary_int(MB_YES, mrz->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, mrz->header.numBytesDgm, &buffer[index]);
     index += 4;
   }
 
@@ -5485,9 +5538,9 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     index = MBSYS_KMBES_HEADER_SIZE;
 
     /* EMdgmMpartition - data partition information */
-    mb_put_binary_short(MB_YES, mwc->partition.numOfDgms, &buffer[index]);
+    mb_put_binary_short(true, mwc->partition.numOfDgms, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mwc->partition.dgmNum, &buffer[index]);
+    mb_put_binary_short(true, mwc->partition.dgmNum, &buffer[index]);
     index += 2;
 
     if (verbose >= 5) {
@@ -5497,9 +5550,9 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
 
     /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
-    mb_put_binary_short(MB_YES, mwc->cmnPart.numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, mwc->cmnPart.numBytesCmnPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mwc->cmnPart.pingCnt, &buffer[index]);
+    mb_put_binary_short(true, mwc->cmnPart.pingCnt, &buffer[index]);
     index += 2;
     buffer[index] = mwc->cmnPart.rxFansPerPing;
     index++;
@@ -5533,15 +5586,15 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
 
     /* EMdgmMWCtxInfo - transmit sectors, general info for all sectors */
-    mb_put_binary_short(MB_YES, mwc->txInfo.numBytesTxInfo, &buffer[index]);
+    mb_put_binary_short(true, mwc->txInfo.numBytesTxInfo, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mwc->txInfo.numTxSectors, &buffer[index]);
+    mb_put_binary_short(true, mwc->txInfo.numTxSectors, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mwc->txInfo.numBytesPerTxSector, &buffer[index]);
+    mb_put_binary_short(true, mwc->txInfo.numBytesPerTxSector, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mwc->txInfo.padding, &buffer[index]);
+    mb_put_binary_short(true, mwc->txInfo.padding, &buffer[index]);
     index += 2;
-    mb_put_binary_float(MB_YES, mwc->txInfo.heave_m, &buffer[index]);
+    mb_put_binary_float(true, mwc->txInfo.heave_m, &buffer[index]);
     index += 4;
 
     if (verbose >= 5) {
@@ -5554,16 +5607,16 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
 
     /* EMdgmMWCtxSectorData - transmit sector data, loop for all i = numTxSectors */
-    for (i=0; i<(mwc->txInfo.numTxSectors); i++) {
-      mb_put_binary_float(MB_YES, mwc->sectorData[i].tiltAngleReTx_deg, &buffer[index]);
+    for (int i=0; i<(mwc->txInfo.numTxSectors); i++) {
+      mb_put_binary_float(true, mwc->sectorData[i].tiltAngleReTx_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mwc->sectorData[i].centreFreq_Hz, &buffer[index]);
+      mb_put_binary_float(true, mwc->sectorData[i].centreFreq_Hz, &buffer[index]);
       index += 4;
-      mb_put_binary_float(MB_YES, mwc->sectorData[i].txBeamWidthAlong_deg, &buffer[index]);
+      mb_put_binary_float(true, mwc->sectorData[i].txBeamWidthAlong_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_short(MB_YES, mwc->sectorData[i].txSectorNum, &buffer[index]);
+      mb_put_binary_short(true, mwc->sectorData[i].txSectorNum, &buffer[index]);
       index += 2;
-      mb_put_binary_short(MB_YES, mwc->sectorData[i].padding, &buffer[index]);
+      mb_put_binary_short(true, mwc->sectorData[i].padding, &buffer[index]);
       index += 2;
 
       if (verbose >= 5) {
@@ -5578,9 +5631,9 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
 
     /* EMdgmMWCrxInfo - receiver, general info */
-    mb_put_binary_short(MB_YES, mwc->rxInfo.numBytesRxInfo, &buffer[index]);
+    mb_put_binary_short(true, mwc->rxInfo.numBytesRxInfo, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, mwc->rxInfo.numBeams, &buffer[index]);
+    mb_put_binary_short(true, mwc->rxInfo.numBeams, &buffer[index]);
     index += 2;
     buffer[index] = mwc->rxInfo.numBytesPerBeamEntry;
     index ++;
@@ -5590,9 +5643,9 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     index ++;
     buffer[index] = mwc->rxInfo.TVGoffset_dB;
     index ++;
-    mb_put_binary_float(MB_YES, mwc->rxInfo.sampleFreq_Hz, &buffer[index]);
+    mb_put_binary_float(true, mwc->rxInfo.sampleFreq_Hz, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, mwc->rxInfo.soundVelocity_mPerSec, &buffer[index]);
+    mb_put_binary_float(true, mwc->rxInfo.soundVelocity_mPerSec, &buffer[index]);
     index += 4;
 
     if (verbose >= 5) {
@@ -5608,16 +5661,16 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
 
     /* EMdgmMWCrxBeamData - receiver, specific info for each beam */
-    for (i=0; i<(mwc->rxInfo.numBeams); i++) {
-      mb_put_binary_float(MB_YES, mwc->beamData_p[i].beamPointAngReVertical_deg, &buffer[index]);
+    for (int i=0; i<(mwc->rxInfo.numBeams); i++) {
+      mb_put_binary_float(true, mwc->beamData_p[i].beamPointAngReVertical_deg, &buffer[index]);
       index += 4;
-      mb_put_binary_short(MB_YES, mwc->beamData_p[i].startRangeSampleNum, &buffer[index]);
+      mb_put_binary_short(true, mwc->beamData_p[i].startRangeSampleNum, &buffer[index]);
       index += 2;
-      mb_put_binary_short(MB_YES, mwc->beamData_p[i].detectedRangeInSamples, &buffer[index]);
+      mb_put_binary_short(true, mwc->beamData_p[i].detectedRangeInSamples, &buffer[index]);
       index += 2;
-      mb_put_binary_short(MB_YES, mwc->beamData_p[i].beamTxSectorNum, &buffer[index]);
+      mb_put_binary_short(true, mwc->beamData_p[i].beamTxSectorNum, &buffer[index]);
       index += 2;
-      mb_put_binary_short(MB_YES, mwc->beamData_p[i].numSampleData, &buffer[index]);
+      mb_put_binary_short(true, mwc->beamData_p[i].numSampleData, &buffer[index]);
       index += 2;
 
       /* now insert the samples */
@@ -5639,7 +5692,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
         case 2:
           /* Rx beam phase in 0.01 degree resolution */
           for (k=0;k<mwc->beamData_p[i].numSampleData;k++) {
-            mb_put_binary_short(MB_YES, mwc->beamData_p[i].samplePhase16bit[k], &buffer[index]);
+            mb_put_binary_short(true, mwc->beamData_p[i].samplePhase16bit[k], &buffer[index]);
             index += 2;
           }
       }
@@ -5668,7 +5721,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
       }
 
     /* Insert closing byte count */
-    mb_put_binary_int(MB_YES, mwc->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, mwc->header.numBytesDgm, &buffer[index]);
     // index += 4;
     }
   }
@@ -5766,31 +5819,31 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
     index = MBSYS_KMBES_HEADER_SIZE;
 
     /* common part */
-    mb_put_binary_short(MB_YES, cpo->cmnPart.numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, cpo->cmnPart.numBytesCmnPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, cpo->cmnPart.sensorSystem, &buffer[index]);
+    mb_put_binary_short(true, cpo->cmnPart.sensorSystem, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, cpo->cmnPart.sensorStatus, &buffer[index]);
+    mb_put_binary_short(true, cpo->cmnPart.sensorStatus, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, cpo->cmnPart.padding, &buffer[index]);
+    mb_put_binary_short(true, cpo->cmnPart.padding, &buffer[index]);
     index += 2;
 
     /* sensor data block */
-    mb_put_binary_int(MB_YES, cpo->sensorData.timeFromSensor_sec, &buffer[index]);
+    mb_put_binary_int(true, cpo->sensorData.timeFromSensor_sec, &buffer[index]);
     index += 4;
-    mb_put_binary_int(MB_YES, cpo->sensorData.timeFromSensor_nanosec, &buffer[index]);
+    mb_put_binary_int(true, cpo->sensorData.timeFromSensor_nanosec, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, cpo->sensorData.posFixQuality_m, &buffer[index]);
+    mb_put_binary_float(true, cpo->sensorData.posFixQuality_m, &buffer[index]);
     index += 4;
-    mb_put_binary_double(MB_YES, cpo->sensorData.correctedLat_deg, &buffer[index]);
+    mb_put_binary_double(true, cpo->sensorData.correctedLat_deg, &buffer[index]);
     index += 8;
-    mb_put_binary_double(MB_YES, cpo->sensorData.correctedLong_deg, &buffer[index]);
+    mb_put_binary_double(true, cpo->sensorData.correctedLong_deg, &buffer[index]);
     index += 8;
-    mb_put_binary_float(MB_YES, cpo->sensorData.speedOverGround_mPerSec, &buffer[index]);
+    mb_put_binary_float(true, cpo->sensorData.speedOverGround_mPerSec, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, cpo->sensorData.courseOverGround_deg, &buffer[index]);
+    mb_put_binary_float(true, cpo->sensorData.courseOverGround_deg, &buffer[index]);
     index += 4;
-    mb_put_binary_float(MB_YES, cpo->sensorData.ellipsoidHeightReRefPoint_m, &buffer[index]);
+    mb_put_binary_float(true, cpo->sensorData.ellipsoidHeightReRefPoint_m, &buffer[index]);
     index += 4;
 
     /* raw data msg from sensor */
@@ -5798,7 +5851,7 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
     index += numBytesRawSensorData;
 
     /* insert closing byte count */
-    mb_put_binary_int(MB_YES, cpo->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, cpo->header.numBytesDgm, &buffer[index]);
   }
 
   if (verbose >= 2) {
@@ -5876,9 +5929,9 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
 
     /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
-    mb_put_binary_short(MB_YES, che->cmnPart.numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, che->cmnPart.numBytesCmnPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, che->cmnPart.pingCnt, &buffer[index]);
+    mb_put_binary_short(true, che->cmnPart.pingCnt, &buffer[index]);
     index += 2;
     buffer[index] = che->cmnPart.rxFansPerPing;
     index++;
@@ -5912,7 +5965,7 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
 
     /* sensor data block */
-    mb_put_binary_float(MB_YES, che->data.heave_m, &buffer[index]);
+    mb_put_binary_float(true, che->data.heave_m, &buffer[index]);
     index += 4;
 
     if (verbose >= 5) {
@@ -5921,7 +5974,7 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
 
     /* insert closing byte count */
-    mb_put_binary_int(MB_YES, che->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, che->header.numBytesDgm, &buffer[index]);
   }
 
   if (verbose >= 2) {
@@ -6005,17 +6058,17 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     numBytesRawSensorData = iip->header.numBytesDgm - MBSYS_KMBES_IIP_VAR_OFFSET;
 
-    mb_put_binary_short(MB_YES, iip->numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, iip->numBytesCmnPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, iip->info, &buffer[index]);
+    mb_put_binary_short(true, iip->info, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, iip->status, &buffer[index]);
+    mb_put_binary_short(true, iip->status, &buffer[index]);
     index += 2;
     memcpy(&buffer[index], iip->install_txt, numBytesRawSensorData);
     index += numBytesRawSensorData;
 
     /* Insert closing byte count */
-    mb_put_binary_int(MB_YES, iip->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, iip->header.numBytesDgm, &buffer[index]);
     // index += 4;
   }
 
@@ -6101,17 +6154,17 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     numBytesRawSensorData = iop->header.numBytesDgm - MBSYS_KMBES_IOP_VAR_OFFSET;
 
-    mb_put_binary_short(MB_YES, iop->numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, iop->numBytesCmnPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, iop->info, &buffer[index]);
+    mb_put_binary_short(true, iop->info, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, iop->status, &buffer[index]);
+    mb_put_binary_short(true, iop->status, &buffer[index]);
     index += 2;
     memcpy(&buffer[index], iop->runtime_txt, numBytesRawSensorData);
     index += numBytesRawSensorData;
 
     /* Insert closing byte count */
-    mb_put_binary_int(MB_YES, iop->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, iop->header.numBytesDgm, &buffer[index]);
     // index += 4;
   }
 
@@ -6138,7 +6191,6 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
   size_t numBytesVersion = 0;
   char *buffer = NULL;
   int index = 0;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6177,7 +6229,7 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg5       time_nanosec:            %u\n", xmb->header.time_nanosec);
 
     fprintf(stderr, "dbg5       pseudosidescan_enabled:  %d\n", xmb->pseudosidescan_enabled);
-    for (i=0;i<28;i++)
+    for (int i=0;i<28;i++)
       fprintf(stderr, "dbg5       unused[%2d]:              %u\n", i, xmb->unused[i]);
     fprintf(stderr, "dbg5       version:                   %s\n", xmb->version);
   }
@@ -6207,9 +6259,9 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* insert the data */
     index = MBSYS_KMBES_HEADER_SIZE;
 
-    mb_put_binary_int(MB_YES, (int)MB_YES, &buffer[index]);
+    mb_put_binary_int(true, 1, &buffer[index]);
     index += 4;
-    for (i=0;i<28;i++) {
+    for (int i=0;i<28;i++) {
       buffer[index] = xmb->unused[i];
       index++;
     }
@@ -6217,7 +6269,7 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
     index += numBytesVersion;
 
     /* Insert closing byte count */
-    mb_put_binary_int(MB_YES, xmb->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, xmb->header.numBytesDgm, &buffer[index]);
     // index += 4;
   }
 
@@ -6245,7 +6297,6 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
   size_t numBytesComment = 0;
   char *buffer = NULL;
   int index = 0;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6276,7 +6327,7 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg5       time_sec:       %u\n", xmc->header.time_sec);
     fprintf(stderr, "dbg5       time_nanosec:   %u\n", xmc->header.time_nanosec);
 
-    for (i=0;i<32;i++)
+    for (int i=0;i<32;i++)
       fprintf(stderr, "dbg5       unused[%2d]:    %u\n", i, xmc->unused[i]);
     fprintf(stderr, "dbg5       comment:        %s\n", xmc->comment);
   }
@@ -6303,7 +6354,7 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* insert the data */
     index = MBSYS_KMBES_HEADER_SIZE;
 
-    for (i=0;i<32;i++) {
+    for (int i=0;i<32;i++) {
       buffer[index] = xmc->unused[i];
       index++;
     }
@@ -6311,7 +6362,7 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
     index += numBytesComment;
 
     /* Insert closing byte count */
-    mb_put_binary_int(MB_YES, xmc->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, xmc->header.numBytesDgm, &buffer[index]);
     // index += 4;
   }
 
@@ -6339,7 +6390,6 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
   size_t numBytesComment = 0;
   char *buffer = NULL;
   int index = 0;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6369,9 +6419,9 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg5       spare:          %d\n", xms->spare);
     fprintf(stderr, "dbg5       pixel_size:     %f\n", xms->pixel_size);
     fprintf(stderr, "dbg5       pixels_ss:      %d\n", xms->pixels_ss);
-    for (i=0;i<32;i++)
+    for (int i=0;i<32;i++)
       fprintf(stderr, "dbg5       unused[%2d]:    %u\n", i, xms->unused[i]);
-    for (i=0;i<xms->pixels_ss;i++)
+    for (int i=0;i<xms->pixels_ss;i++)
       fprintf(stderr, "dbg5       ss[%2d]:        %f %f\n",
                       i, xms->ss[i], xms->ss_alongtrack[i]);
   }
@@ -6401,29 +6451,29 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* insert the data */
     index = MBSYS_KMBES_HEADER_SIZE;
 
-    mb_put_binary_short(MB_YES, xms->pingCnt, &buffer[index]);
+    mb_put_binary_short(true, xms->pingCnt, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, xms->spare, &buffer[index]);
+    mb_put_binary_short(true, xms->spare, &buffer[index]);
     index += 2;
-    mb_put_binary_float(MB_YES, xms->pixel_size, &buffer[index]);
+    mb_put_binary_float(true, xms->pixel_size, &buffer[index]);
     index += 4;
-    mb_put_binary_int(MB_YES, xms->pixels_ss, &buffer[index]);
+    mb_put_binary_int(true, xms->pixels_ss, &buffer[index]);
     index += 4;
-    for (i=0;i<32;i++) {
+    for (int i=0;i<32;i++) {
       buffer[index] = xms->unused[i];
       index++;
     }
-  for (i=0;i<xms->pixels_ss;i++) {
-    mb_put_binary_float(MB_YES, xms->ss[i], &buffer[index]);
+  for (int i=0;i<xms->pixels_ss;i++) {
+    mb_put_binary_float(true, xms->ss[i], &buffer[index]);
     index += 4;
   }
-  for (i=0;i<xms->pixels_ss;i++) {
-    mb_put_binary_float(MB_YES, xms->ss_alongtrack[i], &buffer[index]);
+  for (int i=0;i<xms->pixels_ss;i++) {
+    mb_put_binary_float(true, xms->ss_alongtrack[i], &buffer[index]);
     index += 4;
   }
 
     /* Insert closing byte count */
-    mb_put_binary_int(MB_YES, xms->header.numBytesDgm, &buffer[index]);
+    mb_put_binary_int(true, xms->header.numBytesDgm, &buffer[index]);
     // index += 4;
   }
 
@@ -6590,6 +6640,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       /* #MRZ - multibeam data for raw range,
       depth, reflectivity, seabed image(SI) etc. */
       for (imrz=0;imrz<store->n_mrz_read;imrz++) {
+////fprintf(stderr, "************>%s:%d WRITE mbr_kemkmall_wr_data imrz:%d mrz->header.numBytesDgm:%d\n", __FILE__, __LINE__, imrz, store->mrz[imrz].header.numBytesDgm);
         status = mbr_kemkmall_wr_mrz(verbose, bufferalloc, bufferptr, store_ptr, imrz, &size, error);
         if (status == MB_SUCCESS)
           status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
@@ -6739,7 +6790,8 @@ int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_dimensions = &mbsys_kmbes_dimensions;
   mb_io_ptr->mb_io_pingnumber = &mbsys_kmbes_pingnumber;
   mb_io_ptr->mb_io_sonartype = &mbsys_kmbes_sonartype;
-  mb_io_ptr->mb_io_sidescantype = NULL;
+  mb_io_ptr->mb_io_sidescantype =&mbsys_kmbes_sidescantype;
+  mb_io_ptr->mb_io_preprocess = &mbsys_kmbes_preprocess;
   mb_io_ptr->mb_io_extract = &mbsys_kmbes_extract;
   mb_io_ptr->mb_io_insert = &mbsys_kmbes_insert;
   mb_io_ptr->mb_io_extract_nav = &mbsys_kmbes_extract_nav;

@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 	char dfile[MB_PATH_MAXLINE];
 	char ofile[MB_PATH_MAXLINE];
 	char ctdfile[MB_PATH_MAXLINE];
-	int ofile_set = MB_NO;
+	int ofile_set = false;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 
 	/* platform definition file */
 	char platform_file[MB_PATH_MAXLINE];
-	int use_platform_file = MB_NO;
+	int use_platform_file = false;
 	struct mb_platform_struct *platform = NULL;
 
 	/* MBIO read values */
@@ -137,7 +137,7 @@ int main(int argc, char **argv) {
 	/* program mode */
 	int mode = MB7KPREPROCESS_PROCESS;
 	int fix_time_stamps = MB7KPREPROCESS_TIMEFIX_NONE;
-	int goodnavattitudeonly = MB_YES;
+	int goodnavattitudeonly = true;
 
 	/* data structure pointers */
 	s7k_header *header;
@@ -294,7 +294,7 @@ int main(int argc, char **argv) {
 
 	/* merge navigation and attitude from separate Steve Rock data file */
 	char rockfile[MB_PATH_MAXLINE];
-	int rockdata = MB_NO;
+	int rockdata = false;
 	int nrock = 0;
 	double *rock_time_d = NULL;
 	double *rock_lon = NULL;
@@ -307,7 +307,7 @@ int main(int argc, char **argv) {
 
 	/* merge navigation and attitude from separate WHOI DSL data file */
 	char dslfile[MB_PATH_MAXLINE];
-	int dsldata = MB_NO;
+	int dsldata = false;
 	int ndsl = 0;
 	double *dsl_time_d = NULL;
 	double *dsl_lon = NULL;
@@ -320,7 +320,7 @@ int main(int argc, char **argv) {
 
 	/* merge navigation and attitude from separate ins data file */
 	char insfile[MB_PATH_MAXLINE];
-	int insdata = MB_NO;
+	int insdata = false;
 	int nins = 0;
 	int nins_altitude = 0;
 	int nins_speed = 0;
@@ -340,7 +340,7 @@ int main(int argc, char **argv) {
 
 	/* merge sonardepth from separate parosci pressure sensor data file */
 	char sonardepthfile[MB_PATH_MAXLINE];
-	int sonardepthdata = MB_NO;
+	int sonardepthdata = false;
 	int nsonardepth = 0;
 	double *sonardepth_time_d = NULL;
 	double *sonardepth_sonardepth = NULL;
@@ -425,7 +425,7 @@ int main(int argc, char **argv) {
 	double rangeoffset[3];
 
 	/* depth sensor filtering */
-	int sonardepthfilter = MB_NO;
+	int sonardepthfilter = false;
 	double sonardepthfilterlength = 20.0;
 	double sonardepthfilterdepth = 20.0;
 
@@ -433,7 +433,7 @@ int main(int argc, char **argv) {
 	double sonardepthoffset = 0.0;
 
 	/* multibeam sensor offsets */
-	int multibeam_offset_mode = MB_NO;
+	int multibeam_offset_mode = false;
 	double mbtransmit_offset_x = 0.0;
 	double mbtransmit_offset_y = 0.0;
 	double mbtransmit_offset_z = 0.0;
@@ -448,25 +448,25 @@ int main(int argc, char **argv) {
 	double mbreceive_offset_pitch = 0.0;
 
 	/* position sensor offsets */
-	int position_offset_mode = MB_NO;
+	int position_offset_mode = false;
 	double position_offset_x = 0.0;
 	double position_offset_y = 0.0;
 	double position_offset_z = 0.0;
 
 	/* depth sensor offsets */
-	int depth_offset_mode = MB_NO;
+	int depth_offset_mode = false;
 	double depth_offset_x = 0.0;
 	double depth_offset_y = 0.0;
 	double depth_offset_z = 0.0;
 
 	/* heading sensor offsets */
-	int heading_offset_mode = MB_NO;
+	int heading_offset_mode = false;
 	double heading_offset_heading = 0.0;
 	double heading_offset_roll = 0.0;
 	double heading_offset_pitch = 0.0;
 
 	/* rollpitch sensor offsets */
-	int rollpitch_offset_mode = MB_NO;
+	int rollpitch_offset_mode = false;
 	double rollpitch_offset_heading = 0.0;
 	double rollpitch_offset_roll = 0.0;
 	double rollpitch_offset_pitch = 0.0;
@@ -484,30 +484,30 @@ int main(int argc, char **argv) {
 	/* kluge modes */
 	int klugemode;
 	double klugevalue, klugevalue2, klugevalue3;
-	int kluge_useverticaldepth = MB_NO;       /* kluge 1 */
-	int kluge_zeroalongtrackangles = MB_NO;   /* kluge 2 */
-	int kluge_zeroattitudecorrection = MB_NO; /* kluge 3 */
-	int kluge_kearfottrovnoise = MB_NO;       /* kluge 4 */
-	int kluge_beampatterntweak = MB_NO;       /* kluge 5 */
+	int kluge_useverticaldepth = false;       /* kluge 1 */
+	int kluge_zeroalongtrackangles = false;   /* kluge 2 */
+	int kluge_zeroattitudecorrection = false; /* kluge 3 */
+	int kluge_kearfottrovnoise = false;       /* kluge 4 */
+	int kluge_beampatterntweak = false;       /* kluge 5 */
 	double kluge_beampatternfactor = 1.0;
-	int kluge_beampatternsnelltweak = MB_NO; /* kluge 5 */
+	int kluge_beampatternsnelltweak = false; /* kluge 5 */
 	double kluge_beampatternsnellfactor = 1.0;
-	int kluge_fixtimejump = MB_NO;          /* kluge 6 */
-	int kluge_fixtimejumpbeamedits = MB_NO; /* kluge 7 */
+	int kluge_fixtimejump = false;          /* kluge 6 */
+	int kluge_fixtimejumpbeamedits = false; /* kluge 7 */
 	double kluge_timejump_interval = 0.0;
 	double kluge_timejump_threshold = 0.0;
 	double time_d_org, dtime_d;
 	double time_d_tolerance = 0.001;
 	int iping = 0;
-	int kluge_donotrecalculatebathy = MB_NO;
+	int kluge_donotrecalculatebathy = false;
 	s7k_time s7kTime;
 	mb_path esffile;
 	int esf_status;
-	int esffile_open = MB_NO;
+	int esffile_open = false;
 	struct mb_esf_struct esf;
 
 	/* MBARI data flag */
-	int MBARIdata = MB_NO;
+	int MBARIdata = false;
 
 	/* variables for beam angle calculation */
 	mb_3D_orientation tx_align;
@@ -556,10 +556,12 @@ int main(int argc, char **argv) {
 	int read_data;
 	int testformat;
 	char fileroot[MB_PATH_MAXLINE];
+	int found;
 	int reson_lastread;
 	int sslo_lastread;
 	double sslo_last_time_d;
 	int sslo_last_ping;
+	int foundstart, foundend;
 	int start, end;
 	int nscan, startdata;
 	int ins_time_d_index = -1;
@@ -627,7 +629,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'A':
 			case 'a':
-				goodnavattitudeonly = MB_NO;
+				goodnavattitudeonly = false;
 				break;
 			case 'B':
 			case 'b':
@@ -637,7 +639,7 @@ int main(int argc, char **argv) {
 			case 'c':
 				nscan = sscanf(optarg, "%lf/%lf", &mbtransmit_offset_roll, &mbtransmit_offset_pitch);
 				if (nscan == 2) {
-					multibeam_offset_mode = MB_YES;
+					multibeam_offset_mode = true;
 					mbreceive_offset_roll = mbtransmit_offset_roll;
 					mbreceive_offset_pitch = mbtransmit_offset_pitch;
 				}
@@ -666,7 +668,7 @@ int main(int argc, char **argv) {
 					}
 				}
 				if (nscan > 0)
-					depth_offset_mode = MB_YES;
+					depth_offset_mode = true;
 				break;
 			case 'F':
 			case 'f':
@@ -675,7 +677,7 @@ int main(int argc, char **argv) {
 			case 'G':
 			case 'g':
 				sscanf(optarg, "%s", platform_file);
-				use_platform_file = MB_YES;
+				use_platform_file = true;
 				break;
 			case 'I':
 			case 'i':
@@ -685,23 +687,23 @@ int main(int argc, char **argv) {
 			case 'k':
 				nscan = sscanf(optarg, "%d/%lf/%lf/%lf", &klugemode, &klugevalue, &klugevalue2, &klugevalue3);
 				if (klugemode == MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH) {
-					kluge_useverticaldepth = MB_YES;
+					kluge_useverticaldepth = true;
 				}
 				if (klugemode == MB7KPREPROCESS_KLUGE_ZEROALONGTRACKANGLES) {
-					kluge_zeroalongtrackangles = MB_YES;
+					kluge_zeroalongtrackangles = true;
 				}
 				if (klugemode == MB7KPREPROCESS_KLUGE_ZEROATTITUDECORRECTION) {
-					kluge_zeroattitudecorrection = MB_YES;
+					kluge_zeroattitudecorrection = true;
 				}
 				if (klugemode == MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE) {
-					kluge_kearfottrovnoise = MB_YES;
+					kluge_kearfottrovnoise = true;
 				}
 				if (klugemode == MB7KPREPROCESS_KLUGE_BEAMPATTERNTWEAK && nscan >= 2) {
-					kluge_beampatterntweak = MB_YES;
+					kluge_beampatterntweak = true;
 					kluge_beampatternfactor = klugevalue;
 				}
 				if (klugemode == MB7KPREPROCESS_KLUGE_FIXTIMEJUMP && nscan >= 2) {
-					kluge_fixtimejump = MB_YES;
+					kluge_fixtimejump = true;
 					kluge_timejump_interval = klugevalue;
 					if (nscan == 3)
 						kluge_timejump_threshold = klugevalue2;
@@ -709,13 +711,13 @@ int main(int argc, char **argv) {
 						kluge_timejump_threshold = kluge_timejump_interval / 4.0;
 				}
 				if (klugemode == MB7KPREPROCESS_KLUGE_FIXTIMEJUMPBEAMEDITS) {
-					kluge_fixtimejumpbeamedits = MB_YES;
+					kluge_fixtimejumpbeamedits = true;
 				}
 				if (klugemode == MB7KPREPROCESS_KLUGE_DONOTRECALCULATEBATHY) {
-					kluge_donotrecalculatebathy = MB_YES;
+					kluge_donotrecalculatebathy = true;
 				}
 				if (klugemode == MB7KPREPROCESS_KLUGE_BEAMPATTERNSNELLTWEAK && nscan >= 2) {
-					kluge_beampatternsnelltweak = MB_YES;
+					kluge_beampatternsnelltweak = true;
 					kluge_beampatternsnellfactor = klugevalue;
 				}
 				break;
@@ -726,23 +728,23 @@ int main(int argc, char **argv) {
 			case 'M':
 			case 'm':
 				sscanf(optarg, "%s", rockfile);
-				rockdata = MB_YES;
+				rockdata = true;
 				break;
 			case 'N':
 			case 'n':
 				sscanf(optarg, "%s", insfile);
-				insdata = MB_YES;
+				insdata = true;
 				break;
 			case 'O':
 			case 'o':
 				sscanf(optarg, "%s", ofile);
-				ofile_set = MB_YES;
+				ofile_set = true;
 				break;
 			case 'P':
 			case 'p':
 				sscanf(optarg, "%s", buffer);
 				if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-					sonardepthdata = MB_YES;
+					sonardepthdata = true;
 					strcpy(sonardepthfile, buffer);
 				}
 				else if (optarg[0] == 'F' || optarg[0] == 'f') {
@@ -750,9 +752,9 @@ int main(int argc, char **argv) {
 					if (nscan == 1)
 						sonardepthfilterdepth = 20.0;
 					if (nscan >= 1)
-						sonardepthfilter = MB_YES;
+						sonardepthfilter = true;
 					else
-						sonardepthfilter = MB_NO;
+						sonardepthfilter = false;
 				}
 				break;
 			case 'R':
@@ -806,7 +808,7 @@ int main(int argc, char **argv) {
 			case 'W':
 			case 'w':
 				sscanf(optarg, "%s", dslfile);
-				dsldata = MB_YES;
+				dsldata = true;
 				break;
 			case 'Z':
 			case 'z':
@@ -815,7 +817,7 @@ int main(int argc, char **argv) {
 					const int n = sscanf(optarg, "multibeam_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbtransmit_offset_x, &mbtransmit_offset_y,
 					           &mbtransmit_offset_z, &mbtransmit_offset_heading, &mbtransmit_offset_roll, &mbtransmit_offset_pitch);
 					if (n == 6) {
-						multibeam_offset_mode = MB_YES;
+						multibeam_offset_mode = true;
 						mbreceive_offset_x = mbtransmit_offset_x;
 						mbreceive_offset_y = mbtransmit_offset_y;
 						mbreceive_offset_z = mbtransmit_offset_z;
@@ -829,7 +831,7 @@ int main(int argc, char **argv) {
 					const int n = sscanf(optarg, "mbtransmit_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbtransmit_offset_x, &mbtransmit_offset_y,
 					           &mbtransmit_offset_z, &mbtransmit_offset_heading, &mbtransmit_offset_roll, &mbtransmit_offset_pitch);
 					if (n == 6) {
-						multibeam_offset_mode = MB_YES;
+						multibeam_offset_mode = true;
 					}
 				}
 				/* mbreceive_offsets */
@@ -837,34 +839,34 @@ int main(int argc, char **argv) {
 					const int n = sscanf(optarg, "mbreceive_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbreceive_offset_x, &mbreceive_offset_y,
 					           &mbreceive_offset_z, &mbreceive_offset_heading, &mbreceive_offset_roll, &mbreceive_offset_pitch);
 					if (n == 6) {
-						multibeam_offset_mode = MB_YES;
+						multibeam_offset_mode = true;
 					}
 				}
 				/* position_offsets */
 				else if (strncmp("position_offsets=", optarg, 16) == 0) {
 					const int n = sscanf(optarg, "position_offsets=%lf/%lf/%lf", &position_offset_x, &position_offset_y, &position_offset_z);
 					if (n == 3)
-						position_offset_mode = MB_YES;
+						position_offset_mode = true;
 				}
 				/* depth_offsets */
 				else if (strncmp("depth_offsets=", optarg, 13) == 0) {
 					const int n = sscanf(optarg, "depth_offsets=%lf/%lf/%lf", &depth_offset_x, &depth_offset_y, &depth_offset_z);
 					if (n == 3)
-						depth_offset_mode = MB_YES;
+						depth_offset_mode = true;
 				}
 				/* heading_offsets */
 				else if (strncmp("heading_offsets=", optarg, 15) == 0) {
 					const int n = sscanf(optarg, "heading_offsets=%lf/%lf/%lf", &heading_offset_heading, &heading_offset_roll,
 					           &heading_offset_pitch);
 					if (n == 3)
-						heading_offset_mode = MB_YES;
+						heading_offset_mode = true;
 				}
 				/* rollpitch_offsets */
 				else if (strncmp("rollpitch_offsets=", optarg, 17) == 0) {
 					const int n = sscanf(optarg, "rollpitch_offsets=%lf/%lf/%lf", &rollpitch_offset_heading, &rollpitch_offset_roll,
 					           &rollpitch_offset_pitch);
 					if (n == 3)
-						rollpitch_offset_mode = MB_YES;
+						rollpitch_offset_mode = true;
 				}
 				break;
 			case '?':
@@ -1048,7 +1050,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* read navigation and attitude data from AUV log file if specified */
-	if (insdata == MB_YES) {
+	if (insdata == true) {
 		/* count the data points in the auv log file */
 		if ((tfp = fopen(insfile, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open ins data file <%s> for reading\n", insfile);
@@ -1167,43 +1169,43 @@ int main(int argc, char **argv) {
 		nins_speed = 0;
 		while (fread(buffer, ins_len, 1, tfp) == 1) {
 			if (ins_time_d_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_time_d_index], &(ins_time_d[nins]));
+				mb_get_binary_double(true, &buffer[ins_time_d_index], &(ins_time_d[nins]));
 
 			if (ins_lon_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_lon_index], &(ins_lon[nins]));
+				mb_get_binary_double(true, &buffer[ins_lon_index], &(ins_lon[nins]));
 			ins_lon[nins] *= RTD;
 
 			if (ins_lat_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_lat_index], &(ins_lat[nins]));
+				mb_get_binary_double(true, &buffer[ins_lat_index], &(ins_lat[nins]));
 			ins_lat[nins] *= RTD;
 
 			if (ins_roll_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_roll_index], &(ins_roll[nins]));
+				mb_get_binary_double(true, &buffer[ins_roll_index], &(ins_roll[nins]));
 			ins_roll[nins] *= RTD;
 
 			if (ins_pitch_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_pitch_index], &(ins_pitch[nins]));
+				mb_get_binary_double(true, &buffer[ins_pitch_index], &(ins_pitch[nins]));
 			ins_pitch[nins] *= RTD;
 
 			if (ins_heading_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_heading_index], &(ins_heading[nins]));
+				mb_get_binary_double(true, &buffer[ins_heading_index], &(ins_heading[nins]));
 			ins_heading[nins] *= RTD;
 
 			if (ins_sonardepth_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_sonardepth_index], &(ins_sonardepth[nins]));
+				mb_get_binary_double(true, &buffer[ins_sonardepth_index], &(ins_sonardepth[nins]));
 			ins_sonardepth[nins] += sonardepthoffset;
 
 			if (ins_altitude_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_altitude_index], &(ins_altitude[nins_altitude]));
+				mb_get_binary_double(true, &buffer[ins_altitude_index], &(ins_altitude[nins_altitude]));
 			ins_altitude_time_d[nins_altitude] = ins_time_d[nins];
 
 			if (ins_speed_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_speed_index], &(ins_speed[nins_speed]));
+				mb_get_binary_double(true, &buffer[ins_speed_index], &(ins_speed[nins_speed]));
 			ins_speed_time_d[nins_speed] = ins_time_d[nins];
 
 			if (ins_velocityx_index >= 0 && ins_velocityy_index >= 0) {
-				mb_get_binary_double(MB_YES, &buffer[ins_velocityx_index], &velocityx);
-				mb_get_binary_double(MB_YES, &buffer[ins_velocityy_index], &velocityy);
+				mb_get_binary_double(true, &buffer[ins_velocityx_index], &velocityx);
+				mb_get_binary_double(true, &buffer[ins_velocityy_index], &velocityy);
 				ins_speed[nins_speed] = sqrt(velocityx * velocityx + velocityy * velocityy);
 				ins_speed_time_d[nins_speed] = ins_time_d[nins];
 			}
@@ -1229,7 +1231,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "No INS data read from %s....\n", insfile);
 	}
 	/* read navigation and attitude data from rock file if specified */
-	if (rockdata == MB_YES) {
+	if (rockdata == true) {
 		/* count the data points in the rock file */
 		if ((tfp = fopen(rockfile, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open rock data file <%s> for reading\n", rockfile);
@@ -1299,7 +1301,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "No Rock format nav data read from %s....\n", rockfile);
 	}
 	/* read navigation and attitude data from dsl file if specified */
-	if (dsldata == MB_YES) {
+	if (dsldata == true) {
 		/* count the data points in the dsl file */
 		if ((tfp = fopen(dslfile, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open dsl data file <%s> for reading\n", dslfile);
@@ -1381,7 +1383,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "No DSL format nav data read from %s....\n", dslfile);
 	}
 	/* read sonardepth data from AUV log file if specified */
-	if (sonardepthdata == MB_YES) {
+	if (sonardepthdata == true) {
 		/* count the data points in the auv log file */
 		if ((tfp = fopen(sonardepthfile, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open sonardepth data file <%s> for reading\n", sonardepthfile);
@@ -1447,8 +1449,8 @@ int main(int argc, char **argv) {
 		/* read the data points in the auv log file */
 		nsonardepth = 0;
 		while (fread(buffer, sonardepth_len, 1, tfp) == 1) {
-			mb_get_binary_double(MB_YES, &buffer[sonardepth_time_d_index], &(sonardepth_time_d[nsonardepth]));
-			mb_get_binary_double(MB_YES, &buffer[sonardepth_sonardepth_index], &(sonardepth_sonardepth[nsonardepth]));
+			mb_get_binary_double(true, &buffer[sonardepth_time_d_index], &(sonardepth_time_d[nsonardepth]));
+			mb_get_binary_double(true, &buffer[sonardepth_sonardepth_index], &(sonardepth_sonardepth[nsonardepth]));
 			sonardepth_sonardepth[nsonardepth] += sonardepthoffset;
 			nsonardepth++;
 		}
@@ -1535,7 +1537,7 @@ int main(int argc, char **argv) {
 	 * load platform definition if specified or if offsets otherwise
 	 * specified create a platform structure
 	 */
-	if (use_platform_file == MB_YES) {
+	if (use_platform_file == true) {
 		status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
 		if (status == MB_SUCCESS) {
 			fprintf(stderr, "Platform model with %d sensors read from platform file %s\n", platform->num_sensors, platform_file);
@@ -1546,7 +1548,7 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 	}
-	else if (depth_offset_mode == MB_YES || multibeam_offset_mode == MB_YES) {
+	else if (depth_offset_mode == true || multibeam_offset_mode == true) {
 		status = mb_platform_init(verbose, (void **)&platform, &error);
 
 		/*
@@ -1573,7 +1575,7 @@ int main(int argc, char **argv) {
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0, position_offset_mode, position_offset_x,
-			                                       position_offset_y, position_offset_z, MB_NO, 0.0, 0.0, 0.0, &error);
+			                                       position_offset_y, position_offset_z, false, 0.0, 0.0, 0.0, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_timelatency(verbose, (void *)platform, 1, timelagmode, timelagconstant, ntimelag,
 			                                            timelag_time_d, timelag_model, &error);
@@ -1584,7 +1586,7 @@ int main(int argc, char **argv) {
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0, depth_offset_mode, depth_offset_x,
-			                                       depth_offset_y, depth_offset_z, MB_NO, 0.0, 0.0, 0.0, &error);
+			                                       depth_offset_y, depth_offset_z, false, 0.0, 0.0, 0.0, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_timelatency(verbose, (void *)platform, 2, timelagmode, timelagconstant, ntimelag,
 			                                            timelag_time_d, timelag_model, &error);
@@ -1594,7 +1596,7 @@ int main(int argc, char **argv) {
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_COMPASS, NULL, NULL, NULL, 0, 0, 1,
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
-			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 3, 0, MB_NO, 0.0, 0.0, 0.0, heading_offset_mode,
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 3, 0, false, 0.0, 0.0, 0.0, heading_offset_mode,
 			                                       heading_offset_heading, heading_offset_roll, heading_offset_pitch, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_timelatency(verbose, (void *)platform, 3, timelagmode, timelagconstant, ntimelag,
@@ -1606,7 +1608,7 @@ int main(int argc, char **argv) {
 			                                &error);
 		if (status == MB_SUCCESS)
 			status =
-			    mb_platform_set_sensor_offset(verbose, (void *)platform, 4, 0, MB_NO, 0.0, 0.0, 0.0, rollpitch_offset_mode,
+			    mb_platform_set_sensor_offset(verbose, (void *)platform, 4, 0, false, 0.0, 0.0, 0.0, rollpitch_offset_mode,
 			                                  rollpitch_offset_heading, rollpitch_offset_roll, rollpitch_offset_pitch, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_timelatency(verbose, (void *)platform, 4, timelagmode, timelagconstant, ntimelag,
@@ -1651,18 +1653,18 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(ifile, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES && format == MBF_RESON7KR) {
+	while (read_data == true && format == MBF_RESON7KR) {
 
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
@@ -1766,8 +1768,8 @@ int main(int argc, char **argv) {
 		nrec_other = 0;
 
 		/* read and print data */
-		reson_lastread = MB_NO;
-		sslo_lastread = MB_NO;
+		reson_lastread = false;
+		sslo_lastread = false;
 		while (error <= MB_ERROR_NO_ERROR) {
 			/* reset error */
 			error = MB_ERROR_NO_ERROR;
@@ -1787,43 +1789,43 @@ int main(int argc, char **argv) {
 				nrec_multibeam++;
 
 				bathymetry = &(istore->bathymetry);
-				if (istore->read_volatilesettings == MB_YES)
+				if (istore->read_volatilesettings == true)
 					nrec_volatilesettings++;
-				if (istore->read_matchfilter == MB_YES)
+				if (istore->read_matchfilter == true)
 					nrec_matchfilter++;
-				if (istore->read_beamgeometry == MB_YES)
+				if (istore->read_beamgeometry == true)
 					nrec_beamgeometry++;
-				if (istore->read_remotecontrolsettings == MB_YES)
+				if (istore->read_remotecontrolsettings == true)
 					nrec_remotecontrolsettings++;
-				if (istore->read_bathymetry == MB_YES)
+				if (istore->read_bathymetry == true)
 					nrec_bathymetry++;
-				if (istore->read_backscatter == MB_YES)
+				if (istore->read_backscatter == true)
 					nrec_backscatter++;
-				if (istore->read_beam == MB_YES)
+				if (istore->read_beam == true)
 					nrec_beam++;
-				if (istore->read_verticaldepth == MB_YES)
+				if (istore->read_verticaldepth == true)
 					nrec_verticaldepth++;
-				if (istore->read_image == MB_YES)
+				if (istore->read_image == true)
 					nrec_image++;
-				if (istore->read_v2pingmotion == MB_YES)
+				if (istore->read_v2pingmotion == true)
 					nrec_v2pingmotion++;
-				if (istore->read_v2detectionsetup == MB_YES)
+				if (istore->read_v2detectionsetup == true)
 					nrec_v2detectionsetup++;
-				if (istore->read_v2beamformed == MB_YES)
+				if (istore->read_v2beamformed == true)
 					nrec_v2beamformed++;
-				if (istore->read_v2detection == MB_YES)
+				if (istore->read_v2detection == true)
 					nrec_v2detection++;
-				if (istore->read_v2rawdetection == MB_YES)
+				if (istore->read_v2rawdetection == true)
 					nrec_v2rawdetection++;
-				if (istore->read_v2snippet == MB_YES)
+				if (istore->read_v2snippet == true)
 					nrec_v2snippet++;
-				if (istore->read_calibratedsnippet == MB_YES)
+				if (istore->read_calibratedsnippet == true)
 					nrec_calibratedsnippet++;
-				if (istore->read_processedsidescan == MB_YES)
+				if (istore->read_processedsidescan == true)
 					nrec_processedsidescan++;
 
 				/* print out record headers */
-				if (istore->read_volatilesettings == MB_YES) {
+				if (istore->read_volatilesettings == true) {
 					volatilesettings = &(istore->volatilesettings);
 					header = &(volatilesettings->header);
 					time_j[0] = header->s7kTime.Year;
@@ -1840,7 +1842,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 						        header->RecordNumber);
 				}
-				if (istore->read_matchfilter == MB_YES) {
+				if (istore->read_matchfilter == true) {
 					matchfilter = &(istore->matchfilter);
 					header = &(matchfilter->header);
 					time_j[0] = header->s7kTime.Year;
@@ -1857,7 +1859,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 						        header->RecordNumber);
 				}
-				if (istore->read_beamgeometry == MB_YES) {
+				if (istore->read_beamgeometry == true) {
 					beamgeometry = &(istore->beamgeometry);
 					header = &(beamgeometry->header);
 					time_j[0] = header->s7kTime.Year;
@@ -1874,7 +1876,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        beamgeometry->number_beams);
 				}
-				if (istore->read_remotecontrolsettings == MB_YES) {
+				if (istore->read_remotecontrolsettings == true) {
 					remotecontrolsettings = &(istore->remotecontrolsettings);
 					header = &(remotecontrolsettings->header);
 					time_j[0] = header->s7kTime.Year;
@@ -1891,7 +1893,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 						        header->RecordNumber);
 				}
-				if (istore->read_bathymetry == MB_YES) {
+				if (istore->read_bathymetry == true) {
 					bathymetry = &(istore->bathymetry);
 					header = &(bathymetry->header);
 					time_j[0] = header->s7kTime.Year;
@@ -1938,13 +1940,13 @@ int main(int argc, char **argv) {
 					 * correction accumulate the
 					 * timestamps
 					 */
-					if (kluge_fixtimejump == MB_YES) {
+					if (kluge_fixtimejump == true) {
 						batht_time_d[nbatht] = time_d;
 						batht_time_d_new[nbatht] = time_d;
 						batht_ping[nbatht] = bathymetry->ping_number;
 						batht_time_offset[nbatht] = 0.0;
 						batht_ping_offset[nbatht] = 0;
-						batht_good_offset[nbatht] = MB_NO;
+						batht_good_offset[nbatht] = false;
 						nbatht++;
 					}
 					/*
@@ -1964,17 +1966,17 @@ int main(int argc, char **argv) {
 						if (nedget > 0) {
 							batht_time_offset[nbatht] = sslo_last_time_d - time_d;
 							batht_ping_offset[nbatht] = sslo_last_ping - bathymetry->ping_number;
-							batht_good_offset[nbatht] = MB_YES;
+							batht_good_offset[nbatht] = true;
 						}
 						else {
 							batht_time_offset[nbatht] = -9999.99;
 							batht_ping_offset[nbatht] = 0;
-							batht_good_offset[nbatht] = MB_NO;
+							batht_good_offset[nbatht] = false;
 						}
 						nbatht++;
 					}
 				}
-				if (istore->read_backscatter == MB_YES) {
+				if (istore->read_backscatter == true) {
 					backscatter = &(istore->backscatter);
 					header = &(backscatter->header);
 					time_j[0] = header->s7kTime.Year;
@@ -1991,7 +1993,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        backscatter->ping_number, backscatter->number_samples);
 				}
-				if (istore->read_beam == MB_YES) {
+				if (istore->read_beam == true) {
 					beam = &(istore->beam);
 					header = &(beam->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2008,7 +2010,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        beam->ping_number, beam->number_beams, beam->number_samples);
 				}
-				if (istore->read_verticaldepth == MB_YES) {
+				if (istore->read_verticaldepth == true) {
 					verticaldepth = &(istore->verticaldepth);
 					header = &(verticaldepth->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2025,7 +2027,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        verticaldepth->ping_number);
 				}
-				if (istore->read_image == MB_YES) {
+				if (istore->read_image == true) {
 					image = &(istore->image);
 					header = &(image->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2042,7 +2044,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        image->ping_number, image->width, image->height);
 				}
-				if (istore->read_v2pingmotion == MB_YES) {
+				if (istore->read_v2pingmotion == true) {
 					v2pingmotion = &(istore->v2pingmotion);
 					header = &(v2pingmotion->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2059,7 +2061,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        v2pingmotion->ping_number, v2pingmotion->n);
 				}
-				if (istore->read_v2detectionsetup == MB_YES) {
+				if (istore->read_v2detectionsetup == true) {
 					v2detectionsetup = &(istore->v2detectionsetup);
 					header = &(v2detectionsetup->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2076,7 +2078,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        v2detectionsetup->ping_number, v2detectionsetup->number_beams);
 				}
-				if (istore->read_v2beamformed == MB_YES) {
+				if (istore->read_v2beamformed == true) {
 					v2beamformed = &(istore->v2beamformed);
 					header = &(v2beamformed->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2093,7 +2095,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        v2beamformed->ping_number, v2beamformed->number_beams);
 				}
-				if (istore->read_v2detection == MB_YES) {
+				if (istore->read_v2detection == true) {
 					v2detection = &(istore->v2detection);
 					header = &(v2detection->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2110,7 +2112,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        v2detection->ping_number, v2detection->number_beams);
 				}
-				if (istore->read_v2rawdetection == MB_YES) {
+				if (istore->read_v2rawdetection == true) {
 					v2rawdetection = &(istore->v2rawdetection);
 					header = &(v2rawdetection->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2127,7 +2129,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        v2rawdetection->ping_number, v2rawdetection->number_beams);
 				}
-				if (istore->read_v2snippet == MB_YES) {
+				if (istore->read_v2snippet == true) {
 					v2snippet = &(istore->v2snippet);
 					header = &(v2snippet->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2144,7 +2146,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        v2snippet->ping_number, v2snippet->number_beams);
 				}
-				if (istore->read_calibratedsnippet == MB_YES) {
+				if (istore->read_calibratedsnippet == true) {
 					calibratedsnippet = &(istore->calibratedsnippet);
 					header = &(calibratedsnippet->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2161,7 +2163,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        calibratedsnippet->ping_number, calibratedsnippet->number_beams);
 				}
-				if (istore->read_processedsidescan == MB_YES) {
+				if (istore->read_processedsidescan == true) {
 					processedsidescan = &(istore->processedsidescan);
 					header = &(processedsidescan->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2873,7 +2875,7 @@ int main(int argc, char **argv) {
 			/* handle bluefin ctd data */
 			else if (status == MB_SUCCESS && istore->type == R7KRECID_Bluefin && kind == MB_DATA_SSV) {
 				nrec_bluefinenv++;
-				MBARIdata = MB_YES;
+				MBARIdata = true;
 
 				bluefin = &(istore->bluefin);
 				header = &(bluefin->header);
@@ -2910,7 +2912,7 @@ int main(int argc, char **argv) {
 			/* handle bluefin nav data */
 			else if (status == MB_SUCCESS && istore->type == R7KRECID_Bluefin && kind == MB_DATA_NAV2) {
 				nrec_bluefinnav++;
-				MBARIdata = MB_YES;
+				MBARIdata = true;
 
 				bluefin = &(istore->bluefin);
 				header = &(bluefin->header);
@@ -3242,12 +3244,12 @@ int main(int argc, char **argv) {
 						edget_time_offset[nedget] =
 						    batht_time_d[nbatht - 1] + (batht_time_d[nbatht - 1] - batht_time_d[nbatht - 2]) - time_d;
 						edget_ping_offset[nedget] = batht_ping[nbatht - 1] - fsdwssheader->pingNum;
-						edget_good_offset[nedget] = MB_YES;
+						edget_good_offset[nedget] = true;
 					}
 					else {
 						edget_time_offset[nedget] = -9999.99;
 						edget_ping_offset[nedget] = 0;
-						edget_good_offset[nedget] = MB_NO;
+						edget_good_offset[nedget] = false;
 					}
 					nedget++;
 				}
@@ -3297,15 +3299,15 @@ int main(int argc, char **argv) {
 			}
 			/* set reson_lastread flag */
 			if (status == MB_SUCCESS && kind == MB_DATA_DATA)
-				reson_lastread = MB_YES;
+				reson_lastread = true;
 			else
-				reson_lastread = MB_NO;
+				reson_lastread = false;
 
 			/* set sslo_lastread flag */
 			if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2)
-				sslo_lastread = MB_YES;
+				sslo_lastread = true;
 			else
-				sslo_lastread = MB_NO;
+				sslo_lastread = false;
 		}
 
 		/* close the swath file */
@@ -3412,12 +3414,12 @@ int main(int argc, char **argv) {
 		/* figure out whether and what to read next */
 		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
@@ -3713,7 +3715,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	/* if desired apply filtering to sonardepth data */
-	if (sonardepthfilter == MB_YES) {
+	if (sonardepthfilter == true) {
 		/*
 		 * apply filtering to sonardepth data read from asynchronous
 		 * records in 7k files
@@ -3855,7 +3857,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	/* Fix timestamp jumps if requested with kluge 6 */
-	if (kluge_fixtimejump == MB_YES) {
+	if (kluge_fixtimejump == true) {
 		fprintf(stderr, "Fixing timestamp jumps in %d Reson data\n", nbatht);
 
 		/*
@@ -3884,7 +3886,7 @@ int main(int argc, char **argv) {
 				if (fabs((batht_time_d[i] - batht_time_d[i - 3]) -
 				         kluge_timejump_interval * (batht_ping[i] - batht_ping[i - 3])) > kluge_timejump_threshold) {
 					batht_time_d_new[i] = batht_time_d[i - 3] + kluge_timejump_interval * (batht_ping[i] - batht_ping[i - 3]);
-					batht_good_offset[i] = MB_YES;
+					batht_good_offset[i] = true;
 				}
 			}
 		}
@@ -3894,7 +3896,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Ping: %7d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %15.6f %10.6f %2d  %15.6f", batht_ping[i],
 			        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], batht_time_d[i],
 			        batht_time_offset[i], batht_ping_offset[i], batht_time_d_new[i]);
-			if (batht_good_offset[i] == MB_YES)
+			if (batht_good_offset[i] == true)
 				fprintf(stderr, " ***");
 			fprintf(stderr, "\n");
 		}
@@ -3919,29 +3921,29 @@ int main(int argc, char **argv) {
 	/* fix problems with batht timestamp arrays */
 	else if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_RESON) {
 		for (int i = 0; i < nbatht; i++) {
-			if (batht_good_offset[i] == MB_NO) {
-				bool foundstart = false;
-				bool foundend = false;
-				for (int j = i - 1; j >= 0 && !foundstart; j--) {
-					if (batht_good_offset[j] == MB_YES) {
+			if (batht_good_offset[i] == false) {
+				foundstart = false;
+				foundend = false;
+				for (int j = i - 1; j >= 0 && foundstart == false; j--) {
+					if (batht_good_offset[j] == true) {
 						foundstart = true;
 						start = j;
 					}
 				}
-				for (int j = i + 1; j < nbatht && !foundend; j++) {
-					if (batht_good_offset[j] == MB_YES) {
+				for (int j = i + 1; j < nbatht && foundend == false; j++) {
+					if (batht_good_offset[j] == true) {
 						foundend = true;
 						end = j;
 					}
 				}
-				if (foundstart && foundend) {
+				if (foundstart == true && foundend == true) {
 					batht_time_offset[i] = batht_time_offset[start] + (batht_time_offset[end] - batht_time_offset[start]) *
 					                                                      ((double)(i - start)) / ((double)(end - start));
 				}
-				else if (foundstart) {
+				else if (foundstart == true) {
 					batht_time_offset[i] = batht_time_offset[start];
 				}
-				else if (foundend) {
+				else if (foundend == true) {
 					batht_time_offset[i] = batht_time_offset[end];
 				}
 			}
@@ -3951,29 +3953,29 @@ int main(int argc, char **argv) {
 	/* fix problems with edget timestamp arrays */
 	if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
 		for (int i = 0; i < nedget; i++) {
-			if (edget_good_offset[i] == MB_NO) {
-				bool foundstart = false;
-				bool foundend = false;
-				for (int j = i - 1; j >= 0 && !foundstart; j--) {
-					if (edget_good_offset[j] == MB_YES) {
+			if (edget_good_offset[i] == false) {
+				foundstart = false;
+				foundend = false;
+				for (int j = i - 1; j >= 0 && foundstart == false; j--) {
+					if (edget_good_offset[j] == true) {
 						foundstart = true;
 						start = j;
 					}
 				}
-				for (int j = i + 1; j < nedget && foundend == MB_NO; j++) {
-					if (edget_good_offset[j] == MB_YES) {
-						foundend = MB_YES;
+				for (int j = i + 1; j < nedget && foundend == false; j++) {
+					if (edget_good_offset[j] == true) {
+						foundend = true;
 						end = j;
 					}
 				}
-				if (foundstart && foundend) {
+				if (foundstart == true && foundend == true) {
 					edget_time_offset[i] = edget_time_offset[start] + (edget_time_offset[end] - edget_time_offset[start]) *
 					                                                      ((double)(i - start)) / ((double)(end - start));
 				}
-				else if (foundstart) {
+				else if (foundstart == true) {
 					edget_time_offset[i] = edget_time_offset[start];
 				}
-				else if (foundend) {
+				else if (foundend == true) {
 					edget_time_offset[i] = edget_time_offset[end];
 				}
 			}
@@ -3984,7 +3986,7 @@ int main(int argc, char **argv) {
 	 * remove noise from position data associated with Kearfott INS on an
 	 * ROV that consists of jumps every two seconds
 	 */
-	if (kluge_kearfottrovnoise == MB_YES && ndat_nav > 2) {
+	if (kluge_kearfottrovnoise == true && ndat_nav > 2) {
 		longitude_offset = 0.0;
 		latitude_offset = 0.0;
 		mb_coor_scale(verbose, dat_nav_lat[0], &mtodeglon, &mtodeglat);
@@ -4126,20 +4128,20 @@ int main(int argc, char **argv) {
 				exit(MB_ERROR_OPEN_FAIL);
 			}
 			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		/* else copy single filename to be read */
 		else {
 			strcpy(ifile, read_file);
-			read_data = MB_YES;
+			read_data = true;
 		}
 
 		/* loop over all files to be read */
-		while (read_data == MB_YES && format == MBF_RESON7KR) {
+		while (read_data == true && format == MBF_RESON7KR) {
 			/* figure out the output file name */
-			if (ofile_set == MB_NO) {
+			if (ofile_set == false) {
 				status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
 				if (testformat == MBF_RESON7KR && strncmp(".s7k", &ifile[strlen(ifile) - 4], 4) == 0)
 					sprintf(ofile, "%s.mb%d", fileroot, testformat);
@@ -4165,7 +4167,7 @@ int main(int argc, char **argv) {
 			 * output file, otherwise there is an output file for
 			 * each input file
 			 */
-			if (ofile_set == MB_NO || nfile_write == 0) {
+			if (ofile_set == false || nfile_write == 0) {
 				/*
 				 * initialize writing the output swath sonar
 				 * file
@@ -4329,26 +4331,25 @@ int main(int argc, char **argv) {
 			 * then load any available bathymetry edits so those
 			 * time stamps can be fixed too
 			 */
-			esffile_open = MB_NO;
-			if (error == MB_ERROR_NO_ERROR && kluge_fixtimejump == MB_YES) {
+			esffile_open = false;
+			if (error == MB_ERROR_NO_ERROR && kluge_fixtimejump == true) {
 				/* progress message */
 				fprintf(stderr, "Checking for existing bathymetry edits...\n");
 
 				/* check for existing esf file */
-				int found;  // TOOD(schwehr): Convert mb_esf_check found to bool.
 				esf_status = mb_esf_check(verbose, ofile, esffile, &found, &error);
 
 				/* if esf file found load it */
-				if (esf_status == MB_SUCCESS && found) {
-					esf_status = mb_esf_load(verbose, program_name, ofile, MB_YES, MB_YES, esffile, &esf, &error);
+				if (esf_status == MB_SUCCESS && found == true) {
+					esf_status = mb_esf_load(verbose, program_name, ofile, true, true, esffile, &esf, &error);
 					if (status == MB_SUCCESS && esf.esffp != NULL)
-						esffile_open = MB_YES;
+						esffile_open = true;
 					if (status == MB_FAILURE && error == MB_ERROR_OPEN_FAIL) {
-						esffile_open = MB_NO;
+						esffile_open = false;
 						fprintf(stderr, "\nUnable to open new edit save file %s\n", esf.esffile);
 					}
 					else if (status == MB_FAILURE && error == MB_ERROR_MEMORY_FAIL) {
-						esffile_open = MB_NO;
+						esffile_open = false;
 						fprintf(stderr, "\nUnable to allocate memory for edits in esf file %s\n", esf.esffile);
 					}
 					/* progress message */
@@ -4378,67 +4379,67 @@ int main(int argc, char **argv) {
 					bathymetry = &(istore->bathymetry);
 					v2detection = &(istore->v2detection);
 					v2rawdetection = &(istore->v2rawdetection);
-					if (istore->read_volatilesettings == MB_YES)
+					if (istore->read_volatilesettings == true)
 						nrec_volatilesettings++;
-					if (istore->read_matchfilter == MB_YES)
+					if (istore->read_matchfilter == true)
 						nrec_matchfilter++;
-					if (istore->read_beamgeometry == MB_YES)
+					if (istore->read_beamgeometry == true)
 						nrec_beamgeometry++;
-					if (istore->read_remotecontrolsettings == MB_YES)
+					if (istore->read_remotecontrolsettings == true)
 						nrec_remotecontrolsettings++;
-					if (istore->read_bathymetry == MB_YES)
+					if (istore->read_bathymetry == true)
 						nrec_bathymetry++;
-					if (istore->read_backscatter == MB_YES)
+					if (istore->read_backscatter == true)
 						nrec_backscatter++;
-					if (istore->read_beam == MB_YES)
+					if (istore->read_beam == true)
 						nrec_beam++;
-					if (istore->read_verticaldepth == MB_YES)
+					if (istore->read_verticaldepth == true)
 						nrec_verticaldepth++;
-					if (istore->read_image == MB_YES)
+					if (istore->read_image == true)
 						nrec_image++;
-					if (istore->read_v2pingmotion == MB_YES)
+					if (istore->read_v2pingmotion == true)
 						nrec_v2pingmotion++;
-					if (istore->read_v2detectionsetup == MB_YES)
+					if (istore->read_v2detectionsetup == true)
 						nrec_v2detectionsetup++;
-					if (istore->read_v2beamformed == MB_YES)
+					if (istore->read_v2beamformed == true)
 						nrec_v2beamformed++;
-					if (istore->read_v2detection == MB_YES)
+					if (istore->read_v2detection == true)
 						nrec_v2detection++;
-					if (istore->read_v2rawdetection == MB_YES)
+					if (istore->read_v2rawdetection == true)
 						nrec_v2rawdetection++;
-					if (istore->read_v2snippet == MB_YES)
+					if (istore->read_v2snippet == true)
 						nrec_v2snippet++;
-					if (istore->read_calibratedsnippet == MB_YES)
+					if (istore->read_calibratedsnippet == true)
 						nrec_calibratedsnippet++;
-					if (istore->read_processedsidescan == MB_YES)
+					if (istore->read_processedsidescan == true)
 						nrec_processedsidescan++;
 
 					/*
 					 * if requested fix jumps in
 					 * multibeam timestamps
 					 */
-					if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_bathymetry == MB_YES &&
-					    kluge_fixtimejump == MB_YES) {
+					if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_bathymetry == true &&
+					    kluge_fixtimejump == true) {
 						/*
 						 * find the ping in the
 						 * timestamp list
 						 */
 						bathymetry = &(istore->bathymetry);
 						header = &(bathymetry->header);
-						bool found = false;
-						for (int i = iping; i < nbatht && !found; i++) {
+						found = false;
+						for (int i = iping; i < nbatht && found == false; i++) {
 							if (bathymetry->ping_number == batht_ping[i]) {
 								iping = i;
 								found = true;
 							}
 						}
-						for (int i = 0; i < nbatht && !found; i++) {
+						for (int i = 0; i < nbatht && found == false; i++) {
 							if (bathymetry->ping_number == batht_ping[i]) {
 								iping = i;
 								found = true;
 							}
 						}
-						if (found && batht_good_offset[iping] == MB_YES) {
+						if (found == true && batht_good_offset[iping] == true) {
 							fprintf(stderr,
 							        "*** Timestamp adjusted from "
 							        "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d to ",
@@ -4477,39 +4478,39 @@ int main(int argc, char **argv) {
 							 * of the relevant
 							 * data records
 							 */
-							if (istore->read_volatilesettings == MB_YES)
+							if (istore->read_volatilesettings == true)
 								istore->volatilesettings.header.s7kTime = s7kTime;
-							if (istore->read_matchfilter == MB_YES)
+							if (istore->read_matchfilter == true)
 								istore->matchfilter.header.s7kTime = s7kTime;
-							if (istore->read_beamgeometry == MB_YES)
+							if (istore->read_beamgeometry == true)
 								istore->beamgeometry.header.s7kTime = s7kTime;
-							if (istore->read_remotecontrolsettings == MB_YES)
+							if (istore->read_remotecontrolsettings == true)
 								istore->remotecontrolsettings.header.s7kTime = s7kTime;
-							if (istore->read_bathymetry == MB_YES)
+							if (istore->read_bathymetry == true)
 								istore->bathymetry.header.s7kTime = s7kTime;
-							if (istore->read_backscatter == MB_YES)
+							if (istore->read_backscatter == true)
 								istore->backscatter.header.s7kTime = s7kTime;
-							if (istore->read_beam == MB_YES)
+							if (istore->read_beam == true)
 								istore->beam.header.s7kTime = s7kTime;
-							if (istore->read_verticaldepth == MB_YES)
+							if (istore->read_verticaldepth == true)
 								istore->verticaldepth.header.s7kTime = s7kTime;
-							if (istore->read_image == MB_YES)
+							if (istore->read_image == true)
 								istore->image.header.s7kTime = s7kTime;
-							if (istore->read_v2pingmotion == MB_YES)
+							if (istore->read_v2pingmotion == true)
 								istore->v2pingmotion.header.s7kTime = s7kTime;
-							if (istore->read_v2detectionsetup == MB_YES)
+							if (istore->read_v2detectionsetup == true)
 								istore->v2detectionsetup.header.s7kTime = s7kTime;
-							if (istore->read_v2beamformed == MB_YES)
+							if (istore->read_v2beamformed == true)
 								istore->v2beamformed.header.s7kTime = s7kTime;
-							if (istore->read_v2detection == MB_YES)
+							if (istore->read_v2detection == true)
 								istore->v2detection.header.s7kTime = s7kTime;
-							if (istore->read_v2rawdetection == MB_YES)
+							if (istore->read_v2rawdetection == true)
 								istore->v2rawdetection.header.s7kTime = s7kTime;
-							if (istore->read_v2snippet == MB_YES)
+							if (istore->read_v2snippet == true)
 								istore->v2snippet.header.s7kTime = s7kTime;
-							if (istore->read_calibratedsnippet == MB_YES)
+							if (istore->read_calibratedsnippet == true)
 								istore->calibratedsnippet.header.s7kTime = s7kTime;
-							if (istore->read_processedsidescan == MB_YES)
+							if (istore->read_processedsidescan == true)
 								istore->processedsidescan.header.s7kTime = s7kTime;
 
 							/*
@@ -4518,7 +4519,7 @@ int main(int argc, char **argv) {
 							 * to any affected
 							 * beam edits
 							 */
-							if (esffile_open == MB_YES) {
+							if (esffile_open == true) {
 								for (int i = 0; i < esf.nedit; i++) {
 									if (fabs(esf.edit[i].time_d - time_d_org) < time_d_tolerance) {
 										esf.edit[i].time_d = time_d;
@@ -4533,7 +4534,7 @@ int main(int argc, char **argv) {
 						}
 					}
 					/* print out record headers */
-					if (istore->read_volatilesettings == MB_YES) {
+					if (istore->read_volatilesettings == true) {
 						volatilesettings = &(istore->volatilesettings);
 						header = &(volatilesettings->header);
 						time_j[0] = header->s7kTime.Year;
@@ -4550,7 +4551,7 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber);
 					}
-					if (istore->read_matchfilter == MB_YES) {
+					if (istore->read_matchfilter == true) {
 						matchfilter = &(istore->matchfilter);
 						header = &(matchfilter->header);
 						time_j[0] = header->s7kTime.Year;
@@ -4567,7 +4568,7 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber);
 					}
-					if (istore->read_beamgeometry == MB_YES) {
+					if (istore->read_beamgeometry == true) {
 						beamgeometry = &(istore->beamgeometry);
 						header = &(beamgeometry->header);
 						time_j[0] = header->s7kTime.Year;
@@ -4584,7 +4585,7 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber, beamgeometry->number_beams);
 					}
-					if (istore->read_remotecontrolsettings == MB_YES) {
+					if (istore->read_remotecontrolsettings == true) {
 						remotecontrolsettings = &(istore->remotecontrolsettings);
 						header = &(remotecontrolsettings->header);
 						time_j[0] = header->s7kTime.Year;
@@ -4601,11 +4602,11 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber);
 					}
-					if (istore->read_bathymetry != MB_YES) {
+					if (istore->read_bathymetry != true) {
 						status = MB_FAILURE;
 						error = MB_ERROR_IGNORE;
 					}
-					else if (istore->read_bathymetry == MB_YES) {
+					else if (istore->read_bathymetry == true) {
 						bathymetry = &(istore->bathymetry);
 						header = &(bathymetry->header);
 						time_j[0] = header->s7kTime.Year;
@@ -4630,8 +4631,8 @@ int main(int argc, char **argv) {
 						if (status == MB_SUCCESS) {
 							/* fix time stamp */
 							if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_RESON) {
-								bool found = false;
-								for (int j = 0; j < nbatht && !found; j++) {
+								found = false;
+								for (int j = 0; j < nbatht && found == false; j++) {
 									if (bathymetry->ping_number == batht_ping[j]) {
 										found = true;
 										time_d = batht_time_d_new[j];
@@ -4680,7 +4681,7 @@ int main(int argc, char **argv) {
 							/*
 							 * fix early MBARI version 5 quality flags
 							 */
-							else if (bathymetry->header.Version == 5 && MBARIdata == MB_YES && header->s7kTime.Year < 2008) {
+							else if (bathymetry->header.Version == 5 && MBARIdata == true && header->s7kTime.Year < 2008) {
 								for (int i = 0; i < bathymetry->number_beams; i++) {
 									/*
 									 * phase picks
@@ -4696,7 +4697,7 @@ int main(int argc, char **argv) {
 							/*
 							 * fix upgraded MBARI version 5 quality flags
 							 */
-							else if (bathymetry->header.Version >= 5 && MBARIdata == MB_YES && header->s7kTime.Year <= 2010) {
+							else if (bathymetry->header.Version >= 5 && MBARIdata == true && header->s7kTime.Year <= 2010) {
 								for (int i = 0; i < bathymetry->number_beams; i++) {
 									bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
@@ -4918,7 +4919,7 @@ int main(int argc, char **argv) {
 							}
 
 							/* get sonar depth */
-							if (kluge_useverticaldepth == MB_YES) {
+							if (kluge_useverticaldepth == true) {
 								verticaldepth = (s7kr_verticaldepth *)&(istore->verticaldepth);
 								sonardepth = (double)(verticaldepth->vertical_depth);
 							}
@@ -4968,7 +4969,7 @@ int main(int argc, char **argv) {
 							 * MB_ERROR_MISSING_NAVATTITUDE unless the -N flag has
 							 * been specified
 							 */
-							if (interp_status == MB_FAILURE && goodnavattitudeonly == MB_YES) {
+							if (interp_status == MB_FAILURE && goodnavattitudeonly == true) {
 								status = MB_FAILURE;
 								error = MB_ERROR_MISSING_NAVATTITUDE;
 							}
@@ -4976,13 +4977,13 @@ int main(int argc, char **argv) {
 						/*
 						 * if the optional data are available, then proceed
 						 */
-						if (status == MB_SUCCESS && (bathymetry->optionaldata == MB_NO || kluge_donotrecalculatebathy == MB_NO)) {
+						if (status == MB_SUCCESS && (bathymetry->optionaldata == false || kluge_donotrecalculatebathy == false)) {
 							/*
 							 * initialize all of the beams
 							 */
 							for (int i = 0; i < bathymetry->number_beams; i++) {
-								if (istore->read_v2rawdetection == MB_YES ||
-								    (istore->read_v2detection == MB_YES && istore->read_v2detectionsetup == MB_YES))
+								if (istore->read_v2rawdetection == true ||
+								    (istore->read_v2detection == true && istore->read_v2detectionsetup == true))
 									bathymetry->quality[i] = 0;
 								bathymetry->depth[i] = 0.0;
 								bathymetry->acrosstrack[i] = 0.0;
@@ -5024,14 +5025,14 @@ int main(int argc, char **argv) {
 							/*
 							 * zero atttitude correction if requested
 							 */
-							if (kluge_zeroattitudecorrection == MB_YES) {
+							if (kluge_zeroattitudecorrection == true) {
 								rollr = 0.0;
 								pitchr = 0.0;
 							}
 							/*
 							 * zero alongtrack angles if requested
 							 */
-							if (kluge_zeroalongtrackangles == MB_YES) {
+							if (kluge_zeroalongtrackangles == true) {
 								for (int i = 0; i < bathymetry->number_beams; i++) {
 									beamgeometry->angle_alongtrack[i] = 0.0;
 								}
@@ -5039,11 +5040,11 @@ int main(int argc, char **argv) {
 							/*
 							 * if requested apply kluge scaling of rx beam angles
 							 */
-							if (kluge_beampatterntweak == MB_YES) {
+							if (kluge_beampatterntweak == true) {
 								/*
 								 * v2rawdetect ion record
 								 */
-								if (istore->read_v2rawdetection == MB_YES) {
+								if (istore->read_v2rawdetection == true) {
 									for (int i = 0; i < v2rawdetection->number_beams; i++) {
 										v2rawdetection->rx_angle[i] *= kluge_beampatternfactor;
 									}
@@ -5051,7 +5052,7 @@ int main(int argc, char **argv) {
 								/*
 								 * v2detection record with or without v2detectionsetup
 								 */
-								if (istore->read_v2detection == MB_YES) {
+								if (istore->read_v2detection == true) {
 									for (int i = 0; i < v2detection->number_beams; i++) {
 										v2detection->angle_x[i] *= kluge_beampatternfactor;
 									}
@@ -5059,7 +5060,7 @@ int main(int argc, char **argv) {
 								/*
 								 * beamgeometry record
 								 */
-								if (istore->read_beamgeometry == MB_YES) {
+								if (istore->read_beamgeometry == true) {
 									for (int i = 0; i < bathymetry->number_beams; i++) {
 										beamgeometry->angle_acrosstrack[i] *= kluge_beampatternfactor;
 									}
@@ -5068,11 +5069,11 @@ int main(int argc, char **argv) {
 							/*
 							 * if requested apply kluge scaling of rx beam angles
 							 */
-							if (kluge_beampatternsnelltweak == MB_YES) {
+							if (kluge_beampatternsnelltweak == true) {
 								/*
 								 * v2rawdetection record
 								 */
-								if (istore->read_v2rawdetection == MB_YES) {
+								if (istore->read_v2rawdetection == true) {
 									for (int i = 0; i < v2rawdetection->number_beams; i++) {
 										v2rawdetection->rx_angle[i] =
 										    asin(kluge_beampatternsnellfactor * sin(v2rawdetection->rx_angle[i]));
@@ -5081,7 +5082,7 @@ int main(int argc, char **argv) {
 								/*
 								 * v2detection record with or without v2detectionsetup
 								 */
-								if (istore->read_v2detection == MB_YES) {
+								if (istore->read_v2detection == true) {
 									for (int i = 0; i < v2detection->number_beams; i++) {
 										v2detection->angle_x[i] =
 										    asin(kluge_beampatternsnellfactor * sin(v2detection->angle_x[i]));
@@ -5090,7 +5091,7 @@ int main(int argc, char **argv) {
 								/*
 								 * beamgeometry record
 								 */
-								if (istore->read_beamgeometry == MB_YES) {
+								if (istore->read_beamgeometry == true) {
 									for (int i = 0; i < bathymetry->number_beams; i++) {
 										beamgeometry->angle_acrosstrack[i] =
 										    asin(kluge_beampatternsnellfactor * sin(beamgeometry->angle_acrosstrack[i]));
@@ -5120,7 +5121,7 @@ int main(int argc, char **argv) {
 							/*
 							 * case of v2rawdetection record
 							 */
-							if (istore->read_v2rawdetection == MB_YES) {
+							if (istore->read_v2rawdetection == true) {
 								for (int j = 0; j < v2rawdetection->number_beams; j++) {
 									/*
 									 * beam id
@@ -5278,7 +5279,7 @@ int main(int argc, char **argv) {
 							/*
 							 * case of v2detection record with v2detectionsetup
 							 */
-							else if (istore->read_v2detection == MB_YES && istore->read_v2detectionsetup == MB_YES) {
+							else if (istore->read_v2detection == true && istore->read_v2detectionsetup == true) {
 								for (int j = 0; j < v2detection->number_beams; j++) {
 									const int i = v2detectionsetup->beam_descriptor[j];
 
@@ -5438,7 +5439,7 @@ int main(int argc, char **argv) {
 							/*
 							 * case of v2detection record
 							 */
-							else if (istore->read_v2detection == MB_YES) {
+							else if (istore->read_v2detection == true) {
 								/*
 								 * now loop over the detects
 								 */
@@ -5770,7 +5771,7 @@ int main(int argc, char **argv) {
 							}
 
 							/* set flag */
-							bathymetry->optionaldata = MB_YES;
+							bathymetry->optionaldata = true;
 							bathymetry->header.OffsetToOptionalData =
 							    MBSYS_RESON7K_RECORDHEADER_SIZE + R7KHDRSIZE_7kBathymetricData + bathymetry->number_beams * 9;
 
@@ -5781,7 +5782,7 @@ int main(int argc, char **argv) {
 							fprintf(stafp, "%0.6f\t%0.3f\t%0.3f\n", time_d, roll, pitch);
 						}
 					}
-					if (istore->read_backscatter == MB_YES) {
+					if (istore->read_backscatter == true) {
 						backscatter = &(istore->backscatter);
 						header = &(backscatter->header);
 						time_j[0] = header->s7kTime.Year;
@@ -5798,7 +5799,7 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber, backscatter->ping_number, backscatter->number_samples);
 					}
-					if (istore->read_beam == MB_YES) {
+					if (istore->read_beam == true) {
 						beam = &(istore->beam);
 						header = &(beam->header);
 						time_j[0] = header->s7kTime.Year;
@@ -5815,7 +5816,7 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber, beam->ping_number, beam->number_beams, beam->number_samples);
 					}
-					if (istore->read_verticaldepth == MB_YES) {
+					if (istore->read_verticaldepth == true) {
 						verticaldepth = &(istore->verticaldepth);
 						header = &(verticaldepth->header);
 						time_j[0] = header->s7kTime.Year;
@@ -5832,7 +5833,7 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber, verticaldepth->ping_number);
 					}
-					if (istore->read_image == MB_YES) {
+					if (istore->read_image == true) {
 						image = &(istore->image);
 						header = &(image->header);
 						time_j[0] = header->s7kTime.Year;
@@ -5850,8 +5851,8 @@ int main(int argc, char **argv) {
 							        header->RecordNumber, image->ping_number, image->width, image->height);
 					}
 					/* regenerate sidescan */
-					status = mbsys_reson7k_makess(verbose, imbio_ptr, istore_ptr, ss_source, MB_NO, &pixel_size, MB_NO,
-					                              &swath_width, MB_YES, &error);
+					status = mbsys_reson7k_makess(verbose, imbio_ptr, istore_ptr, ss_source, false, &pixel_size, false,
+					                              &swath_width, true, &error);
 				}
 				/* handle reference point data */
 				else if (status == MB_SUCCESS && istore->type == R7KRECID_ReferencePoint) {
@@ -6789,8 +6790,8 @@ int main(int argc, char **argv) {
 
 					/* fix time stamp */
 					if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
-						bool found = false;
-						for (int j = 0; j < nedget && !found; j++) {
+						found = false;
+						for (int j = 0; j < nedget && found == false; j++) {
 							if (istore->time_d >= edget_time_d[j]) {
 								found = true;
 								time_d = istore->time_d + edget_time_offset[j];
@@ -6852,8 +6853,8 @@ int main(int argc, char **argv) {
 
 					/* fix time stamp */
 					if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
-						bool found = false;
-						for (int j = 0; j < nedget && !found; j++) {
+						found = false;
+						for (int j = 0; j < nedget && found == false; j++) {
 							if (istore->time_d >= edget_time_d[j]) {
 								found = true;
 								time_d = istore->time_d + edget_time_offset[j];
@@ -6921,8 +6922,8 @@ int main(int argc, char **argv) {
 
 					/* fix time stamp */
 					if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
-						bool found = false;
-						for (int j = 0; j < nedget && !found; j++) {
+						found = false;
+						for (int j = 0; j < nedget && found == false; j++) {
 							if (istore->time_d >= edget_time_d[j]) {
 								found = true;
 								time_d = istore->time_d + edget_time_offset[j];
@@ -7101,7 +7102,7 @@ int main(int argc, char **argv) {
 						 * write the new bluefin
 						 * record
 						 */
-						status = mb_put_all(verbose, ombio_ptr, istore_ptr, MB_NO, MB_DATA_NAV2, time_i, time_d, navlon, navlat,
+						status = mb_put_all(verbose, ombio_ptr, istore_ptr, false, MB_DATA_NAV2, time_i, time_d, navlon, navlat,
 						                    speed, heading, obeams_bath, obeams_amp, opixels_ss, beamflag, bath, amp,
 						                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 						if (status != MB_SUCCESS) {
@@ -7118,18 +7119,18 @@ int main(int argc, char **argv) {
 					}
 				}
 				/* do not output compressed image data */
-				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_image == MB_YES)
-					istore->read_image = MB_NO;
+				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_image == true)
+					istore->read_image = false;
 
 				/* do not output full beam data */
-				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_beam == MB_YES)
-					istore->read_beam = MB_NO;
-				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_v2beamformed == MB_YES)
-					istore->read_v2beamformed = MB_NO;
+				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_beam == true)
+					istore->read_beam = false;
+				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_v2beamformed == true)
+					istore->read_v2beamformed = false;
 
 				/* write some data */
 				if (error == MB_ERROR_NO_ERROR && (nins < 1 || kind != MB_DATA_NAV2)) {
-					status = mb_put_all(verbose, ombio_ptr, istore_ptr, MB_NO, kind, time_i, time_d, navlon, navlat, speed,
+					status = mb_put_all(verbose, ombio_ptr, istore_ptr, false, kind, time_i, time_d, navlon, navlat, speed,
 					                    heading, obeams_bath, obeams_amp, opixels_ss, beamflag, bath, amp, bathacrosstrack,
 					                    bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 					if (status != MB_SUCCESS) {
@@ -7243,7 +7244,7 @@ int main(int argc, char **argv) {
 			 * if fixing time stamps of existing beam edits write
 			 * out and close the edit save file
 			 */
-			if (kluge_fixtimejump == MB_YES && kluge_fixtimejumpbeamedits == MB_YES && esffile_open == MB_YES) {
+			if (kluge_fixtimejump == true && kluge_fixtimejumpbeamedits == true && esffile_open == true) {
 				for (int i = 0; i < esf.nedit; i++) {
 					status = mb_esf_save(verbose, &esf, esf.edit[i].time_d, esf.edit[i].beam, esf.edit[i].action, &error);
 				}
@@ -7253,7 +7254,7 @@ int main(int argc, char **argv) {
 			status = mb_close(verbose, &imbio_ptr, &error);
 
 			/* close the output swath file if necessary */
-			if (ofile_set == MB_NO || read_data == MB_NO) {
+			if (ofile_set == false || read_data == false) {
 				status = mb_close(verbose, &ombio_ptr, &error);
 				fclose(tfp);
 				fclose(athfp);
@@ -7263,18 +7264,18 @@ int main(int argc, char **argv) {
 
 				/* generate inf fnv and fbt files */
 				if (status == MB_SUCCESS) {
-					status = mb_make_info(verbose, MB_YES, ofile, format, &error);
+					status = mb_make_info(verbose, true, ofile, format, &error);
 				}
 			}
 			/* figure out whether and what to read next */
 			if (read_datalist) {
 				if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-					read_data = MB_YES;
+					read_data = true;
 				else
-					read_data = MB_NO;
+					read_data = false;
 			}
 			else {
-				read_data = MB_NO;
+				read_data = false;
 			}
 
 			/* end loop over files in list */
