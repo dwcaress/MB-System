@@ -234,7 +234,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 						ivs2 = iv2;
 					if (l2 == 3)
 						ivs2 = iv3;
-					int addside = MB_YES;
+					int addside = true;
 
 					/* Check if the side is already stored in kv. If it
 					    is then Side common to more than one of the
@@ -242,7 +242,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 					int j = 0;
 					while ((j < km) && addside) {
 						if (ivs1[jt] == kv1[j] && ivs2[jt] == kv2[j]) {
-							addside = MB_NO;
+							addside = false;
 							km--;
 							for (int k = j; k < km; k++) {
 								kv1[k] = kv1[k + 1];
@@ -362,82 +362,82 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 	for (int i = 0; i < *ntri; i++) {
 		/* check side 1 of triangle i */
 		if (ct1[i] == -1) {
-			int notfound = MB_YES;
+			int notfound = true;
 			for (int j = 0; notfound && j < *ntri; j++) {
 				if (notfound && iv1[i] == iv2[j] && iv2[i] == iv1[j]) {
 					ct1[i] = j;
 					cs1[i] = 0;
 					ct1[j] = i;
 					cs1[j] = 0;
-					notfound = MB_NO;
+					notfound = false;
 				}
 				if (notfound && iv1[i] == iv3[j] && iv2[i] == iv2[j]) {
 					ct1[i] = j;
 					cs1[i] = 1;
 					ct2[j] = i;
 					cs2[j] = 0;
-					notfound = MB_NO;
+					notfound = false;
 				}
 				if (notfound && iv1[i] == iv1[j] && iv2[i] == iv3[j]) {
 					ct1[i] = j;
 					cs1[i] = 2;
 					ct3[j] = i;
 					cs3[j] = 0;
-					notfound = MB_NO;
+					notfound = false;
 				}
 			}
 		}
 		/* check side 2 of triangle i */
 		if (ct2[i] == -1) {
-			int notfound = MB_YES;
+			int notfound = true;
 			for (int j = 0; notfound && j < *ntri; j++) {
 				if (notfound && iv2[i] == iv2[j] && iv3[i] == iv1[j]) {
 					ct2[i] = j;
 					cs2[i] = 0;
 					ct1[j] = i;
 					cs1[j] = 1;
-					notfound = MB_NO;
+					notfound = false;
 				}
 				if (notfound && iv2[i] == iv3[j] && iv3[i] == iv2[j]) {
 					ct2[i] = j;
 					cs2[i] = 1;
 					ct2[j] = i;
 					cs2[j] = 1;
-					notfound = MB_NO;
+					notfound = false;
 				}
 				if (notfound && iv2[i] == iv1[j] && iv3[i] == iv3[j]) {
 					ct2[i] = j;
 					cs2[i] = 2;
 					ct3[j] = i;
 					cs3[j] = 1;
-					notfound = MB_NO;
+					notfound = false;
 				}
 			}
 		}
 		/* check side 3 of triangle i */
 		if (ct3[i] == -1) {
-			int notfound = MB_YES;
+			int notfound = true;
 			for (int j = 0; notfound && j < *ntri; j++) {
 				if (notfound && iv3[i] == iv2[j] && iv1[i] == iv1[j]) {
 					ct3[i] = j;
 					cs3[i] = 0;
 					ct1[j] = i;
 					cs1[j] = 2;
-					notfound = MB_NO;
+					notfound = false;
 				}
 				if (notfound && iv3[i] == iv3[j] && iv1[i] == iv2[j]) {
 					ct3[i] = j;
 					cs3[i] = 1;
 					ct2[j] = i;
 					cs2[j] = 2;
-					notfound = MB_NO;
+					notfound = false;
 				}
 				if (notfound && iv3[i] == iv1[j] && iv1[i] == iv3[j]) {
 					ct3[i] = j;
 					cs3[i] = 2;
 					ct3[j] = i;
 					cs3[j] = 2;
-					notfound = MB_NO;
+					notfound = false;
 				}
 			}
 		}

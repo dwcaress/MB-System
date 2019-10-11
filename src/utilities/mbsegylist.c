@@ -72,7 +72,7 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 
 	/* make print format */
 	format[0] = '%';
-	if (*invert == MB_YES)
+	if (*invert == true)
 		strcpy(format, "%g");
 	else if (width > 0)
 		sprintf(&format[1], "%d.%df", width, precision);
@@ -80,20 +80,20 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 		sprintf(&format[1], ".%df", precision);
 
 	/* invert value if desired */
-	if (*invert == MB_YES) {
-		*invert = MB_NO;
+	if (*invert == true) {
+		*invert = false;
 		if (value != 0.0)
 			value = 1.0 / value;
 	}
 
 	/* flip sign value if desired */
-	if (*flipsign == MB_YES) {
-		*flipsign = MB_NO;
+	if (*flipsign == true) {
+		*flipsign = false;
 		value = -value;
 	}
 
 	/* print value */
-	if (ascii == MB_YES)
+	if (ascii == true)
 		printf(format, value);
 	else
 		fwrite(&value, sizeof(double), 1, stdout);
@@ -123,15 +123,15 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
 	}
 
 	/* reset invert flag */
-	if (*invert == MB_YES)
-		*invert = MB_NO;
+	if (*invert == true)
+		*invert = false;
 
 	/* reset flipsign flag */
-	if (*flipsign == MB_YES)
-		*flipsign = MB_NO;
+	if (*flipsign == true)
+		*flipsign = false;
 
 	/* print value */
-	if (ascii == MB_YES)
+	if (ascii == true)
 		printf("NaN");
 	else
 		fwrite(&NaN, sizeof(double), 1, stdout);
@@ -179,18 +179,18 @@ int main(int argc, char **argv) {
 	char list[MAX_OPTIONS] = "";
 	int n_list;
 	int nread;
-	int invert_next_value = MB_NO;
-	int signflip_next_value = MB_NO;
-	int first = MB_YES;
-	int ascii = MB_YES;
-	int segment = MB_NO;
+	int invert_next_value = false;
+	int signflip_next_value = false;
+	int first = true;
+	int ascii = true;
+	int segment = false;
 	char segment_tag[MB_PATH_MAXLINE] = "";
 	char delimiter[MB_PATH_MAXLINE] = "";
 
 	/* additional time variables */
-	int first_m = MB_YES;
+	int first_m = true;
 	double time_d_ref;
-	int first_u = MB_YES;
+	int first_u = true;
 	time_t time_u;
 	time_t time_u_ref;
 	double time_interval = 0.0;
@@ -266,7 +266,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'A':
 			case 'a':
-				ascii = MB_NO;
+				ascii = false;
 				break;
 			case 'D':
 			case 'd':
@@ -292,7 +292,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'Z':
 			case 'z':
-				segment = MB_YES;
+				segment = true;
 				sscanf(optarg, "%s", segment_tag);
 				break;
 			case '?':
@@ -365,13 +365,13 @@ int main(int argc, char **argv) {
 	}
 
 	/* output separator for GMT style segment file output */
-	if (segment == MB_YES && ascii == MB_YES) {
+	if (segment == true && ascii == true) {
 		printf("%s\n", segment_tag);
 	}
 
 	/* read and print data */
 	nread = 0;
-	first = MB_YES;
+	first = true;
 	while (error <= MB_ERROR_NO_ERROR) {
 		/* reset error */
 		error = MB_ERROR_NO_ERROR;
@@ -389,7 +389,7 @@ int main(int argc, char **argv) {
 			time_j[4] = 1000 * traceheader.mils;
 			mb_get_itime(verbose, time_j, time_i);
 			mb_get_time(verbose, time_i, &time_d);
-			if (first == MB_YES) {
+			if (first == true) {
 				time_d_old = time_d;
 			}
 			if (traceheader.elev_scalar < 0)
@@ -447,13 +447,13 @@ int main(int argc, char **argv) {
 			for (i = 0; i < n_list; i++) {
 				switch (list[i]) {
 				case '/': /* Inverts next simple value */
-					invert_next_value = MB_YES;
+					invert_next_value = true;
 					break;
 				case '-': /* Flip sign on next simple value */
-					signflip_next_value = MB_YES;
+					signflip_next_value = true;
 					break;
 				case 'C': /* CDP number or CMP number or RP number */
-					if (ascii == MB_YES)
+					if (ascii == true)
 						printf("%6d", traceheader.rp_num);
 					else {
 						b = traceheader.rp_num;
@@ -461,7 +461,7 @@ int main(int argc, char **argv) {
 					}
 					break;
 				case 'c': /* CDP trace or CMP trace or RP trace */
-					if (ascii == MB_YES)
+					if (ascii == true)
 						printf("%6d", traceheader.rp_tr);
 					else {
 						b = traceheader.rp_tr;
@@ -483,7 +483,7 @@ int main(int argc, char **argv) {
 				case 'J': /* time string */
 					mb_get_jtime(verbose, time_i, time_j);
 					seconds = time_i[5] + 0.000001 * time_i[6];
-					if (ascii == MB_YES) {
+					if (ascii == true) {
 						printf("%.4d %.3d %.2d %.2d %9.6f", time_j[0], time_j[1], time_i[3], time_i[4], seconds);
 					}
 					else {
@@ -504,7 +504,7 @@ int main(int argc, char **argv) {
 				case 'j': /* time string */
 					mb_get_jtime(verbose, time_i, time_j);
 					seconds = time_i[5] + 0.000001 * time_i[6];
-					if (ascii == MB_YES) {
+					if (ascii == true) {
 						printf("%.4d %.3d %.4d %9.6f", time_j[0], time_j[1], time_j[2], seconds);
 					}
 					else {
@@ -530,15 +530,15 @@ int main(int argc, char **argv) {
 					break;
 				case 'm': /* time in decimal seconds since
 				        first record */
-					if (first_m == MB_YES) {
+					if (first_m == true) {
 						time_d_ref = time_d;
-						first_m = MB_NO;
+						first_m = false;
 					}
 					b = time_d - time_d_ref;
 					printsimplevalue(verbose, b, 0, 6, ascii, &invert_next_value, &signflip_next_value, &error);
 					break;
 				case 'N': /* number of samples in trace */
-					if (ascii == MB_YES)
+					if (ascii == true)
 						printf("%6d", traceheader.nsamps);
 					else {
 						b = traceheader.nsamps;
@@ -546,7 +546,7 @@ int main(int argc, char **argv) {
 					}
 					break;
 				case 'n': /* trace counter */
-					if (ascii == MB_YES)
+					if (ascii == true)
 						printf("%6d", nread);
 					else {
 						b = nread;
@@ -554,7 +554,7 @@ int main(int argc, char **argv) {
 					}
 					break;
 				case 'R': /* range */
-					if (ascii == MB_YES)
+					if (ascii == true)
 						printf("%6d", traceheader.range);
 					else {
 						b = traceheader.range;
@@ -562,7 +562,7 @@ int main(int argc, char **argv) {
 					}
 					break;
 				case 'S': /* shot number */
-					if (ascii == MB_YES)
+					if (ascii == true)
 						printf("%6d", traceheader.shot_num);
 					else {
 						b = traceheader.shot_num;
@@ -570,7 +570,7 @@ int main(int argc, char **argv) {
 					}
 					break;
 				case 's': /* shot trace */
-					if (ascii == MB_YES)
+					if (ascii == true)
 						printf("%6d", traceheader.shot_tr);
 					else {
 						b = traceheader.shot_tr;
@@ -579,7 +579,7 @@ int main(int argc, char **argv) {
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 					seconds = time_i[5] + 1e-6 * time_i[6];
-					if (ascii == MB_YES)
+					if (ascii == true)
 						printf("%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], seconds);
 					else {
 						b = time_i[0];
@@ -598,7 +598,7 @@ int main(int argc, char **argv) {
 					break;
 				case 't': /* yyyy mm dd hh mm ss time string */
 					seconds = time_i[5] + 1e-6 * time_i[6];
-					if (ascii == MB_YES)
+					if (ascii == true)
 						printf("%.4d %.2d %.2d %.2d %.2d %9.6f", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], seconds);
 					else {
 						b = time_i[0];
@@ -617,7 +617,7 @@ int main(int argc, char **argv) {
 					break;
 				case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 					time_u = (int)time_d;
-					if (ascii == MB_YES)
+					if (ascii == true)
 						printf("%ld", time_u);
 					else {
 						b = time_u;
@@ -626,11 +626,11 @@ int main(int argc, char **argv) {
 					break;
 				case 'u': /* time in seconds since first record */
 					time_u = (int)time_d;
-					if (first_u == MB_YES) {
+					if (first_u == true) {
 						time_u_ref = time_u;
-						first_u = MB_NO;
+						first_u = false;
 					}
-					if (ascii == MB_YES)
+					if (ascii == true)
 						printf("%ld", time_u - time_u_ref);
 					else {
 						b = time_u - time_u_ref;
@@ -640,7 +640,7 @@ int main(int argc, char **argv) {
 				case 'V': /* time in seconds since last ping */
 				case 'v':
 					time_interval = time_d - time_d_old;
-					if (ascii == MB_YES) {
+					if (ascii == true) {
 						if (fabs(time_interval) > 100.)
 							printf("%g", time_interval);
 						else
@@ -662,7 +662,7 @@ int main(int argc, char **argv) {
 						hemi = 'E';
 					degrees = (int)navlon;
 					minutes = 60.0 * (navlon - degrees);
-					if (ascii == MB_YES) {
+					if (ascii == true) {
 						printf("%3d %8.5f%c", degrees, minutes, hemi);
 					}
 					else {
@@ -686,7 +686,7 @@ int main(int argc, char **argv) {
 						hemi = 'N';
 					degrees = (int)navlat;
 					minutes = 60.0 * (navlat - degrees);
-					if (ascii == MB_YES) {
+					if (ascii == true) {
 						printf("%3d %8.5f%c", degrees, minutes, hemi);
 					}
 					else {
@@ -727,11 +727,11 @@ int main(int argc, char **argv) {
 					printsimplevalue(verbose, waterdepth, 11, 6, ascii, &invert_next_value, &signflip_next_value, &error);
 					break;
 				default:
-					if (ascii == MB_YES)
+					if (ascii == true)
 						printf("<Invalid Option: %c>", list[i]);
 					break;
 				}
-				if (ascii == MB_YES) {
+				if (ascii == true) {
 					if (i < (n_list - 1))
 						printf("%s", delimiter);
 					else
@@ -741,8 +741,8 @@ int main(int argc, char **argv) {
 		}
 
 		/* reset first flag */
-		if (error == MB_ERROR_NO_ERROR && first == MB_YES) {
-			first = MB_NO;
+		if (error == MB_ERROR_NO_ERROR && first == true) {
+			first = false;
 		}
 
 		/* save old values */

@@ -66,9 +66,9 @@ int mbr_info_hsldeoih(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -875,18 +875,18 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 	if (status == MB_SUCCESS) {
 
 		/* see if gain values are messed up */
-		gain_ok = MB_NO;
+		gain_ok = false;
 		int i = 0;
-		while (i < 8 && gain_ok == MB_NO) {
+		while (i < 8 && gain_ok == false) {
 			if (data->gain[i] != data->gain[0])
-				gain_ok = MB_YES;
+				gain_ok = true;
 			if (data->gain[i + 8] != data->gain[8])
-				gain_ok = MB_YES;
+				gain_ok = true;
 			i++;
 		}
 
 		/* fix gain values if needed */
-		if (gain_ok == MB_NO) {
+		if (gain_ok == false) {
 			gain_outer = data->gain[0];
 			gain_inner = data->gain[8];
 			for (int i = 0; i < 16; i++) {
@@ -899,16 +899,16 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 
 		/* see if processed beam amplitude values
 		    are available */
-		need_back = MB_YES;
+		need_back = true;
 		i = 0;
-		while (i < MBF_HSLDEOIH_BEAMS && need_back == MB_YES) {
+		while (i < MBF_HSLDEOIH_BEAMS && need_back == true) {
 			if (data->back[i] != 0)
-				need_back = MB_NO;
+				need_back = false;
 			i++;
 		}
 
 		/* get beam amplitude values if needed */
-		if (need_back == MB_YES) {
+		if (need_back == true) {
 			data->back_scale = 1.0;
 			for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 				gain_beam = 6 * data->gain[which_gain[i]];
@@ -1188,18 +1188,18 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 	if (status == MB_SUCCESS) {
 
 		/* see if gain values are messed up */
-		gain_ok = MB_NO;
+		gain_ok = false;
 		int i = 0;
-		while (i < 8 && gain_ok == MB_NO) {
+		while (i < 8 && gain_ok == false) {
 			if (data->gain[i] != data->gain[0])
-				gain_ok = MB_YES;
+				gain_ok = true;
 			if (data->gain[i + 8] != data->gain[8])
-				gain_ok = MB_YES;
+				gain_ok = true;
 			i++;
 		}
 
 		/* fix gain values if needed */
-		if (gain_ok == MB_NO) {
+		if (gain_ok == false) {
 			gain_outer = data->gain[0];
 			gain_inner = data->gain[8];
 			for (int i = 0; i < 16; i++) {
@@ -1212,16 +1212,16 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 
 		/* see if processed beam amplitude values
 		    are available */
-		need_back = MB_YES;
+		need_back = true;
 		i = 0;
-		while (i < MBF_HSLDEOIH_BEAMS && need_back == MB_YES) {
+		while (i < MBF_HSLDEOIH_BEAMS && need_back == true) {
 			if (data->back[i] != 0)
-				need_back = MB_NO;
+				need_back = false;
 			i++;
 		}
 
 		/* get beam amplitude values if needed */
-		if (need_back == MB_YES) {
+		if (need_back == true) {
 			data->back_scale = 1.0;
 			for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 				gain_beam = 6 * data->gain[which_gain[i]];

@@ -24,7 +24,7 @@
 #ifndef MB_STATUS_H_
 #define MB_STATUS_H_
 
-/* MBIO function boolean convention */
+/* MBIO function yes/no/maybe convention */
 #define MB_YES 1
 #define MB_NO 0
 #define MB_MAYBE -1

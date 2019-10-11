@@ -1267,14 +1267,14 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		const double angscale = ((double)store->beam_width_num) / ((double)store->beam_width_denom);
 		const double ttscale = 0.25 / store->sample_rate;
 		const int icenter = store->beams_bath / 2;
-		if (swath_width_set == MB_NO && nbathsort > 0) {
+		if (swath_width_set == false && nbathsort > 0) {
 			double anglestart = fabs((icenter - istart) * angscale + store->png_roll);
 			(*swath_width) = anglestart;
 			const double angleend = fabs((icenter - iend) * angscale + store->png_roll);
 			(*swath_width) = MAX(anglestart, angleend);
 			(*swath_width) = MAX((*swath_width), 60.0);
 		}
-		if (pixel_size_set == MB_NO && nbathsort > 0) {
+		if (pixel_size_set == false && nbathsort > 0) {
 			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
 			double pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_RESON8K_MAXPIXELS;
 			pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort / 2] * sin(DTR * 0.1));

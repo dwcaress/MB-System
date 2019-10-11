@@ -492,8 +492,8 @@ int mbsys_simrad2_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 		}
 
 		/* raw beam record */
-		ping->png_raw1_read = MB_NO; /* flag indicating actual reading of old rawbeam record */
-		ping->png_raw2_read = MB_NO; /* flag indicating actual reading of new rawbeam record */
+		ping->png_raw1_read = false; /* flag indicating actual reading of old rawbeam record */
+		ping->png_raw2_read = false; /* flag indicating actual reading of new rawbeam record */
 		ping->png_raw_date = 0;
 		/* date = year*10000 + month*100 + day
 		    Feb 26, 1995 = 19950226 */
@@ -623,7 +623,7 @@ int mbsys_simrad2_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 		}
 
 		/* sidescan */
-		ping->png_ss_read = MB_NO;
+		ping->png_ss_read = false;
 		/* flag indicating actual reading of sidescan record */
 		ping->png_ss_count = 0;
 		/* sequential counter or input identifier */
@@ -807,8 +807,8 @@ int mbsys_simrad2_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 			}
 
 			/* raw beam record */
-			ping->png_raw1_read = MB_NO; /* flag indicating actual reading of old rawbeam record */
-			ping->png_raw2_read = MB_NO; /* flag indicating actual reading of new rawbeam record */
+			ping->png_raw1_read = false; /* flag indicating actual reading of old rawbeam record */
+			ping->png_raw2_read = false; /* flag indicating actual reading of new rawbeam record */
 			ping->png_raw_date = 0;
 			/* date = year*10000 + month*100 + day
 			    Feb 26, 1995 = 19950226 */
@@ -938,7 +938,7 @@ int mbsys_simrad2_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 			}
 
 			/* sidescan */
-			ping->png_ss_read = MB_NO;
+			ping->png_ss_read = false;
 			/* flag indicating actual reading of sidescan record */
 			ping->png_ss_count = 0;
 			/* sequential counter or input identifier */
@@ -1765,7 +1765,7 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 		/*--------------------------------------------------------------*/
 		/* change timestamp if indicated */
 		/*--------------------------------------------------------------*/
-		if (pars->timestamp_changed == MB_YES) {
+		if (pars->timestamp_changed == true) {
 			time_d = pars->time_d;
 			mb_get_date(verbose, time_d, time_i);
 
@@ -1851,7 +1851,7 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 		swath_width = (double *)&mb_io_ptr->saved2;
 		ping->png_pixel_size = 0;
 		ping->png_pixels_ss = 0;
-		ss_status = mbsys_simrad2_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 1, &ss_error);
+		ss_status = mbsys_simrad2_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, &ss_error);
 	}
 
 	const int status = MB_SUCCESS;
@@ -3625,27 +3625,27 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		*transducer_depth = 0.01 * ping->png_xducer_depth + 655.36 * ping->png_offset_multiplier;
 		depthscale = 0.01 * ping->png_depth_res;
 		dacrscale = 0.01 * ping->png_distance_res;
-		found = MB_NO;
+		found = false;
 		altitude_best = 0.0;
 		xtrack_min = 99999999.9;
 		for (int i = 0; i < ping->png_nbeams; i++) {
 			if (mb_beam_ok(ping->png_beamflag[i]) && fabs(dacrscale * ping->png_acrosstrack[i]) < xtrack_min) {
 				xtrack_min = fabs(dacrscale * ping->png_acrosstrack[i]);
 				altitude_best = depthscale * ping->png_depth[i];
-				found = MB_YES;
+				found = true;
 			}
 		}
-		if (found == MB_NO) {
+		if (found == false) {
 			xtrack_min = 99999999.9;
 			for (int i = 0; i < ping->png_nbeams; i++) {
 				if (ping->png_quality[i] > 0 && fabs(dacrscale * ping->png_acrosstrack[i]) < xtrack_min) {
 					xtrack_min = fabs(dacrscale * ping->png_acrosstrack[i]);
 					altitude_best = depthscale * ping->png_depth[i];
-					found = MB_YES;
+					found = true;
 				}
 			}
 		}
-		if (found == MB_YES) {
+		if (found == true) {
 			*altitude = altitude_best;
 		}
 		else
@@ -4614,12 +4614,12 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		}
 
 		/* get sidescan pixel size */
-		if (swath_width_set == MB_NO && nbathsort > 0) {
+		if (swath_width_set == false && nbathsort > 0) {
 			(*swath_width) =
 			    2.5 + MAX(90.0 - 0.01 * ping->png_depression[0], 90.0 - 0.01 * ping->png_depression[ping->png_nbeams - 1]);
 			(*swath_width) = MAX((*swath_width), 60.0);
 		}
-		if (pixel_size_set == MB_NO && nbathsort > 0) {
+		if (pixel_size_set == false && nbathsort > 0) {
 			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
 			pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_SIMRAD2_MAXPIXELS;
 			pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort / 2] * sin(DTR * 0.1));
@@ -4654,9 +4654,9 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
 		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &ss_time_d);
-		ss_ok = MB_YES;
+		ss_ok = true;
 		if (ping->png_nbeams < ping->png_nbeams_ss || ping->png_nbeams > ping->png_nbeams_ss + 1) {
-			ss_ok = MB_NO;
+			ss_ok = false;
 			if (verbose >= 2)
 				fprintf(stderr,
 				        "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
@@ -4667,7 +4667,7 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 			for (int i = 0; i < ping->png_nbeams; i++) {
 				if (ping->png_beam_num[i] != ping->png_beam_index[i] + 1 &&
 				    ping->png_beam_num[i] != ping->png_beam_index[i] - 1) {
-					ss_ok = MB_NO;
+					ss_ok = false;
 					if (verbose > 0)
 						fprintf(stderr,
 						        "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: bath and ss beam indexes don't "
@@ -4680,7 +4680,7 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 
 		/* loop over raw sidescan, putting each raw pixel into
 		    the binning arrays */
-		if (ss_ok == MB_YES)
+		if (ss_ok == true)
 			for (int i = 0; i < ping->png_nbeams_ss; i++) {
 				beam_ss = &ping->png_ssraw[ping->png_start_sample[i]];
 				if (mb_beam_ok(ping->png_beamflag[i])) {
@@ -4867,12 +4867,12 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		}
 
 		/* get sidescan pixel size */
-		if (swath_width_set == MB_NO && nbathsort > 0) {
+		if (swath_width_set == false && nbathsort > 0) {
 			(*swath_width) =
 			    2.5 + MAX(90.0 - 0.01 * ping->png_depression[0], 90.0 - 0.01 * ping->png_depression[ping->png_nbeams - 1]);
 			(*swath_width) = MAX((*swath_width), 60.0);
 		}
-		if (pixel_size_set == MB_NO && nbathsort > 0) {
+		if (pixel_size_set == false && nbathsort > 0) {
 			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
 			pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_SIMRAD2_MAXPIXELS;
 			pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort / 2] * sin(DTR * 0.1));
@@ -4907,9 +4907,9 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
 		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &ss_time_d);
-		ss_ok = MB_YES;
+		ss_ok = true;
 		if (ping->png_nbeams < ping->png_nbeams_ss || ping->png_nbeams > ping->png_nbeams_ss + 1) {
-			ss_ok = MB_NO;
+			ss_ok = false;
 			if (verbose > 0)
 				fprintf(stderr,
 				        "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
@@ -4920,7 +4920,7 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 			for (int i = 0; i < ping->png_nbeams; i++) {
 				if (ping->png_beam_num[i] != ping->png_beam_index[i] + 1 &&
 				    ping->png_beam_num[i] != ping->png_beam_index[i] - 1) {
-					ss_ok = MB_NO;
+					ss_ok = false;
 					if (verbose > 0)
 						fprintf(stderr,
 						        "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: bath and ss beam indexes don't "
@@ -4933,7 +4933,7 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 
 		/* loop over raw sidescan, putting each raw pixel into
 		    the binning arrays */
-		if (ss_ok == MB_YES)
+		if (ss_ok == true)
 			for (int i = 0; i < ping->png_nbeams_ss; i++) {
 				beam_ss = &ping->png_ssraw[ping->png_start_sample[i]];
 				if (mb_beam_ok(ping->png_beamflag[i])) {

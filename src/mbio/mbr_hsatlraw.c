@@ -157,9 +157,9 @@ int mbr_info_hsatlraw(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_NO;
+	*variable_beams = false;
+	*traveltime = true;
+	*beam_flagging = false;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -692,7 +692,7 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
-	static int line_save_flag = MB_NO;
+	static int line_save_flag = false;
 	static char raw_line[MBF_HSATLRAW_MAXLINE] = "\0";
 	static int type = MBF_HSATLRAW_NONE;
 	static int shift = 0;
@@ -719,47 +719,47 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	int status = MB_SUCCESS;
-	int done = MB_NO;
+	int done = false;
 	int expect = MBF_HSATLRAW_NONE;
-	while (done == MB_NO) {
+	while (done == false) {
 
 		/* get next record label */
-		if (line_save_flag == MB_NO) {
+		if (line_save_flag == false) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			status = mbr_hsatlraw_rd_label(verbose, mbfp, raw_line, &type, &shift, error);
 		}
 		else
-			line_save_flag = MB_NO;
+			line_save_flag = false;
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE && expect == MBF_HSATLRAW_NONE) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			done = MB_YES;
+			done = true;
 		}
 		else if (status == MB_FAILURE && expect != MBF_HSATLRAW_NONE) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			done = MB_YES;
+			done = true;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
 		else if (type == MBF_HSATLRAW_RAW_LINE) {
 			strcpy(data->comment, raw_line + shift);
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			done = MB_YES;
+			done = true;
 			expect = MBF_HSATLRAW_NONE;
 			data->kind = MB_DATA_RAW_LINE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			status = MB_FAILURE;
 		}
 		else if (expect != MBF_HSATLRAW_NONE && expect != type) {
-			done = MB_YES;
-			line_save_flag = MB_YES;
+			done = true;
+			line_save_flag = true;
 		}
 		else if (type == MBF_HSATLRAW_ERGNHYDI) {
 			status = mbr_hsatlraw_rd_ergnhydi(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_MEAN_VELOCITY;
 			}
 		}
@@ -767,7 +767,7 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_hsatlraw_rd_ergnpara(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_STANDBY;
 			}
 		}
@@ -775,7 +775,7 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_hsatlraw_rd_ergnposi(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_NAV_SOURCE;
 			}
 		}
@@ -783,7 +783,7 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_hsatlraw_rd_ergneich(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
-				done = MB_NO;
+				done = false;
 				data->kind = MB_DATA_CALIBRATE;
 				expect = MBF_HSATLRAW_ERGNSLZT;
 			}
@@ -792,7 +792,7 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_hsatlraw_rd_ergnmess(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
-				done = MB_NO;
+				done = false;
 				data->kind = MB_DATA_DATA;
 				expect = MBF_HSATLRAW_ERGNSLZT;
 			}
@@ -801,11 +801,11 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_hsatlraw_rd_ergnslzt(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS && expect == MBF_HSATLRAW_ERGNSLZT) {
-				done = MB_NO;
+				done = false;
 				expect = MBF_HSATLRAW_ERGNAMPL;
 			}
 			else if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				expect = MBF_HSATLRAW_NONE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
 				status = MB_FAILURE;
@@ -815,7 +815,7 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_hsatlraw_rd_ergnctds(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
 			}
 		}
@@ -823,11 +823,11 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_hsatlraw_rd_ergnampl(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS && expect == MBF_HSATLRAW_ERGNAMPL) {
-				done = MB_YES;
+				done = true;
 				expect = MBF_HSATLRAW_NONE;
 			}
 			else if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				expect = MBF_HSATLRAW_NONE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
 				status = MB_FAILURE;
@@ -837,7 +837,7 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_hsatlraw_rd_ldeocmnt(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_COMMENT;
 			}
 		}
@@ -925,7 +925,7 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 	int status = MB_SUCCESS;
 
 	/* read next good line in file */
-	done = MB_NO;
+	done = false;
 	do {
 		/* read next line in file */
 		strncpy(line, "\0", MBF_HSATLRAW_MAXLINE);
@@ -936,15 +936,15 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 			/* check size of line */
 			nchars = strlen(line);
 			if (nchars >= minimum_size) {
-				done = MB_YES;
+				done = true;
 
 				/* trim trailing blank characters */
-				blank = MB_YES;
-				for (int i = (nchars - 1); i >= 0 && blank == MB_YES; i--) {
+				blank = true;
+				for (int i = (nchars - 1); i >= 0 && blank == true; i--) {
 					if (line[i] == ' ' || line[i] == '\r' || line[i] == '\n')
 						line[i] = '\0';
 					else
-						blank = MB_NO;
+						blank = false;
 				}
 				nchars = strlen(line);
 			}
@@ -953,7 +953,7 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 			status = MB_SUCCESS;
 		}
 		else {
-			done = MB_YES;
+			done = true;
 			*error = MB_ERROR_EOF;
 			status = MB_FAILURE;
 		}
@@ -964,7 +964,7 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 			fprintf(stderr, "dbg5       chars:      %d\n", nchars);
 		}
 
-	} while (done == MB_NO);
+	} while (done == false);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -2484,16 +2484,16 @@ int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* check if there are data to output */
-	int datacheck = MB_NO;
+	int datacheck = false;
 	for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 		if (data->time[i] > 0)
-			datacheck = MB_YES;
+			datacheck = true;
 
-	if (verbose >= 5 && datacheck == MB_NO) {
+	if (verbose >= 5 && datacheck == false) {
 		fprintf(stderr, "\ndbg5  No values to be written in MBIO function <%s>\n", __func__);
 	}
 
-	if (verbose >= 5 && datacheck == MB_YES) {
+	if (verbose >= 5 && datacheck == true) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
@@ -2522,11 +2522,11 @@ int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error
 	int status = MB_SUCCESS;
 
 	/* write the record label */
-	if (datacheck == MB_YES)
+	if (datacheck == true)
 		status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNSLZT, error);
 
 	/* write out the data */
-	if (status == MB_SUCCESS && datacheck == MB_YES) {
+	if (status == MB_SUCCESS && datacheck == true) {
 		/* output the event line */
 		fprintf(mbfp, "%+12.7f", data->lon);
 		fprintf(mbfp, "%+12.7f", data->lat);
@@ -2685,16 +2685,16 @@ int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* check if there are data to output */
-	int datacheck = MB_NO;
+	int datacheck = false;
 	for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 		if (data->amplitude[i] > 0)
-			datacheck = MB_YES;
+			datacheck = true;
 
-	if (verbose >= 5 && datacheck == MB_NO) {
+	if (verbose >= 5 && datacheck == false) {
 		fprintf(stderr, "\ndbg5  No values to be written in MBIO function <%s>\n", __func__);
 	}
 
-	if (verbose >= 5 && datacheck == MB_YES) {
+	if (verbose >= 5 && datacheck == true) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
@@ -2736,11 +2736,11 @@ int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error
 	int status = MB_SUCCESS;
 
 	/* write the record label */
-	if (datacheck == MB_YES)
+	if (datacheck == true)
 		status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNAMPL, error);
 
 	/* write out the data */
-	if (status == MB_SUCCESS && datacheck == MB_YES) {
+	if (status == MB_SUCCESS && datacheck == true) {
 		/* output the event line */
 		fprintf(mbfp, "%+12.7f", data->lon);
 		fprintf(mbfp, "%+12.7f", data->lat);

@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 
 	char read_file[MB_PATH_MAXLINE] = "";
 	char output_file[MB_PATH_MAXLINE] = "";
-	int output_file_set = MB_NO;
+	int output_file_set = false;
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
 
 	/* route and auto-line data */
 	char route_file[MB_PATH_MAXLINE] = "";
-	int rawroutefile = MB_NO;
+	int rawroutefile = false;
 	int nroutepoint = 0;
 	int nroutepointfound = 0;
 	int nroutepointalloc = 0;
@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
 			case 'O':
 			case 'o':
 				sscanf(optarg, "%s", output_file);
-				output_file_set = MB_YES;
+				output_file_set = true;
 				break;
 			case 'R':
 			case 'r':
@@ -244,11 +244,11 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
 		exit(status);
 	}
-	rawroutefile = MB_NO;
+	rawroutefile = false;
 	while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 		if (comment[0] == '#') {
 			if (strncmp(comment, "## Route File Version", 21) == 0) {
-				rawroutefile = MB_NO;
+				rawroutefile = false;
 			}
 		}
 		else {
@@ -256,17 +256,17 @@ int main(int argc, char **argv) {
 			if (comment[0] == '#') {
 				fprintf(stderr, "buffer:%s", comment);
 				if (strncmp(comment, "## Route File Version", 21) == 0) {
-					rawroutefile = MB_NO;
+					rawroutefile = false;
 				}
 			}
-			if ((rawroutefile == MB_YES && nget >= 2) ||
-			    (rawroutefile == MB_NO && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_TRANSIT))
-				point_ok = MB_YES;
+			if ((rawroutefile == true && nget >= 2) ||
+			    (rawroutefile == false && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_TRANSIT))
+				point_ok = true;
 			else
-				point_ok = MB_NO;
+				point_ok = false;
 
 			/* if good data check for need to allocate more space */
-			if (point_ok == MB_YES && nroutepoint + 2 > nroutepointalloc) {
+			if (point_ok == true && nroutepoint + 2 > nroutepointalloc) {
 				nroutepointalloc += MBES_ALLOC_NUM;
 				status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
 				status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelat, &error);
@@ -285,7 +285,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* add good point to route */
-			if (point_ok == MB_YES && nroutepointalloc > nroutepoint) {
+			if (point_ok == true && nroutepointalloc > nroutepoint) {
 				routelon[nroutepoint] = lon;
 				routelat[nroutepoint] = lat;
 				routeheading[nroutepoint] = heading;
@@ -338,18 +338,18 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(file, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data == true) {
 		/* read fnv file if possible */
 		mb_get_fnv(verbose, file, &format, &error);
 
@@ -456,12 +456,12 @@ int main(int argc, char **argv) {
 		/* figure out whether and what to read next */
 		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
@@ -482,7 +482,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* output time list for the route */
-	if (output_file_set == MB_NO) {
+	if (output_file_set == false) {
 		sprintf(output_file, "%s_wpttime_d.txt", read_file);
 	}
 	if ((fp = fopen(output_file, "w")) == NULL) {

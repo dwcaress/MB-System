@@ -290,7 +290,7 @@ int main(int argc, char **argv) {
 	int ss_altitude_mode = MBSSLAYOUT_ALTITUDE_ALTITUDE;
 	mb_path topo_grid_file;
 	double bottompick_threshold = 0.5;
-	int channel_swap = MB_NO;
+	int channel_swap = false;
 	int swath_mode = MBSSLAYOUT_SWATHWIDTH_VARIABLE;
 	double swath_width = 0.0;
 	int gain_mode = MBSSLAYOUT_GAIN_OFF;
@@ -449,7 +449,7 @@ int main(int argc, char **argv) {
 
 	/* platform definition file */
 	mb_path platform_file;
-	int use_platform_file = MB_NO;
+	int use_platform_file = false;
 	struct mb_platform_struct *platform = NULL;
 	struct mb_sensor_struct *sensor_bathymetry = NULL;
 	struct mb_sensor_struct *sensor_backscatter = NULL;
@@ -558,11 +558,11 @@ int main(int argc, char **argv) {
 	int jattitude = 0;
 	int jsoundspeed = 0;
 	int data_changed;
-	int new_output_file = MB_NO;
-	int rawroutefile = MB_NO;
-	int oktowrite = MB_NO;
-	int point_ok = MB_NO;
-	int linechange = MB_NO;
+	int new_output_file = false;
+	int rawroutefile = false;
+	int oktowrite = false;
+	int point_ok = false;
+	int linechange = false;
 	int line_number = 0;
 	int nget;
 	int waypoint;
@@ -643,7 +643,7 @@ int main(int argc, char **argv) {
 					verbose++;
 				}
 				else if (strcmp("help", options[option_index].name) == 0) {
-					help = MB_YES;
+					help = true;
 				}
 				/*-------------------------------------------------------
 				 * Define input file and format (usually a datalist) */
@@ -656,7 +656,7 @@ int main(int argc, char **argv) {
 				else if (strcmp("platform-file", options[option_index].name) == 0) {
 					n = sscanf(optarg, "%s", platform_file);
 					if (n == 1)
-						use_platform_file = MB_YES;
+						use_platform_file = true;
 				}
 				else if (strcmp("platform-target-sensor", options[option_index].name) == 0) {
 					n = sscanf(optarg, "%d", &target_sensor);
@@ -718,7 +718,7 @@ int main(int argc, char **argv) {
 					ss_altitude_mode = MBSSLAYOUT_ALTITUDE_TOPO_GRID;
 				}
 				else if (strcmp("channel-swap", options[option_index].name) == 0) {
-					channel_swap = MB_YES;
+					channel_swap = true;
 				}
 				else if (strcmp("swath-width", options[option_index].name) == 0) {
 					n = sscanf(optarg, "%lf", &swath_width);
@@ -1037,7 +1037,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "     read_file:                  %s\n", read_file);
 		fprintf(stderr, "     format:                     %d\n", format);
 		fprintf(stderr, "Source of platform model:\n");
-		if (use_platform_file == MB_YES)
+		if (use_platform_file == true)
 			fprintf(stderr, "     platform_file:              %s\n", platform_file);
 		else
 			fprintf(stderr, "     platform_file:              not specified\n");
@@ -1078,7 +1078,7 @@ int main(int argc, char **argv) {
 		else if (layout_mode == MBSSLAYOUT_ALTITUDE_TOPO_GRID) {
 			fprintf(stderr, "     ss_altitude_mode:         Altitude calculated during 3D layout on topography model\n");
 		}
-		if (channel_swap == MB_YES)
+		if (channel_swap == true)
 			fprintf(stderr, "     channel_swap:             Swapping port and starboard\n");
 		else
 			fprintf(stderr, "     channel_swap:             No swap\n");
@@ -1198,7 +1198,7 @@ int main(int argc, char **argv) {
 
 	/*-------------------------------------------------------------------*/
 	/* load platform definition if specified */
-	if (use_platform_file == MB_YES) {
+	if (use_platform_file == true) {
 		status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
 		if (status == MB_FAILURE) {
 			fprintf(stderr, "\nUnable to open and parse platform file: %s\n", platform_file);
@@ -1309,7 +1309,7 @@ int main(int argc, char **argv) {
 	/*-------------------------------------------------------------------*/
 
 	/* new output file obviously needed */
-	new_output_file = MB_YES;
+	new_output_file = true;
 
 	/* if specified read route time list file */
 	if (line_mode == MBSSLAYOUT_LINE_TIME) {
@@ -1320,7 +1320,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nUnable to open time list file <%s> for reading\n", line_time_list);
 			exit(status);
 		}
-		rawroutefile = MB_NO;
+		rawroutefile = false;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] != '#') {
 				nget = sscanf(comment, "%d %d %lf %lf %lf %lf", &i, &waypoint, &navlon, &navlat, &heading, &time_d);
@@ -1366,7 +1366,7 @@ int main(int argc, char **argv) {
 		mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
 		rangelast = 1000 * line_range_threshold;
 		oktowrite = 0;
-		linechange = MB_NO;
+		linechange = false;
 
 		/* output status */
 		if (verbose > 0) {
@@ -1384,11 +1384,11 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", line_route);
 			exit(status);
 		}
-		rawroutefile = MB_NO;
+		rawroutefile = false;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] == '#') {
 				if (strncmp(comment, "## Route File Version", 21) == 0) {
-					rawroutefile = MB_NO;
+					rawroutefile = false;
 				}
 			}
 			else {
@@ -1396,17 +1396,17 @@ int main(int argc, char **argv) {
 				if (comment[0] == '#') {
 					fprintf(stderr, "buffer:%s", comment);
 					if (strncmp(comment, "## Route File Version", 21) == 0) {
-						rawroutefile = MB_NO;
+						rawroutefile = false;
 					}
 				}
-				if ((rawroutefile == MB_YES && nget >= 2) ||
-				    (rawroutefile == MB_NO && nget >= 3 && waypoint > MBSSLAYOUT_ROUTE_WAYPOINT_NONE))
-					point_ok = MB_YES;
+				if ((rawroutefile == true && nget >= 2) ||
+				    (rawroutefile == false && nget >= 3 && waypoint > MBSSLAYOUT_ROUTE_WAYPOINT_NONE))
+					point_ok = true;
 				else
-					point_ok = MB_NO;
+					point_ok = false;
 
 				/* if good data check for need to allocate more space */
-				if (point_ok == MB_YES && nroutepoint + 1 > nroutepointalloc) {
+				if (point_ok == true && nroutepoint + 1 > nroutepointalloc) {
 					nroutepointalloc += MBSSLAYOUT_ALLOC_NUM;
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
@@ -1425,7 +1425,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* add good point to route */
-				if (point_ok == MB_YES && nroutepointalloc > nroutepoint + 1) {
+				if (point_ok == true && nroutepointalloc > nroutepoint + 1) {
 					routelon[nroutepoint] = navlon;
 					routelat[nroutepoint] = navlat;
 					routeheading[nroutepoint] = heading;
@@ -1444,7 +1444,7 @@ int main(int argc, char **argv) {
 		mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
 		rangelast = 1000 * line_range_threshold;
 		oktowrite = 0;
-		linechange = MB_NO;
+		linechange = false;
 
 		/* output status */
 		if (verbose > 0) {
@@ -1496,19 +1496,19 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &iformat, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(ifile, read_file);
 		iformat = format;
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data == true) {
 		if (verbose > 0)
 			fprintf(stderr, "\nPass 1: Opening file %s %d\n", ifile, iformat);
 
@@ -1843,12 +1843,12 @@ int main(int argc, char **argv) {
 		/* figure out whether and what to read next */
 		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &iformat, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
@@ -2028,7 +2028,7 @@ int main(int argc, char **argv) {
 	/* if generating survey line files the line number is initialized to 0 so the first line is 1 */
 	if (line_mode != MBSSLAYOUT_LINE_OFF) {
 		line_number = activewaypoint;
-		new_output_file = MB_YES;
+		new_output_file = true;
 	}
 
 	/* open file list */
@@ -2039,19 +2039,19 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &iformat, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(ifile, read_file);
 		iformat = format;
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data == true) {
 		if (verbose > 0)
 			fprintf(stderr, "\nPass 2: Opening input file:  %s %d\n", ifile, iformat);
 
@@ -2074,7 +2074,7 @@ int main(int argc, char **argv) {
 
 		/* if not generating survey line files then open output file to coincide with this input file */
 		if (line_mode == MBSSLAYOUT_LINE_OFF)
-			new_output_file = MB_YES;
+			new_output_file = true;
 
 		beamflag = NULL;
 		bath = NULL;
@@ -2182,10 +2182,10 @@ int main(int argc, char **argv) {
 			/* check for new line only if generating survey line files
 			    and new line not already set
 			    and this record is target data */
-			if (status == MB_SUCCESS && line_mode != MBSSLAYOUT_LINE_OFF && new_output_file == MB_NO && kind == output_source) {
+			if (status == MB_SUCCESS && line_mode != MBSSLAYOUT_LINE_OFF && new_output_file == false && kind == output_source) {
 				/* check waypoint time list */
 				if (line_mode == MBSSLAYOUT_LINE_TIME && time_d >= routetime_d[activewaypoint] && activewaypoint < ntimepoint) {
-					new_output_file = MB_YES;
+					new_output_file = true;
 					activewaypoint++;
 					line_number = activewaypoint;
 				}
@@ -2197,7 +2197,7 @@ int main(int argc, char **argv) {
 					range = sqrt(dx * dx + dy * dy);
 					if (range < line_range_threshold && (activewaypoint == 0 || range > rangelast) &&
 					    activewaypoint < nroutepoint - 1) {
-						new_output_file = MB_YES;
+						new_output_file = true;
 						activewaypoint++;
 						line_number = activewaypoint;
 					}
@@ -2205,9 +2205,9 @@ int main(int argc, char **argv) {
 			}
 
 			/* open output files if needed */
-			if (new_output_file == MB_YES) {
+			if (new_output_file == true) {
 				/* reset flag */
-				new_output_file = MB_NO;
+				new_output_file = false;
 
 				if (output_source != MB_DATA_NONE) {
 					/* close any old output file unless a single file has been specified */
@@ -2218,7 +2218,7 @@ int main(int argc, char **argv) {
 						/* generate inf file */
 						/* if (status == MB_SUCCESS)
 						    {
-						    status = mb_make_info(verbose, MB_YES,
+						    status = mb_make_info(verbose, true,
 						                output_file,
 						                MBF_MBLDEOIH,
 						                &error);
@@ -2271,7 +2271,7 @@ int main(int argc, char **argv) {
 			/* if data of interest have been read process them */
 			if (status == MB_SUCCESS && kind == output_source) {
 				/* start out with no change defined */
-				data_changed = MB_NO;
+				data_changed = false;
 
 				/* call mb_extract_rawssdimensions() */
 				status = mb_extract_rawssdimensions(verbose, imbio_ptr, istore_ptr, &kind, &sample_interval, &num_samples_port,
@@ -2343,22 +2343,22 @@ int main(int argc, char **argv) {
 					                                          &jnav, &interp_error);
 					interp_status =
 					    mb_linear_interp(verbose, nav_time_d - 1, nav_speed - 1, n_nav, time_d, &speed, &jnav, &interp_error);
-					data_changed = MB_YES;
+					data_changed = true;
 				}
 				if (n_sensordepth > 0) {
 					interp_status = mb_linear_interp(verbose, sensordepth_time_d - 1, sensordepth_sensordepth - 1, n_sensordepth,
 					                                 time_d, &sensordepth, &jsensordepth, &interp_error);
-					data_changed = MB_YES;
+					data_changed = true;
 				}
 				if (n_altitude > 0) {
 					interp_status = mb_linear_interp(verbose, altitude_time_d - 1, altitude_altitude - 1, n_altitude, time_d,
 					                                 &altitude, &jaltitude, &interp_error);
-					data_changed = MB_YES;
+					data_changed = true;
 				}
 				if (n_heading > 0) {
 					interp_status = mb_linear_interp_heading(verbose, heading_time_d - 1, heading_heading - 1, n_heading, time_d,
 					                                         &heading, &jheading, &interp_error);
-					data_changed = MB_YES;
+					data_changed = true;
 				}
 				if (n_attitude > 0) {
 					interp_status = mb_linear_interp(verbose, attitude_time_d - 1, attitude_roll - 1, n_attitude, time_d, &roll,
@@ -2367,7 +2367,7 @@ int main(int argc, char **argv) {
 					                                 &jattitude, &interp_error);
 					interp_status = mb_linear_interp(verbose, attitude_time_d - 1, attitude_heave - 1, n_attitude, time_d, &heave,
 					                                 &jattitude, &interp_error);
-					data_changed = MB_YES;
+					data_changed = true;
 				}
 				if (n_sensordepth > 0 || n_attitude > 0) {
 					draft = sensordepth - heave;
@@ -2375,7 +2375,7 @@ int main(int argc, char **argv) {
 				if (n_soundspeed > 0) {
 					interp_status = mb_linear_interp(verbose, soundspeed_time_d - 1, soundspeed_soundspeed - 1, n_soundspeed,
 					                                 time_d, &soundspeed, &jsoundspeed, &interp_error);
-					data_changed = MB_YES;
+					data_changed = true;
 				}
 
 				/* if platform defined, do lever arm correction */
@@ -2384,7 +2384,7 @@ int main(int argc, char **argv) {
 					status = mb_platform_position(verbose, (void *)platform, target_sensor, 0, navlon, navlat, sensordepth,
 					                              heading, roll, pitch, &navlon, &navlat, &sensordepth, &error);
 					draft = sensordepth - heave;
-					data_changed = MB_YES;
+					data_changed = true;
 
 					/* calculate target sensor attitude */
 					status = mb_platform_orientation_target(verbose, (void *)platform, target_sensor, 0, heading, roll, pitch,
@@ -2488,13 +2488,13 @@ int main(int argc, char **argv) {
 					rr = 0.5 * soundspeed * sample_interval * i;
 
 					/* look up position(s) for this range */
-					done = MB_NO;
-					for (kangle = kstart; kangle > 0 && done == MB_NO; kangle--) {
+					done = false;
+					for (kangle = kstart; kangle > 0 && done == false; kangle--) {
 						bool found = false;
 						if (rr <= table_range[kstart]) {
 							xtrack = table_xtrack[kstart];
 							ltrack = table_ltrack[kstart];
-							done = MB_YES;
+							done = true;
 							found = true;
 						}
 						else if (rr > table_range[kangle] && rr <= table_range[kangle - 1]) {
@@ -2502,14 +2502,14 @@ int main(int argc, char **argv) {
 							xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle - 1] - table_xtrack[kangle]);
 							ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle - 1] - table_ltrack[kangle]);
 							found = true;
-							done = MB_YES;
+							done = true;
 						}
 						else if (rr < table_range[kangle] && rr >= table_range[kangle - 1]) {
 							factor = (rr - table_range[kangle]) / (table_range[kangle - 1] - table_range[kangle]);
 							xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle - 1] - table_xtrack[kangle]);
 							ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle - 1] - table_ltrack[kangle]);
 							found = true;
-							done = MB_YES;
+							done = true;
 						}
 
 						/* bin the value and position */
@@ -2541,13 +2541,13 @@ int main(int argc, char **argv) {
 					rr = 0.5 * soundspeed * sample_interval * i;
 
 					/* look up position for this range */
-					done = MB_NO;
-					for (kangle = kstart; kangle < nangle - 1 && done == MB_NO; kangle++) {
+					done = false;
+					for (kangle = kstart; kangle < nangle - 1 && done == false; kangle++) {
 						bool found = false;
 						if (rr <= table_range[kstart]) {
 							xtrack = table_xtrack[kstart];
 							ltrack = table_ltrack[kstart];
-							done = MB_YES;
+							done = true;
 							found = true;
 						}
 						else if (rr > table_range[kangle] && rr <= table_range[kangle + 1]) {
@@ -2555,14 +2555,14 @@ int main(int argc, char **argv) {
 							xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle + 1] - table_xtrack[kangle]);
 							ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle + 1] - table_ltrack[kangle]);
 							found = true;
-							done = MB_YES;
+							done = true;
 						}
 						else if (rr < table_range[kangle] && rr >= table_range[kangle + 1]) {
 							factor = (rr - table_range[kangle]) / (table_range[kangle + 1] - table_range[kangle]);
 							xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle + 1] - table_xtrack[kangle]);
 							ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle + 1] - table_ltrack[kangle]);
 							found = true;
-							done = MB_YES;
+							done = true;
 						}
 
 						/* bin the value and position */
@@ -2669,12 +2669,12 @@ int main(int argc, char **argv) {
 		/* figure out whether and what to read next */
 		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
@@ -2690,7 +2690,7 @@ int main(int argc, char **argv) {
 		/* generate inf file */
 		/* if (status == MB_SUCCESS)
 		    {
-		    status = mb_make_info(verbose, MB_YES,
+		    status = mb_make_info(verbose, true,
 		                output_file,
 		                MBF_MBLDEOIH,
 		                &error);

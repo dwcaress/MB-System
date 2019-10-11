@@ -86,8 +86,8 @@ int main(int argc, char **argv) {
 	double eta = ETA_DEF;
 	double ve = VE_DEF;
 	char viewdir = VIEWDIR_DEF;
-	int display_stats = MB_YES;
-	int display_scales = MB_YES;
+	int display_stats = true;
+	int display_scales = true;
 	double sin_eta, cos_eta;
 	double sin_alpha, cos_alpha;
 	double track_length, xscale, zscale, zscale_inch;
@@ -249,11 +249,11 @@ int main(int argc, char **argv) {
 			break;
 		case 'Y':
 		case 'y':
-			display_stats = MB_NO;
+			display_stats = false;
 			break;
 		case 'Z':
 		case 'z':
-			display_scales = MB_NO;
+			display_scales = false;
 			break;
 		case '?':
 			errflg++;
@@ -387,9 +387,9 @@ int main(int argc, char **argv) {
 
 	/* read and process data */
 	nread = 0;
-	done = MB_NO;
+	done = false;
 	error = MB_ERROR_NO_ERROR;
-	while (done == MB_NO && error <= MB_ERROR_NO_ERROR) {
+	while (done == false && error <= MB_ERROR_NO_ERROR) {
 		/* read a ping of data */
 		status = mb_get(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
 		                &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathacrosstrack,
@@ -533,10 +533,10 @@ int main(int argc, char **argv) {
 		/* test if done */
 		if (nread >= num_pings_max && verbose >= 1) {
 			fprintf(stderr, "%s: Maximum number of pings [%d] read before end of file reached...\n", program_name, num_pings_max);
-			done = MB_YES;
+			done = true;
 		}
 		if (nread >= num_pings_max || error > MB_ERROR_NO_ERROR) {
-			done = MB_YES;
+			done = true;
 		}
 
 	} /* end of processing data, 1'st while under read/process data */
@@ -631,18 +631,18 @@ int main(int argc, char **argv) {
 	    wherever the data is good */
 
 	if ((viewdir == 'S') || (viewdir == 's'))
-		forward = MB_YES;
+		forward = true;
 	else if ((viewdir == 'P') || (viewdir == 'p'))
-		forward = MB_NO;
+		forward = false;
 	else if ((viewdir == 'B') || (viewdir == 'b')) {
 		if (alpha < 90.0)
-			forward = MB_YES;
+			forward = true;
 		else
-			forward = MB_NO;
+			forward = false;
 	}
 	for (int j = 0; j < beams_bath - 1; j++) {
 		for (int i = 0; i < nread - 1; i++) {
-			if (forward == MB_YES)
+			if (forward == true)
 				jj = j;
 			else
 				jj = beams_bath - 2 - j;
@@ -666,7 +666,7 @@ int main(int argc, char **argv) {
 	/* titles and such */
 	ps_setline(2); /* set line width */
 
-	if (display_stats == MB_NO) {
+	if (display_stats == false) {
 		/* plot a title */
 		xl[0] = 0;
 		yl[0] = max_yp * scaling + .6;
@@ -698,7 +698,7 @@ int main(int argc, char **argv) {
 		ps_text(xl[0], yl[0], 15., label, 0., 6, 0);
 	} /* else after if display_stats */
 
-	if (display_scales == MB_YES) {
+	if (display_scales == true) {
 		/* plot the x-scale */
 		xscale = 10000; /* x scale in m */
 		if (track_length < 50000)

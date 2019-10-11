@@ -70,9 +70,9 @@ int mbr_info_em12ifrm(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = -3;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_NAV;
 	*sensordepth_source = MB_DATA_DATA;
@@ -291,9 +291,9 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 	/* initialize everything to zeros */
 	mbr_zero_em12ifrm(verbose, mb_io_ptr->raw_data, error);
 	mb_io_ptr->save1 = MB_DATA_NONE;
-	mb_io_ptr->save2 = MB_YES;
-	mb_io_ptr->save3 = MB_YES;
-	mb_io_ptr->save4 = MB_NO;
+	mb_io_ptr->save2 = true;
+	mb_io_ptr->save3 = true;
+	mb_io_ptr->save4 = false;
 	pixel_size = &mb_io_ptr->saved1;
 	swath_width = &mb_io_ptr->saved2;
 	*pixel_size = 0.0;
@@ -466,7 +466,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* check if any data is required */
-	int done = MB_NO;
+	int done = false;
 	save_data = (int *)&mb_io_ptr->save1;
 	nav_available = (int *)&mb_io_ptr->save2;
 	ss_available = (int *)&mb_io_ptr->save3;
@@ -487,20 +487,20 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 	if (*save_data == MB_DATA_DATA) {
 		data->kind = MB_DATA_DATA;
 		*save_data = MB_DATA_NONE;
-		done = MB_YES;
+		done = true;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 	}
 	else if (*save_data == MB_DATA_NAV) {
 		data->kind = MB_DATA_NAV;
 		*save_data = MB_DATA_NONE;
-		done = MB_YES;
+		done = true;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 	}
 
 	/* if not done and no data saved then read next primary record */
-	if (done == MB_NO && *save_data == MB_DATA_NONE) {
+	if (done == false && *save_data == MB_DATA_NONE) {
 		if ((read_status = fread(line, 1, MBF_EM12IFRM_RECORD_SIZE, mb_io_ptr->mbfp)) == MBF_EM12IFRM_RECORD_SIZE) {
 			mb_io_ptr->file_bytes += read_status;
 			status = MB_SUCCESS;
@@ -623,12 +623,12 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 			}
 
 			/* use sidescan if saved */
-			if (*save_ss == MB_YES && *ss_ping_number == data->ping_number && *ss_swath_id == data->swath_id) {
-				done = MB_YES;
+			if (*save_ss == true && *ss_ping_number == data->ping_number && *ss_swath_id == data->swath_id) {
+				done = true;
 			}
 
 			/* initialize sidescan if none saved */
-			else if (*save_ss == MB_NO) {
+			else if (*save_ss == false) {
 				data->pixels_ssraw = 0;
 				for (int i = 0; i < MBF_EM12IFRM_MAXBEAMS; i++) {
 					beamlist[i] = 0;
@@ -651,16 +651,16 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 			shift += 4;
 			strncpy(data->comment, &line[shift], MIN(len, MBSYS_SIMRAD_COMMENT_LENGTH - 1));
 			data->comment[MIN(len + 1, MBSYS_SIMRAD_COMMENT_LENGTH - 1)] = '\0';
-			done = MB_YES;
+			done = true;
 		}
 	}
 
 	/* if not done and no data saved and good bathy record read
 	    then read next sidescan record if available */
-	if (status == MB_SUCCESS && mb_io_ptr->mbfp2 != NULL && done == MB_NO && *save_data == MB_DATA_NONE) {
+	if (status == MB_SUCCESS && mb_io_ptr->mbfp2 != NULL && done == false && *save_data == MB_DATA_NONE) {
 		/* read sidescan until it matches ping number and side */
 		*ss_ping_number = 0;
-		while (done == MB_NO && *ss_available == MB_YES && *ss_ping_number <= data->ping_number) {
+		while (done == false && *ss_available == true && *ss_ping_number <= data->ping_number) {
 			/* read sidescan header from sidescan file */
 			if ((read_status = fread(line, 1, MBF_EM12IFRM_SSHEADER_SIZE, mb_io_ptr->mbfp2)) == MBF_EM12IFRM_SSHEADER_SIZE) {
 				mb_io_ptr->file2_bytes += read_status;
@@ -767,20 +767,20 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 			/* now check status */
 			if (status == MB_SUCCESS && *ss_ping_number == data->ping_number && *ss_swath_id == data->swath_id) {
-				done = MB_YES;
-				*save_ss = MB_NO;
+				done = true;
+				*save_ss = false;
 			}
 			else if (status == MB_SUCCESS && *ss_ping_number > data->ping_number) {
-				done = MB_YES;
-				*save_ss = MB_YES;
+				done = true;
+				*save_ss = true;
 			}
 			else if (status == MB_SUCCESS) {
-				done = MB_NO;
-				*save_ss = MB_NO;
+				done = false;
+				*save_ss = false;
 			}
 			else if (status == MB_FAILURE) {
-				done = MB_YES;
-				*ss_available = MB_NO;
+				done = true;
+				*ss_available = false;
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
 			}
@@ -788,7 +788,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* now check if nav needed */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA && (mb_io_ptr->mbfp2 == NULL || done == MB_YES) &&
+	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA && (mb_io_ptr->mbfp2 == NULL || done == true) &&
 	    mb_io_ptr->mbfp3 != NULL) {
 		/* get ping time */
 		mb_fix_y2k(verbose, data->year, &ptime_i[0]);
@@ -801,12 +801,12 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 		mb_get_time(verbose, ptime_i, &ptime_d);
 
 		/* see if nav is needed and potentially available */
-		if (*nav_available == MB_YES && (mb_io_ptr->nfix == 0 || mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] < ptime_d)) {
-			navdone = MB_NO;
-			while (navdone == MB_NO) {
+		if (*nav_available == true && (mb_io_ptr->nfix == 0 || mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] < ptime_d)) {
+			navdone = false;
+			while (navdone == false) {
 				if ((result = fgets(line, MBF_EM12IFRM_RECORD_SIZE, mb_io_ptr->mbfp3)) != line) {
-					navdone = MB_YES;
-					*nav_available = MB_NO;
+					navdone = true;
+					*nav_available = false;
 				}
 				else {
 					mb_io_ptr->file3_bytes += strlen(line);
@@ -852,10 +852,10 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 							data->longitude = -data->longitude;
 						data->speed = 0.0;
 
-						navdone = MB_YES;
+						navdone = true;
 						data->kind = MB_DATA_NAV;
 						*save_data = MB_DATA_DATA;
-						done = MB_YES;
+						done = true;
 						status = MB_SUCCESS;
 						*error = MB_ERROR_NO_ERROR;
 					}
@@ -1138,7 +1138,7 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				ping->beam_center_sample[i] = 0;
 				ping->beam_start_sample[i] = 0;
 			}
-			if (*save_ss == MB_NO) {
+			if (*save_ss == false) {
 				ping->pixels_ssraw = data->pixels_ssraw;
 				ping->ss_mode = data->ss_mode;
 				for (int i = 0; i < ping->beams_bath; i++) {
@@ -1156,7 +1156,7 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* generate sidescan */
 			ping->pixel_size = 0.0;
 			ping->pixels_ss = 0;
-			status = mbsys_simrad_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 0, error);
+			status = mbsys_simrad_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 0, error);
 		}
 	}
 

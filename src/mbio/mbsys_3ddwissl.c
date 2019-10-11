@@ -716,7 +716,7 @@ int mbsys_3ddwissl_preprocess
     }
 
   /* change timestamp if indicated */
-  if (pars->timestamp_changed == MB_YES)
+  if (pars->timestamp_changed == true)
     {
     store->time_d = pars->time_d;
     mb_get_date(verbose, pars->time_d, time_i);
@@ -994,15 +994,15 @@ int mbsys_3ddwissl_preprocess
     }
 
   /* calculate the bathymetry using the newly inserted values */
-  if (pars->sounding_amplitude_filter == MB_YES)
+  if (pars->sounding_amplitude_filter == true)
     amplitude_threshold = pars->sounding_amplitude_threshold;
   else
     amplitude_threshold = MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD;
-  if (pars->sounding_altitude_filter == MB_YES)
+  if (pars->sounding_altitude_filter == true)
     target_altitude = pars->sounding_target_altitude;
   else
     target_altitude = MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE;
-  if (pars->head1_offsets == MB_YES)
+  if (pars->head1_offsets == true)
     {
     store->heada_offset_x_m = pars->head1_offsets_x;
     store->heada_offset_y_m = pars->head1_offsets_y;
@@ -1011,7 +1011,7 @@ int mbsys_3ddwissl_preprocess
     store->heada_offset_roll_deg = pars->head1_offsets_roll;
     store->heada_offset_pitch_deg = pars->head1_offsets_pitch;
     }
-  if (pars->head2_offsets == MB_YES)
+  if (pars->head2_offsets == true)
     {
     store->headb_offset_x_m = pars->head2_offsets_x;
     store->headb_offset_y_m = pars->head2_offsets_y;
@@ -3737,7 +3737,7 @@ int mbsys_3ddwissl_calculatebathymetry
       }
 
     /* set flag indicating that bathymetry has been calculated */
-    store->bathymetry_calculated = MB_YES;
+    store->bathymetry_calculated = true;
     }
 
   if (verbose >= 2)
@@ -3927,9 +3927,9 @@ int mbsys_3ddwissl_indextablefix
     for (int i = last_good_timestamp + 1; i <= head_a_end; i++)
       indextable[i].time_d_corrected = indextable[last_good_timestamp].time_d_corrected+ dt *
         (i - last_good_timestamp);
-    done = MB_NO;
+    done = false;
     next_good_timestamp = first_good_timestamp;
-    while (done == MB_NO)
+    while (done == false)
       {
       for (int i = first_good_timestamp + 1;
         i <= last_good_timestamp && next_good_timestamp == first_good_timestamp;
@@ -3946,7 +3946,7 @@ int mbsys_3ddwissl_indextablefix
           dt * (i - first_good_timestamp);
       first_good_timestamp = next_good_timestamp;
       if (next_good_timestamp == last_good_timestamp)
-        done = MB_YES;
+        done = true;
       }
     }
 
@@ -3997,9 +3997,9 @@ int mbsys_3ddwissl_indextablefix
     for (int i = last_good_timestamp + 1; i <= head_b_end; i++)
       indextable[i].time_d_corrected = indextable[last_good_timestamp].time_d_corrected+ dt *
         (i - last_good_timestamp);
-    done = MB_NO;
+    done = false;
     next_good_timestamp = first_good_timestamp;
-    while (done == MB_NO)
+    while (done == false)
       {
       for (int i = first_good_timestamp + 1;
         i <= last_good_timestamp && next_good_timestamp == first_good_timestamp;
@@ -4016,7 +4016,7 @@ int mbsys_3ddwissl_indextablefix
           dt * (i - first_good_timestamp);
       first_good_timestamp = next_good_timestamp;
       if (next_good_timestamp == last_good_timestamp)
-        done = MB_YES;
+        done = true;
       }
     }
 

@@ -1241,7 +1241,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 		else {
 			/* loop over reading the records - handle the different formats */
 			while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-				nav_ok = MB_NO;
+				nav_ok = false;
 
 				/* deal with nav in form: time_d lon lat speed */
 				if (merge_nav_format == 1) {
@@ -1250,7 +1250,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 					if (nget == 3)
 						n_speed[nrecord] = 0.0;
 					if (nget >= 3)
-						nav_ok = MB_YES;
+						nav_ok = true;
 				}
 
 				/* deal with nav in form: yr mon day hour min sec lon lat */
@@ -1263,7 +1263,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 					n_time_d[nrecord] = time_d;
 					n_speed[nrecord] = 0.0;
 					if (nget == 8)
-						nav_ok = MB_YES;
+						nav_ok = true;
 				}
 
 				/* deal with nav in form: yr jday hour min sec lon lat */
@@ -1278,7 +1278,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 					n_time_d[nrecord] = time_d;
 					n_speed[nrecord] = 0.0;
 					if (nget == 7)
-						nav_ok = MB_YES;
+						nav_ok = true;
 				}
 
 				/* deal with nav in form: yr jday daymin sec lon lat */
@@ -1292,7 +1292,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 					n_time_d[nrecord] = time_d;
 					n_speed[nrecord] = 0.0;
 					if (nget == 6)
-						nav_ok = MB_YES;
+						nav_ok = true;
 				}
 
 				/* deal with nav in L-DEO processed nav format */
@@ -1348,7 +1348,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 					if (strncmp(NorS, "S", 1) == 0)
 						n_lat[nrecord] = -n_lat[nrecord];
 					n_speed[nrecord] = 0.0;
-					nav_ok = MB_YES;
+					nav_ok = true;
 				}
 
 				/* deal with nav in real and pseudo NMEA 0183 format */
@@ -1357,14 +1357,14 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 					len = strlen(buffer);
 					if (strncmp(buffer, "$", 1) == 0) {
 						if (strncmp(&buffer[3], "DAT", 3) == 0 && len > 15) {
-							time_set = MB_NO;
+							time_set = false;
 							strncpy(dummy, "\0", 128);
 							time_i[0] = atoi(strncpy(dummy, buffer + 7, 4));
 							time_i[1] = atoi(strncpy(dummy, buffer + 11, 2));
 							time_i[2] = atoi(strncpy(dummy, buffer + 13, 2));
 						}
 						else if ((strncmp(&buffer[3], "ZDA", 3) == 0 || strncmp(&buffer[3], "UNX", 3) == 0) && len > 14) {
-							time_set = MB_NO;
+							time_set = false;
 							/* find start of ",hhmmss.ss" */
 							if ((bufftmp = strchr(buffer, ',')) != NULL) {
 								strncpy(dummy, "\0", 128);
@@ -1387,14 +1387,14 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 									time_i[1] = atoi(strncpy(dummy, bufftmp + 4, 2));
 									strncpy(dummy, "\0", 128);
 									time_i[0] = atoi(strncpy(dummy, bufftmp + 7, 4));
-									time_set = MB_YES;
+									time_set = true;
 								}
 							}
 						}
 						else if (((merge_nav_format == 6 && strncmp(&buffer[3], "GLL", 3) == 0) ||
 						          (merge_nav_format == 7 && strncmp(&buffer[3], "GGA", 3) == 0)) &&
-						         time_set == MB_YES && len > 26) {
-							time_set = MB_NO;
+						         time_set == true && len > 26) {
+							time_set = false;
 							/* find start of ",ddmm.mm,N,ddmm.mm,E" */
 							if ((bufftmp = strchr(buffer, ',')) != NULL) {
 								if (merge_nav_format == 7)
@@ -1422,7 +1422,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 									n_lon[nrecord] = -n_lon[nrecord];
 								mb_get_time(verbose, time_i, &time_d);
 								n_time_d[nrecord] = time_d;
-								nav_ok = MB_YES;
+								nav_ok = true;
 							}
 						}
 					}
@@ -1456,7 +1456,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 					if (EorW[0] == 'W' || EorW[0] == 'w')
 						n_lon[nrecord] = -n_lon[nrecord];
 					n_speed[nrecord] = 0.0;
-					nav_ok = MB_YES;
+					nav_ok = true;
 				}
 
 				/* deal with nav in form: yr mon day hour min sec time_d lon lat heading speed sensordepth */
@@ -1465,9 +1465,9 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 					              &time_i[2], &time_i[3], &time_i[4], &sec, &n_time_d[nrecord], &n_lon[nrecord], &n_lat[nrecord],
 					              &heading, &n_speed[nrecord], &sensordepth, &roll, &pitch, &heave);
 					if (nget >= 9)
-						nav_ok = MB_YES;
+						nav_ok = true;
 					if (nrecord > 0 && n_time_d[nrecord] <= n_time_d[nrecord - 1])
-						nav_ok = MB_NO;
+						nav_ok = false;
 				}
 
 				/* deal with nav in r2rnav form:
@@ -1488,11 +1488,11 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 					n_time_d[nrecord] = time_d;
 					n_speed[nrecord] = 0.0;
 					if (nget >= 8)
-						nav_ok = MB_YES;
+						nav_ok = true;
 				}
 
 				/* make sure longitude is defined according to lonflip */
-				if (nav_ok == MB_YES) {
+				if (nav_ok == true) {
 					if (merge_nav_lonflip == -1 && n_lon[nrecord] > 0.0)
 						n_lon[nrecord] = n_lon[nrecord] - 360.0;
 					else if (merge_nav_lonflip == 0 && n_lon[nrecord] < -180.0)
@@ -1504,7 +1504,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && nav_ok == MB_YES) {
+				if (verbose >= 5 && nav_ok == true) {
 					fprintf(stderr, "\ndbg5  New navigation point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       nav[%d]: %f %f %f\n", nrecord, n_time_d[nrecord], n_lon[nrecord], n_lat[nrecord]);
 				}
@@ -1514,7 +1514,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 				}
 
 				/* check for reverses or repeats in time */
-				if (nav_ok == MB_YES) {
+				if (nav_ok == true) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])
@@ -1633,13 +1633,13 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 		else {
 			/* loop over reading the records - handle the different formats */
 			while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-				sensordepth_ok = MB_NO;
+				sensordepth_ok = false;
 
 				/* deal with sensordepth in form: time_d sensordepth */
 				if (merge_sensordepth_format == 1) {
 					nget = sscanf(buffer, "%lf %lf", &n_time_d[nrecord], &n_sensordepth[nrecord]);
 					if (nget == 2)
-						sensordepth_ok = MB_YES;
+						sensordepth_ok = true;
 				}
 
 				/* deal with sensordepth in form: yr mon day hour min sec sensordepth */
@@ -1651,7 +1651,7 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 7)
-						sensordepth_ok = MB_YES;
+						sensordepth_ok = true;
 				}
 
 				/* deal with sensordepth in form: yr jday hour min sec sensordepth */
@@ -1665,7 +1665,7 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 6)
-						sensordepth_ok = MB_YES;
+						sensordepth_ok = true;
 				}
 
 				/* deal with sensordepth in form: yr jday daymin sec sensordepth */
@@ -1677,7 +1677,7 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 5)
-						sensordepth_ok = MB_YES;
+						sensordepth_ok = true;
 				}
 
 				/* deal with sensordepth in form: yr mon day hour min sec time_d lon lat heading speed draft*/
@@ -1686,13 +1686,13 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 					              &time_i[2], &time_i[3], &time_i[4], &sec, &n_time_d[nrecord], &lon, &lat, &heading, &speed,
 					              &n_sensordepth[nrecord], &roll, &pitch, &heave);
 					if (nget >= 9)
-						sensordepth_ok = MB_YES;
+						sensordepth_ok = true;
 					if (nrecord > 0 && n_time_d[nrecord] <= n_time_d[nrecord - 1])
-						sensordepth_ok = MB_NO;
+						sensordepth_ok = false;
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && sensordepth_ok == MB_YES) {
+				if (verbose >= 5 && sensordepth_ok == true) {
 					fprintf(stderr, "\ndbg5  New sensordepth point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       sensordepth[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_sensordepth[nrecord]);
 				}
@@ -1702,7 +1702,7 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 				}
 
 				/* check for reverses or repeats in time */
-				if (sensordepth_ok == MB_YES) {
+				if (sensordepth_ok == true) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])
@@ -1818,13 +1818,13 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 		else {
 			/* loop over reading the records - handle the different formats */
 			while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-				altitude_ok = MB_NO;
+				altitude_ok = false;
 
 				/* deal with altitude in form: time_d altitude */
 				if (merge_altitude_format == 1) {
 					nget = sscanf(buffer, "%lf %lf", &n_time_d[nrecord], &n_altitude[nrecord]);
 					if (nget == 2)
-						altitude_ok = MB_YES;
+						altitude_ok = true;
 				}
 
 				/* deal with altitude in form: yr mon day hour min sec altitude */
@@ -1836,7 +1836,7 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 7)
-						altitude_ok = MB_YES;
+						altitude_ok = true;
 				}
 
 				/* deal with altitude in form: yr jday hour min sec altitude */
@@ -1850,7 +1850,7 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 6)
-						altitude_ok = MB_YES;
+						altitude_ok = true;
 				}
 
 				/* deal with altitude in form: yr jday daymin sec altitude */
@@ -1862,11 +1862,11 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 5)
-						altitude_ok = MB_YES;
+						altitude_ok = true;
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && altitude_ok == MB_YES) {
+				if (verbose >= 5 && altitude_ok == true) {
 					fprintf(stderr, "\ndbg5  New altitude point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       altitude[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_altitude[nrecord]);
 				}
@@ -1876,7 +1876,7 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 				}
 
 				/* check for reverses or repeats in time */
-				if (altitude_ok == MB_YES) {
+				if (altitude_ok == true) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])
@@ -1991,13 +1991,13 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 		else {
 			/* loop over reading the records - handle the different formats */
 			while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-				heading_ok = MB_NO;
+				heading_ok = false;
 
 				/* deal with heading in form: time_d heading */
 				if (merge_heading_format == 1) {
 					nget = sscanf(buffer, "%lf %lf", &n_time_d[nrecord], &n_heading[nrecord]);
 					if (nget == 2)
-						heading_ok = MB_YES;
+						heading_ok = true;
 				}
 
 				/* deal with heading in form: yr mon day hour min sec heading */
@@ -2009,7 +2009,7 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 7)
-						heading_ok = MB_YES;
+						heading_ok = true;
 				}
 
 				/* deal with heading in form: yr jday hour min sec heading */
@@ -2023,7 +2023,7 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 6)
-						heading_ok = MB_YES;
+						heading_ok = true;
 				}
 
 				/* deal with heading in form: yr jday daymin sec heading */
@@ -2035,7 +2035,7 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 5)
-						heading_ok = MB_YES;
+						heading_ok = true;
 				}
 
 				/* deal with heading in form: yr mon day hour min sec time_d lon lat heading speed draft*/
@@ -2044,13 +2044,13 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 					              &time_i[2], &time_i[3], &time_i[4], &sec, &n_time_d[nrecord], &lon, &lat, &n_heading[nrecord],
 					              &speed, &sensordepth, &roll, &pitch, &heave);
 					if (nget >= 9)
-						heading_ok = MB_YES;
+						heading_ok = true;
 					if (nrecord > 0 && n_time_d[nrecord] <= n_time_d[nrecord - 1])
-						heading_ok = MB_NO;
+						heading_ok = false;
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && heading_ok == MB_YES) {
+				if (verbose >= 5 && heading_ok == true) {
 					fprintf(stderr, "\ndbg5  New heading point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       heading[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_heading[nrecord]);
 				}
@@ -2060,7 +2060,7 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 				}
 
 				/* check for reverses or repeats in time */
-				if (heading_ok == MB_YES) {
+				if (heading_ok == true) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])
@@ -2188,14 +2188,14 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 		else {
 			/* loop over reading the records - handle the different formats */
 			while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-				attitude_ok = MB_NO;
+				attitude_ok = false;
 
 				/* deal with attitude in form: time_d roll pitch heave */
 				if (merge_attitude_format == 1) {
 					nget = sscanf(buffer, "%lf %lf %lf %lf", &n_time_d[nrecord], &n_roll[nrecord], &n_pitch[nrecord],
 					              &n_heave[nrecord]);
 					if (nget == 4)
-						attitude_ok = MB_YES;
+						attitude_ok = true;
 				}
 
 				/* deal with attitude in form: yr mon day hour min sec roll pitch heave */
@@ -2207,7 +2207,7 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 9)
-						attitude_ok = MB_YES;
+						attitude_ok = true;
 				}
 
 				/* deal with attitude in form: yr jday hour min sec roll pitch heave */
@@ -2221,7 +2221,7 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 8)
-						attitude_ok = MB_YES;
+						attitude_ok = true;
 				}
 
 				/* deal with attitude in form: yr jday daymin sec roll pitch heave */
@@ -2234,7 +2234,7 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 7)
-						attitude_ok = MB_YES;
+						attitude_ok = true;
 				}
 
 				/* deal with attitude in form: yr mon day hour min sec time_d lon lat heading speed sensordepth roll pitch heave
@@ -2244,13 +2244,13 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 					              &time_i[2], &time_i[3], &time_i[4], &sec, &n_time_d[nrecord], &lon, &lat, &heading, &speed,
 					              &sensordepth, &n_roll[nrecord], &n_pitch[nrecord], &n_heave[nrecord]);
 					if (nget >= 9)
-						attitude_ok = MB_YES;
+						attitude_ok = true;
 					if (nrecord > 0 && n_time_d[nrecord] <= n_time_d[nrecord - 1])
-						attitude_ok = MB_NO;
+						attitude_ok = false;
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && attitude_ok == MB_YES) {
+				if (verbose >= 5 && attitude_ok == true) {
 					fprintf(stderr, "\ndbg5  New attitude point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       attitude[%d]: %f %f %f %f\n", nrecord, n_time_d[nrecord], n_roll[nrecord],
 					        n_pitch[nrecord], n_heave[nrecord]);
@@ -2261,7 +2261,7 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 				}
 
 				/* check for reverses or repeats in time */
-				if (attitude_ok == MB_YES) {
+				if (attitude_ok == true) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])
@@ -2379,13 +2379,13 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 		else {
 			/* loop over reading the records - handle the different formats */
 			while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-				soundspeed_ok = MB_NO;
+				soundspeed_ok = false;
 
 				/* deal with soundspeed in form: time_d soundspeed */
 				if (merge_soundspeed_format == 1) {
 					nget = sscanf(buffer, "%lf %lf", &n_time_d[nrecord], &n_soundspeed[nrecord]);
 					if (nget == 2)
-						soundspeed_ok = MB_YES;
+						soundspeed_ok = true;
 				}
 
 				/* deal with soundspeed in form: yr mon day hour min sec soundspeed */
@@ -2397,7 +2397,7 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 7)
-						soundspeed_ok = MB_YES;
+						soundspeed_ok = true;
 				}
 
 				/* deal with soundspeed in form: yr jday hour min sec soundspeed */
@@ -2411,7 +2411,7 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 6)
-						soundspeed_ok = MB_YES;
+						soundspeed_ok = true;
 				}
 
 				/* deal with soundspeed in form: yr jday daymin sec soundspeed */
@@ -2423,11 +2423,11 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 5)
-						soundspeed_ok = MB_YES;
+						soundspeed_ok = true;
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && soundspeed_ok == MB_YES) {
+				if (verbose >= 5 && soundspeed_ok == true) {
 					fprintf(stderr, "\ndbg5  New soundspeed point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       soundspeed[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_soundspeed[nrecord]);
 				}
@@ -2437,7 +2437,7 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 				}
 
 				/* check for reverses or repeats in time */
-				if (soundspeed_ok == MB_YES) {
+				if (soundspeed_ok == true) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])
@@ -2553,13 +2553,13 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 		else {
 			/* loop over reading the records - handle the different formats */
 			while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-				timeshift_ok = MB_NO;
+				timeshift_ok = false;
 
 				/* deal with timeshift in form: time_d timeshift */
 				if (merge_timeshift_format == 1) {
 					nget = sscanf(buffer, "%lf %lf", &n_time_d[nrecord], &n_timeshift[nrecord]);
 					if (nget == 2)
-						timeshift_ok = MB_YES;
+						timeshift_ok = true;
 				}
 
 				/* deal with timeshift in form: yr mon day hour min sec timeshift */
@@ -2571,7 +2571,7 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 7)
-						timeshift_ok = MB_YES;
+						timeshift_ok = true;
 				}
 
 				/* deal with timeshift in form: yr jday hour min sec timeshift */
@@ -2585,7 +2585,7 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 6)
-						timeshift_ok = MB_YES;
+						timeshift_ok = true;
 				}
 
 				/* deal with timeshift in form: yr jday daymin sec timeshift */
@@ -2597,11 +2597,11 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 					if (nget == 5)
-						timeshift_ok = MB_YES;
+						timeshift_ok = true;
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && timeshift_ok == MB_YES) {
+				if (verbose >= 5 && timeshift_ok == true) {
 					fprintf(stderr, "\ndbg5  New timeshift point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       timeshift[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_timeshift[nrecord]);
 				}
@@ -2611,7 +2611,7 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 				}
 
 				/* check for reverses or repeats in time */
-				if (timeshift_ok == MB_YES) {
+				if (timeshift_ok == true) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])

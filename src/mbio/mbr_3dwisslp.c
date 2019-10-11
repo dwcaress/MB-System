@@ -84,9 +84,9 @@ int mbr_info_3dwisslp
     MB_DESCRIPTION_LENGTH);
   *numfile = 1;
   *filetype = MB_FILETYPE_NORMAL;
-  *variable_beams = MB_YES;
-  *traveltime = MB_NO;
-  *beam_flagging = MB_YES;
+  *variable_beams = true;
+  *traveltime = false;
+  *beam_flagging = true;
   *platform_source = MB_DATA_NONE;
   *nav_source = MB_DATA_DATA;
   *sensordepth_source = MB_DATA_DATA;
@@ -163,7 +163,7 @@ int mbr_alm_3dwisslp
   *file_header_readwritten = MB_NO;
 
   /* set saved bytes flag */
-  mb_io_ptr->save2 = MB_NO;
+  mb_io_ptr->save2 = false;
 
   if (verbose >= 2)
     {
@@ -987,7 +987,7 @@ int mbr_3dwisslp_rd_data
     /* read and check two bytes until a valid record_id is found */
     char *buffer = mb_io_ptr->raw_data;
     read_len = (size_t)sizeof(short);
-    int valid_id = MB_NO;
+    int valid_id = false;
     int skip = 0;
 #ifdef MBF_3DWISSLP_DEBUG
     fprintf(stderr,
@@ -1007,7 +1007,7 @@ int mbr_3dwisslp_rd_data
           ( store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADB) ||
           ( store->record_id == MBSYS_3DDWISSL_RECORD_COMMENT) )
           {
-          valid_id = MB_YES;
+          valid_id = true;
           }
         else
           {
@@ -1038,7 +1038,7 @@ int mbr_3dwisslp_rd_data
         store->record_id = 0;
         }
       }
-    while (status == MB_SUCCESS && valid_id == MB_NO);
+    while (status == MB_SUCCESS && valid_id == false);
 #ifdef MBF_3DWISSLP_DEBUG
     fprintf(stderr,
       "%s:%s():%d RECORD ID: %x %d skip:%d valid_id:%d status:%d error:%d\n",
@@ -1238,7 +1238,7 @@ int mbr_3dwisslp_rd_data
             &(pulse->soundings[isounding].depth)); index += 4;
           }
 
-        store->bathymetry_calculated = MB_YES;
+        store->bathymetry_calculated = true;
         store->kind = MB_DATA_DATA;
         }
       }
@@ -1326,7 +1326,7 @@ int mbr_rt_3dwisslp
 
   /* if needed calculate bathymetry */
   if (( status == MB_SUCCESS) && ( store->kind == MB_DATA_DATA) &&
-    ( store->bathymetry_calculated == MB_NO) )
+    ( store->bathymetry_calculated == false) )
     mbsys_3ddwissl_calculatebathymetry(verbose,
       mbio_ptr,
       store_ptr,

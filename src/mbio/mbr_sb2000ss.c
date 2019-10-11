@@ -91,9 +91,9 @@ int mbr_info_sb2000ss(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = false;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -214,7 +214,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* read next header record from file */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 	int skip = 0;
-	int found = MB_NO;
+	int found = false;
 	int status = MB_SUCCESS;
 	if ((status = fread(buffer, 1, MBSYS_SB2000_HEADER_SIZE, mb_io_ptr->mbfp)) == MBSYS_SB2000_HEADER_SIZE) {
 		mb_io_ptr->file_bytes += status;
@@ -228,7 +228,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			mb_get_binary_short(false, &buffer[26], &test_sensor_size);
 			mb_get_binary_short(false, &buffer[28], &test_data_size);
 			if (test_sensor_size <= 32 && test_data_size <= 2 * MBSYS_SB2000_PIXELS + 4)
-				found = MB_YES;
+				found = true;
 		}
 	}
 	else {
@@ -238,7 +238,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* if not a good header search through file to find one */
-	while (status == MB_SUCCESS && found == MB_NO) {
+	while (status == MB_SUCCESS && found == false) {
 		/* shift bytes by one */
 		for (int i = 0; i < MBSYS_SB2000_HEADER_SIZE - 1; i++)
 			buffer[i] = buffer[i + 1];
@@ -257,11 +257,11 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				mb_get_binary_short(false, &buffer[26], &test_sensor_size);
 				mb_get_binary_short(false, &buffer[28], &test_data_size);
 				if (test_sensor_size <= 32 && test_data_size <= 2 * MBSYS_SB2000_PIXELS + 4)
-					found = MB_YES;
+					found = true;
 			}
 		}
 		else {
-			found = MB_YES;
+			found = true;
 			mb_io_ptr->file_bytes += status;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;

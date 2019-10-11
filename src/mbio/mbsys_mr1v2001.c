@@ -926,8 +926,8 @@ int mbsys_mr1v2001_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 			double bestxtrackflagged = 10000.0;
 			double bestdepth = 0.0;
 			double bestdepthflagged = 0.0;
-			int found = MB_NO;
-			int foundflagged = MB_NO;
+			int found = false;
+			int foundflagged = false;
 
 			/* loop over port bathymetry */
 			for (int i = 0; i < pingport->ps_btycount; i++) {
@@ -944,12 +944,12 @@ int mbsys_mr1v2001_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 				if (pbtyflags[i] == 0 && xtrack < bestxtrack) {
 					bestdepth = depth;
 					bestxtrack = xtrack;
-					found = MB_YES;
+					found = true;
 				}
 				else if (xtrack < bestxtrackflagged) {
 					bestdepthflagged = depth;
 					bestxtrackflagged = xtrack;
-					foundflagged = MB_YES;
+					foundflagged = true;
 				}
 			}
 
@@ -968,17 +968,17 @@ int mbsys_mr1v2001_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 				if (sbtyflags[i] == 0 && xtrack < bestxtrack) {
 					bestdepth = depth;
 					bestxtrack = xtrack;
-					found = MB_YES;
+					found = true;
 				}
 				else if (xtrack < bestxtrackflagged) {
 					bestdepthflagged = depth;
 					bestxtrackflagged = xtrack;
-					foundflagged = MB_YES;
+					foundflagged = true;
 				}
 			}
-			if (found == MB_YES)
+			if (found == true)
 				*altitude = bestdepth - *transducer_depth;
-			else if (foundflagged == MB_YES)
+			else if (foundflagged == true)
 				*altitude = bestdepthflagged - *transducer_depth;
 			else
 				*altitude = 0.0;

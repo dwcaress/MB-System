@@ -1984,23 +1984,23 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		*transducer_depth = store->RMBint_draft + store->RMBint_heave;
 
 		/* get altitude */
-		int altitude_found = MB_NO;
+		int altitude_found = false;
 		if (mb_io_ptr->naltitude > 0) {
 			mb_altint_interp(verbose, mbio_ptr, store->time_d, altitudev, error);
-			altitude_found = MB_YES;
+			altitude_found = true;
 		}
-		if (altitude_found == MB_NO) {
+		if (altitude_found == false) {
 			/* get depth closest to nadir */
 			double xtrackmin = 999999.9;
 			for (int i = 0; i < store->RMB_num_beams; i++) {
 				if ((store->RMB_sounding_flags[i] == MB_FLAG_NONE) && fabs((double)store->RMB_sounding_across[i]) < xtrackmin) {
 					*altitudev = store->RMB_sounding_depths[i] - *transducer_depth;
-					altitude_found = MB_YES;
+					altitude_found = true;
 					xtrackmin = fabs((double)store->RMB_sounding_across[i]);
 				}
 			}
 		}
-		if (altitude_found == MB_NO) {
+		if (altitude_found == false) {
 			*altitudev = 0.0;
 		}
 
@@ -2481,17 +2481,17 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		minxtrack = 0.0;
 		maxxtrack = 0.0;
 		iminxtrack = store->RMB_num_beams / 2;
-		found = MB_NO;
+		found = false;
 		for (int i = 0; i < store->RMB_num_beams; i++) {
 			if (mb_beam_ok(store->RMB_sounding_flags[i])) {
 				store->MSS_table_altitude_sort[nbathsort] =
 				    store->RMB_sounding_depths[i] - store->RMBint_draft + store->RMBint_heave;
 				nbathsort++;
 
-				if (found == MB_NO || fabs(store->RMB_sounding_across[i]) < minxtrack) {
+				if (found == false || fabs(store->RMB_sounding_across[i]) < minxtrack) {
 					minxtrack = fabs(store->RMB_sounding_across[i]);
 					iminxtrack = i;
-					found = MB_YES;
+					found = true;
 				}
 
 				maxxtrack = MAX(fabs(store->RMB_sounding_across[i]), maxxtrack);
@@ -2504,11 +2504,11 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		store->MSS_num_pixels = MBSYS_HYSWEEP_MSS_NUM_PIXELS;
 
 		/* get sidescan swath width and pixel size */
-		if (swath_width_set == MB_NO && store->RMB_num_beams > 0) {
+		if (swath_width_set == false && store->RMB_num_beams > 0) {
 			(*swath_width) =
 			    MAX(fabs(store->RMB_sounding_rollangles[0]), fabs(store->RMB_sounding_rollangles[store->RMB_num_beams - 1]));
 		}
-		if (pixel_size_set == MB_NO && nbathsort > 0) {
+		if (pixel_size_set == false && nbathsort > 0) {
 			/* calculate pixel size implied using swath width and nadir altitude */
 			pixel_size_calc =
 			    2.1 * tan(DTR * (*swath_width)) * store->MSS_table_altitude_sort[nbathsort / 2] / store->MSS_num_pixels;
@@ -2570,11 +2570,11 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		irange = irangenadir;
 		for (int i = sample_start; i < sample_end; i++) {
 			range = ((double)i) / ((double)store->RSS_sample_rate);
-			found = MB_NO;
-			for (int j = irange; j > 0 && found == MB_NO; j--) {
+			found = false;
+			for (int j = irange; j > 0 && found == false; j--) {
 				if (range >= store->MSS_table_range[j] && range < store->MSS_table_range[j - 1]) {
 					irange = j;
-					found = MB_YES;
+					found = true;
 				}
 			}
 			factor =
@@ -2597,11 +2597,11 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		irange = irangenadir;
 		for (int i = sample_start; i < sample_end; i++) {
 			range = ((double)i) / ((double)store->RSS_sample_rate);
-			found = MB_NO;
-			for (int j = irange; j < nrangetable - 1 && found == MB_NO; j++) {
+			found = false;
+			for (int j = irange; j < nrangetable - 1 && found == false; j++) {
 				if (range >= store->MSS_table_range[j] && range < store->MSS_table_range[j + 1]) {
 					irange = j;
-					found = MB_YES;
+					found = true;
 				}
 			}
 			factor =

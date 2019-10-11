@@ -64,9 +64,9 @@ int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_YES;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = false;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -132,10 +132,10 @@ int mbr_alm_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	/* set file header read flag */
 	int *file_header_readwritten = (int *)&mb_io_ptr->save1;
 	/* TODO(schwehr): Why is this file_header_readwritten immediately overwritten? */
-	*file_header_readwritten = MB_NO;
+	*file_header_readwritten = false;
 
 	/* set saved bytes flag */
-	mb_io_ptr->save2 = MB_NO;
+	mb_io_ptr->save2 = false;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -202,12 +202,12 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* set status */
 	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
-	int done = MB_NO;
+	int done = false;
 	size_t index = 0;
 	char buffer[MBF_3DDEPTHP_BUFFER_SIZE];
 
 	/* if first read then read 2 byte magic number at start of file */
-	if (*file_header_readwritten == MB_NO) {
+	if (*file_header_readwritten == false) {
 		/* read and check the first two bytes */
 		size_t read_len = (size_t)2;
 		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
@@ -222,7 +222,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (status == MB_SUCCESS && magic_number == MBF_3DDEPTHP_MAGICNUMBER) {
 			store->file_version = 1;
 			store->sub_version = 1;
-			*file_header_readwritten = MB_YES;
+			*file_header_readwritten = true;
 		}
 
 		/* if ok and magic_number == 0x3D07 then this is the obsolete version 1.0
@@ -285,9 +285,9 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* success */
 				if (status == MB_SUCCESS) {
-					*file_header_readwritten = MB_YES;
+					*file_header_readwritten = true;
 					store->kind = MB_DATA_PARAMETER;
-					done = MB_YES;
+					done = true;
 				}
 			}
 		}
@@ -296,12 +296,12 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			done = MB_YES;
+			done = true;
 		}
 	}
 
 	/* read next record in format version 1.1 */
-	if (status == MB_SUCCESS && done == MB_NO && store->file_version == 1 && store->sub_version == 1) {
+	if (status == MB_SUCCESS && done == false && store->file_version == 1 && store->sub_version == 1) {
 
 		/* read the next record header */
 		size_t read_len = (size_t)sizeof(short);
@@ -314,14 +314,14 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				    store->record_id == MBF_3DDEPTHP_RECORD_POSITION || store->record_id == MBF_3DDEPTHP_RECORD_ATTITUDE ||
 				    store->record_id == MBF_3DDEPTHP_RECORD_HEADING || store->record_id == MBF_3DDEPTHP_RECORD_SENSORDEPTH ||
 				    store->record_id == MBF_3DDEPTHP_RECORD_RAWLIDAR || store->record_id == MBF_3DDEPTHP_RECORD_LIDAR) {
-					valid_id = MB_YES;
+					valid_id = true;
 				}
 				else {
-					valid_id = MB_NO;
+					valid_id = false;
 					skip++;
 				}
 			}
-		} while (status == MB_SUCCESS && valid_id == MB_NO);
+		} while (status == MB_SUCCESS && valid_id == false);
 
 		/* read the full record */
 		if (status == MB_SUCCESS) {
@@ -383,7 +383,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 					/* success */
 					if (status == MB_SUCCESS) {
-						*file_header_readwritten = MB_YES;
+						*file_header_readwritten = true;
 						store->kind = MB_DATA_PARAMETER;
 					}
 				}
@@ -508,7 +508,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					index += 4;
 					mb_get_binary_int(true, (void *)&buffer[index], &(store->num_pulses));
 					index += 4;
-					store->bathymetry_calculated = MB_NO;
+					store->bathymetry_calculated = false;
 
 					/* get time_d timestamp */
 					int time_i[7];
@@ -643,7 +643,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					index += 4;
 					mb_get_binary_int(true, (void *)&buffer[index], &(store->num_pulses));
 					index += 4;
-					store->bathymetry_calculated = MB_YES;
+					store->bathymetry_calculated = true;
 				}
 
 				/* read all of the pulses */
@@ -738,9 +738,9 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* else read next record in the obsolete format version 1.0
 	        - LIDAR scans only with no record id's */
-	else if (status == MB_SUCCESS && done == MB_NO && store->file_version == 1 && store->sub_version == 0) {
+	else if (status == MB_SUCCESS && done == false && store->file_version == 1 && store->sub_version == 0) {
 		/* read the next scan header */
-		if (mb_io_ptr->save2 == MB_NO) {
+		if (mb_io_ptr->save2 == false) {
 			size_t read_len = (size_t)MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE;
 			status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
 		}
@@ -749,7 +749,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				buffer[i] = mb_io_ptr->save_label[i];
 			size_t read_len = (size_t)(MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE - 4);
 			status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[4], &read_len, error);
-			mb_io_ptr->save2 = MB_NO;
+			mb_io_ptr->save2 = false;
 		}
 
 		unsigned int newscancheckvalue = 0;
@@ -778,7 +778,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			index++;
 			mb_get_binary_int(true, (void *)&buffer[index], &(store->nanoseconds));
 			index += 4;
-			store->bathymetry_calculated = MB_NO;
+			store->bathymetry_calculated = false;
 
 			/* fix timestamp problem with the original data files */
 			if (store->year < 2000) {
@@ -809,8 +809,8 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		/* read all of the pulses */
 		if (status == MB_SUCCESS) {
 			store->num_pulses = 0;
-			done = MB_NO;
-			while (done == MB_NO) {
+			done = false;
+			while (done == false) {
 				/* read the next four bytes */
 				size_t read_len = (size_t)4;
 				status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
@@ -820,13 +820,13 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				   by checking the first four bytes */
 				unsigned int *newscancheck = (unsigned int *)buffer;
 				if (status == MB_FAILURE) {
-					done = MB_YES;
+					done = true;
 					status = MB_SUCCESS;
 					*error = MB_ERROR_NO_ERROR;
 				}
 				else if (*newscancheck == newscancheckvalue) {
-					done = MB_YES;
-					mb_io_ptr->save2 = MB_YES;
+					done = true;
+					mb_io_ptr->save2 = true;
 					for (int i = 0; i < 4; i++)
 						mb_io_ptr->save_label[i] = buffer[i];
 				}
@@ -834,11 +834,11 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					read_len = (size_t)(MBF_3DDEPTHP_VERSION_1_0_PULSE_SIZE - 4);
 					status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[4], &read_len, error);
 					if (status == MB_FAILURE)
-						done = MB_YES;
+						done = true;
 				}
 
 				/* if read ok and consistent with new pulse then get values */
-				if (status == MB_SUCCESS && done == MB_NO) {
+				if (status == MB_SUCCESS && done == false) {
 					struct mbsys_3datdepthlidar_pulse_struct *pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[store->num_pulses];
 					index = 0;
 					mb_get_binary_float(true, (void *)&buffer[index], &(pulse->range));
@@ -874,7 +874,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 					store->num_pulses++;
 					if (store->num_pulses >= store->counts_per_scan)
-						done = MB_YES;
+						done = true;
 				}
 			}
 			for (int i = store->num_pulses; i < store->counts_per_scan; i++) {
@@ -948,7 +948,7 @@ int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	const int status = mbr_3ddepthp_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* if needed calculate bathymetry */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->bathymetry_calculated == MB_NO) {
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->bathymetry_calculated == false) {
 		mbsys_3datdepthlidar_calculatebathymetry(verbose, mbio_ptr, store_ptr, error);
 	}
 
@@ -1005,7 +1005,7 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char buffer[MBF_3DDEPTHP_BUFFER_SIZE];
 
 	/* if first write then write the magic number file header */
-	if (*file_header_readwritten == MB_NO) {
+	if (*file_header_readwritten == false) {
 		/* encode the header data */
 		index = 0;
 		const unsigned short magic_number = MBF_3DDEPTHP_MAGICNUMBER;
@@ -1017,7 +1017,7 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		status = mb_fileio_put(verbose, mbio_ptr, (void *)buffer, &write_len, error);
 
 		/* set that header has been written */
-		*file_header_readwritten = MB_YES;
+		*file_header_readwritten = true;
 	}
 
 	/* write next record */

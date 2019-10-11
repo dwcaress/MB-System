@@ -85,8 +85,8 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 		}
 
 		/* set asciiheader and fileheader flags */
-		mb_segyio_ptr->asciiheader_set = MB_NO;
-		mb_segyio_ptr->fileheader_set = MB_NO;
+		mb_segyio_ptr->asciiheader_set = false;
+		mb_segyio_ptr->fileheader_set = false;
 	}
 
 	/* if ok then read file headers */
@@ -97,7 +97,7 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 			*error = MB_ERROR_EOF;
 		}
 		else
-			mb_segyio_ptr->asciiheader_set = MB_YES;
+			mb_segyio_ptr->asciiheader_set = true;
 
 		/* read file header */
 		if (fread(mb_segyio_ptr->buffer, 1, MB_SEGY_FILEHEADER_LENGTH, mb_segyio_ptr->fp) != MB_SEGY_FILEHEADER_LENGTH) {
@@ -105,7 +105,7 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 			*error = MB_ERROR_EOF;
 		}
 		else
-			mb_segyio_ptr->fileheader_set = MB_YES;
+			mb_segyio_ptr->fileheader_set = true;
 
 		/* extract file header data */
 		if (status == MB_SUCCESS) {
@@ -330,8 +330,8 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 		}
 
 		/* set asciiheader and fileheader flags */
-		mb_segyio_ptr->asciiheader_set = MB_NO;
-		mb_segyio_ptr->fileheader_set = MB_NO;
+		mb_segyio_ptr->asciiheader_set = false;
+		mb_segyio_ptr->fileheader_set = false;
 	}
 
 	/* handle the asciiheader structure */
@@ -345,7 +345,7 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 			*error = MB_ERROR_WRITE_FAIL;
 		}
 		else
-			mb_segyio_ptr->asciiheader_set = MB_YES;
+			mb_segyio_ptr->asciiheader_set = true;
 	}
 
 	/* handle the fileheader structure */
@@ -423,7 +423,7 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 			*error = MB_ERROR_WRITE_FAIL;
 		}
 		else
-			mb_segyio_ptr->fileheader_set = MB_YES;
+			mb_segyio_ptr->fileheader_set = true;
 	}
 
 	if (verbose >= 2) {
@@ -920,20 +920,20 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 	int status = MB_SUCCESS;
 
 	/* if asciiheader has not yet been written, write it */
-	if (mb_segyio_ptr->asciiheader_set == MB_NO) {
+	if (mb_segyio_ptr->asciiheader_set == false) {
 		if (fwrite(asciiheader, 1, MB_SEGY_ASCIIHEADER_LENGTH, mb_segyio_ptr->fp) != MB_SEGY_ASCIIHEADER_LENGTH) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_WRITE_FAIL;
 		}
 		else
-			mb_segyio_ptr->asciiheader_set = MB_YES;
+			mb_segyio_ptr->asciiheader_set = true;
 	}
 
 	char *buffer = NULL;
 	int index;
 
 	/* if fileheader has not yet been written, write it */
-	if (mb_segyio_ptr->fileheader_set == MB_NO) {
+	if (mb_segyio_ptr->fileheader_set == false) {
 		/* make sure there is adequate memory in the buffer */
 		if (mb_segyio_ptr->bufferalloc < MB_SEGY_FILEHEADER_LENGTH) {
 			/* allocate buffer memory */
@@ -1012,7 +1012,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 			*error = MB_ERROR_WRITE_FAIL;
 		}
 		else
-			mb_segyio_ptr->fileheader_set = MB_YES;
+			mb_segyio_ptr->fileheader_set = true;
 	}
 
 	/* make sure there is adequate memory in the buffer */

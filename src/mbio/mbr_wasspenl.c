@@ -69,9 +69,9 @@ int mbr_info_wasspenl(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_SINGLE;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -1192,10 +1192,10 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* loop over reading data until a record is ready for return */
-	int done = MB_NO;
+	int done = false;
 	*error = MB_ERROR_NO_ERROR;
 	memset((void *)recordid, 0, (size_t)12);
-	while (done == MB_NO) {
+	while (done == false) {
 		/* read next record header into buffer */
 		read_len = (size_t)16;
 		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
@@ -1239,7 +1239,7 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			status = mb_reallocd(verbose, __FILE__, __LINE__, *record_size, (void **)bufferptr, error);
 			if (status != MB_SUCCESS) {
 				*bufferalloc = 0;
-				done = MB_YES;
+				done = true;
 			}
 			else {
 				*bufferalloc = *record_size;
@@ -1265,15 +1265,15 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				status = mbr_wasspenl_rd_corbathy(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS) {
 					if (genbathy->ping_number == corbathy->ping_number) {
-						done = MB_YES;
+						done = true;
 
 						/* reset beam flags if necessary */
-						reset_beamflags = MB_NO;
+						reset_beamflags = false;
 						for (int i = 0; i < corbathy->num_beams; i++) {
 							if (corbathy->z[i] == 0 && corbathy->empty[i] != MB_FLAG_NULL)
-								reset_beamflags = MB_YES;
+								reset_beamflags = true;
 						}
-						if (reset_beamflags == MB_YES)
+						if (reset_beamflags == true)
 							for (int i = 0; i < corbathy->num_beams; i++) {
 								const int j = corbathy->beam_index[i];
 								if (corbathy->z[i] == 0)
@@ -1287,7 +1287,7 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					else {
 						status = MB_FAILURE;
 						*error = MB_ERROR_UNINTELLIGIBLE;
-						done = MB_YES;
+						done = true;
 					}
 				}
 			}
@@ -1296,69 +1296,69 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			else if (strncmp(recordid, "RAWSONAR", 8) == 0) {
 				status = mbr_wasspenl_rd_rawsonar(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
-					done = MB_YES;
+					done = true;
 			}
 
 			/* read GEN_SENS record */
 			else if (strncmp(recordid, "GEN_SENS", 8) == 0) {
 				status = mbr_wasspenl_rd_gen_sens(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
-					done = MB_YES;
+					done = true;
 			}
 
 			/* read NVUPDATE record */
 			else if (strncmp(recordid, "NVUPDATE", 8) == 0) {
 				status = mbr_wasspenl_rd_nvupdate(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
-					done = MB_YES;
+					done = true;
 			}
 
 			/* read WCD_NAVI record */
 			else if (strncmp(recordid, "WCD_NAVI", 8) == 0) {
 				status = mbr_wasspenl_rd_wcd_navi(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
-					done = MB_YES;
+					done = true;
 			}
 
 			/* read SENSPROP record */
 			else if (strncmp(recordid, "SENSPROP", 8) == 0) {
 				status = mbr_wasspenl_rd_sensprop(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
-					done = MB_YES;
+					done = true;
 			}
 
 			/* read SYS_PROP record */
 			else if (strncmp(recordid, "SYS_PROP", 8) == 0) {
 				status = mbr_wasspenl_rd_sys_prop(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
-					done = MB_YES;
+					done = true;
 			}
 
 			/* read SYS_CFG1 record */
 			else if (strncmp(recordid, "SYS_CFG1", 8) == 0) {
 				status = mbr_wasspenl_rd_sys_cfg1(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
-					done = MB_YES;
+					done = true;
 			}
 
 			/* read MCOMMENT_ record */
 			else if (strncmp(recordid, "MCOMMENT", 8) == 0) {
 				status = mbr_wasspenl_rd_mcomment(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
-					done = MB_YES;
+					done = true;
 			}
 
 			/* read an unknown1 record */
 			else {
 				status = mbr_wasspenl_rd_unknown1(verbose, buffer, store_ptr, error);
 				if (status == MB_SUCCESS)
-					done = MB_YES;
+					done = true;
 			}
 		}
 
 		/* set done if read failure */
 		else {
-			done = MB_YES;
+			done = true;
 		}
 	}
 

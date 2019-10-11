@@ -61,9 +61,9 @@ int mbr_info_hypc8101(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_NAV;
 	*sensordepth_source = MB_DATA_DATA;
@@ -348,8 +348,8 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
-	int done = MB_NO;
-	while (done == MB_NO) {
+	int done = false;
+	while (done == false) {
 		/* read the next line */
 		result = fgets(line, MBF_HYPC8101_MAXLINE, mb_io_ptr->mbfp);
 		if (result == line && strlen(line) < MBF_HYPC8101_MAXLINE) {
@@ -364,7 +364,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
-			done = MB_YES;
+			done = true;
 		}
 
 		/* now make sense of the line */
@@ -398,7 +398,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					data->pitch = 200 * hcp_pitch;
 
 					/* set done and kind */
-					done = MB_YES;
+					done = true;
 					data->kind = MB_DATA_ATTITUDE;
 
 					if (verbose >= 4) {
@@ -447,7 +447,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					data->heading = 100 * gyr_gyro;
 
 					/* set done and kind */
-					done = MB_YES;
+					done = true;
 					data->kind = MB_DATA_HEADING;
 
 					if (verbose >= 4) {
@@ -492,7 +492,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					data->utm_easting = 100 * pos_easting;
 
 					/* set done and kind */
-					done = MB_NO;
+					done = false;
 					data->kind = MB_DATA_NAV;
 
 					if (verbose >= 4) {
@@ -555,7 +555,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					data->pos_longitude = raw_lon / 0.00000009;
 
 					/* set done and kind */
-					done = MB_YES;
+					done = true;
 					data->kind = MB_DATA_NAV;
 
 					if (verbose >= 4) {
@@ -701,7 +701,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					}
 
 					/* set kind and done */
-					done = MB_YES;
+					done = true;
 					data->kind = MB_DATA_DATA;
 
 					if (verbose >= 4) {
@@ -819,7 +819,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* deal with end of header */
 			else if (strncmp(line, "EOH", 3) == 0) {
 				/* set done and kind */
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_PARAMETER;
 
 				if (verbose >= 4) {

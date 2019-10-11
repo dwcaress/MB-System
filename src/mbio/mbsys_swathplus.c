@@ -82,7 +82,7 @@ int mbsys_swathplus_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	}
 
 	/* initialize projection set */
-	store->projection_set = MB_NO;
+	store->projection_set = false;
 	store->projection.projection_alloc = 0;
 	store->projection.projection_id = NULL;
 
@@ -91,12 +91,12 @@ int mbsys_swathplus_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	store->comment.message = NULL;
 
 	/* initialize sxp structs */
-	store->sxp_header_set = MB_NO;
+	store->sxp_header_set = false;
 	store->sxp_ping.points_alloc = 0;
 	store->sxp_ping.points = NULL;
 
 	/* initialize sxi structs */
-	store->sxi_header_set = MB_NO;
+	store->sxi_header_set = false;
 	store->sxi_ping.samps_alloc = 0;
 	store->sxi_ping.sampnum = NULL;
 	store->sxi_ping.angle = NULL;
@@ -1644,7 +1644,7 @@ int swpls_rd_sxpheader(int verbose, char *buffer, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS) {
 		store->kind = MB_DATA_HEADER;
 		store->type = SWPLS_ID_SXP_HEADER_DATA;
-		store->sxp_header_set = MB_YES;
+		store->sxp_header_set = true;
 	}
 	else {
 		store->kind = MB_DATA_NONE;
@@ -1860,7 +1860,7 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) 
 	swpls_projection *projection = NULL;
 
 	/* only read the projection if not previously set */
-	if (store->projection_set == MB_NO) {
+	if (store->projection_set == false) {
 		projection = &(store->projection);
 
 		/* extract the data */
@@ -1897,7 +1897,7 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) 
 			/* set the kind and type */
 			store->kind = MB_DATA_PARAMETER;
 			store->type = SWPLS_ID_PROJECTION;
-			store->projection_set = MB_YES;
+			store->projection_set = true;
 		}
 		else {
 			store->kind = MB_DATA_NONE;
@@ -1909,7 +1909,7 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) 
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:                 %d\n", *error);
 		fprintf(stderr, "dbg2       store->projection_set: %d\n", store->projection_set);
-		if (store->projection_set == MB_YES) {
+		if (store->projection_set == true) {
 			projection = &(store->projection);
 			fprintf(stderr, "dbg2       projection->projection_id:  %s\n", projection->projection_id);
 		}
@@ -2010,7 +2010,7 @@ int swpls_rd_sxiheader(int verbose, char *buffer, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS) {
 		store->kind = MB_DATA_HEADER;
 		store->type = SWPLS_ID_SXI_HEADER_DATA;
-		store->sxi_header_set = MB_YES;
+		store->sxi_header_set = true;
 	}
 	else {
 		store->kind = MB_DATA_NONE;

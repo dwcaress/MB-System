@@ -260,7 +260,7 @@ int main(int argc, char **argv) {
 				action = mb_swap_int(action);
 			}
 
-			if (ignore == MB_NO) {
+			if (ignore == false) {
 				if (action == MBP_EDIT_FLAG) {
 					beam_flag++;
 					if (ignore_flag) {
@@ -292,7 +292,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* write out the edit if not ignored */
-			if (ignore == MB_NO) {
+			if (ignore == false) {
 				if (omode == OUTPUT_TEXT) {
 					int time_i[7];
 					mb_get_date(verbose, time_d, time_i);

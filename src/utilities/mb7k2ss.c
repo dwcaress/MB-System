@@ -1247,7 +1247,7 @@ int main(int argc, char **argv) {
 
 					/* generate inf file */
 					if (status == MB_SUCCESS) {
-						status = mb_make_info(verbose, MB_YES, current_output_file, format_output, &error);
+						status = mb_make_info(verbose, true, current_output_file, format_output, &error);
 					}
 
 					/* output counts */
@@ -1976,7 +1976,7 @@ int main(int argc, char **argv) {
 
 		/* generate inf file */
 		if (status == MB_SUCCESS) {
-			status = mb_make_info(verbose, MB_YES, output_file, format_output, &error);
+			status = mb_make_info(verbose, true, output_file, format_output, &error);
 		}
 
 		/* output counts */

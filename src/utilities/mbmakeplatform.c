@@ -255,9 +255,9 @@ int main(int argc, char **argv) {
 	mb_path input_platform_file;
 	mb_path input_swath_file;
 	int input_swath_format = 0;
-	int input_swath_platform_defined = MB_NO;
+	int input_swath_platform_defined = false;
 	mb_path output_platform_file;
-	int output_platform_file_defined = MB_NO;
+	int output_platform_file_defined = false;
 	mb_path time_latency_model_file;
 	FILE *tfp = NULL;
 	char buffer[MB_PATH_MAXLINE];
@@ -595,17 +595,17 @@ int main(int argc, char **argv) {
 					}
 					if ((status = mb_datalist_read(verbose, datalist, swath_file, dfile, &input_swath_format, &file_weight,
 					                               &error)) == MB_SUCCESS)
-						read_data = MB_YES;
+						read_data = true;
 					else
-						read_data = MB_NO;
+						read_data = false;
 				}
 				else {
 					strcpy(swath_file, input_swath_file);
-					read_data = MB_YES;
+					read_data = true;
 				}
 
 				/* loop over all files to be read */
-				while (read_data == MB_YES && input_swath_platform_defined == MB_NO) {
+				while (read_data == true && input_swath_platform_defined == false) {
 					/* check format and get data sources */
 					if ((status =
 					         mb_format_source(verbose, &input_swath_format, &platform_source, &nav_source, &sensordepth_source,
@@ -632,7 +632,7 @@ int main(int argc, char **argv) {
 					store_ptr = (void *)mb_io_ptr->store_data;
 
 					/* read data */
-					while (error <= MB_ERROR_NO_ERROR && input_swath_platform_defined == MB_NO) {
+					while (error <= MB_ERROR_NO_ERROR && input_swath_platform_defined == false) {
 						status = mb_read_ping(verbose, mbio_ptr, store_ptr, &kind, &error);
 
 						/* if platform_source kind then extract platform definition */
@@ -642,7 +642,7 @@ int main(int argc, char **argv) {
 
 							/* note success */
 							if (status == MB_SUCCESS && platform != NULL) {
-								input_swath_platform_defined = MB_YES;
+								input_swath_platform_defined = true;
 								platform_num_sensors = platform->num_sensors;
 							}
 						}
@@ -655,19 +655,19 @@ int main(int argc, char **argv) {
 					if (read_datalist) {
 						if ((status = mb_datalist_read(verbose, datalist, swath_file, dfile, &input_swath_format, &file_weight,
 						                               &error)) == MB_SUCCESS)
-							read_data = MB_YES;
+							read_data = true;
 						else
-							read_data = MB_NO;
+							read_data = false;
 					}
 					else {
-						read_data = MB_NO;
+						read_data = false;
 					}
 				}
 
 				if (read_datalist)
 					mb_datalist_close(verbose, &datalist, &error);
 
-				if (verbose > 0 && input_swath_platform_defined == MB_YES) {
+				if (verbose > 0 && input_swath_platform_defined == true) {
 					fprintf(stderr, "\nExtracted platform from swath data <%s>\n", input_swath_file);
 					fprintf(stderr, "    platform->type:                        %d <%s>\n", platform->type,
 					        mb_platform_type(platform->type));
@@ -772,7 +772,7 @@ int main(int argc, char **argv) {
 			else if (strcmp("output", options[option_index].name) == 0) {
 				/* set output platform file */
 				strcpy(output_platform_file, optarg);
-				output_platform_file_defined = MB_YES;
+				output_platform_file_defined = true;
 			}
 			else if (strcmp("platform-type-surface-vessel", options[option_index].name) == 0) {
 				platform->type = MB_PLATFORM_SURFACE_VESSEL;
@@ -1175,24 +1175,24 @@ int main(int argc, char **argv) {
 				       &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_heading,
 				       &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_roll,
 				       &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_pitch);
-				tmp_offsets[tmp_sensor.num_offsets].position_offset_mode = MB_YES;
-				tmp_offsets[tmp_sensor.num_offsets].attitude_offset_mode = MB_YES;
+				tmp_offsets[tmp_sensor.num_offsets].position_offset_mode = true;
+				tmp_offsets[tmp_sensor.num_offsets].attitude_offset_mode = true;
 				tmp_sensor.num_offsets++;
 			}
 			else if (strcmp("sensor-offset-positions", options[option_index].name) == 0) {
 				sscanf(optarg, "%lf/%lf/%lf", &tmp_offsets[tmp_sensor.num_offsets].position_offset_x,
 				       &tmp_offsets[tmp_sensor.num_offsets].position_offset_y,
 				       &tmp_offsets[tmp_sensor.num_offsets].position_offset_z);
-				tmp_offsets[tmp_sensor.num_offsets].position_offset_mode = MB_YES;
-				tmp_offsets[tmp_sensor.num_offsets].attitude_offset_mode = MB_NO;
+				tmp_offsets[tmp_sensor.num_offsets].position_offset_mode = true;
+				tmp_offsets[tmp_sensor.num_offsets].attitude_offset_mode = false;
 				tmp_sensor.num_offsets++;
 			}
 			else if (strcmp("sensor-offset-angles", options[option_index].name) == 0) {
 				sscanf(optarg, "%lf/%lf/%lf", &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_heading,
 				       &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_roll,
 				       &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_pitch);
-				tmp_offsets[tmp_sensor.num_offsets].position_offset_mode = MB_NO;
-				tmp_offsets[tmp_sensor.num_offsets].attitude_offset_mode = MB_YES;
+				tmp_offsets[tmp_sensor.num_offsets].position_offset_mode = false;
+				tmp_offsets[tmp_sensor.num_offsets].attitude_offset_mode = true;
 				tmp_sensor.num_offsets++;
 			}
 			else if (strcmp("sensor-time-latency", options[option_index].name) == 0) {
@@ -1536,8 +1536,8 @@ int main(int argc, char **argv) {
 						active_sensor->offsets[ioffset].attitude_offset_heading = d4;
 						active_sensor->offsets[ioffset].attitude_offset_roll = d5;
 						active_sensor->offsets[ioffset].attitude_offset_pitch = d6;
-						active_sensor->offsets[ioffset].position_offset_mode = MB_YES;
-						active_sensor->offsets[ioffset].attitude_offset_mode = MB_YES;
+						active_sensor->offsets[ioffset].position_offset_mode = true;
+						active_sensor->offsets[ioffset].attitude_offset_mode = true;
 					}
 				}
 			}
@@ -1548,8 +1548,8 @@ int main(int argc, char **argv) {
 						active_sensor->offsets[ioffset].position_offset_x = d1;
 						active_sensor->offsets[ioffset].position_offset_y = d2;
 						active_sensor->offsets[ioffset].position_offset_z = d3;
-						active_sensor->offsets[ioffset].position_offset_mode = MB_YES;
-						active_sensor->offsets[ioffset].attitude_offset_mode = MB_NO;
+						active_sensor->offsets[ioffset].position_offset_mode = true;
+						active_sensor->offsets[ioffset].attitude_offset_mode = false;
 					}
 				}
 			}
@@ -1560,8 +1560,8 @@ int main(int argc, char **argv) {
 						active_sensor->offsets[ioffset].attitude_offset_heading = d1;
 						active_sensor->offsets[ioffset].attitude_offset_roll = d2;
 						active_sensor->offsets[ioffset].attitude_offset_pitch = d3;
-						active_sensor->offsets[ioffset].position_offset_mode = MB_NO;
-						active_sensor->offsets[ioffset].attitude_offset_mode = MB_YES;
+						active_sensor->offsets[ioffset].position_offset_mode = false;
+						active_sensor->offsets[ioffset].attitude_offset_mode = true;
 					}
 				}
 			}
@@ -1646,7 +1646,7 @@ int main(int argc, char **argv) {
 	/* if an output has been specified but there are still not sensors in the
 	 * platform, make a generic null platform with one sensor that is the source
 	 * for all data, with no offsets */
-	if (output_platform_file_defined == MB_YES && platform != NULL && platform->num_sensors == 0) {
+	if (output_platform_file_defined == true && platform != NULL && platform->num_sensors == 0) {
 		status =
 		    mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_NONE, NULL, NULL, NULL,
 		                           (MB_SENSOR_CAPABILITY1_POSITION + MB_SENSOR_CAPABILITY1_DEPTH + MB_SENSOR_CAPABILITY1_HEAVE +
@@ -1657,7 +1657,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* write out the platform file */
-	if (status == MB_SUCCESS && output_platform_file_defined == MB_YES) {
+	if (status == MB_SUCCESS && output_platform_file_defined == true) {
 		status = mb_platform_write(verbose, output_platform_file, (void *)platform, &error);
 	}
 

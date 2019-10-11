@@ -62,19 +62,19 @@ void mb_track(int verbose, struct swath *data, int *error) {
 		const double hour1 = data->pings[i].time_i[3] + data->pings[i].time_i[4] / 60.0 + data->pings[i].time_i[5] / 3600.0;
 
 		/* check for time tick */
-		int time_tick = MB_NO;
+		int time_tick = false;
 		if (floor(hour0 / data->time_tick_int) != floor(hour1 / data->time_tick_int))
-			time_tick = MB_YES;
+			time_tick = true;
 
 		/* check for time annotation */
-		int time_annot = MB_NO;
+		int time_annot = false;
 		if (floor(hour0 / data->time_annot_int) != floor(hour1 / data->time_annot_int))
-			time_annot = MB_YES;
+			time_annot = true;
 
 		/* check for date annotation */
-		int date_annot = MB_NO;
+		int date_annot = false;
 		if (floor(hour0 / data->date_annot_int) != floor(hour1 / data->date_annot_int))
-			date_annot = MB_YES;
+			date_annot = true;
 
 		/* now get azimuth and location if needed */
 		double angle = 0.0;
@@ -82,7 +82,7 @@ void mb_track(int verbose, struct swath *data, int *error) {
 		double y = 0.0;
 		double dy = 0.0;
 		double dx = 0.0;
-		if (date_annot == MB_YES || time_annot == MB_YES || time_tick == MB_YES) {
+		if (date_annot == true || time_annot == true || time_tick == true) {
 			/* get azimuth from heading */
 			angle = data->pings[i].heading + 90.0;
 			if (angle > 360.0)
@@ -96,7 +96,7 @@ void mb_track(int verbose, struct swath *data, int *error) {
 		}
 
 		/* do date annotation if needed */
-		if (date_annot == MB_YES) {
+		if (date_annot == true) {
 			const double x1 = x + 0.375 * data->time_tick_len * (dx - dy);
 			const double y1 = y + 0.375 * data->time_tick_len * (dy + dx);
 			const double x3 = x + 0.375 * data->time_tick_len * (dx + dy);
@@ -117,7 +117,7 @@ void mb_track(int verbose, struct swath *data, int *error) {
 		}
 
 		/* do time annotation if needed */
-		else if (time_annot == MB_YES) {
+		else if (time_annot == true) {
 			const double x1 = x + 0.375 * data->time_tick_len * (dx - dy);
 			const double y1 = y + 0.375 * data->time_tick_len * (dy + dx);
 			const double x3 = x + 0.375 * data->time_tick_len * (dx + dy);
@@ -136,7 +136,7 @@ void mb_track(int verbose, struct swath *data, int *error) {
 		}
 
 		/* do time tick if needed */
-		else if (time_tick == MB_YES) {
+		else if (time_tick == true) {
 			const double x1 = x + 0.25 * data->time_tick_len * (dx - dy);
 			const double y1 = y + 0.25 * data->time_tick_len * (dy + dx);
 			const double x3 = x + 0.25 * data->time_tick_len * (dx + dy);
@@ -196,14 +196,14 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 	/* draw the pingnumber ticks and annotations */
 	for (int i = 0; i < data->npings; i++) {
 		/* check for pingnumber tick */
-		int pingnumber_tick = MB_NO;
+		int pingnumber_tick = false;
 		if (data->pings[i].pingnumber % data->pingnumber_tick_int == 0)
-			pingnumber_tick = MB_YES;
+			pingnumber_tick = true;
 
 		/* check for pingnumber annotation */
-		int pingnumber_annot = MB_NO;
+		int pingnumber_annot = false;
 		if (data->pings[i].pingnumber % data->pingnumber_annot_int == 0)
-			pingnumber_annot = MB_YES;
+			pingnumber_annot = true;
 
 		/* now get azimuth and location if needed */
 		double angle = 0.0;
@@ -211,7 +211,7 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 		double y = 0.0;
 		double dx = 0.0;
 		double dy = 0.0;
-		if (pingnumber_tick == MB_YES || pingnumber_annot == MB_YES) {
+		if (pingnumber_tick == true || pingnumber_annot == true) {
 			/* get azimuth from heading */
 			angle = data->pings[i].heading + 90.0;
 			if (angle > 360.0)
@@ -225,7 +225,7 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 		}
 
 		/* do pingnumber annotation if needed */
-		if (pingnumber_annot == MB_YES) {
+		if (pingnumber_annot == true) {
 			char label[25];
 			sprintf(label, "%u ", data->pings[i].pingnumber);
 			double justify[4];
@@ -240,7 +240,7 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 		}
 
 		/* do time tick if needed */
-		else if (pingnumber_tick == MB_YES) {
+		else if (pingnumber_tick == true) {
 			const double x1 = x - 0.25 * data->pingnumber_tick_len * dx;
 			const double y1 = y - 0.25 * data->pingnumber_tick_len * dy;
 			/* TODO(schwehr): Why were x2 and y2 assigned but not used? */
@@ -283,7 +283,7 @@ void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file
 	mb_get_basename(verbose, label, error);
 
 	double angle = 0.0;
-	if (perpendicular == MB_YES)
+	if (perpendicular == true)
 		angle = 0.0 - data->pings[0].heading;
 	else
 		angle = 90.0 - data->pings[0].heading;

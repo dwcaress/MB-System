@@ -67,9 +67,9 @@ int mbr_info_edgjstar(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_NO;
+	*variable_beams = false;
+	*traveltime = false;
+	*beam_flagging = false;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -139,9 +139,9 @@ int mbr_info_edgjstr2(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_NO;
+	*variable_beams = false;
+	*traveltime = false;
+	*beam_flagging = false;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -299,8 +299,8 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* loop over reading data until a full record of some sort is read */
-	done = MB_NO;
-	while (done == MB_NO) {
+	done = false;
+	while (done == false) {
 		/* read message header */
 		if ((read_status = fread(buffer, MBSYS_JSTAR_MESSAGE_SIZE, 1, mb_io_ptr->mbfp)) == 1) {
 			/* extract the message header values */
@@ -339,7 +339,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
-			done = MB_YES;
+			done = true;
 			store->kind = MB_DATA_NONE;
 #ifdef MBF_EDGJSTAR_DEBUG
 			fprintf(stderr, "REACHED END OF FILE: status:%d\n", status);
@@ -355,7 +355,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* read the comment */
 			if ((read_status = fread(comment->comment, message.size, 1, mb_io_ptr->mbfp)) == 1) {
 				comment->comment[message.size] = 0;
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_COMMENT;
 			}
 
@@ -363,7 +363,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_NONE;
 			}
 		}
@@ -385,9 +385,9 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				mb_get_binary_int(true, &buffer[80], &testx2);
 				mb_get_binary_int(true, &buffer[84], &testy2);
                 if (testx1 == testx2 && testy1 == testy2) {
-                    obsolete_header = MB_YES;
+                    obsolete_header = true;
                 } else {
-                    obsolete_header = MB_NO;
+                    obsolete_header = false;
                 }
 
 				index = 0;
@@ -548,7 +548,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 2;
 
                 /* fix problems created by writing obsolete header */
-                if (obsolete_header == MB_YES) {
+                if (obsolete_header == true) {
                     // set first time value
                     // zero extra position values
                     // move seafloor depth, sonar depth, and altitude values if nonzero
@@ -582,7 +582,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				else {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
-					done = MB_YES;
+					done = true;
 					store->kind = MB_DATA_NONE;
 				}
 
@@ -621,14 +621,14 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 				/* set kind */
 				store->kind = MB_DATA_SUBBOTTOM_SUBBOTTOM;
-				done = MB_YES;
+				done = true;
 			}
 
 			/* end of file */
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_NONE;
 			}
 		}
@@ -655,9 +655,9 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				mb_get_binary_int(true, &buffer[80], &testx2);
 				mb_get_binary_int(true, &buffer[84], &testy2);
                 if (testx1 == testx2 && testy1 == testy2) {
-                    obsolete_header = MB_YES;
+                    obsolete_header = true;
                 } else {
-                    obsolete_header = MB_NO;
+                    obsolete_header = false;
                 }
 
 				index = 0;
@@ -844,7 +844,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				else {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
-					done = MB_YES;
+					done = true;
 					store->kind = MB_DATA_NONE;
 				}
 
@@ -896,7 +896,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				}
 				if (store->ssport.pingNum == store->ssstbd.pingNum &&
 				    store->ssport.message.subsystem == store->ssstbd.message.subsystem) {
-					done = MB_YES;
+					done = true;
 				}
 #ifdef MBF_EDGJSTAR_DEBUG
 				fprintf(stderr, "Done reading 1: %d  pingNum:%d %d   subsystem:%d %d\n", done, store->ssport.pingNum,
@@ -908,7 +908,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_NONE;
 			}
 		}
@@ -1104,7 +1104,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				else {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
-					done = MB_YES;
+					done = true;
 					store->kind = MB_DATA_NONE;
 				}
 
@@ -1143,14 +1143,14 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 				/* set kind */
 				store->kind = MB_DATA_SUBBOTTOM_SUBBOTTOM;
-				done = MB_YES;
+				done = true;
 			}
 
 			/* end of file */
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_NONE;
 			}
 		}
@@ -1350,7 +1350,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				else {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
-					done = MB_YES;
+					done = true;
 					store->kind = MB_DATA_NONE;
 				}
 
@@ -1402,7 +1402,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				}
 				if (store->ssport.pingNum == store->ssstbd.pingNum &&
 				    store->ssport.message.subsystem == store->ssstbd.message.subsystem) {
-					done = MB_YES;
+					done = true;
 				}
 #ifdef MBF_EDGJSTAR_DEBUG
 				fprintf(stderr, "Done reading 1: %d  pingNum:%d %d   subsystem:%d %d\n", done, store->ssport.pingNum,
@@ -1414,7 +1414,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_NONE;
 			}
 		}
@@ -1449,7 +1449,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				        sysinfo->system_type, sysinfo->version, sysinfo->platformserialnumber, sysinfo->sysinfosize);
 #endif
 
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_HEADER;
 			}
 		}
@@ -1468,7 +1468,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				mb_get_binary_int(true, &buffer[index], &(filetimestamp->milliseconds));
 				index += 4;
 
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_TIMESTAMP;
 			}
 		}
@@ -1565,7 +1565,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					store->kind = MB_DATA_NMEA_DPT;
 				}
 
-				done = MB_YES;
+				done = true;
 			}
 		}
 
@@ -1619,7 +1619,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				mb_get_binary_int(true, &buffer[index], &(pitchroll->reserve2));
 				index += 4;
 
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_ATTITUDE;
 			}
 		}
@@ -1665,7 +1665,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				        pressure->soundspeed);
 #endif
 
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_CTD;
 			}
 
@@ -1673,7 +1673,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_NONE;
 			}
 		}
@@ -1740,7 +1740,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					index += 2;
 				}
 
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_DVL;
 #ifdef MBF_EDGJSTAR_DEBUG
 				fprintf(stderr,
@@ -1761,7 +1761,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			for (int i = 0; i < message.size; i++) {
 				read_status = fread(buffer, 1, 1, mb_io_ptr->mbfp);
 			}
-			done = MB_YES;
+			done = true;
 			store->kind = MB_DATA_NONE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 		}
@@ -1770,7 +1770,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
-			done = MB_YES;
+			done = true;
 			store->kind = MB_DATA_NONE;
 		}
 	}

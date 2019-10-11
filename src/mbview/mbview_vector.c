@@ -252,7 +252,7 @@ int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, d
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int ivec;
-	int recalculate_minmax = MB_NO;
+	int recalculate_minmax = false;
 	int i, j;
 
 	/* print starting debug statements */
@@ -337,19 +337,19 @@ int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, d
 		shared.shareddata.vectors[ivec].datamin = vecdatamin;
 		shared.shareddata.vectors[ivec].datamax = vecdatamax;
 		if (vecdatamin == vecdatamax)
-			recalculate_minmax = MB_YES;
+			recalculate_minmax = true;
 
 		/* loop over the points in the new vec */
 		shared.shareddata.vectors[ivec].npoints = npoint;
 		for (i = 0; i < npoint; i++) {
 			/* set status values */
-			shared.shareddata.vectors[ivec].vectorpts[i].selected = MB_NO;
+			shared.shareddata.vectors[ivec].vectorpts[i].selected = false;
 
 			/* set data */
 			shared.shareddata.vectors[ivec].vectorpts[i].data = vecdata[i];
 
 			/* get min max of data if necessary */
-			if (recalculate_minmax == MB_YES) {
+			if (recalculate_minmax == true) {
 				if (i == 0) {
 					shared.shareddata.vectors[ivec].datamin = vecdata[i];
 					shared.shareddata.vectors[ivec].datamax = vecdata[i];
@@ -487,7 +487,7 @@ int mbview_enableviewvectors(int verbose, size_t instance, int *error)
 		data = &(view->data);
 
 		/* if instance active reset action sensitivity */
-		if (data->active == MB_YES)
+		if (data->active == true)
 			mbview_update_sensitivity(verbose, instance, error);
 	}
 
@@ -575,7 +575,7 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 		XBell(view->dpy, 100);
 		for (i = 0; i < shared.shareddata.nvector; i++) {
 			for (j = 0; j < shared.shareddata.vectors[i].npoints; j++) {
-				shared.shareddata.vectors[i].vectorpts[j].selected = MB_NO;
+				shared.shareddata.vectors[i].vectorpts[j].selected = false;
 			}
 		}
 	}
@@ -789,9 +789,9 @@ int mbview_drawvector(size_t instance, int rez) {
 				                shared.shareddata.vectors[ivec].datamin, MBV_COLORTABLE_NORMAL, (float)0.0, (float)0.0,
 				                (float)1.0, (float)0.0, (float)0.0, (float)0.0, colortable_bright_red, colortable_bright_green,
 				                colortable_bright_blue, &red, &green, &blue);
-				if (shared.shareddata.vectors[ivec].vectorpts[jpoint].selected == MB_YES ||
+				if (shared.shareddata.vectors[ivec].vectorpts[jpoint].selected == true ||
 				    (jpoint < shared.shareddata.vectors[ivec].npoints - 1 &&
-				     shared.shareddata.vectors[ivec].vectorpts[jpoint + 1].selected == MB_YES)) {
+				     shared.shareddata.vectors[ivec].vectorpts[jpoint + 1].selected == true)) {
 					glColor3f(colortable_object_red[MBV_COLOR_RED], colortable_object_green[MBV_COLOR_RED],
 					          colortable_object_blue[MBV_COLOR_RED]);
 				}

@@ -368,7 +368,7 @@ int smooth_median(int verbose, double original, int apply_threshold, double thre
 	}
 
 	/* apply thresholding */
-	if (apply_threshold == MB_YES) {
+	if (apply_threshold == true) {
 		const double ratio = original / (*smooth);
 		if (ratio < threshold_hi && ratio > threshold_lo) {
 			*smooth = original;
@@ -666,7 +666,7 @@ int main(int argc, char **argv) {
 	int nwritetot = 0;
 	int nexpect;
 	struct mbfilter_ping_struct ping[MBFILTER_BUFFER_DEFAULT];
-	int first = MB_YES;
+	int first = true;
 	int done;
 
 	/* time, user, host variables */
@@ -690,7 +690,7 @@ int main(int argc, char **argv) {
 	int contrast_xdim = 5;
 	int contrast_ldim = 5;
 	int contrast_iter = 1;
-	int apply_threshold = MB_NO;
+	int apply_threshold = false;
 	double threshold_lo = 0.0;
 	double threshold_hi = 0.0;
 	int nweight;
@@ -766,7 +766,7 @@ int main(int argc, char **argv) {
 					filters[num_filters].mode = contrast_mode + 7;
 					filters[num_filters].xdim = contrast_xdim;
 					filters[num_filters].ldim = contrast_ldim;
-					filters[num_filters].threshold = MB_NO;
+					filters[num_filters].threshold = false;
 				}
 				if (n >= 4)
 					filters[num_filters].iteration = contrast_iter;
@@ -784,7 +784,7 @@ int main(int argc, char **argv) {
 					filters[num_filters].mode = hipass_mode;
 					filters[num_filters].xdim = hipass_xdim;
 					filters[num_filters].ldim = hipass_ldim;
-					filters[num_filters].threshold = MB_NO;
+					filters[num_filters].threshold = false;
 				}
 				if (n >= 4)
 					filters[num_filters].iteration = hipass_iter;
@@ -840,17 +840,17 @@ int main(int argc, char **argv) {
 				else
 					filters[num_filters].iteration = 1;
 				if (n >= 6) {
-					filters[num_filters].threshold = MB_YES;
+					filters[num_filters].threshold = true;
 					filters[num_filters].threshold_lo = threshold_lo;
 					filters[num_filters].threshold_hi = threshold_hi;
 				}
-				else if (apply_threshold == MB_YES) {
-					filters[num_filters].threshold = MB_YES;
+				else if (apply_threshold == true) {
+					filters[num_filters].threshold = true;
 					filters[num_filters].threshold_lo = threshold_lo;
 					filters[num_filters].threshold_hi = threshold_hi;
 				}
 				else
-					filters[num_filters].threshold = MB_NO;
+					filters[num_filters].threshold = false;
 				if (n >= 3)
 					num_filters++;
 				break;
@@ -858,7 +858,7 @@ int main(int argc, char **argv) {
 			case 'T':
 			case 't':
 				sscanf(optarg, "%lf/%lf", &threshold_lo, &threshold_hi);
-				apply_threshold = MB_YES;
+				apply_threshold = true;
 				break;
 			case 'V':
 			case 'v':
@@ -975,7 +975,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "          Alongtrack dimension:  %d\n", filters[i].ldim);
 			fprintf(stderr, "          Iterations:            %d\n", filters[i].iteration);
 			if (filters[i].mode == MBFILTER_A_SMOOTH_MEDIAN) {
-				if (filters[i].threshold == MB_YES) {
+				if (filters[i].threshold == true) {
 					fprintf(stderr, "          Threshold applied\n");
 					fprintf(stderr, "          Threshold_lo:          %f\n", filters[i].threshold_lo);
 					fprintf(stderr, "          Threshold_hi:          %f\n", filters[i].threshold_hi);
@@ -999,18 +999,18 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(file, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data == true) {
 
 		/* check for format with amplitude or sidescan data */
 		status = mb_format_system(verbose, &format, &system, &error);
@@ -1238,7 +1238,7 @@ int main(int argc, char **argv) {
 			sprintf(comment, "applying inverse gradient filter for smoothing");
 			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
-		if (smooth_mode == MBFILTER_SMOOTH_MEDIAN && apply_threshold == MB_YES) {
+		if (smooth_mode == MBFILTER_SMOOTH_MEDIAN && apply_threshold == true) {
 			sprintf(comment, "  filter low ratio threshold:   %f", threshold_lo);
 			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 			sprintf(comment, "  filter high ratio threshold:  %f", threshold_hi);
@@ -1291,8 +1291,8 @@ int main(int argc, char **argv) {
 		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 
 		/* read and write */
-		done = MB_NO;
-		first = MB_YES;
+		done = false;
+		first = true;
 		ndata = 0;
 		nhold = 0;
 		nread = 0;
@@ -1340,7 +1340,7 @@ int main(int argc, char **argv) {
 			if (status == MB_FAILURE && error > 0) {
 				status = MB_SUCCESS;
 				error = MB_ERROR_NO_ERROR;
-				done = MB_YES;
+				done = true;
 			}
 
 			/* give the statistics */
@@ -1350,15 +1350,15 @@ int main(int argc, char **argv) {
 			}
 
 			/* get start of ping output range */
-			if (first == MB_YES) {
+			if (first == true) {
 				jbeg = 0;
-				first = MB_NO;
+				first = false;
 			}
 			else
 				jbeg = MIN(nhold / 2 + 1, ndata);
 
 			/* find number of pings to hold */
-			if (done == MB_YES)
+			if (done == true)
 				nhold = 0;
 			else if (ndata > nhold_ping)
 				nhold = nhold_ping;
@@ -1366,7 +1366,7 @@ int main(int argc, char **argv) {
 				nhold = 0;
 
 			/* get end of ping output range */
-			if (done == MB_YES)
+			if (done == true)
 				jend = ndata - 1;
 			else {
 				jend = ndata - 1 - nhold / 2;
@@ -1618,12 +1618,12 @@ int main(int argc, char **argv) {
 		/* figure out whether and what to read next */
 		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */

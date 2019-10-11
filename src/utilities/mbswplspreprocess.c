@@ -155,28 +155,28 @@ static char program_name[] = "mbswplspreprocess";
 static void default_options(options *opts) {
 	/* standard mb system options */
 	opts->errflg = 0;
-	opts->help = MB_NO;
+	opts->help = false;
 	opts->verbose = 0;
 
 	/* transducer processing options */
-	opts->split_txers = MB_NO;
-	opts->remove_rejected = MB_NO;
-	opts->flip_rejected = MB_NO;
-	opts->copy_rawamp = MB_NO;
+	opts->split_txers = false;
+	opts->remove_rejected = false;
+	opts->flip_rejected = false;
+	opts->copy_rawamp = false;
 
 	/* map projection */
-	opts->projection_set = MB_NO;
+	opts->projection_set = false;
 	strcpy(opts->proj4command, "");
 
 	/* print ascii? */
-	opts->print_ascii = MB_NO;
+	opts->print_ascii = false;
 
 	/* input and output file names */
 	opts->format = 0;
-	opts->ofile_set = MB_NO;
+	opts->ofile_set = false;
 	strcpy(opts->read_file, "datalist.mb-1");
 	strcpy(opts->basename, "");
-	opts->write_output = MB_YES;
+	opts->write_output = true;
 } /* default_options */
 /*----------------------------------------------------------------------*/
 static int parse_options(int verbose, int argc, char **argv, options *opts, int *error) {
@@ -194,11 +194,11 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 		switch (c) {
 		case 'A':
 		case 'a':
-			opts->copy_rawamp = MB_YES;
+			opts->copy_rawamp = true;
 			break;
 		case 'B':
 		case 'b':
-			opts->flip_rejected = MB_YES;
+			opts->flip_rejected = true;
 			break;
 		case 'F':
 		case 'f':
@@ -206,7 +206,7 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 			break;
 		case 'G':
 		case 'g':
-			opts->print_ascii = MB_YES;
+			opts->print_ascii = true;
 			break;
 		case 'H':
 		case 'h':
@@ -219,24 +219,24 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 		case 'J':
 		case 'j':
 			sscanf(optarg, "%s", &opts->proj4command[0]);
-			opts->projection_set = MB_YES;
+			opts->projection_set = true;
 			break;
 		case 'N':
 		case 'n':
-			opts->write_output = MB_NO;
+			opts->write_output = false;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", &opts->basename[0]);
-			opts->ofile_set = MB_YES;
+			opts->ofile_set = true;
 			break;
 		case 'R':
 		case 'r':
-			opts->remove_rejected = MB_YES;
+			opts->remove_rejected = true;
 			break;
 		case 'S':
 		case 's':
-			opts->split_txers = MB_YES;
+			opts->split_txers = true;
 			break;
 		case 'V':
 		case 'v':
@@ -675,7 +675,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 	/* get the fileroot name and format from the input name */
 	int status = mb_get_format(verbose, ifile, fileroot, &format, error);
 
-	if ((ofile_set == MB_NO) && (split_txers == MB_NO)) {
+	if ((ofile_set == false) && (split_txers == false)) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			sprintf(ofile[0], "%s.mb%d", fileroot, format);
 		}
@@ -686,7 +686,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 			sprintf(ofile[0], "%s.mb%d", ifile, format);
 		}
 	}
-	else if ((ofile_set == MB_NO) && (split_txers == MB_YES)) {
+	else if ((ofile_set == false) && (split_txers == true)) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 				sprintf(ofile[i], "%s_txer%d.mb%d", fileroot, i + 1, format);
@@ -703,7 +703,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 			}
 		}
 	}
-	else if ((ofile_set == MB_YES) && (split_txers == MB_NO)) {
+	else if ((ofile_set == true) && (split_txers == false)) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			sprintf(ofile[0], "%s.mb%d", *basename, format);
 		}
@@ -714,7 +714,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 			sprintf(ofile[0], "%s.mb%d", ifile, format);
 		}
 	}
-	else if ((ofile_set == MB_YES) && (split_txers == MB_YES)) {
+	else if ((ofile_set == true) && (split_txers == true)) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 				sprintf(ofile[i], "%s_txer%d.mb%d", *basename, i + 1, format);
@@ -843,17 +843,17 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	istore_ptr = imb_io_ptr->store_data;
 
 	/* set the projection for nav data */
-	if (opts->projection_set == MB_YES) {
+	if (opts->projection_set == true) {
 		mb_proj_init(opts->verbose, opts->proj4command, &(imb_io_ptr->pjptr), error);
 		strncpy(imb_io_ptr->projection_id, opts->proj4command, MB_NAME_LENGTH);
-		imb_io_ptr->projection_initialized = MB_YES;
+		imb_io_ptr->projection_initialized = true;
 	}
 
 	/* setup the output filename(s) for writing */
 	status = set_outfile_names(opts->verbose, ofile, ifile, &opts->basename, opts->ofile_set, opts->split_txers, error);
 	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 		ombio_ptr[i] = NULL;
-		ofile_init[i] = MB_NO;
+		ofile_init[i] = false;
 	}
 
 	/* start looping over data records */
@@ -875,7 +875,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 			status = count_record(opts->verbose, recs, istore, error);
 		}
 
-		if ((status == MB_SUCCESS) && (opts->print_ascii == MB_YES)) {
+		if ((status == MB_SUCCESS) && (opts->print_ascii == true)) {
 			status = print_latest_record(opts->verbose, istore, error);
 		}
 
@@ -889,25 +889,25 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 			int txno = 0;
 			int txidx = 0;
 
-			if ((status == MB_SUCCESS) && (opts->flip_rejected == MB_YES)) {
+			if ((status == MB_SUCCESS) && (opts->flip_rejected == true)) {
 				status = flip_sample_flags(opts->verbose, &(istore->sxp_ping), error);
 			}
 
-			if ((status == MB_SUCCESS) && (opts->remove_rejected == MB_YES)) {
+			if ((status == MB_SUCCESS) && (opts->remove_rejected == true)) {
 				status = remove_rejected_samps(opts->verbose, &(istore->sxp_ping), error);
 			}
 
-			if ((status == MB_SUCCESS) && (opts->copy_rawamp == MB_YES)) {
+			if ((status == MB_SUCCESS) && (opts->copy_rawamp == true)) {
 				status = copy_rawamp(opts->verbose, &(istore->sxp_ping), error);
 			}
 
-			if ((status == MB_SUCCESS) && (opts->write_output == MB_YES)) {
+			if ((status == MB_SUCCESS) && (opts->write_output == true)) {
 				/* select the output file based on the txer channel */
 				status = ping_txno(opts->verbose, istore, &txno, error);
-				txidx = (opts->split_txers == MB_YES) ? txno - 1 : 0;
+				txidx = (opts->split_txers == true) ? txno - 1 : 0;
 
 				/* initialize the output file if necessary */
-				if (ofile_init[txidx] == MB_NO) {
+				if (ofile_init[txidx] == false) {
 					status = mb_write_init(opts->verbose, ofile[txidx], opts->format, &ombio_ptr[txidx], &obeams_bath,
 					                       &obeams_amp, &opixels_ss, error);
 					if (status != MB_SUCCESS) {
@@ -917,7 +917,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 					}
 
 					if (status == MB_SUCCESS) {
-						ofile_init[txidx] = MB_YES;
+						ofile_init[txidx] = true;
 					}
 				}
 
@@ -951,9 +951,9 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	/* close the files */
 	status = mb_close(opts->verbose, &imbio_ptr, error);
 	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
-		if (ofile_init[i] == MB_YES) {
+		if (ofile_init[i] == true) {
 			status = mb_close(opts->verbose, &ombio_ptr[i], error);
-			ofile_init[i] = MB_NO;
+			ofile_init[i] = false;
 		}
 	}
 
@@ -1192,23 +1192,23 @@ int main(int argc, char **argv) {
 
 		if ((status = mb_datalist_read(opts.verbose, datalist, ifile, dfile, &(opts.format), &file_weight, &error)) ==
 		    MB_SUCCESS) {
-			read_data = MB_YES;
+			read_data = true;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(ifile, opts.read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* reset total record counter */
 	zero_counts(opts.verbose, &totrecs, &error);
 
 	/* loop over files to be read */
-	while (read_data == MB_YES) {
+	while (read_data == true) {
 		/* reset file record counter */
 		zero_counts(opts.verbose, &filerecs, &error);
 
@@ -1231,14 +1231,14 @@ int main(int argc, char **argv) {
 		if (read_datalist) {
 			if ((status = mb_datalist_read(opts.verbose, datalist, ifile, dfile, &(opts.format), &file_weight, &error)) ==
 			    MB_SUCCESS) {
-				read_data = MB_YES;
+				read_data = true;
 			}
 			else {
-				read_data = MB_NO;
+				read_data = false;
 			}
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 	} /* end loop over files in list */
 

@@ -412,7 +412,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
     /*--------------------------------------------------------------*/
     /* change timestamp if indicated */
     /*--------------------------------------------------------------*/
-    if (pars->timestamp_changed == MB_YES) {
+    if (pars->timestamp_changed == true) {
       /* set time */
       mb_get_date(verbose, pars->time_d, time_i);
       for (int i = 0; i < 7; i++)
@@ -2370,13 +2370,13 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
     }
 
     /* if not set get swath width from sonar settings */
-    if (swath_width_set == MB_NO) {
+    if (swath_width_set == false) {
       *swath_width = MAX(fabs(store->mrz[0].pingInfo.portSectorEdge_deg),
                             fabs(store->mrz[0].pingInfo.starbSectorEdge_deg));
     }
 
     /* get median altitude if needed to calculate pixel size in meters */
-    if (pixel_size_set == MB_NO) {
+    if (pixel_size_set == false) {
 
       /* loop over sub-ping datagrams */
       nbathsort = 0;

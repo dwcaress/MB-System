@@ -33,13 +33,13 @@
 /* memory allocation list variables */
 static const int MB_MEMORY_ALLOC_STEP = 100;
 #define MB_MEMORY_HEAP_MAX 10000
-static int mb_mem_debug = MB_NO;
+static int mb_mem_debug = false;
 static int n_mb_alloc = 0;
 static void *mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
 static size_t mb_alloc_size[MB_MEMORY_HEAP_MAX];
 static mb_name mb_alloc_sourcefile[MB_MEMORY_HEAP_MAX];
 static int mb_alloc_sourceline[MB_MEMORY_HEAP_MAX];
-static int mb_alloc_overflow = MB_NO;
+static int mb_alloc_overflow = false;
 
 /* Local debug define */
 /* #define MB_MEM_DEBUG 1 */
@@ -48,7 +48,7 @@ static int mb_alloc_overflow = MB_NO;
 int mb_mem_debug_on(int verbose, int *error) {
 
 	/* turn debug output on */
-	mb_mem_debug = MB_YES;
+	mb_mem_debug = true;
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -80,7 +80,7 @@ int mb_mem_debug_on(int verbose, int *error) {
 int mb_mem_debug_off(int verbose, int *error) {
 
 	/* turn debug output off */
-	mb_mem_debug = MB_NO;
+	mb_mem_debug = false;
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -151,7 +151,7 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error) {
 			n_mb_alloc++;
 		}
 		else {
-			mb_alloc_overflow = MB_YES;
+			mb_alloc_overflow = true;
 #ifdef MB_MEM_DEBUG
 			fprintf(stderr, "NOTICE: mbm_mem overflow pointer allocated %d in function %s\n", *ptr, __func__);
 #endif
@@ -223,7 +223,7 @@ int mb_mallocd(int verbose, const char *sourcefile, int sourceline, size_t size,
 			n_mb_alloc++;
 		}
 		else {
-			mb_alloc_overflow = MB_YES;
+			mb_alloc_overflow = true;
 #ifdef MB_MEM_DEBUG
 			fprintf(stderr, "NOTICE: mbm_mem overflow pointer allocated %d in function %s\n", *ptr, __func__);
 #endif
@@ -310,7 +310,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error) {
 			n_mb_alloc++;
 		}
 		else {
-			mb_alloc_overflow = MB_YES;
+			mb_alloc_overflow = true;
 #ifdef MB_MEM_DEBUG
 			fprintf(stderr, "NOTICE: mbm_mem overflow pointer allocated %p in function %s\n", *ptr, __func__);
 #endif
@@ -414,7 +414,7 @@ int mb_reallocd(int verbose, const char *sourcefile, int sourceline, size_t size
 			n_mb_alloc++;
 		}
 		else {
-			mb_alloc_overflow = MB_YES;
+			mb_alloc_overflow = true;
 #ifdef MB_MEM_DEBUG
 			fprintf(stderr, "NOTICE: mbm_mem overflow pointer allocated %d in function %s\n", *ptr, __func__);
 #endif
@@ -487,7 +487,7 @@ int mb_free(int verbose, void **ptr, int *error) {
 
 	/* else deallocate the memory if pointer is non-null and
 	    heap overflow has occurred */
-	else if (mb_alloc_overflow == MB_YES && *ptr != NULL) {
+	else if (mb_alloc_overflow == true && *ptr != NULL) {
 #ifdef MB_MEM_DEBUG
 		fprintf(stderr, "NOTICE: mbm_mem overflow pointer freed %d in function %s\n", *ptr, __func__);
 #endif
@@ -562,7 +562,7 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
 
 	/* else deallocate the memory if pointer is non-null and
 	    heap overflow has occurred */
-	else if (mb_alloc_overflow == MB_YES && *ptr != NULL) {
+	else if (mb_alloc_overflow == true && *ptr != NULL) {
 #ifdef MB_MEM_DEBUG
 		fprintf(stderr, "NOTICE: mbm_mem overflow pointer freed %d in function %s\n", *ptr, __func__);
 #endif
@@ -875,7 +875,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 		}
 
 		/* set reallocation flag */
-		mb_io_ptr->bath_arrays_reallocated = MB_YES;
+		mb_io_ptr->bath_arrays_reallocated = true;
 	}
 	if (namp > mb_io_ptr->beams_amp_alloc) {
 		/* set allocation size */
@@ -919,7 +919,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 		}
 
 		/* set reallocation flag */
-		mb_io_ptr->amp_arrays_reallocated = MB_YES;
+		mb_io_ptr->amp_arrays_reallocated = true;
 	}
 	if (nss > mb_io_ptr->pixels_ss_alloc) {
 		/* set allocation size */
@@ -979,7 +979,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 		}
 
 		/* set reallocation flag */
-		mb_io_ptr->ss_arrays_reallocated = MB_YES;
+		mb_io_ptr->ss_arrays_reallocated = true;
 	}
 
 	/* deal with a memory allocation failure */
@@ -1046,11 +1046,11 @@ int mb_update_arrayptr(int verbose, void *mbio_ptr, void **handle, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* look for handle in registered arrays */
-	int found = MB_NO;
-	for (int i = 0; i < mb_io_ptr->n_regarray && found == MB_NO; i++) {
+	int found = false;
+	for (int i = 0; i < mb_io_ptr->n_regarray && found == false; i++) {
 		if (*handle == mb_io_ptr->regarray_oldptr[i]) {
 			*handle = mb_io_ptr->regarray_ptr[i];
-			found = MB_YES;
+			found = true;
 		}
 	}
 

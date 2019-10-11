@@ -66,9 +66,9 @@ int mbr_info_omghdcsj(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = -2;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -153,7 +153,7 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 		                    (void **)&dataplus->buffer, error);
 
 		/* initialize saved values */
-		*read_summary = MB_NO;
+		*read_summary = false;
 		*fileVersion = 0;
 		*toolType = MBSYS_HDCS_None;
 		*profile_size = 0;
@@ -673,7 +673,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 
 			/* set values to saved including data record sizes */
-			*read_summary = MB_YES;
+			*read_summary = true;
 			*fileVersion = summary->fileVersion;
 			*toolType = summary->toolType;
 			if (*fileVersion == 1) {
@@ -3461,14 +3461,14 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* count samples and get first offset */
 			nrawpixels = 0;
 			ssrawoffset = 0;
-			firstgoodbeam = MB_YES;
+			firstgoodbeam = true;
 			for (int i = 0; i < profile->numDepths; i++) {
 				beam = &data->beams[i];
 				if (beam->no_samples > 0) {
 					nrawpixels += beam->no_samples;
-					if (firstgoodbeam == MB_YES) {
+					if (firstgoodbeam == true) {
 						ssrawoffset = beam->offset;
-						firstgoodbeam = MB_NO;
+						firstgoodbeam = false;
 					}
 				}
 			}
@@ -4163,7 +4163,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		if (dataplus->kind == MB_DATA_SUMMARY) {
 			/* set values to be saved including data record sizes */
-			*write_summary = MB_YES;
+			*write_summary = true;
 			*fileVersion = summary->fileVersion;
 			*toolType = summary->toolType;
 			if (*fileVersion == 1) {

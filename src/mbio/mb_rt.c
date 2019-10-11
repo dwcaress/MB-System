@@ -278,7 +278,7 @@ int mb_rt_quad1(int verbose, int *error) {
 			/* ray turns and exits layer before
 			    exhausting tt_left */
 			if (model->dt <= model->tt_left) {
-				model->turned = MB_YES;
+				model->turned = true;
 				model->ray_status = MB_RT_UP_TURN;
 				model->zf = model->layer_depth_top[model->layer];
 				model->xf =
@@ -289,7 +289,7 @@ int mb_rt_quad1(int verbose, int *error) {
 			/* ray turns and exhausts tt_left
 			    before exiting layer */
 			else if (model->dt > model->tt_left) {
-				model->turned = MB_YES;
+				model->turned = true;
 				model->ray_status = MB_RT_UP_TURN;
 				mb_rt_get_depth(verbose, beta, 1, -1, &model->zf, error);
 				model->xf =
@@ -314,7 +314,7 @@ int mb_rt_quad1(int verbose, int *error) {
 		}
 		/* ray exhausts tt_left before exiting layer */
 		else if (model->dt > model->tt_left) {
-			model->turned = MB_YES;
+			model->turned = true;
 			model->ray_status = MB_RT_UP_TURN;
 			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
 			model->xf = model->xc - SAFESQRT(model->radius * model->radius - (model->zf - model->zc) * (model->zf - model->zc));
@@ -476,7 +476,7 @@ int mb_rt_quad4(int verbose, int *error) {
 			/* ray turns and exits layer before
 			    exhausting tt_left */
 			if (model->dt <= model->tt_left) {
-				model->turned = MB_NO;
+				model->turned = false;
 				model->ray_status = MB_RT_DOWN_TURN;
 				model->zf = model->layer_depth_bottom[model->layer];
 				model->xf =
@@ -487,7 +487,7 @@ int mb_rt_quad4(int verbose, int *error) {
 			/* ray turns and exhausts tt_left
 			    before exiting layer */
 			else if (model->dt > model->tt_left) {
-				model->turned = MB_NO;
+				model->turned = false;
 				model->ray_status = MB_RT_DOWN_TURN;
 				mb_rt_get_depth(verbose, beta, 1, -1, &model->zf, error);
 				model->xf =
@@ -512,7 +512,7 @@ int mb_rt_quad4(int verbose, int *error) {
 		}
 		/* ray exhausts tt_left before exiting layer */
 		else if (model->dt > model->tt_left) {
-			model->turned = MB_YES;
+			model->turned = true;
 			model->ray_status = MB_RT_UP_TURN;
 			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
 			model->xf = model->xc - SAFESQRT(model->radius * model->radius - (model->zf - model->zc) * (model->zf - model->zc));
@@ -586,13 +586,13 @@ int mb_rt_circular(int verbose, int *error) {
 	int status = MB_SUCCESS;
 
 	/* decide which case to use */
-	if (model->turned == MB_NO && model->layer_gradient[model->layer] > 0.0)
+	if (model->turned == false && model->layer_gradient[model->layer] > 0.0)
 		status = mb_rt_quad1(verbose, error);
-	else if (model->turned == MB_NO)
+	else if (model->turned == false)
 		status = mb_rt_quad3(verbose, error);
-	else if (model->turned == MB_YES && model->layer_gradient[model->layer] > 0.0)
+	else if (model->turned == true && model->layer_gradient[model->layer] > 0.0)
 		status = mb_rt_quad2(verbose, error);
-	else if (model->turned == MB_YES)
+	else if (model->turned == true)
 		status = mb_rt_quad4(verbose, error);
 
 	/* put points in plotting arrays */
@@ -620,7 +620,7 @@ int mb_rt_line(int verbose, int *error) {
 	/* find linear path */
 	const double asin_arg = MIN(model->pp * model->layer_vel_top[model->layer], 1.000);
 	double theta = asin(asin_arg);
-	if (model->turned == MB_NO) {
+	if (model->turned == false) {
 		model->zf = model->layer_depth_bottom[model->layer];
 	}
 	else {
@@ -661,7 +661,7 @@ int mb_rt_line(int verbose, int *error) {
 		model->xf = model->xx + xvel * model->dt;
 		model->zf = model->zz + zvel * model->dt;
 		model->tt_left = model->tt_left - model->dt;
-		if (model->turned == MB_YES)
+		if (model->turned == true)
 			model->layer--;
 		else
 			model->layer++;
@@ -711,7 +711,7 @@ int mb_rt_vertical(int verbose, int *error) {
 	     (model->zz - model->layer_depth_top[model->layer]) * model->layer_gradient[model->layer];
 
 	double vf;
-	if (model->turned == MB_NO) {
+	if (model->turned == false) {
 		model->zf = model->layer_depth_bottom[model->layer];
 		vf = model->layer_vel_bottom[model->layer];
 	}
@@ -725,9 +725,9 @@ int mb_rt_vertical(int verbose, int *error) {
 	if (model->dt >= model->tt_left) {
 		model->xf = model->xx;
 		const double vfvi = exp(model->tt_left * model->layer_gradient[model->layer]);
-		if (model->turned == MB_NO)
+		if (model->turned == false)
 			vf = vi * vfvi;
-		else if (model->turned == MB_YES)
+		else if (model->turned == true)
 			vf = vi / vfvi;
 		model->zf = (vf - model->layer_vel_top[model->layer]) / model->layer_gradient[model->layer] +
 		            model->layer_depth_top[model->layer];
@@ -739,7 +739,7 @@ int mb_rt_vertical(int verbose, int *error) {
 	else {
 		model->xf = model->xx;
 		model->tt_left = model->tt_left - model->dt;
-		if (model->turned == MB_YES)
+		if (model->turned == true)
 			model->layer--;
 		else
 			model->layer++;
@@ -859,19 +859,19 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 	source_angle = fabs(source_angle);
 	model->pp = sin(DTR * source_angle) / model->vv_source;
 	if (source_angle < 90.0) {
-		model->turned = MB_NO;
+		model->turned = false;
 		model->ray_status = MB_RT_DOWN;
 	}
 	else {
-		model->turned = MB_YES;
+		model->turned = true;
 		model->ray_status = MB_RT_UP;
 	}
 	model->xx = 0.0;
 	model->zz = source_depth;
 	model->tt = 0.0;
 	model->tt_left = end_time;
-	model->outofbounds = MB_NO;
-	model->done = MB_NO;
+	model->outofbounds = false;
+	model->done = false;
 
 	/* set up raypath plotting */
 	if (nplot_max > 0) {
@@ -921,15 +921,15 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 		/* update ray */
 		model->tt = model->tt + model->dt;
 		if (model->layer < 0) {
-			model->outofbounds = MB_YES;
+			model->outofbounds = true;
 			model->ray_status = MB_RT_OUT_TOP;
 		}
 		if (model->layer >= model->number_layer) {
-			model->outofbounds = MB_YES;
+			model->outofbounds = true;
 			model->ray_status = MB_RT_OUT_BOTTOM;
 		}
 		if (model->tt_left <= 0.0)
-			model->done = MB_YES;
+			model->done = true;
 
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  model->done with ray iteration in MB_RT function <%s>\n", __func__);

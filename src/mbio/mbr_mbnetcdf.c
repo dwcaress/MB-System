@@ -66,9 +66,9 @@ int mbr_info_mbnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NETCDF;
-	*variable_beams = MB_YES;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = false;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -138,9 +138,9 @@ int mbr_info_mbncdfxt(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NETCDF;
-	*variable_beams = MB_YES;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = false;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -203,7 +203,7 @@ int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	int *recread = (int *)&mb_io_ptr->save4;
 	double *lastrawtime = (double *)&mb_io_ptr->saved1;
 	int *nrawtimerepeat = (int *)&mb_io_ptr->save5;
-	*dataread = MB_NO;
+	*dataread = false;
 	*commentread = 0;
 	*recread = 0;
 	*lastrawtime = 0.0;
@@ -276,8 +276,8 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
 	/* if first read then set everything up */
-	if (*dataread == MB_NO) {
-		*dataread = MB_YES;
+	if (*dataread == false) {
+		*dataread = true;
 
 		/* get dimensions */
 		int dim_id;
@@ -4896,9 +4896,9 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int *commentwrite = (int *)&mb_io_ptr->save2;
 	int *recwrite = (int *)&mb_io_ptr->save4;
 
-	int extended = MB_NO;
+	int extended = false;
 	if (mb_io_ptr->format == MBF_MBNCDFXT)
-		extended = MB_YES;
+		extended = true;
 
 	int status = MB_SUCCESS;
 
@@ -5116,7 +5116,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbFrequency", NC_CHAR, dimsNbr, dims, &storelocal->mbFrequency_id);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbFrequency_id error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbSonarFrequency", NC_INT, dimsNbr, dims, &storelocal->mbSonarFrequency_id);
 			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbSonarFrequency_id error: %s\n", nc_strerror(nc_status));
@@ -5152,7 +5152,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbDistanceScale", NC_CHAR, dimsNbr, dims, &storelocal->mbDistanceScale_id);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbDistanceScale_id error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbRangeScale", NC_SHORT, dimsNbr, dims, &storelocal->mbRangeScale_id);
 			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbRangeScale_id error: %s\n", nc_strerror(nc_status));
@@ -5175,7 +5175,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbSamplingRate", NC_SHORT, dimsNbr, dims, &storelocal->mbSamplingRate_id);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbSamplingRate_id error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbCompensationLayerMode", NC_CHAR, dimsNbr, dims,
 			                       &storelocal->mbCompensationLayerMode_id);
 			if (verbose >= 2 && nc_status != NC_NOERR)
@@ -5216,7 +5216,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbDepth", NC_INT, dimsNbr, dims, &storelocal->mbDepth_id);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbDepth_id error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status =
 			    nc_def_var(mb_io_ptr->ncid, "mbAcrossBeamAngle", NC_SHORT, dimsNbr, dims, &storelocal->mbAcrossBeamAngle_id);
 			if (verbose >= 2 && nc_status != NC_NOERR)
@@ -5235,7 +5235,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbSQuality", NC_CHAR, dimsNbr, dims, &storelocal->mbSQuality_id);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbSQuality_id error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbReflectivity", NC_CHAR, dimsNbr, dims, &storelocal->mbReflectivity_id);
 			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbReflectivity_id error: %s\n", nc_strerror(nc_status));
@@ -5252,7 +5252,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbSFlag", NC_CHAR, dimsNbr, dims, &storelocal->mbSFlag_id);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbSFlag_id error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status =
 			    nc_def_var(mb_io_ptr->ncid, "mbSLengthOfDetection", NC_CHAR, dimsNbr, dims, &storelocal->mbSLengthOfDetection_id);
 			if (verbose >= 2 && nc_status != NC_NOERR)
@@ -5264,7 +5264,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbAntenna", NC_CHAR, dimsNbr, dims, &storelocal->mbAntenna_id);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbAntenna_id error: %s\n", nc_strerror(nc_status));
-		if (extended != MB_YES) {
+		if (extended != true) {
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbBeamBias", NC_SHORT, dimsNbr, dims, &storelocal->mbBeamBias_id);
 			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbBeamBias_id error: %s\n", nc_strerror(nc_status));
@@ -6094,7 +6094,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		                            storelocal->mbFrequency_orientation);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSonarFrequency_type);
 			if (verbose >= 2 && nc_status != NC_NOERR)
@@ -6712,7 +6712,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		                            storelocal->mbDistanceScale_orientation);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRangeScale_type);
 			if (verbose >= 2 && nc_status != NC_NOERR)
@@ -7104,7 +7104,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		                            storelocal->mbSamplingRate_orientation);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "type",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbCompensationLayerMode_type);
 			if (verbose >= 2 && nc_status != NC_NOERR)
@@ -7496,7 +7496,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		                            storelocal->mbDepth_orientation);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossBeamAngle_type);
 			if (verbose >= 2 && nc_status != NC_NOERR)
@@ -7778,7 +7778,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		                            storelocal->mbSQuality_orientation);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReflectivity_type);
 			if (verbose >= 2 && nc_status != NC_NOERR)
@@ -8058,7 +8058,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		                            storelocal->mbSFlag_orientation);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSLengthOfDetection_type);
 			if (verbose >= 2 && nc_status != NC_NOERR)
@@ -8172,7 +8172,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		                            storelocal->mbAntenna_orientation);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
-		if (extended != MB_YES) {
+		if (extended != true) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbBeamBias_type);
 			if (verbose >= 2 && nc_status != NC_NOERR)
@@ -9160,7 +9160,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbAntenna error: %s\n", nc_strerror(nc_status));
 
-			if (extended != MB_YES) {
+			if (extended != true) {
 				index[0] = 0;
 				count[0] = storelocal->mbBeamNbr;
 				nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbBeamBias_id, index, count, store->mbBeamBias);
@@ -9255,7 +9255,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbFrequency_id, index, count, store->mbFrequency);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbFrequency error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, index, count, store->mbSonarFrequency);
 			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbSonarFrequency error: %s\n", nc_strerror(nc_status));
@@ -9291,7 +9291,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, index, count, store->mbDistanceScale);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbDistanceScale error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbRangeScale_id, index, count, store->mbRangeScale);
 			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbRangeScale error: %s\n", nc_strerror(nc_status));
@@ -9314,7 +9314,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, index, count, store->mbSamplingRate);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbSamplingRate error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, index, count,
 			                             store->mbCompensationLayerMode);
 			if (verbose >= 2 && nc_status != NC_NOERR)
@@ -9357,7 +9357,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbDepth_id, index, count, store->mbDepth);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbDepth error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status =
 			    nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, index, count, store->mbAcrossBeamAngle);
 			if (verbose >= 2 && nc_status != NC_NOERR)
@@ -9376,7 +9376,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbSQuality_id, index, count, store->mbSQuality);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbSQuality error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbReflectivity_id, index, count, store->mbReflectivity);
 			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbReflectivity error: %s\n", nc_strerror(nc_status));
@@ -9393,7 +9393,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbSFlag_id, index, count, store->mbSFlag);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbSQuality error: %s\n", nc_strerror(nc_status));
-		if (extended == MB_YES) {
+		if (extended == true) {
 			nc_status =
 			    nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, index, count, store->mbSLengthOfDetection);
 			if (verbose >= 2 && nc_status != NC_NOERR)

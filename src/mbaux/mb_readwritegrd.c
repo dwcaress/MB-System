@@ -499,7 +499,7 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	if (status == MB_SUCCESS) {
 		double NaN;
 		MB_MAKE_FNAN(NaN);
-		/* int first = MB_NO; */
+		/* int first = false; */
 		/* double min = 0.0; */
 		/* double max = 0.0; */
 		for (int i = 0; i < n_columns; i++)
@@ -510,10 +510,10 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 					G->data[kk] = NaN;
 				else {
 					G->data[kk] = grid[k];
-					/* if (first == MB_YES) { */
+					/* if (first == true) { */
 						/* min = grid[k]; */
 						/* max = grid[k]; */
-						/* first = MB_NO; */
+						/* first = false; */
 					/* } */
 					/* else { */
 						/* min = MIN(min, grid[k]); */

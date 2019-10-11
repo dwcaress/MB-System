@@ -243,7 +243,7 @@ int main(int argc, char **argv) {
 	double endlon = 0.0;
 	double endlat = 0.0;
 	int tracemode = MBSEGYGRID_USESHOT;
-    int tracemode_set = MB_NO;
+    int tracemode_set = false;
 	int tracestart = 0;
 	int traceend = 0;
 	int chanstart = 0;
@@ -257,7 +257,7 @@ int main(int argc, char **argv) {
 	double gain = 0.0;
 	double gainwindow = 0.0;
 	double gaindelay = 0.0;
-	int agcmode = MB_NO;
+	int agcmode = false;
 	double agcwindow = 0.0;
 	double agcmaxvalue = 0.0;
 	int filtermode = MBSEGYGRID_FILTER_OFF;
@@ -283,7 +283,7 @@ int main(int argc, char **argv) {
 	char zlabel[MB_PATH_MAXLINE] = "";
 	char title[MB_PATH_MAXLINE] = "";
 	char plot_cmd[MB_PATH_MAXLINE] = "";
-	int scale2distance = MB_NO;
+	int scale2distance = false;
 	double shotscale = 1.0;
 	double timescale = 1.0;
 
@@ -353,7 +353,7 @@ int main(int argc, char **argv) {
 			{
 				const int n = sscanf(optarg, "%lf/%lf", &shotscale, &timescale);
 				if (n == 2)
-					scale2distance = MB_YES;
+					scale2distance = true;
 				break;
 			}
 			case 'B':
@@ -362,7 +362,7 @@ int main(int argc, char **argv) {
 				const int n = sscanf(optarg, "%lf/%lf", &agcmaxvalue, &agcwindow);
 				if (n < 2)
 					agcwindow = 0.0;
-				agcmode = MB_YES;
+				agcmode = true;
 				break;
 			}
 			case 'C':
@@ -431,7 +431,7 @@ int main(int argc, char **argv) {
 					tracemode = MBSEGYGRID_USESHOT;
 				}
 				else {
-					tracemode_set = MB_YES;
+					tracemode_set = true;
 				}
 				break;
 			}
@@ -523,7 +523,7 @@ int main(int argc, char **argv) {
 		get_segy_limits(verbose, segyfile, &sinftracemode, &sinftracestart, &sinftraceend, &sinfchanstart, &sinfchanend,
 		                &sinftimesweep, &sinftimedelay, &sinfstartlon, &sinfstartlat, &sinfendlon, &sinfendlat, &error);
 		if (traceend < 1 || traceend < tracestart) {
-			if (tracemode_set == MB_NO)
+			if (tracemode_set == false)
                 tracemode = sinftracemode;
 			tracestart = sinftracestart;
 			traceend = sinftraceend;
@@ -663,7 +663,7 @@ int main(int argc, char **argv) {
 		fprintf(outfp, "     grid ymin:          %f\n", ymin);
 		fprintf(outfp, "     grid ymax:          %f\n", ymax);
 		fprintf(outfp, "     NaN values used to flag regions with no data\n");
-		if (scale2distance == MB_YES) {
+		if (scale2distance == true) {
 			fprintf(outfp, "     shot and time scaled to distance in meters\n");
 			fprintf(outfp, "     shotscale:          %f\n", shotscale);
 			fprintf(outfp, "     timescale:          %f\n", timescale);
@@ -719,13 +719,13 @@ int main(int argc, char **argv) {
 					ix = tracecount / decimatex;
 
 					/* now check if this is a trace of interest */
-					traceok = MB_YES;
+					traceok = true;
 					if (tracenum < tracestart || tracenum > traceend)
-						traceok = MB_NO;
+						traceok = false;
 					else if (chanend >= chanstart && (channum < chanstart || channum > chanend))
-						traceok = MB_NO;
+						traceok = false;
 					else if (tracecount % decimatex != 0)
-						traceok = MB_NO;
+						traceok = false;
 				}
 				else if (plotmode == MBSEGYGRID_PLOTBYDISTANCE) {
 					if (traceheader.coord_scalar < 0)
@@ -763,9 +763,9 @@ int main(int argc, char **argv) {
 					trace_x = dx * line_dx + dy * line_dy;
 					ix = ((int)((trace_x - 0.5 * distancebin) / distancebin)) / decimatex;
 					if (ix >= 0 && ix < ngridx)
-						traceok = MB_YES;
+						traceok = true;
 					else
-						traceok = MB_NO;
+						traceok = false;
 				}
 
 				/* figure out where this trace is in the grid vertically */
@@ -807,7 +807,7 @@ int main(int argc, char **argv) {
 				}
 
 				if ((verbose == 0 && nread % 250 == 0) || (nread % 25 == 0)) {
-					if (traceok == MB_YES)
+					if (traceok == true)
 						fprintf(outfp, "PROCESS ");
 					else
 						fprintf(outfp, "IGNORE  ");
@@ -823,7 +823,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* now actually process traces of interest */
-				if (traceok == MB_YES) {
+				if (traceok == true) {
 					/* get bounds of trace in depth window mode */
 					if (windowmode == MBSEGYGRID_WINDOW_DEPTH) {
 						iystart = (int)((dtime + windowstart - timedelay) / sampleinterval);
@@ -917,7 +917,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* apply agc if desired */
-					if (agcmode == MB_YES && agcwindow > 0.0) {
+					if (agcmode == true && agcwindow > 0.0) {
 						if (worktrace == NULL || traceheader.nsamps > worktrace_alloc) {
 							status = mb_reallocd(verbose, __FILE__, __LINE__, traceheader.nsamps * sizeof(float),
 							                     (void **)&worktrace, &error);
@@ -942,7 +942,7 @@ int main(int argc, char **argv) {
 							trace[i] = worktrace[i];
 						}
 					}
-					else if (agcmode == MB_YES) {
+					else if (agcmode == true) {
 						tmax = 0.0;
 						for (int i = 0; i <= traceheader.nsamps; i++) {
 							tmax = MAX(tmax, fabs(trace[i]));
@@ -1013,7 +1013,7 @@ int main(int argc, char **argv) {
 	error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 	strcpy(projection, "SeismicProfile");
-	if (scale2distance == MB_YES) {
+	if (scale2distance == true) {
 		strcpy(xlabel, "Distance (m)");
 		strcpy(ylabel, "Depth (m)");
 		xmax = shotscale * (xmax - xmin);

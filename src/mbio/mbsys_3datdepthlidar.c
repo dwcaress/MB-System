@@ -508,7 +508,7 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 	}
 
 	/* change timestamp if indicated */
-	if (pars->timestamp_changed == MB_YES) {
+	if (pars->timestamp_changed == true) {
 		store->time_d = pars->time_d;
 		mb_get_date(verbose, pars->time_d, time_i);
 		mb_get_jtime(verbose, time_i, time_j);
@@ -1979,7 +1979,7 @@ int mbsys_3datdepthlidar_calculatebathymetry(int verbose,     /* in: verbosity l
 		}
 
 		/* set the bathymetry_calculated flag */
-		store->bathymetry_calculated = MB_YES;
+		store->bathymetry_calculated = true;
 	}
 
 	if (verbose >= 2) {

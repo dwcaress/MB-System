@@ -69,9 +69,9 @@ int mbr_info_xtfr8101(int verbose, int *system, int *beams_bath_max, int *beams_
 	    MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
@@ -167,7 +167,7 @@ int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error) {
 	int *fileheaderread = (int *)&(mb_io_ptr->save1);
 	double *pixel_size = &mb_io_ptr->saved1;
 	double *swath_width = &mb_io_ptr->saved2;
-	*fileheaderread = MB_NO;
+	*fileheaderread = false;
 	*pixel_size = 0.0;
 	*swath_width = 0.0;
 
@@ -253,11 +253,11 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	double timetag, heave, roll, pitch, heading;
 
 	/* read file header if required */
-	if (*fileheaderread == MB_NO) {
+	if (*fileheaderread == false) {
 		read_len = fread(line, 1, MBF_XTFR8101_FILEHEADERLEN, mb_io_ptr->mbfp);
 		if (read_len == MBF_XTFR8101_FILEHEADERLEN) {
 			/* extract data from buffer */
-			*fileheaderread = MB_YES;
+			*fileheaderread = true;
 			status = MB_SUCCESS;
 			int index = 0;
 			fileheader->FileFormat = line[index];
@@ -377,13 +377,13 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* if NavUnits indicates use of projected coordinates (the format spec
 			    indicates the projection parameters are unused!) assume UTM zone 1N
 			    and set up the projection */
-			if (fileheader->NavUnits == 0 && mb_io_ptr->projection_initialized == MB_NO) {
+			if (fileheader->NavUnits == 0 && mb_io_ptr->projection_initialized == false) {
 				/* initialize UTM projection */
 				const int utm_zone = (int)(((RTD * 0.0 + 183.0) / 6.0) + 0.5);
                                 char projection[MB_NAME_LENGTH];
 				sprintf(projection, "UTM%2.2dN", utm_zone);
 				mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
-				mb_io_ptr->projection_initialized = MB_YES;
+				mb_io_ptr->projection_initialized = true;
 			}
 
 			if (verbose >= 5) {
@@ -450,10 +450,10 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* look for next recognizable record */
-	int done = MB_NO;
-	while (status == MB_SUCCESS && done == MB_NO) {
+	int done = false;
+	while (status == MB_SUCCESS && done == false) {
 		/* find the next packet beginning */
-		found = MB_NO;
+		found = false;
 		skip = 0;
 		read_len = fread(line, 1, 2, mb_io_ptr->mbfp);
 		if (read_len != 2) {
@@ -461,8 +461,8 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			*error = MB_ERROR_EOF;
 		}
 		else if (((mb_u_char)line[0]) == 0xce && ((mb_u_char)line[1] == 0xfa))
-			found = MB_YES;
-		while (status == MB_SUCCESS && found == MB_NO) {
+			found = true;
+		while (status == MB_SUCCESS && found == false) {
 			line[0] = line[1];
 			read_len = fread(&(line[1]), 1, 1, mb_io_ptr->mbfp);
 			skip++;
@@ -471,7 +471,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				*error = MB_ERROR_EOF;
 			}
 			else if (((mb_u_char)line[0]) == 0xce && ((mb_u_char)line[1] == 0xfa))
-				found = MB_YES;
+				found = true;
 		}
 
 		/* read the next packet header */
@@ -520,7 +520,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
-			done = MB_YES;
+			done = true;
 		}
 
 		/* read rest of attitude packet */
@@ -593,7 +593,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 		}
 
@@ -742,7 +742,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 
 			/* read and parse the port sidescan channel header */
@@ -807,7 +807,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 
 			/* check for corrupted record */
@@ -845,7 +845,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 
 			/* read and parse the starboard sidescan channel header */
@@ -910,7 +910,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 
 			/* check for corrupted record */
@@ -948,7 +948,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 
 			if (verbose >= 5) {
@@ -1232,7 +1232,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					if (synch != 65535) {
 						status = MB_FAILURE;
 						*error = MB_ERROR_UNINTELLIGIBLE;
-						done = MB_YES;
+						done = true;
 					}
 
 					/* handle RESON_PACKETID_RT_VERY_OLD */
@@ -1420,13 +1420,13 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					else {
 						status = MB_FAILURE;
 						*error = MB_ERROR_UNINTELLIGIBLE;
-						done = MB_YES;
+						done = true;
 					}
 				}
 				else {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
-					done = MB_YES;
+					done = true;
 				}
 
 				if (verbose >= 5) {
@@ -1553,12 +1553,12 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				/* set success */
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
-				done = MB_YES;
+				done = true;
 			}
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 		}
 
@@ -1571,7 +1571,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				if (read_len != 1) {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
-					done = MB_YES;
+					done = true;
 				}
 			}
 #ifdef MBR_XTFR8101_DEBUG
@@ -1644,14 +1644,14 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_get_time(verbose, time_i, &time_d);
 
 		/* do check on time here - we sometimes get a bad fix */
-		badtime = MB_NO;
+		badtime = false;
 		if (time_i[0] < 1970 && time_i[0] > 2100)
-			badtime = MB_YES;
+			badtime = true;
 		if (time_i[1] < 0 && time_i[1] > 12)
-			badtime = MB_YES;
+			badtime = true;
 		if (time_i[2] < 0 && time_i[2] > 31)
-			badtime = MB_YES;
-		if (badtime == MB_YES) {
+			badtime = true;
+		if (badtime == true) {
 			if (verbose > 0)
 				fprintf(stderr, " Bad time from XTF in bathy header\n");
 			data->kind = MB_DATA_NONE;
@@ -1671,7 +1671,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		    XTF allows projected coordinates like UTM but the format spec
 		    lists the projection specification values as unused!
 		    Assume UTM zone 1N as we have to assume something */
-		if (mb_io_ptr->projection_initialized == MB_YES) {
+		if (mb_io_ptr->projection_initialized == true) {
 			mb_proj_inverse(verbose, mb_io_ptr->pjptr, data->bathheader.SensorXcoordinate, data->bathheader.SensorYcoordinate,
 			                &lon, &lat, error);
 		}
@@ -1778,7 +1778,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			    - since the projection is initialized, it will be applied when data
 			    are extracted using mb_extract(), mb_extract_nav(), etc., so we have
 			    to reproject the lon lat values to eastings northings for now */
-			if (mb_io_ptr->projection_initialized == MB_YES) {
+			if (mb_io_ptr->projection_initialized == true) {
 				mb_proj_forward(verbose, mb_io_ptr->pjptr, store->png_longitude, store->png_latitude, &(store->png_longitude),
 				                &(store->png_latitude), error);
 			}
@@ -1921,7 +1921,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* generate processed sidescan */
 		store->pixel_size = 0.0;
 		store->pixels_ss = 0;
-		status = mbsys_reson8k_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, error);
+		status = mbsys_reson8k_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, error);
 	}
 
 	if (verbose >= 2) {

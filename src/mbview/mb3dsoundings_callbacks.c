@@ -175,7 +175,7 @@ int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *err
 	/* set parent widget and app context */
 	mbs_parent_widget = parent;
 	mbs_app_context = app;
-	mbs_work_function_set = MB_NO;
+	mbs_work_function_set = false;
 	mbs_timer_count = 0;
 
 	/* initialize window */
@@ -290,21 +290,21 @@ int mb3dsoundings_updategui() {
 	ac++;
 	XtSetValues(mb3dsoundings.mb3dsdg.scale_snell, args, ac);
 
-	if (mb3dsoundings.view_boundingbox == MB_YES) {
+	if (mb3dsoundings.view_boundingbox == true) {
 		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_boundingbox, True, False);
 	}
 	else {
 		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_boundingbox, False, False);
 	}
 
-	if (mb3dsoundings.view_flagged == MB_YES) {
+	if (mb3dsoundings.view_flagged == true) {
 		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_flagged, True, False);
 	}
 	else {
 		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_flagged, False, False);
 	}
 
-	if (mb3dsoundings.view_scalewithflagged == MB_YES) {
+	if (mb3dsoundings.view_scalewithflagged == true) {
 		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_scalewithflagged, True, False);
 	}
 	else {
@@ -436,7 +436,7 @@ int mb3dsoundings_updatestatus() {
 	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 
 	/* if in info mode and sounding picked print info as status */
-	if (mb3dsoundings.edit_mode == MBS_EDIT_INFO && mb3dsoundings.last_sounding_defined == MB_YES) {
+	if (mb3dsoundings.edit_mode == MBS_EDIT_INFO && mb3dsoundings.last_sounding_defined == true) {
 		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
 		(mb3dsoundings.mb3dsoundings_info_notify)(sounding->ifile, sounding->iping, sounding->ibeam, value_text);
 		fprintf(stderr, "\n%s\n", value_text);
@@ -536,10 +536,10 @@ int mb3dsoundings_end(int verbose, int *error) {
 	/* handle destruction if not already handled */
 	if (mb3dsoundings.init != MBS_WINDOW_NULL) {
 		/* delete old glx_context if it exists */
-		if (mb3dsoundings.glx_init == MB_YES) {
+		if (mb3dsoundings.glx_init == true) {
 			glXDestroyContext(mb3dsoundings.dpy, mb3dsoundings.glx_context);
 			XtDestroyWidget(mb3dsoundings.glwmda);
-			mb3dsoundings.glx_init = MB_NO;
+			mb3dsoundings.glx_init = false;
 		}
 
 		/* destroy the topLevelShell and all its children */
@@ -840,13 +840,13 @@ int mb3dsoundings_reset() {
 	mb3dsoundings.glwmda = NULL;
 	mb3dsoundings.dpy = NULL;
 	mb3dsoundings.vi = NULL;
-	mb3dsoundings.glx_init = MB_NO;
+	mb3dsoundings.glx_init = false;
 	mb3dsoundings.glx_context = NULL;
-	mb3dsoundings.message_on = MB_NO;
+	mb3dsoundings.message_on = false;
 	mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
 	mb3dsoundings.mouse_mode = MBS_MOUSE_ROTATE;
-	mb3dsoundings.keyreverse_mode = MB_NO;
-	mb3dsoundings.mousereverse_mode = MB_NO;
+	mb3dsoundings.keyreverse_mode = false;
+	mb3dsoundings.mousereverse_mode = false;
 
 	/* drawing variables */
 	mb3dsoundings.elevation = 0.0;
@@ -868,9 +868,9 @@ int mb3dsoundings_reset() {
 	mb3dsoundings.gl_size_save = 1.0;
 
 	/* button parameters */
-	mb3dsoundings.button1down = MB_NO;
-	mb3dsoundings.button2down = MB_NO;
-	mb3dsoundings.button3down = MB_NO;
+	mb3dsoundings.button1down = false;
+	mb3dsoundings.button2down = false;
+	mb3dsoundings.button3down = false;
 	mb3dsoundings.button_down_x = 0;
 	mb3dsoundings.button_down_y = 0;
 	mb3dsoundings.button_move_x = 0;
@@ -879,8 +879,8 @@ int mb3dsoundings_reset() {
 	mb3dsoundings.button_up_y = 0;
 
 	/* edit grab parameters */
-	mb3dsoundings.grab_start_defined = MB_NO;
-	mb3dsoundings.grab_end_defined = MB_NO;
+	mb3dsoundings.grab_start_defined = false;
+	mb3dsoundings.grab_end_defined = false;
 	mb3dsoundings.grab_start_x = 0;
 	mb3dsoundings.grab_start_y = 0;
 	mb3dsoundings.grab_end_x = 0;
@@ -894,13 +894,13 @@ int mb3dsoundings_reset() {
 	mb3dsoundings.isnell = 10000;
 
 	/* view parameters */
-	mb3dsoundings.view_boundingbox = MB_YES;
-	mb3dsoundings.view_flagged = MB_YES;
+	mb3dsoundings.view_boundingbox = true;
+	mb3dsoundings.view_flagged = true;
 	mb3dsoundings.view_profiles = MBS_VIEW_PROFILES_NONE;
-	mb3dsoundings.view_scalewithflagged = MB_YES;
+	mb3dsoundings.view_scalewithflagged = true;
 
 	/* last sounding edited */
-	mb3dsoundings.last_sounding_defined = MB_NO;
+	mb3dsoundings.last_sounding_defined = false;
 	mb3dsoundings.last_sounding_edited = 0;
 
 	/* print output debug statements */
@@ -1081,7 +1081,7 @@ int mb3dsoundings_reset_glx() {
 	/* fprintf(stderr,"mb3dsoundings_reset_glx 1\n"); */
 
 	/* delete old glx_context if it exists */
-	if (mb3dsoundings.glx_init == MB_YES) {
+	if (mb3dsoundings.glx_init == true) {
 #ifdef MBV_DEBUG_GLX
 	fprintf(stderr, "%s:%d:%s glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, __func__, mb3dsoundings.dpy, mb3dsoundings.glx_context);
 #endif
@@ -1093,7 +1093,7 @@ int mb3dsoundings_reset_glx() {
 #ifdef MBV_GET_GLX_ERRORS
 	mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);
 #endif
-		mb3dsoundings.glx_init = MB_NO;
+		mb3dsoundings.glx_init = false;
 	}
 
 	/* get dimensions of the drawingArea */
@@ -1142,7 +1142,7 @@ int mb3dsoundings_reset_glx() {
 #endif
 	glViewport(0, 0, mb3dsoundings.gl_width, mb3dsoundings.gl_height);
 	mb3dsoundings.aspect_ratio = ((float)mb3dsoundings.gl_width) / ((float)mb3dsoundings.gl_height);
-	mb3dsoundings.glx_init = MB_YES;
+	mb3dsoundings.glx_init = true;
 
 	mb3dsoundings.dpy = (Display *)XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg);
 	mb3dsoundings.xid = XtWindow(mb3dsoundings.mb3dsdg.drawingArea);
@@ -1354,7 +1354,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 			/* If left mouse button is pushed */
 			if (event->xbutton.button == 1) {
 				/* set button1down flag */
-				mb3dsoundings.button1down = MB_YES;
+				mb3dsoundings.button1down = true;
 
 				/* deal with pick according to edit_mode */
 				if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
@@ -1386,7 +1386,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 				/* rotate mode */
 				if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE) {
 					/* set button2down flag */
-					mb3dsoundings.button2down = MB_YES;
+					mb3dsoundings.button2down = true;
 
 					/* set cursor for rotate */
 					XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
@@ -1399,7 +1399,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 				/* pan zoom mode */
 				else if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM) {
 					/* set button2down flag */
-					mb3dsoundings.button2down = MB_YES;
+					mb3dsoundings.button2down = true;
 
 					/* set cursor for rotate */
 					XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
@@ -1415,7 +1415,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 				/* rotate mode */
 				if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE) {
 					/* set button3down flag */
-					mb3dsoundings.button3down = MB_YES;
+					mb3dsoundings.button3down = true;
 
 					/* set cursor for exaggerate */
 					XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
@@ -1427,7 +1427,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 				/* pan zoom mode */
 				else if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM) {
 					/* set button3down flag */
-					mb3dsoundings.button3down = MB_YES;
+					mb3dsoundings.button3down = true;
 
 					/* set cursor for exaggerate */
 					XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
@@ -1450,7 +1450,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 			mb3dsoundings.button_move_y = mb3dsoundings.gl_height - 1 - event->xmotion.y;
 
 			/* If left mouse button is dragged */
-			if (mb3dsoundings.button1down == MB_YES) {
+			if (mb3dsoundings.button1down == true) {
 
 				/* deal with pick according to edit_mode */
 				if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
@@ -1474,7 +1474,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 			} /* end of left button events */
 
 			/* If middle mouse button is dragged */
-			else if (mb3dsoundings.button2down == MB_YES) {
+			else if (mb3dsoundings.button2down == true) {
 				/* rotate mode */
 				if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE) {
 					/* set cursor for rotate */
@@ -1523,7 +1523,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 			} /* end of middle button events */
 
 			/* If right mouse button is dragged */
-			else if (mb3dsoundings.button3down == MB_YES) {
+			else if (mb3dsoundings.button3down == true) {
 				/* rotate mode */
 				if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE) {
 					/* set cursor for exaggerate */
@@ -1568,7 +1568,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 			mb3dsoundings.button_up_y = mb3dsoundings.gl_height - 1 - event->xbutton.y;
 
 			/* If left mouse button is released */
-			if (mb3dsoundings.button1down == MB_YES) {
+			if (mb3dsoundings.button1down == true) {
 
 				/* deal with pick according to edit_mode */
 				if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
@@ -1589,17 +1589,17 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 			}
 
 			/* If middle mouse button is released */
-			else if (mb3dsoundings.button2down == MB_YES) {
+			else if (mb3dsoundings.button2down == true) {
 			} /* end of middle button events */
 
 			/* If right mouse button is released */
-			else if (mb3dsoundings.button3down == MB_YES) {
+			else if (mb3dsoundings.button3down == true) {
 			} /* end of right button events */
 
 			/* unset all buttondown flags */
-			mb3dsoundings.button1down = MB_NO;
-			mb3dsoundings.button2down = MB_NO;
-			mb3dsoundings.button3down = MB_NO;
+			mb3dsoundings.button1down = false;
+			mb3dsoundings.button2down = false;
+			mb3dsoundings.button3down = false;
 
 			/* set edit cursor */
 			mb3dsoundings_updatecursor();
@@ -1648,7 +1648,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 			case 'j':
 			case 'A':
 			case 'a':
-				if (mb3dsoundings.keyreverse_mode == MB_NO)
+				if (mb3dsoundings.keyreverse_mode == false)
 					mb3dsoundings_left_ping();
 				else
 					mb3dsoundings_right_ping();
@@ -1661,7 +1661,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 			case 'l':
 			case 'D':
 			case 'd':
-				if (mb3dsoundings.keyreverse_mode == MB_NO)
+				if (mb3dsoundings.keyreverse_mode == false)
 					mb3dsoundings_right_ping();
 				else
 					mb3dsoundings_left_ping();
@@ -1846,7 +1846,7 @@ int mb3dsoundings_pick(int x, int y) {
 	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 	rmin = 10000.0;
 	irmin = 0;
-	editevent = MB_NO;
+	editevent = false;
 	for (i = 0; i < soundingdata->num_soundings; i++) {
 		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 		dx = (double)(x - sounding->winx);
@@ -1864,20 +1864,20 @@ int mb3dsoundings_pick(int x, int y) {
 				sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 				soundingdata->num_soundings_unflagged--;
 				soundingdata->num_soundings_flagged++;
-				editevent = MB_YES;
+				editevent = true;
 
 				/* last sounding edited */
-				mb3dsoundings.last_sounding_defined = MB_YES;
+				mb3dsoundings.last_sounding_defined = true;
 				mb3dsoundings.last_sounding_edited = irmin;
 			}
 			else {
 				sounding->beamflag = MB_FLAG_NONE;
 				soundingdata->num_soundings_unflagged++;
 				soundingdata->num_soundings_flagged--;
-				editevent = MB_YES;
+				editevent = true;
 
 				/* last sounding edited */
-				mb3dsoundings.last_sounding_defined = MB_YES;
+				mb3dsoundings.last_sounding_defined = true;
 				mb3dsoundings.last_sounding_edited = irmin;
 			}
 		}
@@ -1886,10 +1886,10 @@ int mb3dsoundings_pick(int x, int y) {
 				sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 				soundingdata->num_soundings_unflagged--;
 				soundingdata->num_soundings_flagged++;
-				editevent = MB_YES;
+				editevent = true;
 
 				/* last sounding edited */
-				mb3dsoundings.last_sounding_defined = MB_YES;
+				mb3dsoundings.last_sounding_defined = true;
 				mb3dsoundings.last_sounding_edited = irmin;
 			}
 		}
@@ -1899,13 +1899,13 @@ int mb3dsoundings_pick(int x, int y) {
 	}
 
 	/* replot the data */
-	if (editevent == MB_YES) {
+	if (editevent == true) {
 		mb3dsoundings_plot(mbs_verbose, &mbs_error);
 		mb3dsoundings_updatestatus();
 	}
 
 	/* communicate edit event back to calling application */
-	if (editevent == MB_YES && mb3dsoundings.mb3dsoundings_edit_notify != NULL) {
+	if (editevent == true && mb3dsoundings.mb3dsoundings_edit_notify != NULL) {
 		(mb3dsoundings.mb3dsoundings_edit_notify)(sounding->ifile, sounding->iping, sounding->ibeam, sounding->beamflag,
 		                                          MB3DSDG_EDIT_FLUSH);
 	}
@@ -1929,7 +1929,7 @@ int mb3dsoundings_eraserestore(int x, int y) {
 	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 	for (i = 0; i < soundingdata->num_soundings; i++) {
 		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-		editevent = MB_NO;
+		editevent = false;
 		dx = (double)(x - sounding->winx);
 		dy = (double)(y - sounding->winy);
 		r = sqrt(dx * dx + dy * dy);
@@ -1938,25 +1938,25 @@ int mb3dsoundings_eraserestore(int x, int y) {
 				sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 				soundingdata->num_soundings_unflagged--;
 				soundingdata->num_soundings_flagged++;
-				editevent = MB_YES;
+				editevent = true;
 
 				/* last sounding edited */
-				mb3dsoundings.last_sounding_defined = MB_YES;
+				mb3dsoundings.last_sounding_defined = true;
 				mb3dsoundings.last_sounding_edited = i;
 			}
 			else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE && !mb_beam_ok(sounding->beamflag)) {
 				sounding->beamflag = MB_FLAG_NONE;
 				soundingdata->num_soundings_unflagged++;
 				soundingdata->num_soundings_flagged--;
-				editevent = MB_YES;
+				editevent = true;
 
 				/* last sounding edited */
-				mb3dsoundings.last_sounding_defined = MB_YES;
+				mb3dsoundings.last_sounding_defined = true;
 				mb3dsoundings.last_sounding_edited = i;
 			}
 
 			/* handle valid edit event */
-			if (editevent == MB_YES) {
+			if (editevent == true) {
 				neditevent++;
 
 				/* communicate edit event back to calling application */
@@ -1996,8 +1996,8 @@ int mb3dsoundings_grab(int x, int y, int grabmode) {
 	/* save grab start point */
 	if (grabmode == MBS_EDIT_GRAB_START) {
 		/* set grab parameters */
-		mb3dsoundings.grab_start_defined = MB_YES;
-		mb3dsoundings.grab_end_defined = MB_NO;
+		mb3dsoundings.grab_start_defined = true;
+		mb3dsoundings.grab_end_defined = false;
 		mb3dsoundings.grab_start_x = x;
 		mb3dsoundings.grab_start_y = y;
 		mb3dsoundings.grab_end_x = x;
@@ -2010,7 +2010,7 @@ int mb3dsoundings_grab(int x, int y, int grabmode) {
 	/* save grab end point */
 	else if (grabmode == MBS_EDIT_GRAB_MOVE) {
 		/* set grab parameters */
-		mb3dsoundings.grab_end_defined = MB_YES;
+		mb3dsoundings.grab_end_defined = true;
 		mb3dsoundings.grab_end_x = x;
 		mb3dsoundings.grab_end_y = y;
 
@@ -2030,17 +2030,17 @@ int mb3dsoundings_grab(int x, int y, int grabmode) {
 		soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 		for (i = 0; i < soundingdata->num_soundings; i++) {
 			sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-			editevent = MB_NO;
+			editevent = false;
 			if (sounding->winx >= xmin && sounding->winx <= xmax && sounding->winy >= ymin && sounding->winy <= ymax) {
 				if (mb_beam_ok(sounding->beamflag)) {
 					sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 					soundingdata->num_soundings_unflagged--;
 					soundingdata->num_soundings_flagged++;
-					editevent = MB_YES;
+					editevent = true;
 					neditevent++;
 
 					/* last sounding edited */
-					mb3dsoundings.last_sounding_defined = MB_YES;
+					mb3dsoundings.last_sounding_defined = true;
 					mb3dsoundings.last_sounding_edited = i;
 
 					/* communicate edit event back to calling application */
@@ -2052,8 +2052,8 @@ int mb3dsoundings_grab(int x, int y, int grabmode) {
 		}
 
 		/* grab done so unset grab flags */
-		mb3dsoundings.grab_start_defined = MB_NO;
-		mb3dsoundings.grab_end_defined = MB_NO;
+		mb3dsoundings.grab_start_defined = false;
+		mb3dsoundings.grab_end_defined = false;
 
 		/* replot and flush the edit events in the calling application */
 		if (neditevent > 0) {
@@ -2098,7 +2098,7 @@ int mb3dsoundings_unflag_view() {
 	}
 
 	/* last sounding edited */
-	mb3dsoundings.last_sounding_defined = MB_NO;
+	mb3dsoundings.last_sounding_defined = false;
 	mb3dsoundings.last_sounding_edited = 0;
 
 	/* replot and flush the edit events in the calling application */
@@ -2143,7 +2143,7 @@ int mb3dsoundings_flag_view() {
 	}
 
 	/* last sounding edited */
-	mb3dsoundings.last_sounding_defined = MB_NO;
+	mb3dsoundings.last_sounding_defined = false;
 	mb3dsoundings.last_sounding_edited = 0;
 
 	/* replot and flush the edit events in the calling application */
@@ -2186,7 +2186,7 @@ int mb3dsoundings_info(int x, int y) {
 	}
 	if (rmin < MBS_PICK_THRESHOLD) {
 		/* select closest sounding */
-		mb3dsoundings.last_sounding_defined = MB_YES;
+		mb3dsoundings.last_sounding_defined = true;
 		mb3dsoundings.last_sounding_edited = irmin;
 
 		mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -2216,7 +2216,7 @@ int mb3dsoundings_bad_ping() {
 	/* only check if last sounding defined */
 	neditevent = 0;
 	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
-	if (mb3dsoundings.last_sounding_defined == MB_YES && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
+	if (mb3dsoundings.last_sounding_defined == true && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
 		/* loop over all soundings */
 		lastsounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
 		for (i = 0; i < soundingdata->num_soundings; i++) {
@@ -2267,7 +2267,7 @@ int mb3dsoundings_zero_ping() {
 	/* only check if last sounding defined */
 	neditevent = 0;
 	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
-	if (mb3dsoundings.last_sounding_defined == MB_YES && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
+	if (mb3dsoundings.last_sounding_defined == true && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
 		/* loop over all soundings */
 		lastsounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
 		for (i = 0; i < soundingdata->num_soundings; i++) {
@@ -2319,7 +2319,7 @@ int mb3dsoundings_left_ping() {
 	/* only check if last sounding defined */
 	neditevent = 0;
 	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
-	if (mb3dsoundings.last_sounding_defined == MB_YES && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
+	if (mb3dsoundings.last_sounding_defined == true && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
 		/* loop over all soundings */
 		lastsounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
 		for (i = 0; i < soundingdata->num_soundings; i++) {
@@ -2370,7 +2370,7 @@ int mb3dsoundings_right_ping() {
 	/* only check if last sounding defined */
 	neditevent = 0;
 	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
-	if (mb3dsoundings.last_sounding_defined == MB_YES && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
+	if (mb3dsoundings.last_sounding_defined == true && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
 		/* loop over all soundings */
 		lastsounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
 		for (i = 0; i < soundingdata->num_soundings; i++) {
@@ -2421,7 +2421,7 @@ int mb3dsoundings_good_ping() {
 	/* only check if last sounding defined */
 	neditevent = 0;
 	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
-	if (mb3dsoundings.last_sounding_defined == MB_YES && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
+	if (mb3dsoundings.last_sounding_defined == true && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
 		/* loop over all soundings */
 		lastsounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
 		for (i = 0; i < soundingdata->num_soundings; i++) {
@@ -2475,7 +2475,7 @@ int mb3dsoundings_setzscale(int verbose, int *error) {
 	zmax = 0.0;
 
 	/* get vertical min maxes for scaling of all soundings */
-	if (mb3dsoundings.view_scalewithflagged == MB_YES && soundingdata->num_soundings > 0) {
+	if (mb3dsoundings.view_scalewithflagged == true && soundingdata->num_soundings > 0) {
 		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[0]);
 		zmin = sounding->z;
 		zmax = sounding->z;
@@ -2588,7 +2588,7 @@ soundingdata->num_soundings); */
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
 	/* Plot the bounding box if desired */
-	if (mb3dsoundings.view_boundingbox == MB_YES) {
+	if (mb3dsoundings.view_boundingbox == true) {
 		glxmin = soundingdata->scale * soundingdata->xmin;
 		glxmax = soundingdata->scale * soundingdata->xmax;
 		glymin = soundingdata->scale * soundingdata->ymin;
@@ -2750,7 +2750,7 @@ soundingdata->num_soundings); */
 	glEnd();
 
 	/* Plot the flagged soundings if desired */
-	if (mb3dsoundings.view_flagged == MB_YES) {
+	if (mb3dsoundings.view_flagged == true) {
 		glColor3f(1.0, 0.0, 0.0);
 		glBegin(GL_POINTS);
 		for (i = 0; i < soundingdata->num_soundings; i++) {
@@ -2763,7 +2763,7 @@ soundingdata->num_soundings); */
 	}
 
 	/* If in info mode and sounding picked plot it green */
-	if (mb3dsoundings.edit_mode == MBS_EDIT_INFO && mb3dsoundings.last_sounding_defined == MB_YES) {
+	if (mb3dsoundings.edit_mode == MBS_EDIT_INFO && mb3dsoundings.last_sounding_defined == true) {
 		glColor3f(0.0, 1.0, 1.0);
 		glBegin(GL_POINTS);
 		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
@@ -2787,8 +2787,8 @@ soundingdata->num_soundings); */
 	/* plot grab rectangle before rotations */
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	if (mb3dsoundings.button1down == MB_YES && mb3dsoundings.grab_start_defined == MB_YES &&
-	    mb3dsoundings.grab_end_defined == MB_YES) {
+	if (mb3dsoundings.button1down == true && mb3dsoundings.grab_start_defined == true &&
+	    mb3dsoundings.grab_end_defined == true) {
 		grabxmin = MIN(mb3dsoundings.grab_start_x, mb3dsoundings.grab_end_x);
 		grabxmax = MAX(mb3dsoundings.grab_start_x, mb3dsoundings.grab_end_x);
 		grabymin = MIN(mb3dsoundings.grab_start_y, mb3dsoundings.grab_end_y);

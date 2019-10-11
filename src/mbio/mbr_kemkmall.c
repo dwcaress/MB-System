@@ -67,9 +67,9 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
           "                      binary datagrams, Kongsberg.\n", MB_DESCRIPTION_LENGTH);
   *numfile = 1;
   *filetype = MB_FILETYPE_SINGLE;
-  *variable_beams = MB_YES;
-  *traveltime = MB_YES;
-  *beam_flagging = MB_YES;
+  *variable_beams = true;
+  *traveltime = true;
+  *beam_flagging = true;
   *platform_source = MB_DATA_NONE;
   *nav_source = MB_DATA_DATA;
   *sensordepth_source = MB_DATA_DATA;
@@ -260,7 +260,7 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
   /* init internal data structure variables */
   mb_io_ptr->saveptr1 = (void *)dgm_index_table;
   mb_io_ptr->save1 = 0;     // most recently read entry in index table, after indexing
-  mb_io_ptr->save2 = MB_NO; // file has been indexed
+  mb_io_ptr->save2 = false; // file has been indexed
 
     if (verbose >= 2) {
         fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -3076,7 +3076,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   dgm_id = (int *)&mb_io_ptr->save1;
   *dgm_id = 0;
   file_indexed = (int *)&mb_io_ptr->save2;
-  *file_indexed = MB_NO;
+  *file_indexed = false;
 
   /* set file position to the start */
   fseek(mb_io_ptr->mbfp, 0, SEEK_SET);
@@ -3085,7 +3085,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   /* set status */
   int status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
-  valid_id = MB_YES;
+  valid_id = true;
 
   while (*error <= MB_ERROR_NO_ERROR) {
 
@@ -3150,7 +3150,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
           mb_io_ptr->file_pos += HEADER_SKIP;
           fseek(mb_io_ptr->mbfp, mb_io_ptr->file_pos, SEEK_SET);
           emdgm_type = UNKNOWN;
-          valid_id = MB_NO;
+          valid_id = false;
         }
       }
 
@@ -3314,7 +3314,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   }
 
   /* set indexed flag */
-  *file_indexed = MB_YES;
+  *file_indexed = true;
   *dgm_id = 0;
   if ((dgm_index_table->dgm_count > 0) && (*error = MB_ERROR_EOF)) {
     status = MB_SUCCESS;
@@ -3387,7 +3387,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   char *buffer = NULL;
   int *bufferalloc = NULL;
   int *dgm_id = NULL;
-  int done = MB_NO;
+  int done = false;
   int jmrz, isounding;
   int numSoundings, numBackscatterSamples;
 
@@ -3421,17 +3421,17 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   /* check index to see if more datagrams can be read */
   if (mb_io_ptr->mbfp != NULL) {
     if (*dgm_id < dgm_index_table->dgm_count) {
-      done = MB_NO;
+      done = false;
     }
     else {
-      done = MB_YES;
+      done = true;
       *error = MB_ERROR_EOF;
       status = MB_FAILURE;
     }
   }
 
   /* if not done loop over reading data until a record is ready for return */
-  while (done == MB_NO) {
+  while (done == false) {
 
     // if reading a file then use the index of datagrams
     if (mb_io_ptr->mbfp != NULL) {
@@ -3452,7 +3452,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         status = mb_reallocd(verbose, __FILE__, __LINE__, *bufferalloc, (void **)bufferptr, error);
         if (status != MB_SUCCESS) {
           *bufferalloc = 0;
-          done = MB_YES;
+          done = true;
         }
         else {
           buffer = (char *)*bufferptr;
@@ -3482,7 +3482,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         status = mb_reallocd(verbose, __FILE__, __LINE__, MB_UDP_SIZE_MAX, (void **)bufferptr, error);
         if (status != MB_SUCCESS) {
           *bufferalloc = 0;
-          done = MB_YES;
+          done = true;
         }
         else {
           buffer = (char *)*bufferptr;
@@ -3511,70 +3511,70 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
             /* #IIP - Info Installation PU */
           status = mbr_kemkmall_rd_iip(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case IOP:
             /* #IOP -  Runtime datagram */
           status = mbr_kemkmall_rd_iop(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SPO:
             /* #SPO - Sensor POsition data */
           status = mbr_kemkmall_rd_spo(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SKM:
             /* #SKM - KM binary sensor data */
           status = mbr_kemkmall_rd_skm(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SVP:
             /* #SVP - Sound Velocity Profile */
           status = mbr_kemkmall_rd_svp(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SVT:
           /* #SVP - Sensor sound Velocity measured at Transducer */
           status = mbr_kemkmall_rd_svt(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SCL:
             /* #SCL - Sensor CLock datagram */
           status = mbr_kemkmall_rd_scl(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SDE:
           /* #SDE - Sensor DEpth data */
           status = mbr_kemkmall_rd_sde(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SHI:
           /* #SHI - Sensor HeIght data */
           status = mbr_kemkmall_rd_shi(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case SHA:
           /* #SHA - Sensor HeAding */
           status = mbr_kemkmall_rd_sha(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case MRZ:
@@ -3586,24 +3586,24 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
           /* check to see if done */
           if (status != MB_SUCCESS) {
-            done = MB_NO;
+            done = false;
           } else {
-            done = MB_YES;
+            done = true;
             store->n_mrz_read = 0;
             store->n_mrz_needed = store->mrz[jmrz].cmnPart.rxFansPerPing;
             for (int imrz = 0; imrz < store->n_mrz_needed; imrz++) {
               if (store->mrz[imrz].cmnPart.pingCnt != store->mrz[jmrz].cmnPart.pingCnt) {
-                done = MB_NO;
+                done = false;
               } else {
                 store->n_mrz_read++;
               }
             }
             if (store->n_mrz_read != store->n_mrz_needed)
-              done = MB_NO;
+              done = false;
             store->num_soundings = 0;
             store->num_backscatter_samples = 0;
             store->num_pixels = 0;
-            if (done == MB_YES) {
+            if (done == true) {
               for (int imrz=0;imrz<store->n_mrz_needed;imrz++) {
                 numSoundings = store->mrz[imrz].rxInfo.numSoundingsMaxMain
                                 + store->mrz[imrz].rxInfo.numExtraDetections;
@@ -3618,9 +3618,9 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
           }
 
           /* if pseudosidescan is expected and XMS datagram not read, then not done yet */
-          if (done == MB_YES && store->xmb.pseudosidescan_enabled == MB_YES
+          if (done == true && store->xmb.pseudosidescan_enabled == true
               && store->mrz[jmrz].cmnPart.pingCnt != store->xms.pingCnt) {
-            done = MB_NO;
+            done = false;
           }
           break;
 
@@ -3630,12 +3630,12 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
           status = mbr_kemkmall_rd_mwc(verbose, buffer, store_ptr, (void *)header_ptr, error);
 
           /* check to see if done */
-          //done = MB_YES;
+          //done = true;
           store->n_mwc_read = 0;
           store->n_mwc_needed = dgm_index->rx_per_ping;
           for (int imwc=0;imwc<dgm_index->rx_per_ping;imwc++) {
             if (store->mrz[0].cmnPart.pingCnt != store->mwc[imwc].cmnPart.pingCnt) {
-              done = MB_NO;
+              done = false;
             } else {
               store->n_mwc_read++;
             }
@@ -3646,41 +3646,41 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
           /* #CPO - Compatibility position sensor data */
           status = mbr_kemkmall_rd_cpo(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case CHE:
           /* #CHE - Compatibility heave data */
           status = mbr_kemkmall_rd_che(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case XMB:
           /* #XMB - Indicates these data were written by MB-System (MB-System only) */
           status = mbr_kemkmall_rd_xmb(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case XMC:
           /* #XMC - Comment datagram (MB-System only) */
           status = mbr_kemkmall_rd_xmc(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         case XMS:
           /* #XMS - MB-System multibeam pseudosidescan */
           status = mbr_kemkmall_rd_xms(verbose, buffer, store_ptr, (void *)header_ptr, error);
           if (status != MB_SUCCESS) {
-            done = MB_NO;
+            done = false;
           } else {
             if (store->n_mrz_read > 0 && store->n_mrz_read == store->n_mrz_needed
                 && store->mrz[0].cmnPart.pingCnt == store->xms.pingCnt) {
-              done = MB_YES;
+              done = true;
             } else {
-              done = MB_NO;
+              done = false;
             }
           }
           break;
@@ -3689,13 +3689,13 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
           /* Unknown datagram format */
           status = mbr_kemkmall_rd_unknown(verbose, buffer, store_ptr, (void *)header_ptr, error); // TODO: implement!
           if (status == MB_SUCCESS)
-            done = MB_YES;
+            done = true;
           break;
 
         default:
           /* should never get here */
           status = MB_FAILURE;
-          done = MB_YES;
+          done = true;
           break;
 
       }
@@ -3703,7 +3703,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
     /* set done if read failure */
     else {
-      done = MB_YES;
+      done = true;
     }
 
     /* increment the index counter */
@@ -3711,8 +3711,8 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       (*dgm_id)++;
 
     /* if not done but no more data in index then done with error */
-    if (done == MB_NO && mb_io_ptr->mbfp != NULL && *dgm_id >= dgm_index_table->dgm_count) {
-      done = MB_YES;
+    if (done == false && mb_io_ptr->mbfp != NULL && *dgm_id >= dgm_index_table->dgm_count) {
+      done = true;
       *error = MB_ERROR_EOF;
       status = MB_FAILURE;
     }
@@ -3759,7 +3759,7 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
 
   /* if reading from a file that has not been indexed, index the file */
-  if (*file_indexed == MB_NO && mb_io_ptr->mbfp != NULL) {
+  if (*file_indexed == false && mb_io_ptr->mbfp != NULL) {
 #ifdef MBR_KEMKMALL_DEBUG
   fprintf(stderr, "About to call mbr_kemkmall_index_data...\n");
 #endif
@@ -3778,8 +3778,8 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
   /* if this is a ping and the first time read by MB-System generate pseudosidescan */
   if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
-    && store->xmb.pseudosidescan_enabled == MB_NO) {
-		status = mbsys_kmbes_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 0, error);
+    && store->xmb.pseudosidescan_enabled == false) {
+		status = mbsys_kmbes_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 0, error);
   }
 
   /* set error and kind in mb_io_ptr */
@@ -6259,7 +6259,7 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* insert the data */
     index = MBSYS_KMBES_HEADER_SIZE;
 
-    mb_put_binary_int(true, (int)MB_YES, &buffer[index]);
+    mb_put_binary_int(true, 1, &buffer[index]);
     index += 4;
     for (int i=0;i<28;i++) {
       buffer[index] = xmb->unused[i];

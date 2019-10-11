@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 	char dfile[MB_PATH_MAXLINE];
 	char swathroot[MB_PATH_MAXLINE];
 	char outroot[MB_PATH_MAXLINE];
-	char outroot_defined = MB_NO;
+	char outroot_defined = false;
 	char xcorfile[MB_PATH_MAXLINE];
 	char xcorfiletot[MB_PATH_MAXLINE];
 	char cmdfile[MB_PATH_MAXLINE];
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 	FILE *fpe = NULL;
 	FILE *fph = NULL;
 	FILE *fpm = NULL;
-	int read_data = MB_NO;
+	int read_data = false;
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
@@ -188,7 +188,7 @@ int main(int argc, char **argv) {
 			case 'O':
 			case 'o':
 				sscanf(optarg, "%s", outroot);
-				outroot_defined = MB_YES;
+				outroot_defined = true;
 				break;
 			case 'S':
 			case 's':
@@ -243,7 +243,7 @@ int main(int argc, char **argv) {
 	mb_get_format(verbose, swathdata, swathroot, &formatguess, &error);
 	if (format == 0)
 		format = formatguess;
-	if (outroot_defined == MB_NO)
+	if (outroot_defined == false)
 		strcpy(outroot, swathroot);
 
 	/* determine whether to read one file or a list of files */
@@ -329,18 +329,18 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(swathfile, swathdata);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data == true) {
 		nestimate = 0;
 		nslope = 0;
 		time_d_avg = 0.0;
@@ -429,7 +429,7 @@ int main(int argc, char **argv) {
 
 					for (int j = j0; j <= j1; j++) {
 						/* interpolate lagged roll value */
-						bool found = MB_NO;
+						bool found = false;
 						time_d = slope_time_d[j] + timelag;
 						for (int l = nr; l < nroll - 1 && !found; l++) {
 							if (time_d >= roll_time_d[l] && time_d <= roll_time_d[l + 1]) {
@@ -568,12 +568,12 @@ int main(int argc, char **argv) {
 		/* figure out whether and what to read next */
 		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */

@@ -378,8 +378,8 @@ int mbvt_quit() {
 	mbvt_deallocate_swath();
 
 	/* clear out old velocity data */
-	if (edit == MB_YES) {
-		edit = MB_NO;
+	if (edit == true) {
+		edit = false;
 		profile->n = 0;
 		strcpy(profile->name, "\0");
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_x, &error);
@@ -582,8 +582,8 @@ int mbvt_open_edit_profile(char *file) {
 	profile = &profile_edit;
 
 	/* clear out old velocity data */
-	if (edit == MB_YES) {
-		edit = MB_NO;
+	if (edit == true) {
+		edit = false;
 		profile->n = 0;
 		strcpy(profile->name, "\0");
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_x, &error);
@@ -649,7 +649,7 @@ int mbvt_open_edit_profile(char *file) {
 	fclose(fp);
 
 	/* assume success */
-	edit = MB_YES;
+	edit = true;
 	status = MB_SUCCESS;
 
 	/* print output debug statements */
@@ -692,8 +692,8 @@ int mbvt_new_edit_profile() {
 	profile = &profile_edit;
 
 	/* clear out old velocity data */
-	if (edit == MB_YES) {
-		edit = MB_NO;
+	if (edit == true) {
+		edit = false;
 		profile->n = 0;
 		strcpy(profile->name, "\0");
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_x, &error);
@@ -742,7 +742,7 @@ int mbvt_new_edit_profile() {
 	}
 
 	/* assume success */
-	edit = MB_YES;
+	edit = true;
 	status = MB_SUCCESS;
 
 	/* print output debug statements */
@@ -818,7 +818,7 @@ int mbvt_save_edit_profile(char *file) {
 	fclose(fp);
 
 	/* assume success */
-	edit = MB_YES;
+	edit = true;
 	status = MB_SUCCESS;
 
 	/* print output debug statements */
@@ -903,11 +903,11 @@ int mbvt_save_swath_profile(char *file) {
 
 		/* set par file for use with mbprocess */
 		status = mb_pr_get_svp(verbose, swathfile, &oldmode, oldfile, &oldanglemode, &corrected, &error);
-		status = mb_pr_update_svp(verbose, swathfile, MB_YES, file, anglemode, corrected, &error);
+		status = mb_pr_update_svp(verbose, swathfile, true, file, anglemode, corrected, &error);
 
 		/* check success */
 		if (status == MB_SUCCESS)
-			edit = MB_YES;
+			edit = true;
 	}
 
 	/* print output debug statements */
@@ -988,11 +988,11 @@ int mbvt_save_residuals(char *file) {
 
 		/* set par file for use with mbprocess */
 		status = mb_pr_get_static(verbose, swathfile, &oldmode, oldfile, &error);
-		status = mb_pr_update_static(verbose, swathfile, MB_YES, file, &error);
+		status = mb_pr_update_static(verbose, swathfile, true, file, &error);
 
 		/* check success */
 		if (status == MB_SUCCESS)
-			edit = MB_YES;
+			edit = true;
 
 		/* open the *.sbao file if possible */
 		sprintf(file, "%s.sbao", swathfile);
@@ -1393,7 +1393,7 @@ int mbvt_plot() {
 	}
 
 	/* plot edit profile */
-	if (edit == MB_YES) {
+	if (edit == true) {
 		for (j = 0; j < profile_edit.n; j++) {
 			xx = xmin + (profile_edit.velocity[j] - xminimum) * xscale;
 			yy = ymin + (profile_edit.depth[j] - yminimum) * yscale;
@@ -2034,7 +2034,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 		do_error_dialog("Data loading aborted.", "The specified swath data", "format is incorrect!");
 		return (status);
 	}
-	if (traveltime == MB_NO) {
+	if (traveltime == false) {
 		fprintf(stderr, "\nProgram <%s> requires travel time data.\n", program_name);
 		fprintf(stderr, "Format %d is does not include travel time data.\n", format);
 		fprintf(stderr, "Travel times and angles are being estimated\n");
@@ -2043,7 +2043,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 		do_error_dialog("Data doesn't include travel times!", "Travel times and angles estimated",
 		                "assuming 1500 m/s sound speed.");
 	}
-	/* if (traveltime == MB_NO)
+	/* if (traveltime == false)
 	    {
 	    fprintf(stderr,"\nProgram <%s> requires travel time data.\n",program_name);
 	    fprintf(stderr,"Format %d is unacceptable because it does not include travel time data.\n",format);
@@ -2117,7 +2117,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 
 	/* Load with ESF File if avialable */
 	if (status == MB_SUCCESS) {
-		status = mb_esf_load(verbose, program_name, swathfile, MB_YES, MB_NO, esffile, &esf, &error);
+		status = mb_esf_load(verbose, program_name, swathfile, true, false, esffile, &esf, &error);
 	}
 
 	/* load data */
@@ -2188,7 +2188,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 				ping[nbuffer].bathacrosstrack[i] = bathacrosstrack[i];
 				ping[nbuffer].bathalongtrack[i] = bathalongtrack[i];
 			}
-			if (traveltime == MB_YES) {
+			if (traveltime == true) {
 				status = mb_ttimes(verbose, mbio_ptr, store_ptr, &kind, &nbeams, ping[nbuffer].ttimes, ping[nbuffer].angles,
 				                   ping[nbuffer].angles_forward, ping[nbuffer].angles_null, ping[nbuffer].heave,
 				                   ping[nbuffer].alongtrack_offset, &ping[nbuffer].sonardepth, &ping[nbuffer].ssv, &error);
@@ -2310,7 +2310,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	do_message_off();
 
 	/* get editable svp if needed */
-	if (edit != MB_YES)
+	if (edit != true)
 		mbvt_new_edit_profile();
 
 	/* add Levitus display profile if nav available */
@@ -2322,15 +2322,15 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	}
 
 	/* load svp files generated by mbsvplist if available */
-	done = MB_NO;
+	done = false;
 	count = 0;
-	while (done == MB_NO) {
+	while (done == false) {
 		sprintf(svp_file, "%s_%3.3d.svp", swathfile, count);
 		if ((fstat = stat(svp_file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 			mbvt_open_display_profile(svp_file);
 		}
 		else if (count > 0)
-			done = MB_YES;
+			done = true;
 		count++;
 	}
 
@@ -2353,7 +2353,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	}
 
 	/* process the data */
-	if (status == MB_SUCCESS && edit == MB_YES)
+	if (status == MB_SUCCESS && edit == true)
 		status = mbvt_process_multibeam();
 
 	/* plot everything */
@@ -2521,7 +2521,7 @@ int mbvt_process_multibeam() {
 	vel = profile_edit.velocity;
 	dep = profile_edit.depth;
 	status = mb_rt_init(verbose, nvel, dep, vel, (void **)&rt_svp, &error);
-	first = MB_YES;
+	first = true;
 	nbeams = 0;
 	rayxmax = 0.0;
 	raydepthmin = 10000;
@@ -2545,17 +2545,17 @@ int mbvt_process_multibeam() {
 			ssv_start = ping[k].ssv;
 
 		/* find a good heave value */
-		found = MB_NO;
-		for (i = 0; i < ping[k].beams_bath && found == MB_NO; i++) {
+		found = false;
+		for (i = 0; i < ping[k].beams_bath && found == false; i++) {
 			if (mb_beam_ok(ping[k].beamflag[i])) {
 				heave_use = ping[k].heave[i];
-				found = MB_YES;
+				found = true;
 			}
 		}
 
 		sonardepth = heave_use + ping[k].sonardepth;
 		sonardepthshift = 0.0;
-		if (first == MB_YES)
+		if (first == true)
 			raydepthmin = MIN(raydepthmin, sonardepth);
 		if (sonardepth < 0.0) {
 			sonardepthshift = sonardepth;
@@ -2574,7 +2574,7 @@ int mbvt_process_multibeam() {
 				factor = cos(DTR * ping[k].angles_forward[i]);
 
 				/* trace rays */
-				if (first == MB_NO) {
+				if (first == false) {
 					/* call raytracing without keeping
 					plotting list */
 					status =
@@ -2604,7 +2604,7 @@ int mbvt_process_multibeam() {
 					bath_min = depth[i];
 				if (depth[i] > bath_max)
 					bath_max = depth[i];
-				if (first == MB_YES) {
+				if (first == true) {
 					rayxmax = MAX(rayxmax, fabs(acrosstrack[i]));
 					raydepthmax = MAX(raydepthmax, depth[i]);
 				}
@@ -2624,7 +2624,7 @@ int mbvt_process_multibeam() {
 		}
 
 		/* reset first flag */
-		first = MB_NO;
+		first = false;
 
 		/* get linear fit to ping */
 		if (ns > 0) {

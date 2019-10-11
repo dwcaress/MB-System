@@ -251,10 +251,10 @@ int main(int argc, char **argv) {
 	char zlabel[MB_PATH_MAXLINE] = "";
 	char title[MB_PATH_MAXLINE] = "";
 	char plot_cmd[MB_PATH_MAXLINE] = "";
-	int scale2distance = MB_NO;
+	int scale2distance = false;
 	double shotscale = 1.0;
 	double frequencyscale = 1.0;
-	int logscale = MB_NO;
+	int logscale = false;
 
 	int sinftracemode = MBSEGYPSD_USESHOT;
 	int sinftracestart = 0;
@@ -309,7 +309,7 @@ int main(int argc, char **argv) {
 			case 'a':
 				n = sscanf(optarg, "%lf/%lf", &shotscale, &frequencyscale);
 				if (n == 2)
-					scale2distance = MB_YES;
+					scale2distance = true;
 				break;
 			case 'D':
 			case 'd':
@@ -321,7 +321,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'L':
 			case 'l':
-				logscale = MB_YES;
+				logscale = true;
 				break;
 			case 'N':
 			case 'n':
@@ -526,7 +526,7 @@ int main(int argc, char **argv) {
 		fprintf(outfp, "     NaN values used to flag regions with no data\n");
 		fprintf(outfp, "     shotscale:          %f\n", shotscale);
 		fprintf(outfp, "     frequencyscale:     %f\n", frequencyscale);
-		if (scale2distance == MB_YES) {
+		if (scale2distance == true) {
 			fprintf(outfp, "     trace numbers scaled to distance in meters\n");
 			fprintf(outfp, "     scaled grid xmin    %f\n", 0.0);
 			fprintf(outfp, "     scaled grid xmax:   %f\n", shotscale * (xmax - xmin));
@@ -604,13 +604,13 @@ int main(int argc, char **argv) {
 				iys = (btime - timedelay) / sampleinterval;
 
 				/* now check if this is a trace of interest */
-				traceok = MB_YES;
+				traceok = true;
 				if (tracenum < tracestart || tracenum > traceend)
-					traceok = MB_NO;
+					traceok = false;
 				else if (chanend >= chanstart && (channum < chanstart || channum > chanend))
-					traceok = MB_NO;
+					traceok = false;
 				else if (tracecount % decimatex != 0)
-					traceok = MB_NO;
+					traceok = false;
 
 				/* get trace min and max */
 				tracemin = trace[0];
@@ -621,7 +621,7 @@ int main(int argc, char **argv) {
 				}
 
 				if ((verbose == 0 && nread % 250 == 0) || (nread % 25 == 0)) {
-					if (traceok == MB_YES)
+					if (traceok == true)
 						fprintf(outfp, "PROCESS ");
 					else
 						fprintf(outfp, "IGNORE  ");
@@ -635,7 +635,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* now actually process traces of interest */
-				if (traceok == MB_YES) {
+				if (traceok == true) {
 					/* zero working psd array */
 					for (iy = 0; iy < ngridy; iy++) {
 						spsd[iy] = 0.0;
@@ -719,7 +719,7 @@ int main(int argc, char **argv) {
 					for (iy = 0; iy < ngridy; iy++) {
 						k = (ngridy - 1 - iy) * ngridx + ix;
 						if (wpsd[iy] > 0.0) {
-							if (logscale == MB_NO)
+							if (logscale == false)
 								grid[k] = spsd[iy] / wpsd[iy];
 							else
 								grid[k] = 20.0 * log10(spsd[iy] / wpsd[iy]);
@@ -747,7 +747,7 @@ int main(int argc, char **argv) {
 	error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 	strcpy(projection, "GenericLinear");
-	if (scale2distance == MB_YES) {
+	if (scale2distance == true) {
 		strcpy(xlabel, "Distance (m)");
 		strcpy(ylabel, "Frequency (Hz)");
 		xmax *= shotscale;
@@ -759,7 +759,7 @@ int main(int argc, char **argv) {
 		strcpy(ylabel, "Frequency (Hz)");
 		dx = (double)decimatex;
 	}
-	if (logscale == MB_YES)
+	if (logscale == true)
 		strcpy(zlabel, "dB/Hz");
 	else
 		strcpy(zlabel, "Intensity/Hz");

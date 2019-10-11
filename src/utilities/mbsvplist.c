@@ -145,11 +145,11 @@ int main(int argc, char **argv) {
 	int svp_printmode;
 	int svp_force_zero;
 	int svp_file_output;
-	int output_as_table = MB_NO;
+	int output_as_table = false;
 
 	/* SVP values */
-	int svp_match_last = MB_NO;
-	int svp_loaded = MB_NO;
+	int svp_match_last = false;
+	int svp_loaded = false;
 	int svp_setprocess;
 	int svp_save_count;
 	struct mbsvplist_svp_struct svp;
@@ -165,15 +165,15 @@ int main(int argc, char **argv) {
 	int svp_repeat_in_file;
 	int svp_unique;
 	int svp_unique_tot;
-	int output_counts = MB_NO;
+	int output_counts = false;
 	int out_cnt = 0;
 	int min_num_pairs = 0;
 	int svp_time_i[7];
-	int ssv_bounds_set = MB_NO;
+	int ssv_bounds_set = false;
 	double ssv_bounds[4];
 
 	/* ttimes values */
-	int ssv_output = MB_NO;
+	int ssv_output = false;
 	int nbeams;
 	double *ttimes = NULL;
 	double *angles = NULL;
@@ -196,10 +196,10 @@ int main(int argc, char **argv) {
 	bounds[2] = -90.0;
 	bounds[3] = 90.0;
 	svp_printmode = MBSVPLIST_PRINTMODE_CHANGE;
-	svp_file_output = MB_NO;
-	svp_setprocess = MB_NO;
-	svp_force_zero = MB_NO;
-	ssv_output = MB_NO;
+	svp_file_output = false;
+	svp_setprocess = false;
+	svp_force_zero = false;
+	ssv_output = false;
 	svp_read_tot = 0;
 	svp_written_tot = 0;
 	svp_unique_tot = 0;
@@ -233,8 +233,8 @@ int main(int argc, char **argv) {
 				break;
 			case 'C':
 			case 'c':
-				output_counts = MB_YES;
-				ssv_output = MB_NO;
+				output_counts = true;
+				ssv_output = false;
 				break;
 			case 'F':
 			case 'f':
@@ -254,34 +254,34 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				svp_file_output = MB_YES;
-				ssv_output = MB_NO;
+				svp_file_output = true;
+				ssv_output = false;
 				break;
 			case 'P':
 			case 'p':
-				svp_file_output = MB_YES;
-				svp_setprocess = MB_YES;
-				ssv_output = MB_NO;
+				svp_file_output = true;
+				svp_setprocess = true;
+				ssv_output = false;
 				break;
 			case 'R':
 			case 'r':
 				mb_get_bounds(optarg, ssv_bounds);
-				ssv_bounds_set = MB_YES;
+				ssv_bounds_set = true;
 				break;
 			case 'S':
 			case 's':
-				ssv_output = MB_YES;
-				svp_file_output = MB_NO;
-				svp_setprocess = MB_NO;
+				ssv_output = true;
+				svp_file_output = false;
+				svp_setprocess = false;
 				break;
 			case 'T':
 			case 't':
-				output_as_table = MB_YES;
-				ssv_output = MB_NO;
+				output_as_table = true;
+				ssv_output = false;
 				break;
 			case 'Z':
 			case 'z':
-				svp_force_zero = MB_YES;
+				svp_force_zero = true;
 				break;
 			case '?':
 				errflg = true;
@@ -362,18 +362,18 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(file, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data == true) {
 		/* check format and get data sources */
 		if ((status = mb_format_source(verbose, &format, &platform_source, &nav_source, &sensordepth_source, &heading_source,
 		                               &attitude_source, &svp_source, &error)) == MB_FAILURE) {
@@ -437,14 +437,14 @@ int main(int argc, char **argv) {
 
 		/* output info */
 		if (verbose >= 1) {
-			if (ssv_output == MB_YES)
+			if (ssv_output == true)
 				fprintf(stderr, "\nSearching %s for SSV records\n", file);
 			else
 				fprintf(stderr, "\nSearching %s for SVP records\n", file);
 		}
 
 		/* read and print data */
-		svp_loaded = MB_NO;
+		svp_loaded = false;
 		svp.n = 0;
 		svp_save_count = 0;
 		svp_read = 0;
@@ -469,54 +469,54 @@ int main(int argc, char **argv) {
 				status = mb_extract_svp(verbose, mbio_ptr, store_ptr, &kind, &svp.n, svp.depth, svp.velocity, &error);
 				if (status == MB_SUCCESS) {
 					svp_read++;
-					svp_loaded = MB_YES;
-					svp.match_last = MB_NO;
-					svp.repeat_in_file = MB_NO;
+					svp_loaded = true;
+					svp.match_last = false;
+					svp.repeat_in_file = false;
 					if (last_time_d != 0.0) {
-						svp.time_set = MB_YES;
+						svp.time_set = true;
 						svp.time_d = last_time_d;
 					}
 					else {
-						svp.time_set = MB_NO;
+						svp.time_set = false;
 						svp.time_d = 0.0;
 					}
 					if (navlon != 0.0 || navlat != 0.0) {
-						svp.position_set = MB_YES;
+						svp.position_set = true;
 						svp.longitude = navlon;
 						svp.latitude = navlat;
 					}
 					else if (last_navlon != 0.0 || last_navlat != 0.0) {
-						svp.position_set = MB_YES;
+						svp.position_set = true;
 						svp.longitude = last_navlon;
 						svp.latitude = last_navlat;
 					}
 					else {
-						svp.position_set = MB_NO;
+						svp.position_set = false;
 						svp.longitude = 0.0;
 						svp.latitude = 0.0;
 					}
-					svp.depthzero_reset = MB_NO;
+					svp.depthzero_reset = false;
 					svp.depthzero = 0.0;
 				}
 				else {
-					svp_loaded = MB_NO;
+					svp_loaded = false;
 				}
 
 				/* force zero depth if requested */
-				if (svp_loaded == MB_YES && svp.n > 0 && svp_force_zero == MB_YES && svp.depth[0] != 0.0) {
+				if (svp_loaded == true && svp.n > 0 && svp_force_zero == true && svp.depth[0] != 0.0) {
 					svp.depthzero = svp.depth[0];
 					svp.depth[0] = 0.0;
-					svp.depthzero_reset = MB_YES;
+					svp.depthzero_reset = true;
 				}
 
 				/* check if the svp is a duplicate to a previous svp
 				    in the same file */
-				if (svp_loaded == MB_YES) {
-					svp_match_last = MB_NO;
-					for (j = 0; j < svp_save_count && svp_match_last == MB_YES; j++) {
+				if (svp_loaded == true) {
+					svp_match_last = false;
+					for (j = 0; j < svp_save_count && svp_match_last == true; j++) {
 						if (svp.n == svp_save[j].n && memcmp(svp.depth, svp_save[j].depth, svp.n) == 0 &&
 						    memcmp(svp.velocity, svp_save[j].velocity, svp.n) == 0) {
-							svp_match_last = MB_YES;
+							svp_match_last = true;
 						}
 					}
 					svp.match_last = svp_match_last;
@@ -524,20 +524,20 @@ int main(int argc, char **argv) {
 
 				/* check if the svp is a duplicate to the previous svp
 				    whether from the same file or a previous file */
-				if (svp_loaded == MB_YES) {
+				if (svp_loaded == true) {
 					/* check if svp is the same as the previous */
 					if (svp.n == svp_last.n && memcmp(svp.depth, svp_last.depth, svp.n) == 0 &&
 					    memcmp(svp.velocity, svp_last.velocity, svp.n) == 0) {
-						svp_repeat_in_file = MB_YES;
+						svp_repeat_in_file = true;
 					}
 					else {
-						svp_repeat_in_file = MB_NO;
+						svp_repeat_in_file = false;
 					}
 					svp.repeat_in_file = svp_repeat_in_file;
 
 					/* save the svp */
-					svp_last.time_set = MB_NO;
-					svp_last.position_set = MB_NO;
+					svp_last.time_set = false;
+					svp_last.position_set = false;
 					svp_last.n = svp.n;
 					for (int i = 0; i < svp.n; i++) {
 						svp_last.depth[i] = svp.depth[i];
@@ -546,7 +546,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* if the svp is unique so far, save it in memory */
-				if (svp_loaded == MB_YES && svp_match_last == MB_NO && svp.n >= min_num_pairs) {
+				if (svp_loaded == true && svp_match_last == false && svp.n >= min_num_pairs) {
 					/* allocate memory as needed */
 					if (svp_save_count >= svp_save_alloc) {
 						svp_save_alloc += MBSVPLIST_SVP_NUM_ALLOC;
@@ -583,12 +583,12 @@ int main(int argc, char **argv) {
 				/* check if any saved svps need time tags and position */
 				if (time_d != 0.0 && (navlon != 0.0 || navlat != 0.0)) {
 					for (isvp = 0; isvp < svp_save_count; isvp++) {
-						if (svp_save[isvp].time_set == MB_NO) {
-							svp_save[isvp].time_set = MB_YES;
+						if (svp_save[isvp].time_set == false) {
+							svp_save[isvp].time_set = true;
 							svp_save[isvp].time_d = time_d;
 						}
-						if (svp_save[isvp].position_set == MB_NO) {
-							svp_save[isvp].position_set = MB_YES;
+						if (svp_save[isvp].position_set == false) {
+							svp_save[isvp].position_set = true;
 							svp_save[isvp].longitude = navlon;
 							svp_save[isvp].latitude = navlat;
 						}
@@ -596,14 +596,14 @@ int main(int argc, char **argv) {
 				}
 
 				/* if desired output ssv_output */
-				if (ssv_output == MB_YES) {
+				if (ssv_output == true) {
 					/* extract ttimes */
 					status = mb_ttimes(verbose, mbio_ptr, store_ptr, &kind, &nbeams, ttimes, angles, angles_forward, angles_null,
 					                   heave, alongtrack_offset, &sonardepth, &ssv, &error);
 
 					/* output ssv */
 					if (status == MB_SUCCESS) {
-						if (ssv_bounds_set == MB_NO || (navlon >= ssv_bounds[0] && navlon <= ssv_bounds[1] &&
+						if (ssv_bounds_set == false || (navlon >= ssv_bounds[0] && navlon <= ssv_bounds[1] &&
 						                                navlat >= ssv_bounds[2] && navlat <= ssv_bounds[3]))
 							fprintf(stdout, "%f %f\n", sonardepth, ssv);
 					}
@@ -614,16 +614,16 @@ int main(int argc, char **argv) {
 		/* close the swath file */
 		status = mb_close(verbose, &mbio_ptr, &error);
 
-		/* output svps from this file if there are any and ssv_output and output_counts are MB_NO */
-		if (svp_save_count > 0 && ssv_output == MB_NO && output_counts == MB_NO) {
+		/* output svps from this file if there are any and ssv_output and output_counts are false */
+		if (svp_save_count > 0 && ssv_output == false && output_counts == false) {
 			for (isvp = 0; isvp < svp_save_count; isvp++) {
 				if (svp_save[isvp].n >= min_num_pairs &&
 				    ((svp_printmode == MBSVPLIST_PRINTMODE_CHANGE &&
-				      (svp_written == 0 || svp_save[isvp].repeat_in_file == MB_NO)) ||
-				     (svp_printmode == MBSVPLIST_PRINTMODE_UNIQUE && (svp_save[isvp].match_last == MB_NO)) ||
+				      (svp_written == 0 || svp_save[isvp].repeat_in_file == false)) ||
+				     (svp_printmode == MBSVPLIST_PRINTMODE_UNIQUE && (svp_save[isvp].match_last == false)) ||
 				     (svp_printmode == MBSVPLIST_PRINTMODE_ALL))) {
 					/* set the output */
-					if (svp_file_output == MB_YES) {
+					if (svp_file_output == true) {
 						/* set file name */
 						sprintf(svp_file, "%s_%3.3d.svp", file, isvp);
 
@@ -637,7 +637,7 @@ int main(int argc, char **argv) {
 					mb_get_date(verbose, svp_save[isvp].time_d, svp_time_i);
 
 					/* print out the svp */
-					if (output_as_table == MB_YES) /* output csv table to stdout */
+					if (output_as_table == true) /* output csv table to stdout */
 					{
 						if (out_cnt == 0) /* output header records */
 						{
@@ -679,16 +679,16 @@ int main(int argc, char **argv) {
 						fprintf(svp_fp, "## SVP Longitude: %f\n", svp_save[isvp].longitude);
 						fprintf(svp_fp, "## SVP Latitude:  %f\n", svp_save[isvp].latitude);
 						fprintf(svp_fp, "## SVP Count: %d\n", svp_save_count);
-						if (svp_save[isvp].depthzero_reset == MB_YES) {
+						if (svp_save[isvp].depthzero_reset == true) {
 							fprintf(svp_fp, "## Initial depth reset from %f to 0.0 meters\n", svp_save[isvp].depthzero);
 						}
-						if (verbose >= 1 && svp_save[isvp].depthzero_reset == MB_YES) {
+						if (verbose >= 1 && svp_save[isvp].depthzero_reset == true) {
 							fprintf(stderr, "Initial depth reset from %f to 0.0 meters\n", svp_save[isvp].depthzero);
 						}
 						fprintf(svp_fp, "## Number of SVP Points: %d\n", svp_save[isvp].n);
 						for (int i = 0; i < svp_save[isvp].n; i++)
 							fprintf(svp_fp, "%8.2f\t%7.2f\n", svp_save[isvp].depth[i], svp_save[isvp].velocity[i]);
-						if (svp_file_output == MB_NO) {
+						if (svp_file_output == false) {
 							fprintf(svp_fp, "## \n");
 							fprintf(svp_fp, "## \n");
 						}
@@ -696,13 +696,13 @@ int main(int argc, char **argv) {
 					}
 
 					/* close the svp file */
-					if (svp_file_output == MB_YES && svp_fp != NULL) {
+					if (svp_file_output == true && svp_fp != NULL) {
 						fclose(svp_fp);
 
 						/* if desired, set first svp output to be used for recalculating
 						    bathymetry */
-						if (svp_setprocess == MB_YES && svp_save_count == 1) {
-							status = mb_pr_update_svp(verbose, file, MB_YES, svp_file, MBP_ANGLES_OK, MB_YES, &error);
+						if (svp_setprocess == true && svp_save_count == 1) {
+							status = mb_pr_update_svp(verbose, file, true, svp_file, MBP_ANGLES_OK, true, &error);
 						}
 					}
 				}
@@ -724,12 +724,12 @@ int main(int argc, char **argv) {
 		/* figure out whether and what to read next */
 		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
@@ -743,7 +743,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Total %d SVP unique records found\n", svp_unique_tot);
 		fprintf(stderr, "Total %d SVP records written\n", svp_written_tot);
 	}
-	if (output_counts == MB_YES)
+	if (output_counts == true)
 		fprintf(stdout, "%d\n", svp_unique_tot);
 
 	/* deallocate memory */

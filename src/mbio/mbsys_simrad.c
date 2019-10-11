@@ -923,59 +923,59 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			*draft = store->em1000_td;
 
 		/* get travel times, angles */
-		interleave = MB_NO;
+		interleave = false;
 		if (store->sonar == MBSYS_SIMRAD_EM1000) {
 			if (ping->bath_mode == 1) {
 				angles_simrad = angles_EM1000_ISO_ANG_60_2_MS_48_FAIS;
-				interleave = MB_NO;
+				interleave = false;
 			}
 			else if (ping->bath_mode == 2) {
 				angles_simrad = angles_EM1000_ISO_ANG_120_07_MS_48_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 3) {
 				angles_simrad = angles_EM1000_ISO_ANG_150_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 4) {
 				angles_simrad = angles_EM1000_CHANNEL_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 5) {
 				angles_simrad = angles_EM1000_150_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 6) {
 				angles_simrad = angles_EM1000_140_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 7) {
 				angles_simrad = angles_EM1000_128_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 8) {
 				angles_simrad = angles_EM1000_120_07_MS_48_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 9) {
 				angles_simrad = angles_EM1000_104_07_MS_48_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 10) {
 				angles_simrad = angles_EM1000_88_07_MS_48_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 11) {
 				angles_simrad = angles_EM1000_70_2_MS_48_FAIS;
-				interleave = MB_NO;
+				interleave = false;
 			}
 			else if (ping->bath_mode == 12) {
 				angles_simrad = angles_EM1000_BERGE_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 13) {
 				angles_simrad = angles_EM1000_BERGE_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 		}
 		else if (store->sonar == MBSYS_SIMRAD_EM12S) {
@@ -1045,7 +1045,7 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			ttscale = 0.0002;
 
 		/* if interleaved get center beam */
-		if (interleave == MB_YES) {
+		if (interleave == true) {
 			if (ping->bath_mode == 12 && abs(ping->bath_acrosstrack[28]) < abs(ping->bath_acrosstrack[29]))
 				istep = 1;
 			else if (ping->bath_mode == 13 && abs(ping->bath_acrosstrack[31]) < abs(ping->bath_acrosstrack[30]))
@@ -1063,7 +1063,7 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			if (store->sonar == MBSYS_SIMRAD_EM1000 && ping->bath_mode == 13) {
 				beta = 90.0 - angles_simrad[*nbeams - 1 - (2 * i + istep)];
 			}
-			else if (store->sonar == MBSYS_SIMRAD_EM1000 && interleave == MB_YES) {
+			else if (store->sonar == MBSYS_SIMRAD_EM1000 && interleave == true) {
 				beta = 90.0 + angles_simrad[2 * i + istep];
 			}
 			else if (store->sonar == MBSYS_SIMRAD_EM1000) {
@@ -2074,59 +2074,59 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		depthoffset = 0.0;
 
 		/* get angles */
-		interleave = MB_NO;
+		interleave = false;
 		if (store->sonar == MBSYS_SIMRAD_EM1000) {
 			if (ping->bath_mode == 1) {
 				angles_simrad = angles_EM1000_ISO_ANG_60_2_MS_48_FAIS;
-				interleave = MB_NO;
+				interleave = false;
 			}
 			else if (ping->bath_mode == 2) {
 				angles_simrad = angles_EM1000_ISO_ANG_120_07_MS_48_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 3) {
 				angles_simrad = angles_EM1000_ISO_ANG_150_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 4) {
 				angles_simrad = angles_EM1000_CHANNEL_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 5) {
 				angles_simrad = angles_EM1000_150_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 6) {
 				angles_simrad = angles_EM1000_140_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 7) {
 				angles_simrad = angles_EM1000_128_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 8) {
 				angles_simrad = angles_EM1000_120_07_MS_48_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 9) {
 				angles_simrad = angles_EM1000_104_07_MS_48_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 10) {
 				angles_simrad = angles_EM1000_88_07_MS_48_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 11) {
 				angles_simrad = angles_EM1000_70_2_MS_48_FAIS;
-				interleave = MB_NO;
+				interleave = false;
 			}
 			else if (ping->bath_mode == 12) {
 				angles_simrad = angles_EM1000_BERGE_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 			else if (ping->bath_mode == 13) {
 				angles_simrad = angles_EM1000_BERGE_02_MS_60_FAIS;
-				interleave = MB_YES;
+				interleave = true;
 			}
 		}
 		else if (store->sonar == MBSYS_SIMRAD_EM12S) {
@@ -2184,7 +2184,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		}
 
 		/* if interleaved get center beam */
-		if (interleave == MB_YES) {
+		if (interleave == true) {
 			if (ping->bath_mode == 12 && abs(ping->bath_acrosstrack[28]) < abs(ping->bath_acrosstrack[29]))
 				istep = 1;
 			else if (ping->bath_mode == 13 && abs(ping->bath_acrosstrack[31]) < abs(ping->bath_acrosstrack[30]))
@@ -2238,11 +2238,11 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		}
 
 		/* get sidescan pixel size */
-		if (swath_width_set == MB_NO && nbathsort > 0) {
+		if (swath_width_set == false && nbathsort > 0) {
 			(*swath_width) = 2.5 + angles_simrad[0];
 			(*swath_width) = MAX((*swath_width), 60.0);
 		}
-		if (pixel_size_set == MB_NO && nbathsort > 0) {
+		if (pixel_size_set == false && nbathsort > 0) {
 			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
 			pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_SIMRAD_MAXPIXELS;
 			pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort / 2] * sin(DTR * 0.1));
@@ -2290,7 +2290,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 					if (store->sonar == MBSYS_SIMRAD_EM1000 && ping->bath_mode == 13) {
 						angle = angles_simrad[ping->beams_bath - 1 - (2 * i + istep)];
 					}
-					else if (store->sonar == MBSYS_SIMRAD_EM1000 && interleave == MB_YES) {
+					else if (store->sonar == MBSYS_SIMRAD_EM1000 && interleave == true) {
 						angle = -angles_simrad[2 * i + istep];
 					}
 					else if (store->sonar == MBSYS_SIMRAD_EM1000) {

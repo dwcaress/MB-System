@@ -396,9 +396,9 @@ int mbr_info_sb2100b1(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
@@ -468,9 +468,9 @@ int mbr_info_sb2100b2(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -1323,13 +1323,13 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	/* initialize everything to zeros */
 	mbr_zero_sb2100bi(verbose, store_ptr, error);
 
-	int done = MB_NO;
+	int done = false;
 	int expect = MBF_SB2100BI_NONE;
-	while (done == MB_NO) {
+	while (done == false) {
 		/* if no label saved get next record label */
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
-		if (*label_save_flag == MB_NO) {
+		if (*label_save_flag == false) {
 			/* get next 10 bytes */
 			if ((status = fread(&label[0], 10, 1, mbfp)) != 1) {
 				status = MB_FAILURE;
@@ -1350,7 +1350,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 
 		/* else use saved label */
 		else
-			*label_save_flag = MB_NO;
+			*label_save_flag = false;
 
 		/* get the label type */
 		if (status == MB_SUCCESS) {
@@ -1379,22 +1379,22 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 
 		/* read the appropriate data records */
 		if ((status == MB_FAILURE || type == MBF_SB2100BI_NONE) && expect == MBF_SB2100BI_NONE) {
-			done = MB_YES;
+			done = true;
 		}
 		else if ((status == MB_FAILURE || type == MBF_SB2100BI_NONE) && expect != MBF_SB2100BI_NONE) {
-			done = MB_YES;
+			done = true;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
 		else if (expect != MBF_SB2100BI_NONE && expect != type) {
-			done = MB_YES;
+			done = true;
 			expect = MBF_SB2100BI_NONE;
-			*label_save_flag = MB_YES;
+			*label_save_flag = true;
 		}
 		else if (type == MBF_SB2100BI_FH) {
 			status = mbr_sb2100bi_rd_fh(verbose, mbfp, record_length_fh, error);
 			if (status == MB_SUCCESS) {
-				done = MB_NO;
+				done = false;
 				expect = MBF_SB2100BI_NONE;
 				store->kind = MB_DATA_NONE;
 			}
@@ -1402,21 +1402,21 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		else if (type == MBF_SB2100BI_PR) {
 			status = mbr_sb2100bi_rd_pr(verbose, mbfp, store, record_length, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_VELOCITY_PROFILE;
 			}
 		}
 		else if (type == MBF_SB2100BI_TR) {
 			status = mbr_sb2100bi_rd_tr(verbose, mbfp, store, record_length, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_COMMENT;
 			}
 		}
 		else if (type == MBF_SB2100BI_DH) {
 			status = mbr_sb2100bi_rd_dh(verbose, mbfp, store, record_length, error);
 			if (status == MB_SUCCESS) {
-				done = MB_NO;
+				done = false;
 				store->kind = MB_DATA_DATA;
 				expect = MBF_SB2100BI_BR;
 			}
@@ -1424,28 +1424,28 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		else if (type == MBF_SB2100BI_BR) {
 			status = mbr_sb2100bi_rd_br(verbose, mbfp, store, record_length, error);
 			if (status == MB_SUCCESS && expect == MBF_SB2100BI_BR) {
-				done = MB_NO;
+				done = false;
 				store->kind = MB_DATA_DATA;
 				expect = MBF_SB2100BI_SR;
 			}
 			else if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				expect = MBF_SB2100BI_NONE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
 				status = MB_FAILURE;
 			}
 			else if (status == MB_FAILURE) {
-				done = MB_YES;
+				done = true;
 				expect = MBF_SB2100BI_NONE;
 			}
 		}
 		else if (type == MBF_SB2100BI_SR) {
 			status = mbr_sb2100bi_rd_sr(verbose, mbfp, store, record_length, error);
 			if (status == MB_SUCCESS && expect == MBF_SB2100BI_SR) {
-				done = MB_YES;
+				done = true;
 			}
 			else if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				expect = MBF_SB2100BI_NONE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
 				status = MB_FAILURE;
@@ -1453,7 +1453,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 			else if (status == MB_FAILURE && *error == MB_ERROR_UNINTELLIGIBLE && expect == MBF_SB2100BI_SR) {
 				/* this preserves the bathymetry
 				   that has already been read */
-				done = MB_YES;
+				done = true;
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
 			}
@@ -2219,9 +2219,9 @@ int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* write file header if not written yet */
-	if (mb_io_ptr->save_flag == MB_NO) {
+	if (mb_io_ptr->save_flag == false) {
 		status = mbr_sb2100bi_wr_fh(verbose, mbfp, error);
-		mb_io_ptr->save_flag = MB_YES;
+		mb_io_ptr->save_flag = true;
 	}
 
 	if (store->kind == MB_DATA_VELOCITY_PROFILE) {

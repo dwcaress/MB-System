@@ -88,9 +88,9 @@ int mbr_info_3dwisslr
     MB_DESCRIPTION_LENGTH);
   *numfile = 1;
   *filetype = MB_FILETYPE_NORMAL;
-  *variable_beams = MB_YES;
-  *traveltime = MB_NO;
-  *beam_flagging = MB_YES;
+  *variable_beams = true;
+  *traveltime = false;
+  *beam_flagging = true;
   *platform_source = MB_DATA_NONE;
   *nav_source = MB_DATA_DATA;
   *sensordepth_source = MB_DATA_DATA;
@@ -172,7 +172,7 @@ int mbr_alm_3dwisslr
 
   /* set saved bytes flag */
   file_indexed = (int *)&mb_io_ptr->save2;
-  *file_indexed = MB_NO;
+  *file_indexed = false;
 
   if (verbose >= 2)
     {
@@ -361,7 +361,7 @@ int mbr_3dwisslr_index_data
   /* set status */
   status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
-  done = MB_NO;
+  done = false;
 
   /* read the fileheader, which is returned as a parameter record */
 
@@ -539,17 +539,17 @@ int mbr_3dwisslr_index_data
       status = MB_FAILURE;
       *error = MB_ERROR_BAD_FORMAT;
       store->kind = MB_DATA_NONE;
-      done = MB_YES;
+      done = true;
       }
     }
 
   /* read subsequent data records */
-  while (done == MB_NO)
+  while (done == false)
     {
     /* read and check two bytes until a valid record_id is found */
     read_len = (size_t)sizeof(short);
     buffer = mb_io_ptr->raw_data;
-    int valid_id = MB_NO;
+    int valid_id = false;
     int skip = 0;
 
 #ifdef MBF_3DWISSLR_DEBUG
@@ -570,7 +570,7 @@ int mbr_3dwisslr_index_data
           ( store->record_id == MBSYS_3DDWISSL_RECORD_RAWHEADB) ||
           ( store->record_id == MBSYS_3DDWISSL_RECORD_COMMENT) )
           {
-          valid_id = MB_YES;
+          valid_id = true;
           }
         else
           {
@@ -601,7 +601,7 @@ int mbr_3dwisslr_index_data
         store->record_id = 0;
         }
       }
-    while (status == MB_SUCCESS && valid_id == MB_NO);
+    while (status == MB_SUCCESS && valid_id == false);
 #ifdef MBF_3DWISSLR_DEBUG
     fprintf(stderr,
       "%s:%s():%d RECORD ID: %x %d skip:%d valid_id:%d status:%d error:%d\n",
@@ -758,7 +758,7 @@ int mbr_3dwisslr_index_data
         }
       else
         {
-        done = MB_YES;
+        done = true;
         }
       }
 
@@ -809,7 +809,7 @@ int mbr_3dwisslr_index_data
     /* else if failure done */
     else if (status != MB_SUCCESS)
       {
-      done = MB_YES;
+      done = true;
       }
     }
 #ifdef MBF_3DWISSLR_DEBUG
@@ -824,7 +824,7 @@ int mbr_3dwisslr_index_data
 #endif
 
   /* set indexed flag */
-  *file_indexed = MB_YES;
+  *file_indexed = true;
   if (mb_io_ptr->num_indextable > 0)
     {
     status = MB_SUCCESS;
@@ -931,19 +931,19 @@ int mbr_3dwisslr_rd_data
   *error = MB_ERROR_NO_ERROR;
 
   /* find next unread record in the file index table */
-  found = MB_NO;
+  found = false;
   int irecord = 0;
-  for (int i = 0; i < mb_io_ptr->num_indextable && found == MB_NO; i++)
-    if (mb_io_ptr->indextable[i].read == MB_NO)
+  for (int i = 0; i < mb_io_ptr->num_indextable && found == false; i++)
+    if (mb_io_ptr->indextable[i].read == false)
       {
-      found = MB_YES;
+      found = true;
       irecord = i;
       }
 
   int status = MB_SUCCESS;
 
   /* read the next record */
-  if (found == MB_YES)
+  if (found == true)
     {
     /* set the file offset */
     fseek(mb_io_ptr->mbfp, mb_io_ptr->indextable[irecord].offset, SEEK_SET);
@@ -952,7 +952,7 @@ int mbr_3dwisslr_rd_data
     buffer = mb_io_ptr->raw_data;
     read_len = mb_io_ptr->indextable[irecord].size;
     status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
-    mb_io_ptr->indextable[irecord].read = MB_YES;
+    mb_io_ptr->indextable[irecord].read = true;
 
     /* parse a file header */
     if (( status == MB_SUCCESS) && ( mb_io_ptr->indextable[irecord].kind == MB_DATA_PARAMETER) )
@@ -1627,7 +1627,7 @@ int mbr_3dwisslr_rd_data
         store->nanoseconds = 1000 * ((unsigned int)time_i[6]);
         }
 
-      store->bathymetry_calculated = MB_NO;
+      store->bathymetry_calculated = false;
       store->kind = MB_DATA_DATA;
       }
 
@@ -1701,7 +1701,7 @@ int mbr_rt_3dwisslr
   int status = MB_SUCCESS;
 
   /* if needed index the file */
-  if (*file_indexed == MB_NO)
+  if (*file_indexed == false)
     status = mbr_3dwisslr_index_data(verbose, mbio_ptr, store_ptr, error);
 
   /* read next data from file */
@@ -1709,7 +1709,7 @@ int mbr_rt_3dwisslr
 
   /* if needed calculate bathymetry */
   if (( status == MB_SUCCESS) && ( store->kind == MB_DATA_DATA) &&
-    ( store->bathymetry_calculated == MB_NO) )
+    ( store->bathymetry_calculated == false) )
     mbsys_3ddwissl_calculatebathymetry(verbose,
       mbio_ptr,
       store_ptr,

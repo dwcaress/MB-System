@@ -63,9 +63,9 @@ int mbr_info_dsl120pf(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = -2;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = false;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -723,7 +723,7 @@ int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* read first file */
 	if (mb_io_ptr->mbfp != NULL) {
 		/* read next four bytes */
-		found = MB_NO;
+		found = false;
 		status = fread(tag, 1, 4, mb_io_ptr->mbfp);
 		if (status == 4)
 			status = MB_SUCCESS;
@@ -734,13 +734,13 @@ int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* if tag not found read single bytes until found
 		    or end of file */
-		while (found == MB_NO && status == MB_SUCCESS) {
+		while (found == false && status == MB_SUCCESS) {
 			/* look for "DSL " tag at start of record */
 			if (strncmp(tag, "DSL ", 4) == 0)
-				found = MB_YES;
+				found = true;
 
 			/* read next byte */
-			if (found == MB_NO) {
+			if (found == false) {
 				for (int i = 0; i < 3; i++)
 					tag[i] = tag[i + 1];
 				status = fread(&tag[3], 1, 1, mb_io_ptr->mbfp);
@@ -787,7 +787,7 @@ int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* read second file */
 	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA && mb_io_ptr->mbfp2 != NULL) {
 		/* read next four bytes */
-		found = MB_NO;
+		found = false;
 		status = fread(tag, 1, 4, mb_io_ptr->mbfp2);
 		if (status == 4)
 			status = MB_SUCCESS;
@@ -798,13 +798,13 @@ int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* if tag not found read single bytes until found
 		    or end of file */
-		while (found == MB_NO && status == MB_SUCCESS) {
+		while (found == false && status == MB_SUCCESS) {
 			/* look for "DSL " tag at start of record */
 			if (strncmp(tag, "DSL ", 4) == 0)
-				found = MB_YES;
+				found = true;
 
 			/* read next byte */
-			if (found == MB_NO) {
+			if (found == false) {
 				for (int i = 0; i < 3; i++)
 					tag[i] = tag[i + 1];
 				status = fread(&tag[3], 1, 1, mb_io_ptr->mbfp2);
