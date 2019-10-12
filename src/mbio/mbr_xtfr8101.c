@@ -25,6 +25,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -1605,7 +1606,6 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double angle, theta, phi;
 	double rr, xx, zz;
 	double lever_x, lever_y, lever_z;
-	int badtime;
 	double gain_correction;
 	double lon, lat;
 
@@ -1644,16 +1644,16 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_get_time(verbose, time_i, &time_d);
 
 		/* do check on time here - we sometimes get a bad fix */
-		badtime = false;
-		if (time_i[0] < 1970 && time_i[0] > 2100)
+		bool badtime = false;
+		if (time_i[0] < 1970 || time_i[0] > 2100)
 			badtime = true;
-		if (time_i[1] < 0 && time_i[1] > 12)
+		if (time_i[1] < 0 || time_i[1] > 12)
 			badtime = true;
-		if (time_i[2] < 0 && time_i[2] > 31)
+		if (time_i[2] < 0 || time_i[2] > 31)
 			badtime = true;
-		if (badtime == true) {
+		if (badtime) {
 			if (verbose > 0)
-				fprintf(stderr, " Bad time from XTF in bathy header\n");
+				fprintf(stderr, "Bad time from XTF in bathy header\n");
 			data->kind = MB_DATA_NONE;
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
