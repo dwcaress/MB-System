@@ -667,7 +667,6 @@ int main(int argc, char **argv) {
 	int nexpect;
 	struct mbfilter_ping_struct ping[MBFILTER_BUFFER_DEFAULT];
 	int first = true;
-	int done;
 
 	/* time, user, host variables */
 	time_t right_now;
@@ -1291,12 +1290,12 @@ int main(int argc, char **argv) {
 		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 
 		/* read and write */
-		done = false;
 		first = true;
 		ndata = 0;
 		nhold = 0;
 		nread = 0;
 		nwrite = 0;
+		bool done = false;
 		while (!done) {
 			/* load some data into the buffer */
 			error = MB_ERROR_NO_ERROR;
@@ -1358,7 +1357,7 @@ int main(int argc, char **argv) {
 				jbeg = MIN(nhold / 2 + 1, ndata);
 
 			/* find number of pings to hold */
-			if (done == true)
+			if (done)
 				nhold = 0;
 			else if (ndata > nhold_ping)
 				nhold = nhold_ping;
@@ -1366,7 +1365,7 @@ int main(int argc, char **argv) {
 				nhold = 0;
 
 			/* get end of ping output range */
-			if (done == true)
+			if (done)
 				jend = ndata - 1;
 			else {
 				jend = ndata - 1 - nhold / 2;

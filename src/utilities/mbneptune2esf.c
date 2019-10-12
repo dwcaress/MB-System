@@ -850,7 +850,7 @@ int main(int argc, char **argv) {
 			start = 0;
 			time_d_lastping = 0.0;
 			fprintf(stderr, "Processing data...\n");
-			while (done == false) {
+			while (!done) {
 				if (verbose > 1)
 					fprintf(stderr, "\n");
 
@@ -946,7 +946,7 @@ int main(int argc, char **argv) {
 						}
 
 						/* write out edits from completed pings */
-						if (status == MB_SUCCESS || done == true) {
+						if (status == MB_SUCCESS || done) {
 							for (i = 0; i < cur_ping.beams_bath; i++) {
 								if (cur_ping.beamflag[i] != cur_ping.beamflagorg[i]) {
 									if (mb_beam_ok(cur_ping.beamflag[i]))

@@ -670,7 +670,7 @@ int main(int argc, char **argv) {
 			/* read */
 			done = false;
             first = true;
-			while (done == false) {
+			while (!done) {
 				if (verbose > 1)
 					fprintf(stderr, "\n");
 

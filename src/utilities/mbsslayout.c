@@ -588,7 +588,6 @@ int main(int argc, char **argv) {
 	int portchannelpick, stbdchannelpick;
 	int kangle, kstart;
 	double xtrack, ltrack, rr, rangemin, factor, fraction;
-	int done;
 	int istart;
 	int jport, jstbd;
 	int previous, interpable;
@@ -2488,8 +2487,8 @@ int main(int argc, char **argv) {
 					rr = 0.5 * soundspeed * sample_interval * i;
 
 					/* look up position(s) for this range */
-					done = false;
-					for (kangle = kstart; kangle > 0 && done == false; kangle--) {
+					bool done = false;
+					for (kangle = kstart; kangle > 0 && !done; kangle--) {
 						bool found = false;
 						if (rr <= table_range[kstart]) {
 							xtrack = table_xtrack[kstart];
@@ -2541,8 +2540,8 @@ int main(int argc, char **argv) {
 					rr = 0.5 * soundspeed * sample_interval * i;
 
 					/* look up position for this range */
-					done = false;
-					for (kangle = kstart; kangle < nangle - 1 && done == false; kangle++) {
+					bool done = false;
+					for (kangle = kstart; kangle < nangle - 1 && !done; kangle++) {
 						bool found = false;
 						if (rr <= table_range[kstart]) {
 							xtrack = table_xtrack[kstart];
