@@ -1187,7 +1187,6 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_em12ifrm_struct *data = (struct mbf_em12ifrm_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
 
 	/* first translate values from data storage structure */

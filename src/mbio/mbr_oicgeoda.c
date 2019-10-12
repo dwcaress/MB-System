@@ -180,7 +180,6 @@ int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	struct mbf_oicgeoda_struct *dataplus = (struct mbf_oicgeoda_struct *)mb_io_ptr->raw_data;
-	struct mbf_oicgeoda_header_struct *header = &(dataplus->header);
 	struct mbf_oicgeoda_data_struct *data = &(dataplus->data);
 
 	int status = MB_SUCCESS;
@@ -253,7 +252,6 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_oicgeoda_struct *dataplus = (struct mbf_oicgeoda_struct *)mb_io_ptr->raw_data;
 	struct mbf_oicgeoda_header_struct *header = &(dataplus->header);
 	struct mbf_oicgeoda_data_struct *data = &(dataplus->data);
-	char *comment = dataplus->client;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -1161,7 +1159,6 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_oicgeoda_struct *dataplus = (struct mbf_oicgeoda_struct *)mb_io_ptr->raw_data;
 	struct mbf_oicgeoda_header_struct *header = &(dataplus->header);
 	struct mbf_oicgeoda_data_struct *data = &(dataplus->data);
-	char *comment = dataplus->client;
 
 	int status = MB_SUCCESS;
 

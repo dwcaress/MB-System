@@ -277,7 +277,6 @@ int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	char *data_ptrr = (char *)data;
 
 	/* read header */
 	int status = fread(buffer, 1, 124, mbfp);
@@ -467,7 +466,6 @@ int mbr_dsl120sf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 
 	/* read bath record */
 	read_bytes = data->bat_len - 12;
@@ -547,7 +545,6 @@ int mbr_dsl120sf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 
 	/* read amp record */
 	read_bytes = data->amp_len - 12;
@@ -629,7 +626,6 @@ int mbr_dsl120sf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 
 	/* read comment record */
 	read_bytes = 80;
@@ -684,7 +680,6 @@ int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 
 	int status = MB_SUCCESS;
 
@@ -875,7 +870,6 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
@@ -1095,7 +1089,6 @@ int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);

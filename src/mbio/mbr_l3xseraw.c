@@ -412,9 +412,6 @@ int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
-
 	/* The tide frame is currently unused by MB-System */
 
 	const int status = MB_SUCCESS;
@@ -1962,9 +1959,6 @@ int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void 
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
-
 	/* The singlebeam frame is currently unused by MB-System */
 
 	const int status = MB_SUCCESS;
@@ -1989,9 +1983,6 @@ int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *st
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* The message frame is currently unused by MB-System */
 
@@ -2295,9 +2286,6 @@ int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *s
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
-
 	/* The geodetic frame is currently unused by MB-System */
 
 	const int status = MB_SUCCESS;
@@ -2322,9 +2310,6 @@ int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *sto
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* The native frame is currently unused by MB-System */
 
@@ -2351,9 +2336,6 @@ int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *st
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
-
 	/* The product frame is currently unused by MB-System */
 
 	const int status = MB_SUCCESS;
@@ -2379,9 +2361,6 @@ int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void 
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
-
 	/* The bathymetry frame is currently unused by MB-System */
 
 	const int status = MB_SUCCESS;
@@ -2406,9 +2385,6 @@ int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *st
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* The control frame is currently unused by MB-System */
 
@@ -7335,12 +7311,6 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_l3xseraw_wr_data(verbose, mbio_ptr, store_ptr, error);

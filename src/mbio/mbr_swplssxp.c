@@ -133,7 +133,6 @@ int mbr_alm_swplssxp(int verbose, void *mbio_ptr, int *error) {
 	int *recordid = (int *)&mb_io_ptr->save3;
 	int *recordidlast = (int *)&mb_io_ptr->save4;
 	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
-	char *buffer = (char *)*bufferptr;
 	int *bufferalloc = (int *)&mb_io_ptr->save6;
 	int *size = (int *)&mb_io_ptr->save8;
 	int *nbadrec = (int *)&mb_io_ptr->save9;
@@ -185,7 +184,6 @@ int mbr_dem_swplssxp(int verbose, void *mbio_ptr, int *error) {
 
 	/* deallocate memory for reading/writing buffer */
 	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
-	char *buffer = (char *)*bufferptr;
 	int *bufferalloc = (int *)&mb_io_ptr->save6;
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)bufferptr, error);
 	*bufferalloc = 0;
@@ -354,9 +352,6 @@ int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to data structure */
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
-	swpls_header *header = &store->sxp_header;
-	swpls_sxpping *ping = &store->sxp_ping;
-	swpls_comment *comment = &store->comment;
 	swpls_projection *projection = &store->projection;
 
 	/* check if projection has been set from *.prj file, if so, copy into projection structure */

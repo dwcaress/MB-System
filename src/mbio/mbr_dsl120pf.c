@@ -222,9 +222,6 @@ int mbr_alm_dsl120pf(int verbose, void *mbio_ptr, int *error) {
 	/* initialize everything to zeros */
 	mbr_zero_dsl120pf(verbose, mb_io_ptr->raw_data, error);
 
-	/* get pointer to data descriptor */
-	struct mbf_dsl120pf_struct *data = (struct mbf_dsl120pf_struct *)mb_io_ptr->raw_data;
-
 	/* now handle parallel files
 	   - find if the user specified file is the
 	     bathymetry or amplitude and construct the second
@@ -305,7 +302,6 @@ int mbr_dsl120pf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120pf_struct *data = (struct mbf_dsl120pf_struct *)mb_io_ptr->raw_data;
-	char *data_ptrr = (char *)data;
 
 	/* read header */
 	int status = fread(buffer, 1, 124, mbfp);
@@ -499,7 +495,6 @@ int mbr_dsl120pf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120pf_struct *data = (struct mbf_dsl120pf_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 
 	/* read bath record */
 	read_bytes = data->bat_len - 12;
@@ -579,7 +574,6 @@ int mbr_dsl120pf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120pf_struct *data = (struct mbf_dsl120pf_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 
 	/* read amp record */
 	read_bytes = data->amp_len - 12;
@@ -661,7 +655,6 @@ int mbr_dsl120pf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120pf_struct *data = (struct mbf_dsl120pf_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 
 	/* read comment record */
 	read_bytes = 80;
@@ -716,7 +709,6 @@ int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120pf_struct *data = (struct mbf_dsl120pf_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 
 	int status = MB_SUCCESS;
 
@@ -971,7 +963,6 @@ int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120pf_struct *data = (struct mbf_dsl120pf_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
@@ -1147,7 +1138,6 @@ int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120pf_struct *data = (struct mbf_dsl120pf_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
@@ -1326,7 +1316,6 @@ int mbr_dsl120pf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 
 	/* get pointer to raw data structure */
 	struct mbf_dsl120pf_struct *data = (struct mbf_dsl120pf_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);

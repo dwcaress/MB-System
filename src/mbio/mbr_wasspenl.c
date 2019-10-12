@@ -1174,14 +1174,6 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
 	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
 	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
-	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
 	char *buffer = (char *)*bufferptr;
@@ -2667,13 +2659,8 @@ int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
-
 #ifdef MBR_WASSPENLDEBUG
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
 	fprintf(stderr, "About to call mbr_wasspenl_wr_data record kind:%d\n", store->kind);
 #endif
 

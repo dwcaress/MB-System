@@ -1275,13 +1275,8 @@ int mbr_wt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* check for non-null pointers */
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
-
-	/* get pointers to mbio descriptor and data structure */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	struct mbsys_3datdepthlidar_struct *store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_3ddepthp_wr_data(verbose, mbio_ptr, store_ptr, error);

@@ -32,7 +32,7 @@
 static const double MB_RT_GRADIENT_TOLERANCE = 0.00001;
 static const int MB_RT_LAYER_HOMOGENEOUS = 0;;
 static const int MB_RT_LAYER_GRADIENT = 1;
-static const int MB_RT_ERROR = 0;
+// static const int MB_RT_ERROR = 0;
 static const int MB_RT_DOWN = 1;
 static const int MB_RT_UP = 2;
 static const int MB_RT_DOWN_TURN = 3;

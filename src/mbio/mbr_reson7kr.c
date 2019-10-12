@@ -134,10 +134,8 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error) {
   int *recordid = (int *)&mb_io_ptr->save3;
   int *recordidlast = (int *)&mb_io_ptr->save4;
   char **bufferptr = (char **)&mb_io_ptr->saveptr1;
-  char *buffer = (char *)*bufferptr;
   int *bufferalloc = (int *)&mb_io_ptr->save6;
   char **buffersaveptr = (char **)&mb_io_ptr->saveptr2;
-  char *buffersave = (char *)*buffersaveptr;
   int *size = (int *)&mb_io_ptr->save8;
   int *nbadrec = (int *)&mb_io_ptr->save9;
   int *deviceid = (int *)&mb_io_ptr->save10;

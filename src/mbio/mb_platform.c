@@ -695,7 +695,6 @@ int mb_platform_deall(int verbose, void **platform_ptr, int *error) {
       if (sensor->num_offsets_alloc > 0 && sensor->offsets != NULL) {
         /* free any time latency model */
         for (int ioffset = 0; ioffset < sensor->num_offsets; ioffset++) {
-          struct mb_sensor_offset_struct *offset = (struct mb_sensor_offset_struct *)&sensor->offsets[ioffset];
           if (sensor->num_time_latency_alloc > 0) {
             status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&sensor->time_latency_time_d, error);
             status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&sensor->time_latency_value, error);
@@ -1877,8 +1876,6 @@ int mb_platform_orientation_target(int verbose, void *platform_ptr, int targetse
     else {
       /* get sensor structures */
       struct mb_sensor_struct *sensor_target = &platform->sensors[targetsensor];
-      struct mb_sensor_struct *sensor_heading = &platform->sensors[platform->source_heading];
-      struct mb_sensor_struct *sensor_rollpitch = &platform->sensors[platform->source_rollpitch];
 
       /* start with zero attitude offset */
       target_roll_offset = 0.0;

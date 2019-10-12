@@ -425,7 +425,6 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   int *filecatalogoffsetoffset = NULL;
   int *platform_set = NULL;
 	struct mb_platform_struct **platform_ptr = NULL;
-  s7k3_FileHeader *FileHeader = NULL;
   int size;
   long offset;
 
@@ -5849,7 +5848,6 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
   int segmentnumbersvalid;
   int firstsamplerxdelay;
   int time_j[5];
-  char *first = "TEST";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -7905,7 +7903,6 @@ int mbr_reson7k3_rd_AbsorptionLoss(int verbose, char *buffer, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SpreadingLoss(int verbose, char *buffer, void *store_ptr, int *error) {
-  struct mbsys_reson7k3_struct *ostore = NULL;
   int time_j[5];
 
   if (verbose >= 2) {
@@ -9106,7 +9103,6 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  int interp_error = MB_ERROR_NO_ERROR;
   int *preprocess_pars_set;
   struct mb_preprocess_struct *preprocess_pars;
   int *platform_set;
@@ -9144,14 +9140,7 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   s7k3_Heading *Heading = &store->Heading;
   s7k3_Navigation *Navigation = &store->Navigation;
   s7k3_Attitude *Attitude = &store->Attitude;
-  s7k3_ProcessedSideScan *ProcessedSideScan = &store->ProcessedSideScan;
   s7k3_SonarSettings *SonarSettings = &store->SonarSettings;
-  s7k3_BeamGeometry *BeamGeometry = &store->BeamGeometry;
-  s7k3_Bathymetry *Bathymetry = &store->Bathymetry;
-  s7k3_SideScan *SideScan = &store->SideScan;
-  s7k3_Image *Image = &store->Image;
-  s7k3_Beamformed *Beamformed = &store->Beamformed;
-  s7k3_DetectionDataSetup *DetectionDataSetup = &store->DetectionDataSetup;
   s7k3_RawDetection *RawDetection = &store->RawDetection;
   s7k3_SegmentedRawDetection *SegmentedRawDetection = &store->SegmentedRawDetection;
   preprocess_pars_set = (int *)&mb_io_ptr->save13;
@@ -9466,7 +9455,6 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_FileCatalog_update(int verbose, void *mbio_ptr, void *store_ptr, int size, void *header_ptr, int *error) {
   s7k3_filecatalogdata *filecatalogdata = NULL;
-  size_t alloc_size = 0;
 
   assert(mbio_ptr != NULL);
   assert(store_ptr != NULL);
@@ -17727,7 +17715,6 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   /* get pointer to raw data structure */
   struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   struct mbsys_reson7k3_struct *ostore = (struct mbsys_reson7k3_struct *)mb_io_ptr->store_data;
-  FILE *mbfpd = mb_io_ptr->mbfp;
 
   /* get saved values */
   char **bufferptr = (char **)&mb_io_ptr->saveptr1;

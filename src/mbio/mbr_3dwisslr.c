@@ -268,12 +268,6 @@ int mbr_3dwisslr_fixtimestamps
   /* always successful */
   *error = MB_ERROR_NO_ERROR;
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointer */
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)mb_io_ptr->store_data;
-
   /* correct timestamps in the file's internal index table using information
    * supplied in the external index table */
 
@@ -324,7 +318,6 @@ int mbr_3dwisslr_index_data
   char *buffer = NULL;
   size_t read_len;
   size_t index;
-  unsigned short magic_number = 0;
   int time_i[7];
   double time_d;
   int done;
@@ -2652,13 +2645,8 @@ int mbr_wt_3dwisslr
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
     }
 
-  /* check for non-null pointers */
   assert(mbio_ptr != NULL);
   assert(store_ptr != NULL);
-
-  /* get pointers to mbio descriptor and data structure */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
   /* write next data to file */
   const int status = mbr_3dwisslr_wr_data(verbose, mbio_ptr, store_ptr, error);
