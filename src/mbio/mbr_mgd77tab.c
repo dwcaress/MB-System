@@ -830,12 +830,8 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
 	struct mbf_mgd77tab_struct *data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
-	int *header_read = (int *)&mb_io_ptr->save1;
 
 	/* set file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);

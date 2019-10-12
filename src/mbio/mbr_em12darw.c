@@ -217,9 +217,7 @@ int mbr_dem_em12darw(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 
-	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)mb_io_ptr->store_data;
 
 	/* deallocate memory for data descriptor */
 	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);

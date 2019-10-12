@@ -320,8 +320,6 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_hsmdldih_struct *data = (struct mbf_hsmdldih_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data; /* The data structure pointer */
-	FILE *mbfp = mb_io_ptr->mbfp;  /* The file pointer */
 	XDR *xdrs = mb_io_ptr->xdrs; /* xdr i/o pointer */
 	FirstReftime = &mb_io_ptr->saved1; /* time from the first header */
 	Header_count = &mb_io_ptr->save1;  /* number of header records encounterd */
@@ -1224,7 +1222,6 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 
 	/* get pointer to raw data structure */
 	struct mbf_hsmdldih_struct *data = (struct mbf_hsmdldih_struct *)data_ptr;
-	FILE *mbfp = mb_io_ptr->mbfp;
 	XDR *xdrs = mb_io_ptr->xdrs; /* xdr i/o pointer */
 
 	/* make sure transid is correct */

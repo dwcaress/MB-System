@@ -547,7 +547,6 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 		const int hour = time_i[3];
 		const int minute = time_i[4];
 		const int second = time_i[5];
-		const int tsecond = 0;
 
 		/* get lon lat */
 		double lon = data->lon2u / 60. + data->lon2b / 600000.;

@@ -134,7 +134,6 @@ int mbr_alm_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	int *recordid = (int *)&mb_io_ptr->save3;
 	int *recordidlast = (int *)&mb_io_ptr->save4;
 	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
-	char *buffer = (char *)*bufferptr;
 	int *bufferalloc = (int *)&mb_io_ptr->save6;
 	int *size = (int *)&mb_io_ptr->save8;
 	int *nbadrec = (int *)&mb_io_ptr->save9;
@@ -185,7 +184,6 @@ int mbr_dem_swplssxi(int verbose, void *mbio_ptr, int *error) {
 
 	/* deallocate memory for reading/writing buffer */
 	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
-	char *buffer = (char *)*bufferptr;
 	int *bufferalloc = (int *)&mb_io_ptr->save6;
 	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)bufferptr, error);
 	*bufferalloc = 0;

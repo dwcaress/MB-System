@@ -300,7 +300,7 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		buffer[read_len] = '\0';
 		status = mb_fileio_get(verbose, mbio_ptr, (char *)buffer, &read_len, error);
 		if (strncmp(buffer, "##PHOTGRAM##V", 13) == 0) {
-			int n = sscanf(buffer, "##PHOTGRAM##V%d", formatversion);
+			/* int n = */ sscanf(buffer, "##PHOTGRAM##V%d", formatversion);
 			*fileheader_initialized = true;
 		}
 		else {
@@ -628,7 +628,6 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* get saved values */
 	int *fileheader_initialized = (int *)&mb_io_ptr->save1;
-	int *formatversion = (int *)&mb_io_ptr->save2;
 
 	int status = MB_SUCCESS;
 
@@ -849,12 +848,6 @@ int mbr_wt_photgram(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 #ifdef MBR_PHOTGRAM_DEBUG
 	fprintf(stderr, "About to call mbr_photgram_wr_data record kind:%d\n", store->kind);

@@ -1362,7 +1362,6 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
 	unsigned int label_test = 0;
 	int record_size = 0;
 	short int tmp = 0;
-	int i = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);

@@ -1023,13 +1023,6 @@ int mbr_wt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	struct mbf_mstiffss_struct *data = (struct mbf_mstiffss_struct *)mb_io_ptr->raw_data;
-	struct mbsys_mstiff_struct *store = (struct mbsys_mstiff_struct *)store_ptr;
-
 	/* set error as this is a read only format */
 	const int status = MB_SUCCESS;
 	*error = MB_ERROR_WRITE_FAIL;

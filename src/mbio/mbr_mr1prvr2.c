@@ -189,7 +189,6 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to data */
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)mb_io_ptr->store_data;
-	char *store_ptr = (char *)store;
 	char *xdrs = mb_io_ptr->xdrs;
 
 	int status = MB_SUCCESS;
@@ -705,12 +704,6 @@ int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_mr1prvr2_wr_data(verbose, mbio_ptr, store_ptr, error);

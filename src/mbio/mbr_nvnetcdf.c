@@ -120,14 +120,10 @@ int mbr_alm_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mbsys_navnetcdf_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
-
-	/* get pointer to raw data structure */
-	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)mb_io_ptr->store_data;
 
 	/* initialize values in structure */
 	int *dataread = (int *)&mb_io_ptr->save1;

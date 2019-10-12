@@ -1946,9 +1946,6 @@ int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
 	/* set error as this is a read only format */
 	status = MB_FAILURE;
 	*error = MB_ERROR_WRITE_FAIL;

@@ -1224,7 +1224,6 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_bchrtunb_struct *data = (struct mbf_bchrtunb_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* set file position */
@@ -2619,7 +2618,6 @@ int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_bchrtunb_struct *data = (struct mbf_bchrtunb_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* first translate values from data storage structure */

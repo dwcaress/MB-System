@@ -235,9 +235,6 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
   /* we will store the datagram index table in mbio descriptor field saveptr1 */
   dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
 
-  /* get pointer to raw data structure */
-  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
-
   /* allocate the datagram index table struct (vector struct) */
   int status = mb_mallocd(verbose, __FILE__, __LINE__,
              sizeof(struct mbsys_kmbes_index_table), (void **)(&dgm_index_table), error);
@@ -2093,7 +2090,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   struct mbsys_kmbes_m_partition partition;
   struct mbsys_kmbes_m_body cmnPart;
   size_t alloc_size = 0;
-  int i, j, k;
+  int k;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2907,8 +2904,6 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  size_t numBytes = 0;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3009,10 +3004,6 @@ int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *he
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
 
-  /* get pointer to raw data structure */
-  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
-  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
-
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
@@ -3047,7 +3038,6 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   int iip_location = -1;
   const int HEADER_SKIP = 8;
   unsigned short pingCnt;
-  int time_i[7];
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3066,9 +3056,6 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
   /* get pointer to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get pointer to raw data structure */
-  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* now get the index table from the mbio descriptor field saveptr1 */
   dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
@@ -3380,7 +3367,6 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index *dgm_index = NULL;
-  struct mbsys_kmbes_header header;
   struct mbsys_kmbes_header *header_ptr = NULL;
   size_t read_len = 0;
   char **bufferptr = NULL;
@@ -3736,7 +3722,6 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  int interp_error = MB_ERROR_NO_ERROR;
   int *file_indexed = NULL;
   double *pixel_size, *swath_width;
 
@@ -3885,7 +3870,6 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_spo *spo = &(store->spo);
-  struct mbsys_kmbes_header *header = &store->spo.header;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -4012,7 +3996,6 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_skm *skm = &(store->skm);
-  struct mbsys_kmbes_header *header = &store->skm.header;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -4228,7 +4211,6 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_svp *svp = &(store->svp);
-  struct mbsys_kmbes_header *header = &store->svp.header;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -4348,7 +4330,6 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_svt *svt = &(store->svt);
-  struct mbsys_kmbes_header *header = &store->svt.header;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -4479,7 +4460,6 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_scl *scl = &(store->scl);
-  struct mbsys_kmbes_header *header = &store->scl.header;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -4587,7 +4567,6 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_sde *sde = &(store->sde);
-  struct mbsys_kmbes_header *header = &store->sde.header;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -4704,7 +4683,6 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_shi *shi = &(store->shi);
-  struct mbsys_kmbes_header *header = &store->shi.header;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -4811,7 +4789,6 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_sha *sha = &(store->sha);
-  struct mbsys_kmbes_header *header = &store->sha.header;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -4937,7 +4914,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to the data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
-  struct mbsys_kmbes_header *header = &store->mrz[imrz].header;
 
   /* size of output record and components thereof - set the size according to what
       we know about, as anything added by Kongsberg that we don't know about will
@@ -5495,7 +5471,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imwc, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
-  int i, k;
+  int k;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5510,7 +5486,6 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_mwc *mwc = &(store->mwc[imwc]);
-  struct mbsys_kmbes_header *header = &store->mwc[imwc].header;
 
   /* size of output record */
   *size = (size_t) mwc->header.numBytesDgm;
@@ -5762,7 +5737,6 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_cpo *cpo = &(store->cpo);
-  struct mbsys_kmbes_header *header = &store->cpo.header;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -5874,7 +5848,6 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
 
@@ -5890,7 +5863,6 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_che *che = &(store->che);
-  struct mbsys_kmbes_header *header = &store->che.header;
 
   /* size of output record */
   *size = (size_t) che->header.numBytesDgm;
@@ -6013,7 +5985,6 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_iip *iip = &(store->iip);
-  struct mbsys_kmbes_header *header = &store->iip.header;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -6109,7 +6080,6 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_iop *iop = &(store->iop);
-  struct mbsys_kmbes_header *header = &store->iop.header;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -6205,7 +6175,6 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_xmb *xmb = &(store->xmb);
   struct mbsys_kmbes_iip *iip = &(store->iip);
-  struct mbsys_kmbes_header *header = &store->xmb.header;
 
   /* have to construct this record now */
   strncpy(xmb->version, MB_VERSION, MB_COMMENT_MAXLINE-1);
@@ -6310,7 +6279,6 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_xmc *xmc = &(store->xmc);
-  struct mbsys_kmbes_header *header = &store->xmc.header;
 
   /* size of output record */
   numBytesComment = strlen(store->xmc.comment) + (strlen(store->xmc.comment) % 2);
@@ -6387,7 +6355,6 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  size_t numBytesComment = 0;
   char *buffer = NULL;
   int index = 0;
 
@@ -6403,7 +6370,6 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_xms *xms = &(store->xms);
-  struct mbsys_kmbes_header *header = &store->xms.header;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -6507,9 +6473,6 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
 
-  /* get pointer to raw data structure */
-  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
-
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
@@ -6531,7 +6494,6 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
 };
 /*--------------------------------------------------------------------*/
 int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  size_t write_len = 0;
   char **bufferptr = NULL;
   char *buffer = NULL;
   int *bufferalloc = NULL;
@@ -6731,12 +6693,6 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     /* check for non-null pointers */
     assert(mbio_ptr != NULL);
     assert(store_ptr != NULL);
-
-  /* get pointer to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get pointer to raw data structure */
-  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
 #ifdef MBR_KEMKMALL_DEBUG
   fprintf(stderr, "\nAbout to call mbr_kemkmall_wr_data record kind:%d\n", store->kind);
