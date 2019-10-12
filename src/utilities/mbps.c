@@ -23,6 +23,7 @@
  *
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -99,7 +100,7 @@ int main(int argc, char **argv) {
 	double mean_latmin;
 	double mean_lonmin;
 	double mean_hdg = 0.0;
-	int done, mean_knt = 0;
+	int mean_knt = 0;
 	int orient;
 	char label[100];
 	int a, b, rotate;
@@ -387,9 +388,9 @@ int main(int argc, char **argv) {
 
 	/* read and process data */
 	nread = 0;
-	done = false;
+	bool done = false;
 	error = MB_ERROR_NO_ERROR;
-	while (done == false && error <= MB_ERROR_NO_ERROR) {
+	while (!done && error <= MB_ERROR_NO_ERROR) {
 		/* read a ping of data */
 		status = mb_get(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
 		                &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathacrosstrack,

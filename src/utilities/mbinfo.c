@@ -501,7 +501,6 @@ int main(int argc, char **argv) {
 	}
 	/* read only once unless coverage mask requested */
 	int pass = 0;
-	int done = false;
 
 	/* metadata controls */
 	int imetadata = 0;
@@ -523,8 +522,8 @@ int main(int argc, char **argv) {
 	int meta_pitchbias = 0;
 	int meta_headingbias = 0;
 	int meta_draft = 0;
-	while (done == false) {
-
+	bool done = false;
+	while (!done) {
 		/* open file list */
 		if (read_datalist) {
 			if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {

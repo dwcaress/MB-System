@@ -866,7 +866,7 @@ int main(int argc, char **argv) {
       start = 0;
       nrec = 0;
       fprintf(stderr, "Processing data...\n");
-      while (done == false) {
+      while (!done) {
         if (verbose > 1)
           fprintf(stderr, "\n");
 
@@ -1654,9 +1654,9 @@ int main(int argc, char **argv) {
         }
 
         /* write out edits from completed pings */
-        if ((status == MB_SUCCESS && nrec == 3) || done == true) {
+        if ((status == MB_SUCCESS && nrec == 3) || done) {
           int k;
-          if (done == true)
+          if (done)
             k = nrec;
           else
             k = 1;
