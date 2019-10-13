@@ -7717,7 +7717,6 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   double *last_7k_time_d;
   FILE *mbfp;
   size_t read_len;
-  int done;
   int *current_ping;
   int *last_ping;
   int *new_ping;
@@ -7781,9 +7780,9 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
   /* loop over reading data until a record is ready for return */
-  done = false;
+  bool done = false;
   *error = MB_ERROR_NO_ERROR;
-  while (done == false) {
+  while (!done) {
 
     /* if previously read record stored use it first */
     if (*save_flag == true) {
@@ -8032,7 +8031,7 @@ Have a nice day...\n");
     }
 
 #ifdef MBR_RESON7KR_DEBUG2
-    if (status == MB_SUCCESS && done == false && *save_flag == false) {
+    if (status == MB_SUCCESS && !done && *save_flag == false) {
       fprintf(stderr, "Reading record id: %4.4X  %4.4d | %4.4X  %4.4d | %4.4hX  %4.4d |", *recordid, *recordid, *deviceid,
               *deviceid, *enumerator, *enumerator);
       if (*recordid == R7KRECID_ReferencePoint)
@@ -8179,7 +8178,7 @@ Have a nice day...\n");
     }
 
     /* if needed parse the data record */
-    if (status == MB_SUCCESS && done == false) {
+    if (status == MB_SUCCESS && !done) {
       if (*recordid == R7KRECID_7kFileHeader) {
         status = mbr_reson7kr_rd_fileheader(verbose, buffer, store_ptr, error);
         (*fileheaders)++;

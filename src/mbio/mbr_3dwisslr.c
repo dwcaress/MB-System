@@ -320,7 +320,6 @@ int mbr_3dwisslr_index_data
   size_t index;
   int time_i[7];
   double time_d;
-  int done;
   int record_num_heada = 0;
   int record_num_headb = 0;
   int record_num_comment = 0;
@@ -354,7 +353,6 @@ int mbr_3dwisslr_index_data
   /* set status */
   status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
-  done = false;
 
   /* read the fileheader, which is returned as a parameter record */
 
@@ -393,6 +391,8 @@ int mbr_3dwisslr_index_data
     read_len = (size_t)(MBSYS_3DDWISSL_V1S1_PARAMETER_SIZE);
     status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
     }
+
+  bool done = false;
   if (status == MB_SUCCESS)
     {
     index = 0;
@@ -537,7 +537,7 @@ int mbr_3dwisslr_index_data
     }
 
   /* read subsequent data records */
-  while (done == false)
+  while (!done)
     {
     /* read and check two bytes until a valid record_id is found */
     read_len = (size_t)sizeof(short);

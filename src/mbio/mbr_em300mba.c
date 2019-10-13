@@ -346,7 +346,6 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	char line[MBSYS_SIMRAD2_BUFFER_SIZE];
 	short short_val;
 	int read_len, len;
-	int done;
 	char *comma_ptr;
 	int i1, i2, i3;
 
@@ -399,9 +398,9 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 
 	/* now loop over reading individual characters to
 	    handle ASCII parameter values */
-	done = false;
+	bool done = false;
 	len = 0;
-	while (status == MB_SUCCESS && done == false) {
+	while (status == MB_SUCCESS && !done) {
 		read_len = fread(&line[len], 1, 1, mbfp);
 		if (read_len == 1) {
 			status = MB_SUCCESS;
@@ -1664,7 +1663,6 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	char line[MBSYS_SIMRAD2_COMMENT_LENGTH];
 	short short_val;
 	int read_len;
-	int done;
 	int navchannel;
 
 	if (verbose >= 2) {
@@ -1733,8 +1731,8 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		done = false;
-		while (done == false) {
+		bool done = false;
+		while (!done) {
 			read_len = fread(&line[0], 1, 1, mbfp);
 			if (read_len == 1 && line[0] == EM2_END) {
 				done = true;
@@ -2849,7 +2847,6 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	int png_ss_count;
 	int png_ss_serial;
 	int read_len;
-	int done;
 	int junk_bytes;
 	int read_size;
 	int offset;
@@ -3070,8 +3067,8 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		done = false;
-		while (done == false) {
+		bool done = false;
+		while (!done) {
 			read_len = fread(&line[0], 1, 1, mbfp);
 			if (read_len == 1 && line[0] == EM2_END) {
 				done = true;
@@ -3183,7 +3180,6 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	char line[EM2_WC_HEADER_SIZE];
 	short short_val;
 	int read_len;
-	int done;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3294,8 +3290,8 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		done = false;
-		while (done == false) {
+		bool done = false;
+		while (!done) {
 			read_len = fread(&line[0], 1, 1, mbfp);
 			if (read_len == 1 && line[0] == EM2_END) {
 				done = true;
@@ -3459,9 +3455,9 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* loop over reading data until a record is ready for return */
-	int done = false;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		/* if no label saved get next record label */
 		if (*label_save_flag == false) {
 			/* read four byte record size */

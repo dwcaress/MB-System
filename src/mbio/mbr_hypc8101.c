@@ -348,8 +348,8 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
-	int done = false;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		/* read the next line */
 		result = fgets(line, MBF_HYPC8101_MAXLINE, mb_io_ptr->mbfp);
 		if (result == line && strlen(line) < MBF_HYPC8101_MAXLINE) {

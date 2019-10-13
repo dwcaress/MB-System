@@ -197,12 +197,12 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int second;
 	int tsecond;
 
-	int done = false;
 	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	int center = MBF_SBIFREMR_NUM_BEAMS / 2;
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 
 		char *result = NULL;
 		/* get next line */

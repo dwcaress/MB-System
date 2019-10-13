@@ -229,9 +229,9 @@ int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* loop over reading data until a record is ready for return */
 	int status = MB_SUCCESS;
-	int done = false;
+	bool done = false;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == false) {
+	while (!done) {
 		/* read next record header into buffer */
 		size_t read_len = (size_t)SWPLS_SIZE_BLOCKHEADER;
 		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
@@ -290,7 +290,7 @@ int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 
 		/* parse the data record */
-		if ((status == MB_SUCCESS) && (done == false)) {
+		if (status == MB_SUCCESS && !done) {
 			if (*recordid == SWPLS_ID_SXP_HEADER_DATA) {
 				status = swpls_rd_sxpheader(verbose, buffer, store_ptr, error);
 				done = true;

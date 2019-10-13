@@ -1323,9 +1323,9 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	/* initialize everything to zeros */
 	mbr_zero_sb2100bi(verbose, store_ptr, error);
 
-	int done = false;
+	bool done = false;
 	int expect = MBF_SB2100BI_NONE;
-	while (done == false) {
+	while (!done) {
 		/* if no label saved get next record label */
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;

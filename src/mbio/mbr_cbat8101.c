@@ -1112,12 +1112,12 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
-	int done = false;
 	type = (short *)label;
 	first = true;
 	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		if (mb_io_ptr->byteswapped == false) {
 			/* get first part of next record label */
 			if ((status = fread(&label[0], 1, 1, mb_io_ptr->mbfp)) != 1) {

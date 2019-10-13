@@ -8019,9 +8019,9 @@ int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
   /* loop over reading data until a record is ready for return */
-  int done = false;
+  bool done = false;
   *error = MB_ERROR_NO_ERROR;
-  while (done == false) {
+  while (!done) {
     /* if previously read record stored use it first */
     if (*save_flag == true) {
       *save_flag = false;
@@ -8290,7 +8290,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
     }
 
 #ifdef MBR_RESON7K3_DEBUG2
-    if (status == MB_SUCCESS && done == false && *save_flag == false) {
+    if (status == MB_SUCCESS && !done && *save_flag == false) {
       fprintf(stderr, "Reading record id: %4.4X  %4.4d | %4.4X  %4.4d | %4.4hX  %4.4d |", *recordid, *recordid, *deviceid,
               *deviceid, *enumerator, *enumerator);
       if (*recordid == R7KRECID_None)
@@ -8453,7 +8453,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
     }
 
     /* if possible and needed parse the data record now */
-    if (status == MB_SUCCESS && done == false) {
+    if (status == MB_SUCCESS && !done) {
 
       if (*recordid == R7KRECID_ReferencePoint) {
         status = mbr_reson7k3_rd_ReferencePoint(verbose, buffer, store_ptr, error);

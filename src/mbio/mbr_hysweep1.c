@@ -237,7 +237,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int *file_header_written;
 	int *line_saved;
 	int *RMB_read;
-	int done;
 	int nscan, nread;
 	char *token;
 	int DEV_device_number;
@@ -307,8 +306,8 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* loop over reading data until a record is ready for return */
-	done = false;
-	while (*error == MB_ERROR_NO_ERROR && done == false) {
+	bool done = false;
+	while (*error == MB_ERROR_NO_ERROR && !done) {
 		/* read the next line */
 		if (*line_saved == false)
 			status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
@@ -804,7 +803,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 
 				/* set *RMB_read flag */
-				if (done == false && status == MB_SUCCESS)
+				if (!done && status == MB_SUCCESS)
 					*RMB_read = true;
 			}
 
@@ -947,7 +946,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 
 				/* set *RMB_read flag */
-				if (done == true)
+				if (done)
 					*RMB_read = false;
 			}
 
@@ -1093,7 +1092,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 
 				/* set *RMB_read flag */
-				if (done == true)
+				if (done)
 					*RMB_read = false;
 			}
 

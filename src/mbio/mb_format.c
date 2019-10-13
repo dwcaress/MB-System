@@ -1665,7 +1665,6 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 	short type2swap;
 	short sonar2swap;
 	int nsonar, nlow, nhigh, subsystem, size;
-	int done;
 
 	/* look for old Simrad Mermaid suffix convention */
 	if (found == false) {
@@ -2384,11 +2383,11 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 			        as low frequency */
 			if ((checkfp = fopen(filename, "r")) != NULL) {
 				/* loop over reading data until four full sidescan sonar records are read */
-				done = false;
+				bool done = false;
 				nsonar = 0;
 				nlow = 0;
 				nhigh = 0;
-				while (done == false) {
+				while (!done) {
 					/* read message header */
 					if (fread(buffer, MBSYS_JSTAR_MESSAGE_SIZE, 1, checkfp) == 1) {
 						/* extract and check the subsystem value from the message header */
@@ -2404,7 +2403,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 							done = true;
 
 						/* read and discard the rest of the record */
-						if (done == false) {
+						if (!done) {
 							mb_get_binary_int(true, &buffer[12], &size);
 							for (i = 0; i < size; i++) {
 								if (fread(buffer, 1, 1, checkfp) != 1)
@@ -3093,7 +3092,6 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 	char *buffer_ptr;
 	int len;
 	int nscan;
-	int rdone;
 	int pformat;
 	struct stat file_status;
 	int fstat;
@@ -3103,16 +3101,16 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 	int istart;
 
 	/* loop over reading from datalist_ptr */
-	int done = false;
-	if (datalist->open == true && done == false) {
-		while (done == false) {
+	bool done = false;
+	if (datalist->open == true && !done) {
+		while (!done) {
 			/* copy current datalist path */
 			strcpy(dpath, datalist->path);
 
 			/* if recursive datalist closed read current datalist */
 			if (datalist->datalist == NULL) {
-				rdone = false;
-				while (rdone == false) {
+				bool rdone = false;
+				while (!rdone) {
 					buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, datalist->fp);
 
 					/* deal with end of datalist file */
@@ -3292,7 +3290,7 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 			}
 
 			/* if open read next entry from recursive datalist */
-			if (done == false && datalist->open == true && datalist->datalist != NULL) {
+			if (!done && datalist->open == true && datalist->datalist != NULL) {
 				datalist2 = (struct mb_datalist_struct *)datalist->datalist;
 				if (datalist2->open == true) {
 					/* recursively call mb_read_datalist */
@@ -3502,21 +3500,21 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 	char tmpstr[MB_PATH_MAXLINE];
 	char *buffer_ptr;
 	int len;
-	int nscan, rdone;
+	int nscan;
 	struct stat file_status;
 	int fstat;
 
 	/* loop over reading from imagelist_ptr */
-	int done = false;
-	if (imagelist->open == true && done == false) {
-		while (done == false) {
+	bool done = false;
+	if (imagelist->open == true && !done) {
+		while (!done) {
 			/* copy current imagelist path */
 			strcpy(dpath, imagelist->path);
 
 			/* if recursive imagelist closed read current imagelist */
 			if (imagelist->imagelist == NULL) {
-				rdone = false;
-				while (rdone == false) {
+				bool rdone = false;
+				while (!rdone) {
                     *imagestatus = MB_IMAGESTATUS_NONE;
                     *time_d = 0.0;
                     *dtime_d = 0.0;
@@ -3700,7 +3698,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 			}
 
 			/* if open read next entry from recursive imagelist */
-			if (done == false && imagelist->open == true && imagelist->imagelist != NULL) {
+			if (!done && imagelist->open == true && imagelist->imagelist != NULL) {
 				imagelist2 = (struct mb_imagelist_struct *)imagelist->imagelist;
 				if (imagelist2->open == true) {
 					/* recursively call mb_read_imagelist */
@@ -3922,8 +3920,8 @@ int mb_get_shortest_path(int verbose, char *path, int *error) {
 	char lasttoken[MB_PATH_MAXLINE];
 
 	/* loop until no changes are made */
-	int done = false;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		/* set no change made */
 		int change = false;
 
