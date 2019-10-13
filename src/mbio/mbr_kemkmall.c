@@ -3373,7 +3373,6 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   char *buffer = NULL;
   int *bufferalloc = NULL;
   int *dgm_id = NULL;
-  int done = false;
   int jmrz, isounding;
   int numSoundings, numBackscatterSamples;
 
@@ -3405,6 +3404,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   *error = MB_ERROR_NO_ERROR;
 
   /* check index to see if more datagrams can be read */
+  bool done = false;
   if (mb_io_ptr->mbfp != NULL) {
     if (*dgm_id < dgm_index_table->dgm_count) {
       done = false;
@@ -3417,7 +3417,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   }
 
   /* if not done loop over reading data until a record is ready for return */
-  while (done == false) {
+  while (!done) {
 
     // if reading a file then use the index of datagrams
     if (mb_io_ptr->mbfp != NULL) {
@@ -3589,7 +3589,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
             store->num_soundings = 0;
             store->num_backscatter_samples = 0;
             store->num_pixels = 0;
-            if (done == true) {
+            if (done) {
               for (int imrz=0;imrz<store->n_mrz_needed;imrz++) {
                 numSoundings = store->mrz[imrz].rxInfo.numSoundingsMaxMain
                                 + store->mrz[imrz].rxInfo.numExtraDetections;
@@ -3604,7 +3604,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
           }
 
           /* if pseudosidescan is expected and XMS datagram not read, then not done yet */
-          if (done == true && store->xmb.pseudosidescan_enabled == true
+          if (done && store->xmb.pseudosidescan_enabled == true
               && store->mrz[jmrz].cmnPart.pingCnt != store->xms.pingCnt) {
             done = false;
           }
@@ -3697,7 +3697,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       (*dgm_id)++;
 
     /* if not done but no more data in index then done with error */
-    if (done == false && mb_io_ptr->mbfp != NULL && *dgm_id >= dgm_index_table->dgm_count) {
+    if (!done && mb_io_ptr->mbfp != NULL && *dgm_id >= dgm_index_table->dgm_count) {
       done = true;
       *error = MB_ERROR_EOF;
       status = MB_FAILURE;

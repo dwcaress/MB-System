@@ -767,8 +767,8 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mbf_xtfpacketheader packetheader;
 
 	/* look for next recognizable record */
-	int done = false;
-	while (status == MB_SUCCESS && done == false) {
+	bool done = false;
+	while (status == MB_SUCCESS && !done) {
 		/* find the next packet beginning */
 		int found = false;
 		int skip = 0;

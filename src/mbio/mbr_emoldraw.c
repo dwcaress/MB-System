@@ -1439,9 +1439,9 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* loop over reading data until a record is ready for return */
-	int done = false;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		/* if no label saved get next record label */
 		if (*label_save_flag == false) {
 			/* read four byte wrapper if data stream is known

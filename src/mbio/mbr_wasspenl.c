@@ -1184,10 +1184,10 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* loop over reading data until a record is ready for return */
-	int done = false;
 	*error = MB_ERROR_NO_ERROR;
 	memset((void *)recordid, 0, (size_t)12);
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		/* read next record header into buffer */
 		read_len = (size_t)16;
 		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);

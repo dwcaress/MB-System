@@ -380,9 +380,9 @@ int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 
 	/* now loop over reading individual characters to
 	    handle ASCII parameter values */
-	int done = false;
 	int len = 0;
-	while (status == MB_SUCCESS && done == false) {
+	bool done = false;
+	while (status == MB_SUCCESS && !done) {
 		read_len = fread(&line[len], 1, 1, mbfp);
 		if (read_len == 1) {
 			status = MB_SUCCESS;
@@ -1770,8 +1770,8 @@ int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		int done = false;
-		while (done == false) {
+		bool done = false;
+		while (!done) {
 			read_len = fread(&line[0], 1, 1, mbfp);
 			if (read_len == 1 && line[0] == EM2_END) {
 				done = true;
@@ -3089,8 +3089,8 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		int done = false;
-		while (done == false) {
+		bool done = false;
+		while (!done) {
 			read_len = fread(&line[0], 1, 1, mbfp);
 			if (read_len == 1 && line[0] == EM2_END) {
 				done = true;
@@ -3311,8 +3311,8 @@ int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		int done = false;
-		while (done == false) {
+		bool done = false;
+		while (!done) {
 			read_len = fread(&line[0], 1, 1, mbfp);
 			if (read_len == 1 && line[0] == EM2_END) {
 				done = true;
@@ -3484,9 +3484,9 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* loop over reading data until a record is ready for return */
-	int done = false;
+	bool done = false;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == false) {
+	while (!done) {
 		/* if no label saved get next record label */
 		if (*label_save_flag == false) {
 			/* read four byte record size */

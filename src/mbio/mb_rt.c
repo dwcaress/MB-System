@@ -63,7 +63,7 @@ struct velocity_model {
 
 	/* raytracing bookkeeping variables */
 	int ray_status;
-	int done;
+	bool done;
 	int outofbounds;
 	int layer;
 	int turned;
@@ -144,7 +144,7 @@ int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, vo
 
 	/* initialize raytracing bookkeeping variables */
 	model->ray_status = 0;
-	model->done = 0;
+	model->done = false;
 	model->outofbounds = 0;
 	model->layer = 0;
 	model->turned = 0;

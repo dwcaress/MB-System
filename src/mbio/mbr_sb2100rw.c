@@ -301,7 +301,6 @@ int mbr_dem_sb2100rw(int verbose, void *mbio_ptr, int *error) {
 int mbr_sb2100rw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line, int *error) {
 	int status = MB_SUCCESS;
 	int nchars;
-	int done;
 	char *result;
 
 	if (verbose >= 2) {
@@ -312,7 +311,7 @@ int mbr_sb2100rw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 	}
 
 	/* read next good line in file */
-	done = false;
+	bool done = false;
 	do {
 		/* read next line in file */
 		strncpy(line, "\0", MBF_SB2100RW_MAXLINE);
@@ -340,7 +339,7 @@ int mbr_sb2100rw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 			fprintf(stderr, "dbg5       chars:      %d\n", nchars);
 		}
 
-	} while (done == false);
+	} while (!done);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -909,9 +908,9 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	int status = MB_SUCCESS;
-	int done = false;
+	bool done = false;
 	int expect = MBF_SB2100RW_NONE;
-	while (done == false) {
+	while (!done) {
 
 		/* get next record label */
 		if (line_save_flag == false) {

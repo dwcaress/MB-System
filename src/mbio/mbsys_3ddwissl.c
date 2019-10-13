@@ -3816,7 +3816,6 @@ int mbsys_3ddwissl_indextablefix
   int head_a_start, head_a_end, head_b_start, head_b_end;
   int first_good_timestamp, next_good_timestamp, last_good_timestamp;
   int num_good_timestamps;
-  int done;
   int i;
 
   if (verbose >= 2)
@@ -3927,9 +3926,9 @@ int mbsys_3ddwissl_indextablefix
     for (int i = last_good_timestamp + 1; i <= head_a_end; i++)
       indextable[i].time_d_corrected = indextable[last_good_timestamp].time_d_corrected+ dt *
         (i - last_good_timestamp);
-    done = false;
     next_good_timestamp = first_good_timestamp;
-    while (done == false)
+    bool done = false;
+    while (!done)
       {
       for (int i = first_good_timestamp + 1;
         i <= last_good_timestamp && next_good_timestamp == first_good_timestamp;
@@ -3997,9 +3996,9 @@ int mbsys_3ddwissl_indextablefix
     for (int i = last_good_timestamp + 1; i <= head_b_end; i++)
       indextable[i].time_d_corrected = indextable[last_good_timestamp].time_d_corrected+ dt *
         (i - last_good_timestamp);
-    done = false;
+    bool done = false;
     next_good_timestamp = first_good_timestamp;
-    while (done == false)
+    while (!done)
       {
       for (int i = first_good_timestamp + 1;
         i <= last_good_timestamp && next_good_timestamp == first_good_timestamp;

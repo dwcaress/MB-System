@@ -252,7 +252,6 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char buffer[MBSYS_JSTAR_SYSINFO_MAX];
 	char nmeastring[MB_COMMENT_MAXLINE];
 	int index;
-	int done;
 	int read_status;
 	int shortspersample;
 	int trace_size;
@@ -299,8 +298,8 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* loop over reading data until a full record of some sort is read */
-	done = false;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		/* read message header */
 		if ((read_status = fread(buffer, MBSYS_JSTAR_MESSAGE_SIZE, 1, mb_io_ptr->mbfp)) == 1) {
 			/* extract the message header values */

@@ -547,9 +547,9 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 
 	/* now loop over reading individual characters to
 	    handle ASCII parameter values */
-	int done = false;
 	int len = 0;
-	while (status == MB_SUCCESS && done == false) {
+	bool done = false;
+	while (status == MB_SUCCESS && !done) {
 		read_len = (size_t)1;
 		status = mb_fileio_get(verbose, mbio_ptr, (char *)&line[len], &read_len, error);
 		if (status == MB_SUCCESS) {
@@ -2209,7 +2209,6 @@ int mbr_em710mba_rd_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 	char line[MBSYS_SIMRAD3_COMMENT_LENGTH];
 	short short_val;
 	size_t read_len;
-	int done;
 	int navchannel;
 
 	if (verbose >= 2) {
@@ -2270,8 +2269,8 @@ int mbr_em710mba_rd_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		done = false;
-		while (done == false) {
+		bool done = false;
+		while (!done) {
 			read_len = (size_t)1;
 			status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 			if (status == MB_SUCCESS && line[0] == EM3_END) {
@@ -3825,8 +3824,8 @@ int mbr_em710mba_rd_ss2_mba(int verbose, void *mbio_ptr, int swap, struct mbsys_
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		int done = false;
-		while (done == false) {
+		bool done = false;
+		while (!done) {
 			read_len = (size_t)1;
 			status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 			if (status == MB_SUCCESS && line[0] == EM3_END) {
@@ -4042,8 +4041,8 @@ int mbr_em710mba_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		int done = false;
-		while (done == false) {
+		bool done = false;
+		while (!done) {
 			read_len = (size_t)1;
 			status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 			if (status == MB_SUCCESS && line[0] == EM3_END) {
@@ -4184,9 +4183,9 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* loop over reading data until a record is ready for return */
-	int done = false;
+	bool done = false;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == false) {
+	while (!done) {
 #ifdef MBR_EM710MBA_DEBUG
 		fprintf(stderr, "\nabove mbr_em710mba_rd_data loop:\n");
 		fprintf(stderr, "label_save_flag:%d status:%d\n", *label_save_flag, status);
@@ -4725,7 +4724,7 @@ Have a nice day...\n");
 		fprintf(stderr, "end of mbr_em710mba_rd_data loop:\n\n");
 #endif
 #ifdef MBR_EM710MBA_DEBUG3
-		if (done == true)
+		if (done)
 			fprintf(stderr, "DONE! type:%x kind:%d status:%d error:%d\n\n", type, store->kind, status, *error);
 #endif
 
