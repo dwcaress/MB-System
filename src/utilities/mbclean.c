@@ -235,54 +235,54 @@ int main(int argc, char **argv) {
   int nunflagesf = 0;
   int nzeroesf = 0;
   char comment[MB_COMMENT_MAXLINE];
-  int check_slope = false;
+  bool check_slope = false;
   double slopemax = 1.0;
-  int check_spike = false;
+  bool check_spike = false;
   double spikemax = 1.0;
   int spike_mode = 1;
   int slope_form = 0;
   double distancemin = 0.01;
   double distancemax = 0.25;
   int mode = MBCLEAN_FLAG_ONE;
-  int zap_beams = false;
+  bool zap_beams = false;
   int zap_beams_right = 0;
   int zap_beams_left = 0;
-  int flag_distance = false;
+  bool flag_distance = false;
   double flag_distance_right = 0.0;
   double flag_distance_left = 0.0;
-  int unflag_distance = false;
+  bool unflag_distance = false;
   double unflag_distance_right = 0.0;
   double unflag_distance_left = 0.0;
-  int flag_angle = false;
+  bool flag_angle = false;
   double flag_angle_right = 0.0;
   double flag_angle_left = 0.0;
-  int unflag_angle = false;
+  bool unflag_angle = false;
   double unflag_angle_right = 0.0;
   double unflag_angle_left = 0.0;
-  int zap_rails = false;
-  int zap_long_across = false;      // 2010/03/07 DY
-  int zap_max_heading_rate = false; // 2010/04/27 DY
-  int check_range = false;
+  bool zap_rails = false;
+  bool zap_long_across = false;
+  bool zap_max_heading_rate = false;
+  bool check_range = false;
   double depth_low;
   double depth_high;
-  int check_range_min = false;
+  bool check_range_min = false;
   double range_min;
-  int check_fraction = false;
+  bool check_fraction = false;
   double fraction_low;
   double fraction_high;
-  int check_speed_good = false;
-  int check_zero_position = false;
-  int check_position_bounds = false;
+  bool check_speed_good = false;
+  bool check_zero_position = false;
+  bool check_position_bounds = false;
   double speed_low;
   double speed_high;
   double west, east, south, north;
-  int check_deviation = false;
+  bool check_deviation = false;
   double deviation_max;
-  int check_num_good_min = false;
+  bool check_num_good_min = false;
   int num_good_min;
   int num_good;
   int action;
-  int check_ping_deviation = false;
+  bool check_ping_deviation = false;
   double ping_deviation_tolerance = 1.0;
   double devsqsum = 0.0;
   int ndevsqsum = 0;
@@ -317,11 +317,10 @@ int main(int argc, char **argv) {
   double slope2;
 
   /* fix_edit_timestamps variables */
-  int fix_edit_timestamps = false;
+  bool fix_edit_timestamps = false;
   double tolerance = 0.0;
 
   /* save file control variables */
-  int esffile_open = false;
   char esffile[MB_PATH_MAXLINE];
   struct mb_esf_struct esf;
 
@@ -558,11 +557,11 @@ int main(int argc, char **argv) {
   }
 
   /* turn on slope checking if nothing else is to be used */
-  if (check_slope == false && zap_beams == false && flag_distance == false && unflag_distance == false && zap_rails == false &&
-      check_spike == false && check_range == false && check_fraction == false && check_speed_good == false &&
-      check_deviation == false && check_num_good_min == false && check_position_bounds == false &&
-      check_zero_position == false && fix_edit_timestamps == false
-        && zap_max_heading_rate == false)
+  if (!check_slope && !zap_beams && flag_distance && !unflag_distance && !zap_rails &&
+      !check_spike && !check_range && !check_fraction && !check_speed_good &&
+      !check_deviation && !check_num_good_min && !check_position_bounds &&
+      !check_zero_position && !fix_edit_timestamps &&
+      !zap_max_heading_rate)
     check_slope = true;
 
   if (verbose >= 2) {
@@ -841,6 +840,7 @@ int main(int argc, char **argv) {
       }
 
       /* now deal with old edit save file */
+      bool esffile_open = false;
       if (status == MB_SUCCESS) {
         /* reset message */
         fprintf(stderr, "Sorting old edits...\n");
@@ -944,7 +944,7 @@ int main(int argc, char **argv) {
 
           /* if requested set all edit timestamps within tolerance of
               ping[nrec].time_d to ping[nrec].time_d */
-          if (fix_edit_timestamps == true)
+          if (fix_edit_timestamps)
             status = mb_esf_fixtimestamps(verbose, &esf, ping[nrec].time_d, tolerance, &error);
 
           /* apply saved edits */
@@ -980,7 +980,7 @@ int main(int argc, char **argv) {
           center = ping[irec].beams_bath / 2;
 
           /* zap outer beams by number if requested */
-          if (zap_beams == true) {
+          if (zap_beams) {
             for (int i = 0; i < MIN(zap_beams_left, center); i++) {
               if (mb_beam_ok(ping[irec].beamflag[i])) {
                 find_bad = true;
@@ -1015,7 +1015,7 @@ int main(int argc, char **argv) {
           }
 
           /* flag outer beams by distance if requested */
-          if (flag_distance == true) {
+          if (flag_distance) {
             for (int i = 0; i < ping[irec].beams_bath; i++) {
               if (mb_beam_ok(ping[irec].beamflag[i]) && (ping[irec].bathacrosstrack[i] <= flag_distance_left ||
                                                          ping[irec].bathacrosstrack[i] >= flag_distance_right)) {
@@ -1035,7 +1035,7 @@ int main(int argc, char **argv) {
           }
 
           /* unflag inner beams by distance if requested */
-          if (unflag_distance == true) {
+          if (unflag_distance) {
             for (int i = 0; i < ping[irec].beams_bath; i++) {
               if (ping[irec].beamflag[i] != MB_FLAG_NULL && !mb_beam_ok(ping[irec].beamflag[i]) &&
                   (ping[irec].bathacrosstrack[i] >= unflag_distance_left &&
@@ -1056,7 +1056,7 @@ int main(int argc, char **argv) {
           }
 
           /* flag outer beams by acrosstrack angle if requested */
-          if (flag_angle == true) {;
+          if (flag_angle) {;
             for (int i = 0; i < ping[irec].beams_bath; i++) {
               double xx;
               double yy;
@@ -1090,7 +1090,7 @@ int main(int argc, char **argv) {
           }
 
           /* unflag inner beams by acrosstrack angle if requested */
-          if (unflag_angle == true) {
+          if (unflag_angle) {
             for (int i = 0; i < ping[irec].beams_bath; i++) {
               double xx;
               double yy;
@@ -1124,7 +1124,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for speed range if requested */
-          if (check_speed_good == true) {
+          if (check_speed_good) {
             if (ping[irec].speed > speed_high || ping[irec].speed < speed_low) {
               for (int i = 0; i < ping[irec].beams_bath; i++) {
                 find_bad = true;
@@ -1142,7 +1142,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for range latitude and longitude if requested */
-          if (check_position_bounds == true) {
+          if (check_position_bounds) {
             if (ping[irec].navlon < west || ping[irec].navlon > east || ping[irec].navlat < south ||
                 ping[irec].navlat > north) {
               for (int i = 0; i < ping[irec].beams_bath; i++) {
@@ -1161,7 +1161,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for zero latitude and longitude if requested */
-          if (check_zero_position == true) {
+          if (check_zero_position) {
             if (ping[irec].navlon == 0.0 && ping[irec].navlat == 0.0) {
               for (int i = 0; i < ping[irec].beams_bath; i++) {
                 find_bad = true;
@@ -1200,7 +1200,7 @@ int main(int argc, char **argv) {
           }
 
           /* check depths for minimum range if requested (replacement for Dana Yoerger test) */
-          if (check_range_min == true) {
+          if (check_range_min) {
             for (int i = 0; i < ping[irec].beams_bath; i++) {
               if (mb_beam_ok(ping[irec].beamflag[i]) &&
                   sqrt(ping[irec].bathacrosstrack[i] * ping[irec].bathacrosstrack[i] +
@@ -1222,7 +1222,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for max heading rate if requested */
-          if (zap_max_heading_rate == true) {
+          if (zap_max_heading_rate) {
             double dh, heading_rate;
                         if (nrec > 1) {
                             dh = ping[nrec-1].heading - ping[0].heading;
@@ -1258,7 +1258,7 @@ int main(int argc, char **argv) {
           }
 
           /* zap rails if requested */
-          if (zap_rails == true) {
+          if (zap_rails) {
             /* flag all beams with acrosstrack distance less than the maximum out to that beam */
             lowdist = 0.0;
             highdist = 0.0;
@@ -1300,10 +1300,10 @@ int main(int argc, char **argv) {
             /* printf("%d %d xtrack: %.2f lowdist=%.2lf %d\n",irec,k,ping[irec].bathacrosstrack[k],
                 lowdist,ping[irec].beamflag[k]); */
 
-          } // if zap_rails==yes
+          } // if zap_rails
 
           /* zap long acrosstrack if requested */
-          if (zap_long_across == true) {
+          if (zap_long_across) {
             for (int j = 0; j < ping[irec].beams_bath; j++) {
               if (mb_beam_ok(ping[irec].beamflag[j]) && fabs(ping[irec].bathacrosstrack[j]) > max_acrosstrack) {
                 find_bad = true;
@@ -1322,7 +1322,7 @@ int main(int argc, char **argv) {
           }
 
           /* do tests that require looping over all available beams */
-          if (check_fraction == true || check_deviation == true || check_spike == true || check_slope == true) {
+          if (check_fraction || check_deviation || check_spike || check_slope) {
             for (int i = 0; i < ping[irec].beams_bath; i++) {
               if (mb_beam_ok(ping[irec].beamflag[i])) {
                 /* get local median value from all available records */
@@ -1354,7 +1354,7 @@ int main(int argc, char **argv) {
                 }
 
                 /* check fractional deviation from median if desired */
-                if (check_fraction == true && median > 0.0) {
+                if (check_fraction && median > 0.0) {
                   if (ping[irec].bath[i] / median < fraction_low ||
                       ping[irec].bath[i] / median > fraction_high) {
                     if (verbose >= 1)
@@ -1373,7 +1373,7 @@ int main(int argc, char **argv) {
                 }
 
                 /* check absolute deviation from median if desired */
-                if (check_deviation == true && median > 0.0) {
+                if (check_deviation && median > 0.0) {
                   if (fabs(ping[irec].bath[i] - median) > deviation_max) {
                     if (verbose >= 1)
                       fprintf(stderr, "a: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %8.2f\n",
@@ -1391,7 +1391,7 @@ int main(int argc, char **argv) {
                 }
 
                 /* check spikes - acrosstrack */
-                if (check_spike == true && 0 != (spike_mode & 1) && median > 0.0 && i > 0 &&
+                if (check_spike && 0 != (spike_mode & 1) && median > 0.0 && i > 0 &&
                     i < ping[irec].beams_bath - 1 && mb_beam_ok(ping[irec].beamflag[i - 1]) &&
                     mb_beam_ok(ping[irec].beamflag[i + 1])) {
                   dd = sqrt((ping[irec].bathx[i - 1] - ping[irec].bathx[i]) *
@@ -1431,7 +1431,7 @@ int main(int argc, char **argv) {
                 }
 
                 /* check spikes - alongtrack */
-                if (check_spike == true && nrec == 3 && 0 != (spike_mode & 2) &&
+                if (check_spike && nrec == 3 && 0 != (spike_mode & 2) &&
                     mb_beam_ok(ping[0].beamflag[i]) && mb_beam_ok(ping[2].beamflag[i])) {
                   dd = sqrt((ping[0].bathx[i] - ping[1].bathx[i]) * (ping[0].bathx[i] - ping[1].bathx[i]) +
                             (ping[0].bathy[i] - ping[1].bathy[i]) * (ping[0].bathy[i] - ping[1].bathy[i]));
@@ -1466,7 +1466,7 @@ int main(int argc, char **argv) {
                 }
 
                 /* check slopes - loop over each of the beams in the current ping */
-                if (check_slope == true && nrec == 3 && median > 0.0)
+                if (check_slope && nrec == 3 && median > 0.0)
                   for (int j = 0; j < nrec; j++) {
                     for (int k = 0; k < ping[j].beams_bath; k++) {
                       if (mb_beam_ok(ping[j].beamflag[k])) {
@@ -1563,7 +1563,7 @@ int main(int argc, char **argv) {
 
           /* check for minimum number of good depths
               on each side of swath */
-          if (check_num_good_min == true && num_good_min > 0) {
+          if (check_num_good_min && num_good_min > 0) {
             /* do port */
             num_good = 0;
             for (int i = 0; i < center; i++) {
@@ -1616,7 +1616,7 @@ int main(int argc, char **argv) {
           }
 
           /* check ping deviation */
-          if (check_ping_deviation == true && nrec >= 3) {
+          if (check_ping_deviation && nrec >= 3) {
             devsqsum = 0.0;
             ndevsqsum = 0;
             for (int i = 0; i < ping[irec].beams_bath; i++) {
@@ -1735,7 +1735,7 @@ int main(int argc, char **argv) {
       status = mb_esf_close(verbose, &esf, &error);
 
       /* update mbprocess parameter file */
-      if (esffile_open == true) {
+      if (esffile_open) {
         /* update mbprocess parameter file */
         status = mb_pr_update_format(verbose, swathfile, true, format, &error);
         status = mb_pr_update_edit(verbose, swathfile, MBP_EDIT_ON, esffile, &error);
