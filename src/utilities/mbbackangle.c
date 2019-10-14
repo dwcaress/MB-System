@@ -84,7 +84,7 @@ static const char usage_message[] =
 
 /*--------------------------------------------------------------------*/
 int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, int nangles, double angle_max, double dangle,
-                 int symmetry, int *nmean, double *mean, double *sigma, int *error) {
+                 bool symmetry, int *nmean, double *mean, double *sigma, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -132,7 +132,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 			sum += mean[ii];
 			sumsq += sigma[ii];
 			sumn += nmean[ii];
-			if (symmetry == true) {
+			if (symmetry) {
 				const int jj = nangles - ii - 1;
 				sum += mean[jj];
 				sumsq += sigma[jj];
@@ -162,7 +162,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 }
 /*--------------------------------------------------------------------*/
 int output_model(int verbose, FILE *tfp, double beamwidth, double depression, double ref_angle, int ntable, int nping,
-                 double time_d, double altitude, int nangles, double angle_max, double dangle, int symmetry, int *nmean,
+                 double time_d, double altitude, int nangles, double angle_max, double dangle, bool symmetry, int *nmean,
                  double *mean, double *sigma, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
@@ -320,10 +320,10 @@ int main(int argc, char **argv) {
 	struct mbba_grid_struct grid;
 
 	/* angle function variables */
-	int amplitude_on = false;
-	int sidescan_on = false;
-	int dump = false;
-	int symmetry = false;
+	bool amplitude_on = false;
+	bool sidescan_on = false;
+	bool dump = false;
+	bool symmetry = false;
 	int nangles = 81;
 	double angle_max = 80.0;
 	double dangle;
@@ -351,8 +351,8 @@ int main(int argc, char **argv) {
 	int beammode = MBBACKANGLE_BEAMPATTERN_EMPIRICAL;
 	double ssbeamwidth = 50.0;
 	double ssdepression = 20.0;
-	int corr_slope = false;
-	int corr_topogrid = false;
+	bool corr_slope = false;
+	bool corr_topogrid = false;
 	int corr_symmetry = MBP_SSCORR_ASYMMETRIC; /* BOB */
 	int amp_corr_type;
 	int amp_corr_slope = MBP_AMPCORR_IGNORESLOPE;
@@ -363,7 +363,7 @@ int main(int argc, char **argv) {
 	double ref_angle_default = 30.0;
 
 	/* amp vs angle grid variables */
-	int gridamp = false;
+	bool gridamp = false;
 	double gridampangle = 0.0;
 	double gridampmin = 0.0;
 	double gridampmax = 0.0;
@@ -372,7 +372,7 @@ int main(int argc, char **argv) {
 	double gridampdx = 0.0;
 	double gridampdy = 0.0;
 	float *gridamphist = NULL;
-	int gridss = false;
+	bool gridss = false;
 	double gridssangle = 0.0;
 	double gridssmin = 0.0;
 	double gridssmax = 0.0;
@@ -567,23 +567,23 @@ int main(int argc, char **argv) {
 	} // end command line arg parsing
 
 	/* set mode if necessary */
-	if (amplitude_on != true && sidescan_on != true) {
+	if (!amplitude_on && !sidescan_on) {
 		amplitude_on = true;
 		sidescan_on = true;
 	}
-	if (corr_slope == false && corr_topogrid == false) {
+	if (!corr_slope && !corr_topogrid) {
 		amp_corr_slope = MBP_AMPCORR_IGNORESLOPE;
 		ss_corr_slope = MBP_SSCORR_IGNORESLOPE;
 	}
-	else if (corr_slope == true && corr_topogrid == false) {
+	else if (corr_slope && !corr_topogrid) {
 		amp_corr_slope = MBP_AMPCORR_USESLOPE;
 		ss_corr_slope = MBP_SSCORR_USESLOPE;
 	}
-	else if (corr_slope == false && corr_topogrid == true) {
+	else if (!corr_slope && corr_topogrid) {
 		amp_corr_slope = MBP_AMPCORR_USETOPO;
 		ss_corr_slope = MBP_SSCORR_USETOPO;
 	}
-	else if (corr_slope == true && corr_topogrid == true) {
+	else if (corr_slope && corr_topogrid) {
 		amp_corr_slope = MBP_AMPCORR_USETOPOSLOPE;
 		ss_corr_slope = MBP_SSCORR_USETOPOSLOPE;
 	}
@@ -653,7 +653,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* allocate memory for angle arrays */
-	if (amplitude_on == true) {
+	if (amplitude_on) {
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(int), (void **)&nmeanamp, &error);
 		if (error == MB_ERROR_NO_ERROR)
@@ -667,7 +667,7 @@ int main(int argc, char **argv) {
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&sigmatotamp, &error);
 	}
-	if (sidescan_on == true) {
+	if (sidescan_on) {
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(int), (void **)&nmeanss, &error);
 		if (error == MB_ERROR_NO_ERROR)
@@ -691,9 +691,9 @@ int main(int argc, char **argv) {
 	}
 
 	/* check grid modes */
-	if (gridamp == true && amplitude_on == false)
+	if (gridamp && !amplitude_on)
 		gridamp = false;
-	if (gridss == true && sidescan_on == false)
+	if (gridss && !sidescan_on)
 		gridss = false;
 
 	/* output some information */
@@ -702,21 +702,21 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Number of angle bins: %d\n", nangles);
 		fprintf(stderr, "Maximum angle:         %f\n", angle_max);
 		fprintf(stderr, "Default altitude:      %f\n", altitude_default);
-		if (amplitude_on == true)
+		if (amplitude_on)
 			fprintf(stderr, "Working on beam amplitude data...\n");
-		if (sidescan_on == true)
+		if (sidescan_on)
 			fprintf(stderr, "Working on sidescan data...\n");
 		if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
 			fprintf(stderr, "Generating empirical correction tables...\n");
 		else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN)
 			fprintf(stderr, "Generating sidescan model correction tables...\n");
-		if (corr_slope == true)
+		if (corr_slope)
 			fprintf(stderr, "Using seafloor slope in calculating correction tables...\n");
 		else
 			fprintf(stderr, "Using flat bottom assumption in calculating correction tables...\n");
-		if (gridamp == true)
+		if (gridamp)
 			fprintf(stderr, "Outputting gridded histograms of beam amplitude vs grazing angle...\n");
-		if (gridss == true)
+		if (gridss)
 			fprintf(stderr, "Outputting gridded histograms of sidescan amplitude vs grazing angle...\n");
 	}
 
@@ -725,7 +725,7 @@ int main(int argc, char **argv) {
 	angle_start = -angle_max - 0.5 * dangle;
 
 	/* initialize histogram */
-	if (amplitude_on == true)
+	if (amplitude_on)
 		for (int i = 0; i < nangles; i++) {
 			nmeanamp[i] = 0;
 			meanamp[i] = 0.0;
@@ -734,7 +734,7 @@ int main(int argc, char **argv) {
 			meantotamp[i] = 0.0;
 			sigmatotamp[i] = 0.0;
 		}
-	if (sidescan_on == true)
+	if (sidescan_on)
 		for (int i = 0; i < nangles; i++) {
 			nmeanss[i] = 0;
 			meanss[i] = 0.0;
@@ -745,7 +745,7 @@ int main(int argc, char **argv) {
 		}
 
 	/* get topography grid if specified */
-	if (corr_topogrid == true) {
+	if (corr_topogrid) {
 		grid.data = NULL;
 		status = mb_read_gmt_grd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue, &grid.nxy,
 		                         &grid.n_columns, &grid.n_rows, &grid.min, &grid.max, &grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
@@ -796,7 +796,7 @@ int main(int argc, char **argv) {
 	altitude_totavg = 0.0;
 
 	/* initialize grids */
-	if (gridamp == true) {
+	if (gridamp) {
 		/* allocate memory for output grids */
 		status = mb_mallocd(verbose, __FILE__, __LINE__, gridampn_columns * gridampn_rows * sizeof(float), (void **)&gridamphist, &error);
 
@@ -809,7 +809,7 @@ int main(int argc, char **argv) {
 			exit(error);
 		}
 	}
-	if (gridss == true) {
+	if (gridss) {
 		/* allocate memory for output grids */
 		status = mb_mallocd(verbose, __FILE__, __LINE__, gridssn_columns * gridssn_rows * sizeof(float), (void **)&gridsshist, &error);
 
@@ -961,13 +961,13 @@ int main(int argc, char **argv) {
 
 		/* initialize grid arrays */
 		if (error == MB_ERROR_NO_ERROR) {
-			if (gridamp == true) {
+			if (gridamp) {
 				/* initialize the memory */
 				for (int i = 0; i < gridampn_columns * gridampn_rows; i++) {
 					gridamphist[i] = 0.0;
 				}
 			}
-			if (gridss == true) {
+			if (gridss) {
 				/* initialize the memory */
 				for (int i = 0; i < gridssn_columns * gridssn_rows; i++) {
 					gridsshist[i] = 0.0;
@@ -976,12 +976,12 @@ int main(int argc, char **argv) {
 		}
 
 		/* open output files */
-		if (error == MB_ERROR_NO_ERROR && dump == true) {
+		if (error == MB_ERROR_NO_ERROR && dump) {
 			atfp = stdout;
 			stfp = stdout;
 		}
 		else if (error == MB_ERROR_NO_ERROR) {
-			if (amplitude_on == true) {
+			if (amplitude_on) {
 				strcpy(amptablefile, swathfile);
 				strcat(amptablefile, ".aga");
 				if ((atfp = fopen(amptablefile, "w")) == NULL) {
@@ -991,7 +991,7 @@ int main(int argc, char **argv) {
 					exit(MB_ERROR_OPEN_FAIL);
 				}
 			}
-			if (sidescan_on == true) {
+			if (sidescan_on) {
 				strcpy(sstablefile, swathfile);
 				strcat(sstablefile, ".sga");
 				if ((stfp = fopen(sstablefile, "w")) == NULL) {
@@ -1006,7 +1006,7 @@ int main(int argc, char **argv) {
 		/* write to output file */
 		if (error == MB_ERROR_NO_ERROR) {
 			/* set comments in table files */
-			if (amplitude_on == true) {
+			if (amplitude_on) {
 				fprintf(atfp, "## Amplitude correction table files generated by program %s\n", program_name);
 				fprintf(atfp, "## MB-system Version %s\n", MB_VERSION);
 				fprintf(atfp, "## Table file format: 1.0.0\n");
@@ -1032,7 +1032,7 @@ int main(int argc, char **argv) {
 				fprintf(atfp, "## Data type:             beam amplitude\n");
 			}
 
-			if (sidescan_on == true) {
+			if (sidescan_on) {
 				fprintf(stfp, "## Sidescan correction table files generated by program %s\n", program_name);
 				fprintf(stfp, "## MB-system Version %s\n", MB_VERSION);
 				fprintf(stfp, "## Table file format: 1.0.0\n");
@@ -1085,18 +1085,18 @@ int main(int argc, char **argv) {
 				time_d_avg /= navg;
 				altitude_avg /= navg;
 				if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL) {
-					if (amplitude_on == true)
+					if (amplitude_on)
 						output_table(verbose, atfp, ntable, navg, time_d_avg, nangles, angle_max, dangle, symmetry, nmeanamp,
 						             meanamp, sigmaamp, &error);
-					if (sidescan_on == true)
+					if (sidescan_on)
 						output_table(verbose, stfp, ntable, navg, time_d_avg, nangles, angle_max, dangle, symmetry, nmeanss,
 						             meanss, sigmass, &error);
 				}
 				else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN) {
-					if (amplitude_on == true)
+					if (amplitude_on)
 						output_model(verbose, atfp, ssbeamwidth, ssdepression, ref_angle, ntable, navg, time_d_avg, altitude_avg,
 						             nangles, angle_max, dangle, symmetry, nmeanamp, meanamp, sigmaamp, &error);
-					if (sidescan_on == true)
+					if (sidescan_on)
 						output_model(verbose, stfp, ssbeamwidth, ssdepression, ref_angle, ntable, navg, time_d_avg, altitude_avg,
 						             nangles, angle_max, dangle, symmetry, nmeanss, meanss, sigmass, &error);
 				}
@@ -1106,13 +1106,13 @@ int main(int argc, char **argv) {
 				navg = 0;
 				time_d_avg = 0.0;
 				altitude_avg = 0.0;
-				if (amplitude_on == true)
+				if (amplitude_on)
 					for (int i = 0; i < nangles; i++) {
 						nmeanamp[i] = 0;
 						meanamp[i] = 0.0;
 						sigmaamp[i] = 0.0;
 					}
-				if (sidescan_on == true)
+				if (sidescan_on)
 					for (int i = 0; i < nangles; i++) {
 						nmeanss[i] = 0;
 						meanss[i] = 0.0;
@@ -1160,11 +1160,11 @@ int main(int argc, char **argv) {
 				headingy = cos(heading * DTR);
 
 				/* do the amplitude */
-				if (amplitude_on == true)
+				if (amplitude_on)
 					for (int i = 0; i < beams_amp; i++) {
 						if (mb_beam_ok(beamflag[i])) {
 							namp++;
-							if (corr_topogrid == true) {
+							if (corr_topogrid) {
 								/* get position in grid */
 								r[0] = headingy * bathacrosstrack[i] + headingx * bathalongtrack[i];
 								r[1] = -headingx * bathacrosstrack[i] + headingy * bathalongtrack[i];
@@ -1188,7 +1188,7 @@ int main(int argc, char **argv) {
 									r[2] /= rr;
 
 									/* get normal vector to grid surface */
-									if (corr_slope == true) {
+									if (corr_slope) {
 										v1[0] = 2.0 * grid.dx / mtodeglon;
 										v1[1] = 2.0 * grid.dy / mtodeglat;
 										v1[2] = grid.data[kgrid11] - grid.data[kgrid00];
@@ -1240,7 +1240,7 @@ int main(int argc, char **argv) {
 								}
 								altitude_use = bathy - sonardepth;
 								angle = RTD * atan(bathacrosstrack[i] / altitude_use);
-								if (corr_slope == true)
+								if (corr_slope)
 									angle += RTD * atan(slope);
 							}
 							else {
@@ -1265,7 +1265,7 @@ int main(int argc, char **argv) {
 								}
 
 								/* load amplitude into grid */
-								if (gridamp == true) {
+								if (gridamp) {
 									ix = (angle + gridampangle) / gridampdx;
 									jy = (amp[i] - gridampmin) / gridampdy;
 									if (ix >= 0 && ix < gridampn_columns && jy >= 0 && jy < gridampn_rows) {
@@ -1283,11 +1283,11 @@ int main(int argc, char **argv) {
 					}
 
 				/* do the sidescan */
-				if (sidescan_on == true)
+				if (sidescan_on)
 					for (int i = 0; i < pixels_ss; i++) {
 						if (ss[i] > MB_SIDESCAN_NULL) {
 							nss++;
-							if (corr_topogrid == true) {
+							if (corr_topogrid) {
 								/* get position in grid */
 								r[0] = headingy * ssacrosstrack[i] + headingx * ssalongtrack[i];
 								r[1] = -headingx * ssacrosstrack[i] + headingy * ssalongtrack[i];
@@ -1311,7 +1311,7 @@ int main(int argc, char **argv) {
 									r[2] /= rr;
 
 									/* get normal vector to grid surface */
-									if (corr_slope == true) {
+									if (corr_slope) {
 										v1[0] = 2.0 * grid.dx / mtodeglon;
 										v1[1] = 2.0 * grid.dy / mtodeglat;
 										v1[2] = grid.data[kgrid11] - grid.data[kgrid00];
@@ -1363,7 +1363,7 @@ int main(int argc, char **argv) {
 								}
 								altitude_use = bathy - sonardepth;
 								angle = RTD * atan(ssacrosstrack[i] / altitude_use);
-								if (corr_slope == true)
+								if (corr_slope)
 									angle += RTD * atan(slope);
 							}
 							else {
@@ -1388,7 +1388,7 @@ int main(int argc, char **argv) {
 								}
 
 								/* load amplitude into grid */
-								if (gridss == true) {
+								if (gridss) {
 									ix = (angle + gridssangle) / gridssdx;
 									jy = (ss[i] - gridssmin) / gridssdy;
 									if (ix >= 0 && ix < gridssn_columns && jy >= 0 && jy < gridssn_rows) {
@@ -1413,9 +1413,9 @@ int main(int argc, char **argv) {
 		if (esf.edit != NULL || esf.esffp != NULL)
 			mb_esf_close(verbose, &esf, &error);
 
-		if (dump == false && amplitude_on == true)
+		if (!dump && amplitude_on)
 			fclose(atfp);
-		if (dump == false && sidescan_on == true)
+		if (!dump && sidescan_on)
 			fclose(stfp);
 		ntabletot += ntable;
 		nrectot += nrec;
@@ -1423,7 +1423,7 @@ int main(int argc, char **argv) {
 		nsstot += nss;
 
 		/* output grids */
-		if (gridamp == true) {
+		if (gridamp) {
 			/* normalize the grid */
 			ampmax = 0.0;
 			for (ix = 0; ix < gridampn_columns; ix++) {
@@ -1464,7 +1464,7 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "\nError executing mbm_grdplot on grid file %s\n", gridfile);
 			}
 		}
-		if (gridss == true) {
+		if (gridss) {
 			/* normalize the grid */
 			ampmax = 0.0;
 			for (ix = 0; ix < gridssn_columns; ix++) {
@@ -1507,23 +1507,23 @@ int main(int argc, char **argv) {
 		}
 
 		/* set amplitude correction in parameter file */
-		if (amplitude_on == true)
+		if (amplitude_on)
 			status = mb_pr_update_ampcorr(verbose, swathfile, true, amptablefile, amp_corr_type, corr_symmetry, ref_angle,
 			                              amp_corr_slope, grid.file, &error);
 
 		/* set sidescan correction in parameter file */
-		if (sidescan_on == true)
+		if (sidescan_on)
 			status = mb_pr_update_sscorr(verbose, swathfile, true, sstablefile, ss_corr_type, corr_symmetry, ref_angle,
 			                             ss_corr_slope, grid.file, &error);
 
 		/* output information */
 		if (error == MB_ERROR_NO_ERROR && verbose > 0) {
 			fprintf(stderr, "%d records processed\n", nrec);
-			if (amplitude_on == true) {
+			if (amplitude_on) {
 				fprintf(stderr, "%d amplitude data processed\n", namp);
 				fprintf(stderr, "%d tables written to %s\n", ntable, amptablefile);
 			}
-			if (sidescan_on == true) {
+			if (sidescan_on) {
 				fprintf(stderr, "%d sidescan data processed\n", nss);
 				fprintf(stderr, "%d tables written to %s\n", ntable, sstablefile);
 			}
@@ -1548,7 +1548,7 @@ int main(int argc, char **argv) {
 	/* write out total tables */
 	time_d_totavg /= ntotavg;
 	altitude_totavg /= ntotavg;
-	if (dump == false && amplitude_on == true) {
+	if (!dump && amplitude_on) {
 		strcpy(amptablefile, read_file);
 		strcat(amptablefile, "_tot.aga");
 		if ((atfp = fopen(amptablefile, "w")) == NULL) {
@@ -1588,7 +1588,7 @@ int main(int argc, char **argv) {
 			             angle_max, dangle, symmetry, nmeantotamp, meantotamp, sigmatotamp, &error);
 		fclose(atfp);
 	}
-	if (dump == false && sidescan_on == true) {
+	if (!dump && sidescan_on) {
 		strcpy(sstablefile, read_file);
 		strcat(sstablefile, "_tot.sga");
 		if ((stfp = fopen(sstablefile, "w")) == NULL) {
@@ -1632,36 +1632,36 @@ int main(int argc, char **argv) {
 	/* output information */
 	if (error == MB_ERROR_NO_ERROR && verbose > 0) {
 		fprintf(stderr, "\n%d total records processed\n", nrectot);
-		if (amplitude_on == true) {
+		if (amplitude_on) {
 			fprintf(stderr, "%d total amplitude data processed\n", namptot);
 			fprintf(stderr, "%d total aga tables written\n", ntabletot);
 		}
-		if (sidescan_on == true) {
+		if (sidescan_on) {
 			fprintf(stderr, "%d total sidescan data processed\n", nsstot);
 			fprintf(stderr, "%d total sga tables written\n", ntabletot);
 		}
 	}
 
 	/* deallocate memory used for data arrays */
-	if (amplitude_on == true) {
+	if (amplitude_on) {
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&nmeanamp, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&meanamp, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&sigmaamp, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&nmeantotamp, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&meantotamp, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&sigmatotamp, &error);
-		if (gridamp == true) {
+		if (gridamp) {
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&gridamphist, &error);
 		}
 	}
-	if (sidescan_on == true) {
+	if (sidescan_on) {
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&nmeanss, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&meanss, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&sigmass, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&nmeantotss, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&meantotss, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&sigmatotss, &error);
-		if (gridss == true) {
+		if (gridss) {
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&gridsshist, &error);
 		}
 	}

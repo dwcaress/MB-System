@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
 	int navformat = 9;
 	int usblformat = 165;
 
-	int useaverage = false;
+	bool useaverage = false;
 	int error = MB_ERROR_NO_ERROR;
 
 	/* process argument list */
@@ -496,7 +496,7 @@ int main(int argc, char **argv) {
 	/* now loop over nav data applying adjustments */
 	for (int i = 0; i < nnav; i++) {
 		/* interpolate adjustment */
-		if (useaverage == false) {
+		if (!useaverage) {
 			/* get adjustment by interpolation */
 			int j;
 			/* intstat = */ mb_linear_interp(verbose, ttime - 1, tlon - 1, ntie, ntime[i], &navlon, &j, &error);
