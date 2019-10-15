@@ -88,10 +88,9 @@ int main(int argc, char **argv) {
 	char read_file[MB_PATH_MAXLINE];
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
-	int look_bounds = false;
-	int copyfiles = false;
-	int reportdatalists = false;
-	int file_in_bounds = false;
+	bool look_bounds = false;
+	bool copyfiles = false;
+	bool reportdatalists = false;
 	double file_weight = 1.0;
 	int format;
 	int pings;
@@ -109,23 +108,22 @@ int main(int argc, char **argv) {
 	char command[MB_PATH_MAXLINE];
 	char *filename;
 	int nfile = 0;
-	int make_inf = false;
-	int force_update = false;
-	int status_report = false;
-	int problem_report = false;
+	bool make_inf = false;
+	bool force_update = false;
+	bool status_report = false;
+	bool problem_report = false;
 	int nparproblem;
 	int ndataproblem;
 	int nparproblemtot = 0;
 	int ndataproblemtot = 0;
 	int nproblemfiles = 0;
-	int remove_locks = false;
-	int make_datalistp = false;
+	bool remove_locks = false;
+	bool make_datalistp = false;
 	int recursion = -1;
 
 	int prstatus = MB_PR_FILE_UP_TO_DATE;
 	int lock_status = MB_SUCCESS;
 	int lock_error = MB_ERROR_NO_ERROR;
-	int locked = false;
 	int lock_purpose = 0;
 	mb_path lock_program = "";
 	mb_path lock_cpu = "";
@@ -356,7 +354,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "Convenience datalist file %s created...\n", file);
 
 		/* exit unless building ancillary files has also been requested */
-		if (make_inf == false)
+		if (!make_inf)
 			exit(error);
 	}
 
@@ -364,14 +362,17 @@ int main(int argc, char **argv) {
 	if (format == 0)
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
+	int file_in_bounds = false;  // TODO(schwehr): Convert mb_check_info to bool.
+	int locked = false;  // TODO(schwehr): Convert mb_pr_lockinfo to bool.
+
 	/* if not a datalist just output filename format and weight */
 	if (format > 0) {
 		nfile++;
 
-		if (make_inf == true) {
+		if (make_inf) {
 			status = mb_make_info(verbose, force_update, read_file, format, &error);
 		}
-		else if (problem_report == true) {
+		else if (problem_report) {
 			status = mb_pr_check(verbose, read_file, &nparproblem, &ndataproblem, &error);
 			if (nparproblem + ndataproblem > 0)
 				nproblemfiles++;
@@ -380,7 +381,7 @@ int main(int argc, char **argv) {
 		}
 		else {
 			/* check for mbinfo file if bounds checking enabled */
-			if (look_bounds == true) {
+			if (look_bounds) {
 				status = mb_check_info(verbose, read_file, lonflip, bounds, &file_in_bounds, &error);
 				if (status == MB_FAILURE) {
 					file_in_bounds = true;
@@ -390,14 +391,14 @@ int main(int argc, char **argv) {
 			}
 
 			/* ouput file if no bounds checking or in bounds */
-			if (look_bounds == false || file_in_bounds == true) {
+			if (!look_bounds || file_in_bounds == true) {
 				if (verbose > 0)
 					fprintf(output, "%s %d %f\n", read_file, format, file_weight);
 				else
 					fprintf(output, "%s %d %f", read_file, format, file_weight);
 
 				/* check status if desired */
-				if (status_report == true) {
+				if (status_report) {
 					status = mb_pr_checkstatus(verbose, read_file, &prstatus, &error);
 					if (verbose > 0) {
 						if (prstatus == MB_PR_FILE_UP_TO_DATE)
@@ -422,17 +423,17 @@ int main(int argc, char **argv) {
 				}
 
 				/* check locks if desired */
-				if (status_report == true || remove_locks == true) {
+				if (status_report || remove_locks) {
 					lock_status = mb_pr_lockinfo(verbose, read_file, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
 					                             lock_date, &lock_error);
-					if (locked == true && status_report == true) {
+					if (locked == true && status_report) {
 						if (verbose > 0)
 							fprintf(output, "\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", lock_program, lock_user,
 							        lock_cpu, lock_date);
 						else
 							fprintf(output, "\t<Locked>");
 					}
-					if (locked == true && remove_locks == true) {
+					if (locked == true && remove_locks) {
 						sprintf(lockfile, "%s.lck", file);
 						sprintf(command, "/bin/rm -f %s", lockfile);
 					}
@@ -458,12 +459,12 @@ int main(int argc, char **argv) {
 			mb_get_relative_path(verbose, dfile, pwd, &error);
 
 			/* generate inf fnv fbt files */
-			if (make_inf == true) {
+			if (make_inf) {
 				status = mb_make_info(verbose, force_update, file, format, &error);
 			}
 
 			/* or generate problem reports */
-			else if (problem_report == true) {
+			else if (problem_report) {
 				status = mb_pr_check(verbose, file, &nparproblem, &ndataproblem, &error);
 				if (nparproblem + ndataproblem > 0)
 					nproblemfiles++;
@@ -472,9 +473,9 @@ int main(int argc, char **argv) {
 			}
 
 			/* or copy files */
-			else if (copyfiles == true) {
+			else if (copyfiles) {
 				/* check for mbinfo file if bounds checking enabled */
-				if (look_bounds == true) {
+				if (look_bounds) {
 					status = mb_check_info(verbose, file, lonflip, bounds, &file_in_bounds, &error);
 					if (status == MB_FAILURE) {
 						file_in_bounds = true;
@@ -484,7 +485,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* copy file if no bounds checking or in bounds */
-				if (look_bounds == false || file_in_bounds == true) {
+				if (!look_bounds || file_in_bounds == true) {
 					fprintf(output, "Copying %s %d %f\n", file, format, file_weight);
 					sprintf(command, "cp %s* .", file);
 					shellstatus = system(command);
@@ -500,7 +501,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* or list the datalists parsed through the recursive datalist structure */
-			else if (reportdatalists == true) {
+			else if (reportdatalists) {
 				if (strcmp(dfile, dfilelast) != 0)
 					status = mb_datalist_recursion(verbose, datalist, true, &recursion, &error);
 				strcpy(dfilelast, dfile);
@@ -510,7 +511,7 @@ int main(int argc, char **argv) {
 			    structure, with bounds checking if desired */
 			else {
 				/* check for mbinfo file if bounds checking enabled */
-				if (look_bounds == true) {
+				if (look_bounds) {
 					status = mb_check_info(verbose, file, lonflip, bounds, &file_in_bounds, &error);
 					if (status == MB_FAILURE) {
 						file_in_bounds = true;
@@ -520,14 +521,14 @@ int main(int argc, char **argv) {
 				}
 
 				/* ouput file if no bounds checking or in bounds */
-				if (look_bounds == false || file_in_bounds == true) {
+				if (!look_bounds || file_in_bounds == true) {
 					if (verbose > 0)
 						fprintf(output, "%s %d %f\n", file, format, file_weight);
 					else
 						fprintf(output, "%s %d %f", file, format, file_weight);
 
 					/* check status if desired */
-					if (status_report == true) {
+					if (status_report) {
 						status = mb_pr_checkstatus(verbose, file, &prstatus, &error);
 						if (verbose > 0) {
 							if (prstatus == MB_PR_FILE_UP_TO_DATE)
@@ -552,17 +553,17 @@ int main(int argc, char **argv) {
 					}
 
 					/* check locks if desired */
-					if (status_report == true || remove_locks == true) {
+					if (status_report || remove_locks) {
 						lock_status = mb_pr_lockinfo(verbose, file, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
 						                             lock_date, &lock_error);
-						if (locked == true && status_report == true) {
+						if (locked == true && status_report) {
 							if (verbose > 0)
 								fprintf(output, "\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", lock_program, lock_user,
 								        lock_cpu, lock_date);
 							else
 								fprintf(output, "\t<Locked>");
 						}
-						if (locked == true && remove_locks == true) {
+						if (locked == true && remove_locks) {
 							sprintf(lockfile, "%s.lck", file);
 							fprintf(output, "\tRemoving lock file %s\n", lockfile);
 							sprintf(command, "/bin/rm -f %s", lockfile);
@@ -584,7 +585,7 @@ int main(int argc, char **argv) {
 	/* output counts */
 	if (verbose > 0) {
 		fprintf(output, "\nTotal swath files:         %d\n", nfile);
-		if (problem_report == true) {
+		if (problem_report) {
 			fprintf(output, "Total files with problems: %d\n", nproblemfiles);
 			fprintf(output, "Total parameter problems:  %d\n", nparproblemtot);
 			fprintf(output, "Total data problems:       %d\n", ndataproblemtot);

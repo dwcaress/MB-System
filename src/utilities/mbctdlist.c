@@ -54,8 +54,7 @@ static const char usage_message[] =
     "mbctdlist [-A -Ddecimate -Fformat -Gdelimeter -H -Ifile -Llonflip -Ooutput_format -V -Zsegment]";
 
 /*--------------------------------------------------------------------*/
-int printsimplevalue(int verbose, double value, int width, int precision, int ascii, int *invert, int *flipsign, int *error) {
-
+int printsimplevalue(int verbose, double value, int width, int precision, bool ascii, bool *invert, bool *flipsign, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -71,7 +70,7 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 	/* make print format */
 	char format[24];
 	format[0] = '%';
-	if (*invert == true)
+	if (*invert)
 		strcpy(format, "%g");
 	else if (width > 0)
 		sprintf(&format[1], "%d.%df", width, precision);
@@ -79,20 +78,20 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 		sprintf(&format[1], ".%df", precision);
 
 	/* invert value if desired */
-	if (*invert == true) {
+	if (*invert) {
 		*invert = false;
 		if (value != 0.0)
 			value = 1.0 / value;
 	}
 
 	/* flip sign value if desired */
-	if (*flipsign == true) {
+	if (*flipsign) {
 		*flipsign = false;
 		value = -value;
 	}
 
 	/* print value */
-	if (ascii == true)
+	if (ascii)
 		printf(format, value);
 	else
 		fwrite(&value, sizeof(double), 1, stdout);
@@ -111,7 +110,7 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
+int printNaN(int verbose, bool ascii, bool *invert, bool *flipsign, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -122,15 +121,15 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
 	}
 
 	/* reset invert flag */
-	if (*invert == true)
+	if (*invert)
 		*invert = false;
 
 	/* reset flipsign flag */
-	if (*flipsign == true)
+	if (*flipsign)
 		*flipsign = false;
 
 	/* print value */
-	if (ascii == true)
+	if (ascii)
 		printf("NaN");
 	else
 		fwrite(&NaN, sizeof(double), 1, stdout);
@@ -184,12 +183,12 @@ int main(int argc, char **argv) {
 	int n_list;
 	double distance_total = 0.0;
 	int time_j[5];
-	int mblist_next_value = false;
-	int invert_next_value = false;
-	int signflip_next_value = false;
-	int first = true;
-	int ascii = true;
-	int segment = false;
+	bool mblist_next_value = false;
+	bool invert_next_value = false;
+	bool signflip_next_value = false;
+	bool first = true;
+	bool ascii = true;
+	bool segment = false;
 	char segment_tag[MB_PATH_MAXLINE];
 	char delimiter[MB_PATH_MAXLINE];
 
@@ -257,9 +256,9 @@ int main(int argc, char **argv) {
 	double soundspeed;
 
 	/* additional time variables */
-	int first_m = true;
+	bool first_m = true;
 	double time_d_ref;
-	int first_u = true;
+	bool first_u = true;
 	time_t time_u;
 	time_t time_u_ref;
 	double seconds;
@@ -493,7 +492,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* output separator for GMT style segment file output */
-		if (segment == true && ascii == true) {
+		if (segment && ascii) {
 			printf("%s\n", segment_tag);
 		}
 
@@ -718,7 +717,7 @@ int main(int argc, char **argv) {
 							mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
 							headingx = sin(DTR * heading);
 							headingy = cos(DTR * heading);
-							if (first == true) {
+							if (first) {
 								time_interval = 0.0;
 								course = heading;
 								speed_made_good = 0.0;
@@ -799,7 +798,7 @@ int main(int argc, char **argv) {
 										                 &signflip_next_value, &error);
 										break;
 									case 'C': /* Conductivity or Sonar altitude (m) */
-										if (mblist_next_value == false)
+										if (!mblist_next_value)
 											printsimplevalue(verbose, conductivity, 0, 5, ascii, &invert_next_value,
 											                 &signflip_next_value, &error);
 										else {
@@ -809,7 +808,7 @@ int main(int argc, char **argv) {
 										}
 										break;
 									case 'c': /* Temperature or sonar transducer depth (m) */
-										if (mblist_next_value == false)
+										if (!mblist_next_value)
 											printsimplevalue(verbose, temperature, 0, 5, ascii, &invert_next_value,
 											                 &signflip_next_value, &error);
 										else {
@@ -829,7 +828,7 @@ int main(int argc, char **argv) {
 									case 'J': /* time string */
 										mb_get_jtime(verbose, time_i, time_j);
 										seconds = time_i[5] + 0.000001 * time_i[6];
-										if (ascii == true) {
+										if (ascii) {
 											printf("%.4d %.3d %.2d %.2d %9.6f", time_j[0], time_j[1], time_i[3], time_i[4],
 											       seconds);
 										}
@@ -851,7 +850,7 @@ int main(int argc, char **argv) {
 									case 'j': /* time string */
 										mb_get_jtime(verbose, time_i, time_j);
 										seconds = time_i[5] + 0.000001 * time_i[6];
-										if (ascii == true) {
+										if (ascii) {
 											printf("%.4d %.3d %.4d %9.6f", time_j[0], time_j[1], time_j[2], seconds);
 										}
 										else {
@@ -882,7 +881,7 @@ int main(int argc, char **argv) {
 										break;
 									case 'm': /* time in decimal seconds since
 									        first record */
-										if (first_m == true) {
+										if (first_m) {
 											time_d_ref = time_d;
 											first_m = false;
 										}
@@ -902,7 +901,7 @@ int main(int argc, char **argv) {
 										                 &signflip_next_value, &error);
 										break;
 									case 'S': /* salinity or speed */
-										if (mblist_next_value == false)
+										if (!mblist_next_value)
 											printsimplevalue(verbose, salinity, 0, 5, ascii, &invert_next_value,
 											                 &signflip_next_value, &error);
 										else {
@@ -912,7 +911,7 @@ int main(int argc, char **argv) {
 										}
 										break;
 									case 's': /* speed made good */
-										if (mblist_next_value == false)
+										if (!mblist_next_value)
 											printsimplevalue(verbose, soundspeed, 0, 3, ascii, &invert_next_value,
 											                 &signflip_next_value, &error);
 										else {
@@ -923,7 +922,7 @@ int main(int argc, char **argv) {
 										break;
 									case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 										seconds = time_i[5] + 1e-6 * time_i[6];
-										if (ascii == true)
+										if (ascii)
 											printf("%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f", time_i[0], time_i[1], time_i[2], time_i[3],
 											       time_i[4], seconds);
 										else {
@@ -943,7 +942,7 @@ int main(int argc, char **argv) {
 										break;
 									case 't': /* yyyy mm dd hh mm ss time string */
 										seconds = time_i[5] + 1e-6 * time_i[6];
-										if (ascii == true)
+										if (ascii)
 											printf("%.4d %.2d %.2d %.2d %.2d %9.6f", time_i[0], time_i[1], time_i[2], time_i[3],
 											       time_i[4], seconds);
 										else {
@@ -963,7 +962,7 @@ int main(int argc, char **argv) {
 										break;
 									case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 										time_u = (int)time_d;
-										if (ascii == true)
+										if (ascii)
 											printf("%ld", time_u);
 										else {
 											b = time_u;
@@ -972,11 +971,11 @@ int main(int argc, char **argv) {
 										break;
 									case 'u': /* time in seconds since first record */
 										time_u = (int)time_d;
-										if (first_u == true) {
+										if (first_u) {
 											time_u_ref = time_u;
 											first_u = false;
 										}
-										if (ascii == true)
+										if (ascii)
 											printf("%ld", time_u - time_u_ref);
 										else {
 											b = time_u - time_u_ref;
@@ -985,7 +984,7 @@ int main(int argc, char **argv) {
 										break;
 									case 'V': /* time in seconds since last value */
 									case 'v':
-										if (ascii == true) {
+										if (ascii) {
 											if (fabs(time_interval) > 100.)
 												printf("%g", time_interval);
 											else
@@ -1010,7 +1009,7 @@ int main(int argc, char **argv) {
 											hemi = 'E';
 										degrees = (int)dlon;
 										minutes = 60.0 * (dlon - degrees);
-										if (ascii == true) {
+										if (ascii) {
 											printf("%3d %8.5f%c", degrees, minutes, hemi);
 										}
 										else {
@@ -1037,7 +1036,7 @@ int main(int argc, char **argv) {
 											hemi = 'N';
 										degrees = (int)dlat;
 										minutes = 60.0 * (dlat - degrees);
-										if (ascii == true) {
+										if (ascii) {
 											printf("%3d %8.5f%c", degrees, minutes, hemi);
 										}
 										else {
@@ -1050,11 +1049,11 @@ int main(int argc, char **argv) {
 										}
 										break;
 									default:
-										if (ascii == true)
+										if (ascii)
 											printf("<Invalid Option: %c>", list[i]);
 										break;
 									}
-									if (ascii == true) {
+									if (ascii) {
 										if (i < (n_list - 1))
 											printf("%s", delimiter);
 										else
