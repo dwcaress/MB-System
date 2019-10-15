@@ -1753,7 +1753,7 @@ int main(int argc, char **argv) {
   void *ombio_ptr = NULL;
 
   /* MBIO merge control parameters */
-  int merge = false;
+  bool merge = false;
   int mformat = 0;
   char mfile[MB_PATH_MAXLINE];
   int mbeams_bath;
@@ -1835,13 +1835,12 @@ int main(int argc, char **argv) {
   int istart_amp, iend_amp, offset_amp;
   int istart_ss, iend_ss, offset_ss;
   char comment[MB_COMMENT_MAXLINE];
-  int insertcomments = false;
-  int bathonly = false;
+  bool insertcomments = false;
+  bool bathonly = false;
   char commentfile[MB_PATH_MAXLINE];
   int stripmode = MBCOPY_STRIPMODE_NONE;
   int copymode = MBCOPY_PARTIAL;
-  int use_sleep = false;
-  int inbounds = true;
+  bool use_sleep = false;
 
   /* sleep variable */
   double sleep_factor = 1.0;
@@ -2035,7 +2034,7 @@ int main(int argc, char **argv) {
   else if (iformat > 0 && oformat <= 0)
     oformat = iformat;
 
-  if (merge == true && mformat <= 0)
+  if (merge && mformat <= 0)
     mb_get_format(verbose, mfile, NULL, &mformat, &error);
 
   /* obtain format array locations - format ids will
@@ -2052,7 +2051,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
     exit(error);
   }
-  if (merge == true && (status = mb_format(verbose, &mformat, &error)) != MB_SUCCESS) {
+  if (merge && (status = mb_format(verbose, &mformat, &error)) != MB_SUCCESS) {
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding merge format %d:\n%s\n", mformat, message);
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2071,7 +2070,7 @@ int main(int argc, char **argv) {
   imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
 
   /* initialize reading the merge swath sonar file */
-  if (merge == true &&
+  if (merge &&
       (status = mb_read_init(verbose, mfile, mformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mmbio_ptr,
                              &btime_d, &etime_d, &mbeams_bath, &mbeams_amp, &mpixels_ss, &error)) != MB_SUCCESS) {
     mb_error(verbose, error, &message);
@@ -2093,7 +2092,7 @@ int main(int argc, char **argv) {
   omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
 
   /* bathonly mode works only if output format is mbldeoih */
-  if (bathonly == true && oformat != MBF_MBLDEOIH) {
+  if (bathonly && oformat != MBF_MBLDEOIH) {
     bathonly = false;
     if (verbose > 0) {
       fprintf(stderr, "\nThe -D option (strip amplitude and sidescan) is only valid for output format %d\n", MBF_MBLDEOIH);
@@ -2105,7 +2104,7 @@ int main(int argc, char **argv) {
       - set the format to use - this allows user to set use of old format
       in .mbio_defaults file - purpose is to keep compatibility with
       Fledermaus */
-  if (bathonly == true && oformat == MBF_MBLDEOIH) {
+  if (bathonly && oformat == MBF_MBLDEOIH) {
     omb_io_ptr->save1 = fbtversion;
   }
 
@@ -2189,7 +2188,7 @@ int main(int argc, char **argv) {
   if (error == MB_ERROR_NO_ERROR)
     status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ossalongtrack, &error);
 
-  if (true == merge) {
+  if (merge) {
     if (error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&mbeamflag, &error);
     if (error == MB_ERROR_NO_ERROR)
@@ -2231,7 +2230,7 @@ int main(int argc, char **argv) {
   setup_transfer_rules(verbose, ipixels_ss, opixels_ss, &istart_ss, &iend_ss, &offset_ss, &error);
 
   /* insert comments from file into output */
-  if (insertcomments == true) {
+  if (insertcomments) {
     /* open file */
     if ((fp = fopen(commentfile, "r")) == NULL) {
       fprintf(stderr, "\nUnable to Open Comment File <%s> for reading\n", commentfile);
@@ -2296,7 +2295,7 @@ int main(int argc, char **argv) {
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    if (merge == true) {
+    if (merge) {
       strncpy(comment, "\0", 256);
       sprintf(comment, "  Merge file:         %s", mfile);
       status = mb_put_comment(verbose, ombio_ptr, comment, &error);
@@ -2368,7 +2367,7 @@ int main(int argc, char **argv) {
   }
 
   /* start expecting data to be in time and space bounds */
-  inbounds = true;
+  bool inbounds = true;
 
   /* read and write */
   while (error <= MB_ERROR_NO_ERROR) {
@@ -2408,7 +2407,7 @@ int main(int argc, char **argv) {
         inbounds = false;
     }
 
-    if (merge == true && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && inbounds == true) {
+    if (merge && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && inbounds) {
       while (merror <= MB_ERROR_NO_ERROR && (mkind != MB_DATA_DATA || time_d - .001 > mtime_d)) {
         /* find merge record */
 
@@ -2470,10 +2469,10 @@ int main(int argc, char **argv) {
     }
 
     /* do sleep if required */
-    if (use_sleep == true && kind == MB_DATA_DATA && error <= MB_ERROR_NO_ERROR && idata == 1) {
+    if (use_sleep && kind == MB_DATA_DATA && error <= MB_ERROR_NO_ERROR && idata == 1) {
       time_d_last = time_d;
     }
-    else if (use_sleep == true && kind == MB_DATA_DATA && error <= MB_ERROR_NO_ERROR && idata > 1) {
+    else if (use_sleep && kind == MB_DATA_DATA && error <= MB_ERROR_NO_ERROR && idata > 1) {
       sleep_time = (unsigned int)(sleep_factor * (time_d - time_d_last));
       sleep(sleep_time);
       time_d_last = time_d;
@@ -2490,7 +2489,7 @@ int main(int argc, char **argv) {
       }
 
       /* do bathymetry */
-      if (merge == true) {
+      if (merge) {
         /* merge data */
         for (int i = istart_bath; i < iend_bath; i++) {
           const int j = i + offset_bath;
@@ -2580,13 +2579,13 @@ int main(int argc, char **argv) {
       ostore_ptr = omb_io_ptr->store_data;
       if (kind == MB_DATA_DATA || kind == MB_DATA_COMMENT) {
         /* strip amplitude and sidescan if requested */
-        if (bathonly == true) {
+        if (bathonly) {
           namp = 0;
           nss = 0;
         }
 
         /* copy the data to mbldeoih */
-        if (merge == true) {
+        if (merge) {
           status =
               mbcopy_any_to_mbldeoih(verbose, kind, sensorhead, sensortype,
                                                time_i, time_d, navlon, navlat, speed, heading, draft, altitude,
@@ -2624,7 +2623,7 @@ int main(int argc, char **argv) {
       }
     }
 
-    if (merge == true && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR) {
+    if (merge && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR) {
       switch (copymode) {
       case MBCOPY_PARTIAL:
       case MBCOPY_ANY_TO_MBLDEOIH:
@@ -2645,7 +2644,7 @@ int main(int argc, char **argv) {
     }
 
     /* write some data */
-    if ((kind != MB_DATA_COMMENT && error == MB_ERROR_NO_ERROR && inbounds == true) ||
+    if ((kind != MB_DATA_COMMENT && error == MB_ERROR_NO_ERROR && inbounds) ||
         (kind == MB_DATA_COMMENT && stripmode == MBCOPY_STRIPMODE_NONE)) {
       error = MB_ERROR_NO_ERROR;
       status = mb_put_all(verbose, ombio_ptr, ostore_ptr, false, kind, time_i, time_d, navlon, navlat, speed, heading,
