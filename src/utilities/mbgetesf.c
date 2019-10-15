@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 	int esf_mode = MB_ESF_MODE_EXPLICIT;
 
 	/* save file control variables */
-	int sofile_set = false;
+	bool sofile_set = false;
 	mb_path sofile = "";
 	FILE *sofp = NULL;
 
@@ -349,7 +349,7 @@ int main(int argc, char **argv) {
 	/* now deal with new edit save file */
 	if (status == MB_SUCCESS) {
 		/* get edit save file */
-		if (sofile_set == false) {
+		if (!sofile_set) {
 			sofp = stdout;
 		}
 		else if ((sofp = fopen(sofile, "w")) == NULL) {
