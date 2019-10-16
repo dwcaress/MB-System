@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
 	double *mRrateK = NULL;
 	double *utcTime = NULL;
 
-	int angles_in_degrees = true;
+	bool angles_in_degrees = true;
 
 	int time_i[7];
 	int nrecord, irecord, nscan, ifield;
@@ -263,7 +263,7 @@ int main(int argc, char **argv) {
 			if (strcmp(type, "double") == 0) {
 				fields[nfields].type = TYPE_DOUBLE;
 				fields[nfields].size = 8;
-				if (angles_in_degrees == true &&
+				if (angles_in_degrees &&
 				    (strcmp(fields[nfields].name, "mLatK") == 0 || strcmp(fields[nfields].name, "mLonK") == 0 ||
 				     strcmp(fields[nfields].name, "mLatK") == 0 || strcmp(fields[nfields].name, "mRollK") == 0 ||
 				     strcmp(fields[nfields].name, "mPitchK") == 0 || strcmp(fields[nfields].name, "mHeadK") == 0 ||

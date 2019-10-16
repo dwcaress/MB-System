@@ -94,13 +94,13 @@ int main(int argc, char **argv) {
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* dump control parameters */
-	int mb_data_data_list = false;
-	int mb_data_comment_list = false;
-	int mb_data_calibrate_list = false;
-	int mb_data_mean_velocity_list = false;
-	int mb_data_velocity_profile_list = false;
-	int mb_data_standby_list = false;
-	int mb_data_nav_source_list = false;
+	bool mb_data_data_list = false;
+	bool mb_data_comment_list = false;
+	bool mb_data_calibrate_list = false;
+	bool mb_data_mean_velocity_list = false;
+	bool mb_data_velocity_profile_list = false;
+	bool mb_data_standby_list = false;
+	bool mb_data_nav_source_list = false;
 	int mb_data_data_count = 0;
 	int mb_data_comment_count = 0;
 	int mb_data_calibrate_count = 0;
@@ -325,7 +325,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* deal with survey data record */
-		if (kind == MB_DATA_DATA && mb_data_data_list == true) {
+		if (kind == MB_DATA_DATA && mb_data_data_list) {
 			mb_data_data_count++;
 			fprintf(output, "\n");
 			fprintf(output, "Survey Data Record (ERGNMESS + ERGNSLZT +ERGNAMPL):\n");
@@ -388,7 +388,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* deal with comment record */
-		if (kind == MB_DATA_COMMENT && mb_data_comment_list == true) {
+		if (kind == MB_DATA_COMMENT && mb_data_comment_list) {
 			mb_data_comment_count++;
 			fprintf(output, "\n");
 			fprintf(output, "Comment Record (LDEOCMNT):\n");
@@ -396,7 +396,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* deal with calibrate data record */
-		if (kind == MB_DATA_CALIBRATE && mb_data_calibrate_list == true) {
+		if (kind == MB_DATA_CALIBRATE && mb_data_calibrate_list) {
 			mb_data_calibrate_count++;
 			fprintf(output, "\n");
 			fprintf(output, "Calibrate Data Record (ERGNEICH + ERGNSLZT +ERGNAMPL):\n");
@@ -459,7 +459,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* deal with mean velocity data record */
-		if (kind == MB_DATA_MEAN_VELOCITY && mb_data_mean_velocity_list == true) {
+		if (kind == MB_DATA_MEAN_VELOCITY && mb_data_mean_velocity_list) {
 			mb_data_mean_velocity_count++;
 			fprintf(output, "\n");
 			fprintf(output, "Mean Water Velocity Record (ERGNHYDI):\n");
@@ -475,7 +475,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* deal with velocity profile data record */
-		if (kind == MB_DATA_VELOCITY_PROFILE && mb_data_velocity_profile_list == true) {
+		if (kind == MB_DATA_VELOCITY_PROFILE && mb_data_velocity_profile_list) {
 			mb_data_velocity_profile_count++;
 			fprintf(output, "\n");
 			fprintf(output, "Water Velocity Profile Record (ERGNCTDS):\n");
@@ -490,7 +490,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* deal with standby data record */
-		if (kind == MB_DATA_STANDBY && mb_data_standby_list == true) {
+		if (kind == MB_DATA_STANDBY && mb_data_standby_list) {
 			mb_data_standby_count++;
 			fprintf(output, "\n");
 			fprintf(output, "Standby Data Record (ERGNPARA):\n");
@@ -502,7 +502,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* deal with navigation source data record */
-		if (kind == MB_DATA_NAV_SOURCE && mb_data_nav_source_list == true) {
+		if (kind == MB_DATA_NAV_SOURCE && mb_data_nav_source_list) {
 			mb_data_nav_source_count++;
 			fprintf(output, "\n");
 			fprintf(output, "Standby Data Record (ERGNPARA):\n");
@@ -539,19 +539,19 @@ int main(int argc, char **argv) {
 
 	/* give the statistics */
 	fprintf(output, "\n");
-	if (mb_data_data_list == true)
+	if (mb_data_data_list)
 		fprintf(output, "%d survey data records listed\n", mb_data_data_count);
-	if (mb_data_comment_list == true)
+	if (mb_data_comment_list)
 		fprintf(output, "%d comment records listed\n", mb_data_comment_count);
-	if (mb_data_calibrate_list == true)
+	if (mb_data_calibrate_list)
 		fprintf(output, "%d calibrate data records listed\n", mb_data_calibrate_count);
-	if (mb_data_mean_velocity_list == true)
+	if (mb_data_mean_velocity_list)
 		fprintf(output, "%d mean velocity data records listed\n", mb_data_mean_velocity_count);
-	if (mb_data_velocity_profile_list == true)
+	if (mb_data_velocity_profile_list)
 		fprintf(output, "%d velocity profile data records listed\n", mb_data_velocity_profile_count);
-	if (mb_data_standby_list == true)
+	if (mb_data_standby_list)
 		fprintf(output, "%d standby data records listed\n", mb_data_standby_count);
-	if (mb_data_nav_source_list == true)
+	if (mb_data_nav_source_list)
 		fprintf(output, "%d navigation source data records listed\n", mb_data_nav_source_count);
 
 	exit(error);
