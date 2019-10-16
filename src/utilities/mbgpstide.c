@@ -134,9 +134,9 @@ int main(int argc, char **argv) {
 	double interval = 300.0;
 	mb_path tide_file;
 	mb_path nav_file;
-	int file_output = false;
-	int mbprocess_update = false;
-	int skip_existing = false;
+	bool file_output = false;
+	bool mbprocess_update = false;
+	bool skip_existing = false;
 	int tideformat = 2;
 	int ngood = 0;
 
@@ -145,10 +145,12 @@ int main(int argc, char **argv) {
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	int pid;
 
-	FILE *tfp, *mfp, *ofp;
+	FILE *tfp;
+	FILE *mfp;
+	FILE *ofp;
 	struct stat file_status;
 	int fstat;
-	int proceed = true;
+	bool proceed = true;
 	int input_size, input_modtime, output_size, output_modtime;
 	mb_path line = "";
 	mb_path geoidgrid = "";
@@ -161,9 +163,7 @@ int main(int argc, char **argv) {
 	int gps_source = 0;
 	double tide_offset = 0.0;
 	double geoid_offset = 0.0;
-	int geoid_set = false;
-	int read_geoid = false;
-	int have_height = false;
+	bool geoid_set = false;
 	double height = 0.0;
 	double ttime_d;
 	double atime_d;
@@ -347,7 +347,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* If a single output file is specified, open and initialise it */
-	if (file_output == true) {
+	if (file_output) {
 		if (strcmp(tide_file, "-") == 0) {
 			ofp = stdout;
 		} else {
@@ -408,6 +408,9 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
+	bool read_geoid = false;
+	bool have_height = false;
+
 	/* loop over all files to be read */
 	while (read_data == true) {
 
@@ -415,9 +418,9 @@ int main(int argc, char **argv) {
 			model if one was made previously and is up to date AND the
 			appropriate request has been made */
 		proceed = true;
-		if (file_output == false) {
+		if (!file_output) {
 			sprintf(tide_file, "%s.gps.tde", file);
-			if (skip_existing == true) {
+			if (skip_existing) {
 				if ((fstat = stat(file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					input_modtime = file_status.st_mtime;
 					input_size = file_status.st_size;
@@ -440,7 +443,7 @@ int main(int argc, char **argv) {
 			}
 		}
 		/* skip the file */
-		if (proceed == false) {
+		if (!proceed) {
 			/* some helpful output */
 			fprintf(stderr, "\n---------------------------------------\n\nProcessing tides for %s\n\n", file);
 		}
@@ -448,7 +451,7 @@ int main(int argc, char **argv) {
 		/* generate the tide model */
 		else {
 			/* if one output file per input file then open and initialise it */
-			if (file_output == false) {
+			if (!file_output) {
 				if ((ofp = fopen(tide_file, "w")) == NULL) {
 					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to open tide output file <%s>\n", tide_file);
@@ -527,7 +530,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* get geoid corrections */
-			if (geoid_set == true) {
+			if (geoid_set) {
 				sprintf(nav_file, "%s.fnv", swath_file);
 				if ((fstat = stat(nav_file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					sprintf(line, "awk '{ print $8 \" \" $9 \" \" $7 }' %s | grdtrack -G%s", nav_file, geoidgrid);
@@ -621,9 +624,9 @@ int main(int argc, char **argv) {
 					nread++;
 				}
 
-				if (have_height == true) {
+				if (have_height) {
 
-					if (ttime_d > next_interval || (file_output == false && error == MB_ERROR_EOF)) {
+					if (ttime_d > next_interval || (!file_output && error == MB_ERROR_EOF)) {
 						if (count_tide > 0) {
 							ngood++;
 							atide = sum_tide / count_tide;
@@ -653,7 +656,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* find the first geoid offset along the track after the height time */
-					while (read_geoid == true && geoid_time < ttime_d) {
+					while (read_geoid && geoid_time < ttime_d) {
 						if (EOF == fscanf(tfp, "%lf %lf %lf %lf\n", &tidelat, &tidelon, &geoid_time, &geoid_offset)) {
 							pclose(tfp);
 							read_geoid = false;
@@ -675,20 +678,21 @@ int main(int argc, char **argv) {
 			/* close the swath file */
 			status = mb_close(verbose, &mbio_ptr, &error);
 
-			if (read_geoid == true) {
+			if (read_geoid) {
 				pclose(tfp);
 				read_geoid = false;
 			}
 
-			if (file_output == false) {
+			// TODO(schwehr): This looks wrong.
+			// Why not if (ofp) {fclose(ofp); ofp = NULL;}
+			if (!file_output) {
 				fclose(ofp);
 			}
 
-			/* output read statistics */
 			fprintf(stderr, "%d records read from %s\n", nread, file);
 
 			/* set mbprocess usage of tide file */
-			if (mbprocess_update == true && ngood > 0) {
+			if (mbprocess_update && ngood > 0) {
 				status = mb_pr_update_tide(verbose, swath_file, MBP_TIDE_ON, tide_file, tideformat, &error);
 				fprintf(stderr, "MBprocess set to apply tide correction to %s\n", swath_file);
 			}
@@ -713,7 +717,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* if single output file specified, then finalise and close it */
-	if (file_output == true) {
+	if (file_output) {
 		if (count_tide > 0) {
 			atide = sum_tide / count_tide;
 			if (tideformat == 1) {

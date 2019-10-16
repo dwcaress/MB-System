@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 	char dfile[MB_PATH_MAXLINE];
 	char ofile[MB_PATH_MAXLINE];
 	char ctdfile[MB_PATH_MAXLINE];
-	int ofile_set = false;
+	bool ofile_set = false;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 
 	/* platform definition file */
 	char platform_file[MB_PATH_MAXLINE];
-	int use_platform_file = false;
+	bool use_platform_file = false;
 	struct mb_platform_struct *platform = NULL;
 
 	/* MBIO read values */
@@ -137,7 +137,7 @@ int main(int argc, char **argv) {
 	/* program mode */
 	int mode = MB7KPREPROCESS_PROCESS;
 	int fix_time_stamps = MB7KPREPROCESS_TIMEFIX_NONE;
-	int goodnavattitudeonly = true;
+	bool goodnavattitudeonly = true;
 
 	/* data structure pointers */
 	s7k_header *header;
@@ -294,7 +294,7 @@ int main(int argc, char **argv) {
 
 	/* merge navigation and attitude from separate Steve Rock data file */
 	char rockfile[MB_PATH_MAXLINE];
-	int rockdata = false;
+	bool rockdata = false;
 	int nrock = 0;
 	double *rock_time_d = NULL;
 	double *rock_lon = NULL;
@@ -307,7 +307,7 @@ int main(int argc, char **argv) {
 
 	/* merge navigation and attitude from separate WHOI DSL data file */
 	char dslfile[MB_PATH_MAXLINE];
-	int dsldata = false;
+	bool dsldata = false;
 	int ndsl = 0;
 	double *dsl_time_d = NULL;
 	double *dsl_lon = NULL;
@@ -320,7 +320,7 @@ int main(int argc, char **argv) {
 
 	/* merge navigation and attitude from separate ins data file */
 	char insfile[MB_PATH_MAXLINE];
-	int insdata = false;
+	bool insdata = false;
 	int nins = 0;
 	int nins_altitude = 0;
 	int nins_speed = 0;
@@ -340,7 +340,7 @@ int main(int argc, char **argv) {
 
 	/* merge sonardepth from separate parosci pressure sensor data file */
 	char sonardepthfile[MB_PATH_MAXLINE];
-	int sonardepthdata = false;
+	bool sonardepthdata = false;
 	int nsonardepth = 0;
 	double *sonardepth_time_d = NULL;
 	double *sonardepth_sonardepth = NULL;
@@ -425,7 +425,7 @@ int main(int argc, char **argv) {
 	double rangeoffset[3];
 
 	/* depth sensor filtering */
-	int sonardepthfilter = false;
+	bool sonardepthfilter = false;
 	double sonardepthfilterlength = 20.0;
 	double sonardepthfilterdepth = 20.0;
 
@@ -433,7 +433,7 @@ int main(int argc, char **argv) {
 	double sonardepthoffset = 0.0;
 
 	/* multibeam sensor offsets */
-	int multibeam_offset_mode = false;
+	bool multibeam_offset_mode = false;
 	double mbtransmit_offset_x = 0.0;
 	double mbtransmit_offset_y = 0.0;
 	double mbtransmit_offset_z = 0.0;
@@ -448,25 +448,25 @@ int main(int argc, char **argv) {
 	double mbreceive_offset_pitch = 0.0;
 
 	/* position sensor offsets */
-	int position_offset_mode = false;
+	bool position_offset_mode = false;
 	double position_offset_x = 0.0;
 	double position_offset_y = 0.0;
 	double position_offset_z = 0.0;
 
 	/* depth sensor offsets */
-	int depth_offset_mode = false;
+	bool depth_offset_mode = false;
 	double depth_offset_x = 0.0;
 	double depth_offset_y = 0.0;
 	double depth_offset_z = 0.0;
 
 	/* heading sensor offsets */
-	int heading_offset_mode = false;
+	bool heading_offset_mode = false;
 	double heading_offset_heading = 0.0;
 	double heading_offset_roll = 0.0;
 	double heading_offset_pitch = 0.0;
 
 	/* rollpitch sensor offsets */
-	int rollpitch_offset_mode = false;
+	bool rollpitch_offset_mode = false;
 	double rollpitch_offset_heading = 0.0;
 	double rollpitch_offset_roll = 0.0;
 	double rollpitch_offset_pitch = 0.0;
@@ -484,30 +484,30 @@ int main(int argc, char **argv) {
 	/* kluge modes */
 	int klugemode;
 	double klugevalue, klugevalue2, klugevalue3;
-	int kluge_useverticaldepth = false;       /* kluge 1 */
-	int kluge_zeroalongtrackangles = false;   /* kluge 2 */
-	int kluge_zeroattitudecorrection = false; /* kluge 3 */
-	int kluge_kearfottrovnoise = false;       /* kluge 4 */
-	int kluge_beampatterntweak = false;       /* kluge 5 */
+	bool kluge_useverticaldepth = false;       /* kluge 1 */
+	bool kluge_zeroalongtrackangles = false;   /* kluge 2 */
+	bool kluge_zeroattitudecorrection = false; /* kluge 3 */
+	bool kluge_kearfottrovnoise = false;       /* kluge 4 */
+	bool kluge_beampatterntweak = false;       /* kluge 5 */
 	double kluge_beampatternfactor = 1.0;
-	int kluge_beampatternsnelltweak = false; /* kluge 5 */
+	bool kluge_beampatternsnelltweak = false;  /* kluge 5 */
 	double kluge_beampatternsnellfactor = 1.0;
-	int kluge_fixtimejump = false;          /* kluge 6 */
-	int kluge_fixtimejumpbeamedits = false; /* kluge 7 */
+	bool kluge_fixtimejump = false;            /* kluge 6 */
+	bool kluge_fixtimejumpbeamedits = false;   /* kluge 7 */
 	double kluge_timejump_interval = 0.0;
 	double kluge_timejump_threshold = 0.0;
 	double time_d_org, dtime_d;
 	double time_d_tolerance = 0.001;
 	int iping = 0;
-	int kluge_donotrecalculatebathy = false;
+	bool kluge_donotrecalculatebathy = false;
 	s7k_time s7kTime;
 	mb_path esffile;
 	int esf_status;
-	int esffile_open = false;
+	bool esffile_open = false;
 	struct mb_esf_struct esf;
 
 	/* MBARI data flag */
-	int MBARIdata = false;
+	bool MBARIdata = false;
 
 	/* variables for beam angle calculation */
 	mb_3D_orientation tx_align;
@@ -1050,7 +1050,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* read navigation and attitude data from AUV log file if specified */
-	if (insdata == true) {
+	if (insdata) {
 		/* count the data points in the auv log file */
 		if ((tfp = fopen(insfile, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open ins data file <%s> for reading\n", insfile);
@@ -1231,7 +1231,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "No INS data read from %s....\n", insfile);
 	}
 	/* read navigation and attitude data from rock file if specified */
-	if (rockdata == true) {
+	if (rockdata) {
 		/* count the data points in the rock file */
 		if ((tfp = fopen(rockfile, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open rock data file <%s> for reading\n", rockfile);
@@ -1301,7 +1301,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "No Rock format nav data read from %s....\n", rockfile);
 	}
 	/* read navigation and attitude data from dsl file if specified */
-	if (dsldata == true) {
+	if (dsldata) {
 		/* count the data points in the dsl file */
 		if ((tfp = fopen(dslfile, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open dsl data file <%s> for reading\n", dslfile);
@@ -1383,7 +1383,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "No DSL format nav data read from %s....\n", dslfile);
 	}
 	/* read sonardepth data from AUV log file if specified */
-	if (sonardepthdata == true) {
+	if (sonardepthdata) {
 		/* count the data points in the auv log file */
 		if ((tfp = fopen(sonardepthfile, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open sonardepth data file <%s> for reading\n", sonardepthfile);
@@ -1537,7 +1537,7 @@ int main(int argc, char **argv) {
 	 * load platform definition if specified or if offsets otherwise
 	 * specified create a platform structure
 	 */
-	if (use_platform_file == true) {
+	if (use_platform_file) {
 		status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
 		if (status == MB_SUCCESS) {
 			fprintf(stderr, "Platform model with %d sensors read from platform file %s\n", platform->num_sensors, platform_file);
@@ -1548,7 +1548,7 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 	}
-	else if (depth_offset_mode == true || multibeam_offset_mode == true) {
+	else if (depth_offset_mode || multibeam_offset_mode) {
 		status = mb_platform_init(verbose, (void **)&platform, &error);
 
 		/*
@@ -1940,7 +1940,7 @@ int main(int argc, char **argv) {
 					 * correction accumulate the
 					 * timestamps
 					 */
-					if (kluge_fixtimejump == true) {
+					if (kluge_fixtimejump) {
 						batht_time_d[nbatht] = time_d;
 						batht_time_d_new[nbatht] = time_d;
 						batht_ping[nbatht] = bathymetry->ping_number;
@@ -3715,7 +3715,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	/* if desired apply filtering to sonardepth data */
-	if (sonardepthfilter == true) {
+	if (sonardepthfilter) {
 		/*
 		 * apply filtering to sonardepth data read from asynchronous
 		 * records in 7k files
@@ -3857,7 +3857,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	/* Fix timestamp jumps if requested with kluge 6 */
-	if (kluge_fixtimejump == true) {
+	if (kluge_fixtimejump) {
 		fprintf(stderr, "Fixing timestamp jumps in %d Reson data\n", nbatht);
 
 		/*
@@ -3986,7 +3986,7 @@ int main(int argc, char **argv) {
 	 * remove noise from position data associated with Kearfott INS on an
 	 * ROV that consists of jumps every two seconds
 	 */
-	if (kluge_kearfottrovnoise == true && ndat_nav > 2) {
+	if (kluge_kearfottrovnoise && ndat_nav > 2) {
 		longitude_offset = 0.0;
 		latitude_offset = 0.0;
 		mb_coor_scale(verbose, dat_nav_lat[0], &mtodeglon, &mtodeglat);
@@ -4141,7 +4141,7 @@ int main(int argc, char **argv) {
 		/* loop over all files to be read */
 		while (read_data == true && format == MBF_RESON7KR) {
 			/* figure out the output file name */
-			if (ofile_set == false) {
+			if (!ofile_set) {
 				status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
 				if (testformat == MBF_RESON7KR && strncmp(".s7k", &ifile[strlen(ifile) - 4], 4) == 0)
 					sprintf(ofile, "%s.mb%d", fileroot, testformat);
@@ -4167,7 +4167,7 @@ int main(int argc, char **argv) {
 			 * output file, otherwise there is an output file for
 			 * each input file
 			 */
-			if (ofile_set == false || nfile_write == 0) {
+			if (!ofile_set || nfile_write == 0) {
 				/*
 				 * initialize writing the output swath sonar
 				 * file
@@ -4332,7 +4332,7 @@ int main(int argc, char **argv) {
 			 * time stamps can be fixed too
 			 */
 			esffile_open = false;
-			if (error == MB_ERROR_NO_ERROR && kluge_fixtimejump == true) {
+			if (error == MB_ERROR_NO_ERROR && kluge_fixtimejump) {
 				/* progress message */
 				fprintf(stderr, "Checking for existing bathymetry edits...\n");
 
@@ -4419,7 +4419,7 @@ int main(int argc, char **argv) {
 					 * multibeam timestamps
 					 */
 					if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_bathymetry == true &&
-					    kluge_fixtimejump == true) {
+					    kluge_fixtimejump) {
 						/*
 						 * find the ping in the
 						 * timestamp list
@@ -4681,7 +4681,7 @@ int main(int argc, char **argv) {
 							/*
 							 * fix early MBARI version 5 quality flags
 							 */
-							else if (bathymetry->header.Version == 5 && MBARIdata == true && header->s7kTime.Year < 2008) {
+							else if (bathymetry->header.Version == 5 && MBARIdata && header->s7kTime.Year < 2008) {
 								for (int i = 0; i < bathymetry->number_beams; i++) {
 									/*
 									 * phase picks
@@ -4697,7 +4697,7 @@ int main(int argc, char **argv) {
 							/*
 							 * fix upgraded MBARI version 5 quality flags
 							 */
-							else if (bathymetry->header.Version >= 5 && MBARIdata == true && header->s7kTime.Year <= 2010) {
+							else if (bathymetry->header.Version >= 5 && MBARIdata && header->s7kTime.Year <= 2010) {
 								for (int i = 0; i < bathymetry->number_beams; i++) {
 									bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
@@ -4919,7 +4919,7 @@ int main(int argc, char **argv) {
 							}
 
 							/* get sonar depth */
-							if (kluge_useverticaldepth == true) {
+							if (kluge_useverticaldepth) {
 								verticaldepth = (s7kr_verticaldepth *)&(istore->verticaldepth);
 								sonardepth = (double)(verticaldepth->vertical_depth);
 							}
@@ -4969,7 +4969,7 @@ int main(int argc, char **argv) {
 							 * MB_ERROR_MISSING_NAVATTITUDE unless the -N flag has
 							 * been specified
 							 */
-							if (interp_status == MB_FAILURE && goodnavattitudeonly == true) {
+							if (interp_status == MB_FAILURE && goodnavattitudeonly) {
 								status = MB_FAILURE;
 								error = MB_ERROR_MISSING_NAVATTITUDE;
 							}
@@ -4977,7 +4977,7 @@ int main(int argc, char **argv) {
 						/*
 						 * if the optional data are available, then proceed
 						 */
-						if (status == MB_SUCCESS && (bathymetry->optionaldata == false || kluge_donotrecalculatebathy == false)) {
+						if (status == MB_SUCCESS && (bathymetry->optionaldata == false || !kluge_donotrecalculatebathy)) {
 							/*
 							 * initialize all of the beams
 							 */
@@ -5025,14 +5025,14 @@ int main(int argc, char **argv) {
 							/*
 							 * zero atttitude correction if requested
 							 */
-							if (kluge_zeroattitudecorrection == true) {
+							if (kluge_zeroattitudecorrection) {
 								rollr = 0.0;
 								pitchr = 0.0;
 							}
 							/*
 							 * zero alongtrack angles if requested
 							 */
-							if (kluge_zeroalongtrackangles == true) {
+							if (kluge_zeroalongtrackangles) {
 								for (int i = 0; i < bathymetry->number_beams; i++) {
 									beamgeometry->angle_alongtrack[i] = 0.0;
 								}
@@ -5040,7 +5040,7 @@ int main(int argc, char **argv) {
 							/*
 							 * if requested apply kluge scaling of rx beam angles
 							 */
-							if (kluge_beampatterntweak == true) {
+							if (kluge_beampatterntweak) {
 								/*
 								 * v2rawdetect ion record
 								 */
@@ -5069,7 +5069,7 @@ int main(int argc, char **argv) {
 							/*
 							 * if requested apply kluge scaling of rx beam angles
 							 */
-							if (kluge_beampatternsnelltweak == true) {
+							if (kluge_beampatternsnelltweak) {
 								/*
 								 * v2rawdetection record
 								 */
@@ -7244,7 +7244,7 @@ int main(int argc, char **argv) {
 			 * if fixing time stamps of existing beam edits write
 			 * out and close the edit save file
 			 */
-			if (kluge_fixtimejump == true && kluge_fixtimejumpbeamedits == true && esffile_open == true) {
+			if (kluge_fixtimejump && kluge_fixtimejumpbeamedits && esffile_open) {
 				for (int i = 0; i < esf.nedit; i++) {
 					status = mb_esf_save(verbose, &esf, esf.edit[i].time_d, esf.edit[i].beam, esf.edit[i].action, &error);
 				}
@@ -7254,7 +7254,7 @@ int main(int argc, char **argv) {
 			status = mb_close(verbose, &imbio_ptr, &error);
 
 			/* close the output swath file if necessary */
-			if (ofile_set == false || read_data == false) {
+			if (!ofile_set || read_data == false) {
 				status = mb_close(verbose, &ombio_ptr, &error);
 				fclose(tfp);
 				fclose(athfp);

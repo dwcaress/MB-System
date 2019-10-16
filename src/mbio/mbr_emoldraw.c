@@ -197,9 +197,6 @@ int mbr_emoldraw_chk_label(int verbose, void *mbio_ptr, short type) {
 		fprintf(stderr, "dbg2       type:       %d\n", type);
 	}
 
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
 /* swap bytes if necessary */
 #ifdef BYTESWAPPED
 	type = (short)mb_swap_short(type);
@@ -1442,9 +1439,9 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* loop over reading data until a record is ready for return */
-	int done = false;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		/* if no label saved get next record label */
 		if (*label_save_flag == false) {
 			/* read four byte wrapper if data stream is known
@@ -3888,12 +3885,6 @@ int mbr_wt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_emoldraw_wr_data(verbose, mbio_ptr, store_ptr, error);

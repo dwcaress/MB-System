@@ -469,9 +469,9 @@ int main(int argc, char **argv) {
 	double file_weight;
 	int xdim = 0;
 	int ydim = 0;
-	int spacing_priority = false;
-	int set_dimensions = false;
-	int set_spacing = false;
+	bool spacing_priority = false;
+	bool set_dimensions = false;
+	bool set_spacing = false;
 	double dx_set = 0.0;
 	double dy_set = 0.0;
 	double dx = 0.0;
@@ -488,17 +488,17 @@ int main(int argc, char **argv) {
 	int datatype = MBGRID_DATA_BATHYMETRY;
 	char gridkindstring[MB_PATH_MAXLINE];
 	int gridkind = MBGRID_GMTGRD;
-	int more = false;
-	int use_NaN = false;
+	bool more = false;
+	bool use_NaN = false;
 	double clipvalue = NO_DATA_FLAG;
 	float outclipvalue = NO_DATA_FLAG;
 	double scale = 1.0;
 	double boundsfactor = 0.0;
-	int setborder = false;
+	bool setborder = false;
 	double border = 0.0;
 	double extend = 0.0;
-	int check_time = false;
-	int first_in_stays = true;
+	bool check_time = false;
+	bool first_in_stays = true;
 	double timediff = 300.0;
 	double minormax_weighted_mean_threshold = 1.0;
 	int rformat;
@@ -548,7 +548,7 @@ int main(int argc, char **argv) {
 
 	/* grid variables */
 	double gbnd[4], wbnd[4], obnd[4];
-	int gbndset = false;
+	bool gbndset = false;
 	double xlon, ylat, xx, yy;
 	double factor, weight, topofactor;
 	int gxdim, gydim, offx, offy, xtradim;
@@ -589,11 +589,11 @@ int main(int argc, char **argv) {
 	int nmax;
 	double smin, smax;
 	int nbinset, nbinzero, nbinspline, nbinbackground;
-	int bathy_in_feet = false;
+	bool bathy_in_feet = false;
 
 	/* projected grid parameters */
-	int use_projection = false;
-	int projection_pars_f = false;
+	bool use_projection = false;
+	bool projection_pars_f = false;
 	double reference_lon, reference_lat;
 	int utm_zone = 1;
 	char projection_pars[MB_PATH_MAXLINE];
@@ -922,11 +922,11 @@ int main(int argc, char **argv) {
 	}
 
 	/* if bounds not set get bounds of input data */
-	if (gbndset == false || (set_spacing == false && set_dimensions == false)) {
+	if (!gbndset || (!set_spacing && !set_dimensions)) {
 		formatread = -1;
 		status = mb_get_info_datalist(verbose, filelist, &formatread, &mb_info, lonflip, &error);
 
-		if (gbndset == false) {
+		if (!gbndset) {
 			gbnd[0] = mb_info.lon_min;
 			gbnd[1] = mb_info.lon_max;
 			gbnd[2] = mb_info.lat_min;
@@ -934,7 +934,7 @@ int main(int argc, char **argv) {
 			gbndset = true;
 		}
 
-		if (set_spacing == false && set_dimensions == false) {
+		if (!set_spacing && !set_dimensions) {
 			dx_set = 0.02 * mb_info.altitude_max;
 			dy_set = 0.02 * mb_info.altitude_max;
 			set_spacing = true;
@@ -967,21 +967,21 @@ int main(int argc, char **argv) {
 
 	/* more option not available with minimum
 	    or maximum filter algorithms */
-	if (more == true && (grid_mode == MBGRID_MINIMUM_FILTER || grid_mode == MBGRID_MAXIMUM_FILTER))
+	if (more && (grid_mode == MBGRID_MINIMUM_FILTER || grid_mode == MBGRID_MAXIMUM_FILTER))
 		more = false;
 
 	/* NaN cannot be used for ASCII grids */
-	if (use_NaN == true && (gridkind == MBGRID_ASCII || gridkind == MBGRID_ARCASCII))
+	if (use_NaN && (gridkind == MBGRID_ASCII || gridkind == MBGRID_ARCASCII))
 		use_NaN = false;
 
 	/* define NaN in case it's needed */
-	if (use_NaN == true) {
+	if (use_NaN) {
 		MB_MAKE_FNAN(NaN);
 		outclipvalue = NaN;
 	}
 
 	/* deal with projected gridding */
-	if (projection_pars_f == true) {
+	if (projection_pars_f) {
 		/* check for UTM with undefined zone */
 		if (strcmp(projection_pars, "UTM") == 0 || strcmp(projection_pars, "U") == 0 || strcmp(projection_pars, "utm") == 0 ||
 		    strcmp(projection_pars, "u") == 0) {
@@ -1112,7 +1112,7 @@ int main(int argc, char **argv) {
 			if (dy_set <= 0.0)
 				dy_set = dx_set;
 			ydim = lrint((gbnd[3] - gbnd[2]) / dy_set + 1);
-			if (spacing_priority == true) {
+			if (spacing_priority) {
 				gbnd[1] = gbnd[0] + dx_set * (xdim - 1);
 				gbnd[3] = gbnd[2] + dy_set * (ydim - 1);
 			}
@@ -1150,7 +1150,7 @@ int main(int argc, char **argv) {
 			if (dy_set <= 0.0)
 				dy_set = mtodeglon * dx_set / mtodeglat;
 			ydim = lrint((gbnd[3] - gbnd[2]) / (mtodeglat * dy_set) + 1);
-			if (spacing_priority == true) {
+			if (spacing_priority) {
 				gbnd[1] = gbnd[0] + mtodeglon * dx_set * (xdim - 1);
 				gbnd[3] = gbnd[2] + mtodeglat * dy_set * (ydim - 1);
 			}
@@ -1161,7 +1161,7 @@ int main(int argc, char **argv) {
 			if (dy_set <= 0.0)
 				dy_set = deglattokm * dx_set / deglontokm;
 			ydim = lrint((gbnd[3] - gbnd[2]) * deglattokm / dy_set + 1);
-			if (spacing_priority == true) {
+			if (spacing_priority) {
 				gbnd[1] = gbnd[0] + dx_set * (xdim - 1) / deglontokm;
 				gbnd[3] = gbnd[2] + dy_set * (ydim - 1) / deglattokm;
 			}
@@ -1172,7 +1172,7 @@ int main(int argc, char **argv) {
 			if (dy_set <= 0.0)
 				dy_set = mtodeglon * dx_set / mtodeglat;
 			ydim = lrint((gbnd[3] - gbnd[2]) / (mtodeglat * 0.3048 * dy_set) + 1);
-			if (spacing_priority == true) {
+			if (spacing_priority) {
 				gbnd[1] = gbnd[0] + mtodeglon * 0.3048 * dx_set * (xdim - 1);
 				gbnd[3] = gbnd[2] + mtodeglat * 0.3048 * dy_set * (ydim - 1);
 			}
@@ -1195,7 +1195,7 @@ int main(int argc, char **argv) {
 			if (dy_set <= 0.0)
 				dy_set = dx_set;
 			ydim = lrint((gbnd[3] - gbnd[2]) / dy_set + 1);
-			if (spacing_priority == true) {
+			if (spacing_priority) {
 				gbnd[1] = gbnd[0] + dx_set * (xdim - 1);
 				gbnd[3] = gbnd[2] + dy_set * (ydim - 1);
 			}
@@ -1223,7 +1223,7 @@ int main(int argc, char **argv) {
 		topofactor = -1.0;
 	else
 		topofactor = 1.0;
-	if (bathy_in_feet == true && (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY))
+	if (bathy_in_feet && (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY))
 		topofactor = topofactor / 0.3048;
 
 	/* check that dx == dy for Arc ascii grid output */
@@ -1234,7 +1234,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* get data input bounds in lon lat */
-	if (use_projection == false) {
+	if (!use_projection) {
 		bounds[0] = wbnd[0];
 		bounds[1] = wbnd[1];
 		bounds[2] = wbnd[2];
@@ -1313,7 +1313,7 @@ int main(int argc, char **argv) {
 	bdata_origin_y = 0.5 * (wbnd[2] + wbnd[3]);
 
 	/* set plot label strings */
-	if (use_projection == true) {
+	if (use_projection) {
 		sprintf(xlabel, "Easting (%s)", units);
 		sprintf(ylabel, "Northing (%s)", units);
 	}
@@ -1322,24 +1322,24 @@ int main(int argc, char **argv) {
 		strcpy(ylabel, "Latitude");
 	}
 	if (datatype == MBGRID_DATA_BATHYMETRY) {
-		if (bathy_in_feet == true)
+		if (bathy_in_feet)
 			strcpy(zlabel, "Depth (ft)");
 		else
 			strcpy(zlabel, "Depth (m)");
 		strcpy(nlabel, "Number of Depth Data Points");
-		if (bathy_in_feet == true)
+		if (bathy_in_feet)
 			strcpy(sdlabel, "Depth Standard Deviation (ft)");
 		else
 			strcpy(sdlabel, "Depth Standard Deviation (m)");
 		strcpy(title, "Bathymetry Grid");
 	}
 	else if (datatype == MBGRID_DATA_TOPOGRAPHY) {
-		if (bathy_in_feet == true)
+		if (bathy_in_feet)
 			strcpy(zlabel, "Topography (ft)");
 		else
 			strcpy(zlabel, "Topography (m)");
 		strcpy(nlabel, "Number of Topography Data Points");
-		if (bathy_in_feet == true)
+		if (bathy_in_feet)
 			strcpy(sdlabel, "Topography Standard Deviation (ft)");
 		else
 			strcpy(sdlabel, "Topography Standard Deviation (m)");
@@ -1366,12 +1366,12 @@ int main(int argc, char **argv) {
 		fprintf(outfp, "Input Data Type:     ");
 		if (datatype == MBGRID_DATA_BATHYMETRY) {
 			fprintf(outfp, "Bathymetry\n");
-			if (bathy_in_feet == true)
+			if (bathy_in_feet)
 				fprintf(outfp, "Bathymetry gridded in feet\n");
 		}
 		else if (datatype == MBGRID_DATA_TOPOGRAPHY) {
 			fprintf(outfp, "Topography\n");
-			if (bathy_in_feet == true)
+			if (bathy_in_feet)
 				fprintf(outfp, "Topography gridded in feet\n");
 		}
 		else if (datatype == MBGRID_DATA_AMPLITUDE)
@@ -1398,12 +1398,12 @@ int main(int argc, char **argv) {
 		else
 			fprintf(outfp, "Gaussian Weighted Mean\n");
 		fprintf(outfp, "Grid projection: %s\n", projection_id);
-		if (use_projection == true) {
+		if (use_projection) {
 			fprintf(outfp, "Projection ID: %s\n", projection_id);
 		}
 		fprintf(outfp, "Grid dimensions: %d %d\n", xdim, ydim);
 		fprintf(outfp, "Grid bounds:\n");
-		if (use_projection == true) {
+		if (use_projection) {
 			fprintf(outfp, "  Eastings:  %9.4f %9.4f\n", gbnd[0], gbnd[1]);
 			fprintf(outfp, "  Northings: %9.4f %9.4f\n", gbnd[2], gbnd[3]);
 			fprintf(outfp, "  Longitude: %9.4f %9.4f\n", obnd[0], obnd[1]);
@@ -1416,7 +1416,7 @@ int main(int argc, char **argv) {
 		if (boundsfactor > 1.0)
 			fprintf(outfp, "  Grid bounds correspond to %f times actual data coverage\n", boundsfactor);
 		fprintf(outfp, "Working grid dimensions: %d %d\n", gxdim, gydim);
-		if (use_projection == true) {
+		if (use_projection) {
 			fprintf(outfp, "Working Grid bounds:\n");
 			fprintf(outfp, "  Eastings:  %9.4f %9.4f\n", wbnd[0], wbnd[1]);
 			fprintf(outfp, "  Northings: %9.4f %9.4f\n", wbnd[2], wbnd[3]);
@@ -1447,11 +1447,11 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "Footprint 1/e distance: %f times footprint\n", scale);
     if (grid_mode == MBGRID_MINIMUM_WEIGHTED_MEAN)
       fprintf(outfp, "Minimum filter threshold for Minimum Weighted Mean: %f\n", minormax_weighted_mean_threshold);
-		if (check_time == true && first_in_stays == false)
+		if (check_time && !first_in_stays)
 			fprintf(outfp, "Swath overlap handling:       Last data used\n");
-		if (check_time == true && first_in_stays == true)
+		if (check_time && first_in_stays)
 			fprintf(outfp, "Swath overlap handling:       First data used\n");
-		if (check_time == true)
+		if (check_time)
 			fprintf(outfp, "Swath overlap time threshold: %f minutes\n", timediff / 60.);
 		if (clipmode == MBGRID_INTERP_NONE)
 			fprintf(outfp, "Spline interpolation not applied\n");
@@ -1488,11 +1488,11 @@ int main(int argc, char **argv) {
 			if (strlen(gridkindstring) > 0)
 				fprintf(outfp, "GMT Grid ID:     %s\n", gridkindstring);
 		}
-		if (use_NaN == true)
+		if (use_NaN)
 			fprintf(outfp, "NaN values used to flag regions with no data\n");
 		else
 			fprintf(outfp, "Real value of %f used to flag regions with no data\n", outclipvalue);
-		if (more == true)
+		if (more)
 			fprintf(outfp, "Data density and sigma grids also created\n");
 		fprintf(outfp, "MBIO parameters:\n");
 		fprintf(outfp, "  Ping averaging:       %d\n", pings);
@@ -1511,7 +1511,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nExtracting background from grid file %s...\n", backgroundfile);
 
 		/* guess about twice the data actually expected */
-		if (use_projection == true)
+		if (use_projection)
 			nbackground_alloc = 2 * gxdim * gydim;
 		else
 			nbackground_alloc = 2 * gxdim * gydim;
@@ -1599,7 +1599,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* resample extracted grid to have similar resolution as working grid */
-		if (use_projection == true)
+		if (use_projection)
 			sprintf(plot_cmd, "gmt grdsample %s -Gtmpgrdsample%d.grd -R%.12f/%.12f/%.12f/%.12f -I%.12f/%.12f", backgroundfileuse,
 			        pid, bounds[0], bounds[1], bounds[2], bounds[3], dx * mtodeglon, dy * mtodeglat);
 		else
@@ -1616,7 +1616,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* extract points with preprocessing if that will help */
-		if (use_projection == true) {
+		if (use_projection) {
 			sprintf(plot_cmd, "gmt grd2xyz tmpgrdsample%d.grd -s -bo | gmt blockmean -bi -bo -C -R%f/%f/%f/%f -I%.12f/%.12f", pid,
 			        bounds[0], bounds[1], bounds[2], bounds[3], dx * mtodeglon, dy * mtodeglat);
 		}
@@ -1639,7 +1639,7 @@ int main(int argc, char **argv) {
 					tlon -= 360.0;
 				else if (lonflip == 1 && tlon < 0.0)
 					tlon += 360.0;
-				if (use_projection == true)
+				if (use_projection)
 					mb_proj_forward(verbose, pjptr, tlon, tlat, &tlon, &tlat, &error);
 #ifdef USESURFACE
 				if (nbackground >= nbackground_alloc) {
@@ -1892,7 +1892,7 @@ int main(int argc, char **argv) {
 						    error == MB_ERROR_NO_ERROR) {
 
 							/* reproject beam positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								mb_proj_forward(verbose, pjptr, navlon, navlat, &navlon, &navlat, &error);
 								for (ib = 0; ib < beams_bath; ib++)
 									if (mb_beam_ok(beamflag[ib]))
@@ -2217,7 +2217,7 @@ int main(int argc, char **argv) {
                             }
 
 							/* reproject beam positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								mb_proj_forward(verbose, pjptr, navlon, navlat, &navlon, &navlat, &error);
 								for (ib = 0; ib < beams_bath; ib++)
 									if (mb_beam_ok(beamflag[ib]))
@@ -2288,7 +2288,7 @@ int main(int argc, char **argv) {
 										}
 
 										/* check if within allowed time */
-										if (check_time == true) {
+										if (check_time) {
 											/* if in region of interest
 											   check if time is ok */
 											if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
@@ -2298,7 +2298,7 @@ int main(int argc, char **argv) {
 													time_ok = true;
 												}
 												else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-													if (first_in_stays == true)
+													if (first_in_stays)
 														time_ok = false;
 													else {
 														time_ok = true;
@@ -2334,7 +2334,7 @@ int main(int argc, char **argv) {
 											   DWC 1/29/2001 */
 											/* now handles projected grids
 											   DWC 3/5/2003 */
-											if (use_projection == true) {
+											if (use_projection) {
 												foot_dx = (bathlon[ib] - navlon);
 												foot_dy = (bathlat[ib] - navlat);
 											}
@@ -2365,7 +2365,7 @@ int main(int argc, char **argv) {
 												foot_hlength = foot_range * tan(DTR * foot_dphi);
 
 												/* get range of bins around footprint to examine */
-												if (use_projection == true) {
+												if (use_projection) {
 													foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / dx);
 													foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / dx);
 													foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / dy);
@@ -2396,7 +2396,7 @@ int main(int argc, char **argv) {
 														sbath = topofactor * bath[ib] + dzdx * xx + dzdy * yy;
 
 														/* get center and corners of bin in meters from sounding center */
-														if (use_projection == true) {
+														if (use_projection) {
 															xx0 = xx;
 															yy0 = yy;
 															bdx = 0.5 * dx;
@@ -2647,7 +2647,7 @@ int main(int argc, char **argv) {
                             }
 
 							/* reproject beam positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								mb_proj_forward(verbose, pjptr, navlon, navlat, &navlon, &navlat, &error);
 								for (ib = 0; ib < beams_bath; ib++)
 									if (mb_beam_ok(beamflag[ib]))
@@ -2663,7 +2663,7 @@ int main(int argc, char **argv) {
 									iy = (bathlat[ib] - wbnd[2] + 0.5 * dy) / dy;
 
 									/* check if within allowed time */
-									if (check_time == true) {
+									if (check_time) {
 										/* if in region of interest
 										   check if time is ok */
 										if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
@@ -2673,7 +2673,7 @@ int main(int argc, char **argv) {
 												time_ok = true;
 											}
 											else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-												if (first_in_stays == true)
+												if (first_in_stays)
 													time_ok = false;
 												else {
 													time_ok = true;
@@ -2724,7 +2724,7 @@ int main(int argc, char **argv) {
 											   DWC 1/29/2001 */
 											/* now handles projected grids
 											   DWC 3/5/2003 */
-											if (use_projection == true) {
+											if (use_projection) {
 												foot_dx = (bathlon[ib] - navlon);
 												foot_dy = (bathlat[ib] - navlat);
 											}
@@ -2755,7 +2755,7 @@ int main(int argc, char **argv) {
 												foot_hlength = foot_range * tan(DTR * foot_dphi);
 
 												/* get range of bins around footprint to examine */
-												if (use_projection == true) {
+												if (use_projection) {
 													foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / dx);
 													foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / dx);
 													foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / dy);
@@ -2786,7 +2786,7 @@ int main(int argc, char **argv) {
 														sbath = topofactor * bath[ib];
 
 														/* get center and corners of bin in meters from sounding center */
-														if (use_projection == true) {
+														if (use_projection) {
 															xx0 = xx;
 															yy0 = yy;
 															bdx = 0.5 * dx;
@@ -3045,7 +3045,7 @@ int main(int argc, char **argv) {
 						    error == MB_ERROR_NO_ERROR) {
 
 							/* reproject beam positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								for (ib = 0; ib < beams_bath; ib++)
 									if (mb_beam_ok(beamflag[ib]))
 										mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
@@ -3060,7 +3060,7 @@ int main(int argc, char **argv) {
 									if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
 										/* check if within allowed time */
 										kgrid = ix * gydim + iy;
-										if (check_time == false)
+										if (check_time)
 											time_ok = true;
 										else {
 											if (firsttime[kgrid] <= 0.0) {
@@ -3068,7 +3068,7 @@ int main(int argc, char **argv) {
 												time_ok = true;
 											}
 											else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-												if (first_in_stays == true)
+												if (first_in_stays)
 													time_ok = false;
 												else {
 													time_ok = true;
@@ -3114,7 +3114,7 @@ int main(int argc, char **argv) {
 						else if (datatype == MBGRID_DATA_AMPLITUDE && error == MB_ERROR_NO_ERROR) {
 
 							/* reproject beam positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								for (ib = 0; ib < beams_amp; ib++)
 									if (mb_beam_ok(beamflag[ib]))
 										mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
@@ -3129,7 +3129,7 @@ int main(int argc, char **argv) {
 									if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
 										/* check if within allowed time */
 										kgrid = ix * gydim + iy;
-										if (check_time == false)
+										if (!check_time)
 											time_ok = true;
 										else {
 											if (firsttime[kgrid] <= 0.0) {
@@ -3137,7 +3137,7 @@ int main(int argc, char **argv) {
 												time_ok = true;
 											}
 											else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-												if (first_in_stays == true)
+												if (first_in_stays)
 													time_ok = false;
 												else {
 													time_ok = true;
@@ -3183,7 +3183,7 @@ int main(int argc, char **argv) {
 						else if (datatype == MBGRID_DATA_SIDESCAN && error == MB_ERROR_NO_ERROR) {
 
 							/* reproject pixel positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								for (ib = 0; ib < pixels_ss; ib++)
 									if (ss[ib] > MB_SIDESCAN_NULL)
 										mb_proj_forward(verbose, pjptr, sslon[ib], sslat[ib], &sslon[ib], &sslat[ib], &error);
@@ -3197,7 +3197,7 @@ int main(int argc, char **argv) {
 									if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
 										/* check if within allowed time */
 										kgrid = ix * gydim + iy;
-										if (check_time == false)
+										if (!check_time)
 											time_ok = true;
 										else {
 											if (firsttime[kgrid] <= 0.0) {
@@ -3205,7 +3205,7 @@ int main(int argc, char **argv) {
 												time_ok = true;
 											}
 											else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-												if (first_in_stays == true)
+												if (first_in_stays)
 													time_ok = false;
 												else {
 													time_ok = true;
@@ -3283,7 +3283,7 @@ int main(int argc, char **argv) {
 				/* loop over reading */
 				while (fscanf(rfp, "%lf %lf %lf", &tlon, &tlat, &tvalue) != EOF) {
 					/* reproject data positions if necessary */
-					if (use_projection == true)
+					if (use_projection)
 						mb_proj_forward(verbose, pjptr, tlon, tlat, &tlon, &tlat, &error);
 
 					/* get position in grid */
@@ -3292,7 +3292,7 @@ int main(int argc, char **argv) {
 					if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
 						/* check if overwriting */
 						kgrid = ix * gydim + iy;
-						if (check_time == false)
+						if (!check_time)
 							time_ok = true;
 						else {
 							if (firsttime[kgrid] > 0.0)
@@ -3545,7 +3545,7 @@ int main(int argc, char **argv) {
 						    error == MB_ERROR_NO_ERROR) {
 
 							/* reproject beam positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								for (ib = 0; ib < beams_bath; ib++)
 									if (mb_beam_ok(beamflag[ib]))
 										mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
@@ -3563,7 +3563,7 @@ int main(int argc, char **argv) {
 									bath[ib], dx, dy, wbnd[0], wbnd[1]); */
 
 									/* check if within allowed time */
-									if (check_time == true) {
+									if (check_time) {
 										/* if in region of interest
 										   check if time is ok */
 										if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
@@ -3573,7 +3573,7 @@ int main(int argc, char **argv) {
 												time_ok = true;
 											}
 											else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-												if (first_in_stays == true)
+												if (first_in_stays)
 													time_ok = false;
 												else {
 													time_ok = true;
@@ -3641,7 +3641,7 @@ int main(int argc, char **argv) {
 						else if (datatype == MBGRID_DATA_AMPLITUDE && error == MB_ERROR_NO_ERROR) {
 
 							/* reproject beam positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								for (ib = 0; ib < beams_amp; ib++)
 									if (mb_beam_ok(beamflag[ib]))
 										mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
@@ -3656,7 +3656,7 @@ int main(int argc, char **argv) {
 									iy = (bathlat[ib] - wbnd[2] + 0.5 * dy) / dy;
 
 									/* check if within allowed time */
-									if (check_time == true) {
+									if (check_time) {
 										/* if in region of interest
 										   check if time is ok */
 										if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
@@ -3666,7 +3666,7 @@ int main(int argc, char **argv) {
 												time_ok = true;
 											}
 											else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-												if (first_in_stays == true)
+												if (first_in_stays)
 													time_ok = false;
 												else {
 													time_ok = true;
@@ -3731,7 +3731,7 @@ int main(int argc, char **argv) {
 						else if (datatype == MBGRID_DATA_SIDESCAN && error == MB_ERROR_NO_ERROR) {
 
 							/* reproject pixel positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								for (ib = 0; ib < pixels_ss; ib++)
 									if (ss[ib] > MB_SIDESCAN_NULL)
 										mb_proj_forward(verbose, pjptr, sslon[ib], sslat[ib], &sslon[ib], &sslat[ib], &error);
@@ -3745,7 +3745,7 @@ int main(int argc, char **argv) {
 									iy = (sslat[ib] - wbnd[2] + 0.5 * dy) / dy;
 
 									/* check if within allowed time */
-									if (check_time == true) {
+									if (check_time) {
 										/* if in region of interest
 										   check if time is ok */
 										if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
@@ -3755,7 +3755,7 @@ int main(int argc, char **argv) {
 												time_ok = true;
 											}
 											else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-												if (first_in_stays == true)
+												if (first_in_stays)
 													time_ok = false;
 												else {
 													time_ok = true;
@@ -3852,7 +3852,7 @@ int main(int argc, char **argv) {
 				/* loop over reading */
 				while (fscanf(rfp, "%lf %lf %lf", &tlon, &tlat, &tvalue) != EOF) {
 					/* reproject data positions if necessary */
-					if (use_projection == true)
+					if (use_projection)
 						mb_proj_forward(verbose, pjptr, tlon, tlat, &tlon, &tlat, &error);
 
 					/* get position in grid */
@@ -3860,7 +3860,7 @@ int main(int argc, char **argv) {
 					iy = (tlat - wbnd[2] + 0.5 * dy) / dy;
 
 					/* check if overwriting */
-					if (check_time == true) {
+					if (check_time) {
 						/* if in region of interest
 						   check if overwriting */
 						if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
@@ -4115,7 +4115,7 @@ int main(int argc, char **argv) {
 						    error == MB_ERROR_NO_ERROR) {
 
 							/* reproject beam positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								for (ib = 0; ib < beams_bath; ib++)
 									if (mb_beam_ok(beamflag[ib]))
 										mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
@@ -4133,7 +4133,7 @@ int main(int argc, char **argv) {
 									bath[ib], dx, dy, wbnd[0], wbnd[1]); */
 
 									/* check if within allowed time */
-									if (check_time == true) {
+									if (check_time) {
 										/* if in region of interest
 										   check if time is ok */
 										if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
@@ -4143,7 +4143,7 @@ int main(int argc, char **argv) {
 												time_ok = true;
 											}
 											else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-												if (first_in_stays == true)
+												if (first_in_stays)
 													time_ok = false;
 												else {
 													time_ok = true;
@@ -4185,7 +4185,7 @@ int main(int argc, char **argv) {
 						else if (datatype == MBGRID_DATA_AMPLITUDE && error == MB_ERROR_NO_ERROR) {
 
 							/* reproject beam positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								for (ib = 0; ib < beams_amp; ib++)
 									if (mb_beam_ok(beamflag[ib]))
 										mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
@@ -4200,7 +4200,7 @@ int main(int argc, char **argv) {
 									iy = (bathlat[ib] - wbnd[2] + 0.5 * dy) / dy;
 
 									/* check if within allowed time */
-									if (check_time == true) {
+									if (check_time) {
 										/* if in region of interest
 										   check if time is ok */
 										if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
@@ -4210,7 +4210,7 @@ int main(int argc, char **argv) {
 												time_ok = true;
 											}
 											else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-												if (first_in_stays == true)
+												if (first_in_stays)
 													time_ok = false;
 												else {
 													time_ok = true;
@@ -4253,7 +4253,7 @@ int main(int argc, char **argv) {
 						else if (datatype == MBGRID_DATA_SIDESCAN && error == MB_ERROR_NO_ERROR) {
 
 							/* reproject pixel positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								for (ib = 0; ib < pixels_ss; ib++)
 									if (ss[ib] > MB_SIDESCAN_NULL)
 										mb_proj_forward(verbose, pjptr, sslon[ib], sslat[ib], &sslon[ib], &sslat[ib], &error);
@@ -4267,7 +4267,7 @@ int main(int argc, char **argv) {
 									iy = (sslat[ib] - wbnd[2] + 0.5 * dy) / dy;
 
 									/* check if within allowed time */
-									if (check_time == true) {
+									if (check_time) {
 										/* if in region of interest
 										   check if time is ok */
 										if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
@@ -4277,7 +4277,7 @@ int main(int argc, char **argv) {
 												time_ok = true;
 											}
 											else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-												if (first_in_stays == true)
+												if (first_in_stays)
 													time_ok = false;
 												else {
 													time_ok = true;
@@ -4470,7 +4470,7 @@ int main(int argc, char **argv) {
 						    error == MB_ERROR_NO_ERROR) {
 
 							/* reproject beam positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								for (ib = 0; ib < beams_bath; ib++)
 									if (mb_beam_ok(beamflag[ib]))
 										mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
@@ -4488,7 +4488,7 @@ int main(int argc, char **argv) {
 									bath[ib], dx, dy, wbnd[0], wbnd[1]); */
 
 									/* check if within allowed time */
-									if (check_time == true) {
+									if (check_time) {
 										/* if in region of interest
 										   check if time is ok */
 										if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
@@ -4498,7 +4498,7 @@ int main(int argc, char **argv) {
 												time_ok = true;
 											}
 											else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-												if (first_in_stays == true)
+												if (first_in_stays)
 													time_ok = false;
 												else {
 													time_ok = true;
@@ -4554,7 +4554,7 @@ int main(int argc, char **argv) {
 						else if (datatype == MBGRID_DATA_AMPLITUDE && error == MB_ERROR_NO_ERROR) {
 
 							/* reproject beam positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								for (ib = 0; ib < beams_amp; ib++)
 									if (mb_beam_ok(beamflag[ib]))
 										mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
@@ -4569,7 +4569,7 @@ int main(int argc, char **argv) {
 									iy = (bathlat[ib] - wbnd[2] + 0.5 * dy) / dy;
 
 									/* check if within allowed time */
-									if (check_time == true) {
+									if (check_time) {
 										/* if in region of interest
 										   check if time is ok */
 										if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
@@ -4579,7 +4579,7 @@ int main(int argc, char **argv) {
 												time_ok = true;
 											}
 											else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-												if (first_in_stays == true)
+												if (first_in_stays)
 													time_ok = false;
 												else {
 													time_ok = true;
@@ -4634,7 +4634,7 @@ int main(int argc, char **argv) {
 						else if (datatype == MBGRID_DATA_SIDESCAN && error == MB_ERROR_NO_ERROR) {
 
 							/* reproject pixel positions if necessary */
-							if (use_projection == true) {
+							if (use_projection) {
 								for (ib = 0; ib < pixels_ss; ib++)
 									if (ss[ib] > MB_SIDESCAN_NULL)
 										mb_proj_forward(verbose, pjptr, sslon[ib], sslat[ib], &sslon[ib], &sslat[ib], &error);
@@ -4648,7 +4648,7 @@ int main(int argc, char **argv) {
 									iy = (sslat[ib] - wbnd[2] + 0.5 * dy) / dy;
 
 									/* check if within allowed time */
-									if (check_time == true) {
+									if (check_time) {
 										/* if in region of interest
 										   check if time is ok */
 										if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
@@ -4658,7 +4658,7 @@ int main(int argc, char **argv) {
 												time_ok = true;
 											}
 											else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-												if (first_in_stays == true)
+												if (first_in_stays)
 													time_ok = false;
 												else {
 													time_ok = true;
@@ -4772,7 +4772,7 @@ int main(int argc, char **argv) {
 	/* if clip set do smooth interpolation */
 	if (clipmode != MBGRID_INTERP_NONE && clip > 0 && nbinset > 0) {
 		/* set up data vector */
-		if (setborder == true)
+		if (setborder)
 			ndata = 2 * gxdim + 2 * gydim - 2;
 		else
 			ndata = 8;
@@ -4819,7 +4819,7 @@ int main(int argc, char **argv) {
 			}
 
 		/* if desired set border */
-		if (setborder == true) {
+		if (setborder) {
 			for (int i = 0; i < gxdim; i++) {
 				j = 0;
 				kgrid = i * gydim + j;
@@ -4900,7 +4900,7 @@ int main(int argc, char **argv) {
 			}
 
 		/* if desired set border */
-		if (setborder == true) {
+		if (setborder) {
 			for (int i = 0; i < gxdim; i++) {
 				int j = 0;
 				kgrid = i * gydim + j;
@@ -5347,7 +5347,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* write second output file */
-	if (more == true) {
+	if (more) {
 		for (int i = 0; i < xdim; i++)
 			for (int j = 0; j < ydim; j++) {
 				kgrid = (i + offx) * gydim + (j + offy);
@@ -5482,7 +5482,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nError executing mbm_grdplot on output file %s\n", ofile);
 		}
 	}
-	if (more == true && gridkind == MBGRID_GMTGRD) {
+	if (more && gridkind == MBGRID_GMTGRD) {
 		/* execute mbm_grdplot */
 		strcpy(ofile, fileroot);
 		strcat(ofile, "_num.grd");

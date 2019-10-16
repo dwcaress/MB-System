@@ -202,11 +202,11 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* set status */
 	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
-	int done = false;
 	size_t index = 0;
 	char buffer[MBF_3DDEPTHP_BUFFER_SIZE];
 
 	/* if first read then read 2 byte magic number at start of file */
+	bool done = false;
 	if (*file_header_readwritten == false) {
 		/* read and check the first two bytes */
 		size_t read_len = (size_t)2;
@@ -301,7 +301,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* read next record in format version 1.1 */
-	if (status == MB_SUCCESS && done == false && store->file_version == 1 && store->sub_version == 1) {
+	if (status == MB_SUCCESS && !done && store->file_version == 1 && store->sub_version == 1) {
 
 		/* read the next record header */
 		size_t read_len = (size_t)sizeof(short);
@@ -738,7 +738,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* else read next record in the obsolete format version 1.0
 	        - LIDAR scans only with no record id's */
-	else if (status == MB_SUCCESS && done == false && store->file_version == 1 && store->sub_version == 0) {
+	else if (status == MB_SUCCESS && !done && store->file_version == 1 && store->sub_version == 0) {
 		/* read the next scan header */
 		if (mb_io_ptr->save2 == false) {
 			size_t read_len = (size_t)MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE;
@@ -810,7 +810,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (status == MB_SUCCESS) {
 			store->num_pulses = 0;
 			done = false;
-			while (done == false) {
+			while (!done) {
 				/* read the next four bytes */
 				size_t read_len = (size_t)4;
 				status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
@@ -838,7 +838,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 
 				/* if read ok and consistent with new pulse then get values */
-				if (status == MB_SUCCESS && done == false) {
+				if (status == MB_SUCCESS && !done) {
 					struct mbsys_3datdepthlidar_pulse_struct *pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[store->num_pulses];
 					index = 0;
 					mb_get_binary_float(true, (void *)&buffer[index], &(pulse->range));
@@ -1275,13 +1275,8 @@ int mbr_wt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* check for non-null pointers */
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
-
-	/* get pointers to mbio descriptor and data structure */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	struct mbsys_3datdepthlidar_struct *store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_3ddepthp_wr_data(verbose, mbio_ptr, store_ptr, error);

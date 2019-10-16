@@ -343,7 +343,7 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int smooth_median(int verbose, double original, int apply_threshold, double threshold_lo, double threshold_hi, int n, double *val,
+int smooth_median(int verbose, double original, bool apply_threshold, double threshold_lo, double threshold_hi, int n, double *val,
                   double *wgt, double *smooth, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
@@ -368,7 +368,7 @@ int smooth_median(int verbose, double original, int apply_threshold, double thre
 	}
 
 	/* apply thresholding */
-	if (apply_threshold == true) {
+	if (apply_threshold) {
 		const double ratio = original / (*smooth);
 		if (ratio < threshold_hi && ratio > threshold_lo) {
 			*smooth = original;
@@ -666,8 +666,6 @@ int main(int argc, char **argv) {
 	int nwritetot = 0;
 	int nexpect;
 	struct mbfilter_ping_struct ping[MBFILTER_BUFFER_DEFAULT];
-	int first = true;
-	int done;
 
 	/* time, user, host variables */
 	time_t right_now;
@@ -690,7 +688,7 @@ int main(int argc, char **argv) {
 	int contrast_xdim = 5;
 	int contrast_ldim = 5;
 	int contrast_iter = 1;
-	int apply_threshold = false;
+	bool apply_threshold = false;
 	double threshold_lo = 0.0;
 	double threshold_hi = 0.0;
 	int nweight;
@@ -844,7 +842,7 @@ int main(int argc, char **argv) {
 					filters[num_filters].threshold_lo = threshold_lo;
 					filters[num_filters].threshold_hi = threshold_hi;
 				}
-				else if (apply_threshold == true) {
+				else if (apply_threshold) {
 					filters[num_filters].threshold = true;
 					filters[num_filters].threshold_lo = threshold_lo;
 					filters[num_filters].threshold_hi = threshold_hi;
@@ -1238,7 +1236,7 @@ int main(int argc, char **argv) {
 			sprintf(comment, "applying inverse gradient filter for smoothing");
 			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
-		if (smooth_mode == MBFILTER_SMOOTH_MEDIAN && apply_threshold == true) {
+		if (smooth_mode == MBFILTER_SMOOTH_MEDIAN && apply_threshold) {
 			sprintf(comment, "  filter low ratio threshold:   %f", threshold_lo);
 			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 			sprintf(comment, "  filter high ratio threshold:  %f", threshold_hi);
@@ -1291,12 +1289,12 @@ int main(int argc, char **argv) {
 		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 
 		/* read and write */
-		done = false;
-		first = true;
+		bool first = true;
 		ndata = 0;
 		nhold = 0;
 		nread = 0;
 		nwrite = 0;
+		bool done = false;
 		while (!done) {
 			/* load some data into the buffer */
 			error = MB_ERROR_NO_ERROR;
@@ -1350,7 +1348,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* get start of ping output range */
-			if (first == true) {
+			if (first) {
 				jbeg = 0;
 				first = false;
 			}
@@ -1358,7 +1356,7 @@ int main(int argc, char **argv) {
 				jbeg = MIN(nhold / 2 + 1, ndata);
 
 			/* find number of pings to hold */
-			if (done == true)
+			if (done)
 				nhold = 0;
 			else if (ndata > nhold_ping)
 				nhold = nhold_ping;
@@ -1366,7 +1364,7 @@ int main(int argc, char **argv) {
 				nhold = 0;
 
 			/* get end of ping output range */
-			if (done == true)
+			if (done)
 				jend = ndata - 1;
 			else {
 				jend = ndata - 1 - nhold / 2;

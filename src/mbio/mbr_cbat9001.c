@@ -962,7 +962,6 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int status = MB_SUCCESS;
-	int done;
 	int first;
 	short *type;
 	char label[2];
@@ -980,18 +979,17 @@ int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_cbat9001_struct *data = (struct mbf_cbat9001_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
-	done = false;
 	type = (short *)label;
 	first = true;
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		if (mb_io_ptr->byteswapped == false) {
 			/* get first part of next record label */
 			if ((status = fread(&label[0], 1, 1, mb_io_ptr->mbfp)) != 1) {

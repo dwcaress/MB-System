@@ -79,8 +79,8 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 	double headingy = 0.0;
 
 	/* read the data */
-	int done = false;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg2  About to read ping in function <%s>\n", __func__);

@@ -28,6 +28,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -554,7 +555,6 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mbf_xtfb1624_struct *data = (struct mbf_xtfb1624_struct *)mb_io_ptr->raw_data;
 	struct mbf_xtfb1624_xtffileheader *fileheader = (struct mbf_xtfb1624_xtffileheader *)&(data->fileheader);
 	struct mbf_xtfattitudeheader *attitudeheader = (struct mbf_xtfattitudeheader *)&(data->attitudeheader);
-	struct mbf_xtfrawcustomheader *rawcustomheader = (struct mbf_xtfrawcustomheader *)&(data->rawcustomheader);
 	struct mbf_xtfpingheader *pingheader = (struct mbf_xtfpingheader *)&(data->pingheader);
 	struct mbf_xtfpingchanheader *pingchanportheader = (struct mbf_xtfpingchanheader *)&(data->pingchanportheader);
 	struct mbf_xtfpingchanheader *pingchanstbdheader = (struct mbf_xtfpingchanheader *)&(data->pingchanstbdheader);
@@ -767,8 +767,8 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mbf_xtfpacketheader packetheader;
 
 	/* look for next recognizable record */
-	int done = false;
-	while (status == MB_SUCCESS && done == false) {
+	bool done = false;
+	while (status == MB_SUCCESS && !done) {
 		/* find the next packet beginning */
 		int found = false;
 		int skip = 0;
@@ -1481,16 +1481,16 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_get_time(verbose, time_i, &time_d);
 
 		/* do check on time here - we sometimes get a bad fix */
-		int badtime = false;
-		if (time_i[0] < 1970 && time_i[0] > 2100)
+		bool badtime = false;
+		if (time_i[0] < 1970 || time_i[0] > 2100)
 			badtime = true;
-		if (time_i[1] < 0 && time_i[1] > 12)
+		if (time_i[1] < 0 || time_i[1] > 12)
 			badtime = true;
-		if (time_i[2] < 0 && time_i[2] > 31)
+		if (time_i[2] < 0 || time_i[2] > 31)
 			badtime = true;
-		if (badtime == true) {
+		if (badtime) {
 			if (verbose > 0)
-				fprintf(stderr, " Bad time from XTF in ping header\n");
+				fprintf(stderr, "Bad time from XTF in ping header\n");
 			data->kind = MB_DATA_NONE;
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
@@ -1793,9 +1793,6 @@ int mbr_wt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set error as this is a read only format */
 	status = MB_FAILURE;

@@ -929,17 +929,16 @@ int mbr_elmk2unb_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_elmk2unb_struct *data = (struct mbf_elmk2unb_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	int status = MB_SUCCESS;
-	int done = false;
 	type = (short int *)label;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		/* get next record label */
 		if ((status = fread(&label[0], 1, 1, mb_io_ptr->mbfp)) != 1) {
 			status = MB_FAILURE;

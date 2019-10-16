@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
 
 	/* histogram variables */
 	int mode = MBHISTOGRAM_SS;
-	int gaussian = false;
+	bool gaussian = false;
 	int nbins = 0;
 	int nintervals = 0;
 	double value_min = 0.0;
@@ -160,7 +160,6 @@ int main(int argc, char **argv) {
 	double value_bin_max;
 	double data_min;
 	double data_max;
-	int data_first = true;
 	double target_min;
 	double target_max;
 	double *histogram = NULL;
@@ -177,7 +176,6 @@ int main(int argc, char **argv) {
 	    stderr if verbose > 1) */
 	FILE *output;
 
-	int read_data;
 	int nrec, nvalue;
 	int nrectot = 0;
 	int nvaluetot = 0;
@@ -376,6 +374,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -395,8 +394,10 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
+	bool data_first = true;
+
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 
 		/* obtain format array location - format id will
 		    be aliased to current id if old format id given */
@@ -470,7 +471,7 @@ int main(int argc, char **argv) {
 							const int j = (bath[i] - value_bin_min) / dvalue_bin;
 							if (j >= 0 && j < nbins)
 								histogram[j]++;
-							if (data_first == true) {
+							if (data_first) {
 								data_min = bath[i];
 								data_max = bath[i];
 								data_first = false;
@@ -490,7 +491,7 @@ int main(int argc, char **argv) {
 							const int j = (amp[i] - value_bin_min) / dvalue_bin;
 							if (j >= 0 && j < nbins)
 								histogram[j]++;
-							if (data_first == true) {
+							if (data_first) {
 								data_min = amp[i];
 								data_max = amp[i];
 								data_first = false;
@@ -510,7 +511,7 @@ int main(int argc, char **argv) {
 							const int j = (ss[i] - value_bin_min) / dvalue_bin;
 							if (j >= 0 && j < nbins)
 								histogram[j]++;
-							if (data_first == true) {
+							if (data_first) {
 								data_min = ss[i];
 								data_max = ss[i];
 								data_first = false;
@@ -557,7 +558,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* recast histogram as gaussian */
-	if (gaussian == true) {
+	if (gaussian) {
 		/* get total number of good values */
 		total = 0.0;
 		for (int i = 0; i < nbins; i++)
@@ -573,7 +574,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* calculate gaussian intervals if required */
-	if (nintervals > 0 && gaussian == true) {
+	if (nintervals > 0 && gaussian) {
 		/* get interval spacing */
 		target_min = -2.0;
 		target_max = 2.0;
@@ -623,7 +624,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* print out the results */
-	if (nintervals <= 0 && gaussian == true) {
+	if (nintervals <= 0 && gaussian) {
 		for (int i = 0; i < nbins; i++) {
 			fprintf(output, "%f %f\n", value_min + i * dvalue_bin, histogram[i]);
 		}

@@ -1289,7 +1289,6 @@ int main(int argc, char **argv)
   /* buffer handling parameters */
   int n_buffer_max = 1;
   struct mbtrnpreprocess_ping_struct ping[MBTRNPREPROCESS_BUFFER_DEFAULT];
-  int done;
 
   /* counting parameters */
   int n_pings_read = 0;
@@ -2084,9 +2083,9 @@ int main(int argc, char **argv)
     int n_ping_count = 0;
 
     /* loop over reading data */
-    done = false;
     idataread = 0;
 
+    bool done = false;
     while (!done)
       {
       /* open new log file if it is time */

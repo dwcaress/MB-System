@@ -175,7 +175,6 @@ int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	int byte_count;
 	int group_id;
-	int done;
 	int index;
 	int skip;
 
@@ -203,8 +202,8 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 	const int status = MB_SUCCESS;
 
 	/* loop over groups */
-	done = false;
-	while (index <= buffer_size && status == MB_SUCCESS && done == false) {
+	bool done = false;
+	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
 		skip = 0;
 #ifdef DATAINPCBYTEORDER
@@ -233,7 +232,7 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 #endif
 
 		/* deal with group */
-		if (done == false) {
+		if (!done) {
 			/* get group size and id */
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&byte_count);
 			index += 4;
@@ -412,9 +411,6 @@ int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
-
 	/* The tide frame is currently unused by MB-System */
 
 	const int status = MB_SUCCESS;
@@ -433,7 +429,6 @@ int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store
 int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	int byte_count;
 	int group_id;
-	int done;
 	int index;
 	int skip;
 	int nchar;
@@ -462,8 +457,8 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 	const int status = MB_SUCCESS;
 
 	/* loop over groups */
-	done = false;
-	while (index <= buffer_size && status == MB_SUCCESS && done == false) {
+	bool done = false;
+	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
 		skip = 0;
 #ifdef DATAINPCBYTEORDER
@@ -492,7 +487,7 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 #endif
 
 		/* deal with group */
-		if (done == false) {
+		if (!done) {
 			/* get group size and id */
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&byte_count);
 			index += 4;
@@ -775,7 +770,6 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	int byte_count;
 	int group_id;
-	int done;
 	int index;
 	int ngoodss;
 	double xmin, xmax, binsize;
@@ -805,8 +799,8 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 	const int status = MB_SUCCESS;
 
 	/* loop over groups */
-	done = false;
-	while (index <= buffer_size && status == MB_SUCCESS && done == false) {
+	bool done = false;
+	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
 		skip = 0;
 #ifdef DATAINPCBYTEORDER
@@ -835,7 +829,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 #endif
 
 		/* deal with group */
-		if (done == false) {
+		if (!done) {
 			/* get group size and id */
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&byte_count);
 			index += 4;
@@ -1213,7 +1207,6 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	int byte_count;
 	int group_id;
-	int done;
 	int index;
 	double alpha, beta, theta, phi;
 	double rr, xx, zz;
@@ -1268,8 +1261,8 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 	int status = MB_SUCCESS;
 
 	/* loop over groups */
-	done = false;
-	while (index <= buffer_size && status == MB_SUCCESS && done == false) {
+	bool done = false;
+	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
 		skip = 0;
 #ifdef DATAINPCBYTEORDER
@@ -1298,7 +1291,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 #endif
 
 		/* deal with group */
-		if (done == false) {
+		if (!done) {
 			/* get group size and id */
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&byte_count);
 			index += 4;
@@ -1962,9 +1955,6 @@ int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void 
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
-
 	/* The singlebeam frame is currently unused by MB-System */
 
 	const int status = MB_SUCCESS;
@@ -1990,9 +1980,6 @@ int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *st
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
-
 	/* The message frame is currently unused by MB-System */
 
 	const int status = MB_SUCCESS;
@@ -2011,7 +1998,6 @@ int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *st
 int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 int byte_count;
 	int group_id;
-	int done;
 	int index;
 	int skip;
 
@@ -2039,8 +2025,8 @@ int byte_count;
 	const int status = MB_SUCCESS;
 
 	/* loop over groups */
-	done = false;
-	while (index <= buffer_size && status == MB_SUCCESS && done == false) {
+	bool done = false;
+	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
 		skip = 0;
 #ifdef DATAINPCBYTEORDER
@@ -2069,7 +2055,7 @@ int byte_count;
 #endif
 
 		/* deal with group */
-		if (done == false) {
+		if (!done) {
 			/* get group size and id */
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&byte_count);
 			index += 4;
@@ -2295,9 +2281,6 @@ int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *s
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
-
 	/* The geodetic frame is currently unused by MB-System */
 
 	const int status = MB_SUCCESS;
@@ -2322,9 +2305,6 @@ int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *sto
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* The native frame is currently unused by MB-System */
 
@@ -2351,9 +2331,6 @@ int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *st
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
-
 	/* The product frame is currently unused by MB-System */
 
 	const int status = MB_SUCCESS;
@@ -2378,9 +2355,6 @@ int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void 
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* The bathymetry frame is currently unused by MB-System */
 
@@ -2407,9 +2381,6 @@ int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *st
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
-
 	/* The control frame is currently unused by MB-System */
 
 	const int status = MB_SUCCESS;
@@ -2428,7 +2399,6 @@ int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *st
 int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	int byte_count;
 	int group_id;
-	int done;
 	int index;
 	int skip;
 
@@ -2456,8 +2426,8 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 	const int status = MB_SUCCESS;
 
 	/* loop over groups */
-	done = false;
-	while (index <= buffer_size && status == MB_SUCCESS && done == false) {
+	bool done = false;
+	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
 		skip = 0;
 #ifdef DATAINPCBYTEORDER
@@ -2486,7 +2456,7 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 #endif
 
 		/* deal with group */
-		if (done == false) {
+		if (!done) {
 			/* get group size and id */
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&byte_count);
 			index += 4;
@@ -2532,7 +2502,6 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	int byte_count;
 	int group_id;
-	int done;
 	int index;
 	int skip;
 
@@ -2575,8 +2544,8 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 	const int status = MB_SUCCESS;
 
 	/* loop over groups */
-	done = false;
-	while (index <= buffer_size && status == MB_SUCCESS && done == false) {
+	bool done = false;
+	while (index <= buffer_size && status == MB_SUCCESS && !done) {
 		/* look for group start or frame end */
 		skip = 0;
 #ifdef DATAINPCBYTEORDER
@@ -2605,7 +2574,7 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 #endif
 
 		/* deal with group */
-		if (done == false) {
+		if (!done) {
 			/* get group size and id */
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&byte_count);
 			index += 4;
@@ -2840,7 +2809,6 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	static char label[4];
-	int done;
 	int frame_id;
 	int frame_source;
 	int frame_sec;
@@ -2894,7 +2862,6 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	store->sbm_hrp = false;
 	store->sbm_signal = false;
 	store->sbm_message = false;
-	done = false;
 	if (*frame_save == true) {
 		store->mul_frame = false;
 		store->sid_frame = false;
@@ -2902,7 +2869,8 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	int status = MB_SUCCESS;
 
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		/* use saved frame if available */
 		if (*frame_save == true) {
 			frame_id = *frame_id_save;
@@ -7335,12 +7303,6 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to store data structure */
-	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_l3xseraw_wr_data(verbose, mbio_ptr, store_ptr, error);

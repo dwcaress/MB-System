@@ -181,7 +181,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int xdr_status;
 	int read_status;
 	int nskip;
-	int done;
 	int length = 0;
 	int telegram_id = 0;
 	int telegram_cnt = 0;
@@ -389,9 +388,9 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get travel times telegrams */
-	done = false;
 	store->tt_beam_cnt = 0;
-	while (xdr_status == true && done == false) {
+	bool done = false;
+	while (xdr_status == true && !done) {
 		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_id);
 
@@ -536,7 +535,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* get sidescan telegrams */
 	done = false;
-	while (xdr_status == true && done == false) {
+	while (xdr_status == true && !done) {
 		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_id);
 
@@ -964,7 +963,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    ((mb_io_ptr->nfix > 0 && mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] < store->tt_transmit_time_d) ||
 	     mb_io_ptr->nfix <= 0)) {
 		done = false;
-		while (done == false) {
+		while (!done) {
 			/* get system telegram */
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &telegram_id);
 
@@ -1330,10 +1329,6 @@ int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
 	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 #ifndef MBR_HSDS2RAW_DEBUG
@@ -1365,12 +1360,6 @@ int mbr_wt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 

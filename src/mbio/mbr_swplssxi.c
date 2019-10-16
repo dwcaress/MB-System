@@ -134,7 +134,6 @@ int mbr_alm_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	int *recordid = (int *)&mb_io_ptr->save3;
 	int *recordidlast = (int *)&mb_io_ptr->save4;
 	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
-	char *buffer = (char *)*bufferptr;
 	int *bufferalloc = (int *)&mb_io_ptr->save6;
 	int *size = (int *)&mb_io_ptr->save8;
 	int *nbadrec = (int *)&mb_io_ptr->save9;
@@ -185,7 +184,6 @@ int mbr_dem_swplssxi(int verbose, void *mbio_ptr, int *error) {
 
 	/* deallocate memory for reading/writing buffer */
 	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
-	char *buffer = (char *)*bufferptr;
 	int *bufferalloc = (int *)&mb_io_ptr->save6;
 	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)bufferptr, error);
 	*bufferalloc = 0;
@@ -233,9 +231,9 @@ int mbr_swplssxi_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* loop over reading data until a record is ready for return */
 	int status = MB_SUCCESS;
-	int done = false;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		/* read next record header into buffer */
 		size_t read_len = (size_t)SWPLS_SIZE_BLOCKHEADER;
 		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
@@ -294,7 +292,7 @@ int mbr_swplssxi_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 
 		/* parse the data record */
-		if ((status == MB_SUCCESS) && (done == false)) {
+		if ((status == MB_SUCCESS) && !done) {
 			if (*recordid == SWPLS_ID_SXI_HEADER_DATA) {
 				status = swpls_rd_sxiheader(verbose, buffer, store_ptr, error);
 				done = true;

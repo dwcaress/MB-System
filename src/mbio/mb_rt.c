@@ -32,7 +32,7 @@
 static const double MB_RT_GRADIENT_TOLERANCE = 0.00001;
 static const int MB_RT_LAYER_HOMOGENEOUS = 0;;
 static const int MB_RT_LAYER_GRADIENT = 1;
-static const int MB_RT_ERROR = 0;
+// static const int MB_RT_ERROR = 0;
 static const int MB_RT_DOWN = 1;
 static const int MB_RT_UP = 2;
 static const int MB_RT_DOWN_TURN = 3;
@@ -63,7 +63,7 @@ struct velocity_model {
 
 	/* raytracing bookkeeping variables */
 	int ray_status;
-	int done;
+	bool done;
 	int outofbounds;
 	int layer;
 	int turned;
@@ -144,7 +144,7 @@ int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, vo
 
 	/* initialize raytracing bookkeeping variables */
 	model->ray_status = 0;
-	model->done = 0;
+	model->done = false;
 	model->outofbounds = 0;
 	model->layer = 0;
 	model->turned = 0;

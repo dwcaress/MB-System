@@ -192,7 +192,6 @@ int main(int argc, char **argv) {
 	struct mbrphsbias_ping_struct *ping;
 	struct mbrphsbias_file_struct *file;
 
-	int done;
 	int nbeams;
 
 	/* get current default values */
@@ -528,8 +527,8 @@ int main(int argc, char **argv) {
 		}
 
 		/* read the pings into memory */
-		done = false;
-		while (done == false) {
+		bool done = false;
+		while (!done) {
 			if (verbose > 1)
 				fprintf(stderr, "\n");
 

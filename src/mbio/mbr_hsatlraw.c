@@ -719,9 +719,9 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	int status = MB_SUCCESS;
-	int done = false;
 	int expect = MBF_HSATLRAW_NONE;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 
 		/* get next record label */
 		if (line_save_flag == false) {
@@ -911,7 +911,6 @@ int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *s
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line, int *error) {
 	int nchars;
-	int done;
 	char *result;
 	int blank;
 
@@ -925,7 +924,7 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 	int status = MB_SUCCESS;
 
 	/* read next good line in file */
-	done = false;
+	bool done = false;
 	do {
 		/* read next line in file */
 		strncpy(line, "\0", MBF_HSATLRAW_MAXLINE);
@@ -964,7 +963,7 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 			fprintf(stderr, "dbg5       chars:      %d\n", nchars);
 		}
 
-	} while (done == false);
+	} while (!done);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

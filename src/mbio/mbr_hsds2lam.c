@@ -869,12 +869,6 @@ int mbr_wt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
-
 	/* write next data to file */
 	const int status = mbr_hsds2lam_wr_data(verbose, mbio_ptr, store_ptr, error);
 

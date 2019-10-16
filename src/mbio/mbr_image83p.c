@@ -171,7 +171,6 @@ int mbr_dem_image83p(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
-	int done;
 	int index;
 	int swap = false;
 	short short_val;
@@ -199,10 +198,10 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read next record header from file */
-	done = false;
 	for (int i = 0; i < MBF_IMAGE83P_BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	int status = MB_SUCCESS;
+	bool done = false;
 	if ((status = fread(buffer, 1, 6, mb_io_ptr->mbfp)) == 6) {
 		/* check for valid header */
 		if (strncmp(buffer, "83P", 3) == 0) {
@@ -212,7 +211,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 		else {
 			/* loop over reading bytes until valid header is found */
-			while (done == false) {
+			while (!done) {
 				for (int i = 0; i < 5; i++)
 					buffer[i] = buffer[i + 1];
 				status = fread(&buffer[5], 1, 1, mb_io_ptr->mbfp);

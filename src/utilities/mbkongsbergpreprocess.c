@@ -91,7 +91,6 @@ int main(int argc, char **argv) {
 	char *message;
 
 	/* MBIO read control parameters */
-	int read_datalist = false;
 	char read_file[MB_PATH_MAXLINE] = "";
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -109,9 +108,9 @@ int main(int argc, char **argv) {
 	char ifile[MB_PATH_MAXLINE] = "";
 	char dfile[MB_PATH_MAXLINE] = "";
 	char ofile[MB_PATH_MAXLINE] = "";
-	int ofile_set = false;
+	bool ofile_set = false;
 	char odir[MB_PATH_MAXLINE] = "";
-	int odir_set = false;
+	bool odir_set = false;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -160,7 +159,7 @@ int main(int argc, char **argv) {
 	int sonardepth_source = MB_DATA_DATA;
 
 	/* counting variables file */
-	int output_counts = false;
+	bool output_counts = false;
 	int nfile_read = 0;
 	int nfile_write = 0;
 	int nrec_0x30_pu_id = 0;
@@ -242,7 +241,7 @@ int main(int argc, char **argv) {
 
 	/* merge sonardepth from separate parosci pressure sensor data file */
 	char sonardepthfile[MB_PATH_MAXLINE] = "";
-	int sonardepthdata = false;
+	bool sonardepthdata = false;
 	int nsonardepth = 0;
 	double *sonardepth_time_d = NULL;
 	double *sonardepth_sonardepth = NULL;
@@ -288,7 +287,7 @@ int main(int argc, char **argv) {
 	double sonardepthfilterdepth = 20.0;
 
 	/* depth sensor offset and lever arm parameters */
-	int sonardepthlever = false;
+	bool sonardepthlever = false;
 	double sonardepthoffset = 0.0; /* depth sensor offset (+ makes vehicle deeper) */
 	double depthsensoroffx = 0.0;
 	double depthsensoroffy = 0.0;
@@ -590,7 +589,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* read sonardepth data from file if specified */
-	if (sonardepthdata == true) {
+	if (sonardepthdata) {
 		/* count the data points in the auv log file */
 		if ((tfp = fopen(sonardepthfile, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open sonardepth data file <%s> for reading\n", sonardepthfile);
@@ -719,8 +718,7 @@ int main(int argc, char **argv) {
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = true;
+	const bool read_datalist =  format < 0;
 
 	/* open file list */
 	if (read_datalist) {
@@ -1435,7 +1433,7 @@ int main(int argc, char **argv) {
 		status = mb_close(verbose, &imbio_ptr, &error);
 
 		/* output counts */
-		if (output_counts == true) {
+		if (output_counts) {
 			fprintf(stdout, "\nData records read from: %s\n", ifile);
 			fprintf(stdout, "     nrec_0x30_pu_id:         %d\n", nrec_0x30_pu_id);
 			fprintf(stdout, "     nrec_0x31_pu_status:          %d\n", nrec_0x31_pu_status);
@@ -1687,7 +1685,7 @@ int main(int argc, char **argv) {
 		}
 
 	/* output counts */
-	if (output_counts == true) {
+	if (output_counts) {
 		fprintf(stdout, "\nTotal data records read from: %s\n", read_file);
 		fprintf(stdout, "     nrec_0x30_pu_id_tot:     %d\n", nrec_0x30_pu_id_tot);
 		fprintf(stdout, "     nrec_0x31_pu_status_tot:      %d\n", nrec_0x31_pu_status_tot);
@@ -1791,7 +1789,7 @@ int main(int argc, char **argv) {
 		/* loop over all files to be read */
 		while (read_data == true && (format == MBF_EM710RAW || format == MBF_EM710MBA)) {
 			/* figure out the output file name if not specified */
-			if (ofile_set == false) {
+			if (!ofile_set) {
 				status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
 				if (format == MBF_EM710MBA && strncmp(".mb59", &ifile[strlen(ifile) - 5], 5) == 0)
 					sprintf(ofile, "%sf.mb%d", fileroot, MBF_EM710MBA);
@@ -1800,7 +1798,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* if output directory was set by user, reset file path */
-			if (odir_set == true) {
+			if (odir_set) {
 				strcpy(buffer, odir);
 				if (buffer[strlen(odir) - 1] != '/')
 					strcat(buffer, "/");
@@ -1826,7 +1824,7 @@ int main(int argc, char **argv) {
 
 			/* if ofile has been set then there is only one output file, otherwise there
 			    is an output file for each input file */
-			if (ofile_set == false || nfile_write == 0) {
+			if (!ofile_set || nfile_write == 0) {
 				/* initialize writing the output swath sonar file */
 				if ((status = mb_write_init(verbose, ofile, MBF_EM710MBA, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
 				                            &error)) != MB_SUCCESS) {
@@ -2167,7 +2165,7 @@ int main(int argc, char **argv) {
 						else
 							depthsensor_mode = MBKONSBERGPREPROCESS_ZMODE_USE_HEAVE_ONLY;
 					}
-					if (sonardepthlever == false) {
+					if (!sonardepthlever) {
 						depth_off_x = istore->par_dsx;
 						depth_off_y = istore->par_dsy;
 						depth_off_z = istore->par_dsz;
@@ -2571,7 +2569,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* output counts */
-			if (output_counts == true) {
+			if (output_counts) {
 				fprintf(stdout, "\nData records written to: %s\n", ofile);
 				fprintf(stdout, "     nrec_0x30_pu_id:         %d\n", nrec_0x30_pu_id);
 				fprintf(stdout, "     nrec_0x31_pu_status:          %d\n", nrec_0x31_pu_status);
@@ -2665,7 +2663,7 @@ int main(int argc, char **argv) {
 			status = mb_close(verbose, &imbio_ptr, &error);
 
 			/* close the output swath file if necessary */
-			if (ofile_set == false || read_data == false) {
+			if (!ofile_set || read_data == false) {
 				status = mb_close(verbose, &ombio_ptr, &error);
 
 				/* open up start and end times by two minutes */
@@ -2732,7 +2730,7 @@ int main(int argc, char **argv) {
 			mb_datalist_close(verbose, &datalist, &error);
 
 		/* output counts */
-		if (output_counts == true) {
+		if (output_counts) {
 			fprintf(stdout, "\nTotal files read:  %d\n", nfile_read);
 			fprintf(stdout, "Total files written: %d\n", nfile_write);
 			fprintf(stdout, "\nTotal data records written from: %s\n", read_file);

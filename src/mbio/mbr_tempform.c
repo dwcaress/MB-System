@@ -193,9 +193,9 @@ int mbr_tempform_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* loop over reading data until a record is ready for return */
-	done = false;
 	*error = MB_ERROR_NO_ERROR;
 	int status = MB_SUCCESS;
+        done = false;
 	while (done == false) {
 		/* read the next record header - set read_kind value */
 

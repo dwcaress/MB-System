@@ -122,14 +122,14 @@ int main(int argc, char **argv) {
 	int icomment = 0;
 
 	/* mbinfo control parameters */
-	int comments = false;
-	int good_nav_only = false;
+	bool comments = false;
+	bool good_nav_only = false;
 	int good_nav;
 	double speed_threshold = 50.0;
-	int bathy_in_feet = false;
+	bool bathy_in_feet = false;  // TODO(schwehr): Switch to bathy_in_meters.
 	double bathy_scale;
 	int lonflip_use = 0;
-	int lonflip_set = false;
+	bool lonflip_set = false;
 
 	/* limit variables */
 	double lonmin = 0.0;
@@ -198,12 +198,12 @@ int main(int argc, char **argv) {
 	double ngs_percent;
 	double nzs_percent;
 	double nfs_percent;
-	int beginnav = false;
-	int beginsdp = false;
-	int beginalt = false;
-	int beginbath = false;
-	int beginamp = false;
-	int beginss = false;
+	bool beginnav = false;
+	bool beginsdp = false;
+	bool beginalt = false;
+	bool beginbath = false;
+	bool beginamp = false;
+	bool beginss = false;
 	int nread = 0;
 
 	/* variance finding variables */
@@ -235,7 +235,7 @@ int main(int argc, char **argv) {
 	int *nssvartot = NULL;
 
 	/* coverage mask variables */
-	int coverage_mask = false;
+	bool coverage_mask = false;
 	int mask_nx = 0;
 	int mask_ny = 0;
 	double mask_dx = 0.0;
@@ -243,7 +243,7 @@ int main(int argc, char **argv) {
 	int *mask = NULL;
 
 	/* notice variables */
-	int print_notices = false;
+	bool print_notices = false;
 	int notice_list[MB_NOTICE_MAX];
 	int notice_list_tot[MB_NOTICE_MAX];
 	char *notice_msg;
@@ -251,7 +251,7 @@ int main(int argc, char **argv) {
 	/* output stream for basic stuff (stdout if verbose <= 1,
 	    output if verbose > 1) */
 	FILE *output = NULL;
-	int output_usefile = false;
+	bool output_usefile = false;
 	char *fileprint;
 	enum OutputFormat output_format = FREE_TEXT;
 	int len1;
@@ -426,7 +426,7 @@ int main(int argc, char **argv) {
 		fprintf(stream, "dbg2       bathy feet: %d\n", bathy_in_feet);
 		fprintf(stream, "dbg2       lonflip_set:%d\n", lonflip_set);
 		fprintf(stream, "dbg2       coverage:   %d\n", coverage_mask);
-		if (coverage_mask == true) {
+		if (coverage_mask) {
 			fprintf(stream, "dbg2       mask_nx:    %d\n", mask_nx);
 			fprintf(stream, "dbg2       mask_ny:    %d\n", mask_ny);
 		}
@@ -449,7 +449,7 @@ int main(int argc, char **argv) {
 	if (format == 0)
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
-	if (bathy_in_feet == true)
+	if (bathy_in_feet)
 		bathy_scale = 1.0 / 0.3048;
 	else
 		bathy_scale = 1.0;
@@ -464,7 +464,7 @@ int main(int argc, char **argv) {
 		pings_read = 1;
 
 	/* Open output file if requested */
-	if (output_usefile == true) {
+	if (output_usefile) {
 		char output_file[MB_PATH_MAXLINE];
 		strcpy(output_file, read_file);
 		switch (output_format) {
@@ -501,7 +501,6 @@ int main(int argc, char **argv) {
 	}
 	/* read only once unless coverage mask requested */
 	int pass = 0;
-	int done = false;
 
 	/* metadata controls */
 	int imetadata = 0;
@@ -523,8 +522,8 @@ int main(int argc, char **argv) {
 	int meta_pitchbias = 0;
 	int meta_headingbias = 0;
 	int meta_draft = 0;
-	while (done == false) {
-
+	bool done = false;
+	while (!done) {
 		/* open file list */
 		if (read_datalist) {
 			if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
@@ -615,7 +614,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* if coverage mask requested get cell sizes */
-			if (pass == 1 && coverage_mask == true) {
+			if (pass == 1 && coverage_mask) {
 				if (mask_nx > 1 && mask_ny <= 0) {
 					if ((lonmax - lonmin) > (latmax - latmin)) {
 						mask_ny = mask_nx * (latmax - latmin) / (lonmax - lonmin);
@@ -669,7 +668,7 @@ int main(int argc, char **argv) {
 					nssvar[i] = 0;
 				}
 			}
-			if (pass == 1 && coverage_mask == true) {
+			if (pass == 1 && coverage_mask) {
 				for (int i = 0; i < mask_nx * mask_ny; i++)
 					mask[i] = false;
 			}
@@ -796,7 +795,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* print comment records */
-					if (pass == 0 && error == MB_ERROR_COMMENT && comments == true) {
+					if (pass == 0 && error == MB_ERROR_COMMENT && comments) {
 						if (strncmp(comment, "META", 4) != 0) {
 							if (icomment == 0) {
 								switch (output_format) {
@@ -1241,7 +1240,7 @@ int main(int argc, char **argv) {
 						ntsbeams += pixels_ss;
 
 						/* set lonflip if needed */
-						if (lonflip_set == false && (navlon != 0.0 || navlat != 0.0)) {
+						if (!lonflip_set && (navlon != 0.0 || navlat != 0.0)) {
 							lonflip_set = true;
 							if (navlon < -270.0)
 								lonflip_use = 0;
@@ -1326,7 +1325,7 @@ int main(int argc, char **argv) {
 							sdpbeg = sonardepth;
 							altbeg = altitude;
 						}
-						else if (good_nav_only == true) {
+						else if (good_nav_only) {
 							if (lonbeg == 0.0 && latbeg == 0.0 && navlon != 0.0 && navlat != 0.0) {
 								lonbeg = navlon;
 								if (beams_bath > 0) {
@@ -1367,12 +1366,12 @@ int main(int argc, char **argv) {
 
 						/* check for good nav */
 						speed_apparent = 3600.0 * distance / (time_d - time_d_last);
-						if (good_nav_only == true) {
+						if (good_nav_only) {
 							//if (navlon == 0.0 || navlat == 0.0) {		// This still misses lots of trash JL
 							if ((navlon > -0.005 && navlon < 0.005) && (navlat > -0.005 && navlat < 0.005)) {
 								good_nav = false;
 							}
-							else if (beginnav == true && speed_apparent >= speed_threshold) {
+							else if (beginnav && speed_apparent >= speed_threshold) {
 								good_nav = false;
 							}
 							else {
@@ -1383,44 +1382,44 @@ int main(int argc, char **argv) {
 							good_nav = true;
 
 						/* get total distance */
-						if (good_nav_only == false || (good_nav == true && speed_apparent < speed_threshold)) {
+						if (!good_nav_only || (good_nav == true && speed_apparent < speed_threshold)) {
 							distot += distance;
 							distotfile += distance;
 						}
 
 						/* get starting mins and maxs */
-						if (beginnav == false && good_nav == true) {
+						if (!beginnav && good_nav == true) {
 							lonmin = navlon;
 							lonmax = navlon;
 							latmin = navlat;
 							latmax = navlat;
 							beginnav = true;
 						}
-						if (beginsdp == false && sonardepth > 0.0) {
+						if (!beginsdp && sonardepth > 0.0) {
 							sdpmin = sonardepth;
 							sdpmax = sonardepth;
 							beginsdp = true;
 						}
-						if (beginalt == false && altitude > 0.0) {
+						if (!beginalt && altitude > 0.0) {
 							altmin = altitude;
 							altmax = altitude;
 							beginalt = true;
 						}
-						if (beginbath == false && beams_bath > 0)
+						if (!beginbath && beams_bath > 0)
 							for (int i = 0; i < beams_bath; i++)
 								if (mb_beam_ok(beamflag[i])) {
 									bathmin = bath[i];
 									bathmax = bath[i];
 									beginbath = true;
 								}
-						if (beginamp == false && beams_amp > 0)
+						if (!beginamp && beams_amp > 0)
 							for (int i = 0; i < beams_amp; i++)
 								if (mb_beam_ok(beamflag[i])) {
 									ampmin = amp[i];
 									ampmax = amp[i];
 									beginamp = true;
 								}
-						if (beginss == false && pixels_ss > 0)
+						if (!beginss && pixels_ss > 0)
 							for (int i = 0; i < pixels_ss; i++)
 								if (ss[i] > MB_SIDESCAN_NULL) {
 									ssmin = ss[i];
@@ -1429,23 +1428,23 @@ int main(int argc, char **argv) {
 								}
 
 						/* get mins and maxs */
-						if (good_nav == true && beginnav == true) {
+						if (good_nav == true && beginnav) {
 							lonmin = MIN(lonmin, navlon);
 							lonmax = MAX(lonmax, navlon);
 							latmin = MIN(latmin, navlat);
 							latmax = MAX(latmax, navlat);
 						}
-						if (beginsdp == true) {
+						if (beginsdp) {
 							sdpmin = MIN(sdpmin, sonardepth);
 							sdpmax = MAX(sdpmax, sonardepth);
 						}
-						if (beginalt == true) {
+						if (beginalt) {
 							altmin = MIN(altmin, altitude);
 							altmax = MAX(altmax, altitude);
 						}
 						for (int i = 0; i < beams_bath; i++) {
 							if (mb_beam_ok(beamflag[i])) {
-								if (good_nav == true && beginnav == true) {
+								if (good_nav == true && beginnav) {
 									lonmin = MIN(lonmin, bathlon[i]);
 									lonmax = MAX(lonmax, bathlon[i]);
 									latmin = MIN(latmin, bathlat[i]);
@@ -1473,7 +1472,7 @@ int main(int argc, char **argv) {
 						}
 						for (int i = 0; i < pixels_ss; i++) {
 							if (ss[i] > MB_SIDESCAN_NULL) {
-								if (good_nav == true && beginnav == true) {
+								if (good_nav == true && beginnav) {
 									lonmin = MIN(lonmin, sslon[i]);
 									lonmax = MAX(lonmax, sslon[i]);
 									latmin = MIN(latmin, sslat[i]);
@@ -1494,7 +1493,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* update coverage mask */
-					if (pass == 1 && coverage_mask == true && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
+					if (pass == 1 && coverage_mask && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
 						int ix = (int)((navlon - lonmin) / mask_dx);
 						int iy = (int)((navlat - latmin) / mask_dy);
 						if (ix >= 0 && ix < mask_nx && iy >= 0 && iy < mask_ny) {
@@ -1524,7 +1523,7 @@ int main(int argc, char **argv) {
 					if (pass == 0 && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
 						if (navlon == 0.0 || navlat == 0.0)
 							mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_ZERO_NAV);
-						else if (beginnav == true && speed_apparent >= speed_threshold)
+						else if (beginnav && speed_apparent >= speed_threshold)
 							mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_TOO_FAST);
 						for (int i = 0; i < beams_bath; i++) {
 							if (mb_beam_ok(beamflag[i])) {
@@ -1671,7 +1670,7 @@ int main(int argc, char **argv) {
 				mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_AVG_TOO_FAST);
 
 			/* get notices if desired */
-			if (print_notices == true && pass == 0) {
+			if (print_notices && pass == 0) {
 				status = mb_notice_get_list(verbose, mbio_ptr, notice_list);
 				for (int i = 0; i < MB_NOTICE_MAX; i++)
 					notice_list_tot[i] += notice_list[i];
@@ -1785,7 +1784,7 @@ int main(int argc, char **argv) {
 			mb_datalist_close(verbose, &datalist, &error);
 
 		/* figure out if done */
-		if (pass > 0 || coverage_mask == false)
+		if (pass > 0 || !coverage_mask)
 			done = true;
 		pass++;
 
@@ -1888,7 +1887,7 @@ int main(int argc, char **argv) {
 		fprintf(output, "Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d (%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d)\n",
 		        timbeg_i[1], timbeg_i[2], timbeg_i[0], timbeg_i[3], timbeg_i[4], timbeg_i[5], timbeg_i[6], timbeg_j[1],
 		        timbeg_i[0], timbeg_i[1], timbeg_i[2], timbeg_i[3], timbeg_i[4], timbeg_i[5], timbeg_i[6]);
-		if (bathy_in_feet == false)
+		if (!bathy_in_feet)
 			fprintf(output, "Lon: %15.9f     Lat: %15.9f     Depth: %10.4f meters\n", lonbeg, latbeg, bathbeg);
 		else
 			fprintf(output, "Lon: %15.9f     Lat: %15.9f     Depth: %10.4f feet\n", lonbeg, latbeg, bathy_scale * bathbeg);
@@ -1898,7 +1897,7 @@ int main(int argc, char **argv) {
 		fprintf(output, "Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d (%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d)\n",
 		        timend_i[1], timend_i[2], timend_i[0], timend_i[3], timend_i[4], timend_i[5], timend_i[6], timend_j[1],
 		        timend_i[0], timend_i[1], timend_i[2], timend_i[3], timend_i[4], timend_i[5], timend_i[6]);
-		if (bathy_in_feet == false)
+		if (!bathy_in_feet)
 			fprintf(output, "Lon: %15.9f     Lat: %15.9f     Depth: %10.4f meters\n", lonend, latend, bathend);
 		else
 			fprintf(output, "Lon: %15.9f     Lat: %15.9f     Depth: %10.4f feet\n", lonend, latend, bathy_scale * bathend);
@@ -1964,7 +1963,7 @@ int main(int argc, char **argv) {
 		        timbeg_i[3], timbeg_i[4], timbeg_i[5], timbeg_i[6], timbeg_j[1]);
 		fprintf(output, "\"time_iso\": \"%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d\",\n", timbeg_i[0], timbeg_i[1], timbeg_i[2],
 		        timbeg_i[3], timbeg_i[4], timbeg_i[5], timbeg_i[6]);
-		if (bathy_in_feet == false)
+		if (!bathy_in_feet)
 			fprintf(output, "\"longitude\": \"%.9f\",\n\"latitude\": \"%.9f\",\n\"depth_meters\": \"%.4f\",\n", lonbeg, latbeg,
 			        bathbeg);
 		else
@@ -1980,7 +1979,7 @@ int main(int argc, char **argv) {
 		        timend_i[3], timend_i[4], timend_i[5], timend_i[6], timend_j[1]);
 		fprintf(output, "\"time_iso\": \"%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d\",\n", timend_i[0], timend_i[1], timend_i[2],
 		        timend_i[3], timend_i[4], timend_i[5], timend_i[6]);
-		if (bathy_in_feet == false)
+		if (!bathy_in_feet)
 			fprintf(output, "\"longitude\": \"%.9f\",\n\"latitude\": \"%.9f\",\n\"depth_meters\": \"%.4f\",\n", lonend, latend,
 			        bathend);
 		else
@@ -2066,7 +2065,7 @@ int main(int argc, char **argv) {
 		        timbeg_i[0], timbeg_i[3], timbeg_i[4], timbeg_i[5], timbeg_i[6], timbeg_j[1]);
 		fprintf(output, "\t\t<time_iso>%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d</time_iso>\n", timbeg_i[0], timbeg_i[1],
 		        timbeg_i[2], timbeg_i[3], timbeg_i[4], timbeg_i[5], timbeg_i[6]);
-		if (bathy_in_feet == false) {
+		if (!bathy_in_feet) {
 			fprintf(output, "\t\t<longitude>%.9f</longitude>\n", lonbeg);
 			fprintf(output, "\t\t<latitude>%.9f</latitude>\n", latbeg);
 			fprintf(output, "\t\t<depth_meters>%.4f</depth_meters>\n", bathbeg);
@@ -2088,7 +2087,7 @@ int main(int argc, char **argv) {
 		        timend_i[0], timend_i[3], timend_i[4], timend_i[5], timend_i[6], timend_j[1]);
 		fprintf(output, "\t\t<time_iso>%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d</time_iso>\n", timend_i[0], timend_i[1],
 		        timend_i[2], timend_i[3], timend_i[4], timend_i[5], timend_i[6]);
-		if (bathy_in_feet == false) {
+		if (!bathy_in_feet) {
 			fprintf(output, "\t\t<longitude>%.9f</longitude>\n", lonend);
 			fprintf(output, "\t\t<latitude>%.9f</latitude>\n", latend);
 			fprintf(output, "\t\t<depth_meters>%.4f</depth_meters>\n", bathend);
@@ -2268,7 +2267,7 @@ int main(int argc, char **argv) {
 			break;
 		}
 	}
-	if (print_notices == true) {
+	if (print_notices) {
 		switch (output_format) {
 		case FREE_TEXT:
 			fprintf(output, "\nData Record Type Notices:\n");
@@ -2376,7 +2375,7 @@ int main(int argc, char **argv) {
 			break;
 		}
 	}
-	if (coverage_mask == true) {
+	if (coverage_mask) {
 		switch (output_format) {
 		case FREE_TEXT:
 			fprintf(output, "\nCoverage Mask:\nCM dimensions: %d %d\n", mask_nx, mask_ny);
@@ -2424,7 +2423,7 @@ int main(int argc, char **argv) {
 		break;
 	}
 
-	if (output_usefile == true && output != NULL) {
+	if (output_usefile && output != NULL) {
 		fclose(output);
 	}
 
