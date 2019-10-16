@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 	char ifile[MB_PATH_MAXLINE] = "";
 	char dfile[MB_PATH_MAXLINE] = "";
 	char ofile[MB_PATH_MAXLINE] = "";
-	int ofile_set = false;
+	bool ofile_set = false;  // TODO(schwehr): Is this used for anything?
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
 
 	/* platform definition file */
 	char platform_file[MB_PATH_MAXLINE] = "";
-	int use_platform_file = false;
+	bool use_platform_file = false;
 	struct mb_platform_struct *platform = NULL;
 
 	/* MBIO read values */
@@ -164,13 +164,13 @@ int main(int argc, char **argv) {
 	int nrec_other_tot = 0;
 
 	/* projection */
-	int projection_set = false;
+	bool projection_set = false;
 	mb_path proj4command = "";
 	void *pjptr = NULL;
 
 	/* merge navigation data file */
 	char navfile[MB_PATH_MAXLINE] = "";
-	int navdata = false;
+	bool navdata = false;
 	int navformat = MBHYSWEEPPREPROCESS_NAVFORMAT_OFG;
 	int nnav = 0;
 	double *nav_time_d = NULL;
@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
 
 	/* merge sonardepth from separate data file */
 	char sonardepthfile[MB_PATH_MAXLINE] = "";
-	int sonardepthdata = false;
+	bool sonardepthdata = false;
 	int nsonardepth = 0;
 	double *sonardepth_time_d = NULL;
 	double *sonardepth_sonardepth = NULL;
@@ -227,26 +227,26 @@ int main(int argc, char **argv) {
 	double *timelag_model = NULL;
 
 	/* sensor offset parameters */
-	int offset_sonar_mode = false;
+	bool offset_sonar_mode = false;
 	double offset_sonar_roll = 0.0;
 	double offset_sonar_pitch = 0.0;
 	double offset_sonar_heading = 0.0;
 	double offset_sonar_x = 0.0;
 	double offset_sonar_y = 0.0;
 	double offset_sonar_z = 0.0;
-	int offset_mru_mode = false;
+	bool offset_mru_mode = false;
 	double offset_mru_x = 0.0;
 	double offset_mru_y = 0.0;
 	double offset_mru_z = 0.0;
-	int offset_nav_mode = false;
+	bool offset_nav_mode = false;
 	double offset_nav_x = 0.0;
 	double offset_nav_y = 0.0;
 	double offset_nav_z = 0.0;
 
 	/* processing kluge modes */
 	int klugemode;
-	int kluge_force_attitude_compensation = false;
-	int kluge_flip_attitude_sign = false;
+	bool kluge_force_attitude_compensation = false;
+	bool kluge_flip_attitude_sign = false;
 
 	/* variables for beam angle calculation */
 	mb_3D_orientation tx_align;
@@ -493,12 +493,12 @@ int main(int argc, char **argv) {
 	}
 
 	/* set projection for nav data */
-	if (projection_set == true) {
+	if (projection_set) {
 		mb_proj_init(verbose, proj4command, &pjptr, &error);
 	}
 
 	/* read navigation data from file if specified */
-	if (navdata == true) {
+	if (navdata) {
 		/* count the data points in the nav file */
 		if ((tfp = fopen(navfile, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open nav data file <%s> for reading\n", navfile);
@@ -558,7 +558,7 @@ int main(int argc, char **argv) {
 					time_i[6] = (int)((second - time_i[5]) * 1000000.0);
 					mb_get_time(verbose, time_i, &time_d);
 
-					if (projection_set == true) {
+					if (projection_set) {
 						mb_proj_inverse(verbose, pjptr, easting, northing, &navlon, &navlat, &error);
 					}
 					else {
@@ -580,12 +580,12 @@ int main(int argc, char **argv) {
 	}
 
 	/* set projection for nav data */
-	if (projection_set == true) {
+	if (projection_set) {
 		mb_proj_free(verbose, &pjptr, &error);
 	}
 
 	/* read sonardepth data from separate file if specified */
-	if (sonardepthdata == true) {
+	if (sonardepthdata) {
 		/* count the data points in the sonardepth file */
 		if ((tfp = fopen(sonardepthfile, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open sonardepth data file <%s> for reading\n", sonardepthfile);
@@ -693,7 +693,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* load platform definition if specified or if offsets otherwise specified create a platform structure */
-	if (use_platform_file == true) {
+	if (use_platform_file) {
 		status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
 		if (status == MB_FAILURE) {
 			fprintf(stderr, "\nUnable to open and parse platform file: %s\n", platform_file);
@@ -701,7 +701,7 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 	}
-	else if (offset_sonar_mode == true || offset_mru_mode == true || offset_nav_mode == true) {
+	else if (offset_sonar_mode || offset_mru_mode || offset_nav_mode) {
 		status = mb_platform_init(verbose, (void **)&platform, &error);
 
 		/* set sensor 0 (multibeam)
@@ -784,19 +784,19 @@ int main(int argc, char **argv) {
 	fprintf(stdout, "     Navigation (northing easting sonardepth altitude heading): %d\n", nnav);
 	fprintf(stdout, "     Sonar depth (sonardepth):                                  %d\n", nsonardepth);
 	fprintf(stdout, "     Time lag:                                                  %d\n", ntimelag);
-	if (offset_sonar_mode == true || offset_mru_mode == true || offset_nav_mode == true)
+	if (offset_sonar_mode || offset_mru_mode || offset_nav_mode)
 		fprintf(stdout, "\nOffsets to be applied:\n");
-	if (offset_sonar_mode == true) {
+	if (offset_sonar_mode) {
 		fprintf(stdout, "     Roll bias:    %8.3f\n", offset_sonar_roll);
 		fprintf(stdout, "     Pitch bias:   %8.3f\n", offset_sonar_pitch);
 		fprintf(stdout, "     Heading bias: %8.3f\n", offset_sonar_heading);
 		fprintf(stdout, "               X (m)   Y (m)   Z (m)   T (sec)\n");
 		fprintf(stdout, "     Sonar: %8.3f %8.3f %8.3f\n", offset_sonar_x, offset_sonar_y, offset_sonar_z);
 	}
-	if (offset_mru_mode == true) {
+	if (offset_mru_mode) {
 		fprintf(stdout, "     MRU:   %8.3f %8.3f %8.3f\n", offset_mru_x, offset_mru_y, offset_mru_z);
 	}
-	if (offset_nav_mode == true) {
+	if (offset_nav_mode) {
 		fprintf(stdout, "     Nav:   %8.3f %8.3f %8.3f\n", offset_nav_x, offset_nav_y, offset_nav_z);
 	}
 
@@ -862,7 +862,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* set projection if specified */
-		if (projection_set == true) {
+		if (projection_set) {
 			strcpy(istore->PRJ_proj4_command, proj4command);
 		}
 
@@ -1003,7 +1003,7 @@ int main(int argc, char **argv) {
 			/* save primary attitude data */
 			if (status == MB_SUCCESS && kind == MB_DATA_ATTITUDE) {
 				/* flip attitude sign */
-				if (kluge_flip_attitude_sign == true) {
+				if (kluge_flip_attitude_sign) {
 					istore->HCP_roll *= -1;
 					istore->HCP_pitch *= -1;
 				}
@@ -1492,7 +1492,7 @@ int main(int argc, char **argv) {
 			istore = (struct mbsys_hysweep_struct *)istore_ptr;
 
 			/* set projection if specified */
-			if (projection_set == true) {
+			if (projection_set) {
 				strcpy(istore->PRJ_proj4_command, proj4command);
 			}
 
@@ -1965,7 +1965,7 @@ int main(int argc, char **argv) {
 						}
 
 						/* correct beam roll angles for roll if necessary */
-						if (!(istore->RMB_sonar_flags & 0x0001) || kluge_force_attitude_compensation == 1) {
+						if (!(istore->RMB_sonar_flags & 0x0001) || kluge_force_attitude_compensation) {
 							for (int i = 0; i < istore->RMB_num_beams; i++) {
 								istore->RMB_sounding_rollangles[i] += istore->RMBint_roll;
 							}
@@ -1973,7 +1973,7 @@ int main(int argc, char **argv) {
 
 						/* get beam pitch angles if necessary */
 						if (!(istore->RMB_beam_data_available & 0x0040)) {
-							if (!(istore->RMB_sonar_flags & 0x0002) || kluge_force_attitude_compensation == 1) {
+							if (!(istore->RMB_sonar_flags & 0x0002) || kluge_force_attitude_compensation) {
 								for (int i = 0; i < istore->RMB_num_beams; i++) {
 									istore->RMB_sounding_pitchangles[i] = istore->RMBint_pitch;
 								}
