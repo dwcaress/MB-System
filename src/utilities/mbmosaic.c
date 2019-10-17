@@ -1056,9 +1056,9 @@ int main(int argc, char **argv) {
 	double file_weight = 1.0;
 	int xdim = 0;
 	int ydim = 0;
-	int spacing_priority = false;
-	int set_dimensions = false;
-	int set_spacing = false;
+	bool spacing_priority = false;
+	bool set_dimensions = false;
+	bool set_spacing = false;
 	double dx_set = 0.0;
 	double dy_set = 0.0;
 	double dx = 0.0;
@@ -1069,11 +1069,11 @@ int main(int argc, char **argv) {
 	double tension = 0.0;
 	int grid_mode = MBMOSAIC_SINGLE_BEST;
 	int datatype = MBMOSAIC_DATA_SIDESCAN;
-	int usefiltered = false;
+	bool usefiltered = false;
 	char gridkindstring[MB_PATH_MAXLINE];
 	int gridkind = MBMOSAIC_GMTGRD;
-	int more = false;
-	int use_NaN = false;
+	bool more = false;
+	bool use_NaN = false;
 	double clipvalue = NO_DATA_FLAG;
 	float outclipvalue = NO_DATA_FLAG;
 	double scale = 1.0;
@@ -1092,7 +1092,7 @@ int main(int argc, char **argv) {
 	double *priority_angle_angle = NULL;
 	double *priority_angle_priority = NULL;
 	int weight_priorities = 0;
-	int usetopogrid = false;
+	bool usetopogrid = false;
 	double altitude_default = 1000.0;
 	int pstatus;
 	mb_path path = "";
@@ -1103,8 +1103,8 @@ int main(int argc, char **argv) {
 	mb_path dfile = "";
 	char plot_cmd[MB_COMMENT_MAXLINE] = "";
 	int plot_status;
-	int use_beams = false;
-	int use_slope = false;
+	bool use_beams = false;
+	bool use_slope = false;
 
 	/* topography parameters */
 	mb_path topogridfile = "";
@@ -1149,7 +1149,7 @@ int main(int argc, char **argv) {
 
 	/* grid variables */
 	double gbnd[4], wbnd[4], obnd[4];
-	int gbndset = false;
+	bool gbndset = false;
 	double xlon, ylat, xx, yy;
 	double gaussian_factor;
 	int gxdim, gydim, offx, offy;
@@ -1187,8 +1187,8 @@ int main(int argc, char **argv) {
 	int table_error = MB_ERROR_NO_ERROR;
 
 	/* projected grid parameters */
-	int use_projection = false;
-	int projection_pars_f = false;
+	bool use_projection = false;
+	bool projection_pars_f = false;
 	double reference_lon, reference_lat;
 	int utm_zone = 1;
 	mb_path projection_pars = "";
@@ -1571,7 +1571,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* if bounds not set get bounds of input data */
-	if (gbndset == false) {
+	if (!gbndset) {
 		formatread = -1;
 		status = mb_get_info_datalist(verbose, filelist, &formatread, &mb_info, lonflip, &error);
 
@@ -1581,7 +1581,7 @@ int main(int argc, char **argv) {
 		gbnd[3] = mb_info.lat_max;
 		gbndset = true;
 
-		if (set_spacing == false && set_dimensions == false) {
+		if (!set_spacing && !set_dimensions) {
 			dx_set = 0.02 * mb_info.altitude_max;
 			dy_set = 0.02 * mb_info.altitude_max;
 			set_spacing = true;
@@ -1617,21 +1617,21 @@ int main(int argc, char **argv) {
 		use_slope = true;
 
 	/* more option not available with single best algorithm */
-	if (more == true && grid_mode == MBMOSAIC_SINGLE_BEST)
+	if (more && grid_mode == MBMOSAIC_SINGLE_BEST)
 		more = false;
 
 	/* NaN cannot be used for ASCII grids */
-	if (use_NaN == true && (gridkind == MBMOSAIC_ASCII || gridkind == MBMOSAIC_ARCASCII))
+	if (use_NaN && (gridkind == MBMOSAIC_ASCII || gridkind == MBMOSAIC_ARCASCII))
 		use_NaN = false;
 
 	/* define NaN in case it's needed */
-	if (use_NaN == true) {
+	if (use_NaN) {
 		MB_MAKE_FNAN(NaN);
 		outclipvalue = NaN;
 	}
 
 	/* deal with projected gridding */
-	if (projection_pars_f == true) {
+	if (projection_pars_f) {
 		/* check for UTM with undefined zone */
 		if (strcmp(projection_pars, "UTM") == 0 || strcmp(projection_pars, "U") == 0 || strcmp(projection_pars, "utm") == 0 ||
 		    strcmp(projection_pars, "u") == 0) {
@@ -1753,12 +1753,12 @@ int main(int argc, char **argv) {
 		}
 
 		/* calculate grid properties */
-		if (set_spacing == true) {
+		if (set_spacing) {
 			xdim = lrint((gbnd[1] - gbnd[0]) / dx_set + 1);
 			if (dy_set <= 0.0)
 				dy_set = dx_set;
 			ydim = lrint((gbnd[3] - gbnd[2]) / dy_set + 1);
-			if (spacing_priority == true) {
+			if (spacing_priority) {
 				gbnd[1] = gbnd[0] + dx_set * (xdim - 1);
 				gbnd[3] = gbnd[2] + dy_set * (ydim - 1);
 			}
@@ -1794,40 +1794,40 @@ int main(int argc, char **argv) {
 		mb_coor_scale(verbose, 0.5 * (gbnd[2] + gbnd[3]), &mtodeglon, &mtodeglat);
 		deglontokm = 0.001 / mtodeglon;
 		deglattokm = 0.001 / mtodeglat;
-		if (set_spacing == true && (units[0] == 'M' || units[0] == 'm')) {
+		if (set_spacing && (units[0] == 'M' || units[0] == 'm')) {
 			xdim = lrint((gbnd[1] - gbnd[0]) / (mtodeglon * dx_set) + 1);
 			if (dy_set <= 0.0)
 				dy_set = mtodeglon * dx_set / mtodeglat;
 			ydim = lrint((gbnd[3] - gbnd[2]) / (mtodeglat * dy_set) + 1);
-			if (spacing_priority == true) {
+			if (spacing_priority) {
 				gbnd[1] = gbnd[0] + mtodeglon * dx_set * (xdim - 1);
 				gbnd[3] = gbnd[2] + mtodeglat * dy_set * (ydim - 1);
 			}
 			strcpy(units, "meters");
 		}
-		else if (set_spacing == true && (units[0] == 'K' || units[0] == 'k')) {
+		else if (set_spacing && (units[0] == 'K' || units[0] == 'k')) {
 			xdim = lrint((gbnd[1] - gbnd[0]) * deglontokm / dx_set + 1);
 			if (dy_set <= 0.0)
 				dy_set = deglattokm * dx_set / deglontokm;
 			ydim = lrint((gbnd[3] - gbnd[2]) * deglattokm / dy_set + 1);
-			if (spacing_priority == true) {
+			if (spacing_priority) {
 				gbnd[1] = gbnd[0] + dx_set * (xdim - 1) / deglontokm;
 				gbnd[3] = gbnd[2] + dy_set * (ydim - 1) / deglattokm;
 			}
 			strcpy(units, "km");
 		}
-		else if (set_spacing == true && (units[0] == 'F' || units[0] == 'f')) {
+		else if (set_spacing && (units[0] == 'F' || units[0] == 'f')) {
 			xdim = lrint((gbnd[1] - gbnd[0]) / (mtodeglon * 0.3048 * dx_set) + 1);
 			if (dy_set <= 0.0)
 				dy_set = mtodeglon * dx_set / mtodeglat;
 			ydim = lrint((gbnd[3] - gbnd[2]) / (mtodeglat * 0.3048 * dy_set) + 1);
-			if (spacing_priority == true) {
+			if (spacing_priority) {
 				gbnd[1] = gbnd[0] + mtodeglon * 0.3048 * dx_set * (xdim - 1);
 				gbnd[3] = gbnd[2] + mtodeglat * 0.3048 * dy_set * (ydim - 1);
 			}
 			strcpy(units, "feet");
 		}
-		else if (set_spacing == true) {
+		else if (set_spacing) {
 			if (strncmp(units, "arcmin", 6) == 0) {
 				dx_set = dx_set / 60.0;
 				dy_set = dy_set / 60.0;
@@ -1844,7 +1844,7 @@ int main(int argc, char **argv) {
 			if (dy_set <= 0.0)
 				dy_set = dx_set;
 			ydim = lrint((gbnd[3] - gbnd[2]) / dy_set + 1);
-			if (spacing_priority == true) {
+			if (spacing_priority) {
 				gbnd[1] = gbnd[0] + dx_set * (xdim - 1);
 				gbnd[3] = gbnd[2] + dy_set * (ydim - 1);
 			}
@@ -1869,7 +1869,7 @@ int main(int argc, char **argv) {
 	wbnd[3] = gbnd[3] + offy * dy;
 
 	/* get data input bounds in lon lat */
-	if (use_projection == false) {
+	if (!use_projection) {
 		bounds[0] = wbnd[0];
 		bounds[1] = wbnd[1];
 		bounds[2] = wbnd[2];
@@ -1999,7 +1999,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* read topography grid if 3D bottom correction specified */
-	if (usetopogrid == true) {
+	if (usetopogrid) {
 		status = mb_topogrid_init(verbose, topogridfile, &lonflip, &topogrid_ptr, &error);
 		if (error != MB_ERROR_NO_ERROR) {
 			mb_error(verbose, error, &message);
@@ -2016,13 +2016,13 @@ int main(int argc, char **argv) {
 		fprintf(outfp, "List of input files: %s\n", filelist);
 		fprintf(outfp, "Output fileroot:     %s\n", fileroot);
 		fprintf(outfp, "Input Data Type:     ");
-		if (datatype == MBMOSAIC_DATA_AMPLITUDE && usefiltered == false)
+		if (datatype == MBMOSAIC_DATA_AMPLITUDE && !usefiltered)
 			fprintf(outfp, "Amplitude (unfiltered)\n");
-		else if (datatype == MBMOSAIC_DATA_AMPLITUDE && usefiltered == true)
+		else if (datatype == MBMOSAIC_DATA_AMPLITUDE && usefiltered)
 			fprintf(outfp, "Amplitude (filtered)\n");
-		else if (datatype == MBMOSAIC_DATA_SIDESCAN && usefiltered == false)
+		else if (datatype == MBMOSAIC_DATA_SIDESCAN && !usefiltered)
 			fprintf(outfp, "Sidescan (unfiltered)\n");
-		else if (datatype == MBMOSAIC_DATA_SIDESCAN && usefiltered == true)
+		else if (datatype == MBMOSAIC_DATA_SIDESCAN && usefiltered)
 			fprintf(outfp, "Sidescan (filtered)\n");
 		else if (datatype == MBMOSAIC_DATA_FLAT_GRAZING)
 			fprintf(outfp, "Flat bottom grazing angle\n");
@@ -2033,12 +2033,12 @@ int main(int argc, char **argv) {
 		else
 			fprintf(outfp, "Unknown?\n");
 		fprintf(outfp, "Grid projection: %s\n", projection_id);
-		if (use_projection == true) {
+		if (use_projection) {
 			fprintf(outfp, "Projection ID: %s\n", projection_id);
 		}
 		fprintf(outfp, "Grid dimensions: %d %d\n", xdim, ydim);
 		fprintf(outfp, "Grid bounds:\n");
-		if (use_projection == true) {
+		if (use_projection) {
 			fprintf(outfp, "  Eastings:  %9.4f %9.4f\n", gbnd[0], gbnd[1]);
 			fprintf(outfp, "  Northings: %9.4f %9.4f\n", gbnd[2], gbnd[3]);
 			fprintf(outfp, "  Longitude: %9.4f %9.4f\n", obnd[0], obnd[1]);
@@ -2051,13 +2051,13 @@ int main(int argc, char **argv) {
 		if (boundsfactor > 1.0)
 			fprintf(outfp, "  Grid bounds correspond to %f times actual data coverage\n", boundsfactor);
 		fprintf(outfp, "Working grid dimensions: %d %d\n", gxdim, gydim);
-		if (use_projection == true) {
+		if (use_projection) {
 			fprintf(outfp, "Working Grid bounds:\n");
 			fprintf(outfp, "  Eastings:  %9.4f %9.4f\n", wbnd[0], wbnd[1]);
 			fprintf(outfp, "  Northings: %9.4f %9.4f\n", wbnd[2], wbnd[3]);
 			fprintf(outfp, "Easting interval:  %f %s\n", dx, units);
 			fprintf(outfp, "Northing interval: %f %s\n", dy, units);
-			if (set_spacing == true) {
+			if (set_spacing) {
 				fprintf(outfp, "Specified Easting interval:  %f %s\n", dx_set, units);
 				fprintf(outfp, "Specified Northing interval: %f %s\n", dy_set, units);
 			}
@@ -2068,7 +2068,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "  Latitude:  %9.4f %9.4f\n", wbnd[2], wbnd[3]);
 			fprintf(outfp, "Longitude interval: %f degrees or %f m\n", dx, 1000 * dx * deglontokm);
 			fprintf(outfp, "Latitude interval:  %f degrees or %f m\n", dy, 1000 * dy * deglattokm);
-			if (set_spacing == true) {
+			if (set_spacing) {
 				fprintf(outfp, "Specified Longitude interval: %f %s\n", dx_set, units);
 				fprintf(outfp, "Specified Latitude interval:  %f %s\n", dy_set, units);
 			}
@@ -2087,7 +2087,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "  All pixels weighted evenly\n");
 		if (priority_mode & MBMOSAIC_PRIORITY_ANGLE) {
 			fprintf(outfp, "  Pixels prioritized by flat bottom grazing angle\n");
-			if (usetopogrid == true)
+			if (usetopogrid)
 				fprintf(outfp, "  Pixel depths calculated from topography grid: %s\n", topogridfile);
 			else
 				fprintf(outfp, "  Pixel depths calculated from topoography in the swath file\n");
@@ -2154,11 +2154,11 @@ int main(int argc, char **argv) {
 			if (strlen(gridkindstring) > 0)
 				fprintf(outfp, "GMT Grid ID:     %s\n", gridkindstring);
 		}
-		if (use_NaN == true)
+		if (use_NaN)
 			fprintf(outfp, "NaN values used to flag regions with no data\n");
 		else
 			fprintf(outfp, "Real value of %f used to flag regions with no data\n", outclipvalue);
-		if (more == true)
+		if (more)
 			fprintf(outfp, "Data density and sigma grids also created\n");
 		fprintf(outfp, "MBIO parameters:\n");
 		fprintf(outfp, "  Ping averaging:       %d\n", pings);
@@ -2240,7 +2240,7 @@ int main(int argc, char **argv) {
 				/* initialize the multibeam file */
 				if (file_in_bounds == true) {
 					/* check for filtered amplitude or sidescan file */
-					if (usefiltered == true && datatype == MBMOSAIC_DATA_AMPLITUDE) {
+					if (usefiltered && datatype == MBMOSAIC_DATA_AMPLITUDE) {
 						if ((status = mb_get_ffa(verbose, file, &format, &error)) != MB_SUCCESS) {
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error returned from function <mb_get_ffa>:\n%s\n", message);
@@ -2250,7 +2250,7 @@ int main(int argc, char **argv) {
 							exit(error);
 						}
 					}
-					else if (usefiltered == true && datatype == MBMOSAIC_DATA_SIDESCAN) {
+					else if (usefiltered && datatype == MBMOSAIC_DATA_SIDESCAN) {
 						if ((status = mb_get_ffs(verbose, file, &format, &error)) != MB_SUCCESS) {
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error returned from function <mb_get_ffs>:\n%s\n", message);
@@ -2394,7 +2394,7 @@ int main(int argc, char **argv) {
 							}
 
 							/* mosaic beam based data (amplitude, grazing angle, slope) */
-							if (use_beams == true && error == MB_ERROR_NO_ERROR) {
+							if (use_beams && error == MB_ERROR_NO_ERROR) {
 								/* translate beam locations to lon/lat */
 								for (ib = 0; ib < beams_amp; ib++) {
 									if (mb_beam_ok(beamflag[ib])) {
@@ -2430,11 +2430,11 @@ int main(int argc, char **argv) {
 								                            beamflag, gangles, priorities, &error);
 
 								/* get bathymetry slopes if needed */
-								if (use_slope == true)
+								if (use_slope)
 									mbmosaic_get_beamslopes(verbose, beams_bath, beamflag, bath, bathacrosstrack, slopes, &error);
 
 								/* reproject beam positions if necessary */
-								if (use_projection == true) {
+								if (use_projection) {
 									for (ib = 0; ib < beams_amp; ib++)
 										if (mb_beam_ok(beamflag[ib])) {
 											mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
@@ -2568,7 +2568,7 @@ int main(int argc, char **argv) {
 
 								/* get angle vs acrosstrack distance table using topographic grid */
 								table_error = MB_ERROR_NO_ERROR;
-								if (usetopogrid == true) {
+								if (usetopogrid) {
 									table_status = mb_topogrid_getangletable(verbose, topogrid_ptr, nangle, angle_min, angle_max,
 									                                         navlon, navlat, heading, altitude, sonardepth, pitch,
 									                                         table_angle, table_xtrack, table_ltrack,
@@ -2617,7 +2617,7 @@ int main(int argc, char **argv) {
 								                          gangles, priorities, &error);
 
 								/* reproject pixel positions if necessary */
-								if (use_projection == true) {
+								if (use_projection) {
 									for (ib = 0; ib < pixels_ss; ib++)
 										if (ss[ib] > MB_SIDESCAN_NULL) {
 											mb_proj_forward(verbose, pjptr, sslon[ib], sslat[ib], &sslon[ib], &sslat[ib], &error);
@@ -2750,7 +2750,7 @@ int main(int argc, char **argv) {
 				/* initialize the multibeam file */
 				if (file_in_bounds == true) {
 					/* check for filtered amplitude or sidescan file */
-					if (usefiltered == true && datatype == MBMOSAIC_DATA_AMPLITUDE) {
+					if (usefiltered && datatype == MBMOSAIC_DATA_AMPLITUDE) {
 						if ((status = mb_get_ffa(verbose, file, &format, &error)) != MB_SUCCESS) {
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error returned from function <mb_get_ffa>:\n%s\n", message);
@@ -2760,7 +2760,7 @@ int main(int argc, char **argv) {
 							exit(error);
 						}
 					}
-					else if (usefiltered == true && datatype == MBMOSAIC_DATA_SIDESCAN) {
+					else if (usefiltered && datatype == MBMOSAIC_DATA_SIDESCAN) {
 						if ((status = mb_get_ffs(verbose, file, &format, &error)) != MB_SUCCESS) {
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error returned from function <mb_get_ffa>:\n%s\n", message);
@@ -2901,7 +2901,7 @@ int main(int argc, char **argv) {
 							}
 
 							/* mosaic beam based data (amplitude, grazing angle, slope) */
-							if (use_beams == true && error == MB_ERROR_NO_ERROR) {
+							if (use_beams && error == MB_ERROR_NO_ERROR) {
 
 								/* translate beam locations to lon/lat */
 								for (ib = 0; ib < beams_amp; ib++) {
@@ -2937,11 +2937,11 @@ int main(int argc, char **argv) {
 								                            beamflag, gangles, priorities, &error);
 
 								/* get bathymetry slopes if needed */
-								if (use_slope == true)
+								if (use_slope)
 									mbmosaic_get_beamslopes(verbose, beams_bath, beamflag, bath, bathacrosstrack, slopes, &error);
 
 								/* reproject beam positions if necessary */
-								if (use_projection == true) {
+								if (use_projection) {
 									for (ib = 0; ib < beams_amp; ib++)
 										if (mb_beam_ok(beamflag[ib])) {
 											mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
@@ -3087,7 +3087,7 @@ int main(int argc, char **argv) {
 
 								/* get angle vs acrosstrack distance table using topographic grid */
 								table_error = MB_ERROR_NO_ERROR;
-								if (usetopogrid == true) {
+								if (usetopogrid) {
 									table_status = mb_topogrid_getangletable(verbose, topogrid_ptr, nangle, angle_min, angle_max,
 									                                         navlon, navlat, heading, altitude, sonardepth, pitch,
 									                                         table_angle, table_xtrack, table_ltrack,
@@ -3132,7 +3132,7 @@ int main(int argc, char **argv) {
 								                          gangles, priorities, &error);
 
 								/* reproject pixel positions if necessary */
-								if (use_projection == true) {
+								if (use_projection) {
 									for (ib = 0; ib < pixels_ss; ib++)
 										if (ss[ib] > MB_SIDESCAN_NULL) {
 											mb_proj_forward(verbose, pjptr, sslon[ib], sslat[ib], &sslon[ib], &sslat[ib], &error);
@@ -3234,7 +3234,7 @@ int main(int argc, char **argv) {
 		fclose(dfp);
 
 	/* deallocate topography grid array if necessary */
-	if (usetopogrid == true)
+	if (usetopogrid)
 		status = mb_topogrid_deall(verbose, &topogrid_ptr, &error);
 
 	/* now loop over all points in the output grid */
@@ -3632,7 +3632,7 @@ int main(int argc, char **argv) {
 	fprintf(outfp, "Minimum sigma: %10.5f   Maximum sigma: %10.5f\n", smin, smax);
 
 	/* set plot label strings */
-	if (use_projection == true) {
+	if (use_projection) {
 		sprintf(xlabel, "Easting (%s)", units);
 		sprintf(ylabel, "Northing (%s)", units);
 	}
@@ -3719,7 +3719,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* write second output file */
-	if (more == true) {
+	if (more) {
 		for (int i = 0; i < xdim; i++)
 			for (int j = 0; j < ydim; j++) {
 				kgrid = (i + offx) * gydim + (j + offy);
@@ -3827,7 +3827,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* deallocate projection */
-	if (use_projection == true)
+	if (use_projection)
 		proj_status = mb_proj_free(verbose, &(pjptr), &error);
 
 	/* run mbm_grdplot */
@@ -3851,7 +3851,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nError executing mbm_grdplot on output file %s\n", ofile);
 		}
 	}
-	if (more == true && gridkind == MBMOSAIC_GMTGRD) {
+	if (more && gridkind == MBMOSAIC_GMTGRD) {
 		/* execute mbm_grdplot */
 		strcpy(ofile, fileroot);
 		strcat(ofile, "_num.grd");
