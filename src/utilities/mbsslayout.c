@@ -290,7 +290,7 @@ int main(int argc, char **argv) {
 	int ss_altitude_mode = MBSSLAYOUT_ALTITUDE_ALTITUDE;
 	mb_path topo_grid_file;
 	double bottompick_threshold = 0.5;
-	int channel_swap = false;
+	bool channel_swap = false;
 	int swath_mode = MBSSLAYOUT_SWATHWIDTH_VARIABLE;
 	double swath_width = 0.0;
 	int gain_mode = MBSSLAYOUT_GAIN_OFF;
@@ -449,7 +449,7 @@ int main(int argc, char **argv) {
 
 	/* platform definition file */
 	mb_path platform_file;
-	int use_platform_file = false;
+	bool use_platform_file = false;
 	struct mb_platform_struct *platform = NULL;
 	struct mb_sensor_struct *sensor_bathymetry = NULL;
 	struct mb_sensor_struct *sensor_backscatter = NULL;
@@ -558,11 +558,6 @@ int main(int argc, char **argv) {
 	int jattitude = 0;
 	int jsoundspeed = 0;
 	int data_changed;
-	int new_output_file = false;
-	int rawroutefile = false;
-	int oktowrite = false;
-	int point_ok = false;
-	int linechange = false;
 	int line_number = 0;
 	int nget;
 	int waypoint;
@@ -1036,7 +1031,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "     read_file:                  %s\n", read_file);
 		fprintf(stderr, "     format:                     %d\n", format);
 		fprintf(stderr, "Source of platform model:\n");
-		if (use_platform_file == true)
+		if (use_platform_file)
 			fprintf(stderr, "     platform_file:              %s\n", platform_file);
 		else
 			fprintf(stderr, "     platform_file:              not specified\n");
@@ -1077,7 +1072,7 @@ int main(int argc, char **argv) {
 		else if (layout_mode == MBSSLAYOUT_ALTITUDE_TOPO_GRID) {
 			fprintf(stderr, "     ss_altitude_mode:         Altitude calculated during 3D layout on topography model\n");
 		}
-		if (channel_swap == true)
+		if (channel_swap)
 			fprintf(stderr, "     channel_swap:             Swapping port and starboard\n");
 		else
 			fprintf(stderr, "     channel_swap:             No swap\n");
@@ -1197,7 +1192,7 @@ int main(int argc, char **argv) {
 
 	/*-------------------------------------------------------------------*/
 	/* load platform definition if specified */
-	if (use_platform_file == true) {
+	if (use_platform_file) {
 		status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
 		if (status == MB_FAILURE) {
 			fprintf(stderr, "\nUnable to open and parse platform file: %s\n", platform_file);
@@ -1308,7 +1303,11 @@ int main(int argc, char **argv) {
 	/*-------------------------------------------------------------------*/
 
 	/* new output file obviously needed */
-	new_output_file = true;
+	bool new_output_file = true;
+	bool rawroutefile = false;
+	bool oktowrite = false;  // TODO(schwehr): Set but unused?
+	bool point_ok = false;
+	bool linechange = false;  // TODO(schwehr): Set but unused?
 
 	/* if specified read route time list file */
 	if (line_mode == MBSSLAYOUT_LINE_TIME) {
@@ -1364,7 +1363,7 @@ int main(int argc, char **argv) {
 		activewaypoint = 1;
 		mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
 		rangelast = 1000 * line_range_threshold;
-		oktowrite = 0;
+		oktowrite = false;
 		linechange = false;
 
 		/* output status */
@@ -1398,14 +1397,14 @@ int main(int argc, char **argv) {
 						rawroutefile = false;
 					}
 				}
-				if ((rawroutefile == true && nget >= 2) ||
-				    (rawroutefile == false && nget >= 3 && waypoint > MBSSLAYOUT_ROUTE_WAYPOINT_NONE))
+				if ((rawroutefile && nget >= 2) ||
+				    (!rawroutefile && nget >= 3 && waypoint > MBSSLAYOUT_ROUTE_WAYPOINT_NONE))
 					point_ok = true;
 				else
 					point_ok = false;
 
 				/* if good data check for need to allocate more space */
-				if (point_ok == true && nroutepoint + 1 > nroutepointalloc) {
+				if (point_ok && nroutepoint + 1 > nroutepointalloc) {
 					nroutepointalloc += MBSSLAYOUT_ALLOC_NUM;
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
@@ -1424,7 +1423,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* add good point to route */
-				if (point_ok == true && nroutepointalloc > nroutepoint + 1) {
+				if (point_ok && nroutepointalloc > nroutepoint + 1) {
 					routelon[nroutepoint] = navlon;
 					routelat[nroutepoint] = navlat;
 					routeheading[nroutepoint] = heading;
@@ -1442,7 +1441,7 @@ int main(int argc, char **argv) {
 		activewaypoint = 1;
 		mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
 		rangelast = 1000 * line_range_threshold;
-		oktowrite = 0;
+		oktowrite = false;
 		linechange = false;
 
 		/* output status */
@@ -2181,7 +2180,7 @@ int main(int argc, char **argv) {
 			/* check for new line only if generating survey line files
 			    and new line not already set
 			    and this record is target data */
-			if (status == MB_SUCCESS && line_mode != MBSSLAYOUT_LINE_OFF && new_output_file == false && kind == output_source) {
+			if (status == MB_SUCCESS && line_mode != MBSSLAYOUT_LINE_OFF && !new_output_file && kind == output_source) {
 				/* check waypoint time list */
 				if (line_mode == MBSSLAYOUT_LINE_TIME && time_d >= routetime_d[activewaypoint] && activewaypoint < ntimepoint) {
 					new_output_file = true;
@@ -2204,7 +2203,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* open output files if needed */
-			if (new_output_file == true) {
+			if (new_output_file) {
 				/* reset flag */
 				new_output_file = false;
 
