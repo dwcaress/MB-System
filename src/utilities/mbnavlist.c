@@ -54,7 +54,7 @@ static const char usage_message[] =
     "-Kkind -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
 
 /*--------------------------------------------------------------------*/
-int printsimplevalue(int verbose, double value, int width, int precision, int ascii, int *invert, int *flipsign, int *error) {
+int printsimplevalue(int verbose, double value, int width, int precision, bool ascii, bool *invert, bool *flipsign, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -70,7 +70,7 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 	/* make print format */
 	char format[24];
 	format[0] = '%';
-	if (*invert == true)
+	if (*invert)
 		strcpy(format, "%g");
 	else if (width > 0)
 		sprintf(&format[1], "%d.%df", width, precision);
@@ -78,20 +78,20 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 		sprintf(&format[1], ".%df", precision);
 
 	/* invert value if desired */
-	if (*invert == true) {
+	if (*invert) {
 		*invert = false;
 		if (value != 0.0)
 			value = 1.0 / value;
 	}
 
 	/* flip sign value if desired */
-	if (*flipsign == true) {
+	if (*flipsign) {
 		*flipsign = false;
 		value = -value;
 	}
 
 	/* print value */
-	if (ascii == true)
+	if (ascii)
 		printf(format, value);
 	else
 		fwrite(&value, sizeof(double), 1, stdout);
@@ -150,11 +150,9 @@ int main(int argc, char **argv) {
 	char list[MAX_OPTIONS];
 	int n_list;
 	int time_j[5];
-	int invert_next_value = false;
-	int signflip_next_value = false;
-	int projectednav_next_value = false;
-	int ascii = true;
-	int segment = false;
+	bool projectednav_next_value = false;
+	bool ascii = true;
+	bool segment = false;
 	int segment_mode = MBNAVLIST_SEGMENT_MODE_NONE;
 	char segment_tag[MB_PATH_MAXLINE];
 	char delimiter[MB_PATH_MAXLINE];
@@ -197,9 +195,9 @@ int main(int argc, char **argv) {
 	double aheave[MB_ASYNCH_SAVE_MAX];
 
 	/* additional time variables */
-	int first_m = true;
+	bool first_m = true;
 	double time_d_ref;
-	int first_u = true;
+	bool first_u = true;
 	time_t time_u;
 	time_t time_u_ref;
 	double seconds;
@@ -220,7 +218,7 @@ int main(int argc, char **argv) {
 	double b;
 
 	/* projected coordinate system */
-	int use_projection = false;
+	bool use_projection = false;
 	char projection_pars[MB_PATH_MAXLINE];
 	char projection_id[MB_PATH_MAXLINE];
 	int proj_status;
@@ -440,6 +438,9 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
+	bool invert_next_value = false;
+	bool signflip_next_value = false;
+
 	/* loop over all files to be read */
 	while (read_data == true) {
 		/* check format and get data sources */
@@ -504,7 +505,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* output separator for GMT style segment file output */
-		if (segment == true && ascii == true) {
+		if (segment && ascii) {
 			if (segment_mode == MBNAVLIST_SEGMENT_MODE_TAG)
 				printf("%s\n", segment_tag);
 			else if (segment_mode == MBNAVLIST_SEGMENT_MODE_SWATHFILE)
@@ -517,7 +518,7 @@ int main(int argc, char **argv) {
 		double distance_total = 0.0;
 		int nread = 0;
 		int nnav = 0;
-		int first = true;
+		bool first = true;
 		while (error <= MB_ERROR_NO_ERROR) {
 			/* read a ping of data */
 			status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
@@ -596,7 +597,7 @@ int main(int argc, char **argv) {
 
 					/* calculate course made good and distance */
 					mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-					if (first == true) {
+					if (first) {
 						time_interval = 0.0;
 						course = heading;
 						speed_made_good = 0.0;
@@ -623,7 +624,7 @@ int main(int argc, char **argv) {
 					distance_total += 0.001 * distance;
 
 					/* get projected navigation if needed */
-					if (use_projection == true) {
+					if (use_projection) {
 						/* set up projection if this is the first data */
 						if (pjptr == NULL) {
 							/* Default projection is UTM */
@@ -694,7 +695,7 @@ int main(int argc, char **argv) {
 							case 'J': /* time string */
 								mb_get_jtime(verbose, time_i, time_j);
 								seconds = time_i[5] + 0.000001 * time_i[6];
-								if (ascii == true) {
+								if (ascii) {
 									printf("%.4d %.3d %.2d %.2d %9.6f", time_j[0], time_j[1], time_i[3], time_i[4], seconds);
 								}
 								else {
@@ -715,7 +716,7 @@ int main(int argc, char **argv) {
 							case 'j': /* time string */
 								mb_get_jtime(verbose, time_i, time_j);
 								seconds = time_i[5] + 0.000001 * time_i[6];
-								if (ascii == true) {
+								if (ascii) {
 									printf("%.4d %.3d %.4d %9.6f", time_j[0], time_j[1], time_j[2], seconds);
 								}
 								else {
@@ -745,7 +746,7 @@ int main(int argc, char **argv) {
 								break;
 							case 'm': /* time in decimal seconds since
 							        first record */
-								if (first_m == true) {
+								if (first_m) {
 									time_d_ref = time_d;
 									first_m = false;
 								}
@@ -773,7 +774,7 @@ int main(int argc, char **argv) {
 								break;
 							case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 								seconds = time_i[5] + 1e-6 * time_i[6];
-								if (ascii == true)
+								if (ascii)
 									printf("%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f", time_i[0], time_i[1], time_i[2], time_i[3],
 									       time_i[4], seconds);
 								else {
@@ -793,7 +794,7 @@ int main(int argc, char **argv) {
 								break;
 							case 't': /* yyyy mm dd hh mm ss time string */
 								seconds = time_i[5] + 1e-6 * time_i[6];
-								if (ascii == true)
+								if (ascii)
 									printf("%.4d %.2d %.2d %.2d %.2d %9.6f", time_i[0], time_i[1], time_i[2], time_i[3],
 									       time_i[4], seconds);
 								else {
@@ -813,7 +814,7 @@ int main(int argc, char **argv) {
 								break;
 							case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 								time_u = (int)time_d;
-								if (ascii == true)
+								if (ascii)
 									printf("%ld", time_u);
 								else {
 									b = time_u;
@@ -822,11 +823,11 @@ int main(int argc, char **argv) {
 								break;
 							case 'u': /* time in seconds since first record */
 								time_u = (int)time_d;
-								if (first_u == true) {
+								if (first_u) {
 									time_u_ref = time_u;
 									first_u = false;
 								}
-								if (ascii == true)
+								if (ascii)
 									printf("%ld", time_u - time_u_ref);
 								else {
 									b = time_u - time_u_ref;
@@ -835,7 +836,7 @@ int main(int argc, char **argv) {
 								break;
 							case 'V': /* time in seconds since last ping */
 							case 'v':
-								if (ascii == true) {
+								if (ascii) {
 									if (fabs(time_interval) > 100.)
 										printf("%g", time_interval);
 									else
@@ -846,7 +847,7 @@ int main(int argc, char **argv) {
 								}
 								break;
 							case 'X': /* longitude decimal degrees */
-								if (projectednav_next_value == false) {
+								if (!projectednav_next_value) {
 									dlon = navlon;
 									printsimplevalue(verbose, dlon, 15, 10, ascii, &invert_next_value, &signflip_next_value,
 									                 &error);
@@ -881,7 +882,7 @@ int main(int argc, char **argv) {
 								}
 								break;
 							case 'Y': /* latitude decimal degrees */
-								if (projectednav_next_value == false) {
+								if (!projectednav_next_value) {
 									dlat = navlat;
 									printsimplevalue(verbose, dlat, 15, 10, ascii, &invert_next_value, &signflip_next_value,
 									                 &error);
@@ -903,7 +904,7 @@ int main(int argc, char **argv) {
 									hemi = 'N';
 								degrees = (int)dlat;
 								minutes = 60.0 * (dlat - degrees);
-								if (ascii == true) {
+								if (ascii) {
 									printf("%3d %11.8f%c", degrees, minutes, hemi);
 								}
 								else {
@@ -916,11 +917,11 @@ int main(int argc, char **argv) {
 								}
 								break;
 							default:
-								if (ascii == true)
+								if (ascii)
 									printf("<Invalid Option: %c>", list[i]);
 								break;
 							}
-							if (ascii == true) {
+							if (ascii) {
 								if (i < (n_list - 1))
 									printf("%s", delimiter);
 								else
