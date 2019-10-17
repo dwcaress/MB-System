@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 
 	char read_file[MB_PATH_MAXLINE] = "";
 	char output_file[MB_PATH_MAXLINE] = "";
-	int output_file_set = false;
+	bool output_file_set = false;
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
@@ -106,7 +106,6 @@ int main(int argc, char **argv) {
 
 	/* route and auto-line data */
 	char route_file[MB_PATH_MAXLINE] = "";
-	int rawroutefile = false;
 	int nroutepoint = 0;
 	int nroutepointfound = 0;
 	int nroutepointalloc = 0;
@@ -244,7 +243,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
 		exit(status);
 	}
-	rawroutefile = false;
+	bool rawroutefile = false;
 	while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 		if (comment[0] == '#') {
 			if (strncmp(comment, "## Route File Version", 21) == 0) {
@@ -259,8 +258,8 @@ int main(int argc, char **argv) {
 					rawroutefile = false;
 				}
 			}
-			if ((rawroutefile == true && nget >= 2) ||
-			    (rawroutefile == false && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_TRANSIT))
+			if ((rawroutefile && nget >= 2) ||
+			    (!rawroutefile && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_TRANSIT))
 				point_ok = true;
 			else
 				point_ok = false;
@@ -482,7 +481,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* output time list for the route */
-	if (output_file_set == false) {
+	if (!output_file_set) {
 		sprintf(output_file, "%s_wpttime_d.txt", read_file);
 	}
 	if ((fp = fopen(output_file, "w")) == NULL) {

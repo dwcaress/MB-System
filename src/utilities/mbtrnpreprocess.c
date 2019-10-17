@@ -1238,8 +1238,6 @@ int main(int argc, char **argv)
   char *message;
 
   /* MBIO read control parameters */
-  int read_data = false;
-  int read_socket = false;
   mb_path input;
   void *datalist;
   int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -1274,7 +1272,7 @@ int main(int argc, char **argv)
 
   /* platform definition file */
   mb_path platform_file;
-  int use_platform_file = false;
+  bool use_platform_file = false;
   struct mb_platform_struct *platform = NULL;
   struct mb_sensor_struct *sensor_bathymetry = NULL;
   struct mb_sensor_struct *sensor_backscatter = NULL;
@@ -1314,7 +1312,7 @@ int main(int argc, char **argv)
   double swath_width = 150.0;
   double tangent, threshold_tangent;
   int n_output_soundings = 101;
-  int median_filter = false;
+  bool median_filter = false;
   int median_filter_n_across = 1;
   int median_filter_n_along = 1;
   int median_filter_n_total = 1;
@@ -1338,7 +1336,7 @@ int main(int argc, char **argv)
   unsigned int checksum;
 
   /* log file parameters */
-  int make_logs = false;
+  ibool make_logs = false;
   mb_path log_directory;
   FILE *logfp = NULL;
   mb_path log_message;
@@ -1693,7 +1691,7 @@ int main(int argc, char **argv)
   mbtrnpreprocess_init_debug(verbose);
 
   /* load platform definition if specified */
-  if (use_platform_file == true)
+  if (use_platform_file)
     {
     status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
     if (status == MB_FAILURE)
@@ -1767,7 +1765,7 @@ int main(int argc, char **argv)
     }
 
   /* get number of ping records to hold */
-  if (median_filter == true)
+  if (median_filter)
     {
     median_filter_n_total = median_filter_n_across * median_filter_n_along;
     median_filter_n_min = median_filter_n_total / 2;
@@ -1798,6 +1796,7 @@ int main(int argc, char **argv)
 
   /* determine whether to read one file or a list of files */
   const bool read_datalist = format < 0;
+  bool read_data = false;
 
   /* open file list */
   if (read_datalist)
@@ -1826,10 +1825,10 @@ int main(int argc, char **argv)
   MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_CYCLE_XT], mtime_dtime());
   MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_STATS_XT], mtime_dtime());
   /* loop over all files to be read */
-  while (read_data == true)
+  while (read_data)
     {
     /* open log file if specified */
-    if (make_logs == true)
+    if (make_logs)
       {
       gettimeofday(&timeofday, &timezone);
       now_time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
@@ -2089,7 +2088,7 @@ int main(int argc, char **argv)
     while (!done)
       {
       /* open new log file if it is time */
-      if (make_logs == true)
+      if (make_logs)
         {
         gettimeofday(&timeofday, &timezone);
         now_time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;

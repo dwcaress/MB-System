@@ -222,7 +222,7 @@ int main(int argc, char **argv) {
 
   /* platform definition file */
   mb_path platform_file = "";
-  int use_platform_file = false;
+  bool use_platform_file = false;
   struct mb_platform_struct *platform = NULL;
   struct mb_sensor_struct *sensor_bathymetry = NULL;
   struct mb_sensor_struct *sensor_backscatter = NULL;
@@ -235,10 +235,10 @@ int main(int argc, char **argv) {
   int target_sensor = -1;
 
   /* output fnv files for each sensor */
-  int output_sensor_fnv = false;
+  bool output_sensor_fnv = false;
 
   /* skip existing output files */
-  int skip_existing = false;
+  bool skip_existing = false;
 
   /* file indexing (used by some formats) */
   int num_indextable = 0;
@@ -248,34 +248,26 @@ int main(int argc, char **argv) {
   struct mb_io_indextable_struct *i_indextable = NULL;
 
   /* kluge various data fixes */
-  int kluge_timejumps = false;
+  bool kluge_timejumps = false;
   double kluge_timejumps_threshold = 0.0;
-  int kluge_timejumps_ancilliary = false;
+  bool kluge_timejumps_ancilliary = false;
   double kluge_timejumps_anc_threshold = 0.0;
-  int kluge_timejumps_mbaripressure = false;
+  bool kluge_timejumps_mbaripressure = false;
   double kluge_timejumps_mba_threshold = 0.0;
   double kluge_first_time_d;
   double kluge_last_time_d;
   double dtime_d_expect;
   double dtime_d;
-  int correction_on = false;
   double correction_start_time_d = 0.0;
   int correction_start_index = 0;
   int correction_end_index = -1;
-  int kluge_beamtweak = false;
+  bool kluge_beamtweak = false;  // TODO(schwehr): Set but unused?
   double kluge_beamtweak_factor = 1.0;
-  int kluge_soundspeedtweak = false;
+  bool kluge_soundspeedtweak = false;  // TODO(schwehr): Set but unused?
   double kluge_soundspeedtweak_factor = 1.0;
-  int timestamp_changed = false;
-  int nav_changed = false;
-  int heading_changed = false;
-  int sensordepth_changed = false;
-  int altitude_changed = false;
-  int attitude_changed = false;
-  int soundspeed_changed = false;
-  int kluge_fix_wissl_timestamps = false;
-  int kluge_fix_wissl_timestamps_setup1 = false;
-  int kluge_fix_wissl_timestamps_setup2 = false;
+  bool kluge_fix_wissl_timestamps = false;
+  bool kluge_fix_wissl_timestamps_setup1 = false;
+  bool kluge_fix_wissl_timestamps_setup2 = false;
 
   /* preprocess structure */
   struct mb_preprocess_struct preprocess_pars;
@@ -417,7 +409,6 @@ int main(int argc, char **argv) {
   double start_time_d;
   double end_time_d;
   int istart, iend;
-  int proceed = true;
   int input_size, input_modtime, output_size, output_modtime;
 
   mb_path fnvfile = "";
@@ -936,7 +927,7 @@ int main(int argc, char **argv) {
       fprintf(stderr, "dbg2       read_file:                    %s\n", read_file);
       fprintf(stderr, "dbg2       format:                       %d\n", format);
       fprintf(stderr, "dbg2  Source of platform model:\n");
-      if (use_platform_file == true)
+      if (use_platform_file)
         fprintf(stderr, "dbg2       platform_file:                %s\n", platform_file);
       else
         fprintf(stderr, "dbg2       platform_file:              not specified\n");
@@ -1034,7 +1025,7 @@ int main(int argc, char **argv) {
       fprintf(stderr, "     read_file:                    %s\n", read_file);
       fprintf(stderr, "     format:                       %d\n", format);
       fprintf(stderr, "Source of platform model:\n");
-      if (use_platform_file == true)
+      if (use_platform_file)
         fprintf(stderr, "     platform_file:                %s\n", platform_file);
       else
         fprintf(stderr, "     platform_file:              not specified\n");
@@ -1134,7 +1125,7 @@ int main(int argc, char **argv) {
 
   /*-------------------------------------------------------------------*/
   /* load platform definition if specified */
-  if (use_platform_file == true) {
+  if (use_platform_file) {
     status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
     if (status == MB_FAILURE) {
       fprintf(stderr, "\nUnable to open and parse platform file: %s\n", platform_file);
@@ -1806,8 +1797,10 @@ int main(int argc, char **argv) {
   }
 #endif
 
+  bool correction_on = false;
+
   /* deal with correcting MBARI Mapping AUV pressure depth time jumps */
-  if  (kluge_timejumps_mbaripressure == true) {
+  if (kluge_timejumps_mbaripressure) {
     if (verbose > 0) {
       fprintf(stderr, "\n-----------------------------------------------\n");
       fprintf(stderr, "Applying time jump corrections to MBARI pressure depth data:\n");
@@ -1822,7 +1815,7 @@ int main(int argc, char **argv) {
       for (int i = 2;i<n_sensordepth;i++) {
         dtime_d = sensordepth_time_d[i] - sensordepth_time_d[i-1];
         if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_mba_threshold) {
-          if (correction_on == false) {
+          if (!correction_on) {
             correction_on = true;
             correction_start_time_d = sensordepth_time_d[i-1];
             correction_start_index = i;
@@ -1837,7 +1830,7 @@ int main(int argc, char **argv) {
           fprintf(stderr, "newt[%d]: %f\n", i, sensordepth_time_d[i]);
         } else {
           /* if correction has been on and there was a negative jump that needs deleting */
-          if (correction_on == true && correction_end_index > correction_start_index) {
+          if (correction_on && correction_end_index > correction_start_index) {
             for (ii=correction_start_index;ii<=correction_end_index;ii++) {
               fprintf(stderr,"DEP MBARI DELETE: i:%d t:%f\n", ii, sensordepth_time_d[ii]);
               sensordepth_time_d[ii] = 0.0;
@@ -1865,7 +1858,7 @@ int main(int argc, char **argv) {
   }
 
   /* deal with ancillary data time jump corrections */
-  if  (kluge_timejumps_ancilliary == true) {
+  if  (kluge_timejumps_ancilliary) {
     if (verbose > 0) {
       fprintf(stderr, "\n-----------------------------------------------\n");
       fprintf(stderr, "Applying time jump corrections to ancillary data:\n");
@@ -2275,7 +2268,7 @@ int main(int argc, char **argv) {
     n_wt_files = 0;
 
   /* if requested to output integrated nav for all survey sensors, open files */
-  if (output_sensor_fnv == true && platform != NULL) {
+  if (output_sensor_fnv && platform != NULL) {
     if (verbose > 0)
       fprintf(stderr, "\nOutputting fnv files for survey sensors\n");
     for (isensor = 0; isensor < platform->num_sensors; isensor++) {
@@ -2341,8 +2334,8 @@ int main(int argc, char **argv) {
     /* Figure out if the file should be preprocessed - don't if it looks like
       the file was previously preprocessed and looks up to date  AND the
       appropriate request has been made */
-    proceed = true;
-    if (skip_existing == true) {
+    bool proceed = true;
+    if (skip_existing) {
       if ((fstat = stat(ifile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         input_modtime = file_status.st_mtime;
         input_size = file_status.st_size;
@@ -2365,7 +2358,7 @@ int main(int argc, char **argv) {
     }
 
     /* skip redo if requested and relevant */
-    if (proceed == false) {
+    if (!proceed) {
       if (verbose > 0)
         fprintf(stderr, "\nPass 2: Skipping input file:  %s %d\n", ifile, iformat);
     }
@@ -2515,7 +2508,7 @@ int main(int argc, char **argv) {
       start_time_d = -1.0;
       end_time_d = -1.0;
 
-            if (kluge_fix_wissl_timestamps == true)
+            if (kluge_fix_wissl_timestamps)
                 kluge_fix_wissl_timestamps_setup2 = false;
 
       /* ------------------------------- */
@@ -2585,11 +2578,12 @@ int main(int argc, char **argv) {
           n_rt_att3++;
         }
 
-        timestamp_changed = false;
-        nav_changed = false;
-        heading_changed = false;
-        sensordepth_changed = false;
-        attitude_changed = false;
+        bool timestamp_changed = false;
+	bool nav_changed = false;
+        bool heading_changed = false;
+        bool sensordepth_changed = false;
+        bool attitude_changed = false;
+        bool altitude_changed = false;
 
         /* apply preprocessing to survey data records */
         if (status == MB_SUCCESS &&
@@ -2604,7 +2598,7 @@ int main(int argc, char **argv) {
           status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth_org, &altitude_org, &error);
 
           /* apply time jump fix */
-          if (kluge_timejumps == true) {
+          if (kluge_timejumps) {
             if (kind == MB_DATA_DATA) {
               if (n_rf_data == 1)
                 kluge_first_time_d = time_d;
@@ -2627,14 +2621,14 @@ int main(int argc, char **argv) {
            * and kluge_fix_wissl_timestamps is enabled, call special function
            * to fix the timestmps in the file's internal index table */
           if (kind == MB_DATA_DATA && iformat == MBF_3DWISSLR
-            && kluge_fix_wissl_timestamps == true) {
-            if (kluge_fix_wissl_timestamps_setup1 == false) {
+            && kluge_fix_wissl_timestamps) {
+            if (!kluge_fix_wissl_timestamps_setup1) {
                 status = mb_indextablefix(verbose, imbio_ptr,
                                           num_indextable, indextable,
                                           &error);
                 kluge_fix_wissl_timestamps_setup1 = true;
             }
-            if (kluge_fix_wissl_timestamps_setup2 == false) {
+            if (!kluge_fix_wissl_timestamps_setup2) {
                 status = mb_indextableapply(verbose, imbio_ptr,
                                             num_indextable, indextable,
                                             n_rt_files, &error);
@@ -2768,7 +2762,7 @@ int main(int argc, char **argv) {
             }
 
             /* if attitude changed apply rigid rotations to any bathymetry */
-            if (attitude_changed == true) {
+            if (attitude_changed) {
               /* loop over the beams */
               for (int i = 0; i < beams_bath; i++) {
                 if (beamflag[i] != MB_FLAG_NULL) {
@@ -2789,7 +2783,7 @@ int main(int argc, char **argv) {
             }
 
             /* recalculate bathymetry by changes to sensor depth  */
-            if (sensordepth_changed == true) {
+            if (sensordepth_changed) {
               /* get draft change */
               depth_offset_change = draft - draft_org;
 
@@ -2803,8 +2797,8 @@ int main(int argc, char **argv) {
             }
 
             /* insert navigation */
-            if (timestamp_changed == true || nav_changed == true || heading_changed == true ||
-              sensordepth_changed == true || attitude_changed == true) {
+            if (timestamp_changed || nav_changed || heading_changed ||
+              sensordepth_changed || attitude_changed) {
               status = mb_insert_nav(verbose, imbio_ptr, istore_ptr, time_i, time_d, navlon, navlat, speed, heading,
                            draft, roll, pitch, heave, &error);
             }
@@ -2820,7 +2814,7 @@ int main(int argc, char **argv) {
 
             /* if attitude changed apply rigid rotations to the bathymetry */
             if (preprocess_pars.no_change_survey == false &&
-              (attitude_changed == true || sensordepth_changed == true)) {
+              (attitude_changed || sensordepth_changed)) {
               status = mb_insert(verbose, imbio_ptr, istore_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
                          beams_bath, beams_amp, pixels_ss, beamflag, bath, amp, bathacrosstrack, bathalongtrack,
                          ss, ssacrosstrack, ssalongtrack, comment, &error);
@@ -2897,7 +2891,7 @@ int main(int argc, char **argv) {
         }
 
         /* if requested output integrated nav */
-        if (output_sensor_fnv == true && status == MB_SUCCESS && kind == MB_DATA_DATA) {
+        if (output_sensor_fnv && status == MB_SUCCESS && kind == MB_DATA_DATA) {
           /* loop over all sensors and output integrated nav for all
             sensors producing mapping data */
           for (isensor = 0; isensor < platform->num_sensors; isensor++) {
@@ -3140,7 +3134,7 @@ int main(int argc, char **argv) {
   /*-------------------------------------------------------------------*/
 
   /* close any integrated navigation files */
-  if (output_sensor_fnv == true) {
+  if (output_sensor_fnv) {
     for (isensor = 0; isensor < platform->num_sensors; isensor++) {
       if (platform->sensors[isensor].capability2 != 0) {
         for (ioffset = 0; ioffset < platform->sensors[isensor].num_offsets; ioffset++) {

@@ -110,7 +110,6 @@ int main(int argc, char **argv) {
 	char dfile[MB_PATH_MAXLINE];
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_NO;
-	int read_data;
 	double file_weight;
 	int format;
 	int formatread;
@@ -194,12 +193,12 @@ int main(int argc, char **argv) {
     double voxel_size_xy = 0.05;
     double voxel_size_z = 0.05;
     int occupy_threshold = 5;
-    int count_flagged = false;
+    bool count_flagged = false;
     int empty_mode = MBVC_EMPTY_FLAG;
     int occupied_mode = MBVC_OCCUPIED_IGNORE;
-    int apply_range_minimum = false;
+    bool apply_range_minimum = false;
     double range_minimum = 0.0;
-    int apply_range_maximum = false;
+    bool apply_range_maximum = false;
     double range_maximum = 0.0;
 
     /* swath data storage */
@@ -217,10 +216,9 @@ int main(int argc, char **argv) {
     double x_min, x_max, y_min, y_max, z_min, z_max;
     int action;
 
-	/* save file control variables */
-	int esffile_open = false;
-	char esffile[MB_PATH_MAXLINE];
-	struct mb_esf_struct esf;
+    /* save file control variables */
+    char esffile[MB_PATH_MAXLINE];
+    struct mb_esf_struct esf;
 
     int n_pings = 0;
     int n_beams = 0;
@@ -250,7 +248,6 @@ int main(int argc, char **argv) {
 	int prstatus = MB_PR_FILE_UP_TO_DATE;
 	int lock_status = MB_SUCCESS;
 	int lock_error = MB_ERROR_NO_ERROR;
-	int locked = false;
 	int lock_purpose = 0;
 	mb_path lock_program = "";
 	mb_path lock_cpu = "";
@@ -263,7 +260,6 @@ int main(int argc, char **argv) {
 	FILE *outfp, *fp;
 
     int nscan = 0;
-    int oktoprocess = false;
     int uselockfiles = true;
     double mtodeglon, mtodeglat;
     double headingx, headingy;
@@ -432,6 +428,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -451,9 +448,12 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
+	bool esffile_open = false;
+	int locked = false;  // TODO(schwehr): Make mb_pr_lockinfo take a bool locked
+
 	/* loop over all files to be read */
-	while (read_data == true) {
-		oktoprocess = true;
+	while (read_data) {
+		bool oktoprocess = true;
 
 		/* check format and get format flags */
 		if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
@@ -896,7 +896,7 @@ int main(int argc, char **argv) {
                         iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
                         iz = (pings[i].bathz[j] - z_min) / voxel_size_z;
                         kk = (ix * n_voxel_y + iy) * n_voxel_z + iz;
-                        if (mb_beam_ok(pings[i].beamflag[j]) || count_flagged == true) {
+                        if (mb_beam_ok(pings[i].beamflag[j]) || count_flagged) {
                             voxel_count[kk] = MIN(voxel_count[kk] + 1, (unsigned char) 255);
                         }
                     }
@@ -947,11 +947,11 @@ int main(int argc, char **argv) {
             }
 
             /* apply range filter to the soundings */
-            if (apply_range_minimum == true || apply_range_maximum == true) {
+            if (apply_range_minimum || apply_range_maximum) {
                 for (int i = 0; i < n_pings; i++) {
                     for (int j = 0; j< pings[i].beams_bath; j++) {
                         if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
-                            if (apply_range_minimum == true
+                            if (apply_range_minimum
                                 && mb_beam_ok(pings[i].beamflag[j])
                                 && pings[i].bathr[j] < range_minimum) {
                                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
@@ -960,7 +960,7 @@ int main(int argc, char **argv) {
                                             j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
                                             action, &error);
                                 n_density_flag++;
-                            } else if (apply_range_maximum == true
+                            } else if (apply_range_maximum
                                 && mb_beam_ok(pings[i].beamflag[j])
                                 && pings[i].bathr[j] > range_maximum) {
                                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;

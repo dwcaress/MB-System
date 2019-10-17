@@ -78,7 +78,6 @@ int main(int argc, char **argv) {
 	FILE *fpe = NULL;
 	FILE *fph = NULL;
 	FILE *fpm = NULL;
-	int read_data = false;
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
@@ -248,6 +247,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data = false;
 
 	/* get time lag step */
 	lagstep = (lagend - lagstart) / (nlag - 1);
@@ -340,7 +340,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 		nestimate = 0;
 		nslope = 0;
 		time_d_avg = 0.0;
