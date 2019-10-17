@@ -165,13 +165,12 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int acti
 }
 
 /*--------------------------------------------------------------------*/
-int find_line(int verbose, char *line_name, struct neptune_line_tree **node, int create, struct neptune_line_tree **result,
+int find_line(int verbose, char *line_name, struct neptune_line_tree **node, bool create, struct neptune_line_tree **result,
               int *nlines, int *error) {
 	int status = MB_SUCCESS;
-	int comp;
 
 	if (NULL == *node) {
-		if (false == create)
+		if (!create)
 			return MB_FAILURE;
 
 #ifdef USE_MB_MALLOC
@@ -191,7 +190,7 @@ int find_line(int verbose, char *line_name, struct neptune_line_tree **node, int
 		return status;
 	}
 
-	comp = strncmp(line_name, (*node)->name, LINE_NAME_LENGTH);
+	const int comp = strncmp(line_name, (*node)->name, LINE_NAME_LENGTH);
 	if (0 == comp) {
 		*result = *node;
 		return status;
@@ -201,11 +200,11 @@ int find_line(int verbose, char *line_name, struct neptune_line_tree **node, int
 	return find_line(verbose, line_name, &((*node)->next), create, result, nlines, error);
 }
 /*--------------------------------------------------------------------*/
-int find_ping(int verbose, int ping, struct neptune_ping_tree **node, int create, struct neptune_ping_tree **result, int *error) {
+int find_ping(int verbose, int ping, struct neptune_ping_tree **node, bool create, struct neptune_ping_tree **result, int *error) {
 	int status = MB_SUCCESS;
 
 	if (NULL == *node) {
-		if (false == create)
+		if (!create)
 			return MB_FAILURE;
 
 #ifdef USE_MB_MALLOC
@@ -367,9 +366,7 @@ int main(int argc, char **argv) {
 	struct neptune_line_tree *rule_lines = NULL;
 	int no_lines = 0;
 	FILE *rules_fp;
-	int rules_done;
 	int rule_level;
-	int usable_rule;
 	int nscan;
 	int nlines;
 	int npings;
@@ -391,12 +388,11 @@ int main(int argc, char **argv) {
 	struct neptune_beam_list *beam;
 	char *buffer_ptr;
 
-	int output_file_set = false;
+	bool output_file_set = false;
 	char output_file[MB_PATH_MAXLINE];
 	FILE *output;
 
 	/* save file control variables */
-	int esffile_open = false;
 	char esffile[MB_PATH_MAXLINE];
 	struct mb_esf_struct esf;
 
@@ -537,13 +533,13 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	rules_done = false;
-	usable_rule = false;
+	bool rules_done = false;
+	bool usable_rule = false;
 	rule_level = 0;
 	status = MB_SUCCESS;
-	while (false == rules_done) {
+	while (!rules_done) {
 		/* skip till we find a rule */
-		while (false == rules_done && false == usable_rule) {
+		while (!rules_done && !usable_rule) {
 			buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, rules_fp);
 			if (buffer_ptr != buffer)
 				rules_done = true;
@@ -563,7 +559,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* read a rule */
-		if (false == rules_done) {
+		if (!rules_done) {
 			buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, rules_fp);
 			if (buffer_ptr != buffer) {
 				rules_done = true;
@@ -666,8 +662,10 @@ int main(int argc, char **argv) {
 	int i = 0;
 	line_array(rule_lines, &lines, &i);
 
+	bool esffile_open = false;
+
 	/* output rules found */
-	if (true == output_file_set) {
+	if (output_file_set) {
 		if (0 == strncmp("-", output_file, 2))
 			output = stdout;
 		else
@@ -724,7 +722,7 @@ int main(int argc, char **argv) {
 					}
 			}
 
-		if (true == usable_rule) {
+		if (usable_rule) {
 
 			/* check format and get format flags */
 			if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) !=

@@ -255,9 +255,9 @@ int main(int argc, char **argv) {
 	mb_path input_platform_file;
 	mb_path input_swath_file;
 	int input_swath_format = 0;
-	int input_swath_platform_defined = false;
+	bool input_swath_platform_defined = false;
 	mb_path output_platform_file;
-	int output_platform_file_defined = false;
+	bool output_platform_file_defined = false;
 	mb_path time_latency_model_file;
 	FILE *tfp = NULL;
 	char buffer[MB_PATH_MAXLINE];
@@ -605,7 +605,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* loop over all files to be read */
-				while (read_data == true && input_swath_platform_defined == false) {
+				while (read_data == true && !input_swath_platform_defined) {
 					/* check format and get data sources */
 					if ((status =
 					         mb_format_source(verbose, &input_swath_format, &platform_source, &nav_source, &sensordepth_source,
@@ -632,7 +632,7 @@ int main(int argc, char **argv) {
 					store_ptr = (void *)mb_io_ptr->store_data;
 
 					/* read data */
-					while (error <= MB_ERROR_NO_ERROR && input_swath_platform_defined == false) {
+					while (error <= MB_ERROR_NO_ERROR && !input_swath_platform_defined) {
 						status = mb_read_ping(verbose, mbio_ptr, store_ptr, &kind, &error);
 
 						/* if platform_source kind then extract platform definition */
@@ -667,7 +667,7 @@ int main(int argc, char **argv) {
 				if (read_datalist)
 					mb_datalist_close(verbose, &datalist, &error);
 
-				if (verbose > 0 && input_swath_platform_defined == true) {
+				if (verbose > 0 && input_swath_platform_defined) {
 					fprintf(stderr, "\nExtracted platform from swath data <%s>\n", input_swath_file);
 					fprintf(stderr, "    platform->type:                        %d <%s>\n", platform->type,
 					        mb_platform_type(platform->type));
@@ -1646,7 +1646,7 @@ int main(int argc, char **argv) {
 	/* if an output has been specified but there are still not sensors in the
 	 * platform, make a generic null platform with one sensor that is the source
 	 * for all data, with no offsets */
-	if (output_platform_file_defined == true && platform != NULL && platform->num_sensors == 0) {
+	if (output_platform_file_defined && platform != NULL && platform->num_sensors == 0) {
 		status =
 		    mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_NONE, NULL, NULL, NULL,
 		                           (MB_SENSOR_CAPABILITY1_POSITION + MB_SENSOR_CAPABILITY1_DEPTH + MB_SENSOR_CAPABILITY1_HEAVE +
@@ -1657,7 +1657,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* write out the platform file */
-	if (status == MB_SUCCESS && output_platform_file_defined == true) {
+	if (status == MB_SUCCESS && output_platform_file_defined) {
 		status = mb_platform_write(verbose, output_platform_file, (void *)platform, &error);
 	}
 
