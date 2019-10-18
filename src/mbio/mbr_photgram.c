@@ -268,7 +268,6 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	short checksum;
 	int *fileheader_initialized;
 	int *formatversion;
-	int swap = true;
 	int index;
 	int skip;
 
@@ -324,6 +323,8 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		skip++;
 	}
 
+
+	const bool swap = true;
 
 	/* if a valid record label has been found then read and parse it */
 	if (status == MB_SUCCESS) {
@@ -609,7 +610,6 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char buffer[MB_COMMENT_MAXLINE + 8];
 	size_t write_len;
 	int checksum = 0;
-	int swap = true;
 	int index;
 
 	if (verbose >= 2) {
@@ -641,6 +641,8 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			*fileheader_initialized = true;
 		}
 	}
+
+	const bool swap = true;
 
 	/* now write the data record */
 	if (status == MB_SUCCESS) {

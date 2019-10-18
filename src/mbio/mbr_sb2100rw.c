@@ -882,7 +882,6 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
-	static int line_save_flag = false;
 	static char raw_line[MBF_SB2100RW_MAXLINE] = "\0";
 	static int type = MBF_SB2100RW_NONE;
 
@@ -908,12 +907,12 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	int status = MB_SUCCESS;
-	bool done = false;
 	int expect = MBF_SB2100RW_NONE;
+	static bool line_save_flag = false;
+	bool done = false;
 	while (!done) {
-
 		/* get next record label */
-		if (line_save_flag == false) {
+		if (!line_save_flag) {
 			/* save position in file */
 			mb_io_ptr->file_bytes = ftell(mbfp);
 

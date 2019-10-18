@@ -8292,7 +8292,7 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 	/* set swap flag */
-	int swap = true;
+	const bool swap = true;
 
 	int status = MB_SUCCESS;
 	if (store->kind == MB_DATA_COMMENT || store->kind == MB_DATA_START || store->kind == MB_DATA_STOP) {

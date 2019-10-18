@@ -1984,12 +1984,12 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		*transducer_depth = store->RMBint_draft + store->RMBint_heave;
 
 		/* get altitude */
-		int altitude_found = false;
+		bool altitude_found = false;
 		if (mb_io_ptr->naltitude > 0) {
 			mb_altint_interp(verbose, mbio_ptr, store->time_d, altitudev, error);
 			altitude_found = true;
 		}
-		if (altitude_found == false) {
+		if (!altitude_found) {
 			/* get depth closest to nadir */
 			double xtrackmin = 999999.9;
 			for (int i = 0; i < store->RMB_num_beams; i++) {
@@ -2000,11 +2000,10 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			}
 		}
-		if (altitude_found == false) {
+		if (!altitude_found) {
 			*altitudev = 0.0;
 		}
 
-		/* set status */
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 
@@ -2013,7 +2012,6 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* deal with comment */
 	else if (*kind == MB_DATA_COMMENT) {
-		/* set status */
 		*error = MB_ERROR_COMMENT;
 		status = MB_FAILURE;
 	}

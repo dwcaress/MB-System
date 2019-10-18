@@ -770,7 +770,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 	bool done = false;
 	while (status == MB_SUCCESS && !done) {
 		/* find the next packet beginning */
-		int found = false;
+		bool found = false;
 		int skip = 0;
 		int read_len = fread(line, 1, 2, mb_io_ptr->mbfp);
 		if (read_len != 2) {
@@ -779,7 +779,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 		}
 		else if (((mb_u_char)line[0]) == 0xce && ((mb_u_char)line[1] == 0xfa))
 			found = true;
-		while (status == MB_SUCCESS && found == false) {
+		while (status == MB_SUCCESS && !found) {
 			line[0] = line[1];
 			read_len = fread(&(line[1]), 1, 1, mb_io_ptr->mbfp);
 			skip++;

@@ -192,7 +192,7 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	/* check for valid start byte and type */
 	const mb_u_char startbyte = label[0];
 	const mb_u_char typebyte = label[1];
-	int typegood = true;
+	bool typegood = true;
 	if (startbyte == EM2_START_BYTE &&
 	    (typebyte == EM2_ID_STOP2 || typebyte == EM2_ID_OFF || typebyte == EM2_ID_ON || typebyte == EM2_ID_EXTRAPARAMETERS ||
 	     typebyte == EM2_ID_ATTITUDE || typebyte == EM2_ID_CLOCK || typebyte == EM2_ID_BATH || typebyte == EM2_ID_SBDEPTH ||
@@ -208,15 +208,15 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		typegood = false;
 	}
 
-	int sonargood = true;
+	bool sonargood = true;
 
 	/* check for data byte swapping if necessary */
-	if (typegood == true && *databyteswapped == -1) {
+	if (typegood && *databyteswapped == -1) {
 		const short sonarunswap = *((short *)&label[2]);
 		const short sonarswap = mb_swap_short(sonarunswap);
 
 		/* check for valid sonarunswap */
-                int sonarunswapgood = true;
+                bool sonarunswapgood = true;
 		if (sonarunswap == MBSYS_SIMRAD2_EM120 || sonarunswap == MBSYS_SIMRAD2_EM300 || sonarunswap == MBSYS_SIMRAD2_EM1002 ||
 		    sonarunswap == MBSYS_SIMRAD2_EM2000 || sonarunswap == MBSYS_SIMRAD2_EM3000 ||
 		    sonarunswap == MBSYS_SIMRAD2_EM3000D_1 || sonarunswap == MBSYS_SIMRAD2_EM3000D_2 ||
@@ -231,7 +231,7 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		}
 
 		/* check for valid sonarswap */
-		int sonarswapgood = true;
+		bool sonarswapgood = true;
 		if (sonarswap == MBSYS_SIMRAD2_EM120 || sonarswap == MBSYS_SIMRAD2_EM300 || sonarswap == MBSYS_SIMRAD2_EM1002 ||
 		    sonarswap == MBSYS_SIMRAD2_EM2000 || sonarswap == MBSYS_SIMRAD2_EM3000 || sonarswap == MBSYS_SIMRAD2_EM3000D_1 ||
 		    sonarswap == MBSYS_SIMRAD2_EM3000D_2 || sonarswap == MBSYS_SIMRAD2_EM3000D_3 ||
@@ -244,13 +244,13 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			sonarswapgood = false;
 		}
 
-		if (sonarunswapgood == true && sonarswapgood == false) {
+		if (sonarunswapgood && !sonarswapgood) {
 			if (mb_io_ptr->byteswapped == true)
 				*databyteswapped = true;
 			else
 				*databyteswapped = false;
 		}
-		else if (sonarunswapgood == false && sonarswapgood == true) {
+		else if (!sonarunswapgood && sonarswapgood) {
 			if (mb_io_ptr->byteswapped == true)
 				*databyteswapped = false;
 			else
@@ -286,13 +286,13 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		sonargood = true;
 	}
 
-	if (startbyte == EM2_START_BYTE && typegood == false && sonargood == true) {
+	if (startbyte == EM2_START_BYTE && !typegood && sonargood) {
 		mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_BAD_DATAGRAM);
 		if (verbose >= 1)
 			fprintf(stderr, "Bad datagram type: %4.4hX %4.4hX | %d %d\n", *type, *sonar, *type, *sonar);
 	}
 	int status = MB_SUCCESS;
-	if (typegood != true || sonargood != true) {
+	if (!typegood || !sonargood) {
 		status = MB_FAILURE;
 	}
 
@@ -7879,7 +7879,7 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 
 	/* set swap flag */
-	int swap = false;
+	const bool swap = false;
 
 	int status = MB_SUCCESS;
 

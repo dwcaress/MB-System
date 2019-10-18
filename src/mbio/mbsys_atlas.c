@@ -870,7 +870,7 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 	if (*kind == MB_DATA_DATA) {
 		/* get transducer depth and altitude */
 		*transducer_depth = store->tt_draught + store->start_heave;
-		int found = false;
+		bool found = false;
 		double bath_best = 0.0;
 		double xtrack_min = 99999999.9;
 		for (int i = 0; i < store->tt_beam_cnt; i++) {
@@ -880,7 +880,7 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 				found = true;
 			}
 		}
-		if (found == false) {
+		if (!found) {
 			xtrack_min = 99999999.9;
 			for (int i = 0; i < store->tt_beam_cnt; i++) {
 				if (store->pr_beamflag[i] != MB_FLAG_NULL && fabs(store->pr_bathacrosstrack[i]) < xtrack_min) {
@@ -890,12 +890,11 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 				}
 			}
 		}
-		if (found == true)
+		if (found)
 			*altitude = bath_best - *transducer_depth;
 		else
 			*altitude = 0.0;
 
-		/* set status */
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 

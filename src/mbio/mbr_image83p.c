@@ -170,16 +170,6 @@ int mbr_dem_image83p(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
-	int index;
-	int swap = false;
-	short short_val;
-	int int_val;
-	int numberbytes, seconds_hundredths;
-	double degrees, minutes, dec_minutes;
-	double alpha, beta, theta, phi;
-	double soundspeed, rr, xx, zz;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -187,6 +177,15 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
+
+	char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
+	int index;
+	short short_val;
+	int int_val;
+	int numberbytes, seconds_hundredths;
+	double degrees, minutes, dec_minutes;
+	double alpha, beta, theta, phi;
+	double soundspeed, rr, xx, zz;
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -232,6 +231,8 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 	}
+
+	const bool swap = false;
 
 	/* read rest of record from file */
 	if (status == MB_SUCCESS) {
@@ -550,15 +551,6 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
-	int swap = false;
-	int seconds_hundredths;
-	int degrees;
-	double minutes;
-	char NorS;
-	int write_len = 0;
-	int index;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -566,6 +558,14 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
+
+	char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
+	int seconds_hundredths;
+	int degrees;
+	double minutes;
+	char NorS;
+	int write_len = 0;
+	int index;
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -627,6 +627,8 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	int status = MB_SUCCESS;
+
+	const bool swap = false;
 
 	/*  translate values from image83p data storage structure */
 	if (store != NULL) {

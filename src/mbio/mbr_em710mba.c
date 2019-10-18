@@ -245,8 +245,8 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	}
 
 	/* check for data byte swapping if necessary */
-	int sonarswapgood = false;
-	int sonarunswapgood = false;
+	bool sonarswapgood = false;
+	bool sonarunswapgood = false;
 	if (typegood == true && *databyteswapped == -1) {
 		const short sonarunswap = *((short *)&label[2]);
 		const short sonarswap = mb_swap_short(sonarunswap);
@@ -270,13 +270,13 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		else {
 			sonarswapgood = false;
 		}
-		if (sonarunswapgood == true && sonarswapgood == false) {
+		if (sonarunswapgood && !sonarswapgood) {
 			if (mb_io_ptr->byteswapped == true)
 				*databyteswapped = true;
 			else
 				*databyteswapped = false;
 		}
-		else if (sonarunswapgood == false && sonarswapgood == true) {
+		else if (!sonarunswapgood && sonarswapgood) {
 			if (mb_io_ptr->byteswapped == true)
 				*databyteswapped = false;
 			else
@@ -8524,7 +8524,7 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* figure out which storage structure to use */
 	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
-	int swap = true;
+	const bool swap = true;
 	int status = MB_SUCCESS;
 
 	if (store->kind == MB_DATA_COMMENT || store->kind == MB_DATA_START || store->kind == MB_DATA_STOP) {

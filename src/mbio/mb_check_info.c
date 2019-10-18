@@ -844,10 +844,10 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
 	double xtrackmin = 0.0;
 	double xtrackmax = 0.0;
 	double distmin = 0.0;
-	int found = false;
+	bool found = false;
 	for (int i = 0; i < nbath; i++) {
 		if ((checkgood && mb_beam_ok(beamflag[i])) || !mb_beam_check_flag_unusable(beamflag[i])) {
-			if (found == false) {
+			if (!found) {
 				*ibeamport = i;
 				*ibeamcntr = i;
 				*ibeamstbd = i;
@@ -880,7 +880,7 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
 	found = false;
 	for (int i = 0; i < nss; i++) {
 		if (ss[i] > 0.0) {
-			if (found == false) {
+			if (!found) {
 				*ipixelport = i;
 				*ipixelcntr = i;
 				*ipixelstbd = i;
@@ -1043,9 +1043,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 		mb_get_format(verbose, read_file, NULL, format, error);
 
 	/* determine whether to read one file or a list of files */
-	int read_datalist = false;
-	if (*format < 0)
-		read_datalist = true;
+	const bool read_datalist = *format < 0;
 
 	/* open file list */
 	char swathfile[MB_PATH_MAXLINE];
@@ -1053,7 +1051,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 	int read_data;
 	char dfile[MB_PATH_MAXLINE];
 	int status = MB_SUCCESS;
-	if (read_datalist == true) {
+	if (read_datalist) {
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, error)) != MB_SUCCESS) {
 			*error = MB_ERROR_OPEN_FAIL;
@@ -1188,7 +1186,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 			status = mb_memory_list(verbose, error);
 
 		/* figure out whether and what to read next */
-		if (read_datalist == true) {
+		if (read_datalist) {
 			double file_weight;
 			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, format, &file_weight, error)) == MB_SUCCESS)
 				read_data = true;
@@ -1201,7 +1199,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == true)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, error);
 
 	/* check memory */

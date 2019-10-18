@@ -563,18 +563,15 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 		*transducer_depth = store->sonar_depth - store->heave;
 
 		/* get altitude from depth closest to nadir */
-		int altitude_found = false;
 		double xtrackmin = 999999.9;
 		*altitudev = 0.0;
 		for (int i = 0; i < store->num_proc_beams; i++) {
 			if (mb_beam_ok(store->beamflag[i]) && fabs(store->bathacrosstrack[i]) < xtrackmin) {
 				*altitudev = store->bath[i] - *transducer_depth;
-				altitude_found = true;
 				xtrackmin = fabs(store->bathacrosstrack[i]);
 			}
 		}
 
-		/* set status */
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 
@@ -583,14 +580,12 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 
 	/* deal with comment */
 	else if (*kind == MB_DATA_COMMENT) {
-		/* set status */
 		*error = MB_ERROR_COMMENT;
 		status = MB_FAILURE;
 	}
 
 	/* deal with other record type */
 	else {
-		/* set status */
 		*error = MB_ERROR_OTHER;
 		status = MB_FAILURE;
 	}

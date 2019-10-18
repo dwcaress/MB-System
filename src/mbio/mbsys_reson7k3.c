@@ -3921,12 +3921,8 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
   int ss_source = R7KRECID_None;
 
   /* kluge parameters */
-  int kluge_beampatternsnell = false;
   double kluge_beampatternsnellfactor = 1.0;
-  int kluge_soundspeedsnell = false;
   double kluge_soundspeedsnellfactor = 1.0;
-  int kluge_zeroAttitudecorrection = false;
-  int kluge_zeroalongtrackangles = false;
 
   /* variables for beam angle calculation */
   mb_3D_orientation tx_align;
@@ -4005,6 +4001,11 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
   /* get saved values */
   pixel_size = (double *)&mb_io_ptr->saved1;
   swath_width = (double *)&mb_io_ptr->saved2;
+
+  bool kluge_beampatternsnell = false;
+  bool kluge_soundspeedsnell = false;
+  bool kluge_zeroAttitudecorrection = false;
+  bool kluge_zeroalongtrackangles = false;
 
   /* get kluges */
   for (int i = 0; i < pars->n_kluge; i++) {
@@ -4517,7 +4518,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                                      time_d, &heave, &jAttitude, &interp_error);
 
     /* interpolate soundspeed */
-    if (pars->modify_soundspeed || kluge_soundspeedsnell == true) {
+    if (pars->modify_soundspeed || kluge_soundspeedsnell) {
       interp_status = mb_linear_interp(verbose, pars->soundspeed_time_d - 1, pars->soundspeed_soundspeed - 1, pars->n_soundspeed,
                                      time_d, &soundspeednew, &jsoundspeed, &interp_error);
     }
@@ -4695,20 +4696,20 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
       pitchr = DTR * pitch;
 
       /* zero atttitude correction if requested */
-      if (kluge_zeroAttitudecorrection == true) {
+      if (kluge_zeroAttitudecorrection) {
         rollr = 0.0;
         pitchr = 0.0;
       }
 
       /* zero alongtrack angles if requested */
-      if (kluge_zeroalongtrackangles == true) {
+      if (kluge_zeroalongtrackangles) {
         for (int i = 0; i < RawDetection->number_beams; i++) {
           BeamGeometry->angle_alongtrack[i] = 0.0;
         }
       }
 
       /* if requested apply kluge scaling of rx beam angles */
-      if (kluge_beampatternsnell == true) {
+      if (kluge_beampatternsnell) {
         /*
          * RawDetection record
          */
@@ -4739,7 +4740,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
       /* if requested apply kluge scaling of sound speed - which means
           changing beam angles by Snell's law and changing the sound
           speed used to calculate Bathymetry */
-      if (kluge_soundspeedsnell == true) {
+      if (kluge_soundspeedsnell) {
         /*
          * sound speed
          */
@@ -4747,7 +4748,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
         soundspeed *= kluge_soundspeedsnellfactor;
       }
 
-      if (pars->modify_soundspeed || kluge_soundspeedsnell == true) {
+      if (pars->modify_soundspeed || kluge_soundspeedsnell) {
         /* change the sound speed recorded for the current ping and
          * then use it to alter the beam angles and recalculated the
          * Bathymetry
@@ -8260,7 +8261,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
 //mbsys_reson7k3_print_SegmentedRawDetection(verbose, SegmentedRawDetection, error);
 //mbsys_reson7k3_print_SnippetBackscatteringStrength(verbose, SnippetBackscatteringStrength, error);
       int ibeamdetectindex = 0;
-      int processbeam = false;
+      bool processbeam = false;
       for (int i = 0; i < SnippetBackscatteringStrength->number_beams; i++) {
         snippetbackscatteringstrengthdata = (s7k3_snippetbackscatteringstrengthdata *) &(SnippetBackscatteringStrength->snippetbackscatteringstrengthdata[i]);
         processbeam = false;
@@ -8269,8 +8270,8 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
         if (store->read_RawDetection == true) {
 
           // search RawDetection record for the associated sounding
-          int found = false;
-          for (int j = ibeamdetectindex; j < RawDetection->number_beams && found == false; j++) {
+          bool found = false;
+          for (int j = ibeamdetectindex; j < RawDetection->number_beams && !found; j++) {
             if ((RawDetection->rawdetectiondata[j].beam_descriptor == snippetbackscatteringstrengthdata->beam_number)
                 && ((RawDetection->rawdetectiondata[j].flags & 0x40) == 0)) {
               ibeamdetectindex = j;
@@ -8278,7 +8279,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
             }
           }
           // Now get altitude, xtrack, range, and angle from the sounding detection
-          if (found == true && mb_beam_ok(beamflag[ibeamdetectindex])) {
+          if (found && mb_beam_ok(beamflag[ibeamdetectindex])) {
             processbeam = true;
             rawdetectiondata = &(RawDetection->rawdetectiondata[ibeamdetectindex]);
             bathydata = &(RawDetection->bathydata[ibeamdetectindex]);
@@ -8294,8 +8295,8 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
         else if (store->read_SegmentedRawDetection == true) {
 
           // search SegmentedRawDetection record for the associated sounding
-          int found = false;
-          for (int j = ibeamdetectindex; j < SegmentedRawDetection->n_rx && found == false; j++) {
+          bool found = false;
+          for (int j = ibeamdetectindex; j < SegmentedRawDetection->n_rx && !found; j++) {
             if ((SegmentedRawDetection->segmentedrawdetectionrxdata[j].beam_number == snippetbackscatteringstrengthdata->beam_number)
                 && ((SegmentedRawDetection->segmentedrawdetectionrxdata[j].flags2 & 0x4000) == 0)) {
               ibeamdetectindex = j;
@@ -8304,7 +8305,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
           }
 
           // Now get altitude, xtrack, range, and angle from the sounding detection
-          if (found == true && mb_beam_ok(beamflag[ibeamdetectindex])) {
+          if (found && mb_beam_ok(beamflag[ibeamdetectindex])) {
             processbeam = true;
             segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[ibeamdetectindex]);
             segmentedrawdetectiontxdata = &(SegmentedRawDetection->segmentedrawdetectiontxdata[segmentedrawdetectionrxdata->used_segment-1]);
@@ -8318,7 +8319,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
         }
 
         // Define the snippet samples to use and calculate the geometry
-        if (processbeam == true) {
+        if (processbeam) {
           nsample = snippetbackscatteringstrengthdata->end_sample - snippetbackscatteringstrengthdata->begin_sample + 1;
           beam_foot = range * sin(DTR * beamwidth) / cos(DTR * angle);
           sint = fabs(sin(DTR * angle));
@@ -8360,7 +8361,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
 //mbsys_reson7k3_print_SegmentedRawDetection(verbose, SegmentedRawDetection, error);
 //mbsys_reson7k3_print_Snippet(verbose, Snippet, error);
       int ibeamdetectindex = 0;
-      int processbeam = false;
+      bool processbeam = false;
       for (int i = 0; i < Snippet->number_beams; i++) {
         snippetdata = (s7k3_snippetdata *) &(Snippet->snippetdata[i]);
         processbeam = false;
@@ -8369,8 +8370,8 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
         if (store->read_RawDetection == true) {
 
           // search RawDetection record for the associated sounding
-          int found = false;
-          for (int j = ibeamdetectindex; j < RawDetection->number_beams && found == false; j++) {
+          bool found = false;
+          for (int j = ibeamdetectindex; j < RawDetection->number_beams && !found; j++) {
             if ((RawDetection->rawdetectiondata[j].beam_descriptor == snippetdata->beam_number)
                 && ((RawDetection->rawdetectiondata[j].flags & 0x40) == 0)) {
               ibeamdetectindex = j;
@@ -8378,7 +8379,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
             }
           }
           // Now get altitude, xtrack, range, and angle from the sounding detection
-          if (found == true && mb_beam_ok(beamflag[ibeamdetectindex])) {
+          if (found && mb_beam_ok(beamflag[ibeamdetectindex])) {
             processbeam = true;
             rawdetectiondata = &(RawDetection->rawdetectiondata[ibeamdetectindex]);
             bathydata = &(RawDetection->bathydata[ibeamdetectindex]);
@@ -8394,8 +8395,8 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
         else if (store->read_SegmentedRawDetection == true) {
 
           // search SegmentedRawDetection record for the associated sounding
-          int found = false;
-          for (int j = ibeamdetectindex; j < SegmentedRawDetection->n_rx && found == false; j++) {
+          bool found = false;
+          for (int j = ibeamdetectindex; j < SegmentedRawDetection->n_rx && !found; j++) {
             if ((SegmentedRawDetection->segmentedrawdetectionrxdata[j].beam_number == snippetdata->beam_number)
                 && ((SegmentedRawDetection->segmentedrawdetectionrxdata[j].flags2 & 0x4000) == 0)) {
               ibeamdetectindex = j;
@@ -8404,7 +8405,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
           }
 
           // Now get altitude, xtrack, range, and angle from the sounding detection
-          if (found == true && mb_beam_ok(beamflag[ibeamdetectindex])) {
+          if (found && mb_beam_ok(beamflag[ibeamdetectindex])) {
             processbeam = true;
             segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[ibeamdetectindex]);
             segmentedrawdetectiontxdata = &(SegmentedRawDetection->segmentedrawdetectiontxdata[segmentedrawdetectionrxdata->used_segment-1]);
@@ -8418,7 +8419,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
         }
 
         // Define the snippet samples to use and calculate the geometry
-        if (processbeam == true) {
+        if (processbeam) {
           nsample = snippetdata->end_sample - snippetdata->begin_sample + 1;
           beam_foot = range * sin(DTR * beamwidth) / cos(DTR * angle);
           sint = fabs(sin(DTR * angle));
@@ -8502,7 +8503,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
       for (int i = sample_start; i < sample_end; i++) {
         range = ((double)i) / ((double)SonarSettings->sample_rate);
         found = false;
-        for (int j = irange; j > 0 && found == false; j--) {
+        for (int j = irange; j > 0 && !found; j--) {
           if (range >= rangetable[j] && range < rangetable[j - 1]) {
             irange = j;
             found = true;
@@ -8534,7 +8535,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
       for (int i = sample_start; i < sample_end; i++) {
         range = ((double)i) / ((double)SonarSettings->sample_rate);
         found = false;
-        for (int j = irange; j < nrangetable - 1 && found == false; j++) {
+        for (int j = irange; j < nrangetable - 1 && !found; j++) {
           if (range >= rangetable[j] && range < rangetable[j + 1]) {
             irange = j;
             found = true;
@@ -8607,7 +8608,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
       for (int i = sample_start; i < sample_end; i++) {
         range = ((double)i) / ((double)SonarSettings->sample_rate);
         found = false;
-        for (int j = irange; j > 0 && found == false; j--) {
+        for (int j = irange; j > 0 && !found; j--) {
           if (range >= rangetable[j] && range < rangetable[j - 1]) {
             irange = j;
             found = true;
@@ -8639,7 +8640,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
       for (int i = sample_start; i < sample_end; i++) {
         range = ((double)i) / ((double)SonarSettings->sample_rate);
         found = false;
-        for (int j = irange; j < nrangetable - 1 && found == false; j++) {
+        for (int j = irange; j < nrangetable - 1 && !found; j++) {
           if (range >= rangetable[j] && range < rangetable[j + 1]) {
             irange = j;
             found = true;
