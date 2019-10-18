@@ -542,7 +542,7 @@ int mbr_3dwisslr_index_data
     /* read and check two bytes until a valid record_id is found */
     read_len = (size_t)sizeof(short);
     buffer = mb_io_ptr->raw_data;
-    int valid_id = false;
+    bool valid_id = false;
     int skip = 0;
 
 #ifdef MBF_3DWISSLR_DEBUG
@@ -594,7 +594,7 @@ int mbr_3dwisslr_index_data
         store->record_id = 0;
         }
       }
-    while (status == MB_SUCCESS && valid_id == false);
+    while (status == MB_SUCCESS && !valid_id);
 #ifdef MBF_3DWISSLR_DEBUG
     fprintf(stderr,
       "%s:%s():%d RECORD ID: %x %d skip:%d valid_id:%d status:%d error:%d\n",

@@ -7700,7 +7700,7 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 
 	/* set swap flag */
-	int swap = false;
+	const bool swap = false;
 
 	int status = MB_SUCCESS;
 

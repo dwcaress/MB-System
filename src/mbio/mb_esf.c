@@ -157,21 +157,6 @@ int mb_esf_load(int verbose, const char *program_name, char *swathfile, int load
             to any existing esf file. Any
             existing esf file will be backed up first. */
 int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, int output, struct mb_esf_struct *esf, int *error) {
-	int status = MB_SUCCESS;
-	char command[MB_PATH_MAXLINE];
-	FILE *esffp;
-	struct stat file_status;
-	int fstat;
-	char fmode[16];
-	int header = true;
-
-	/* time, user, host variables */
-	time_t right_now;
-	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
-	mb_path esf_header;
-
-	int nedit;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -183,6 +168,20 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, 
 		fprintf(stderr, "dbg2       esf:           %p\n", (void *)esf);
 		fprintf(stderr, "dbg2       error:         %p\n", (void *)error);
 	}
+
+	int status = MB_SUCCESS;
+	char command[MB_PATH_MAXLINE];
+	FILE *esffp;
+	struct stat file_status;
+	int fstat;
+	char fmode[16];
+
+	/* time, user, host variables */
+	time_t right_now;
+	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	mb_path esf_header;
+
+	int nedit;
 
 	/* initialize the esf structure */
 	strcpy(esf->esffile, esffile);
@@ -319,7 +318,7 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, 
 
 	if (status == MB_SUCCESS && output != MBP_ESF_NOWRITE) {
 		/* check if esf file exists */
-		header = true;
+		bool header = true;
 		fstat = stat(esffile, &file_status);
 		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 			/* copy old edit save file to tmp file */
@@ -358,7 +357,7 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, 
 		}
 
 		/* if writing a new esf file then put version header at beginning */
-		if (status == MB_SUCCESS && header == true) {
+		if (status == MB_SUCCESS && header) {
 			memset(esf_header, 0, MB_PATH_MAXLINE);
 			right_now = time((time_t *)0);
 			strcpy(date, ctime(&right_now));

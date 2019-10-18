@@ -15133,7 +15133,6 @@ int mbr_reson7k3_wr_CompressedWaterColumn(int verbose, int *bufferalloc, char **
   s7k3_compressedwatercolumndata *compressedwatercolumndata;
   int index;
   char *buffer;
-  int segmentnumbersvalid = false;
   size_t size_beamheader, size_sample, nwrite;
 
   if (verbose >= 2) {
@@ -15154,6 +15153,7 @@ int mbr_reson7k3_wr_CompressedWaterColumn(int verbose, int *bufferalloc, char **
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_CompressedWaterColumn;
   size_beamheader = 6;
+  bool segmentnumbersvalid = false;
   if (CompressedWaterColumn->flags & 0x4000) {
     segmentnumbersvalid = true;
     size_beamheader++;
@@ -15224,7 +15224,7 @@ int mbr_reson7k3_wr_CompressedWaterColumn(int verbose, int *bufferalloc, char **
       compressedwatercolumndata = (s7k3_compressedwatercolumndata *)&(CompressedWaterColumn->compressedwatercolumndata[i]);
       mb_put_binary_short(false, compressedwatercolumndata->beam_number, &buffer[index]);
       index += 2;
-      if (segmentnumbersvalid == true) {
+      if (segmentnumbersvalid) {
         buffer[index] = compressedwatercolumndata->segment_number;
         index += 1;
       }
