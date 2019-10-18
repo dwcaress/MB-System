@@ -166,9 +166,9 @@ int main(int argc, char **argv) {
 
 	/* control parameters */
 	double areabounds[4];
-	int areaboundsset = false;
+	bool areaboundsset = false;
 	double binsize = 0.0;
-	int binsizeset = false;
+	bool binsizeset = false;
 	double mtodeglon;
 	double mtodeglat;
 	double dx, dy;
@@ -316,7 +316,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* if bounds not set get bounds of input data */
-	if (areaboundsset == false) {
+	if (!areaboundsset) {
 		formatread = format;
 		status = mb_get_info_datalist(verbose, read_file, &formatread, &mb_info, lonflip, &error);
 
@@ -325,7 +325,7 @@ int main(int argc, char **argv) {
 		areabounds[2] = mb_info.lat_min;
 		areabounds[3] = mb_info.lat_max;
 
-		if (binsizeset == false)
+		if (!binsizeset)
 			binsize = 0.2 * mb_info.altitude_max;
 	}
 

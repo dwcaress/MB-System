@@ -743,12 +743,12 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 		/* if ping flag set check for any unset
 		    beam flags - set or unset ping flag based on whether any
 		    unflagged beams are found */
-		int anyunflagged = false;
+		bool anyunflagged = false;
 		for (int i = 0; i < nbath; i++) {
 			if (mb_beam_ok(beamflag[i]))
 				anyunflagged = true;
 		}
-		if (anyunflagged == false)
+		if (!anyunflagged)
 			mb_ping->ping_flags = GSF_IGNORE_PING;
 		else
 			mb_ping->ping_flags = 0;

@@ -19,7 +19,6 @@
  *
  * Author:	D. W. Caress
  * Date:	March 1, 1993
- *
  */
 
 #include <stdio.h>
@@ -33,13 +32,13 @@
 /* memory allocation list variables */
 static const int MB_MEMORY_ALLOC_STEP = 100;
 #define MB_MEMORY_HEAP_MAX 10000
-static int mb_mem_debug = false;
+static bool mb_mem_debug = false;
 static int n_mb_alloc = 0;
 static void *mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
 static size_t mb_alloc_size[MB_MEMORY_HEAP_MAX];
 static mb_name mb_alloc_sourcefile[MB_MEMORY_HEAP_MAX];
 static int mb_alloc_sourceline[MB_MEMORY_HEAP_MAX];
-static int mb_alloc_overflow = false;
+static bool mb_alloc_overflow = false;
 
 /* Local debug define */
 /* #define MB_MEM_DEBUG 1 */
@@ -50,13 +49,13 @@ int mb_mem_debug_on(int verbose, int *error) {
 	/* turn debug output on */
 	mb_mem_debug = true;
 
-	if (verbose >= 2 || mb_mem_debug) {
+	/* if (verbose >= 2 || mb_mem_debug) */ {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
 
-	if (verbose >= 6 || mb_mem_debug) {
+	/* if (verbose >= 6 || mb_mem_debug) */ {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < n_mb_alloc; i++)
 			fprintf(stderr, "dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n", i, (void *)mb_alloc_ptr[i], mb_alloc_size[i],
@@ -65,7 +64,7 @@ int mb_mem_debug_on(int verbose, int *error) {
 
 	const int status = MB_SUCCESS;
 
-	if (verbose >= 2 || mb_mem_debug) {
+	/* if (verbose >= 2 || mb_mem_debug) */ {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -82,13 +81,13 @@ int mb_mem_debug_off(int verbose, int *error) {
 	/* turn debug output off */
 	mb_mem_debug = false;
 
-	if (verbose >= 2 || mb_mem_debug) {
+	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
 
-	if (verbose >= 6 || mb_mem_debug) {
+	if (verbose >= 6) {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < n_mb_alloc; i++)
 			fprintf(stderr, "dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n", i, (void *)mb_alloc_ptr[i], mb_alloc_size[i],
@@ -97,7 +96,7 @@ int mb_mem_debug_off(int verbose, int *error) {
 
 	const int status = MB_SUCCESS;
 
-	if (verbose >= 2 || mb_mem_debug) {
+	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -487,7 +486,7 @@ int mb_free(int verbose, void **ptr, int *error) {
 
 	/* else deallocate the memory if pointer is non-null and
 	    heap overflow has occurred */
-	else if (mb_alloc_overflow == true && *ptr != NULL) {
+	else if (mb_alloc_overflow && *ptr != NULL) {
 #ifdef MB_MEM_DEBUG
 		fprintf(stderr, "NOTICE: mbm_mem overflow pointer freed %d in function %s\n", *ptr, __func__);
 #endif
@@ -1046,8 +1045,8 @@ int mb_update_arrayptr(int verbose, void *mbio_ptr, void **handle, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* look for handle in registered arrays */
-	int found = false;
-	for (int i = 0; i < mb_io_ptr->n_regarray && found == false; i++) {
+	bool found = false;
+	for (int i = 0; i < mb_io_ptr->n_regarray && !found; i++) {
 		if (*handle == mb_io_ptr->regarray_oldptr[i]) {
 			*handle = mb_io_ptr->regarray_ptr[i];
 			found = true;

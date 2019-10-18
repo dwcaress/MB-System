@@ -87,8 +87,8 @@ int main(int argc, char **argv) {
 	double eta = ETA_DEF;
 	double ve = VE_DEF;
 	char viewdir = VIEWDIR_DEF;
-	int display_stats = true;
-	int display_scales = true;
+	bool display_stats = true;
+	bool display_scales = true;
 	double sin_eta, cos_eta;
 	double sin_alpha, cos_alpha;
 	double track_length, xscale, zscale, zscale_inch;
@@ -667,7 +667,7 @@ int main(int argc, char **argv) {
 	/* titles and such */
 	ps_setline(2); /* set line width */
 
-	if (display_stats == false) {
+	if (!display_stats) {
 		/* plot a title */
 		xl[0] = 0;
 		yl[0] = max_yp * scaling + .6;
@@ -699,7 +699,7 @@ int main(int argc, char **argv) {
 		ps_text(xl[0], yl[0], 15., label, 0., 6, 0);
 	} /* else after if display_stats */
 
-	if (display_scales == true) {
+	if (display_scales) {
 		/* plot the x-scale */
 		xscale = 10000; /* x scale in m */
 		if (track_length < 50000)

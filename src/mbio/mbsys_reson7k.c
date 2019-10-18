@@ -4640,14 +4640,10 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
   int ss_source = R7KRECID_None;
 
   /* kluge parameters */
-  int kluge_beampatternsnell = false;
   double kluge_beampatternsnellfactor = 1.0;
-  int kluge_soundspeedsnell = false;
   double kluge_soundspeedsnellfactor = 1.0;
-  int kluge_zeroattitudecorrection = false;
-  int kluge_zeroalongtrackangles = false;
 
-  /* variables for beam angle calculation */
+  /* Variables for beam angle calculation */
   mb_3D_orientation tx_align;
   mb_3D_orientation tx_orientation;
   double tx_steer;
@@ -4720,6 +4716,11 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
   /* get saved values */
   pixel_size = (double *)&mb_io_ptr->saved1;
   swath_width = (double *)&mb_io_ptr->saved2;
+
+  bool kluge_beampatternsnell = false;
+  bool kluge_soundspeedsnell = false;
+  bool kluge_zeroattitudecorrection = false;
+  bool kluge_zeroalongtrackangles = false;
 
   /* get kluges */
   for (int i = 0; i < pars->n_kluge; i++) {
@@ -5253,20 +5254,20 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           soundspeed = 1500.0;
 
         /* zero atttitude correction if requested */
-        if (kluge_zeroattitudecorrection == true) {
+        if (kluge_zeroattitudecorrection) {
           roll = 0.0;
           pitch = 0.0;
         }
 
         /* zero alongtrack angles if requested */
-        if (kluge_zeroalongtrackangles == true) {
+        if (kluge_zeroalongtrackangles) {
           for (int i = 0; i < bathymetry->number_beams; i++) {
             beamgeometry->angle_alongtrack[i] = 0.0;
           }
         }
 
         /* if requested apply kluge scaling of rx beam angles */
-        if (kluge_beampatternsnell == true) {
+        if (kluge_beampatternsnell) {
           /*
            * v2rawdetection record
            */
@@ -5319,7 +5320,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           soundspeed *= kluge_soundspeedsnellfactor;
         }
 
-        if (pars->modify_soundspeed || kluge_soundspeedsnell == true) {
+        if (pars->modify_soundspeed || kluge_soundspeedsnell) {
           /* change the sound speed recorded for the current ping and
            * then use it to alter the beam angles and recalculated the
            * bathymetry

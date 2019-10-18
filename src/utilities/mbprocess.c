@@ -501,16 +501,15 @@ int main(int argc, char **argv) {
 	struct mb_process_struct process;
 
 	/* processing variables */
-	int checkuptodate = true;
-	int testonly = false;
-	int printfilestatus = false;
-	int read_data = false;
+	bool checkuptodate = true;
+	bool testonly = false;
+	bool printfilestatus = false;
 	char read_file[MB_PATH_MAXLINE];
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_NO;
 	double file_weight;
-	int proceedprocess = false;
-	int outofdate = false;
+	bool proceedprocess = false;
+	bool outofdate = false;
 	double time_d_lastping = 0.0;
 	int ifilemodtime = 0;
 	int ofilemodtime = 0;
@@ -536,7 +535,7 @@ int main(int argc, char **argv) {
 	int variable_beams;
 	int traveltime;
 	int beam_flagging;
-	int calculatespeedheading = false;
+	bool calculatespeedheading = false;
 	int mbp_ifile_specified;
 	char mbp_ifile[MBP_FILENAMESIZE];
 	char mbp_pfile[MBP_FILENAMESIZE];
@@ -660,7 +659,7 @@ int main(int argc, char **argv) {
 	double *alongtrack_offset = NULL;
 
 	/* ssv handling variables */
-	int ssv_prelimpass = false;
+	bool ssv_prelimpass = false;
 	double ssv_default;
 	double ssv_start;
 
@@ -841,6 +840,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data = false;
 
 	/* open file list */
 	if (read_datalist) {
@@ -903,7 +903,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nProgram Operation:\n");
 		fprintf(stderr, "  Input file:      %s\n", read_file);
 		fprintf(stderr, "  Format:          %d\n", format);
-		if (checkuptodate == true)
+		if (checkuptodate)
 			fprintf(stderr, "  Files processed only if out of date.\n");
 		else
 			fprintf(stderr, "  All files processed.\n");
@@ -953,21 +953,21 @@ int main(int argc, char **argv) {
 		/* skip if processing cannot be inferred */
 		if (status == MB_FAILURE) {
 			proceedprocess = false;
-			if (verbose > 0 || testonly == true)
+			if (verbose > 0 || testonly)
 				fprintf(stderr, "Data skipped - processing unknown: %s\n", mbp_ifile);
 		}
 
 		/* skip if input file can't be read */
 		else if (ifilemodtime == 0) {
 			proceedprocess = false;
-			if (verbose > 0 || testonly == true)
+			if (verbose > 0 || testonly)
 				fprintf(stderr, "Data skipped - input file cannot be read: %s\n", mbp_ifile);
 		}
 
 		/* skip if parameter file can't be read */
 		else if (pfilemodtime == 0) {
 			proceedprocess = false;
-			if (verbose > 0 || testonly == true)
+			if (verbose > 0 || testonly)
 				fprintf(stderr, "Data skipped - parameter file cannot be read: %s\n", mbp_pfile);
 		}
 		/* check for up to date */
@@ -1024,9 +1024,9 @@ int main(int argc, char **argv) {
 				outofdate = true;
 
 			/* deal with information */
-			if (outofdate == true || checkuptodate == false) {
+			if (outofdate || !checkuptodate) {
 				/* not testing - do it for real */
-				if (testonly == false) {
+				if (!testonly) {
 					/* want to process, now try to set a lock of the file to be processed */
 					if (uselockfiles == true) {
 						lock_status =
@@ -1074,21 +1074,23 @@ int main(int argc, char **argv) {
 			}
 
 			/* write out information */
-			if (testonly == false) {
-				if (proceedprocess == true)
+			if (!testonly) {
+				// TODO(scwhehr): Simplify this.
+				if (proceedprocess)
 					string1 = str_process_yes;
-				else if (proceedprocess == false)
+				else if (!proceedprocess)
 					string1 = str_process_no;
 			}
 			else {
-				if (proceedprocess == true)
+				// TODO(scwhehr): Simplify this.
+				if (proceedprocess)
 					string1 = str_process_yes_test;
-				else if (proceedprocess == false)
+				else if (!proceedprocess)
 					string1 = str_process_no_test;
 			}
-			if (outofdate == true)
+			if (outofdate)
 				string2 = str_outofdate_yes;
-			else if (outofdate == false && checkuptodate == false)
+			else if (!outofdate && checkuptodate == false)
 				string2 = str_outofdate_overridden;
 			else
 				string2 = str_outofdate_no;
@@ -1105,8 +1107,8 @@ int main(int argc, char **argv) {
 			if (locked == true)
 				fprintf(stderr, "\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", lock_program, lock_user, lock_cpu,
 				        lock_date);
-			if (testonly == true || verbose > 0 || printfilestatus == true) {
-				if (outofdate == true)
+			if (testonly || verbose > 0 || printfilestatus) {
+				if (outofdate)
 					fprintf(stderr, "\tFile Status: out of date\n");
 				else
 					fprintf(stderr, "\tFile Status: up to date\n");
@@ -1180,12 +1182,12 @@ int main(int argc, char **argv) {
 			}
 
 			/* reset proceedprocess if only testing */
-			if (testonly == true)
+			if (testonly)
 				proceedprocess = false;
 		}
 
 		/* now process the input file */
-		if (proceedprocess == true) {
+		if (proceedprocess) {
 
 			/* check for nav format with heading, speed, and draft merge */
 			if (process.mbp_nav_mode == MBP_NAV_ON &&
@@ -3687,7 +3689,7 @@ int main(int argc, char **argv) {
 					status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 					if (error == MB_ERROR_NO_ERROR)
 						ocomment++;
-					if (ssv_prelimpass == true) {
+					if (ssv_prelimpass) {
 						strncpy(comment, "\0", MBP_FILENAMESIZE);
 						sprintf(comment, "  SSV initial pass:   on");
 						status = mb_put_comment(verbose, ombio_ptr, comment, &error);
@@ -4800,7 +4802,7 @@ int main(int argc, char **argv) {
 						calculatespeedheading = true;
 				}
 				if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA || kind == nav_source) &&
-				    calculatespeedheading == true) {
+				    calculatespeedheading) {
 					if (process.mbp_nav_mode == MBP_NAV_ON) {
 						mb_coor_scale(verbose, nlat[itime - 1], &mtodeglon, &mtodeglat);
 						del_time = ntime[itime] - ntime[itime - 1];

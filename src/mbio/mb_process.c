@@ -1902,27 +1902,6 @@ int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *er
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, int *error) {
-	char ofile[MBP_FILENAMESIZE];
-	int format;
-	char line[MB_PATH_MAXLINE];
-	FILE *fp = NULL;
-	int unexpected_format = false;
-	int unexpected_output = false;
-	int missing_ifile = false;
-	int missing_ofile = false;
-	int missing_navfile = false;
-	int missing_navadjfile = false;
-	int missing_attitudefile = false;
-	int missing_sonardepthfile = false;
-	int missing_svpfile = false;
-	int missing_editfile = false;
-	int missing_tidefile = false;
-	struct stat statbuf;
-
-	/* output stream for basic stuff (stdout if verbose <= 1,
-	    output if verbose > 1) */
-	FILE *output;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1930,26 +1909,30 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 		fprintf(stderr, "dbg2       ifile:     %s\n", ifile);
 	}
 
-	/* set output stream */
-	if (verbose <= 1)
-		output = stdout;
-	else
-		output = stderr;
+	/* output stream for basic stuff (stdout if verbose <= 1,
+	    output if verbose > 1) */
+	FILE *output = verbose <= 1 ? stdout : stderr;
+
+	char ofile[MBP_FILENAMESIZE];
+	int format;
+	char line[MB_PATH_MAXLINE];
+	FILE *fp = NULL;
+	struct stat statbuf;
 
 	/* set no problem */
 	*nparproblem = 0;
 	*ndataproblem = 0;
-	unexpected_format = false;
-	unexpected_output = false;
-	missing_ifile = false;
-	missing_ofile = false;
-	missing_navfile = false;
-	missing_navadjfile = false;
-	missing_attitudefile = false;
-	missing_sonardepthfile = false;
-	missing_svpfile = false;
-	missing_editfile = false;
-	missing_tidefile = false;
+	bool unexpected_format = false;
+	bool unexpected_output = false;
+	bool missing_ifile = false;
+	bool missing_ofile = false;
+	bool missing_navfile = false;
+	bool missing_navadjfile = false;
+	bool missing_attitudefile = false;
+	bool missing_sonardepthfile = false;
+	bool missing_svpfile = false;
+	bool missing_editfile = false;
+	bool missing_tidefile = false;
 
 	/* check if input exists */
 	if (stat(ifile, &statbuf) != 0) {
@@ -2060,51 +2043,51 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 	/* output results */
 	if (*nparproblem > 0 && verbose > 0) {
 		fprintf(output, "\nParameter File Problems: %s\n", ifile);
-		if (unexpected_format == true)
+		if (unexpected_format)
 			fprintf(output, "\tUnexpected format: %d instead of %d\n", process.mbp_format, format);
-		if (unexpected_output == true)
+		if (unexpected_output)
 			fprintf(output, "\tUnexpected output: %s instead of %s\n", process.mbp_ofile, ofile);
-		if (missing_ifile == true)
+		if (missing_ifile)
 			fprintf(output, "\tMissing input file: %s does not exist\n", process.mbp_ifile);
-		if (missing_ofile == true)
+		if (missing_ofile)
 			fprintf(output, "\tMissing output file: %s does not exist\n", process.mbp_ofile);
-		if (missing_navfile == true)
+		if (missing_navfile)
 			fprintf(output, "\tMissing nav file: %s does not exist\n", process.mbp_navfile);
-		if (missing_navadjfile == true)
+		if (missing_navadjfile)
 			fprintf(output, "\tMissing navadj file: %s does not exist\n", process.mbp_navadjfile);
-		if (missing_attitudefile == true)
+		if (missing_attitudefile)
 			fprintf(output, "\tMissing attitude file: %s does not exist\n", process.mbp_attitudefile);
-		if (missing_sonardepthfile == true)
+		if (missing_sonardepthfile)
 			fprintf(output, "\tMissing sonardepth file: %s does not exist\n", process.mbp_sonardepthfile);
-		if (missing_svpfile == true)
+		if (missing_svpfile)
 			fprintf(output, "\tMissing svp file: %s does not exist\n", process.mbp_svpfile);
-		if (missing_editfile == true)
+		if (missing_editfile)
 			fprintf(output, "\tMissing edit file: %s does not exist\n", process.mbp_editfile);
-		if (missing_tidefile == true)
+		if (missing_tidefile)
 			fprintf(output, "\tMissing tide file: %s does not exist\n", process.mbp_tidefile);
 	}
 	else if (*nparproblem > 0) {
-		if (unexpected_format == true)
+		if (unexpected_format)
 			fprintf(output, "%s : Unexpected format : %d\n", process.mbp_ifile, process.mbp_format);
-		if (unexpected_output == true)
+		if (unexpected_output)
 			fprintf(output, "%s : Unexpected output : %s\n", process.mbp_ifile, process.mbp_ofile);
-		if (missing_ifile == true)
+		if (missing_ifile)
 			fprintf(output, "%s : Missing input file : %s\n", process.mbp_ifile, process.mbp_ifile);
-		if (missing_ofile == true)
+		if (missing_ofile)
 			fprintf(output, "%s : Missing output file : %s\n", process.mbp_ifile, process.mbp_ofile);
-		if (missing_navfile == true)
+		if (missing_navfile)
 			fprintf(output, "%s : Missing nav file : %s\n", process.mbp_ifile, process.mbp_navfile);
-		if (missing_navadjfile == true)
+		if (missing_navadjfile)
 			fprintf(output, "%s : Missing navadj file : %s\n", process.mbp_ifile, process.mbp_navadjfile);
-		if (missing_attitudefile == true)
+		if (missing_attitudefile)
 			fprintf(output, "%s : Missing attitude file : %s\n", process.mbp_ifile, process.mbp_attitudefile);
-		if (missing_sonardepthfile == true)
+		if (missing_sonardepthfile)
 			fprintf(output, "%s : Missing sonardepth file : %s\n", process.mbp_ifile, process.mbp_sonardepthfile);
-		if (missing_svpfile == true)
+		if (missing_svpfile)
 			fprintf(output, "%s : Missing svp file : %s\n", process.mbp_ifile, process.mbp_svpfile);
-		if (missing_editfile == true)
+		if (missing_editfile)
 			fprintf(output, "%s : Missing edit file : %s\n", process.mbp_ifile, process.mbp_editfile);
-		if (missing_tidefile == true)
+		if (missing_tidefile)
 			fprintf(output, "%s : Missing tide file : %s\n", process.mbp_ifile, process.mbp_tidefile);
 	}
 
@@ -4401,10 +4384,6 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y, int *error) {
-	int inside = true;
-	double ax, ay, bx, by;
-	double z1, z2, z3, z4, z;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4426,7 +4405,8 @@ int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y,
 	    quad point to the candidate point - if all four cross
 	    product z components are positive, the point is inside
 	    the quad */
-	inside = true;
+	double ax, ay, bx, by;
+	double z1, z2, z3, z4, z;
 
 	ax = x[1] - x[0];
 	ay = y[1] - y[0];
@@ -4453,6 +4433,7 @@ int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y,
 	z4 = ax * by - ay * bx;
 
 	z = z1 * z2 * z3 * z4;
+	bool inside = true;
 	if (z <= 0.0)
 		inside = false;
 

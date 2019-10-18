@@ -692,7 +692,7 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
-	static int line_save_flag = false;
+	static bool line_save_flag = false;
 	static char raw_line[MBF_HSATLRAW_MAXLINE] = "\0";
 	static int type = MBF_HSATLRAW_NONE;
 	static int shift = 0;
@@ -724,7 +724,7 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	while (!done) {
 
 		/* get next record label */
-		if (line_save_flag == false) {
+		if (!line_save_flag) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			status = mbr_hsatlraw_rd_label(verbose, mbfp, raw_line, &type, &shift, error);
 		}
@@ -2483,16 +2483,16 @@ int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* check if there are data to output */
-	int datacheck = false;
+	bool datacheck = false;
 	for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 		if (data->time[i] > 0)
 			datacheck = true;
 
-	if (verbose >= 5 && datacheck == false) {
+	if (verbose >= 5 && !datacheck) {
 		fprintf(stderr, "\ndbg5  No values to be written in MBIO function <%s>\n", __func__);
 	}
 
-	if (verbose >= 5 && datacheck == true) {
+	if (verbose >= 5 && datacheck) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
@@ -2521,11 +2521,11 @@ int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error
 	int status = MB_SUCCESS;
 
 	/* write the record label */
-	if (datacheck == true)
+	if (datacheck)
 		status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNSLZT, error);
 
 	/* write out the data */
-	if (status == MB_SUCCESS && datacheck == true) {
+	if (status == MB_SUCCESS && datacheck) {
 		/* output the event line */
 		fprintf(mbfp, "%+12.7f", data->lon);
 		fprintf(mbfp, "%+12.7f", data->lat);
@@ -2684,16 +2684,16 @@ int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* check if there are data to output */
-	int datacheck = false;
+	bool datacheck = false;
 	for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 		if (data->amplitude[i] > 0)
 			datacheck = true;
 
-	if (verbose >= 5 && datacheck == false) {
+	if (verbose >= 5 && !datacheck) {
 		fprintf(stderr, "\ndbg5  No values to be written in MBIO function <%s>\n", __func__);
 	}
 
-	if (verbose >= 5 && datacheck == true) {
+	if (verbose >= 5 && datacheck) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
@@ -2735,11 +2735,11 @@ int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error
 	int status = MB_SUCCESS;
 
 	/* write the record label */
-	if (datacheck == true)
+	if (datacheck)
 		status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNAMPL, error);
 
 	/* write out the data */
-	if (status == MB_SUCCESS && datacheck == true) {
+	if (status == MB_SUCCESS && datacheck) {
 		/* output the event line */
 		fprintf(mbfp, "%+12.7f", data->lon);
 		fprintf(mbfp, "%+12.7f", data->lat);

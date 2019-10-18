@@ -145,11 +145,9 @@ int main(int argc, char **argv) {
 	int svp_printmode;
 	int svp_force_zero;
 	int svp_file_output;
-	int output_as_table = false;
+	bool output_as_table = false;
 
 	/* SVP values */
-	int svp_match_last = false;
-	int svp_loaded = false;
 	int svp_setprocess;
 	int svp_save_count;
 	struct mbsvplist_svp_struct svp;
@@ -165,15 +163,14 @@ int main(int argc, char **argv) {
 	int svp_repeat_in_file;
 	int svp_unique;
 	int svp_unique_tot;
-	int output_counts = false;
+	bool output_counts = false;
 	int out_cnt = 0;
 	int min_num_pairs = 0;
 	int svp_time_i[7];
-	int ssv_bounds_set = false;
+	bool ssv_bounds_set = false;
 	double ssv_bounds[4];
 
 	/* ttimes values */
-	int ssv_output = false;
 	int nbeams;
 	double *ttimes = NULL;
 	double *angles = NULL;
@@ -185,7 +182,6 @@ int main(int argc, char **argv) {
 
 	time_t right_now;
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	int read_data;
 	int j, isvp;
 
 	/* get current default values */
@@ -199,7 +195,7 @@ int main(int argc, char **argv) {
 	svp_file_output = false;
 	svp_setprocess = false;
 	svp_force_zero = false;
-	ssv_output = false;
+	bool ssv_output = false;
 	svp_read_tot = 0;
 	svp_written_tot = 0;
 	svp_unique_tot = 0;
@@ -353,6 +349,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -372,8 +369,11 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
+	bool svp_match_last = false;
+	bool svp_loaded = false;
+
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 		/* check format and get data sources */
 		if ((status = mb_format_source(verbose, &format, &platform_source, &nav_source, &sensordepth_source, &heading_source,
 		                               &attitude_source, &svp_source, &error)) == MB_FAILURE) {
@@ -437,7 +437,7 @@ int main(int argc, char **argv) {
 
 		/* output info */
 		if (verbose >= 1) {
-			if (ssv_output == true)
+			if (ssv_output)
 				fprintf(stderr, "\nSearching %s for SSV records\n", file);
 			else
 				fprintf(stderr, "\nSearching %s for SVP records\n", file);
@@ -503,7 +503,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* force zero depth if requested */
-				if (svp_loaded == true && svp.n > 0 && svp_force_zero == true && svp.depth[0] != 0.0) {
+				if (svp_loaded && svp.n > 0 && svp_force_zero == true && svp.depth[0] != 0.0) {
 					svp.depthzero = svp.depth[0];
 					svp.depth[0] = 0.0;
 					svp.depthzero_reset = true;
@@ -511,9 +511,9 @@ int main(int argc, char **argv) {
 
 				/* check if the svp is a duplicate to a previous svp
 				    in the same file */
-				if (svp_loaded == true) {
+				if (svp_loaded) {
 					svp_match_last = false;
-					for (j = 0; j < svp_save_count && svp_match_last == true; j++) {
+					for (j = 0; j < svp_save_count && svp_match_last; j++) {
 						if (svp.n == svp_save[j].n && memcmp(svp.depth, svp_save[j].depth, svp.n) == 0 &&
 						    memcmp(svp.velocity, svp_save[j].velocity, svp.n) == 0) {
 							svp_match_last = true;
@@ -524,7 +524,7 @@ int main(int argc, char **argv) {
 
 				/* check if the svp is a duplicate to the previous svp
 				    whether from the same file or a previous file */
-				if (svp_loaded == true) {
+				if (svp_loaded) {
 					/* check if svp is the same as the previous */
 					if (svp.n == svp_last.n && memcmp(svp.depth, svp_last.depth, svp.n) == 0 &&
 					    memcmp(svp.velocity, svp_last.velocity, svp.n) == 0) {
@@ -546,7 +546,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* if the svp is unique so far, save it in memory */
-				if (svp_loaded == true && svp_match_last == false && svp.n >= min_num_pairs) {
+				if (svp_loaded && !svp_match_last && svp.n >= min_num_pairs) {
 					/* allocate memory as needed */
 					if (svp_save_count >= svp_save_alloc) {
 						svp_save_alloc += MBSVPLIST_SVP_NUM_ALLOC;
@@ -596,14 +596,14 @@ int main(int argc, char **argv) {
 				}
 
 				/* if desired output ssv_output */
-				if (ssv_output == true) {
+				if (ssv_output) {
 					/* extract ttimes */
 					status = mb_ttimes(verbose, mbio_ptr, store_ptr, &kind, &nbeams, ttimes, angles, angles_forward, angles_null,
 					                   heave, alongtrack_offset, &sonardepth, &ssv, &error);
 
 					/* output ssv */
 					if (status == MB_SUCCESS) {
-						if (ssv_bounds_set == false || (navlon >= ssv_bounds[0] && navlon <= ssv_bounds[1] &&
+						if (!ssv_bounds_set || (navlon >= ssv_bounds[0] && navlon <= ssv_bounds[1] &&
 						                                navlat >= ssv_bounds[2] && navlat <= ssv_bounds[3]))
 							fprintf(stdout, "%f %f\n", sonardepth, ssv);
 					}
@@ -615,7 +615,7 @@ int main(int argc, char **argv) {
 		status = mb_close(verbose, &mbio_ptr, &error);
 
 		/* output svps from this file if there are any and ssv_output and output_counts are false */
-		if (svp_save_count > 0 && ssv_output == false && output_counts == false) {
+		if (svp_save_count > 0 && !ssv_output && !output_counts) {
 			for (isvp = 0; isvp < svp_save_count; isvp++) {
 				if (svp_save[isvp].n >= min_num_pairs &&
 				    ((svp_printmode == MBSVPLIST_PRINTMODE_CHANGE &&
@@ -637,7 +637,7 @@ int main(int argc, char **argv) {
 					mb_get_date(verbose, svp_save[isvp].time_d, svp_time_i);
 
 					/* print out the svp */
-					if (output_as_table == true) /* output csv table to stdout */
+					if (output_as_table) /* output csv table to stdout */
 					{
 						if (out_cnt == 0) /* output header records */
 						{
@@ -743,7 +743,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Total %d SVP unique records found\n", svp_unique_tot);
 		fprintf(stderr, "Total %d SVP records written\n", svp_written_tot);
 	}
-	if (output_counts == true)
+	if (output_counts)
 		fprintf(stdout, "%d\n", svp_unique_tot);
 
 	/* deallocate memory */

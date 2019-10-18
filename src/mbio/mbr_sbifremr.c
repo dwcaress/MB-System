@@ -171,8 +171,6 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 	static char line[MBF_SBIFREMR_MAXLINE];
-	static int line_save = false;
-	static int first = true;
 	static int ping_num_save = 0;
 	static double heading_save = 0.0;
 
@@ -201,12 +199,14 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 	*error = MB_ERROR_NO_ERROR;
 	int center = MBF_SBIFREMR_NUM_BEAMS / 2;
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+	static bool first = true;
+	static bool line_save = false;
 	bool done = false;
 	while (!done) {
 
 		char *result = NULL;
 		/* get next line */
-		if (line_save == false) {
+		if (!line_save) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			strncpy(line, "\0", MBF_SBIFREMR_MAXLINE);
 			result = fgets(line, MBF_SBIFREMR_MAXLINE, mbfp);
@@ -244,7 +244,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 			beam_num = 19 - beam_num;
 
 			/* check if new ping */
-			if (ping_num != ping_num_save && first == false) {
+			if (ping_num != ping_num_save && !first) {
 				done = true;
 				line_save = true;
 				first = true;

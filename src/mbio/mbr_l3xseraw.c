@@ -4002,10 +4002,6 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 	int group_cnt_index;
 	int frame_id;
 	int group_id;
-	int write_conductivity = false;
-	int write_salinity = false;
-	int write_temperature = false;
-	int write_pressure = false;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4147,6 +4143,11 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 		frame_count += group_count + 12;
 	}
 
+	bool write_conductivity = false;
+	bool write_salinity = false;
+	bool write_temperature = false;
+	bool write_pressure = false;
+
 	/* figure out which ctd groups are nonzero */
 	if (store->svp_nctd > 0) {
 		for (int i = 0; i < store->svp_nctd; i++) {
@@ -4162,7 +4163,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 	}
 
 	/* get conductivity group */
-	if (store->svp_nctd > 0 && write_conductivity == true) {
+	if (store->svp_nctd > 0 && write_conductivity) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -4205,7 +4206,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 	}
 
 	/* get salinity group */
-	if (store->svp_nctd > 0 && write_salinity == true) {
+	if (store->svp_nctd > 0 && write_salinity) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -4248,7 +4249,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 	}
 
 	/* get temperature group */
-	if (store->svp_nctd > 0 && write_temperature == true) {
+	if (store->svp_nctd > 0 && write_temperature) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -4291,7 +4292,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 	}
 
 	/* get pressure group */
-	if (store->svp_nctd > 0 && write_pressure == true) {
+	if (store->svp_nctd > 0 && write_pressure) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
