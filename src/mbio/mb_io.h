@@ -785,11 +785,11 @@ struct mb_buffer_struct {
 /* MBIO datalist control structure */
 #define MB_DATALIST_RECURSION_MAX 25
 struct mb_datalist_struct {
-  int open;
+  bool open;
   int recursion;
   int look_processed;
-  int local_weight;
-  int weight_set;
+  bool local_weight;
+  bool weight_set;
   double weight;
   FILE *fp;
   char path[MB_PATH_MAXLINE];

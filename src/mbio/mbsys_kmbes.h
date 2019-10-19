@@ -111,6 +111,7 @@
 /* X-datagrams */
 #define MBSYS_KMBES_X_MBSYSTEM                 "#XMB" // Indicates these data written by MB-System (MB-System only)
 #define MBSYS_KMBES_X_COMMENT                  "#XMC" // Comment datagram (MB-System only)
+#define MBSYS_KMBES_X_EXTENSION                "#XMT" // Multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
 #define MBSYS_KMBES_X_PSEUDOSIDESCAN           "#XMS" // Multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
 
 #define MBSYS_KMBES_SYNC_CHAR 0x23  // ascii "#"
@@ -141,6 +142,8 @@
 #define MBSYS_KMBES_CPO_VAR_OFFSET 72
 #define MBSYS_KMBES_IIP_VAR_OFFSET 30
 #define MBSYS_KMBES_IOP_VAR_OFFSET 30
+#define MBSYS_KMBES_XMT_PINGINFO_DATALENGTH 60
+#define MBSYS_KMBES_XMT_SOUNDING_DATALENGTH 24
 
 /*---------------------------------------------------------------*/
 /* Array size definitions (if needed for use in data reading and writing) */
@@ -1270,9 +1273,11 @@ struct mbsys_kmbes_ib {
 struct mbsys_kmbes_xmb {
     /* Definition of #XMB datagram indicating these data have been written by MB-System */
     struct mbsys_kmbes_header header;
-    int pseudosidescan_enabled;  /* Flag indicating ping data includes a pseudosidescan XMS datagram
+    int mbsystem_extensions;      /* Flag indicating ping data includes a pseudosidescan XMS datagram
                                     following the the MRZ datagrams */
-    char unused[28];
+    int watercolumn;              /* Flag indicating ping data includes water column MWC datagrams
+                                    following the the MRZ datagrams */
+    char unused[24];
     char version[MB_COMMENT_MAXLINE];          /* MB-System version string */
 };
 
@@ -1301,15 +1306,18 @@ struct mbsys_kmbes_xmc {
 
 struct mbsys_kmbes_xmt_ping_info {
     /* #XMTZ - ping info. Information on vessel/system level, i.e. information common to all beams in the current ping. */
-    unsigned short numBytesInfoData;    /* Number of bytes in current struct (32). */
-    unsigned short padding0;            /* Number of bytes per sounding entry (16) */
-    float longtitude;                   /* Sonar longtitude */
-    float latitude;                     /* Sonar latitude */
-    float sensorDepth;                  /* Sonar depth */
-    float heading;                      /* Sonar heading */
-    float roll;                         /* Sonar roll */
-    float pitch;                        /* Sonar pitch */
-    int numSoundings;                   /* number of soundings */
+    unsigned short numBytesInfoData;     /* Number of bytes in current struct (60). */
+    unsigned short numBytesPerSounding;  /* Number of bytes per sounding entry (16) */
+    int padding0;                        /* padding field */
+    double longitude;                   /* Sonar longtitude (degrees) */
+    double latitude;                     /* Sonar latitude (degrees) */
+    double sensordepth;                  /* Sonar depth (meters) */
+    double heading;                       /* Sonar heading (degrees) */
+    float speed;                         /* Sonar speed (m/s) */
+    float roll;                          /* Sonar roll (degrees) */
+    float pitch;                         /* Sonar pitch (degrees) */
+    float heave;                         /* Sonar heave (meters) */
+    int numSoundings;                    /* number of soundings */
 };
 
 struct mbsys_kmbes_xmt_sounding {
@@ -1324,6 +1332,11 @@ struct mbsys_kmbes_xmt_sounding {
                                             (degrees, zero = vertical down) */
     float angle_azimuthal;              /* Azimuthal beam angle for raytracing
                                             (degrees, zero = forward, positive clockwise) */
+    float beam_heave;                   /* Difference in sensordepth between ping
+                                            time and beam receive time */
+    float alongtrack_offset;            /* Alongtrack offset in the direction of
+                                            platform travel between ping time and beam receive time */
+
 };
 struct mbsys_kmbes_xmt {
     /* Definition of #XMT datagram containing corrected/interpolated navigation,
@@ -1331,6 +1344,7 @@ struct mbsys_kmbes_xmt {
        for each MRZ datagram (MB-System only) */
     struct mbsys_kmbes_header header;
     struct mbsys_kmbes_m_partition partition;
+    struct mbsys_kmbes_m_body cmnPart;
     struct mbsys_kmbes_xmt_ping_info xmtPingInfo;
     struct mbsys_kmbes_xmt_sounding xmtSounding[MBSYS_KMBES_MAX_NUM_BEAMS+MBSYS_KMBES_MAX_EXTRA_DET];
 };
@@ -1387,6 +1401,7 @@ struct mbsys_kmbes_index
     mbsys_kmbes_emdgm_type emdgm_type; // EM datagram type enumeration
     struct mbsys_kmbes_header header;  // EM datagram header
     long file_pos;                     // EM datagram file pointer position
+    int index_org;                     // original order in file
     int  ping_num;
     mb_u_char  rx_per_ping;            // Number of rx fans per ping (# of datagrams generated per ping)
     mb_u_char  rx_index;               // Index 0 is the aft swath, port side.
@@ -1471,6 +1486,9 @@ struct mbsys_kmbes_struct {
     int n_mrz_read;
     int n_mrz_needed;  // Number of MRZ datagrams for the current ping = mrz[mrz.cmnPart.rxFanIndex].cmnPart.rxFansPerPing
     struct mbsys_kmbes_mrz mrz[MBSYS_KMBES_MAX_NUM_MRZ_DGMS];
+
+    /* #XMT - MB-System corrected navigation, attitude, and beam travel times, and angles */
+    struct mbsys_kmbes_xmt xmt[MBSYS_KMBES_MAX_NUM_MRZ_DGMS];
 
     /* #XMS - MB-System pseudosidescan (included after MRZ datagrams when written by MB-System) */
     struct mbsys_kmbes_xms xms;

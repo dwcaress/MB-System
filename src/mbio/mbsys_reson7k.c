@@ -5066,12 +5066,11 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
         s7kTime.Hours = time_i[3];
         s7kTime.Minutes = time_i[4];
         s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
-        fprintf(stderr,
-                "Timestamp changed in function %s: "
-                "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
-                "| ping_number:%d\n",
-                __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
-                bathymetry->ping_number);
+        if (verbose > 1)
+          fprintf(stderr, "Timestamp changed in function %s: "
+                "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d | ping_number:%d\n",
+                __func__, time_i[0], time_i[1], time_i[2], time_i[3],
+                time_i[4], time_i[5], time_i[6], bathymetry->ping_number);
 
         /* apply the timestamp to all of the relevant data records */
         if (store->read_volatilesettings == true)

@@ -1388,8 +1388,8 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
       }
 
       /* check if new segment needed */
-      else if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR &&
-               (section->distance + distance >= project.section_length ||
+      else if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && file != NULL
+               && (section->distance + distance >= project.section_length ||
                 section->num_beams >= project.section_soundings)) {
         new_segment = true;
         /*fprintf(stderr, "NEW SEGMENT: section->distance:%f distance:%f project.section_length:%f\n",
@@ -1398,8 +1398,8 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 
       /* if end of segment or end of file resolve position
           of last snav point in last segment */
-      if ((error > MB_ERROR_NO_ERROR || new_segment == true) && project.num_files > 0 &&
-          (file->num_sections > 0 && section->num_pings > 0)) {
+      if ((error > MB_ERROR_NO_ERROR || new_segment == true) && project.num_files > 0
+          && file != NULL && (file->num_sections > 0 && section->num_pings > 0)) {
         /* resolve position of last snav point in last segment */
         if (section->num_snav == 1 ||
             (section->distance >= (section->num_snav - 0.5) * project.section_length / (MBNA_SNAV_NUM - 1))) {

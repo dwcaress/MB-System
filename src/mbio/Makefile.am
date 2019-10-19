@@ -184,6 +184,7 @@ libmbio_la_SOURCES += mbr_l3xseraw.c
 libmbio_la_SOURCES += mbr_mbarirov.c
 libmbio_la_SOURCES += mbr_mbarrov2.c
 libmbio_la_SOURCES += mbr_mbldeoih.c
+libmbio_la_SOURCES += mbr_mbarimb1.c
 libmbio_la_SOURCES += mbr_mbnetcdf.c
 libmbio_la_SOURCES += mbr_mbpronav.c
 libmbio_la_SOURCES += mbr_mgd77dat.c

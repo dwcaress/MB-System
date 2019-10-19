@@ -2318,7 +2318,7 @@ int mbr_emoldraw_wr_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *s
 		checksum = 0;
 		for (int j = 0; j < EM_START_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(false, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_START_SIZE - 2] = char_ptr[0];
 		line[EM_START_SIZE - 1] = char_ptr[1];
@@ -2445,7 +2445,7 @@ int mbr_emoldraw_wr_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *st
 		checksum = 0;
 		for (int j = 0; j < EM_STOP_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(false, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_STOP_SIZE - 2] = char_ptr[0];
 		line[EM_STOP_SIZE - 1] = char_ptr[1];
@@ -2571,7 +2571,7 @@ int mbr_emoldraw_wr_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		checksum = 0;
 		for (int j = 0; j < EM_PARAMETER_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(false, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_PARAMETER_SIZE - 2] = char_ptr[0];
 		line[EM_PARAMETER_SIZE - 1] = char_ptr[1];
@@ -2718,7 +2718,7 @@ int mbr_emoldraw_wr_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		checksum = 0;
 		for (int j = 0; j < EM_POS_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(false, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_POS_SIZE - 2] = char_ptr[0];
 		line[EM_POS_SIZE - 1] = char_ptr[1];
@@ -2804,14 +2804,14 @@ int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		/* construct record */
 		sprintf(line, "%2.2d%2.2d%2.2d", store->svp_day, store->svp_month, store->svp_year);
 		sprintf(line + 6, "%2.2d%2.2d%2.2d%2.2d", store->svp_hour, store->svp_minute, store->svp_second, store->svp_centisecond);
-		mb_put_binary_short(false, (short)store->svp_num, (void *)&line[14]);
+		mb_put_binary_short(true, (short)store->svp_num, (void *)&line[14]);
 		for (int i = 0; i < store->svp_num; i++) {
-			mb_put_binary_short(false, (short)store->svp_depth[i], (void *)&line[16 + 4 * i]);
-			mb_put_binary_short(false, (short)store->svp_vel[i], (void *)&line[18 + 4 * i]);
+			mb_put_binary_short(true, (short)store->svp_depth[i], (void *)&line[16 + 4 * i]);
+			mb_put_binary_short(true, (short)store->svp_vel[i], (void *)&line[18 + 4 * i]);
 		}
 		for (int i = store->svp_num; i < 100; i++) {
-			mb_put_binary_short(false, (short)0, (void *)&line[16 + 4 * i]);
-			mb_put_binary_short(false, (short)0, (void *)&line[18 + 4 * i]);
+			mb_put_binary_short(true, (short)0, (void *)&line[16 + 4 * i]);
+			mb_put_binary_short(true, (short)0, (void *)&line[18 + 4 * i]);
 		}
 		line[EM_SVP_SIZE - 3] = 0x03;
 
@@ -2820,7 +2820,7 @@ int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		checksum = 0;
 		for (int j = 0; j < EM_SVP_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(false, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_SVP_SIZE - 2] = char_ptr[0];
 		line[EM_SVP_SIZE - 1] = char_ptr[1];
@@ -2925,23 +2925,23 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 		/* construct record */
 		sprintf(line, "%2.2d%2.2d%2.2d", store->day, store->month, store->year);
 		sprintf(line + 6, "%2.2d%2.2d%2.2d%2.2d", store->hour, store->minute, store->second, store->centisecond);
-		mb_put_binary_short(false, (short)ping->ping_number, (void *)&line[14]);
+		mb_put_binary_short(true, (short)ping->ping_number, (void *)&line[14]);
 		line[16] = (char)ping->bath_mode;
 		line[17] = (char)ping->bath_quality;
-		mb_put_binary_short(false, (short)ping->keel_depth, (void *)&line[18]);
-		mb_put_binary_short(false, (short)ping->heading, (void *)&line[20]);
-		mb_put_binary_short(false, (short)ping->roll, (void *)&line[22]);
-		mb_put_binary_short(false, (short)ping->pitch, (void *)&line[24]);
-		mb_put_binary_short(false, (short)ping->xducer_pitch, (void *)&line[26]);
-		mb_put_binary_short(false, (short)ping->ping_heave, (void *)&line[28]);
-		mb_put_binary_short(false, (short)ping->sound_vel, (void *)&line[30]);
+		mb_put_binary_short(true, (short)ping->keel_depth, (void *)&line[18]);
+		mb_put_binary_short(true, (short)ping->heading, (void *)&line[20]);
+		mb_put_binary_short(true, (short)ping->roll, (void *)&line[22]);
+		mb_put_binary_short(true, (short)ping->pitch, (void *)&line[24]);
+		mb_put_binary_short(true, (short)ping->xducer_pitch, (void *)&line[26]);
+		mb_put_binary_short(true, (short)ping->ping_heave, (void *)&line[28]);
+		mb_put_binary_short(true, (short)ping->sound_vel, (void *)&line[30]);
 		for (int i = 0; i < MBSYS_EM1000_MAXBEAMS; i++) {
 			if (!mb_beam_ok(ping->beamflag[i]))
 				ping->bath[i] = 0;
-			mb_put_binary_short(false, (short)ping->bath[i], (void *)&beamarray[0]);
-			mb_put_binary_short(false, (short)ping->bath_acrosstrack[i], (void *)&beamarray[2]);
-			mb_put_binary_short(false, (short)ping->bath_alongtrack[i], (void *)&beamarray[4]);
-			mb_put_binary_short(false, (short)ping->tt[i], (void *)&beamarray[6]);
+			mb_put_binary_short(true, (short)ping->bath[i], (void *)&beamarray[0]);
+			mb_put_binary_short(true, (short)ping->bath_acrosstrack[i], (void *)&beamarray[2]);
+			mb_put_binary_short(true, (short)ping->bath_alongtrack[i], (void *)&beamarray[4]);
+			mb_put_binary_short(true, (short)ping->tt[i], (void *)&beamarray[6]);
 			beamarray[8] = (char)ping->amp[i];
 			beamarray[9] = (char)ping->quality[i];
 			beamarray[10] = (char)ping->heave[i];
@@ -2955,7 +2955,7 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 		checksum = 0;
 		for (int j = 0; j < EM_1000_BATH_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(false, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_1000_BATH_SIZE - 2] = char_ptr[0];
 		line[EM_1000_BATH_SIZE - 1] = char_ptr[1];
@@ -3064,24 +3064,24 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 		/* construct record */
 		sprintf(line, "%2.2d%2.2d%2.2d", store->day, store->month, store->year);
 		sprintf(line + 6, "%2.2d%2.2d%2.2d%2.2d", store->hour, store->minute, store->second, store->centisecond);
-		mb_put_binary_short(false, (short)ping->ping_number, (void *)&line[14]);
+		mb_put_binary_short(true, (short)ping->ping_number, (void *)&line[14]);
 		line[16] = (char)ping->bath_res;
 		line[17] = (char)ping->bath_quality;
-		mb_put_binary_short(false, (short)ping->keel_depth, (void *)&line[18]);
-		mb_put_binary_short(false, (short)ping->heading, (void *)&line[20]);
-		mb_put_binary_short(false, (short)ping->roll, (void *)&line[22]);
-		mb_put_binary_short(false, (short)ping->pitch, (void *)&line[24]);
-		mb_put_binary_short(false, (short)ping->ping_heave, (void *)&line[26]);
-		mb_put_binary_short(false, (short)ping->sound_vel, (void *)&line[28]);
+		mb_put_binary_short(true, (short)ping->keel_depth, (void *)&line[18]);
+		mb_put_binary_short(true, (short)ping->heading, (void *)&line[20]);
+		mb_put_binary_short(true, (short)ping->roll, (void *)&line[22]);
+		mb_put_binary_short(true, (short)ping->pitch, (void *)&line[24]);
+		mb_put_binary_short(true, (short)ping->ping_heave, (void *)&line[26]);
+		mb_put_binary_short(true, (short)ping->sound_vel, (void *)&line[28]);
 		line[30] = (char)ping->bath_mode;
 		line[31] = (char)0;
 		for (int i = 0; i < MBSYS_EM12_MAXBEAMS; i++) {
 			if (!mb_beam_ok(ping->beamflag[i]))
 				ping->bath[i] = 0;
-			mb_put_binary_short(false, (short)ping->bath[i], (void *)&beamarray[0]);
-			mb_put_binary_short(false, (short)ping->bath_acrosstrack[i], (void *)&beamarray[2]);
-			mb_put_binary_short(false, (short)ping->bath_alongtrack[i], (void *)&beamarray[4]);
-			mb_put_binary_short(false, (short)ping->tt[i], (void *)&beamarray[6]);
+			mb_put_binary_short(true, (short)ping->bath[i], (void *)&beamarray[0]);
+			mb_put_binary_short(true, (short)ping->bath_acrosstrack[i], (void *)&beamarray[2]);
+			mb_put_binary_short(true, (short)ping->bath_alongtrack[i], (void *)&beamarray[4]);
+			mb_put_binary_short(true, (short)ping->tt[i], (void *)&beamarray[6]);
 			beamarray[8] = (char)ping->amp[i];
 			beamarray[9] = (char)ping->quality[i];
 			beamarray[10] = (char)ping->heave[i];
@@ -3095,7 +3095,7 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 		checksum = 0;
 		for (int j = 0; j < EM_12S_BATH_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(false, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_12S_BATH_SIZE - 2] = char_ptr[0];
 		line[EM_12S_BATH_SIZE - 1] = char_ptr[1];
@@ -3208,7 +3208,7 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		/* construct record */
 		sprintf(line, "%2.2d%2.2d%2.2d", store->day, store->month, store->year);
 		sprintf(line + 6, "%2.2d%2.2d%2.2d%2.2d", store->hour, store->minute, store->second, store->centisecond);
-		mb_put_binary_short(false, (short)ping->ping_number, (void *)&line[14]);
+		mb_put_binary_short(true, (short)ping->ping_number, (void *)&line[14]);
 		line[16] = (char)ping->bath_mode;
 		line[17] = (char)ping->bath_quality;
 		line[18] = (char)ping->bath_num;
@@ -3217,12 +3217,12 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		line[21] = (char)ping->power_level;
 		line[22] = (char)ping->tx_status;
 		line[23] = (char)ping->rx_status;
-		mb_put_binary_short(false, (short)ping->keel_depth, (void *)&line[24]);
-		mb_put_binary_short(false, (unsigned short)ping->heading, (void *)&line[26]);
-		mb_put_binary_short(false, (short)ping->roll, (void *)&line[28]);
-		mb_put_binary_short(false, (short)ping->pitch, (void *)&line[30]);
-		mb_put_binary_short(false, (short)ping->ping_heave, (void *)&line[32]);
-		mb_put_binary_short(false, (short)ping->sound_vel, (void *)&line[34]);
+		mb_put_binary_short(true, (short)ping->keel_depth, (void *)&line[24]);
+		mb_put_binary_short(true, (unsigned short)ping->heading, (void *)&line[26]);
+		mb_put_binary_short(true, (short)ping->roll, (void *)&line[28]);
+		mb_put_binary_short(true, (short)ping->pitch, (void *)&line[30]);
+		mb_put_binary_short(true, (short)ping->ping_heave, (void *)&line[32]);
+		mb_put_binary_short(true, (short)ping->sound_vel, (void *)&line[34]);
 		line[36] = (char)ping->along_res;
 		line[37] = (char)ping->across_res;
 		line[38] = (char)ping->depth_res;
@@ -3230,10 +3230,10 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		for (int i = 0; i < MBSYS_EM121_MAXBEAMS; i++) {
 			if (!mb_beam_ok(ping->beamflag[i]))
 				ping->bath[i] = 0;
-			mb_put_binary_short(false, (short)ping->bath[i], (void *)&beamarray[0]);
-			mb_put_binary_short(false, (short)ping->bath_acrosstrack[i], (void *)&beamarray[2]);
-			mb_put_binary_short(false, (short)ping->bath_alongtrack[i], (void *)&beamarray[4]);
-			mb_put_binary_short(false, (short)ping->tt[i], (void *)&beamarray[6]);
+			mb_put_binary_short(true, (short)ping->bath[i], (void *)&beamarray[0]);
+			mb_put_binary_short(true, (short)ping->bath_acrosstrack[i], (void *)&beamarray[2]);
+			mb_put_binary_short(true, (short)ping->bath_alongtrack[i], (void *)&beamarray[4]);
+			mb_put_binary_short(true, (short)ping->tt[i], (void *)&beamarray[6]);
 			beamarray[8] = (char)ping->amp[i];
 			beamarray[9] = (char)ping->quality[i];
 			beamarray[10] = (char)ping->heave[i];
@@ -3247,7 +3247,7 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		checksum = 0;
 		for (int j = 0; j < EM_121_BATH_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(false, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_121_BATH_SIZE - 2] = char_ptr[0];
 		line[EM_121_BATH_SIZE - 1] = char_ptr[1];
@@ -3443,8 +3443,8 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 			/* construct record */
 			sprintf(line, "%2.2d%2.2d%2.2d", store->day, store->month, store->year);
 			sprintf(line + 6, "%2.2d%2.2d%2.2d%2.2d", store->hour, store->minute, store->second, store->centisecond);
-			mb_put_binary_short(false, (short)ping->ping_number, (void *)&line[14]);
-			mb_put_binary_short(false, (short)ping->sound_vel, (void *)&line[16]);
+			mb_put_binary_short(true, (short)ping->ping_number, (void *)&line[14]);
+			mb_put_binary_short(true, (short)ping->sound_vel, (void *)&line[16]);
 			line[18] = (char)ping->ss_mode;
 			line[19] = (char)num_datagrams;
 			odatagram = datagram + 1;
@@ -3455,8 +3455,8 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 				for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
 					line[22 + 6 * j] = (char)(i + 1);
 					line[23 + 6 * j] = (char)ping->beam_frequency[i];
-					mb_put_binary_short(false, (short)ping->beam_samples[i], (void *)&line[24 + 6 * j]);
-					mb_put_binary_short(false, (short)ping->beam_center_sample[i], (void *)&line[26 + 6 * j]);
+					mb_put_binary_short(true, (short)ping->beam_samples[i], (void *)&line[24 + 6 * j]);
+					mb_put_binary_short(true, (short)ping->beam_center_sample[i], (void *)&line[26 + 6 * j]);
 					j++;
 				}
 			}
@@ -3477,7 +3477,7 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 			checksum = 0;
 			for (int j = 0; j < EM_SS_SIZE - 3; j++)
 				checksum += uchar_ptr[j];
-			mb_put_binary_short(false, (short)checksum, (void *)&short_val);
+			mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 			char_ptr = (char *)&short_val;
 			line[EM_SS_SIZE - 2] = char_ptr[0];
 			line[EM_SS_SIZE - 1] = char_ptr[1];
@@ -3679,8 +3679,8 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 			/* construct record */
 			sprintf(line, "%2.2d%2.2d%2.2d", store->day, store->month, store->year);
 			sprintf(line + 6, "%2.2d%2.2d%2.2d%2.2d", store->hour, store->minute, store->second, store->centisecond);
-			mb_put_binary_short(false, (short)ping->ping_number, (void *)&line[14]);
-			mb_put_binary_short(false, (short)ping->sound_vel, (void *)&line[16]);
+			mb_put_binary_short(true, (short)ping->ping_number, (void *)&line[14]);
+			mb_put_binary_short(true, (short)ping->sound_vel, (void *)&line[16]);
 			line[18] = (char)ping->ss_mode;
 			line[19] = (char)num_datagrams;
 			odatagram = datagram + 1;
@@ -3691,8 +3691,8 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 				for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
 					line[22 + 6 * j] = (char)(i + 1);
 					line[23 + 6 * j] = (char)ping->beam_frequency[i];
-					mb_put_binary_short(false, (short)ping->beam_samples[i], (void *)&line[24 + 6 * j]);
-					mb_put_binary_short(false, (short)ping->beam_center_sample[i], (void *)&line[26 + 6 * j]);
+					mb_put_binary_short(true, (short)ping->beam_samples[i], (void *)&line[24 + 6 * j]);
+					mb_put_binary_short(true, (short)ping->beam_center_sample[i], (void *)&line[26 + 6 * j]);
 					j++;
 				}
 			}
@@ -3703,7 +3703,7 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 				beam_ssp = &ping->ssp[ping->beam_start_sample[i]];
 				for (int j = 0; j < ping->beam_samples[i]; j++) {
 					line[ioffset] = (char)beam_ss[j];
-					mb_put_binary_short(false, (short)beam_ssp[j], (void *)&short_val);
+					mb_put_binary_short(true, (short)beam_ssp[j], (void *)&short_val);
 					line[ioffset + 1] = char_ptr[0];
 					line[ioffset + 2] = char_ptr[1];
 					ioffset += 3;
@@ -3719,7 +3719,7 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 			checksum = 0;
 			for (int j = 0; j < EM_SSP_SIZE - 3; j++)
 				checksum += uchar_ptr[j];
-			mb_put_binary_short(false, (short)checksum, (void *)&short_val);
+			mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 			char_ptr = (char *)&short_val;
 			line[EM_SSP_SIZE - 2] = char_ptr[0];
 			line[EM_SSP_SIZE - 1] = char_ptr[1];
