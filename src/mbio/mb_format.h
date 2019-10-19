@@ -69,7 +69,7 @@
 #define MB_SYS_RESON7K3 40
 
 /* Number of supported MBIO data formats */
-#define MB_FORMATS 80
+#define MB_FORMATS 81
 
 /* Data formats supported by MBIO */
 
@@ -235,6 +235,10 @@ pixel sidescan, xdr binary, SOEST */
 /* Generic in-house multibeam, variable beam, \
 bathymetry, amplitude, and sidescan \
 binary, centered, L-DEO. */
+
+#define MBF_MBARIMB1 72
+/* Generic in-house swath bathymetry, variable beam, \
+bathymetry only, binary, centered, MBARI. */
 
 #define MBF_MBNETCDF 75
 /* CARAIBES CDF multibeam, variable beam, \
@@ -546,6 +550,7 @@ int mbr_register_mr1aldeo(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mr1bldeo(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mr1prvr2(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error);
+int mbr_register_mbarimb1(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_register_cbat9001(int verbose, void *mbio_ptr, int *error);
@@ -746,6 +751,11 @@ int mbr_info_mr1prvr2(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
 int mbr_info_mbldeoih(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_mbarimb1(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,

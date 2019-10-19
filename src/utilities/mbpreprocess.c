@@ -131,7 +131,8 @@ static const char usage_message[] =
     "\t--kluge-soundspeed-tweak=factor\n"
     "\t--kluge-zero-attitude-correction\n"
     "\t--kluge-zero-alongtrack-angles\n"
-    "\t--kluge-fix-wissl-timestamps\n";
+    "\t--kluge-fix-wissl-timestamps\n"
+    "\t--kluge-auv-sentry-sensordepth\n";
 
 /*--------------------------------------------------------------------*/
 
@@ -261,9 +262,9 @@ int main(int argc, char **argv) {
   double correction_start_time_d = 0.0;
   int correction_start_index = 0;
   int correction_end_index = -1;
-  bool kluge_beamtweak = false;  // TODO(schwehr): Set but unused?
+  bool kluge_beamtweak = false;
   double kluge_beamtweak_factor = 1.0;
-  bool kluge_soundspeedtweak = false;  // TODO(schwehr): Set but unused?
+  bool kluge_soundspeedtweak = false;
   double kluge_soundspeedtweak_factor = 1.0;
   bool kluge_fix_wissl_timestamps = false;
   bool kluge_fix_wissl_timestamps_setup1 = false;
@@ -519,6 +520,7 @@ int main(int argc, char **argv) {
                                       {"kluge-zero-attitude-correction", no_argument, NULL, 0},
                                       {"kluge-zero-alongtrack-angles", no_argument, NULL, 0},
                                       {"kluge-fix-wissl-timestamps", no_argument, NULL, 0},
+                                      {"kluge-auv-sentry-sensordepth", no_argument, NULL, 0},
                                       {NULL, 0, NULL, 0}};
 
     int option_index;
@@ -868,7 +870,11 @@ int main(int argc, char **argv) {
           preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_FIXWISSLTIMESTAMPS;
           preprocess_pars.n_kluge++;
           preprocess_pars.recalculate_bathymetry = true;
-                  kluge_fix_wissl_timestamps = true;
+          kluge_fix_wissl_timestamps = true;
+        }
+        else if (strcmp("kluge-auv-sentry-sensordepth", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_AUVSENTRYSENSORDEPTH;
+          preprocess_pars.n_kluge++;
         }
         break;
       case '?':
@@ -1323,7 +1329,7 @@ int main(int argc, char **argv) {
   }
 
   /* loop over all files to be read */
-  while (read_data == true) {
+  while (read_data) {
     /* if origin of the ancillary data has not been specified, figure out
        defaults based on the first file's format */
     if (nav_mode == MBPREPROCESS_MERGE_OFF) {
@@ -2309,7 +2315,7 @@ int main(int argc, char **argv) {
   }
 
   /* loop over all files to be read */
-  while (read_data == true) {
+  while (read_data) {
     /* get output format - in some cases this may be a
      * different, generally extended format
      * more suitable for processing than the original */
@@ -2579,7 +2585,7 @@ int main(int argc, char **argv) {
         }
 
         bool timestamp_changed = false;
-	bool nav_changed = false;
+        bool nav_changed = false;
         bool heading_changed = false;
         bool sensordepth_changed = false;
         bool attitude_changed = false;
@@ -2804,7 +2810,7 @@ int main(int argc, char **argv) {
             }
 
             /* insert altitude */
-            if (altitude_changed == true) {
+            if (altitude_changed) {
               status = mb_insert_altitude(verbose, imbio_ptr, istore_ptr, sensordepth, altitude, &error);
               if (status == MB_FAILURE) {
                 status = MB_SUCCESS;
@@ -2813,7 +2819,7 @@ int main(int argc, char **argv) {
             }
 
             /* if attitude changed apply rigid rotations to the bathymetry */
-            if (preprocess_pars.no_change_survey == false &&
+            if (!preprocess_pars.no_change_survey &&
               (attitude_changed || sensordepth_changed)) {
               status = mb_insert(verbose, imbio_ptr, istore_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
                          beams_bath, beams_amp, pixels_ss, beamflag, bath, amp, bathacrosstrack, bathalongtrack,

@@ -24,7 +24,7 @@ AC_INIT([mbsystem],[5.7.6beta15],[http://listserver.mbari.org/sympa/arc/mbsystem
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 # AC_LANG([C++])
-AC_DEFINE(VERSION_DATE, "10 October 2019", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "18 October 2019", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -101,7 +101,7 @@ AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
 AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
 AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"])
-AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with mbtrn,mbtnav)"])
+AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)"])
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
 AS_ECHO([" "])

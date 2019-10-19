@@ -323,10 +323,10 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			itype = 0;
 		else
 			itype = 10711;
-		mb_put_binary_int(false, (int)ilatitude, (void *)&line[0]);
-		mb_put_binary_int(false, (int)ilongitude, (void *)&line[4]);
-		mb_put_binary_int(false, (int)idepth, (void *)&line[8]);
-		mb_put_binary_short(false, (short)itype, (void *)&line[12]);
+		mb_put_binary_int(true, (int)ilatitude, (void *)&line[0]);
+		mb_put_binary_int(true, (int)ilongitude, (void *)&line[4]);
+		mb_put_binary_int(true, (int)idepth, (void *)&line[8]);
+		mb_put_binary_short(true, (short)itype, (void *)&line[12]);
 	}
 
 	int status = MB_SUCCESS;

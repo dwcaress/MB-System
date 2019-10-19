@@ -1207,7 +1207,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 11) {
-				mb_put_binary_float(false, trace[i], (void *)&buffer[index]);
+				mb_put_binary_float(true, trace[i], (void *)&buffer[index]);
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 2) {

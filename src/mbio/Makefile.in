@@ -164,30 +164,31 @@ am_libmbio_la_OBJECTS = mb_absorption.lo mb_access.lo mb_angle.lo \
 	mbr_hydrob93.lo mbr_hypc8101.lo mbr_hysweep1.lo \
 	mbr_image83p.lo mbr_imagemba.lo mbr_kemkmall.lo \
 	mbr_l3xseraw.lo mbr_mbarirov.lo mbr_mbarrov2.lo \
-	mbr_mbldeoih.lo mbr_mbnetcdf.lo mbr_mbpronav.lo \
-	mbr_mgd77dat.lo mbr_mgd77tab.lo mbr_mgd77txt.lo \
-	mbr_mr1aldeo.lo mbr_mr1bldeo.lo mbr_mr1prhig.lo \
-	mbr_mr1prvr2.lo mbr_mstiffss.lo mbr_nvnetcdf.lo \
-	mbr_oicgeoda.lo mbr_oicmbari.lo mbr_omghdcsj.lo \
-	mbr_photgram.lo mbr_reson7k3.lo mbr_reson7kr.lo \
-	mbr_samesurf.lo mbr_sb2000sb.lo mbr_sb2000ss.lo \
-	mbr_sb2100bi.lo mbr_sb2100rw.lo mbr_sbifremr.lo \
-	mbr_sbsiocen.lo mbr_sbsiolsi.lo mbr_sbsiomrg.lo \
-	mbr_sbsioswb.lo mbr_sburicen.lo mbr_sburivax.lo \
-	mbr_segysegy.lo mbr_swplssxi.lo mbr_swplssxp.lo \
-	mbr_wasspenl.lo mbr_xtfb1624.lo mbr_xtfr8101.lo \
-	mbsys_3datdepthlidar.lo mbsys_3ddwissl.lo mbsys_atlas.lo \
-	mbsys_benthos.lo mbsys_dsl.lo mbsys_elac.lo mbsys_elacmk2.lo \
-	mbsys_hdcs.lo mbsys_hs10.lo mbsys_hsds.lo mbsys_hsmd.lo \
-	mbsys_hysweep.lo mbsys_image83p.lo mbsys_jstar.lo \
-	mbsys_kmbes.lo mbsys_ldeoih.lo mbsys_mr1b.lo mbsys_mr1.lo \
-	mbsys_mr1v2001.lo mbsys_mstiff.lo mbsys_navnetcdf.lo \
-	mbsys_netcdf.lo mbsys_oic.lo mbsys_reson7k3.lo \
-	mbsys_reson7k.lo mbsys_reson8k.lo mbsys_reson.lo \
-	mbsys_sb2000.lo mbsys_sb2100.lo mbsys_sb.lo mbsys_simrad2.lo \
-	mbsys_simrad3.lo mbsys_simrad.lo mbsys_singlebeam.lo \
-	mbsys_stereopair.lo mbsys_surf.lo mbsys_swathplus.lo \
-	mbsys_wassp.lo mbsys_xse.lo $(am__objects_1)
+	mbr_mbldeoih.lo mbr_mbarimb1.lo mbr_mbnetcdf.lo \
+	mbr_mbpronav.lo mbr_mgd77dat.lo mbr_mgd77tab.lo \
+	mbr_mgd77txt.lo mbr_mr1aldeo.lo mbr_mr1bldeo.lo \
+	mbr_mr1prhig.lo mbr_mr1prvr2.lo mbr_mstiffss.lo \
+	mbr_nvnetcdf.lo mbr_oicgeoda.lo mbr_oicmbari.lo \
+	mbr_omghdcsj.lo mbr_photgram.lo mbr_reson7k3.lo \
+	mbr_reson7kr.lo mbr_samesurf.lo mbr_sb2000sb.lo \
+	mbr_sb2000ss.lo mbr_sb2100bi.lo mbr_sb2100rw.lo \
+	mbr_sbifremr.lo mbr_sbsiocen.lo mbr_sbsiolsi.lo \
+	mbr_sbsiomrg.lo mbr_sbsioswb.lo mbr_sburicen.lo \
+	mbr_sburivax.lo mbr_segysegy.lo mbr_swplssxi.lo \
+	mbr_swplssxp.lo mbr_wasspenl.lo mbr_xtfb1624.lo \
+	mbr_xtfr8101.lo mbsys_3datdepthlidar.lo mbsys_3ddwissl.lo \
+	mbsys_atlas.lo mbsys_benthos.lo mbsys_dsl.lo mbsys_elac.lo \
+	mbsys_elacmk2.lo mbsys_hdcs.lo mbsys_hs10.lo mbsys_hsds.lo \
+	mbsys_hsmd.lo mbsys_hysweep.lo mbsys_image83p.lo \
+	mbsys_jstar.lo mbsys_kmbes.lo mbsys_ldeoih.lo mbsys_mr1b.lo \
+	mbsys_mr1.lo mbsys_mr1v2001.lo mbsys_mstiff.lo \
+	mbsys_navnetcdf.lo mbsys_netcdf.lo mbsys_oic.lo \
+	mbsys_reson7k3.lo mbsys_reson7k.lo mbsys_reson8k.lo \
+	mbsys_reson.lo mbsys_sb2000.lo mbsys_sb2100.lo mbsys_sb.lo \
+	mbsys_simrad2.lo mbsys_simrad3.lo mbsys_simrad.lo \
+	mbsys_singlebeam.lo mbsys_stereopair.lo mbsys_surf.lo \
+	mbsys_swathplus.lo mbsys_wassp.lo mbsys_xse.lo \
+	$(am__objects_1)
 nodist_libmbio_la_OBJECTS =
 libmbio_la_OBJECTS = $(am_libmbio_la_OBJECTS) \
 	$(nodist_libmbio_la_OBJECTS)
@@ -250,25 +251,26 @@ am__depfiles_remade = ./$(DEPDIR)/mb_absorption.Plo \
 	./$(DEPDIR)/mbr_hypc8101.Plo ./$(DEPDIR)/mbr_hysweep1.Plo \
 	./$(DEPDIR)/mbr_image83p.Plo ./$(DEPDIR)/mbr_imagemba.Plo \
 	./$(DEPDIR)/mbr_kemkmall.Plo ./$(DEPDIR)/mbr_l3xseraw.Plo \
-	./$(DEPDIR)/mbr_mbarirov.Plo ./$(DEPDIR)/mbr_mbarrov2.Plo \
-	./$(DEPDIR)/mbr_mbldeoih.Plo ./$(DEPDIR)/mbr_mbnetcdf.Plo \
-	./$(DEPDIR)/mbr_mbpronav.Plo ./$(DEPDIR)/mbr_mgd77dat.Plo \
-	./$(DEPDIR)/mbr_mgd77tab.Plo ./$(DEPDIR)/mbr_mgd77txt.Plo \
-	./$(DEPDIR)/mbr_mr1aldeo.Plo ./$(DEPDIR)/mbr_mr1bldeo.Plo \
-	./$(DEPDIR)/mbr_mr1prhig.Plo ./$(DEPDIR)/mbr_mr1prvr2.Plo \
-	./$(DEPDIR)/mbr_mstiffss.Plo ./$(DEPDIR)/mbr_nvnetcdf.Plo \
-	./$(DEPDIR)/mbr_oicgeoda.Plo ./$(DEPDIR)/mbr_oicmbari.Plo \
-	./$(DEPDIR)/mbr_omghdcsj.Plo ./$(DEPDIR)/mbr_photgram.Plo \
-	./$(DEPDIR)/mbr_reson7k3.Plo ./$(DEPDIR)/mbr_reson7kr.Plo \
-	./$(DEPDIR)/mbr_samesurf.Plo ./$(DEPDIR)/mbr_sb2000sb.Plo \
-	./$(DEPDIR)/mbr_sb2000ss.Plo ./$(DEPDIR)/mbr_sb2100bi.Plo \
-	./$(DEPDIR)/mbr_sb2100rw.Plo ./$(DEPDIR)/mbr_sbifremr.Plo \
-	./$(DEPDIR)/mbr_sbsiocen.Plo ./$(DEPDIR)/mbr_sbsiolsi.Plo \
-	./$(DEPDIR)/mbr_sbsiomrg.Plo ./$(DEPDIR)/mbr_sbsioswb.Plo \
-	./$(DEPDIR)/mbr_sburicen.Plo ./$(DEPDIR)/mbr_sburivax.Plo \
-	./$(DEPDIR)/mbr_segysegy.Plo ./$(DEPDIR)/mbr_swplssxi.Plo \
-	./$(DEPDIR)/mbr_swplssxp.Plo ./$(DEPDIR)/mbr_wasspenl.Plo \
-	./$(DEPDIR)/mbr_xtfb1624.Plo ./$(DEPDIR)/mbr_xtfr8101.Plo \
+	./$(DEPDIR)/mbr_mbarimb1.Plo ./$(DEPDIR)/mbr_mbarirov.Plo \
+	./$(DEPDIR)/mbr_mbarrov2.Plo ./$(DEPDIR)/mbr_mbldeoih.Plo \
+	./$(DEPDIR)/mbr_mbnetcdf.Plo ./$(DEPDIR)/mbr_mbpronav.Plo \
+	./$(DEPDIR)/mbr_mgd77dat.Plo ./$(DEPDIR)/mbr_mgd77tab.Plo \
+	./$(DEPDIR)/mbr_mgd77txt.Plo ./$(DEPDIR)/mbr_mr1aldeo.Plo \
+	./$(DEPDIR)/mbr_mr1bldeo.Plo ./$(DEPDIR)/mbr_mr1prhig.Plo \
+	./$(DEPDIR)/mbr_mr1prvr2.Plo ./$(DEPDIR)/mbr_mstiffss.Plo \
+	./$(DEPDIR)/mbr_nvnetcdf.Plo ./$(DEPDIR)/mbr_oicgeoda.Plo \
+	./$(DEPDIR)/mbr_oicmbari.Plo ./$(DEPDIR)/mbr_omghdcsj.Plo \
+	./$(DEPDIR)/mbr_photgram.Plo ./$(DEPDIR)/mbr_reson7k3.Plo \
+	./$(DEPDIR)/mbr_reson7kr.Plo ./$(DEPDIR)/mbr_samesurf.Plo \
+	./$(DEPDIR)/mbr_sb2000sb.Plo ./$(DEPDIR)/mbr_sb2000ss.Plo \
+	./$(DEPDIR)/mbr_sb2100bi.Plo ./$(DEPDIR)/mbr_sb2100rw.Plo \
+	./$(DEPDIR)/mbr_sbifremr.Plo ./$(DEPDIR)/mbr_sbsiocen.Plo \
+	./$(DEPDIR)/mbr_sbsiolsi.Plo ./$(DEPDIR)/mbr_sbsiomrg.Plo \
+	./$(DEPDIR)/mbr_sbsioswb.Plo ./$(DEPDIR)/mbr_sburicen.Plo \
+	./$(DEPDIR)/mbr_sburivax.Plo ./$(DEPDIR)/mbr_segysegy.Plo \
+	./$(DEPDIR)/mbr_swplssxi.Plo ./$(DEPDIR)/mbr_swplssxp.Plo \
+	./$(DEPDIR)/mbr_wasspenl.Plo ./$(DEPDIR)/mbr_xtfb1624.Plo \
+	./$(DEPDIR)/mbr_xtfr8101.Plo \
 	./$(DEPDIR)/mbsys_3datdepthlidar.Plo \
 	./$(DEPDIR)/mbsys_3ddwissl.Plo ./$(DEPDIR)/mbsys_atlas.Plo \
 	./$(DEPDIR)/mbsys_benthos.Plo ./$(DEPDIR)/mbsys_dsl.Plo \
@@ -581,26 +583,26 @@ libmbio_la_SOURCES = mb_absorption.c mb_access.c mb_angle.c \
 	mbr_hsunknwn.c mbr_hsuricen.c mbr_hsurivax.c mbr_hydrob93.c \
 	mbr_hypc8101.c mbr_hysweep1.c mbr_image83p.c mbr_imagemba.c \
 	mbr_kemkmall.c mbr_l3xseraw.c mbr_mbarirov.c mbr_mbarrov2.c \
-	mbr_mbldeoih.c mbr_mbnetcdf.c mbr_mbpronav.c mbr_mgd77dat.c \
-	mbr_mgd77tab.c mbr_mgd77txt.c mbr_mr1aldeo.c mbr_mr1bldeo.c \
-	mbr_mr1prhig.c mbr_mr1prvr2.c mbr_mstiffss.c mbr_nvnetcdf.c \
-	mbr_oicgeoda.c mbr_oicmbari.c mbr_omghdcsj.c mbr_photgram.c \
-	mbr_reson7k3.c mbr_reson7kr.c mbr_samesurf.c mbr_sb2000sb.c \
-	mbr_sb2000ss.c mbr_sb2100bi.c mbr_sb2100rw.c mbr_sbifremr.c \
-	mbr_sbsiocen.c mbr_sbsiolsi.c mbr_sbsiomrg.c mbr_sbsioswb.c \
-	mbr_sburicen.c mbr_sburivax.c mbr_segysegy.c mbr_swplssxi.c \
-	mbr_swplssxp.c mbr_wasspenl.c mbr_xtfb1624.c mbr_xtfr8101.c \
-	mbsys_3datdepthlidar.c mbsys_3ddwissl.c mbsys_atlas.c \
-	mbsys_benthos.c mbsys_dsl.c mbsys_elac.c mbsys_elacmk2.c \
-	mbsys_hdcs.c mbsys_hs10.c mbsys_hsds.c mbsys_hsmd.c \
-	mbsys_hysweep.c mbsys_image83p.c mbsys_jstar.c mbsys_kmbes.c \
-	mbsys_ldeoih.c mbsys_mr1b.c mbsys_mr1.c mbsys_mr1v2001.c \
-	mbsys_mstiff.c mbsys_navnetcdf.c mbsys_netcdf.c mbsys_oic.c \
-	mbsys_reson7k3.c mbsys_reson7k.c mbsys_reson8k.c mbsys_reson.c \
-	mbsys_sb2000.c mbsys_sb2100.c mbsys_sb.c mbsys_simrad2.c \
-	mbsys_simrad3.c mbsys_simrad.c mbsys_singlebeam.c \
-	mbsys_stereopair.c mbsys_surf.c mbsys_swathplus.c \
-	mbsys_wassp.c mbsys_xse.c $(am__append_3)
+	mbr_mbldeoih.c mbr_mbarimb1.c mbr_mbnetcdf.c mbr_mbpronav.c \
+	mbr_mgd77dat.c mbr_mgd77tab.c mbr_mgd77txt.c mbr_mr1aldeo.c \
+	mbr_mr1bldeo.c mbr_mr1prhig.c mbr_mr1prvr2.c mbr_mstiffss.c \
+	mbr_nvnetcdf.c mbr_oicgeoda.c mbr_oicmbari.c mbr_omghdcsj.c \
+	mbr_photgram.c mbr_reson7k3.c mbr_reson7kr.c mbr_samesurf.c \
+	mbr_sb2000sb.c mbr_sb2000ss.c mbr_sb2100bi.c mbr_sb2100rw.c \
+	mbr_sbifremr.c mbr_sbsiocen.c mbr_sbsiolsi.c mbr_sbsiomrg.c \
+	mbr_sbsioswb.c mbr_sburicen.c mbr_sburivax.c mbr_segysegy.c \
+	mbr_swplssxi.c mbr_swplssxp.c mbr_wasspenl.c mbr_xtfb1624.c \
+	mbr_xtfr8101.c mbsys_3datdepthlidar.c mbsys_3ddwissl.c \
+	mbsys_atlas.c mbsys_benthos.c mbsys_dsl.c mbsys_elac.c \
+	mbsys_elacmk2.c mbsys_hdcs.c mbsys_hs10.c mbsys_hsds.c \
+	mbsys_hsmd.c mbsys_hysweep.c mbsys_image83p.c mbsys_jstar.c \
+	mbsys_kmbes.c mbsys_ldeoih.c mbsys_mr1b.c mbsys_mr1.c \
+	mbsys_mr1v2001.c mbsys_mstiff.c mbsys_navnetcdf.c \
+	mbsys_netcdf.c mbsys_oic.c mbsys_reson7k3.c mbsys_reson7k.c \
+	mbsys_reson8k.c mbsys_reson.c mbsys_sb2000.c mbsys_sb2100.c \
+	mbsys_sb.c mbsys_simrad2.c mbsys_simrad3.c mbsys_simrad.c \
+	mbsys_singlebeam.c mbsys_stereopair.c mbsys_surf.c \
+	mbsys_swathplus.c mbsys_wassp.c mbsys_xse.c $(am__append_3)
 libmbio_la_LIBADD = $(top_builddir)/src/bsio/libmbbsio.la \
 	$(top_builddir)/src/surf/libmbsapi.la $(am__append_4) \
 	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${XDR_LIB} \
@@ -776,6 +778,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_imagemba.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_kemkmall.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_l3xseraw.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_mbarimb1.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_mbarirov.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_mbarrov2.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_mbldeoih.Plo@am__quote@ # am--include-marker
@@ -1084,6 +1087,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/mbr_imagemba.Plo
 	-rm -f ./$(DEPDIR)/mbr_kemkmall.Plo
 	-rm -f ./$(DEPDIR)/mbr_l3xseraw.Plo
+	-rm -f ./$(DEPDIR)/mbr_mbarimb1.Plo
 	-rm -f ./$(DEPDIR)/mbr_mbarirov.Plo
 	-rm -f ./$(DEPDIR)/mbr_mbarrov2.Plo
 	-rm -f ./$(DEPDIR)/mbr_mbldeoih.Plo
@@ -1280,6 +1284,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/mbr_imagemba.Plo
 	-rm -f ./$(DEPDIR)/mbr_kemkmall.Plo
 	-rm -f ./$(DEPDIR)/mbr_l3xseraw.Plo
+	-rm -f ./$(DEPDIR)/mbr_mbarimb1.Plo
 	-rm -f ./$(DEPDIR)/mbr_mbarirov.Plo
 	-rm -f ./$(DEPDIR)/mbr_mbarrov2.Plo
 	-rm -f ./$(DEPDIR)/mbr_mbldeoih.Plo

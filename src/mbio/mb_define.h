@@ -277,7 +277,7 @@ int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, i
 int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path, char *ppath, char *dpath, int *format,
                       double *weight, int *error);
 int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format, double *weight, int *error);
-int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recursion, int *error);
+int mb_datalist_recursion(int verbose, void *datalist_ptr, bool print, int *recursion, int *error);
 int mb_datalist_close(int verbose, void **datalist_ptr, int *error);
 int mb_get_relative_path(int verbose, char *path, char *pwd, int *error);
 int mb_get_shortest_path(int verbose, char *path, int *error);

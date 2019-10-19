@@ -2571,7 +2571,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 # AC_LANG([C++])
 
-$as_echo "#define VERSION_DATE \"10 October 2019\"" >>confdefs.h
+$as_echo "#define VERSION_DATE \"18 October 2019\"" >>confdefs.h
 
 
 ac_aux_dir=
@@ -2748,7 +2748,7 @@ $as_echo "        --with-opengl-include - location of OpenGL headers (optional)"
 $as_echo "        --with-otps-dir       - location of OTPS installation (optional)"
 $as_echo "        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"
 $as_echo "        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"
-$as_echo "        --disable-mbtools     - disable building graphical tools (use with mbtrn,mbtnav)"
+$as_echo "        --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)"
 $as_echo "        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"
 $as_echo "        --enable-test         - Enable building unit tests in test/ and third-party/"
 $as_echo " "
