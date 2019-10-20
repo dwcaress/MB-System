@@ -402,7 +402,6 @@ int main(int argc, char **argv) {
 	int sensorhead = 0;
 	int pingmultiplicity;
 	double time_d_lastping;
-	int read_data;
 	int start, done;
 
 	/* get current default values */
@@ -684,6 +683,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -704,7 +704,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 
 		usable_rule = false;
 		/* check if this file matches any lines */

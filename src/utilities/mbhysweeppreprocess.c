@@ -270,7 +270,6 @@ int main(int argc, char **argv) {
 	int fstat;
 	char buffer[MB_PATH_MAXLINE] = "";
 	char *result;
-	int read_data;
 	char fileroot[MB_PATH_MAXLINE] = "";
 	int nscan;
 	int year, month, day, hour, minute;
@@ -815,6 +814,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -835,7 +835,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == true && format == MBF_HYSWEEP1) {
+	while (read_data && format == MBF_HYSWEEP1) {
 
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
@@ -1455,7 +1455,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* loop over all files to be read */
-		while (read_data == true && format == MBF_HYSWEEP1) {
+		while (read_data && format == MBF_HYSWEEP1) {
 			/* figure out the output file name */
 			status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
 			if (testformat == MBF_HYSWEEP1 && strncmp(".HSX", &ifile[strlen(ifile) - 4], 4) == 0)

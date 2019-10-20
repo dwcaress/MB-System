@@ -274,7 +274,6 @@ int main(int argc, char **argv) {
   struct mb_preprocess_struct preprocess_pars;
 
   /* MBIO read control parameters */
-  int read_data;
   mb_path read_file = "";
   void *datalist = NULL;
   int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -1308,6 +1307,7 @@ int main(int argc, char **argv) {
 
   /* determine whether to read one file or a list of files */
   const bool read_datalist = format < 0;
+  bool read_data;
 
   /* open file list */
   if (read_datalist) {
