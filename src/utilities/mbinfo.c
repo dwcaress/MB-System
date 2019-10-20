@@ -258,7 +258,6 @@ int main(int argc, char **argv) {
 	int len2;
 	char string[500];
 
-	int read_data;
 	double speed_apparent;
 	double time_d_last = 0.0;
 	int val_int;
@@ -457,6 +456,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* if reading from datalist then variance calculations
 	    are disabled */
@@ -543,7 +543,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* loop over all files to be read */
-		while (read_data == true) {
+		while (read_data) {
 
 			void *mbio_ptr = NULL;
 			/* initialize reading the swath file */

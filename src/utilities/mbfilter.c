@@ -698,7 +698,6 @@ int main(int argc, char **argv) {
 	double *distances;
 	int iteration;
 
-	int read_data;
 	double *dataptr0, *dataptr1;
 	char *flagptr0, *flagptr1;
 	double ddis;
@@ -940,6 +939,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* output some information */
 	if (verbose > 0) {
@@ -1008,7 +1008,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 
 		/* check for format with amplitude or sidescan data */
 		status = mb_format_system(verbose, &format, &system, &error);

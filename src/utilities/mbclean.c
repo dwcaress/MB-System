@@ -329,7 +329,6 @@ int main(int argc, char **argv) {
   int sensorhead_status = MB_SUCCESS;
   int sensorhead_error = MB_ERROR_NO_ERROR;
   double distance_left, distance_right;
-  int read_data;
   int start, done;
   double left;
   double right;
@@ -652,6 +651,7 @@ int main(int argc, char **argv) {
 
   /* determine whether to read one file or a list of files */
   const bool read_datalist = format < 0;
+  bool read_data;
 
   /* open file list */
   if (read_datalist) {
@@ -672,7 +672,7 @@ int main(int argc, char **argv) {
   }
 
   /* loop over all files to be read */
-  while (read_data == true) {
+  while (read_data) {
     oktoprocess = true;
 
     /* check format and get format flags */

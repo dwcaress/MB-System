@@ -154,7 +154,6 @@ int main(int argc, char **argv) {
 	int input_size, input_modtime, output_size, output_modtime;
 	mb_path line = "";
 	mb_path geoidgrid = "";
-	int read_data;
 	int nread;
 	double lasttime_d = 0.0;
 	double last_heave = 0.0;
@@ -389,6 +388,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -412,7 +412,7 @@ int main(int argc, char **argv) {
 	bool have_height = false;
 
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 
 		/* Figure out if the file needs a tide model - don't generate a new tide
 			model if one was made previously and is up to date AND the

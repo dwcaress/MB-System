@@ -133,7 +133,6 @@ int main(int argc, char **argv) {
 	char *result;
 	int nget;
 	int point_ok;
-	int read_data;
 	int nread;
 
 	/* get current default values */
@@ -328,6 +327,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -348,7 +348,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 		/* read fnv file if possible */
 		mb_get_fnv(verbose, file, &format, &error);
 

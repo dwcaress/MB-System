@@ -217,7 +217,6 @@ int main(int argc, char **argv) {
 	mb_path dfile;
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
-	int read_data;
 	double file_weight;
 	int pings = 1;
 	int lonflip;
@@ -447,6 +446,7 @@ int main(int argc, char **argv) {
 	    happens in this loop and the order of arguments matters
 	    - the input and output arguments must be given first */
 	{
+	bool read_data;
 	int option_index;
 	bool errflg = false;
 	int c;
@@ -605,7 +605,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* loop over all files to be read */
-				while (read_data == true && !input_swath_platform_defined) {
+				while (read_data && !input_swath_platform_defined) {
 					/* check format and get data sources */
 					if ((status =
 					         mb_format_source(verbose, &input_swath_format, &platform_source, &nav_source, &sensordepth_source,

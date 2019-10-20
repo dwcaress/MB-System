@@ -941,7 +941,6 @@ int main(int argc, char **argv) {
   double receive_gain;
 
   int shellstatus;
-  int read_data;
   int nbeams;
 
   /* output files */
@@ -1236,6 +1235,7 @@ int main(int argc, char **argv) {
 
   /* determine whether to read one file or a list of files */
   const bool read_datalist = format < 0;
+  bool read_data;
 
   /* open file list */
   if (read_datalist) {
@@ -2677,7 +2677,7 @@ int main(int argc, char **argv) {
   bool use_swathbounds = false;  // TODO(schwehr): Set but not used.
 
   /* loop over all files to be read */
-  while (read_data == true) {
+  while (read_data) {
 
     /* initialize reading the swath file */
     if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,

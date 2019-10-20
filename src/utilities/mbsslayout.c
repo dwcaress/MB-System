@@ -377,7 +377,6 @@ int main(int argc, char **argv) {
 	double filter_length = 0.0;
 
 	/* MBIO read control parameters */
-	int read_data;
 	mb_path read_file;
 	mb_path output_file;
 	void *datalist;
@@ -1485,6 +1484,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -1506,7 +1506,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 		if (verbose > 0)
 			fprintf(stderr, "\nPass 1: Opening file %s %d\n", ifile, iformat);
 
@@ -2049,7 +2049,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 		if (verbose > 0)
 			fprintf(stderr, "\nPass 2: Opening input file:  %s %d\n", ifile, iformat);
 

@@ -188,7 +188,6 @@ int main(int argc, char **argv) {
 	char *result;
 	int nget;
 	int point_ok;
-	int read_data;
 	int nread;
 	int nwrite;
 	int first;
@@ -573,6 +572,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -612,7 +612,7 @@ int main(int argc, char **argv) {
 	bool recalculatesweep = false;
 
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
@@ -1312,7 +1312,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* close output file if conditions warrant */
-		if (read_data == false || (!output_file_set && nroutepoint < 2 && ntimepoint < 2)) {
+		if (!read_data || (!output_file_set && nroutepoint < 2 && ntimepoint < 2)) {
 			/* close current output file */
 			if (fp != NULL) {
 				fclose(fp);
