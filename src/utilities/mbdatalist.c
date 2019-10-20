@@ -391,7 +391,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* ouput file if no bounds checking or in bounds */
-			if (!look_bounds || file_in_bounds == true) {
+			if (!look_bounds || file_in_bounds) {
 				if (verbose > 0)
 					fprintf(output, "%s %d %f\n", read_file, format, file_weight);
 				else
@@ -426,14 +426,14 @@ int main(int argc, char **argv) {
 				if (status_report || remove_locks) {
 					lock_status = mb_pr_lockinfo(verbose, read_file, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
 					                             lock_date, &lock_error);
-					if (locked == true && status_report) {
+					if (locked && status_report) {
 						if (verbose > 0)
 							fprintf(output, "\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", lock_program, lock_user,
 							        lock_cpu, lock_date);
 						else
 							fprintf(output, "\t<Locked>");
 					}
-					if (locked == true && remove_locks) {
+					if (locked && remove_locks) {
 						sprintf(lockfile, "%s.lck", file);
 						sprintf(command, "/bin/rm -f %s", lockfile);
 					}
@@ -485,7 +485,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* copy file if no bounds checking or in bounds */
-				if (!look_bounds || file_in_bounds == true) {
+				if (!look_bounds || file_in_bounds) {
 					fprintf(output, "Copying %s %d %f\n", file, format, file_weight);
 					sprintf(command, "cp %s* .", file);
 					shellstatus = system(command);
@@ -521,7 +521,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* ouput file if no bounds checking or in bounds */
-				if (!look_bounds || file_in_bounds == true) {
+				if (!look_bounds || file_in_bounds) {
 					if (verbose > 0)
 						fprintf(output, "%s %d %f\n", file, format, file_weight);
 					else
@@ -556,14 +556,14 @@ int main(int argc, char **argv) {
 					if (status_report || remove_locks) {
 						lock_status = mb_pr_lockinfo(verbose, file, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
 						                             lock_date, &lock_error);
-						if (locked == true && status_report) {
+						if (locked && status_report) {
 							if (verbose > 0)
 								fprintf(output, "\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", lock_program, lock_user,
 								        lock_cpu, lock_date);
 							else
 								fprintf(output, "\t<Locked>");
 						}
-						if (locked == true && remove_locks) {
+						if (locked && remove_locks) {
 							sprintf(lockfile, "%s.lck", file);
 							fprintf(output, "\tRemoving lock file %s\n", lockfile);
 							sprintf(command, "/bin/rm -f %s", lockfile);

@@ -102,7 +102,7 @@ struct mbclean_ping_struct {
 
 /* bad beam identifier structure definition */
 struct bad_struct {
-  int flag;
+  bool flag;
   int ping;
   int beam;
   double bath;
@@ -132,7 +132,6 @@ int main(int argc, char **argv) {
   char *message = NULL;
 
   /* swath file locking variables */
-  int uselockfiles;
   int lock_status;
   int locked;
   int lock_purpose;
@@ -148,13 +147,11 @@ int main(int argc, char **argv) {
   char dfile[MB_PATH_MAXLINE];
   void *datalist;
   int look_processed = MB_DATALIST_LOOK_UNSET;
-  int oktoprocess;
   double file_weight;
   int format;
   int formatread;
   int variable_beams;
   int traveltime;
-  int beam_flagging;
   int pings;
   int lonflip;
   double bounds[4];
@@ -337,6 +334,7 @@ int main(int argc, char **argv) {
 
   /* get current default values */
   status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+  int uselockfiles;  // TODO(schwehr): Make mb_uselockfiles take a bool.
   status = mb_uselockfiles(verbose, &uselockfiles);
 
   /* reset all defaults but the format and lonflip */
@@ -671,9 +669,11 @@ int main(int argc, char **argv) {
     read_data = true;
   }
 
+  int beam_flagging;  // TODO(schwehr): make mb_format_flags take a bool.
+
   /* loop over all files to be read */
   while (read_data) {
-    oktoprocess = true;
+    bool oktoprocess = true;
 
     /* check format and get format flags */
     if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
@@ -687,7 +687,7 @@ int main(int argc, char **argv) {
     }
 
     /* warn if beam flagging not supported for the current data format */
-    if (beam_flagging == false) {
+    if (!beam_flagging) {
       fprintf(stderr, "\nWarning:\nMBIO format %d does not allow flagging of bad bathymetry data.\n", format);
       fprintf(stderr,
               "\nWhen mbprocess applies edits to file:\n\t%s\nthe soundings will be nulled (zeroed) rather than flagged.\n",
@@ -695,7 +695,7 @@ int main(int argc, char **argv) {
     }
 
     /* try to lock file */
-    if (uselockfiles == true)
+    if (uselockfiles)
       status = mb_pr_lockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
     else {
       lock_status =
@@ -738,7 +738,7 @@ int main(int argc, char **argv) {
     }
 
     /* proceed if file locked and format ok */
-    if (oktoprocess == true) {
+    if (oktoprocess) {
       /* check for "fast bathymetry" or "fbt" file */
       strcpy(swathfileread, swathfile);
       formatread = format;
@@ -1179,7 +1179,7 @@ int main(int argc, char **argv) {
           }
 
           /* check depths for acceptable range if requested */
-          if (check_range == true) {
+          if (check_range) {
             for (int i = 0; i < ping[irec].beams_bath; i++) {
               if (mb_beam_ok(ping[irec].beamflag[i]) &&
                   (ping[irec].bath[i] < depth_low || ping[irec].bath[i] > depth_high)) {
@@ -1529,7 +1529,7 @@ int main(int argc, char **argv) {
                           }
                         }
                         if (verbose >= 1 && slope > slopemax && dd > distancemin * median &&
-                            bad[0].flag == true) {
+                            bad[0].flag) {
                           const int p = bad[0].ping;
                           const int b = bad[0].beam;
                           if (verbose >= 2)
@@ -1542,7 +1542,7 @@ int main(int argc, char **argv) {
                               ping[p].time_i[6], b, bad[0].bath, median, slope, dd);
                         }
                         if (verbose >= 1 && slope > slopemax && dd > distancemin * median &&
-                            bad[1].flag == true) {
+                            bad[1].flag) {
                           const int p = bad[1].ping;
                           const int b = bad[1].beam;
                           if (verbose >= 2)
@@ -1742,7 +1742,7 @@ int main(int argc, char **argv) {
       }
 
       /* unlock the raw swath file */
-      if (uselockfiles == true)
+      if (uselockfiles)
         status = mb_pr_unlockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
 
       /* check memory */

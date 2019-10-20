@@ -711,6 +711,7 @@ int main(int argc, char **argv) {
 							    mb_linear_interp(verbose, nav_time_d - 1, nav_speed - 1, nnav, time_d, &speed, &j, &error);
 
 						/* only output if interpolation of nav etc has worked */
+						// TODO(schwehr): true should be MB_SUCCESS?
 						if (interp_status == true) {
 
 							/* calculate course made good and distance */

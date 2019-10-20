@@ -118,7 +118,7 @@ struct mbfilter_filter_struct {
 	int xdim;
 	int ldim;
 	int iteration;
-	int threshold;
+	bool threshold;
 	double threshold_lo;
 	double threshold_hi;
 	double hipass_offset;
@@ -973,7 +973,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "          Alongtrack dimension:  %d\n", filters[i].ldim);
 			fprintf(stderr, "          Iterations:            %d\n", filters[i].iteration);
 			if (filters[i].mode == MBFILTER_A_SMOOTH_MEDIAN) {
-				if (filters[i].threshold == true) {
+				if (filters[i].threshold) {
 					fprintf(stderr, "          Threshold applied\n");
 					fprintf(stderr, "          Threshold_lo:          %f\n", filters[i].threshold_lo);
 					fprintf(stderr, "          Threshold_hi:          %f\n", filters[i].threshold_hi);

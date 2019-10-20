@@ -616,7 +616,6 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
   double bath_offset;
   double alpha, beta, theta, phi;
   int istep = 0;
-  int interleave = 0;
 
   /* copy the data  */
   if (istore != NULL && ostore != NULL && (void *)istore != (void *)ostore) {
@@ -1045,11 +1044,11 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
       }
 
       /* get angles */
-      interleave = false;
+      bool interleave = false;
       if (istore->sonar == MBSYS_SIMRAD_EM1000) {
         if (iping->bath_mode == 1) {
           angles_simrad = angles_EM1000_ISO_ANG_60_2_MS_48_FAIS;
-          interleave = false;
+          // interleave = false;
         }
         else if (iping->bath_mode == 2) {
           angles_simrad = angles_EM1000_ISO_ANG_120_07_MS_48_FAIS;
@@ -1152,7 +1151,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
       }
 
       /* if interleaved get center beam */
-      if (interleave == true) {
+      if (interleave) {
         if (iping->bath_mode == 12 && abs(iping->bath_acrosstrack[28]) < abs(iping->bath_acrosstrack[29]))
           istep = 1;
         else if (iping->bath_mode == 13 && abs(iping->bath_acrosstrack[31]) < abs(iping->bath_acrosstrack[30]))
@@ -1179,7 +1178,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
         if (istore->sonar == MBSYS_SIMRAD_EM1000 && iping->bath_mode == 13) {
           beta = 90.0 - angles_simrad[oping->png_nbeams - 1 - (2 * i + istep)];
         }
-        else if (istore->sonar == MBSYS_SIMRAD_EM1000 && interleave == true) {
+        else if (istore->sonar == MBSYS_SIMRAD_EM1000 && interleave) {
           beta = 90.0 + angles_simrad[2 * i + istep];
         }
         else if (istore->sonar == MBSYS_SIMRAD_EM1000) {
@@ -1531,7 +1530,7 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
       /* get navigation, applying inverse projection if defined */
       mb_ping->longitude = istore->png_longitude;
       mb_ping->latitude = istore->png_latitude;
-      if (imb_io_ptr->projection_initialized == true) {
+      if (imb_io_ptr->projection_initialized) {
         mb_proj_inverse(verbose, imb_io_ptr->pjptr, mb_ping->longitude, mb_ping->latitude, &(mb_ping->longitude),
                         &(mb_ping->latitude), error);
       }
@@ -2219,11 +2218,11 @@ int main(int argc, char **argv) {
   }
 
   /* set up transfer rules */
-  if (omb_io_ptr->variable_beams == true && obeams_bath != ibeams_bath)
+  if (omb_io_ptr->variable_beams && obeams_bath != ibeams_bath)
     obeams_bath = ibeams_bath;
-  if (omb_io_ptr->variable_beams == true && obeams_amp != ibeams_amp)
+  if (omb_io_ptr->variable_beams && obeams_amp != ibeams_amp)
     obeams_amp = ibeams_amp;
-  if (omb_io_ptr->variable_beams == true && opixels_ss != ipixels_ss)
+  if (omb_io_ptr->variable_beams && opixels_ss != ipixels_ss)
     opixels_ss = ipixels_ss;
   setup_transfer_rules(verbose, ibeams_bath, obeams_bath, &istart_bath, &iend_bath, &offset_bath, &error);
   setup_transfer_rules(verbose, ibeams_amp, obeams_amp, &istart_amp, &iend_amp, &offset_amp, &error);
@@ -2424,19 +2423,19 @@ int main(int argc, char **argv) {
     /* check numbers of input and output beams */
     if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && nbath != ibeams_bath) {
       ibeams_bath = nbath;
-      if (omb_io_ptr->variable_beams == true)
+      if (omb_io_ptr->variable_beams)
         obeams_bath = ibeams_bath;
       setup_transfer_rules(verbose, ibeams_bath, obeams_bath, &istart_bath, &iend_bath, &offset_bath, &error);
     }
     if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && namp != ibeams_amp) {
       ibeams_amp = namp;
-      if (omb_io_ptr->variable_beams == true)
+      if (omb_io_ptr->variable_beams)
         obeams_amp = ibeams_amp;
       setup_transfer_rules(verbose, ibeams_amp, obeams_amp, &istart_amp, &iend_amp, &offset_amp, &error);
     }
     if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && nss != ipixels_ss) {
       ipixels_ss = nss;
-      if (omb_io_ptr->variable_beams == true)
+      if (omb_io_ptr->variable_beams)
         opixels_ss = ipixels_ss;
       setup_transfer_rules(verbose, ipixels_ss, opixels_ss, &istart_ss, &iend_ss, &offset_ss, &error);
     }
