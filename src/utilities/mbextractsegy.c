@@ -180,14 +180,11 @@ int main(int argc, char **argv) {
 	double lastheading;
 	double headingdiff;
 	double lastdistance;
-	int rangeok;
 	int oktowrite;
-	int linechange;
 	double dx, dy;
 	FILE *fp = NULL;
 	char *result;
 	int nget;
-	int point_ok;
 	int nread;
 	int nwrite;
 	int first;
@@ -393,6 +390,7 @@ int main(int argc, char **argv) {
 	nshotmax = (int)(maxwidth / xscale);
 
 	bool rawroutefile = false;
+	int rangeok;
 
 	/* if specified read route time list file */
 	if (timelist_file_set) {
@@ -492,6 +490,7 @@ int main(int argc, char **argv) {
 						rawroutefile = false;
 					}
 				}
+				bool point_ok;
 				if ((rawroutefile && nget >= 2) ||
 				    (!rawroutefile && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_NONE))
 					point_ok = true;
@@ -499,7 +498,7 @@ int main(int argc, char **argv) {
 					point_ok = false;
 
 				/* if good data check for need to allocate more space */
-				if (point_ok == true && nroutepoint + 1 > nroutepointalloc) {
+				if (point_ok && nroutepoint + 1 > nroutepointalloc) {
 					nroutepointalloc += MBES_ALLOC_NUM;
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
@@ -519,7 +518,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* add good point to route */
-				if (point_ok == true && nroutepointalloc > nroutepoint + 1) {
+				if (point_ok && nroutepointalloc > nroutepoint + 1) {
 					routelon[nroutepoint] = lon;
 					routelat[nroutepoint] = lat;
 					routeheading[nroutepoint] = heading;
@@ -610,6 +609,7 @@ int main(int argc, char **argv) {
 	}
 
 	bool recalculatesweep = false;
+	bool linechange;
 
 	/* loop over all files to be read */
 	while (read_data) {
@@ -712,13 +712,13 @@ int main(int argc, char **argv) {
 					range = sqrt(dx * dx + dy * dy);
 					if (range < rangethreshold)
 						rangeok = true;
-					if (rangeok == true && (activewaypoint == 0 || range > rangelast) && activewaypoint < nroutepoint - 1) {
+					if (rangeok && (activewaypoint == 0 || range > rangelast) && activewaypoint < nroutepoint - 1) {
 						linechange = true;
 					}
 				}
 
 				/* apply line change */
-				if (linechange == true) {
+				if (linechange) {
 					/* close current output file */
 					if (fp != NULL) {
 						fclose(fp);
@@ -831,7 +831,7 @@ int main(int argc, char **argv) {
 					activewaypoint++;
 				}
 
-				if (linechange == true) {
+				if (linechange) {
 					mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
 					rangelast = 1000 * rangethreshold;
 					seafloordepthmin = -1.0;
