@@ -124,7 +124,6 @@ int main(int argc, char **argv) {
 	/* mbinfo control parameters */
 	bool comments = false;
 	bool good_nav_only = false;
-	int good_nav;
 	double speed_threshold = 50.0;
 	bool bathy_in_feet = false;  // TODO(schwehr): Switch to bathy_in_meters.
 	double bathy_scale;
@@ -260,7 +259,6 @@ int main(int argc, char **argv) {
 
 	double speed_apparent;
 	double time_d_last = 0.0;
-	int val_int;
 	double val_double;
 
 	for (int i = 0; i < 7; i++) {
@@ -522,6 +520,9 @@ int main(int argc, char **argv) {
 	int meta_pitchbias = 0;
 	int meta_headingbias = 0;
 	int meta_draft = 0;
+
+	int val_int;  // TODO(schwehr): bool?
+	bool good_nav;
 	bool done = false;
 	while (!done) {
 		/* open file list */
@@ -1382,13 +1383,13 @@ int main(int argc, char **argv) {
 							good_nav = true;
 
 						/* get total distance */
-						if (!good_nav_only || (good_nav == true && speed_apparent < speed_threshold)) {
+						if (!good_nav_only || (good_nav && speed_apparent < speed_threshold)) {
 							distot += distance;
 							distotfile += distance;
 						}
 
 						/* get starting mins and maxs */
-						if (!beginnav && good_nav == true) {
+						if (!beginnav && good_nav) {
 							lonmin = navlon;
 							lonmax = navlon;
 							latmin = navlat;
@@ -1428,7 +1429,7 @@ int main(int argc, char **argv) {
 								}
 
 						/* get mins and maxs */
-						if (good_nav == true && beginnav) {
+						if (good_nav && beginnav) {
 							lonmin = MIN(lonmin, navlon);
 							lonmax = MAX(lonmax, navlon);
 							latmin = MIN(latmin, navlat);
@@ -1444,7 +1445,7 @@ int main(int argc, char **argv) {
 						}
 						for (int i = 0; i < beams_bath; i++) {
 							if (mb_beam_ok(beamflag[i])) {
-								if (good_nav == true && beginnav) {
+								if (good_nav && beginnav) {
 									lonmin = MIN(lonmin, bathlon[i]);
 									lonmax = MAX(lonmax, bathlon[i]);
 									latmin = MIN(latmin, bathlat[i]);
@@ -1472,7 +1473,7 @@ int main(int argc, char **argv) {
 						}
 						for (int i = 0; i < pixels_ss; i++) {
 							if (ss[i] > MB_SIDESCAN_NULL) {
-								if (good_nav == true && beginnav) {
+								if (good_nav && beginnav) {
 									lonmin = MIN(lonmin, sslon[i]);
 									lonmax = MAX(lonmax, sslon[i]);
 									latmin = MIN(latmin, sslat[i]);

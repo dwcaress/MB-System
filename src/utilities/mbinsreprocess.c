@@ -138,8 +138,6 @@ int main(int argc, char **argv) {
 	double *mRrateK = NULL;
 	double *utcTime = NULL;
 
-	bool angles_in_degrees = true;
-
 	int time_i[7];
 	int nrecord, irecord, nscan, ifield;
 	size_t recordsize = 0;
@@ -249,6 +247,7 @@ int main(int argc, char **argv) {
 	/* parse the ascii header listing the included data fields */
 	nfields = 0;
 	recordsize = 0;
+	bool angles_in_degrees = true;
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer && strncmp(buffer, "# begin", 7) != 0) {
 		nscan = sscanf(buffer, "# %s %s %s", type, fields[nfields].name, fields[nfields].format);
 		if (nscan == 3) {
@@ -291,7 +290,7 @@ int main(int argc, char **argv) {
 			else if (strcmp(type, "angle") == 0) {
 				fields[nfields].type = TYPE_ANGLE;
 				fields[nfields].size = 8;
-				if (angles_in_degrees == true &&
+				if (angles_in_degrees &&
 				    (strcmp(fields[nfields].name, "mRollCB") == 0 || strcmp(fields[nfields].name, "mOmega_xCB") == 0 ||
 				     strcmp(fields[nfields].name, "mPitchCB") == 0 || strcmp(fields[nfields].name, "mOmega_yCB") == 0 ||
 				     strcmp(fields[nfields].name, "mYawCB") == 0 || strcmp(fields[nfields].name, "mOmega_zCB") == 0))
@@ -377,7 +376,7 @@ int main(int argc, char **argv) {
 				mb_get_binary_double(true, &buffer[fields[ifield].index], &dvalue);
 				dvalue *= fields[ifield].scale;
 				if ((strcmp(fields[ifield].name, "mHeadK") == 0 || strcmp(fields[ifield].name, "mYawK") == 0) &&
-				    angles_in_degrees == true && dvalue < 0.0)
+				    angles_in_degrees && dvalue < 0.0)
 					dvalue += 360.0;
 				if (strcmp(fields[ifield].name, "mLatK") == 0)
 					mLatK[irecord] = dvalue;
@@ -433,7 +432,7 @@ int main(int argc, char **argv) {
 			else if (fields[ifield].type == TYPE_ANGLE) {
 				mb_get_binary_double(true, &buffer[fields[ifield].index], &dvalue);
 				dvalue *= fields[ifield].scale;
-				if (strcmp(fields[ifield].name, "mYawCB") == 0 && angles_in_degrees == true && dvalue < 0.0)
+				if (strcmp(fields[ifield].name, "mYawCB") == 0 && angles_in_degrees && dvalue < 0.0)
 					dvalue += 360.0;
 			}
 		}

@@ -590,7 +590,7 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
 			/* find previous good beam */
 			bool found_pre = false;
 			if (i > 0) {
-				for (int j = i - 1; j >= 0 && found_pre == false; j--) {
+				for (int j = i - 1; j >= 0 && !found_pre; j--) {
 					if (mb_beam_ok(beamflag[j])) {
 						found_pre = true;
 						i0 = j;
@@ -601,7 +601,7 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
 			/* find post good beam */
 			bool found_post = false;
 			if (i < beams_bath - 1) {
-				for (int j = i + 1; j < beams_bath && found_post == false; j++) {
+				for (int j = i + 1; j < beams_bath && !found_post; j++) {
 					if (mb_beam_ok(beamflag[j])) {
 						found_post = true;
 						i1 = j;

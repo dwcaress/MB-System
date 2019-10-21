@@ -809,7 +809,6 @@ int main(int argc, char **argv) {
   bool check_bath = false;
   bool check_amp = false;
   bool check_ss = false;
-  bool invert_next_value = false;
   bool signflip_next_value = false;
   bool raw_next_value = false;
   bool port_next_value = false;
@@ -1262,6 +1261,8 @@ int main(int argc, char **argv) {
   /* initialize output files */
   status = mb_mallocd(verbose, __FILE__, __LINE__, n_list * sizeof(FILE *), (void **)&output, &error);
 
+  bool invert_next_value = false;
+
   if (!netcdf) {
     /* open output file */
     if (0 == strncmp("-", output_file, 2))
@@ -1685,7 +1686,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "course");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -1695,7 +1696,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "degrees true\";\n");
 
@@ -1732,7 +1733,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "along_track");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -1742,7 +1743,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "km\";\n");
 
@@ -1755,7 +1756,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "along_track_m");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -1765,7 +1766,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "m\";\n");
 
@@ -1778,7 +1779,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "unix_time");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -1788,7 +1789,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "s\";\n");
 
@@ -1802,7 +1803,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "survey_time");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -1812,7 +1813,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "s\";\n");
 
@@ -1835,7 +1836,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "pitch");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -1845,7 +1846,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "degrees from horizontal\";\n");
 
@@ -1857,7 +1858,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "draft");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -1867,7 +1868,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "m\";\n");
 
@@ -1891,7 +1892,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "roll");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -1901,7 +1902,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "degrees from horizontal\";\n");
 
@@ -1913,7 +1914,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "heave");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -1923,7 +1924,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "m\";\n");
 
@@ -1935,7 +1936,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "speed");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -1945,7 +1946,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "km/hr\";\n");
 
@@ -1957,7 +1958,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "speed_made_good");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -1967,7 +1968,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "km/hr\";\n");
 
@@ -2037,7 +2038,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "longitude");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2047,7 +2048,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "degrees\";\n");
 
@@ -2071,7 +2072,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "latitude");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2081,7 +2082,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "degrees\";\n");
 
@@ -2105,7 +2106,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "topography");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2115,7 +2116,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           if (bathy_in_feet)
             fprintf(outfile, "f\";\n");
@@ -2130,7 +2131,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "depth");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2140,7 +2141,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           if (bathy_in_feet)
             fprintf(outfile, "f\";\n");
@@ -2215,7 +2216,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "backscatter");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2225,7 +2226,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "dB\";\n");
 
@@ -2238,7 +2239,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "absorption");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2248,7 +2249,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "dB/km\";\n");
 
@@ -2261,7 +2262,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "bsn");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2271,7 +2272,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "dB\";\n");
 
@@ -2284,7 +2285,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "bso");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2294,7 +2295,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "dB\";\n");
 
@@ -2307,7 +2308,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "mback");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2317,7 +2318,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           if (format == MBF_EM300RAW || format == MBF_EM300MBA)
             fprintf(outfile, "dB + 64\";\n");
@@ -2333,7 +2334,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "depression");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2343,7 +2344,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "degrees\";\n");
 
@@ -2388,7 +2389,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "tvg_start");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2398,7 +2399,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "samples\";\n");
 
@@ -2411,7 +2412,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "tvg_stop");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2421,7 +2422,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "samples\";\n");
 
@@ -2449,7 +2450,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "pulse_length");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2459,7 +2460,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "seconds\";\n");
 
@@ -2502,7 +2503,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "sidescan");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2516,7 +2517,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "dB\";\n");
 
@@ -2529,7 +2530,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "range");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2539,7 +2540,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "samples\";\n");
 
@@ -2552,7 +2553,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "sample_rate");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2562,7 +2563,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "Hertz\";\n");
 
@@ -2575,7 +2576,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "pixels");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2585,7 +2586,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "pixels\";\n");
 
@@ -2598,7 +2599,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "beam_pixels");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2608,7 +2609,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "pixels\";\n");
 
@@ -2621,7 +2622,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "transmit_gain");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2631,7 +2632,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "dB\";\n");
 
@@ -2644,7 +2645,7 @@ int main(int argc, char **argv) {
           strcpy(variable, "receive_gain");
           if (signflip_next_value)
             strcat(variable, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             strcat(variable, "_");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2654,7 +2655,7 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
           if (signflip_next_value)
             fprintf(outfile, "-");
-          if (invert_next_value == true)
+          if (invert_next_value)
             fprintf(outfile, "1/");
           fprintf(outfile, "dB\";\n");
 
@@ -2985,7 +2986,7 @@ int main(int argc, char **argv) {
       }
 
       /* get time interval since last ping */
-      if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && first == true) {
+      if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && first) {
         time_interval = 0.0;
       }
       else if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
@@ -2994,7 +2995,7 @@ int main(int argc, char **argv) {
 
       /* calculate course made good */
       if (error == MB_ERROR_NO_ERROR && use_course) {
-        if (first == true) {
+        if (first) {
           course = heading;
           speed_made_good = speed;
           course_old = heading;
@@ -4752,7 +4753,7 @@ int main(int argc, char **argv) {
         }
 
       /* reset first flag */
-      if (error == MB_ERROR_NO_ERROR && first == true) {
+      if (error == MB_ERROR_NO_ERROR && first) {
         first = false;
       }
     }
