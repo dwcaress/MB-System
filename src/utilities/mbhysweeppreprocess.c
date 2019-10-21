@@ -40,21 +40,22 @@
 #include "mbsys_hysweep.h"
 
 #define MBHYSWEEPPREPROCESS_ALLOC_CHUNK 1000
-#define MBHYSWEEPPREPROCESS_PROCESS 1
-#define MBHYSWEEPPREPROCESS_TIMESTAMPLIST 2
-#define MBHYSWEEPPREPROCESS_TIMELAG_OFF 0
-#define MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT 1
-#define MBHYSWEEPPREPROCESS_TIMELAG_MODEL 2
+// TODO(schwehr): enums
+static const int MBHYSWEEPPREPROCESS_PROCESS = 1;
+static const int MBHYSWEEPPREPROCESS_TIMESTAMPLIST = 2;
+static const int MBHYSWEEPPREPROCESS_TIMELAG_OFF = 0;
+static const int MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT = 1;
+static const int MBHYSWEEPPREPROCESS_TIMELAG_MODEL = 2;
 
-#define MBHYSWEEPPREPROCESS_SONAR_OFFSET_NONE 0
-#define MBHYSWEEPPREPROCESS_SONAR_OFFSET_SONAR 1
-#define MBHYSWEEPPREPROCESS_SONAR_OFFSET_MRU 2
-#define MBHYSWEEPPREPROCESS_SONAR_OFFSET_NAVIGATION 3
+static const int MBHYSWEEPPREPROCESS_SONAR_OFFSET_NONE = 0;
+static const int MBHYSWEEPPREPROCESS_SONAR_OFFSET_SONAR = 1;
+static const int MBHYSWEEPPREPROCESS_SONAR_OFFSET_MRU = 2;
+static const int MBHYSWEEPPREPROCESS_SONAR_OFFSET_NAVIGATION = 3;
 
 #define MBHYSWEEPPREPROCESS_OFFSET_MAX 12
 
-#define MBHYSWEEPPREPROCESS_NAVFORMAT_NONE 0
-#define MBHYSWEEPPREPROCESS_NAVFORMAT_OFG 1
+static const int MBHYSWEEPPREPROCESS_NAVFORMAT_NONE = 0;
+static const int MBHYSWEEPPREPROCESS_NAVFORMAT_OFG = 1;
 
 
 static const char program_name[] = "mbhysweeppreprocess";
@@ -270,7 +271,6 @@ int main(int argc, char **argv) {
 	int fstat;
 	char buffer[MB_PATH_MAXLINE] = "";
 	char *result;
-	int read_data;
 	char fileroot[MB_PATH_MAXLINE] = "";
 	int nscan;
 	int year, month, day, hour, minute;
@@ -815,6 +815,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -835,7 +836,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == true && format == MBF_HYSWEEP1) {
+	while (read_data && format == MBF_HYSWEEP1) {
 
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
@@ -953,11 +954,11 @@ int main(int argc, char **argv) {
 			         (istore->kind == MB_DATA_NAV || istore->kind == MB_DATA_NAV1 || istore->kind == MB_DATA_NAV2)) {
 				/* check device for being enabled */
 				device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->POS_device_number]);
-				if (device->DV2_enabled == true) {
+				if (device->DV2_enabled) {
 					nrec_POS++;
 
 					/* add latest fix */
-					if (imb_io_ptr->projection_initialized == true) {
+					if (imb_io_ptr->projection_initialized) {
 						mb_proj_inverse(verbose, imb_io_ptr->pjptr, istore->POS_x, istore->POS_y, &navlon, &navlat, &error);
 					}
 					else {
@@ -965,6 +966,7 @@ int main(int argc, char **argv) {
 						navlat = istore->POS_y;
 					}
 
+					// TODO(schwehr): Probable bug.  Always false?
 					if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == true)
 						fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d POS record:%d\n",
 						        istore->time_i[0], istore->time_i[1], istore->time_i[2], istore->time_i[3], istore->time_i[4],
@@ -1010,7 +1012,7 @@ int main(int argc, char **argv) {
 
 				/* check device for being enabled */
 				device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->HCP_device_number]);
-				if (device->DV2_enabled == true) {
+				if (device->DV2_enabled) {
 					nrec_HCP++;
 
 					if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == true)
@@ -1052,7 +1054,7 @@ int main(int argc, char **argv) {
 			if (status == MB_SUCCESS && kind == MB_DATA_HEADING) {
 				/* check device for being enabled */
 				device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->GYR_device_number]);
-				if (device->DV2_enabled == true) {
+				if (device->DV2_enabled) {
 					nrec_GYR++;
 
 					if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == true)
@@ -1088,7 +1090,7 @@ int main(int argc, char **argv) {
 			if (status == MB_SUCCESS && kind == MB_DATA_SONARDEPTH) {
 				/* check device for being enabled */
 				device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->DFT_device_number]);
-				if (device->DV2_enabled == true) {
+				if (device->DV2_enabled) {
 					nrec_DFT++;
 
 					if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == true)
@@ -1124,7 +1126,7 @@ int main(int argc, char **argv) {
 			if (status == MB_SUCCESS && kind == MB_DATA_ALTITUDE) {
 				/* check device for being enabled */
 				device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->GYR_device_number]);
-				if (device->DV2_enabled == true) {
+				if (device->DV2_enabled) {
 					nrec_EC1++;
 
 					if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == true)
@@ -1455,7 +1457,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* loop over all files to be read */
-		while (read_data == true && format == MBF_HYSWEEP1) {
+		while (read_data && format == MBF_HYSWEEP1) {
 			/* figure out the output file name */
 			status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
 			if (testformat == MBF_HYSWEEP1 && strncmp(".HSX", &ifile[strlen(ifile) - 4], 4) == 0)
@@ -1729,7 +1731,7 @@ int main(int argc, char **argv) {
 					/* set values at sonar ping time */
 					istore->RMBint_lon = navlon;
 					istore->RMBint_lat = navlat;
-					if (imb_io_ptr->projection_initialized == true) {
+					if (imb_io_ptr->projection_initialized) {
 						mb_proj_forward(verbose, imb_io_ptr->pjptr, istore->RMBint_lon, istore->RMBint_lat, &(istore->RMBint_x),
 						                &(istore->RMBint_y), &error);
 					}
@@ -2091,7 +2093,7 @@ int main(int argc, char **argv) {
 				else if (status == MB_SUCCESS && (kind == MB_DATA_NAV || kind == MB_DATA_NAV1 || kind == MB_DATA_NAV2)) {
 					/* check device for being enabled */
 					device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->POS_device_number]);
-					if (device->DV2_enabled == true)
+					if (device->DV2_enabled)
 						nrec_POS++;
 					else
 						nrec_POSunused++;

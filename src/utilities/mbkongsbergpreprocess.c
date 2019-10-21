@@ -315,7 +315,6 @@ int main(int argc, char **argv) {
 	int fstat;
 	char buffer[MB_PATH_MAXLINE] = "";
 	char *result;
-	int read_data;
 	char fileroot[MB_PATH_MAXLINE] = "";
 	char *filenameptr;
 	int testformat;
@@ -719,6 +718,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist =  format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -739,7 +739,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == true &&
+	while (read_data &&
 	       (format == MBF_EM300RAW || format == MBF_EM300MBA || format == MBF_EM710RAW || format == MBF_EM710MBA)) {
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
@@ -854,34 +854,34 @@ int main(int argc, char **argv) {
 
 				if (format == MBF_EM300RAW) {
 					nrec_0x58_bathymetry2++;
-					if (ping->png_raw_read == true)
+					if (ping->png_raw_read)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == true)
+					if (ping->png_ss_read)
 						nrec_0x59_sidescan2++;
 				}
 				else if (format == MBF_EM300MBA) {
 					nrec_0xE5_bathymetry_mbari59++;
-					if (ping->png_raw_read == true)
+					if (ping->png_raw_read)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == true)
+					if (ping->png_ss_read)
 						nrec_0x59_sidescan2++;
 				}
 				else if (format == MBF_EM710RAW) {
 					nrec_0x58_bathymetry2++;
-					if (ping->png_raw_read == true)
+					if (ping->png_raw_read)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == true)
+					if (ping->png_ss_read)
 						nrec_0x59_sidescan2++;
-					if (ping->png_quality_read == true)
+					if (ping->png_quality_read)
 						nrec_0x4F_quality++;
 				}
 				else if (format == MBF_EM710MBA) {
 					nrec_0xE5_bathymetry_mbari59++;
-					if (ping->png_raw_read == true)
+					if (ping->png_raw_read)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == true)
+					if (ping->png_ss_read)
 						nrec_0x59_sidescan2++;
-					if (ping->png_quality_read == true)
+					if (ping->png_quality_read)
 						nrec_0x4F_quality++;
 				}
 			}
@@ -1787,7 +1787,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* loop over all files to be read */
-		while (read_data == true && (format == MBF_EM710RAW || format == MBF_EM710MBA)) {
+		while (read_data && (format == MBF_EM710RAW || format == MBF_EM710MBA)) {
 			/* figure out the output file name if not specified */
 			if (!ofile_set) {
 				status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
@@ -2663,7 +2663,7 @@ int main(int argc, char **argv) {
 			status = mb_close(verbose, &imbio_ptr, &error);
 
 			/* close the output swath file if necessary */
-			if (!ofile_set || read_data == false) {
+			if (!ofile_set || !read_data) {
 				status = mb_close(verbose, &ombio_ptr, &error);
 
 				/* open up start and end times by two minutes */

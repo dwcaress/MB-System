@@ -276,7 +276,6 @@ int main(int argc, char **argv) {
 	double dx, dy;
 	double b;
 
-	int read_data;
 	int ictd;
 
 	/* get current default values */
@@ -428,6 +427,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/**************************************************************************************/
 
@@ -452,7 +452,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
@@ -607,7 +607,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
@@ -711,6 +711,7 @@ int main(int argc, char **argv) {
 							    mb_linear_interp(verbose, nav_time_d - 1, nav_speed - 1, nnav, time_d, &speed, &j, &error);
 
 						/* only output if interpolation of nav etc has worked */
+						// TODO(schwehr): true should be MB_SUCCESS?
 						if (interp_status == true) {
 
 							/* calculate course made good and distance */

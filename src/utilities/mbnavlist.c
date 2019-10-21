@@ -227,7 +227,6 @@ int main(int argc, char **argv) {
 	int utm_zone;
 	double naveasting, navnorthing, deasting, dnorthing;
 
-	int read_data;
 	int inav;
 
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -418,6 +417,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -442,7 +442,7 @@ int main(int argc, char **argv) {
 	bool signflip_next_value = false;
 
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 		/* check format and get data sources */
 		if ((status = mb_format_source(verbose, &format, &platform_source, &nav_source, &sensordepth_source, &heading_source,
 		                               &attitude_source, &svp_source, &error)) == MB_FAILURE) {

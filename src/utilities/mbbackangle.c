@@ -390,7 +390,6 @@ int main(int argc, char **argv) {
 	char *projection = "GenericLinear";
 
 	int ampkind;
-	int read_data;
 	double mtodeglon, mtodeglat;
 	double headingx, headingy;
 	double r[3], rr;
@@ -829,6 +828,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -854,7 +854,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 
 		/* obtain format array location - format id will
 		    be aliased to current id if old format id given */

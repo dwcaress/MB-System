@@ -118,7 +118,7 @@ struct mbfilter_filter_struct {
 	int xdim;
 	int ldim;
 	int iteration;
-	int threshold;
+	bool threshold;
 	double threshold_lo;
 	double threshold_hi;
 	double hipass_offset;
@@ -698,7 +698,6 @@ int main(int argc, char **argv) {
 	double *distances;
 	int iteration;
 
-	int read_data;
 	double *dataptr0, *dataptr1;
 	char *flagptr0, *flagptr1;
 	double ddis;
@@ -940,6 +939,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* output some information */
 	if (verbose > 0) {
@@ -973,7 +973,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "          Alongtrack dimension:  %d\n", filters[i].ldim);
 			fprintf(stderr, "          Iterations:            %d\n", filters[i].iteration);
 			if (filters[i].mode == MBFILTER_A_SMOOTH_MEDIAN) {
-				if (filters[i].threshold == true) {
+				if (filters[i].threshold) {
 					fprintf(stderr, "          Threshold applied\n");
 					fprintf(stderr, "          Threshold_lo:          %f\n", filters[i].threshold_lo);
 					fprintf(stderr, "          Threshold_hi:          %f\n", filters[i].threshold_hi);
@@ -1008,7 +1008,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over all files to be read */
-	while (read_data == true) {
+	while (read_data) {
 
 		/* check for format with amplitude or sidescan data */
 		status = mb_format_system(verbose, &format, &system, &error);

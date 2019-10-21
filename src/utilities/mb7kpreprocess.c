@@ -392,7 +392,6 @@ int main(int argc, char **argv) {
 	double *batht_time_d_new = NULL;
 	double *batht_time_offset = NULL;
 	int *batht_ping_offset = NULL;
-	int *batht_good_offset = NULL;
 
 	/* edgetech timetag data */
 	int nedget = 0;
@@ -402,7 +401,6 @@ int main(int argc, char **argv) {
 	double *edget_time_d_new = NULL;
 	double *edget_time_offset = NULL;
 	int *edget_ping_offset = NULL;
-	int *edget_good_offset = NULL;
 
 	/* timedelay parameters */
 	int timedelaymode = MB7KPREPROCESS_TIMEDELAY_UNDEFINED;
@@ -503,7 +501,6 @@ int main(int argc, char **argv) {
 	s7k_time s7kTime;
 	mb_path esffile;
 	int esf_status;
-	bool esffile_open = false;
 	struct mb_esf_struct esf;
 
 	/* MBARI data flag */
@@ -553,15 +550,12 @@ int main(int argc, char **argv) {
 	int fstat;
 	char buffer[MB_PATH_MAXLINE];
 	char *result;
-	int read_data;
 	int testformat;
 	char fileroot[MB_PATH_MAXLINE];
-	int found;
 	int reson_lastread;
 	int sslo_lastread;
 	double sslo_last_time_d;
 	int sslo_last_ping;
-	int foundstart, foundend;
 	int start, end;
 	int nscan, startdata;
 	int ins_time_d_index = -1;
@@ -1644,6 +1638,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -1663,8 +1658,11 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
+	bool *batht_good_offset = NULL;
+	bool *edget_good_offset = NULL;
+
 	/* loop over all files to be read */
-	while (read_data == true && format == MBF_RESON7KR) {
+	while (read_data && format == MBF_RESON7KR) {
 
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
@@ -1789,43 +1787,43 @@ int main(int argc, char **argv) {
 				nrec_multibeam++;
 
 				bathymetry = &(istore->bathymetry);
-				if (istore->read_volatilesettings == true)
+				if (istore->read_volatilesettings)
 					nrec_volatilesettings++;
-				if (istore->read_matchfilter == true)
+				if (istore->read_matchfilter)
 					nrec_matchfilter++;
-				if (istore->read_beamgeometry == true)
+				if (istore->read_beamgeometry)
 					nrec_beamgeometry++;
-				if (istore->read_remotecontrolsettings == true)
+				if (istore->read_remotecontrolsettings)
 					nrec_remotecontrolsettings++;
-				if (istore->read_bathymetry == true)
+				if (istore->read_bathymetry)
 					nrec_bathymetry++;
-				if (istore->read_backscatter == true)
+				if (istore->read_backscatter)
 					nrec_backscatter++;
-				if (istore->read_beam == true)
+				if (istore->read_beam)
 					nrec_beam++;
-				if (istore->read_verticaldepth == true)
+				if (istore->read_verticaldepth)
 					nrec_verticaldepth++;
-				if (istore->read_image == true)
+				if (istore->read_image)
 					nrec_image++;
-				if (istore->read_v2pingmotion == true)
+				if (istore->read_v2pingmotion)
 					nrec_v2pingmotion++;
-				if (istore->read_v2detectionsetup == true)
+				if (istore->read_v2detectionsetup)
 					nrec_v2detectionsetup++;
-				if (istore->read_v2beamformed == true)
+				if (istore->read_v2beamformed)
 					nrec_v2beamformed++;
-				if (istore->read_v2detection == true)
+				if (istore->read_v2detection)
 					nrec_v2detection++;
-				if (istore->read_v2rawdetection == true)
+				if (istore->read_v2rawdetection)
 					nrec_v2rawdetection++;
-				if (istore->read_v2snippet == true)
+				if (istore->read_v2snippet)
 					nrec_v2snippet++;
-				if (istore->read_calibratedsnippet == true)
+				if (istore->read_calibratedsnippet)
 					nrec_calibratedsnippet++;
-				if (istore->read_processedsidescan == true)
+				if (istore->read_processedsidescan)
 					nrec_processedsidescan++;
 
 				/* print out record headers */
-				if (istore->read_volatilesettings == true) {
+				if (istore->read_volatilesettings) {
 					volatilesettings = &(istore->volatilesettings);
 					header = &(volatilesettings->header);
 					time_j[0] = header->s7kTime.Year;
@@ -1842,7 +1840,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 						        header->RecordNumber);
 				}
-				if (istore->read_matchfilter == true) {
+				if (istore->read_matchfilter) {
 					matchfilter = &(istore->matchfilter);
 					header = &(matchfilter->header);
 					time_j[0] = header->s7kTime.Year;
@@ -1859,7 +1857,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 						        header->RecordNumber);
 				}
-				if (istore->read_beamgeometry == true) {
+				if (istore->read_beamgeometry) {
 					beamgeometry = &(istore->beamgeometry);
 					header = &(beamgeometry->header);
 					time_j[0] = header->s7kTime.Year;
@@ -1876,7 +1874,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        beamgeometry->number_beams);
 				}
-				if (istore->read_remotecontrolsettings == true) {
+				if (istore->read_remotecontrolsettings) {
 					remotecontrolsettings = &(istore->remotecontrolsettings);
 					header = &(remotecontrolsettings->header);
 					time_j[0] = header->s7kTime.Year;
@@ -1893,7 +1891,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 						        header->RecordNumber);
 				}
-				if (istore->read_bathymetry == true) {
+				if (istore->read_bathymetry) {
 					bathymetry = &(istore->bathymetry);
 					header = &(bathymetry->header);
 					time_j[0] = header->s7kTime.Year;
@@ -1926,7 +1924,7 @@ int main(int argc, char **argv) {
 						                     (void **)&batht_time_offset, &error);
 						status &= mb_reallocd(verbose, __FILE__, __LINE__, nbatht_alloc * sizeof(int), (void **)&batht_ping_offset,
 						                     &error);
-						status &= mb_reallocd(verbose, __FILE__, __LINE__, nbatht_alloc * sizeof(int), (void **)&batht_good_offset,
+						status &= mb_reallocd(verbose, __FILE__, __LINE__, nbatht_alloc * sizeof(bool), (void **)&batht_good_offset,
 						                     &error);
 						if (error != MB_ERROR_NO_ERROR) {
 							mb_error(verbose, error, &message);
@@ -1976,7 +1974,7 @@ int main(int argc, char **argv) {
 						nbatht++;
 					}
 				}
-				if (istore->read_backscatter == true) {
+				if (istore->read_backscatter) {
 					backscatter = &(istore->backscatter);
 					header = &(backscatter->header);
 					time_j[0] = header->s7kTime.Year;
@@ -1993,7 +1991,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        backscatter->ping_number, backscatter->number_samples);
 				}
-				if (istore->read_beam == true) {
+				if (istore->read_beam) {
 					beam = &(istore->beam);
 					header = &(beam->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2010,7 +2008,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        beam->ping_number, beam->number_beams, beam->number_samples);
 				}
-				if (istore->read_verticaldepth == true) {
+				if (istore->read_verticaldepth) {
 					verticaldepth = &(istore->verticaldepth);
 					header = &(verticaldepth->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2027,7 +2025,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        verticaldepth->ping_number);
 				}
-				if (istore->read_image == true) {
+				if (istore->read_image) {
 					image = &(istore->image);
 					header = &(image->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2044,7 +2042,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        image->ping_number, image->width, image->height);
 				}
-				if (istore->read_v2pingmotion == true) {
+				if (istore->read_v2pingmotion) {
 					v2pingmotion = &(istore->v2pingmotion);
 					header = &(v2pingmotion->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2061,7 +2059,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        v2pingmotion->ping_number, v2pingmotion->n);
 				}
-				if (istore->read_v2detectionsetup == true) {
+				if (istore->read_v2detectionsetup) {
 					v2detectionsetup = &(istore->v2detectionsetup);
 					header = &(v2detectionsetup->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2078,7 +2076,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        v2detectionsetup->ping_number, v2detectionsetup->number_beams);
 				}
-				if (istore->read_v2beamformed == true) {
+				if (istore->read_v2beamformed) {
 					v2beamformed = &(istore->v2beamformed);
 					header = &(v2beamformed->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2095,7 +2093,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        v2beamformed->ping_number, v2beamformed->number_beams);
 				}
-				if (istore->read_v2detection == true) {
+				if (istore->read_v2detection) {
 					v2detection = &(istore->v2detection);
 					header = &(v2detection->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2112,7 +2110,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        v2detection->ping_number, v2detection->number_beams);
 				}
-				if (istore->read_v2rawdetection == true) {
+				if (istore->read_v2rawdetection) {
 					v2rawdetection = &(istore->v2rawdetection);
 					header = &(v2rawdetection->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2129,7 +2127,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        v2rawdetection->ping_number, v2rawdetection->number_beams);
 				}
-				if (istore->read_v2snippet == true) {
+				if (istore->read_v2snippet) {
 					v2snippet = &(istore->v2snippet);
 					header = &(v2snippet->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2146,7 +2144,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        v2snippet->ping_number, v2snippet->number_beams);
 				}
-				if (istore->read_calibratedsnippet == true) {
+				if (istore->read_calibratedsnippet) {
 					calibratedsnippet = &(istore->calibratedsnippet);
 					header = &(calibratedsnippet->header);
 					time_j[0] = header->s7kTime.Year;
@@ -2163,7 +2161,7 @@ int main(int argc, char **argv) {
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 						        calibratedsnippet->ping_number, calibratedsnippet->number_beams);
 				}
-				if (istore->read_processedsidescan == true) {
+				if (istore->read_processedsidescan) {
 					processedsidescan = &(istore->processedsidescan);
 					header = &(processedsidescan->header);
 					time_j[0] = header->s7kTime.Year;
@@ -3214,7 +3212,7 @@ int main(int argc, char **argv) {
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nedget_alloc * sizeof(int), (void **)&edget_ping_offset, &error);
 					status =
-					    mb_reallocd(verbose, __FILE__, __LINE__, nedget_alloc * sizeof(int), (void **)&edget_good_offset, &error);
+					    mb_reallocd(verbose, __FILE__, __LINE__, nedget_alloc * sizeof(bool), (void **)&edget_good_offset, &error);
 					if (error != MB_ERROR_NO_ERROR) {
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
@@ -3896,7 +3894,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Ping: %7d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %15.6f %10.6f %2d  %15.6f", batht_ping[i],
 			        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], batht_time_d[i],
 			        batht_time_offset[i], batht_ping_offset[i], batht_time_d_new[i]);
-			if (batht_good_offset[i] == true)
+			if (batht_good_offset[i])
 				fprintf(stderr, " ***");
 			fprintf(stderr, "\n");
 		}
@@ -3921,29 +3919,29 @@ int main(int argc, char **argv) {
 	/* fix problems with batht timestamp arrays */
 	else if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_RESON) {
 		for (int i = 0; i < nbatht; i++) {
-			if (batht_good_offset[i] == false) {
-				foundstart = false;
-				foundend = false;
-				for (int j = i - 1; j >= 0 && foundstart == false; j--) {
-					if (batht_good_offset[j] == true) {
+			if (!batht_good_offset[i]) {
+				bool foundstart = false;
+				bool foundend = false;
+				for (int j = i - 1; j >= 0 && !foundstart; j--) {
+					if (batht_good_offset[j]) {
 						foundstart = true;
 						start = j;
 					}
 				}
-				for (int j = i + 1; j < nbatht && foundend == false; j++) {
-					if (batht_good_offset[j] == true) {
+				for (int j = i + 1; j < nbatht && !foundend; j++) {
+					if (batht_good_offset[j]) {
 						foundend = true;
 						end = j;
 					}
 				}
-				if (foundstart == true && foundend == true) {
+				if (foundstart && foundend) {
 					batht_time_offset[i] = batht_time_offset[start] + (batht_time_offset[end] - batht_time_offset[start]) *
 					                                                      ((double)(i - start)) / ((double)(end - start));
 				}
-				else if (foundstart == true) {
+				else if (foundstart) {
 					batht_time_offset[i] = batht_time_offset[start];
 				}
-				else if (foundend == true) {
+				else if (foundend) {
 					batht_time_offset[i] = batht_time_offset[end];
 				}
 			}
@@ -3953,29 +3951,29 @@ int main(int argc, char **argv) {
 	/* fix problems with edget timestamp arrays */
 	if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
 		for (int i = 0; i < nedget; i++) {
-			if (edget_good_offset[i] == false) {
-				foundstart = false;
-				foundend = false;
-				for (int j = i - 1; j >= 0 && foundstart == false; j--) {
-					if (edget_good_offset[j] == true) {
+			if (!edget_good_offset[i]) {
+				bool foundstart = false;
+				bool foundend = false;
+				for (int j = i - 1; j >= 0 && !foundstart; j--) {
+					if (edget_good_offset[j]) {
 						foundstart = true;
 						start = j;
 					}
 				}
-				for (int j = i + 1; j < nedget && foundend == false; j++) {
-					if (edget_good_offset[j] == true) {
+				for (int j = i + 1; j < nedget && !foundend; j++) {
+					if (edget_good_offset[j]) {
 						foundend = true;
 						end = j;
 					}
 				}
-				if (foundstart == true && foundend == true) {
+				if (foundstart && foundend) {
 					edget_time_offset[i] = edget_time_offset[start] + (edget_time_offset[end] - edget_time_offset[start]) *
 					                                                      ((double)(i - start)) / ((double)(end - start));
 				}
-				else if (foundstart == true) {
+				else if (foundstart) {
 					edget_time_offset[i] = edget_time_offset[start];
 				}
-				else if (foundend == true) {
+				else if (foundend) {
 					edget_time_offset[i] = edget_time_offset[end];
 				}
 			}
@@ -4066,6 +4064,8 @@ int main(int argc, char **argv) {
 			        batht_ping[i], batht_time_offset[i], batht_ping_offset[i], batht_good_offset[i]);
 		}
 	}
+
+	int found;  // TODO(schwehr): Make mb_esf_check take a bool.
 	/*
 	 * now read the data files again, this time interpolating nav and
 	 * attitude into the multibeam records and fixing other problems
@@ -4139,7 +4139,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* loop over all files to be read */
-		while (read_data == true && format == MBF_RESON7KR) {
+		while (read_data && format == MBF_RESON7KR) {
 			/* figure out the output file name */
 			if (!ofile_set) {
 				status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
@@ -4331,7 +4331,7 @@ int main(int argc, char **argv) {
 			 * then load any available bathymetry edits so those
 			 * time stamps can be fixed too
 			 */
-			esffile_open = false;
+			bool esffile_open = false;
 			if (error == MB_ERROR_NO_ERROR && kluge_fixtimejump) {
 				/* progress message */
 				fprintf(stderr, "Checking for existing bathymetry edits...\n");
@@ -4340,7 +4340,7 @@ int main(int argc, char **argv) {
 				esf_status = mb_esf_check(verbose, ofile, esffile, &found, &error);
 
 				/* if esf file found load it */
-				if (esf_status == MB_SUCCESS && found == true) {
+				if (esf_status == MB_SUCCESS && found) {
 					esf_status = mb_esf_load(verbose, program_name, ofile, true, true, esffile, &esf, &error);
 					if (status == MB_SUCCESS && esf.esffp != NULL)
 						esffile_open = true;
@@ -4379,46 +4379,46 @@ int main(int argc, char **argv) {
 					bathymetry = &(istore->bathymetry);
 					v2detection = &(istore->v2detection);
 					v2rawdetection = &(istore->v2rawdetection);
-					if (istore->read_volatilesettings == true)
+					if (istore->read_volatilesettings)
 						nrec_volatilesettings++;
-					if (istore->read_matchfilter == true)
+					if (istore->read_matchfilter)
 						nrec_matchfilter++;
-					if (istore->read_beamgeometry == true)
+					if (istore->read_beamgeometry)
 						nrec_beamgeometry++;
-					if (istore->read_remotecontrolsettings == true)
+					if (istore->read_remotecontrolsettings)
 						nrec_remotecontrolsettings++;
-					if (istore->read_bathymetry == true)
+					if (istore->read_bathymetry)
 						nrec_bathymetry++;
-					if (istore->read_backscatter == true)
+					if (istore->read_backscatter)
 						nrec_backscatter++;
-					if (istore->read_beam == true)
+					if (istore->read_beam)
 						nrec_beam++;
-					if (istore->read_verticaldepth == true)
+					if (istore->read_verticaldepth)
 						nrec_verticaldepth++;
-					if (istore->read_image == true)
+					if (istore->read_image)
 						nrec_image++;
-					if (istore->read_v2pingmotion == true)
+					if (istore->read_v2pingmotion)
 						nrec_v2pingmotion++;
-					if (istore->read_v2detectionsetup == true)
+					if (istore->read_v2detectionsetup)
 						nrec_v2detectionsetup++;
-					if (istore->read_v2beamformed == true)
+					if (istore->read_v2beamformed)
 						nrec_v2beamformed++;
-					if (istore->read_v2detection == true)
+					if (istore->read_v2detection)
 						nrec_v2detection++;
-					if (istore->read_v2rawdetection == true)
+					if (istore->read_v2rawdetection)
 						nrec_v2rawdetection++;
-					if (istore->read_v2snippet == true)
+					if (istore->read_v2snippet)
 						nrec_v2snippet++;
-					if (istore->read_calibratedsnippet == true)
+					if (istore->read_calibratedsnippet)
 						nrec_calibratedsnippet++;
-					if (istore->read_processedsidescan == true)
+					if (istore->read_processedsidescan)
 						nrec_processedsidescan++;
 
 					/*
 					 * if requested fix jumps in
 					 * multibeam timestamps
 					 */
-					if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_bathymetry == true &&
+					if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_bathymetry &&
 					    kluge_fixtimejump) {
 						/*
 						 * find the ping in the
@@ -4427,19 +4427,19 @@ int main(int argc, char **argv) {
 						bathymetry = &(istore->bathymetry);
 						header = &(bathymetry->header);
 						found = false;
-						for (int i = iping; i < nbatht && found == false; i++) {
+						for (int i = iping; i < nbatht && !found; i++) {
 							if (bathymetry->ping_number == batht_ping[i]) {
 								iping = i;
 								found = true;
 							}
 						}
-						for (int i = 0; i < nbatht && found == false; i++) {
+						for (int i = 0; i < nbatht && !found; i++) {
 							if (bathymetry->ping_number == batht_ping[i]) {
 								iping = i;
 								found = true;
 							}
 						}
-						if (found == true && batht_good_offset[iping] == true) {
+						if (found && batht_good_offset[iping]) {
 							fprintf(stderr,
 							        "*** Timestamp adjusted from "
 							        "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d to ",
@@ -4478,39 +4478,39 @@ int main(int argc, char **argv) {
 							 * of the relevant
 							 * data records
 							 */
-							if (istore->read_volatilesettings == true)
+							if (istore->read_volatilesettings)
 								istore->volatilesettings.header.s7kTime = s7kTime;
-							if (istore->read_matchfilter == true)
+							if (istore->read_matchfilter)
 								istore->matchfilter.header.s7kTime = s7kTime;
-							if (istore->read_beamgeometry == true)
+							if (istore->read_beamgeometry)
 								istore->beamgeometry.header.s7kTime = s7kTime;
-							if (istore->read_remotecontrolsettings == true)
+							if (istore->read_remotecontrolsettings)
 								istore->remotecontrolsettings.header.s7kTime = s7kTime;
-							if (istore->read_bathymetry == true)
+							if (istore->read_bathymetry)
 								istore->bathymetry.header.s7kTime = s7kTime;
-							if (istore->read_backscatter == true)
+							if (istore->read_backscatter)
 								istore->backscatter.header.s7kTime = s7kTime;
-							if (istore->read_beam == true)
+							if (istore->read_beam)
 								istore->beam.header.s7kTime = s7kTime;
-							if (istore->read_verticaldepth == true)
+							if (istore->read_verticaldepth)
 								istore->verticaldepth.header.s7kTime = s7kTime;
-							if (istore->read_image == true)
+							if (istore->read_image)
 								istore->image.header.s7kTime = s7kTime;
-							if (istore->read_v2pingmotion == true)
+							if (istore->read_v2pingmotion)
 								istore->v2pingmotion.header.s7kTime = s7kTime;
-							if (istore->read_v2detectionsetup == true)
+							if (istore->read_v2detectionsetup)
 								istore->v2detectionsetup.header.s7kTime = s7kTime;
-							if (istore->read_v2beamformed == true)
+							if (istore->read_v2beamformed)
 								istore->v2beamformed.header.s7kTime = s7kTime;
-							if (istore->read_v2detection == true)
+							if (istore->read_v2detection)
 								istore->v2detection.header.s7kTime = s7kTime;
-							if (istore->read_v2rawdetection == true)
+							if (istore->read_v2rawdetection)
 								istore->v2rawdetection.header.s7kTime = s7kTime;
-							if (istore->read_v2snippet == true)
+							if (istore->read_v2snippet)
 								istore->v2snippet.header.s7kTime = s7kTime;
-							if (istore->read_calibratedsnippet == true)
+							if (istore->read_calibratedsnippet)
 								istore->calibratedsnippet.header.s7kTime = s7kTime;
-							if (istore->read_processedsidescan == true)
+							if (istore->read_processedsidescan)
 								istore->processedsidescan.header.s7kTime = s7kTime;
 
 							/*
@@ -4519,7 +4519,7 @@ int main(int argc, char **argv) {
 							 * to any affected
 							 * beam edits
 							 */
-							if (esffile_open == true) {
+							if (esffile_open) {
 								for (int i = 0; i < esf.nedit; i++) {
 									if (fabs(esf.edit[i].time_d - time_d_org) < time_d_tolerance) {
 										esf.edit[i].time_d = time_d;
@@ -4534,7 +4534,7 @@ int main(int argc, char **argv) {
 						}
 					}
 					/* print out record headers */
-					if (istore->read_volatilesettings == true) {
+					if (istore->read_volatilesettings) {
 						volatilesettings = &(istore->volatilesettings);
 						header = &(volatilesettings->header);
 						time_j[0] = header->s7kTime.Year;
@@ -4551,7 +4551,7 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber);
 					}
-					if (istore->read_matchfilter == true) {
+					if (istore->read_matchfilter) {
 						matchfilter = &(istore->matchfilter);
 						header = &(matchfilter->header);
 						time_j[0] = header->s7kTime.Year;
@@ -4568,7 +4568,7 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber);
 					}
-					if (istore->read_beamgeometry == true) {
+					if (istore->read_beamgeometry) {
 						beamgeometry = &(istore->beamgeometry);
 						header = &(beamgeometry->header);
 						time_j[0] = header->s7kTime.Year;
@@ -4585,7 +4585,7 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber, beamgeometry->number_beams);
 					}
-					if (istore->read_remotecontrolsettings == true) {
+					if (istore->read_remotecontrolsettings) {
 						remotecontrolsettings = &(istore->remotecontrolsettings);
 						header = &(remotecontrolsettings->header);
 						time_j[0] = header->s7kTime.Year;
@@ -4606,7 +4606,7 @@ int main(int argc, char **argv) {
 						status = MB_FAILURE;
 						error = MB_ERROR_IGNORE;
 					}
-					else if (istore->read_bathymetry == true) {
+					else if (istore->read_bathymetry) {
 						bathymetry = &(istore->bathymetry);
 						header = &(bathymetry->header);
 						time_j[0] = header->s7kTime.Year;
@@ -4632,7 +4632,7 @@ int main(int argc, char **argv) {
 							/* fix time stamp */
 							if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_RESON) {
 								found = false;
-								for (int j = 0; j < nbatht && found == false; j++) {
+								for (int j = 0; j < nbatht && !found; j++) {
 									if (bathymetry->ping_number == batht_ping[j]) {
 										found = true;
 										time_d = batht_time_d_new[j];
@@ -4977,13 +4977,13 @@ int main(int argc, char **argv) {
 						/*
 						 * if the optional data are available, then proceed
 						 */
-						if (status == MB_SUCCESS && (bathymetry->optionaldata == false || !kluge_donotrecalculatebathy)) {
+						if (status == MB_SUCCESS && (!bathymetry->optionaldata || !kluge_donotrecalculatebathy)) {
 							/*
 							 * initialize all of the beams
 							 */
 							for (int i = 0; i < bathymetry->number_beams; i++) {
-								if (istore->read_v2rawdetection == true ||
-								    (istore->read_v2detection == true && istore->read_v2detectionsetup == true))
+								if (istore->read_v2rawdetection ||
+								    (istore->read_v2detection && istore->read_v2detectionsetup))
 									bathymetry->quality[i] = 0;
 								bathymetry->depth[i] = 0.0;
 								bathymetry->acrosstrack[i] = 0.0;
@@ -5044,7 +5044,7 @@ int main(int argc, char **argv) {
 								/*
 								 * v2rawdetect ion record
 								 */
-								if (istore->read_v2rawdetection == true) {
+								if (istore->read_v2rawdetection) {
 									for (int i = 0; i < v2rawdetection->number_beams; i++) {
 										v2rawdetection->rx_angle[i] *= kluge_beampatternfactor;
 									}
@@ -5052,7 +5052,7 @@ int main(int argc, char **argv) {
 								/*
 								 * v2detection record with or without v2detectionsetup
 								 */
-								if (istore->read_v2detection == true) {
+								if (istore->read_v2detection) {
 									for (int i = 0; i < v2detection->number_beams; i++) {
 										v2detection->angle_x[i] *= kluge_beampatternfactor;
 									}
@@ -5060,7 +5060,7 @@ int main(int argc, char **argv) {
 								/*
 								 * beamgeometry record
 								 */
-								if (istore->read_beamgeometry == true) {
+								if (istore->read_beamgeometry) {
 									for (int i = 0; i < bathymetry->number_beams; i++) {
 										beamgeometry->angle_acrosstrack[i] *= kluge_beampatternfactor;
 									}
@@ -5073,7 +5073,7 @@ int main(int argc, char **argv) {
 								/*
 								 * v2rawdetection record
 								 */
-								if (istore->read_v2rawdetection == true) {
+								if (istore->read_v2rawdetection) {
 									for (int i = 0; i < v2rawdetection->number_beams; i++) {
 										v2rawdetection->rx_angle[i] =
 										    asin(kluge_beampatternsnellfactor * sin(v2rawdetection->rx_angle[i]));
@@ -5082,7 +5082,7 @@ int main(int argc, char **argv) {
 								/*
 								 * v2detection record with or without v2detectionsetup
 								 */
-								if (istore->read_v2detection == true) {
+								if (istore->read_v2detection) {
 									for (int i = 0; i < v2detection->number_beams; i++) {
 										v2detection->angle_x[i] =
 										    asin(kluge_beampatternsnellfactor * sin(v2detection->angle_x[i]));
@@ -5091,7 +5091,7 @@ int main(int argc, char **argv) {
 								/*
 								 * beamgeometry record
 								 */
-								if (istore->read_beamgeometry == true) {
+								if (istore->read_beamgeometry) {
 									for (int i = 0; i < bathymetry->number_beams; i++) {
 										beamgeometry->angle_acrosstrack[i] =
 										    asin(kluge_beampatternsnellfactor * sin(beamgeometry->angle_acrosstrack[i]));
@@ -5121,7 +5121,7 @@ int main(int argc, char **argv) {
 							/*
 							 * case of v2rawdetection record
 							 */
-							if (istore->read_v2rawdetection == true) {
+							if (istore->read_v2rawdetection) {
 								for (int j = 0; j < v2rawdetection->number_beams; j++) {
 									/*
 									 * beam id
@@ -5279,7 +5279,7 @@ int main(int argc, char **argv) {
 							/*
 							 * case of v2detection record with v2detectionsetup
 							 */
-							else if (istore->read_v2detection == true && istore->read_v2detectionsetup == true) {
+							else if (istore->read_v2detection && istore->read_v2detectionsetup) {
 								for (int j = 0; j < v2detection->number_beams; j++) {
 									const int i = v2detectionsetup->beam_descriptor[j];
 
@@ -5439,7 +5439,7 @@ int main(int argc, char **argv) {
 							/*
 							 * case of v2detection record
 							 */
-							else if (istore->read_v2detection == true) {
+							else if (istore->read_v2detection) {
 								/*
 								 * now loop over the detects
 								 */
@@ -5782,7 +5782,7 @@ int main(int argc, char **argv) {
 							fprintf(stafp, "%0.6f\t%0.3f\t%0.3f\n", time_d, roll, pitch);
 						}
 					}
-					if (istore->read_backscatter == true) {
+					if (istore->read_backscatter) {
 						backscatter = &(istore->backscatter);
 						header = &(backscatter->header);
 						time_j[0] = header->s7kTime.Year;
@@ -5799,7 +5799,7 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber, backscatter->ping_number, backscatter->number_samples);
 					}
-					if (istore->read_beam == true) {
+					if (istore->read_beam) {
 						beam = &(istore->beam);
 						header = &(beam->header);
 						time_j[0] = header->s7kTime.Year;
@@ -5816,7 +5816,7 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber, beam->ping_number, beam->number_beams, beam->number_samples);
 					}
-					if (istore->read_verticaldepth == true) {
+					if (istore->read_verticaldepth) {
 						verticaldepth = &(istore->verticaldepth);
 						header = &(verticaldepth->header);
 						time_j[0] = header->s7kTime.Year;
@@ -5833,7 +5833,7 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber, verticaldepth->ping_number);
 					}
-					if (istore->read_image == true) {
+					if (istore->read_image) {
 						image = &(istore->image);
 						header = &(image->header);
 						time_j[0] = header->s7kTime.Year;
@@ -6791,7 +6791,7 @@ int main(int argc, char **argv) {
 					/* fix time stamp */
 					if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
 						found = false;
-						for (int j = 0; j < nedget && found == false; j++) {
+						for (int j = 0; j < nedget && !found; j++) {
 							if (istore->time_d >= edget_time_d[j]) {
 								found = true;
 								time_d = istore->time_d + edget_time_offset[j];
@@ -6854,7 +6854,7 @@ int main(int argc, char **argv) {
 					/* fix time stamp */
 					if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
 						found = false;
-						for (int j = 0; j < nedget && found == false; j++) {
+						for (int j = 0; j < nedget && !found; j++) {
 							if (istore->time_d >= edget_time_d[j]) {
 								found = true;
 								time_d = istore->time_d + edget_time_offset[j];
@@ -6923,7 +6923,7 @@ int main(int argc, char **argv) {
 					/* fix time stamp */
 					if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
 						found = false;
-						for (int j = 0; j < nedget && found == false; j++) {
+						for (int j = 0; j < nedget && !found; j++) {
 							if (istore->time_d >= edget_time_d[j]) {
 								found = true;
 								time_d = istore->time_d + edget_time_offset[j];
@@ -7119,13 +7119,13 @@ int main(int argc, char **argv) {
 					}
 				}
 				/* do not output compressed image data */
-				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_image == true)
+				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_image)
 					istore->read_image = false;
 
 				/* do not output full beam data */
-				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_beam == true)
+				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_beam)
 					istore->read_beam = false;
-				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_v2beamformed == true)
+				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && istore->read_v2beamformed)
 					istore->read_v2beamformed = false;
 
 				/* write some data */
@@ -7254,7 +7254,7 @@ int main(int argc, char **argv) {
 			status = mb_close(verbose, &imbio_ptr, &error);
 
 			/* close the output swath file if necessary */
-			if (!ofile_set || read_data == false) {
+			if (!ofile_set || !read_data) {
 				status = mb_close(verbose, &ombio_ptr, &error);
 				fclose(tfp);
 				fclose(athfp);

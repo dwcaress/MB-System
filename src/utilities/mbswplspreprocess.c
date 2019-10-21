@@ -1131,9 +1131,6 @@ int main(int argc, char **argv) {
 	mb_path ifile;
 	mb_path dfile;
 
-	/* MBIO read values */
-	int read_data;
-
 	/* counting variables */
 	counts filerecs;
 	counts totrecs;
@@ -1181,6 +1178,7 @@ int main(int argc, char **argv) {
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = opts.format < 0;
+	bool read_data;
 
 	/* open file list */
 	if (read_datalist) {
@@ -1208,7 +1206,7 @@ int main(int argc, char **argv) {
 	zero_counts(opts.verbose, &totrecs, &error);
 
 	/* loop over files to be read */
-	while (read_data == true) {
+	while (read_data) {
 		/* reset file record counter */
 		zero_counts(opts.verbose, &filerecs, &error);
 
