@@ -854,34 +854,34 @@ int main(int argc, char **argv) {
 
 				if (format == MBF_EM300RAW) {
 					nrec_0x58_bathymetry2++;
-					if (ping->png_raw_read == true)
+					if (ping->png_raw_read)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == true)
+					if (ping->png_ss_read)
 						nrec_0x59_sidescan2++;
 				}
 				else if (format == MBF_EM300MBA) {
 					nrec_0xE5_bathymetry_mbari59++;
-					if (ping->png_raw_read == true)
+					if (ping->png_raw_read)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == true)
+					if (ping->png_ss_read)
 						nrec_0x59_sidescan2++;
 				}
 				else if (format == MBF_EM710RAW) {
 					nrec_0x58_bathymetry2++;
-					if (ping->png_raw_read == true)
+					if (ping->png_raw_read)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == true)
+					if (ping->png_ss_read)
 						nrec_0x59_sidescan2++;
-					if (ping->png_quality_read == true)
+					if (ping->png_quality_read)
 						nrec_0x4F_quality++;
 				}
 				else if (format == MBF_EM710MBA) {
 					nrec_0xE5_bathymetry_mbari59++;
-					if (ping->png_raw_read == true)
+					if (ping->png_raw_read)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == true)
+					if (ping->png_ss_read)
 						nrec_0x59_sidescan2++;
-					if (ping->png_quality_read == true)
+					if (ping->png_quality_read)
 						nrec_0x4F_quality++;
 				}
 			}

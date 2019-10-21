@@ -456,7 +456,6 @@ int main(int argc, char **argv) {
 	int beams_amp;
 	int pixels_ss;
 	char file[MB_PATH_MAXLINE];
-	int file_in_bounds;
 	void *mbio_ptr = NULL;
 	struct mb_io_struct *mb_io_ptr = NULL;
 	int topo_type;
@@ -578,13 +577,11 @@ int main(int argc, char **argv) {
 	double bdata_origin_x, bdata_origin_y;
 	float *output = NULL;
 	float *sgrid = NULL;
-	int *num = NULL;
 	int *cnt = NULL;
 	float xmin, ymin, ddx, ddy, zflag, cay;
 	double **data;
 	double *value = NULL;
 	int ndata, ndatafile, nbackground, nbackground_alloc;
-	int time_ok;
 	double zmin, zmax, zclip;
 	int nmax;
 	double smin, smax;
@@ -592,7 +589,6 @@ int main(int argc, char **argv) {
 	bool bathy_in_feet = false;
 
 	/* projected grid parameters */
-	bool use_projection = false;
 	bool projection_pars_f = false;
 	double reference_lon, reference_lat;
 	int utm_zone = 1;
@@ -980,6 +976,8 @@ int main(int argc, char **argv) {
 		outclipvalue = NaN;
 	}
 
+	bool use_projection = false;
+
 	/* deal with projected gridding */
 	if (projection_pars_f) {
 		/* check for UTM with undefined zone */
@@ -1107,7 +1105,7 @@ int main(int argc, char **argv) {
 		deglattokm = 0.001 / mtodeglat;
 
 		/* calculate grid properties */
-		if (set_spacing == true) {
+		if (set_spacing) {
 			xdim = lrint((gbnd[1] - gbnd[0]) / dx_set + 1);
 			if (dy_set <= 0.0)
 				dy_set = dx_set;
@@ -1145,7 +1143,7 @@ int main(int argc, char **argv) {
 		deglattokm = 0.001 / mtodeglat;
 
 		/* calculate grid properties */
-		if (set_spacing == true && (units[0] == 'M' || units[0] == 'm')) {
+		if (set_spacing && (units[0] == 'M' || units[0] == 'm')) {
 			xdim = lrint((gbnd[1] - gbnd[0]) / (mtodeglon * dx_set) + 1);
 			if (dy_set <= 0.0)
 				dy_set = mtodeglon * dx_set / mtodeglat;
@@ -1156,7 +1154,7 @@ int main(int argc, char **argv) {
 			}
 			strcpy(units, "meters");
 		}
-		else if (set_spacing == true && (units[0] == 'K' || units[0] == 'k')) {
+		else if (set_spacing && (units[0] == 'K' || units[0] == 'k')) {
 			xdim = lrint((gbnd[1] - gbnd[0]) * deglontokm / dx_set + 1);
 			if (dy_set <= 0.0)
 				dy_set = deglattokm * dx_set / deglontokm;
@@ -1167,7 +1165,7 @@ int main(int argc, char **argv) {
 			}
 			strcpy(units, "km");
 		}
-		else if (set_spacing == true && (units[0] == 'F' || units[0] == 'f')) {
+		else if (set_spacing && (units[0] == 'F' || units[0] == 'f')) {
 			xdim = lrint((gbnd[1] - gbnd[0]) / (mtodeglon * 0.3048 * dx_set) + 1);
 			if (dy_set <= 0.0)
 				dy_set = mtodeglon * dx_set / mtodeglat;
@@ -1178,7 +1176,7 @@ int main(int argc, char **argv) {
 			}
 			strcpy(units, "feet");
 		}
-		else if (set_spacing == true) {
+		else if (set_spacing) {
 			if (strncmp(units, "arcmin", 6) == 0) {
 				dx_set = dx_set / 60.0;
 				dy_set = dy_set / 60.0;
@@ -1422,7 +1420,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "  Northings: %9.4f %9.4f\n", wbnd[2], wbnd[3]);
 			fprintf(outfp, "Easting interval:  %f %s\n", dx, units);
 			fprintf(outfp, "Northing interval: %f %s\n", dy, units);
-			if (set_spacing == true) {
+			if (set_spacing) {
 				fprintf(outfp, "Specified Easting interval:  %f %s\n", dx_set, units);
 				fprintf(outfp, "Specified Northing interval: %f %s\n", dy_set, units);
 			}
@@ -1433,7 +1431,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "  Latitude:  %9.4f %9.4f\n", wbnd[2], wbnd[3]);
 			fprintf(outfp, "Longitude interval: %f degrees or %f m\n", dx, 1000 * dx * deglontokm);
 			fprintf(outfp, "Latitude interval:  %f degrees or %f m\n", dy, 1000 * dy * deglattokm);
-			if (set_spacing == true) {
+			if (set_spacing) {
 				fprintf(outfp, "Specified Longitude interval: %f %s\n", dx_set, units);
 				fprintf(outfp, "Specified Latitude interval:  %f %s\n", dy_set, units);
 			}
@@ -1709,6 +1707,8 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	int *num = NULL;  // TODO(schwehr): Can num be a bool?
+
 	/* allocate memory for grid arrays */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(double), (void **)&grid, &error);
 	if (status == MB_SUCCESS)
@@ -1740,6 +1740,9 @@ int main(int argc, char **argv) {
 	}
 
 /* -------------------------------------------------------------------------- */
+	int file_in_bounds;  // TODO(schwehr): Make mb_check_info take a bool.
+	bool time_ok;  // TODO(schwehr): Probably can be many localize variables.
+
 	/***** do weighted footprint slope gridding *****/
 	if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT_SLOPE) {
 		/* set up parameters for first cut low resolution slope grid */
@@ -1808,7 +1811,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
-				if (file_in_bounds == true) {
+				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
 						mb_get_fbt(verbose, rfile, &rformat, &error);
@@ -1924,7 +1927,7 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds == true)
+				if (verbose > 0 || file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
@@ -2124,7 +2127,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
-				if (file_in_bounds == true) {
+				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
 						mb_get_fbt(verbose, rfile, &rformat, &error);
@@ -2323,7 +2326,7 @@ int main(int argc, char **argv) {
 
 										/* process if in region of interest */
 										if (ix >= -xtradim && ix < gxdim + xtradim && iy >= -xtradim && iy < gydim + xtradim &&
-										    time_ok == true) {
+										    time_ok) {
 											/* calculate footprint - this is a kluge assuming
 											   sonar at surface - also assumes lon lat grid
 											   - to be generalized in later version
@@ -2468,7 +2471,7 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds == true)
+				if (verbose > 0 || file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 			} /* end if (format > 0) */
 		}
@@ -2554,7 +2557,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
-				if (file_in_bounds == true) {
+				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
 						mb_get_fbt(verbose, rfile, &rformat, &error);
@@ -2698,7 +2701,7 @@ int main(int argc, char **argv) {
 
 									/* process if in region of interest */
 									if (ix >= -xtradim && ix < gxdim + xtradim && iy >= -xtradim && iy < gydim + xtradim &&
-									    time_ok == true) {
+									    time_ok) {
 										/* deal with point data without footprint */
 										if (topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM) {
 											kgrid = ix * gydim + iy;
@@ -2858,7 +2861,7 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds == true)
+				if (verbose > 0 || file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
@@ -2967,7 +2970,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
-				if (file_in_bounds == true) {
+				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
 						mb_get_fbt(verbose, rfile, &rformat, &error);
@@ -3083,7 +3086,7 @@ int main(int argc, char **argv) {
 										}
 
 										/* make sure there is space for the data */
-										if (time_ok == true && cnt[kgrid] >= num[kgrid]) {
+										if (time_ok && cnt[kgrid] >= num[kgrid]) {
 											num[kgrid] += REALLOC_STEP_SIZE;
 											if ((data[kgrid] = (double *)realloc(data[kgrid], num[kgrid] * sizeof(double))) ==
 											    NULL) {
@@ -3101,7 +3104,7 @@ int main(int argc, char **argv) {
 										}
 
 										/* process it */
-										if (time_ok == true) {
+										if (time_ok) {
 											value = data[kgrid];
 											value[cnt[kgrid]] = topofactor * bath[ib];
 											cnt[kgrid]++;
@@ -3152,7 +3155,7 @@ int main(int argc, char **argv) {
 										}
 
 										/* make sure there is space for the data */
-										if (time_ok == true && cnt[kgrid] >= num[kgrid]) {
+										if (time_ok && cnt[kgrid] >= num[kgrid]) {
 											num[kgrid] += REALLOC_STEP_SIZE;
 											if ((data[kgrid] = (double *)realloc(data[kgrid], num[kgrid] * sizeof(double))) ==
 											    NULL) {
@@ -3170,7 +3173,7 @@ int main(int argc, char **argv) {
 										}
 
 										/* process it */
-										if (time_ok == true) {
+										if (time_ok) {
 											value = data[kgrid];
 											value[cnt[kgrid]] = amp[ib];
 											cnt[kgrid]++;
@@ -3220,7 +3223,7 @@ int main(int argc, char **argv) {
 										}
 
 										/* make sure there is space for the data */
-										if (time_ok == true && cnt[kgrid] >= num[kgrid]) {
+										if (time_ok && cnt[kgrid] >= num[kgrid]) {
 											num[kgrid] += REALLOC_STEP_SIZE;
 											if ((data[kgrid] = (double *)realloc(data[kgrid], num[kgrid] * sizeof(double))) ==
 											    NULL) {
@@ -3238,7 +3241,7 @@ int main(int argc, char **argv) {
 										}
 
 										/* process it */
-										if (time_ok == true) {
+										if (time_ok) {
 											value = data[kgrid];
 											value[cnt[kgrid]] = ss[ib];
 											cnt[kgrid]++;
@@ -3255,7 +3258,7 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds == true)
+				if (verbose > 0 || file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
@@ -3302,7 +3305,7 @@ int main(int argc, char **argv) {
 						}
 
 						/* make sure there is space for the data */
-						if (time_ok == true && cnt[kgrid] >= num[kgrid]) {
+						if (time_ok && cnt[kgrid] >= num[kgrid]) {
 							num[kgrid] += REALLOC_STEP_SIZE;
 							if ((data[kgrid] = (double *)realloc(data[kgrid], num[kgrid] * sizeof(double))) == NULL) {
 								error = MB_ERROR_MEMORY_FAIL;
@@ -3319,7 +3322,7 @@ int main(int argc, char **argv) {
 						}
 
 						/* process it */
-						if (time_ok == true) {
+						if (time_ok) {
 							value = data[kgrid];
 							value[cnt[kgrid]] = topofactor * tvalue;
 							cnt[kgrid]++;
@@ -3467,7 +3470,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
-				if (file_in_bounds == true) {
+				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
 						mb_get_fbt(verbose, rfile, &rformat, &error);
@@ -3598,7 +3601,7 @@ int main(int argc, char **argv) {
 
 									/* process if in region of interest */
 									if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim &&
-									    iy >= -xtradim && iy < gydim + xtradim && time_ok == true) {
+									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
 										ix1 = MAX(ix - xtradim, 0);
 										ix2 = MIN(ix + xtradim, gxdim - 1);
 										iy1 = MAX(iy - xtradim, 0);
@@ -3620,7 +3623,7 @@ int main(int argc, char **argv) {
 										ndata++;
 										ndatafile++;
 									}
-									else if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok == true) {
+									else if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok) {
 										kgrid = ix * gydim + iy;
 										if ((num[kgrid] > 0 && grid_mode == MBGRID_MINIMUM_FILTER &&
 										     grid[kgrid] > topofactor * bath[ib]) ||
@@ -3691,7 +3694,7 @@ int main(int argc, char **argv) {
 
 									/* process if in region of interest */
 									if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim &&
-									    iy >= -xtradim && iy < gydim + xtradim && time_ok == true) {
+									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
 										ix1 = MAX(ix - xtradim, 0);
 										ix2 = MIN(ix + xtradim, gxdim - 1);
 										iy1 = MAX(iy - xtradim, 0);
@@ -3712,7 +3715,7 @@ int main(int argc, char **argv) {
 										ndata++;
 										ndatafile++;
 									}
-									else if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok == true) {
+									else if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok) {
 										kgrid = ix * gydim + iy;
 										if ((num[kgrid] > 0 && grid_mode == MBGRID_MINIMUM_FILTER && grid[kgrid] > amp[ib]) ||
 										    (num[kgrid] > 0 && grid_mode == MBGRID_MAXIMUM_FILTER && grid[kgrid] < amp[ib]) ||
@@ -3780,7 +3783,7 @@ int main(int argc, char **argv) {
 
 									/* process if in region of interest */
 									if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim &&
-									    iy >= -xtradim && iy < gydim + xtradim && time_ok == true) {
+									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
 										ix1 = MAX(ix - xtradim, 0);
 										ix2 = MIN(ix + xtradim, gxdim - 1);
 										iy1 = MAX(iy - xtradim, 0);
@@ -3801,7 +3804,7 @@ int main(int argc, char **argv) {
 										ndata++;
 										ndatafile++;
 									}
-									else if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok == true) {
+									else if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok) {
 										kgrid = ix * gydim + iy;
 										if ((num[kgrid] > 0 && grid_mode == MBGRID_MINIMUM_FILTER && grid[kgrid] > ss[ib]) ||
 										    (num[kgrid] > 0 && grid_mode == MBGRID_MAXIMUM_FILTER && grid[kgrid] < ss[ib]) ||
@@ -3824,7 +3827,7 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds == true)
+				if (verbose > 0 || file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
@@ -3878,7 +3881,7 @@ int main(int argc, char **argv) {
 
 					/* process the data */
 					if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim && iy >= -xtradim &&
-					    iy < gydim + xtradim && time_ok == true) {
+					    iy < gydim + xtradim && time_ok) {
 						ix1 = MAX(ix - xtradim, 0);
 						ix2 = MIN(ix + xtradim, gxdim - 1);
 						iy1 = MAX(iy - xtradim, 0);
@@ -3899,7 +3902,7 @@ int main(int argc, char **argv) {
 						ndata++;
 						ndatafile++;
 					}
-					else if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok == true) {
+					else if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok) {
 						kgrid = ix * gydim + iy;
 						if ((num[kgrid] > 0 && grid_mode == MBGRID_MINIMUM_FILTER && grid[kgrid] > topofactor * tvalue) ||
 						    (num[kgrid] > 0 && grid_mode == MBGRID_MAXIMUM_FILTER && grid[kgrid] < topofactor * tvalue) ||
@@ -4037,7 +4040,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
-				if (file_in_bounds == true) {
+				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
 						mb_get_fbt(verbose, rfile, &rformat, &error);
@@ -4167,7 +4170,7 @@ int main(int argc, char **argv) {
 										time_ok = true;
 
 									/* process if in region of interest */
-									if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok == true) {
+									if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok) {
 										kgrid = ix * gydim + iy;
 										if (cnt[kgrid] <= 0
                           || (grid_mode == MBGRID_MINIMUM_WEIGHTED_MEAN &&
@@ -4234,7 +4237,7 @@ int main(int argc, char **argv) {
 										time_ok = true;
 
 									/* process if in region of interest */
-									if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok == true) {
+									if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok) {
 										kgrid = ix * gydim + iy;
 										if (cnt[kgrid] <= 0
                           || (grid_mode == MBGRID_MINIMUM_WEIGHTED_MEAN &&
@@ -4301,7 +4304,7 @@ int main(int argc, char **argv) {
 										time_ok = true;
 
 									/* process if in region of interest */
-									if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok == true) {
+									if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok) {
 										kgrid = ix * gydim + iy;
 										if (cnt[kgrid] <= 0
                           || (grid_mode == MBGRID_MINIMUM_WEIGHTED_MEAN &&
@@ -4323,7 +4326,7 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds == true)
+				if (verbose > 0 || file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
@@ -4392,7 +4395,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
-				if (file_in_bounds == true) {
+				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
 						mb_get_fbt(verbose, rfile, &rformat, &error);
@@ -4523,7 +4526,7 @@ int main(int argc, char **argv) {
 
 									/* process if in region of interest */
 									if (ix >= -xtradim && ix < gxdim + xtradim &&
-									    iy >= -xtradim && iy < gydim + xtradim && time_ok == true) {
+									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
 										kgrid = ix * gydim + iy;
                     if (fabs(minormax[kgrid] - topofactor * bath[ib]) < minormax_weighted_mean_threshold) {
   										ix1 = MAX(ix - xtradim, 0);
@@ -4604,7 +4607,7 @@ int main(int argc, char **argv) {
 
 									/* process if in region of interest */
 									if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim &&
-									    iy >= -xtradim && iy < gydim + xtradim && time_ok == true) {
+									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
 										kgrid = ix * gydim + iy;
                     if (fabs(minormax[kgrid] - amp[ib]) < minormax_weighted_mean_threshold) {
   										ix1 = MAX(ix - xtradim, 0);
@@ -4683,7 +4686,7 @@ int main(int argc, char **argv) {
 
 									/* process if in region of interest */
 									if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim &&
-									    iy >= -xtradim && iy < gydim + xtradim && time_ok == true) {
+									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
 										kgrid = ix * gydim + iy;
                     if (fabs(minormax[kgrid] - ss[ib]) < minormax_weighted_mean_threshold) {
   										ix1 = MAX(ix - xtradim, 0);
@@ -4716,7 +4719,7 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds == true)
+				if (verbose > 0 || file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
@@ -4979,6 +4982,7 @@ int main(int argc, char **argv) {
 							dmask[ii] = false;
 
 						/* loop over rings around point, starting close */
+						// TODO(schwehr): Is num an int or a bool?
 						for (ir = 0; ir <= clip && num[kgrid] == false; ir++) {
 							/* set bounds of search */
 							i1 = MAX(0, i - ir);
@@ -5451,7 +5455,7 @@ int main(int argc, char **argv) {
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&minormax, &error);
 
 	/* deallocate projection */
-	if (use_projection == true)
+	if (use_projection)
 		proj_status = mb_proj_free(verbose, &(pjptr), &error);
 
 	/* run mbm_grdplot */
