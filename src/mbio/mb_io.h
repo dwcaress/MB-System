@@ -455,6 +455,7 @@ struct mb_io_struct {
   int numfile;             /* the number of parallel files required for i/o */
   int filetype;            /* type of files used (normal, single normal, xdr, or gsf) */
   int filemode;            /* file mode (read or write) */
+  // TODO(schwehr): Bool
   int variable_beams;      /* if true then number of beams variable */
   int traveltime;          /* if true then traveltime and angle data supported */
   int beam_flagging;       /* if true then beam flagging supported */
@@ -597,7 +598,7 @@ struct mb_io_struct {
   double *new_ss_alongtrack;
 
   /* variables for projections to and from projected coordinates */
-  int projection_initialized;
+  int projection_initialized;  // TODO(schwehr): bool
   char projection_id[MB_NAME_LENGTH];
   void *pjptr;
 
