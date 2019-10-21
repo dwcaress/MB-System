@@ -1158,6 +1158,7 @@ typedef struct s7k3_Bathymetry_struct {
                                           //       for each beam (minimum depth gate)
   f32 max_depth_gate[MBSYS_RESON7K_MAX_SOUNDINGS];  // Maximum two-way travel time to filter point
                                           //       for each beam (maximum depth gate)
+  // TODO(schwehr): Can optionaldata be a bool?
   u32 optionaldata;                             // Flag indicating if bathymetry calculated and
                                           //       values below filled in
                                                   //  0 = No
