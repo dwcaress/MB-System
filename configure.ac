@@ -24,7 +24,7 @@ AC_INIT([mbsystem],[5.7.6beta15],[http://listserver.mbari.org/sympa/arc/mbsystem
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 # AC_LANG([C++])
-AC_DEFINE(VERSION_DATE, "18 October 2019", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "21 October 2019", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
