@@ -1043,7 +1043,6 @@ int main(int argc, char **argv) {
 	int beams_amp;
 	int pixels_ss;
 	mb_path file = "";
-	int file_in_bounds;
 	void *mbio_ptr = NULL;
 	struct mb_io_struct *mb_io_ptr = NULL;
 	void *store_ptr = NULL;
@@ -2206,6 +2205,8 @@ int main(int argc, char **argv) {
 		fprintf(outfp, "\nUnable to open datalist file: %s\n", dfile);
 	}
 
+	int file_in_bounds;  // TODO(schwehr): Make mb_check_info a bool.
+
 	/***** do first pass gridding *****/
 	if (grid_mode == MBMOSAIC_SINGLE_BEST || priority_mode != MBMOSAIC_PRIORITY_NONE) {
 
@@ -2238,7 +2239,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the multibeam file */
-				if (file_in_bounds == true) {
+				if (file_in_bounds) {
 					/* check for filtered amplitude or sidescan file */
 					if (usefiltered && datatype == MBMOSAIC_DATA_AMPLITUDE) {
 						if ((status = mb_get_ffa(verbose, file, &format, &error)) != MB_SUCCESS) {
@@ -2684,7 +2685,7 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds == true)
+				if (verbose > 0 || file_in_bounds)
 					fprintf(outfp, "%u data points processed in %s\n", ndatafile, file);
 
 				/* add to datalist if data actually contributed */
@@ -2748,7 +2749,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the multibeam file */
-				if (file_in_bounds == true) {
+				if (file_in_bounds) {
 					/* check for filtered amplitude or sidescan file */
 					if (usefiltered && datatype == MBMOSAIC_DATA_AMPLITUDE) {
 						if ((status = mb_get_ffa(verbose, file, &format, &error)) != MB_SUCCESS) {
@@ -3208,7 +3209,7 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds == true)
+				if (verbose > 0 || file_in_bounds)
 					fprintf(outfp, "%u data points processed in %s\n", ndatafile, file);
 
 				/* add to datalist if data actually contributed */
