@@ -2099,14 +2099,14 @@ struct mbsys_reson7k_struct {
 
 	/* ping record id's */
 	int current_ping_number;
-	int read_volatilesettings;
-	int read_matchfilter;
-	int read_beamgeometry;
-	int read_remotecontrolsettings;
-	int read_bathymetry;
-	int read_backscatter;
-	int read_beam;
-	int read_verticaldepth;
+	int read_volatilesettings;  // TODO(schwehr): bool
+	int read_matchfilter;  // TODO(schwehr): bool
+	int read_beamgeometry;  // TODO(schwehr): bool
+	int read_remotecontrolsettings;  // TODO(schwehr): bool
+	int read_bathymetry;  // TODO(schwehr): bool
+	int read_backscatter;  // TODO(schwehr): bool
+	int read_beam;  // TODO(schwehr): bool
+	int read_verticaldepth;  // TODO(schwehr): bool
 	int read_tvg;
 	int read_image;
 	int read_v2pingmotion;

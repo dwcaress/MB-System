@@ -271,7 +271,7 @@ int main(int argc, char **argv) {
 
 	FILE *fp;
 	int nread;
-	int tracecount, tracenum, channum, traceok;
+	int tracecount, tracenum, channum;
 	double tracemin, tracemax;
 	double xwidth, ywidth;
 	int ix, iy, iys;
@@ -547,6 +547,8 @@ int main(int argc, char **argv) {
 		fftw_out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * nfft);
 		plan = fftw_plan_dft_1d(nfft, fftw_in, fftw_out, FFTW_FORWARD, FFTW_MEASURE);
 
+		bool traceok;
+
 		/* read and print data */
 		nread = 0;
 		while (error <= MB_ERROR_NO_ERROR) {
@@ -621,7 +623,7 @@ int main(int argc, char **argv) {
 				}
 
 				if ((verbose == 0 && nread % 250 == 0) || (nread % 25 == 0)) {
-					if (traceok == true)
+					if (traceok)
 						fprintf(outfp, "PROCESS ");
 					else
 						fprintf(outfp, "IGNORE  ");
@@ -635,7 +637,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* now actually process traces of interest */
-				if (traceok == true) {
+				if (traceok) {
 					/* zero working psd array */
 					for (iy = 0; iy < ngridy; iy++) {
 						spsd[iy] = 0.0;

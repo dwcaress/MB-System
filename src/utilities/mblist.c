@@ -4155,7 +4155,7 @@ int main(int argc, char **argv) {
                   mb_get_jtime(verbose, time_i, time_j);
                   seconds = time_i[5] + 1e-6 * time_i[6];
                   if (ascii) {
-                    if (netcdf == true)
+                    if (netcdf)
                       fprintf(output[i], "%d, %d, %d, %d, %d", time_j[0], time_j[1], time_j[2], time_j[3],
                               time_j[4]);
                     else

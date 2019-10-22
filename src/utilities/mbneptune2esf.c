@@ -314,7 +314,6 @@ int main(int argc, char **argv) {
 	int format;
 	int variable_beams;
 	int traveltime;
-	int beam_flagging;
 	int pings;
 	int lonflip;
 	double bounds[4];
@@ -725,6 +724,7 @@ int main(int argc, char **argv) {
 		if (usable_rule) {
 
 			/* check format and get format flags */
+			int beam_flagging;  // TODO(schwehr): mb_format_flags should take a bool.
 			if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) !=
 			    MB_SUCCESS) {
 				mb_error(verbose, error, &message);
@@ -736,7 +736,7 @@ int main(int argc, char **argv) {
 
 			/* check that clean mode is allowed
 			    for the specified data format */
-			if (beam_flagging == false && mode <= 2) {
+			if (!beam_flagging && mode <= 2) {
 				fprintf(stderr, "\nMBIO format %d does not allow flagging of bad data (specified by cleaning mode %d).\n", format,
 				        mode);
 				fprintf(stderr,
@@ -976,7 +976,7 @@ int main(int argc, char **argv) {
 			status = mb_esf_close(verbose, &esf, &error);
 
 			/* update mbprocess parameter file */
-			if (esffile_open == true) {
+			if (esffile_open) {
 				/* update mbprocess parameter file */
 				status = mb_pr_update_format(verbose, swathfile, true, format, &error);
 				status = mb_pr_update_edit(verbose, swathfile, MBP_EDIT_ON, esffile, &error);

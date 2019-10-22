@@ -115,7 +115,6 @@ int main(int argc, char **argv) {
 	int formatread;
 	int variable_beams;
 	int traveltime;
-	int beam_flagging;
 	int defaultpings;
 	int lonflip;
 	double bounds[4];
@@ -209,7 +208,7 @@ int main(int argc, char **argv) {
     /* voxel storage */
     int n_voxel = 0;
     int n_voxel_alloc = 0;
-    unsigned char *voxel_count = NULL;
+    unsigned char *voxel_count = NULL;  // TODO(schwehr): Make this a bool
     int n_voxel_x;
     int n_voxel_y;
     int n_voxel_z;
@@ -260,11 +259,10 @@ int main(int argc, char **argv) {
 	FILE *outfp, *fp;
 
     int nscan = 0;
-    int uselockfiles = true;
+	int uselockfiles = true;  // TODO(schwehr): mb_uselockfiles should use a bool
     double mtodeglon, mtodeglat;
     double headingx, headingy;
     double sensorx, sensory, sensorz;
-    int first, done;
     int ix, iy, iz, kk;
 
 	/* get current default values */
@@ -449,11 +447,12 @@ int main(int argc, char **argv) {
 	}
 
 	bool esffile_open = false;
-	int locked = false;  // TODO(schwehr): Make mb_pr_lockinfo take a bool locked
+	int locked = false;  // TODO(schwehr): Make mb_pr_lockinfo take a bool
 
 	/* loop over all files to be read */
 	while (read_data) {
 		bool oktoprocess = true;
+		int beam_flagging;  // TODO(schwehr): Make mb_format_flags take a bool
 
 		/* check format and get format flags */
 		if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
@@ -467,7 +466,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* warn if beam flagging not supported for the current data format */
-		if (beam_flagging == false) {
+		if (!beam_flagging) {
 			fprintf(stderr, "\nWarning:\nMBIO format %d does not allow flagging of bad bathymetry data.\n", format);
 			fprintf(stderr,
 			        "\nWhen mbprocess applies edits to file:\n\t%s\nthe soundings will be nulled (zeroed) rather than flagged.\n",
@@ -475,7 +474,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* try to lock file */
-		if (uselockfiles == true)
+		if (uselockfiles)
 			status = mb_pr_lockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
 		else {
 			lock_status =
@@ -518,7 +517,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* proceed if file locked and format ok */
-		if (oktoprocess == true) {
+		if (oktoprocess) {
             /* check for *inf file, create if necessary, and load metadata */
             status = mb_get_info_datalist(verbose, swathfile, &formatread, &mb_info, lonflip, &error);
 
@@ -668,8 +667,8 @@ int main(int argc, char **argv) {
 			}
 
 			/* read */
-			done = false;
-            first = true;
+			bool done = false;
+			bool first = true;
 			while (!done) {
 				if (verbose > 1)
 					fprintf(stderr, "\n");
@@ -755,7 +754,7 @@ int main(int argc, char **argv) {
                                                             * (pings[n_pings].bathy[j] - sensory)
                                                            + (pings[n_pings].bathz[j] - sensorz)
                                                             * (pings[n_pings].bathz[j] - sensorz));
-                            if (first == true) {
+                            if (first) {
                                 x_min = pings[n_pings].bathx[j];
                                 x_max = pings[n_pings].bathx[j];
                                 y_min = pings[n_pings].bathy[j];
@@ -922,7 +921,7 @@ int main(int argc, char **argv) {
                             iz = (pings[i].bathz[j] - z_min) / voxel_size_z;
                             kk = (ix * n_voxel_y + iy) * n_voxel_z + iz;
                             if (occupied_mode == MBVC_OCCUPIED_UNFLAG
-                                && voxel_count[kk] == true
+                                && voxel_count[kk]
                                 && !mb_beam_ok(pings[i].beamflag[j])) {
                                 pings[i].beamflag[j] = MB_FLAG_NONE;
                                 action = MBP_EDIT_UNFLAG;
@@ -932,7 +931,7 @@ int main(int argc, char **argv) {
                                 n_density_unflag++;
                             }
                             if (empty_mode == MBVC_EMPTY_FLAG
-                                && voxel_count[kk] == false
+                                && !voxel_count[kk]
                                 && mb_beam_ok(pings[i].beamflag[j])) {
                                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                                 action = MBP_EDIT_FILTER;
@@ -979,14 +978,14 @@ int main(int argc, char **argv) {
 			status = mb_esf_close(verbose, &esf, &error);
 
 			/* update mbprocess parameter file */
-			if (esffile_open == true) {
+			if (esffile_open) {
 				/* update mbprocess parameter file */
 				status = mb_pr_update_format(verbose, swathfile, true, format, &error);
 				status = mb_pr_update_edit(verbose, swathfile, MBP_EDIT_ON, esffile, &error);
 			}
 
 			/* unlock the raw swath file */
-			if (uselockfiles == true)
+			if (uselockfiles)
 				status = mb_pr_unlockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
 
 			/* check memory */

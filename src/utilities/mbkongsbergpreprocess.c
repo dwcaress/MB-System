@@ -1965,11 +1965,11 @@ int main(int argc, char **argv) {
 					ping = (struct mbsys_simrad3_ping_struct *)&(istore->pings[istore->ping_index]);
 
 					nrec_0xE5_bathymetry_mbari59++;
-					if (ping->png_raw_read == true)
+					if (ping->png_raw_read)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == true)
+					if (ping->png_ss_read)
 						nrec_0x59_sidescan2++;
-					if (ping->png_quality_read == true)
+					if (ping->png_quality_read)
 						nrec_0x4F_quality++;
 				}
 				else if (status == MB_SUCCESS) {
