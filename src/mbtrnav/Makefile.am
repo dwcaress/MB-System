@@ -4,7 +4,7 @@ include_HEADERS =
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/terrain-nav -I${top_srcdir}/src/mbtrnav/qnx-utils -I${top_srcdir}/src/mbtrnav/newmat  -I${top_srcdir}/src/mbtrnav/gctp/source -I${top_srcdir}/src/mbtrn/mframe/src -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/utils -I${top_srcdir}/src/mbtrnav/terrain-nav -I${top_srcdir}/src/mbtrnav/qnx-utils -I${top_srcdir}/src/mbtrnav/newmat  -I${top_srcdir}/src/mbtrnav/gctp/source -I${top_srcdir}/src/mbtrn/mframe/src -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE
 
 
 libgeolib_la_LDFLAGS =  -no-undefined -version-info 0:0:0
@@ -169,7 +169,10 @@ libtrnw_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
 libtrnw_la_SOURCES = \
                 trnw/trnw.cpp \
-                trnw/mb1_msg.c
+                trnw/mb1_msg.c \
+                trnw/netif.c \
+                trnw/trnif_proto.c \
+                trnw/trnif_msg.c
 
 libtrnw_la_LIBADD = libtnav.la \
 					libqnx.la \
@@ -177,7 +180,7 @@ libtrnw_la_LIBADD = libtnav.la \
 					-lm -lpthread
 
 
-bin_PROGRAMS =   trn-server trn-cli #  readlog writelog
+bin_PROGRAMS =   trn-server trn-cli netif-test trnif-test #  readlog writelog
 
 
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
@@ -185,6 +188,12 @@ trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la libqnx.la libn
 
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
+
+netif_test_SOURCES =  utils/netif-test.c
+netif_test_LDADD = ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
+
+trnif_test_SOURCES =  utils/trnif-test.c
+trnif_test_LDADD = ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
 
 dist_bin_SCRIPTS = 
 
