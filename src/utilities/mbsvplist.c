@@ -51,11 +51,11 @@
 #define MBSVPLIST_PRINTMODE_ALL 2
 
 struct mbsvplist_svp_struct {
-	int time_set;        /* time stamp known */
-	int position_set;    /* position known */
-	int repeat_in_file;  /* repeats a previous svp in the same file */
-	int match_last;      /* repeats the last svp in the same file or the previous file */
-	int depthzero_reset; /* uppermost SVP value set to zero depth */
+	bool time_set;        /* time stamp known */
+	bool position_set;    /* position known */
+	bool repeat_in_file;  /* repeats a previous svp in the same file */
+	bool match_last;      /* repeats the last svp in the same file or the previous file */
+	bool depthzero_reset; /* uppermost SVP value set to zero depth */
 	double time_d;
 	double longitude;
 	double latitude;
@@ -143,12 +143,9 @@ int main(int argc, char **argv) {
 
 	/* output mode settings */
 	int svp_printmode;
-	int svp_force_zero;
-	int svp_file_output;
 	bool output_as_table = false;
 
 	/* SVP values */
-	int svp_setprocess;
 	int svp_save_count;
 	struct mbsvplist_svp_struct svp;
 	struct mbsvplist_svp_struct svp_last;
@@ -192,9 +189,9 @@ int main(int argc, char **argv) {
 	bounds[2] = -90.0;
 	bounds[3] = 90.0;
 	svp_printmode = MBSVPLIST_PRINTMODE_CHANGE;
-	svp_file_output = false;
-	svp_setprocess = false;
-	svp_force_zero = false;
+	bool svp_file_output = false;
+	bool svp_setprocess = false;
+	bool svp_force_zero = false;
 	bool ssv_output = false;
 	svp_read_tot = 0;
 	svp_written_tot = 0;
@@ -503,7 +500,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* force zero depth if requested */
-				if (svp_loaded && svp.n > 0 && svp_force_zero == true && svp.depth[0] != 0.0) {
+				if (svp_loaded && svp.n > 0 && svp_force_zero && svp.depth[0] != 0.0) {
 					svp.depthzero = svp.depth[0];
 					svp.depth[0] = 0.0;
 					svp.depthzero_reset = true;
@@ -583,11 +580,11 @@ int main(int argc, char **argv) {
 				/* check if any saved svps need time tags and position */
 				if (time_d != 0.0 && (navlon != 0.0 || navlat != 0.0)) {
 					for (isvp = 0; isvp < svp_save_count; isvp++) {
-						if (svp_save[isvp].time_set == false) {
+						if (!svp_save[isvp].time_set) {
 							svp_save[isvp].time_set = true;
 							svp_save[isvp].time_d = time_d;
 						}
-						if (svp_save[isvp].position_set == false) {
+						if (!svp_save[isvp].position_set) {
 							svp_save[isvp].position_set = true;
 							svp_save[isvp].longitude = navlon;
 							svp_save[isvp].latitude = navlat;
@@ -619,11 +616,11 @@ int main(int argc, char **argv) {
 			for (isvp = 0; isvp < svp_save_count; isvp++) {
 				if (svp_save[isvp].n >= min_num_pairs &&
 				    ((svp_printmode == MBSVPLIST_PRINTMODE_CHANGE &&
-				      (svp_written == 0 || svp_save[isvp].repeat_in_file == false)) ||
-				     (svp_printmode == MBSVPLIST_PRINTMODE_UNIQUE && (svp_save[isvp].match_last == false)) ||
+				      (svp_written == 0 || !svp_save[isvp].repeat_in_file)) ||
+				     (svp_printmode == MBSVPLIST_PRINTMODE_UNIQUE && !svp_save[isvp].match_last) ||
 				     (svp_printmode == MBSVPLIST_PRINTMODE_ALL))) {
 					/* set the output */
-					if (svp_file_output == true) {
+					if (svp_file_output) {
 						/* set file name */
 						sprintf(svp_file, "%s_%3.3d.svp", file, isvp);
 
@@ -679,16 +676,16 @@ int main(int argc, char **argv) {
 						fprintf(svp_fp, "## SVP Longitude: %f\n", svp_save[isvp].longitude);
 						fprintf(svp_fp, "## SVP Latitude:  %f\n", svp_save[isvp].latitude);
 						fprintf(svp_fp, "## SVP Count: %d\n", svp_save_count);
-						if (svp_save[isvp].depthzero_reset == true) {
+						if (svp_save[isvp].depthzero_reset) {
 							fprintf(svp_fp, "## Initial depth reset from %f to 0.0 meters\n", svp_save[isvp].depthzero);
 						}
-						if (verbose >= 1 && svp_save[isvp].depthzero_reset == true) {
+						if (verbose >= 1 && svp_save[isvp].depthzero_reset) {
 							fprintf(stderr, "Initial depth reset from %f to 0.0 meters\n", svp_save[isvp].depthzero);
 						}
 						fprintf(svp_fp, "## Number of SVP Points: %d\n", svp_save[isvp].n);
 						for (int i = 0; i < svp_save[isvp].n; i++)
 							fprintf(svp_fp, "%8.2f\t%7.2f\n", svp_save[isvp].depth[i], svp_save[isvp].velocity[i]);
-						if (svp_file_output == false) {
+						if (!svp_file_output) {
 							fprintf(svp_fp, "## \n");
 							fprintf(svp_fp, "## \n");
 						}
@@ -696,12 +693,12 @@ int main(int argc, char **argv) {
 					}
 
 					/* close the svp file */
-					if (svp_file_output == true && svp_fp != NULL) {
+					if (svp_file_output && svp_fp != NULL) {
 						fclose(svp_fp);
 
 						/* if desired, set first svp output to be used for recalculating
 						    bathymetry */
-						if (svp_setprocess == true && svp_save_count == 1) {
+						if (svp_setprocess && svp_save_count == 1) {
 							status = mb_pr_update_svp(verbose, file, true, svp_file, MBP_ANGLES_OK, true, &error);
 						}
 					}

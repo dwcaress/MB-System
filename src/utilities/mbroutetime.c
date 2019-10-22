@@ -132,7 +132,6 @@ int main(int argc, char **argv) {
 	FILE *fp = NULL;
 	char *result;
 	int nget;
-	int point_ok;
 	int nread;
 
 	/* get current default values */
@@ -257,6 +256,8 @@ int main(int argc, char **argv) {
 					rawroutefile = false;
 				}
 			}
+
+			bool point_ok;
 			if ((rawroutefile && nget >= 2) ||
 			    (!rawroutefile && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_TRANSIT))
 				point_ok = true;
@@ -264,7 +265,7 @@ int main(int argc, char **argv) {
 				point_ok = false;
 
 			/* if good data check for need to allocate more space */
-			if (point_ok == true && nroutepoint + 2 > nroutepointalloc) {
+			if (point_ok && nroutepoint + 2 > nroutepointalloc) {
 				nroutepointalloc += MBES_ALLOC_NUM;
 				status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
 				status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelat, &error);
@@ -283,7 +284,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* add good point to route */
-			if (point_ok == true && nroutepointalloc > nroutepoint) {
+			if (point_ok && nroutepointalloc > nroutepoint) {
 				routelon[nroutepoint] = lon;
 				routelat[nroutepoint] = lat;
 				routeheading[nroutepoint] = heading;

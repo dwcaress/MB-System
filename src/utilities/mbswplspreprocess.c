@@ -84,17 +84,17 @@ typedef struct mbdefaults_struct {
 
 typedef struct options_struct {
 	int errflg;
-	int split_txers;
-	int help;
+	bool split_txers;
+	bool help;
 	int verbose;
 	int format;
-	int ofile_set;
-	int projection_set;
-	int write_output;
-	int print_ascii;
-	int remove_rejected;
-	int flip_rejected;
-	int copy_rawamp;
+	bool ofile_set;
+	bool projection_set;
+	bool write_output;
+	bool print_ascii;
+	bool remove_rejected;
+	bool flip_rejected;
+	bool copy_rawamp;
 	mb_path proj4command;
 	mb_path read_file;
 	mb_path basename;
@@ -210,7 +210,7 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 			break;
 		case 'H':
 		case 'h':
-			opts->help++;
+			opts->help = true;
 			break;
 		case 'I':
 		case 'i':
@@ -654,7 +654,7 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 } /* remove_rejected_samps */
 
 /*----------------------------------------------------------------------*/
-static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path *basename, int ofile_set, int split_txers,
+static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path *basename, bool ofile_set, bool split_txers,
                              int *error) {
 	mb_path fileroot;
 	int format;
@@ -675,7 +675,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 	/* get the fileroot name and format from the input name */
 	int status = mb_get_format(verbose, ifile, fileroot, &format, error);
 
-	if ((ofile_set == false) && (split_txers == false)) {
+	if (!ofile_set && !split_txers) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			sprintf(ofile[0], "%s.mb%d", fileroot, format);
 		}
@@ -686,7 +686,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 			sprintf(ofile[0], "%s.mb%d", ifile, format);
 		}
 	}
-	else if ((ofile_set == false) && (split_txers == true)) {
+	else if (!ofile_set && split_txers) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 				sprintf(ofile[i], "%s_txer%d.mb%d", fileroot, i + 1, format);
@@ -703,7 +703,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 			}
 		}
 	}
-	else if ((ofile_set == true) && (split_txers == false)) {
+	else if (ofile_set && !split_txers) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			sprintf(ofile[0], "%s.mb%d", *basename, format);
 		}
@@ -714,7 +714,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 			sprintf(ofile[0], "%s.mb%d", ifile, format);
 		}
 	}
-	else if ((ofile_set == true) && (split_txers == true)) {
+	else if (ofile_set && split_txers) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 				sprintf(ofile[i], "%s_txer%d.mb%d", *basename, i + 1, format);
@@ -816,7 +816,6 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	void *ombio_ptr[SWPLS_MAX_TXERS];
 	struct mb_io_struct *imb_io_ptr = NULL;
 	void *istore_ptr = NULL;
-	int ofile_init[SWPLS_MAX_TXERS];
 	mb_path ofile[SWPLS_MAX_TXERS];
 	struct mbsys_swathplus_struct *istore = NULL;
 
@@ -843,7 +842,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	istore_ptr = imb_io_ptr->store_data;
 
 	/* set the projection for nav data */
-	if (opts->projection_set == true) {
+	if (opts->projection_set) {
 		mb_proj_init(opts->verbose, opts->proj4command, &(imb_io_ptr->pjptr), error);
 		strncpy(imb_io_ptr->projection_id, opts->proj4command, MB_NAME_LENGTH);
 		imb_io_ptr->projection_initialized = true;
@@ -851,6 +850,8 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 
 	/* setup the output filename(s) for writing */
 	status = set_outfile_names(opts->verbose, ofile, ifile, &opts->basename, opts->ofile_set, opts->split_txers, error);
+
+	bool ofile_init[SWPLS_MAX_TXERS];
 	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 		ombio_ptr[i] = NULL;
 		ofile_init[i] = false;
@@ -875,7 +876,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 			status = count_record(opts->verbose, recs, istore, error);
 		}
 
-		if ((status == MB_SUCCESS) && (opts->print_ascii == true)) {
+		if (status == MB_SUCCESS && opts->print_ascii) {
 			status = print_latest_record(opts->verbose, istore, error);
 		}
 
@@ -889,25 +890,25 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 			int txno = 0;
 			int txidx = 0;
 
-			if ((status == MB_SUCCESS) && (opts->flip_rejected == true)) {
+			if (status == MB_SUCCESS && opts->flip_rejected) {
 				status = flip_sample_flags(opts->verbose, &(istore->sxp_ping), error);
 			}
 
-			if ((status == MB_SUCCESS) && (opts->remove_rejected == true)) {
+			if (status == MB_SUCCESS && opts->remove_rejected) {
 				status = remove_rejected_samps(opts->verbose, &(istore->sxp_ping), error);
 			}
 
-			if ((status == MB_SUCCESS) && (opts->copy_rawamp == true)) {
+			if (status == MB_SUCCESS && opts->copy_rawamp) {
 				status = copy_rawamp(opts->verbose, &(istore->sxp_ping), error);
 			}
 
-			if ((status == MB_SUCCESS) && (opts->write_output == true)) {
+			if (status == MB_SUCCESS && opts->write_output) {
 				/* select the output file based on the txer channel */
 				status = ping_txno(opts->verbose, istore, &txno, error);
-				txidx = (opts->split_txers == true) ? txno - 1 : 0;
+				txidx = opts->split_txers ? txno - 1 : 0;
 
 				/* initialize the output file if necessary */
-				if (ofile_init[txidx] == false) {
+				if (!ofile_init[txidx]) {
 					status = mb_write_init(opts->verbose, ofile[txidx], opts->format, &ombio_ptr[txidx], &obeams_bath,
 					                       &obeams_amp, &opixels_ss, error);
 					if (status != MB_SUCCESS) {
@@ -951,7 +952,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	/* close the files */
 	status = mb_close(opts->verbose, &imbio_ptr, error);
 	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
-		if (ofile_init[i] == true) {
+		if (ofile_init[i]) {
 			status = mb_close(opts->verbose, &ombio_ptr[i], error);
 			ofile_init[i] = false;
 		}
@@ -1162,7 +1163,6 @@ int main(int argc, char **argv) {
 		print_mbdefaults(opts.verbose, &opts, &mbdflts, &error);
 	}
 
-	/* if help desired then print it and exit */
 	if (opts.help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);

@@ -533,7 +533,6 @@ int main(int argc, char **argv) {
   char str_locked_no[] = "unlocked";
   int format = 0;
   int variable_beams;
-  int traveltime;
   int beam_flagging;
   bool calculatespeedheading = false;
   char mbp_ifile[MBP_FILENAMESIZE];
@@ -550,7 +549,7 @@ int main(int argc, char **argv) {
   int nsonardepth = 0;
   int ntide = 0;
   int nstatic = 0;
-  int size, nchar, len, nget, sonardepth_ok, tide_ok, static_ok;
+  int size, nchar, len, nget;
   int time_j[5], stime_i[7], ftime_i[7];
   int ihr;
   double sec, hr;
@@ -1212,10 +1211,12 @@ int main(int argc, char **argv) {
         }
       }
 
+      int traveltime;  // TODO(schwehr): Make mb_format_flags take bools.
+
       /* check for format with travel time data */
       if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE) {
         status = mb_format_flags(verbose, &process.mbp_format, &variable_beams, &traveltime, &beam_flagging, &error);
-        if (traveltime != true) {
+        if (!traveltime) {
           fprintf(stderr, "\nWarning:\n\tFormat %d does not include travel time data.\n", process.mbp_format);
           fprintf(stderr, "\tTravel times and angles estimated assuming\n");
           fprintf(stderr, "\t1500 m/s water sound speed.\n");
@@ -2498,7 +2499,7 @@ int main(int argc, char **argv) {
           exit(MB_ERROR_OPEN_FAIL);
         }
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-          sonardepth_ok = false;
+	  bool sonardepth_ok = false;
 
           /* ignore comments */
           if (buffer[0] != '#') {
@@ -2551,7 +2552,7 @@ int main(int argc, char **argv) {
           }
 
           /* output some debug values */
-          if (verbose >= 5 && sonardepth_ok == true) {
+          if (verbose >= 5 && sonardepth_ok) {
             fprintf(stderr, "\ndbg5  New sonardepth point read in program <%s>\n", program_name);
             fprintf(stderr, "dbg5       sonardepth[%d]: %f %f\n", nsonardepth, fsonardepthtime[nsonardepth],
                     fsonardepth[nsonardepth]);
@@ -2562,7 +2563,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for reverses or repeats in time */
-          if (sonardepth_ok == true) {
+          if (sonardepth_ok) {
             if (nsonardepth == 0)
               nsonardepth++;
             else if (fsonardepthtime[nsonardepth] > fsonardepthtime[nsonardepth - 1])
@@ -2651,7 +2652,7 @@ int main(int argc, char **argv) {
           exit(MB_ERROR_OPEN_FAIL);
         }
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-          tide_ok = false;
+          bool tide_ok = false;
 
           /* ignore comments */
           if (buffer[0] != '#') {
@@ -2703,7 +2704,7 @@ int main(int argc, char **argv) {
           }
 
           /* output some debug values */
-          if (verbose >= 5 && tide_ok == true) {
+          if (verbose >= 5 && tide_ok) {
             fprintf(stderr, "\ndbg5  New tide point read in program <%s>\n", program_name);
             fprintf(stderr, "dbg5       tide[%d]: %f %f\n", ntide, tidetime[ntide], tide[ntide]);
           }
@@ -2713,7 +2714,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for reverses or repeats in time */
-          if (tide_ok == true) {
+          if (tide_ok) {
             if (ntide == 0)
               ntide++;
             else if (tidetime[ntide] > tidetime[ntide - 1])
@@ -2819,7 +2820,7 @@ int main(int argc, char **argv) {
           exit(MB_ERROR_OPEN_FAIL);
         }
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-          static_ok = false;
+          bool static_ok = false;
 
           /* deal with static in form: beam_# offset */
           if (buffer[0] != '#') {
@@ -2830,7 +2831,7 @@ int main(int argc, char **argv) {
             }
 
             /* output some debug values */
-            if (verbose >= 5 && static_ok == true) {
+            if (verbose >= 5 && static_ok) {
               fprintf(stderr, "\ndbg5  New static beam correction read in program <%s>\n", program_name);
               fprintf(stderr, "dbg5       beam:%d offset:%f\n", staticbeam[nstatic], staticoffset[nstatic]);
             }
@@ -2903,7 +2904,7 @@ int main(int argc, char **argv) {
           exit(MB_ERROR_OPEN_FAIL);
         }
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-          static_ok = false;
+          bool static_ok = false;
 
           /* deal with static in form: angle offset */
           if (buffer[0] != '#') {
@@ -2914,7 +2915,7 @@ int main(int argc, char **argv) {
             }
 
             /* output some debug values */
-            if (verbose >= 5 && static_ok == true) {
+            if (verbose >= 5 && static_ok) {
               fprintf(stderr, "\ndbg5  New static angle correction read in program <%s>\n", program_name);
               fprintf(stderr, "dbg5       angle:%f offset:%f\n", staticangle[nstatic], staticoffset[nstatic]);
             }
@@ -3271,7 +3272,7 @@ int main(int argc, char **argv) {
           is obtained, then close and reopen the file
           this provides the starting surface sound velocity
           for recalculating the bathymetry */
-      if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE && traveltime == true &&
+      if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE && traveltime &&
           process.mbp_ssv_mode != MBP_SSV_SET) {
         ssv_start = 0.0;
         ssv_prelimpass = true;
@@ -4876,7 +4877,7 @@ int main(int argc, char **argv) {
             --------------------------------------------*/
 
           /* extract travel times if they exist */
-          if (traveltime == true) {
+          if (traveltime) {
             status = mb_ttimes(verbose, imbio_ptr, store_ptr, &kind, &nbeams, ttimes, angles, angles_forward,
                                angles_null, bheave, alongtrack_offset, &draft_org, &ssv, &error);
           }

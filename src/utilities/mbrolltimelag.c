@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 	char dfile[MB_PATH_MAXLINE];
 	char swathroot[MB_PATH_MAXLINE];
 	char outroot[MB_PATH_MAXLINE];
-	char outroot_defined = false;
+	bool outroot_defined = false;
 	char xcorfile[MB_PATH_MAXLINE];
 	char xcorfiletot[MB_PATH_MAXLINE];
 	char cmdfile[MB_PATH_MAXLINE];
@@ -242,7 +242,7 @@ int main(int argc, char **argv) {
 	mb_get_format(verbose, swathdata, swathroot, &formatguess, &error);
 	if (format == 0)
 		format = formatguess;
-	if (outroot_defined == false)
+	if (!outroot_defined)
 		strcpy(outroot, swathroot);
 
 	/* determine whether to read one file or a list of files */

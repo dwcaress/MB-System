@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
 	double sinfendlat = 0.0;
 
 	int nread;
-	int tracecount, tracenum, channum, traceok;
+	int tracecount, tracenum, channum;
 	double tracemin, tracemax;
 	double xwidth, ywidth;
 	int ix, iy, iys, igainstart, igainend;
@@ -685,6 +685,9 @@ int main(int argc, char **argv) {
 			gridweight[k] = 0.0;
 		}
 
+
+		bool traceok;
+
 		/* read and print data */
 		nread = 0;
 		while (error <= MB_ERROR_NO_ERROR) {
@@ -807,7 +810,7 @@ int main(int argc, char **argv) {
 				}
 
 				if ((verbose == 0 && nread % 250 == 0) || (nread % 25 == 0)) {
-					if (traceok == true)
+					if (traceok)
 						fprintf(outfp, "PROCESS ");
 					else
 						fprintf(outfp, "IGNORE  ");
@@ -823,7 +826,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* now actually process traces of interest */
-				if (traceok == true) {
+				if (traceok) {
 					/* get bounds of trace in depth window mode */
 					if (windowmode == MBSEGYGRID_WINDOW_DEPTH) {
 						iystart = (int)((dtime + windowstart - timedelay) / sampleinterval);

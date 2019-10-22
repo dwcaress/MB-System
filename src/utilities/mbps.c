@@ -156,7 +156,6 @@ int main(int argc, char **argv) {
 	int nread;
 
 	char title[MB_COMMENT_MAXLINE];
-	int forward;
 	double xx, yy, zz;
 	double heading_start, dheading, dheadingx, dheadingy;
 	int jj;
@@ -631,6 +630,7 @@ int main(int argc, char **argv) {
 	    laying down white filled boxes with black outlines
 	    wherever the data is good */
 
+	bool forward;
 	if ((viewdir == 'S') || (viewdir == 's'))
 		forward = true;
 	else if ((viewdir == 'P') || (viewdir == 'p'))
@@ -643,7 +643,7 @@ int main(int argc, char **argv) {
 	}
 	for (int j = 0; j < beams_bath - 1; j++) {
 		for (int i = 0; i < nread - 1; i++) {
-			if (forward == true)
+			if (forward)
 				jj = j;
 			else
 				jj = beams_bath - 2 - j;

@@ -869,7 +869,7 @@ int main(int argc, char **argv) {
 									hemi = 'E';
 								degrees = (int)dlon;
 								minutes = 60.0 * (dlon - degrees);
-								if (ascii == true) {
+								if (ascii) {
 									printf("%3d %11.8f%c", degrees, minutes, hemi);
 								}
 								else {
