@@ -38,7 +38,14 @@ trn_server.cpp calls getFilterState() which currently only returns 0
  Trigger 5: Windowed NIS maximum has been exceeded
 ******************************************************************************/
 //static int transitionMatrix[5][3] = {{0, 0, 1}, {1, 1, 1}, {1, 2, 2}, {2, 2, 2}, {2, 2, 2}};
-
+TerrainNav::TerrainNav()
+: mapFile(NULL),vehicleSpecFile(NULL),
+particlesFile(NULL),saveDirectory(NULL),tNavFilter(NULL),
+terrainMap(NULL),filterType(1),mapType(1),
+allowFilterReinits(true),_trnLog(NULL),numReinits(0)
+{
+ 
+}
 TerrainNav::TerrainNav(char* mapName) {
 	//initialize pointers
 	this->mapFile = strdup(mapName);
