@@ -952,7 +952,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		/*--------------------------------------------------------------*/
 		/* change timestamp if indicated */
 		/*--------------------------------------------------------------*/
-		if (pars->timestamp_changed == MB_YES) {
+		if (pars->timestamp_changed == true) {
 			time_d = pars->time_d;
 			mb_get_date(verbose, time_d, time_i);
 
@@ -1148,8 +1148,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			rx_r = store->par_s3r;
 			rx_p = store->par_s3p;
 		}
-		// fprintf(stderr,"Sensordepth values:  txz:%f rxz:%f wlz:%f heave:%f height:%f  ping->png_xducer_depth:%f\n",
-		// tx_z, rx_z, store->par_wlz, heave, sensordepth, ping->png_xducer_depth);
 
 		/* insert sonardepth if requested */
 		if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
@@ -1217,9 +1215,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			 * into the ping->png_xducer_depth value and the average heave at the sector transmit time and the beam receive time
 			 */
 			ping->png_bheave[i] = 0.5 * (receive_heave + transmit_heave) - heave;
-			// fprintf(stderr,"AAA png_count:%d beam:%d times: %f %f %f   heave:%f %f transmit_heave:%f receive_heave:%f
-			// bheave:%f\n",  ping->png_count,i,time_d,transmit_time_d,receive_time_d,0.01 *
-			// ping->png_heave,heave,transmit_heave,receive_heave,ping->png_bheave[i]);
 
 			/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
 			    Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
@@ -1273,12 +1268,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			ping->png_azimuth[i] = 90.0 + beamAzimuth;
 			if (ping->png_azimuth[i] < 0.0)
 				ping->png_azimuth[i] += 360.0;
-			// fprintf(stderr,"mb_beaudoin result: i:%d tx steer:%f rph: %f %f %f  rx steer:%f rph: %f %f %f  beam: %f %f\n",
-			// i,tx_steer,tx_orientation.roll,tx_orientation.pitch,tx_orientation.heading,
-			// i,rx_steer,rx_orientation.roll,rx_orientation.pitch,rx_orientation.heading,
-			// beamDepression,beamAzimuth);
-			/* fprintf(stderr,"i:%d %f %f     %f %f\n",
-			i,beamDepression,beamAzimuth,ping->png_depression[i],ping->png_azimuth[i]);*/
 
 			/* calculate beamflag */
 			detection_mask = (mb_u_char)ping->png_raw_rxdetection[i];
@@ -1324,7 +1313,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		swath_width = (double *)&mb_io_ptr->saved2;
 		ping->png_pixel_size = 0;
 		ping->png_pixels_ss = 0;
-		status = mbsys_simrad3_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 1, error);
+		status = mbsys_simrad3_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, error);
 	}
 
 	if (verbose >= 2) {
@@ -2115,7 +2104,6 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			}
 		}
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -2185,7 +2173,6 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*namp = 0;
 		*nss = 0;
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -2213,7 +2200,6 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		/* copy comment */
 		strncpy(comment, store->par_com, MBSYS_SIMRAD3_COMMENT_LENGTH);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -2874,27 +2860,27 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get transducer depth and altitude */
 		*transducer_depth = ping->png_xducer_depth;
-		found = MB_NO;
+		found = false;
 		altitude_best = 0.0;
 		xtrack_min = 99999999.9;
 		for (int i = 0; i < ping->png_nbeams; i++) {
 			if (mb_beam_ok(ping->png_beamflag[i]) && fabs(ping->png_acrosstrack[i]) < xtrack_min) {
 				xtrack_min = fabs(ping->png_acrosstrack[i]);
 				altitude_best = ping->png_depth[i];
-				found = MB_YES;
+				found = true;
 			}
 		}
-		if (found == MB_NO) {
+		if (found == false) {
 			xtrack_min = 99999999.9;
 			for (int i = 0; i < ping->png_nbeams; i++) {
 				if (ping->png_quality[i] > 0 && fabs(ping->png_acrosstrack[i]) < xtrack_min) {
 					xtrack_min = fabs(ping->png_acrosstrack[i]);
 					altitude_best = ping->png_depth[i];
-					found = MB_YES;
+					found = true;
 				}
 			}
 		}
-		if (found == MB_YES)
+		if (found == true)
 			*altitude = altitude_best;
 		else
 			*altitude = 0.0;
@@ -3189,11 +3175,6 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
-	// if (*kind == MB_DATA_DATA)
-	// for (inav=0;inav<*n;inav++)
-	// fprintf(stderr,"ExtractNNav: %.6f %12.8f %12.8f   %6.3f km/hr %7.3f deg %10.3f m %5.2f deg %5.2f deg %6.3f m\n",
-	//		time_d[inav], navlon[inav], navlat[inav], speed[inav], heading[inav],
-	//		draft[inav], roll, pitch[inav], heave[inav]);
 
 	return (status);
 }
@@ -3360,9 +3341,6 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
-	// if (*kind == MB_DATA_DATA)
-	// fprintf(stderr,"ExtractNav: %.6f %12.8f %12.8f   %6.3f km/hr %7.3f deg %10.3f m %5.2f deg %5.2f deg %6.3f m\n",
-	//		*time_d, *navlon, *navlat, *speed, *heading, *draft, *roll, *pitch, *heave);
 
 	return (status);
 }
@@ -3402,8 +3380,6 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 
 	/* insert data in ping structure */
 	if (store->kind == MB_DATA_DATA) {
-		// fprintf(stderr,"InsertNav: %.6f %12.8f %12.8f   %6.3f km/hr %7.3f deg %10.3f m %5.2f deg %5.2f deg %6.3f m\n\n",
-		//		time_d, navlon, navlat, speed, heading, draft, roll, pitch, heave);
 		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* get time */
@@ -3838,13 +3814,13 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		}
 
 		/* get sidescan pixel size */
-		if (swath_width_set == MB_NO) {
+		if (swath_width_set == false) {
 			if (store->run_swath_angle > 0)
 				*swath_width = (double)store->run_swath_angle;
 			else
 				*swath_width = 2.5 + MAX(90.0 - ping->png_depression[0], 90.0 - ping->png_depression[ping->png_nbeams - 1]);
 		}
-		if (pixel_size_set == MB_NO && nbathsort > 0) {
+		if (pixel_size_set == false && nbathsort > 0) {
 			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
 			pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_SIMRAD3_MAXPIXELS;
 			if (store->run_max_swath > 0) {
@@ -3883,23 +3859,19 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
 		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &ss_time_d);
-		ss_ok = MB_YES;
+		ss_ok = true;
 		if (ping->png_nbeams < ping->png_nbeams_ss || ping->png_nbeams > ping->png_nbeams_ss + 1) {
-			ss_ok = MB_NO;
+			ss_ok = false;
 			if (verbose > 0)
 				fprintf(stderr,
 				        "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
 				        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 				        ping->png_nbeams, ping->png_nbeams_ss);
 		}
-		/*fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d   bathbeams:%d   ssbeams:%d\n",
-		__func__, time_i[0], time_i[1], time_i[2],
-		time_i[3], time_i[4], time_i[5], time_i[6],
-		ping->png_nbeams, ping->png_nbeams_ss);*/
 
 		/* loop over raw sidescan, putting each raw pixel into
 		    the binning arrays */
-		if (ss_ok == MB_YES)
+		if (ss_ok == true)
 			for (int i = 0; i < ping->png_nbeams_ss; i++) {
 				beam_ss = &ping->png_ssraw[ping->png_start_sample[i]];
 				if (mb_beam_ok(ping->png_beamflag[i])) {
@@ -3913,10 +3885,6 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 							ss_spacing_use = beam_foot / ping->png_beam_samples[i];
 						else
 							ss_spacing_use = ss_spacing / sint;
-						/* fprintf(stderr, "spacing: %f %f n:%d sint:%f beamwidth:%f angle:%f range:%f foot:%f factor:%f\n",
-						ss_spacing, ss_spacing_use,
-						ping->png_beam_samples[i], sint, beamwidth, angle, range, beam_foot,
-						ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 					}
 					for (int k = 0; k < ping->png_beam_samples[i]; k++) {
 						if (beam_ss[k] != EM3_INVALID_AMP) {
@@ -3986,7 +3954,6 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 			}
 		}
 
-		/* print debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Sidescan regenerated in <%s>\n", __func__);
 			fprintf(stderr, "dbg2       png_nbeams_ss: %d\n", ping->png_nbeams_ss);

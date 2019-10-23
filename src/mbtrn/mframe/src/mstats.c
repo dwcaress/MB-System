@@ -326,6 +326,32 @@ int mstats_update_stats(mstats_t *stats, uint32_t channels, mstats_flags flags)
     return retval;
 }
 // End function mstats_update_stats
+mstats_profile_t *mstats_profile_new(uint32_t ev_counters, uint32_t status_counters, uint32_t tm_channels, const char ***channel_labels, double pstart, double psec)
+{
+    mstats_profile_t *self =(mstats_profile_t *)malloc(sizeof(mstats_profile_t));
+    if (self) {
+        self->session_start = mtime_dtime();
+        self->uptime = 0.0;
+        self->stats = mstats_new(ev_counters, status_counters, tm_channels, channel_labels);
+        
+        mstats_set_period(self->stats,pstart,psec);
+    }
+    return self;
+}
+
+void mstats_profile_destroy(mstats_profile_t **pself)
+{
+    if(NULL!=pself){
+        mstats_profile_t *self = (mstats_profile_t *)*pself;
+        if(NULL!=self){
+            if(NULL!=self->stats){
+                mstats_destroy(&self->stats);
+            }
+            free(self);
+            *pself=NULL;
+        }
+    }
+}
 
 mstats_profile_t *mstats_profile_new(uint32_t ev_counters, uint32_t status_counters, uint32_t tm_channels, const char ***channel_labels, double pstart, double psec)
 {

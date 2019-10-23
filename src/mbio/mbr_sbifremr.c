@@ -64,9 +64,9 @@ int mbr_info_sbifremr(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = false;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -171,8 +171,6 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 	static char line[MBF_SBIFREMR_MAXLINE];
-	static int line_save = MB_NO;
-	static int first = MB_YES;
 	static int ping_num_save = 0;
 	static double heading_save = 0.0;
 
@@ -197,22 +195,24 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int second;
 	int tsecond;
 
-	int done = MB_NO;
 	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	int center = MBF_SBIFREMR_NUM_BEAMS / 2;
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-	while (done == MB_NO) {
+	static bool first = true;
+	static bool line_save = false;
+	bool done = false;
+	while (!done) {
 
 		char *result = NULL;
 		/* get next line */
-		if (line_save == MB_NO) {
+		if (!line_save) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			strncpy(line, "\0", MBF_SBIFREMR_MAXLINE);
 			result = fgets(line, MBF_SBIFREMR_MAXLINE, mbfp);
 		}
 		else {
-			line_save = MB_NO;
+			line_save = false;
 			result = line;
 		}
 
@@ -223,15 +223,15 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 		if (result == NULL) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
-			done = MB_YES;
+			done = true;
 		}
 
 		/* deal with comment */
 		else if (nchars > 2 && line[0] == '#' && line[1] == '#') {
 			strncpy(data->comment, &line[2], MBF_SBIFREMR_MAXLINE - 3);
 			data->kind = MB_DATA_COMMENT;
-			done = MB_YES;
-			first = MB_YES;
+			done = true;
+			first = true;
 		}
 
 		/* deal with good line */
@@ -244,10 +244,10 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 			beam_num = 19 - beam_num;
 
 			/* check if new ping */
-			if (ping_num != ping_num_save && first == MB_NO) {
-				done = MB_YES;
-				line_save = MB_YES;
-				first = MB_YES;
+			if (ping_num != ping_num_save && !first) {
+				done = true;
+				line_save = true;
+				first = true;
 			}
 
 			/* else convert and store the data */
@@ -282,7 +282,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 				if (NorS == 'S')
 					data->lat[beam_num] = -1.0 * data->lat[beam_num];
 				data->deph[beam_num] = -depth;
-				first = MB_NO;
+				first = false;
 				ping_num_save = ping_num;
 			}
 		}
@@ -547,7 +547,6 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 		const int hour = time_i[3];
 		const int minute = time_i[4];
 		const int second = time_i[5];
-		const int tsecond = 0;
 
 		/* get lon lat */
 		double lon = data->lon2u / 60. + data->lon2b / 600000.;
@@ -676,7 +675,6 @@ int mbr_wt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Ready to write data in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);

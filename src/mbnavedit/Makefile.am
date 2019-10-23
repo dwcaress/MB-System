@@ -7,22 +7,32 @@ endif
 
 AM_CFLAGS = ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
-        -I${top_srcdir}/src/mbaux \
-        -I${top_srcdir}/src/gsf \
-        $(MBTRNINCDIR) \
-        ${libmotif_CPPFLAGS}
+AM_CPPFLAGS =
+AM_CPPFLAGS += -I${top_srcdir}/src/mbio
+AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
+AM_CPPFLAGS += $(MBTRNINCDIR)
+AM_CPPFLAGS += -I${top_srcdir}/src/gsf
+AM_CPPFLAGS += ${libmotif_CPPFLAGS}
 
 AM_LDFLAGS =
 
-LIBS = ${top_builddir}/src/mbio/libmbio.la \
-        ${top_builddir}/src/mbaux/libmbaux.la \
-        ${top_builddir}/src/mbaux/libmbxgr.la \
-        ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-        ${libmotif_LIBS} $(MBTRNLIB) \
-        $(LIBM)
+LIBS =
+LIBS += ${top_builddir}/src/mbio/libmbio.la
+LIBS += ${top_builddir}/src/mbaux/libmbaux.la
+LIBS += ${top_builddir}/src/mbaux/libmbxgr.la
+LIBS += ${libgmt_LIBS}
+LIBS += ${libnetcdf_LIBS}
+LIBS += ${libproj_LIBS}
+LIBS += ${libmotif_LIBS}
+LIBS += $(MBTRNLIB) 
+LIBS += $(LIBM)
 
-mbnavedit_SOURCES = mbnavedit.c mbnavedit_creation.c mbnavedit_util.c mbnavedit_callbacks.c \
-	mbnavedit_prog.c mbnavedit_creation.h mbnavedit_extrawidgets.h mbnavedit.h
-
-
+mbnavedit_SOURCES =
+mbnavedit_SOURCES += mbnavedit.c
+mbnavedit_SOURCES += mbnavedit.h
+mbnavedit_SOURCES += mbnavedit_callbacks.c
+mbnavedit_SOURCES += mbnavedit_creation.c
+mbnavedit_SOURCES += mbnavedit_creation.h
+mbnavedit_SOURCES += mbnavedit_extrawidgets.h
+mbnavedit_SOURCES += mbnavedit_prog.c
+mbnavedit_SOURCES += mbnavedit_util.c

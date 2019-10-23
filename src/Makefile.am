@@ -15,9 +15,27 @@ if BUILD_MBTNAV
   XBUILD_SUB_MBTRNBIN = mbtrnutils
 endif
 
-SUBDIRS = gsf surf bsio $(XBUILD_SUB_MBTRN) $(XBUILD_SUB_MBTNAV) mbio mbaux  \
-	utilities $(XBUILD_SUB_MBTRNBIN) gmt otps macros share man html ps \
-	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL)
+SUBDIRS =
+if BUILD_GSF
+SUBDIRS += gsf
+endif
+SUBDIRS += surf
+SUBDIRS += bsio
+SUBDIRS += $(XBUILD_SUB_MBTNAV)
+SUBDIRS += $(XBUILD_SUB_MBTRN)
+SUBDIRS += mbio
+SUBDIRS += mbaux
+SUBDIRS += utilities
+SUBDIRS += $(XBUILD_SUB_MBTRNBIN)
+SUBDIRS += gmt
+SUBDIRS += otps
+SUBDIRS += macros
+SUBDIRS += share
+SUBDIRS += man
+SUBDIRS += html
+SUBDIRS += ps
+SUBDIRS += $(XBUILD_SUB_MOTIF)
+SUBDIRS += $(XBUILD_SUB_GL)
 
 CLEANFILES =
 DISTCLEANFILES =

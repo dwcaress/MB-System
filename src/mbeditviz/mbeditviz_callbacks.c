@@ -243,7 +243,7 @@ int do_mbeditviz_init(Widget parentwidget, XtAppContext appcon) {
 
 	parent = parentwidget;
 	app = appcon;
-	mbev_message_on = MB_NO;
+	mbev_message_on = false;
 
 #ifdef MBEDITVIZ_GUI_DEBUG
 	fprintf(stderr, "do_mbeditviz_init\n");
@@ -278,14 +278,14 @@ int do_mbeditviz_init(Widget parentwidget, XtAppContext appcon) {
 
 	/* initialize mbview_id list */
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-		mbview_id[i] = MB_NO;
+		mbview_id[i] = false;
 	}
 
 	/* set sensitivity of widgets that require an mbview instance to be active */
 	do_mbeditviz_update_gui();
 
 	/* set timer for function to keep updating the filelist */
-	timer_function_set = MB_NO;
+	timer_function_set = false;
 	do_mbeditviz_settimer();
 
 #ifdef MBEDITVIZ_GUI_DEBUG
@@ -484,7 +484,7 @@ void do_mbeditviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 		mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_error);
 		mbeditviz_mb3dsoundings_dismiss();
 
-		mbev_status = mbview_destroy(mbev_verbose, 0, MB_YES, &mbev_error);
+		mbev_status = mbview_destroy(mbev_verbose, 0, true, &mbev_error);
 		mbev_grid.status = MBEV_GRID_NOTVIEWED;
 	}
 
@@ -495,7 +495,7 @@ void do_mbeditviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 	/* loop over all files to be sure all files are unloaded */
 	for (ifile = 0; ifile < mbev_num_files; ifile++) {
 		file = &(mbev_files[ifile]);
-		if (file->load_status == MB_YES) {
+		if (file->load_status == true) {
 			mbeditviz_unload_file(ifile);
 		}
 	}
@@ -536,7 +536,7 @@ void do_mbeditviz_viewall(Widget w, XtPointer client_data, XtPointer call_data) 
 		mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_error);
 		mbeditviz_mb3dsoundings_dismiss();
 
-		mbev_status = mbview_destroy(mbev_verbose, 0, MB_YES, &mbev_error);
+		mbev_status = mbview_destroy(mbev_verbose, 0, true, &mbev_error);
 		mbev_grid.status = MBEV_GRID_NOTVIEWED;
 #ifdef MBEDITVIZ_GUI_DEBUG
 		fprintf(stderr, "do_mbeditviz_viewall destroyed previous windows\n");
@@ -562,7 +562,7 @@ void do_mbeditviz_viewall(Widget w, XtPointer client_data, XtPointer call_data) 
 		fprintf(stderr, "do_mbeditviz_viewall loading file %d\n", ifile);
 #endif
 		file = &(mbev_files[ifile]);
-		if (file->load_status == MB_NO) {
+		if (file->load_status == false) {
 			sprintf(value_text, "Loading file %d of %d...", ifile + 1, mbev_num_files);
 			do_mbeditviz_message_on(value_text);
 #ifdef MBEDITVIZ_GUI_DEBUG
@@ -633,7 +633,7 @@ void do_mbeditviz_viewselected(Widget w, XtPointer client_data, XtPointer call_d
 		mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_error);
 		mbeditviz_mb3dsoundings_dismiss();
 
-		mbev_status = mbview_destroy(mbev_verbose, 0, MB_YES, &mbev_error);
+		mbev_status = mbview_destroy(mbev_verbose, 0, true, &mbev_error);
 		mbev_grid.status = MBEV_GRID_NOTVIEWED;
 	}
 
@@ -661,24 +661,24 @@ void do_mbeditviz_viewselected(Widget w, XtPointer client_data, XtPointer call_d
 	loadcount = 0;
 	for (ifile = 0; ifile < mbev_num_files; ifile++) {
 		/* find out if file is in selected list */
-		selected = MB_NO;
+		selected = false;
 		for (i = 0; i < position_count; i++) {
 			if (ifile == position_list[i] - 1)
-				selected = MB_YES;
+				selected = true;
 		}
 
 		/* load unloaded selected files, unload loaded unselected files */
 		file = &(mbev_files[ifile]);
-		if (selected == MB_YES && file->load_status == MB_NO) {
+		if (selected == true && file->load_status == false) {
 			loadcount++;
 			sprintf(value_text, "Loading file %d of %d...", loadcount, position_count);
 			do_mbeditviz_message_on(value_text);
 			mbeditviz_load_file(ifile);
 		}
-		else if (selected == MB_YES && file->load_status == MB_YES) {
+		else if (selected == true && file->load_status == true) {
 			loadcount++;
 		}
-		else if (selected == MB_NO && file->load_status == MB_YES) {
+		else if (selected == false && file->load_status == true) {
 			mbeditviz_unload_file(ifile);
 		}
 	}
@@ -733,7 +733,7 @@ void do_mbeditviz_regrid(Widget w, XtPointer client_data, XtPointer call_data) {
 		mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_error);
 		mbeditviz_mb3dsoundings_dismiss();
 
-		mbev_status = mbview_destroy(mbev_verbose, 0, MB_YES, &mbev_error);
+		mbev_status = mbview_destroy(mbev_verbose, 0, true, &mbev_error);
 		mbev_grid.status = MBEV_GRID_NOTVIEWED;
 	}
 
@@ -745,7 +745,7 @@ void do_mbeditviz_regrid(Widget w, XtPointer client_data, XtPointer call_data) {
 	loadcount = 0;
 	for (ifile = 0; ifile < mbev_num_files; ifile++) {
 		file = &(mbev_files[ifile]);
-		if (file->load_status == MB_YES)
+		if (file->load_status == true)
 			loadcount++;
 	}
 
@@ -798,7 +798,7 @@ void do_mbeditviz_updategrid(Widget w, XtPointer client_data, XtPointer call_dat
 	loadcount = 0;
 	for (ifile = 0; ifile < mbev_num_files; ifile++) {
 		file = &(mbev_files[ifile]);
-		if (file->load_status == MB_YES)
+		if (file->load_status == true)
 			loadcount++;
 	}
 
@@ -1008,9 +1008,9 @@ void do_mbeditviz_viewgrid() {
 		mbv_display_mode = MBV_DISPLAY_2D;
 		mbv_mouse_mode = MBV_MOUSE_MOVE;
 		mbv_grid_mode = MBV_GRID_VIEW_PRIMARY;
-		mbv_primary_histogram = MB_NO;
-		mbv_primaryslope_histogram = MB_NO;
-		mbv_secondary_histogram = MB_NO;
+		mbv_primary_histogram = false;
+		mbv_primaryslope_histogram = false;
+		mbv_secondary_histogram = false;
 		mbv_primary_shade_mode = MBV_SHADE_VIEW_SLOPE;
 		mbv_slope_shade_mode = MBV_SHADE_VIEW_NONE;
 		mbv_secondary_shade_mode = MBV_SHADE_VIEW_NONE;
@@ -1108,7 +1108,7 @@ void do_mbeditviz_viewgrid() {
 		/* add navigation to view */
 		for (ifile = 0; ifile < mbev_num_files; ifile++) {
 			file = &(mbev_files[ifile]);
-			if (file->load_status == MB_YES && file->num_pings > 0) {
+			if (file->load_status == true && file->num_pings > 0) {
 				/* set message */
 				sprintf(value_text, "Loading nav %d of %d...", ifile + 1, mbev_num_files);
 				do_mbeditviz_message_on(value_text);
@@ -1177,7 +1177,7 @@ void do_mbeditviz_viewgrid() {
 					mbev_status = mbview_addnav(mbev_verbose, mbev_instance, file->num_pings, navtime_d, navlon, navlat, navz,
 					                            navheading, navspeed, navportlon, navportlat, navstbdlon, navstbdlat, navline,
 					                            navshot, navcdp, MBV_COLOR_BLACK, 2, file->name, MB_PROCESSED_NONE, file->path,
-					                            file->path, file->format, MB_YES, MB_NO, MB_NO, MB_NO, 1, &mbev_error);
+					                            file->path, file->format, true, false, false, false, 1, &mbev_error);
 
 				/* deallocate memory used for data arrays */
 				free(navtime_d);
@@ -1415,7 +1415,7 @@ void do_mbeditviz_update_gui() {
 	mbev_num_soundings_loaded = 0;
 	for (i = 0; i < mbev_num_files; i++) {
 		file = &(mbev_files[i]);
-		if (file->load_status == MB_YES) {
+		if (file->load_status == true) {
 			mbev_num_files_loaded++;
 			mbev_num_pings_loaded += file->num_pings;
 			for (j = 0; j < file->num_pings; j++) {
@@ -1520,7 +1520,7 @@ void do_mbeditviz_update_filelist() {
 #endif
 
 	/* check to see if anything has changed */
-	update_filelist = MB_NO;
+	update_filelist = false;
 
 	/* check for change in number of files */
 	ac = 0;
@@ -1528,7 +1528,7 @@ void do_mbeditviz_update_filelist() {
 	ac++;
 	XtGetValues(list_filelist, args, ac);
 	if (item_count != mbev_num_files)
-		update_filelist = MB_YES;
+		update_filelist = true;
 
 	/* check for change in load status, lock status, or esf status */
 	for (i = 0; i < mbev_num_files; i++) {
@@ -1537,7 +1537,7 @@ void do_mbeditviz_update_filelist() {
 		/* check load status */
 		if (file->load_status != file->load_status_shown) {
 			file->load_status_shown = file->load_status;
-			update_filelist = MB_YES;
+			update_filelist = true;
 		}
 
 		/* check for locks */
@@ -1545,24 +1545,24 @@ void do_mbeditviz_update_filelist() {
 		                             lock_date, &lock_error);
 		if (locked != file->locked) {
 			file->locked = locked;
-			update_filelist = MB_YES;
+			update_filelist = true;
 		}
 
 		/* check for edit save file */
 		sprintf(save_file, "%s.esf", mbev_files[i].path);
 		fstat = stat(save_file, &file_status);
 		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
-			esf_exists = MB_YES;
+			esf_exists = true;
 		else
-			esf_exists = MB_NO;
+			esf_exists = false;
 		if (esf_exists != file->esf_exists) {
 			file->esf_exists = esf_exists;
-			update_filelist = MB_YES;
+			update_filelist = true;
 		}
 	}
 
 	/* only update the filelist if necessary */
-	if (update_filelist == MB_YES) {
+	if (update_filelist == true) {
 		/* get the current selection, if any, from the list */
 		ac = 0;
 		XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
@@ -1588,13 +1588,13 @@ void do_mbeditviz_update_filelist() {
 				file = &(mbev_files[i]);
 
 				/* set label strings */
-				if (file->load_status == MB_YES)
+				if (file->load_status == true)
 					lockstrptr = loadedstr;
-				else if (file->locked == MB_YES)
+				else if (file->locked == true)
 					lockstrptr = lockedstr;
 				else
 					lockstrptr = unlockedstr;
-				if (file->esf_exists == MB_YES)
+				if (file->esf_exists == true)
 					esfstrptr = esfyesstr;
 				else
 					esfstrptr = esfnostr;
@@ -1863,7 +1863,7 @@ int do_mbeditviz_message_on(char *message) {
 		fprintf(stderr, "dbg2       message:   %s\n", message);
 	}
 
-	mbev_message_on = MB_YES;
+	mbev_message_on = true;
 
 	set_mbview_label_string(label_mbeditviz_message, message);
 	XtManageChild(bulletinBoard_mbeditviz_message);
@@ -1901,7 +1901,7 @@ int do_mbeditviz_message_off() {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
-	mbev_message_on = MB_NO;
+	mbev_message_on = false;
 
 	XtUnmanageChild(bulletinBoard_mbeditviz_message);
 	XSync(XtDisplay(bulletinBoard_mbeditviz_message), 0);
@@ -2001,11 +2001,11 @@ int do_mbeditviz_settimer() {
 	int id;
 
 	/* set timer function if none set for this instance */
-	if (timer_function_set == MB_NO) {
+	if (timer_function_set == false) {
 		id = XtAppAddTimeOut(app, (unsigned long)timer_timeout_time, (XtTimerCallbackProc)do_mbeditviz_workfunction,
 		                     (XtPointer)-1);
 		if (id > 0)
-			timer_function_set = MB_YES;
+			timer_function_set = true;
 		else
 			status = MB_FAILURE;
 	}
@@ -2021,7 +2021,7 @@ int do_mbeditviz_settimer() {
 int do_mbeditviz_workfunction(XtPointer client_data) {
 	int status = MB_SUCCESS;
 
-	timer_function_set = MB_NO;
+	timer_function_set = false;
 
 	/* reset filelist */
 	if (mbev_num_files > 0) {

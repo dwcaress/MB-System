@@ -18,15 +18,15 @@ class MbinfoTest(unittest.TestCase):
     self.cmd = '../../src/utilities/mbinfo'
 
   def CheckInfoJson(self, src_filename, expected_filename):
-      cmd = [self.cmd, '-X1', '-I' + src_filename]
-      output = subprocess.check_output(cmd)
-      self.assertIn(b'"limits"', output)
+    cmd = [self.cmd, '-X1', '-I' + src_filename]
+    output = subprocess.check_output(cmd)
+    self.assertIn(b'"limits"', output)
 
-      summary = json.loads(output)
-      with open(expected_filename) as src:
-        expected = json.load(src)
-      # expected = json.loads(open(expected_filename).read())
-      self.assertEqual(expected, summary)
+    summary = json.loads(output, strict=False)
+
+    with open(expected_filename) as src:
+      expected = json.load(src, strict=False)
+    self.assertEqual(expected, summary)
 
   def testNoArgs(self):
     # Report a failure by calling exit(3).  There is no real failure.

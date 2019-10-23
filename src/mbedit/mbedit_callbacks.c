@@ -110,7 +110,7 @@ WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
 /*--------------------------------------------------------------------*/
 
 /* id variables */
-static char program_name[] = "MBedit";
+static const char program_name[] = "MBedit";
 
 /* additional widgets */
 Widget fileSelectionList;
@@ -176,13 +176,13 @@ int mx_interval;
 int my_interval;
 int mode_pick = MODE_TOGGLE;
 int mshow_beammode = BEAM_MODE_FLAG;
-int mshow_flaggedsoundings = MB_YES;
-int mshow_flaggedprofiles = MB_NO;
+int mshow_flaggedsoundings = true;
+int mshow_flaggedprofiles = false;
 int mview_mode = VIEW_WATERFALL;
 int mshow_time = 1;
 int mode_output = OUTPUT_MODE_EDIT;
-int mode_reverse_keys = MB_NO;
-int mode_reverse_mouse = MB_NO;
+int mode_reverse_keys = false;
+int mode_reverse_mouse = false;
 int ttime_i[7];
 int f_beams_max;
 double f_distance_max;
@@ -212,7 +212,7 @@ int fileformats[NUM_FILES_MAX];
 mb_path filepaths[NUM_FILES_MAX];
 int filelocks[NUM_FILES_MAX];
 int fileesfs[NUM_FILES_MAX];
-int timer_function_set = MB_NO;
+int timer_function_set = false;
 
 static char input_file[MB_PATH_MAXLINE];
 int selected = 0; /* indicates an input file is selected */
@@ -459,7 +459,7 @@ void do_mbedit_init(int argc, char **argv) {
 	do_mbedit_settimer();
 
 	/* if startup indicated by num_files > 0 try to open first file */
-	if (startup_file == MB_YES && numfiles > 0) {
+	if (startup_file == true && numfiles > 0) {
 		do_load_specific_file(0);
 	}
 
@@ -501,9 +501,9 @@ void do_parse_datalist(char *file, int form) {
 	/* read in datalist if forma = -1 */
 	else if (format == -1) {
 		error = MB_ERROR_NO_ERROR;
-		done = MB_NO;
+		done = false;
 		if ((datalist_status = mb_datalist_open(verbose, &datalist, file, MB_DATALIST_LOOK_NO, &error)) == MB_SUCCESS) {
-			while (done == MB_NO) {
+			while (done == false) {
 				if ((datalist_status = mb_datalist_read2(verbose, datalist, &filestatus, fileraw, fileprocessed, dfile,
 				                                         &fileformat, &weight, &error)) == MB_SUCCESS) {
 					if (numfiles < NUM_FILES_MAX) {
@@ -516,7 +516,7 @@ void do_parse_datalist(char *file, int form) {
 				}
 				else {
 					datalist_status = mb_datalist_close(verbose, &datalist, &error);
-					done = MB_YES;
+					done = true;
 				}
 			}
 		}
@@ -621,7 +621,7 @@ void do_load_specific_file(int i_file) {
 	struct stat file_status;
 	int fstat;
 	char save_file[MB_PATH_MAXLINE];
-	int save_mode = MB_NO;
+	int save_mode = false;
 
 	/* check the specified file is in the list */
 	if (numfiles > 0 && i_file >= 0 && i_file < numfiles) {
@@ -639,8 +639,8 @@ void do_load_specific_file(int i_file) {
 		/* if esf file exists deal with it */
 		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 			/* if save_mode set load data using esf */
-			if (save_mode == MB_YES)
-				do_load(MB_YES);
+			if (save_mode == true)
+				do_load(true);
 
 			/* else bring up dialog asking
 			if esf should be used */
@@ -650,7 +650,7 @@ void do_load_specific_file(int i_file) {
 
 		/* else just try to load the data without an esf */
 		else {
-			(void)do_load(MB_NO);
+			(void)do_load(false);
 		}
 	}
 }
@@ -760,20 +760,20 @@ int do_setup_data() {
 	XmToggleButtonSetState(toggleButton_show_flaggedprofiles_on, mshow_flaggedprofiles, FALSE);
 
 	/* turn off all view mode togglebuttons */
-	XmToggleButtonSetState(toggleButton_view_waterfall, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_view_alongtrack, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_view_waterfall, false, FALSE);
+	XmToggleButtonSetState(toggleButton_view_alongtrack, false, FALSE);
+	XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
 	XmToggleButtonSetState(toggleButton_show_flags, FALSE, FALSE);
 	XmToggleButtonSetState(toggleButton_show_detects, FALSE, FALSE);
 	XmToggleButtonSetState(toggleButton_show_pulsetypes, FALSE, FALSE);
 
 	/* now turn on the current view mode togglebutton */
 	if (mview_mode == 0)
-		XmToggleButtonSetState(toggleButton_view_waterfall, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_view_waterfall, true, FALSE);
 	else if (mview_mode == 1)
-		XmToggleButtonSetState(toggleButton_view_alongtrack, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_view_alongtrack, true, FALSE);
 	else if (mview_mode == 2)
-		XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_view_acrosstrack, true, FALSE);
 	if (mshow_beammode == BEAM_MODE_FLAG)
 		XmToggleButtonSetState(toggleButton_show_flags, TRUE, FALSE);
 	else if (mshow_beammode == BEAM_MODE_DETECT)
@@ -785,47 +785,47 @@ int do_setup_data() {
 	status = mbedit_set_viewmode(mview_mode);
 
 	/* turn off all plot mode togglebuttons */
-	XmToggleButtonSetState(toggleButton_show_wideplot, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_time, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_interval, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_lon, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_latitude, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_heading, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_speed, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_depth, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_altitude, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_sonardepth, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_roll, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_pitch, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_heave, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_wideplot, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_time, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_interval, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_lon, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_latitude, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_heading, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_speed, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_depth, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_altitude, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_sonardepth, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_roll, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_pitch, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_heave, false, FALSE);
 
 	/* now turn on the current plot mode togglebutton */
 	if (mshow_time == 0)
-		XmToggleButtonSetState(toggleButton_show_wideplot, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_show_wideplot, true, FALSE);
 	else if (mshow_time == 1)
-		XmToggleButtonSetState(toggleButton_show_time, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_show_time, true, FALSE);
 	else if (mshow_time == 2)
-		XmToggleButtonSetState(toggleButton_show_interval, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_show_interval, true, FALSE);
 	else if (mshow_time == 3)
-		XmToggleButtonSetState(toggleButton_show_lon, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_show_lon, true, FALSE);
 	else if (mshow_time == 4)
-		XmToggleButtonSetState(toggleButton_show_latitude, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_show_latitude, true, FALSE);
 	else if (mshow_time == 5)
-		XmToggleButtonSetState(toggleButton_show_heading, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_show_heading, true, FALSE);
 	else if (mshow_time == 6)
-		XmToggleButtonSetState(toggleButton_show_speed, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_show_speed, true, FALSE);
 	else if (mshow_time == 7)
-		XmToggleButtonSetState(toggleButton_show_depth, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_show_depth, true, FALSE);
 	else if (mshow_time == 8)
-		XmToggleButtonSetState(toggleButton_show_altitude, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_show_altitude, true, FALSE);
 	else if (mshow_time == 9)
-		XmToggleButtonSetState(toggleButton_show_sonardepth, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_show_sonardepth, true, FALSE);
 	else if (mshow_time == 10)
-		XmToggleButtonSetState(toggleButton_show_roll, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_show_roll, true, FALSE);
 	else if (mshow_time == 11)
-		XmToggleButtonSetState(toggleButton_show_pitch, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_show_pitch, true, FALSE);
 	else if (mshow_time == 12)
-		XmToggleButtonSetState(toggleButton_show_heave, MB_YES, FALSE);
+		XmToggleButtonSetState(toggleButton_show_heave, true, FALSE);
 
 	/* get filter values and set widgets */
 	do_get_filters();
@@ -875,7 +875,7 @@ void do_build_filelist() {
 	char save_file[MB_PATH_MAXLINE];
 
 	/* check to see if anything has changed */
-	update_filelist = MB_NO;
+	update_filelist = false;
 
 	/* check for change in number of files */
 	ac = 0;
@@ -883,12 +883,12 @@ void do_build_filelist() {
 	ac++;
 	XtGetValues(list_filelist, args, ac);
 	if (item_count != numfiles)
-		update_filelist = MB_YES;
+		update_filelist = true;
 
 	/* check current file shown vs loaded */
 	if (currentfile != currentfile_shown) {
 		currentfile_shown = currentfile;
-		update_filelist = MB_YES;
+		update_filelist = true;
 	}
 
 	/* check for change in lock status or esf status */
@@ -898,24 +898,24 @@ void do_build_filelist() {
 		                             &lock_error);
 		if (locked != filelocks[i]) {
 			filelocks[i] = locked;
-			update_filelist = MB_YES;
+			update_filelist = true;
 		}
 
 		/* check for edit save file */
 		sprintf(save_file, "%s.esf", filepaths[i]);
 		fstat = stat(save_file, &file_status);
 		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
-			esf_exists = MB_YES;
+			esf_exists = true;
 		else
-			esf_exists = MB_NO;
+			esf_exists = false;
 		if (esf_exists != fileesfs[i]) {
 			fileesfs[i] = esf_exists;
-			update_filelist = MB_YES;
+			update_filelist = true;
 		}
 	}
 
 	/* only rebuild the filelist if necessary */
-	if (update_filelist == MB_YES) {
+	if (update_filelist == true) {
 		/* get the current selection, if any, from the list */
 		ac = 0;
 		XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
@@ -938,13 +938,13 @@ void do_build_filelist() {
 				/* check for locks */
 				if (currentfile == i)
 					lockstrptr = loadedstr;
-				else if (filelocks[i] == MB_YES)
+				else if (filelocks[i] == true)
 					lockstrptr = lockedstr;
 				else
 					lockstrptr = unlockedstr;
 
 				/* check for edit save file */
-				if (fileesfs[i] == MB_YES)
+				if (fileesfs[i] == true)
 					esfstrptr = esfyesstr;
 				else
 					esfstrptr = esfnostr;
@@ -1401,13 +1401,13 @@ void do_load(int save_mode) {
 
 void do_load_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 	/* load the current file without using edit save file */
-	do_load(MB_NO);
+	do_load(false);
 }
 /*--------------------------------------------------------------------*/
 
 void do_load_ok_with_save(Widget w, XtPointer client_data, XtPointer call_data) {
 	/* load the current file using edit save file */
-	do_load(MB_YES);
+	do_load(true);
 }
 
 /*--------------------------------------------------------------------*/
@@ -1694,7 +1694,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			case 'j':
 			case 'A':
 			case 'a':
-				if (mode_reverse_keys == MB_NO)
+				if (mode_reverse_keys == false)
 					status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
 					                                 mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 				else
@@ -1709,7 +1709,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			case 'l':
 			case 'D':
 			case 'd':
-				if (mode_reverse_keys == MB_NO)
+				if (mode_reverse_keys == false)
 					status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
 					                                  mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 				else
@@ -1851,9 +1851,9 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 				/* set the view mode */
 				mview_mode = VIEW_WATERFALL;
 				mbedit_set_viewmode(mview_mode);
-				XmToggleButtonSetState(toggleButton_view_waterfall, MB_YES, FALSE);
-				XmToggleButtonSetState(toggleButton_view_alongtrack, MB_NO, FALSE);
-				XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_NO, FALSE);
+				XmToggleButtonSetState(toggleButton_view_waterfall, true, FALSE);
+				XmToggleButtonSetState(toggleButton_view_alongtrack, false, FALSE);
+				XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
 
 				/* replot the data */
 				status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
@@ -1864,9 +1864,9 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 				/* set the view mode */
 				mview_mode = VIEW_ALONGTRACK;
 				mbedit_set_viewmode(mview_mode);
-				XmToggleButtonSetState(toggleButton_view_waterfall, MB_NO, FALSE);
-				XmToggleButtonSetState(toggleButton_view_alongtrack, MB_YES, FALSE);
-				XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_NO, FALSE);
+				XmToggleButtonSetState(toggleButton_view_waterfall, false, FALSE);
+				XmToggleButtonSetState(toggleButton_view_alongtrack, true, FALSE);
+				XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
 
 				/* replot the data */
 				status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
@@ -1877,9 +1877,9 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 				/* set the view mode */
 				mview_mode = VIEW_ACROSSTRACK;
 				mbedit_set_viewmode(mview_mode);
-				XmToggleButtonSetState(toggleButton_view_waterfall, MB_NO, FALSE);
-				XmToggleButtonSetState(toggleButton_view_alongtrack, MB_NO, FALSE);
-				XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_YES, FALSE);
+				XmToggleButtonSetState(toggleButton_view_waterfall, false, FALSE);
+				XmToggleButtonSetState(toggleButton_view_alongtrack, false, FALSE);
+				XmToggleButtonSetState(toggleButton_view_acrosstrack, true, FALSE);
 
 				/* replot the data */
 				status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval, mplot_size, mshow_beammode,
@@ -1933,8 +1933,8 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 		/* Check for mouse pressed and not pressed and released. */
 		if (event->xany.type == ButtonPress) {
 			/* If left mouse button is pushed then toggle, pick, erase, restore, grab, or info. */
-			if ((event->xbutton.button == 1 && mode_reverse_mouse == MB_NO) ||
-			    (event->xbutton.button == 3 && mode_reverse_mouse == MB_YES)) {
+			if ((event->xbutton.button == 1 && mode_reverse_mouse == false) ||
+			    (event->xbutton.button == 3 && mode_reverse_mouse == true)) {
 				x_loc = event->xbutton.x;
 				y_loc = event->xbutton.y;
 				grab_mode = GRAB_START;
@@ -1984,7 +1984,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 						                            mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 					}
 					else if (key_a_down) {
-						if (mode_reverse_keys == MB_NO)
+						if (mode_reverse_keys == false)
 							status = mbedit_action_left_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
 							                                 mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
 							                                 &icurrent, &mnplot);
@@ -1994,7 +1994,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 							                                  &icurrent, &mnplot);
 					}
 					else if (key_d_down) {
-						if (mode_reverse_keys == MB_NO)
+						if (mode_reverse_keys == false)
 							status = mbedit_action_right_ping(mplot_width, mexager, mx_interval, my_interval, mplot_size,
 							                                  mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles, mshow_time, &nbuffer, &ngood,
 							                                  &icurrent, &mnplot);
@@ -2012,13 +2012,13 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 
 					/* If the button is still pressed then read the location */
 					/* of the pointer and run the action mouse function again */
-					if (mode_reverse_mouse == MB_NO) {
+					if (mode_reverse_mouse == false) {
 						if ((mask_return & 256) == 256 && mode_pick != MODE_TOGGLE && mode_pick != MODE_PICK)
 							doit = 1;
 						else
 							doit = 0;
 					}
-					else if (mode_reverse_mouse == MB_YES) {
+					else if (mode_reverse_mouse == true) {
 						if ((mask_return & 1024) == 1024 && mode_pick != MODE_TOGGLE && mode_pick != MODE_PICK)
 							doit = 1;
 						else
@@ -2071,8 +2071,8 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			} /* end of middle button events */
 
 			/* If right mouse button is pushed then scroll forward. */
-			if ((event->xbutton.button == 3 && mode_reverse_mouse == MB_NO) ||
-			    (event->xbutton.button == 1 && mode_reverse_mouse == MB_YES)) {
+			if ((event->xbutton.button == 3 && mode_reverse_mouse == false) ||
+			    (event->xbutton.button == 1 && mode_reverse_mouse == true)) {
 				time(&start_time_t);
 				doit = 1;
 				while (doit) {
@@ -2096,8 +2096,8 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 					/* If a scroll button is still pressed then scroll again */
 					status = XQueryPointer(theDisplay, can_xid, &root_return, &child_return, &root_x_return, &root_y_return,
 					                       &win_x, &win_y, &mask_return);
-					if ((mode_reverse_mouse == MB_YES && (mask_return & 256)) ||
-					    (mode_reverse_mouse == MB_NO && (mask_return & 1024)))
+					if ((mode_reverse_mouse == true && (mask_return & 256)) ||
+					    (mode_reverse_mouse == false && (mask_return & 1024)))
 						doit++;
 					else
 						doit = 0;
@@ -2204,12 +2204,12 @@ void do_view_mode(Widget w, XtPointer client_data, XtPointer call_data) {
 	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* turn off all togglebuttons */
-	XmToggleButtonSetState(toggleButton_view_waterfall, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_view_alongtrack, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_view_waterfall, false, FALSE);
+	XmToggleButtonSetState(toggleButton_view_alongtrack, false, FALSE);
+	XmToggleButtonSetState(toggleButton_view_acrosstrack, false, FALSE);
 
 	/* turn on the one that was clicked */
-	XmToggleButtonSetState(w, MB_YES, FALSE);
+	XmToggleButtonSetState(w, true, FALSE);
 
 	/* now set the data type id */
 	if (w == toggleButton_view_waterfall)
@@ -2237,22 +2237,22 @@ void do_show_time(Widget w, XtPointer client_data, XtPointer call_data) {
 	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* turn off all togglebuttons */
-	XmToggleButtonSetState(toggleButton_show_wideplot, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_time, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_interval, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_lon, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_latitude, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_heading, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_speed, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_depth, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_altitude, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_sonardepth, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_roll, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_pitch, MB_NO, FALSE);
-	XmToggleButtonSetState(toggleButton_show_heave, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_wideplot, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_time, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_interval, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_lon, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_latitude, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_heading, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_speed, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_depth, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_altitude, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_sonardepth, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_roll, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_pitch, false, FALSE);
+	XmToggleButtonSetState(toggleButton_show_heave, false, FALSE);
 
 	/* turn on the one that was clicked */
-	XmToggleButtonSetState(w, MB_YES, FALSE);
+	XmToggleButtonSetState(w, true, FALSE);
 
 	/* now set the data type id */
 	if (w == toggleButton_show_wideplot)
@@ -2660,11 +2660,11 @@ int do_mbedit_settimer() {
 	int id;
 
 	/* set timer function if none set for this instance */
-	if (timer_function_set == MB_NO) {
+	if (timer_function_set == false) {
 		id = XtAppAddTimeOut(app_context, (unsigned long)timer_timeout_time, (XtTimerCallbackProc)do_mbedit_workfunction,
 		                     (XtPointer)-1);
 		if (id > 0)
-			timer_function_set = MB_YES;
+			timer_function_set = true;
 		else
 			status = MB_FAILURE;
 	}
@@ -2680,7 +2680,7 @@ int do_mbedit_settimer() {
 int do_mbedit_workfunction(XtPointer client_data) {
 	int status = MB_SUCCESS;
 
-	timer_function_set = MB_NO;
+	timer_function_set = false;
 
 	/* reset filelist */
 	if (numfiles > 0 && expose_plot_ok == True) {

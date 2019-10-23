@@ -3,6 +3,9 @@
 /* Machine is littleendian, (Byteswapping on) */
 #undef BYTESWAPPED
 
+/* Build with GSF */
+#undef ENABLE_GSF
+
 /* Machine is bigendian, (Byteswapping off) */
 #undef ENDIAN_BIG
 
@@ -69,8 +72,14 @@
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
 #undef MBSYSTEM_OTPS_LOCATION
 
+/* Build libmbtnav */
+#undef MBTNAV_ENABLED
+
 /* Build libmbtrn and mbtrnpreprocess */
 #undef MBTRN_ENABLED
+
+/* Build graphical tools */
+#undef MBUTILS_ENABLED
 
 /* Name of package */
 #undef PACKAGE

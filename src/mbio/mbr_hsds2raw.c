@@ -68,9 +68,9 @@ int mbr_info_hsds2raw(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = -3;
 	*filetype = MB_FILETYPE_XDR;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -181,7 +181,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int xdr_status;
 	int read_status;
 	int nskip;
-	int done;
 	int length = 0;
 	int telegram_id = 0;
 	int telegram_cnt = 0;
@@ -288,21 +287,21 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_id);
 
 	/* telegram id ok - just read send and receive strings */
-	if (xdr_status == MB_YES && telegram_id == MBSYS_ATLAS_TELEGRAM_START) {
-		if (xdr_status == MB_YES)
+	if (xdr_status == true && telegram_id == MBSYS_ATLAS_TELEGRAM_START) {
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)telegram_send, 16);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)telegram_recv, 16);
 	}
 
 	/* expected telegram id wrong - try to resync on recv string */
-	else if (xdr_status == MB_YES) {
+	else if (xdr_status == true) {
 		memset(telegram_recv, 0, 16);
 		read_status = 1;
 		nskip = 0;
@@ -312,53 +311,52 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
 				nskip++;
 		}
-		if (read_status == MB_YES) {
+		if (read_status == true) {
 			fprintf(stderr, "Resync on START telegram: %d missing bytes\n", (44 - nskip));
 		}
 		else {
-			xdr_status = MB_NO;
+			xdr_status = false;
 		}
 	}
 
 	/* hopefully we are synced - read the telegram */
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &telegram_utc_time_d);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &telegram_loc_time_d);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_block_no);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_block_cnt);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_u_int((XDR *)mb_io_ptr->xdrs, &store->start_ping_no);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->start_transmit_time_d);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)store->start_opmode, 32);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->start_heave);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->start_roll);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->start_pitch);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->start_heading);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->start_ckeel);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->start_cmean);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->start_depth_min);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->start_depth_max);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_data_status);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_sensor_status);
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 	if (verbose >= 5)
 #endif
@@ -390,28 +388,28 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get travel times telegrams */
-	done = MB_NO;
 	store->tt_beam_cnt = 0;
-	while (xdr_status == MB_YES && done == MB_NO) {
-		if (xdr_status == MB_YES)
+	bool done = false;
+	while (xdr_status == true && !done) {
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_id);
 
 		/* telegram id ok - just read send and receive strings */
-		if (xdr_status == MB_YES && telegram_id == MBSYS_ATLAS_TELEGRAM_TRAVELTIMES) {
-			if (xdr_status == MB_YES)
+		if (xdr_status == true && telegram_id == MBSYS_ATLAS_TELEGRAM_TRAVELTIMES) {
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_cnt);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)telegram_send, 16);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)telegram_recv, 16);
 		}
 
 		/* expected telegram id wrong - try to resync on recv string */
-		else if (xdr_status == MB_YES) {
+		else if (xdr_status == true) {
 			memset(telegram_recv, 0, 16);
 			read_status = 1;
 			nskip = 0;
@@ -421,76 +419,75 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
 					nskip++;
 			}
-			if (read_status == MB_YES) {
+			if (read_status == true) {
 				fprintf(stderr, "Resync on TRAVELTIMES telegram: %d missing bytes\n", (44 - nskip));
 			}
 			else {
-				xdr_status = MB_NO;
+				xdr_status = false;
 			}
 		}
 
 		/* hopefully we are synced - read the telegram */
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &telegram_utc_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &telegram_loc_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_block_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_block_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_max_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_act_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_data_status);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_sensor_status);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_int((XDR *)mb_io_ptr->xdrs, &store->tt_ping_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->tt_transmit_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->tt_beam_table_index);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &tt_max_lead_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &tt_act_lead_cnt);
 		store->tt_beam_cnt += tt_act_lead_cnt;
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->tt_long1);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->tt_long2);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->tt_long3);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->tt_xdraught);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->tt_double1);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->tt_double2);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->tt_sensdraught);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->tt_draught);
 		for (int i = 0; i < MBSYS_ATLAS_MAXBEAMTELEGRAM; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &(store->tt_lruntime[i]));
 		}
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)store->tt_lamplitude, MBSYS_ATLAS_MAXBEAMTELEGRAM);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)store->tt_lstatus, MBSYS_ATLAS_MAXBEAMTELEGRAM);
 
 		/* set done if done */
-		if (xdr_status != MB_YES || telegram_act_no == telegram_max_no)
-			done = MB_YES;
+		if (xdr_status != true || telegram_act_no == telegram_max_no)
+			done = true;
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 		if (verbose >= 5)
 #endif
@@ -512,7 +509,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	}
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 	if (verbose >= 5)
 #endif
@@ -538,27 +534,27 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get sidescan telegrams */
-	done = MB_NO;
-	while (xdr_status == MB_YES && done == MB_NO) {
-		if (xdr_status == MB_YES)
+	done = false;
+	while (xdr_status == true && !done) {
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_id);
 
 		/* telegram id ok - just read send and receive strings */
-		if (xdr_status == MB_YES && telegram_id == MBSYS_ATLAS_TELEGRAM_SIDESCAN) {
-			if (xdr_status == MB_YES)
+		if (xdr_status == true && telegram_id == MBSYS_ATLAS_TELEGRAM_SIDESCAN) {
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_cnt);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)telegram_send, 16);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)telegram_recv, 16);
 		}
 
 		/* expected telegram id wrong - try to resync on recv string */
-		else if (xdr_status == MB_YES) {
+		else if (xdr_status == true) {
 			memset(telegram_recv, 0, 16);
 			read_status = 1;
 			nskip = 0;
@@ -568,48 +564,48 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
 					nskip++;
 			}
-			if (read_status == MB_YES) {
+			if (read_status == true) {
 				fprintf(stderr, "Resync on SIDESCAN telegram: %d missing bytes\n", (44 - nskip));
 			}
 			else {
-				xdr_status = MB_NO;
+				xdr_status = false;
 			}
 		}
 
 		/* hopefully we are synced - read the telegram */
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &telegram_utc_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &telegram_loc_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_block_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_block_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_max_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_act_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_data_status);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_sensor_status);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_int((XDR *)mb_io_ptr->xdrs, &store->ss_ping_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->ss_transmit_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->ss_timedelay);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->ss_timespacing);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->ss_max_side_bb_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->ss_max_side_sb_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &ss_act_side_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-		if (xdr_status == MB_YES) {
+		if (xdr_status == true) {
 			int i = 0;
 			if (telegram_act_no * MBSYS_ATLAS_MAXPIXELTELEGRAM <= MBSYS_ATLAS_MAXPIXELS)
 				i = (telegram_act_no - 1) * MBSYS_ATLAS_MAXPIXELTELEGRAM;
@@ -617,10 +613,9 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 
 		/* set done if done */
-		if (xdr_status != MB_YES || telegram_act_no == telegram_max_no)
-			done = MB_YES;
+		if (xdr_status != true || telegram_act_no == telegram_max_no)
+			done = true;
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 		if (verbose >= 5)
 #endif
@@ -644,7 +639,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	}
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 	if (verbose >= 5)
 #endif
@@ -666,21 +660,21 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_id);
 
 	/* telegram id ok - just read send and receive strings */
-	if (xdr_status == MB_YES && telegram_id == MBSYS_ATLAS_TELEGRAM_TRACKINGWINDOWS) {
-		if (xdr_status == MB_YES)
+	if (xdr_status == true && telegram_id == MBSYS_ATLAS_TELEGRAM_TRACKINGWINDOWS) {
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)telegram_send, 16);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)telegram_recv, 16);
 	}
 
 	/* expected telegram id wrong - try to resync on recv string */
-	else if (xdr_status == MB_YES) {
+	else if (xdr_status == true) {
 		memset(telegram_recv, 0, 16);
 		read_status = 1;
 		nskip = 0;
@@ -690,45 +684,44 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
 				nskip++;
 		}
-		if (read_status == MB_YES) {
+		if (read_status == true) {
 			fprintf(stderr, "Resync on TRACKINGWINDOWS telegram: %d missing bytes\n", (44 - nskip));
 		}
 		else {
-			xdr_status = MB_NO;
+			xdr_status = false;
 		}
 	}
 
 	/* hopefully we are synced - read the telegram */
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &telegram_utc_time_d);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &telegram_loc_time_d);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_block_no);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_block_cnt);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_data_status);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_sensor_status);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->tr_transmit_time_d);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_u_int((XDR *)mb_io_ptr->xdrs, &store->tr_ping_no);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->tr_window_mode);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->tr_no_of_win_groups);
 	for (int i = 0; i < 100; i++) {
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->tr_repeat_count[i]);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->tr_start[i]);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->tr_stop[i]);
 	}
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 	if (verbose >= 5)
 #endif
@@ -762,21 +755,21 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_id);
 
 	/* telegram id ok - just read send and receive strings */
-	if (xdr_status == MB_YES && telegram_id == MBSYS_ATLAS_TELEGRAM_BACKSCATTER) {
-		if (xdr_status == MB_YES)
+	if (xdr_status == true && telegram_id == MBSYS_ATLAS_TELEGRAM_BACKSCATTER) {
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)telegram_send, 16);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)telegram_recv, 16);
 	}
 
 	/* expected telegram id wrong - try to resync on recv string */
-	else if (xdr_status == MB_YES) {
+	else if (xdr_status == true) {
 		memset(telegram_recv, 0, 16);
 		read_status = 1;
 		nskip = 0;
@@ -786,73 +779,72 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
 				nskip++;
 		}
-		if (read_status == MB_YES) {
+		if (read_status == true) {
 			fprintf(stderr, "Resync on BACKSCATTER telegram: %d missing bytes\n", (44 - nskip));
 		}
 		else {
-			xdr_status = MB_NO;
+			xdr_status = false;
 		}
 	}
 
 	/* hopefully we are synced - read the telegram */
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &telegram_utc_time_d);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &telegram_loc_time_d);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_block_no);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_block_cnt);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_data_status);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_sensor_status);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->bs_transmit_time_d);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->bs_ping_no);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_u_short((XDR *)mb_io_ptr->xdrs, &store->bs_nrActualGainSets);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->bs_rxGup);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->bs_rxGain);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->bs_ar);
 	for (int i = 0; i < MBSYS_ATLAS_HSDS2_RX_PAR; i++) {
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->bs_TvgRx_time[i]);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->bs_TvgRx_gain[i]);
 	}
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_u_short((XDR *)mb_io_ptr->xdrs, &store->bs_nrTxSets);
 	for (int i = 0; i < MBSYS_ATLAS_HSDS2_TX_PAR; i++) {
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_int((XDR *)mb_io_ptr->xdrs, &store->bs_txBeamIndex[i]);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->bs_txLevel[i]);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->bs_txBeamAngle[i]);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->bs_pulseLength[i]);
 	}
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_u_short((XDR *)mb_io_ptr->xdrs, &store->bs_nrBsSets);
 	for (int i = 0; i < MBSYS_ATLAS_HSDS2_PFB_NUM; i++) {
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->bs_m_tau[i]);
 	}
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)store->bs_eff_ampli, MBSYS_ATLAS_HSDS2_PFB_NUM);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
-	if (xdr_status == MB_YES)
+	if (xdr_status == true)
 		xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)store->bs_nis, MBSYS_ATLAS_HSDS2_PFB_NUM);
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 	if (verbose >= 5)
 #endif
@@ -898,7 +890,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* set error if required */
-	if (xdr_status == MB_NO) {
+	if (xdr_status == false) {
 		*error = MB_ERROR_EOF;
 		status = MB_FAILURE;
 	}
@@ -970,27 +962,27 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	if ((XDR *)mb_io_ptr->xdrs2 != NULL &&
 	    ((mb_io_ptr->nfix > 0 && mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] < store->tt_transmit_time_d) ||
 	     mb_io_ptr->nfix <= 0)) {
-		done = MB_NO;
-		while (done == MB_NO) {
+		done = false;
+		while (!done) {
 			/* get system telegram */
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &telegram_id);
 
 			/* telegram id ok - just read send and receive strings */
-			if (xdr_status == MB_YES && telegram_id == MBSYS_ATLAS_TELEGRAM_SYSTEM) {
-				if (xdr_status == MB_YES)
+			if (xdr_status == true && telegram_id == MBSYS_ATLAS_TELEGRAM_SYSTEM) {
+				if (xdr_status == true)
 					xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &telegram_cnt);
-				if (xdr_status == MB_YES)
+				if (xdr_status == true)
 					xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-				if (xdr_status == MB_YES)
+				if (xdr_status == true)
 					xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, telegram_send, 16);
-				if (xdr_status == MB_YES)
+				if (xdr_status == true)
 					xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-				if (xdr_status == MB_YES)
+				if (xdr_status == true)
 					xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, telegram_recv, 16);
 			}
 
 			/* expected telegram id wrong - try to resync on recv string */
-			else if (xdr_status == MB_YES) {
+			else if (xdr_status == true) {
 				memset(telegram_recv, 0, 16);
 				read_status = 1;
 				nskip = 0;
@@ -1000,51 +992,50 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp2)) == 1)
 						nskip++;
 				}
-				if (read_status == MB_YES) {
+				if (read_status == true) {
 					fprintf(stderr, "Resync on SYSTEM telegram: %d missing bytes\n", (44 - nskip));
 				}
 				else {
-					xdr_status = MB_NO;
+					xdr_status = false;
 				}
 			}
 
 			/* hopefully we are synced - read the telegram */
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &telegram_utc_time_d);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &telegram_loc_time_d);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &telegram_block_no);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &telegram_block_cnt);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, carrier_name, 8);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, task_name, 16);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, operator_name, 32);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, gauge_name, 32);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, comment, 32);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, profile_name, 32);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &profile_version);
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 			if (verbose >= 5)
 #endif
@@ -1068,134 +1059,133 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				fprintf(stderr, "dbg5       profile_version:         %d\n", profile_version);
 			}
 
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &telegram_block_no);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &telegram_block_cnt);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_pos_lat);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_pos_lon);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, sys_pos_sensor, 8);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_pos_lat_tpe);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_pos_lon_tpe);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_pos_time);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_pos_data_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_pos_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_height);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, sys_height_sensor, 8);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_height_time);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_height_data_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_height_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_speed_wlong);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_speed_wcross);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, sys_tw_sensor, 8);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_tw_time);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_tw_data_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_tw_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_cog);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, sys_cog_sensor, 8);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_cog_time);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_cog_data_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_cog_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_sog);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, sys_sog_sensor, 8);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_sog_time);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_sog_data_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_sog_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_set);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_drift);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, sys_set_drift_sensor, 8);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_set_drift_time);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_set_drift_data_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_set_drift_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_heading);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, sys_heading_sensor, 8);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_heading_time);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_heading_data_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_heading_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_depth);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, sys_depth_sensor, 8);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_depth_water_level);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_depth_time);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_depth_data_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_depth_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_wspeed_abs);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_wdir_abs);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &length);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs2, sys_wind_sensor, 8);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs2, &sys_wind_time);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_wind_data_status);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_wind_status);
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 			if (verbose >= 5)
 #endif
@@ -1258,13 +1248,13 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			}
 
 			/* add to nav fix list */
-			if (xdr_status == MB_YES) {
+			if (xdr_status == true) {
 				mb_navint_add(verbose, mbio_ptr, sys_pos_time, (RTD * sys_pos_lon), (RTD * sys_pos_lat), error);
 				if (mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] >= store->tt_transmit_time_d)
-					done = MB_YES;
+					done = true;
 			}
 			else
-				done = MB_YES;
+				done = true;
 		}
 	}
 
@@ -1339,10 +1329,6 @@ int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
 	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 #ifndef MBR_HSDS2RAW_DEBUG
@@ -1374,12 +1360,6 @@ int mbr_wt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 

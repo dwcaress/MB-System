@@ -20,12 +20,11 @@
  *
  * Author:	D. W. Caress
  * Date:	December 28, 1994
- *
- *
- *
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,32 +38,74 @@
 #define MBHISTOGRAM_AMP 1
 #define MBHISTOGRAM_SS 2
 
-double qsnorm(double p);
+static const char program_name[] = "MBHISTOGRAM";
+static const char help_message[] =
+    "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n\tof the bathymetry,  amplitude, "
+    " or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up "
+    "the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
+static const char usage_message[] =
+    "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip "
+    "-Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
 
+/*--------------------------------------------------------------------*/
+
+/* double qsnorm(p)
+ * double	p;
+ *
+ * Function to invert the cumulative normal probability
+ * function.  If z is a standardized normal random deviate,
+ * and Q(z) = p is the cumulative Gaussian probability
+ * function, then z = qsnorm(p).
+ *
+ * Note that 0.0 < p < 1.0.  Data values outside this range
+ * will return +/- a large number (1.0e6).
+ * To compute p from a sample of data to test for Normalcy,
+ * sort the N samples into non-decreasing order, label them
+ * i=[1, N], and then compute p = i/(N+1).
+ *
+ * Author:	Walter H. F. Smith
+ * Date:	19 February, 1991-1995.
+ *
+ * Based on a Fortran subroutine by R. L. Parker.  I had been
+ * using IMSL library routine DNORIN(DX) to do what qsnorm(p)
+ * does, when I was at the Lamont-Doherty Geological Observatory
+ * which had a site license for IMSL.  I now need to invert the
+ * gaussian CDF without calling IMSL; hence, this routine.
+ *
+ */
+
+double qsnorm(double p) {
+	double t, z;
+
+	if (p <= 0.0) {
+		return (-1.0e6);
+	}
+	else if (p >= 1.0) {
+		return (1.0e6);
+	}
+	else if (p == 0.5) {
+		return (0.0);
+	}
+	else if (p > 0.5) {
+		t = sqrt(-2.0 * log(1.0 - p));
+		z = t - (2.515517 + t * (0.802853 + t * 0.010328)) / (1.0 + t * (1.432788 + t * (0.189269 + t * 0.001308)));
+		return (z);
+	}
+	else {
+		t = sqrt(-2.0 * log(p));
+		z = t - (2.515517 + t * (0.802853 + t * 0.010328)) / (1.0 + t * (1.432788 + t * (0.189269 + t * 0.001308)));
+		return (-z);
+	}
+}
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBHISTOGRAM";
-	char help_message[] = "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n\tof the bathymetry,  amplitude, "
-	                      " or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up "
-	                      "the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
-	char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip "
-	                       "-Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
-	extern char *optarg;
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
 
 	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
 	char read_file[MB_PATH_MAXLINE];
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -109,7 +150,7 @@ int main(int argc, char **argv) {
 
 	/* histogram variables */
 	int mode = MBHISTOGRAM_SS;
-	int gaussian = MB_NO;
+	bool gaussian = false;
 	int nbins = 0;
 	int nintervals = 0;
 	double value_min = 0.0;
@@ -119,7 +160,6 @@ int main(int argc, char **argv) {
 	double value_bin_max;
 	double data_min;
 	double data_max;
-	int data_first = MB_YES;
 	double target_min;
 	double target_max;
 	double *histogram = NULL;
@@ -136,178 +176,164 @@ int main(int argc, char **argv) {
 	    stderr if verbose > 1) */
 	FILE *output;
 
-	int read_data;
 	int nrec, nvalue;
 	int nrectot = 0;
 	int nvaluetot = 0;
-	int i, j;
 
 	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to stdin */
 	strcpy(read_file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:GgHhI:i:L:l:M:m:N:n:P:p:R:r:S:s:T:t:Vv")) != -1)
-		switch (c) {
-		case 'A':
-		case 'a':
-			sscanf(optarg, "%d", &mode);
-			flag++;
-			break;
-		case 'B':
-		case 'b':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
-			btime_i[6] = 0;
-			flag++;
-			break;
-		case 'D':
-		case 'd':
-			sscanf(optarg, "%lf/%lf", &value_min, &value_max);
-			flag++;
-			break;
-		case 'E':
-		case 'e':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
-			etime_i[6] = 0;
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'G':
-		case 'g':
-			gaussian = MB_YES;
-			break;
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d", &lonflip);
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			sscanf(optarg, "%d", &nintervals);
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			sscanf(optarg, "%d", &nbins);
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf(optarg, "%d", &pings);
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, bounds);
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%lf", &speedmin);
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf", &timegap);
-			flag++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case '?':
-			errflg++;
+	{
+		bool errflg = false;
+		bool help = false;
+		int c;
+		while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:GgHhI:i:L:l:M:m:N:n:P:p:R:r:S:s:T:t:Vv")) != -1)
+		{
+			switch (c) {
+			case 'A':
+			case 'a':
+				sscanf(optarg, "%d", &mode);
+				break;
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
+				btime_i[6] = 0;
+				break;
+			case 'D':
+			case 'd':
+				sscanf(optarg, "%lf/%lf", &value_min, &value_max);
+				break;
+			case 'E':
+			case 'e':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
+				etime_i[6] = 0;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+				gaussian = true;
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				break;
+			case 'M':
+			case 'm':
+				sscanf(optarg, "%d", &nintervals);
+				break;
+			case 'N':
+			case 'n':
+				sscanf(optarg, "%d", &nbins);
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%d", &pings);
+				break;
+			case 'R':
+			case 'r':
+				mb_get_bounds(optarg, bounds);
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%lf", &speedmin);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf", &timegap);
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case '?':
+				errflg = true;
+			}
 		}
 
-	/* set output stream */
-	if (verbose <= 1)
-		output = stdout;
-	else
-		output = stderr;
+		if (verbose <= 1)
+			output = stdout;
+		else
+			output = stderr;
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(output, "usage: %s\n", usage_message);
-		fprintf(output, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(output, "usage: %s\n", usage_message);
+			fprintf(output, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	/* print starting message */
-	if (verbose == 1 || help) {
-		fprintf(output, "\nProgram %s\n", program_name);
-		fprintf(output, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(output, "\nProgram %s\n", program_name);
+			fprintf(output, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	/* get format if required */
-	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		/* get format if required */
+		if (format == 0)
+			mb_get_format(verbose, read_file, NULL, &format, &error);
 
-	/* figure out histogram dimensions */
-	if (nintervals > 0 && nbins <= 0)
-		nbins = 50 * nintervals;
-	if (nbins <= 0)
-		nbins = 16;
+		/* figure out histogram dimensions */
+		if (nintervals > 0 && nbins <= 0)
+			nbins = 50 * nintervals;
+		if (nbins <= 0)
+			nbins = 16;
 
-	/* print starting debug statements */
-	if (verbose >= 2) {
-		fprintf(output, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(output, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(output, "dbg2  Control Parameters:\n");
-		fprintf(output, "dbg2       verbose:    %d\n", verbose);
-		fprintf(output, "dbg2       help:       %d\n", help);
-		fprintf(output, "dbg2       format:     %d\n", format);
-		fprintf(output, "dbg2       pings:      %d\n", pings);
-		fprintf(output, "dbg2       lonflip:    %d\n", lonflip);
-		fprintf(output, "dbg2       bounds[0]:  %f\n", bounds[0]);
-		fprintf(output, "dbg2       bounds[1]:  %f\n", bounds[1]);
-		fprintf(output, "dbg2       bounds[2]:  %f\n", bounds[2]);
-		fprintf(output, "dbg2       bounds[3]:  %f\n", bounds[3]);
-		fprintf(output, "dbg2       btime_i[0]: %d\n", btime_i[0]);
-		fprintf(output, "dbg2       btime_i[1]: %d\n", btime_i[1]);
-		fprintf(output, "dbg2       btime_i[2]: %d\n", btime_i[2]);
-		fprintf(output, "dbg2       btime_i[3]: %d\n", btime_i[3]);
-		fprintf(output, "dbg2       btime_i[4]: %d\n", btime_i[4]);
-		fprintf(output, "dbg2       btime_i[5]: %d\n", btime_i[5]);
-		fprintf(output, "dbg2       btime_i[6]: %d\n", btime_i[6]);
-		fprintf(output, "dbg2       etime_i[0]: %d\n", etime_i[0]);
-		fprintf(output, "dbg2       etime_i[1]: %d\n", etime_i[1]);
-		fprintf(output, "dbg2       etime_i[2]: %d\n", etime_i[2]);
-		fprintf(output, "dbg2       etime_i[3]: %d\n", etime_i[3]);
-		fprintf(output, "dbg2       etime_i[4]: %d\n", etime_i[4]);
-		fprintf(output, "dbg2       etime_i[5]: %d\n", etime_i[5]);
-		fprintf(output, "dbg2       etime_i[6]: %d\n", etime_i[6]);
-		fprintf(output, "dbg2       speedmin:   %f\n", speedmin);
-		fprintf(output, "dbg2       timegap:    %f\n", timegap);
-		fprintf(output, "dbg2       file:       %s\n", read_file);
-		fprintf(output, "dbg2       mode:       %d\n", mode);
-		fprintf(output, "dbg2       gaussian:   %d\n", gaussian);
-		fprintf(output, "dbg2       nbins:      %d\n", nbins);
-		fprintf(output, "dbg2       nintervals: %d\n", nintervals);
-		fprintf(output, "dbg2       value_min:  %f\n", value_min);
-		fprintf(output, "dbg2       value_max:  %f\n", value_max);
-	}
+		if (verbose >= 2) {
+			fprintf(output, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(output, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(output, "dbg2  Control Parameters:\n");
+			fprintf(output, "dbg2       verbose:    %d\n", verbose);
+			fprintf(output, "dbg2       help:       %d\n", help);
+			fprintf(output, "dbg2       format:     %d\n", format);
+			fprintf(output, "dbg2       pings:      %d\n", pings);
+			fprintf(output, "dbg2       lonflip:    %d\n", lonflip);
+			fprintf(output, "dbg2       bounds[0]:  %f\n", bounds[0]);
+			fprintf(output, "dbg2       bounds[1]:  %f\n", bounds[1]);
+			fprintf(output, "dbg2       bounds[2]:  %f\n", bounds[2]);
+			fprintf(output, "dbg2       bounds[3]:  %f\n", bounds[3]);
+			fprintf(output, "dbg2       btime_i[0]: %d\n", btime_i[0]);
+			fprintf(output, "dbg2       btime_i[1]: %d\n", btime_i[1]);
+			fprintf(output, "dbg2       btime_i[2]: %d\n", btime_i[2]);
+			fprintf(output, "dbg2       btime_i[3]: %d\n", btime_i[3]);
+			fprintf(output, "dbg2       btime_i[4]: %d\n", btime_i[4]);
+			fprintf(output, "dbg2       btime_i[5]: %d\n", btime_i[5]);
+			fprintf(output, "dbg2       btime_i[6]: %d\n", btime_i[6]);
+			fprintf(output, "dbg2       etime_i[0]: %d\n", etime_i[0]);
+			fprintf(output, "dbg2       etime_i[1]: %d\n", etime_i[1]);
+			fprintf(output, "dbg2       etime_i[2]: %d\n", etime_i[2]);
+			fprintf(output, "dbg2       etime_i[3]: %d\n", etime_i[3]);
+			fprintf(output, "dbg2       etime_i[4]: %d\n", etime_i[4]);
+			fprintf(output, "dbg2       etime_i[5]: %d\n", etime_i[5]);
+			fprintf(output, "dbg2       etime_i[6]: %d\n", etime_i[6]);
+			fprintf(output, "dbg2       speedmin:   %f\n", speedmin);
+			fprintf(output, "dbg2       timegap:    %f\n", timegap);
+			fprintf(output, "dbg2       file:       %s\n", read_file);
+			fprintf(output, "dbg2       mode:       %d\n", mode);
+			fprintf(output, "dbg2       gaussian:   %d\n", gaussian);
+			fprintf(output, "dbg2       nbins:      %d\n", nbins);
+			fprintf(output, "dbg2       nintervals: %d\n", nintervals);
+			fprintf(output, "dbg2       value_min:  %f\n", value_min);
+			fprintf(output, "dbg2       value_max:  %f\n", value_max);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(output, "\n%s\n", help_message);
-		fprintf(output, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(output, "\n%s\n", help_message);
+			fprintf(output, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* allocate memory for histogram arrays */
@@ -343,34 +369,35 @@ int main(int argc, char **argv) {
 	value_bin_max = value_max + 0.5 * dvalue_bin;
 
 	/* initialize histogram */
-	for (i = 0; i < nbins; i++)
+	for (int i = 0; i < nbins; i++)
 		histogram[i] = 0;
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(file, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
+	bool data_first = true;
+
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data) {
 
 		/* obtain format array location - format id will
 		    be aliased to current id if old format id given */
@@ -438,16 +465,16 @@ int main(int argc, char **argv) {
 
 				/* do the bathymetry */
 				if (mode == MBHISTOGRAM_BATH)
-					for (i = 0; i < beams_bath; i++) {
+					for (int i = 0; i < beams_bath; i++) {
 						if (mb_beam_ok(beamflag[i])) {
 							nvalue++;
-							j = (bath[i] - value_bin_min) / dvalue_bin;
+							const int j = (bath[i] - value_bin_min) / dvalue_bin;
 							if (j >= 0 && j < nbins)
 								histogram[j]++;
-							if (data_first == MB_YES) {
+							if (data_first) {
 								data_min = bath[i];
 								data_max = bath[i];
-								data_first = MB_NO;
+								data_first = false;
 							}
 							else {
 								data_min = MIN(bath[i], data_min);
@@ -458,16 +485,16 @@ int main(int argc, char **argv) {
 
 				/* do the amplitude */
 				if (mode == MBHISTOGRAM_AMP)
-					for (i = 0; i < beams_amp; i++) {
+					for (int i = 0; i < beams_amp; i++) {
 						if (mb_beam_ok(beamflag[i])) {
 							nvalue++;
-							j = (amp[i] - value_bin_min) / dvalue_bin;
+							const int j = (amp[i] - value_bin_min) / dvalue_bin;
 							if (j >= 0 && j < nbins)
 								histogram[j]++;
-							if (data_first == MB_YES) {
+							if (data_first) {
 								data_min = amp[i];
 								data_max = amp[i];
-								data_first = MB_NO;
+								data_first = false;
 							}
 							else {
 								data_min = MIN(amp[i], data_min);
@@ -478,16 +505,16 @@ int main(int argc, char **argv) {
 
 				/* do the sidescan */
 				if (mode == MBHISTOGRAM_SS)
-					for (i = 0; i < pixels_ss; i++) {
+					for (int i = 0; i < pixels_ss; i++) {
 						if (ss[i] > MB_SIDESCAN_NULL) {
 							nvalue++;
-							j = (ss[i] - value_bin_min) / dvalue_bin;
+							const int j = (ss[i] - value_bin_min) / dvalue_bin;
 							if (j >= 0 && j < nbins)
 								histogram[j]++;
-							if (data_first == MB_YES) {
+							if (data_first) {
 								data_min = ss[i];
 								data_max = ss[i];
-								data_first = MB_NO;
+								data_first = false;
 							}
 							else {
 								data_min = MIN(ss[i], data_min);
@@ -509,19 +536,19 @@ int main(int argc, char **argv) {
 		}
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* output information */
@@ -531,15 +558,15 @@ int main(int argc, char **argv) {
 	}
 
 	/* recast histogram as gaussian */
-	if (gaussian == MB_YES) {
+	if (gaussian) {
 		/* get total number of good values */
 		total = 0.0;
-		for (i = 0; i < nbins; i++)
+		for (int i = 0; i < nbins; i++)
 			total = total + histogram[i];
 
 		/* recast histogram */
 		sum = 0.0;
-		for (i = 0; i < nbins; i++) {
+		for (int i = 0; i < nbins; i++) {
 			p = (histogram[i] / 2 + sum) / (total + 1);
 			sum = sum + histogram[i];
 			histogram[i] = qsnorm(p);
@@ -547,7 +574,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* calculate gaussian intervals if required */
-	if (nintervals > 0 && gaussian == MB_YES) {
+	if (nintervals > 0 && gaussian) {
 		/* get interval spacing */
 		target_min = -2.0;
 		target_max = 2.0;
@@ -557,7 +584,7 @@ int main(int argc, char **argv) {
 		intervals[0] = MAX(data_min, value_min);
 		intervals[nintervals - 1] = MIN(data_max, value_max);
 		ibin = 0;
-		for (j = 1; j < nintervals - 1; j++) {
+		for (int j = 1; j < nintervals - 1; j++) {
 			target = target_min + j * dinterval;
 			while (histogram[ibin] < target && ibin < nbins - 1)
 				ibin++;
@@ -573,7 +600,7 @@ int main(int argc, char **argv) {
 	else if (nintervals > 0) {
 		/* get total number of good values */
 		total = 0.0;
-		for (i = 0; i < nbins; i++)
+		for (int i = 0; i < nbins; i++)
 			total = total + histogram[i];
 
 		/* get interval spacing */
@@ -583,7 +610,7 @@ int main(int argc, char **argv) {
 		intervals[0] = value_bin_min;
 		total = 0.0;
 		ibin = -1;
-		for (j = 1; j < nintervals; j++) {
+		for (int j = 1; j < nintervals; j++) {
 			target = j * dinterval;
 			while (total < target && ibin < nbins - 1) {
 				ibin++;
@@ -597,18 +624,18 @@ int main(int argc, char **argv) {
 	}
 
 	/* print out the results */
-	if (nintervals <= 0 && gaussian == MB_YES) {
-		for (i = 0; i < nbins; i++) {
+	if (nintervals <= 0 && gaussian) {
+		for (int i = 0; i < nbins; i++) {
 			fprintf(output, "%f %f\n", value_min + i * dvalue_bin, histogram[i]);
 		}
 	}
 	else if (nintervals <= 0) {
-		for (i = 0; i < nbins; i++) {
+		for (int i = 0; i < nbins; i++) {
 			fprintf(output, "%f %d\n", value_min + i * dvalue_bin, (int)histogram[i]);
 		}
 	}
 	else {
-		for (i = 0; i < nintervals; i++)
+		for (int i = 0; i < nintervals; i++)
 			fprintf(output, "%f\n", intervals[i]);
 	}
 
@@ -623,65 +650,13 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(output, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(output, "dbg2  Ending status:\n");
 		fprintf(output, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	fprintf(output, "\n");
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-
-/* double qsnorm(p)
- * double	p;
- *
- * Function to invert the cumulative normal probability
- * function.  If z is a standardized normal random deviate,
- * and Q(z) = p is the cumulative Gaussian probability
- * function, then z = qsnorm(p).
- *
- * Note that 0.0 < p < 1.0.  Data values outside this range
- * will return +/- a large number (1.0e6).
- * To compute p from a sample of data to test for Normalcy,
- * sort the N samples into non-decreasing order, label them
- * i=[1, N], and then compute p = i/(N+1).
- *
- * Author:	Walter H. F. Smith
- * Date:	19 February, 1991-1995.
- *
- * Based on a Fortran subroutine by R. L. Parker.  I had been
- * using IMSL library routine DNORIN(DX) to do what qsnorm(p)
- * does, when I was at the Lamont-Doherty Geological Observatory
- * which had a site license for IMSL.  I now need to invert the
- * gaussian CDF without calling IMSL; hence, this routine.
- *
- */
-
-double qsnorm(double p) {
-	double t, z;
-
-	if (p <= 0.0) {
-		return (-1.0e6);
-	}
-	else if (p >= 1.0) {
-		return (1.0e6);
-	}
-	else if (p == 0.5) {
-		return (0.0);
-	}
-	else if (p > 0.5) {
-		t = sqrt(-2.0 * log(1.0 - p));
-		z = t - (2.515517 + t * (0.802853 + t * 0.010328)) / (1.0 + t * (1.432788 + t * (0.189269 + t * 0.001308)));
-		return (z);
-	}
-	else {
-		t = sqrt(-2.0 * log(p));
-		z = t - (2.515517 + t * (0.802853 + t * 0.010328)) / (1.0 + t * (1.432788 + t * (0.189269 + t * 0.001308)));
-		return (-z);
-	}
 }
 /*--------------------------------------------------------------------*/

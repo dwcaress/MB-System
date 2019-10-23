@@ -406,7 +406,7 @@ int mbview_reset_prglx(size_t instance) {
 	/* If profile view enabled update opengl plotting widget */
 	if (data->profile_view_mode == MBV_VIEW_ON) {
 		/* delete old glx_context if it exists */
-		if (view->prglx_init == MB_YES) {
+		if (view->prglx_init == true) {
 #ifdef MBV_DEBUG_GLX
 			fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, __func__, instance, view->dpy, view->prglx_context);
 #endif
@@ -414,7 +414,7 @@ int mbview_reset_prglx(size_t instance) {
 #ifdef MBV_GET_GLX_ERRORS
 			mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
 #endif
-			view->prglx_init = MB_NO;
+			view->prglx_init = false;
 		}
 
 		/* get and set sizes of the drawingArea */
@@ -458,7 +458,7 @@ int mbview_reset_prglx(size_t instance) {
 #ifdef MBV_GET_GLX_ERRORS
 		mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
 #endif
-		view->prglx_init = MB_YES;
+		view->prglx_init = true;
 		glViewport(0, 0, data->prwidth, data->prheight);
 		view->praspect_ratio = ((float)data->prheight) / ((float)data->prwidth);
 	}
@@ -501,9 +501,9 @@ int mbview_destroy_prglx(size_t instance) {
 	/* If profile view enabled update opengl plotting widget */
 	if (data->profile_view_mode == MBV_VIEW_ON) {
 		/* delete old glx_context if it exists */
-		if (view->prglx_init == MB_YES) {
+		if (view->prglx_init == true) {
 			glXDestroyContext(view->dpy, view->prglx_context);
-			view->prglx_init = MB_NO;
+			view->prglx_init = false;
 		}
 	}
 
@@ -563,7 +563,7 @@ int mbview_plotprofile(size_t instance) {
 		zmax = zcenter + 0.5 * view->praspect_ratio * data->profile.length / data->profile_exageration;
 		yzmin = scale * data->profile_exageration * (zmin - zcenter);
 		yzmax = scale * data->profile_exageration * (zmax - zcenter);
-		clip = MB_NO;
+		clip = false;
 
 /* set projection to 2D */
 #ifdef MBV_DEBUG_GLX
@@ -592,7 +592,7 @@ int mbview_plotprofile(size_t instance) {
 		glLineWidth(1.0);
 		glBegin(GL_QUADS);
 		for (i = 0; i < data->profile.npoints - 1; i++) {
-			if (data->profile.points[i].boundary == MB_NO || data->profile.points[i + 1].boundary == MB_NO) {
+			if (data->profile.points[i].boundary == false || data->profile.points[i + 1].boundary == false) {
 				if (data->profile.points[i].slope < data->profile_slopethreshold) {
 					glColor3f(colortable_object_red[MBV_COLOR_BLACK], colortable_object_green[MBV_COLOR_BLACK],
 					          colortable_object_blue[MBV_COLOR_BLACK]);
@@ -604,11 +604,11 @@ int mbview_plotprofile(size_t instance) {
 				x = scale * data->profile.points[i].distance;
 				y = scale * data->profile_exageration * (data->profile.points[i].zdata - zcenter);
 				if (y < yzmin) {
-					clip = MB_YES;
+					clip = true;
 					y = yzmin;
 				}
 				if (y > yzmax) {
-					clip = MB_YES;
+					clip = true;
 					y = yzmax;
 				}
 				glVertex3f(x, yzmin, MBV_OPENGL_ZPROFILE1);
@@ -616,11 +616,11 @@ int mbview_plotprofile(size_t instance) {
 				x = scale * data->profile.points[i + 1].distance;
 				y = scale * data->profile_exageration * (data->profile.points[i + 1].zdata - zcenter);
 				if (y < yzmin) {
-					clip = MB_YES;
+					clip = true;
 					y = yzmin;
 				}
 				if (y > yzmax) {
-					clip = MB_YES;
+					clip = true;
 					y = yzmax;
 				}
 				glVertex3f(x, y, MBV_OPENGL_ZPROFILE1);
@@ -635,7 +635,7 @@ int mbview_plotprofile(size_t instance) {
 		glLineWidth(2.0);
 		glBegin(GL_LINES);
 		for (i = 0; i < data->profile.npoints; i++) {
-			if (data->profile.points[i].boundary == MB_YES) {
+			if (data->profile.points[i].boundary == true) {
 				x = scale * data->profile.points[i].distance;
 				glVertex3f(x, yzmin, MBV_OPENGL_ZPROFILE1);
 				glVertex3f(x, yzmax, MBV_OPENGL_ZPROFILE1);
@@ -644,7 +644,7 @@ int mbview_plotprofile(size_t instance) {
 		glEnd();
 
 		/* draw box */
-		if (clip == MB_NO)
+		if (clip == false)
 			glColor3f(colortable_object_red[MBV_COLOR_BLACK], colortable_object_green[MBV_COLOR_BLACK],
 			          colortable_object_blue[MBV_COLOR_BLACK]);
 		else

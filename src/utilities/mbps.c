@@ -23,6 +23,7 @@
  *
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -60,23 +61,23 @@ struct ping {
 	double *yp;
 };
 
-int rgb_black[] = {0, 0, 0};
-int rgb_white[] = {255, 255, 255};
+static const int rgb_black[] = {0, 0, 0};
+static const int rgb_white[] = {255, 255, 255};
 
+static const char program_name[] = "MBPS";
+static const char help_message[] =
+    "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
+static const char usage_message[] =
+    "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha "
+    "-Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats "
+    "\n\t-Zdisplay_scales -V -H]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBPS";
-	char help_message[] = "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
-	char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha "
-	                       "-Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats "
-	                       "\n\t-Zdisplay_scales -V -H]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;
-	int flag = 0;
 
 	/*ALBERTO definitions */
 	int gap = 1;
@@ -86,8 +87,8 @@ int main(int argc, char **argv) {
 	double eta = ETA_DEF;
 	double ve = VE_DEF;
 	char viewdir = VIEWDIR_DEF;
-	int display_stats = MB_YES;
-	int display_scales = MB_YES;
+	bool display_stats = true;
+	bool display_scales = true;
 	double sin_eta, cos_eta;
 	double sin_alpha, cos_alpha;
 	double track_length, xscale, zscale, zscale_inch;
@@ -99,14 +100,13 @@ int main(int argc, char **argv) {
 	double mean_latmin;
 	double mean_lonmin;
 	double mean_hdg = 0.0;
-	int done, mean_knt = 0;
+	int mean_knt = 0;
 	int orient;
 	char label[100];
 	int a, b, rotate;
 	double x, y, z;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -159,19 +159,20 @@ int main(int argc, char **argv) {
 	int forward;
 	double xx, yy, zz;
 	double heading_start, dheading, dheadingx, dheadingy;
-	int i, j, jj, k;
+	int jj;
 
+	// TODO(schwehr): Remove embedded prototypes.
 	void Polygon_Fill();
 	void Good_Polygon();
 
 	/* initialize some time variables */
-	for (i = 0; i < 7; i++) {
+	for (int i = 0; i < 7; i++) {
 		timbeg_i[i] = 0;
 		timend_i[i] = 0;
 	}
 
 	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to stdin */
 	strcpy(file, "stdin");
@@ -190,86 +191,70 @@ int main(int argc, char **argv) {
 		case 'A':
 		case 'a':
 			sscanf(optarg, "%lf", &alpha);
-			flag++;
 			break;
 		case 'B':
 		case 'b':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
 			btime_i[6] = 0;
-			flag++;
 			break;
 		case 'D':
 		case 'd':
 			sscanf(optarg, "%c", &viewdir);
-			flag++;
 			break;
 		case 'E':
 		case 'e':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
 			etime_i[6] = 0;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
 			sscanf(optarg, "%d", &gap);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", file);
-			flag++;
 			break;
 		case 'K':
 		case 'k':
 			sscanf(optarg, "%lf", &eta);
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			sscanf(optarg, "%d", &num_pings_max);
 			if (num_pings_max < 2 || num_pings_max > MBPS_MAXPINGS)
 				num_pings_max = MBPS_MAXPINGS;
-			flag++;
 			break;
 		case 'P':
 		case 'p':
 			sscanf(optarg, "%d", &pings);
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%lf", &speedmin);
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			sscanf(optarg, "%s", title);
-			flag++;
 			break;
 		case 'X':
 		case 'x':
 			sscanf(optarg, "%lf", &ve);
-			flag++;
 			break;
 		case 'W':
 		case 'w':
 			sscanf(optarg, "%lf", &meters_per_inch);
-			flag++;
 			break;
 		case 'Y':
 		case 'y':
-			display_stats = MB_NO;
-			flag++;
+			display_stats = false;
 			break;
 		case 'Z':
 		case 'z':
-			display_scales = MB_NO;
-			flag++;
+			display_scales = false;
 			break;
 		case '?':
 			errflg++;
@@ -277,7 +262,7 @@ int main(int argc, char **argv) {
 		} /* switch */
 
 	/* Process the title of the plot */
-	for (i = 1; i < argc; i++) {
+	for (int i = 1; i < argc; i++) {
 		if (argv[i][0] == '-' && ((argv[i][1] == 'T') || (argv[i][1] == 't'))) {
 			strcpy(title, argv[i]);
 			title[0] = ' ';
@@ -299,13 +284,11 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -385,7 +368,7 @@ int main(int argc, char **argv) {
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
-	for (i = 0; i < num_pings_max + 3; i++) {
+	for (int i = 0; i < num_pings_max + 3; i++) {
 		data[i].beams_bath = 0;
 		data[i].beamflag = NULL;
 		data[i].bath = NULL;
@@ -405,9 +388,9 @@ int main(int argc, char **argv) {
 
 	/* read and process data */
 	nread = 0;
-	done = MB_NO;
+	bool done = false;
 	error = MB_ERROR_NO_ERROR;
-	while (done == MB_NO && error <= MB_ERROR_NO_ERROR) {
+	while (!done && error <= MB_ERROR_NO_ERROR) {
 		/* read a ping of data */
 		status = mb_get(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
 		                &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathacrosstrack,
@@ -428,7 +411,7 @@ int main(int argc, char **argv) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&(data[nread].yp), &error);
 
 			/* copy data to storage arrays */
-			for (i = 0; i < beams_bath; i++) {
+			for (int i = 0; i < beams_bath; i++) {
 				data[nread].beamflag[i] = beamflag[i];
 				data[nread].bath[i] = bath[i];
 				data[nread].bathacrosstrack[i] = bathacrosstrack[i];
@@ -484,7 +467,7 @@ int main(int argc, char **argv) {
 				distot += distance * 1000.0; /* distance in meters */
 
 				/* loop over the beams */
-				for (j = 0; j < beams_bath; j++) {
+				for (int j = 0; j < beams_bath; j++) {
 					if (j >= data[nread].beams_bath) {
 						data[nread].beamflag[j] = MB_FLAG_NULL;
 						data[nread].xp[j] = BAD;
@@ -540,7 +523,6 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		/* print debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Reading loop finished in program <%s>\n", program_name);
 			fprintf(stderr, "dbg2       status:     %d\n", status);
@@ -552,10 +534,10 @@ int main(int argc, char **argv) {
 		/* test if done */
 		if (nread >= num_pings_max && verbose >= 1) {
 			fprintf(stderr, "%s: Maximum number of pings [%d] read before end of file reached...\n", program_name, num_pings_max);
-			done = MB_YES;
+			done = true;
 		}
 		if (nread >= num_pings_max || error > MB_ERROR_NO_ERROR) {
-			done = MB_YES;
+			done = true;
 		}
 
 	} /* end of processing data, 1'st while under read/process data */
@@ -563,7 +545,6 @@ int main(int argc, char **argv) {
 	/* close the swath file */
 	status = mb_close(verbose, &mbio_ptr, &error);
 
-	/* print debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Reading loop finished in program <%s>\n", program_name);
 		fprintf(stderr, "dbg2       status:     %d\n", status);
@@ -584,11 +565,11 @@ int main(int argc, char **argv) {
 
 	/* rescale xp[],yp[] to zero mean; get min and max */
 	max_yp = min_yp = max_xp = min_xp = 0.0;
-	for (i = 0; i < nread; i++) {
+	for (int i = 0; i < nread; i++) {
 		beamflag = data[i].beamflag;
 		xp = data[i].xp;
 		yp = data[i].yp;
-		for (j = 0; j < data[i].beams_bath; j++) {
+		for (int j = 0; j < data[i].beams_bath; j++) {
 			if (mb_beam_ok(beamflag[j])) {
 				yp[j] -= mean_yp;
 				xp[j] -= mean_xp;
@@ -651,18 +632,18 @@ int main(int argc, char **argv) {
 	    wherever the data is good */
 
 	if ((viewdir == 'S') || (viewdir == 's'))
-		forward = MB_YES;
+		forward = true;
 	else if ((viewdir == 'P') || (viewdir == 'p'))
-		forward = MB_NO;
+		forward = false;
 	else if ((viewdir == 'B') || (viewdir == 'b')) {
 		if (alpha < 90.0)
-			forward = MB_YES;
+			forward = true;
 		else
-			forward = MB_NO;
+			forward = false;
 	}
-	for (j = 0; j < beams_bath - 1; j++) {
-		for (i = 0; i < nread - 1; i++) {
-			if (forward == MB_YES)
+	for (int j = 0; j < beams_bath - 1; j++) {
+		for (int i = 0; i < nread - 1; i++) {
+			if (forward == true)
 				jj = j;
 			else
 				jj = beams_bath - 2 - j;
@@ -686,7 +667,7 @@ int main(int argc, char **argv) {
 	/* titles and such */
 	ps_setline(2); /* set line width */
 
-	if (display_stats == MB_NO) {
+	if (!display_stats) {
 		/* plot a title */
 		xl[0] = 0;
 		yl[0] = max_yp * scaling + .6;
@@ -718,7 +699,7 @@ int main(int argc, char **argv) {
 		ps_text(xl[0], yl[0], 15., label, 0., 6, 0);
 	} /* else after if display_stats */
 
-	if (display_scales == MB_YES) {
+	if (display_scales) {
 		/* plot the x-scale */
 		xscale = 10000; /* x scale in m */
 		if (track_length < 50000)
@@ -791,7 +772,7 @@ int main(int argc, char **argv) {
 		ps_text(xl[0] - 1.7, yl[0], 15., "direction", 0., 1, 0);
 
 		/* plot the three axes */
-		for (i = 0; i < 3; i++) {
+		for (int i = 0; i < 3; i++) {
 			xl[0] = 0.; /* point in center of page */
 			yl[0] = 0.;
 			rotate = 0; /* set to 1 if arrow is rotated below */
@@ -861,7 +842,7 @@ int main(int argc, char **argv) {
 	ps_plotend(1);
 
 	/* deallocate arrays */
-	for (i = 0; i < nread; i++) {
+	for (int i = 0; i < nread; i++) {
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&(data[i].beams_bath), &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&(data[i].bath), &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&(data[i].bathacrosstrack), &error);
@@ -874,14 +855,12 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 
 } /* main */

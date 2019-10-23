@@ -138,7 +138,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 		strcpy(store->mbHistCode_long_name, "History code");
 		strcpy(store->mbHistCode_name_code, "MB_HISTORY_CODE");
 		strcpy(store->mbHistCode_units, "");
-		strcpy(store->mbHistCode_unit_code, "MB_NOT_DEFINED");
+		strcpy(store->mbHistCode_unit_code, "falseT_DEFINED");
 		store->mbHistCode_add_offset = 0;
 		store->mbHistCode_scale_factor = 1;
 		store->mbHistCode_minimum = 1;
@@ -273,7 +273,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 		strcpy(store->mbPType_long_name, "PType of captor");
 		strcpy(store->mbPType_name_code, "MB_POSITION_TYPE");
 		strcpy(store->mbPType_units, "");
-		strcpy(store->mbPType_unit_code, "MB_NOT_DEFINED");
+		strcpy(store->mbPType_unit_code, "falseT_DEFINED");
 		store->mbPType_add_offset = 0;
 		store->mbPType_scale_factor = 1;
 		store->mbPType_minimum = 1;
@@ -287,7 +287,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 		strcpy(store->mbPQuality_long_name, "Factor of quality    ");
 		strcpy(store->mbPQuality_name_code, "MB_POSITION_QUALITY");
 		strcpy(store->mbPQuality_units, "");
-		strcpy(store->mbPQuality_unit_code, "MB_NOT_DEFINED");
+		strcpy(store->mbPQuality_unit_code, "falseT_DEFINED");
 		store->mbPQuality_add_offset = 0;
 		store->mbPQuality_scale_factor = 1;
 		store->mbPQuality_minimum = 1;
@@ -301,7 +301,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 		strcpy(store->mbPFlag_long_name, "Flag of position   ");
 		strcpy(store->mbPFlag_name_code, "MB_POSITION_Flag");
 		strcpy(store->mbPFlag_units, "");
-		strcpy(store->mbPFlag_unit_code, "MB_NOT_DEFINED");
+		strcpy(store->mbPFlag_unit_code, "falseT_DEFINED");
 		store->mbPFlag_add_offset = 0;
 		store->mbPFlag_scale_factor = 1;
 		store->mbPFlag_minimum = -127;
@@ -500,7 +500,6 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		*namp = 0;
 		*nss = 0;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -540,7 +539,6 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		/* copy comment */
 		strcpy(comment, store->comment);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -962,7 +960,6 @@ int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 		*pitch = 0.0;
 		*heave = 0.0;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");

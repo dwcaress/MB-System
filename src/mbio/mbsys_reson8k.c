@@ -340,7 +340,6 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			ssalongtrack[i] = store->ss_alongtrack[i];
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -392,7 +391,6 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*namp = 0;
 		*nss = 0;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -420,7 +418,6 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		/* copy comment */
 		strcpy(comment, store->comment);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -882,7 +879,6 @@ int mbsys_reson8k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		*pitch = store->png_pitch;
 		*heave = store->png_heave;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -934,7 +930,6 @@ int mbsys_reson8k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		*pitch = store->png_pitch;
 		*heave = store->png_heave;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -1272,14 +1267,14 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		const double angscale = ((double)store->beam_width_num) / ((double)store->beam_width_denom);
 		const double ttscale = 0.25 / store->sample_rate;
 		const int icenter = store->beams_bath / 2;
-		if (swath_width_set == MB_NO && nbathsort > 0) {
+		if (swath_width_set == false && nbathsort > 0) {
 			double anglestart = fabs((icenter - istart) * angscale + store->png_roll);
 			(*swath_width) = anglestart;
 			const double angleend = fabs((icenter - iend) * angscale + store->png_roll);
 			(*swath_width) = MAX(anglestart, angleend);
 			(*swath_width) = MAX((*swath_width), 60.0);
 		}
-		if (pixel_size_set == MB_NO && nbathsort > 0) {
+		if (pixel_size_set == false && nbathsort > 0) {
 			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
 			double pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_RESON8K_MAXPIXELS;
 			pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort / 2] * sin(DTR * 0.1));
@@ -1305,7 +1300,6 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 				if (goodbeam2 >= 0 && goodbeam1 >= 0) {
 					const int pixel1 = (ttscale * store->range[goodbeam1] - store->ssrawtimedelay) / ss_spacing;
 					const int pixel2 = (ttscale * store->range[goodbeam2] - store->ssrawtimedelay) / ss_spacing;
-					/*fprintf(stderr, "port beams:%d %d  pixels: %d %d\n", goodbeam1, goodbeam2, pixel1, pixel2);*/
 					for (int ipixel = pixel1; ipixel < pixel2; ipixel++) {
 						const double xtrackss = store->bath_acrosstrack[goodbeam1] +
 						           ((double)(ipixel - pixel1)) / ((double)(pixel2 - pixel1)) *
@@ -1399,7 +1393,6 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 			store->ss_alongtrack[i] = ssalongtrack[i];
 		}
 
-		/* print debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Sidescan regenerated in <%s>\n", __func__);
 			fprintf(stderr, "dbg2       beams_bath:    %d\n", store->beams_bath);

@@ -140,7 +140,7 @@ int mbpingedit_startup(int verbose, Widget parent, XtAppContext app, int *error)
 	/* set parent widget and app context */
 	mbp_parent_widget = parent;
 	mbp_app_context = app;
-	mbp_work_function_set = MB_NO;
+	mbp_work_function_set = false;
 	mbp_timer_count = 0;
 
 	/* initialize window */

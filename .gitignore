@@ -109,3 +109,5 @@ lib
 *.log
 *.trs
 *~
+src/mbtrn/mb1conv
+src/mbtrnutils/mbtrnpp

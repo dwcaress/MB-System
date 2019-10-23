@@ -23,7 +23,9 @@
  * Location:	R/V Thompson, at the dock in Apia, Samoa
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,40 +35,33 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-#define MBES_ALLOC_NUM 128
-#define MBES_ROUTE_WAYPOINT_NONE 0
-#define MBES_ROUTE_WAYPOINT_SIMPLE 1
-#define MBES_ROUTE_WAYPOINT_TRANSIT 2
-#define MBES_ROUTE_WAYPOINT_STARTLINE 3
-#define MBES_ROUTE_WAYPOINT_ENDLINE 4
-#define MBES_ONLINE_THRESHOLD 15.0
-#define MBES_ONLINE_COUNT 30
+const int MBES_ALLOC_NUM = 128;
+/* #define MBES_ROUTE_WAYPOINT_NONE 0 */
+/* #define MBES_ROUTE_WAYPOINT_SIMPLE 1 */
+const int MBES_ROUTE_WAYPOINT_TRANSIT = 2;
+/* #define MBES_ROUTE_WAYPOINT_STARTLINE 3 */
+const int  MBES_ROUTE_WAYPOINT_ENDLINE = 4;
+/* #define MBES_ONLINE_THRESHOLD 15.0 */
+/* #define MBES_ONLINE_COUNT 30 */
+
+static const char program_name[] = "MBroutetime";
+static const char help_message[] =
+    "MBroutetime outputs a list of the times when a survey hit the waypoints\nof a planned survey route. "
+    "This (lon lat time_d) list can then be used by mbextractsegy\nor mb7k2ss to extract subbottom (or "
+    "sidescan) data into files corresponding\nto the lines between waypoints.";
+static const char usage_message[] =
+    "mbroutetime  -Rroutefile [-Fformat -Ifile -Owaypointtimefile -Urangethreshold -H -V]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBroutetime";
-	char help_message[] = "MBroutetime outputs a list of the times when a survey hit the waypoints\nof a planned survey route. "
-	                      "This (lon lat time_d) list can then be used by mbextractsegy\nor mb7k2ss to extract subbottom (or "
-	                      "sidescan) data into files corresponding\nto the lines between waypoints.";
-	char usage_message[] = "mbroutetime  -Rroutefile [-Fformat -Ifile -Owaypointtimefile -Urangethreshold -H -V]";
-	extern char *optarg;
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
 
-	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
 	char read_file[MB_PATH_MAXLINE] = "";
 	char output_file[MB_PATH_MAXLINE] = "";
-	int output_file_set = MB_NO;
+	bool output_file_set = false;
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
@@ -111,7 +106,6 @@ int main(int argc, char **argv) {
 
 	/* route and auto-line data */
 	char route_file[MB_PATH_MAXLINE] = "";
-	int rawroutefile = MB_NO;
 	int nroutepoint = 0;
 	int nroutepointfound = 0;
 	int nroutepointalloc = 0;
@@ -139,113 +133,106 @@ int main(int argc, char **argv) {
 	char *result;
 	int nget;
 	int point_ok;
-	int read_data;
 	int nread;
-	int i;
 
 	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");
 
-	/* process argument list */
-	while ((c = getopt(argc, argv, "F:f:I:i:O:o:R:r:U:u:VvHh")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", output_file);
-			output_file_set = MB_YES;
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			sscanf(optarg, "%s", route_file);
-			flag++;
-			break;
-		case 'U':
-		case 'u':
-			sscanf(optarg, "%lf", &rangethreshold);
-			flag++;
-			break;
-		case '?':
-			errflg++;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		/* process argument list */
+		while ((c = getopt(argc, argv, "F:f:I:i:O:o:R:r:U:u:VvHh")) != -1)
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", output_file);
+				output_file_set = true;
+				break;
+			case 'R':
+			case 'r':
+				sscanf(optarg, "%s", route_file);
+				break;
+			case 'U':
+			case 'u':
+				sscanf(optarg, "%lf", &rangethreshold);
+				break;
+			case '?':
+				errflg = true;
+			}
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	/* print starting message */
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+			fprintf(stderr, "dbg2       help:              %d\n", help);
+			fprintf(stderr, "dbg2       format:            %d\n", format);
+			fprintf(stderr, "dbg2       pings:             %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:           %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:         %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:         %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:         %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:         %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:        %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:        %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:        %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:        %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:        %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:        %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:        %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:        %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:        %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:        %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:        %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:        %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:        %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:        %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:          %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:           %f\n", timegap);
+			fprintf(stderr, "dbg2       read_file:         %s\n", read_file);
+			fprintf(stderr, "dbg2       route_file:        %s\n", route_file);
+			fprintf(stderr, "dbg2       output_file_set:   %d\n", output_file_set);
+			fprintf(stderr, "dbg2       output_file:       %s\n", output_file);
+			fprintf(stderr, "dbg2       rangethreshold:    %f\n", rangethreshold);
+		}
 
-	/* print starting debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
-		fprintf(stderr, "dbg2       help:              %d\n", help);
-		fprintf(stderr, "dbg2       format:            %d\n", format);
-		fprintf(stderr, "dbg2       pings:             %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:           %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:         %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:         %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:         %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:         %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:        %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:        %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:        %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:        %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:        %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:        %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:        %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:        %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:        %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:        %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:        %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:        %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:        %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:        %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:          %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:           %f\n", timegap);
-		fprintf(stderr, "dbg2       read_file:         %s\n", read_file);
-		fprintf(stderr, "dbg2       route_file:        %s\n", route_file);
-		fprintf(stderr, "dbg2       output_file_set:   %d\n", output_file_set);
-		fprintf(stderr, "dbg2       output_file:       %s\n", output_file);
-		fprintf(stderr, "dbg2       rangethreshold:    %f\n", rangethreshold);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* read route file */
@@ -255,11 +242,11 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
 		exit(status);
 	}
-	rawroutefile = MB_NO;
+	bool rawroutefile = false;
 	while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 		if (comment[0] == '#') {
 			if (strncmp(comment, "## Route File Version", 21) == 0) {
-				rawroutefile = MB_NO;
+				rawroutefile = false;
 			}
 		}
 		else {
@@ -267,17 +254,17 @@ int main(int argc, char **argv) {
 			if (comment[0] == '#') {
 				fprintf(stderr, "buffer:%s", comment);
 				if (strncmp(comment, "## Route File Version", 21) == 0) {
-					rawroutefile = MB_NO;
+					rawroutefile = false;
 				}
 			}
-			if ((rawroutefile == MB_YES && nget >= 2) ||
-			    (rawroutefile == MB_NO && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_TRANSIT))
-				point_ok = MB_YES;
+			if ((rawroutefile && nget >= 2) ||
+			    (!rawroutefile && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_TRANSIT))
+				point_ok = true;
 			else
-				point_ok = MB_NO;
+				point_ok = false;
 
 			/* if good data check for need to allocate more space */
-			if (point_ok == MB_YES && nroutepoint + 2 > nroutepointalloc) {
+			if (point_ok == true && nroutepoint + 2 > nroutepointalloc) {
 				nroutepointalloc += MBES_ALLOC_NUM;
 				status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
 				status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelat, &error);
@@ -296,7 +283,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* add good point to route */
-			if (point_ok == MB_YES && nroutepointalloc > nroutepoint) {
+			if (point_ok == true && nroutepointalloc > nroutepoint) {
 				routelon[nroutepoint] = lon;
 				routelat[nroutepoint] = lat;
 				routeheading[nroutepoint] = heading;
@@ -313,18 +300,14 @@ int main(int argc, char **argv) {
 
 	/* Check that there are valid waypoints in memory */
 	if (nroutepoint < 1) {
-		error = MB_ERROR_EOF;
-		status = MB_FAILURE;
 		fprintf(stderr, "\nNo line start or line end waypoints read from route file: <%s>\n", route_file);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_EOF);
 	}
 	else if (nroutepoint < 2) {
-		error = MB_ERROR_EOF;
-		status = MB_FAILURE;
 		fprintf(stderr, "\nOnly one line start or line end waypoint read from route file: <%s>\n", route_file);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_EOF);
 	}
 
 	/* set starting values */
@@ -343,30 +326,29 @@ int main(int argc, char **argv) {
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(file, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data) {
 		/* read fnv file if possible */
 		mb_get_fnv(verbose, file, &format, &error);
 
@@ -456,7 +438,6 @@ int main(int argc, char **argv) {
 				}
 			}
 
-			/* print debug statements */
 			if (verbose >= 2) {
 				fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
 				fprintf(stderr, "dbg2       kind:           %d\n", kind);
@@ -472,19 +453,19 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "%d records read from %s\n", nread, file);
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* if the last route point was not reached, add one last waypoint */
@@ -500,7 +481,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* output time list for the route */
-	if (output_file_set == MB_NO) {
+	if (!output_file_set) {
 		sprintf(output_file, "%s_wpttime_d.txt", read_file);
 	}
 	if ((fp = fopen(output_file, "w")) == NULL) {
@@ -509,7 +490,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nUnable to open output waypoint time list file <%s> for writing\n", output_file);
 		exit(status);
 	}
-	for (i = 0; i < nroutepointfound; i++) {
+	for (int i = 0; i < nroutepointfound; i++) {
 		fprintf(fp, "%3d %3d %11.6f %10.6f %10.6f %.6f\n", i, routewaypoint[i], routelon[i], routelat[i], routeheading[i],
 		        routetime_d[i]);
 		if (verbose > 0)
@@ -529,14 +510,12 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

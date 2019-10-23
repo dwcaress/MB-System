@@ -66,9 +66,9 @@ int mbr_info_cbat9001(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_NAV;
 	*sensordepth_source = MB_DATA_DATA;
@@ -335,7 +335,6 @@ int mbr_cbat9001_rd_comment(int verbose, FILE *mbfp, int swap, struct mbf_cbat90
 		strncpy(data->comment, line, MBF_CBAT9001_COMMENT_LENGTH - 1);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -386,7 +385,7 @@ int mbr_cbat9001_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		data->par_second = (int)line[5];
 		data->par_hundredth_sec = (int)line[6];
 		data->par_thousandth_sec = (int)line[7];
-		if (swap == MB_NO) {
+		if (swap == false) {
 			short_ptr = (short *)&line[8];
 			data->roll_offset = *short_ptr;
 			short_ptr = (short *)&line[10];
@@ -464,7 +463,6 @@ int mbr_cbat9001_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
@@ -541,7 +539,7 @@ int mbr_cbat9001_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 		data->pos_second = (int)line[5];
 		data->pos_hundredth_sec = (int)line[6];
 		data->pos_thousandth_sec = (int)line[7];
-		if (swap == MB_NO) {
+		if (swap == false) {
 			int_ptr = (int *)&line[8];
 			data->pos_latitude = *int_ptr;
 			int_ptr = (int *)&line[12];
@@ -583,7 +581,6 @@ int mbr_cbat9001_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
@@ -654,7 +651,7 @@ int mbr_cbat9001_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 		data->svp_second = (int)line[5];
 		data->svp_hundredth_sec = (int)line[6];
 		data->svp_thousandth_sec = (int)line[7];
-		if (swap == MB_NO) {
+		if (swap == false) {
 			int_ptr = (int *)&line[8];
 			data->svp_latitude = *int_ptr;
 			int_ptr = (int *)&line[12];
@@ -670,7 +667,7 @@ int mbr_cbat9001_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 		for (int i = 0; i < 500; i++) {
 			short_ptr = (short *)&line[16 + 4 * i];
 			short_ptr2 = (short *)&line[18 + 4 * i];
-			if (swap == MB_NO) {
+			if (swap == false) {
 				data->svp_depth[i] = *short_ptr;
 				data->svp_vel[i] = *short_ptr2;
 			}
@@ -683,7 +680,6 @@ int mbr_cbat9001_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
@@ -748,7 +744,7 @@ int mbr_cbat9001_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		data->svp_second = (int)line[5];
 		data->svp_hundredth_sec = (int)line[6];
 		data->svp_thousandth_sec = (int)line[7];
-		if (swap == MB_NO) {
+		if (swap == false) {
 			int_ptr = (int *)&line[8];
 			data->svp_latitude = *int_ptr;
 			int_ptr = (int *)&line[12];
@@ -764,7 +760,7 @@ int mbr_cbat9001_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		for (int i = 0; i < 200; i++) {
 			short_ptr = (short *)&line[16 + 4 * i];
 			short_ptr2 = (short *)&line[18 + 4 * i];
-			if (swap == MB_NO) {
+			if (swap == false) {
 				data->svp_depth[i] = *short_ptr;
 				data->svp_vel[i] = *short_ptr2;
 			}
@@ -777,7 +773,6 @@ int mbr_cbat9001_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
@@ -843,7 +838,7 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 		data->second = (int)line[5];
 		data->hundredth_sec = (int)line[6];
 		data->thousandth_sec = (int)line[7];
-		if (swap == MB_NO) {
+		if (swap == false) {
 			int_ptr = (int *)&line[8];
 			data->latitude = *int_ptr;
 			int_ptr = (int *)&line[12];
@@ -884,7 +879,7 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 		data->gain2 = (int)line[30];
 		data->gain3 = (int)line[31];
 		data->beams_bath = MBF_CBAT9001_MAXBEAMS;
-		if (swap == MB_NO) {
+		if (swap == false) {
 			for (int i = 0; i < data->beams_bath; i++) {
 				beamarray = line + 32 + 12 * i;
 				short_ptr = (short *)beamarray;
@@ -924,7 +919,6 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -968,7 +962,6 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int status = MB_SUCCESS;
-	int done;
 	int first;
 	short *type;
 	char label[2];
@@ -986,19 +979,18 @@ int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_cbat9001_struct *data = (struct mbf_cbat9001_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
-	done = MB_NO;
 	type = (short *)label;
-	first = MB_YES;
+	first = true;
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == MB_NO) {
-		if (mb_io_ptr->byteswapped == MB_NO) {
+	bool done = false;
+	while (!done) {
+		if (mb_io_ptr->byteswapped == false) {
 			/* get first part of next record label */
 			if ((status = fread(&label[0], 1, 1, mb_io_ptr->mbfp)) != 1) {
 				status = MB_FAILURE;
@@ -1024,7 +1016,7 @@ int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 			/* if not first and second part looks like first
 			    get other piece from last label */
-			if (status == MB_SUCCESS && first == MB_NO && label[1] == 0x02) {
+			if (status == MB_SUCCESS && first == false && label[1] == 0x02) {
 				label[0] = label[1];
 				label[1] = label_save[0];
 			}
@@ -1043,7 +1035,7 @@ int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
 		}
 
 		/* reset first flag */
-		first = MB_NO;
+		first = false;
 
 		/*		fprintf(stderr,"\nstart of mbr_cbat9001_rd_data loop:\n");
 		        fprintf(stderr,"done:%d\n",done);
@@ -1058,54 +1050,54 @@ int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE) {
-			done = MB_YES;
+			done = true;
 		}
 		else if (*type == RESON_COMMENT) {
 			status = mbr_cbat9001_rd_comment(verbose, mbfp, mb_io_ptr->byteswapped, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_COMMENT;
 			}
 		}
 		else if (*type == RESON_PARAMETER) {
 			status = mbr_cbat9001_rd_parameter(verbose, mbfp, mb_io_ptr->byteswapped, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_PARAMETER;
 			}
 		}
 		else if (*type == RESON_NAV) {
 			status = mbr_cbat9001_rd_nav(verbose, mbfp, mb_io_ptr->byteswapped, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_NAV;
 			}
 		}
 		else if (*type == RESON_SVP) {
 			status = mbr_cbat9001_rd_svp(verbose, mbfp, mb_io_ptr->byteswapped, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
 			}
 		}
 		else if (*type == RESON_BATH_9001) {
 			status = mbr_cbat9001_rd_bath(verbose, mbfp, mb_io_ptr->byteswapped, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_DATA;
 			}
 		}
 		else if (*type == RESON_SHORT_SVP) {
 			status = mbr_cbat9001_rd_short_svp(verbose, mbfp, mb_io_ptr->byteswapped, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
 			}
 		}
 
 		/* bail out if there is an error */
 		if (status == MB_FAILURE)
-			done = MB_YES;
+			done = true;
 
 		/*		fprintf(stderr,"end of mbr_cbat9001_rd_data loop:\n");
 		        fprintf(stderr,"done:%d\n",done);
@@ -1315,7 +1307,6 @@ int mbr_cbat9001_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 	/* get pointer to raw data structure */
 	struct mbf_cbat9001_struct *data = (struct mbf_cbat9001_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -1323,7 +1314,7 @@ int mbr_cbat9001_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 
 	/* write the record label */
 	label = RESON_COMMENT;
-	if (swap == MB_YES)
+	if (swap == true)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -1387,7 +1378,6 @@ int mbr_cbat9001_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 	/* get pointer to raw data structure */
 	struct mbf_cbat9001_struct *data = (struct mbf_cbat9001_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
@@ -1420,7 +1410,7 @@ int mbr_cbat9001_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 
 	/* write the record label */
 	label = RESON_PARAMETER;
-	if (swap == MB_YES)
+	if (swap == true)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -1441,7 +1431,7 @@ int mbr_cbat9001_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 		line[5] = (char)data->par_second;
 		line[6] = (char)data->par_hundredth_sec;
 		line[7] = (char)data->par_thousandth_sec;
-		if (swap == MB_NO) {
+		if (swap == false) {
 			short_ptr = (short *)&line[8];
 			*short_ptr = data->roll_offset;
 			short_ptr = (short *)&line[10];
@@ -1562,7 +1552,6 @@ int mbr_cbat9001_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	/* get pointer to raw data structure */
 	struct mbf_cbat9001_struct *data = (struct mbf_cbat9001_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
@@ -1588,7 +1577,7 @@ int mbr_cbat9001_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 
 	/* write the record label */
 	label = RESON_NAV;
-	if (swap == MB_YES)
+	if (swap == true)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -1609,7 +1598,7 @@ int mbr_cbat9001_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 		line[5] = (char)data->pos_second;
 		line[6] = (char)data->pos_hundredth_sec;
 		line[7] = (char)data->pos_thousandth_sec;
-		if (swap == MB_NO) {
+		if (swap == false) {
 			int_ptr = (int *)&line[8];
 			*int_ptr = data->pos_latitude;
 			int_ptr = (int *)&line[12];
@@ -1697,7 +1686,6 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	/* get pointer to raw data structure */
 	struct mbf_cbat9001_struct *data = (struct mbf_cbat9001_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
@@ -1728,7 +1716,7 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	}
 
 	/* write the record label */
-	if (swap == MB_YES)
+	if (swap == true)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -1749,7 +1737,7 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 		line[5] = (char)data->svp_second;
 		line[6] = (char)data->svp_hundredth_sec;
 		line[7] = (char)data->svp_thousandth_sec;
-		if (swap == MB_NO) {
+		if (swap == false) {
 			int_ptr = (int *)&line[8];
 			*int_ptr = data->svp_latitude;
 			int_ptr = (int *)&line[12];
@@ -1764,7 +1752,7 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 		for (int i = 0; i < data->svp_num; i++) {
 			short_ptr = (short *)&line[16 + 4 * i];
 			short_ptr2 = (short *)&line[18 + 4 * i];
-			if (swap == MB_NO) {
+			if (swap == false) {
 
 				*short_ptr = (short)data->svp_depth[i];
 				*short_ptr2 = (short)data->svp_vel[i];
@@ -1827,7 +1815,6 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 	/* get pointer to raw data structure */
 	struct mbf_cbat9001_struct *data = (struct mbf_cbat9001_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -1860,7 +1847,7 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 
 	/* write the record label */
 	label = RESON_BATH_9001;
-	if (swap == MB_YES)
+	if (swap == true)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -1881,7 +1868,7 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 		line[5] = (char)data->second;
 		line[6] = (char)data->hundredth_sec;
 		line[7] = (char)data->thousandth_sec;
-		if (swap == MB_NO) {
+		if (swap == false) {
 			int_ptr = (int *)&line[8];
 			*int_ptr = data->latitude;
 			int_ptr = (int *)&line[12];
@@ -1922,7 +1909,7 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 		line[30] = (char)data->gain2;
 		line[31] = (char)data->gain3;
 
-		if (swap == MB_NO) {
+		if (swap == false) {
 			for (int i = 0; i < MBF_CBAT9001_MAXBEAMS; i++) {
 				beamarray = line + 32 + 12 * i;
 				short_ptr = (short *)beamarray;

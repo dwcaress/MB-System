@@ -81,10 +81,9 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 	double headingy = 0.0;
 
 	/* read the data */
-	int done = MB_NO;
-	while (done == MB_NO) {
+	bool done = false;
+	while (!done) {
 
-		/* print debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  About to read ping in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2       need_new_ping: %d\n", mb_io_ptr->need_new_ping);
@@ -106,22 +105,22 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 			    pointers of arrays passed into this function,
 			    as these pointers may have changed */
 			if (status == MB_SUCCESS && mb_io_ptr->new_kind == MB_DATA_DATA) {
-				if (mb_io_ptr->bath_arrays_reallocated == MB_YES) {
+				if (mb_io_ptr->bath_arrays_reallocated == true) {
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&beamflag, error);
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&bath, error);
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&bathlon, error);
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&bathlat, error);
-					mb_io_ptr->bath_arrays_reallocated = MB_NO;
+					mb_io_ptr->bath_arrays_reallocated = false;
 				}
-				if (mb_io_ptr->amp_arrays_reallocated == MB_YES) {
+				if (mb_io_ptr->amp_arrays_reallocated == true) {
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&amp, error);
-					mb_io_ptr->amp_arrays_reallocated = MB_NO;
+					mb_io_ptr->amp_arrays_reallocated = false;
 				}
-				if (mb_io_ptr->ss_arrays_reallocated == MB_YES) {
+				if (mb_io_ptr->ss_arrays_reallocated == true) {
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&ss, error);
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&sslon, error);
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&sslat, error);
-					mb_io_ptr->ss_arrays_reallocated = MB_NO;
+					mb_io_ptr->ss_arrays_reallocated = false;
 				}
 			}
 
@@ -140,7 +139,7 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 
 			/* set errors if not survey data */
 			if (status == MB_SUCCESS) {
-				mb_io_ptr->need_new_ping = MB_NO;
+				mb_io_ptr->need_new_ping = false;
 				if (mb_io_ptr->new_kind == MB_DATA_DATA)
 					mb_io_ptr->ping_count++;
 				else if (mb_io_ptr->new_kind == MB_DATA_COMMENT) {
@@ -184,7 +183,6 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 			mb_io_ptr->old_lat = mb_io_ptr->new_lat;
 		}
 
-		/* print debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  New ping read in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2       need_new_ping: %d\n", mb_io_ptr->need_new_ping);
@@ -228,7 +226,6 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 			}
 		}
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping checked by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -345,7 +342,6 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 			}
 		}
 
-		/* print debug statements */
 		if (verbose >= 4 && mb_io_ptr->new_kind == MB_DATA_DATA &&
 		    (status == MB_SUCCESS || (*error<MB_ERROR_NO_ERROR && * error> MB_ERROR_COMMENT && mb_io_ptr->pings_read == 1))) {
 			fprintf(stderr, "\ndbg4  New ping binned by MBIO function <%s>\n", __func__);
@@ -381,69 +377,68 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 
 		/* if data is ok but more pings needed keep reading */
 		if (status == MB_SUCCESS && mb_io_ptr->new_kind == MB_DATA_DATA && mb_io_ptr->pings_binned < mb_io_ptr->pings_avg) {
-			done = MB_NO;
-			mb_io_ptr->need_new_ping = MB_YES;
-			reset_last = MB_YES;
+			done = false;
+			mb_io_ptr->need_new_ping = true;
+			reset_last = true;
 		}
 
 		/* if data is ok and enough pings binned then done */
 		else if (status == MB_SUCCESS && mb_io_ptr->new_kind == MB_DATA_DATA && mb_io_ptr->pings_binned >= mb_io_ptr->pings_avg) {
-			done = MB_YES;
-			mb_io_ptr->need_new_ping = MB_YES;
-			reset_last = MB_YES;
+			done = true;
+			mb_io_ptr->need_new_ping = true;
+			reset_last = true;
 		}
 
 		/* if data gap and only one ping read and more
 		    pings needed set error save flag and keep reading */
 		else if (*error == MB_ERROR_TIME_GAP && mb_io_ptr->new_kind == MB_DATA_DATA && mb_io_ptr->pings_read == 1 &&
 		         mb_io_ptr->pings_avg > 1) {
-			done = MB_NO;
-			mb_io_ptr->need_new_ping = MB_YES;
+			done = false;
+			mb_io_ptr->need_new_ping = true;
 			mb_io_ptr->error_save = *error;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			reset_last = MB_YES;
+			reset_last = true;
 		}
 
 		/* if other kind of data and need more pings
 		    then keep reading */
 		else if ((*error == MB_ERROR_OTHER || *error == MB_ERROR_UNINTELLIGIBLE) &&
 		         mb_io_ptr->pings_binned < mb_io_ptr->pings_avg) {
-			done = MB_NO;
-			mb_io_ptr->need_new_ping = MB_YES;
+			done = false;
+			mb_io_ptr->need_new_ping = true;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			reset_last = MB_NO;
+			reset_last = false;
 		}
 
 		/* if error and only one ping read then done */
 		else if (*error != MB_ERROR_NO_ERROR && mb_io_ptr->pings_read <= 1) {
-			done = MB_YES;
-			mb_io_ptr->need_new_ping = MB_YES;
+			done = true;
+			mb_io_ptr->need_new_ping = true;
 			if (*error == MB_ERROR_TIME_GAP || *error == MB_ERROR_OUT_BOUNDS)
-				reset_last = MB_YES;
+				reset_last = true;
 			else
-				reset_last = MB_NO;
+				reset_last = false;
 		}
 
 		/* if error and more than one ping read,
 		    then done but save the ping */
 		else if (*error != MB_ERROR_NO_ERROR) {
-			done = MB_YES;
-			mb_io_ptr->need_new_ping = MB_NO;
+			done = true;
+			mb_io_ptr->need_new_ping = false;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			reset_last = MB_NO;
+			reset_last = false;
 		}
 
 		/* if needed reset "last" pings */
-		if (reset_last == MB_YES) {
+		if (reset_last == true) {
 			mb_io_ptr->last_time_d = mb_io_ptr->new_time_d;
 			mb_io_ptr->last_lon = mb_io_ptr->new_lon;
 			mb_io_ptr->last_lat = mb_io_ptr->new_lat;
 		}
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  End of reading loop in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Current status values:\n");
@@ -539,7 +534,6 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 			}
 		}
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Distance and Speed Calculated in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Speed and Distance Related Values:\n");
@@ -610,7 +604,7 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 				sslat[i] = 0.0;
 			}
 		}
-		if (mb_io_ptr->variable_beams == MB_NO) {
+		if (mb_io_ptr->variable_beams == false) {
 			*nbath = mb_io_ptr->beams_bath_max;
 			*namp = mb_io_ptr->beams_amp_max;
 			*nss = mb_io_ptr->pixels_ss_max;

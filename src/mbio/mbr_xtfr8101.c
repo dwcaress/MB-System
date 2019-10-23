@@ -25,6 +25,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -69,9 +70,9 @@ int mbr_info_xtfr8101(int verbose, int *system, int *beams_bath_max, int *beams_
 	    MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
@@ -167,7 +168,7 @@ int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error) {
 	int *fileheaderread = (int *)&(mb_io_ptr->save1);
 	double *pixel_size = &mb_io_ptr->saved1;
 	double *swath_width = &mb_io_ptr->saved2;
-	*fileheaderread = MB_NO;
+	*fileheaderread = false;
 	*pixel_size = 0.0;
 	*swath_width = 0.0;
 
@@ -253,11 +254,11 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	double timetag, heave, roll, pitch, heading;
 
 	/* read file header if required */
-	if (*fileheaderread == MB_NO) {
+	if (*fileheaderread == false) {
 		read_len = fread(line, 1, MBF_XTFR8101_FILEHEADERLEN, mb_io_ptr->mbfp);
 		if (read_len == MBF_XTFR8101_FILEHEADERLEN) {
 			/* extract data from buffer */
-			*fileheaderread = MB_YES;
+			*fileheaderread = true;
 			status = MB_SUCCESS;
 			int index = 0;
 			fileheader->FileFormat = line[index];
@@ -273,7 +274,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			for (int i = 0; i < 16; i++)
 				fileheader->SonarName[i] = line[index + i];
 			index += 16;
-			mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->SonarType));
+			mb_get_binary_short(true, &line[index], (short int *)&(fileheader->SonarType));
 			index += 2;
 			for (int i = 0; i < 64; i++)
 				fileheader->NoteString[i] = line[index + i];
@@ -281,23 +282,23 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			for (int i = 0; i < 64; i++)
 				fileheader->ThisFileName[i] = line[index + i];
 			index += 64;
-			mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->NavUnits));
+			mb_get_binary_short(true, &line[index], (short int *)&(fileheader->NavUnits));
 			index += 2;
-			mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->NumberOfSonarChannels));
+			mb_get_binary_short(true, &line[index], (short int *)&(fileheader->NumberOfSonarChannels));
 			index += 2;
-			mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->NumberOfBathymetryChannels));
+			mb_get_binary_short(true, &line[index], (short int *)&(fileheader->NumberOfBathymetryChannels));
 			index += 2;
-			mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->Reserved1));
+			mb_get_binary_short(true, &line[index], (short int *)&(fileheader->Reserved1));
 			index += 2;
-			mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->Reserved2));
+			mb_get_binary_short(true, &line[index], (short int *)&(fileheader->Reserved2));
 			index += 2;
-			mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->Reserved3));
+			mb_get_binary_short(true, &line[index], (short int *)&(fileheader->Reserved3));
 			index += 2;
-			mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->Reserved4));
+			mb_get_binary_short(true, &line[index], (short int *)&(fileheader->Reserved4));
 			index += 2;
-			mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->Reserved5));
+			mb_get_binary_short(true, &line[index], (short int *)&(fileheader->Reserved5));
 			index += 2;
-			mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->Reserved6));
+			mb_get_binary_short(true, &line[index], (short int *)&(fileheader->Reserved6));
 			index += 2;
 			for (int i = 0; i < 12; i++)
 				fileheader->ProjectionType[i] = line[index + i];
@@ -305,69 +306,69 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			for (int i = 0; i < 10; i++)
 				fileheader->SpheroidType[i] = line[index + i];
 			index += 10;
-			mb_get_binary_int(MB_YES, &line[index], (int *)&(fileheader->NavigationLatency));
+			mb_get_binary_int(true, &line[index], (int *)&(fileheader->NavigationLatency));
 			index += 4;
-			mb_get_binary_float(MB_YES, &line[index], &(fileheader->OriginY));
+			mb_get_binary_float(true, &line[index], &(fileheader->OriginY));
 			index += 4;
-			mb_get_binary_float(MB_YES, &line[index], &(fileheader->OriginX));
+			mb_get_binary_float(true, &line[index], &(fileheader->OriginX));
 			index += 4;
-			mb_get_binary_float(MB_YES, &line[index], &(fileheader->NavOffsetY));
+			mb_get_binary_float(true, &line[index], &(fileheader->NavOffsetY));
 			index += 4;
-			mb_get_binary_float(MB_YES, &line[index], &(fileheader->NavOffsetX));
+			mb_get_binary_float(true, &line[index], &(fileheader->NavOffsetX));
 			index += 4;
-			mb_get_binary_float(MB_YES, &line[index], &(fileheader->NavOffsetZ));
+			mb_get_binary_float(true, &line[index], &(fileheader->NavOffsetZ));
 			index += 4;
-			mb_get_binary_float(MB_YES, &line[index], &(fileheader->NavOffsetYaw));
+			mb_get_binary_float(true, &line[index], &(fileheader->NavOffsetYaw));
 			index += 4;
-			mb_get_binary_float(MB_YES, &line[index], &(fileheader->MRUOffsetY));
+			mb_get_binary_float(true, &line[index], &(fileheader->MRUOffsetY));
 			index += 4;
-			mb_get_binary_float(MB_YES, &line[index], &(fileheader->MRUOffsetX));
+			mb_get_binary_float(true, &line[index], &(fileheader->MRUOffsetX));
 			index += 4;
-			mb_get_binary_float(MB_YES, &line[index], &(fileheader->MRUOffsetZ));
+			mb_get_binary_float(true, &line[index], &(fileheader->MRUOffsetZ));
 			index += 4;
-			mb_get_binary_float(MB_YES, &line[index], &(fileheader->MRUOffsetYaw));
+			mb_get_binary_float(true, &line[index], &(fileheader->MRUOffsetYaw));
 			index += 4;
-			mb_get_binary_float(MB_YES, &line[index], &(fileheader->MRUOffsetPitch));
+			mb_get_binary_float(true, &line[index], &(fileheader->MRUOffsetPitch));
 			index += 4;
-			mb_get_binary_float(MB_YES, &line[index], &(fileheader->MRUOffsetRoll));
+			mb_get_binary_float(true, &line[index], &(fileheader->MRUOffsetRoll));
 			index += 4;
 			for (ichan = 0; ichan < 6; ichan++) {
 				fileheader->chaninfo[ichan].TypeOfChannel = line[index];
 				index++;
 				fileheader->chaninfo[ichan].SubChannelNumber = line[index];
 				index++;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->chaninfo[ichan].CorrectionFlags));
+				mb_get_binary_short(true, &line[index], (short int *)&(fileheader->chaninfo[ichan].CorrectionFlags));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->chaninfo[ichan].UniPolar));
+				mb_get_binary_short(true, &line[index], (short int *)&(fileheader->chaninfo[ichan].UniPolar));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->chaninfo[ichan].BytesPerSample));
+				mb_get_binary_short(true, &line[index], (short int *)&(fileheader->chaninfo[ichan].BytesPerSample));
 				index += 2;
-				mb_get_binary_int(MB_YES, &line[index], (int *)&(fileheader->chaninfo[ichan].SamplesPerChannel));
+				mb_get_binary_int(true, &line[index], (int *)&(fileheader->chaninfo[ichan].SamplesPerChannel));
 				index += 4;
 				for (int i = 0; i < 16; i++)
 					fileheader->chaninfo[ichan].ChannelName[i] = line[index + i];
 				index += 16;
-				mb_get_binary_float(MB_YES, &line[index], &(fileheader->chaninfo[ichan].VoltScale));
+				mb_get_binary_float(true, &line[index], &(fileheader->chaninfo[ichan].VoltScale));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(fileheader->chaninfo[ichan].Frequency));
+				mb_get_binary_float(true, &line[index], &(fileheader->chaninfo[ichan].Frequency));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(fileheader->chaninfo[ichan].HorizBeamAngle));
+				mb_get_binary_float(true, &line[index], &(fileheader->chaninfo[ichan].HorizBeamAngle));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(fileheader->chaninfo[ichan].TiltAngle));
+				mb_get_binary_float(true, &line[index], &(fileheader->chaninfo[ichan].TiltAngle));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(fileheader->chaninfo[ichan].BeamWidth));
+				mb_get_binary_float(true, &line[index], &(fileheader->chaninfo[ichan].BeamWidth));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(fileheader->chaninfo[ichan].OffsetX));
+				mb_get_binary_float(true, &line[index], &(fileheader->chaninfo[ichan].OffsetX));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(fileheader->chaninfo[ichan].OffsetY));
+				mb_get_binary_float(true, &line[index], &(fileheader->chaninfo[ichan].OffsetY));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(fileheader->chaninfo[ichan].OffsetZ));
+				mb_get_binary_float(true, &line[index], &(fileheader->chaninfo[ichan].OffsetZ));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(fileheader->chaninfo[ichan].OffsetYaw));
+				mb_get_binary_float(true, &line[index], &(fileheader->chaninfo[ichan].OffsetYaw));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(fileheader->chaninfo[ichan].OffsetPitch));
+				mb_get_binary_float(true, &line[index], &(fileheader->chaninfo[ichan].OffsetPitch));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(fileheader->chaninfo[ichan].OffsetRoll));
+				mb_get_binary_float(true, &line[index], &(fileheader->chaninfo[ichan].OffsetRoll));
 				index += 4;
 				for (int i = 0; i < 56; i++)
 					fileheader->chaninfo[ichan].ReservedArea[i] = line[index + i];
@@ -377,16 +378,15 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* if NavUnits indicates use of projected coordinates (the format spec
 			    indicates the projection parameters are unused!) assume UTM zone 1N
 			    and set up the projection */
-			if (fileheader->NavUnits == 0 && mb_io_ptr->projection_initialized == MB_NO) {
+			if (fileheader->NavUnits == 0 && mb_io_ptr->projection_initialized == false) {
 				/* initialize UTM projection */
 				const int utm_zone = (int)(((RTD * 0.0 + 183.0) / 6.0) + 0.5);
                                 char projection[MB_NAME_LENGTH];
 				sprintf(projection, "UTM%2.2dN", utm_zone);
 				mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
-				mb_io_ptr->projection_initialized = MB_YES;
+				mb_io_ptr->projection_initialized = true;
 			}
 
-			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg5       FileFormat:                 %d\n", fileheader->FileFormat);
@@ -451,10 +451,10 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* look for next recognizable record */
-	int done = MB_NO;
-	while (status == MB_SUCCESS && done == MB_NO) {
+	bool done = false;
+	while (status == MB_SUCCESS && !done) {
 		/* find the next packet beginning */
-		found = MB_NO;
+		found = false;
 		skip = 0;
 		read_len = fread(line, 1, 2, mb_io_ptr->mbfp);
 		if (read_len != 2) {
@@ -462,8 +462,8 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			*error = MB_ERROR_EOF;
 		}
 		else if (((mb_u_char)line[0]) == 0xce && ((mb_u_char)line[1] == 0xfa))
-			found = MB_YES;
-		while (status == MB_SUCCESS && found == MB_NO) {
+			found = true;
+		while (status == MB_SUCCESS && found == false) {
 			line[0] = line[1];
 			read_len = fread(&(line[1]), 1, 1, mb_io_ptr->mbfp);
 			skip++;
@@ -472,7 +472,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				*error = MB_ERROR_EOF;
 			}
 			else if (((mb_u_char)line[0]) == 0xce && ((mb_u_char)line[1] == 0xfa))
-				found = MB_YES;
+				found = true;
 		}
 
 		/* read the next packet header */
@@ -488,13 +488,13 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			index++;
 			packetheader.SubChannelNumber = line[index];
 			index++;
-			mb_get_binary_short(MB_YES, &line[index], (short int *)&(packetheader.NumChansToFollow));
+			mb_get_binary_short(true, &line[index], (short int *)&(packetheader.NumChansToFollow));
 			index += 2;
-			mb_get_binary_short(MB_YES, &line[index], (short int *)&(packetheader.Reserved1[0]));
+			mb_get_binary_short(true, &line[index], (short int *)&(packetheader.Reserved1[0]));
 			index += 2;
-			mb_get_binary_short(MB_YES, &line[index], (short int *)&(packetheader.Reserved1[1]));
+			mb_get_binary_short(true, &line[index], (short int *)&(packetheader.Reserved1[1]));
 			index += 2;
-			mb_get_binary_int(MB_YES, &line[index], (int *)&(packetheader.NumBytesThisRecord));
+			mb_get_binary_int(true, &line[index], (int *)&(packetheader.NumBytesThisRecord));
 			index += 4;
 
 			/* check packet header details */
@@ -505,7 +505,6 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				packetheader.HeaderType = 99;
 			}
 
-			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg5       Bytes Skipped:              %d\n", skip);
@@ -522,7 +521,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
-			done = MB_YES;
+			done = true;
 		}
 
 		/* read rest of attitude packet */
@@ -537,20 +536,20 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				/* parse the rest of the attitude record */
 				int index = 0;
 				for (int i = 0; i < 4; i++) {
-					mb_get_binary_int(MB_YES, &line[index], (int *)&(attitudeheader->Reserved2[i]));
+					mb_get_binary_int(true, &line[index], (int *)&(attitudeheader->Reserved2[i]));
 					index += 4;
 				}
-				mb_get_binary_float(MB_YES, &line[index], &(attitudeheader->Pitch));
+				mb_get_binary_float(true, &line[index], &(attitudeheader->Pitch));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(attitudeheader->Roll));
+				mb_get_binary_float(true, &line[index], &(attitudeheader->Roll));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(attitudeheader->Heave));
+				mb_get_binary_float(true, &line[index], &(attitudeheader->Heave));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(attitudeheader->Yaw));
+				mb_get_binary_float(true, &line[index], &(attitudeheader->Yaw));
 				index += 4;
-				mb_get_binary_int(MB_YES, &line[index], (int *)&(attitudeheader->TimeTag));
+				mb_get_binary_int(true, &line[index], (int *)&(attitudeheader->TimeTag));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(attitudeheader->Heading));
+				mb_get_binary_float(true, &line[index], &(attitudeheader->Heading));
 				index += 4;
 				for (int i = 0; i < 10; i++) {
 					attitudeheader->Reserved3[i] = line[index];
@@ -568,7 +567,6 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				mb_attint_add(verbose, mbio_ptr, timetag, heave, roll, pitch, error);
 				mb_hedint_add(verbose, mbio_ptr, timetag, heading, error);
 
-				/* print debug statements */
 				if (verbose >= 5) {
 					fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       MagicNumber:                %d %d %x%x\n",
@@ -596,7 +594,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 		}
 
@@ -611,7 +609,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			read_len = fread(line, 1, 242, mb_io_ptr->mbfp);
 			if (read_len == 242) {
 				int index = 0;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(sidescanheader->Year));
+				mb_get_binary_short(true, &line[index], (short int *)&(sidescanheader->Year));
 				index += 2;
 				sidescanheader->Month = line[index];
 				index++;
@@ -625,69 +623,69 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				index++;
 				sidescanheader->HSeconds = line[index];
 				index++;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(sidescanheader->JulianDay));
+				mb_get_binary_short(true, &line[index], (short int *)&(sidescanheader->JulianDay));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(sidescanheader->CurrentLineID));
+				mb_get_binary_short(true, &line[index], (short int *)&(sidescanheader->CurrentLineID));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(sidescanheader->EventNumber));
+				mb_get_binary_short(true, &line[index], (short int *)&(sidescanheader->EventNumber));
 				index += 2;
-				mb_get_binary_int(MB_YES, &line[index], (int *)&(sidescanheader->PingNumber));
+				mb_get_binary_int(true, &line[index], (int *)&(sidescanheader->PingNumber));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->SoundVelocity));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->SoundVelocity));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->OceanTide));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->OceanTide));
 				index += 4;
-				mb_get_binary_int(MB_YES, &line[index], (int *)&(sidescanheader->Reserved2));
+				mb_get_binary_int(true, &line[index], (int *)&(sidescanheader->Reserved2));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->ConductivityFreq));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->ConductivityFreq));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->TemperatureFreq));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->TemperatureFreq));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->PressureFreq));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->PressureFreq));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->PressureTemp));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->PressureTemp));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->Conductivity));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->Conductivity));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->WaterTemperature));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->WaterTemperature));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->Pressure));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->Pressure));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->ComputedSoundVelocity));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->ComputedSoundVelocity));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->MagX));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->MagX));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->MagY));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->MagY));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->MagZ));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->MagZ));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->AuxVal1));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->AuxVal1));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->AuxVal2));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->AuxVal2));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->AuxVal3));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->AuxVal3));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->AuxVal4));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->AuxVal4));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->AuxVal5));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->AuxVal5));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->AuxVal6));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->AuxVal6));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->SpeedLog));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->SpeedLog));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->Turbidity));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->Turbidity));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->ShipSpeed));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->ShipSpeed));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->ShipGyro));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->ShipGyro));
 				index += 4;
-				mb_get_binary_double(MB_YES, &line[index], &(sidescanheader->ShipYcoordinate));
+				mb_get_binary_double(true, &line[index], &(sidescanheader->ShipYcoordinate));
 				index += 8;
-				mb_get_binary_double(MB_YES, &line[index], &(sidescanheader->ShipXcoordinate));
+				mb_get_binary_double(true, &line[index], &(sidescanheader->ShipXcoordinate));
 				index += 8;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(sidescanheader->ShipAltitude));
+				mb_get_binary_short(true, &line[index], (short int *)&(sidescanheader->ShipAltitude));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(sidescanheader->ShipDepth));
+				mb_get_binary_short(true, &line[index], (short int *)&(sidescanheader->ShipDepth));
 				index += 2;
 				sidescanheader->FixTimeHour = line[index];
 				index++;
@@ -697,45 +695,45 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				index++;
 				sidescanheader->Reserved4 = line[index];
 				index++;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->SensorSpeed));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->SensorSpeed));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->KP));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->KP));
 				index += 4;
-				mb_get_binary_double(MB_YES, &line[index], &(sidescanheader->SensorYcoordinate));
+				mb_get_binary_double(true, &line[index], &(sidescanheader->SensorYcoordinate));
 				index += 8;
-				mb_get_binary_double(MB_YES, &line[index], &(sidescanheader->SensorXcoordinate));
+				mb_get_binary_double(true, &line[index], &(sidescanheader->SensorXcoordinate));
 				index += 8;
-				mb_get_binary_short(MB_YES, &line[index], &(sidescanheader->Reserved6));
+				mb_get_binary_short(true, &line[index], &(sidescanheader->Reserved6));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], &(sidescanheader->RangeToSensor));
+				mb_get_binary_short(true, &line[index], &(sidescanheader->RangeToSensor));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], &(sidescanheader->BearingToSensor));
+				mb_get_binary_short(true, &line[index], &(sidescanheader->BearingToSensor));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], &(sidescanheader->CableOut));
+				mb_get_binary_short(true, &line[index], &(sidescanheader->CableOut));
 				index += 2;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->Layback));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->Layback));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->CableTension));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->CableTension));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->SensorDepth));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->SensorDepth));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->SensorPrimaryAltitude));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->SensorPrimaryAltitude));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->SensorAuxAltitude));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->SensorAuxAltitude));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->SensorPitch));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->SensorPitch));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->SensorRoll));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->SensorRoll));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->SensorHeading));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->SensorHeading));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->Heave));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->Heave));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->Yaw));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->Yaw));
 				index += 4;
-				mb_get_binary_int(MB_YES, &line[index], &(sidescanheader->AttitudeTimeTag));
+				mb_get_binary_int(true, &line[index], &(sidescanheader->AttitudeTimeTag));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->DOT));
+				mb_get_binary_float(true, &line[index], &(sidescanheader->DOT));
 				index += 4;
 				for (int i = 0; i < 20; i++) {
 					sidescanheader->ReservedSpace[i] = line[index];
@@ -745,7 +743,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 
 			/* read and parse the port sidescan channel header */
@@ -753,49 +751,49 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				read_len = fread(line, 1, 64, mb_io_ptr->mbfp);
 			if (status == MB_SUCCESS && read_len == 64) {
 				int index = 0;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanportheader->ChannelNumber));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->ChannelNumber));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanportheader->DownsampleMethod));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->DownsampleMethod));
 				index += 2;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanportheader->SlantRange));
+				mb_get_binary_float(true, &line[index], &(pingchanportheader->SlantRange));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanportheader->GroundRange));
+				mb_get_binary_float(true, &line[index], &(pingchanportheader->GroundRange));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanportheader->TimeDelay));
+				mb_get_binary_float(true, &line[index], &(pingchanportheader->TimeDelay));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanportheader->TimeDuration));
+				mb_get_binary_float(true, &line[index], &(pingchanportheader->TimeDuration));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanportheader->SecondsPerPing));
+				mb_get_binary_float(true, &line[index], &(pingchanportheader->SecondsPerPing));
 				index += 4;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanportheader->ProcessingFlags));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->ProcessingFlags));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanportheader->Frequency));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->Frequency));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanportheader->InitialGainCode));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->InitialGainCode));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanportheader->GainCode));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->GainCode));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanportheader->BandWidth));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->BandWidth));
 				index += 2;
-				mb_get_binary_int(MB_YES, &line[index], (int *)&(pingchanportheader->ContactNumber));
+				mb_get_binary_int(true, &line[index], (int *)&(pingchanportheader->ContactNumber));
 				index += 4;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanportheader->ContactClassification));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->ContactClassification));
 				index += 2;
 				pingchanportheader->ContactSubNumber = (mb_u_char)line[index];
 				index++;
 				pingchanportheader->ContactType = (mb_u_char)line[index];
 				index++;
-				mb_get_binary_int(MB_YES, &line[index], (int *)&(pingchanportheader->NumSamples));
+				mb_get_binary_int(true, &line[index], (int *)&(pingchanportheader->NumSamples));
 				index += 4;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanportheader->Reserved));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->Reserved));
 				index += 2;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanportheader->ContactTimeOffTrack));
+				mb_get_binary_float(true, &line[index], &(pingchanportheader->ContactTimeOffTrack));
 				index += 4;
 				pingchanportheader->ContactCloseNumber = (mb_u_char)line[index];
 				index++;
 				pingchanportheader->Reserved2 = (mb_u_char)line[index];
 				index++;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanportheader->FixedVSOP));
+				mb_get_binary_float(true, &line[index], &(pingchanportheader->FixedVSOP));
 				index += 4;
 				for (int i = 0; i < 6; i++) {
 					pingchanportheader->ReservedSpace[i] = (mb_u_char)line[index];
@@ -810,7 +808,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 
 			/* check for corrupted record */
@@ -840,7 +838,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				else if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 2) {
 					int index = 0;
 					for (int i = 0; i < pingchanportheader->NumSamples; i++) {
-						mb_get_binary_short(MB_YES, &line[index], (short *)&(data->ssrawport[i]));
+						mb_get_binary_short(true, &line[index], (short *)&(data->ssrawport[i]));
 						index += 2;
 					}
 				}
@@ -848,7 +846,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 
 			/* read and parse the starboard sidescan channel header */
@@ -856,49 +854,49 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				read_len = fread(line, 1, 64, mb_io_ptr->mbfp);
 			if (status == MB_SUCCESS && read_len == 64) {
 				int index = 0;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanstbdheader->ChannelNumber));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->ChannelNumber));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanstbdheader->DownsampleMethod));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->DownsampleMethod));
 				index += 2;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanstbdheader->SlantRange));
+				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->SlantRange));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanstbdheader->GroundRange));
+				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->GroundRange));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanstbdheader->TimeDelay));
+				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->TimeDelay));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanstbdheader->TimeDuration));
+				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->TimeDuration));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanstbdheader->SecondsPerPing));
+				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->SecondsPerPing));
 				index += 4;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanstbdheader->ProcessingFlags));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->ProcessingFlags));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanstbdheader->Frequency));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->Frequency));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanstbdheader->InitialGainCode));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->InitialGainCode));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanstbdheader->GainCode));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->GainCode));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanstbdheader->BandWidth));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->BandWidth));
 				index += 2;
-				mb_get_binary_int(MB_YES, &line[index], (int *)&(pingchanstbdheader->ContactNumber));
+				mb_get_binary_int(true, &line[index], (int *)&(pingchanstbdheader->ContactNumber));
 				index += 4;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanstbdheader->ContactClassification));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->ContactClassification));
 				index += 2;
 				pingchanstbdheader->ContactSubNumber = (mb_u_char)line[index];
 				index++;
 				pingchanstbdheader->ContactType = (mb_u_char)line[index];
 				index++;
-				mb_get_binary_int(MB_YES, &line[index], (int *)&(pingchanstbdheader->NumSamples));
+				mb_get_binary_int(true, &line[index], (int *)&(pingchanstbdheader->NumSamples));
 				index += 4;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanstbdheader->Reserved));
+				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->Reserved));
 				index += 2;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanstbdheader->ContactTimeOffTrack));
+				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->ContactTimeOffTrack));
 				index += 4;
 				pingchanstbdheader->ContactCloseNumber = (mb_u_char)line[index];
 				index++;
 				pingchanstbdheader->Reserved2 = (mb_u_char)line[index];
 				index++;
-				mb_get_binary_float(MB_YES, &line[index], &(pingchanstbdheader->FixedVSOP));
+				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->FixedVSOP));
 				index += 4;
 				for (int i = 0; i < 6; i++) {
 					pingchanstbdheader->ReservedSpace[i] = (mb_u_char)line[index];
@@ -913,7 +911,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 
 			/* check for corrupted record */
@@ -943,7 +941,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				else if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 2) {
 					int index = 0;
 					for (int i = 0; i < pingchanstbdheader->NumSamples; i++) {
-						mb_get_binary_short(MB_YES, &line[index], (short *)&(data->ssrawstbd[i]));
+						mb_get_binary_short(true, &line[index], (short *)&(data->ssrawstbd[i]));
 						index += 2;
 					}
 				}
@@ -951,10 +949,9 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 
-			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg5       MagicNumber:                %d %d %x%x\n",
@@ -1097,7 +1094,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				/* parse the rest of the bathymetry header */
 				int index = 0;
 
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(bathheader->Year));
+				mb_get_binary_short(true, &line[index], (short int *)&(bathheader->Year));
 				index += 2;
 				bathheader->Month = line[index];
 				index++;
@@ -1111,69 +1108,69 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				index++;
 				bathheader->HSeconds = line[index];
 				index++;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(bathheader->JulianDay));
+				mb_get_binary_short(true, &line[index], (short int *)&(bathheader->JulianDay));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(bathheader->CurrentLineID));
+				mb_get_binary_short(true, &line[index], (short int *)&(bathheader->CurrentLineID));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(bathheader->EventNumber));
+				mb_get_binary_short(true, &line[index], (short int *)&(bathheader->EventNumber));
 				index += 2;
-				mb_get_binary_int(MB_YES, &line[index], (int *)&(bathheader->PingNumber));
+				mb_get_binary_int(true, &line[index], (int *)&(bathheader->PingNumber));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->SoundVelocity));
+				mb_get_binary_float(true, &line[index], &(bathheader->SoundVelocity));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->OceanTide));
+				mb_get_binary_float(true, &line[index], &(bathheader->OceanTide));
 				index += 4;
-				mb_get_binary_int(MB_YES, &line[index], (int *)&(bathheader->Reserved2));
+				mb_get_binary_int(true, &line[index], (int *)&(bathheader->Reserved2));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->ConductivityFreq));
+				mb_get_binary_float(true, &line[index], &(bathheader->ConductivityFreq));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->TemperatureFreq));
+				mb_get_binary_float(true, &line[index], &(bathheader->TemperatureFreq));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->PressureFreq));
+				mb_get_binary_float(true, &line[index], &(bathheader->PressureFreq));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->PressureTemp));
+				mb_get_binary_float(true, &line[index], &(bathheader->PressureTemp));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->Conductivity));
+				mb_get_binary_float(true, &line[index], &(bathheader->Conductivity));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->WaterTemperature));
+				mb_get_binary_float(true, &line[index], &(bathheader->WaterTemperature));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->Pressure));
+				mb_get_binary_float(true, &line[index], &(bathheader->Pressure));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->ComputedSoundVelocity));
+				mb_get_binary_float(true, &line[index], &(bathheader->ComputedSoundVelocity));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->MagX));
+				mb_get_binary_float(true, &line[index], &(bathheader->MagX));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->MagY));
+				mb_get_binary_float(true, &line[index], &(bathheader->MagY));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->MagZ));
+				mb_get_binary_float(true, &line[index], &(bathheader->MagZ));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->AuxVal1));
+				mb_get_binary_float(true, &line[index], &(bathheader->AuxVal1));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->AuxVal2));
+				mb_get_binary_float(true, &line[index], &(bathheader->AuxVal2));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->AuxVal3));
+				mb_get_binary_float(true, &line[index], &(bathheader->AuxVal3));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->AuxVal4));
+				mb_get_binary_float(true, &line[index], &(bathheader->AuxVal4));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->AuxVal5));
+				mb_get_binary_float(true, &line[index], &(bathheader->AuxVal5));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->AuxVal6));
+				mb_get_binary_float(true, &line[index], &(bathheader->AuxVal6));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->SpeedLog));
+				mb_get_binary_float(true, &line[index], &(bathheader->SpeedLog));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->Turbidity));
+				mb_get_binary_float(true, &line[index], &(bathheader->Turbidity));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->ShipSpeed));
+				mb_get_binary_float(true, &line[index], &(bathheader->ShipSpeed));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->ShipGyro));
+				mb_get_binary_float(true, &line[index], &(bathheader->ShipGyro));
 				index += 4;
-				mb_get_binary_double(MB_YES, &line[index], &(bathheader->ShipYcoordinate));
+				mb_get_binary_double(true, &line[index], &(bathheader->ShipYcoordinate));
 				index += 8;
-				mb_get_binary_double(MB_YES, &line[index], &(bathheader->ShipXcoordinate));
+				mb_get_binary_double(true, &line[index], &(bathheader->ShipXcoordinate));
 				index += 8;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(bathheader->ShipAltitude));
+				mb_get_binary_short(true, &line[index], (short int *)&(bathheader->ShipAltitude));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], (short int *)&(bathheader->ShipDepth));
+				mb_get_binary_short(true, &line[index], (short int *)&(bathheader->ShipDepth));
 				index += 2;
 				bathheader->FixTimeHour = line[index];
 				index++;
@@ -1183,45 +1180,45 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				index++;
 				bathheader->Reserved4 = line[index];
 				index++;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->SensorSpeed));
+				mb_get_binary_float(true, &line[index], &(bathheader->SensorSpeed));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->KP));
+				mb_get_binary_float(true, &line[index], &(bathheader->KP));
 				index += 4;
-				mb_get_binary_double(MB_YES, &line[index], &(bathheader->SensorYcoordinate));
+				mb_get_binary_double(true, &line[index], &(bathheader->SensorYcoordinate));
 				index += 8;
-				mb_get_binary_double(MB_YES, &line[index], &(bathheader->SensorXcoordinate));
+				mb_get_binary_double(true, &line[index], &(bathheader->SensorXcoordinate));
 				index += 8;
-				mb_get_binary_short(MB_YES, &line[index], &(bathheader->Reserved6));
+				mb_get_binary_short(true, &line[index], &(bathheader->Reserved6));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], &(bathheader->RangeToSensor));
+				mb_get_binary_short(true, &line[index], &(bathheader->RangeToSensor));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], &(bathheader->BearingToSensor));
+				mb_get_binary_short(true, &line[index], &(bathheader->BearingToSensor));
 				index += 2;
-				mb_get_binary_short(MB_YES, &line[index], &(bathheader->CableOut));
+				mb_get_binary_short(true, &line[index], &(bathheader->CableOut));
 				index += 2;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->Layback));
+				mb_get_binary_float(true, &line[index], &(bathheader->Layback));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->CableTension));
+				mb_get_binary_float(true, &line[index], &(bathheader->CableTension));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->SensorDepth));
+				mb_get_binary_float(true, &line[index], &(bathheader->SensorDepth));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->SensorPrimaryAltitude));
+				mb_get_binary_float(true, &line[index], &(bathheader->SensorPrimaryAltitude));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->SensorAuxAltitude));
+				mb_get_binary_float(true, &line[index], &(bathheader->SensorAuxAltitude));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->SensorPitch));
+				mb_get_binary_float(true, &line[index], &(bathheader->SensorPitch));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->SensorRoll));
+				mb_get_binary_float(true, &line[index], &(bathheader->SensorRoll));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->SensorHeading));
+				mb_get_binary_float(true, &line[index], &(bathheader->SensorHeading));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->Heave));
+				mb_get_binary_float(true, &line[index], &(bathheader->Heave));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->Yaw));
+				mb_get_binary_float(true, &line[index], &(bathheader->Yaw));
 				index += 4;
-				mb_get_binary_int(MB_YES, &line[index], &(bathheader->AttitudeTimeTag));
+				mb_get_binary_int(true, &line[index], &(bathheader->AttitudeTimeTag));
 				index += 4;
-				mb_get_binary_float(MB_YES, &line[index], &(bathheader->DOT));
+				mb_get_binary_float(true, &line[index], &(bathheader->DOT));
 				index += 4;
 				for (int i = 0; i < 20; i++) {
 					bathheader->ReservedSpace[i] = line[index];
@@ -1232,11 +1229,11 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				read_len = fread(line, 1, bathheader->packetheader.NumBytesThisRecord - 242 - 14, mb_io_ptr->mbfp);
 				if (read_len == bathheader->packetheader.NumBytesThisRecord - 242 - 14) {
 					/* check synch value */
-					mb_get_binary_int(MB_YES, &line[0], (int *)&(synch));
+					mb_get_binary_int(true, &line[0], (int *)&(synch));
 					if (synch != 65535) {
 						status = MB_FAILURE;
 						*error = MB_ERROR_UNINTELLIGIBLE;
-						done = MB_YES;
+						done = true;
 					}
 
 					/* handle RESON_PACKETID_RT_VERY_OLD */
@@ -1250,29 +1247,29 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 						index++;
 						reson8100rit->packet_subtype = line[index];
 						index++;
-						mb_get_binary_int(MB_NO, &line[index], (int *)&(reson8100rit->Seconds));
+						mb_get_binary_int(false, &line[index], (int *)&(reson8100rit->Seconds));
 						index += 4;
-						mb_get_binary_int(MB_NO, &line[index], (int *)&(reson8100rit->Millisecs));
+						mb_get_binary_int(false, &line[index], (int *)&(reson8100rit->Millisecs));
 						index += 4;
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->latency));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->latency));
 						index += 2;
 						reson8100rit->ping_number = 0;
 						reson8100rit->sonar_id = 0;
 						reson8100rit->sonar_model = 0;
 						reson8100rit->frequency = 0;
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->velocity));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->velocity));
 						index += 2;
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->sample_rate));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->sample_rate));
 						index += 2;
 						reson8100rit->pulse_width = (unsigned short)(mb_u_char)line[index];
 						index++;
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->ping_rate));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->ping_rate));
 						index += 2;
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->range_set));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->range_set));
 						index += 2;
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->power));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->power));
 						index += 2;
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->gain));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->gain));
 						index += 2;
 						index += 2; /* skip projector value */
 						reson8100rit->tvg_spread = (mb_u_char)line[index];
@@ -1293,10 +1290,10 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 						reson8100rit->spare[1] = 0;
 						reson8100rit->spare[2] = 0;
 						reson8100rit->temperature = 0;
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->beam_count));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->beam_count));
 						index += 2;
 						for (int i = 0; i < reson8100rit->beam_count; i++) {
-							mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->range[i]));
+							mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->range[i]));
 							reson8100rit->intensity[i] = 0;
 							index += 2;
 						}
@@ -1317,44 +1314,44 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 						index++;
 						reson8100rit->packet_subtype = line[index];
 						index++;
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->latency));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->latency));
 						index += 2;
-						mb_get_binary_int(MB_NO, &line[index], (int *)&(reson8100rit->Seconds));
+						mb_get_binary_int(false, &line[index], (int *)&(reson8100rit->Seconds));
 						index += 4;
-						mb_get_binary_int(MB_NO, &line[index], (int *)&(reson8100rit->Millisecs));
-						index += 4;
-
-						mb_get_binary_int(MB_NO, &line[index], (int *)&(reson8100rit->ping_number));
+						mb_get_binary_int(false, &line[index], (int *)&(reson8100rit->Millisecs));
 						index += 4;
 
-						mb_get_binary_int(MB_NO, &line[index], (int *)&(reson8100rit->sonar_id));
+						mb_get_binary_int(false, &line[index], (int *)&(reson8100rit->ping_number));
 						index += 4;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->sonar_model));
+						mb_get_binary_int(false, &line[index], (int *)&(reson8100rit->sonar_id));
+						index += 4;
+
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->sonar_model));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->frequency));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->frequency));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->velocity));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->velocity));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->sample_rate));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->sample_rate));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->ping_rate));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->ping_rate));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->range_set));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->range_set));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->power));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->power));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->gain));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->gain));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->pulse_width));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->pulse_width));
 						index += 2;
 
 						reson8100rit->tvg_spread = (mb_u_char)line[index];
@@ -1369,25 +1366,25 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 						reson8100rit->projector_beam_width = (mb_u_char)line[index];
 						index++;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->beam_width_num));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->beam_width_num));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->beam_width_denom));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->beam_width_denom));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->projector_angle));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->projector_angle));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->min_range));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->min_range));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->max_range));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->max_range));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->min_depth));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->min_depth));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->max_depth));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->max_depth));
 						index += 2;
 
 						reson8100rit->filters_active = (mb_u_char)line[index];
@@ -1402,14 +1399,14 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 						reson8100rit->spare[2] = (mb_u_char)line[index];
 						index++;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->temperature));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->temperature));
 						index += 2;
 
-						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->beam_count));
+						mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->beam_count));
 						index += 2;
 
 						for (int i = 0; i < reson8100rit->beam_count; i++) {
-							mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->range[i]));
+							mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->range[i]));
 							index += 2;
 						}
 						for (int i = 0; i < reson8100rit->beam_count / 2 + reson8100rit->beam_count % 2; i++) {
@@ -1417,23 +1414,22 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 							index++;
 						}
 						for (int i = 0; i < reson8100rit->beam_count; i++) {
-							mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->intensity[i]));
+							mb_get_binary_short(false, &line[index], (short int *)&(reson8100rit->intensity[i]));
 							index += 2;
 						}
 					}
 					else {
 						status = MB_FAILURE;
 						*error = MB_ERROR_UNINTELLIGIBLE;
-						done = MB_YES;
+						done = true;
 					}
 				}
 				else {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
-					done = MB_YES;
+					done = true;
 				}
 
-				/* print debug statements */
 				if (verbose >= 5) {
 					fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       MagicNumber:                %d %d %x%x\n",
@@ -1558,12 +1554,12 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				/* set success */
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
-				done = MB_YES;
+				done = true;
 			}
 			else {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				done = MB_YES;
+				done = true;
 			}
 		}
 
@@ -1576,7 +1572,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				if (read_len != 1) {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
-					done = MB_YES;
+					done = true;
 				}
 			}
 #ifdef MBR_XTFR8101_DEBUG
@@ -1610,7 +1606,6 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double angle, theta, phi;
 	double rr, xx, zz;
 	double lever_x, lever_y, lever_z;
-	int badtime;
 	double gain_correction;
 	double lon, lat;
 
@@ -1649,16 +1644,16 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_get_time(verbose, time_i, &time_d);
 
 		/* do check on time here - we sometimes get a bad fix */
-		badtime = MB_NO;
-		if (time_i[0] < 1970 && time_i[0] > 2100)
-			badtime = MB_YES;
-		if (time_i[1] < 0 && time_i[1] > 12)
-			badtime = MB_YES;
-		if (time_i[2] < 0 && time_i[2] > 31)
-			badtime = MB_YES;
-		if (badtime == MB_YES) {
+		bool badtime = false;
+		if (time_i[0] < 1970 || time_i[0] > 2100)
+			badtime = true;
+		if (time_i[1] < 0 || time_i[1] > 12)
+			badtime = true;
+		if (time_i[2] < 0 || time_i[2] > 31)
+			badtime = true;
+		if (badtime) {
 			if (verbose > 0)
-				fprintf(stderr, " Bad time from XTF in bathy header\n");
+				fprintf(stderr, "Bad time from XTF in bathy header\n");
 			data->kind = MB_DATA_NONE;
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
@@ -1676,7 +1671,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		    XTF allows projected coordinates like UTM but the format spec
 		    lists the projection specification values as unused!
 		    Assume UTM zone 1N as we have to assume something */
-		if (mb_io_ptr->projection_initialized == MB_YES) {
+		if (mb_io_ptr->projection_initialized == true) {
 			mb_proj_inverse(verbose, mb_io_ptr->pjptr, data->bathheader.SensorXcoordinate, data->bathheader.SensorYcoordinate,
 			                &lon, &lat, error);
 		}
@@ -1783,7 +1778,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			    - since the projection is initialized, it will be applied when data
 			    are extracted using mb_extract(), mb_extract_nav(), etc., so we have
 			    to reproject the lon lat values to eastings northings for now */
-			if (mb_io_ptr->projection_initialized == MB_YES) {
+			if (mb_io_ptr->projection_initialized == true) {
 				mb_proj_forward(verbose, mb_io_ptr->pjptr, store->png_longitude, store->png_latitude, &(store->png_longitude),
 				                &(store->png_latitude), error);
 			}
@@ -1926,7 +1921,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* generate processed sidescan */
 		store->pixel_size = 0.0;
 		store->pixels_ss = 0;
-		status = mbsys_reson8k_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, error);
+		status = mbsys_reson8k_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, error);
 	}
 
 	if (verbose >= 2) {
@@ -1950,9 +1945,6 @@ int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set error as this is a read only format */
 	status = MB_FAILURE;

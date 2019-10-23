@@ -69,9 +69,9 @@ int mbr_info_nvnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NETCDF;
-	*variable_beams = MB_NO;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_NO;
+	*variable_beams = false;
+	*traveltime = false;
+	*beam_flagging = false;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -120,20 +120,16 @@ int mbr_alm_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mbsys_navnetcdf_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* get pointer to raw data structure */
-	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)mb_io_ptr->store_data;
-
 	/* initialize values in structure */
 	int *dataread = (int *)&mb_io_ptr->save1;
 	int *commentread = (int *)&mb_io_ptr->save2;
 	int *recread = (int *)&mb_io_ptr->save4;
-	*dataread = MB_NO;
+	*dataread = false;
 	*commentread = 0;
 	*recread = 0;
 
@@ -206,8 +202,8 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* if first read then set everything up */
-	if (*dataread == MB_NO) {
-		*dataread = MB_YES;
+	if (*dataread == false) {
+		*dataread = true;
 
 		/* get dimensions */
 		nc_status = nc_inq_dimid(mb_io_ptr->ncid, "mbHistoryRecNbr", &dim_id);

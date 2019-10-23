@@ -136,9 +136,9 @@ am__DEPENDENCIES_1 =
 libmbaux_la_DEPENDENCIES = ${top_builddir}/src/mbio/libmbio.la \
 	$(MBTRNLIB) $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
-am_libmbaux_la_OBJECTS = mb_zgrid.lo mb_surface.lo mb_cheb.lo \
-	mb_delaun.lo mb_track.lo mb_truecont.lo mb_readwritegrd.lo \
-	mb_intersectgrid.lo
+am_libmbaux_la_OBJECTS = mb_cheb.lo mb_delaun.lo mb_intersectgrid.lo \
+	mb_readwritegrd.lo mb_surface.lo mb_track.lo mb_truecont.lo \
+	mb_zgrid.lo
 libmbaux_la_OBJECTS = $(am_libmbaux_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -398,29 +398,19 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_MOTIF_TRUE@XGRLIB = libmbxgr.la
 @BUILD_MOTIF_TRUE@XGRINC = mb_xgraphics.h
-@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
-@BUILD_MBTRN_TRUE@MBTRNLIB = $(top_builddir)/src/mbtrn/libmbtrn.la
-lib_LTLIBRARIES = libmbaux.la $(XGRLIB)
-include_HEADERS = mb_aux.h $(XGRINC)
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
-	      $(MBTRNINCDIR) \
-	      ${libgmt_CPPFLAGS} \
-	      ${libgdal_CPPFLAGS} \
-	      ${libnetcdf_CPPFLAGS}
-
+@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
+@BUILD_MBTRN_TRUE@MBTRNLIB = $(top_builddir)/src/mbtrn/libr7kr.la
+lib_LTLIBRARIES = libmbaux.la ${XGRLIB}
+include_HEADERS = mb_aux.h ${XGRINC}
+AM_CPPFLAGS = -I${top_srcdir}/src/mbio $(MBTRNINCDIR) \
+	${libgmt_CPPFLAGS} ${libgdal_CPPFLAGS} ${libnetcdf_CPPFLAGS}
 AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
 libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
-libmbaux_la_SOURCES = \
-		      mb_zgrid.c mb_surface.c mb_cheb.c \
-		      mb_delaun.c mb_track.c mb_truecont.c mb_readwritegrd.c \
-		      mb_intersectgrid.c
-
-libmbaux_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la \
-          $(MBTRNLIB) \
-			    ${libgmt_LIBS} \
-			    ${libgdal_LIBS} \
-			    ${libnetcdf_LIBS}
-
+libmbaux_la_SOURCES = mb_cheb.c mb_delaun.c mb_intersectgrid.c \
+	mb_readwritegrd.c mb_surface.c mb_track.c mb_truecont.c \
+	mb_zgrid.c
+libmbaux_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la $(MBTRNLIB) \
+	${libgmt_LIBS} ${libgdal_LIBS} ${libnetcdf_LIBS}
 @BUILD_MOTIF_TRUE@libmbxgr_la_LDFLAGS = -no-undefined -version-info 0:0:0
 @BUILD_MOTIF_TRUE@libmbxgr_la_SOURCES = mb_xgraphics.c
 @BUILD_MOTIF_TRUE@libmbxgr_la_LIBADD = ${libmotif_LIBS}

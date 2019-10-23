@@ -402,13 +402,13 @@ int mbsys_3ddwissl_alloc
   /* head A calibration */
   memset((void *)&store->calibration_v1s1_a, 0,
     sizeof(struct mbsys_3ddwissl_calibration_v1s1_struct));
-  memset((void *)&store->calibration_v1s2_a, 0,
-    sizeof(struct mbsys_3ddwissl_calibration_v1s2_struct));
+  memset((void *)&store->calibration_v1s3_a, 0,
+    sizeof(struct mbsys_3ddwissl_calibration_v1s3_struct));
 
   memset((void *)&store->calibration_v1s1_b, 0,
     sizeof(struct mbsys_3ddwissl_calibration_v1s1_struct));
-  memset((void *)&store->calibration_v1s2_b, 0,
-    sizeof(struct mbsys_3ddwissl_calibration_v1s2_struct));
+  memset((void *)&store->calibration_v1s3_b, 0,
+    sizeof(struct mbsys_3ddwissl_calibration_v1s3_struct));
 
   /* Scan Information */
   store->record_id = MB_DATA_NONE;    /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or
@@ -716,7 +716,7 @@ int mbsys_3ddwissl_preprocess
     }
 
   /* change timestamp if indicated */
-  if (pars->timestamp_changed == MB_YES)
+  if (pars->timestamp_changed == true)
     {
     store->time_d = pars->time_d;
     mb_get_date(verbose, pars->time_d, time_i);
@@ -764,7 +764,6 @@ int mbsys_3ddwissl_preprocess
       &jnav,
       &interp_error);
     store->speed = (float)speed;
-    /* fprintf(stderr," 2: lon:%.12f lat:%.12f ", store->navlon, store->navlat); */
     }
   if (pars->n_sensordepth > 0)
     interp_status = mb_linear_interp(verbose,
@@ -814,17 +813,11 @@ int mbsys_3ddwissl_preprocess
       &jattitude,
       &interp_error);
     store->pitch = (float)pitch;
-    /* interp_status = mb_linear_interp(verbose, */
-    /*      pars->attitude_time_d-1, pars->attitude_heave-1, pars->n_attitude, */
-    /*      time_d, &store->heave, &jattitude, */
-    /*      &interp_error); */
     }
 
   /* do lever arm correction */
   if (platform_ptr != NULL)
     {
-    /* fprintf(stderr,"Before: lon:%f lat:%f sensordepth:%f heading:%f roll:%f pitch:%f   ", */
-    /* store->navlon,store->navlat,store->sensordepth,heading,roll,pitch); */
 
     /* calculate sonar position position */
     status =mb_platform_position(verbose,
@@ -841,7 +834,6 @@ int mbsys_3ddwissl_preprocess
       &store->navlat,
       &store->sensordepth,
       error);
-    /* printf(stderr,"   3: lon:%.12f lat:%.12f \n", store->navlon, store->navlat); */
 
     /* calculate sonar attitude */
     status = mb_platform_orientation_target(verbose,
@@ -858,8 +850,6 @@ int mbsys_3ddwissl_preprocess
     store->heading = (float)heading;
     store->roll = (float)roll;
     store->pitch = (float)pitch;
-    /* fprintf(stderr,"After: lon:%f lat:%f sensordepth:%f heading:%f roll:%f pitch:%f\n", */
-    /* store->navlon,store->navlat,store->sensordepth,store->heading,store->roll,store->pitch); */
     }
 
   /* get scaling */
@@ -868,7 +858,7 @@ int mbsys_3ddwissl_preprocess
   headingy = cos(store->heading * DTR);
 
   /* loop over all pulses */
-  for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+  for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
     {
     /* get pulse */
     struct mbsys_3ddwissl_pulse_struct *pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
@@ -1004,15 +994,15 @@ int mbsys_3ddwissl_preprocess
     }
 
   /* calculate the bathymetry using the newly inserted values */
-  if (pars->sounding_amplitude_filter == MB_YES)
+  if (pars->sounding_amplitude_filter == true)
     amplitude_threshold = pars->sounding_amplitude_threshold;
   else
     amplitude_threshold = MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD;
-  if (pars->sounding_altitude_filter == MB_YES)
+  if (pars->sounding_altitude_filter == true)
     target_altitude = pars->sounding_target_altitude;
   else
     target_altitude = MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE;
-  if (pars->head1_offsets == MB_YES)
+  if (pars->head1_offsets == true)
     {
     store->heada_offset_x_m = pars->head1_offsets_x;
     store->heada_offset_y_m = pars->head1_offsets_y;
@@ -1021,7 +1011,7 @@ int mbsys_3ddwissl_preprocess
     store->heada_offset_roll_deg = pars->head1_offsets_roll;
     store->heada_offset_pitch_deg = pars->head1_offsets_pitch;
     }
-  if (pars->head2_offsets == MB_YES)
+  if (pars->head2_offsets == true)
     {
     store->headb_offset_x_m = pars->head2_offsets_x;
     store->headb_offset_y_m = pars->head2_offsets_y;
@@ -1087,7 +1077,6 @@ int mbsys_3ddwissl_sensorhead
       ( store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADB) )
       *sensorhead = 0;
     }
-
   const int status = MB_SUCCESS;
 
   if (verbose >= 2)
@@ -1206,8 +1195,6 @@ int mbsys_3ddwissl_extract
         amp[ibath] = (double) sounding->amplitude;
         bathacrosstrack[ibath] = sounding->acrosstrack;
         bathalongtrack[ibath] = sounding->alongtrack;
-/*fprintf(stderr,"%s:%s():%d Extracting sounding ipulse:%d isounding:%d ibath:%d beamflag:%d\n", */
-/*__FILE__, __FUNCTION__, __LINE__, ipulse, isounding, ibath, beamflag[ibath]); */
         }
       }
 
@@ -1272,9 +1259,6 @@ int mbsys_3ddwissl_insert
   int status = MB_SUCCESS;
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_sounding_struct *sounding;
-  double dlon, dlat, dheading;
-  int ipulse, isounding;
-  int ibath;
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
@@ -1318,9 +1302,9 @@ int mbsys_3ddwissl_insert
     store->time_d = time_d;
 
     /* calculate change in navigation */
-    dlon = navlon - store->navlon;
-    dlat = navlat - store->navlat;
-    dheading = heading - store->heading;
+    double dlon = navlon - store->navlon;
+    double dlat = navlat - store->navlat;
+    double dheading = heading - store->heading;
 
     /* set the navigation */
     store->navlon = navlon;
@@ -1349,20 +1333,18 @@ int mbsys_3ddwissl_insert
       }
 
     /* set the bathymetry */
-    for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
       {
       pulse = &store->pulses[ipulse];
-      for (isounding = 0; isounding < store->soundings_per_pulse; isounding++)
+      for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++)
         {
-        ibath = store->soundings_per_pulse * ipulse + isounding;
+        int ibath = store->soundings_per_pulse * ipulse + isounding;
         sounding = &pulse->soundings[isounding];
         sounding->beamflag = beamflag[ibath];
         sounding->depth = bath[ibath] - store->sensordepth;
         sounding->amplitude = amp[ibath];
         sounding->acrosstrack = bathacrosstrack[ibath];
         sounding->alongtrack = bathalongtrack[ibath];
-/*fprintf(stderr,"%s:%s():%d Inserting sounding ipulse:%d isounding:%d ibath:%d beamflag:%d\n", */
-/*__FILE__, __FUNCTION__, __LINE__, ipulse, isounding, ibath, beamflag[ibath]); */
         }
       }
 
@@ -1522,6 +1504,8 @@ int mbsys_3ddwissl_detects
 {
   assert(mbio_ptr != NULL);
   assert(store_ptr != NULL);
+  struct mbsys_3ddwissl_pulse_struct *pulse;
+  struct mbsys_3ddwissl_sounding_struct *sounding;
 
   if (verbose >= 2)
     {
@@ -1551,8 +1535,22 @@ int mbsys_3ddwissl_detects
     *nbeams = store->pulses_per_scan * store->soundings_per_pulse;
 
     /* LIDAR detects */
-    for (int i = 0; i < *nbeams; i++)
-      detects[i] = MB_DETECT_LIDAR;
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+      {
+      pulse = &store->pulses[ipulse];
+      for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++)
+        {
+        int ibath = store->soundings_per_pulse * ipulse + isounding;
+        sounding = &pulse->soundings[isounding];
+
+        // Bits 8-11 are used for multi-detect sounding priority, with highest == 0
+        // A sounding flagged as secondary has a priority of 1, else the priority is 0
+        if (mb_beam_check_flag_secondary(sounding->beamflag))
+          detects[ibath] = MB_DETECT_LIDAR | 0x100;
+        else
+          detects[ibath] = MB_DETECT_LIDAR;
+        }
+      }
 
     /* always successful */
     *error = MB_ERROR_NO_ERROR;
@@ -1789,8 +1787,6 @@ int mbsys_3ddwissl_extract_altitude
 {
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_sounding_struct *sounding;
-  int ipulse, isounding;
-  double rmin, r;
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
@@ -1823,16 +1819,16 @@ int mbsys_3ddwissl_extract_altitude
     *transducer_depth = store->sensordepth;
 
     /* loop over all soundings looking for most nadir */
-    rmin = 9999999.9;
-    for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+    double rmin = 9999999.9;
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
       {
       pulse = &store->pulses[ipulse];
-      for (isounding=0; isounding < store->soundings_per_pulse; isounding++)
+      for (int isounding=0; isounding < store->soundings_per_pulse; isounding++)
         {
         sounding = &pulse->soundings[isounding];
         if (mb_beam_ok(sounding->beamflag))
           {
-          r = sqrt(
+          double r = sqrt(
             sounding->acrosstrack * sounding->acrosstrack + sounding->alongtrack *
             sounding->alongtrack);
           if (r < rmin)
@@ -2425,16 +2421,13 @@ int mbsys_3ddwissl_copy
 /*----------------------------------------------------------------------*/
 int mbsys_3ddwissl_print_store
 (
-  int verbose,                /* in: verbosity level set on command line 0..N */
-  void *store_ptr,                  /* in: see
-                               mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
-  int *error                  /* out: see mb_status.h:MB_ERROR */
+  int verbose,              /* in: verbosity level set on command line 0..N */
+  void *store_ptr,          /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
+  int *error                /* out: see mb_status.h:MB_ERROR */
 )
 {
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_sounding_struct *sounding;
-  int status;
-  int ipulse, isounding;
 
   if (verbose >= 2)
     {
@@ -2448,7 +2441,7 @@ int mbsys_3ddwissl_print_store
   assert(store_ptr != NULL);
 
   /* always successful */
-  status = MB_SUCCESS;
+  int status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
 
   /* get data structure pointers */
@@ -2921,508 +2914,508 @@ int mbsys_3ddwissl_print_store
     fprintf(stderr,
       "%s     calibration A: cfg_path:                      %s\n",
       first,
-      store->calibration_v1s2_a.cfg_path);
+      store->calibration_v1s3_a.cfg_path);
     fprintf(stderr,
       "%s     calibration A: laser_head_no:                 %d\n",
       first,
-      store->calibration_v1s2_a.laser_head_no);
+      store->calibration_v1s3_a.laser_head_no);
     fprintf(stderr,
       "%s     calibration A: process_for_air:               %d\n",
       first,
-      store->calibration_v1s2_a.process_for_air);
+      store->calibration_v1s3_a.process_for_air);
     fprintf(stderr,
       "%s     calibration A: temperature_compensation:      %d\n",
       first,
-      store->calibration_v1s2_a.temperature_compensation);
+      store->calibration_v1s3_a.temperature_compensation);
     fprintf(stderr,
       "%s     calibration A: emergency_shutdown:            %d\n",
       first,
-      store->calibration_v1s2_a.emergency_shutdown);
+      store->calibration_v1s3_a.emergency_shutdown);
     fprintf(stderr,
       "%s     calibration A: ocb_temperature_limit_c:       %f\n",
       first,
-      store->calibration_v1s2_a.ocb_temperature_limit_c);
+      store->calibration_v1s3_a.ocb_temperature_limit_c);
     fprintf(stderr,
       "%s     calibration A: ocb_temperature_limit_c:       %f\n",
       first,
-      store->calibration_v1s2_a.ocb_temperature_limit_c);
+      store->calibration_v1s3_a.ocb_temperature_limit_c);
     fprintf(stderr,
       "%s     calibration A: ocb_humidity_limit:            %f\n",
       first,
-      store->calibration_v1s2_a.ocb_humidity_limit);
+      store->calibration_v1s3_a.ocb_humidity_limit);
     fprintf(stderr,
       "%s     calibration A: pb_temperature_limit_1_c:      %f\n",
       first,
-      store->calibration_v1s2_a.pb_temperature_limit_1_c);
+      store->calibration_v1s3_a.pb_temperature_limit_1_c);
     fprintf(stderr,
       "%s     calibration A: pb_temperature_limit_2_c:      %f\n",
       first,
-      store->calibration_v1s2_a.pb_temperature_limit_2_c);
+      store->calibration_v1s3_a.pb_temperature_limit_2_c);
     fprintf(stderr,
       "%s     calibration A: pb_humidity_limit:             %f\n",
       first,
-      store->calibration_v1s2_a.pb_humidity_limit);
+      store->calibration_v1s3_a.pb_humidity_limit);
     fprintf(stderr,
       "%s     calibration A: dig_temperature_limit_c:       %f\n",
       first,
-      store->calibration_v1s2_a.dig_temperature_limit_c);
+      store->calibration_v1s3_a.dig_temperature_limit_c);
     fprintf(stderr,
       "%s     calibration A: ocb_comm_port:                 %s\n",
       first,
-      store->calibration_v1s2_a.ocb_comm_port);
+      store->calibration_v1s3_a.ocb_comm_port);
     fprintf(stderr,
       "%s     calibration A: ocb_comm_cfg:                  %s\n",
       first,
-      store->calibration_v1s2_a.ocb_comm_cfg);
+      store->calibration_v1s3_a.ocb_comm_cfg);
     fprintf(stderr,
       "%s     calibration A: az_ao_deg_to_volt:             %f\n",
       first,
-      store->calibration_v1s2_a.az_ao_deg_to_volt);
+      store->calibration_v1s3_a.az_ao_deg_to_volt);
     fprintf(stderr,
       "%s     calibration A: az_ai_neg_v_to_deg:            %f\n",
       first,
-      store->calibration_v1s2_a.az_ai_neg_v_to_deg);
+      store->calibration_v1s3_a.az_ai_neg_v_to_deg);
     fprintf(stderr,
       "%s     calibration A: az_ai_pos_v_to_deg:            %f\n",
       first,
-      store->calibration_v1s2_a.az_ai_pos_v_to_deg);
+      store->calibration_v1s3_a.az_ai_pos_v_to_deg);
     fprintf(stderr,
       "%s     calibration A: t1_air:                        %f\n",
       first,
-      store->calibration_v1s2_a.t1_air);
+      store->calibration_v1s3_a.t1_air);
     fprintf(stderr,
       "%s     calibration A: ff_air:                        %f\n",
       first,
-      store->calibration_v1s2_a.ff_air);
+      store->calibration_v1s3_a.ff_air);
     fprintf(stderr,
       "%s     calibration A: t1_water_g4000:                %f\n",
       first,
-      store->calibration_v1s2_a.t1_water_g4000);
+      store->calibration_v1s3_a.t1_water_g4000);
     fprintf(stderr,
       "%s     calibration A: ff_water_g4000:                %f\n",
       first,
-      store->calibration_v1s2_a.ff_water_g4000);
+      store->calibration_v1s3_a.ff_water_g4000);
     fprintf(stderr,
       "%s     calibration A: t1_water_g3000:                %f\n",
       first,
-      store->calibration_v1s2_a.t1_water_g3000);
+      store->calibration_v1s3_a.t1_water_g3000);
     fprintf(stderr,
       "%s     calibration A: ff_water_g3000:                %f\n",
       first,
-      store->calibration_v1s2_a.ff_water_g3000);
+      store->calibration_v1s3_a.ff_water_g3000);
     fprintf(stderr,
       "%s     calibration A: t1_water_g2000:                %f\n",
       first,
-      store->calibration_v1s2_a.t1_water_g2000);
+      store->calibration_v1s3_a.t1_water_g2000);
     fprintf(stderr,
       "%s     calibration A: ff_water_g2000:                %f\n",
       first,
-      store->calibration_v1s2_a.ff_water_g2000);
+      store->calibration_v1s3_a.ff_water_g2000);
     fprintf(stderr,
       "%s     calibration A: t1_water_g1000:                %f\n",
       first,
-      store->calibration_v1s2_a.t1_water_g1000);
+      store->calibration_v1s3_a.t1_water_g1000);
     fprintf(stderr,
       "%s     calibration A: ff_water_g1000:                %f\n",
       first,
-      store->calibration_v1s2_a.ff_water_g1000);
+      store->calibration_v1s3_a.ff_water_g1000);
     fprintf(stderr,
       "%s     calibration A: t1_water_g400:                 %f\n",
       first,
-      store->calibration_v1s2_a.t1_water_g400);
+      store->calibration_v1s3_a.t1_water_g400);
     fprintf(stderr,
       "%s     calibration A: ff_water_g400:                 %f\n",
       first,
-      store->calibration_v1s2_a.ff_water_g400);
+      store->calibration_v1s3_a.ff_water_g400);
     fprintf(stderr,
       "%s     calibration A: t1_water_g300:                 %f\n",
       first,
-      store->calibration_v1s2_a.t1_water_g300);
+      store->calibration_v1s3_a.t1_water_g300);
     fprintf(stderr,
       "%s     calibration A: ff_water_g300:                 %f\n",
       first,
-      store->calibration_v1s2_a.ff_water_g300);
+      store->calibration_v1s3_a.ff_water_g300);
     fprintf(stderr,
       "%s     calibration A: temp_comp_poly2:               %f\n",
       first,
-      store->calibration_v1s2_a.temp_comp_poly2);
+      store->calibration_v1s3_a.temp_comp_poly2);
     fprintf(stderr,
       "%s     calibration A: temp_comp_poly1:               %f\n",
       first,
-      store->calibration_v1s2_a.temp_comp_poly1);
+      store->calibration_v1s3_a.temp_comp_poly1);
     fprintf(stderr,
       "%s     calibration A: temp_comp_poly:                %f\n",
       first,
-      store->calibration_v1s2_a.temp_comp_poly);
+      store->calibration_v1s3_a.temp_comp_poly);
     fprintf(stderr,
       "%s     calibration A: laser_start_time_sec:          %f\n",
       first,
-      store->calibration_v1s2_a.laser_start_time_sec);
+      store->calibration_v1s3_a.laser_start_time_sec);
     fprintf(stderr,
       "%s     calibration A: scanner_shift_cts:             %f\n",
       first,
-      store->calibration_v1s2_a.scanner_shift_cts);
+      store->calibration_v1s3_a.scanner_shift_cts);
     fprintf(stderr,
       "%s     calibration A: factory_scanner_lrg_deg:       %f\n",
       first,
-      store->calibration_v1s2_a.factory_scanner_lrg_deg);
+      store->calibration_v1s3_a.factory_scanner_lrg_deg);
     fprintf(stderr,
       "%s     calibration A: factory_scanner_med_deg:       %f\n",
       first,
-      store->calibration_v1s2_a.factory_scanner_med_deg);
+      store->calibration_v1s3_a.factory_scanner_med_deg);
     fprintf(stderr,
       "%s     calibration A: factory_scanner_sml_deg:       %f\n",
       first,
-      store->calibration_v1s2_a.factory_scanner_sml_deg);
+      store->calibration_v1s3_a.factory_scanner_sml_deg);
     fprintf(stderr,
       "%s     calibration A: el_angle_fixed_deg:            %f\n",
       first,
-      store->calibration_v1s2_a.el_angle_fixed_deg);
+      store->calibration_v1s3_a.el_angle_fixed_deg);
     fprintf(stderr,
       "%s     calibration A: zda_to_pps_max_msec            %d\n",
       first,
-      store->calibration_v1s2_a.zda_to_pps_max_msec);
+      store->calibration_v1s3_a.zda_to_pps_max_msec);
     fprintf(stderr,
       "%s     calibration A: zda_udp_port                   %d\n",
       first,
-      store->calibration_v1s2_a.zda_udp_port);
+      store->calibration_v1s3_a.zda_udp_port);
     fprintf(stderr,
       "%s     calibration A: show_time_sync_errors          %d\n",
       first,
-      store->calibration_v1s2_a.show_time_sync_errors);
+      store->calibration_v1s3_a.show_time_sync_errors);
     fprintf(stderr,
       "%s     calibration A: min_time_diff_update_msec      %d\n",
       first,
-      store->calibration_v1s2_a.min_time_diff_update_msec);
+      store->calibration_v1s3_a.min_time_diff_update_msec);
     fprintf(stderr,
       "%s     calibration A:  ctd_tcp_port                  %d\n",
       first,
-      store->calibration_v1s2_a.ctd_tcp_port);
+      store->calibration_v1s3_a.ctd_tcp_port);
     fprintf(stderr,
       "%s     calibration A: trigger_level_volt             %f\n",
       first,
-      store->calibration_v1s2_a.trigger_level_volt);
+      store->calibration_v1s3_a.trigger_level_volt);
     fprintf(stderr,
       "%s     calibration A: mf_t0_position                 %d\n",
       first,
-      store->calibration_v1s2_a.mf_t0_position);
+      store->calibration_v1s3_a.mf_t0_position);
     fprintf(stderr,
       "%s     calibration A: mf_start_proc                  %d\n",
       first,
-      store->calibration_v1s2_a.mf_start_proc);
+      store->calibration_v1s3_a.mf_start_proc);
     fprintf(stderr,
       "%s     calibration A: dig_ref_pos_t0_cnts            %d\n",
       first,
-      store->calibration_v1s2_a.dig_ref_pos_t0_cnts);
+      store->calibration_v1s3_a.dig_ref_pos_t0_cnts);
     fprintf(stderr,
       "%s     calibration A: dummy                          %d\n",
       first,
-      store->calibration_v1s2_a.dummy);
+      store->calibration_v1s3_a.dummy);
     fprintf(stderr,
       "%s     calibration A:  t0_min_height_raw_cts         %d\n",
       first,
-      store->calibration_v1s2_a.t0_min_height_raw_cts);
+      store->calibration_v1s3_a.t0_min_height_raw_cts);
     fprintf(stderr,
       "%s     calibration A: scanner_neg_polynom_0          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_neg_polynom_0);
+      store->calibration_v1s3_a.scanner_neg_polynom_0);
     fprintf(stderr,
       "%s     calibration A: scanner_neg_polynom_1          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_neg_polynom_1);
+      store->calibration_v1s3_a.scanner_neg_polynom_1);
     fprintf(stderr,
       "%s     calibration A: scanner_neg_polynom_2          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_neg_polynom_2);
+      store->calibration_v1s3_a.scanner_neg_polynom_2);
     fprintf(stderr,
       "%s     calibration A: scanner_neg_polynom_3          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_neg_polynom_3);
+      store->calibration_v1s3_a.scanner_neg_polynom_3);
     fprintf(stderr,
       "%s     calibration A: scanner_neg_polynom_4          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_neg_polynom_4);
+      store->calibration_v1s3_a.scanner_neg_polynom_4);
     fprintf(stderr,
       "%s     calibration A: scanner_neg_polynom_5          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_neg_polynom_5);
+      store->calibration_v1s3_a.scanner_neg_polynom_5);
     fprintf(stderr,
       "%s     calibration A: scanner_pos_polynom_0          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_pos_polynom_0);
+      store->calibration_v1s3_a.scanner_pos_polynom_0);
     fprintf(stderr,
       "%s     calibration A: scanner_pos_polynom_1          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_pos_polynom_1);
+      store->calibration_v1s3_a.scanner_pos_polynom_1);
     fprintf(stderr,
       "%s     calibration A: scanner_pos_polynom_2          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_pos_polynom_2);
+      store->calibration_v1s3_a.scanner_pos_polynom_2);
     fprintf(stderr,
       "%s     calibration A: scanner_pos_polynom_3          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_pos_polynom_3);
+      store->calibration_v1s3_a.scanner_pos_polynom_3);
     fprintf(stderr,
       "%s     calibration A: scanner_pos_polynom_4          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_pos_polynom_4);
+      store->calibration_v1s3_a.scanner_pos_polynom_4);
     fprintf(stderr,
       "%s     calibration A: scanner_pos_polynom_5          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_pos_polynom_5);
+      store->calibration_v1s3_a.scanner_pos_polynom_5);
 
     fprintf(stderr,
       "%s     calibration B: cfg_path:                      %s\n",
       first,
-      store->calibration_v1s2_b.cfg_path);
+      store->calibration_v1s3_b.cfg_path);
     fprintf(stderr,
       "%s     calibration B: laser_head_no:                 %d\n",
       first,
-      store->calibration_v1s2_b.laser_head_no);
+      store->calibration_v1s3_b.laser_head_no);
     fprintf(stderr,
       "%s     calibration B: process_for_air:               %d\n",
       first,
-      store->calibration_v1s2_b.process_for_air);
+      store->calibration_v1s3_b.process_for_air);
     fprintf(stderr,
       "%s     calibration B: temperature_compensation:      %d\n",
       first,
-      store->calibration_v1s2_b.temperature_compensation);
+      store->calibration_v1s3_b.temperature_compensation);
     fprintf(stderr,
       "%s     calibration B: emergency_shutdown:            %d\n",
       first,
-      store->calibration_v1s2_b.emergency_shutdown);
+      store->calibration_v1s3_b.emergency_shutdown);
     fprintf(stderr,
       "%s     calibration B: ocb_temperature_limit_c:       %f\n",
       first,
-      store->calibration_v1s2_b.ocb_temperature_limit_c);
+      store->calibration_v1s3_b.ocb_temperature_limit_c);
     fprintf(stderr,
       "%s     calibration B: ocb_temperature_limit_c:       %f\n",
       first,
-      store->calibration_v1s2_b.ocb_temperature_limit_c);
+      store->calibration_v1s3_b.ocb_temperature_limit_c);
     fprintf(stderr,
       "%s     calibration B: ocb_humidity_limit:            %f\n",
       first,
-      store->calibration_v1s2_b.ocb_humidity_limit);
+      store->calibration_v1s3_b.ocb_humidity_limit);
     fprintf(stderr,
       "%s     calibration B: pb_temperature_limit_1_c:      %f\n",
       first,
-      store->calibration_v1s2_b.pb_temperature_limit_1_c);
+      store->calibration_v1s3_b.pb_temperature_limit_1_c);
     fprintf(stderr,
       "%s     calibration B: pb_temperature_limit_2_c:      %f\n",
       first,
-      store->calibration_v1s2_b.pb_temperature_limit_2_c);
+      store->calibration_v1s3_b.pb_temperature_limit_2_c);
     fprintf(stderr,
       "%s     calibration B: pb_humidity_limit:             %f\n",
       first,
-      store->calibration_v1s2_b.pb_humidity_limit);
+      store->calibration_v1s3_b.pb_humidity_limit);
     fprintf(stderr,
       "%s     calibration B: dig_temperature_limit_c:       %f\n",
       first,
-      store->calibration_v1s2_b.dig_temperature_limit_c);
+      store->calibration_v1s3_b.dig_temperature_limit_c);
     fprintf(stderr,
       "%s     calibration B: ocb_comm_port:                 %s\n",
       first,
-      store->calibration_v1s2_b.ocb_comm_port);
+      store->calibration_v1s3_b.ocb_comm_port);
     fprintf(stderr,
       "%s     calibration B: ocb_comm_cfg:                  %s\n",
       first,
-      store->calibration_v1s2_b.ocb_comm_cfg);
+      store->calibration_v1s3_b.ocb_comm_cfg);
     fprintf(stderr,
       "%s     calibration B: az_ao_deg_to_volt:             %f\n",
       first,
-      store->calibration_v1s2_b.az_ao_deg_to_volt);
+      store->calibration_v1s3_b.az_ao_deg_to_volt);
     fprintf(stderr,
       "%s     calibration B: az_ai_neg_v_to_deg:            %f\n",
       first,
-      store->calibration_v1s2_b.az_ai_neg_v_to_deg);
+      store->calibration_v1s3_b.az_ai_neg_v_to_deg);
     fprintf(stderr,
       "%s     calibration B: az_ai_pos_v_to_deg:            %f\n",
       first,
-      store->calibration_v1s2_b.az_ai_pos_v_to_deg);
+      store->calibration_v1s3_b.az_ai_pos_v_to_deg);
     fprintf(stderr,
       "%s     calibration B: t1_air:                        %f\n",
       first,
-      store->calibration_v1s2_b.t1_air);
+      store->calibration_v1s3_b.t1_air);
     fprintf(stderr,
       "%s     calibration B: ff_air:                        %f\n",
       first,
-      store->calibration_v1s2_b.ff_air);
+      store->calibration_v1s3_b.ff_air);
     fprintf(stderr,
       "%s     calibration B: t1_water_g4000:                %f\n",
       first,
-      store->calibration_v1s2_b.t1_water_g4000);
+      store->calibration_v1s3_b.t1_water_g4000);
     fprintf(stderr,
       "%s     calibration B: ff_water_g4000:                %f\n",
       first,
-      store->calibration_v1s2_b.ff_water_g4000);
+      store->calibration_v1s3_b.ff_water_g4000);
     fprintf(stderr,
       "%s     calibration B: t1_water_g3000:                %f\n",
       first,
-      store->calibration_v1s2_b.t1_water_g3000);
+      store->calibration_v1s3_b.t1_water_g3000);
     fprintf(stderr,
       "%s     calibration B: ff_water_g3000:                %f\n",
       first,
-      store->calibration_v1s2_b.ff_water_g3000);
+      store->calibration_v1s3_b.ff_water_g3000);
     fprintf(stderr,
       "%s     calibration B: t1_water_g2000:                %f\n",
       first,
-      store->calibration_v1s2_b.t1_water_g2000);
+      store->calibration_v1s3_b.t1_water_g2000);
     fprintf(stderr,
       "%s     calibration B: ff_water_g2000:                %f\n",
       first,
-      store->calibration_v1s2_b.ff_water_g2000);
+      store->calibration_v1s3_b.ff_water_g2000);
     fprintf(stderr,
       "%s     calibration B: t1_water_g1000:                %f\n",
       first,
-      store->calibration_v1s2_b.t1_water_g1000);
+      store->calibration_v1s3_b.t1_water_g1000);
     fprintf(stderr,
       "%s     calibration B: ff_water_g1000:                %f\n",
       first,
-      store->calibration_v1s2_b.ff_water_g1000);
+      store->calibration_v1s3_b.ff_water_g1000);
     fprintf(stderr,
       "%s     calibration B: t1_water_g400:                 %f\n",
       first,
-      store->calibration_v1s2_b.t1_water_g400);
+      store->calibration_v1s3_b.t1_water_g400);
     fprintf(stderr,
       "%s     calibration B: ff_water_g400:                 %f\n",
       first,
-      store->calibration_v1s2_b.ff_water_g400);
+      store->calibration_v1s3_b.ff_water_g400);
     fprintf(stderr,
       "%s     calibration B: t1_water_g300:                 %f\n",
       first,
-      store->calibration_v1s2_b.t1_water_g300);
+      store->calibration_v1s3_b.t1_water_g300);
     fprintf(stderr,
       "%s     calibration B: ff_water_g300:                 %f\n",
       first,
-      store->calibration_v1s2_b.ff_water_g300);
+      store->calibration_v1s3_b.ff_water_g300);
     fprintf(stderr,
       "%s     calibration B: temp_comp_poly2:               %f\n",
       first,
-      store->calibration_v1s2_b.temp_comp_poly2);
+      store->calibration_v1s3_b.temp_comp_poly2);
     fprintf(stderr,
       "%s     calibration B: temp_comp_poly1:               %f\n",
       first,
-      store->calibration_v1s2_b.temp_comp_poly1);
+      store->calibration_v1s3_b.temp_comp_poly1);
     fprintf(stderr,
       "%s     calibration B: temp_comp_poly:                %f\n",
       first,
-      store->calibration_v1s2_b.temp_comp_poly);
+      store->calibration_v1s3_b.temp_comp_poly);
     fprintf(stderr,
       "%s     calibration B: laser_start_time_sec:          %f\n",
       first,
-      store->calibration_v1s2_b.laser_start_time_sec);
+      store->calibration_v1s3_b.laser_start_time_sec);
     fprintf(stderr,
       "%s     calibration B: scanner_shift_cts:             %f\n",
       first,
-      store->calibration_v1s2_b.scanner_shift_cts);
+      store->calibration_v1s3_b.scanner_shift_cts);
     fprintf(stderr,
       "%s     calibration B: factory_scanner_lrg_deg:       %f\n",
       first,
-      store->calibration_v1s2_b.factory_scanner_lrg_deg);
+      store->calibration_v1s3_b.factory_scanner_lrg_deg);
     fprintf(stderr,
       "%s     calibration B: factory_scanner_med_deg:       %f\n",
       first,
-      store->calibration_v1s2_b.factory_scanner_med_deg);
+      store->calibration_v1s3_b.factory_scanner_med_deg);
     fprintf(stderr,
       "%s     calibration B: factory_scanner_sml_deg:       %f\n",
       first,
-      store->calibration_v1s2_b.factory_scanner_sml_deg);
+      store->calibration_v1s3_b.factory_scanner_sml_deg);
     fprintf(stderr,
       "%s     calibration B: el_angle_fixed_deg:            %f\n",
       first,
-      store->calibration_v1s2_b.el_angle_fixed_deg);
+      store->calibration_v1s3_b.el_angle_fixed_deg);
     fprintf(stderr,
       "%s     calibration B: zda_to_pps_max_msec            %d\n",
       first,
-      store->calibration_v1s2_b.zda_to_pps_max_msec);
+      store->calibration_v1s3_b.zda_to_pps_max_msec);
     fprintf(stderr,
       "%s     calibration B: zda_udp_port                   %d\n",
       first,
-      store->calibration_v1s2_b.zda_udp_port);
+      store->calibration_v1s3_b.zda_udp_port);
     fprintf(stderr,
       "%s     calibration B: show_time_sync_errors          %d\n",
       first,
-      store->calibration_v1s2_b.show_time_sync_errors);
+      store->calibration_v1s3_b.show_time_sync_errors);
     fprintf(stderr,
       "%s     calibration B: min_time_diff_update_msec      %d\n",
       first,
-      store->calibration_v1s2_b.min_time_diff_update_msec);
+      store->calibration_v1s3_b.min_time_diff_update_msec);
     fprintf(stderr,
       "%s     calibration B:  ctd_tcp_port                  %d\n",
       first,
-      store->calibration_v1s2_b.ctd_tcp_port);
+      store->calibration_v1s3_b.ctd_tcp_port);
     fprintf(stderr,
       "%s     calibration B: trigger_level_volt             %f\n",
       first,
-      store->calibration_v1s2_b.trigger_level_volt);
+      store->calibration_v1s3_b.trigger_level_volt);
     fprintf(stderr,
       "%s     calibration B: mf_t0_position                 %d\n",
       first,
-      store->calibration_v1s2_b.mf_t0_position);
+      store->calibration_v1s3_b.mf_t0_position);
     fprintf(stderr,
       "%s     calibration B: mf_start_proc                  %d\n",
       first,
-      store->calibration_v1s2_b.mf_start_proc);
+      store->calibration_v1s3_b.mf_start_proc);
     fprintf(stderr,
       "%s     calibration B: dig_ref_pos_t0_cnts            %d\n",
       first,
-      store->calibration_v1s2_b.dig_ref_pos_t0_cnts);
+      store->calibration_v1s3_b.dig_ref_pos_t0_cnts);
     fprintf(stderr,
       "%s     calibration B: dummy                          %d\n",
       first,
-      store->calibration_v1s2_b.dummy);
+      store->calibration_v1s3_b.dummy);
     fprintf(stderr,
       "%s     calibration B:  t0_min_height_raw_cts         %d\n",
       first,
-      store->calibration_v1s2_b.t0_min_height_raw_cts);
+      store->calibration_v1s3_b.t0_min_height_raw_cts);
     fprintf(stderr,
       "%s     calibration B: scanner_neg_polynom_0          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_neg_polynom_0);
+      store->calibration_v1s3_b.scanner_neg_polynom_0);
     fprintf(stderr,
       "%s     calibration B: scanner_neg_polynom_1          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_neg_polynom_1);
+      store->calibration_v1s3_b.scanner_neg_polynom_1);
     fprintf(stderr,
       "%s     calibration B: scanner_neg_polynom_2          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_neg_polynom_2);
+      store->calibration_v1s3_b.scanner_neg_polynom_2);
     fprintf(stderr,
       "%s     calibration B: scanner_neg_polynom_3          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_neg_polynom_3);
+      store->calibration_v1s3_b.scanner_neg_polynom_3);
     fprintf(stderr,
       "%s     calibration B: scanner_neg_polynom_4          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_neg_polynom_4);
+      store->calibration_v1s3_b.scanner_neg_polynom_4);
     fprintf(stderr,
       "%s     calibration B: scanner_neg_polynom_5          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_neg_polynom_5);
+      store->calibration_v1s3_b.scanner_neg_polynom_5);
     fprintf(stderr,
       "%s     calibration B: scanner_pos_polynom_0          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_pos_polynom_0);
+      store->calibration_v1s3_b.scanner_pos_polynom_0);
     fprintf(stderr,
       "%s     calibration B: scanner_pos_polynom_1          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_pos_polynom_1);
+      store->calibration_v1s3_b.scanner_pos_polynom_1);
     fprintf(stderr,
       "%s     calibration B: scanner_pos_polynom_2          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_pos_polynom_2);
+      store->calibration_v1s3_b.scanner_pos_polynom_2);
     fprintf(stderr,
       "%s     calibration B: scanner_pos_polynom_3          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_pos_polynom_3);
+      store->calibration_v1s3_b.scanner_pos_polynom_3);
     fprintf(stderr,
       "%s     calibration B: scanner_pos_polynom_4          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_pos_polynom_4);
+      store->calibration_v1s3_b.scanner_pos_polynom_4);
     fprintf(stderr,
       "%s     calibration B: scanner_pos_polynom_5          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_pos_polynom_5);
+      store->calibration_v1s3_b.scanner_pos_polynom_5);
     }
   if (store->kind == MB_DATA_DATA)
     {
@@ -3479,7 +3472,7 @@ int mbsys_3ddwissl_print_store
 
     fprintf(stderr, "%s     num_pulses_alloc:              %d\n", first,
       store->num_pulses_alloc);
-    for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
       {
       pulse = &(store->pulses[ipulse]);
       fprintf(stderr, "%s------------------------------------------\n", first);
@@ -3511,7 +3504,7 @@ int mbsys_3ddwissl_print_store
         pulse->roll_offset);
       fprintf(stderr, "%s     pitch_offset:                  %f\n", first,
         pulse->pitch_offset);
-      for (isounding = 0; isounding < store->soundings_per_pulse; isounding++)
+      for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++)
         {
         sounding = &(pulse->soundings[isounding]);
         fprintf(stderr, "%s     --------\n", first);
@@ -3562,28 +3555,20 @@ int mbsys_3ddwissl_print_store
 /*--------------------------------------------------------------------*/
 int mbsys_3ddwissl_calculatebathymetry
 (
-  int verbose,                    /* in: verbosity level set on command line
-                               0..N */
-  void *mbio_ptr,                        /* in: see mb_io.h:mb_io_struct */
-  void *store_ptr,                      /* in: see
-                                   mbsys_3ddwissl.h:mbsys_3ddwissl_struct
-                                   */
-  double amplitude_threshold,            /* used to determine valid soundings */
-  double target_altitude,            /* used to prioritize picks close to a desired
-                           standoff */
-  int *error                      /* out: see mb_status.h:MB_ERROR */
+  int verbose,        /* in: verbosity level set on command line 0..N */
+  void *mbio_ptr,     /* in: see mb_io.h:mb_io_struct */
+  void *store_ptr,    /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
+  double amplitude_threshold,   /* used to determine valid soundings */
+  double target_altitude, /* used to prioritize picks close to a desired standoff */
+  int *error              /* out: see mb_status.h:MB_ERROR */
 )
 {
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_sounding_struct *sounding;
-  int status;
-  int time_i[7];
   double alpha, beta, theta, phi;
   double angle_az_sign, angle_el_sign;
   double mtodeglon, mtodeglat;
   double xx;
-  int ipulse, isounding, isounding_largest;
-  short amplitude_largest, amplitude_max;
   double head_offset_x_m;
   double head_offset_y_m;
   double head_offset_z_m;
@@ -3607,7 +3592,7 @@ int mbsys_3ddwissl_calculatebathymetry
   assert(store_ptr != NULL);
 
   /* always successful */
-  status = MB_SUCCESS;
+  int status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
 
   /* get data structure pointers */
@@ -3617,6 +3602,7 @@ int mbsys_3ddwissl_calculatebathymetry
   if (store->kind == MB_DATA_DATA)
     {
     /* get time_d timestamp */
+    int time_i[7];
     time_i[0] = store->year;
     time_i[1] = store->month;
     time_i[2] = store->day;
@@ -3657,11 +3643,11 @@ int mbsys_3ddwissl_calculatebathymetry
       }
 
     /* figure out valid amplitude threshold */
-    for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
       {
       pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
-      amplitude_max = 0;
-      for (isounding=0; isounding<store->soundings_per_pulse; isounding++)
+      short amplitude_max = 0;
+      for (int isounding=0; isounding<store->soundings_per_pulse; isounding++)
         {
         sounding = &pulse->soundings[isounding];
         /* valid pulses have nonzero ranges */
@@ -3669,15 +3655,14 @@ int mbsys_3ddwissl_calculatebathymetry
           amplitude_max = sounding->amplitude;
         }
       }
-/*fprintf(stderr,"\namplitude_max:%d amplitude_threshold:%f\n", amplitude_max, amplitude_threshold); */
 
     /* loop over all pulses and soundings */
-    for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
       {
       pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
-      isounding_largest = -1;
-      amplitude_largest = 0;
-      for (isounding=0; isounding<store->soundings_per_pulse; isounding++)
+      int isounding_largest = -1;
+      short amplitude_largest = 0;
+      for (int isounding=0; isounding<store->soundings_per_pulse; isounding++)
         {
         sounding = &pulse->soundings[isounding];
 
@@ -3704,12 +3689,10 @@ int mbsys_3ddwissl_calculatebathymetry
             {
             amplitude_factor = 1.0;
             }
-/*fprintf(stderr,"amplitude_max:%d amplitude_threshold:%f amplitude_factor:%f\n", */
-/*amplitude_max, amplitude_threshold, amplitude_factor); */
 
           /* set beamflag */
           if (sounding->amplitude * amplitude_factor >= amplitude_threshold)
-            sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
+            sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SECONDARY;
           else
             sounding->beamflag = MB_FLAG_NULL;
 
@@ -3750,13 +3733,11 @@ int mbsys_3ddwissl_calculatebathymetry
         sounding = &pulse->soundings[isounding_largest];
         if (sounding->beamflag != MB_FLAG_NULL)
           sounding->beamflag = MB_FLAG_NONE;
-/*fprintf(stderr," ipulse:%d isounding:%d angle_az_sign:%f xyz: %f %f %f\n", */
-/*ipulse,isounding,angle_az_sign,sounding->acrosstrack,sounding->alongtrack,sounding->depth); */
         }
       }
 
     /* set flag indicating that bathymetry has been calculated */
-    store->bathymetry_calculated = MB_YES;
+    store->bathymetry_calculated = true;
     }
 
   if (verbose >= 2)
@@ -3835,7 +3816,6 @@ int mbsys_3ddwissl_indextablefix
   int head_a_start, head_a_end, head_b_start, head_b_end;
   int first_good_timestamp, next_good_timestamp, last_good_timestamp;
   int num_good_timestamps;
-  int done;
   int i;
 
   if (verbose >= 2)
@@ -3863,47 +3843,12 @@ int mbsys_3ddwissl_indextablefix
 
   /* resort the total index table so that the data records are sorted by
    * left/right head, then file, then original order */
-/*fprintf(stderr,"\nOriginal Index Table:\n");
-   for (i=0;i<num_indextable;i++) {
-   double nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
-   fprintf(stderr,"%4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d\n",
-   i, indextable[i].file_index, indextable[i].total_index_org, indextable[i].total_index_sorted,
-   indextable[i].subsensor, indextable[i].subsensor_index,
-   indextable[i].time_d_org, indextable[i].time_d_corrected, nearest_minute_time_d,
-   indextable[i].offset, indextable[i].size, indextable[i].kind,
-   indextable[i].read);
-   }*/
   qsort((void *)indextable,
     num_indextable,
     sizeof(struct mb_io_indextable_struct),
     (void *)mbsys_3ddwissl_wissl_indextable_compare1);
   for (i=0; i<num_indextable; i++)
     indextable[i].total_index_sorted = i;
-/*
-   fprintf(stderr,"\nSorted Index Table:\n");
-   dt = 0.0;
-   for (i=0;i<num_indextable;i++) {
-   if (i > 0 && indextable[i].kind == MB_DATA_DATA && indextable[i].subsensor ==
-      indextable[i-1].subsensor) {
-   dt = indextable[i].time_d_org - indextable[i-1].time_d_org;
-   }
-   else {
-   dt = 0.0;
-   }
-   double nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
-   fprintf(stderr,"%4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d   %10.6f",
-   i, indextable[i].file_index, indextable[i].total_index_org, indextable[i].total_index_sorted,
-   indextable[i].subsensor, indextable[i].subsensor_index,
-   indextable[i].time_d_org, indextable[i].time_d_corrected, nearest_minute_time_d,
-   indextable[i].offset, indextable[i].size, indextable[i].kind,
-   indextable[i].read, dt);
-   if (fabs(dt) > 0.05) fprintf(stderr, " *****");
-   if (indextable[i].time_d_org - nearest_minute_time_d >= 0.0
-     && indextable[i].time_d_org - nearest_minute_time_d < 0.01)
-    fprintf(stderr, " $$$$$");
-   fprintf(stderr, "\n");
-   }
- */
 
   /* Correct the WiSSL timestamps produced by the first version of the sensor.
    * The timestamps need correcting because the clock drifts between being reset t
@@ -3941,8 +3886,6 @@ int mbsys_3ddwissl_indextablefix
         head_b_end = i;
       }
     }
-/*fprintf(stderr,"head_a_start:%d head_a_end:%d\n", head_a_start, head_a_end); */
-/*fprintf(stderr,"head_b_start:%d head_b_end:%d\n\n", head_b_start, head_b_end); */
 
   /* deal with head A data - start by identifying all good timestamps */
   dt = 0.0;
@@ -3958,7 +3901,6 @@ int mbsys_3ddwissl_indextablefix
       ( indextable[i].time_d_org - nearest_minute_time_d < dt_threshold) &&
       ( fabs(dt) > dt_threshold) )
       {
-/*fprintf(stderr,"Good timestamp A: %d %.6f\n",i,indextable[i].time_d_org); */
       indextable[i].time_d_corrected = indextable[i].time_d_org;
       num_good_timestamps++;
       if (first_good_timestamp > i)
@@ -3970,9 +3912,6 @@ int mbsys_3ddwissl_indextablefix
       indextable[i].time_d_corrected = 0.0;
       }
     }
-/*fprintf(stderr,"\nHead A: dt_threshold:%f num_good_timestamps:%d first_good_timestamp:%d
-   last_good_timestamp:%d\n\n", */
-/*dt_threshold, num_good_timestamps,first_good_timestamp,last_good_timestamp); */
 
   /* if good timestamps found then extrapolate and interpolate the other timestamps */
   if (last_good_timestamp > first_good_timestamp)
@@ -3981,18 +3920,15 @@ int mbsys_3ddwissl_indextablefix
       (indextable[last_good_timestamp].time_d_corrected -
       indextable[first_good_timestamp].time_d_corrected)/
       ((double)(last_good_timestamp - first_good_timestamp));
-/*fprintf(stderr,"dt:%.6f\n",dt); */
     for (int i = head_a_start; i < first_good_timestamp; i++)
       indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected+ dt *
         (i - first_good_timestamp);
-/*fprintf(stderr,"New time_d A-0: %5d %.6f\n", i, indextable[i].time_d_corrected); */
     for (int i = last_good_timestamp + 1; i <= head_a_end; i++)
       indextable[i].time_d_corrected = indextable[last_good_timestamp].time_d_corrected+ dt *
         (i - last_good_timestamp);
-/*fprintf(stderr,"New time_d A-2: %5d %.6f\n", i, indextable[i].time_d_corrected); */
-    done = MB_NO;
     next_good_timestamp = first_good_timestamp;
-    while (done == MB_NO)
+    bool done = false;
+    while (!done)
       {
       for (int i = first_good_timestamp + 1;
         i <= last_good_timestamp && next_good_timestamp == first_good_timestamp;
@@ -4007,10 +3943,9 @@ int mbsys_3ddwissl_indextablefix
       for (int i = first_good_timestamp + 1; i < next_good_timestamp; i++)
         indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected+
           dt * (i - first_good_timestamp);
-/*fprintf(stderr,"New time_d A-1: %5d %.6f\n", i, indextable[i].time_d_corrected); */
       first_good_timestamp = next_good_timestamp;
       if (next_good_timestamp == last_good_timestamp)
-        done = MB_YES;
+        done = true;
       }
     }
 
@@ -4036,7 +3971,6 @@ int mbsys_3ddwissl_indextablefix
       ( indextable[i].time_d_org - nearest_minute_time_d < dt_threshold) &&
       ( fabs(dt) > dt_threshold) )
       {
-/*fprintf(stderr,"Good timestamp B: %d %.6f\n",i,indextable[i].time_d_org); */
       indextable[i].time_d_corrected = indextable[i].time_d_org;
       num_good_timestamps++;
       if (first_good_timestamp > i)
@@ -4048,9 +3982,6 @@ int mbsys_3ddwissl_indextablefix
       indextable[i].time_d_corrected = 0.0;
       }
     }
-/*fprintf(stderr,"\nHead B: dt_threshold:%f num_good_timestamps:%d first_good_timestamp:%d
-   last_good_timestamp:%d\n", */
-/*dt_threshold, num_good_timestamps,first_good_timestamp,last_good_timestamp); */
 
   /* if good timestamps found then extrapolate and interpolate the other timestamps */
   if (last_good_timestamp > first_good_timestamp)
@@ -4062,14 +3993,12 @@ int mbsys_3ddwissl_indextablefix
     for (int i = head_b_start; i < first_good_timestamp; i++)
       indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected+ dt *
         (i - first_good_timestamp);
-/*fprintf(stderr,"New time_d B-0: %5d %.6f\n", i, indextable[i].time_d_corrected); */
     for (int i = last_good_timestamp + 1; i <= head_b_end; i++)
       indextable[i].time_d_corrected = indextable[last_good_timestamp].time_d_corrected+ dt *
         (i - last_good_timestamp);
-/*fprintf(stderr,"New time_d B-2: %5d %.6f\n", i, indextable[i].time_d_corrected); */
-    done = MB_NO;
+    bool done = false;
     next_good_timestamp = first_good_timestamp;
-    while (done == MB_NO)
+    while (!done)
       {
       for (int i = first_good_timestamp + 1;
         i <= last_good_timestamp && next_good_timestamp == first_good_timestamp;
@@ -4084,10 +4013,9 @@ int mbsys_3ddwissl_indextablefix
       for (int i = first_good_timestamp + 1; i < next_good_timestamp; i++)
         indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected+
           dt * (i - first_good_timestamp);
-/*fprintf(stderr,"New time_d B-1: %5d %.6f\n", i, indextable[i].time_d_corrected); */
       first_good_timestamp = next_good_timestamp;
       if (next_good_timestamp == last_good_timestamp)
-        done = MB_YES;
+        done = true;
       }
     }
 
@@ -4098,31 +4026,6 @@ int mbsys_3ddwissl_indextablefix
     for (int i = head_b_start; i <= head_b_end; i++)
       indextable[i].time_d_corrected = indextable[i].time_d_org;
     }
-
-/*fprintf(stderr,"\nCorrected Timestamp Index Table:\n");
-   dt = 0.0;
-   for (i=0;i<num_indextable;i++) {
-   if (i > 0 && indextable[i].kind == MB_DATA_DATA && indextable[i].subsensor ==
-      indextable[i-1].subsensor) {
-   dt = indextable[i].time_d_corrected - indextable[i-1].time_d_corrected;
-   }
-   else {
-   dt = 0.0;
-   }
-   double nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
-   fprintf(stderr,"FIX: %4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d
-        %10.6f",
-   i, indextable[i].file_index, indextable[i].total_index_org, indextable[i].total_index_sorted,
-   indextable[i].subsensor, indextable[i].subsensor_index,
-   indextable[i].time_d_org, indextable[i].time_d_corrected, nearest_minute_time_d,
-   indextable[i].offset, indextable[i].size, indextable[i].kind,
-   indextable[i].read, dt);
-   if (fabs(dt) > 0.05) fprintf(stderr, " *****");
-   if (indextable[i].time_d_corrected - nearest_minute_time_d >= 0.0
-     && indextable[i].time_d_corrected - nearest_minute_time_d < dt_threshold)
-    fprintf(stderr, " $$$$$");
-   fprintf(stderr, "\n");
-   }*/
 
   if (verbose >= 2)
     {
@@ -4177,30 +4080,6 @@ int mbsys_3ddwissl_indextableapply
   /* get index table structure pointer */
   indextable = (struct mb_io_indextable_struct *)indextable_ptr;
 
-/*fprintf(stderr,"\nExternal Index Table:\n");
-   for (i=0;i<num_indextable;i++) {
-   nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
-   fprintf(stderr,"EXT %4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d\n",
-   i, indextable[i].file_index, indextable[i].total_index_org, indextable[i].total_index_sorted,
-   indextable[i].subsensor, indextable[i].subsensor_index,
-   indextable[i].time_d_org, indextable[i].time_d_corrected, nearest_minute_time_d,
-   indextable[i].offset, indextable[i].size, indextable[i].kind,
-   mb_io_ptr->indextable[i].read);
-   }*//*
-
-   fprintf(stderr,"\nOriginal internal Index Table:\n");
-   for (i=0;i<mb_io_ptr->num_indextable;i++) {
-   nearest_minute_time_d = 60.0 * round(mb_io_ptr->indextable[i].time_d_org / 60.0);
-   fprintf(stderr,"INT %4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d\n",
-   i, mb_io_ptr->indextable[i].file_index, mb_io_ptr->indextable[i].total_index_org,
-      mb_io_ptr->indextable[i].total_index_sorted,
-   mb_io_ptr->indextable[i].subsensor, mb_io_ptr->indextable[i].subsensor_index,
-   mb_io_ptr->indextable[i].time_d_org, mb_io_ptr->indextable[i].time_d_corrected,
-      nearest_minute_time_d,
-   mb_io_ptr->indextable[i].offset, mb_io_ptr->indextable[i].size, mb_io_ptr->indextable[i].kind,
-   mb_io_ptr->indextable[i].read);
-   }*/
-
   /* correct timestamps in the file's internal index table using information
    * supplied in the external index table */
 
@@ -4234,14 +4113,6 @@ int mbsys_3ddwissl_indextableapply
       for (giindex = giindex_a_begin; giindex <= giindex_a_end; giindex++)
         if (mb_io_ptr->indextable[iindex].subsensor_index ==
           indextable[giindex].subsensor_index)
-/*fprintf(stderr,"A Replacing iindex:%d giindex:%d  file: %d %d subsensor: %d:%d %d:%d  time_d: %.6f
-   %.6f %.6f\n",
-   iindex, giindex, n_file, indextable[giindex].file_index,
-   mb_io_ptr->indextable[iindex].subsensor, mb_io_ptr->indextable[iindex].subsensor_index,
-   indextable[giindex].subsensor, indextable[giindex].subsensor_index,
-   mb_io_ptr->indextable[iindex].time_d_org,
-   indextable[giindex].time_d_org,
-   indextable[giindex].time_d_corrected);*/
           mb_io_ptr->indextable[iindex].time_d_corrected =
             indextable[giindex].time_d_corrected;
 
@@ -4251,14 +4122,6 @@ int mbsys_3ddwissl_indextableapply
       for (giindex = giindex_b_begin; giindex <= giindex_b_end; giindex++)
         if (mb_io_ptr->indextable[iindex].subsensor_index ==
           indextable[giindex].subsensor_index)
-/*fprintf(stderr,"B Replacing iindex:%d giindex:%d  file: %d %d subsensor: %d:%d %d:%d  time_d: %.6f
-   %.6f %.6f\n",
-   iindex, giindex, n_file, indextable[giindex].file_index,
-   mb_io_ptr->indextable[iindex].subsensor, mb_io_ptr->indextable[iindex].subsensor_index,
-   indextable[giindex].subsensor, indextable[giindex].subsensor_index,
-   mb_io_ptr->indextable[iindex].time_d_org,
-   indextable[giindex].time_d_org,
-   indextable[giindex].time_d_corrected);*/
           mb_io_ptr->indextable[iindex].time_d_corrected =
             indextable[giindex].time_d_corrected;
 
@@ -4270,18 +4133,6 @@ int mbsys_3ddwissl_indextableapply
     sizeof(struct mb_io_indextable_struct), (void *)mbsys_3ddwissl_wissl_indextable_compare2);
   for (i=0; i<mb_io_ptr->num_indextable; i++)
     mb_io_ptr->indextable[i].total_index_sorted = i;
-/*fprintf(stderr,"\nCorrected and resorted Index Table:\n");
-   for (i=0;i<mb_io_ptr->num_indextable;i++) {
-   nearest_minute_time_d = 60.0 * round(mb_io_ptr->indextable[i].time_d_org / 60.0);
-   fprintf(stderr,"%4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d\n",
-   i, mb_io_ptr->indextable[i].file_index, mb_io_ptr->indextable[i].total_index_org,
-      mb_io_ptr->indextable[i].total_index_sorted,
-   mb_io_ptr->indextable[i].subsensor, mb_io_ptr->indextable[i].subsensor_index,
-   mb_io_ptr->indextable[i].time_d_org, mb_io_ptr->indextable[i].time_d_corrected,
-      nearest_minute_time_d,
-   mb_io_ptr->indextable[i].offset, mb_io_ptr->indextable[i].size, mb_io_ptr->indextable[i].kind,
-   mb_io_ptr->indextable[i].read);
-   }*/
 
   if (verbose >= 2)
     {

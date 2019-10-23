@@ -19,11 +19,11 @@
  *
  * Author:	D. W. Caress
  * Date:	January 22, 1993
- *
- *
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,131 +33,112 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-#define MBFORMAT_LIST_LONG 0
-#define MBFORMAT_LIST_SIMPLE 1
-#define MBFORMAT_LIST_ROOT 2
+enum MbformatList {
+  MBFORMAT_LIST_LONG = 0,
+  MBFORMAT_LIST_SIMPLE = 1,
+  MBFORMAT_LIST_ROOT = 2
+};
+
+static const char program_name[] = "MBFORMAT";
+static const char help_message[] =
+    "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  "
+    "If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
+static const char usage_message[] = "mbformat [-Fformat -Ifile -L -K -V -W -H]";
 
 /*--------------------------------------------------------------------*/
-
 int main(int argc, char **argv) {
-	/* id variables */
-	char program_name[] = "MBFORMAT";
-	char help_message[] = "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  "
-	                      "If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
-	char usage_message[] = "mbformat [-Fformat -Ifile -L -K -V -W -H]";
-
-	/* parsing variables */
-	extern char *optarg;
-	int errflg = 0;
-	int c;
-	int error = MB_ERROR_NO_ERROR;
-	int status;
-	int help;
-	int html;
-	int verbose;
 	char file[MB_PATH_MAXLINE];
-	char root[MB_PATH_MAXLINE];
-	int file_specified;
-	int format;
-	int format_save;
-	int format_specified;
-	char format_description[MB_DESCRIPTION_LENGTH];
-	char *format_informal_ptr;
-	char *format_attributes_ptr;
-	char format_name[MB_DESCRIPTION_LENGTH];
-	char format_informal[MB_DESCRIPTION_LENGTH];
-	char format_attributes[MB_DESCRIPTION_LENGTH];
-	int list_mode;
-	int i;
-
-	help = 0;
-	verbose = 0;
-	file_specified = MB_NO;
-	format = 0;
-	format_specified = MB_NO;
-	html = MB_NO;
-	list_mode = MBFORMAT_LIST_LONG;
+	int verbose = 0;
+	bool file_specified = false;
+	int format = 0;
+	bool format_specified = false;
+	bool html = false;
+	enum MbformatList list_mode = MBFORMAT_LIST_LONG;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "F:f:HhI:i:LlKkVvWw")) != -1)
-		switch (c) {
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			format_specified = MB_YES;
-			break;
-		case 'L':
-		case 'l':
-			list_mode = MBFORMAT_LIST_SIMPLE;
-			break;
-		case 'K':
-		case 'k':
-			list_mode = MBFORMAT_LIST_ROOT;
-			break;
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", file);
-			file_specified = MB_YES;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'W':
-		case 'w':
-			html = MB_YES;
-			break;
-		case '?':
-			errflg++;
+	{
+		bool errflg = false;
+		bool help = false;
+		int c;
+		while ((c = getopt(argc, argv, "F:f:HhI:i:LlKkVvWw")) != -1)
+			switch (c) {
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				format_specified = true;
+				break;
+			case 'L':
+			case 'l':
+				list_mode = MBFORMAT_LIST_SIMPLE;
+				break;
+			case 'K':
+			case 'k':
+				list_mode = MBFORMAT_LIST_ROOT;
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", file);
+				file_specified = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'W':
+			case 'w':
+				html = true;
+				break;
+			case '?':
+				errflg = true;
+			}
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	/* print starting message */
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose: %d\n", verbose);
+			fprintf(stderr, "dbg2       help:    %d\n", help);
+			if (format_specified)
+				fprintf(stderr, "dbg2       format:  %d\n", format);
+			if (file_specified)
+				fprintf(stderr, "dbg2       file:    %s\n", file);
+		}
 
-	/* print starting debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
-		fprintf(stderr, "dbg2       help:    %d\n", help);
-		if (format_specified == MB_YES)
-			fprintf(stderr, "dbg2       format:  %d\n", format);
-		if (file_specified == MB_YES)
-			fprintf(stderr, "dbg2       file:    %s\n", file);
-	}
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(MB_ERROR_NO_ERROR);
+		}
+	} /* process argument list */
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
-	}
+	int status = MB_SUCCESS;
+	int error = MB_ERROR_NO_ERROR;
 
 	/* print out the info */
-	if (file_specified == MB_YES) {
-		format_save = format;
+	int format_save = format;
+	char root[MB_PATH_MAXLINE];
+	if (file_specified) {
 		status = mb_get_format(verbose, file, root, &format, &error);
 	}
-	else if (format_specified == MB_YES) {
-		format_save = format;
+	else if (format_specified) {
 		status = mb_format(verbose, &format, &error);
 	}
-	if (file_specified == MB_YES && format == 0) {
+
+	if (file_specified && format == 0) {
 		if (list_mode == MBFORMAT_LIST_SIMPLE)
 			printf("%d\n", format);
 		else if (list_mode == MBFORMAT_LIST_ROOT)
@@ -165,7 +146,7 @@ int main(int argc, char **argv) {
 		else
 			printf("Program %s unable to infer format from filename %s\n", program_name, file);
 	}
-	else if (format_specified == MB_YES && format == 0) {
+	else if (format_specified && format == 0) {
 		if (list_mode == MBFORMAT_LIST_SIMPLE)
 			printf("%d\n", format);
 		else if (list_mode == MBFORMAT_LIST_ROOT)
@@ -181,20 +162,21 @@ int main(int argc, char **argv) {
 			printf("%s %d\n", root, format);
 		}
 		else {
+			char format_description[MB_DESCRIPTION_LENGTH];
 			status = mb_format_description(verbose, &format, format_description, &error);
 			if (status == MB_SUCCESS) {
 				printf("\nMBIO data format id: %d\n", format);
 				printf("%s", format_description);
 			}
-			else if (file_specified == MB_YES) {
+			else if (file_specified) {
 				printf("Program %s unable to infer format from filename %s\n", program_name, file);
 			}
-			else if (format_specified == MB_YES) {
+			else if (format_specified) {
 				printf("Specified format %d invalid for MB-System\n", format_save);
 			}
 		}
 	}
-	else if (html == MB_YES) {
+	else if (html) {
 		printf("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2//EN\">\n");
 		printf("<HTML>\n<HEAD>\n   <TITLE>MB-System Supported Data Formats</TITLE>\n");
 		printf("</HEAD>\n<BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFFF\" LINK=\"#336699\" VLINK=\"#997040\" ALINK=\"#CC9900\">\n\n");
@@ -230,15 +212,22 @@ int main(int argc, char **argv) {
 		printf("</UL>\n\n");
 		printf("<P>The following swath mapping sonar data formats are currently supported by MB-System:</P>\n\n");
 
-		for (i = 0; i <= 1000; i++) {
+		for (int i = 0; i <= 1000; i++) {
 			format = i;
+			char format_description[MB_DESCRIPTION_LENGTH];
 			if ((status = mb_format_description(verbose, &format, format_description, &error)) == MB_SUCCESS && format == i) {
-				format_informal_ptr = (char *)strstr(format_description, "Informal Description:");
-				format_attributes_ptr = (char *)strstr(format_description, "Attributes:");
+				const char *format_informal_ptr =
+				    (char *)strstr(format_description, "Informal Description:");
+				const char *format_attributes_ptr =
+				    (char *)strstr(format_description, "Attributes:");
+				/* TODO(schwehr): These strncpy are not safe. */
+				char format_name[MB_DESCRIPTION_LENGTH];
 				strncpy(format_name, format_description, strlen(format_description) - strlen(format_informal_ptr));
 				format_name[strlen(format_description) - strlen(format_informal_ptr) - 1] = '\0';
+				char format_informal[MB_DESCRIPTION_LENGTH];
 				strncpy(format_informal, format_informal_ptr, strlen(format_informal_ptr) - strlen(format_attributes_ptr));
 				format_informal[strlen(format_informal_ptr) - strlen(format_attributes_ptr) - 1] = '\0';
+				char format_attributes[MB_DESCRIPTION_LENGTH];
 				strcpy(format_attributes, format_attributes_ptr);
 				format_attributes[strlen(format_attributes_ptr) - 1] = '\0';
 				printf("\n<UL>\n<LI>MBIO Data Format ID:  %d </LI>\n", format);
@@ -256,8 +245,8 @@ int main(int argc, char **argv) {
 		status = MB_SUCCESS;
 		error = MB_ERROR_NO_ERROR;
 	}
-	else if (list_mode == MB_YES) {
-		for (i = 0; i <= 1000; i++) {
+	else if (list_mode) {
+		for (int i = 0; i <= 1000; i++) {
 			format = i;
 			if ((status = mb_format(verbose, &format, &error)) == MB_SUCCESS && format == i) {
 				printf("%d\n", format);
@@ -268,8 +257,9 @@ int main(int argc, char **argv) {
 	}
 	else {
 		printf("\nSupported MBIO Formats:\n");
-		for (i = 0; i <= 1000; i++) {
+		for (int i = 0; i <= 1000; i++) {
 			format = i;
+			char format_description[MB_DESCRIPTION_LENGTH];
 			if ((status = mb_format_description(verbose, &format, format_description, &error)) == MB_SUCCESS && format == i) {
 				printf("\nMBIO Data Format ID:  %d\n", format);
 				printf("%s", format_description);
@@ -279,14 +269,12 @@ int main(int argc, char **argv) {
 		error = MB_ERROR_NO_ERROR;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

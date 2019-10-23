@@ -138,195 +138,8 @@ static double coeff[2][12]; /* Coefficients for 12 nearby points, constrained an
 
 static double relax_old, relax_new = 1.4; /* Coefficients for relaxation factor to speed up convergence */
 
-static int compare_points();
 static struct MB_SURFACE_DATA *data;     /* Data point and index to node it currently constrains  */
 static struct MB_SURFACE_BRIGGS *briggs; /* Coefficients in Taylor series for Laplacian(z) a la I. C. Briggs (1974)  */
-
-/* function prototypes */
-int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, double xxmin, double xxmax, double yymin,
-               double yymax, double xxinc, double yyinc, double ttension, float *sgrid);
-void set_coefficients(void);
-void set_offset(void);
-void fill_in_forecast(void);
-int compare_points(struct MB_SURFACE_DATA *point_1, struct MB_SURFACE_DATA *point_2);
-void smart_divide(void);
-void set_index(void);
-void find_nearest_point(void);
-void set_grid_parameters(void);
-void initialize_grid(void);
-void new_initialize_grid(void);
-void read_data(int ndat, float *xdat, float *ydat, float *zdat);
-void get_output(float *sgrid);
-int iterate(int mode);
-void check_errors(void);
-int remove_planar_trend(void);
-int replace_planar_trend(void);
-int throw_away_unusables(void);
-int rescale_z_values(void);
-void load_constraints(char *low, char *high);
-double guess_surface_time(int n_columns, int n_rows);
-int get_prime_factors(int n, int f[]);
-int gcd_euclid(int a, int b);
-
-
-int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, double xxmin, double xxmax, double yymin,
-               double yymax, double xxinc, double yyinc, double ttension, float *sgrid) {
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       xxmin:      %f\n", xxmin);
-		fprintf(stderr, "dbg2       xxmax:      %f\n", xxmax);
-		fprintf(stderr, "dbg2       yymin:      %f\n", yymin);
-		fprintf(stderr, "dbg2       yymax:      %f\n", yymax);
-		fprintf(stderr, "dbg2       xxinc:      %f\n", xxinc);
-		fprintf(stderr, "dbg2       xxinc:      %f\n", xxinc);
-		fprintf(stderr, "dbg2       ttension:   %f\n", ttension);
-		fprintf(stderr, "dbg2       ndat:       %d\n", ndat);
-		for (int i = 0; i < ndat; i++)
-			fprintf(stderr, "dbg2       data:       %f %f %f\n", xdat[i], ydat[i], zdat[i]);
-	}
-
-	/* copy parameters */
-	xmin = xxmin;
-	xmax = xxmax;
-	ymin = yymin;
-	ymax = yymax;
-	xinc = xxinc;
-	yinc = yyinc;
-	tension = ttension;
-	total_iterations = 0;
-
-	/* set local verbose */
-	if (verbose > 0)
-		local_verbose = TRUE;
-	else
-		local_verbose = FALSE;
-
-	/* New in v4.3:  Default to unconstrained:  */
-	set_low = set_high = 0;
-
-	int serror = FALSE;
-	if (xmin >= xmax || ymin >= ymax)
-		serror = TRUE;
-	if (xinc <= 0.0 || yinc <= 0.0)
-		serror = TRUE;
-
-	if (tension != 0.0) {
-		boundary_tension = tension;
-		interior_tension = tension;
-	}
-	relax_old = 1.0 - relax_new;
-
-	n_columns = rint((xmax - xmin) / xinc) + 1;
-	n_rows = rint((ymax - ymin) / yinc) + 1;
-	m_columns = n_columns + 4;
-	m_rows = n_rows + 4;
-	r_xinc = 1.0 / xinc;
-	r_yinc = 1.0 / yinc;
-
-	/* New stuff here for v4.3:  Check out the grid dimensions:  */
-	grid = gcd_euclid(n_columns - 1, n_rows - 1);
-
-	/*
-	if (local_verbose || size_query || grid == 1) fprintf (stderr, "W: %.3lf E: %.3lf S: %.3lf N: %.3lf n_columns: %d n_rows: %d\n",
-	    xmin, xmax, ymin, ymax, n_columns, n_rows);
-	if (grid == 1) fprintf(stderr,"surface:  WARNING:  Your grid dimensions are mutually prime.\n");
-	if (grid == 1 || size_query) suggest_sizes_for_surface(n_columns-1, n_rows-1);
-	if (size_query) exit(0);
-	*/
-
-	/* New idea: set grid = 1, read data, setting index.  Then throw
-	    away data that can't be used in end game, constraining
-	    size of briggs->b[6] structure.  */
-
-	grid = 1;
-	set_grid_parameters();
-	read_data(ndat, xdat, ydat, zdat);
-	throw_away_unusables();
-	remove_planar_trend();
-	rescale_z_values();
-
-	char low[100];
-	char high[100];
-	load_constraints(low, high);
-
-	/* Set up factors and reset grid to first value  */
-
-	grid = gcd_euclid(n_columns - 1, n_rows - 1);
-	n_fact = get_prime_factors(grid, factors);
-	set_grid_parameters();
-	while (block_n_columns < 4 || block_n_rows < 4) {
-		smart_divide();
-		set_grid_parameters();
-	}
-	set_offset();
-	set_index();
-	/* Now the data are ready to go for the first iteration.  */
-
-	/* Allocate more space  */
-
-	status =
-	    mb_mallocd(local_verbose, __FILE__, __LINE__, npoints * sizeof(struct MB_SURFACE_BRIGGS), (void **)&briggs, &local_error);
-	status = mb_mallocd(local_verbose, __FILE__, __LINE__, m_columns * m_rows * sizeof(char), (void **)&iu, &local_error);
-	status = mb_mallocd(local_verbose, __FILE__, __LINE__, m_columns * m_rows * sizeof(float), (void **)&u, &local_error);
-
-	if (radius > 0)
-		initialize_grid(); /* Fill in nodes with a weighted avg in a search radius  */
-
-	/*
-	if (local_verbose) fprintf(stderr,"Grid\tMode\tIteration\tMax Change\tConv Limit\tTotal Iterations\n");
-	*/
-
-	set_coefficients();
-
-	old_grid = grid;
-	find_nearest_point();
-	iterate(1);
-
-	while (grid > 1) {
-		smart_divide();
-		set_grid_parameters();
-		set_offset();
-		set_index();
-		fill_in_forecast();
-		iterate(0);
-		old_grid = grid;
-		find_nearest_point();
-		iterate(1);
-	}
-
-	if (local_verbose)
-		check_errors();
-
-	replace_planar_trend();
-
-	get_output(sgrid);
-
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&data, &local_error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&briggs, &local_error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&iu, &local_error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&u, &local_error);
-	if (set_low)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&lower, &local_error);
-	if (set_high)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&upper, &local_error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", local_error);
-		for (int i = 0; i < m_columns * m_rows; i++)
-			fprintf(stderr, "dbg2       grid:       %d %f\n", i, sgrid[i]);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	/* return status */
-	return (status);
-}
 
 void set_coefficients() {
 	const double loose = 1.0 - interior_tension;
@@ -367,26 +180,33 @@ void set_coefficients() {
 }
 
 void set_offset() {
-	int add_w[5], add_e[5], add_s[5], add_n[5], add_w2[5], add_e2[5], add_s2[5], add_n2[5];
-
+	/* Make these const. */
+	int add_w[5];
 	add_w[0] = -m_rows;
 	add_w[1] = add_w[2] = add_w[3] = add_w[4] = -grid_east;
+	int add_w2[5];
 	add_w2[0] = -2 * m_rows;
 	add_w2[1] = -m_rows - grid_east;
 	add_w2[2] = add_w2[3] = add_w2[4] = -2 * grid_east;
+	int add_e[5];
 	add_e[4] = m_rows;
 	add_e[0] = add_e[1] = add_e[2] = add_e[3] = grid_east;
+	int add_e2[5];
 	add_e2[4] = 2 * m_rows;
 	add_e2[3] = m_rows + grid_east;
 	add_e2[2] = add_e2[1] = add_e2[0] = 2 * grid_east;
 
+	int add_n[5];
 	add_n[4] = 1;
 	add_n[3] = add_n[2] = add_n[1] = add_n[0] = grid;
+	int add_n2[5];
 	add_n2[4] = 2;
 	add_n2[3] = grid + 1;
 	add_n2[2] = add_n2[1] = add_n2[0] = 2 * grid;
+	int add_s[5];
 	add_s[0] = -1;
 	add_s[1] = add_s[2] = add_s[3] = add_s[4] = -grid;
+	int add_s2[5];
 	add_s2[0] = -2;
 	add_s2[1] = -grid - 1;
 	add_s2[2] = add_s2[3] = add_s2[4] = -2 * grid;
@@ -481,6 +301,12 @@ void fill_in_forecast() {
 	iu[ij_ne_corner] = 5;
 }
 
+void smart_divide() {
+	/* Divide grid by its largest prime factor */
+	grid /= factors[n_fact - 1];
+	n_fact--;
+}
+
 int compare_points(struct MB_SURFACE_DATA *point_1, struct MB_SURFACE_DATA *point_2) {
 	/*  Routine for qsort to sort data structure for fast access to data by node location.
 	    Sorts on index first, then on radius to node corresponding to index, so that index
@@ -509,12 +335,6 @@ int compare_points(struct MB_SURFACE_DATA *point_1, struct MB_SURFACE_DATA *poin
 		return (1);
 	else
 		return (0);
-}
-
-void smart_divide() {
-	/* Divide grid by its largest prime factor */
-	grid /= factors[n_fact - 1];
-	n_fact--;
 }
 
 void set_index() {
@@ -664,44 +484,6 @@ void initialize_grid() { /*
 				u[ij_sw_corner + (i * m_rows + j) * grid] = sum_zw / sum_w;
 			}
 		}
-	}
-}
-
-void new_initialize_grid() { /*
-	                          * For the initial gridsize, load constrained nodes with weighted avg of their data;
-	                          * and then do something with the unconstrained ones.
-	                          */
-	const double dx_scale = 4.0 / grid_xinc;
-	const double dy_scale = 4.0 / grid_yinc;
-	n_empty = block_n_rows * block_n_columns;
-	int k = 0;
-	while (k < npoints) {
-		const int block_i = data[k].index / block_n_rows;
-		const int block_j = data[k].index % block_n_rows;
-		const double x0 = xmin + block_i * grid_xinc;
-		const double y0 = ymin + block_j * grid_yinc;
-		const int u_index = ij_sw_corner + (block_i * m_rows + block_j) * grid;
-		const int k_index = data[k].index;
-
-		double dy = (data[k].y - y0) * dy_scale;
-		double dx = (data[k].x - x0) * dx_scale;
-		double sum_w = 1.0 / (1.0 + dx * dx + dy * dy);
-		double sum_zw = data[k].z * sum_w;
-		k++;
-
-		while (k < npoints && data[k].index == k_index) {
-
-			dy = (data[k].y - y0) * dy_scale;
-			dx = (data[k].x - x0) * dx_scale;
-			const double weight = 1.0 / (1.0 + dx * dx + dy * dy);
-			sum_zw += data[k].z * weight;
-			sum_w += weight;
-			sum_zw += weight * data[k].z;
-			k++;
-		}
-		u[u_index] = sum_zw / sum_w;
-		iu[u_index] = 5;
-		n_empty--;
 	}
 }
 
@@ -1007,6 +789,7 @@ int iterate(int mode) {
 
 	return (iteration_count);
 }
+
 
 void check_errors() {
 
@@ -1368,76 +1151,6 @@ void load_constraints(char *low, char *high) {
 	}
 }
 
-double guess_surface_time(int n_columns, int n_rows) {
-	/* Routine to guess a number proportional to the operations
-	 * required by surface working on a user-desired grid of
-	 * size n_columns by n_rows, where n_columns = (xmax - xmin)/dx, and same for
-	 * n_rows.  (That is, one less than actually used in routine.)
-	 *
-	 * This is based on the following untested conjecture:
-	 * 	The operations are proportional to T = n_columnsg*n_rowsg*L,
-	 *	where L is a measure of the distance that data
-	 *	constraints must propagate, and n_columnsg, n_rowsg are the
-	 * 	current size of the grid.
-	 *	For n_columns,n_rows relatively prime, we will go through only
-	 * 	one grid cycle, L = max(n_columns,n_rows), and T = n_columns*n_rows*L.
-	 *	But for n_columns,n_rows whose greatest common divisor is a highly
-	 * 	composite number, we will have L equal to the division
-	 * 	step made at each new grid cycle, and n_columnsg,n_rowsg will
-	 * 	also be smaller than n_columns,n_rows.  Thus we can hope to find
-	 *	some n_columns,n_rows for which the total value of T is small.
-	 *
-	 * The above is pure speculation and has not been derived
-	 * empirically.  In actual practice, the distribution of the
-	 * data, both spatially and in terms of their values, will
-	 * have a strong effect on convergence.
-	 *
-	 * W. H. F. Smith, 26 Feb 1992.  */
-
-	int gcd_euclid(); /* Finds the greatest common divisor  */
-	int get_prime_factors();
-	int gcd;      /* Current value of the gcd  */
-	int n_columnsg, n_rowsg; /* Current value of the grid dimensions  */
-	int nfactors; /* Number of prime factors of current gcd  */
-	int factor;   /* Currently used factor  */
-	/* Doubles are used below, even though the values will be integers,
-	    because the multiplications might reach sizes of O(n**3)  */
-	double t_sum;  /* Sum of values of T at each grid cycle  */
-	double length; /* Current propagation distance.  */
-
-	gcd = gcd_euclid(n_columns, n_rows);
-	if (gcd > 1) {
-		nfactors = get_prime_factors(gcd, factors);
-		n_columnsg = n_columns / gcd;
-		n_rowsg = n_rows / gcd;
-		if (n_columnsg < 3 || n_rowsg < 3) {
-			factor = factors[nfactors - 1];
-			nfactors--;
-			gcd /= factor;
-			n_columnsg *= factor;
-			n_rowsg *= factor;
-		}
-	}
-	else {
-		n_columnsg = n_columns;
-		n_rowsg = n_rows;
-	}
-	length = MAX(n_columnsg, n_rowsg);
-	t_sum = n_columnsg * (n_rowsg * length); /* Make it double at each multiply  */
-
-	/* Are there more grid cycles ?  */
-	while (gcd > 1) {
-		factor = factors[nfactors - 1];
-		nfactors--;
-		gcd /= factor;
-		n_columnsg *= factor;
-		n_rowsg *= factor;
-		length = factor;
-		t_sum += n_columnsg * (n_rowsg * length);
-	}
-	return (t_sum);
-}
-
 int get_prime_factors(int n, int f[]) {
 	/* Fills the integer array f with the prime factors of n.
 	 * Returns the number of locations filled in f, which is
@@ -1556,8 +1269,8 @@ int get_prime_factors(int n, int f[]) {
 	}
 	return (n_factors);
 }
-/* gcd_euclid.c  Greatest common divisor routine  */
 
+/* gcd_euclid.c  Greatest common divisor routine  */
 #define IABS(i) (((i) < 0) ? -(i) : (i))
 
 int gcd_euclid(int a, int b) {
@@ -1581,4 +1294,160 @@ int gcd_euclid(int a, int b) {
 		v = r;     /* followed by an if test to do r = u%v  */
 	}
 	return (u);
+}
+
+int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, double xxmin, double xxmax, double yymin,
+               double yymax, double xxinc, double yyinc, double ttension, float *sgrid) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       xxmin:      %f\n", xxmin);
+		fprintf(stderr, "dbg2       xxmax:      %f\n", xxmax);
+		fprintf(stderr, "dbg2       yymin:      %f\n", yymin);
+		fprintf(stderr, "dbg2       yymax:      %f\n", yymax);
+		fprintf(stderr, "dbg2       xxinc:      %f\n", xxinc);
+		fprintf(stderr, "dbg2       xxinc:      %f\n", xxinc);
+		fprintf(stderr, "dbg2       ttension:   %f\n", ttension);
+		fprintf(stderr, "dbg2       ndat:       %d\n", ndat);
+		for (int i = 0; i < ndat; i++)
+			fprintf(stderr, "dbg2       data:       %f %f %f\n", xdat[i], ydat[i], zdat[i]);
+	}
+
+	/* copy parameters */
+	xmin = xxmin;
+	xmax = xxmax;
+	ymin = yymin;
+	ymax = yymax;
+	xinc = xxinc;
+	yinc = yyinc;
+	tension = ttension;
+	total_iterations = 0;
+
+	/* set local verbose */
+	if (verbose > 0)
+		local_verbose = TRUE;
+	else
+		local_verbose = FALSE;
+
+	/* New in v4.3:  Default to unconstrained:  */
+	set_low = set_high = 0;
+
+	int serror = FALSE;
+	if (xmin >= xmax || ymin >= ymax)
+		serror = TRUE;
+	if (xinc <= 0.0 || yinc <= 0.0)
+		serror = TRUE;
+
+	if (tension != 0.0) {
+		boundary_tension = tension;
+		interior_tension = tension;
+	}
+	relax_old = 1.0 - relax_new;
+
+	n_columns = rint((xmax - xmin) / xinc) + 1;
+	n_rows = rint((ymax - ymin) / yinc) + 1;
+	m_columns = n_columns + 4;
+	m_rows = n_rows + 4;
+	r_xinc = 1.0 / xinc;
+	r_yinc = 1.0 / yinc;
+
+	/* New stuff here for v4.3:  Check out the grid dimensions:  */
+	grid = gcd_euclid(n_columns - 1, n_rows - 1);
+
+	/*
+	if (local_verbose || size_query || grid == 1) fprintf (stderr, "W: %.3lf E: %.3lf S: %.3lf N: %.3lf n_columns: %d n_rows: %d\n",
+	    xmin, xmax, ymin, ymax, n_columns, n_rows);
+	if (grid == 1) fprintf(stderr,"surface:  WARNING:  Your grid dimensions are mutually prime.\n");
+	if (grid == 1 || size_query) suggest_sizes_for_surface(n_columns-1, n_rows-1);
+	if (size_query) exit(0);
+	*/
+
+	/* New idea: set grid = 1, read data, setting index.  Then throw
+	    away data that can't be used in end game, constraining
+	    size of briggs->b[6] structure.  */
+
+	grid = 1;
+	set_grid_parameters();
+	read_data(ndat, xdat, ydat, zdat);
+	throw_away_unusables();
+	remove_planar_trend();
+	rescale_z_values();
+
+	char low[100];
+	char high[100];
+	load_constraints(low, high);
+
+	/* Set up factors and reset grid to first value  */
+
+	grid = gcd_euclid(n_columns - 1, n_rows - 1);
+	n_fact = get_prime_factors(grid, factors);
+	set_grid_parameters();
+	while (block_n_columns < 4 || block_n_rows < 4) {
+		smart_divide();
+		set_grid_parameters();
+	}
+	set_offset();
+	set_index();
+	/* Now the data are ready to go for the first iteration.  */
+
+	/* Allocate more space  */
+
+	status =
+	    mb_mallocd(local_verbose, __FILE__, __LINE__, npoints * sizeof(struct MB_SURFACE_BRIGGS), (void **)&briggs, &local_error);
+	status = mb_mallocd(local_verbose, __FILE__, __LINE__, m_columns * m_rows * sizeof(char), (void **)&iu, &local_error);
+	status = mb_mallocd(local_verbose, __FILE__, __LINE__, m_columns * m_rows * sizeof(float), (void **)&u, &local_error);
+
+	if (radius > 0)
+		initialize_grid(); /* Fill in nodes with a weighted avg in a search radius  */
+
+	/*
+	if (local_verbose) fprintf(stderr,"Grid\tMode\tIteration\tMax Change\tConv Limit\tTotal Iterations\n");
+	*/
+
+	set_coefficients();
+
+	old_grid = grid;
+	find_nearest_point();
+	iterate(1);
+
+	while (grid > 1) {
+		smart_divide();
+		set_grid_parameters();
+		set_offset();
+		set_index();
+		fill_in_forecast();
+		iterate(0);
+		old_grid = grid;
+		find_nearest_point();
+		iterate(1);
+	}
+
+	if (local_verbose)
+		check_errors();
+
+	replace_planar_trend();
+
+	get_output(sgrid);
+
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&data, &local_error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&briggs, &local_error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&iu, &local_error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&u, &local_error);
+	if (set_low)
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&lower, &local_error);
+	if (set_high)
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&upper, &local_error);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", local_error);
+		for (int i = 0; i < m_columns * m_rows; i++)
+			fprintf(stderr, "dbg2       grid:       %d %f\n", i, sgrid[i]);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
 }

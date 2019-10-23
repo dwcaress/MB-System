@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_aux.h	5/16/94
+ *    The MB-system:  mb_aux.h  5/16/94
  *
  *    Copyright (c); 1993-2019 by
  *    David W. Caress (caress@mbari.org);
@@ -16,11 +16,11 @@
  * functions and programs.  The source files mb_contour.c, mb_track.c,
  * and mbcontour.c all depend on this include file.
  *
- * Author:	D. W. Caress
- * Date:	May 15, 1994
+ * Author:  D. W. Caress
+ * Date:  May 15, 1994
  *
- * Name change:	mb_countour.h changed to mb_aux.h
- * Date:	October 13, 2009
+ * Name change:  mb_countour.h changed to mb_aux.h
+ * Date:  October 13, 2009
  *
  *
  */
@@ -28,6 +28,13 @@
 #ifndef MB_AUX_H_
 #define MB_AUX_H_
 
+/* Avoid conflict with GDAL */
+#undef PACKAGE_BUGREPORT
+#undef PACKAGE_NAME
+#undef PACKAGE_STRING
+#undef PACKAGE_TARNAME
+#undef PACKAGE_URL
+#undef PACKAGE_VERSION
 #include "mb_io.h"
 
 /* contour algorithm defines */
@@ -36,136 +43,143 @@
 
 /* swath bathymetry data structure */
 struct ping {
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double heading;
-    double sensordepth;
-	unsigned int pingnumber;
-	int beams_bath;
-	int beams_bath_alloc;
-	char *beamflag;
-	double *bath;
-	double *bathlon;
-	double *bathlat;
-	int *bflag[2];
+  int time_i[7];
+  double time_d;
+  double navlon;
+  double navlat;
+  double heading;
+  double sensordepth;
+  unsigned int pingnumber;
+  int beams_bath;
+  int beams_bath_alloc;
+  char *beamflag;
+  double *bath;
+  double *bathlon;
+  double *bathlat;
+  int *bflag[2];
 };
 
 /* structure including swath bathymetry data and control parameters
     for swath contouring and ship track plotting */
 struct swath {
-	/* raw swath data */
-	int npings;
-	int npings_max;
-	int beams_bath;
-	struct ping *pings;
+  /* raw swath data */
+  int npings;
+  int npings_max;
+  int beams_bath;
+  struct ping *pings;
 
-	/* what is plotted */
-	int contour_algorithm;
-	int plot_contours;
-	int plot_triangles;
-	int plot_track;
-	int plot_name;
-	int plot_pingnumber;
+  /* what is plotted */
+  int contour_algorithm;
+  int plot_contours;
+  int plot_triangles;
+  int plot_track;
+  int plot_name;
+  int plot_pingnumber;
 
-	/* contour control parameters */
-	double contour_int;
-	double color_int;
-	double tick_int;
-	double label_int;
-	double tick_len;
-	double label_hgt;
-	double label_spacing;
-	int ncolor;
-	int nlevel;
-	int nlevelset;
-	double *level_list;
-	int *label_list;
-	int *tick_list;
-	int *color_list;
+  /* contour control parameters */
+  double contour_int;
+  double color_int;
+  double tick_int;
+  double label_int;
+  double tick_len;
+  double label_hgt;
+  double label_spacing;
+  int ncolor;
+  int nlevel;
+  int nlevelset;
+  double *level_list;
+  int *label_list;
+  int *tick_list;
+  int *color_list;
 
-	/* track control parameters */
-	double time_tick_int;
-	double time_annot_int;
-	double date_annot_int;
-	double time_tick_len;
-	double name_hgt;
+  /* track control parameters */
+  double time_tick_int;
+  double time_annot_int;
+  double date_annot_int;
+  double time_tick_len;
+  double name_hgt;
 
-	/* pingnumber control parameters */
-	int pingnumber_tick_int;
-	int pingnumber_annot_int;
-	double pingnumber_tick_len;
+  /* pingnumber control parameters */
+  int pingnumber_tick_int;
+  int pingnumber_annot_int;
+  double pingnumber_tick_len;
 
-	/* triangle network */
-	int npts;
-	int npts_alloc;
-	double *x;
-	double *y;
-	double *z;
-	int *edge;
-	int *pingid;
-	int ntri;
-	int ntri_alloc;
-	int *iv[3];
-	int *ct[3];
-	int *cs[3];
-	int *ed[3];
+  /* triangle network */
+  int npts;
+  int npts_alloc;
+  int *edge;
+  int *pingid;
+  int *beamid;
+  double *x;
+  double *y;
+  double *z;
+  int ntri;
+  int ntri_alloc;
+  int *iv[3];
+  int *ct[3];
+  int *cs[3];
+  int *ed[3];
+  double bath_min;
+  double bath_max;
+  double triangle_scale;
 
-	/* mb_delaun work arrays */
-	double *v1;
-	double *v2;
-	double *v3;
-	int *istack;
-	int *kv1;
-	int *kv2;
+  /* triangle side flags */
+  int *flag[3];
 
-	/* triangle side flags */
-	int *flag[3];
+  /* mb_delaun work arrays */
+  int ndelaun_alloc;
+  double *v1;
+  double *v2;
+  double *v3;
+  int *istack;
+  int *kv1;
+  int *kv2;
 
-	/* contour arrays */
-	int nsave;
-	double *xsave;
-	double *ysave;
-	int *isave;
-	int *jsave;
+  /* contour arrays */
+  int nsave;
+  int nsave_alloc;
+  double *xsave;
+  double *ysave;
+  int *isave;
+  int *jsave;
 
-	/* contour label arrays */
-	int nlabel;
-	double *xlabel;
-	double *ylabel;
-	double *angle;
-	int *justify;
+  /* contour label arrays */
+  int nlabel;
+  double *xlabel;
+  double *ylabel;
+  double *angle;
+  int *justify;
 
-	/* function pointers for plot functions */
-	void (*contour_plot)(double x, double y, int ipen);
-	void (*contour_newpen)(int ipen);
-	void (*contour_setline)(int linewidth);
-	void (*contour_justify_string)(double height, char *string, double *s);
-	void (*contour_plot_string)(double x, double y, double hgt, double angle, char *label);
+  /* function pointers for plot functions */
+  void (*contour_plot)(double x, double y, int ipen);
+  void (*contour_newpen)(int ipen);
+  void (*contour_setline)(int linewidth);
+  void (*contour_justify_string)(double height, char *string, double *s);
+  void (*contour_plot_string)(double x, double y, double hgt, double angle, char *label);
 };
 
 /* topography grid structure for mb_intersectgrid() */
 struct mb_topogrid_struct {
-	mb_path file;
-	int projection_mode;
-	mb_path projection_id;
-	float nodatavalue;
-	int nxy;
-	int n_columns;
-	int n_rows;
-	double min;
-	double max;
-	double xmin;
-	double xmax;
-	double ymin;
-	double ymax;
-	double dx;
-	double dy;
-	float *data;
+  mb_path file;
+  int projection_mode;
+  mb_path projection_id;
+  float nodatavalue;
+  int nxy;
+  int n_columns;
+  int n_rows;
+  double min;
+  double max;
+  double xmin;
+  double xmax;
+  double ymin;
+  double ymax;
+  double dx;
+  double dy;
+  float *data;
 };
 
 /* mb_contour and mb_track function prototypes */
+int mb_triangulate(int verbose, struct swath *data, int *error);
 int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_bath, int contour_algorithm, int plot_contours,
                     int plot_triangles, int plot_track, int plot_name, int plot_pingnumber, double contour_int, double color_int,
                     double tick_int, double label_int, double tick_len, double label_hgt, double label_spacing, int ncolor,
@@ -214,13 +228,13 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
                      char *titl, char *projection, int argc, char **argv, int *error);
 
 /* mb_cheb function prototypes */
-void lsqup(double *a, int *ia, int *nia, int nnz, int nc, int nr, double *x, double *dx, double *d, int nfix, int *ifix,
-           double *fix, int ncycle, double *sigma);
+void lsqup(const double *a, const int *ia, const int *nia, int nnz, int nc, int nr, double *x, double *dx, const double *d, int nfix, const int *ifix,
+           const double *fix, int ncycle, const double *sigma);
 void chebyu(double *sigma, int ncycle, double shi, double slo, double *work);
 void splits(double *x, double *t, int n);
 double errlim(double *sigma, int ncycle, double shi, double slo);
 double errrat(double x1, double x2, double *sigma, int ncycle);
-void lspeig(double *a, int *ia, int *nia, int nnz, int nc, int nr, int ncyc, int *nsig, double *x, double *dx, double *sigma,
+void lspeig(const double *a, const int *ia, const int *nia, int nnz, int nc, int nr, int ncyc, int *nsig, double *x, double *dx, double *sigma,
             double *w, double *smax, double *err, double *sup);
 
 /* mb_topogrid function prototypes */

@@ -24,7 +24,9 @@
  * Date:	January 6, 1995
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -66,42 +68,194 @@ struct mbba_grid_struct {
 	float *data;
 };
 
-/* function prototypes */
+static const char program_name[] = "mbbackangle";
+static const char help_message[] =
+    "MBbackangle reads a swath sonar data file and generates a set \n\t"
+    "of tables containing the average amplitude an/or sidescan values\n\t"
+    "as a function of the angle of interaction (grazing angle) \n\t"
+    "with the seafloor. Each table represents the symmetrical \n\t"
+    "average function for a user defined number of pings. The tables \n\t"
+    "are output to a \".aga\" and \".sga\" files that can be applied \n\t"
+    "by MBprocess.";
+static const char usage_message[] =
+    "mbbackangle -Ifile "
+    "[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/min/max/n_columns/n_rows "
+    "-Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Zaltitude -V -H]";
+
+/*--------------------------------------------------------------------*/
 int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, int nangles, double angle_max, double dangle,
-                 int symmetry, int *nmean, double *mean, double *sigma, int *error);
-int output_model(int verbose, FILE *tfp, double ssbeamwidth, double ssdepression, double ref_angle, int ntable, int nping,
-                 double time_d, double altitude, int nangles, double angle_max, double dangle, int symmetry, int *nmean,
-                 double *mean, double *sigma, int *error);
+                 bool symmetry, int *nmean, double *mean, double *sigma, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       tfp:             %p\n", (void *)tfp);
+		fprintf(stderr, "dbg2       ntable:          %d\n", ntable);
+		fprintf(stderr, "dbg2       nping:           %d\n", nping);
+		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
+		fprintf(stderr, "dbg2       nangles:         %d\n", nangles);
+		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
+		fprintf(stderr, "dbg2       dangle:          %f\n", dangle);
+		fprintf(stderr, "dbg2       symmetry:        %d\n", symmetry);
+		fprintf(stderr, "dbg2       mean and sigma:\n");
+		for (int i = 0; i < nangles; i++)
+			fprintf(stderr, "dbg2         %d %f %d %f %f\n", i, (i * dangle), nmean[i], mean[i], sigma[i]);
+	}
 
-char program_name[] = "mbbackangle";
+	/* process sums and print out results */
+	int time_i[7];
+	mb_get_date(verbose, time_d, time_i);
+	fprintf(tfp, "# table: %d\n", ntable);
+	fprintf(tfp, "# nping: %d\n", nping);
+	fprintf(tfp, "# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n", time_i[0], time_i[1], time_i[2], time_i[3],
+	        time_i[4], time_i[5], time_i[6], time_d);
+	fprintf(tfp, "# nangles: %d\n", nangles);
 
+	for (int i = 0; i < nangles; i++) {
+		const double angle = -angle_max + i * dangle;
+		int i0;
+		int i1;
+		if (fabs(angle) > MBBACKANGLE_INNERSWATHLIMIT) {
+			i0 = MAX(i - 1, 0);
+			i1 = MIN(i + 1, nangles - 1);
+		}
+		else {
+			i0 = i;
+			i1 = i;
+		}
+		double amean = 0.0;
+		double asigma = 0.0;
+		double sum = 0.0;
+		double sumsq = 0.0;
+		double sumn = 0.0;
+		for (int ii = i0; ii <= i1; ii++) {
+			sum += mean[ii];
+			sumsq += sigma[ii];
+			sumn += nmean[ii];
+			if (symmetry) {
+				const int jj = nangles - ii - 1;
+				sum += mean[jj];
+				sumsq += sigma[jj];
+				sumn += nmean[jj];
+			}
+		}
+		if (sumn > 0.0) {
+			amean = sum / sumn;
+			asigma = sqrt((sumsq / sumn) - amean * amean);
+		}
+		fprintf(tfp, "%7.4f %12.4f %12.4f\n", angle, amean, asigma);
+	}
+	fprintf(tfp, "#\n");
+	fprintf(tfp, "#\n");
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int output_model(int verbose, FILE *tfp, double beamwidth, double depression, double ref_angle, int ntable, int nping,
+                 double time_d, double altitude, int nangles, double angle_max, double dangle, bool symmetry, int *nmean,
+                 double *mean, double *sigma, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       tfp:             %p\n", (void *)tfp);
+		fprintf(stderr, "dbg2       beamwidth:       %f\n", beamwidth);
+		fprintf(stderr, "dbg2       depression:      %f\n", depression);
+		fprintf(stderr, "dbg2       ref_angle:       %f\n", ref_angle);
+		fprintf(stderr, "dbg2       ntable:          %d\n", ntable);
+		fprintf(stderr, "dbg2       nping:           %d\n", nping);
+		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
+		fprintf(stderr, "dbg2       altitude:        %f\n", altitude);
+		fprintf(stderr, "dbg2       nangles:         %d\n", nangles);
+		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
+		fprintf(stderr, "dbg2       dangle:          %f\n", dangle);
+		fprintf(stderr, "dbg2       symmetry:        %d\n", symmetry);
+		fprintf(stderr, "dbg2       mean and sigma:\n");
+		for (int i = 0; i < nangles; i++)
+			fprintf(stderr, "dbg2         %d %f %d %f %f\n", i, (i * dangle), nmean[i], mean[i], sigma[i]);
+	}
+
+	/* get average amplitude at reference angle */
+	const int iref = (angle_max - ref_angle) / dangle;
+	const int i0 = MAX(iref - 1, 0);
+	const int i1 = MIN(iref + 1, nangles - 1);
+	double ref_amp = 0.0;
+	double sum = 0.0;
+	double sumsq = 0.0;
+	double sumn = 0.0;
+	for (int ii = i0; ii <= i1; ii++) {
+		sum += mean[ii];
+		sumsq += sigma[ii];
+		sumn += nmean[ii];
+		const int jj = nangles - ii - 1;
+		sum += mean[jj];
+		sumsq += sigma[jj];
+		sumn += nmean[jj];
+	}
+	double asigma;
+	if (sumn > 0.0) {
+		ref_amp = sum / sumn;
+		asigma = sqrt((sumsq / sumn) - ref_amp * ref_amp);
+	}
+
+	/* get model that combines gaussian with 1/r
+	    - gaussian must drop to 0.7 max at 0.5 * beamwidth
+	    - model must equal ref_amp at ref_angle */
+	double del = (90.0 - depression) - 0.5 * beamwidth;
+	const double aa = -log(0.1) / (del * del);
+	del = 90.0 - depression - ref_angle;
+	double range = altitude / cos(DTR * ref_angle);
+	const double factor = ref_amp * range * range / exp(-aa * del * del);
+
+	/* process sums and print out results */
+	int time_i[7];
+	mb_get_date(verbose, time_d, time_i);
+	fprintf(tfp, "# table: %d\n", ntable);
+	fprintf(tfp, "# nping: %d\n", nping);
+	fprintf(tfp, "# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n", time_i[0], time_i[1], time_i[2], time_i[3],
+	        time_i[4], time_i[5], time_i[6], time_d);
+	fprintf(tfp, "# nangles: %d\n", nangles);
+	for (int i = 0; i < nangles; i++) {
+		const double angle = -angle_max + i * dangle;
+		del = fabs(angle) - (90 - depression);
+		range = altitude / cos(DTR * fabs(angle));
+		const double amean = factor * exp(-aa * del * del) / (range * range);
+		fprintf(tfp, "%7.4f %12.4f %12.4f\n", angle, amean, asigma);
+	}
+	fprintf(tfp, "#\n");
+	fprintf(tfp, "#\n");
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char help_message[] = "MBbackangle reads a swath sonar data file and generates a set \n\t\
-of tables containing the average amplitude an/or sidescan values\n\t\
-as a function of the angle of interaction (grazing angle) \n\t\
-with the seafloor. Each table represents the symmetrical \n\t\
-average function for a user defined number of pings. The tables \n\t\
-are output to a \".aga\" and \".sga\" files that can be applied \n\t\
-by MBprocess.";
-	char usage_message[] = "mbbackangle -Ifile \
-[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/min/max/n_columns/n_rows \
--Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Zaltitude -V -H]";
-	extern char *optarg;
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
 	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
 
 	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
 	char read_file[MB_PATH_MAXLINE];
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -166,10 +320,10 @@ by MBprocess.";
 	struct mbba_grid_struct grid;
 
 	/* angle function variables */
-	int amplitude_on = MB_NO;
-	int sidescan_on = MB_NO;
-	int dump = MB_NO;
-	int symmetry = MB_NO;
+	bool amplitude_on = false;
+	bool sidescan_on = false;
+	bool dump = false;
+	bool symmetry = false;
 	int nangles = 81;
 	double angle_max = 80.0;
 	double dangle;
@@ -197,8 +351,8 @@ by MBprocess.";
 	int beammode = MBBACKANGLE_BEAMPATTERN_EMPIRICAL;
 	double ssbeamwidth = 50.0;
 	double ssdepression = 20.0;
-	int corr_slope = MB_NO;
-	int corr_topogrid = MB_NO;
+	bool corr_slope = false;
+	bool corr_topogrid = false;
 	int corr_symmetry = MBP_SSCORR_ASYMMETRIC; /* BOB */
 	int amp_corr_type;
 	int amp_corr_slope = MBP_AMPCORR_IGNORESLOPE;
@@ -209,7 +363,7 @@ by MBprocess.";
 	double ref_angle_default = 30.0;
 
 	/* amp vs angle grid variables */
-	int gridamp = MB_NO;
+	bool gridamp = false;
 	double gridampangle = 0.0;
 	double gridampmin = 0.0;
 	double gridampmax = 0.0;
@@ -218,7 +372,7 @@ by MBprocess.";
 	double gridampdx = 0.0;
 	double gridampdy = 0.0;
 	float *gridamphist = NULL;
-	int gridss = MB_NO;
+	bool gridss = false;
 	double gridssangle = 0.0;
 	double gridssmin = 0.0;
 	double gridssmax = 0.0;
@@ -236,7 +390,6 @@ by MBprocess.";
 	char *projection = "GenericLinear";
 
 	int ampkind;
-	int read_data;
 	double mtodeglon, mtodeglat;
 	double headingx, headingy;
 	double r[3], rr;
@@ -261,12 +414,8 @@ by MBprocess.";
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 
 	double d1, d2;
-	int i, j;
-	int ix, jy, kgrid, k, n;
+	int ix, jy, kgrid;
 	int kgrid00, kgrid10, kgrid01, kgrid11;
-
-	char *ctime();
-	char *getenv();
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -282,165 +431,167 @@ by MBprocess.";
 	memset(&grid, 0, sizeof(struct mbba_grid_struct));
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:T:t:VvZ:z:")) != -1)
-		switch (c) {
-		case 'A':
-		case 'a':
-			sscanf(optarg, "%d", &ampkind);
-			if (ampkind == MBBACKANGLE_SS)
-				sidescan_on = MB_YES;
-			if (ampkind == MBBACKANGLE_AMP)
-				amplitude_on = MB_YES;
-			flag++;
-			break;
-		case 'B':
-		case 'b':
-			n = sscanf(optarg, "%d/%lf/%lf", &beammode, &d1, &d2);
-			if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN) {
-				if (n >= 2)
-					ssbeamwidth = d1;
-				if (n >= 3)
-					ssdepression = d2;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+
+		while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:T:t:VvZ:z:")) != -1)
+		{
+			switch (c) {
+			case 'A':
+			case 'a':
+				sscanf(optarg, "%d", &ampkind);
+				if (ampkind == MBBACKANGLE_SS)
+					sidescan_on = true;
+				if (ampkind == MBBACKANGLE_AMP)
+					amplitude_on = true;
+				break;
+			case 'B':
+			case 'b':
+			{
+				const int n = sscanf(optarg, "%d/%lf/%lf", &beammode, &d1, &d2);
+				if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN) {
+					if (n >= 2)
+						ssbeamwidth = d1;
+					if (n >= 3)
+						ssdepression = d2;
+				}
+				break;
 			}
-			flag++;
-			break;
-		case 'C':
-		case 'c':
-			symmetry = MB_YES;
-			corr_symmetry = MBP_SSCORR_SYMMETRIC;
-			flag++;
-			break;
-		case 'D':
-		case 'd':
-			dump = MB_YES;
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'G':
-		case 'g':
-			n = sscanf(optarg, "%d/%lf/%lf/%lf/%d/%d", &mode, &angle, &ampmin, &ampmax, &i, &j);
-			if (n == 5) {
-				n = sscanf(optarg, "%d/%lf/%lf/%d/%d", &mode, &angle, &ampmax, &i, &j);
-				ampmin = 0.0;
-				n = 6;
+			case 'C':
+			case 'c':
+				symmetry = true;
+				corr_symmetry = MBP_SSCORR_SYMMETRIC;
+				break;
+			case 'D':
+			case 'd':
+				dump = true;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+			{
+				int i;
+				int j;
+				int n = sscanf(optarg, "%d/%lf/%lf/%lf/%d/%d", &mode, &angle, &ampmin, &ampmax, &i, &j);
+				if (n == 5) {
+					n = sscanf(optarg, "%d/%lf/%lf/%d/%d", &mode, &angle, &ampmax, &i, &j);
+					ampmin = 0.0;
+					n = 6;
+				}
+				if (mode == MBBACKANGLE_AMP && n == 6) {
+					gridamp = true;
+					gridampangle = angle;
+					gridampmin = ampmin;
+					gridampmax = ampmax;
+					gridampn_columns = i;
+					gridampn_rows = j;
+					gridampdx = 2.0 * gridampangle / (gridampn_columns - 1);
+					gridampdy = (gridampmax - gridampmin) / (gridampn_rows - 1);
+				}
+				else if (mode == MBBACKANGLE_SS && n == 6) {
+					gridss = true;
+					gridssangle = angle;
+					gridssmin = ampmin;
+					gridssmax = ampmax;
+					gridssn_columns = i;
+					gridssn_rows = j;
+					gridssdx = 2.0 * gridssangle / (gridssn_columns - 1);
+					gridssdy = (gridssmax - gridssmin) / (gridssn_rows - 1);
+				}
+				break;
 			}
-			if (mode == MBBACKANGLE_AMP && n == 6) {
-				gridamp = MB_YES;
-				gridampangle = angle;
-				gridampmin = ampmin;
-				gridampmax = ampmax;
-				gridampn_columns = i;
-				gridampn_rows = j;
-				gridampdx = 2.0 * gridampangle / (gridampn_columns - 1);
-				gridampdy = (gridampmax - gridampmin) / (gridampn_rows - 1);
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'N':
+			case 'n':
+				sscanf(optarg, "%d/%lf", &nangles, &angle_max);
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%d", &pings_avg);
+				break;
+			case 'Q':
+			case 'q':
+				corr_slope = true;
+				break;
+			case 'R':
+			case 'r':
+				sscanf(optarg, "%lf", &ref_angle_default);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%s", grid.file);
+				corr_topogrid = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'Z':
+			case 'z':
+				sscanf(optarg, "%lf", &altitude_default);
+				break;
+			case '?':
+				errflg = true;
 			}
-			else if (mode == MBBACKANGLE_SS && n == 6) {
-				gridss = MB_YES;
-				gridssangle = angle;
-				gridssmin = ampmin;
-				gridssmax = ampmax;
-				gridssn_columns = i;
-				gridssn_rows = j;
-				gridssdx = 2.0 * gridssangle / (gridssn_columns - 1);
-				gridssdy = (gridssmax - gridssmin) / (gridssn_rows - 1);
-			}
-			flag++;
-			break;
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			sscanf(optarg, "%d/%lf", &nangles, &angle_max);
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf(optarg, "%d", &pings_avg);
-			flag++;
-			break;
-		case 'Q':
-		case 'q':
-			corr_slope = MB_YES;
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			sscanf(optarg, "%lf", &ref_angle_default);
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%s", grid.file);
-			corr_topogrid = MB_YES;
-			flag++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'Z':
-		case 'z':
-			sscanf(optarg, "%lf", &altitude_default);
-			flag++;
-			break;
-		case '?':
-			errflg++;
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	/* print starting message */
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
+
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
+	} // end command line arg parsing
 
 	/* set mode if necessary */
-	if (amplitude_on != MB_YES && sidescan_on != MB_YES) {
-		amplitude_on = MB_YES;
-		sidescan_on = MB_YES;
+	if (!amplitude_on && !sidescan_on) {
+		amplitude_on = true;
+		sidescan_on = true;
 	}
-	if (corr_slope == MB_NO && corr_topogrid == MB_NO) {
+	if (!corr_slope && !corr_topogrid) {
 		amp_corr_slope = MBP_AMPCORR_IGNORESLOPE;
 		ss_corr_slope = MBP_SSCORR_IGNORESLOPE;
 	}
-	else if (corr_slope == MB_YES && corr_topogrid == MB_NO) {
+	else if (corr_slope && !corr_topogrid) {
 		amp_corr_slope = MBP_AMPCORR_USESLOPE;
 		ss_corr_slope = MBP_SSCORR_USESLOPE;
 	}
-	else if (corr_slope == MB_NO && corr_topogrid == MB_YES) {
+	else if (!corr_slope && corr_topogrid) {
 		amp_corr_slope = MBP_AMPCORR_USETOPO;
 		ss_corr_slope = MBP_SSCORR_USETOPO;
 	}
-	else if (corr_slope == MB_YES && corr_topogrid == MB_YES) {
+	else if (corr_slope && corr_topogrid) {
 		amp_corr_slope = MBP_AMPCORR_USETOPOSLOPE;
 		ss_corr_slope = MBP_SSCORR_USETOPOSLOPE;
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
-		fprintf(stderr, "dbg2       help:         %d\n", help);
 		fprintf(stderr, "dbg2       format:       %d\n", format);
 		fprintf(stderr, "dbg2       pings:        %d\n", pings);
 		fprintf(stderr, "dbg2       lonflip:      %d\n", lonflip);
@@ -500,15 +651,8 @@ by MBprocess.";
 		fprintf(stderr, "dbg2       gridssdy:     %f\n", gridssdy);
 	}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
-	}
-
 	/* allocate memory for angle arrays */
-	if (amplitude_on == MB_YES) {
+	if (amplitude_on) {
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(int), (void **)&nmeanamp, &error);
 		if (error == MB_ERROR_NO_ERROR)
@@ -522,7 +666,7 @@ by MBprocess.";
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&sigmatotamp, &error);
 	}
-	if (sidescan_on == MB_YES) {
+	if (sidescan_on) {
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(int), (void **)&nmeanss, &error);
 		if (error == MB_ERROR_NO_ERROR)
@@ -546,10 +690,10 @@ by MBprocess.";
 	}
 
 	/* check grid modes */
-	if (gridamp == MB_YES && amplitude_on == MB_NO)
-		gridamp = MB_NO;
-	if (gridss == MB_YES && sidescan_on == MB_NO)
-		gridss = MB_NO;
+	if (gridamp && !amplitude_on)
+		gridamp = false;
+	if (gridss && !sidescan_on)
+		gridss = false;
 
 	/* output some information */
 	if (verbose > 0) {
@@ -557,21 +701,21 @@ by MBprocess.";
 		fprintf(stderr, "Number of angle bins: %d\n", nangles);
 		fprintf(stderr, "Maximum angle:         %f\n", angle_max);
 		fprintf(stderr, "Default altitude:      %f\n", altitude_default);
-		if (amplitude_on == MB_YES)
+		if (amplitude_on)
 			fprintf(stderr, "Working on beam amplitude data...\n");
-		if (sidescan_on == MB_YES)
+		if (sidescan_on)
 			fprintf(stderr, "Working on sidescan data...\n");
 		if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
 			fprintf(stderr, "Generating empirical correction tables...\n");
 		else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN)
 			fprintf(stderr, "Generating sidescan model correction tables...\n");
-		if (corr_slope == MB_YES)
+		if (corr_slope)
 			fprintf(stderr, "Using seafloor slope in calculating correction tables...\n");
 		else
 			fprintf(stderr, "Using flat bottom assumption in calculating correction tables...\n");
-		if (gridamp == MB_YES)
+		if (gridamp)
 			fprintf(stderr, "Outputting gridded histograms of beam amplitude vs grazing angle...\n");
-		if (gridss == MB_YES)
+		if (gridss)
 			fprintf(stderr, "Outputting gridded histograms of sidescan amplitude vs grazing angle...\n");
 	}
 
@@ -580,8 +724,8 @@ by MBprocess.";
 	angle_start = -angle_max - 0.5 * dangle;
 
 	/* initialize histogram */
-	if (amplitude_on == MB_YES)
-		for (i = 0; i < nangles; i++) {
+	if (amplitude_on)
+		for (int i = 0; i < nangles; i++) {
 			nmeanamp[i] = 0;
 			meanamp[i] = 0.0;
 			sigmaamp[i] = 0.0;
@@ -589,8 +733,8 @@ by MBprocess.";
 			meantotamp[i] = 0.0;
 			sigmatotamp[i] = 0.0;
 		}
-	if (sidescan_on == MB_YES)
-		for (i = 0; i < nangles; i++) {
+	if (sidescan_on)
+		for (int i = 0; i < nangles; i++) {
 			nmeanss[i] = 0;
 			meanss[i] = 0.0;
 			sigmass[i] = 0.0;
@@ -600,16 +744,15 @@ by MBprocess.";
 		}
 
 	/* get topography grid if specified */
-	if (corr_topogrid == MB_YES) {
+	if (corr_topogrid) {
 		grid.data = NULL;
 		status = mb_read_gmt_grd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue, &grid.nxy,
 		                         &grid.n_columns, &grid.n_rows, &grid.min, &grid.max, &grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
 		                         &grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
 		if (status == MB_FAILURE) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to read grd file: %s\n", grid.file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 
 		/* rationalize grid bounds and lonflip */
@@ -652,7 +795,7 @@ by MBprocess.";
 	altitude_totavg = 0.0;
 
 	/* initialize grids */
-	if (gridamp == MB_YES) {
+	if (gridamp) {
 		/* allocate memory for output grids */
 		status = mb_mallocd(verbose, __FILE__, __LINE__, gridampn_columns * gridampn_rows * sizeof(float), (void **)&gridamphist, &error);
 
@@ -665,7 +808,7 @@ by MBprocess.";
 			exit(error);
 		}
 	}
-	if (gridss == MB_YES) {
+	if (gridss) {
 		/* allocate memory for output grids */
 		status = mb_mallocd(verbose, __FILE__, __LINE__, gridssn_columns * gridssn_rows * sizeof(float), (void **)&gridsshist, &error);
 
@@ -684,35 +827,34 @@ by MBprocess.";
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(swathfile, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* Deal with ESF File if avialable */
 	if (status == MB_SUCCESS) {
-		status = mb_esf_load(verbose, program_name, swathfile, MB_YES, MB_NO, esffile, &esf, &error);
+		status = mb_esf_load(verbose, program_name, swathfile, true, false, esffile, &esf, &error);
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data) {
 
 		/* obtain format array location - format id will
 		    be aliased to current id if old format id given */
@@ -819,46 +961,44 @@ by MBprocess.";
 
 		/* initialize grid arrays */
 		if (error == MB_ERROR_NO_ERROR) {
-			if (gridamp == MB_YES) {
+			if (gridamp) {
 				/* initialize the memory */
-				for (i = 0; i < gridampn_columns * gridampn_rows; i++) {
+				for (int i = 0; i < gridampn_columns * gridampn_rows; i++) {
 					gridamphist[i] = 0.0;
 				}
 			}
-			if (gridss == MB_YES) {
+			if (gridss) {
 				/* initialize the memory */
-				for (i = 0; i < gridssn_columns * gridssn_rows; i++) {
+				for (int i = 0; i < gridssn_columns * gridssn_rows; i++) {
 					gridsshist[i] = 0.0;
 				}
 			}
 		}
 
 		/* open output files */
-		if (error == MB_ERROR_NO_ERROR && dump == MB_YES) {
+		if (error == MB_ERROR_NO_ERROR && dump) {
 			atfp = stdout;
 			stfp = stdout;
 		}
 		else if (error == MB_ERROR_NO_ERROR) {
-			if (amplitude_on == MB_YES) {
+			if (amplitude_on) {
 				strcpy(amptablefile, swathfile);
 				strcat(amptablefile, ".aga");
 				if ((atfp = fopen(amptablefile, "w")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nUnable to open output table file %s\n", amptablefile);
 					fprintf(stderr, "Program %s aborted!\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 			}
-			if (sidescan_on == MB_YES) {
+			if (sidescan_on) {
 				strcpy(sstablefile, swathfile);
 				strcat(sstablefile, ".sga");
 				if ((stfp = fopen(sstablefile, "w")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nUnable to open output table file %s\n", sstablefile);
 					fprintf(stderr, "Program %s aborted!\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 			}
 		}
@@ -866,7 +1006,7 @@ by MBprocess.";
 		/* write to output file */
 		if (error == MB_ERROR_NO_ERROR) {
 			/* set comments in table files */
-			if (amplitude_on == MB_YES) {
+			if (amplitude_on) {
 				fprintf(atfp, "## Amplitude correction table files generated by program %s\n", program_name);
 				fprintf(atfp, "## MB-system Version %s\n", MB_VERSION);
 				fprintf(atfp, "## Table file format: 1.0.0\n");
@@ -892,7 +1032,7 @@ by MBprocess.";
 				fprintf(atfp, "## Data type:             beam amplitude\n");
 			}
 
-			if (sidescan_on == MB_YES) {
+			if (sidescan_on) {
 				fprintf(stfp, "## Sidescan correction table files generated by program %s\n", program_name);
 				fprintf(stfp, "## MB-system Version %s\n", MB_VERSION);
 				fprintf(stfp, "## Table file format: 1.0.0\n");
@@ -945,18 +1085,18 @@ by MBprocess.";
 				time_d_avg /= navg;
 				altitude_avg /= navg;
 				if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL) {
-					if (amplitude_on == MB_YES)
+					if (amplitude_on)
 						output_table(verbose, atfp, ntable, navg, time_d_avg, nangles, angle_max, dangle, symmetry, nmeanamp,
 						             meanamp, sigmaamp, &error);
-					if (sidescan_on == MB_YES)
+					if (sidescan_on)
 						output_table(verbose, stfp, ntable, navg, time_d_avg, nangles, angle_max, dangle, symmetry, nmeanss,
 						             meanss, sigmass, &error);
 				}
 				else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN) {
-					if (amplitude_on == MB_YES)
+					if (amplitude_on)
 						output_model(verbose, atfp, ssbeamwidth, ssdepression, ref_angle, ntable, navg, time_d_avg, altitude_avg,
 						             nangles, angle_max, dangle, symmetry, nmeanamp, meanamp, sigmaamp, &error);
-					if (sidescan_on == MB_YES)
+					if (sidescan_on)
 						output_model(verbose, stfp, ssbeamwidth, ssdepression, ref_angle, ntable, navg, time_d_avg, altitude_avg,
 						             nangles, angle_max, dangle, symmetry, nmeanss, meanss, sigmass, &error);
 				}
@@ -966,14 +1106,14 @@ by MBprocess.";
 				navg = 0;
 				time_d_avg = 0.0;
 				altitude_avg = 0.0;
-				if (amplitude_on == MB_YES)
-					for (i = 0; i < nangles; i++) {
+				if (amplitude_on)
+					for (int i = 0; i < nangles; i++) {
 						nmeanamp[i] = 0;
 						meanamp[i] = 0.0;
 						sigmaamp[i] = 0.0;
 					}
-				if (sidescan_on == MB_YES)
-					for (i = 0; i < nangles; i++) {
+				if (sidescan_on)
+					for (int i = 0; i < nangles; i++) {
 						nmeanss[i] = 0;
 						meanss[i] = 0.0;
 						sigmass[i] = 0.0;
@@ -1020,11 +1160,11 @@ by MBprocess.";
 				headingy = cos(heading * DTR);
 
 				/* do the amplitude */
-				if (amplitude_on == MB_YES)
-					for (i = 0; i < beams_amp; i++) {
+				if (amplitude_on)
+					for (int i = 0; i < beams_amp; i++) {
 						if (mb_beam_ok(beamflag[i])) {
 							namp++;
-							if (corr_topogrid == MB_YES) {
+							if (corr_topogrid) {
 								/* get position in grid */
 								r[0] = headingy * bathacrosstrack[i] + headingx * bathalongtrack[i];
 								r[1] = -headingx * bathacrosstrack[i] + headingy * bathalongtrack[i];
@@ -1048,7 +1188,7 @@ by MBprocess.";
 									r[2] /= rr;
 
 									/* get normal vector to grid surface */
-									if (corr_slope == MB_YES) {
+									if (corr_slope) {
 										v1[0] = 2.0 * grid.dx / mtodeglon;
 										v1[1] = 2.0 * grid.dy / mtodeglat;
 										v1[2] = grid.data[kgrid11] - grid.data[kgrid00];
@@ -1074,13 +1214,6 @@ by MBprocess.";
 									angle = RTD * acos(r[0] * v[0] + r[1] * v[1] + r[2] * v[2]);
 									if (bathacrosstrack[i] < 0.0)
 										angle = -angle;
-
-									/* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
-									i,bathacrosstrack[i],bathalongtrack[i],bath[i],sonardepth,RTD * atan(bathacrosstrack[i] /
-									(sonardepth + grid.data[kgrid]))); fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
-									ix,grid.n_columns,jy,grid.n_rows,grid.data[kgrid]);
-									fprintf(stderr,"R:%f %f %f  V1:%f %f %f  V2:%f %f %f  V:%f %f %f  angle:%f\n\n",
-									r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 								}
 								else {
 									if (ix >= 0 && ix < grid.n_columns && jy >= 0 && jy < grid.n_rows && grid.data[kgrid] > grid.nodatavalue)
@@ -1107,7 +1240,7 @@ by MBprocess.";
 								}
 								altitude_use = bathy - sonardepth;
 								angle = RTD * atan(bathacrosstrack[i] / altitude_use);
-								if (corr_slope == MB_YES)
+								if (corr_slope)
 									angle += RTD * atan(slope);
 							}
 							else {
@@ -1121,7 +1254,7 @@ by MBprocess.";
 							}
 							if (bathy > 0.0) {
 								/* load amplitude into table */
-								j = (angle - angle_start) / dangle;
+								const int j = (angle - angle_start) / dangle;
 								if (j >= 0 && j < nangles) {
 									meanamp[j] += amp[i];
 									sigmaamp[j] += amp[i] * amp[i];
@@ -1132,30 +1265,29 @@ by MBprocess.";
 								}
 
 								/* load amplitude into grid */
-								if (gridamp == MB_YES) {
+								if (gridamp) {
 									ix = (angle + gridampangle) / gridampdx;
 									jy = (amp[i] - gridampmin) / gridampdy;
 									if (ix >= 0 && ix < gridampn_columns && jy >= 0 && jy < gridampn_rows) {
-										k = ix * gridampn_rows + jy;
+										const int k = ix * gridampn_rows + jy;
 										gridamphist[k] += 1.0;
 									}
 								}
 							}
 
-							/* print debug statements */
 							if (verbose >= 5) {
-								fprintf(stderr, "dbg5       %d %d: slope:%f altitude:%f xtrack:%f ang:%f j:%d\n", nrec, i, slope,
-								        altitude_use, bathacrosstrack[i], angle, j);
+								fprintf(stderr, "dbg5       %d %d: slope:%f altitude:%f xtrack:%f ang:%f\n", nrec, i, slope,
+								        altitude_use, bathacrosstrack[i], angle);
 							}
 						}
 					}
 
 				/* do the sidescan */
-				if (sidescan_on == MB_YES)
-					for (i = 0; i < pixels_ss; i++) {
+				if (sidescan_on)
+					for (int i = 0; i < pixels_ss; i++) {
 						if (ss[i] > MB_SIDESCAN_NULL) {
 							nss++;
-							if (corr_topogrid == MB_YES) {
+							if (corr_topogrid) {
 								/* get position in grid */
 								r[0] = headingy * ssacrosstrack[i] + headingx * ssalongtrack[i];
 								r[1] = -headingx * ssacrosstrack[i] + headingy * ssalongtrack[i];
@@ -1179,7 +1311,7 @@ by MBprocess.";
 									r[2] /= rr;
 
 									/* get normal vector to grid surface */
-									if (corr_slope == MB_YES) {
+									if (corr_slope) {
 										v1[0] = 2.0 * grid.dx / mtodeglon;
 										v1[1] = 2.0 * grid.dy / mtodeglat;
 										v1[2] = grid.data[kgrid11] - grid.data[kgrid00];
@@ -1205,13 +1337,6 @@ by MBprocess.";
 									angle = RTD * acos(r[0] * v[0] + r[1] * v[1] + r[2] * v[2]);
 									if (ssacrosstrack[i] < 0.0)
 										angle = -angle;
-
-									/* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
-									i,ssacrosstrack[i],ssalongtrack[i],ss[i],sonardepth,RTD * atan(ssacrosstrack[i] / (sonardepth
-									+ grid.data[kgrid]))); fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
-									ix,grid.n_columns,jy,grid.n_rows,grid.data[kgrid]);
-									fprintf(stderr,"R:%f %f %f  V1:%f %f %f  V2:%f %f %f  V:%f %f %f  angle:%f\n\n",
-									r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 								}
 								else {
 									if (ix >= 0 && ix < grid.n_columns && jy >= 0 && jy < grid.n_rows && grid.data[kgrid] > grid.nodatavalue)
@@ -1238,7 +1363,7 @@ by MBprocess.";
 								}
 								altitude_use = bathy - sonardepth;
 								angle = RTD * atan(ssacrosstrack[i] / altitude_use);
-								if (corr_slope == MB_YES)
+								if (corr_slope)
 									angle += RTD * atan(slope);
 							}
 							else {
@@ -1252,7 +1377,7 @@ by MBprocess.";
 							}
 							if (bathy > 0.0) {
 								/* load amplitude into table */
-								j = (angle - angle_start) / dangle;
+								const int j = (angle - angle_start) / dangle;
 								if (j >= 0 && j < nangles) {
 									meanss[j] += ss[i];
 									sigmass[j] += ss[i] * ss[i];
@@ -1263,20 +1388,19 @@ by MBprocess.";
 								}
 
 								/* load amplitude into grid */
-								if (gridss == MB_YES) {
+								if (gridss) {
 									ix = (angle + gridssangle) / gridssdx;
 									jy = (ss[i] - gridssmin) / gridssdy;
 									if (ix >= 0 && ix < gridssn_columns && jy >= 0 && jy < gridssn_rows) {
-										k = ix * gridssn_rows + jy;
+										const int k = ix * gridssn_rows + jy;
 										gridsshist[k] += 1.0;
 									}
 								}
 							}
 
-							/* print debug statements */
 							if (verbose >= 5) {
-								fprintf(stderr, "dbg5kkk       %d %d: slope:%f altitude:%f xtrack:%f ang:%f j:%d\n", nrec, i,
-								        slope, altitude_use, ssacrosstrack[i], angle, j);
+								fprintf(stderr, "dbg5kkk       %d %d: slope:%f altitude:%f xtrack:%f ang:%f\n", nrec, i,
+								        slope, altitude_use, ssacrosstrack[i], angle);
 							}
 						}
 					}
@@ -1289,9 +1413,9 @@ by MBprocess.";
 		if (esf.edit != NULL || esf.esffp != NULL)
 			mb_esf_close(verbose, &esf, &error);
 
-		if (dump == MB_NO && amplitude_on == MB_YES)
+		if (!dump && amplitude_on)
 			fclose(atfp);
-		if (dump == MB_NO && sidescan_on == MB_YES)
+		if (!dump && sidescan_on)
 			fclose(stfp);
 		ntabletot += ntable;
 		nrectot += nrec;
@@ -1299,19 +1423,19 @@ by MBprocess.";
 		nsstot += nss;
 
 		/* output grids */
-		if (gridamp == MB_YES) {
+		if (gridamp) {
 			/* normalize the grid */
 			ampmax = 0.0;
 			for (ix = 0; ix < gridampn_columns; ix++) {
 				norm = 0.0;
 				for (jy = 0; jy < gridampn_rows; jy++) {
-					k = ix * gridampn_rows + jy;
+					const int k = ix * gridampn_rows + jy;
 					norm += gridamphist[k];
 				}
 				if (norm > 0.0) {
 					norm *= 0.001;
 					for (jy = 0; jy < gridampn_rows; jy++) {
-						k = ix * gridampn_rows + jy;
+						const int k = ix * gridampn_rows + jy;
 						gridamphist[k] /= norm;
 						ampmax = MAX(ampmax, gridamphist[k]);
 					}
@@ -1340,19 +1464,19 @@ by MBprocess.";
 				fprintf(stderr, "\nError executing mbm_grdplot on grid file %s\n", gridfile);
 			}
 		}
-		if (gridss == MB_YES) {
+		if (gridss) {
 			/* normalize the grid */
 			ampmax = 0.0;
 			for (ix = 0; ix < gridssn_columns; ix++) {
 				norm = 0.0;
 				for (jy = 0; jy < gridssn_rows; jy++) {
-					k = ix * gridssn_rows + jy;
+					const int k = ix * gridssn_rows + jy;
 					norm += gridsshist[k];
 				}
 				if (norm > 0.0) {
 					norm *= 0.001;
 					for (jy = 0; jy < gridssn_rows; jy++) {
-						k = ix * gridssn_rows + jy;
+						const int k = ix * gridssn_rows + jy;
 						gridsshist[k] /= norm;
 						ampmax = MAX(ampmax, gridsshist[k]);
 					}
@@ -1383,48 +1507,48 @@ by MBprocess.";
 		}
 
 		/* set amplitude correction in parameter file */
-		if (amplitude_on == MB_YES)
-			status = mb_pr_update_ampcorr(verbose, swathfile, MB_YES, amptablefile, amp_corr_type, corr_symmetry, ref_angle,
+		if (amplitude_on)
+			status = mb_pr_update_ampcorr(verbose, swathfile, true, amptablefile, amp_corr_type, corr_symmetry, ref_angle,
 			                              amp_corr_slope, grid.file, &error);
 
 		/* set sidescan correction in parameter file */
-		if (sidescan_on == MB_YES)
-			status = mb_pr_update_sscorr(verbose, swathfile, MB_YES, sstablefile, ss_corr_type, corr_symmetry, ref_angle,
+		if (sidescan_on)
+			status = mb_pr_update_sscorr(verbose, swathfile, true, sstablefile, ss_corr_type, corr_symmetry, ref_angle,
 			                             ss_corr_slope, grid.file, &error);
 
 		/* output information */
 		if (error == MB_ERROR_NO_ERROR && verbose > 0) {
 			fprintf(stderr, "%d records processed\n", nrec);
-			if (amplitude_on == MB_YES) {
+			if (amplitude_on) {
 				fprintf(stderr, "%d amplitude data processed\n", namp);
 				fprintf(stderr, "%d tables written to %s\n", ntable, amptablefile);
 			}
-			if (sidescan_on == MB_YES) {
+			if (sidescan_on) {
 				fprintf(stderr, "%d sidescan data processed\n", nss);
 				fprintf(stderr, "%d tables written to %s\n", ntable, sstablefile);
 			}
 		}
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* write out total tables */
 	time_d_totavg /= ntotavg;
 	altitude_totavg /= ntotavg;
-	if (dump == MB_NO && amplitude_on == MB_YES) {
+	if (!dump && amplitude_on) {
 		strcpy(amptablefile, read_file);
 		strcat(amptablefile, "_tot.aga");
 		if ((atfp = fopen(amptablefile, "w")) == NULL) {
@@ -1464,7 +1588,7 @@ by MBprocess.";
 			             angle_max, dangle, symmetry, nmeantotamp, meantotamp, sigmatotamp, &error);
 		fclose(atfp);
 	}
-	if (dump == MB_NO && sidescan_on == MB_YES) {
+	if (!dump && sidescan_on) {
 		strcpy(sstablefile, read_file);
 		strcat(sstablefile, "_tot.sga");
 		if ((stfp = fopen(sstablefile, "w")) == NULL) {
@@ -1508,36 +1632,36 @@ by MBprocess.";
 	/* output information */
 	if (error == MB_ERROR_NO_ERROR && verbose > 0) {
 		fprintf(stderr, "\n%d total records processed\n", nrectot);
-		if (amplitude_on == MB_YES) {
+		if (amplitude_on) {
 			fprintf(stderr, "%d total amplitude data processed\n", namptot);
 			fprintf(stderr, "%d total aga tables written\n", ntabletot);
 		}
-		if (sidescan_on == MB_YES) {
+		if (sidescan_on) {
 			fprintf(stderr, "%d total sidescan data processed\n", nsstot);
 			fprintf(stderr, "%d total sga tables written\n", ntabletot);
 		}
 	}
 
 	/* deallocate memory used for data arrays */
-	if (amplitude_on == MB_YES) {
+	if (amplitude_on) {
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&nmeanamp, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&meanamp, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&sigmaamp, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&nmeantotamp, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&meantotamp, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&sigmatotamp, &error);
-		if (gridamp == MB_YES) {
+		if (gridamp) {
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&gridamphist, &error);
 		}
 	}
-	if (sidescan_on == MB_YES) {
+	if (sidescan_on) {
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&nmeanss, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&meanss, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&sigmass, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&nmeantotss, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&meantotss, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&sigmatotss, &error);
-		if (gridss == MB_YES) {
+		if (gridss) {
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&gridsshist, &error);
 		}
 	}
@@ -1552,190 +1676,15 @@ by MBprocess.";
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	if (verbose > 0)
 		fprintf(stderr, "\n");
+
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, int nangles, double angle_max, double dangle,
-                 int symmetry, int *nmean, double *mean, double *sigma, int *error) {
-	int status = MB_SUCCESS;
-	double angle, amean, asigma, sum, sumsq, sumn;
-	int time_i[7];
-	int ii, jj, i0, i1;
-	int i;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       tfp:             %p\n", (void *)tfp);
-		fprintf(stderr, "dbg2       ntable:          %d\n", ntable);
-		fprintf(stderr, "dbg2       nping:           %d\n", nping);
-		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
-		fprintf(stderr, "dbg2       nangles:         %d\n", nangles);
-		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
-		fprintf(stderr, "dbg2       dangle:          %f\n", dangle);
-		fprintf(stderr, "dbg2       symmetry:        %d\n", symmetry);
-		fprintf(stderr, "dbg2       mean and sigma:\n");
-		for (i = 0; i < nangles; i++)
-			fprintf(stderr, "dbg2         %d %f %d %f %f\n", i, (i * dangle), nmean[i], mean[i], sigma[i]);
-	}
-
-	/* process sums and print out results */
-	mb_get_date(verbose, time_d, time_i);
-	fprintf(tfp, "# table: %d\n", ntable);
-	fprintf(tfp, "# nping: %d\n", nping);
-	fprintf(tfp, "# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n", time_i[0], time_i[1], time_i[2], time_i[3],
-	        time_i[4], time_i[5], time_i[6], time_d);
-	fprintf(tfp, "# nangles: %d\n", nangles);
-	for (i = 0; i < nangles; i++) {
-		amean = 0.0;
-		asigma = 0.0;
-		sum = 0.0;
-		sumsq = 0.0;
-		sumn = 0.0;
-		angle = -angle_max + i * dangle;
-		if (fabs(angle) > MBBACKANGLE_INNERSWATHLIMIT) {
-			i0 = MAX(i - 1, 0);
-			i1 = MIN(i + 1, nangles - 1);
-		}
-		else {
-			i0 = i;
-			i1 = i;
-		}
-		for (ii = i0; ii <= i1; ii++) {
-			sum += mean[ii];
-			sumsq += sigma[ii];
-			sumn += nmean[ii];
-			if (symmetry == MB_YES) {
-				jj = nangles - ii - 1;
-				sum += mean[jj];
-				sumsq += sigma[jj];
-				sumn += nmean[jj];
-			}
-		}
-		if (sumn > 0.0) {
-			amean = sum / sumn;
-			asigma = sqrt((sumsq / sumn) - amean * amean);
-		}
-		fprintf(tfp, "%7.4f %12.4f %12.4f\n", angle, amean, asigma);
-	}
-	fprintf(tfp, "#\n");
-	fprintf(tfp, "#\n");
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	/* return status */
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int output_model(int verbose, FILE *tfp, double beamwidth, double depression, double ref_angle, int ntable, int nping,
-                 double time_d, double altitude, int nangles, double angle_max, double dangle, int symmetry, int *nmean,
-                 double *mean, double *sigma, int *error) {
-	int status = MB_SUCCESS;
-	double ref_amp, range, del, factor, aa;
-	double angle, amean, asigma, sum, sumsq, sumn;
-	int time_i[7];
-	int ii, jj, i0, i1, iref;
-	int i;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       tfp:             %p\n", (void *)tfp);
-		fprintf(stderr, "dbg2       beamwidth:       %f\n", beamwidth);
-		fprintf(stderr, "dbg2       depression:      %f\n", depression);
-		fprintf(stderr, "dbg2       ref_angle:       %f\n", ref_angle);
-		fprintf(stderr, "dbg2       ntable:          %d\n", ntable);
-		fprintf(stderr, "dbg2       nping:           %d\n", nping);
-		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
-		fprintf(stderr, "dbg2       altitude:        %f\n", altitude);
-		fprintf(stderr, "dbg2       nangles:         %d\n", nangles);
-		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
-		fprintf(stderr, "dbg2       dangle:          %f\n", dangle);
-		fprintf(stderr, "dbg2       symmetry:        %d\n", symmetry);
-		fprintf(stderr, "dbg2       mean and sigma:\n");
-		for (i = 0; i < nangles; i++)
-			fprintf(stderr, "dbg2         %d %f %d %f %f\n", i, (i * dangle), nmean[i], mean[i], sigma[i]);
-	}
-
-	/* get average amplitude at reference angle */
-	iref = (angle_max - ref_angle) / dangle;
-	i0 = MAX(iref - 1, 0);
-	i1 = MIN(iref + 1, nangles - 1);
-	ref_amp = 0.0;
-	sum = 0.0;
-	sumsq = 0.0;
-	sumn = 0.0;
-	for (ii = i0; ii <= i1; ii++) {
-		sum += mean[ii];
-		sumsq += sigma[ii];
-		sumn += nmean[ii];
-		jj = nangles - ii - 1;
-		sum += mean[jj];
-		sumsq += sigma[jj];
-		sumn += nmean[jj];
-	}
-	if (sumn > 0.0) {
-		ref_amp = sum / sumn;
-		asigma = sqrt((sumsq / sumn) - ref_amp * ref_amp);
-	}
-
-	/* get model that combines gaussian with 1/r
-	    - gaussian must drop to 0.7 max at 0.5 * beamwidth
-	    - model must equal ref_amp at ref_angle */
-	del = (90.0 - depression) - 0.5 * beamwidth;
-	aa = -log(0.1) / (del * del);
-	del = 90.0 - depression - ref_angle;
-	range = altitude / cos(DTR * ref_angle);
-	factor = ref_amp * range * range / exp(-aa * del * del);
-
-	/* process sums and print out results */
-	mb_get_date(verbose, time_d, time_i);
-	fprintf(tfp, "# table: %d\n", ntable);
-	fprintf(tfp, "# nping: %d\n", nping);
-	fprintf(tfp, "# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n", time_i[0], time_i[1], time_i[2], time_i[3],
-	        time_i[4], time_i[5], time_i[6], time_d);
-	fprintf(tfp, "# nangles: %d\n", nangles);
-	for (i = 0; i < nangles; i++) {
-		angle = -angle_max + i * dangle;
-		del = fabs(angle) - (90 - depression);
-		range = altitude / cos(DTR * fabs(angle));
-		amean = factor * exp(-aa * del * del) / (range * range);
-		fprintf(tfp, "%7.4f %12.4f %12.4f\n", angle, amean, asigma);
-	}
-	fprintf(tfp, "#\n");
-	fprintf(tfp, "#\n");
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	/* return status */
-	return (status);
 }
 /*--------------------------------------------------------------------*/

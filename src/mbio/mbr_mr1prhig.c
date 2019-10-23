@@ -64,9 +64,9 @@ int mbr_info_mr1prhig(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_XDR;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -219,7 +219,7 @@ int mbr_alm_mr1prhig(int verbose, void *mbio_ptr, int *error) {
 
 	/* initialize everything to zeros */
 	mbr_zero_mr1prhig(verbose, data, error);
-	mb_io_ptr->fileheader = MB_NO;
+	mb_io_ptr->fileheader = false;
 	mb_io_ptr->hdr_comment_size = 0;
 	mb_io_ptr->hdr_comment = NULL;
 
@@ -302,7 +302,6 @@ int mbr_mr1prhig_rd_hdr(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data
 		*error = MB_ERROR_EOF;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       mf_magic:         %d\n", data->mf_magic);
@@ -450,7 +449,6 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 	if (status == MB_FAILURE)
 		*error = MB_ERROR_EOF;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sec:              %d\n", data->sec);
@@ -482,7 +480,6 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 		fprintf(stderr, "\n");
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "dbg5       port_beam  depth   xtrack\n");
 		for (int i = 0; i < data->port_btycount; i++) {
@@ -540,10 +537,10 @@ int mbr_mr1prhig_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* if first time through read file header */
-	if (mb_io_ptr->fileheader == MB_NO) {
+	if (mb_io_ptr->fileheader == false) {
 		status = mbr_mr1prhig_rd_hdr(verbose, xdrs, data, &mb_io_ptr->hdr_comment, error);
 		if (status == MB_SUCCESS) {
-			mb_io_ptr->fileheader = MB_YES;
+			mb_io_ptr->fileheader = true;
 			if (mb_io_ptr->hdr_comment == NULL)
 				mb_io_ptr->hdr_comment_size = 0;
 			else
@@ -733,7 +730,6 @@ int mbr_mr1prhig_wr_hdr(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data
 		fprintf(stderr, "dbg2       hdr_comment:%p\n", (void *)*hdr_comment);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       mf_magic:         %d\n", data->mf_magic);
@@ -789,7 +785,6 @@ int mbr_mr1prhig_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sec:              %d\n", data->sec);
@@ -924,7 +919,7 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 	int status = MB_SUCCESS;
 
 	/* if comment and file header not written */
-	if (mb_io_ptr->fileheader == MB_NO && data->kind == MB_DATA_COMMENT) {
+	if (mb_io_ptr->fileheader == false && data->kind == MB_DATA_COMMENT) {
 		/* add comment to string mb_io_ptr->hdr_comment
 		    to be be written in file header */
 		lenc = strlen(data->comment);
@@ -944,23 +939,23 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 	}
 
 	/* if data and file header not written */
-	else if (mb_io_ptr->fileheader == MB_NO && data->kind != MB_DATA_COMMENT) {
+	else if (mb_io_ptr->fileheader == false && data->kind != MB_DATA_COMMENT) {
 		/* write file header */
 		status = mbr_mr1prhig_wr_hdr(verbose, xdrs, data, &mb_io_ptr->hdr_comment, error);
-		mb_io_ptr->fileheader = MB_YES;
+		mb_io_ptr->fileheader = true;
 
 		/* write data */
 		status = mbr_mr1prhig_wr_ping(verbose, xdrs, data, error);
 	}
 
 	/* if data and file header written */
-	else if (mb_io_ptr->fileheader == MB_YES && data->kind == MB_DATA_DATA) {
+	else if (mb_io_ptr->fileheader == true && data->kind == MB_DATA_DATA) {
 		/* write data */
 		status = mbr_mr1prhig_wr_ping(verbose, xdrs, data, error);
 	}
 
 	/* if not data and file header written */
-	else if (mb_io_ptr->fileheader == MB_YES && data->kind != MB_DATA_DATA) {
+	else if (mb_io_ptr->fileheader == true && data->kind != MB_DATA_DATA) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_KIND;
 	}

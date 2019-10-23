@@ -1,5 +1,6 @@
 -------------------------------------------------------------------------------
 MB-SYSTEM CHANGELOG FILE:
+
 -------------------------------------------------------------------------------
 
 This file lists changes to the source code of the MB-System open
@@ -7,8 +8,10 @@ source software package for the processing and display of swath sonar data.
 This file is located at the top of the MB-System source code distribution
 directory structure.
 
+
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
+
 -------------------------------------------------------------------------------
 Prior to 5.7.1, the MB-System source code repository was a privately hosted
 Subversion archive. In that era, "*" denotes source distribution releases
@@ -20,307 +23,486 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
 
-  Version 5.7.6beta5     August 6, 2019
-  Version 5.7.6beta4     August 2, 2019
-  Version 5.7.6beta2     July 25, 2019
-  Version 5.7.6beta1     July 6, 2019
-* Version 5.7.5          June 26, 2019
-  Version 5.7.5beta12    June 24, 2019
-  Version 5.7.5beta11    June 16, 2019
-  Version 5.7.5beta10    June 9, 2019
-  Version 5.7.5beta9     June 8, 2019
-  Version 5.7.5beta8     April 11, 2019
-  Version 5.7.5beta7     March 28, 2019
-  Version 5.7.5beta6     March 26, 2019
-  Version 5.7.5beta5     March 22, 2019
-  Version 5.7.5beta4     March 21, 2019
-  Version 5.7.5beta3     March 14, 2019
-  Version 5.7.5beta2     March 4, 2019
-  Version 5.7.5beta1     February 26, 2019
-  Version 5.7.5beta0     February 25, 2019
-* Version 5.7.4          February 12, 2019
-* Version 5.7.3          February 8, 2019
-  Version 5.7.2          February 4, 2019
-* Version 5.7.1          December 19, 2018
-  Version 5.6.20181218   December 18, 2018
-* Version 5.6.20181217   December 17, 2018
-  Version 5.6.20181214   December 14, 2018
-  Version 5.6.20181129   November 29, 2018
-  Version 5.6.20181016   October 16, 2018
-  Version 5.6.002        September 14, 2018
-  Version 5.6.002        September 11, 2018
-  Version 5.5.2350       September 6, 2018
-  Version 5.5.2348       August 20, 2018
-  Version 5.5.2347       August 17, 2018
-  Version 5.5.2346       August 13, 2018
-  Version 5.5.2345       August 10, 2018
-  Version 5.5.2344       August 3, 2018
-  Version 5.5.2343       July 10, 2018
-* Version 5.5.2342       June 29, 2018
-  Version 5.5.2340       June 26, 2018
-  Version 5.5.2339       June 25, 2018
-* Version 5.5.2336       June 6, 2018
-  Version 5.5.2335       May 6, 2018
-  Version 5.5.2334       April 18, 2018
-  Version 5.5.2333       April 18, 2018
-  Version 5.5.2332       April 17, 2018
-  Version 5.5.2331       April 10, 2018
-  Version 5.5.2330       March 7, 2018
-  Version 5.5.2329       February 12, 2018
-  Version 5.5.2328       January 31, 2018
-* Version 5.5.2327       January 23, 2018
-  Version 5.5.2324       January 18, 2018
-  Version 5.5.2323       December 7, 2017
-  Version 5.5.2322       November 25, 2017
-* Version 5.5.2321       October 26, 2017
-  Version 5.5.2320       October 18, 2017
-* Version 5.5.2319       October 16, 2017
-* Version 5.5.2318       September 29, 2017
-* Version 5.5.2314       August 24, 2017
-* Version 5.5.2313       August 9, 2017
-  Version 5.5.2312       July 14, 2017
-  Version 5.5.2311       June 20, 2017
-* Version 5.5.2309       June 4, 2017
-  Version 5.5.2306       May 27, 2017
-  Version 5.5.2305       May 13, 2017
-  Version 5.5.2304       May 6, 2017
-  Version 5.5.2303       April 28, 2017
-  Version 5.5.2302       April 20, 2017
-  Version 5.5.2301       April 17, 2017
-  Version 5.5.2300       April 15, 2017
-  Version 5.5.2299       April 10, 2017
-  Version 5.5.2297       April 5, 2017
-  Version 5.5.2296       March 31, 2017
-  Version 5.5.2295       March 26, 2017
-  Version 5.5.2294       March 21, 2017
-  Version 5.5.2293       March 6, 2017
-  Version 5.5.2290       January 2, 2017
-  Version 5.5.2289       December 2, 2016
-  Version 5.5.2287       November 29, 2016
-  Version 5.5.2286       November 8, 2016
-  Version 5.5.2285       November 3, 2016
-* Version 5.5.2284       October 23, 2016
-  Version 5.5.2282       August 25, 2016
-  Version 5.5.2281       August 7, 2016
-* Version 5.5.2279       July 8, 2016
-* Version 5.5.2278       July 1, 2016
-  Version 5.5.2277       June 25, 2016
-  Version 5.5.2275       May 17, 2016
-* Version 5.5.2274       May 5, 2016
-  Version 5.5.2271       April 1, 2016
-* Version 5.5.2270       March 24, 2016
-  Version 5.5.2268       March 14, 2016
-* Version 5.5.2267       February 11, 2016
-  Version 5.5.2265       February 11, 2016
-  Version 5.5.2264       February 2, 2016
-* Version 5.5.2263       January 7, 2016
-  Version 5.5.2260       December 22, 2015
-  Version 5.5.2259       October 27, 2015
-  Version 5.5.2258       October 5, 2015
-  Version 5.5.2257       September 1, 2015
-  Version 5.5.2256       August 24, 2015
-  Version 5.5.2255       August 11, 2015
-  Version 5.5.2254       July 23, 2015
-* Version 5.5.2252       July 1, 2015
-* Version 5.5.2251       June 30, 2015
-  Version 5.5.2250       June 29, 2015
-  Version 5.5.2249       June 26, 2015
-* Version 5.5.2248       May 31, 2015
-  Version 5.5.2247       May 29, 2015
-* Version 5.5.2246       May 27, 2015
-* Version 5.5.2243       May 22, 2015
-* Version 5.5.2242       May 16, 2015
-  Version 5.5.2241       May 12, 2015
-  Version 5.5.2240       May 8, 2015
-  Version 5.5.2239       May 6, 2015
-  Version 5.5.2238       April 14, 2015
-  Version 5.5.2237       March 23, 2015
-  Version 5.5.2234       March 5, 2015
-* Version 5.5.2233       February 23, 2015
-  Version 5.5.2232       February 21, 2015
-  Version 5.5.2231       February 20, 2015
-  Version 5.5.2230       February 18, 2015
-  Version 5.5.2229       February 14, 2015
-  Version 5.5.2228       February 6, 2015
-* Version 5.4.2220       January 22, 2015 (Last GMT4-compatible archive revision, released February 27, 2015)
-  Version 5.4.2219       December 11, 2014
-  Version 5.4.2218       December 4, 2014
-  Version 5.4.2217       December 1, 2014
-* Version 5.4.2213       November 13, 2014
-  Version 5.4.2210       November 10, 2014
-* Version 5.4.2209       November 4, 2014
-* Version 5.4.2208       October 29, 2014
-  Version 5.4.2204       September 5, 2014
-* Version 5.4.2202       August 25, 2014
-  Version 5.4.2201       August 20, 2014
-* Version 5.4.2200       July 24, 2014
-* Version 5.4.2199       July 19, 2014
-  Version 5.4.2196       July 14, 2014
-  Version 5.4.2195       July 9, 2014
-  Version 5.4.2194       July 8, 2014
-* Version 5.4.2191       June 4, 2014
-* Version 5.4.2188       May 31, 2014
-  Version 5.4.2187       May 28, 2014
-  Version 5.4.2186       May 26, 2014
-  Version 5.4.2185       May 11, 2014
-* Version 5.4.2183       April 16, 2014
-  Version 5.4.2182       April 8, 2014
-  Version 5.4.2181       April 4, 2014
-* Version 5.4.2176       March 18, 2014
-* Version 5.4.2168       February 19, 2014
-* Version 5.4.2163       January 31, 2014
-  Version 5.4.2162       January 24, 2014
-* Version 5.4.2159       January 18, 2014
-  Version 5.4.2158       January 18, 2014
-* Version 5.4.2157       October 14, 2013
-  Version 5.4.2155       October 13, 2013
-  Version 5.4.2154       September 26, 2013
-  Version 5.4.2153       September 22, 2013
-* Version 5.4.2152       September 16, 2013
-  Version 5.4.2151       September 12, 2013
-  Version 5.4.2149       September 2, 2013
-  Version 5.4.2148       August 28, 2013
-  Version 5.4.2147       August 27, 2013
-  Version 5.4.2144       August 26, 2013
-  Version 5.4.2143       August 24, 2013
-  Version 5.4.2141       August 24, 2013
-  Version 5.4.2139       August 19, 2013
-  Version 5.4.2138       August 18, 2013
-  Version 5.4.2137       August 9, 2013
-  Version 5.4.2136       August 8, 2013
-* Version 5.4.2135       August 7, 2013
-  Version 5.4.2133       July 29, 2013
-  Version 5.4.2132       July 26, 2013
-  Version 5.4.2130       July 20, 2013
-  Version 5.4.2129       July 8, 2013
-  Version 5.4.2128       June 18, 2013
-  Version 5.4.2123       June 10, 2013
-  Version 5.4.2082       May 24, 2013
-  Version 5.3.2053       April 4, 2013
-  Version 5.3.2051       March 20, 2013
-  Version 5.3.2042       March 12, 2013
-* Version 5.3.2017       March 3, 2013
-* Version 5.3.2013       January 29, 2013
-* Version 5.3.2012       January 25, 2013
-* Version 5.3.2011       January 17, 2013
-  Version 5.3.2010       January 14, 2013
-* Version 5.3.2009       January 10, 2013
-* Version 5.3.2008       January 6, 2013
-  Version 5.3.2007       January 5, 2013
-  Version 5.3.2006       January 4, 2013
-  Version 5.3.2005       December 31, 2012
-  Version 5.3.2004       December 12, 2012
-  Version 5.3.2000       Navember 14, 2012
-  Version 5.3.1999       Navember 13, 2012
-  Version 5.3.1998       Navember 6, 2012
-  Version 5.3.1994       October 27, 2012
-  Version 5.3.1988       September 29, 2012
-  Version 5.3.1986       September 12, 2012
-* Version 5.3.1982       August 15, 2012
-  Version 5.3.1981       August 2, 2012
-* Version 5.3.1980       July 13, 2012
-* Version 5.3.1955       May 16, 2012
-  Version 5.3.1941       March 6, 2012
-* Version 5.3.1917       January 10, 2012
-* Version 5.3.1912       November 19, 2011
-* Version 5.3.1909       November 16, 2011
-* Version 5.3.1907       November 9, 2011
-* Version 5.3.1906       September 28, 2011
-* Version 5.2.1880       December 30, 2010
-  Version 5.1.3beta1875  November 23, 2010
-  Version 5.1.3beta1874  November 7, 2010
-  Version 5.1.3beta1862  June 7, 2010
-  Version 5.1.3beta1858  May 18, 2010
-  Version 5.1.3beta1855  May 4, 2010
-  Version 5.1.3beta1851  April 14, 2010
-  Version 5.1.3beta1844  March 30, 2010
-  Version 5.1.3beta1843  March 29, 2010
-  Version 5.1.3beta1829  February 5, 2010
-* Version 5.1.2          December 31, 2009
-  Version 5.1.2beta15    December 30, 2009
-  Version 5.1.2beta14    December 28, 2009
-  Version 5.1.2beta13    December 28, 2009
-  Version 5.1.2beta12    December 26, 2009
-  Version 5.1.2beta11    Ausust 26, 2009
-  Version 5.1.2beta10    Ausust 12, 2009
-  Version 5.1.2beta09    Ausust 7, 2009
-  Version 5.1.2beta08    Ausust 5, 2009
-  Version 5.1.2beta06    July 2, 2009
-  Version 5.1.2beta05    June 14, 2009
-  Version 5.1.2beta02    March 13, 2009
-  Version 5.1.2beta01    March 9, 2009
-* Version 5.1.1          December 31, 2008
-  Version 5.1.1beta26    November 18, 2008
-  Version 5.1.1beta25    September 28, 2008
-  Version 5.1.1beta23    September 19, 2008
-  Version 5.1.1beta21    July 20, 2008
-  Version 5.1.1beta20    July 10, 2008
-  Version 5.1.1beta19    June 6, 2008
-  Version 5.1.1beta18    May 16, 2008
-  Version 5.1.1beta17    March 21, 2008
-  Version 5.1.1beta16    March 14, 2008
-  Version 5.1.1beta15    February 8, 2008
-  Version 5.1.1beta14    January 15, 2008
-  Version 5.1.1beta13    November 16, 2007
-  Version 5.1.1beta12    November 2, 2007
-  Version 5.1.1beta11    October 17, 2007
-  Version 5.1.1beta10    October 8, 2007
-  Version 5.1.1beta5     July 5, 2007
-* Version 5.1.0          November 26, 2006
-  Version 5.1.0beta4     October 5, 2006
-  Version 5.1.0beta3     September 11, 2006
-  Version 5.1.0beta2     August 9, 2006
-  Version 5.1.0beta      July 5, 2006
-* Version 5.0.9          February 20, 2006
-* Version 5.0.8          February 8, 2006
-  Version 5.0.8beta5     February 3, 2006
-  Version 5.0.8beta4     February 1, 2006
-  Version 5.0.8beta3     February 1, 2006
-  Version 5.0.8beta2     January 27, 2006
-  Version 5.0.8beta      January 24, 2006
-* Version 5.0.7          April 7, 2005
-* Version 5.0.6          February 19, 2005
-* Version 5.0.5          October 6, 2004
-* Version 5.0.4          May 22, 2004
-* Version 5.0.3          February 27, 2004
-* Version 5.0.2          December 24, 2003
-* Version 5.0.1          December 12, 2003
-* Version 5.0.0          December 5, 2003
-  Version 5.0.beta31     April 29, 2003
-  Version 5.0.beta30     April 25, 2003
-  Version 5.0.beta29     March 10, 2003
-  Version 5.0.beta28     January 14, 2003
-  Version 5.0.beta27     November 13, 2002
-  Version 5.0.beta26     November 3, 2002
-  Version 5.0.beta25     October 15, 2002
-  Version 5.0.beta24     October 4, 2002
-  Version 5.0.beta23     September 20, 2002
-  Version 5.0.beta22     August 30, 2002
-  Version 5.0.beta21     July 25, 2002
-  Version 5.0.beta20     July 20, 2002
-  Version 5.0.beta18     May 31, 2002
-  Version 5.0.beta17     May 1, 2002
-  Version 5.0.beta16     April 5, 2002
-  Version 5.0.beta15     March 26, 2002
-  Version 5.0.beta14     February 25, 2002
-  Version 5.0.beta13     February 22, 2002
-  Version 5.0.beta12     January 2, 2002
-  Version 5.0.beta11     December 20, 2001
-  Version 5.0.beta10     November 20, 2001
-  Version 5.0.beta09     November 6, 2001
-  Version 5.0.beta08     October 19, 2001
-  Version 5.0.beta07     August 10, 2001
-  Version 5.0.beta06     July 30, 2001
-  Version 5.0.beta05     July 23, 2001
-  Version 5.0.beta04     July 20, 2001
-  Version 5.0.beta03     July 19, 2001
-  Version 5.0.beta02     June 30, 2001
-  Version 5.0.beta01     June 8, 2001
-  Version 5.0.beta00     April 6, 2001
+- Version 5.7.6beta15    October 21, 2019
+- Version 5.7.6beta14    October 8, 2019
+- Version 5.7.6beta12    September 20, 2019
+- Version 5.7.6beta10    September 18, 2019
+- Version 5.7.6beta8     September 9, 2019
+- Version 5.7.6beta6     August 26, 2019
+- Version 5.7.6beta5     August 6, 2019
+- Version 5.7.6beta4     August 2, 2019
+- Version 5.7.6beta2     July 25, 2019
+- Version 5.7.6beta1     July 6, 2019
+- **Version 5.7.5          June 26, 2019**
+- Version 5.7.5beta12    June 24, 2019
+- Version 5.7.5beta11    June 16, 2019
+- Version 5.7.5beta10    June 9, 2019
+- Version 5.7.5beta9     June 8, 2019
+- Version 5.7.5beta8     April 11, 2019
+- Version 5.7.5beta7     March 28, 2019
+- Version 5.7.5beta6     March 26, 2019
+- Version 5.7.5beta5     March 22, 2019
+- Version 5.7.5beta4     March 21, 2019
+- Version 5.7.5beta3     March 14, 2019
+- Version 5.7.5beta2     March 4, 2019
+- Version 5.7.5beta1     February 26, 2019
+- Version 5.7.5beta0     February 25, 2019
+- **Version 5.7.4          February 12, 2019**
+- **Version 5.7.3          February 8, 2019**
+- Version 5.7.2          February 4, 2019
+- **Version 5.7.1          December 19, 2018**
+- Version 5.6.20181218   December 18, 2018
+- **Version 5.6.20181217   December 17, 2018**
+- Version 5.6.20181214   December 14, 2018
+- Version 5.6.20181129   November 29, 2018
+- Version 5.6.20181016   October 16, 2018
+- Version 5.6.002        September 14, 2018
+- Version 5.6.002        September 11, 2018
+- Version 5.5.2350       September 6, 2018
+- Version 5.5.2348       August 20, 2018
+- Version 5.5.2347       August 17, 2018
+- Version 5.5.2346       August 13, 2018
+- Version 5.5.2345       August 10, 2018
+- Version 5.5.2344       August 3, 2018
+- Version 5.5.2343       July 10, 2018
+- **Version 5.5.2342       June 29, 2018**
+- Version 5.5.2340       June 26, 2018
+- Version 5.5.2339       June 25, 2018
+- **Version 5.5.2336       June 6, 2018**
+- Version 5.5.2335       May 6, 2018
+- Version 5.5.2334       April 18, 2018
+- Version 5.5.2333       April 18, 2018
+- Version 5.5.2332       April 17, 2018
+- Version 5.5.2331       April 10, 2018
+- Version 5.5.2330       March 7, 2018
+- Version 5.5.2329       February 12, 2018
+- Version 5.5.2328       January 31, 2018
+- **Version 5.5.2327       January 23, 2018**
+- Version 5.5.2324       January 18, 2018
+- Version 5.5.2323       December 7, 2017
+- Version 5.5.2322       November 25, 2017
+- **Version 5.5.2321       October 26, 2017**
+- Version 5.5.2320       October 18, 2017
+- **Version 5.5.2319       October 16, 2017**
+- **Version 5.5.2318       September 29, 2017**
+- **Version 5.5.2314       August 24, 2017**
+- **Version 5.5.2313       August 9, 2017**
+- Version 5.5.2312       July 14, 2017
+- Version 5.5.2311       June 20, 2017
+- **Version 5.5.2309       June 4, 2017**
+- Version 5.5.2306       May 27, 2017
+- Version 5.5.2305       May 13, 2017
+- Version 5.5.2304       May 6, 2017
+- Version 5.5.2303       April 28, 2017
+- Version 5.5.2302       April 20, 2017
+- Version 5.5.2301       April 17, 2017
+- Version 5.5.2300       April 15, 2017
+- Version 5.5.2299       April 10, 2017
+- Version 5.5.2297       April 5, 2017
+- Version 5.5.2296       March 31, 2017
+- Version 5.5.2295       March 26, 2017
+- Version 5.5.2294       March 21, 2017
+- Version 5.5.2293       March 6, 2017
+- Version 5.5.2290       January 2, 2017
+- Version 5.5.2289       December 2, 2016
+- Version 5.5.2287       November 29, 2016
+- Version 5.5.2286       November 8, 2016
+- Version 5.5.2285       November 3, 2016
+- **Version 5.5.2284       October 23, 2016**
+- Version 5.5.2282       August 25, 2016
+- Version 5.5.2281       August 7, 2016
+- **Version 5.5.2279       July 8, 2016**
+- **Version 5.5.2278       July 1, 2016**
+- Version 5.5.2277       June 25, 2016
+- Version 5.5.2275       May 17, 2016
+- **Version 5.5.2274       May 5, 2016**
+- Version 5.5.2271       April 1, 2016
+- **Version 5.5.2270       March 24, 2016**
+- Version 5.5.2268       March 14, 2016
+- **Version 5.5.2267       February 11, 2016**
+- Version 5.5.2265       February 11, 2016
+- Version 5.5.2264       February 2, 2016
+- **Version 5.5.2263       January 7, 2016**
+- Version 5.5.2260       December 22, 2015
+- Version 5.5.2259       October 27, 2015
+- Version 5.5.2258       October 5, 2015
+- Version 5.5.2257       September 1, 2015
+- Version 5.5.2256       August 24, 2015
+- Version 5.5.2255       August 11, 2015
+- Version 5.5.2254       July 23, 2015
+- **Version 5.5.2252       July 1, 2015**
+- **Version 5.5.2251       June 30, 2015**
+- Version 5.5.2250       June 29, 2015
+- Version 5.5.2249       June 26, 2015
+- **Version 5.5.2248       May 31, 2015**
+- Version 5.5.2247       May 29, 2015
+- **Version 5.5.2246       May 27, 2015**
+- **Version 5.5.2243       May 22, 2015**
+- **Version 5.5.2242       May 16, 2015**
+- Version 5.5.2241       May 12, 2015
+- Version 5.5.2240       May 8, 2015
+- Version 5.5.2239       May 6, 2015
+- Version 5.5.2238       April 14, 2015
+- Version 5.5.2237       March 23, 2015
+- Version 5.5.2234       March 5, 2015
+- **Version 5.5.2233       February 23, 2015**
+- Version 5.5.2232       February 21, 2015
+- Version 5.5.2231       February 20, 2015
+- Version 5.5.2230       February 18, 2015
+- Version 5.5.2229       February 14, 2015
+- Version 5.5.2228       February 6, 2015
+- **Version 5.4.2220       January 22, 2015 (Last GMT4-compatible archive revision, released February 27, 2015)**
+- Version 5.4.2219       December 11, 2014
+- Version 5.4.2218       December 4, 2014
+- Version 5.4.2217       December 1, 2014
+- **Version 5.4.2213       November 13, 2014**
+- Version 5.4.2210       November 10, 2014
+- **Version 5.4.2209       November 4, 2014**
+- **Version 5.4.2208       October 29, 2014**
+- Version 5.4.2204       September 5, 2014
+- **Version 5.4.2202       August 25, 2014**
+- Version 5.4.2201       August 20, 2014
+- **Version 5.4.2200       July 24, 2014**
+- **Version 5.4.2199       July 19, 2014**
+- Version 5.4.2196       July 14, 2014
+- Version 5.4.2195       July 9, 2014
+- Version 5.4.2194       July 8, 2014
+- **Version 5.4.2191       June 4, 2014**
+- **Version 5.4.2188       May 31, 2014**
+- Version 5.4.2187       May 28, 2014
+- Version 5.4.2186       May 26, 2014
+- Version 5.4.2185       May 11, 2014
+- **Version 5.4.2183       April 16, 2014**
+- Version 5.4.2182       April 8, 2014
+- Version 5.4.2181       April 4, 2014
+- **Version 5.4.2176       March 18, 2014**
+- **Version 5.4.2168       February 19, 2014**
+- **Version 5.4.2163       January 31, 2014**
+- Version 5.4.2162       January 24, 2014
+- **Version 5.4.2159       January 18, 2014**
+- Version 5.4.2158       January 18, 2014
+- **Version 5.4.2157       October 14, 2013**
+- Version 5.4.2155       October 13, 2013
+- Version 5.4.2154       September 26, 2013
+- Version 5.4.2153       September 22, 2013
+- **Version 5.4.2152       September 16, 2013**
+- Version 5.4.2151       September 12, 2013
+- Version 5.4.2149       September 2, 2013
+- Version 5.4.2148       August 28, 2013
+- Version 5.4.2147       August 27, 2013
+- Version 5.4.2144       August 26, 2013
+- Version 5.4.2143       August 24, 2013
+- Version 5.4.2141       August 24, 2013
+- Version 5.4.2139       August 19, 2013
+- Version 5.4.2138       August 18, 2013
+- Version 5.4.2137       August 9, 2013
+- Version 5.4.2136       August 8, 2013
+- **Version 5.4.2135       August 7, 2013**
+- Version 5.4.2133       July 29, 2013
+- Version 5.4.2132       July 26, 2013
+- Version 5.4.2130       July 20, 2013
+- Version 5.4.2129       July 8, 2013
+- Version 5.4.2128       June 18, 2013
+- Version 5.4.2123       June 10, 2013
+- Version 5.4.2082       May 24, 2013
+- Version 5.3.2053       April 4, 2013
+- Version 5.3.2051       March 20, 2013
+- Version 5.3.2042       March 12, 2013
+- **Version 5.3.2017       March 3, 2013**
+- **Version 5.3.2013       January 29, 2013**
+- **Version 5.3.2012       January 25, 2013**
+- **Version 5.3.2011       January 17, 2013**
+- Version 5.3.2010       January 14, 2013
+- **Version 5.3.2009       January 10, 2013**
+- **Version 5.3.2008       January 6, 2013**
+- Version 5.3.2007       January 5, 2013
+- Version 5.3.2006       January 4, 2013
+- Version 5.3.2005       December 31, 2012
+- Version 5.3.2004       December 12, 2012
+- Version 5.3.2000       Navember 14, 2012
+- Version 5.3.1999       Navember 13, 2012
+- Version 5.3.1998       Navember 6, 2012
+- Version 5.3.1994       October 27, 2012
+- Version 5.3.1988       September 29, 2012
+- Version 5.3.1986       September 12, 2012
+- **Version 5.3.1982       August 15, 2012**
+- Version 5.3.1981       August 2, 2012
+- **Version 5.3.1980       July 13, 2012**
+- **Version 5.3.1955       May 16, 2012**
+- Version 5.3.1941       March 6, 2012
+- **Version 5.3.1917       January 10, 2012**
+- **Version 5.3.1912       November 19, 2011**
+- **Version 5.3.1909       November 16, 2011**
+- **Version 5.3.1907       November 9, 2011**
+- **Version 5.3.1906       September 28, 2011**
+- **Version 5.2.1880       December 30, 2010**
+- Version 5.1.3beta1875  November 23, 2010
+- Version 5.1.3beta1874  November 7, 2010
+- Version 5.1.3beta1862  June 7, 2010
+- Version 5.1.3beta1858  May 18, 2010
+- Version 5.1.3beta1855  May 4, 2010
+- Version 5.1.3beta1851  April 14, 2010
+- Version 5.1.3beta1844  March 30, 2010
+- Version 5.1.3beta1843  March 29, 2010
+- Version 5.1.3beta1829  February 5, 2010
+- **Version 5.1.2          December 31, 2009**
+- Version 5.1.2beta15    December 30, 2009
+- Version 5.1.2beta14    December 28, 2009
+- Version 5.1.2beta13    December 28, 2009
+- Version 5.1.2beta12    December 26, 2009
+- Version 5.1.2beta11    Ausust 26, 2009
+- Version 5.1.2beta10    Ausust 12, 2009
+- Version 5.1.2beta09    Ausust 7, 2009
+- Version 5.1.2beta08    Ausust 5, 2009
+- Version 5.1.2beta06    July 2, 2009
+- Version 5.1.2beta05    June 14, 2009
+- Version 5.1.2beta02    March 13, 2009
+- Version 5.1.2beta01    March 9, 2009
+- **Version 5.1.1          December 31, 2008**
+- Version 5.1.1beta26    November 18, 2008
+- Version 5.1.1beta25    September 28, 2008
+- Version 5.1.1beta23    September 19, 2008
+- Version 5.1.1beta21    July 20, 2008
+- Version 5.1.1beta20    July 10, 2008
+- Version 5.1.1beta19    June 6, 2008
+- Version 5.1.1beta18    May 16, 2008
+- Version 5.1.1beta17    March 21, 2008
+- Version 5.1.1beta16    March 14, 2008
+- Version 5.1.1beta15    February 8, 2008
+- Version 5.1.1beta14    January 15, 2008
+- Version 5.1.1beta13    November 16, 2007
+- Version 5.1.1beta12    November 2, 2007
+- Version 5.1.1beta11    October 17, 2007
+- Version 5.1.1beta10    October 8, 2007
+- Version 5.1.1beta5     July 5, 2007
+- **Version 5.1.0          November 26, 2006**
+- Version 5.1.0beta4     October 5, 2006
+- Version 5.1.0beta3     September 11, 2006
+- Version 5.1.0beta2     August 9, 2006
+- Version 5.1.0beta      July 5, 2006
+- **Version 5.0.9          February 20, 2006**
+- **Version 5.0.8          February 8, 2006**
+- Version 5.0.8beta5     February 3, 2006
+- Version 5.0.8beta4     February 1, 2006
+- Version 5.0.8beta3     February 1, 2006
+- Version 5.0.8beta2     January 27, 2006
+- Version 5.0.8beta      January 24, 2006
+- **Version 5.0.7          April 7, 2005**
+- **Version 5.0.6          February 19, 2005**
+- **Version 5.0.5          October 6, 2004**
+- **Version 5.0.4          May 22, 2004**
+- **Version 5.0.3          February 27, 2004**
+- **Version 5.0.2          December 24, 2003**
+- **Version 5.0.1          December 12, 2003**
+- **Version 5.0.0          December 5, 2003**
+- Version 5.0.beta31     April 29, 2003
+- Version 5.0.beta30     April 25, 2003
+- Version 5.0.beta29     March 10, 2003
+- Version 5.0.beta28     January 14, 2003
+- Version 5.0.beta27     November 13, 2002
+- Version 5.0.beta26     November 3, 2002
+- Version 5.0.beta25     October 15, 2002
+- Version 5.0.beta24     October 4, 2002
+- Version 5.0.beta23     September 20, 2002
+- Version 5.0.beta22     August 30, 2002
+- Version 5.0.beta21     July 25, 2002
+- Version 5.0.beta20     July 20, 2002
+- Version 5.0.beta18     May 31, 2002
+- Version 5.0.beta17     May 1, 2002
+- Version 5.0.beta16     April 5, 2002
+- Version 5.0.beta15     March 26, 2002
+- Version 5.0.beta14     February 25, 2002
+- Version 5.0.beta13     February 22, 2002
+- Version 5.0.beta12     January 2, 2002
+- Version 5.0.beta11     December 20, 2001
+- Version 5.0.beta10     November 20, 2001
+- Version 5.0.beta09     November 6, 2001
+- Version 5.0.beta08     October 19, 2001
+- Version 5.0.beta07     August 10, 2001
+- Version 5.0.beta06     July 30, 2001
+- Version 5.0.beta05     July 23, 2001
+- Version 5.0.beta04     July 20, 2001
+- Version 5.0.beta03     July 19, 2001
+- Version 5.0.beta02     June 30, 2001
+- Version 5.0.beta01     June 8, 2001
+- Version 5.0.beta00     April 6, 2001
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
+
+-----> 5.7.6beta15 (October 21, 2019)
+
+Format 261 (MBF_KEMKMALL): Fixed preprocessing of Kongsberg multibeam data in the
+kmall format, particularly with regard to merging WHOI-NDSF processed navigation
+for surveys by AUV Sentry and ROV Jason.
+
+Format 72 (MBF_MBARIMB1): Added support for a format used to store filtered and
+decimated multibeam bathymetry as generated by mbtrnpp for use by the terrain
+relative navigation module.
+
+Mbpreprocess: Added an option named --kluge-auv-sentry-sensordepth that causes
+mbpreprocess to replace the sensor depth value with the antenna height recorded
+in the position record. This allows processing of AUV Sentry Kongsberg EM2020
+using the embedded navigation, attitude, and sensor depth. At this time the
+Kongsberg EM2040 is not accepting the input depth datagrams, and so the sensor
+depth field is populated with incorrect values. Once a post-processed navigation,
+attitude, and sensor depth model is available for merging, this kluge option is
+no longer needed.
+
+Terrain Aided Navigation (TRN) tools: Working towards supporting realtime UDP
+based reading of Kongsberg kmall format data into program mbtrnpp. Removed
+test data from the gctp projection package embedded within the TRN server
+source tree.
+
+mbtrnpp: Augmented this tool to acquire realtime Kongsberg multibeam data over
+a UDP port. Note that configure must be invoked with the --enable-mbtrn  and
+--enable-mbtnav options for the terrain relative navigation tools to be built.
+We do encourage general users to avoid building with these options - the TRN
+tools are experimental, changing rapidly, and for now specific to MBARI AUVs.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices. Current changes include replacing MB_YES/MB_NO with boolean
+true and false, and changing the type of the associated variables from int to
+bool.
+
+-----> 5.7.6beta14 (October 8, 2019)
+
+MBnavadjustmerge: Added options --unset-short-section-ties=min_length and
+--skip-short-section-crossings=min_length that allow the deletion or prevention
+of ties made using short sections of data. This increases the reliability of the
+autopicking of ties. The track length threshold is specified with the
+command.
+
+MBnavadjust: Restrict autopicking of ties incorporating short sections of data.
+The track length threshold is 1/4 of the target segment track length specified
+in the options dialog.
+
+Format 88 (MBF_RESON7KR) and Format 89 (MBF_RESON7K3): Corrected handling of
+reverse-mounted receive and/or transmit arrays.
+
+MBpreprocess: Fixed handling of --filter-apply-nav option.
+
+MBclean: Added flagging/unflagging by beam angle as part of the -Y option
+  -Yangle_left/angle_right/3 to flag outside angle_left to angle_right
+  -Yangle_left/angle_right/4 to unflag outside angle_left to angle_right
+
+Terrain Aided Navigation (TRN) tools: The TRN related code has been refactored
+and reorganized by Kent Headley. There are now three related directories under
+src: src/mbtrn src/mbtrnav src/mbtrnutils. The former program mbtrnpreprocess
+is now mbtrnpp. The source for mbtrnpp is now in src/mbtrnutils rather than
+src/utilities.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices.
+
+-----> 5.7.6beta12 (September 20, 2019)
+
+Mbset: Fix to mbset so that the mbp_navadj_mode is set to MBP_NAVADJ_OFF
+instead of MBP_NAV_OFF and MBP_NAVADJ_LLZ instead of MBP_NAV_ON.
+
+Mbminirovnav: Fix so that variations in the NAV* and CTD* files are handled
+properly.
+
+Mbnavadjustmerge: Fixed handling of
+--unset-skipped-crossings-by-block=survey1/survey2
+commands.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices.
+
+-----> 5.7.6beta10 (September 18, 2019)
+
+Mbnavadjust: Changed the contouring displayed during analysis of crossings to
+be based on a triangular mesh representation of the bathymetry data for each
+section. The Delauney set of triangles used for each section is saved to a
+file in the project directory. These can be made the first time each section
+is displayed by mbnavadjust, or they can be made offline using the program
+mbnavadjustmerge.
+
+Mbnavadjustmerge: Added options to pre-generate the triangular mesh files for
+each section in an mbnavadjust project (--triangulate, --triangulate-all,
+--triangulate-section=file:section, and --triangulate-scale=scale).
+
+Mbtrn library: Updated to current code written by Kent Headley.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices.
+
+-----> 5.7.6beta8 (September 9, 2019)
+
+MBIO library beam flagging and detect types: The handling of multi-pick
+soundings has been modified. This refers to sensors that can report more than
+one sounding per beam, including both multibeam sonars and lidars. At present
+the relevant data format are MBF_RESON7K3 (89), MBF_3DWISSLR (232), and
+MBF_3DWISSLP (233). There are two major changes.
+First, the detects array returned by mb_detects() now packs two
+parameters into the 32-bit values: the detect type uses bits 0-7 and the
+detect priority uses bits 8-11. The priority value will be 0 except when a
+sensor is reporting multiple sounding per beam (sonar) or pulse (lidar); in
+that case the primary (best) sounding will have a priority of 0, and other
+secondary soundings (less than best) will have priorities > 0. If the sensor
+ranks the soundings then the priorities will reflect the ranking order with
+lower = better.
+Second, all secondary soundings will initially be assigned beamflags with a
+new value indicating that status (MB_FLAG_FLAG + MB_FLAG_SECONDARY). At this
+time, the bathymetry editing programs mbedit, mbeditviz, and mbclean will
+treat secondary soundings as not-to-be-used, which means those soundings will
+not be displayed or available for unflagging. Eventually these editors will be
+enabled to optionally display and unflag secondary soundings.
+
+Mblist: The output of beam flag values now includes secondary soundings.
+The possible output characters representing the beam flags are now:
+'-'=null, 'G'=good, 'M'=manual, 'F'=filter, 'S'=sonar, 'N'=secondary (multi-pick),
+and 'I'=interpolated.
+
+Mbminirovnav: Rewritten to handle the actual variability of MBARI MiniROV raw
+navigation, attitude, depth, and DVL data logs.
+
+Formats MBF_3DWISSLR (232) and MBF_3DWISSLP (233): Augmented to handle a new
+version of the 3D at Depth RAA swath file format generated by the WiSSL
+(wide swath subsea lidar).
+
+Mbnavadjust: The navigation adjustment optimization algorithm has been modified.
+The problem is to find a perturbation (adjustment) to the original navigation
+that matches features in overlapping and crossing swath bathymetry data.
+The first stage of the inversion is to solve for the average position offsets between
+different surveys, and then remove that signal out of the navigation offset
+observations. The second stage of the inversion involves an iterative
+relaxation towards a coarse navigation adjustment model. The third stage is to
+obtain a full resolution perturbation model by solving a large, sparse,
+overdetermined least squares problem that satisfies the remaining navigation
+offset signal. The algorithm change is that the coarse
+stage 2 solution is linearly interpolated over the gaps between directly
+constrained navigation points before proceeding to the third stage. This
+reduces the tendency of the overall solution to trend towards zero adjustment
+along unconstrained sections of survey lines.
+
+Mbtrn library: Updated to current code written by Kent Headley.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices.
+
+-----> 5.7.6beta6 (August 26, 2019)
+
+Mbm_route2mission: AUV spiral descent option now includes a behavior to disable
+DVL aiding of the INS during the descent.
+
+Formats MBF_3DWISSLR (232) and MBF_3DWISSLP (233): these i/o modules have been
+updated to handle both a new version (1.3) of the 3D at Depth Wide
+Swath Lidar (WiSSL) *.raa format data.
+
+Mbtrn library: Updated to current code written by Kent Headley.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices.
 
 -----> 5.7.6beta5 (August 6, 2019)
 
@@ -387,7 +569,7 @@ displayed when the diference between the minimum and maximum depth of a section
 is less than one meter.
 
 Formats MBF_3DWISSLR (232) and MBF_3DWISSLP (233): working towards the code
-successfuly reading and writing the 3D at Depth WiSSL *.raa format version 1.2.
+successfully reading and writing the 3D at Depth WiSSL *.raa format version 1.2.
 
 -----> 5.7.5 (June 26, 2019)
 
@@ -687,6 +869,7 @@ angular offsets.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 -----> 5.5.2350 (September 6, 2018)
@@ -2036,6 +2219,7 @@ Format 88 (MBF_RESON7KR): Update Reson 7k i/o module to handle TVG records.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 -----> 5.4.2219 (December 11, 2014)
@@ -2201,7 +2385,7 @@ held by NIO.
 
 Mbm_grdplot: Added two "sealevel" color palletes that use Haxby colors for
 negative values (e.g. topography below sea level) and either greens or browns
-for positive values (e.g. topography above sea level). The Sealevel 2 pallette
+for positive values (e.g. topography above sea level). The Sealevel 2 palette
 was contributed by Jenny Paduan.
 
 Mbeditviz: Changed default illumination parameters to magnitude=1.0 and
@@ -2334,7 +2518,7 @@ GSF library: Updated to new release 03.05. This release is licensed using LGPL 2
 
 -----> 5.4.2185 (May 11, 2014)
 
-Several programs: Fixed formating error in printing system time_tm.tv_sec values.
+Several programs: Fixed formatting error in printing system time_tm.tv_sec values.
 
 MBsvpselect: Fixed sscanf format warning.
 
@@ -2856,6 +3040,7 @@ tree. The old install_makefiles build system has been updated to still work.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 -----> 5.3.2062 (May 17, 2013)
@@ -3737,7 +3922,7 @@ Fixed bug in parsing file start and end times in *.inf files.
 MBIO functions mb_defaults(), mb_env(), and mb_lonflip():
 Changed mb_defaults(), mb_env(), and mb_lonflip() functions to always return
 MB_SUCCESS status even when ~/.mbio_defaults file does not exist. Working with
-system defaults hould not be an error.
+system defaults should not be an error.
 
 Program mbeditviz:
 Changed mbeditviz_import_file() function in mbeditviz_prog.c to reset global
@@ -3751,6 +3936,7 @@ Increased verbosity of mbnavedit for -X option.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.2 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 -----> 5.2.1880 (December 30, 2010)
@@ -3826,7 +4012,7 @@ format 59)for later use by mbprocess. The default algorithm matches the original
 bathymetry to within about 0.1% altitude by calculating an effective heave for
 each ping and takeoff angles for each beam. A second algorithm (which can only
 be activated by uncommenting an #ifdef statement in mbr_em710raw.c) matches the
-orignal bathymetry by modifying both the takeoff angles and the travel time
+original bathymetry by modifying both the takeoff angles and the travel time
 measurement - this achieves matching of the original bathymetry to about 0.02%
 of altitude. Use of the second algorithm is not recommended because modifying
 the fundamental observations (travel times) to match the sonar's calculation
@@ -4080,6 +4266,7 @@ warning messages in Ubuntu.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.1.2 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 Fixed pixel calculation algorithm in mbmosaic. Previously, sidescan
@@ -4283,6 +4470,7 @@ Fixed memory management bug for formats 56 and 57 (Simrad EM3002 etc).
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 Fixed longstanding error in src/mbio/mb_angle.c in the application
@@ -4506,6 +4694,7 @@ The following are no longer distributed with MB-System:
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 The version 5.1.0 release of MB-System contains both bug fixes
@@ -4527,7 +4716,7 @@ rotational bathymetry correction - previously did not initialize
 heave values for non-null but flagged beams.
 
 A minor change to mbbackangle to output the slope correction
-status (-Q) in the coments in the output file.
+status (-Q) in the comments in the output file.
 
 Altered mbbackangle so that it outputs at least one table,
 even if there are no survey pings in a file. This prevents
@@ -4629,6 +4818,7 @@ bathymetry records.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.0.9 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 The version 5.0.9 release of MB-System is purely a bug fix
@@ -4651,6 +4841,7 @@ values in the smooth inversion function can be less than 1.0.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.0.8 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 The version 5.0.8 release of MB-System includes several changes
@@ -4812,6 +5003,7 @@ longitude and latitude.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.0.7 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 The version 5.0.7 release of MB-System includes several changes
@@ -4882,6 +5074,7 @@ contributed by Gordon Keith.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.0.6 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 The version 5.0.6 release of MB-System includes several changes
@@ -4949,6 +5142,7 @@ datasets.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.0.5 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 The version 5.0.5 release of MB-System includes several changes
@@ -5033,6 +5227,7 @@ according to suggestions from Bob Covill.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.0.4 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 The version 5.0.4 release of MB-System includes several changes
@@ -5068,6 +5263,7 @@ raytracing even if the travel times are not recorded.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.0.3 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 The version 5.0.3 release of MB-System includes two bug fixes
@@ -5087,6 +5283,7 @@ on byteswapped systems (e.g. Intel processors running Linux).
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.0.2 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 The version 5.0.2 release of MB-System includes two bug fixes
@@ -5101,6 +5298,7 @@ SeaBeam 2100 data in the binary formats 42 and 43.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.0.1 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 The version 5.0.1 release of MB-System includes two bug fixes
@@ -5118,6 +5316,7 @@ mbsystem or create a soft link to mbsystem-5.0.1 named mbsystem
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.0.0 RELEASE NOTES:
+
 -------------------------------------------------------------------------------
 
 The version 5.0 release of MB-System includes a number of

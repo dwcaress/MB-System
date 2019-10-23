@@ -66,9 +66,9 @@ int mbr_info_hsldeoih(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -369,7 +369,6 @@ int mbr_hsldeoih_rd_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 		strncpy(data->sensors, read_data.sensors, 8);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -460,7 +459,6 @@ int mbr_hsldeoih_rd_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 		data->tide = read_data.tide;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -556,7 +554,6 @@ int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 		*error = MB_ERROR_UNINTELLIGIBLE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -650,7 +647,6 @@ int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 		data->depth_center = read_data.depth_center;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -879,18 +875,18 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 	if (status == MB_SUCCESS) {
 
 		/* see if gain values are messed up */
-		gain_ok = MB_NO;
+		gain_ok = false;
 		int i = 0;
-		while (i < 8 && gain_ok == MB_NO) {
+		while (i < 8 && gain_ok == false) {
 			if (data->gain[i] != data->gain[0])
-				gain_ok = MB_YES;
+				gain_ok = true;
 			if (data->gain[i + 8] != data->gain[8])
-				gain_ok = MB_YES;
+				gain_ok = true;
 			i++;
 		}
 
 		/* fix gain values if needed */
-		if (gain_ok == MB_NO) {
+		if (gain_ok == false) {
 			gain_outer = data->gain[0];
 			gain_inner = data->gain[8];
 			for (int i = 0; i < 16; i++) {
@@ -903,16 +899,16 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 
 		/* see if processed beam amplitude values
 		    are available */
-		need_back = MB_YES;
+		need_back = true;
 		i = 0;
-		while (i < MBF_HSLDEOIH_BEAMS && need_back == MB_YES) {
+		while (i < MBF_HSLDEOIH_BEAMS && need_back == true) {
 			if (data->back[i] != 0)
-				need_back = MB_NO;
+				need_back = false;
 			i++;
 		}
 
 		/* get beam amplitude values if needed */
-		if (need_back == MB_YES) {
+		if (need_back == true) {
 			data->back_scale = 1.0;
 			for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 				gain_beam = 6 * data->gain[which_gain[i]];
@@ -922,7 +918,6 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -1193,18 +1188,18 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 	if (status == MB_SUCCESS) {
 
 		/* see if gain values are messed up */
-		gain_ok = MB_NO;
+		gain_ok = false;
 		int i = 0;
-		while (i < 8 && gain_ok == MB_NO) {
+		while (i < 8 && gain_ok == false) {
 			if (data->gain[i] != data->gain[0])
-				gain_ok = MB_YES;
+				gain_ok = true;
 			if (data->gain[i + 8] != data->gain[8])
-				gain_ok = MB_YES;
+				gain_ok = true;
 			i++;
 		}
 
 		/* fix gain values if needed */
-		if (gain_ok == MB_NO) {
+		if (gain_ok == false) {
 			gain_outer = data->gain[0];
 			gain_inner = data->gain[8];
 			for (int i = 0; i < 16; i++) {
@@ -1217,16 +1212,16 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 
 		/* see if processed beam amplitude values
 		    are available */
-		need_back = MB_YES;
+		need_back = true;
 		i = 0;
-		while (i < MBF_HSLDEOIH_BEAMS && need_back == MB_YES) {
+		while (i < MBF_HSLDEOIH_BEAMS && need_back == true) {
 			if (data->back[i] != 0)
-				need_back = MB_NO;
+				need_back = false;
 			i++;
 		}
 
 		/* get beam amplitude values if needed */
-		if (need_back == MB_YES) {
+		if (need_back == true) {
 			data->back_scale = 1.0;
 			for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 				gain_beam = 6 * data->gain[which_gain[i]];
@@ -1236,7 +1231,6 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -1346,7 +1340,6 @@ int mbr_hsldeoih_rd_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 		strncpy(data->comment, read_data.comment, MBF_HSLDEOIH_MAXLINE);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -1369,7 +1362,6 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
 	unsigned int label_test = 0;
 	int record_size = 0;
 	short int tmp = 0;
-	int i = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1506,7 +1498,6 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
 		data->kind = MB_DATA_NAV_SOURCE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Read record label in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       label:      %d\n", label);
@@ -1705,7 +1696,6 @@ int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -1802,7 +1792,6 @@ int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -1903,7 +1892,6 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -2000,7 +1988,6 @@ int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -2109,7 +2096,6 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -2381,7 +2367,6 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -2653,7 +2638,6 @@ int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);

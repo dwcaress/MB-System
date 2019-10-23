@@ -68,9 +68,9 @@ int mbr_info_emoldraw(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_NO;
+	*variable_beams = false;
+	*traveltime = true;
+	*beam_flagging = false;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_NAV;
 	*sensordepth_source = MB_DATA_DATA;
@@ -148,7 +148,7 @@ int mbr_alm_emoldraw(int verbose, void *mbio_ptr, int *error) {
 	*swath_width = 0.0;
 	*num_bathrec = 0;
 	*num_ssrec = 0;
-	*file_has_ss = MB_YES;
+	*file_has_ss = true;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -196,9 +196,6 @@ int mbr_emoldraw_chk_label(int verbose, void *mbio_ptr, short type) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       type:       %d\n", type);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 /* swap bytes if necessary */
 #ifdef BYTESWAPPED
@@ -282,7 +279,6 @@ int mbr_emoldraw_rd_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *s
 			store->comment[i] = line[341 + i];
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->par_year);
@@ -372,7 +368,6 @@ int mbr_emoldraw_rd_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *st
 			store->comment[i] = line[341 + i];
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->par_year);
@@ -468,7 +463,6 @@ int mbr_emoldraw_rd_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 			store->sonar = MBSYS_SIMRAD_EM1000;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->par_year);
@@ -567,7 +561,6 @@ int mbr_emoldraw_rd_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		mb_get_double(&(store->line_heading), line + 85, 5);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->pos_year);
@@ -631,17 +624,16 @@ int mbr_emoldraw_rd_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		mb_get_int(&(store->svp_minute), line + 8, 2);
 		mb_get_int(&(store->svp_second), line + 10, 2);
 		mb_get_int(&(store->svp_centisecond), line + 12, 2);
-		mb_get_binary_short(MB_YES, &line[14], &short_val);
+		mb_get_binary_short(true, &line[14], &short_val);
 		store->svp_num = short_val;
 		for (int i = 0; i < store->svp_num; i++) {
-			mb_get_binary_short(MB_YES, &line[16 + 4 * i], &short_val);
+			mb_get_binary_short(true, &line[16 + 4 * i], &short_val);
 			store->svp_depth[i] = short_val;
-			mb_get_binary_short(MB_YES, &line[18 + 4 * i], &short_val);
+			mb_get_binary_short(true, &line[18 + 4 * i], &short_val);
 			store->svp_vel[i] = short_val;
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->svp_year);
@@ -710,32 +702,32 @@ int mbr_emoldraw_rd_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 		mb_get_int(&(store->centisecond), line + 12, 2);
 
 		/* get binary stuff */
-		mb_get_binary_short(MB_YES, &line[14], &short_val);
+		mb_get_binary_short(true, &line[14], &short_val);
 		ping->ping_number = (int)short_val;
 		ping->bath_mode = (int)line[16];
 		ping->bath_quality = (int)line[17];
-		mb_get_binary_short(MB_YES, &line[18], &short_val);
+		mb_get_binary_short(true, &line[18], &short_val);
 		ping->keel_depth = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[20], &short_val);
+		mb_get_binary_short(true, &line[20], &short_val);
 		ping->heading = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[22], &short_val);
+		mb_get_binary_short(true, &line[22], &short_val);
 		ping->roll = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[24], &short_val);
+		mb_get_binary_short(true, &line[24], &short_val);
 		ping->pitch = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[26], &short_val);
+		mb_get_binary_short(true, &line[26], &short_val);
 		ping->xducer_pitch = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[28], &short_val);
+		mb_get_binary_short(true, &line[28], &short_val);
 		ping->ping_heave = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[30], &short_val);
+		mb_get_binary_short(true, &line[30], &short_val);
 		ping->sound_vel = (int)short_val;
 		for (int i = 0; i < MBSYS_EM1000_MAXBEAMS; i++) {
 			for (int j = 0; j < 11; j++)
 				beamarray[j] = line[32 + 11 * i + j];
 			short_ptr = (short int *)beamarray;
-			mb_get_binary_short(MB_YES, &short_ptr[0], (short *)&ping->bath[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[1], &ping->bath_acrosstrack[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[2], &ping->bath_alongtrack[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[3], &ping->tt[i]);
+			mb_get_binary_short(true, &short_ptr[0], (short *)&ping->bath[i]);
+			mb_get_binary_short(true, &short_ptr[1], &ping->bath_acrosstrack[i]);
+			mb_get_binary_short(true, &short_ptr[2], &ping->bath_alongtrack[i]);
+			mb_get_binary_short(true, &short_ptr[3], &ping->tt[i]);
 			ping->amp[i] = (mb_s_char)beamarray[8];
 			ping->quality[i] = (mb_u_char)beamarray[9];
 			ping->heave[i] = (mb_s_char)beamarray[10];
@@ -751,7 +743,6 @@ int mbr_emoldraw_rd_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 			ping->beams_bath = 48;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->year);
@@ -841,32 +832,32 @@ int mbr_emoldraw_rd_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 		ping->swath_id = swath_id;
 
 		/* get binary stuff */
-		mb_get_binary_short(MB_YES, &line[14], &short_val);
+		mb_get_binary_short(true, &line[14], &short_val);
 		ping->ping_number = (int)short_val;
 		ping->beams_bath = MBSYS_EM12_MAXBEAMS;
 		ping->bath_res = (int)line[16];
 		ping->bath_quality = (int)line[17];
-		mb_get_binary_short(MB_YES, &line[18], &short_val);
+		mb_get_binary_short(true, &line[18], &short_val);
 		ping->keel_depth = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[20], &short_val);
+		mb_get_binary_short(true, &line[20], &short_val);
 		ping->heading = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[22], &short_val);
+		mb_get_binary_short(true, &line[22], &short_val);
 		ping->roll = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[24], &short_val);
+		mb_get_binary_short(true, &line[24], &short_val);
 		ping->pitch = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[26], &short_val);
+		mb_get_binary_short(true, &line[26], &short_val);
 		ping->ping_heave = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[28], &short_val);
+		mb_get_binary_short(true, &line[28], &short_val);
 		ping->sound_vel = (int)short_val;
 		ping->bath_mode = (int)line[30];
 		for (int i = 0; i < ping->beams_bath; i++) {
 			for (int j = 0; j < 11; j++)
 				beamarray[j] = line[32 + 11 * i + j];
 			short_ptr = (short int *)beamarray;
-			mb_get_binary_short(MB_YES, &short_ptr[0], (short *)&ping->bath[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[1], &ping->bath_acrosstrack[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[2], &ping->bath_alongtrack[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[3], &ping->tt[i]);
+			mb_get_binary_short(true, &short_ptr[0], (short *)&ping->bath[i]);
+			mb_get_binary_short(true, &short_ptr[1], &ping->bath_acrosstrack[i]);
+			mb_get_binary_short(true, &short_ptr[2], &ping->bath_alongtrack[i]);
+			mb_get_binary_short(true, &short_ptr[3], &ping->tt[i]);
 			ping->amp[i] = (mb_s_char)beamarray[8];
 			ping->quality[i] = (mb_u_char)beamarray[9];
 			ping->heave[i] = (mb_s_char)beamarray[10];
@@ -877,7 +868,6 @@ int mbr_emoldraw_rd_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->year);
@@ -956,7 +946,7 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		mb_get_int(&(store->centisecond), line + 12, 2);
 
 		/* get binary stuff */
-		mb_get_binary_short(MB_YES, &line[14], &short_val);
+		mb_get_binary_short(true, &line[14], &short_val);
 		ping->ping_number = (int)short_val;
 		ping->bath_mode = (int)line[16];
 		ping->bath_res = 0;
@@ -968,17 +958,17 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		ping->power_level = (int)line[21];
 		ping->tx_status = (int)line[22];
 		ping->rx_status = (int)line[23];
-		mb_get_binary_short(MB_YES, &line[24], &short_val);
+		mb_get_binary_short(true, &line[24], &short_val);
 		ping->keel_depth = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[26], &short_val);
+		mb_get_binary_short(true, &line[26], &short_val);
 		ping->heading = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[28], &short_val);
+		mb_get_binary_short(true, &line[28], &short_val);
 		ping->roll = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[30], &short_val);
+		mb_get_binary_short(true, &line[30], &short_val);
 		ping->pitch = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[32], &short_val);
+		mb_get_binary_short(true, &line[32], &short_val);
 		ping->ping_heave = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[34], &short_val);
+		mb_get_binary_short(true, &line[34], &short_val);
 		ping->sound_vel = (int)short_val;
 		ping->along_res = (int)line[36];
 		ping->across_res = (int)line[37];
@@ -988,10 +978,10 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 			for (int j = 0; j < 11; j++)
 				beamarray[j] = line[44 + 11 * i + j];
 			short_ptr = (short int *)beamarray;
-			mb_get_binary_short(MB_YES, &short_ptr[0], (short *)&ping->bath[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[1], &ping->bath_acrosstrack[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[2], &ping->bath_alongtrack[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[3], &ping->tt[i]);
+			mb_get_binary_short(true, &short_ptr[0], (short *)&ping->bath[i]);
+			mb_get_binary_short(true, &short_ptr[1], &ping->bath_acrosstrack[i]);
+			mb_get_binary_short(true, &short_ptr[2], &ping->bath_alongtrack[i]);
+			mb_get_binary_short(true, &short_ptr[3], &ping->tt[i]);
 			ping->amp[i] = (mb_s_char)beamarray[8];
 			ping->quality[i] = (mb_u_char)beamarray[9];
 			ping->heave[i] = (mb_s_char)beamarray[10];
@@ -1002,7 +992,6 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->year);
@@ -1077,7 +1066,7 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 	ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
 	/* if first call for current ping, initialize */
-	if (first == MB_YES) {
+	if (first == true) {
 		ping->pixels_ssraw = 0;
 		for (int i = 0; i < ping->beams_bath; i++) {
 			ping->beam_samples[i] = 0;
@@ -1111,9 +1100,9 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 		ping->swath_id = swath_id;
 
 		/* get binary stuff */
-		mb_get_binary_short(MB_YES, &line[14], &short_val);
+		mb_get_binary_short(true, &line[14], &short_val);
 		ping->ping_number = (int)short_val;
-		/*		mb_get_binary_short(MB_YES, &line[16], &short_val); ping->sound_vel = (int) short_val;*/
+		/*		mb_get_binary_short(true, &line[16], &short_val); ping->sound_vel = (int) short_val;*/
 		ping->ss_mode = (int)line[18];
 		num_datagrams = (int)line[19];
 		datagram = (int)line[20];
@@ -1130,8 +1119,8 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 		for (int i = 0; i < num_beams; i++) {
 			beamlist[i] = ((int)line[22 + 6 * i]) - 1;
 			ping->beam_frequency[beamlist[i]] = (short int)line[23 + 6 * i];
-			mb_get_binary_short(MB_YES, &line[24 + 6 * i], &ping->beam_samples[beamlist[i]]);
-			mb_get_binary_short(MB_YES, &line[26 + 6 * i], &ping->beam_center_sample[beamlist[i]]);
+			mb_get_binary_short(true, &line[24 + 6 * i], &ping->beam_samples[beamlist[i]]);
+			mb_get_binary_short(true, &line[26 + 6 * i], &ping->beam_center_sample[beamlist[i]]);
 			npixelsum += ping->beam_samples[beamlist[i]];
 		}
 
@@ -1168,11 +1157,10 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 
 	/* set flag if another sidescan record needs to be read */
 	if (status == MB_SUCCESS && datagram < num_datagrams)
-		*more = MB_YES;
+		*more = true;
 	else
-		*more = MB_NO;
+		*more = false;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->year);
@@ -1241,7 +1229,7 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
 	/* if first call for current ping, initialize */
-	if (first == MB_YES) {
+	if (first == true) {
 		ping->pixels_ssraw = 0;
 		for (int i = 0; i < ping->beams_bath; i++) {
 			ping->beam_samples[i] = 0;
@@ -1275,9 +1263,9 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		ping->swath_id = swath_id;
 
 		/* get binary stuff */
-		mb_get_binary_short(MB_YES, &line[14], &short_val);
+		mb_get_binary_short(true, &line[14], &short_val);
 		ping->ping_number = (int)short_val;
-		/*		mb_get_binary_short(MB_YES, &line[16], &short_val); ping->sound_vel = (int) short_val;*/
+		/*		mb_get_binary_short(true, &line[16], &short_val); ping->sound_vel = (int) short_val;*/
 		ping->ss_mode = (int)line[18];
 		num_datagrams = (int)line[19];
 		datagram = (int)line[20];
@@ -1294,8 +1282,8 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		for (int i = 0; i < num_beams; i++) {
 			beamlist[i] = ((int)line[22 + 6 * i]) - 1;
 			ping->beam_frequency[beamlist[i]] = (short int)line[23 + 6 * i];
-			mb_get_binary_short(MB_YES, &line[24 + 6 * i], &ping->beam_samples[beamlist[i]]);
-			mb_get_binary_short(MB_YES, &line[26 + 6 * i], &ping->beam_center_sample[beamlist[i]]);
+			mb_get_binary_short(true, &line[24 + 6 * i], &ping->beam_samples[beamlist[i]]);
+			mb_get_binary_short(true, &line[26 + 6 * i], &ping->beam_center_sample[beamlist[i]]);
 			npixelsum += ping->beam_samples[beamlist[i]];
 		}
 
@@ -1320,7 +1308,7 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 				ping->ssraw[ping->pixels_ssraw] = (mb_s_char)line[ioffset];
 				char_ptr[0] = line[ioffset + 1];
 				char_ptr[1] = line[ioffset + 2];
-				mb_get_binary_short(MB_YES, (short *)char_ptr, &ping->ssp[ping->pixels_ssraw]);
+				mb_get_binary_short(true, (short *)char_ptr, &ping->ssp[ping->pixels_ssraw]);
 				ioffset += 3;
 				ping->pixels_ssraw++;
 			}
@@ -1335,11 +1323,10 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 
 	/* set flag if another sidescan record needs to be read */
 	if (status == MB_SUCCESS && datagram < num_datagrams)
-		*more = MB_YES;
+		*more = true;
 	else
-		*more = MB_NO;
+		*more = false;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->year);
@@ -1426,25 +1413,25 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	num_bathrec = (int *)&mb_io_ptr->save6;
 	num_ssrec = (int *)&mb_io_ptr->save7;
 	file_has_ss = (int *)&mb_io_ptr->save8;
-	if (*expect_save_flag == MB_YES) {
+	if (*expect_save_flag == true) {
 		expect = *expect_save;
 		first_type = *first_type_save;
 		first_ss = *first_ss_save;
 		more_ss = *more_ss_save;
-		*expect_save_flag = MB_NO;
+		*expect_save_flag = false;
 	}
 	else {
 		expect = EM_NONE;
 		first_type = EM_NONE;
-		first_ss = MB_YES;
-		more_ss = MB_NO;
+		first_ss = true;
+		more_ss = false;
 	}
 
 	/* check if sidescan is to be expected */
 	if (*num_bathrec > 3 && *num_ssrec == 0)
-		*file_has_ss = MB_NO;
+		*file_has_ss = false;
 	else
-		*file_has_ss = MB_YES;
+		*file_has_ss = true;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -1452,14 +1439,14 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* loop over reading data until a record is ready for return */
-	int done = MB_NO;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == MB_NO) {
+	bool done = false;
+	while (!done) {
 		/* if no label saved get next record label */
-		if (*label_save_flag == MB_NO) {
+		if (*label_save_flag == false) {
 			/* read four byte wrapper if data stream is known
 			    to have wrappers */
-			if (*wrapper == MB_YES) {
+			if (*wrapper == true) {
 				if ((read_len = fread(label, 1, 4, mb_io_ptr->mbfp)) != 4) {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
@@ -1488,15 +1475,15 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* set wrapper status if needed */
 			if (*wrapper < 0) {
 				if (skip == 0)
-					*wrapper = MB_NO;
+					*wrapper = false;
 				else if (skip == 4)
-					*wrapper = MB_YES;
+					*wrapper = true;
 			}
 		}
 
 		/* else use saved label */
 		else
-			*label_save_flag = MB_NO;
+			*label_save_flag = false;
 
 /* swap bytes if necessary */
 #ifdef BYTESWAPPED
@@ -1533,14 +1520,14 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MBR_EMOLDRAW_DEBUG
 			fprintf(stderr, "call nothing, read failure, no expect\n");
 #endif
-			done = MB_YES;
+			done = true;
 		}
 		else if (status == MB_FAILURE && expect != EM_NONE) {
 #ifdef MBR_EMOLDRAW_DEBUG
 			fprintf(stderr, "call nothing, read failure, expect %x\n", expect);
 #endif
 			store->kind = MB_DATA_DATA;
-			done = MB_YES;
+			done = true;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
@@ -1551,7 +1538,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MBR_EMOLDRAW_DEBUG
 			fprintf(stderr, "call nothing, try again\n");
 #endif
-			done = MB_NO;
+			done = false;
 		}
 		else if (*type == EM_START) {
 #ifdef MBR_EMOLDRAW_DEBUG
@@ -1559,17 +1546,17 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 			status = mbr_emoldraw_rd_start(verbose, mbfp, store, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_START;
 				if (expect != EM_NONE) {
 					*expect_save = expect;
-					*expect_save_flag = MB_YES;
+					*expect_save_flag = true;
 					*first_type_save = first_type;
 					*first_ss_save = first_ss;
 					*more_ss_save = more_ss;
 				}
 				else
-					*expect_save_flag = MB_NO;
+					*expect_save_flag = false;
 			}
 		}
 		else if (*type == EM_STOP && expect != EM_NONE) {
@@ -1577,9 +1564,9 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
 #endif
 			store->kind = MB_DATA_DATA;
-			done = MB_YES;
+			done = true;
 			expect = EM_NONE;
-			*label_save_flag = MB_YES;
+			*label_save_flag = true;
 		}
 		else if (*type == EM_STOP) {
 #ifdef MBR_EMOLDRAW_DEBUG
@@ -1587,17 +1574,17 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 			status = mbr_emoldraw_rd_stop(verbose, mbfp, store, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_STOP;
 				if (expect != EM_NONE) {
 					*expect_save = expect;
-					*expect_save_flag = MB_YES;
+					*expect_save_flag = true;
 					*first_type_save = first_type;
 					*first_ss_save = first_ss;
 					*more_ss_save = more_ss;
 				}
 				else
-					*expect_save_flag = MB_NO;
+					*expect_save_flag = false;
 			}
 		}
 		else if (*type == EM_PARAMETER) {
@@ -1606,17 +1593,17 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 			status = mbr_emoldraw_rd_parameter(verbose, mbfp, store, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_COMMENT;
 				if (expect != EM_NONE) {
 					*expect_save = expect;
-					*expect_save_flag = MB_YES;
+					*expect_save_flag = true;
 					*first_type_save = first_type;
 					*first_ss_save = first_ss;
 					*more_ss_save = more_ss;
 				}
 				else
-					*expect_save_flag = MB_NO;
+					*expect_save_flag = false;
 			}
 		}
 		else if (*type == EM_POS) {
@@ -1625,17 +1612,17 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 			status = mbr_emoldraw_rd_pos(verbose, mbfp, store, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_NAV;
 				if (expect != EM_NONE) {
 					*expect_save = expect;
-					*expect_save_flag = MB_YES;
+					*expect_save_flag = true;
 					*first_type_save = first_type;
 					*first_ss_save = first_ss;
 					*more_ss_save = more_ss;
 				}
 				else
-					*expect_save_flag = MB_NO;
+					*expect_save_flag = false;
 			}
 		}
 		else if (*type == EM_SVP) {
@@ -1644,17 +1631,17 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 			status = mbr_emoldraw_rd_svp(verbose, mbfp, store, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				store->kind = MB_DATA_VELOCITY_PROFILE;
 				if (expect != EM_NONE) {
 					*expect_save = expect;
-					*expect_save_flag = MB_YES;
+					*expect_save_flag = true;
 					*first_type_save = first_type;
 					*first_ss_save = first_ss;
 					*more_ss_save = more_ss;
 				}
 				else
-					*expect_save_flag = MB_NO;
+					*expect_save_flag = false;
 			}
 		}
 		else if (*type == EM_12S_BATH && expect != EM_NONE && expect != EM_12S_BATH) {
@@ -1662,9 +1649,9 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
 #endif
 			store->kind = MB_DATA_DATA;
-			done = MB_YES;
+			done = true;
 			expect = EM_NONE;
-			*label_save_flag = MB_YES;
+			*label_save_flag = true;
 		}
 		else if (*type == EM_12S_BATH) {
 #ifdef MBR_EMOLDRAW_DEBUG
@@ -1678,13 +1665,13 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				fprintf(stderr, "check num_bathrec:%d\n", *num_bathrec);
 #endif
 				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
-					done = MB_NO;
+				if (first_type == EM_NONE && *file_has_ss == true) {
+					done = false;
 					first_type = EM_12S_BATH;
 					expect = EM_12S_SS;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
 			}
@@ -1694,9 +1681,9 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
 #endif
 			store->kind = MB_DATA_DATA;
-			done = MB_YES;
+			done = true;
 			expect = EM_NONE;
-			*label_save_flag = MB_YES;
+			*label_save_flag = true;
 		}
 		else if (*type == EM_12DP_BATH) {
 #ifdef MBR_EMOLDRAW_DEBUG
@@ -1710,13 +1697,13 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
 #endif
 				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
-					done = MB_NO;
+				if (first_type == EM_NONE && *file_has_ss == true) {
+					done = false;
 					first_type = EM_12DP_BATH;
 					expect = EM_12DP_SS;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
 			}
@@ -1726,9 +1713,9 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
 #endif
 			store->kind = MB_DATA_DATA;
-			done = MB_YES;
+			done = true;
 			expect = EM_NONE;
-			*label_save_flag = MB_YES;
+			*label_save_flag = true;
 		}
 		else if (*type == EM_12DS_BATH) {
 #ifdef MBR_EMOLDRAW_DEBUG
@@ -1742,13 +1729,13 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
 #endif
 				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
-					done = MB_NO;
+				if (first_type == EM_NONE && *file_has_ss == true) {
+					done = false;
 					first_type = EM_12DS_BATH;
 					expect = EM_12DS_SS;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
 			}
@@ -1758,9 +1745,9 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
 #endif
 			store->kind = MB_DATA_DATA;
-			done = MB_YES;
+			done = true;
 			expect = EM_NONE;
-			*label_save_flag = MB_YES;
+			*label_save_flag = true;
 		}
 		else if (*type == EM_121_BATH) {
 #ifdef MBR_EMOLDRAW_DEBUG
@@ -1774,13 +1761,13 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
 #endif
 				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
-					done = MB_NO;
+				if (first_type == EM_NONE && *file_has_ss == true) {
+					done = false;
 					first_type = EM_121_BATH;
 					expect = EM_12S_SS;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
 			}
@@ -1790,9 +1777,9 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
 #endif
 			store->kind = MB_DATA_DATA;
-			done = MB_YES;
+			done = true;
 			expect = EM_NONE;
-			*label_save_flag = MB_YES;
+			*label_save_flag = true;
 		}
 		else if (*type == EM_1000_BATH) {
 #ifdef MBR_EMOLDRAW_DEBUG
@@ -1806,13 +1793,13 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 				store->sonar = MBSYS_SIMRAD_EM1000;
 				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
-					done = MB_NO;
+				if (first_type == EM_NONE && *file_has_ss == true) {
+					done = false;
 					first_type = EM_12DS_BATH;
 					expect = EM_12S_SS;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
 			}
@@ -1822,46 +1809,46 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
 #endif
 			store->kind = MB_DATA_DATA;
-			done = MB_YES;
+			done = true;
 			expect = EM_NONE;
-			*label_save_flag = MB_YES;
+			*label_save_flag = true;
 		}
 		else if (*type == EM_12S_SS) {
 #ifdef MBR_EMOLDRAW_DEBUG
 			fprintf(stderr, "call mbr_emoldraw_rd_ss type %x\n", *type);
 #endif
 			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_CENTER, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == MB_YES)
+			if (status == MB_SUCCESS && first_ss == true)
 				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == MB_NO) {
-				*file_has_ss = MB_YES;
+			if (status == MB_SUCCESS && more_ss == false) {
+				*file_has_ss = true;
 				if (first_type == EM_NONE) {
-					done = MB_NO;
+					done = false;
 					first_type = EM_12S_SS;
 					expect = EM_12S_BATH;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
-				first_ss = MB_YES;
+				first_ss = true;
 			}
-			else if (status == MB_SUCCESS && more_ss == MB_YES) {
-				done = MB_NO;
+			else if (status == MB_SUCCESS && more_ss == true) {
+				done = false;
 				expect = EM_12S_SS;
-				first_ss = MB_NO;
+				first_ss = false;
 			}
 			else if (status == MB_FAILURE) {
 				if (first_type == EM_NONE) {
-					done = MB_NO;
+					done = false;
 					first_type = EM_12S_SS;
 					expect = EM_12S_BATH;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
-				first_ss = MB_YES;
+				first_ss = true;
 			}
 		}
 		else if (*type == EM_12DP_SS && expect != EM_NONE && expect != EM_12DP_SS) {
@@ -1869,46 +1856,46 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
 #endif
 			store->kind = MB_DATA_DATA;
-			done = MB_YES;
+			done = true;
 			expect = EM_NONE;
-			*label_save_flag = MB_YES;
+			*label_save_flag = true;
 		}
 		else if (*type == EM_12DP_SS) {
 #ifdef MBR_EMOLDRAW_DEBUG
 			fprintf(stderr, "call mbr_emoldraw_rd_ss type %x\n", *type);
 #endif
 			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_PORT, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == MB_YES)
+			if (status == MB_SUCCESS && first_ss == true)
 				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == MB_NO) {
-				*file_has_ss = MB_YES;
+			if (status == MB_SUCCESS && more_ss == false) {
+				*file_has_ss = true;
 				if (first_type == EM_NONE) {
-					done = MB_NO;
+					done = false;
 					first_type = EM_12DP_SS;
 					expect = EM_12DP_BATH;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
-				first_ss = MB_YES;
+				first_ss = true;
 			}
-			else if (status == MB_SUCCESS && more_ss == MB_YES) {
-				done = MB_NO;
+			else if (status == MB_SUCCESS && more_ss == true) {
+				done = false;
 				expect = EM_12DP_SS;
-				first_ss = MB_NO;
+				first_ss = false;
 			}
 			else if (status == MB_FAILURE) {
 				if (first_type == EM_NONE) {
-					done = MB_NO;
+					done = false;
 					first_type = EM_12DP_SS;
 					expect = EM_12DP_BATH;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
-				first_ss = MB_YES;
+				first_ss = true;
 			}
 		}
 
@@ -1917,46 +1904,46 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
 #endif
 			store->kind = MB_DATA_DATA;
-			done = MB_YES;
+			done = true;
 			expect = EM_NONE;
-			*label_save_flag = MB_YES;
+			*label_save_flag = true;
 		}
 		else if (*type == EM_12DS_SS) {
 #ifdef MBR_EMOLDRAW_DEBUG
 			fprintf(stderr, "call mbr_emoldraw_rd_ss type %x\n", *type);
 #endif
 			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_STARBOARD, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == MB_YES)
+			if (status == MB_SUCCESS && first_ss == true)
 				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == MB_NO) {
-				*file_has_ss = MB_YES;
+			if (status == MB_SUCCESS && more_ss == false) {
+				*file_has_ss = true;
 				if (first_type == EM_NONE) {
-					done = MB_NO;
+					done = false;
 					first_type = EM_12DS_SS;
 					expect = EM_12DS_BATH;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
-				first_ss = MB_YES;
+				first_ss = true;
 			}
-			else if (status == MB_SUCCESS && more_ss == MB_YES) {
-				done = MB_NO;
+			else if (status == MB_SUCCESS && more_ss == true) {
+				done = false;
 				expect = EM_12DS_SS;
-				first_ss = MB_NO;
+				first_ss = false;
 			}
 			else if (status == MB_FAILURE) {
 				if (first_type == EM_NONE) {
-					done = MB_NO;
+					done = false;
 					first_type = EM_12DS_SS;
 					expect = EM_12DS_BATH;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
-				first_ss = MB_YES;
+				first_ss = true;
 			}
 		}
 		else if (*type == EM_12S_SSP && expect != EM_NONE && expect != EM_12S_SS) {
@@ -1964,46 +1951,46 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
 #endif
 			store->kind = MB_DATA_DATA;
-			done = MB_YES;
+			done = true;
 			expect = EM_NONE;
-			*label_save_flag = MB_YES;
+			*label_save_flag = true;
 		}
 		else if (*type == EM_12S_SSP) {
 #ifdef MBR_EMOLDRAW_DEBUG
 			fprintf(stderr, "call mbr_emoldraw_rd_ssp type %x\n", *type);
 #endif
 			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_CENTER, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == MB_YES)
+			if (status == MB_SUCCESS && first_ss == true)
 				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == MB_NO) {
-				*file_has_ss = MB_YES;
+			if (status == MB_SUCCESS && more_ss == false) {
+				*file_has_ss = true;
 				if (first_type == EM_NONE) {
-					done = MB_NO;
+					done = false;
 					first_type = EM_12S_SSP;
 					expect = EM_12S_BATH;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
-				first_ss = MB_YES;
+				first_ss = true;
 			}
-			else if (status == MB_SUCCESS && more_ss == MB_YES) {
-				done = MB_NO;
+			else if (status == MB_SUCCESS && more_ss == true) {
+				done = false;
 				expect = EM_12S_SS;
-				first_ss = MB_NO;
+				first_ss = false;
 			}
 			else if (status == MB_FAILURE) {
 				if (first_type == EM_NONE) {
-					done = MB_NO;
+					done = false;
 					first_type = EM_12S_SSP;
 					expect = EM_12S_BATH;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
-				first_ss = MB_YES;
+				first_ss = true;
 			}
 		}
 		else if (*type == EM_12DP_SSP && expect != EM_NONE && expect != EM_12DP_SS) {
@@ -2011,46 +1998,46 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
 #endif
 			store->kind = MB_DATA_DATA;
-			done = MB_YES;
+			done = true;
 			expect = EM_NONE;
-			*label_save_flag = MB_YES;
+			*label_save_flag = true;
 		}
 		else if (*type == EM_12DP_SSP) {
 #ifdef MBR_EMOLDRAW_DEBUG
 			fprintf(stderr, "call mbr_emoldraw_rd_ssp type %x\n", *type);
 #endif
 			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_PORT, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == MB_YES)
+			if (status == MB_SUCCESS && first_ss == true)
 				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == MB_NO) {
-				*file_has_ss = MB_YES;
+			if (status == MB_SUCCESS && more_ss == false) {
+				*file_has_ss = true;
 				if (first_type == EM_NONE) {
-					done = MB_NO;
+					done = false;
 					first_type = EM_12DP_SSP;
 					expect = EM_12DP_BATH;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
-				first_ss = MB_YES;
+				first_ss = true;
 			}
-			else if (status == MB_SUCCESS && more_ss == MB_YES) {
-				done = MB_NO;
+			else if (status == MB_SUCCESS && more_ss == true) {
+				done = false;
 				expect = EM_12DP_SS;
-				first_ss = MB_NO;
+				first_ss = false;
 			}
 			else if (status == MB_FAILURE) {
 				if (first_type == EM_NONE) {
-					done = MB_NO;
+					done = false;
 					first_type = EM_12DP_SSP;
 					expect = EM_12DP_BATH;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
-				first_ss = MB_YES;
+				first_ss = true;
 			}
 		}
 
@@ -2059,52 +2046,52 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
 #endif
 			store->kind = MB_DATA_DATA;
-			done = MB_YES;
+			done = true;
 			expect = EM_NONE;
-			*label_save_flag = MB_YES;
+			*label_save_flag = true;
 		}
 		else if (*type == EM_12DS_SSP) {
 #ifdef MBR_EMOLDRAW_DEBUG
 			fprintf(stderr, "call mbr_emoldraw_rd_ssp type %x\n", *type);
 #endif
 			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_STARBOARD, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == MB_YES)
+			if (status == MB_SUCCESS && first_ss == true)
 				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == MB_NO) {
-				*file_has_ss = MB_YES;
+			if (status == MB_SUCCESS && more_ss == false) {
+				*file_has_ss = true;
 				if (first_type == EM_NONE) {
-					done = MB_NO;
+					done = false;
 					first_type = EM_12DS_SSP;
 					expect = EM_12DS_BATH;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
-				first_ss = MB_YES;
+				first_ss = true;
 			}
-			else if (status == MB_SUCCESS && more_ss == MB_YES) {
-				done = MB_NO;
+			else if (status == MB_SUCCESS && more_ss == true) {
+				done = false;
 				expect = EM_12DS_SS;
-				first_ss = MB_NO;
+				first_ss = false;
 			}
 			else if (status == MB_FAILURE) {
 				if (first_type == EM_NONE) {
-					done = MB_NO;
+					done = false;
 					first_type = EM_12DS_SSP;
 					expect = EM_12DS_BATH;
 				}
 				else {
-					done = MB_YES;
+					done = true;
 					expect = EM_NONE;
 				}
-				first_ss = MB_YES;
+				first_ss = true;
 			}
 		}
 
 		/* bail out if there is an error */
 		if (status == MB_FAILURE)
-			done = MB_YES;
+			done = true;
 
 #ifdef MBR_EMOLDRAW_DEBUG
 		fprintf(stderr, "end of mbr_emoldraw_rd_data loop:\n");
@@ -2116,14 +2103,14 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get file position */
-	if (*label_save_flag == MB_YES)
+	if (*label_save_flag == true)
 		mb_io_ptr->file_bytes = ftell(mbfp) - 2;
-	else if (*expect_save_flag != MB_YES)
+	else if (*expect_save_flag != true)
 		mb_io_ptr->file_bytes = ftell(mbfp);
 
 /* swap label if saved and byteswapped */
 #ifdef BYTESWAPPED
-	if (*label_save_flag == MB_YES)
+	if (*label_save_flag == true)
 		*type = (short int)mb_swap_short(*type);
 #endif
 
@@ -2205,7 +2192,6 @@ int mbr_rt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		pheading = store->line_heading;
 		mb_navint_interp(verbose, mbio_ptr, ptime_d, pheading, rawspeed, &plon, &plat, &pspeed, error);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "dbg4       Interpolated Navigation:\n");
 			fprintf(stderr, "dbg4       longitude:  %f\n", plon);
@@ -2220,7 +2206,7 @@ int mbr_rt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* generate sidescan */
 		ping->pixel_size = 0.0;
 		ping->pixels_ss = 0;
-		status = mbsys_simrad_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 0, error);
+		status = mbsys_simrad_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 0, error);
 	}
 
 	if (verbose >= 2) {
@@ -2252,7 +2238,6 @@ int mbr_emoldraw_wr_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *s
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->par_year);
@@ -2281,7 +2266,7 @@ int mbr_emoldraw_wr_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *s
 	}
 
 	/* write the record size */
-	mb_put_binary_int(MB_NO, (int)(EM_START_SIZE + 2), (void *)&write_size);
+	mb_put_binary_int(false, (int)(EM_START_SIZE + 2), (void *)&write_size);
 	write_len = fwrite(&write_size, 1, 4, mbfp);
 	int status = MB_SUCCESS;
 	if (write_len != 4) {
@@ -2292,7 +2277,7 @@ int mbr_emoldraw_wr_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *s
 		status = MB_SUCCESS;
 
 	/* write the record label */
-	mb_put_binary_short(MB_NO, (short)EM_START, (void *)&label);
+	mb_put_binary_short(false, (short)EM_START, (void *)&label);
 	write_len = fwrite(&label, 1, 2, mbfp);
 	if (write_len != 2) {
 		status = MB_FAILURE;
@@ -2333,7 +2318,7 @@ int mbr_emoldraw_wr_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *s
 		checksum = 0;
 		for (int j = 0; j < EM_START_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_START_SIZE - 2] = char_ptr[0];
 		line[EM_START_SIZE - 1] = char_ptr[1];
@@ -2380,7 +2365,6 @@ int mbr_emoldraw_wr_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *st
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->par_year);
@@ -2409,7 +2393,7 @@ int mbr_emoldraw_wr_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *st
 	}
 
 	/* write the record size */
-	mb_put_binary_int(MB_NO, (int)(EM_STOP_SIZE + 2), (void *)&write_size);
+	mb_put_binary_int(false, (int)(EM_STOP_SIZE + 2), (void *)&write_size);
 	write_len = fwrite(&write_size, 1, 4, mbfp);
 	int status = MB_SUCCESS;
 	if (write_len != 4) {
@@ -2420,7 +2404,7 @@ int mbr_emoldraw_wr_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *st
 		status = MB_SUCCESS;
 
 	/* write the record label */
-	mb_put_binary_short(MB_NO, (short)EM_STOP, (void *)&label);
+	mb_put_binary_short(false, (short)EM_STOP, (void *)&label);
 	write_len = fwrite(&label, 1, 2, mbfp);
 	if (write_len != 2) {
 		status = MB_FAILURE;
@@ -2461,7 +2445,7 @@ int mbr_emoldraw_wr_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *st
 		checksum = 0;
 		for (int j = 0; j < EM_STOP_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_STOP_SIZE - 2] = char_ptr[0];
 		line[EM_STOP_SIZE - 1] = char_ptr[1];
@@ -2507,7 +2491,6 @@ int mbr_emoldraw_wr_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->par_year);
@@ -2536,7 +2519,7 @@ int mbr_emoldraw_wr_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 	}
 
 	/* write the record size */
-	mb_put_binary_int(MB_NO, (int)(EM_PARAMETER_SIZE + 2), (void *)&write_size);
+	mb_put_binary_int(false, (int)(EM_PARAMETER_SIZE + 2), (void *)&write_size);
 	write_len = fwrite(&write_size, 1, 4, mbfp);
 	int status = MB_SUCCESS;
 	if (write_len != 4) {
@@ -2547,7 +2530,7 @@ int mbr_emoldraw_wr_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		status = MB_SUCCESS;
 
 	/* write the record label */
-	mb_put_binary_short(MB_NO, (short)EM_PARAMETER, (void *)&label);
+	mb_put_binary_short(false, (short)EM_PARAMETER, (void *)&label);
 	write_len = fwrite(&label, 1, 2, mbfp);
 	if (write_len != 2) {
 		status = MB_FAILURE;
@@ -2588,7 +2571,7 @@ int mbr_emoldraw_wr_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		checksum = 0;
 		for (int j = 0; j < EM_PARAMETER_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_PARAMETER_SIZE - 2] = char_ptr[0];
 		line[EM_PARAMETER_SIZE - 1] = char_ptr[1];
@@ -2638,7 +2621,6 @@ int mbr_emoldraw_wr_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->pos_year);
@@ -2661,7 +2643,7 @@ int mbr_emoldraw_wr_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	}
 
 	/* write the record size */
-	mb_put_binary_int(MB_NO, (int)(EM_POS_SIZE + 2), (void *)&write_size);
+	mb_put_binary_int(false, (int)(EM_POS_SIZE + 2), (void *)&write_size);
 	write_len = fwrite(&write_size, 1, 4, mbfp);
 	int status = MB_SUCCESS;
 	if (write_len != 4) {
@@ -2672,7 +2654,7 @@ int mbr_emoldraw_wr_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		status = MB_SUCCESS;
 
 	/* write the record label */
-	mb_put_binary_short(MB_NO, (short)EM_POS, (void *)&label);
+	mb_put_binary_short(false, (short)EM_POS, (void *)&label);
 	write_len = fwrite(&label, 1, 2, mbfp);
 	if (write_len != 2) {
 		status = MB_FAILURE;
@@ -2736,7 +2718,7 @@ int mbr_emoldraw_wr_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		checksum = 0;
 		for (int j = 0; j < EM_POS_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_POS_SIZE - 2] = char_ptr[0];
 		line[EM_POS_SIZE - 1] = char_ptr[1];
@@ -2782,7 +2764,6 @@ int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->svp_year);
@@ -2798,7 +2779,7 @@ int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	}
 
 	/* write the record size */
-	mb_put_binary_int(MB_NO, (int)(EM_SVP_SIZE + 2), (void *)&write_size);
+	mb_put_binary_int(false, (int)(EM_SVP_SIZE + 2), (void *)&write_size);
 	write_len = fwrite(&write_size, 1, 4, mbfp);
 	int status = MB_SUCCESS;
 	if (write_len != 4) {
@@ -2809,7 +2790,7 @@ int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		status = MB_SUCCESS;
 
 	/* write the record label */
-	mb_put_binary_short(MB_NO, (short)EM_SVP, (void *)&label);
+	mb_put_binary_short(false, (short)EM_SVP, (void *)&label);
 	write_len = fwrite(&label, 1, 2, mbfp);
 	if (write_len != 2) {
 		status = MB_FAILURE;
@@ -2823,14 +2804,14 @@ int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		/* construct record */
 		sprintf(line, "%2.2d%2.2d%2.2d", store->svp_day, store->svp_month, store->svp_year);
 		sprintf(line + 6, "%2.2d%2.2d%2.2d%2.2d", store->svp_hour, store->svp_minute, store->svp_second, store->svp_centisecond);
-		mb_put_binary_short(MB_YES, (short)store->svp_num, (void *)&line[14]);
+		mb_put_binary_short(true, (short)store->svp_num, (void *)&line[14]);
 		for (int i = 0; i < store->svp_num; i++) {
-			mb_put_binary_short(MB_YES, (short)store->svp_depth[i], (void *)&line[16 + 4 * i]);
-			mb_put_binary_short(MB_YES, (short)store->svp_vel[i], (void *)&line[18 + 4 * i]);
+			mb_put_binary_short(true, (short)store->svp_depth[i], (void *)&line[16 + 4 * i]);
+			mb_put_binary_short(true, (short)store->svp_vel[i], (void *)&line[18 + 4 * i]);
 		}
 		for (int i = store->svp_num; i < 100; i++) {
-			mb_put_binary_short(MB_YES, (short)0, (void *)&line[16 + 4 * i]);
-			mb_put_binary_short(MB_YES, (short)0, (void *)&line[18 + 4 * i]);
+			mb_put_binary_short(true, (short)0, (void *)&line[16 + 4 * i]);
+			mb_put_binary_short(true, (short)0, (void *)&line[18 + 4 * i]);
 		}
 		line[EM_SVP_SIZE - 3] = 0x03;
 
@@ -2839,7 +2820,7 @@ int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		checksum = 0;
 		for (int j = 0; j < EM_SVP_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_SVP_SIZE - 2] = char_ptr[0];
 		line[EM_SVP_SIZE - 1] = char_ptr[1];
@@ -2890,7 +2871,6 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 	/* get ping structure */
 	ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->year);
@@ -2920,7 +2900,7 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 	}
 
 	/* write the record size */
-	mb_put_binary_int(MB_NO, (int)(EM_1000_BATH_SIZE + 2), (void *)&write_size);
+	mb_put_binary_int(false, (int)(EM_1000_BATH_SIZE + 2), (void *)&write_size);
 	write_len = fwrite(&write_size, 1, 4, mbfp);
 	int status = MB_SUCCESS;
 	if (write_len != 4) {
@@ -2931,7 +2911,7 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 		status = MB_SUCCESS;
 
 	/* write the record label */
-	mb_put_binary_short(MB_NO, (short)EM_1000_BATH, (void *)&label);
+	mb_put_binary_short(false, (short)EM_1000_BATH, (void *)&label);
 	write_len = fwrite(&label, 1, 2, mbfp);
 	if (write_len != 2) {
 		status = MB_FAILURE;
@@ -2945,23 +2925,23 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 		/* construct record */
 		sprintf(line, "%2.2d%2.2d%2.2d", store->day, store->month, store->year);
 		sprintf(line + 6, "%2.2d%2.2d%2.2d%2.2d", store->hour, store->minute, store->second, store->centisecond);
-		mb_put_binary_short(MB_YES, (short)ping->ping_number, (void *)&line[14]);
+		mb_put_binary_short(true, (short)ping->ping_number, (void *)&line[14]);
 		line[16] = (char)ping->bath_mode;
 		line[17] = (char)ping->bath_quality;
-		mb_put_binary_short(MB_YES, (short)ping->keel_depth, (void *)&line[18]);
-		mb_put_binary_short(MB_YES, (short)ping->heading, (void *)&line[20]);
-		mb_put_binary_short(MB_YES, (short)ping->roll, (void *)&line[22]);
-		mb_put_binary_short(MB_YES, (short)ping->pitch, (void *)&line[24]);
-		mb_put_binary_short(MB_YES, (short)ping->xducer_pitch, (void *)&line[26]);
-		mb_put_binary_short(MB_YES, (short)ping->ping_heave, (void *)&line[28]);
-		mb_put_binary_short(MB_YES, (short)ping->sound_vel, (void *)&line[30]);
+		mb_put_binary_short(true, (short)ping->keel_depth, (void *)&line[18]);
+		mb_put_binary_short(true, (short)ping->heading, (void *)&line[20]);
+		mb_put_binary_short(true, (short)ping->roll, (void *)&line[22]);
+		mb_put_binary_short(true, (short)ping->pitch, (void *)&line[24]);
+		mb_put_binary_short(true, (short)ping->xducer_pitch, (void *)&line[26]);
+		mb_put_binary_short(true, (short)ping->ping_heave, (void *)&line[28]);
+		mb_put_binary_short(true, (short)ping->sound_vel, (void *)&line[30]);
 		for (int i = 0; i < MBSYS_EM1000_MAXBEAMS; i++) {
 			if (!mb_beam_ok(ping->beamflag[i]))
 				ping->bath[i] = 0;
-			mb_put_binary_short(MB_YES, (short)ping->bath[i], (void *)&beamarray[0]);
-			mb_put_binary_short(MB_YES, (short)ping->bath_acrosstrack[i], (void *)&beamarray[2]);
-			mb_put_binary_short(MB_YES, (short)ping->bath_alongtrack[i], (void *)&beamarray[4]);
-			mb_put_binary_short(MB_YES, (short)ping->tt[i], (void *)&beamarray[6]);
+			mb_put_binary_short(true, (short)ping->bath[i], (void *)&beamarray[0]);
+			mb_put_binary_short(true, (short)ping->bath_acrosstrack[i], (void *)&beamarray[2]);
+			mb_put_binary_short(true, (short)ping->bath_alongtrack[i], (void *)&beamarray[4]);
+			mb_put_binary_short(true, (short)ping->tt[i], (void *)&beamarray[6]);
 			beamarray[8] = (char)ping->amp[i];
 			beamarray[9] = (char)ping->quality[i];
 			beamarray[10] = (char)ping->heave[i];
@@ -2975,7 +2955,7 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 		checksum = 0;
 		for (int j = 0; j < EM_1000_BATH_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_1000_BATH_SIZE - 2] = char_ptr[0];
 		line[EM_1000_BATH_SIZE - 1] = char_ptr[1];
@@ -3026,7 +3006,6 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 	/* get ping structure */
 	ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->year);
@@ -3055,7 +3034,7 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 	}
 
 	/* write the record size */
-	mb_put_binary_int(MB_NO, (int)(EM_12S_BATH_SIZE + 2), (void *)&write_size);
+	mb_put_binary_int(false, (int)(EM_12S_BATH_SIZE + 2), (void *)&write_size);
 	write_len = fwrite(&write_size, 1, 4, mbfp);
 	int status = MB_SUCCESS;
 	if (write_len != 4) {
@@ -3067,11 +3046,11 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 
 	/* write the record label */
 	if (ping->swath_id == EM_SWATH_CENTER)
-		mb_put_binary_short(MB_NO, (short)EM_12S_BATH, (void *)&label);
+		mb_put_binary_short(false, (short)EM_12S_BATH, (void *)&label);
 	else if (ping->swath_id == EM_SWATH_PORT)
-		mb_put_binary_short(MB_NO, (short)EM_12DP_BATH, (void *)&label);
+		mb_put_binary_short(false, (short)EM_12DP_BATH, (void *)&label);
 	else
-		mb_put_binary_short(MB_NO, (short)EM_12DS_BATH, (void *)&label);
+		mb_put_binary_short(false, (short)EM_12DS_BATH, (void *)&label);
 	write_len = fwrite(&label, 1, 2, mbfp);
 	if (write_len != 2) {
 		status = MB_FAILURE;
@@ -3085,24 +3064,24 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 		/* construct record */
 		sprintf(line, "%2.2d%2.2d%2.2d", store->day, store->month, store->year);
 		sprintf(line + 6, "%2.2d%2.2d%2.2d%2.2d", store->hour, store->minute, store->second, store->centisecond);
-		mb_put_binary_short(MB_YES, (short)ping->ping_number, (void *)&line[14]);
+		mb_put_binary_short(true, (short)ping->ping_number, (void *)&line[14]);
 		line[16] = (char)ping->bath_res;
 		line[17] = (char)ping->bath_quality;
-		mb_put_binary_short(MB_YES, (short)ping->keel_depth, (void *)&line[18]);
-		mb_put_binary_short(MB_YES, (short)ping->heading, (void *)&line[20]);
-		mb_put_binary_short(MB_YES, (short)ping->roll, (void *)&line[22]);
-		mb_put_binary_short(MB_YES, (short)ping->pitch, (void *)&line[24]);
-		mb_put_binary_short(MB_YES, (short)ping->ping_heave, (void *)&line[26]);
-		mb_put_binary_short(MB_YES, (short)ping->sound_vel, (void *)&line[28]);
+		mb_put_binary_short(true, (short)ping->keel_depth, (void *)&line[18]);
+		mb_put_binary_short(true, (short)ping->heading, (void *)&line[20]);
+		mb_put_binary_short(true, (short)ping->roll, (void *)&line[22]);
+		mb_put_binary_short(true, (short)ping->pitch, (void *)&line[24]);
+		mb_put_binary_short(true, (short)ping->ping_heave, (void *)&line[26]);
+		mb_put_binary_short(true, (short)ping->sound_vel, (void *)&line[28]);
 		line[30] = (char)ping->bath_mode;
 		line[31] = (char)0;
 		for (int i = 0; i < MBSYS_EM12_MAXBEAMS; i++) {
 			if (!mb_beam_ok(ping->beamflag[i]))
 				ping->bath[i] = 0;
-			mb_put_binary_short(MB_YES, (short)ping->bath[i], (void *)&beamarray[0]);
-			mb_put_binary_short(MB_YES, (short)ping->bath_acrosstrack[i], (void *)&beamarray[2]);
-			mb_put_binary_short(MB_YES, (short)ping->bath_alongtrack[i], (void *)&beamarray[4]);
-			mb_put_binary_short(MB_YES, (short)ping->tt[i], (void *)&beamarray[6]);
+			mb_put_binary_short(true, (short)ping->bath[i], (void *)&beamarray[0]);
+			mb_put_binary_short(true, (short)ping->bath_acrosstrack[i], (void *)&beamarray[2]);
+			mb_put_binary_short(true, (short)ping->bath_alongtrack[i], (void *)&beamarray[4]);
+			mb_put_binary_short(true, (short)ping->tt[i], (void *)&beamarray[6]);
 			beamarray[8] = (char)ping->amp[i];
 			beamarray[9] = (char)ping->quality[i];
 			beamarray[10] = (char)ping->heave[i];
@@ -3116,7 +3095,7 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 		checksum = 0;
 		for (int j = 0; j < EM_12S_BATH_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_12S_BATH_SIZE - 2] = char_ptr[0];
 		line[EM_12S_BATH_SIZE - 1] = char_ptr[1];
@@ -3167,7 +3146,6 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 	/* get ping structure */
 	ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->year);
@@ -3205,7 +3183,7 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 	}
 
 	/* write the record size */
-	mb_put_binary_int(MB_NO, (int)(EM_121_BATH_SIZE + 2), (void *)&write_size);
+	mb_put_binary_int(false, (int)(EM_121_BATH_SIZE + 2), (void *)&write_size);
 	write_len = fwrite(&write_size, 1, 4, mbfp);
 	int status = MB_SUCCESS;
 	if (write_len != 4) {
@@ -3216,7 +3194,7 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		status = MB_SUCCESS;
 
 	/* write the record label */
-	mb_put_binary_short(MB_NO, (short)EM_121_BATH, (void *)&label);
+	mb_put_binary_short(false, (short)EM_121_BATH, (void *)&label);
 	write_len = fwrite(&label, 1, 2, mbfp);
 	if (write_len != 2) {
 		status = MB_FAILURE;
@@ -3230,7 +3208,7 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		/* construct record */
 		sprintf(line, "%2.2d%2.2d%2.2d", store->day, store->month, store->year);
 		sprintf(line + 6, "%2.2d%2.2d%2.2d%2.2d", store->hour, store->minute, store->second, store->centisecond);
-		mb_put_binary_short(MB_YES, (short)ping->ping_number, (void *)&line[14]);
+		mb_put_binary_short(true, (short)ping->ping_number, (void *)&line[14]);
 		line[16] = (char)ping->bath_mode;
 		line[17] = (char)ping->bath_quality;
 		line[18] = (char)ping->bath_num;
@@ -3239,12 +3217,12 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		line[21] = (char)ping->power_level;
 		line[22] = (char)ping->tx_status;
 		line[23] = (char)ping->rx_status;
-		mb_put_binary_short(MB_YES, (short)ping->keel_depth, (void *)&line[24]);
-		mb_put_binary_short(MB_YES, (unsigned short)ping->heading, (void *)&line[26]);
-		mb_put_binary_short(MB_YES, (short)ping->roll, (void *)&line[28]);
-		mb_put_binary_short(MB_YES, (short)ping->pitch, (void *)&line[30]);
-		mb_put_binary_short(MB_YES, (short)ping->ping_heave, (void *)&line[32]);
-		mb_put_binary_short(MB_YES, (short)ping->sound_vel, (void *)&line[34]);
+		mb_put_binary_short(true, (short)ping->keel_depth, (void *)&line[24]);
+		mb_put_binary_short(true, (unsigned short)ping->heading, (void *)&line[26]);
+		mb_put_binary_short(true, (short)ping->roll, (void *)&line[28]);
+		mb_put_binary_short(true, (short)ping->pitch, (void *)&line[30]);
+		mb_put_binary_short(true, (short)ping->ping_heave, (void *)&line[32]);
+		mb_put_binary_short(true, (short)ping->sound_vel, (void *)&line[34]);
 		line[36] = (char)ping->along_res;
 		line[37] = (char)ping->across_res;
 		line[38] = (char)ping->depth_res;
@@ -3252,10 +3230,10 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		for (int i = 0; i < MBSYS_EM121_MAXBEAMS; i++) {
 			if (!mb_beam_ok(ping->beamflag[i]))
 				ping->bath[i] = 0;
-			mb_put_binary_short(MB_YES, (short)ping->bath[i], (void *)&beamarray[0]);
-			mb_put_binary_short(MB_YES, (short)ping->bath_acrosstrack[i], (void *)&beamarray[2]);
-			mb_put_binary_short(MB_YES, (short)ping->bath_alongtrack[i], (void *)&beamarray[4]);
-			mb_put_binary_short(MB_YES, (short)ping->tt[i], (void *)&beamarray[6]);
+			mb_put_binary_short(true, (short)ping->bath[i], (void *)&beamarray[0]);
+			mb_put_binary_short(true, (short)ping->bath_acrosstrack[i], (void *)&beamarray[2]);
+			mb_put_binary_short(true, (short)ping->bath_alongtrack[i], (void *)&beamarray[4]);
+			mb_put_binary_short(true, (short)ping->tt[i], (void *)&beamarray[6]);
 			beamarray[8] = (char)ping->amp[i];
 			beamarray[9] = (char)ping->quality[i];
 			beamarray[10] = (char)ping->heave[i];
@@ -3269,7 +3247,7 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		checksum = 0;
 		for (int j = 0; j < EM_121_BATH_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
-		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
+		mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
 		line[EM_121_BATH_SIZE - 2] = char_ptr[0];
 		line[EM_121_BATH_SIZE - 1] = char_ptr[1];
@@ -3329,7 +3307,6 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 	/* get ping structure */
 	ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->year);
@@ -3393,7 +3370,6 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 			datagram_size[num_datagrams] = new_datagram_size;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       num_datagrams:    %d\n", num_datagrams);
@@ -3412,7 +3388,6 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 	for (datagram = 0; datagram < num_datagrams; datagram++) {
 		num_beams = datagram_end[datagram] - datagram_start[datagram] + 1;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5       year:             %d\n", store->year);
@@ -3439,7 +3414,7 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 		}
 
 		/* write the record size */
-		mb_put_binary_int(MB_NO, (int)(EM_SS_SIZE + 2), (void *)&write_size);
+		mb_put_binary_int(false, (int)(EM_SS_SIZE + 2), (void *)&write_size);
 		write_len = fwrite(&write_size, 1, 4, mbfp);
 		if (write_len != 4) {
 			status = MB_FAILURE;
@@ -3450,11 +3425,11 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 
 		/* write the record label */
 		if (ping->swath_id == EM_SWATH_CENTER)
-			mb_put_binary_short(MB_NO, (short)EM_12S_SS, (void *)&label);
+			mb_put_binary_short(false, (short)EM_12S_SS, (void *)&label);
 		else if (ping->swath_id == EM_SWATH_PORT)
-			mb_put_binary_short(MB_NO, (short)EM_12DP_SS, (void *)&label);
+			mb_put_binary_short(false, (short)EM_12DP_SS, (void *)&label);
 		else
-			mb_put_binary_short(MB_NO, (short)EM_12DS_SS, (void *)&label);
+			mb_put_binary_short(false, (short)EM_12DS_SS, (void *)&label);
 		write_len = fwrite(&label, 1, 2, mbfp);
 		if (write_len != 2) {
 			status = MB_FAILURE;
@@ -3468,8 +3443,8 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 			/* construct record */
 			sprintf(line, "%2.2d%2.2d%2.2d", store->day, store->month, store->year);
 			sprintf(line + 6, "%2.2d%2.2d%2.2d%2.2d", store->hour, store->minute, store->second, store->centisecond);
-			mb_put_binary_short(MB_YES, (short)ping->ping_number, (void *)&line[14]);
-			mb_put_binary_short(MB_YES, (short)ping->sound_vel, (void *)&line[16]);
+			mb_put_binary_short(true, (short)ping->ping_number, (void *)&line[14]);
+			mb_put_binary_short(true, (short)ping->sound_vel, (void *)&line[16]);
 			line[18] = (char)ping->ss_mode;
 			line[19] = (char)num_datagrams;
 			odatagram = datagram + 1;
@@ -3480,8 +3455,8 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 				for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
 					line[22 + 6 * j] = (char)(i + 1);
 					line[23 + 6 * j] = (char)ping->beam_frequency[i];
-					mb_put_binary_short(MB_YES, (short)ping->beam_samples[i], (void *)&line[24 + 6 * j]);
-					mb_put_binary_short(MB_YES, (short)ping->beam_center_sample[i], (void *)&line[26 + 6 * j]);
+					mb_put_binary_short(true, (short)ping->beam_samples[i], (void *)&line[24 + 6 * j]);
+					mb_put_binary_short(true, (short)ping->beam_center_sample[i], (void *)&line[26 + 6 * j]);
 					j++;
 				}
 			}
@@ -3502,7 +3477,7 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 			checksum = 0;
 			for (int j = 0; j < EM_SS_SIZE - 3; j++)
 				checksum += uchar_ptr[j];
-			mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
+			mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 			char_ptr = (char *)&short_val;
 			line[EM_SS_SIZE - 2] = char_ptr[0];
 			line[EM_SS_SIZE - 1] = char_ptr[1];
@@ -3566,7 +3541,6 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	/* get ping structure */
 	ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->year);
@@ -3631,7 +3605,6 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 			datagram_size[num_datagrams] = new_datagram_size;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       num_datagrams:    %d\n", num_datagrams);
@@ -3650,7 +3623,6 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	for (datagram = 0; datagram < num_datagrams; datagram++) {
 		num_beams = datagram_end[datagram] - datagram_start[datagram] + 1;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5       year:             %d\n", store->year);
@@ -3678,7 +3650,7 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		}
 
 		/* write the record size */
-		mb_put_binary_int(MB_NO, (int)(EM_12S_SSP_SIZE + 2), (void *)&write_size);
+		mb_put_binary_int(false, (int)(EM_12S_SSP_SIZE + 2), (void *)&write_size);
 		write_len = fwrite(&write_size, 1, 4, mbfp);
 		if (write_len != 4) {
 			status = MB_FAILURE;
@@ -3689,11 +3661,11 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 
 		/* write the record label */
 		if (ping->swath_id == EM_SWATH_CENTER)
-			mb_put_binary_short(MB_NO, (short)EM_12S_SSP, (void *)&label);
+			mb_put_binary_short(false, (short)EM_12S_SSP, (void *)&label);
 		else if (ping->swath_id == EM_SWATH_PORT)
-			mb_put_binary_short(MB_NO, (short)EM_12DP_SSP, (void *)&label);
+			mb_put_binary_short(false, (short)EM_12DP_SSP, (void *)&label);
 		else
-			mb_put_binary_short(MB_NO, (short)EM_12DS_SSP, (void *)&label);
+			mb_put_binary_short(false, (short)EM_12DS_SSP, (void *)&label);
 		write_len = fwrite(&label, 1, 2, mbfp);
 		if (write_len != 2) {
 			status = MB_FAILURE;
@@ -3707,8 +3679,8 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 			/* construct record */
 			sprintf(line, "%2.2d%2.2d%2.2d", store->day, store->month, store->year);
 			sprintf(line + 6, "%2.2d%2.2d%2.2d%2.2d", store->hour, store->minute, store->second, store->centisecond);
-			mb_put_binary_short(MB_YES, (short)ping->ping_number, (void *)&line[14]);
-			mb_put_binary_short(MB_YES, (short)ping->sound_vel, (void *)&line[16]);
+			mb_put_binary_short(true, (short)ping->ping_number, (void *)&line[14]);
+			mb_put_binary_short(true, (short)ping->sound_vel, (void *)&line[16]);
 			line[18] = (char)ping->ss_mode;
 			line[19] = (char)num_datagrams;
 			odatagram = datagram + 1;
@@ -3719,8 +3691,8 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 				for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
 					line[22 + 6 * j] = (char)(i + 1);
 					line[23 + 6 * j] = (char)ping->beam_frequency[i];
-					mb_put_binary_short(MB_YES, (short)ping->beam_samples[i], (void *)&line[24 + 6 * j]);
-					mb_put_binary_short(MB_YES, (short)ping->beam_center_sample[i], (void *)&line[26 + 6 * j]);
+					mb_put_binary_short(true, (short)ping->beam_samples[i], (void *)&line[24 + 6 * j]);
+					mb_put_binary_short(true, (short)ping->beam_center_sample[i], (void *)&line[26 + 6 * j]);
 					j++;
 				}
 			}
@@ -3731,7 +3703,7 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 				beam_ssp = &ping->ssp[ping->beam_start_sample[i]];
 				for (int j = 0; j < ping->beam_samples[i]; j++) {
 					line[ioffset] = (char)beam_ss[j];
-					mb_put_binary_short(MB_YES, (short)beam_ssp[j], (void *)&short_val);
+					mb_put_binary_short(true, (short)beam_ssp[j], (void *)&short_val);
 					line[ioffset + 1] = char_ptr[0];
 					line[ioffset + 2] = char_ptr[1];
 					ioffset += 3;
@@ -3747,7 +3719,7 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 			checksum = 0;
 			for (int j = 0; j < EM_SSP_SIZE - 3; j++)
 				checksum += uchar_ptr[j];
-			mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
+			mb_put_binary_short(true, (short)checksum, (void *)&short_val);
 			char_ptr = (char *)&short_val;
 			line[EM_SSP_SIZE - 2] = char_ptr[0];
 			line[EM_SSP_SIZE - 1] = char_ptr[1];
@@ -3913,12 +3885,6 @@ int mbr_wt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_emoldraw_wr_data(verbose, mbio_ptr, store_ptr, error);

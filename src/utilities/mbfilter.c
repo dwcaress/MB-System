@@ -29,11 +29,11 @@
  *
  * Author:	D. W. Caress
  * Date:	January 16, 1995
- *
- *
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -118,75 +118,505 @@ struct mbfilter_filter_struct {
 	int xdim;
 	int ldim;
 	int iteration;
-	int threshold;
+	bool threshold;
 	double threshold_lo;
 	double threshold_hi;
 	double hipass_offset;
 };
 
-/* function prototypes */
-int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, int *error);
-int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, double *hipass, int *error);
-int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass, int *error);
-int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, int *error);
-int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, double *smooth, int *error);
-int smooth_median(int verbose, double original, int apply_threshold, double threshold_lo, double threshold_hi, int n, double *val,
-                  double *wgt, double *smooth, int *error);
-int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth, int *error);
-int contrast_edge(int verbose, int n, double *val, double *grad, double *result, int *error);
-int contrast_gradient(int verbose, int n, double *val, double *wgt, double *result, int *error);
+static const char program_name[] = "MBFILTER";
+static const char help_message[] = "mbfilter applies one or more simple filters to the specified\n\t"
+    "data (sidescan and/or beam amplitude). The filters\n\t"
+    "include:\n\t"
+    "  - boxcar mean for lo-pass filtering (-S1)\n\t"
+    "  - gaussian mean for lo-pass filtering (-S2)\n\t"
+    "  - boxcar median for lo-pass filtering (-S3)\n\t"
+    "  - inverse gradient for lo-pass filtering (-S4)\n\t"
+    "  - boxcar mean subtraction for hi-pass filtering (-D1)\n\t"
+    "  - gaussian mean subtraction for hi-pass filtering (-D2)\n\t"
+    "  - boxcar median subtraction for hi-pass filtering (-D3)\n\t"
+    "  - edge detection for contrast enhancement (-C1)\n\t"
+    "  - gradient magnitude subtraction for contrast enhancement (-C2)\n\t"
+    "These filters are primarily intended for use with sidescan\n\t"
+    "data. In particular, the lo-pass or smoothing filters\n\t"
+    "can be used for first-order speckle reduction in sidescan\n\t"
+    "data, and the hi-pass filters can be used to emphasize\n\t"
+    "fine scale structure in the data.\n\t"
+    "The default input and output streams are stdin and stdout.\n";
+static const char usage_message[] =
+    "mbfilter ["
+    "-Akind -Byr/mo/da/hr/mn/sc\n\t"
+    "-Cmode/xdim/ldim/iteration\n\t"
+    "-Dmode/xdim/ldim/iteration/offset\n\t"
+    "-Eyr/mo/da/hr/mn/sc -Fformat -Iinfile -Nbuffersize\n\t"
+    "-Rwest/east/south/north -Smode/xdim/ldim/iteration\n\t"
+    "-Tthreshold -V -H]";
+
+/*--------------------------------------------------------------------*/
+int hipass_mean(int verbose, int n, const double *val, double *wgt, double *hipass, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       n:               %d\n", n);
+		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
+		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
+		for (int i = 0; i < n; i++)
+			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
+	}
+
+	/* get mean */
+	*hipass = 0.0;
+	int nn = 0;
+	for (int i = 0; i < n; i++) {
+		*hipass += val[i];
+		nn++;
+	}
+	if (nn > 0)
+		*hipass = val[0] - *hipass / nn;
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       hipass:          %f\n", *hipass);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, double *hipass, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       n:               %d\n", n);
+		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
+		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
+		fprintf(stderr, "dbg2       dis:             %p\n", (void *)dis);
+		for (int i = 0; i < n; i++)
+			fprintf(stderr, "dbg2       val[%d]: %f  dis[%d]: %f\n", i, val[i], i, dis[i]);
+	}
+
+	/* get weights */
+	*hipass = 0.0;
+	double wgtsum = 0.0;
+	for (int i = 0; i < n; i++) {
+		wgt[i] = exp(-dis[i] * dis[i]);
+		wgtsum += wgt[i];
+	}
+
+	if (wgtsum > 0.0) {
+		/* get value */
+		*hipass = 0.0;
+		for (int i = 0; i < n; i++) {
+			*hipass += wgt[i] * val[i];
+		}
+		*hipass = val[0] - *hipass / wgtsum;
+	}
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       hipass:          %f\n", *hipass);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       n:               %d\n", n);
+		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
+		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
+		for (int i = 0; i < n; i++)
+			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
+	}
+
+	/* start */
+	*hipass = 0.0;
+
+	/* sort values and get median value */
+	if (n > 0) {
+		qsort((char *)val, n, sizeof(double), (void *)mb_double_compare);
+		*hipass = val[0] - val[n / 2];
+	}
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       hipass:          %f\n", *hipass);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       n:               %d\n", n);
+		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
+		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
+		for (int i = 0; i < n; i++)
+			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
+	}
+
+	/* get mean */
+	*smooth = 0.0;
+	int nn = 0;
+	for (int i = 0; i < n; i++) {
+		*smooth += val[i];
+		nn++;
+	}
+	if (nn > 0)
+		*smooth = *smooth / nn;
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       smooth:          %f\n", *smooth);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, double *smooth, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       n:               %d\n", n);
+		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
+		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
+		fprintf(stderr, "dbg2       dis:             %p\n", (void *)dis);
+		for (int i = 0; i < n; i++)
+			fprintf(stderr, "dbg2       val[%d]: %f  dis[%d]: %f\n", i, val[i], i, dis[i]);
+	}
+
+	/* get weights */
+	*smooth = 0.0;
+	double wgtsum = 0.0;
+	for (int i = 0; i < n; i++) {
+		wgt[i] = exp(-dis[i] * dis[i]);
+		wgtsum += wgt[i];
+	}
+
+	if (wgtsum > 0.0) {
+		/* get value */
+		*smooth = 0.0;
+		for (int i = 0; i < n; i++) {
+			*smooth += wgt[i] * val[i];
+		}
+		*smooth = *smooth / wgtsum;
+	}
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       smooth:          %f\n", *smooth);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int smooth_median(int verbose, double original, bool apply_threshold, double threshold_lo, double threshold_hi, int n, double *val,
+                  double *wgt, double *smooth, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       original:        %f\n", original);
+		fprintf(stderr, "dbg2       apply_threshold: %d\n", apply_threshold);
+		fprintf(stderr, "dbg2       n:               %d\n", n);
+		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
+		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
+		for (int i = 0; i < n; i++)
+			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
+	}
+
+	/* start */
+	*smooth = 0.0;
+
+	/* sort values and get median value */
+	if (n > 0) {
+		qsort((char *)val, n, sizeof(double), (void *)mb_double_compare);
+		*smooth = val[n / 2];
+	}
+
+	/* apply thresholding */
+	if (apply_threshold) {
+		const double ratio = original / (*smooth);
+		if (ratio < threshold_hi && ratio > threshold_lo) {
+			*smooth = original;
+		}
+	}
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       smooth:          %f\n", *smooth);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       n:               %d\n", n);
+		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
+		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
+		for (int i = 0; i < n; i++)
+			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
+	}
+
+	/* get weights */
+	*smooth = 0.0;
+	double wgtsum = 0.0;
+	int nn = 0;
+	wgt[0] = 0.5;
+	for (int i = 1; i < n; i++) {
+		double diff = fabs(val[i] - val[0]);
+		if (diff < 0.01)
+			diff = 0.01;
+		wgt[i] = 1.0 / diff;
+		wgtsum += wgt[i];
+		nn++;
+	}
+	if (nn > 0) {
+		*smooth = wgt[0] * val[0];
+		for (int i = 1; i < n; i++) {
+			*smooth += 0.5 * wgt[i] * val[i] / wgtsum;
+		}
+	}
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       smooth:          %f\n", *smooth);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int contrast_edge(int verbose, int n, double *val, double *grad, double *result, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       n:               %d\n", n);
+		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
+		fprintf(stderr, "dbg2       grad:            %p\n", (void *)grad);
+		for (int i = 0; i < n; i++)
+			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
+	}
+
+	/* get gradients */
+	double gradsum = 0.0;
+	double edge = 0.0;
+	for (int i = 0; i < n; i++) {
+		grad[i] = 0.0;
+		for (int ii = 0; ii < n; ii++) {
+			if (val[ii] > 0.0 && i != ii) {
+				grad[i] += (val[ii] - val[i]) * (val[ii] - val[i]);
+			}
+		}
+		gradsum += grad[i];
+		edge += val[i] * grad[i];
+	}
+	edge = edge / gradsum;
+	const double contrast = pow((fabs(val[0] - edge) / fabs(val[0] + edge)), 0.75);
+	if (val[0] >= edge)
+		*result = edge * (1.0 + contrast) / (1.0 - contrast);
+	else
+		*result = edge * (1.0 - contrast) / (1.0 + contrast);
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       result:          %f\n", *result);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int contrast_gradient(int verbose, int n, double *val, double *wgt, double *result, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       n:               %d\n", n);
+		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
+		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
+		for (int i = 0; i < n; i++)
+			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
+	}
+
+	/* get weights */
+	*result = 0.0;
+	double gradient = 0.0;
+	int nn = 0;
+	for (int i = 1; i < n; i++) {
+		gradient += (val[i] - val[0]) * (val[i] - val[0]);
+		nn++;
+	}
+	gradient = sqrt(gradient);
+	*result = val[0] - 2 * gradient;
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       result:          %f\n", *result);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbcopy_any_to_mbldeoih(int verbose, int system, int kind, int *time_i, double time_d, double navlon, double navlat,
                            double speed, double heading, double draft, double altitude, double roll, double pitch, double heave,
                            double beamwidth_xtrack, double beamwidth_ltrack, int nbath, int namp, int nss, char *beamflag,
                            double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                            double *ssacrosstrack, double *ssalongtrack, char *comment, char *ombio_ptr, char *ostore_ptr,
-                           int *error);
+                           int *error) {
+	/* get data structure pointer */
+	struct mbsys_ldeoih_struct *ostore = (struct mbsys_ldeoih_struct *)ostore_ptr;
 
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       ombio_ptr:  %p\n", (void *)ombio_ptr);
+		fprintf(stderr, "dbg2       ostore_ptr: %p\n", (void *)ostore_ptr);
+		fprintf(stderr, "dbg2       system:     %d\n", system);
+		fprintf(stderr, "dbg2       kind:       %d\n", kind);
+	}
+	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
+		fprintf(stderr, "dbg2       time_i[0]:  %d\n", time_i[0]);
+		fprintf(stderr, "dbg2       time_i[1]:  %d\n", time_i[1]);
+		fprintf(stderr, "dbg2       time_i[2]:  %d\n", time_i[2]);
+		fprintf(stderr, "dbg2       time_i[3]:  %d\n", time_i[3]);
+		fprintf(stderr, "dbg2       time_i[4]:  %d\n", time_i[4]);
+		fprintf(stderr, "dbg2       time_i[5]:  %d\n", time_i[5]);
+		fprintf(stderr, "dbg2       time_i[6]:  %d\n", time_i[6]);
+		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
+		fprintf(stderr, "dbg2       navlon:     %f\n", navlon);
+		fprintf(stderr, "dbg2       navlat:     %f\n", navlat);
+		fprintf(stderr, "dbg2       speed:      %f\n", speed);
+		fprintf(stderr, "dbg2       heading:    %f\n", heading);
+		fprintf(stderr, "dbg2       draft:      %f\n", draft);
+		fprintf(stderr, "dbg2       altitude:   %f\n", altitude);
+		fprintf(stderr, "dbg2       roll:       %f\n", roll);
+		fprintf(stderr, "dbg2       pitch:      %f\n", pitch);
+		fprintf(stderr, "dbg2       heave:      %f\n", heave);
+		fprintf(stderr, "dbg2       beamwidth_xtrack: %f\n", beamwidth_xtrack);
+		fprintf(stderr, "dbg2       beamwidth_ltrack: %f\n", beamwidth_ltrack);
+	}
+	if (verbose >= 2 && kind == MB_DATA_DATA) {
+		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
+		if (verbose >= 3)
+			for (int i = 0; i < nbath; i++)
+				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
+				        bathacrosstrack[i], bathalongtrack[i]);
+		fprintf(stderr, "dbg2       namp:       %d\n", namp);
+		if (verbose >= 3)
+			for (int i = 0; i < namp; i++)
+				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
+				        bathalongtrack[i]);
+		fprintf(stderr, "dbg2        nss:       %d\n", nss);
+		if (verbose >= 3)
+			for (int i = 0; i < nss; i++)
+				fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
+				        ssalongtrack[i]);
+	}
+	if (verbose >= 2 && kind == MB_DATA_COMMENT) {
+		fprintf(stderr, "dbg2       comment:     \ndbg2       %s\n", comment);
+	}
+
+	int status = MB_SUCCESS;
+
+	/* copy the data  */
+	if (ostore != NULL) {
+		/* set beam widths */
+		ostore->beam_xwidth = beamwidth_xtrack;
+		ostore->beam_lwidth = beamwidth_ltrack;
+		if (system == MB_SYS_SB2100)
+			ostore->ss_type = MB_SIDESCAN_LINEAR;
+		else
+			ostore->ss_type = MB_SIDESCAN_LOGARITHMIC;
+		ostore->kind = kind;
+
+		/* insert data */
+		if (kind == MB_DATA_DATA) {
+			mb_insert_altitude(verbose, ombio_ptr, (void *)ostore, draft, altitude, error);
+			mb_insert_nav(verbose, ombio_ptr, (void *)ostore, time_i, time_d, navlon, navlat, speed, heading, draft, roll, pitch,
+			              heave, error);
+		}
+		status =
+		    mb_insert(verbose, ombio_ptr, (void *)ostore, kind, time_i, time_d, navlon, navlat, speed, heading, nbath, namp, nss,
+		              beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBcopy function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBFILTER";
-	char help_message[] = "mbfilter applies one or more simple filters to the specified\n\t\
-data (sidescan and/or beam amplitude). The filters\n\t\
-include:\n\t\
-  - boxcar mean for lo-pass filtering (-S1)\n\t\
-  - gaussian mean for lo-pass filtering (-S2)\n\t\
-  - boxcar median for lo-pass filtering (-S3)\n\t\
-  - inverse gradient for lo-pass filtering (-S4)\n\t\
-  - boxcar mean subtraction for hi-pass filtering (-D1)\n\t\
-  - gaussian mean subtraction for hi-pass filtering (-D2)\n\t\
-  - boxcar median subtraction for hi-pass filtering (-D3)\n\t\
-  - edge detection for contrast enhancement (-C1)\n\t\
-  - gradient magnitude subtraction for contrast enhancement (-C2)\n\t\
-These filters are primarily intended for use with sidescan\n\t\
-data. In particular, the lo-pass or smoothing filters\n\t\
-can be used for first-order speckle reduction in sidescan\n\t\
-data, and the hi-pass filters can be used to emphasize\n\t\
-fine scale structure in the data.\n\t\
-The default input and output streams are stdin and stdout.\n";
-
-	char usage_message[] = "mbfilter [\
--Akind -Byr/mo/da/hr/mn/sc\n\t\
--Cmode/xdim/ldim/iteration\n\t\
--Dmode/xdim/ldim/iteration/offset\n\t\
--Eyr/mo/da/hr/mn/sc -Fformat -Iinfile -Nbuffersize\n\t\
--Rwest/east/south/north -Smode/xdim/ldim/iteration\n\t\
--Tthreshold -V -H]";
-	extern char *optarg;
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
-	int status;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
 
 	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
 	char read_file[MB_PATH_MAXLINE];
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -236,8 +666,6 @@ The default input and output streams are stdin and stdout.\n";
 	int nwritetot = 0;
 	int nexpect;
 	struct mbfilter_ping_struct ping[MBFILTER_BUFFER_DEFAULT];
-	int first = MB_YES;
-	int done;
 
 	/* time, user, host variables */
 	time_t right_now;
@@ -260,7 +688,7 @@ The default input and output streams are stdin and stdout.\n";
 	int contrast_xdim = 5;
 	int contrast_ldim = 5;
 	int contrast_iter = 1;
-	int apply_threshold = MB_NO;
+	bool apply_threshold = false;
 	double threshold_lo = 0.0;
 	double threshold_hi = 0.0;
 	int nweight;
@@ -270,7 +698,6 @@ The default input and output streams are stdin and stdout.\n";
 	double *distances;
 	int iteration;
 
-	int read_data;
 	double *dataptr0, *dataptr1;
 	char *flagptr0, *flagptr1;
 	double ddis;
@@ -278,13 +705,10 @@ The default input and output streams are stdin and stdout.\n";
 	int ifilter, ndx, ndl;
 	int ia, ib;
 	int ja, jb, jbeg, jend;
-	int i, j, ii, jj, n;
-
-	char *ctime();
-	char *getenv();
+	int ii, jj;
 
 	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* reset all defaults but the format and lonflip */
 	pings = 1;
@@ -313,203 +737,200 @@ The default input and output streams are stdin and stdout.\n";
 	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:HhI:i:N:n:R:r:S:s:T:t:Vv")) != -1)
-		switch (c) {
-		case 'A':
-		case 'a':
-			sscanf(optarg, "%d", &datakind);
-			if (datakind != MBFILTER_SS && datakind != MBFILTER_AMP)
-				datakind = MBFILTER_SS;
-			flag++;
-			break;
-		case 'B':
-		case 'b':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
-			btime_i[6] = 0;
-			flag++;
-			break;
-		case 'C':
-		case 'c':
-			n = sscanf(optarg, "%d/%d/%d/%d", &contrast_mode, &contrast_xdim, &contrast_ldim, &contrast_iter);
-			if (n >= 3) {
-				filters[num_filters].mode = contrast_mode + 7;
-				filters[num_filters].xdim = contrast_xdim;
-				filters[num_filters].ldim = contrast_ldim;
-				filters[num_filters].threshold = MB_NO;
+	{
+		bool errflg = 0;
+		int c;
+		bool help = 0;
+		while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:HhI:i:N:n:R:r:S:s:T:t:Vv")) != -1)
+		{
+			switch (c) {
+			case 'A':
+			case 'a':
+				sscanf(optarg, "%d", &datakind);
+				if (datakind != MBFILTER_SS && datakind != MBFILTER_AMP)
+					datakind = MBFILTER_SS;
+				break;
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
+				btime_i[6] = 0;
+				break;
+			case 'C':
+			case 'c':
+			{
+				const int n = sscanf(optarg, "%d/%d/%d/%d", &contrast_mode, &contrast_xdim, &contrast_ldim, &contrast_iter);
+				if (n >= 3) {
+					filters[num_filters].mode = contrast_mode + 7;
+					filters[num_filters].xdim = contrast_xdim;
+					filters[num_filters].ldim = contrast_ldim;
+					filters[num_filters].threshold = false;
+				}
+				if (n >= 4)
+					filters[num_filters].iteration = contrast_iter;
+				else
+					filters[num_filters].iteration = 1;
+				if (n >= 3)
+					num_filters++;
+				break;
 			}
-			if (n >= 4)
-				filters[num_filters].iteration = contrast_iter;
-			else
-				filters[num_filters].iteration = 1;
-			if (n >= 3)
-				num_filters++;
-			flag++;
-			break;
-		case 'D':
-		case 'd':
-			n = sscanf(optarg, "%d/%d/%d/%d/%lf", &hipass_mode, &hipass_xdim, &hipass_ldim, &hipass_iter, &hipass_offset);
-			if (n >= 3) {
-				filters[num_filters].mode = hipass_mode;
-				filters[num_filters].xdim = hipass_xdim;
-				filters[num_filters].ldim = hipass_ldim;
-				filters[num_filters].threshold = MB_NO;
+			case 'D':
+			case 'd':
+			{
+				const int n = sscanf(optarg, "%d/%d/%d/%d/%lf", &hipass_mode, &hipass_xdim, &hipass_ldim, &hipass_iter, &hipass_offset);
+				if (n >= 3) {
+					filters[num_filters].mode = hipass_mode;
+					filters[num_filters].xdim = hipass_xdim;
+					filters[num_filters].ldim = hipass_ldim;
+					filters[num_filters].threshold = false;
+				}
+				if (n >= 4)
+					filters[num_filters].iteration = hipass_iter;
+				else
+					filters[num_filters].iteration = 1;
+				if (n >= 5)
+					filters[num_filters].hipass_offset = hipass_offset;
+				else
+					filters[num_filters].hipass_offset = 1000.0;
+				if (n >= 3)
+					num_filters++;
+				break;
 			}
-			if (n >= 4)
-				filters[num_filters].iteration = hipass_iter;
-			else
-				filters[num_filters].iteration = 1;
-			if (n >= 5)
-				filters[num_filters].hipass_offset = hipass_offset;
-			else
-				filters[num_filters].hipass_offset = 1000.0;
-			if (n >= 3)
-				num_filters++;
-			flag++;
-			break;
-		case 'E':
-		case 'e':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
-			etime_i[6] = 0;
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			sscanf(optarg, "%d", &n_buffer_max);
-			if (n_buffer_max > MBFILTER_BUFFER_DEFAULT || n_buffer_max < 10)
-				n_buffer_max = MBFILTER_BUFFER_DEFAULT;
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, bounds);
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			n = sscanf(optarg, "%d/%d/%d/%d/%lf/%lf", &smooth_mode, &smooth_xdim, &smooth_ldim, &smooth_iter, &threshold_lo,
-			           &threshold_hi);
-			if (n >= 3) {
-				filters[num_filters].mode = smooth_mode + 3;
-				filters[num_filters].xdim = smooth_xdim;
-				filters[num_filters].ldim = smooth_ldim;
+			case 'E':
+			case 'e':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
+				etime_i[6] = 0;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'N':
+			case 'n':
+				sscanf(optarg, "%d", &n_buffer_max);
+				if (n_buffer_max > MBFILTER_BUFFER_DEFAULT || n_buffer_max < 10)
+					n_buffer_max = MBFILTER_BUFFER_DEFAULT;
+				break;
+			case 'R':
+			case 'r':
+				mb_get_bounds(optarg, bounds);
+				break;
+			case 'S':
+			case 's':
+			{
+				const int n = sscanf(optarg, "%d/%d/%d/%d/%lf/%lf", &smooth_mode, &smooth_xdim, &smooth_ldim, &smooth_iter, &threshold_lo,
+				           &threshold_hi);
+				if (n >= 3) {
+					filters[num_filters].mode = smooth_mode + 3;
+					filters[num_filters].xdim = smooth_xdim;
+					filters[num_filters].ldim = smooth_ldim;
+				}
+				if (n >= 4)
+					filters[num_filters].iteration = smooth_iter;
+				else
+					filters[num_filters].iteration = 1;
+				if (n >= 6) {
+					filters[num_filters].threshold = true;
+					filters[num_filters].threshold_lo = threshold_lo;
+					filters[num_filters].threshold_hi = threshold_hi;
+				}
+				else if (apply_threshold) {
+					filters[num_filters].threshold = true;
+					filters[num_filters].threshold_lo = threshold_lo;
+					filters[num_filters].threshold_hi = threshold_hi;
+				}
+				else
+					filters[num_filters].threshold = false;
+				if (n >= 3)
+					num_filters++;
+				break;
 			}
-			if (n >= 4)
-				filters[num_filters].iteration = smooth_iter;
-			else
-				filters[num_filters].iteration = 1;
-			if (n >= 6) {
-				filters[num_filters].threshold = MB_YES;
-				filters[num_filters].threshold_lo = threshold_lo;
-				filters[num_filters].threshold_hi = threshold_hi;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf/%lf", &threshold_lo, &threshold_hi);
+				apply_threshold = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case '?':
+				errflg = true;
 			}
-			else if (apply_threshold == MB_YES) {
-				filters[num_filters].threshold = MB_YES;
-				filters[num_filters].threshold_lo = threshold_lo;
-				filters[num_filters].threshold_hi = threshold_hi;
-			}
-			else
-				filters[num_filters].threshold = MB_NO;
-			if (n >= 3)
-				num_filters++;
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf/%lf", &threshold_lo, &threshold_hi);
-			apply_threshold = MB_YES;
-			flag++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case '?':
-			errflg++;
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
-
-	/* print starting message */
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
-
-	/* set data type if not set properly */
-	if (datakind != MBFILTER_BATH && datakind != MBFILTER_AMP)
-		datakind = MBFILTER_SS;
-
-	/* print starting debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
-		fprintf(stderr, "dbg2       help:           %d\n", help);
-		fprintf(stderr, "dbg2       pings:          %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
-		fprintf(stderr, "dbg2       data format:    %d\n", format);
-		fprintf(stderr, "dbg2       read_file:      %s\n", read_file);
-		fprintf(stderr, "dbg2       datakind:       %d\n", datakind);
-		fprintf(stderr, "dbg2       n_buffer_max:   %d\n", n_buffer_max);
-		fprintf(stderr, "dbg2       num_filters:    %d\n", num_filters);
-		for (i = 0; i < num_filters; i++) {
-			fprintf(stderr, "dbg2       filters[%d].mode:          %d\n", i, filters[i].mode);
-			fprintf(stderr, "dbg2       filters[%d].xdim:          %d\n", i, filters[i].xdim);
-			fprintf(stderr, "dbg2       filters[%d].ldim:          %d\n", i, filters[i].ldim);
-			fprintf(stderr, "dbg2       filters[%d].iteration:     %d\n", i, filters[i].iteration);
-			fprintf(stderr, "dbg2       filters[%d].threshold:     %d\n", i, filters[i].threshold);
-			fprintf(stderr, "dbg2       filters[%d].threshold_lo:  %f\n", i, filters[i].threshold_lo);
-			fprintf(stderr, "dbg2       filters[%d].threshold_hi:  %f\n", i, filters[i].threshold_hi);
-			fprintf(stderr, "dbg2       filters[%d].hipass_offset: %f\n", i, filters[i].hipass_offset);
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
-	}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
+
+		/* set data type if not set properly */
+		if (datakind != MBFILTER_BATH && datakind != MBFILTER_AMP)
+			datakind = MBFILTER_SS;
+
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+			fprintf(stderr, "dbg2       help:           %d\n", help);
+			fprintf(stderr, "dbg2       pings:          %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
+			fprintf(stderr, "dbg2       data format:    %d\n", format);
+			fprintf(stderr, "dbg2       read_file:      %s\n", read_file);
+			fprintf(stderr, "dbg2       datakind:       %d\n", datakind);
+			fprintf(stderr, "dbg2       n_buffer_max:   %d\n", n_buffer_max);
+			fprintf(stderr, "dbg2       num_filters:    %d\n", num_filters);
+			for (int i = 0; i < num_filters; i++) {
+				fprintf(stderr, "dbg2       filters[%d].mode:          %d\n", i, filters[i].mode);
+				fprintf(stderr, "dbg2       filters[%d].xdim:          %d\n", i, filters[i].xdim);
+				fprintf(stderr, "dbg2       filters[%d].ldim:          %d\n", i, filters[i].ldim);
+				fprintf(stderr, "dbg2       filters[%d].iteration:     %d\n", i, filters[i].iteration);
+				fprintf(stderr, "dbg2       filters[%d].threshold:     %d\n", i, filters[i].threshold);
+				fprintf(stderr, "dbg2       filters[%d].threshold_lo:  %f\n", i, filters[i].threshold_lo);
+				fprintf(stderr, "dbg2       filters[%d].threshold_hi:  %f\n", i, filters[i].threshold_hi);
+				fprintf(stderr, "dbg2       filters[%d].hipass_offset: %f\n", i, filters[i].hipass_offset);
+			}
+		}
+
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* get format if required */
@@ -517,8 +938,8 @@ The default input and output streams are stdin and stdout.\n";
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* output some information */
 	if (verbose > 0) {
@@ -529,7 +950,7 @@ The default input and output streams are stdin and stdout.\n";
 		else if (datakind == MBFILTER_SS)
 			fprintf(stderr, "\nProcessing sidescan data...\n");
 		fprintf(stderr, "Number of filters to be applied: %d\n\n", num_filters);
-		for (i = 0; i < num_filters; i++) {
+		for (int i = 0; i < num_filters; i++) {
 			if (filters[i].mode == MBFILTER_A_HIPASS_MEAN)
 				fprintf(stderr, "Filter %d: High pass mean subtraction\n", i);
 			else if (filters[i].mode == MBFILTER_A_HIPASS_GAUSSIAN)
@@ -552,7 +973,7 @@ The default input and output streams are stdin and stdout.\n";
 			fprintf(stderr, "          Alongtrack dimension:  %d\n", filters[i].ldim);
 			fprintf(stderr, "          Iterations:            %d\n", filters[i].iteration);
 			if (filters[i].mode == MBFILTER_A_SMOOTH_MEDIAN) {
-				if (filters[i].threshold == MB_YES) {
+				if (filters[i].threshold) {
 					fprintf(stderr, "          Threshold applied\n");
 					fprintf(stderr, "          Threshold_lo:          %f\n", filters[i].threshold_lo);
 					fprintf(stderr, "          Threshold_hi:          %f\n", filters[i].threshold_hi);
@@ -569,26 +990,25 @@ The default input and output streams are stdin and stdout.\n";
 	}
 
 	/* open file list */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(file, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data) {
 
 		/* check for format with amplitude or sidescan data */
 		status = mb_format_system(verbose, &format, &system, &error);
@@ -653,7 +1073,7 @@ The default input and output streams are stdin and stdout.\n";
 		omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
 
 		/* allocate memory for data arrays */
-		for (i = 0; i < n_buffer_max; i++) {
+		for (int i = 0; i < n_buffer_max; i++) {
 			ping[i].beamflag = NULL;
 			ping[i].bath = NULL;
 			ping[i].amp = NULL;
@@ -727,7 +1147,7 @@ The default input and output streams are stdin and stdout.\n";
 		/* get ideal number of ping records to hold */
 		nhold_ping = 1;
 		nweightmax = 1;
-		for (i = 0; i < num_filters; i++) {
+		for (int i = 0; i < num_filters; i++) {
 			nhold_ping = MAX(nhold_ping, filters[i].ldim);
 			nweightmax = MAX(nweightmax, filters[i].xdim * filters[i].ldim);
 		}
@@ -816,7 +1236,7 @@ The default input and output streams are stdin and stdout.\n";
 			sprintf(comment, "applying inverse gradient filter for smoothing");
 			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
-		if (smooth_mode == MBFILTER_SMOOTH_MEDIAN && apply_threshold == MB_YES) {
+		if (smooth_mode == MBFILTER_SMOOTH_MEDIAN && apply_threshold) {
 			sprintf(comment, "  filter low ratio threshold:   %f", threshold_lo);
 			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 			sprintf(comment, "  filter high ratio threshold:  %f", threshold_hi);
@@ -869,12 +1289,12 @@ The default input and output streams are stdin and stdout.\n";
 		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 
 		/* read and write */
-		done = MB_NO;
-		first = MB_YES;
+		bool first = true;
 		ndata = 0;
 		nhold = 0;
 		nread = 0;
 		nwrite = 0;
+		bool done = false;
 		while (!done) {
 			/* load some data into the buffer */
 			error = MB_ERROR_NO_ERROR;
@@ -890,7 +1310,7 @@ The default input and output streams are stdin and stdout.\n";
 				                    ping[ndata].ss, ping[ndata].ssacrosstrack, ping[ndata].ssalongtrack, comment, &error);
 				if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
 					if (datakind == MBFILTER_SS) {
-						for (i = 0; i < ping[ndata].pixels_ss; i++) {
+						for (int i = 0; i < ping[ndata].pixels_ss; i++) {
 							if (ping[ndata].ss[i] > MB_SIDESCAN_NULL)
 								ping[ndata].pixelflag[i] = MB_FLAG_NONE;
 							else
@@ -918,7 +1338,7 @@ The default input and output streams are stdin and stdout.\n";
 			if (status == MB_FAILURE && error > 0) {
 				status = MB_SUCCESS;
 				error = MB_ERROR_NO_ERROR;
-				done = MB_YES;
+				done = true;
 			}
 
 			/* give the statistics */
@@ -928,15 +1348,15 @@ The default input and output streams are stdin and stdout.\n";
 			}
 
 			/* get start of ping output range */
-			if (first == MB_YES) {
+			if (first) {
 				jbeg = 0;
-				first = MB_NO;
+				first = false;
 			}
 			else
 				jbeg = MIN(nhold / 2 + 1, ndata);
 
 			/* find number of pings to hold */
-			if (done == MB_YES)
+			if (done)
 				nhold = 0;
 			else if (ndata > nhold_ping)
 				nhold = nhold_ping;
@@ -944,7 +1364,7 @@ The default input and output streams are stdin and stdout.\n";
 				nhold = 0;
 
 			/* get end of ping output range */
-			if (done == MB_YES)
+			if (done)
 				jend = ndata - 1;
 			else {
 				jend = ndata - 1 - nhold / 2;
@@ -954,8 +1374,6 @@ The default input and output streams are stdin and stdout.\n";
 			if (verbose >= 1) {
 				fprintf(stderr, "%d survey records being processed\n\n", (jend - jbeg + 1));
 			}
-			/*fprintf(stderr, "done:%d jbeg:%d jend:%d ndata:%d nhold_ping:%d nhold:%d\n",
-			done, jbeg, jend, ndata, nhold_ping, nhold);*/
 
 			/* loop over all filters */
 			for (ifilter = 0; ifilter < num_filters; ifilter++) {
@@ -969,7 +1387,7 @@ The default input and output streams are stdin and stdout.\n";
 						        filters[ifilter].iteration);
 
 					/* set in and out data arrays */
-					for (j = 0; j < ndata; j++) {
+					for (int j = 0; j < ndata; j++) {
 						if (datakind == MBFILTER_BATH) {
 							ping[j].ndatapts = ping[j].beams_bath;
 							ping[j].data_i_ptr = ping[j].bath;
@@ -989,7 +1407,7 @@ The default input and output streams are stdin and stdout.\n";
 					}
 
 					/* loop over all the data */
-					for (j = 0; j < ndata; j++) {
+					for (int j = 0; j < ndata; j++) {
 
 						/* get beginning and end pings */
 						ja = j - ndl;
@@ -1005,7 +1423,7 @@ The default input and output streams are stdin and stdout.\n";
 						ndatapts = ping[j].ndatapts;
 
 						/* loop over each value */
-						for (i = 0; i < ndatapts; i++) {
+						for (int i = 0; i < ndatapts; i++) {
 							/* get beginning and end values */
 							ia = i - ndx;
 							ib = i + ndx;
@@ -1077,18 +1495,18 @@ The default input and output streams are stdin and stdout.\n";
 					/* reset initial array and add offset
 					    if done with final iteration */
 					if (iteration == filters[ifilter].iteration - 1)
-						for (j = 0; j < ndata; j++)
-							for (i = 0; i < ping[j].ndatapts; i++)
+						for (int j = 0; j < ndata; j++)
+							for (int i = 0; i < ping[j].ndatapts; i++)
 								ping[j].data_i_ptr[i] = ping[j].data_f_ptr[i] + filters[ifilter].hipass_offset;
 					else
-						for (j = 0; j < ndata; j++)
-							for (i = 0; i < ping[j].ndatapts; i++)
+						for (int j = 0; j < ndata; j++)
+							for (int i = 0; i < ping[j].ndatapts; i++)
 								ping[j].data_i_ptr[i] = ping[j].data_f_ptr[i];
 
 					/* save results if done with final iteration */
 					if (ndata > 0 && iteration == filters[ifilter].iteration - 1) {
-						for (j = jbeg; j <= jend; j++)
-							for (i = 0; i < ping[j].ndatapts; i++)
+						for (int j = jbeg; j <= jend; j++)
+							for (int i = 0; i < ping[j].ndatapts; i++)
 								ping[j].datasave[i] = ping[j].data_i_ptr[i];
 					}
 
@@ -1098,7 +1516,7 @@ The default input and output streams are stdin and stdout.\n";
 
 			/* output pings to be cleared from buffer */
 			if (ndata > 0)
-				for (j = jbeg; j <= jend; j++) {
+				for (int j = jbeg; j <= jend; j++) {
 					if (datakind == MBFILTER_BATH) {
 						status = mbcopy_any_to_mbldeoih(
 						    verbose, system, MB_DATA_DATA, ping[j].time_i, ping[j].time_d, ping[j].navlon, ping[j].navlat,
@@ -1129,23 +1547,19 @@ The default input and output streams are stdin and stdout.\n";
 					}
 
 					/* write the data */
-					/*fprintf(stderr,"calling mb_write_ping datakind:%d verbose:%d nwrite:%d\n",datakind,verbose,nwrite);*/
 					status = mb_write_ping(verbose, ombio_ptr, omb_io_ptr->store_data, &error);
 					if (status == MB_SUCCESS) {
 						nunload++;
 						nwrite++;
 						nwritetot++;
 					}
-					/*verbose = 1;
-					fprintf(stderr,"nunload:%d nwrite:%d verbose:%d error:%d pointers: %d %d\n",
-					nunload,nwrite,verbose,error,ombio_ptr,omb_io_ptr->store_data);*/
 				}
 
 			/* save processed data in buffer */
 			if (ndata > nhold) {
-				for (j = 0; j < nhold; j++) {
+				for (int j = 0; j < nhold; j++) {
 					jj = ndata - nhold + j;
-					for (i = 0; i < 7; i++)
+					for (int i = 0; i < 7; i++)
 						ping[j].time_i[i] = ping[jj].time_i[i];
 					ping[j].time_d = ping[jj].time_d;
 					ping[j].navlon = ping[jj].navlon;
@@ -1161,22 +1575,22 @@ The default input and output streams are stdin and stdout.\n";
 					ping[j].beams_bath = ping[jj].beams_bath;
 					ping[j].beams_amp = ping[jj].beams_amp;
 					ping[j].pixels_ss = ping[jj].pixels_ss;
-					for (i = 0; i < ping[j].beams_bath; i++) {
+					for (int i = 0; i < ping[j].beams_bath; i++) {
 						ping[j].beamflag[i] = ping[jj].beamflag[i];
 						ping[j].bath[i] = ping[jj].bath[i];
 						ping[j].bathacrosstrack[i] = ping[jj].bathacrosstrack[i];
 						ping[j].bathalongtrack[i] = ping[jj].bathalongtrack[i];
 					}
-					for (i = 0; i < ping[j].beams_amp; i++) {
+					for (int i = 0; i < ping[j].beams_amp; i++) {
 						ping[j].amp[i] = ping[jj].amp[i];
 					}
-					for (i = 0; i < ping[j].pixels_ss; i++) {
+					for (int i = 0; i < ping[j].pixels_ss; i++) {
 						ping[j].pixelflag[i] = ping[jj].pixelflag[i];
 						ping[j].ss[i] = ping[jj].ss[i];
 						ping[j].ssacrosstrack[i] = ping[jj].ssacrosstrack[i];
 						ping[j].ssalongtrack[i] = ping[jj].ssalongtrack[i];
 					}
-					for (i = 0; i < ping[jj].ndatapts; i++)
+					for (int i = 0; i < ping[jj].ndatapts; i++)
 						ping[j].datasave[i] = ping[jj].datasave[i];
 				}
 				ndata = nhold;
@@ -1200,19 +1614,19 @@ The default input and output streams are stdin and stdout.\n";
 		}
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* check memory */
@@ -1225,520 +1639,6 @@ The default input and output streams are stdin and stdout.\n";
 		fprintf(stderr, "%d total data records written\n", nwritetot);
 	}
 
-	/* end it all */
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, int *error) {
-	int status = MB_SUCCESS;
-	int i, nn;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       n:               %d\n", n);
-		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
-		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		for (i = 0; i < n; i++)
-			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
-	}
-
-	/* get mean */
-	*hipass = 0.0;
-	nn = 0;
-	for (i = 0; i < n; i++) {
-		*hipass += val[i];
-		nn++;
-	}
-	if (nn > 0)
-		*hipass = val[0] - *hipass / nn;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       hipass:          %f\n", *hipass);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	/* return status */
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, double *hipass, int *error) {
-	int status = MB_SUCCESS;
-	double wgtsum;
-	int i;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       n:               %d\n", n);
-		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
-		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		fprintf(stderr, "dbg2       dis:             %p\n", (void *)dis);
-		for (i = 0; i < n; i++)
-			fprintf(stderr, "dbg2       val[%d]: %f  dis[%d]: %f\n", i, val[i], i, dis[i]);
-	}
-
-	/* get weights */
-	*hipass = 0.0;
-	wgtsum = 0.0;
-	for (i = 0; i < n; i++) {
-		wgt[i] = exp(-dis[i] * dis[i]);
-		wgtsum += wgt[i];
-	}
-
-	if (wgtsum > 0.0) {
-		/* get value */
-		*hipass = 0.0;
-		for (i = 0; i < n; i++) {
-			*hipass += wgt[i] * val[i];
-		}
-		*hipass = val[0] - *hipass / wgtsum;
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       hipass:          %f\n", *hipass);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	/* return status */
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass, int *error) {
-	int status = MB_SUCCESS;
-	int i;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       n:               %d\n", n);
-		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
-		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		for (i = 0; i < n; i++)
-			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
-	}
-
-	/* start */
-	*hipass = 0.0;
-
-	/* sort values and get median value */
-	if (n > 0) {
-		qsort((char *)val, n, sizeof(double), (void *)mb_double_compare);
-		*hipass = val[0] - val[n / 2];
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       hipass:          %f\n", *hipass);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	/* return status */
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, int *error) {
-	int status = MB_SUCCESS;
-	int i, nn;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       n:               %d\n", n);
-		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
-		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		for (i = 0; i < n; i++)
-			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
-	}
-
-	/* get mean */
-	*smooth = 0.0;
-	nn = 0;
-	for (i = 0; i < n; i++) {
-		*smooth += val[i];
-		nn++;
-	}
-	if (nn > 0)
-		*smooth = *smooth / nn;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       smooth:          %f\n", *smooth);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	/* return status */
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, double *smooth, int *error) {
-	int status = MB_SUCCESS;
-	double wgtsum;
-	int i;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       n:               %d\n", n);
-		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
-		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		fprintf(stderr, "dbg2       dis:             %p\n", (void *)dis);
-		for (i = 0; i < n; i++)
-			fprintf(stderr, "dbg2       val[%d]: %f  dis[%d]: %f\n", i, val[i], i, dis[i]);
-	}
-
-	/* get weights */
-	*smooth = 0.0;
-	wgtsum = 0.0;
-	for (i = 0; i < n; i++) {
-		wgt[i] = exp(-dis[i] * dis[i]);
-		wgtsum += wgt[i];
-	}
-
-	if (wgtsum > 0.0) {
-		/* get value */
-		*smooth = 0.0;
-		for (i = 0; i < n; i++) {
-			*smooth += wgt[i] * val[i];
-		}
-		*smooth = *smooth / wgtsum;
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       smooth:          %f\n", *smooth);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	/* return status */
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int smooth_median(int verbose, double original, int apply_threshold, double threshold_lo, double threshold_hi, int n, double *val,
-                  double *wgt, double *smooth, int *error) {
-	int status = MB_SUCCESS;
-	double ratio;
-	int i;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       original:        %f\n", original);
-		fprintf(stderr, "dbg2       apply_threshold: %d\n", apply_threshold);
-		fprintf(stderr, "dbg2       n:               %d\n", n);
-		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
-		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		for (i = 0; i < n; i++)
-			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
-	}
-
-	/* start */
-	*smooth = 0.0;
-
-	/* sort values and get median value */
-	if (n > 0) {
-		qsort((char *)val, n, sizeof(double), (void *)mb_double_compare);
-		*smooth = val[n / 2];
-	}
-
-	/* apply thresholding */
-	if (apply_threshold == MB_YES) {
-		ratio = original / (*smooth);
-		if (ratio < threshold_hi && ratio > threshold_lo) {
-			/*fprintf(stderr,"IGNORE MEDIAN FILTER: ratio:%f threshold:%f %f original:%f smooth:%f\n",
-			ratio, threshold_lo, threshold_hi, original, *smooth);*/
-			*smooth = original;
-		}
-		/*else
-		fprintf(stderr,"** APPLY MEDIAN FILTER: ratio:%f threshold:%f %f original:%f smooth:%f\n",
-		ratio, threshold_lo, threshold_hi, original, *smooth);*/
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       smooth:          %f\n", *smooth);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	/* return status */
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth, int *error) {
-	int status = MB_SUCCESS;
-	double wgtsum;
-	double diff;
-	int i, nn;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       n:               %d\n", n);
-		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
-		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		for (i = 0; i < n; i++)
-			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
-	}
-
-	/* get weights */
-	*smooth = 0.0;
-	wgtsum = 0.0;
-	nn = 0;
-	wgt[0] = 0.5;
-	for (i = 1; i < n; i++) {
-		diff = fabs(val[i] - val[0]);
-		if (diff < 0.01)
-			diff = 0.01;
-		wgt[i] = 1.0 / diff;
-		wgtsum += wgt[i];
-		nn++;
-	}
-	if (nn > 0) {
-		*smooth = wgt[0] * val[0];
-		for (i = 1; i < n; i++) {
-			*smooth += 0.5 * wgt[i] * val[i] / wgtsum;
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       smooth:          %f\n", *smooth);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	/* return status */
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int contrast_edge(int verbose, int n, double *val, double *grad, double *result, int *error) {
-	int status = MB_SUCCESS;
-	double edge;
-	double gradsum;
-	double contrast;
-	int i, ii;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       n:               %d\n", n);
-		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
-		fprintf(stderr, "dbg2       grad:            %p\n", (void *)grad);
-		for (i = 0; i < n; i++)
-			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
-	}
-
-	/* get gradients */
-	gradsum = 0.0;
-	edge = 0.0;
-	for (i = 0; i < n; i++) {
-		grad[i] = 0.0;
-		for (ii = 0; ii < n; ii++) {
-			if (val[ii] > 0.0 && i != ii) {
-				grad[i] += (val[ii] - val[i]) * (val[ii] - val[i]);
-			}
-		}
-		gradsum += grad[i];
-		edge += val[i] * grad[i];
-	}
-	edge = edge / gradsum;
-	contrast = pow((fabs(val[0] - edge) / fabs(val[0] + edge)), 0.75);
-	if (val[0] >= edge)
-		*result = edge * (1.0 + contrast) / (1.0 - contrast);
-	else
-		*result = edge * (1.0 - contrast) / (1.0 + contrast);
-	/*fprintf(stderr, "val: %f %f  edge:%f contrast:%f\n",
-	val[0], *result, edge, contrast);*/
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       result:          %f\n", *result);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	/* return status */
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int contrast_gradient(int verbose, int n, double *val, double *wgt, double *result, int *error) {
-	int status = MB_SUCCESS;
-	double gradient;
-	int i, nn;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       n:               %d\n", n);
-		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
-		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		for (i = 0; i < n; i++)
-			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
-	}
-
-	/* get weights */
-	*result = 0.0;
-	gradient = 0.0;
-	nn = 0;
-	for (i = 1; i < n; i++) {
-		gradient += (val[i] - val[0]) * (val[i] - val[0]);
-		nn++;
-	}
-	gradient = sqrt(gradient);
-	*result = val[0] - 2 * gradient;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       result:          %f\n", *result);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	/* return status */
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbcopy_any_to_mbldeoih(int verbose, int system, int kind, int *time_i, double time_d, double navlon, double navlat,
-                           double speed, double heading, double draft, double altitude, double roll, double pitch, double heave,
-                           double beamwidth_xtrack, double beamwidth_ltrack, int nbath, int namp, int nss, char *beamflag,
-                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
-                           double *ssacrosstrack, double *ssalongtrack, char *comment, char *ombio_ptr, char *ostore_ptr,
-                           int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_ldeoih_struct *ostore;
-	int i;
-
-	/* get data structure pointer */
-	ostore = (struct mbsys_ldeoih_struct *)ostore_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       ombio_ptr:  %p\n", (void *)ombio_ptr);
-		fprintf(stderr, "dbg2       ostore_ptr: %p\n", (void *)ostore_ptr);
-		fprintf(stderr, "dbg2       system:     %d\n", system);
-		fprintf(stderr, "dbg2       kind:       %d\n", kind);
-	}
-	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
-		fprintf(stderr, "dbg2       time_i[0]:  %d\n", time_i[0]);
-		fprintf(stderr, "dbg2       time_i[1]:  %d\n", time_i[1]);
-		fprintf(stderr, "dbg2       time_i[2]:  %d\n", time_i[2]);
-		fprintf(stderr, "dbg2       time_i[3]:  %d\n", time_i[3]);
-		fprintf(stderr, "dbg2       time_i[4]:  %d\n", time_i[4]);
-		fprintf(stderr, "dbg2       time_i[5]:  %d\n", time_i[5]);
-		fprintf(stderr, "dbg2       time_i[6]:  %d\n", time_i[6]);
-		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
-		fprintf(stderr, "dbg2       navlon:     %f\n", navlon);
-		fprintf(stderr, "dbg2       navlat:     %f\n", navlat);
-		fprintf(stderr, "dbg2       speed:      %f\n", speed);
-		fprintf(stderr, "dbg2       heading:    %f\n", heading);
-		fprintf(stderr, "dbg2       draft:      %f\n", draft);
-		fprintf(stderr, "dbg2       altitude:   %f\n", altitude);
-		fprintf(stderr, "dbg2       roll:       %f\n", roll);
-		fprintf(stderr, "dbg2       pitch:      %f\n", pitch);
-		fprintf(stderr, "dbg2       heave:      %f\n", heave);
-		fprintf(stderr, "dbg2       beamwidth_xtrack: %f\n", beamwidth_xtrack);
-		fprintf(stderr, "dbg2       beamwidth_ltrack: %f\n", beamwidth_ltrack);
-	}
-	if (verbose >= 2 && kind == MB_DATA_DATA) {
-		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
-		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
-				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
-				        bathacrosstrack[i], bathalongtrack[i]);
-		fprintf(stderr, "dbg2       namp:       %d\n", namp);
-		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
-				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
-				        bathalongtrack[i]);
-		fprintf(stderr, "dbg2        nss:       %d\n", nss);
-		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
-				fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
-				        ssalongtrack[i]);
-	}
-	if (verbose >= 2 && kind == MB_DATA_COMMENT) {
-		fprintf(stderr, "dbg2       comment:     \ndbg2       %s\n", comment);
-	}
-
-	/* copy the data  */
-	if (ostore != NULL) {
-		/* set beam widths */
-		ostore->beam_xwidth = beamwidth_xtrack;
-		ostore->beam_lwidth = beamwidth_ltrack;
-		if (system == MB_SYS_SB2100)
-			ostore->ss_type = MB_SIDESCAN_LINEAR;
-		else
-			ostore->ss_type = MB_SIDESCAN_LOGARITHMIC;
-		ostore->kind = kind;
-
-		/* insert data */
-		if (kind == MB_DATA_DATA) {
-			mb_insert_altitude(verbose, ombio_ptr, (void *)ostore, draft, altitude, error);
-			mb_insert_nav(verbose, ombio_ptr, (void *)ostore, time_i, time_d, navlon, navlat, speed, heading, draft, roll, pitch,
-			              heave, error);
-		}
-		status =
-		    mb_insert(verbose, ombio_ptr, (void *)ostore, kind, time_i, time_d, navlon, navlat, speed, heading, nbath, namp, nss,
-		              beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBcopy function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	/* return status */
-	return (status);
 }
 /*--------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
-  *
+ *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -21,9 +21,6 @@
  *
  * Author:	D. W. Caress
  * Date:	September 3, 1996
- *
- *
- *
  */
 
 #include <math.h>
@@ -57,9 +54,8 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 	int status;
 	const char *stdin_string = "stdin";
 	if (strncmp(file, stdin_string, 5) == 0) {
-		*file_in_bounds = MB_YES;
+		*file_in_bounds = true;
 
-		/*print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "dbg4  Cannot check bounds if input is stdin...\n");
 		}
@@ -139,15 +135,15 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 
 				/* check for lonflip conflict with bounds */
 				if (lon_min > lon_max || lat_min > lat_max)
-					*file_in_bounds = MB_YES;
+					*file_in_bounds = true;
 
 				/* else check mask against desired input bounds */
 				else if (mask_nx > 0 && mask_ny > 0) {
-					*file_in_bounds = MB_NO;
+					*file_in_bounds = false;
 					const double mask_dx = (lon_max - lon_min) / mask_nx;
 					const double mask_dy = (lat_max - lat_min) / mask_ny;
-					for (int i = 0; i < mask_nx && *file_in_bounds == MB_NO; i++)
-						for (int j = 0; j < mask_ny && *file_in_bounds == MB_NO; j++) {
+					for (int i = 0; i < mask_nx && *file_in_bounds == false; i++)
+						for (int j = 0; j < mask_ny && *file_in_bounds == false; j++) {
 							int k = i + j * mask_nx;
 							const double lonwest = lon_min + i * mask_dx;
 							const double loneast = lonwest + mask_dx;
@@ -155,7 +151,7 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 							const double latnorth = latsouth + mask_dy;
 							if (mask[k] == 1 && lonwest < bounds[1] && loneast > bounds[0] && latsouth < bounds[3] &&
 							    latnorth > bounds[2])
-								*file_in_bounds = MB_YES;
+								*file_in_bounds = true;
 						}
 					mb_freed(verbose, __FILE__, __LINE__, (void **)&mask, error);
 				}
@@ -163,12 +159,11 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 				/* else check whole file against desired input bounds */
 				else {
 					if (lon_min < bounds[1] && lon_max > bounds[0] && lat_min < bounds[3] && lat_max > bounds[2])
-						*file_in_bounds = MB_YES;
+						*file_in_bounds = true;
 					else
-						*file_in_bounds = MB_NO;
+						*file_in_bounds = false;
 				}
 
-				/*print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "dbg4  Bounds from inf file:\n");
 					fprintf(stderr, "dbg4      lon_min: %f\n", lon_min);
@@ -181,9 +176,8 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 			/* else if no data records in inf file
 			    treat file as out of bounds */
 			else if (nrecords == 0) {
-				*file_in_bounds = MB_NO;
+				*file_in_bounds = false;
 
-				/*print debug statements */
 				if (verbose >= 4)
 					fprintf(stderr, "dbg4  The inf file shows zero records so out of bounds...\n");
 			}
@@ -191,9 +185,8 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 			/* else if no data assume inf file is botched so
 			assume file has data in bounds */
 			else {
-				*file_in_bounds = MB_YES;
+				*file_in_bounds = true;
 
-				/*print debug statements */
 				if (verbose >= 4)
 					fprintf(stderr, "dbg4  No data listed in inf file so cannot check bounds...\n");
 			}
@@ -204,9 +197,8 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 
 		/* if no inf file assume file has data in bounds */
 		else {
-			*file_in_bounds = MB_YES;
+			*file_in_bounds = true;
 
-			/*print debug statements */
 			if (verbose >= 4)
 				fprintf(stderr, "dbg4  Cannot open inf file so cannot check bounds...\n");
 		}
@@ -254,7 +246,6 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 
-		/*print debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "dbg2  Cannot open requested inf file: %s\n", file_inf);
 		}
@@ -422,26 +413,9 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 				sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
 				for (int j = 0; j < mask_ny; j++)
 					fgets(line, 128, fp);
-				// sscanf(line, "CM dimensions: %d %d", &mb_info->mask_nx, &mb_info->mask_ny);
-				// status = mb_mallocd(verbose,__FILE__, __LINE__,mb_info->mask_nx*mb_info->mask_ny*sizeof(int),
-				//			(void **)&mb_info->mask,error);
-				// for (j=mb_info->mask_ny-1;j>=0;j--)
-				//	{
-				//	if ((startptr = fgets(line, 128, fp)) != NULL)
-				//		{
-				//		startptr = &line[6];
-				//		for (i=0;i<mb_info->mask_nx;i++)
-				//			{
-				//			k = i + j * mb_info->mask_nx;
-				//			mb_info->mask[k] = strtol(startptr, &endptr, 0);
-				//			startptr = endptr;
-				//			}
-				//		}
-				//	}
 			}
 		}
 
-		/* close the file */
 		fclose(fp);
 
 		/* apply lonflip if needed */
@@ -538,22 +512,6 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		fprintf(stderr, "dbg2       problem_avgtoofast:       %d\n", mb_info->problem_avgtoofast);
 		fprintf(stderr, "dbg2       problem_toodeep:          %d\n", mb_info->problem_toodeep);
 		fprintf(stderr, "dbg2       problem_baddatagram:      %d\n", mb_info->problem_baddatagram);
-		// fprintf(stderr,"dbg2       mask_nx:                  %d\n",mb_info->mask_nx);
-		// fprintf(stderr,"dbg2       mask_ny:                  %d\n",mb_info->mask_ny);
-		// fprintf(stderr,"dbg2       mask_dx:                  %g\n",mb_info->mask_dx);
-		// fprintf(stderr,"dbg2       mask_dy:                  %g\n",mb_info->mask_dy);
-		// fprintf(stderr,"dbg2       mask:                     %p\n",mb_info->mask);
-		// fprintf(stderr,"dbg2       mask:\n");
-		// for (j=mb_info->mask_ny-1;j>=0;j--)
-		//	{
-		//	fprintf(stderr, "dbg2       ");
-		//	for (i=0;i<mb_info->mask_nx;i++)
-		//		{
-		//		k = i + j * mb_info->mask_nx;
-		//		fprintf(stderr, " %1d", mb_info->mask[k]);
-		//		}
-		//	fprintf(stderr, "\n");
-		//	}
 		fprintf(stderr, "dbg2       error:                    %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
@@ -600,7 +558,7 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 	}
 
 	/* make new inf file if not there or out of date */
-	if (force == MB_YES || (datmodtime > 0 && datmodtime > infmodtime)) {
+	if (force == true || (datmodtime > 0 && datmodtime > infmodtime)) {
 		if (verbose >= 1)
 			fprintf(stderr, "\nGenerating inf file for %s\n", file);
 		char command[MB_PATH_MAXLINE];
@@ -640,7 +598,7 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 		/* TODO(schwehr): Check the result of shellstatus */
 	}
 
-	int status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -886,17 +844,17 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
 	double xtrackmin = 0.0;
 	double xtrackmax = 0.0;
 	double distmin = 0.0;
-	int found = MB_NO;
+	bool found = false;
 	for (int i = 0; i < nbath; i++) {
 		if ((checkgood && mb_beam_ok(beamflag[i])) || !mb_beam_check_flag_unusable(beamflag[i])) {
-			if (found == MB_NO) {
+			if (!found) {
 				*ibeamport = i;
 				*ibeamcntr = i;
 				*ibeamstbd = i;
 				xtrackmin = bathacrosstrack[i];
 				distmin = fabs(bathacrosstrack[i]);
 				xtrackmax = bathacrosstrack[i];
-				found = MB_YES;
+				found = true;
 			}
 			else {
 				if (fabs(bathacrosstrack[i]) < distmin) {
@@ -919,17 +877,17 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
 	xtrackmin = 0.0;
 	xtrackmax = 0.0;
 	distmin = 0.0;
-	found = MB_NO;
+	found = false;
 	for (int i = 0; i < nss; i++) {
 		if (ss[i] > 0.0) {
-			if (found == MB_NO) {
+			if (!found) {
 				*ipixelport = i;
 				*ipixelcntr = i;
 				*ipixelstbd = i;
 				xtrackmin = ssacrosstrack[i];
 				distmin = fabs(ssacrosstrack[i]);
 				xtrackmax = ssacrosstrack[i];
-				found = MB_YES;
+				found = true;
 			}
 			else {
 				if (fabs(ssacrosstrack[i]) < distmin) {
@@ -977,7 +935,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error) {
 	}
 
 	/* initialize mb_info_struct */
-	mb_info->loaded = MB_NO;
+	mb_info->loaded = false;
 	mb_info->file[0] = '\0';
 
 	mb_info->nrecords = 0;
@@ -1085,9 +1043,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 		mb_get_format(verbose, read_file, NULL, format, error);
 
 	/* determine whether to read one file or a list of files */
-	int read_datalist = MB_NO;
-	if (*format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = *format < 0;
 
 	/* open file list */
 	char swathfile[MB_PATH_MAXLINE];
@@ -1095,7 +1051,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 	int read_data;
 	char dfile[MB_PATH_MAXLINE];
 	int status = MB_SUCCESS;
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, error)) != MB_SUCCESS) {
 			*error = MB_ERROR_OPEN_FAIL;
@@ -1105,19 +1061,19 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 		}
 		double file_weight;
 		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, format, &file_weight, error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(swathfile, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
 	int nfile = 0;
-	while (read_data == MB_YES) {
+	while (read_data == true) {
 		/* read inf file */
 		struct mb_info_struct mb_info_file;
 		status = mb_get_info(verbose, swathfile, &mb_info_file, lonflip, error);
@@ -1230,25 +1186,25 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 			status = mb_memory_list(verbose, error);
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			double file_weight;
 			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, format, &file_weight, error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, error);
 
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, error);
+		/* status = */ mb_memory_list(verbose, error);
 
 	/* set error and status (if you got here you succeeded */
 	*error = MB_ERROR_NO_ERROR;
@@ -1317,21 +1273,6 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 		fprintf(stderr, "dbg2       problem_avgtoofast:       %d\n", mb_info->problem_avgtoofast);
 		fprintf(stderr, "dbg2       problem_toodeep:          %d\n", mb_info->problem_toodeep);
 		fprintf(stderr, "dbg2       problem_baddatagram:      %d\n", mb_info->problem_baddatagram);
-		// fprintf(stderr,"dbg2       mask_nx:                  %d\n",mb_info->mask_nx);
-		// fprintf(stderr,"dbg2       mask_ny:                  %d\n",mb_info->mask_ny);
-		// fprintf(stderr,"dbg2       mask_dx:                  %g\n",mb_info->mask_dx);
-		// fprintf(stderr,"dbg2       mask_dy:                  %g\n",mb_info->mask_dy);
-		// fprintf(stderr,"dbg2       mask:\n");
-		// for (j=mb_info->mask_ny-1;j>=0;j--)
-		//	{
-		//	fprintf(stderr, "dbg2       ");
-		//	for (int i=0;i<mb_info->mask_nx;i++)
-		//		{
-		//		k = i + j * mb_info->mask_nx;
-		//		fprintf(stderr, " %1d", mb_info->mask[k]);
-		//		}
-		//	fprintf(stderr, "\n");
-		//	}
 		fprintf(stderr, "dbg2       error:          %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);

@@ -136,7 +136,7 @@ am__DEPENDENCIES_1 =
 libmbbsio_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libmbbsio_la_OBJECTS = mbbs_io.lo mbbs_iomrv1.lo mbbs_iomrv2.lo \
 	mbbs_memalloc.lo mbbs_misc.lo mbbs_swapbytes.lo mbbs_tm.lo \
-	mbbs_utils.lo mbbs_wrhdrfields.lo mbbs_wrsampflags.lo
+	mbbs_wrhdrfields.lo mbbs_wrsampflags.lo
 libmbbsio_la_OBJECTS = $(am_libmbbsio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -164,7 +164,7 @@ am__depfiles_remade = ./$(DEPDIR)/mbbs_io.Plo \
 	./$(DEPDIR)/mbbs_iomrv1.Plo ./$(DEPDIR)/mbbs_iomrv2.Plo \
 	./$(DEPDIR)/mbbs_memalloc.Plo ./$(DEPDIR)/mbbs_misc.Plo \
 	./$(DEPDIR)/mbbs_swapbytes.Plo ./$(DEPDIR)/mbbs_tm.Plo \
-	./$(DEPDIR)/mbbs_utils.Plo ./$(DEPDIR)/mbbs_wrhdrfields.Plo \
+	./$(DEPDIR)/mbbs_wrhdrfields.Plo \
 	./$(DEPDIR)/mbbs_wrsampflags.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -392,12 +392,9 @@ include_HEADERS = mbbs.h mbbs_defines.h mbbs_mem.h
 lib_LTLIBRARIES = libmbbsio.la
 libmbbsio_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbbsio_la_LIBADD = ${XDR_LIB}
-libmbbsio_la_SOURCES = mbbs_io.c mbbs_iomrv1.c \
-                        mbbs_iomrv2.c mbbs_memalloc.c \
-                        mbbs_misc.c mbbs_swapbytes.c \
-                        mbbs_tm.c mbbs_utils.c \
-                        mbbs_wrhdrfields.c mbbs_wrsampflags.c
-
+libmbbsio_la_SOURCES = mbbs_io.c mbbs_iomrv1.c mbbs_iomrv2.c \
+	mbbs_memalloc.c mbbs_misc.c mbbs_swapbytes.c mbbs_tm.c \
+	mbbs_wrhdrfields.c mbbs_wrsampflags.c
 all: all-am
 
 .SUFFIXES:
@@ -483,7 +480,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbbs_misc.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbbs_swapbytes.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbbs_tm.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbbs_utils.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbbs_wrhdrfields.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbbs_wrsampflags.Plo@am__quote@ # am--include-marker
 
@@ -645,7 +641,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/mbbs_misc.Plo
 	-rm -f ./$(DEPDIR)/mbbs_swapbytes.Plo
 	-rm -f ./$(DEPDIR)/mbbs_tm.Plo
-	-rm -f ./$(DEPDIR)/mbbs_utils.Plo
 	-rm -f ./$(DEPDIR)/mbbs_wrhdrfields.Plo
 	-rm -f ./$(DEPDIR)/mbbs_wrsampflags.Plo
 	-rm -f Makefile
@@ -700,7 +695,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/mbbs_misc.Plo
 	-rm -f ./$(DEPDIR)/mbbs_swapbytes.Plo
 	-rm -f ./$(DEPDIR)/mbbs_tm.Plo
-	-rm -f ./$(DEPDIR)/mbbs_utils.Plo
 	-rm -f ./$(DEPDIR)/mbbs_wrhdrfields.Plo
 	-rm -f ./$(DEPDIR)/mbbs_wrsampflags.Plo
 	-rm -f Makefile

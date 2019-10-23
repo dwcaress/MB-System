@@ -69,9 +69,9 @@ int mbr_info_swplssxp(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_SINGLE;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -133,7 +133,6 @@ int mbr_alm_swplssxp(int verbose, void *mbio_ptr, int *error) {
 	int *recordid = (int *)&mb_io_ptr->save3;
 	int *recordidlast = (int *)&mb_io_ptr->save4;
 	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
-	char *buffer = (char *)*bufferptr;
 	int *bufferalloc = (int *)&mb_io_ptr->save6;
 	int *size = (int *)&mb_io_ptr->save8;
 	int *nbadrec = (int *)&mb_io_ptr->save9;
@@ -146,8 +145,8 @@ int mbr_alm_swplssxp(int verbose, void *mbio_ptr, int *error) {
 	*bufferalloc = 0;
 	*size = 0;
 	*nbadrec = 0;
-	*header_rec_written = MB_NO;
-	*projection_rec_written = MB_NO;
+	*header_rec_written = false;
+	*projection_rec_written = false;
 
 	/* allocate memory if necessary */
 	if (status == MB_SUCCESS) {
@@ -185,7 +184,6 @@ int mbr_dem_swplssxp(int verbose, void *mbio_ptr, int *error) {
 
 	/* deallocate memory for reading/writing buffer */
 	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
-	char *buffer = (char *)*bufferptr;
 	int *bufferalloc = (int *)&mb_io_ptr->save6;
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)bufferptr, error);
 	*bufferalloc = 0;
@@ -231,9 +229,9 @@ int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* loop over reading data until a record is ready for return */
 	int status = MB_SUCCESS;
-	int done = MB_NO;
+	bool done = false;
 	*error = MB_ERROR_NO_ERROR;
-	while (done == MB_NO) {
+	while (!done) {
 		/* read next record header into buffer */
 		size_t read_len = (size_t)SWPLS_SIZE_BLOCKHEADER;
 		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
@@ -277,7 +275,7 @@ int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			status = mb_reallocd(verbose, __FILE__, __LINE__, *size + SWPLS_SIZE_BLOCKHEADER, (void **)bufferptr, error);
 			if (status != MB_SUCCESS) {
 				*bufferalloc = 0;
-				done = MB_YES;
+				done = true;
 			}
 			else {
 				*bufferalloc = *size + SWPLS_SIZE_BLOCKHEADER;
@@ -292,34 +290,34 @@ int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 
 		/* parse the data record */
-		if ((status == MB_SUCCESS) && (done == MB_NO)) {
+		if (status == MB_SUCCESS && !done) {
 			if (*recordid == SWPLS_ID_SXP_HEADER_DATA) {
 				status = swpls_rd_sxpheader(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				done = true;
 			}
 			else if (*recordid == SWPLS_ID_PROCESSED_PING) {
 				status = swpls_rd_sxpping(verbose, buffer, store_ptr, SWPLS_ID_PROCESSED_PING, error);
-				done = MB_YES;
+				done = true;
 			}
 			else if (*recordid == SWPLS_ID_PROCESSED_PING2) {
 				status = swpls_rd_sxpping(verbose, buffer, store_ptr, SWPLS_ID_PROCESSED_PING2, error);
-				done = MB_YES;
+				done = true;
 			}
 			else if (*recordid == SWPLS_ID_COMMENT) {
 				status = swpls_rd_comment(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				done = true;
 			}
 			else if (*recordid == SWPLS_ID_PROJECTION) {
 				status = swpls_rd_projection(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				done = true;
 			}
 			else {
-				done = MB_NO;
+				done = false;
 			}
 		}
 
 		if (status == MB_FAILURE) {
-			done = MB_YES;
+			done = true;
 		}
 	}
 
@@ -354,13 +352,10 @@ int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to data structure */
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
-	swpls_header *header = &store->sxp_header;
-	swpls_sxpping *ping = &store->sxp_ping;
-	swpls_comment *comment = &store->comment;
 	swpls_projection *projection = &store->projection;
 
 	/* check if projection has been set from *.prj file, if so, copy into projection structure */
-	if ((store->projection_set == MB_NO) && (mb_io_ptr->projection_initialized == MB_YES)) {
+	if ((store->projection_set == false) && (mb_io_ptr->projection_initialized == true)) {
 		projection->time_d = time(NULL);
 		projection->microsec = 0;
 		projection->nchars = strnlen(mb_io_ptr->projection_id, MB_NAME_LENGTH);
@@ -377,14 +372,14 @@ int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		if (status == MB_SUCCESS) {
 			strncpy(projection->projection_id, mb_io_ptr->projection_id, (size_t)projection->nchars);
-			store->projection_set = MB_YES;
+			store->projection_set = true;
 		}
 	}
 	/* check if projection has been read from *mb222 file, if so, tell mb system */
-	else if ((store->projection_set == MB_YES) && (mb_io_ptr->projection_initialized == MB_NO)) {
+	else if ((store->projection_set == true) && (mb_io_ptr->projection_initialized == false)) {
 		mb_proj_init(verbose, projection->projection_id, &(mb_io_ptr->pjptr), error);
 		strncpy(mb_io_ptr->projection_id, projection->projection_id, MB_NAME_LENGTH);
-		mb_io_ptr->projection_initialized = MB_YES;
+		mb_io_ptr->projection_initialized = true;
 	}
 
 	/* throw away data if the time stamp makes no sense */
@@ -437,28 +432,28 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* write header record if needed (just once, here at top of file) */
-	if ((store->sxp_header_set == MB_YES) && (*header_rec_written == MB_NO)) {
+	if ((store->sxp_header_set == true) && (*header_rec_written == false)) {
 		const int origkind = store->kind;
 		const int origtype = store->type;
 		store->kind = MB_DATA_HEADER;
 		store->type = SWPLS_ID_SXP_HEADER_DATA;
 		status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
 		if (status == MB_SUCCESS) {
-			*header_rec_written = MB_YES;
+			*header_rec_written = true;
 		}
 		store->kind = origkind;
 		store->type = origtype;
 	}
 
 	/* write projection record if needed (just once, here at top of file) */
-	if ((store->projection_set == MB_YES) && (*projection_rec_written == MB_NO)) {
+	if ((store->projection_set == true) && (*projection_rec_written == false)) {
 		const int origkind = store->kind;
 		const int origtype = store->type;
 		store->kind = MB_DATA_PARAMETER;
 		store->type = SWPLS_ID_PROJECTION;
 		status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
 		if (status == MB_SUCCESS) {
-			*projection_rec_written = MB_YES;
+			*projection_rec_written = true;
 		}
 		store->kind = origkind;
 		store->type = origtype;

@@ -46,40 +46,32 @@ CONLOG_PATH=${CONLOG_PATH:-"$CONLOG_PATH_DFL"}
 let CYCLES="${CYCLES_DFL}"
 
 # application path
-APP_CMD="/usr/local/bin/mbtrnpp.exe"
+APP_CMD="/usr/local/bin/mbtrnpp"
 # log directory
-OPT_LOGDIR="--log-directory=/home/reson/axialgeo/out"
+OPT_LOGDIR="--log-directory=/home/mappingauv/mbtrnpptest"
 # input source
 # [optional if --rhost is used]
-OPT_INPUT="" #"--input=socket"
+OPT_INPUT="--input=socket:192.168.100.113:239.255.0.1:6020"
 # output destination
 # [optional if --thost is used]
-OPT_OUTPUT="" #"--output=socket"
+OPT_OUTPUT="--output=mbtrnpp_$$.mb1"
 # beam swath (deg)
-OPT_SWATH="--swath=120"
+OPT_SWATH="--swath=90"
 # number of beams to publish
-OPT_SOUNDINGS="--soundings=25"
+OPT_SOUNDINGS="--soundings=21"
 # input data format
 # [do not use with datalist input]
-OPT_FORMAT="--format=88"
+OPT_FORMAT="--format=261"
 # median filter settings
-OPT_MFILTER="--median-filter=0.25/9/3"
+OPT_MFILTER="--median-filter=0.10/9/3"
 
-# reson host:port
-# localhost     : if running on reson host
-# this host IP  : if running on remote host
-# use port 7000 for 7k center
-# use configured port for emu7k
-OPT_RHOST="--rhost=localhost:7000"
-
-# TRN host:port
-# localhost     : if clients are on this host
-# this host IP  : if clients are on remote host
-# Mapper 1
-OPT_THOST="--thost=134.89.32.107:27000"
-# Mapper 2
-#OPT_THOST="--thost=134.89.32.110:27000"
-
+# Define socket input
+#   example: --input=socket:192.168.100.113:239.255.0.1:6020
+#              IP of host running mbtrnpp : 192.168.100.113
+#              Broadcast group : 239.255.0.1
+#              Multibeam multicast port : 6020
+# OPT_INPUT="--input=socket:192.168.100.113:239.255.0.1:6020"
+#
 # verbose level (-5 to +2)
 # +2 is a LOT of info
 # -2 to 0 recommended for missions
@@ -87,7 +79,7 @@ OPT_THOST="--thost=134.89.32.107:27000"
 OPT_VERBOSE="--verbose=-2"
 # drop TRN clients after hbeat messages
 # if they haven't renewed
-OPT_HBEAT="--hbeat=100"
+OPT_HBEAT=""
 # delay between TRN messages (msec)
 OPT_DELAY="" #"--delay=100"
 # statistics logging interval (s)
@@ -128,12 +120,12 @@ printUsage(){
     echo
     echo " use: `basename $0` [options] [-- --option=value...]"
     echo " Options:"
-	echo "  -a cmd  : app command            [$APP_CMD]"
+    echo "  -a cmd  : app command            [$APP_CMD]"
     echo "  -c n    : cycles (<=0 forever)   [$CYCLES]"
     echo "  -d path : enable console log, set directory"
     echo "  -t      : test [print cmdine]"
     echo "  -v      : verbose output         [$VERBOSE]"
-	echo "  -w n    : loop delay (s)         [$LOOP_DELAY_SEC]"
+    echo "  -w n    : loop delay (s)         [$LOOP_DELAY_SEC]"
     echo "  -h      : print use message"
     echo ""
 }
@@ -180,8 +172,8 @@ while getopts a:c:d:e:htvw: Option
     do
         #    vout "processing $Option[$OPTARG]"
         case $Option in
-		a ) APP_CMD=$OPTARG
-		;;
+    a ) APP_CMD=$OPTARG
+    ;;
         c ) let "CYCLES=$OPTARG"
         ;;
         d ) DO_CONLOG="Y"
@@ -216,7 +208,7 @@ while getopts a:c:d:e:htvw: Option
 # process command line args
 if [ "$#" -eq 0 ];then
     printUsage
-    #	exit -1
+    #  exit -1
     else
     # this ensures that quoted whitespace is preserved by getopts
     # note use of $@, in quotes
@@ -283,18 +275,6 @@ do
     then
     OPT_HBEAT=$a
     vout "ovr OPT_HBEAT: $OPT_HBEAT"
-    fi
-
-    if [ ${a:2:5} == "rhost" ]
-    then
-    OPT_RHOST=$a
-    vout "ovr OPT_RHOST: $OPT_RHOST"
-    fi
-
-    if [ ${a:2:5} == "thost" ]
-    then
-    OPT_THOST=$a
-    vout "ovr OPT_THOST: $OPT_THOST"
     fi
 
     if [ ${a:2:4} == "rcap" ]
@@ -366,7 +346,7 @@ done
 
 
 # set cmdline options
-APP_OPTS="$OPT_VERBOSE $OPT_LOGDIR $OPT_RHOST $OPT_THOST $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_INPUT $OPT_OUTPUT $OPT_MBRLOG $OPT_STATS $OPT_HBEAT $OPT_DELAY $OPT_NOMLOG $OPT_NOBLOG $OPT_NORLOG  $OPT_RCAP $OPT_HELP"
+APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_MBRLOG $OPT_STATS $OPT_HBEAT $OPT_DELAY $OPT_NOMLOG $OPT_NOBLOG $OPT_NORLOG  $OPT_RCAP $OPT_HELP"
 
 if [ ${DO_TEST} ]
 then
@@ -384,9 +364,9 @@ vout "loop delay   [$LOOP_DELAY_SEC]"
 
 if [ "${DO_CONLOG}" == "Y" ]
 then
-	vout "console log  [${CONLOG_PATH}/${CONLOG}]"]
+  vout "console log  [${CONLOG_PATH}/${CONLOG}]"]
 else
-	vout "console log  [N]"
+  vout "console log  [N]"
 fi
 
 vout "cmdline:"
@@ -396,36 +376,22 @@ vout
 # validate application options
 if [ ! -f ${APP_CMD} ]
 then
-	exitError "executable not found [$APP_CMD]" 1
-fi
-
-if [ ! -z ${MBT_FORMAT} ] && [ ! -z ${MBT_INPUT} ] && [ ! -z `expr "${MBT_INPUT}" : '\(.*mb-1\)'` ]
-then
-	echo "WARN - format specified for datalist"
+  exitError "executable not found [$APP_CMD]" 1
 fi
 
 if [ ! -d ${OPT_LOGDIR:15:} ]
 then
-	exitError "log directory not found [${OPT_LOGDIR:15:}]" 1
-fi
-
-if [ "${MBT_INPUT:0:6}" != "socket" ] && [ ! -f "${MBT_INPUT}" ] && [ -z ${MBT_RHOST} ]
-then
-    #exitError "input file not found" 1
-    echo "WARN - input file not defined"
-    echo "[set MBT_INPUT or use '-- --input=<file>|socket' on cmdline]"
-    echo "or"
-    echo "[set MBT_RHOST or use '-- --rhost=host:port' on cmdline]"
+  exitError "log directory not found [${OPT_LOGDIR:15:}]" 1
 fi
 
 if [ "${DO_CONLOG}" == "Y" ] && [ ! -d ${CONLOG_PATH} ]
 then
     if [ -f ${CONLOG_PATH} ]
     then
-    	exitError "ERR - ${CONLOG_PATH} is not a directory"
+      exitError "ERR - ${CONLOG_PATH} is not a directory"
     else
-	    vout "creating log dir ${CONLOG_PATH}"
-    	mkdir -p ${CONLOG_PATH}
+      vout "creating log dir ${CONLOG_PATH}"
+      mkdir -p ${CONLOG_PATH}
         if [ ! -d ${CONLOG_PATH} ]
         then
             exitError "ERR - could not create log dir ${CONLOG_PATH}"
@@ -442,17 +408,17 @@ do
     # run the app
     if [ "${DO_CONLOG}" == "Y" ]
     then
-	    $APP_CMD $APP_OPTS &> ${CONLOG_PATH}/${CONLOG}
+      $APP_CMD $APP_OPTS &> ${CONLOG_PATH}/${CONLOG}
     else
-    	$APP_CMD $APP_OPTS
+      $APP_CMD $APP_OPTS
     fi
 
-	echo "`date` - $APP_CMD exited"
+  echo "`date` - $APP_CMD exited"
 
     # check stop condition (if not <0)
     if [ ${LOOP_COUNT} -ge 0 ]
     then
-	    let "LOOP_COUNT=${LOOP_COUNT}-1"
+      let "LOOP_COUNT=${LOOP_COUNT}-1"
         if [ ${LOOP_COUNT} -eq 0 ]
         then
             vout "mbtrnpp - completed $CYCLES cycles - exiting"

@@ -20,7 +20,9 @@
  * Date:	April 18, 2004
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,32 +44,25 @@
 #define MBES_NUM_PLOT_MAX 50
 #define MBES_MAX_SWEEP 1.0
 
+static const char program_name[] = "MBextractsegy";
+static const char help_message[] =
+    "MBextractsegy extracts subbottom profiler, center beam reflection,\nor seismic reflection data from "
+    "data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
+static const char usage_message[] =
+    "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat \n\t-Ifile -Jxscale/yscale "
+    "-Lstartline/lineroot \n\t-Osegyfile -Qtimelistfile -Rroutefile \n\t-Ssampleformat -Zplotmax -H -V]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBextractsegy";
-	char help_message[] = "MBextractsegy extracts subbottom profiler, center beam reflection,\nor seismic reflection data from "
-	                      "data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
-	char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat \n\t-Ifile -Jxscale/yscale "
-	                       "-Lstartline/lineroot \n\t-Osegyfile -Qtimelistfile -Rroutefile \n\t-Ssampleformat -Zplotmax -H -V]";
-	extern char *optarg;
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
-	char *message;
 
 	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
 	mb_path read_file = "";
 	mb_path output_file = "";
-	int output_file_set = MB_NO;
+	bool output_file_set = false;
 	void *datalist = NULL;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight = 1.0;
@@ -126,14 +121,13 @@ int main(int argc, char **argv) {
 
 	/* route and auto-line data */
 	mb_path timelist_file = "";
-	int timelist_file_set = MB_NO;
+	bool timelist_file_set = false;
 	int ntimepoint = 0;
 	int ntimepointalloc = 0;
 	double *routetime_d = NULL;
 	mb_path route_file = "";
-	int route_file_set = MB_NO;
-	int checkroutebearing = MB_NO;
-	int rawroutefile = MB_NO;
+	bool route_file_set = false;
+	bool checkroutebearing = false;
 	mb_path lineroot = "";
 	int nroutepoint = 0;
 	int nroutepointalloc = 0;
@@ -155,7 +149,6 @@ int main(int argc, char **argv) {
 	/* auto plotting */
 	FILE *sfp = NULL;
 	mb_path scriptfile = "";
-	int recalculatesweep = MB_NO;
 	double seafloordepthmin = -1.0;
 	double seafloordepthmax = -1.0;
 	double seafloordepthminplot[MBES_NUM_PLOT_MAX];
@@ -187,15 +180,11 @@ int main(int argc, char **argv) {
 	double lastheading;
 	double headingdiff;
 	double lastdistance;
-	int rangeok;
 	int oktowrite;
-	int linechange;
 	double dx, dy;
 	FILE *fp = NULL;
 	char *result;
 	int nget;
-	int point_ok;
-	int read_data;
 	int nread;
 	int nwrite;
 	int first;
@@ -204,10 +193,9 @@ int main(int argc, char **argv) {
 	double linetracemin, linetracemax, linetracelength, endofdata;
 	double draft, roll, pitch, heave;
 	int shellstatus;
-	int i, j;
 
 	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");
@@ -216,8 +204,8 @@ int main(int argc, char **argv) {
 	strcpy(lineroot, "sbp");
 
 	/* initialize output segy structures */
-	for (j = 0; j < 40; j++)
-		for (i = 0; i < 80; i++)
+	for (int j = 0; j < 40; j++)
+		for (int i = 0; i < 80; i++)
 			segyasciiheader.line[j][i] = 0;
 	segyfileheader.jobid = 0;
 	segyfileheader.line = 0;
@@ -246,165 +234,153 @@ int main(int argc, char **argv) {
 	segyfileheader.units = 0;
 	segyfileheader.impulse_polarity = 0;
 	segyfileheader.domain = 0;
-	for (i = 0; i < 338; i++)
+	for (int i = 0; i < 338; i++)
 		segyfileheader.extra[i] = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:J:j:L:l:MmO:o:Q:q:R:r:S:s:T:t:U:u:Z:z:VvHh")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'B':
-		case 'b':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
-			btime_i[6] = 0;
-			flag++;
-			break;
-		case 'E':
-		case 'e':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
-			etime_i[6] = 0;
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			flag++;
-			break;
-		case 'J':
-		case 'j':
-			sscanf(optarg, "%lf/%lf/%lf", &xscale, &yscale, &maxwidth);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d/%s", &startline, lineroot);
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			checkroutebearing = MB_YES;
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", output_file);
-			output_file_set = MB_YES;
-			flag++;
-			break;
-		case 'Q':
-		case 'q':
-			sscanf(optarg, "%s", timelist_file);
-			timelist_file_set = MB_YES;
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			sscanf(optarg, "%s", route_file);
-			route_file_set = MB_YES;
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%d", &sampleformat);
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf", &timeshift);
-			flag++;
-			break;
-		case 'U':
-		case 'u':
-			sscanf(optarg, "%lf", &rangethreshold);
-			flag++;
-			break;
-		case 'Z':
-		case 'z':
-			sscanf(optarg, "%lf", &zmax);
-			flag++;
-			break;
-		case '?':
-			errflg++;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:J:j:L:l:MmO:o:Q:q:R:r:S:s:T:t:U:u:Z:z:VvHh")) != -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
+				btime_i[6] = 0;
+				break;
+			case 'E':
+			case 'e':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
+				etime_i[6] = 0;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'J':
+			case 'j':
+				sscanf(optarg, "%lf/%lf/%lf", &xscale, &yscale, &maxwidth);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d/%s", &startline, lineroot);
+				break;
+			case 'M':
+			case 'm':
+				checkroutebearing = true;
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", output_file);
+				output_file_set = true;
+				break;
+			case 'Q':
+			case 'q':
+				sscanf(optarg, "%s", timelist_file);
+				timelist_file_set = true;
+				break;
+			case 'R':
+			case 'r':
+				sscanf(optarg, "%s", route_file);
+				route_file_set = true;
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%d", &sampleformat);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf", &timeshift);
+				break;
+			case 'U':
+			case 'u':
+				sscanf(optarg, "%lf", &rangethreshold);
+				break;
+			case 'Z':
+			case 'z':
+				sscanf(optarg, "%lf", &zmax);
+				break;
+			case '?':
+				errflg = true;
+			}
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	/* print starting message */
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	/* print starting debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
-		fprintf(stderr, "dbg2       help:              %d\n", help);
-		fprintf(stderr, "dbg2       format:            %d\n", format);
-		fprintf(stderr, "dbg2       pings:             %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:           %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:         %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:         %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:         %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:         %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:        %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:        %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:        %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:        %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:        %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:        %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:        %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:        %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:        %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:        %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:        %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:        %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:        %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:        %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:          %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:           %f\n", timegap);
-		fprintf(stderr, "dbg2       sampleformat:      %d\n", sampleformat);
-		fprintf(stderr, "dbg2       timeshift:         %f\n", timeshift);
-		fprintf(stderr, "dbg2       file:              %s\n", file);
-		fprintf(stderr, "dbg2       timelist_file_set: %d\n", timelist_file_set);
-		fprintf(stderr, "dbg2       timelist_file:     %s\n", timelist_file);
-		fprintf(stderr, "dbg2       route_file_set:    %d\n", route_file_set);
-		fprintf(stderr, "dbg2       route_file:        %s\n", route_file);
-		fprintf(stderr, "dbg2       checkroutebearing: %d\n", checkroutebearing);
-		fprintf(stderr, "dbg2       output_file_set:   %d\n", output_file_set);
-		fprintf(stderr, "dbg2       output_file:       %s\n", output_file);
-		fprintf(stderr, "dbg2       lineroot:          %s\n", lineroot);
-		fprintf(stderr, "dbg2       xscale:            %f\n", xscale);
-		fprintf(stderr, "dbg2       yscale:            %f\n", yscale);
-		fprintf(stderr, "dbg2       maxwidth:          %f\n", maxwidth);
-		fprintf(stderr, "dbg2       rangethreshold:    %f\n", rangethreshold);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+			fprintf(stderr, "dbg2       help:              %d\n", help);
+			fprintf(stderr, "dbg2       format:            %d\n", format);
+			fprintf(stderr, "dbg2       pings:             %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:           %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:         %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:         %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:         %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:         %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:        %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:        %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:        %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:        %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:        %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:        %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:        %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:        %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:        %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:        %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:        %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:        %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:        %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:        %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:          %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:           %f\n", timegap);
+			fprintf(stderr, "dbg2       sampleformat:      %d\n", sampleformat);
+			fprintf(stderr, "dbg2       timeshift:         %f\n", timeshift);
+			fprintf(stderr, "dbg2       file:              %s\n", file);
+			fprintf(stderr, "dbg2       timelist_file_set: %d\n", timelist_file_set);
+			fprintf(stderr, "dbg2       timelist_file:     %s\n", timelist_file);
+			fprintf(stderr, "dbg2       route_file_set:    %d\n", route_file_set);
+			fprintf(stderr, "dbg2       route_file:        %s\n", route_file);
+			fprintf(stderr, "dbg2       checkroutebearing: %d\n", checkroutebearing);
+			fprintf(stderr, "dbg2       output_file_set:   %d\n", output_file_set);
+			fprintf(stderr, "dbg2       output_file:       %s\n", output_file);
+			fprintf(stderr, "dbg2       lineroot:          %s\n", lineroot);
+			fprintf(stderr, "dbg2       xscale:            %f\n", xscale);
+			fprintf(stderr, "dbg2       yscale:            %f\n", yscale);
+			fprintf(stderr, "dbg2       maxwidth:          %f\n", maxwidth);
+			fprintf(stderr, "dbg2       rangethreshold:    %f\n", rangethreshold);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* set starting line number */
@@ -413,8 +389,11 @@ int main(int argc, char **argv) {
 	/* set maximum number of shots per plot */
 	nshotmax = (int)(maxwidth / xscale);
 
+	bool rawroutefile = false;
+	int rangeok;
+
 	/* if specified read route time list file */
-	if (timelist_file_set == MB_YES) {
+	if (timelist_file_set) {
 		/* open the input file */
 		if ((fp = fopen(timelist_file, "r")) == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
@@ -422,9 +401,10 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nUnable to open time list file <%s> for reading\n", timelist_file);
 			exit(status);
 		}
-		rawroutefile = MB_NO;
+		rawroutefile = false;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] != '#') {
+				int i;
 				nget = sscanf(comment, "%d %d %lf %lf %lf %lf", &i, &waypoint, &lon, &lat, &heading, &time_d);
 
 				/* if good data check for need to allocate more space */
@@ -441,6 +421,7 @@ int main(int argc, char **argv) {
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routetime_d, &error);
 					if (status != MB_SUCCESS) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -471,12 +452,12 @@ int main(int argc, char **argv) {
 		seafloordepthmin = -1.0;
 		seafloordepthmax = -1.0;
 		nplot = 0;
-		for (i = 0; i < MBES_NUM_PLOT_MAX; i++) {
+		for (int i = 0; i < MBES_NUM_PLOT_MAX; i++) {
 			seafloordepthminplot[i] = -1;
 			seafloordepthmaxplot[i] = -1;
 		}
 		oktowrite = 0;
-		rangeok = MB_NO;
+		rangeok = false;
 
 		/* output status */
 		if (verbose > 0) {
@@ -486,7 +467,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* if specified read route file */
-	else if (route_file_set == MB_YES) {
+	else if (route_file_set) {
 		/* open the input file */
 		if ((fp = fopen(route_file, "r")) == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
@@ -494,11 +475,11 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
 			exit(status);
 		}
-		rawroutefile = MB_NO;
+		rawroutefile = false;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] == '#') {
 				if (strncmp(comment, "## Route File Version", 21) == 0) {
-					rawroutefile = MB_NO;
+					rawroutefile = false;
 				}
 			}
 			else {
@@ -506,17 +487,18 @@ int main(int argc, char **argv) {
 				if (comment[0] == '#') {
 					fprintf(stderr, "buffer:%s", comment);
 					if (strncmp(comment, "## Route File Version", 21) == 0) {
-						rawroutefile = MB_NO;
+						rawroutefile = false;
 					}
 				}
-				if ((rawroutefile == MB_YES && nget >= 2) ||
-				    (rawroutefile == MB_NO && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_NONE))
-					point_ok = MB_YES;
+				bool point_ok;
+				if ((rawroutefile && nget >= 2) ||
+				    (!rawroutefile && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_NONE))
+					point_ok = true;
 				else
-					point_ok = MB_NO;
+					point_ok = false;
 
 				/* if good data check for need to allocate more space */
-				if (point_ok == MB_YES && nroutepoint + 1 > nroutepointalloc) {
+				if (point_ok && nroutepoint + 1 > nroutepointalloc) {
 					nroutepointalloc += MBES_ALLOC_NUM;
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
@@ -527,6 +509,7 @@ int main(int argc, char **argv) {
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int), (void **)&routewaypoint, &error);
 					if (status != MB_SUCCESS) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -535,7 +518,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* add good point to route */
-				if (point_ok == MB_YES && nroutepointalloc > nroutepoint + 1) {
+				if (point_ok && nroutepointalloc > nroutepoint + 1) {
 					routelon[nroutepoint] = lon;
 					routelat[nroutepoint] = lat;
 					routeheading[nroutepoint] = heading;
@@ -556,12 +539,12 @@ int main(int argc, char **argv) {
 		seafloordepthmin = -1.0;
 		seafloordepthmax = -1.0;
 		nplot = 0;
-		for (i = 0; i < MBES_NUM_PLOT_MAX; i++) {
+		for (int i = 0; i < MBES_NUM_PLOT_MAX; i++) {
 			seafloordepthminplot[i] = -1;
 			seafloordepthmaxplot[i] = -1;
 		}
 		oktowrite = 0;
-		rangeok = MB_NO;
+		rangeok = false;
 
 		/* output status */
 		if (verbose > 0) {
@@ -587,33 +570,32 @@ int main(int argc, char **argv) {
 		sprintf(zbounds, "-%f/%f", zmax, zmax);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(file, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* set up plotting script file */
-	if ((route_file_set == MB_YES && nroutepoint > 1) || (timelist_file_set == MB_YES && ntimepoint > 1)) {
+	if ((route_file_set && nroutepoint > 1) || (timelist_file_set && ntimepoint > 1)) {
 		sprintf(scriptfile, "%s_section.cmd", lineroot);
 	}
-	else if (output_file_set == MB_NO || read_datalist == MB_YES) {
+	else if (!output_file_set || read_datalist) {
 		sprintf(scriptfile, "%s_section.cmd", read_file);
 	}
 	else {
@@ -626,12 +608,16 @@ int main(int argc, char **argv) {
 		exit(status);
 	}
 
+	bool recalculatesweep = false;
+	bool linechange;
+
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data) {
 
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -661,6 +647,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -669,7 +656,7 @@ int main(int argc, char **argv) {
 
 		/* read and print data */
 		nread = 0;
-		first = MB_YES;
+		first = true;
 		lastlon = 0.0;
 		lastlat = 0.0;
 		lastheading = 0.0;
@@ -692,7 +679,7 @@ int main(int argc, char **argv) {
 			/* deal with nav and time from survey data only - not nav, sidescan, or subbottom */
 			if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
 				/* reset output flag */
-				linechange = MB_NO;
+				linechange = false;
 
 				/* get nav data */
 				status = mb_extract_nav(verbose, mbio_ptr, store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
@@ -714,9 +701,7 @@ int main(int argc, char **argv) {
 					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 					range = sqrt(dx * dx + dy * dy);
 					if (time_d >= routetime_d[activewaypoint] && activewaypoint < ntimepoint) {
-						linechange = MB_YES;
-						/* fprintf(stderr,"LINECHANGE 1!! dx:%f dy:%f range:%f activewaypoint:%d time_d: %f %f\n",
-						dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
+						linechange = true;
 					}
 				}
 
@@ -726,16 +711,14 @@ int main(int argc, char **argv) {
 					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 					range = sqrt(dx * dx + dy * dy);
 					if (range < rangethreshold)
-						rangeok = MB_YES;
-					if (rangeok == MB_YES && (activewaypoint == 0 || range > rangelast) && activewaypoint < nroutepoint - 1) {
-						linechange = MB_YES;
-						/* fprintf(stderr,"LINECHANGE 2!! dx:%f dy:%f range:%f %f
-						 * activewaypoint:%d\n",dx,dy,range,rangethreshold,activewaypoint); */
+						rangeok = true;
+					if (rangeok && (activewaypoint == 0 || range > rangelast) && activewaypoint < nroutepoint - 1) {
+						linechange = true;
 					}
 				}
 
 				/* apply line change */
-				if (linechange == MB_YES) {
+				if (linechange) {
 					/* close current output file */
 					if (fp != NULL) {
 						fclose(fp);
@@ -770,7 +753,6 @@ int main(int argc, char **argv) {
 						nplot = nwrite / nshotmax;
 						if (nwrite % nshotmax > 0)
 							nplot++;
-						// fprintf(stderr,"nwrite:%d nshotmax:%d nplot:%d\n",nwrite,nshotmax,nplot);
 						/* calculate sweep needed for all of the data in the line - if this is more than 1.0 seconds,
 						  then make section plots using only the sweep needed for each section alone */
 						delay = seafloordepthmin / 750.0;
@@ -778,10 +760,8 @@ int main(int argc, char **argv) {
 						endofdata = seafloordepthmax / 750.0 + linetracelength;
 						endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
 						sweep = endofdata - delay;
-						if (sweep > MBES_MAX_SWEEP)
-							recalculatesweep = MB_YES;
-						else
-							recalculatesweep = MB_NO;
+
+						recalculatesweep = sweep > MBES_MAX_SWEEP;
 
 						fprintf(sfp, "# Generate %d section plot(s) of segy file: %s\n", nplot, output_file);
 						fprintf(sfp, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
@@ -793,8 +773,8 @@ int main(int argc, char **argv) {
 						fprintf(stderr, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
 						fprintf(stderr, "#   Section length: %f km\n", linedistance);
 						fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
-						for (i = 0; i < nplot; i++) {
-							if (recalculatesweep == MB_YES) {
+						for (int i = 0; i < nplot; i++) {
+							if (recalculatesweep) {
 								seafloordepthmin = seafloordepthminplot[i];
 								seafloordepthmax = seafloordepthmaxplot[i];
 								delay = seafloordepthmin / 750.0;
@@ -839,12 +819,6 @@ int main(int argc, char **argv) {
 							fprintf(stderr, "%s", command);
 							fprintf(sfp, "%s", command);
 
-							// sprintf(command, "convert -density 100 %s_%4.4d_%2.2d_sectionplot.ps -trim -quality 75
-							// %s_%4.4d_%2.2d_sectionplot.jpg\n\n", 		lineroot, linenumber, i + 1, lineroot, linenumber, i + 1);
-							//sprintf(command, "gmt psconvert %s_%4.4d_%2.2d_sectionplot.ps -Tj -A -E300 -P\n\n", lineroot,
-							//        linenumber, i + 1);
-							//fprintf(stderr, "%s", command);
-							//fprintf(sfp, "%s", command);
 							fflush(sfp);
 						}
 					}
@@ -857,18 +831,18 @@ int main(int argc, char **argv) {
 					activewaypoint++;
 				}
 
-				if (linechange == MB_YES) {
+				if (linechange) {
 					mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
 					rangelast = 1000 * rangethreshold;
 					seafloordepthmin = -1.0;
 					seafloordepthmax = -1.0;
 					nplot = 0;
-					for (i = 0; i < MBES_NUM_PLOT_MAX; i++) {
+					for (int i = 0; i < MBES_NUM_PLOT_MAX; i++) {
 						seafloordepthminplot[i] = -1;
 						seafloordepthmaxplot[i] = -1;
 					}
 					oktowrite = 0;
-					rangeok = MB_NO;
+					rangeok = false;
 				}
 				else
 					rangelast = range;
@@ -940,7 +914,7 @@ int main(int argc, char **argv) {
 				/* if following a route check that the vehicle has come on line
 				    (within MBES_ONLINE_THRESHOLD degrees)
 				    before writing any data */
-				if (activewaypoint > 0 && checkroutebearing == MB_YES && nroutepoint > 1) {
+				if (activewaypoint > 0 && checkroutebearing && nroutepoint > 1) {
 					headingdiff = fabs(routeheading[activewaypoint - 1] - segytraceheader.heading);
 					if (headingdiff > 180.0)
 						headingdiff = 360.0 - headingdiff;
@@ -948,22 +922,16 @@ int main(int argc, char **argv) {
 						oktowrite++;
 					else
 						oktowrite = 0;
-					/* fprintf(stderr,"heading: %f %f %f oktowrite:%d\n",
-					routeheading[activewaypoint-1],segytraceheader.heading,headingdiff,oktowrite);*/
 				}
 				else if (activewaypoint > 0)
 					oktowrite = MBES_ONLINE_COUNT;
 				else if (nroutepoint == 0 && ntimepoint == 0)
 					oktowrite = MBES_ONLINE_COUNT;
-				/*if (status == MB_SUCCESS)
-				fprintf(stderr,"activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n",
-				activewaypoint,linenumber,range, navlon,
-				routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 
 				/* open output segy file if needed */
 				if (fp == NULL && oktowrite > 0) {
 					/* set up output filename */
-					if (output_file_set == MB_NO) {
+					if (!output_file_set) {
 						if (nroutepoint > 1 || ntimepoint > 1) {
 							sprintf(output_file, "%s_%4.4d.segy", lineroot, linenumber);
 						}
@@ -976,11 +944,9 @@ int main(int argc, char **argv) {
 					/* open the new file */
 					nwrite = 0;
 					if ((fp = fopen(output_file, "w")) == NULL) {
-						status = MB_FAILURE;
-						error = MB_ERROR_WRITE_FAIL;
 						fprintf(stderr, "\nError opening output segy file:\n%s\n", output_file);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-						exit(error);
+						exit(MB_ERROR_WRITE_FAIL);
 					}
 					else if (verbose > 0) {
 						/* output info on file output */
@@ -994,7 +960,7 @@ int main(int argc, char **argv) {
 					tracemin = segydata[0];
 					tracemax = segydata[0];
 					tracerms = 0.0;
-					for (i = 0; i < segytraceheader.nsamps; i++) {
+					for (int i = 0; i < segytraceheader.nsamps; i++) {
 						tracemin = MIN(tracemin, segydata[i]);
 						tracemax = MAX(tracemax, segydata[i]);
 						tracerms += segydata[i] * segydata[i];
@@ -1076,63 +1042,63 @@ int main(int argc, char **argv) {
 
 							/* insert file header data into output buffer */
 							index = 0;
-							mb_put_binary_int(MB_NO, segyfileheader.jobid, (void *)&(buffer[index]));
+							mb_put_binary_int(false, segyfileheader.jobid, (void *)&(buffer[index]));
 							index += 4;
-							mb_put_binary_int(MB_NO, segyfileheader.line, (void *)&(buffer[index]));
+							mb_put_binary_int(false, segyfileheader.line, (void *)&(buffer[index]));
 							index += 4;
-							mb_put_binary_int(MB_NO, segyfileheader.reel, (void *)&(buffer[index]));
+							mb_put_binary_int(false, segyfileheader.reel, (void *)&(buffer[index]));
 							index += 4;
-							mb_put_binary_short(MB_NO, segyfileheader.channels, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.channels, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.aux_channels, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.aux_channels, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.sample_interval, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.sample_interval, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.sample_interval_org, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.sample_interval_org, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.number_samples, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.number_samples, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.number_samples_org, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.number_samples_org, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.format, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.format, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.cdp_fold, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.cdp_fold, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.trace_sort, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.trace_sort, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.vertical_sum, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.vertical_sum, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.sweep_start, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.sweep_start, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.sweep_end, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.sweep_end, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.sweep_length, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.sweep_length, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.sweep_type, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.sweep_type, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.sweep_trace, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.sweep_trace, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.sweep_taper_start, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.sweep_taper_start, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.sweep_taper_end, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.sweep_taper_end, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.sweep_taper, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.sweep_taper, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.correlated, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.correlated, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.binary_gain, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.binary_gain, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.amplitude, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.amplitude, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.units, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.units, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.impulse_polarity, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.impulse_polarity, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.vibrate_polarity, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.vibrate_polarity, (void *)&(buffer[index]));
 							index += 2;
-							mb_put_binary_short(MB_NO, segyfileheader.domain, (void *)&(buffer[index]));
+							mb_put_binary_short(false, segyfileheader.domain, (void *)&(buffer[index]));
 							index += 2;
-							for (i = 0; i < 338; i++) {
+							for (int i = 0; i < 338; i++) {
 								buffer[index] = segyfileheader.extra[i];
 								index++;
 							}
@@ -1147,139 +1113,138 @@ int main(int argc, char **argv) {
 								error = MB_ERROR_WRITE_FAIL;
 							}
 						}
-						// fprintf(stderr,"J\n");
 
 						/* insert segy header data into output buffer */
 						index = 0;
-						mb_put_binary_int(MB_NO, segytraceheader.seq_num, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.seq_num, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.seq_reel, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.seq_reel, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.shot_num, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.shot_num, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.shot_tr, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.shot_tr, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.espn, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.espn, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.rp_num, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.rp_num, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.rp_tr, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.rp_tr, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_short(MB_NO, segytraceheader.trc_id, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.trc_id, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.num_vstk, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.num_vstk, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.cdp_fold, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.cdp_fold, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.use, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.use, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_int(MB_NO, segytraceheader.range, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.range, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.grp_elev, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.grp_elev, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.src_elev, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.src_elev, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.src_depth, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.src_depth, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.grp_datum, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.grp_datum, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.src_datum, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.src_datum, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.src_wbd, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.src_wbd, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.grp_wbd, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.grp_wbd, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_short(MB_NO, segytraceheader.elev_scalar, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.elev_scalar, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.coord_scalar, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.coord_scalar, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_int(MB_NO, segytraceheader.src_long, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.src_long, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.src_lat, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.src_lat, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.grp_long, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.grp_long, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.grp_lat, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.grp_lat, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_short(MB_NO, segytraceheader.coord_units, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.coord_units, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.wvel, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.wvel, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.sbvel, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.sbvel, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.src_up_vel, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.src_up_vel, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.grp_up_vel, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.grp_up_vel, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.src_static, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.src_static, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.grp_static, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.grp_static, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.tot_static, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.tot_static, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.laga, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.laga, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_int(MB_NO, segytraceheader.delay_mils, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.delay_mils, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_short(MB_NO, segytraceheader.smute_mils, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.smute_mils, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.emute_mils, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.emute_mils, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.nsamps, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.nsamps, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.si_micros, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.si_micros, (void *)&buffer[index]);
 						index += 2;
-						for (i = 0; i < 19; i++) {
-							mb_put_binary_short(MB_NO, segytraceheader.other_1[i], (void *)&buffer[index]);
+						for (int i = 0; i < 19; i++) {
+							mb_put_binary_short(false, segytraceheader.other_1[i], (void *)&buffer[index]);
 							index += 2;
 						}
-						mb_put_binary_short(MB_NO, segytraceheader.year, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.year, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.day_of_yr, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.day_of_yr, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.hour, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.hour, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.min, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.min, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.sec, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.sec, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.mils, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.mils, (void *)&buffer[index]);
 						index += 2;
-						mb_put_binary_short(MB_NO, segytraceheader.tr_weight, (void *)&buffer[index]);
+						mb_put_binary_short(false, segytraceheader.tr_weight, (void *)&buffer[index]);
 						index += 2;
-						for (i = 0; i < 5; i++) {
-							mb_put_binary_short(MB_NO, segytraceheader.other_2[i], (void *)&buffer[index]);
+						for (int i = 0; i < 5; i++) {
+							mb_put_binary_short(false, segytraceheader.other_2[i], (void *)&buffer[index]);
 							index += 2;
 						}
-						mb_put_binary_float(MB_NO, segytraceheader.delay, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.delay, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_float(MB_NO, segytraceheader.smute_sec, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.smute_sec, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_float(MB_NO, segytraceheader.emute_sec, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.emute_sec, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_float(MB_NO, segytraceheader.si_secs, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.si_secs, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_float(MB_NO, segytraceheader.wbt_secs, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.wbt_secs, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_int(MB_NO, segytraceheader.end_of_rp, (void *)&buffer[index]);
+						mb_put_binary_int(false, segytraceheader.end_of_rp, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_float(MB_NO, segytraceheader.dummy1, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.dummy1, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_float(MB_NO, segytraceheader.dummy2, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.dummy2, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_float(MB_NO, segytraceheader.dummy3, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.dummy3, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_float(MB_NO, segytraceheader.dummy4, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.dummy4, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_float(MB_NO, segytraceheader.soundspeed, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.soundspeed, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_float(MB_NO, segytraceheader.distance, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.distance, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_float(MB_NO, segytraceheader.roll, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.roll, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_float(MB_NO, segytraceheader.pitch, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.pitch, (void *)&buffer[index]);
 						index += 4;
-						mb_put_binary_float(MB_NO, segytraceheader.heading, (void *)&buffer[index]);
+						mb_put_binary_float(false, segytraceheader.heading, (void *)&buffer[index]);
 						index += 4;
 
 						/* write out segy header */
@@ -1290,8 +1255,8 @@ int main(int argc, char **argv) {
 
 						/* insert segy data into output buffer */
 						index = 0;
-						for (i = 0; i < segytraceheader.nsamps; i++) {
-							mb_put_binary_float(MB_NO, segydata[i], (void *)&buffer[index]);
+						for (int i = 0; i < segytraceheader.nsamps; i++) {
+							mb_put_binary_float(false, segydata[i], (void *)&buffer[index]);
 							index += 4;
 						}
 
@@ -1306,7 +1271,6 @@ int main(int argc, char **argv) {
 				}
 			}
 
-			/* print debug statements */
 			if (verbose >= 2) {
 				fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
 				fprintf(stderr, "dbg2       kind:           %d\n", kind);
@@ -1337,18 +1301,18 @@ int main(int argc, char **argv) {
 		buffer_alloc = 0;
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* close output file if conditions warrant */
-		if (read_data == MB_NO || (output_file_set == MB_NO && nroutepoint < 2 && ntimepoint < 2)) {
+		if (!read_data || (!output_file_set && nroutepoint < 2 && ntimepoint < 2)) {
 			/* close current output file */
 			if (fp != NULL) {
 				fclose(fp);
@@ -1382,8 +1346,6 @@ int main(int argc, char **argv) {
 				nplot = nwrite / nshotmax;
 				if (nwrite % nshotmax > 0)
 					nplot++;
-				/*fprintf(stderr,"seafloordepthmin:%f seafloordepthmax:%f linetracelength:%f\n", seafloordepthmin,
-				 * seafloordepthmax,linetracelength);*/
 
 				/* calculate sweep needed for all of the data in the line - if this is more than 1.0 seconds,
 				  then make section plots using only the sweep needed for each section alone */
@@ -1393,9 +1355,9 @@ int main(int argc, char **argv) {
 				endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
 				sweep = endofdata - delay;
 				if (sweep > MBES_MAX_SWEEP)
-					recalculatesweep = MB_YES;
+					recalculatesweep = true;
 				else {
-					recalculatesweep = MB_NO;
+					recalculatesweep = false;
 				}
 
 				fprintf(sfp, "# Generate %d section plot(s) of segy file: %s\n", nplot, output_file);
@@ -1408,8 +1370,8 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
 				fprintf(stderr, "#   Section length: %f km\n", linedistance);
 				fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
-				for (i = 0; i < nplot; i++) {
-					if (recalculatesweep == MB_YES) {
+				for (int i = 0; i < nplot; i++) {
+					if (recalculatesweep) {
 						seafloordepthmin = seafloordepthminplot[i];
 						seafloordepthmax = seafloordepthmaxplot[i];
 						delay = seafloordepthmin / 750.0;
@@ -1468,7 +1430,7 @@ int main(int argc, char **argv) {
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* close plotting script file */
@@ -1477,7 +1439,7 @@ int main(int argc, char **argv) {
 	shellstatus = system(command);
 
 	/* deallocate route arrays */
-	if (route_file_set == MB_YES) {
+	if (route_file_set) {
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
@@ -1488,14 +1450,12 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

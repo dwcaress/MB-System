@@ -61,9 +61,9 @@ int mbr_info_mgd77dat(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_NO;
+	*variable_beams = false;
+	*traveltime = true;
+	*beam_flagging = false;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -278,10 +278,6 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 	}
-	/*fprintf(stderr,"_RAWLINE:");
-	for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
-	fprintf(stderr,"%c",line[i]);
-	fprintf(stderr,"\n");*/
 
 	/* handle "pseudo-mgd77" in which each record is
 	 * followed by a cr or lf or both */
@@ -304,12 +300,7 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 		}
-		/*fprintf(stderr,"---SKIPPED %zu BYTES---\n",skip);*/
 	}
-	/*fprintf(stderr,"+FIXLINE:");
-	for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
-	fprintf(stderr,"%c",line[i]);
-	fprintf(stderr,"\n");*/
 
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 

@@ -39,19 +39,15 @@
  *	- initializes plotting variables, the colortable, and the GC
  **********************************************************************/
 void xg_init(Display *display, Window can_xid, int *can_bounds, char *fontname, void **xgid) {
-	/* local variables */
-	struct xg_graphic *graphic;
-	XGCValues gc_val;
-	int i;
-
 	/* allocate memory for xg_graphic structure */
-	if ((graphic = (struct xg_graphic *)calloc(1, sizeof(struct xg_graphic))) == NULL)
+	struct xg_graphic *graphic = (struct xg_graphic *)calloc(1, sizeof(struct xg_graphic));
+	if (graphic == NULL)
 		exit(1);
 
 	/* copy input variables to global variables */
 	graphic->dpy = display;
 	graphic->xid = can_xid;
-	for (i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 		graphic->bounds[i] = can_bounds[i];
 
 	/* check for the type of display and set the display_type */
@@ -121,6 +117,7 @@ void xg_init(Display *display, Window can_xid, int *can_bounds, char *fontname, 
 	}
 
 	/* set up graphics context */
+	XGCValues gc_val;
 	gc_val.foreground = graphic->fg_pixel;
 	gc_val.background = graphic->bg_pixel;
 	gc_val.font = graphic->font_info->fid;
@@ -144,9 +141,7 @@ void xg_init(Display *display, Window can_xid, int *can_bounds, char *fontname, 
  *	- deallocates xg_graphic structure when no longer needed
  **********************************************************************/
 void xg_free(void *xgid) {
-	struct xg_graphic *graphic;
-
-	graphic = (struct xg_graphic *)xgid;
+	struct xg_graphic *graphic = (struct xg_graphic *)xgid;
 	free(graphic);
 }
 /**********************************************************************
@@ -154,10 +149,8 @@ void xg_free(void *xgid) {
  *	- draws a pixel
  **********************************************************************/
 void xg_drawpoint(void *xgid, int x, int y, unsigned int pixel, int style) {
-	struct xg_graphic *graphic;
+	struct xg_graphic *graphic = (struct xg_graphic *)xgid;
 	GC *gc;
-
-	graphic = (struct xg_graphic *)xgid;
 	if (style == XG_SOLIDLINE)
 		gc = &graphic->gc_solid;
 	else
@@ -170,10 +163,8 @@ void xg_drawpoint(void *xgid, int x, int y, unsigned int pixel, int style) {
  *	- draws a line
  **********************************************************************/
 void xg_drawline(void *xgid, int x1, int y1, int x2, int y2, unsigned int pixel, int style) {
-	struct xg_graphic *graphic;
+	struct xg_graphic *graphic = (struct xg_graphic *)xgid;
 	GC *gc;
-
-	graphic = (struct xg_graphic *)xgid;
 	if (style == XG_SOLIDLINE)
 		gc = &graphic->gc_solid;
 	else
@@ -186,10 +177,8 @@ void xg_drawline(void *xgid, int x1, int y1, int x2, int y2, unsigned int pixel,
  *	- draws a rectangle outline
  **********************************************************************/
 void xg_drawrectangle(void *xgid, int x, int y, int width, int height, unsigned int pixel, int style) {
-	struct xg_graphic *graphic;
+	struct xg_graphic *graphic = (struct xg_graphic *)xgid;
 	GC *gc;
-
-	graphic = (struct xg_graphic *)xgid;
 	if (style == XG_SOLIDLINE)
 		gc = &graphic->gc_solid;
 	else
@@ -202,16 +191,13 @@ void xg_drawrectangle(void *xgid, int x, int y, int width, int height, unsigned 
  *	- draws a triangle outline
  **********************************************************************/
 void xg_drawtriangle(void *xgid, int x1, int y1, int x2, int y2, int x3, int y3, unsigned int pixel, int style) {
-	struct xg_graphic *graphic;
+	struct xg_graphic *graphic = (struct xg_graphic *)xgid;
 	GC *gc;
-	XSegment segments[3];
-	int nsegments = 3;
-
-	graphic = (struct xg_graphic *)xgid;
 	if (style == XG_SOLIDLINE)
 		gc = &graphic->gc_solid;
 	else
 		gc = &graphic->gc_dash;
+	XSegment segments[3];
 	segments[0].x1 = (short)x1;
 	segments[0].y1 = (short)y1;
 	segments[0].x2 = (short)x2;
@@ -225,6 +211,7 @@ void xg_drawtriangle(void *xgid, int x1, int y1, int x2, int y2, int x3, int y3,
 	segments[2].x2 = (short)x1;
 	segments[2].y2 = (short)y1;
 	XSetForeground(graphic->dpy, *gc, pixel);
+	const int nsegments = 3;
 	XDrawSegments(graphic->dpy, graphic->xid, *gc, segments, nsegments);
 }
 /**********************************************************************
@@ -232,10 +219,8 @@ void xg_drawtriangle(void *xgid, int x1, int y1, int x2, int y2, int x3, int y3,
  *	- fills a rectangle
  **********************************************************************/
 void xg_fillrectangle(void *xgid, int x, int y, int width, int height, unsigned int pixel, int style) {
-	struct xg_graphic *graphic;
+	struct xg_graphic *graphic = (struct xg_graphic *)xgid;
 	GC *gc;
-
-	graphic = (struct xg_graphic *)xgid;
 	if (style == XG_SOLIDLINE)
 		gc = &graphic->gc_solid;
 	else
@@ -248,18 +233,13 @@ void xg_fillrectangle(void *xgid, int x, int y, int width, int height, unsigned 
  *	- fills a triangle
  **********************************************************************/
 void xg_filltriangle(void *xgid, int x1, int y1, int x2, int y2, int x3, int y3, unsigned int pixel, int style) {
-	struct xg_graphic *graphic;
+	struct xg_graphic *graphic = (struct xg_graphic *)xgid;
 	GC *gc;
-	XPoint points[3];
-	int npoints = 3;
-	int shape = Convex;
-	int mode = CoordModeOrigin;
-
-	graphic = (struct xg_graphic *)xgid;
 	if (style == XG_SOLIDLINE)
 		gc = &graphic->gc_solid;
 	else
 		gc = &graphic->gc_dash;
+	XPoint points[3];
 	points[0].x = (short)x1;
 	points[0].y = (short)y1;
 	points[1].x = (short)x2;
@@ -267,6 +247,9 @@ void xg_filltriangle(void *xgid, int x1, int y1, int x2, int y2, int x3, int y3,
 	points[2].x = (short)x3;
 	points[2].y = (short)y3;
 	XSetForeground(graphic->dpy, *gc, pixel);
+	const int npoints = 3;
+	const int shape = Convex;
+	const int mode = CoordModeOrigin;
 	XFillPolygon(graphic->dpy, graphic->xid, *gc, points, npoints, shape, mode);
 }
 /**********************************************************************
@@ -274,17 +257,15 @@ void xg_filltriangle(void *xgid, int x1, int y1, int x2, int y2, int x3, int y3,
  *	- draws a string
  **********************************************************************/
 void xg_drawstring(void *xgid, int x, int y, char *string, unsigned int pixel, int style) {
-	struct xg_graphic *graphic;
-	GC *gc;
-	int string_length;
 
-	graphic = (struct xg_graphic *)xgid;
+	struct xg_graphic *graphic = (struct xg_graphic *)xgid;
+	GC *gc;
 	if (style == XG_SOLIDLINE)
 		gc = &graphic->gc_solid;
 	else
 		gc = &graphic->gc_dash;
 	XSetForeground(graphic->dpy, *gc, pixel);
-	string_length = strlen(string);
+	const int string_length = strlen(string);
 	XDrawString(graphic->dpy, graphic->xid, *gc, x, y, string, string_length);
 }
 /**********************************************************************
@@ -292,15 +273,13 @@ void xg_drawstring(void *xgid, int x, int y, char *string, unsigned int pixel, i
  *	- figures out the dimensions of a string when drawn
  **********************************************************************/
 void xg_justify(void *xgid, char *string, int *width, int *ascent, int *descent) {
-	struct xg_graphic *graphic;
-	int string_length;
-	XCharStruct string_info;
+
+	struct xg_graphic *graphic = (struct xg_graphic *)xgid;
 	int direction;
 	int lascent;
 	int ldescent;
-
-	graphic = (struct xg_graphic *)xgid;
-	string_length = strlen(string);
+	const int string_length = strlen(string);
+	XCharStruct string_info;
 	XTextExtents(graphic->font_info, string, string_length, &direction, &lascent, &ldescent, &string_info);
 	*width = string_info.width;
 	*ascent = string_info.ascent;
@@ -311,17 +290,11 @@ void xg_justify(void *xgid, char *string, int *width, int *ascent, int *descent)
  *	- sets clipping mask for all gc's
  **********************************************************************/
 void xg_setclip(void *xgid, int x, int y, int width, int height) {
-	struct xg_graphic *graphic;
-	XRectangle rectangle[1];
-
 	/* set up rectangle */
-	rectangle[0].x = x;
-	rectangle[0].y = y;
-	rectangle[0].width = width;
-	rectangle[0].height = height;
+	XRectangle rectangle[1] = {x, y, width, height};
 
 	/* set clip rectangle */
-	graphic = (struct xg_graphic *)xgid;
+	struct xg_graphic *graphic = (struct xg_graphic *)xgid;
 	XSetClipRectangles(graphic->dpy, graphic->gc_solid, 0, 0, rectangle, 1, Unsorted);
 	XSetClipRectangles(graphic->dpy, graphic->gc_dash, 0, 0, rectangle, 1, Unsorted);
 }

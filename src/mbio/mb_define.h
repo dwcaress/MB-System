@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_define.h	4/21/96
-  *
+ *
  *    Copyright (c) 1996-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -21,6 +21,8 @@
 
 #ifndef MB_DEFINE_H_
 #define MB_DEFINE_H_
+
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -129,6 +131,9 @@ typedef struct {
 #define MB_NAME_LENGTH 32
 #define MB_LONGNAME_LENGTH 128
 #define MB_DESCRIPTION_LENGTH 2048
+
+/* maximum UDP packet size */
+#define MB_UDP_SIZE_MAX 65536
 
 /* typedef for path string */
 typedef char mb_path[MB_PATH_MAXLINE];
@@ -272,7 +277,7 @@ int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, i
 int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path, char *ppath, char *dpath, int *format,
                       double *weight, int *error);
 int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format, double *weight, int *error);
-int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recursion, int *error);
+int mb_datalist_recursion(int verbose, void *datalist_ptr, bool print, int *recursion, int *error);
 int mb_datalist_close(int verbose, void **datalist_ptr, int *error);
 int mb_get_relative_path(int verbose, char *path, char *pwd, int *error);
 int mb_get_shortest_path(int verbose, char *path, int *error);
@@ -284,40 +289,42 @@ int mb_get_fnv(int verbose, char *file, int *format, int *error);
 int mb_get_ffa(int verbose, char *file, int *format, int *error);
 int mb_get_ffs(int verbose, char *file, int *format, int *error);
 int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, double heading, int nbath, int nss, char *beamflag,
-                   double *bath, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
-                   double *ssalongtrack, int *ibeamport, int *ibeamcntr, int *ibeamstbd, int *ipixelport, int *ipixelcntr,
-                   int *ipixelstbd, int *error);
+                  double *bath, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                  double *ssalongtrack, int *ibeamport, int *ibeamcntr, int *ibeamstbd, int *ipixelport, int *ipixelcntr,
+                  int *ipixelstbd, int *error);
 int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
-                double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
-                int *beams_amp, int *pixels_ss, int *error);
-int mb_input_init(int verbose, char *file, int format, int pings, int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
-                double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
-                int *beams_amp, int *pixels_ss,
-                int (*input_open)(int verbose, void *mbio_ptr, char *path, int *error),
-                int (*input_read)(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error),
-                int (*input_close)(int verbose, void *mbio_ptr, int *error),
-                int *error);
+                  double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
+                  int *beams_amp, int *pixels_ss, int *error);
+int mb_input_init(int verbose, char *socket_definition, int format, int pings,
+                  int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
+                  double speedmin, double timegap, void **mbio_ptr,
+                  double *btime_d, double *etime_d, int *beams_bath,
+                  int *beams_amp, int *pixels_ss,
+                  int (*input_open)(int verbose, void *mbio_ptr, char *definition, int *error),
+                  int (*input_read)(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error),
+                  int (*input_close)(int verbose, void *mbio_ptr, int *error),
+                  int *error);
 int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *beams_bath, int *beams_amp, int *pixels_ss,
                   int *error);
 int mb_close(int verbose, void **mbio_ptr, int *error);
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *error);
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
-               double *navlat, double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath,
-               int *namp, int *nss, char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
-               double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+                  double *navlat, double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath,
+                  int *namp, int *nss, char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
+                  double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
 int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], double *time_d, double *navlon, double *navlat,
-           double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath, int *namp,
-           int *nss, char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
-           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+                  double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath, int *namp,
+                  int *nss, char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                  double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
 int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], double *time_d, double *navlon, double *navlat,
-            double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath, int *namp,
-            int *nss, char *beamflag, double *bath, double *amp, double *bathlon, double *bathlat, double *ss, double *sslon,
-            double *sslat, char *comment, int *error);
+                  double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath, int *namp,
+                  int *nss, char *beamflag, double *bath, double *amp, double *bathlon, double *bathlat, double *ss, double *sslon,
+                  double *sslat, char *comment, int *error);
 int mb_write_ping(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int kind, int time_i[7], double time_d, double navlon,
-               double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
-               double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
-               double *ssalongtrack, char *comment, int *error);
+                  double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
+                  double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                  double *ssalongtrack, char *comment, int *error);
 int mb_put_comment(int verbose, void *mbio_ptr, char *comment, int *error);
 int mb_fileio_open(int verbose, void *mbio_ptr, int *error);
 int mb_fileio_close(int verbose, void *mbio_ptr, int *error);
@@ -336,26 +343,26 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_p
 int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error);
 int mb_sensorhead(int verbose, void *mbio_ptr, void *store_ptr, int *sensorhead, int *error);
 int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
-               double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag, double *bath,
-               double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
-               double *ssalongtrack, char *comment, int *error);
+                double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag, double *bath,
+                double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                double *ssalongtrack, char *comment, int *error);
 int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon, double navlat,
-              double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath, double *amp,
-              double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack, double *ssalongtrack,
-              char *comment, int *error);
+                double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath, double *amp,
+                double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack, double *ssalongtrack,
+                char *comment, int *error);
 int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
-                   double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch, double *heave,
-                   int *error);
+                double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch, double *heave,
+                int *error);
 int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int *kind, int *n, int *time_i, double *time_d,
-                    double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
-                    double *heave, int *error);
+                double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
+                double *heave, int *error);
 int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
-                  double speed, double heading, double draft, double roll, double pitch, double heave, int *error);
+                double speed, double heading, double draft, double roll, double pitch, double heave, int *error);
 int mb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth, double *altitude,
-                        int *error);
+                int *error);
 int mb_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude, int *error);
 int mb_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
-                   int *error);
+                int *error);
 int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error);
 int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
               double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft, double *ssv,
@@ -527,20 +534,22 @@ int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double 
 int mb_swap_check(void);
 int mb_get_double(double *, char *, int);
 int mb_get_int(int *, char *, int);
-int mb_get_binary_short(int, void *, void *);
-int mb_get_binary_int(int, void *, void *);
-int mb_get_binary_float(int, void *, void *);
-int mb_get_binary_double(int, void *, void *);
-int mb_get_binary_long(int, void *, void *);
-int mb_put_binary_short(int, short, void *);
-int mb_put_binary_int(int, int, void *);
-int mb_put_binary_float(int, float, void *);
-int mb_put_binary_double(int, double, void *);
-int mb_put_binary_long(int, mb_s_long, void *);
+
+int mb_get_binary_short(bool swapped, void *buffer, const void *ptr);
+int mb_get_binary_int(bool swapped, void *buffer, const void *ptr);
+int mb_get_binary_float(bool swapped, void *buffer, const void *ptr);
+int mb_get_binary_double(bool swapped, void *buffer, const void *ptr);
+int mb_get_binary_long(bool swapped, void *buffer, const void *ptr);
+int mb_put_binary_short(bool swapped, short value, void *buffer);
+int mb_put_binary_int(bool swapped, int value, void *buffer);
+int mb_put_binary_float(bool swapped, float value, void *buffer);
+int mb_put_binary_double(bool swapped, double value, void *buffer);
+int mb_put_binary_long(bool swapped, mb_s_long value, void *buffer);
+
 int mb_get_bounds(char *text, double *bounds);
-double mb_ddmmss_to_degree(char *text);
-int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *alpha, double *beta, int *error);
-int mb_rollpitch_to_takeoff(int verbose, double alpha, double beta, double *theta, double *phi, int *error);
+double mb_ddmmss_to_degree(const char *text);
+int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch, double *roll, int *error);
+int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *theta, double *phi, int *error);
 int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, double *phi, int *error);
 int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double sonar_offset_z, double nav_offset_x,
              double nav_offset_y, double nav_offset_z, double vru_offset_x, double vru_offset_y, double vru_offset_z,
@@ -598,12 +607,12 @@ int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, d
 int mb_proj_transform(int verbose, void *pjsrcptr, void *pjdstptr, int npoint, double *x, double *y, double *z, int *error);
 
 /* mb_spline function prototypes */
-int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double ypn, double *y2, int *error);
-int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, double x, double *y, int *i, int *error);
-int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error);
-int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error);
-int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error);
-int mb_linear_interp_heading(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error);
+int mb_spline_init(int verbose, const double *x, const double *y, int n, double yp1, double ypn, double *y2, int *error);
+int mb_spline_interp(int verbose, const double *xa, const double *ya, double *y2a, int n, double x, double *y, int *i, int *error);
+int mb_linear_interp(int verbose, const double *xa, const double *ya, int n, double x, double *y, int *i, int *error);
+int mb_linear_interp_longitude(int verbose, const double *xa, const double *ya, int n, double x, double *y, int *i, int *error);
+int mb_linear_interp_latitude(int verbose, const double *xa, const double *ya, int n, double x, double *y, int *i, int *error);
+int mb_linear_interp_heading(int verbose, const double *xa, const double *ya, int n, double x, double *y, int *i, int *error);
 
 int mb_swap_check();
 int mb_swap_float(float *a);

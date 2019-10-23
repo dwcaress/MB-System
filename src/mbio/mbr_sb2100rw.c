@@ -67,9 +67,9 @@ int mbr_info_sb2100rw(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -301,7 +301,6 @@ int mbr_dem_sb2100rw(int verbose, void *mbio_ptr, int *error) {
 int mbr_sb2100rw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line, int *error) {
 	int status = MB_SUCCESS;
 	int nchars;
-	int done;
 	char *result;
 
 	if (verbose >= 2) {
@@ -312,7 +311,7 @@ int mbr_sb2100rw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 	}
 
 	/* read next good line in file */
-	done = MB_NO;
+	bool done = false;
 	do {
 		/* read next line in file */
 		strncpy(line, "\0", MBF_SB2100RW_MAXLINE);
@@ -324,24 +323,23 @@ int mbr_sb2100rw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 		/* check for eof */
 		if (result == line) {
 			if (nchars >= minimum_size)
-				done = MB_YES;
+				done = true;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
 		else {
-			done = MB_YES;
+			done = true;
 			*error = MB_ERROR_EOF;
 			status = MB_FAILURE;
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg5  New line read in function <%s>\n", __func__);
 			fprintf(stderr, "dbg5       line:       %s\n", line);
 			fprintf(stderr, "dbg5       chars:      %d\n", nchars);
 		}
 
-	} while (done == MB_NO);
+	} while (!done);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -450,7 +448,6 @@ int mbr_sb2100rw_rd_pr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -501,7 +498,6 @@ int mbr_sb2100rw_rd_tr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 		strncpy(data->comment, line, nchars - 1);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Value read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -601,7 +597,6 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 			data->algorithm_order[i] = line[1 + shift + i];
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -683,7 +678,6 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 	  }
 	**/
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "dbg5       beam src tt angle angfor depth xtrack ltrack amp sig2noise echo quality\n");
 		for (int i = 0; i < data->num_beams; i++) {
@@ -794,7 +788,6 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -870,7 +863,6 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "dbg5       beam amp_ss ltrack\n");
 		for (int i = 0; i < data->num_pixels; i++) {
@@ -890,7 +882,6 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
-	static int line_save_flag = MB_NO;
 	static char raw_line[MBF_SB2100RW_MAXLINE] = "\0";
 	static int type = MBF_SB2100RW_NONE;
 
@@ -916,12 +907,12 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	int status = MB_SUCCESS;
-	int done = MB_NO;
 	int expect = MBF_SB2100RW_NONE;
-	while (done == MB_NO) {
-
+	static bool line_save_flag = false;
+	bool done = false;
+	while (!done) {
 		/* get next record label */
-		if (line_save_flag == MB_NO) {
+		if (!line_save_flag) {
 			/* save position in file */
 			mb_io_ptr->file_bytes = ftell(mbfp);
 
@@ -929,28 +920,28 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_sb2100rw_rd_label(verbose, mbfp, raw_line, &type, error);
 		}
 		else
-			line_save_flag = MB_NO;
+			line_save_flag = false;
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE && expect == MBF_SB2100RW_NONE) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			done = MB_YES;
+			done = true;
 		}
 		else if (status == MB_FAILURE && expect != MBF_SB2100RW_NONE) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			done = MB_YES;
+			done = true;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
 		else if (expect != MBF_SB2100RW_NONE && expect != type) {
-			done = MB_YES;
+			done = true;
 			expect = MBF_SB2100RW_NONE;
-			line_save_flag = MB_YES;
+			line_save_flag = true;
 		}
 		else if (type == MBF_SB2100RW_RAW_LINE) {
 			strcpy(data->comment, raw_line);
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			done = MB_YES;
+			done = true;
 			data->kind = MB_DATA_RAW_LINE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			status = MB_FAILURE;
@@ -959,7 +950,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_sb2100rw_rd_pr(verbose, mbfp, data, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
 			}
 		}
@@ -967,7 +958,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_sb2100rw_rd_tr(verbose, mbfp, data, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_COMMENT;
 			}
 		}
@@ -975,7 +966,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_sb2100rw_rd_dr(verbose, mbfp, data, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
-				done = MB_NO;
+				done = false;
 				data->kind = MB_DATA_DATA;
 				expect = MBF_SB2100RW_SS;
 			}
@@ -984,10 +975,10 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = mbr_sb2100rw_rd_ss(verbose, mbfp, data, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS && expect == MBF_SB2100RW_SS) {
-				done = MB_YES;
+				done = true;
 			}
 			else if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				expect = MBF_SB2100RW_NONE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
 				status = MB_FAILURE;
@@ -995,7 +986,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else if (status == MB_FAILURE && *error == MB_ERROR_UNINTELLIGIBLE && expect == MBF_SB2100RW_SS) {
 				/* this preserves the bathymetry
 				   that has already been read */
-				done = MB_YES;
+				done = true;
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
 			}
@@ -1179,7 +1170,6 @@ int mbr_sb2100rw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error)
 	/* get pointer to raw data structure */
 	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       raw line:         %s\n", data->comment);
@@ -1283,7 +1273,6 @@ int mbr_sb2100rw_wr_pr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	/* get pointer to raw data structure */
 	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -1359,7 +1348,6 @@ int mbr_sb2100rw_wr_tr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	/* get pointer to raw data structure */
 	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -1410,7 +1398,6 @@ int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	/* get pointer to raw data structure */
 	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -1591,7 +1578,6 @@ int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	/* get pointer to raw data structure */
 	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);

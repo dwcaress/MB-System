@@ -66,9 +66,9 @@ int mbr_info_hsurivax(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = false;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -388,7 +388,6 @@ int mbr_wt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *datacomment = (char *)data;
 	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Status at beginning of MBIO function <%s>\n", __func__);
 		if (store != NULL)
@@ -460,7 +459,6 @@ int mbr_wt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Ready to write data in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:       %d\n", dataplus->kind);

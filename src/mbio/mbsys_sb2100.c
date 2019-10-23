@@ -229,7 +229,6 @@ int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			ssalongtrack[i] = store->pixels[i].alongtrack;
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -269,7 +268,6 @@ int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		/* copy comment */
 		strcpy(comment, store->comment);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -440,18 +438,18 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		for (int i = 0; i < namp; i++)
 			store->beams[i].amplitude = 4.0 * (amp[i] + gain_db);
 		if (store->pixel_size <= 0.0)
-			set_pixel_size = MB_YES;
+			set_pixel_size = true;
 		else
-			set_pixel_size = MB_NO;
+			set_pixel_size = false;
 		for (int i = 0; i < nss; i++) {
 			if (ss[i] > MB_SIDESCAN_NULL)
 				store->pixels[i].amplitude = gain_factor * ss[i];
 			else
 				store->pixels[i].amplitude = 0;
 			store->pixels[i].alongtrack = ssalongtrack[i];
-			if (set_pixel_size == MB_YES && ssacrosstrack[i] > 0) {
+			if (set_pixel_size == true && ssacrosstrack[i] > 0) {
 				store->pixel_size = ssacrosstrack[i] / (i - center_pixel);
-				set_pixel_size = MB_NO;
+				set_pixel_size = false;
 			}
 		}
 	}
@@ -852,7 +850,6 @@ int mbsys_sb2100_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 		*pitch = store->pitch;
 		*heave = -store->heave;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");

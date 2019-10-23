@@ -35,27 +35,90 @@
 
 #include <stdio.h>
 
+#include "mbbs.h"
 #include "mbbs_defines.h"
-
-extern double mbbs_nand();
-extern float mbbs_nanf();
 
 extern unsigned long bs_iobytecnt;
 extern int bs_ionaninit;
 extern float bs_ionanf;
 extern double bs_ionand;
 
-int mbbs_mr1_xdrpnghdrv1(Ping *png, XDR *xdrs)
+/*
+   Internal routine.
+   Does XDR decoding of an obsolete MR1 version 1 PingSide header.
+   Records the total number of bytes transferred into *bytecnt.
+   Returns 1 if successful, 0 otherwise.
+*/
+int mr1_xdrsidev1(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
+{
+	*bytecnt = 0;
+
+	/* output in obsolete format not allowed! */
+	if (xdrs->x_op == XDR_ENCODE)
+		return 0;
+
+	if (!bs_ionaninit) {
+		bs_ionanf = mbbs_nanf();
+		bs_ionand = mbbs_nand();
+		bs_ionaninit = 1;
+	}
+
+	/* HMRG code never archived anything to the old ps_trans[]
+	   fields, so their contents are meaningless -- this code
+	   reads those meaningless values and then stores a NaN
+	   to the new ps_xmitpwr field */
+	if (!xdr_float(xdrs, &(ps->ps_xmitpwr)))
+		return 0;
+	*bytecnt += 4;
+	if (!xdr_float(xdrs, &(ps->ps_xmitpwr)))
+		return 0;
+	*bytecnt += 4;
+	ps->ps_xmitpwr = bs_ionanf;
+
+	/* HMRG code never archived anything to the ps_gain field
+	   prior to the format MR1 version 2 changeover -- this code
+	   reads that meaningless value and then stores a NaN
+	   to the ps_gain field */
+	if (!xdr_float(xdrs, &(ps->ps_gain)))
+		return 0;
+	*bytecnt += 4;
+	ps->ps_gain = bs_ionanf;
+
+	/* HMRG code never archived anything to the ps_pulse field
+	   prior to the format MR1 version 2 changeover with the exception
+	   of one format conversion program (sb4b2mr) -- this code
+	   reads that value and then replaces it with a NaN unless
+	   it is non-zero */
+	if (!xdr_float(xdrs, &(ps->ps_pulse)))
+		return 0;
+	*bytecnt += 4;
+	if (ps->ps_pulse == 0.)
+		ps->ps_pulse = bs_ionanf;
+
+	if (!xdr_int(xdrs, &(ps->ps_btycount)))
+		return 0;
+	*bytecnt += 4;
+	if (xdrs->x_op == XDR_DECODE)
+		ps->ps_btypad = 0;
+	if (!xdr_float(xdrs, &(ps->ps_ssxoffset)))
+		return 0;
+	*bytecnt += 4;
+	if (!xdr_int(xdrs, &(ps->ps_sscount)))
+		return 0;
+	*bytecnt += 4;
+	if (xdrs->x_op == XDR_DECODE)
+		ps->ps_sspad = 0;
+
+	return 1;
+}
+
 /*
    Internal routine.
    Does XDR decoding of an MR1 version 1 ping header.
    Returns 1 if successful, 0 otherwise.
 */
+int mbbs_mr1_xdrpnghdrv1(Ping *png, XDR *xdrs)
 {
-	int tvsec, tvusec;
-	unsigned long sidebc;
-	int mr1_xdrsidev1(PingSide *, XDR *, unsigned long *);
-
 	bs_iobytecnt = 0;
 
 	/* output in obsolete format not allowed! */
@@ -74,10 +137,12 @@ int mbbs_mr1_xdrpnghdrv1(Ping *png, XDR *xdrs)
 	   struct's fields may be 4 or 8 bytes; for backward
 	   compatibility with old files that use 4-byte fields,
 	   we use 4-byte primitives */
+	int tvsec;
 	if (!xdr_int(xdrs, &tvsec))
 		return 0;
 	bs_iobytecnt += 4;
 	png->png_tm.tv_sec = tvsec;
+	int tvusec;
 	if (!xdr_int(xdrs, &tvusec))
 		return 0;
 	bs_iobytecnt += 4;
@@ -145,6 +210,7 @@ int mbbs_mr1_xdrpnghdrv1(Ping *png, XDR *xdrs)
 	png->png_magy = bs_ionanf;
 	png->png_magz = bs_ionanf;
 
+	unsigned long sidebc;
 	if (!mr1_xdrsidev1(&(png->png_sides[ACP_PORT]), xdrs, &sidebc))
 		return 0;
 	bs_iobytecnt += sidebc;
@@ -158,75 +224,6 @@ int mbbs_mr1_xdrpnghdrv1(Ping *png, XDR *xdrs)
 	png->png_sides[ACP_STBD].ps_bdrange = png->png_alt;
 	png->png_sides[ACP_STBD].ps_ssndrmask = 0.;
 	png->png_sides[ACP_STBD].ps_ssyoffset = bs_ionanf;
-
-	return 1;
-}
-
-int mr1_xdrsidev1(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
-/*
-   Internal routine.
-   Does XDR decoding of an obsolete MR1 version 1 PingSide header.
-   Records the total number of bytes transferred into *bytecnt.
-   Returns 1 if successful, 0 otherwise.
-*/
-{
-	*bytecnt = 0;
-
-	/* output in obsolete format not allowed! */
-	if (xdrs->x_op == XDR_ENCODE)
-		return 0;
-
-	if (!bs_ionaninit) {
-		bs_ionanf = mbbs_nanf();
-		bs_ionand = mbbs_nand();
-		bs_ionaninit = 1;
-	}
-
-	/* HMRG code never archived anything to the old ps_trans[]
-	   fields, so their contents are meaningless -- this code
-	   reads those meaningless values and then stores a NaN
-	   to the new ps_xmitpwr field */
-	if (!xdr_float(xdrs, &(ps->ps_xmitpwr)))
-		return 0;
-	*bytecnt += 4;
-	if (!xdr_float(xdrs, &(ps->ps_xmitpwr)))
-		return 0;
-	*bytecnt += 4;
-	ps->ps_xmitpwr = bs_ionanf;
-
-	/* HMRG code never archived anything to the ps_gain field
-	   prior to the format MR1 version 2 changeover -- this code
-	   reads that meaningless value and then stores a NaN
-	   to the ps_gain field */
-	if (!xdr_float(xdrs, &(ps->ps_gain)))
-		return 0;
-	*bytecnt += 4;
-	ps->ps_gain = bs_ionanf;
-
-	/* HMRG code never archived anything to the ps_pulse field
-	   prior to the format MR1 version 2 changeover with the exception
-	   of one format conversion program (sb4b2mr) -- this code
-	   reads that value and then replaces it with a NaN unless
-	   it is non-zero */
-	if (!xdr_float(xdrs, &(ps->ps_pulse)))
-		return 0;
-	*bytecnt += 4;
-	if (ps->ps_pulse == 0.)
-		ps->ps_pulse = bs_ionanf;
-
-	if (!xdr_int(xdrs, &(ps->ps_btycount)))
-		return 0;
-	*bytecnt += 4;
-	if (xdrs->x_op == XDR_DECODE)
-		ps->ps_btypad = 0;
-	if (!xdr_float(xdrs, &(ps->ps_ssxoffset)))
-		return 0;
-	*bytecnt += 4;
-	if (!xdr_int(xdrs, &(ps->ps_sscount)))
-		return 0;
-	*bytecnt += 4;
-	if (xdrs->x_op == XDR_DECODE)
-		ps->ps_sspad = 0;
 
 	return 1;
 }

@@ -167,11 +167,11 @@ int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_project
 	memcpy(data->primary_data, primary_data, data->primary_nxy * sizeof(float));
 
 	/* reset contours and histograms */
-	view->contourlorez = MB_NO;
-	view->contourhirez = MB_NO;
-	view->contourfullrez = MB_NO;
-	view->primary_histogram_set = MB_NO;
-	view->primaryslope_histogram_set = MB_NO;
+	view->contourlorez = false;
+	view->contourhirez = false;
+	view->contourfullrez = false;
+	view->primary_histogram_set = false;
+	view->primaryslope_histogram_set = false;
 
 	/* set status bit arrays */
 	mbview_setcolorparms(instance);
@@ -220,13 +220,13 @@ int mbview_updateprimarygrid(int verbose, size_t instance, int primary_n_columns
 
 	/* set value and calculate derivative */
 	if (primary_n_columns == data->primary_n_columns && primary_n_rows == data->primary_n_rows) {
-		first = MB_YES;
+		first = true;
 		for (k = 0; k < data->primary_n_columns * data->primary_n_rows; k++) {
 			data->primary_data[k] = primary_data[k];
-			if (first == MB_YES && primary_data[k] != data->primary_nodatavalue) {
+			if (first == true && primary_data[k] != data->primary_nodatavalue) {
 				data->primary_min = data->primary_data[k];
 				data->primary_max = data->primary_data[k];
-				first = MB_NO;
+				first = false;
 			}
 			else if (primary_data[k] != data->primary_nodatavalue) {
 				data->primary_min = MIN(data->primary_min, data->primary_data[k]);
@@ -246,11 +246,11 @@ int mbview_updateprimarygrid(int verbose, size_t instance, int primary_n_columns
 	mbview_colorclear(instance);
 
 	/* reset contour and histogram flags */
-	view->contourlorez = MB_NO;
-	view->contourhirez = MB_NO;
-	view->contourfullrez = MB_NO;
-	view->primary_histogram_set = MB_NO;
-	view->primaryslope_histogram_set = MB_NO;
+	view->contourlorez = false;
+	view->contourhirez = false;
+	view->contourfullrez = false;
+	view->primary_histogram_set = false;
+	view->primaryslope_histogram_set = false;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -303,9 +303,9 @@ int mbview_updateprimarygridcell(int verbose, size_t instance, int primary_ix, i
 		mbview_derivative(instance, primary_ix, primary_jy);
 
 		/* reset contour flags */
-		view->contourlorez = MB_NO;
-		view->contourhirez = MB_NO;
-		view->contourfullrez = MB_NO;
+		view->contourlorez = false;
+		view->contourhirez = false;
+		view->contourfullrez = false;
 	}
 
 	/* print output debug statements */

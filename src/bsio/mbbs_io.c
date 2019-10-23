@@ -50,12 +50,19 @@
 #include "mbbs_defines.h"
 #include "mbbs_mem.h"
 
-extern int mbbs_getpngdataptrs(Ping *, MemType *, PingData *);
-extern double mbbs_nand();
-extern float mbbs_nanf();
-extern MemType *mbbs_pngmemalloc(Ping *);
-extern int mbbs_mr1_xdrpnghdrv1(Ping *, XDR *);
-extern int mbbs_mr1_xdrpnghdrv2(Ping *, XDR *);
+int mbbs_getpngdataptrs(Ping *, MemType *, PingData *);
+double mbbs_nand();
+float mbbs_nanf();
+MemType *mbbs_pngmemalloc(Ping *);
+int mbbs_mr1_xdrpnghdrv1(Ping *, XDR *);
+int mbbs_mr1_xdrpnghdrv2(Ping *, XDR *);
+
+int mbbs_xdrbsfhdr(BSFile *, XDR *);
+int mbbs_xdrpnghdr(Ping *, XDR *, int);
+int mbbs_xdrpngdata(Ping *, MemType *, XDR *);
+int mbbs_xdrpngpddata(Ping *, PingData *, XDR *);
+int mbbs_xdrstring(XDR *, char **, unsigned long *);
+int mbbs_xdrside(PingSide *, XDR *, int, unsigned long *);
 
 unsigned long bs_iobytecnt;
 int bs_ionaninit = 0;
@@ -72,14 +79,9 @@ int mbbs_rdbsfhdr(BSFile *bsf, XDR *xdrs)
    to by xdrs and returns this header in the structure bsf.
    xdrs is assumed to be positioned at the next header,
    and does not search.
-   Returns BS_SUCCESS, BS_BADARCH or BS_READ.
+   Returns BS_SUCCESS or BS_READ.
 */
 {
-	int mbbs_xdrbsfhdr(BSFile *, XDR *);
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
-
 	if (mbbs_xdrbsfhdr(bsf, xdrs))
 		return BS_SUCCESS;
 	else
@@ -90,14 +92,9 @@ int mbbs_wrbsfhdr(BSFile *bsf, XDR *xdrs)
 /*
    User-callable routine.
    Writes the BSFile header bsf onto the XDR stream pointed to by xdrs.
-   Returns BS_SUCCESS, BS_BADARCH or BS_READ.
+   Returns BS_SUCCESS or BS_READ.
 */
 {
-	int mbbs_xdrbsfhdr(BSFile *, XDR *);
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
-
 	if (mbbs_xdrbsfhdr(bsf, xdrs))
 		return BS_SUCCESS;
 	else
@@ -128,14 +125,9 @@ int mbbs_rdpnghdr(Ping *png, XDR *xdrs, int version)
    xdrs is assumed to be positioned at the next header,
    and does not search. version should be the bs_version value
    from the file header which indicates the version of the file.
-   Returns BS_SUCCESS, BS_BADARCH, BS_BADARG or BS_READ.
+   Returns BS_SUCCESS, BS_BADARG or BS_READ.
 */
 {
-	int mbbs_xdrpnghdr(Ping *, XDR *, int);
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
-
 	switch (version) {
 	case MR1_VERSION_1_0:
 		if (mbbs_mr1_xdrpnghdrv1(png, xdrs))
@@ -165,14 +157,9 @@ int mbbs_wrpnghdr(Ping *png, XDR *xdrs)
 /*
    User-callable routine.
    Writes the Ping header png onto the XDR stream pointed to by xdrs.
-   Returns BS_SUCCESS, BS_BADARCH or BS_WRITE.
+   Returns BS_SUCCESS or BS_WRITE.
 */
 {
-	int mbbs_xdrpnghdr(Ping *, XDR *, int);
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
-
 	if (mbbs_xdrpnghdr(png, xdrs, (int)BS_VERSION_CURR))
 		return BS_SUCCESS;
 	else
@@ -186,14 +173,9 @@ int mbbs_rdpngdata(Ping *png, MemType *data, XDR *xdrs)
    the memory pointed to by data argument. It assumes that
    the stream is positioned correctly (i.e., right after the
    header), and does not search.
-   Returns BS_SUCCESS, BS_BADARCH or BS_READ.
+   Returns BS_SUCCESS or BS_READ.
 */
 {
-	int mbbs_xdrpngdata(Ping *, MemType *, XDR *);
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
-
 	if (mbbs_xdrpngdata(png, data, xdrs))
 		return BS_SUCCESS;
 	else
@@ -204,14 +186,9 @@ int mbbs_wrpngdata(Ping *png, MemType *data, XDR *xdrs)
 /*
    User-callable routine.
    Writes sample data to the XDR stream pointed to by xdrs.
-   Returns BS_SUCCESS, BS_BADARCH or BS_WRITE.
+   Returns BS_SUCCESS or BS_WRITE.
 */
 {
-	int mbbs_xdrpngdata(Ping *, MemType *, XDR *);
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
-
 	if (mbbs_xdrpngdata(png, data, xdrs))
 		return BS_SUCCESS;
 	else
@@ -222,14 +199,9 @@ int mbbs_rdpngpddata(Ping *png, PingData *pddata, XDR *xdrs)
 /*
    User-callable routine.
    Reads sample data from the XDR stream pointed to by xdrs.
-   Returns BS_SUCCESS, BS_BADARCH or BS_WRITE.
+   Returns BS_SUCCESS or BS_WRITE.
 */
 {
-	int mbbs_xdrpngpddata(Ping *, PingData *, XDR *);
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
-
 	if (mbbs_xdrpngpddata(png, pddata, xdrs))
 		return BS_SUCCESS;
 	else
@@ -240,14 +212,9 @@ int mbbs_wrpngpddata(Ping *png, PingData *pddata, XDR *xdrs)
 /*
    User-callable routine.
    Writes sample data to the XDR stream pointed to by xdrs.
-   Returns BS_SUCCESS, BS_BADARCH or BS_WRITE.
+   Returns BS_SUCCESS or BS_WRITE.
 */
 {
-	int mbbs_xdrpngpddata(Ping *, PingData *, XDR *);
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
-
 	if (mbbs_xdrpngpddata(png, pddata, xdrs))
 		return BS_SUCCESS;
 	else
@@ -263,13 +230,10 @@ int mbbs_rdpng(Ping *png, MemType **data, XDR *xdrs, int version)
    it does some error checking). Memory for the actual sample
    data is allocated. version should be the bs_version value
    from the file header which indicates the version of the file.
-   Returns BS_SUCCESS, BS_BADARCH, BS_BADARG, BS_MEMALLOC or BS_READ.
+   Returns BS_SUCCESS, BS_BADARG, BS_MEMALLOC or BS_READ.
 */
 {
 	unsigned long ibcsv;
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
 
 	bs_iobytecnt = 0;
 
@@ -305,13 +269,10 @@ int mbbs_wrpng(Ping *png, MemType *data, XDR *xdrs)
    User-callable routine.
    Writes ping header and data to the
    XDR stream pointed to by xdrs.
-   Returns BS_SUCCESS, BS_BADARCH or BS_WRITE.
+   Returns BS_SUCCESS or BS_WRITE.
 */
 {
 	unsigned long ibcsv;
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
 
 	bs_iobytecnt = 0;
 
@@ -332,7 +293,7 @@ int mbbs_seekpng(int count, XDR *xdrs, int version)
    Seeks past the next n pings in the XDR stream pointed to by xdrs.
    version should be the bs_version value from the file header which
    indicates the version of the file.
-   Returns BS_SUCCESS, BS_BADARCH, BS_BADARG or BS_READ.
+   Returns BS_SUCCESS, BS_BADARG or BS_READ.
 */
 {
 	Ping png;
@@ -342,9 +303,6 @@ int mbbs_seekpng(int count, XDR *xdrs, int version)
 	float f;
 	char *cp;
 	unsigned long ibcsv;
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
 
 	bs_iobytecnt = 0;
 
@@ -465,7 +423,7 @@ int mbbs_seekpngdata(Ping *png, XDR *xdrs)
    Seeks past a single ping data segment
    to the beginning of the next ping header
    in the XDR stream pointed to by xdrs.
-   Returns BS_SUCCESS, BS_BADARCH or BS_READ.
+   Returns BS_SUCCESS or BS_READ.
 */
 {
 	int j, bsi, side, err, n, ii, rem;
@@ -473,9 +431,6 @@ int mbbs_seekpngdata(Ping *png, XDR *xdrs)
 	u_int ui1;
 	float f;
 	char *cp;
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
 
 	bs_iobytecnt = 0;
 
@@ -579,7 +534,7 @@ int mbbs_copypng(int count, XDR *xdris, XDR *xdros, int version)
    from the file header which indicates the version of the file.
    Note that this routine will set bs_iobytecnt to the count
    of bytes written, not bytes read!
-   Returns BS_SUCCESS, BS_BADARCH, BS_BADARG, BS_READ or BS_WRITE.
+   Returns BS_SUCCESS, BS_BADARG, BS_READ or BS_WRITE.
 */
 {
 	Ping png;
@@ -589,9 +544,6 @@ int mbbs_copypng(int count, XDR *xdris, XDR *xdros, int version)
 	float f;
 	char *cp;
 	unsigned int ibcsv;
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
 
 	bs_iobytecnt = 0;
 
@@ -737,7 +689,6 @@ int mbbs_xdrbsfhdr(BSFile *bsf, XDR *xdrs)
 	char **cpp;
 	int version;
 	unsigned long strbc;
-	int mbbs_xdrstring(XDR *, char **, unsigned long *);
 
 	bs_iobytecnt = 0;
 
@@ -855,7 +806,6 @@ int mbbs_xdrpnghdr(Ping *png, XDR *xdrs, int version)
 	unsigned int flags;
 	int tvsec, tvusec;
 	unsigned long sidebc;
-	int mbbs_xdrside(PingSide *, XDR *, int, unsigned long *);
 
 	switch (version) {
 	case BS_VERSION_1_0:
@@ -1128,7 +1078,6 @@ int mbbs_xdrpngdata(Ping *png, MemType *data, XDR *xdrs)
 */
 {
 	PingData pd;
-	int mbbs_xdrpngpddata(Ping *, PingData *, XDR *);
 
 	if (mbbs_getpngdataptrs(png, data, &pd) != BS_SUCCESS)
 		return 0;
@@ -1374,9 +1323,6 @@ int mbbs_xdrstring(XDR *xdrs, char **cpp, unsigned long *bytecnt)
 
 int mbbs_rdversion(FILE *fp, int *version) {
 	XDR xdrs;
-
-	if (sizeof(int) < 4)
-		return BS_BADARCH;
 
 	bs_iobytecnt = 0;
 

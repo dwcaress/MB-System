@@ -67,9 +67,9 @@ int mbr_info_hsds2lam(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_XDR;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -193,7 +193,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* get telegram */
 	nskip = 0;
 	xdr_status = xdr_int(mb_io_ptr->xdrs, &telegram_id);
-	while (xdr_status == MB_YES && telegram_id != MBSYS_ATLAS_TELEGRAM_HSDS2LAM &&
+	while (xdr_status == true && telegram_id != MBSYS_ATLAS_TELEGRAM_HSDS2LAM &&
 	       telegram_id != MBSYS_ATLAS_TELEGRAM_COMMENTLAM) {
 		xdr_status = xdr_int(mb_io_ptr->xdrs, &telegram_id);
 		nskip++;
@@ -201,163 +201,163 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* read ping record */
 	if (telegram_id == MBSYS_ATLAS_TELEGRAM_HSDS2LAM) {
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->start_ping_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_transmit_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->start_opmode, strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_heave);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_roll);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_pitch);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_heading);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_ckeel);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_cmean);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_depth_min);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_depth_max);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->tt_ping_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_transmit_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_beam_table_index);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_beam_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_long1);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_long2);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_long3);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_xdraught);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_double1);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_double2);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_sensdraught);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_draught);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->pr_navlon);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->pr_navlat);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->pr_speed);
 		for (int i = 0; i < store->tt_beam_cnt; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &(store->tt_lruntime[i]));
 		}
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->tt_lamplitude, strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->tt_lstatus, strlength);
 		for (int i = 0; i < store->tt_beam_cnt; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double(mb_io_ptr->xdrs, &(store->pr_bath[i]));
 		}
 		for (int i = 0; i < store->tt_beam_cnt; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double(mb_io_ptr->xdrs, &(store->pr_bathacrosstrack[i]));
 		}
 		for (int i = 0; i < store->tt_beam_cnt; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double(mb_io_ptr->xdrs, &(store->pr_bathalongtrack[i]));
 		}
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->pr_beamflag, strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->ss_ping_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->ss_transmit_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->ss_timedelay);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->ss_timespacing);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->ss_max_side_bb_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->ss_max_side_sb_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->ss_sidescan, strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tr_transmit_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->tr_ping_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tr_window_mode);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tr_no_of_win_groups);
 		for (int i = 0; i < 100; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tr_repeat_count[i]);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->tr_start[i]);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->tr_stop[i]);
 		}
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->bs_transmit_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->bs_ping_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_short(mb_io_ptr->xdrs, &store->bs_nrActualGainSets);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_rxGup);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_rxGain);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_ar);
 		for (int i = 0; i < MBSYS_ATLAS_HSDS2_RX_PAR; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_TvgRx_time[i]);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_TvgRx_gain[i]);
 		}
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_short(mb_io_ptr->xdrs, &store->bs_nrTxSets);
 		for (int i = 0; i < MBSYS_ATLAS_HSDS2_TX_PAR; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->bs_txBeamIndex[i]);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_txLevel[i]);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_txBeamAngle[i]);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_pulseLength[i]);
 		}
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_short(mb_io_ptr->xdrs, &store->bs_nrBsSets);
 		for (int i = 0; i < MBSYS_ATLAS_HSDS2_PFB_NUM; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_m_tau[i]);
 		}
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->bs_eff_ampli, strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->bs_nis, strlength);
 
 		/* set kind */
@@ -369,9 +369,9 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* read comment record */
 	else if (telegram_id == MBSYS_ATLAS_TELEGRAM_COMMENTLAM) {
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->comment, strlength);
 
 		/* set kind */
@@ -381,7 +381,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* set error if required */
-	if (xdr_status == MB_NO) {
+	if (xdr_status == false) {
 		*error = MB_ERROR_EOF;
 		status = MB_FAILURE;
 	}
@@ -414,7 +414,6 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	}
 
-/* print debug statements */
 #ifndef MBR_HSDS2LAM_DEBUG
 	if (verbose >= 5)
 #endif
@@ -561,7 +560,6 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* get pointer to raw data structure */
 	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
-/* print debug statements */
 #ifndef MBR_HSDS2LAM_DEBUG
 	if (verbose >= 5)
 #endif
@@ -648,181 +646,181 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	if (store->kind == MB_DATA_DATA || store->kind == MB_DATA_CALIBRATE) {
 		telegram_id = MBSYS_ATLAS_TELEGRAM_HSDS2LAM;
 		xdr_status = xdr_int(mb_io_ptr->xdrs, &telegram_id);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->start_ping_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_transmit_time_d);
 		strlength = 32;
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->start_opmode, strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_heave);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_roll);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_pitch);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_heading);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_ckeel);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_cmean);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_depth_min);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_depth_max);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->tt_ping_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_transmit_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_beam_table_index);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_beam_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_long1);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_long2);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_long3);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_xdraught);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_double1);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_double2);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_sensdraught);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_draught);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->pr_navlon);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->pr_navlat);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->pr_speed);
 		for (int i = 0; i < store->tt_beam_cnt; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &(store->tt_lruntime[i]));
 		}
 		if (store->tt_beam_cnt % 4 == 0)
 			strlength = store->tt_beam_cnt;
 		else
 			strlength = 4 * ((store->tt_beam_cnt / 4) + 1);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->tt_lamplitude, strlength);
 		if (store->tt_beam_cnt % 4 == 0)
 			strlength = store->tt_beam_cnt;
 		else
 			strlength = 4 * ((store->tt_beam_cnt / 4) + 1);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->tt_lstatus, strlength);
 		for (int i = 0; i < store->tt_beam_cnt; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double(mb_io_ptr->xdrs, &(store->pr_bath[i]));
 		}
 		for (int i = 0; i < store->tt_beam_cnt; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double(mb_io_ptr->xdrs, &(store->pr_bathacrosstrack[i]));
 		}
 		for (int i = 0; i < store->tt_beam_cnt; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_double(mb_io_ptr->xdrs, &(store->pr_bathalongtrack[i]));
 		}
 		if (store->tt_beam_cnt % 4 == 0)
 			strlength = store->tt_beam_cnt;
 		else
 			strlength = 4 * ((store->tt_beam_cnt / 4) + 1);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->pr_beamflag, strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->ss_ping_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->ss_transmit_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->ss_timedelay);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->ss_timespacing);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->ss_max_side_bb_cnt);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->ss_max_side_sb_cnt);
 		if ((store->ss_max_side_bb_cnt + store->ss_max_side_sb_cnt) % 4 == 0)
 			strlength = store->ss_max_side_bb_cnt + store->ss_max_side_sb_cnt;
 		else
 			strlength = 4 * (((store->ss_max_side_bb_cnt + store->ss_max_side_sb_cnt) / 4) + 1);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->ss_sidescan, strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tr_transmit_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->tr_ping_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tr_window_mode);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tr_no_of_win_groups);
 		for (int i = 0; i < 100; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tr_repeat_count[i]);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->tr_start[i]);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->tr_stop[i]);
 		}
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_double(mb_io_ptr->xdrs, &store->bs_transmit_time_d);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &store->bs_ping_no);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_short(mb_io_ptr->xdrs, &store->bs_nrActualGainSets);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_rxGup);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_rxGain);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_ar);
 		for (int i = 0; i < MBSYS_ATLAS_HSDS2_RX_PAR; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_TvgRx_time[i]);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_TvgRx_gain[i]);
 		}
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_short(mb_io_ptr->xdrs, &store->bs_nrTxSets);
 		for (int i = 0; i < MBSYS_ATLAS_HSDS2_TX_PAR; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->bs_txBeamIndex[i]);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_txLevel[i]);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_txBeamAngle[i]);
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_pulseLength[i]);
 		}
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_u_short(mb_io_ptr->xdrs, &store->bs_nrBsSets);
 		for (int i = 0; i < MBSYS_ATLAS_HSDS2_PFB_NUM; i++) {
-			if (xdr_status == MB_YES)
+			if (xdr_status == true)
 				xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_m_tau[i]);
 		}
 		strlength = MBSYS_ATLAS_HSDS2_PFB_NUM;
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->bs_eff_ampli, strlength);
 		strlength = MBSYS_ATLAS_HSDS2_PFB_NUM;
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->bs_nis, strlength);
 	}
 
@@ -834,19 +832,19 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			strlength = strlen(store->comment) + 1;
 		else
 			strlength = 4 * (((strlen(store->comment) + 1) / 4) + 1);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
-		if (xdr_status == MB_YES)
+		if (xdr_status == true)
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->comment, strlength);
 	}
 
 	else
-		xdr_status = MB_NO;
+		xdr_status = false;
 
 	int status = MB_SUCCESS;
 
 	/* set error if required */
-	if (xdr_status == MB_NO) {
+	if (xdr_status == false) {
 		*error = MB_ERROR_WRITE_FAIL;
 		status = MB_FAILURE;
 	}
@@ -870,12 +868,6 @@ int mbr_wt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_hsds2lam_wr_data(verbose, mbio_ptr, store_ptr, error);

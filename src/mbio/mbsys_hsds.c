@@ -219,7 +219,6 @@ int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			amp[i] = store->back_scale * store->back[i];
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -255,7 +254,6 @@ int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		/* copy comment */
 		strcpy(comment, store->comment);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -398,13 +396,9 @@ int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 		for (int i = 0; i < nbath; i++) {
 			if (mb_beam_check_flag_null(beamflag[i])) {
 				store->depth[i] = 0.0;
-				/*fprintf(stderr, "NULL: time_d:%f i:%d flag:%d bath: %f %d\n",
-				time_d, i, beamflag[i], bath[i], store->depth[i]);*/
 			}
 			else if (mb_beam_check_flag(beamflag[i])) {
 				store->depth[i] = -scalefactor * bath[i];
-				/*fprintf(stderr, "FLAG: time_d:%f i:%d flag:%d bath: %f %d\n",
-				time_d, i, beamflag[i], bath[i], store->depth[i]);*/
 			}
 			else {
 				store->depth[i] = scalefactor * bath[i];
@@ -740,7 +734,6 @@ int mbsys_hsds_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*pitch = store->pitch;
 		*heave = store->heave;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");

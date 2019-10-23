@@ -65,9 +65,9 @@ int mbr_info_sbsioswb(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_NO;
-	*traveltime = MB_NO;
-	*beam_flagging = MB_YES;
+	*variable_beams = false;
+	*traveltime = false;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -230,7 +230,6 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 #endif
 
-	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5) {
 		fprintf(stderr, "\ndbg5  New header record read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  New header values:\n");
@@ -309,7 +308,6 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->data_size = mb_swap_short(data->data_size);
 #endif
 
-		/* print debug statements */
 		if (status == MB_SUCCESS && verbose >= 5) {
 			fprintf(stderr, "\ndbg5  Header record after byte shift in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5  New header values:\n");
@@ -394,7 +392,6 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 #endif
 
-		/* print debug statements */
 		if (status == MB_SUCCESS && verbose >= 5) {
 			fprintf(stderr, "\ndbg5  New sensor record read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5  New sensor values:\n");
@@ -463,7 +460,6 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 		}
 
-		/* print debug statements */
 		if (status == MB_SUCCESS && verbose >= 5 && data->kind == MB_DATA_DATA) {
 			fprintf(stderr, "\ndbg5  New data record read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5  New data values:\n");
@@ -490,7 +486,6 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			*error = MB_ERROR_EOF;
 		}
 
-		/* print debug statements */
 		if (status == MB_SUCCESS && verbose >= 5) {
 			fprintf(stderr, "\ndbg5  New comment record read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5  New comment:\n");
@@ -711,14 +706,12 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	sensor_size = data->sensor_size;
 	data_size = data->data_size;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Ready to write data in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
 		fprintf(stderr, "dbg5       error:      %d\n", *error);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Header record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Header values:\n");
@@ -740,7 +733,6 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       data_type:  %c%c\n", data->data_type[0], data->data_type[1]);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && data->kind == MB_DATA_DATA) {
 		fprintf(stderr, "\ndbg5  Sensor record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Sensor values:\n");
@@ -748,7 +740,6 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       eclipse_heading: %d\n", data->eclipse_heading);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && data->kind == MB_DATA_DATA) {
 		fprintf(stderr, "\ndbg5  Data record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Data values:\n");
@@ -759,7 +750,6 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			        data->bath_struct[i].bath_acrosstrack);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && data->kind == MB_DATA_COMMENT) {
 		fprintf(stderr, "\ndbg5  Comment record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Comment:\n");

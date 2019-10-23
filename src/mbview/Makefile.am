@@ -9,13 +9,14 @@ include_HEADERS = mbview.h
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
-        -I${top_srcdir}/src/mbaux \
-        $(MBTRNINCDIR) \
-        ${libgmt_CPPFLAGS} \
-        ${libnetcdf_CPPFLAGS} \
-        ${libmotif_CPPFLAGS} \
-        ${libopengl_CPPFLAGS}
+AM_CPPFLAGS =
+AM_CPPFLAGS += -I${top_srcdir}/src/mbio
+AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
+AM_CPPFLAGS += $(MBTRNINCDIR)
+AM_CPPFLAGS += ${libgmt_CPPFLAGS}
+AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
+AM_CPPFLAGS += ${libmotif_CPPFLAGS}
+AM_CPPFLAGS += ${libopengl_CPPFLAGS}
 
 libmbview_la_CFLAGS = -DMBVIEW_LIBRARY
 libmbview_la_LDFLAGS = -no-undefined -version-info 0:0:0

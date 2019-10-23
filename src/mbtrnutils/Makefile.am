@@ -23,7 +23,7 @@ AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/ut
 
 bin_PROGRAMS =  mbtrnpp
 
-mbtrnpp_SOURCES = mbtrnpreprocess.c
+mbtrnpp_SOURCES = mbtrnpp.c
 mbtrnpp_LDADD =  $(top_builddir)/src/mbio/libmbio.la \
   $(top_builddir)/src/mbaux/libmbaux.la \
   $(top_builddir)/src/mbaux/libmbxgr.la \

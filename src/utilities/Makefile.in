@@ -107,8 +107,8 @@ bin_PROGRAMS = mbconfig$(EXEEXT) mb7k2jstar$(EXEEXT) mb7k2ss$(EXEEXT) \
 	mbsegyinfo$(EXEEXT) mbsegylist$(EXEEXT) mbset$(EXEEXT) \
 	mbsslayout$(EXEEXT) mbstripnan$(EXEEXT) mbsvplist$(EXEEXT) \
 	mbsvpselect$(EXEEXT) mbswplspreprocess$(EXEEXT) \
-	mbtime$(EXEEXT) mbvoxelclean$(EXEEXT) $(am__EXEEXT_1) \
-	$(am__EXEEXT_2)
+	mbtime$(EXEEXT) mbvoxelclean$(EXEEXT) $(am__EXEEXT_1)
+@BUILD_GSF_TRUE@am__append_1 = -I${top_srcdir}/src/gsf
 subdir = src/utilities
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -124,7 +124,6 @@ CONFIG_HEADER = $(top_builddir)/src/mbio/mb_config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @BUILD_FFTW_TRUE@am__EXEEXT_1 = mbsegypsd$(EXEEXT)
-@BUILD_MBTRN_TRUE@am__EXEEXT_2 = mbtrnpreprocess$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_mb7k2jstar_OBJECTS = mb7k2jstar.$(OBJEXT)
@@ -163,7 +162,8 @@ mbconfig_OBJECTS = $(am_mbconfig_OBJECTS)
 mbconfig_LDADD = $(LDADD)
 am_mbcopy_OBJECTS = mbcopy.$(OBJEXT)
 mbcopy_OBJECTS = $(am_mbcopy_OBJECTS)
-mbcopy_DEPENDENCIES = ${top_builddir}/src/gsf/libmbgsf.la
+@BUILD_GSF_TRUE@mbcopy_DEPENDENCIES =  \
+@BUILD_GSF_TRUE@	${top_builddir}/src/gsf/libmbgsf.la
 am_mbctdlist_OBJECTS = mbctdlist.$(OBJEXT)
 mbctdlist_OBJECTS = $(am_mbctdlist_OBJECTS)
 mbctdlist_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
@@ -240,8 +240,7 @@ mbpreprocess_OBJECTS = $(am_mbpreprocess_OBJECTS)
 mbpreprocess_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
 am_mbprocess_OBJECTS = mbprocess.$(OBJEXT)
 mbprocess_OBJECTS = $(am_mbprocess_OBJECTS)
-mbprocess_DEPENDENCIES = ${top_builddir}/src/gsf/libmbgsf.la \
-	${top_builddir}/src/mbaux/libmbaux.la
+mbprocess_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
 am_mbrollbias_OBJECTS = mbrollbias.$(OBJEXT)
 mbrollbias_OBJECTS = $(am_mbrollbias_OBJECTS)
 mbrollbias_LDADD = $(LDADD)
@@ -295,17 +294,6 @@ mbswplspreprocess_DEPENDENCIES =  \
 am_mbtime_OBJECTS = mbtime.$(OBJEXT)
 mbtime_OBJECTS = $(am_mbtime_OBJECTS)
 mbtime_LDADD = $(LDADD)
-@BUILD_MBTRN_TRUE@am_mbtrnpreprocess_OBJECTS =  \
-@BUILD_MBTRN_TRUE@	mbtrnpreprocess.$(OBJEXT)
-mbtrnpreprocess_OBJECTS = $(am_mbtrnpreprocess_OBJECTS)
-@BUILD_MBTRN_TRUE@mbtrnpreprocess_DEPENDENCIES =  \
-@BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbtrn/libmbtrn.la \
-@BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbio/libmbio.la \
-@BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbaux/libmbaux.la \
-@BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbaux/libmbxgr.la \
-@BUILD_MBTRN_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-@BUILD_MBTRN_TRUE@	$(am__DEPENDENCIES_1) $(MBTRNLIB) \
-@BUILD_MBTRN_TRUE@	$(am__DEPENDENCIES_1)
 am_mbvoxelclean_OBJECTS = mbvoxelclean.$(OBJEXT)
 mbvoxelclean_OBJECTS = $(am_mbvoxelclean_OBJECTS)
 mbvoxelclean_LDADD = $(LDADD)
@@ -350,8 +338,7 @@ am__depfiles_remade = ./$(DEPDIR)/geodesic.Po \
 	./$(DEPDIR)/mbset.Po ./$(DEPDIR)/mbsslayout.Po \
 	./$(DEPDIR)/mbstripnan.Po ./$(DEPDIR)/mbsvplist.Po \
 	./$(DEPDIR)/mbsvpselect.Po ./$(DEPDIR)/mbswplspreprocess.Po \
-	./$(DEPDIR)/mbtime.Po ./$(DEPDIR)/mbtrnpreprocess.Po \
-	./$(DEPDIR)/mbvoxelclean.Po
+	./$(DEPDIR)/mbtime.Po ./$(DEPDIR)/mbvoxelclean.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -394,7 +381,7 @@ SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mbsslayout_SOURCES) $(mbstripnan_SOURCES) \
 	$(mbsvplist_SOURCES) $(mbsvpselect_SOURCES) \
 	$(mbswplspreprocess_SOURCES) $(mbtime_SOURCES) \
-	$(mbtrnpreprocess_SOURCES) $(mbvoxelclean_SOURCES)
+	$(mbvoxelclean_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -496,10 +483,8 @@ LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
-LIBS = ${top_builddir}/src/mbio/libmbio.la \
-       	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-        $(LIBM)
-
+LIBS = ${top_builddir}/src/mbio/libmbio.la ${libgmt_LIBS} \
+	${libnetcdf_LIBS} ${libproj_LIBS} $(LIBM)
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
@@ -627,19 +612,12 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_FFTW_TRUE@FFTW_PROG = mbsegypsd
-@BUILD_MBTRN_TRUE@MBTRN_PROG = mbtrnpreprocess
-@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
-@BUILD_MBTRN_TRUE@MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
+@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
 include_HEADERS = levitus.h
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
-	    -I${top_srcdir}/src/mbaux \
-	    -I${top_srcdir}/src/gsf \
-        $(MBTRNINCDIR) \
-	    ${libgmt_CPPFLAGS} \
-	    ${libnetcdf_CPPFLAGS} \
-	    ${libfftw_CPPFLAGS}
-
+AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
+	$(am__append_1) $(MBTRNINCDIR) ${libgmt_CPPFLAGS} \
+	${libnetcdf_CPPFLAGS} ${libfftw_CPPFLAGS}
 AM_LDFLAGS = 
 mbconfig_SOURCES = mbconfig.c
 mb7k2jstar_SOURCES = mb7k2jstar.c
@@ -656,7 +634,7 @@ mbauvnavusbl_SOURCES = mbauvnavusbl.c
 mbbackangle_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbbackangle_SOURCES = mbbackangle.c
 mbclean_SOURCES = mbclean.c
-mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la
+@BUILD_GSF_TRUE@mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la
 mbcopy_SOURCES = mbcopy.c
 mbctdlist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbctdlist_SOURCES = mbctdlist.c
@@ -687,7 +665,7 @@ mbnavlist_SOURCES = mbnavlist.c
 mbneptune2esf_SOURCES = mbneptune2esf.c
 mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbpreprocess_SOURCES = mbpreprocess.c
-mbprocess_LDADD = ${top_builddir}/src/gsf/libmbgsf.la ${top_builddir}/src/mbaux/libmbaux.la
+mbprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbprocess_SOURCES = mbprocess.c
 mbrollbias_SOURCES = mbrollbias.c
 mbrolltimelag_SOURCES = mbrolltimelag.c
@@ -707,19 +685,12 @@ mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbswplspreprocess_SOURCES = mbswplspreprocess.c
 mbtime_SOURCES = mbtime.c
 mbvoxelclean_SOURCES = mbvoxelclean.c
-@BUILD_FFTW_TRUE@mbsegypsd_LDADD = ${top_builddir}/src/mbaux/libmbaux.la \
-@BUILD_FFTW_TRUE@                  ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${libfftw_LIBS}
-
+@BUILD_FFTW_TRUE@mbsegypsd_LDADD =  \
+@BUILD_FFTW_TRUE@	${top_builddir}/src/mbaux/libmbaux.la \
+@BUILD_FFTW_TRUE@	${libgmt_LIBS} ${libnetcdf_LIBS} \
+@BUILD_FFTW_TRUE@	${libproj_LIBS} ${libfftw_LIBS}
 @BUILD_FFTW_TRUE@mbsegypsd_SOURCES = mbsegypsd.c
 @BUILD_FFTW_TRUE@mbsegypsd_LDFLAGS = 
-@BUILD_MBTRN_TRUE@mbtrnpreprocess_SOURCES = mbtrnpreprocess.c
-@BUILD_MBTRN_TRUE@mbtrnpreprocess_LDADD = $(top_builddir)/src/mbtrn/libmbtrn.la \
-@BUILD_MBTRN_TRUE@       $(top_builddir)/src/mbio/libmbio.la \
-@BUILD_MBTRN_TRUE@       $(top_builddir)/src/mbaux/libmbaux.la \
-@BUILD_MBTRN_TRUE@       $(top_builddir)/src/mbaux/libmbxgr.la \
-@BUILD_MBTRN_TRUE@       ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-@BUILD_MBTRN_TRUE@       $(MBTRNLIB) $(LIBM)
-
 BUILT_SOURCES = levitus.h
 CLEANFILES = levitus.h
 DISTCLEANFILES = levitus.h
@@ -1011,10 +982,6 @@ mbtime$(EXEEXT): $(mbtime_OBJECTS) $(mbtime_DEPENDENCIES) $(EXTRA_mbtime_DEPENDE
 	@rm -f mbtime$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mbtime_OBJECTS) $(mbtime_LDADD) $(LIBS)
 
-mbtrnpreprocess$(EXEEXT): $(mbtrnpreprocess_OBJECTS) $(mbtrnpreprocess_DEPENDENCIES) $(EXTRA_mbtrnpreprocess_DEPENDENCIES) 
-	@rm -f mbtrnpreprocess$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(mbtrnpreprocess_OBJECTS) $(mbtrnpreprocess_LDADD) $(LIBS)
-
 mbvoxelclean$(EXEEXT): $(mbvoxelclean_OBJECTS) $(mbvoxelclean_DEPENDENCIES) $(EXTRA_mbvoxelclean_DEPENDENCIES) 
 	@rm -f mbvoxelclean$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mbvoxelclean_OBJECTS) $(mbvoxelclean_LDADD) $(LIBS)
@@ -1077,7 +1044,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsvpselect.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbswplspreprocess.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtime.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrnpreprocess.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbvoxelclean.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -1287,7 +1253,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/mbsvpselect.Po
 	-rm -f ./$(DEPDIR)/mbswplspreprocess.Po
 	-rm -f ./$(DEPDIR)/mbtime.Po
-	-rm -f ./$(DEPDIR)/mbtrnpreprocess.Po
 	-rm -f ./$(DEPDIR)/mbvoxelclean.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -1386,7 +1351,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/mbsvpselect.Po
 	-rm -f ./$(DEPDIR)/mbswplspreprocess.Po
 	-rm -f ./$(DEPDIR)/mbtime.Po
-	-rm -f ./$(DEPDIR)/mbtrnpreprocess.Po
 	-rm -f ./$(DEPDIR)/mbvoxelclean.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

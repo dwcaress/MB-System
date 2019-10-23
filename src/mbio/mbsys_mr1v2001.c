@@ -333,7 +333,6 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 			ssalongtrack[j] = ssyoffset;
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -373,7 +372,6 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		/* copy comment */
 		strcpy(comment, store->comment);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -928,8 +926,8 @@ int mbsys_mr1v2001_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 			double bestxtrackflagged = 10000.0;
 			double bestdepth = 0.0;
 			double bestdepthflagged = 0.0;
-			int found = MB_NO;
-			int foundflagged = MB_NO;
+			bool found = false;
+			bool foundflagged = false;
 
 			/* loop over port bathymetry */
 			for (int i = 0; i < pingport->ps_btycount; i++) {
@@ -946,12 +944,12 @@ int mbsys_mr1v2001_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 				if (pbtyflags[i] == 0 && xtrack < bestxtrack) {
 					bestdepth = depth;
 					bestxtrack = xtrack;
-					found = MB_YES;
+					found = true;
 				}
 				else if (xtrack < bestxtrackflagged) {
 					bestdepthflagged = depth;
 					bestxtrackflagged = xtrack;
-					foundflagged = MB_YES;
+					foundflagged = true;
 				}
 			}
 
@@ -970,17 +968,17 @@ int mbsys_mr1v2001_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 				if (sbtyflags[i] == 0 && xtrack < bestxtrack) {
 					bestdepth = depth;
 					bestxtrack = xtrack;
-					found = MB_YES;
+					found = true;
 				}
 				else if (xtrack < bestxtrackflagged) {
 					bestdepthflagged = depth;
 					bestxtrackflagged = xtrack;
-					foundflagged = MB_YES;
+					foundflagged = true;
 				}
 			}
-			if (found == MB_YES)
+			if (found)
 				*altitude = bestdepth - *transducer_depth;
-			else if (foundflagged == MB_YES)
+			else if (foundflagged)
 				*altitude = bestdepthflagged - *transducer_depth;
 			else
 				*altitude = 0.0;
@@ -1104,7 +1102,6 @@ int mbsys_mr1v2001_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 		*pitch = ping->png_pitch.sns_repval;
 		*heave = 0.0;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");

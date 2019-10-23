@@ -528,7 +528,6 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			}
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -567,7 +566,6 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		else
 			comment[0] = '\0';
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -745,12 +743,12 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 		/* if ping flag set check for any unset
 		    beam flags - set or unset ping flag based on whether any
 		    unflagged beams are found */
-		int anyunflagged = MB_NO;
+		bool anyunflagged = false;
 		for (int i = 0; i < nbath; i++) {
 			if (mb_beam_ok(beamflag[i]))
-				anyunflagged = MB_YES;
+				anyunflagged = true;
 		}
-		if (anyunflagged == MB_NO)
+		if (!anyunflagged)
 			mb_ping->ping_flags = GSF_IGNORE_PING;
 		else
 			mb_ping->ping_flags = 0;
@@ -781,7 +779,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 			}
 
 		/* reset GSF scale factors if needed */
-		mbsys_gsf_setscalefactors(verbose, MB_NO, mb_ping, error);
+		mbsys_gsf_setscalefactors(verbose, false, mb_ping, error);
 	}
 
 	/* insert comment in structure */
@@ -1389,7 +1387,6 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		else
 			*heave = 0.0;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -2071,20 +2068,9 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 				multiplier_min = floor(min_scale_factor / (min + mb_ping->scaleFactors.scaleTable[id - 1].offset));
 			multiplier = MAX(MIN(multiplier_min, multiplier_max), 1.0);
 
-			if (reset_all == MB_YES || multiplier < mb_ping->scaleFactors.scaleTable[id - 1].multiplier) {
-				/* fprintf(stderr,"BEFORE Scale Factors %2d of %2d: minmax: %10f %10f compressionFlag:%5x offset:%10f
-				multiplier:%10f\n", id, GSF_MAX_PING_ARRAY_SUBRECORDS, min, max, mb_ping->scaleFactors.scaleTable[id -
-				1].compressionFlag, mb_ping->scaleFactors.scaleTable[id - 1].offset, mb_ping->scaleFactors.scaleTable[id -
-				1].multiplier); fprintf(stderr,"     highest_precision:%f offset:%f multiplier_min:%f multiplier_max:%f
-				multiplier:%f\n", highest_precision,offset,multiplier_min,multiplier_max,multiplier); */
-
+			if (reset_all == true || multiplier < mb_ping->scaleFactors.scaleTable[id - 1].multiplier) {
 				mb_ping->scaleFactors.scaleTable[id - 1].multiplier = multiplier;
 				mb_ping->scaleFactors.scaleTable[id - 1].offset = offset;
-
-				/* fprintf(stderr,"AFTER  Scale Factors %2d of %2d: minmax: %10f %10f compressionFlag:%5x offset:%10f
-				multiplier:%10f\n\n", id, GSF_MAX_PING_ARRAY_SUBRECORDS, min, max, mb_ping->scaleFactors.scaleTable[id -
-				1].compressionFlag, mb_ping->scaleFactors.scaleTable[id - 1].offset, mb_ping->scaleFactors.scaleTable[id -
-				1].multiplier); */
 			}
 		}
 	}

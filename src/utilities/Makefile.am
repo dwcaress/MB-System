@@ -8,77 +8,84 @@ endif
 
 # TODO(schwehr): What happened to mbps?
 
-bin_PROGRAMS = mbconfig \
-		mb7k2jstar \
-        mb7k2ss \
-        mb7kpreprocess \
-        mbabsorption \
-        mbareaclean \
-        mbauvloglist \
-        mbauvnavusbl \
-        mbbackangle \
-        mbclean \
-        mbcopy \
-        mbctdlist \
-        mbdatalist \
-        mbdefaults \
-        mbdumpesf \
-        mbextractsegy \
-        mbfilter \
-        mbformat \
-        mbgetesf \
-        mbgpstide \
-        mbgrid \
-        mbhistogram \
-        mbhsdump \
-        mbhysweeppreprocess \
-        mbinfo \
-        mbinsreprocess \
-        mbkongsbergpreprocess \
-        mblevitus \
-        mblist \
-		mbmakeplatform \
-		mbminirovnav \
-        mbmosaic \
-        mbnavlist \
-        mbneptune2esf \
-        mbpreprocess \
-        mbprocess \
-        mbrollbias \
-        mbrolltimelag \
-        mbroutetime \
-        mbrphsbias \
-        mbsegygrid \
-        mbsegyinfo \
-        mbsegylist \
-        mbset \
-        mbsslayout \
-        mbstripnan \
-        mbsvplist \
-        mbsvpselect \
-        mbswplspreprocess \
-        mbtime \
-        mbvoxelclean \
-        $(FFTW_PROG)
-
+bin_PROGRAMS =
+bin_PROGRAMS += mbconfig
+bin_PROGRAMS += mb7k2jstar
+bin_PROGRAMS += mb7k2ss
+bin_PROGRAMS += mb7kpreprocess
+bin_PROGRAMS += mbabsorption
+bin_PROGRAMS += mbareaclean
+bin_PROGRAMS += mbauvloglist
+bin_PROGRAMS += mbauvnavusbl
+bin_PROGRAMS += mbbackangle
+bin_PROGRAMS += mbclean
+bin_PROGRAMS += mbcopy
+bin_PROGRAMS += mbctdlist
+bin_PROGRAMS += mbdatalist
+bin_PROGRAMS += mbdefaults
+bin_PROGRAMS += mbdumpesf
+bin_PROGRAMS += mbextractsegy
+bin_PROGRAMS += mbfilter
+bin_PROGRAMS += mbformat
+bin_PROGRAMS += mbgetesf
+bin_PROGRAMS += mbgpstide
+bin_PROGRAMS += mbgrid
+bin_PROGRAMS += mbhistogram
+bin_PROGRAMS += mbhsdump
+bin_PROGRAMS += mbhysweeppreprocess
+bin_PROGRAMS += mbinfo
+bin_PROGRAMS += mbinsreprocess
+bin_PROGRAMS += mbkongsbergpreprocess
+bin_PROGRAMS += mblevitus
+bin_PROGRAMS += mblist
+bin_PROGRAMS += mbmakeplatform
+bin_PROGRAMS += mbminirovnav
+bin_PROGRAMS += mbmosaic
+bin_PROGRAMS += mbnavlist
+bin_PROGRAMS += mbneptune2esf
+bin_PROGRAMS += mbpreprocess
+bin_PROGRAMS += mbprocess
+bin_PROGRAMS += mbrollbias
+bin_PROGRAMS += mbrolltimelag
+bin_PROGRAMS += mbroutetime
+bin_PROGRAMS += mbrphsbias
+bin_PROGRAMS += mbsegygrid
+bin_PROGRAMS += mbsegyinfo
+bin_PROGRAMS += mbsegylist
+bin_PROGRAMS += mbset
+bin_PROGRAMS += mbsslayout
+bin_PROGRAMS += mbstripnan
+bin_PROGRAMS += mbsvplist
+bin_PROGRAMS += mbsvpselect
+bin_PROGRAMS += mbswplspreprocess
+bin_PROGRAMS += mbtime
+bin_PROGRAMS += mbvoxelclean
+bin_PROGRAMS += $(FFTW_PROG)
+bin_PROGRAMS += $(MBTRN_PROG)
 
 include_HEADERS = levitus.h
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
-	    -I${top_srcdir}/src/mbaux \
-	    -I${top_srcdir}/src/gsf \
-		${libgmt_CPPFLAGS} \
-	    ${libnetcdf_CPPFLAGS} \
-	    ${libfftw_CPPFLAGS} \
-		$(MBTRNINCDIR)
+AM_CPPFLAGS =
+AM_CPPFLAGS += -I${top_srcdir}/src/mbio
+AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
+if BUILD_GSF
+AM_CPPFLAGS += -I${top_srcdir}/src/gsf
+endif
+AM_CPPFLAGS += $(MBTRNINCDIR)
+AM_CPPFLAGS += ${libgmt_CPPFLAGS}
+AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
+AM_CPPFLAGS += ${libfftw_CPPFLAGS}
 
 AM_LDFLAGS =
 
-LIBS =  ${top_builddir}/src/mbio/libmbio.la \
-       	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-        $(LIBM)
+LIBS =
+LIBS += ${top_builddir}/src/mbio/libmbio.la
+LIBS += ${libgmt_LIBS}
+LIBS += ${libnetcdf_LIBS}
+LIBS += ${libproj_LIBS}
+LIBS += $(LIBM)
 
 mbconfig_SOURCES = mbconfig.c
 mb7k2jstar_SOURCES = mb7k2jstar.c
@@ -95,7 +102,9 @@ mbauvnavusbl_SOURCES = mbauvnavusbl.c
 mbbackangle_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbbackangle_SOURCES = mbbackangle.c
 mbclean_SOURCES = mbclean.c
+if BUILD_GSF
 mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la
+endif
 mbcopy_SOURCES = mbcopy.c
 mbctdlist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbctdlist_SOURCES = mbctdlist.c
@@ -126,7 +135,7 @@ mbnavlist_SOURCES = mbnavlist.c
 mbneptune2esf_SOURCES = mbneptune2esf.c
 mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbpreprocess_SOURCES = mbpreprocess.c
-mbprocess_LDADD = ${top_builddir}/src/gsf/libmbgsf.la ${top_builddir}/src/mbaux/libmbaux.la
+mbprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbprocess_SOURCES = mbprocess.c
 mbrollbias_SOURCES = mbrollbias.c
 mbrolltimelag_SOURCES = mbrolltimelag.c
@@ -147,8 +156,12 @@ mbswplspreprocess_SOURCES = mbswplspreprocess.c
 mbtime_SOURCES = mbtime.c
 mbvoxelclean_SOURCES = mbvoxelclean.c
 if BUILD_FFTW
-mbsegypsd_LDADD = ${top_builddir}/src/mbaux/libmbaux.la \
-                  ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${libfftw_LIBS}
+mbsegypsd_LDADD =
+mbsegypsd_LDADD += ${top_builddir}/src/mbaux/libmbaux.la
+mbsegypsd_LDADD += ${libgmt_LIBS}
+mbsegypsd_LDADD += ${libnetcdf_LIBS}
+mbsegypsd_LDADD += ${libproj_LIBS}
+mbsegypsd_LDADD += ${libfftw_LIBS}
 mbsegypsd_SOURCES = mbsegypsd.c
 mbsegypsd_LDFLAGS =
 endif

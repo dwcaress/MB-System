@@ -4,6 +4,9 @@
 /* Machine is littleendian, (Byteswapping on) */
 #define BYTESWAPPED 1
 
+/* Build with GSF */
+#define ENABLE_GSF 1
+
 /* Machine is bigendian, (Byteswapping off) */
 /* #undef ENDIAN_BIG */
 
@@ -68,10 +71,16 @@
 #define MBSYSTEM_INSTALL_PREFIX "/usr/local"
 
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
-#define MBSYSTEM_OTPS_LOCATION "/usr/local/opt/otps"
+#define MBSYSTEM_OTPS_LOCATION "/usr/local/src/OTPS2"
+
+/* Build libmbtnav */
+#define MBTNAV_ENABLED 1
 
 /* Build libmbtrn and mbtrnpreprocess */
 #define MBTRN_ENABLED 1
+
+/* Build graphical tools */
+#define MBUTILS_ENABLED 1
 
 /* Name of package */
 #define PACKAGE "mbsystem"
@@ -83,7 +92,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.7.6beta5"
+#define PACKAGE_STRING "mbsystem 5.7.6beta15"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -92,7 +101,7 @@
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.7.6beta5"
+#define PACKAGE_VERSION "5.7.6beta15"
 
 /* Build tools using PCL */
 /* #undef PCLTOOLS_ENABLED */
@@ -104,10 +113,10 @@
 /* #undef TEST_ENABLED */
 
 /* Version number of package */
-#define VERSION "5.7.6beta5"
+#define VERSION "5.7.6beta15"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "6 August 2019"
+#define VERSION_DATE "21 October 2019"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

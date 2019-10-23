@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_error.c	2/2/93
-  *
+ *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -17,8 +17,6 @@
  *
  * Author:	D. W. Caress
  * Date:	February 2, 1993
- *
- *
  */
 
 #include <math.h>
@@ -109,7 +107,6 @@ int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id) {
 		fprintf(stderr, "dbg2       error_id:   %d\n", error_id);
 	}
 
-	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	int status = MB_SUCCESS;
@@ -140,7 +137,6 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id) {
 		fprintf(stderr, "dbg2       problem_id: %d\n", problem_id);
 	}
 
-	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	int status = MB_SUCCESS;
@@ -171,7 +167,6 @@ int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
 		fprintf(stderr, "dbg2       notice_list:    %p\n", (void *)notice_list);
 	}
 
-	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* copy notice list */
@@ -204,7 +199,7 @@ int mb_notice_message(int verbose, int notice, char **message) {
 	int status = MB_SUCCESS;
 
 	/* set the message and status */
-	if (notice < 0 || notice > MB_NOTICE_MAX) {
+	if (notice < 0 || notice >= MB_NOTICE_MAX) {
 		*message = unknown_notice_msg[0];
 		status = MB_FAILURE;
 	}

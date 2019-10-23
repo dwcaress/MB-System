@@ -62,7 +62,7 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	store->kind = MB_DATA_NONE; /* Survey, nav, Comment */
 
 	/* parameter (ship frames) */
-	store->par_parameter = MB_NO;    /* boolean flag for parameter group */
+	store->par_parameter = false;    /* boolean flag for parameter group */
 	store->par_source = 0;           /* sensor id */
 	store->par_sec = 0;              /* sec since 1/1/1901 00:00 */
 	store->par_usec = 0;             /* microseconds */
@@ -86,7 +86,7 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	store->par_hrp_z = 0.0;          /* motion sensor z position, meters */
 
 	/* navigation and motion (ship frames) */
-	store->par_navigationandmotion = MB_NO; /* boolean flag for navigationandmotion group */
+	store->par_navigationandmotion = false; /* boolean flag for navigationandmotion group */
 	store->par_nam_roll_bias = 0.0;         /* roll bias, radians */
 	store->par_nam_pitch_bias = 0.0;        /* pitch bias, radians */
 	store->par_nam_heave_bias = 0.0;        /* heave bias, meters */
@@ -156,19 +156,19 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	store->svp_ssv_depthflag = 0; /* 0 = invalid depth, otherwise depth valid */
 
 	/* position (navigation frames) */
-	store->nav_group_general = MB_NO;  /* boolean flag */
-	store->nav_group_position = MB_NO; /* boolean flag */
-	store->nav_group_accuracy = MB_NO; /* boolean flag */
-	store->nav_group_motiongt = MB_NO; /* boolean flag */
-	store->nav_group_motiontw = MB_NO; /* boolean flag */
-	store->nav_group_track = MB_NO;    /* boolean flag */
-	store->nav_group_hrp = MB_NO;      /* boolean flag */
-	store->nav_group_heave = MB_NO;    /* boolean flag */
-	store->nav_group_roll = MB_NO;     /* boolean flag */
-	store->nav_group_pitch = MB_NO;    /* boolean flag */
-	store->nav_group_heading = MB_NO;  /* boolean flag */
-	store->nav_group_log = MB_NO;      /* boolean flag */
-	store->nav_group_gps = MB_NO;      /* boolean flag */
+	store->nav_group_general = false;  /* boolean flag */
+	store->nav_group_position = false; /* boolean flag */
+	store->nav_group_accuracy = false; /* boolean flag */
+	store->nav_group_motiongt = false; /* boolean flag */
+	store->nav_group_motiontw = false; /* boolean flag */
+	store->nav_group_track = false;    /* boolean flag */
+	store->nav_group_hrp = false;      /* boolean flag */
+	store->nav_group_heave = false;    /* boolean flag */
+	store->nav_group_roll = false;     /* boolean flag */
+	store->nav_group_pitch = false;    /* boolean flag */
+	store->nav_group_heading = false;  /* boolean flag */
+	store->nav_group_log = false;      /* boolean flag */
+	store->nav_group_gps = false;      /* boolean flag */
 	store->nav_source = 0;             /* sensor id */
 	store->nav_sec = 0;                /* sec since 1/1/1901 00:00 */
 	store->nav_usec = 0;               /* microseconds */
@@ -222,28 +222,28 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	                        ellipsoid) */
 
 	/* survey depth (multibeam frames) */
-	store->mul_frame = MB_NO;              /* boolean flag - multibeam frame read */
-	store->mul_group_beam = MB_NO;         /* boolean flag - beam group read */
-	store->mul_group_tt = MB_NO;           /* boolean flag - tt group read */
-	store->mul_group_quality = MB_NO;      /* boolean flag - quality group read */
-	store->mul_group_amp = MB_NO;          /* boolean flag - amp group read */
-	store->mul_group_delay = MB_NO;        /* boolean flag - delay group read */
-	store->mul_group_lateral = MB_NO;      /* boolean flag - lateral group read */
-	store->mul_group_along = MB_NO;        /* boolean flag - along group read */
-	store->mul_group_depth = MB_NO;        /* boolean flag - depth group read */
-	store->mul_group_angle = MB_NO;        /* boolean flag - angle group read */
-	store->mul_group_heave = MB_NO;        /* boolean flag - heave group read */
-	store->mul_group_roll = MB_NO;         /* boolean flag - roll group read */
-	store->mul_group_pitch = MB_NO;        /* boolean flag - pitch group read */
-	store->mul_group_gates = MB_NO;        /* boolean flag - gates group read */
-	store->mul_group_noise = MB_NO;        /* boolean flag - noise group read */
-	store->mul_group_length = MB_NO;       /* boolean flag - length group read */
-	store->mul_group_hits = MB_NO;         /* boolean flag - hits group read */
-	store->mul_group_heavereceive = MB_NO; /* boolean flag - heavereceive group read */
-	store->mul_group_azimuth = MB_NO;      /* boolean flag - azimuth group read */
-	store->mul_group_properties = MB_NO;   /* boolean flag - properties group read */
-	store->mul_group_normamp = MB_NO;      /* boolean flag - normalized amplitude group read */
-	store->mul_group_mbsystemnav = MB_NO;  /* boolean flag - mbsystemnav group read */
+	store->mul_frame = false;              /* boolean flag - multibeam frame read */
+	store->mul_group_beam = false;         /* boolean flag - beam group read */
+	store->mul_group_tt = false;           /* boolean flag - tt group read */
+	store->mul_group_quality = false;      /* boolean flag - quality group read */
+	store->mul_group_amp = false;          /* boolean flag - amp group read */
+	store->mul_group_delay = false;        /* boolean flag - delay group read */
+	store->mul_group_lateral = false;      /* boolean flag - lateral group read */
+	store->mul_group_along = false;        /* boolean flag - along group read */
+	store->mul_group_depth = false;        /* boolean flag - depth group read */
+	store->mul_group_angle = false;        /* boolean flag - angle group read */
+	store->mul_group_heave = false;        /* boolean flag - heave group read */
+	store->mul_group_roll = false;         /* boolean flag - roll group read */
+	store->mul_group_pitch = false;        /* boolean flag - pitch group read */
+	store->mul_group_gates = false;        /* boolean flag - gates group read */
+	store->mul_group_noise = false;        /* boolean flag - noise group read */
+	store->mul_group_length = false;       /* boolean flag - length group read */
+	store->mul_group_hits = false;         /* boolean flag - hits group read */
+	store->mul_group_heavereceive = false; /* boolean flag - heavereceive group read */
+	store->mul_group_azimuth = false;      /* boolean flag - azimuth group read */
+	store->mul_group_properties = false;   /* boolean flag - properties group read */
+	store->mul_group_normamp = false;      /* boolean flag - normalized amplitude group read */
+	store->mul_group_mbsystemnav = false;  /* boolean flag - mbsystemnav group read */
 	store->mul_source = 0;                 /* sensor id */
 	store->mul_sec = 0;                    /* sec since 1/1/1901 00:00 */
 	store->mul_usec = 0;                   /* microseconds */
@@ -291,15 +291,15 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	}
 
 	/* survey sidescan (sidescan frames) */
-	store->sid_frame = MB_NO;           /* boolean flag - sidescan frame read */
-	store->sid_group_avt = MB_NO;       /* boolean flag - amp vs time group read */
-	store->sid_group_pvt = MB_NO;       /* boolean flag - phase vs time group read */
-	store->sid_group_avl = MB_NO;       /* boolean flag - amp vs lateral group read */
-	store->sid_group_pvl = MB_NO;       /* boolean flag - phase vs lateral group read */
-	store->sid_group_signal = MB_NO;    /* boolean flag - phase vs lateral group read */
-	store->sid_group_ping = MB_NO;      /* boolean flag - phase vs lateral group read */
-	store->sid_group_complex = MB_NO;   /* boolean flag - phase vs lateral group read */
-	store->sid_group_weighting = MB_NO; /* boolean flag - phase vs lateral group read */
+	store->sid_frame = false;           /* boolean flag - sidescan frame read */
+	store->sid_group_avt = false;       /* boolean flag - amp vs time group read */
+	store->sid_group_pvt = false;       /* boolean flag - phase vs time group read */
+	store->sid_group_avl = false;       /* boolean flag - amp vs lateral group read */
+	store->sid_group_pvl = false;       /* boolean flag - phase vs lateral group read */
+	store->sid_group_signal = false;    /* boolean flag - phase vs lateral group read */
+	store->sid_group_ping = false;      /* boolean flag - phase vs lateral group read */
+	store->sid_group_complex = false;   /* boolean flag - phase vs lateral group read */
+	store->sid_group_weighting = false; /* boolean flag - phase vs lateral group read */
 	store->sid_source = 0;              /* sensor id */
 	store->sid_sec = 0;                 /* sec since 1/1/1901 00:00 */
 	store->sid_usec = 0;                /* microseconds */
@@ -363,12 +363,12 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	store->sid_wgt_samplesright = 0; /* number of right samples */
 
 	/* seabeam (seabeam frames) */
-	store->sbm_properties = MB_NO;    /* boolean flag - sbm properties group read */
-	store->sbm_hrp = MB_NO;           /* boolean flag - sbm hrp group read */
-	store->sbm_signal = MB_NO;        /* boolean flag - sbm signal group read */
-	store->sbm_sweepsegments = MB_NO; /* boolean flag - sbm sweep segments group read */
-	store->sbm_spacingmode = MB_NO;   /* boolean flag - sbm spacing mode group read */
-	store->sbm_message = MB_NO;       /* boolean flag - sbm message group read */
+	store->sbm_properties = false;    /* boolean flag - sbm properties group read */
+	store->sbm_hrp = false;           /* boolean flag - sbm hrp group read */
+	store->sbm_signal = false;        /* boolean flag - sbm signal group read */
+	store->sbm_sweepsegments = false; /* boolean flag - sbm sweep segments group read */
+	store->sbm_spacingmode = false;   /* boolean flag - sbm spacing mode group read */
+	store->sbm_message = false;       /* boolean flag - sbm message group read */
 	store->sbm_source = 0;            /* sensor id */
 	store->sbm_sec = 0;               /* sec since 1/1/1901 00:00 */
 	store->sbm_usec = 0;              /* microseconds */
@@ -477,14 +477,14 @@ int mbsys_xse_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		*nbath = 0;
 		*namp = 0;
 		*nss = 0;
-		if (store->mul_frame == MB_YES) {
+		if (store->mul_frame == true) {
 			*nbath = store->mul_num_beams;
-			if (store->mul_group_amp == MB_YES)
+			if (store->mul_group_amp == true)
 				*namp = store->mul_num_beams;
 		}
 
-		if (store->sid_frame == MB_YES) {
-			if (store->sid_group_avl == MB_YES)
+		if (store->sid_frame == true) {
+			if (store->sid_group_avl == true)
 				*nss = store->sid_avl_num_samples;
 		}
 	}
@@ -569,10 +569,10 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		*nbath = 0;
 		*namp = 0;
 		*nss = 0;
-		if (store->mul_frame == MB_YES) {
+		if (store->mul_frame == true) {
 			/* set number of beams */
 			*nbath = store->mul_num_beams;
-			if (store->mul_group_amp == MB_YES)
+			if (store->mul_group_amp == true)
 				*namp = store->mul_num_beams;
 
 			/* determine whether beams are ordered
@@ -636,14 +636,14 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		}
 
 		/* get sidescan */
-		if (store->sid_frame == MB_YES) {
-			if (store->sid_group_avl == MB_YES) {
+		if (store->sid_frame == true) {
+			if (store->sid_group_avl == true) {
 				*nss = store->sid_avl_num_samples;
 				for (int i = 0; i < *nss; i++) {
 					const int j = *nss - i - 1;
 					ss[j] = store->sid_avl_amp[i];
 					ssacrosstrack[j] = dsign * 0.001 * store->sid_avl_binsize * (i - *nss / 2);
-					if (store->mul_frame == MB_YES)
+					if (store->mul_frame == true)
 						ssalongtrack[j] =
 						    0.5 * store->nav_speed_ground *
 						    (store->sid_sec + 0.000001 * store->sid_usec - (store->mul_sec + 0.000001 * store->mul_usec));
@@ -667,21 +667,21 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		*navlat = RTD * store->nav_y;
 
 		/* get heading */
-		if (store->nav_group_heading == MB_YES)
+		if (store->nav_group_heading == true)
 			*heading = RTD * store->nav_hdg_heading;
-		else if (store->nav_group_motiongt == MB_YES)
+		else if (store->nav_group_motiongt == true)
 			*heading = RTD * store->nav_course_ground;
-		else if (store->nav_group_motiontw == MB_YES)
+		else if (store->nav_group_motiontw == true)
 			*heading = RTD * store->nav_course_water;
 		else
 			mb_hedint_interp(verbose, mbio_ptr, *time_d, heading, error);
 
 		/* get speed  */
-		if (store->nav_group_log == MB_YES)
+		if (store->nav_group_log == true)
 			*speed = 3.6 * store->nav_log_speed;
-		else if (store->nav_group_motiongt == MB_YES)
+		else if (store->nav_group_motiongt == true)
 			*speed = 3.6 * store->nav_speed_ground;
-		else if (store->nav_group_motiontw == MB_YES)
+		else if (store->nav_group_motiontw == true)
 			*speed = 3.6 * store->nav_speed_water;
 
 		/* get distance and depth values */
@@ -697,7 +697,6 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		/* copy comment */
 		strcpy(comment, store->comment);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -833,7 +832,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 		xtrackmax = 0.0;
 		ixtrackmin = 0;
 		ixtrackmax = 0;
-		if (store->mul_frame == MB_YES) {
+		if (store->mul_frame == true) {
 			/* determine whether beams are ordered
 			port to starboard or starboard to port */
 			for (int i = 0; i < store->mul_num_beams; i++) {
@@ -887,8 +886,8 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 		}
 
 		/* now insert the sidescan */
-		if (store->sid_frame == MB_YES) {
-			store->sid_group_avl = MB_YES;
+		if (store->sid_frame == true) {
+			store->sid_group_avl = true;
 			if (nss != store->sid_avl_num_samples) {
 				store->sid_avl_num_samples = nss;
 				maxoffset = 0.0;
@@ -916,16 +915,16 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 		store->nav_usec = (time_d - ((int)time_d)) * 1000000;
 
 		/*get navigation */
-		store->nav_group_position = MB_YES;
+		store->nav_group_position = true;
 		store->nav_x = DTR * navlon;
 		store->nav_y = DTR * navlat;
 
 		/* get heading */
-		store->nav_group_heading = MB_YES;
+		store->nav_group_heading = true;
 		store->nav_hdg_heading = DTR * heading;
 
 		/* get speed */
-		store->nav_group_log = MB_YES;
+		store->nav_group_log = true;
 		store->nav_log_speed = speed / 3.6;
 	}
 
@@ -983,7 +982,7 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get draft */
-		if (store->par_parameter == MB_YES)
+		if (store->par_parameter == true)
 			*draft = 0.5 * (store->par_trans_z_port + store->par_trans_z_stbd);
 		else
 			*draft = store->par_ship_draft;
@@ -996,7 +995,7 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 
 		/* get travel times, angles */
 		*nbeams = 0;
-		if (store->mul_frame == MB_YES) {
+		if (store->mul_frame == true) {
 			/* determine whether beams are ordered
 			port to starboard or starboard to port */
 			xtrackmin = 0.0;
@@ -1118,7 +1117,7 @@ int mbsys_xse_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 
 		/* get nbeams and detects */
 		*nbeams = 0;
-		if (store->mul_frame == MB_YES) {
+		if (store->mul_frame == true) {
 			/* loop over beams to get nbeams */
 			for (int i = 0; i < store->mul_num_beams; i++) {
 				const int j = store->mul_num_beams - store->beams[i].beam;
@@ -1198,7 +1197,7 @@ int mbsys_xse_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get draft */
-		if (store->par_parameter == MB_YES)
+		if (store->par_parameter == true)
 			*transducer_depth = 0.5 * (store->par_trans_z_port + store->par_trans_z_stbd);
 		else
 			*transducer_depth = store->par_ship_draft;
@@ -1303,7 +1302,7 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*speed = 3.6 * store->mul_speed;
 
 		/* get draft */
-		if (store->par_parameter == MB_YES)
+		if (store->par_parameter == true)
 			*draft = 0.5 * (store->par_trans_z_port + store->par_trans_z_stbd);
 		else
 			*draft = store->par_ship_draft;
@@ -1314,12 +1313,12 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			*pitch = RTD * store->beams[store->mul_num_beams / 2].pitch;
 			*heave = store->beams[store->mul_num_beams / 2].heave;
 		}
-		else if (store->nav_group_hrp == MB_YES) {
+		else if (store->nav_group_hrp == true) {
 			*roll = RTD * store->nav_hrp_roll;
 			*pitch = RTD * store->nav_hrp_pitch;
 			*heave = store->nav_hrp_heave;
 		}
-		else if (store->nav_group_heave == MB_YES && store->nav_group_roll == MB_YES && store->nav_group_pitch == MB_YES) {
+		else if (store->nav_group_heave == true && store->nav_group_roll == true && store->nav_group_pitch == true) {
 			*roll = RTD * store->nav_rol_roll;
 			*pitch = RTD * store->nav_pit_pitch;
 			*heave = store->nav_hea_heave;
@@ -1340,27 +1339,27 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		mb_get_date(verbose, *time_d, time_i);
 
 		/* get heading */
-		if (store->nav_group_heading == MB_YES)
+		if (store->nav_group_heading == true)
 			*heading = RTD * store->nav_hdg_heading;
-		else if (store->nav_group_motiongt == MB_YES)
+		else if (store->nav_group_motiongt == true)
 			*heading = RTD * store->nav_course_ground;
-		else if (store->nav_group_motiontw == MB_YES)
+		else if (store->nav_group_motiontw == true)
 			*heading = RTD * store->nav_course_water;
 		else
 			mb_hedint_interp(verbose, mbio_ptr, *time_d, heading, error);
 
 		/* get speed if possible */
-		if (store->nav_group_log == MB_YES)
+		if (store->nav_group_log == true)
 			*speed = 3.6 * store->nav_log_speed;
-		else if (store->nav_group_motiongt == MB_YES)
+		else if (store->nav_group_motiongt == true)
 			*speed = 3.6 * store->nav_speed_ground;
-		else if (store->nav_group_motiontw == MB_YES)
+		else if (store->nav_group_motiontw == true)
 			*speed = 3.6 * store->nav_speed_water;
 		else
 			*speed = 0.0;
 
 		/* get navigation */
-		if (store->nav_group_position == MB_YES) {
+		if (store->nav_group_position == true) {
 			*navlon = RTD * store->nav_x;
 			*navlat = RTD * store->nav_y;
 		}
@@ -1368,18 +1367,18 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			mb_navint_interp(verbose, mbio_ptr, *time_d, *heading, *speed, navlon, navlat, speed, error);
 
 		/* get draft */
-		if (store->par_parameter == MB_YES)
+		if (store->par_parameter == true)
 			*draft = 0.5 * (store->par_trans_z_port + store->par_trans_z_stbd);
 		else
 			*draft = store->par_ship_draft;
 
 		/* get roll pitch and heave */
-		if (store->nav_group_hrp == MB_YES) {
+		if (store->nav_group_hrp == true) {
 			*roll = RTD * store->nav_hrp_roll;
 			*pitch = RTD * store->nav_hrp_pitch;
 			*heave = store->nav_hrp_heave;
 		}
-		else if (store->nav_group_heave == MB_YES && store->nav_group_roll == MB_YES && store->nav_group_pitch == MB_YES) {
+		else if (store->nav_group_heave == true && store->nav_group_roll == true && store->nav_group_pitch == true) {
 			*roll = RTD * store->nav_rol_roll;
 			*pitch = RTD * store->nav_pit_pitch;
 			*heave = store->nav_hea_heave;
@@ -1493,7 +1492,7 @@ int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 		store->mul_speed = speed / 3.6;
 
 		/* get draft */
-		if (store->par_parameter == MB_YES) {
+		if (store->par_parameter == true) {
 			store->par_trans_z_port = draft;
 			store->par_trans_z_stbd = draft;
 		}
@@ -1511,20 +1510,20 @@ int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 		store->nav_usec = (time_d - ((int)time_d)) * 1000000;
 
 		/*get navigation */
-		store->nav_group_position = MB_YES;
+		store->nav_group_position = true;
 		store->nav_x = DTR * navlon;
 		store->nav_y = DTR * navlat;
 
 		/* get heading */
-		store->nav_group_heading = MB_YES;
+		store->nav_group_heading = true;
 		store->nav_hdg_heading = DTR * heading;
 
 		/* get speed */
-		store->nav_group_log = MB_YES;
+		store->nav_group_log = true;
 		store->nav_log_speed = speed / 3.6;
 
 		/* get draft */
-		if (store->par_parameter == MB_YES) {
+		if (store->par_parameter == true) {
 			store->par_trans_z_port = draft;
 			store->par_trans_z_stbd = draft;
 		}

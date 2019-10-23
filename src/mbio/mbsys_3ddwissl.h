@@ -375,14 +375,14 @@
  * front of the glass on each optical head. Here are the distance offsets of
  * those points to the sensor reference point:
  *
- *   Head A (aft mounted, pointed to port):
+ *   Head A (aft mounted, pointed to starboard):
  *     dx (acrosstrack): -0.48126 inches = -0.012224004 m
  *     dy (alongtrack):  -4.73551 inches = -0.120281954 m
  *     dz (vertical:     -2.44115 inches = -0.062005210 m
  *     droll (in xz plane, + to starboard): +22.08 degrees
  *     dpitch (in yz plane, + forward): -4.68
  *
- *   Head B (forward mounted, pointed to starboard):
+ *   Head B (forward mounted, pointed to port):
  *     dx (acrosstrack): +0.48126 inches = +0.012224004 m
  *     dy (alongtrack):  +4.73551 inches = +0.120281954 m
  *     dz (vertical:     -2.44115 inches = -0.062005210 m
@@ -525,7 +525,7 @@ struct mbsys_3ddwissl_calibration_v1s1_struct
   char unused[116];
   };
 
-/* Version >=1.2 Calibration structure used for data collected starting in May 2019 */
+/* Version 1.2 Calibration structure used for data collected in May 2019 */
 /* - 407 bytes for logged as 1.2, 450 bytes written for 1.3 with 43 unused bytes */
 /*   added so the 450 byte size matches that of version 1.1 */
 struct mbsys_3ddwissl_calibration_v1s2_struct
@@ -593,7 +593,82 @@ struct mbsys_3ddwissl_calibration_v1s2_struct
   double scanner_pos_polynom_3;
   double scanner_pos_polynom_4;
   double scanner_pos_polynom_5;
-  char unused[43];
+  };
+
+/* Version 1.3 Calibration structure used for data collected starting in September 2019 */
+/* - 450 byte size matches that of version 1.1 */
+struct mbsys_3ddwissl_calibration_v1s3_struct
+  {
+  char cfg_path[ 64 ];
+  int laser_head_no;          /* either 1 or 2 */
+  int process_for_air;        /* 1 = air, else water */
+  mb_u_char temperature_compensation;
+  mb_u_char emergency_shutdown;
+  float ocb_temperature_limit_c;
+  float ocb_humidity_limit;
+  float pb_temperature_limit_1_c;
+  float pb_temperature_limit_2_c;
+  float pb_humidity_limit;
+  float dig_temperature_limit_c;
+  char ocb_comm_port[ 24 ];
+  char ocb_comm_cfg [ 24 ];
+  float az_ao_deg_to_volt;
+  float az_ai_neg_v_to_deg;
+  float az_ai_pos_v_to_deg;
+  float t1_air;
+  float ff_air;
+  float t1_water_g4000;
+  float ff_water_g4000;
+  float t1_water_g3000;
+  float ff_water_g3000;
+  float t1_water_g2000;
+  float ff_water_g2000;
+  float t1_water_g1000;
+  float ff_water_g1000;
+  float t1_water_g400;
+  float ff_water_g400;
+  float t1_water_g300;
+  float ff_water_g300;
+  double temp_comp_poly2;
+  double temp_comp_poly1;
+  double temp_comp_poly;
+  float laser_start_time_sec;
+  float scanner_shift_cts;
+  float factory_scanner_lrg_deg;
+  float factory_scanner_med_deg;
+  float factory_scanner_sml_deg;
+  float factory_dig_cnt_to_volts;
+  float el_angle_fixed_deg;
+  int zda_to_pps_max_msec;
+  int zda_udp_port;
+  mb_u_char show_time_sync_errors;
+  int min_time_diff_update_msec;
+  int ctd_tcp_port;
+  double trigger_level_volt;
+  int mf_t0_position;
+  int mf_start_proc;
+  int dig_ref_pos_t0_cnts;
+  int dummy;
+  int t0_min_height_raw_cts;
+  double scanner_neg_polynom_0;
+  double scanner_neg_polynom_1;
+  double scanner_neg_polynom_2;
+  double scanner_neg_polynom_3;
+  double scanner_neg_polynom_4;
+  double scanner_neg_polynom_5;
+  double scanner_pos_polynom_0;
+  double scanner_pos_polynom_1;
+  double scanner_pos_polynom_2;
+  double scanner_pos_polynom_3;
+  double scanner_pos_polynom_4;
+  double scanner_pos_polynom_5;
+
+	// New  request as of 8/20/2019
+  unsigned short trigger_coupling_type; // 0 = AC, 1 = DC, 2 = GND, 3 = HF_Reject,
+                                        // 4 = LF_Reject, 1001 = AC + HF_Reject
+  float digitizer_voltage_range_v; // 2.0 nominal
+  int prf_tune_wait_ms;
+  char unused[33]; // make size match old v1 at 450 bytes
   };
 
 struct mbsys_3ddwissl_sounding_struct
@@ -677,11 +752,11 @@ struct mbsys_3ddwissl_struct
 
   /* head A calibration */
   struct mbsys_3ddwissl_calibration_v1s1_struct calibration_v1s1_a;
-  struct mbsys_3ddwissl_calibration_v1s2_struct calibration_v1s2_a;
+  struct mbsys_3ddwissl_calibration_v1s3_struct calibration_v1s3_a;
 
   /* head B calibration */
   struct mbsys_3ddwissl_calibration_v1s1_struct calibration_v1s1_b;
-  struct mbsys_3ddwissl_calibration_v1s2_struct calibration_v1s2_b;
+  struct mbsys_3ddwissl_calibration_v1s3_struct calibration_v1s3_b;
 
   /* Scan information from raw records */
   unsigned short record_id;          /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or

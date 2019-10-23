@@ -720,7 +720,7 @@ void GMT_mbgrdtiff_set_proj_limits(struct GMT_CTRL *GMT, struct GMT_GRID_HEADER 
 	}
 
 int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
-	char program_name[] = "mbgrdtiff";
+	static const char program_name[] = "mbgrdtiff";
 
 	/* TIFF arrays */
 	mb_path world_file;
@@ -1275,82 +1275,82 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	tiff_header[1] = 'M';
 	index += 2;
 	value_short = 42;
-	mb_put_binary_short(MB_NO, value_short, &tiff_header[index]);
+	mb_put_binary_short(false, value_short, &tiff_header[index]);
 	index += 2;
 	value_int = 8;
-	mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+	mb_put_binary_int(false, value_int, &tiff_header[index]);
 	index += 4;
 
 	/* number of entries in IFD */
 	value_short = NUMBER_TAGS;
-	mb_put_binary_short(MB_NO, value_short, &tiff_header[index]);
+	mb_put_binary_short(false, value_short, &tiff_header[index]);
 	index += 2;
 
 	/* loop over all tags */
 	for (i = 0; i < NUMBER_TAGS; i++) {
-		mb_put_binary_short(MB_NO, tiff_tag[i], &tiff_header[index]);
+		mb_put_binary_short(false, tiff_tag[i], &tiff_header[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, tiff_type[i], &tiff_header[index]);
+		mb_put_binary_short(false, tiff_type[i], &tiff_header[index]);
 		index += 2;
 
 		switch (tiff_tag[i]) {
 		case NewSubfileType:
 			value_int = 1;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = 0;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			break;
 		case ImageWidth:
 			value_int = 1;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = nx;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			break;
 		case ImageLength:
 			value_int = 1;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = ny;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			break;
 		case BitsPerSample:
 			if ((P && gray_only)) {
 				value_int = 1;
-				mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+				mb_put_binary_int(false, value_int, &tiff_header[index]);
 				index += 4;
 				value_short = 8;
-				mb_put_binary_short(MB_NO, value_short, &tiff_header[index]);
+				mb_put_binary_short(false, value_short, &tiff_header[index]);
 				index += 4;
 			}
 			else {
 				value_int = 3;
-				mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+				mb_put_binary_int(false, value_int, &tiff_header[index]);
 				index += 4;
 				value_int = tiff_offset[i];
-				mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+				mb_put_binary_int(false, value_int, &tiff_header[index]);
 				index += 4;
 				value_short = 8;
-				mb_put_binary_short(MB_NO, value_short, &tiff_header[tiff_offset[i]]);
-				mb_put_binary_short(MB_NO, value_short, &tiff_header[tiff_offset[i] + 2]);
-				mb_put_binary_short(MB_NO, value_short, &tiff_header[tiff_offset[i] + 4]);
+				mb_put_binary_short(false, value_short, &tiff_header[tiff_offset[i]]);
+				mb_put_binary_short(false, value_short, &tiff_header[tiff_offset[i] + 2]);
+				mb_put_binary_short(false, value_short, &tiff_header[tiff_offset[i] + 4]);
 			}
 			break;
 		case Compression:
 			value_int = 1;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_short = 1;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[index]);
+			mb_put_binary_short(false, value_short, &tiff_header[index]);
 			index += 4;
 			break;
 		case PhotometricInterpretation:
 			value_int = 1;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			if ((P && gray_only)) {
 				value_short = 1;
@@ -1358,120 +1358,120 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 			else {
 				value_short = 2;
 			}
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[index]);
+			mb_put_binary_short(false, value_short, &tiff_header[index]);
 			index += 4;
 			break;
 		case StripOffsets:
 			value_int = 1;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = IMAGE_OFFSET;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			break;
 		case SamplesPerPixel:
 			value_int = 1;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			if ((P && gray_only))
 				value_short = 1;
 			else
 				value_short = 3;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[index]);
+			mb_put_binary_short(false, value_short, &tiff_header[index]);
 			index += 4;
 			break;
 		case RowsPerStrip:
 			value_int = 1;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = ny;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			break;
 		case StripByteCounts:
 			value_int = 1;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			if ((P && gray_only))
 				value_int = nx * ny;
 			else
 				value_int = 3 * nx * ny;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			break;
 		case XResolution:
 			value_int = 1;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = tiff_offset[i];
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = MAX(nx, ny);
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[tiff_offset[i]]);
+			mb_put_binary_int(false, value_int, &tiff_header[tiff_offset[i]]);
 			value_int = 4;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[tiff_offset[i] + 4]);
+			mb_put_binary_int(false, value_int, &tiff_header[tiff_offset[i] + 4]);
 			break;
 		case YResolution:
 			value_int = 1;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = tiff_offset[i];
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = MAX(nx, ny);
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[tiff_offset[i]]);
+			mb_put_binary_int(false, value_int, &tiff_header[tiff_offset[i]]);
 			value_int = 4;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[tiff_offset[i] + 4]);
+			mb_put_binary_int(false, value_int, &tiff_header[tiff_offset[i] + 4]);
 			break;
 		case ResolutionUnit:
 			value_int = 1;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_short = 2;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[index]);
+			mb_put_binary_short(false, value_short, &tiff_header[index]);
 			index += 4;
 			break;
 		case ModelPixelScaleTag:
 			value_int = 3;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = tiff_offset[i];
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_double = header_work->inc[0];
-			mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i]]);
+			mb_put_binary_double(false, value_double, &tiff_header[tiff_offset[i]]);
 			value_double = header_work->inc[1];
-			mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 8]);
+			mb_put_binary_double(false, value_double, &tiff_header[tiff_offset[i] + 8]);
 			value_double = 0.0;
-			mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 16]);
+			mb_put_binary_double(false, value_double, &tiff_header[tiff_offset[i] + 16]);
 			break;
 		case ModelTiepointTag:
 			value_int = 6;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = tiff_offset[i];
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_double = 0;
-			mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i]]);
+			mb_put_binary_double(false, value_double, &tiff_header[tiff_offset[i]]);
 			value_double = 0;
-			mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 1 * 8]);
+			mb_put_binary_double(false, value_double, &tiff_header[tiff_offset[i] + 1 * 8]);
 			value_double = 0;
-			mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 2 * 8]);
+			mb_put_binary_double(false, value_double, &tiff_header[tiff_offset[i] + 2 * 8]);
 			value_double = header_work->wesn[XLO] - 0.5 * header_work->inc[0];
-			mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 3 * 8]);
+			mb_put_binary_double(false, value_double, &tiff_header[tiff_offset[i] + 3 * 8]);
 			value_double = header_work->wesn[YHI] + 0.5 * header_work->inc[1];
-			mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 4 * 8]);
+			mb_put_binary_double(false, value_double, &tiff_header[tiff_offset[i] + 4 * 8]);
 
 			value_double = 0.0;
-			mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 5 * 8]);
+			mb_put_binary_double(false, value_double, &tiff_header[tiff_offset[i] + 5 * 8]);
 			break;
 		case GeoKeyDirectoryTag:
 			value_int = 20;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = tiff_offset[i];
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 
 			/* index to geotiff geokey directory */
@@ -1480,106 +1480,106 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 			/* geokey directory header
 			    (KeyDirectoryVersion, KeyRevision, MinorRevision, NumberOfKeys) */
 			value_short = 1;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			value_short = 0;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			value_short = 2;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			value_short = 4;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 
 			/* GTModelTypeGeoKey */
 			value_short = GTModelTypeGeoKey;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			value_short = 0;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			value_short = 1;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			value_short = modeltype;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 
 			/* GTRasterTypeGeoKey */
 			value_short = GTRasterTypeGeoKey;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			value_short = 0;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			value_short = 1;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			value_short = RasterPixelIsPoint;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 
 			/* GTCitationGeoKey */
 			value_short = GTCitationGeoKey;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			value_short = GeoAsciiParamsTag;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			value_short = strlen(tiff_comment);
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			value_short = 0;
-			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 
 			if (modeltype == ModelTypeGeographic) {
 				/* GeographicTypeGeoKey */
 				value_short = GeographicTypeGeoKey;
-				mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+				mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 				keyindex += 2;
 				value_short = 0;
-				mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+				mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 				keyindex += 2;
 				value_short = 1;
-				mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+				mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 				keyindex += 2;
 				value_short = projectionid;
-				mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+				mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 				keyindex += 2;
 			}
 
 			else if (modeltype == ModelTypeProjected) {
 				/* ProjectedCSTypeGeoKey */
 				value_short = ProjectedCSTypeGeoKey;
-				mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+				mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 				keyindex += 2;
 				value_short = 0;
-				mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+				mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 				keyindex += 2;
 				value_short = 1;
-				mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+				mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 				keyindex += 2;
 				value_short = projectionid;
-				mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+				mb_put_binary_short(false, value_short, &tiff_header[keyindex]);
 				keyindex += 2;
 			}
 			break;
 		case GeoDoubleParamsTag:
 			value_int = 1;
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = tiff_offset[i];
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			break;
 		case GeoAsciiParamsTag:
 			value_int = strlen(tiff_comment);
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = tiff_offset[i];
-			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
 
 			/* put in the string */

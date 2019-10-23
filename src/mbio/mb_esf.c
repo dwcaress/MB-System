@@ -54,11 +54,11 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *e
 	char mbp_editfile[MB_PATH_MAXLINE];
 	int status = mb_pr_get_edit(verbose, swathfile, &mbp_edit_mode, mbp_editfile, error);
 	if (mbp_edit_mode == MBP_EDIT_ON) {
-		*found = MB_YES;
+		*found = true;
 		strcpy(esffile, mbp_editfile);
 	}
 	else {
-		*found = MB_NO;
+		*found = false;
 		sprintf(esffile, "%s.esf", swathfile);
 	}
 
@@ -88,9 +88,9 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *e
             esf file should be opened,
             overwriting any existing esf file. Any
             existing esf file will be backed up first.
-        If both load and output are MB_NO, nothing will be
+        If both load and output are false, nothing will be
         done. */
-int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int output, char *esffile, struct mb_esf_struct *esf,
+int mb_esf_load(int verbose, const char *program_name, char *swathfile, int load, int output, char *esffile, struct mb_esf_struct *esf,
                 int *error) {
 	int found;
 
@@ -119,7 +119,7 @@ int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int 
 	/* get name of existing or new esffile, then load old edits
 	    and/or open new esf file */
 	int status = mb_esf_check(verbose, swathfile, esffile, &found, error);
-	if ((load == MB_YES && found == MB_YES) || output != MBP_ESF_NOWRITE) {
+	if ((load == true && found == true) || output != MBP_ESF_NOWRITE) {
 		status = mb_esf_open(verbose, program_name, esffile, load, output, esf, error);
 	}
 	else {
@@ -156,24 +156,7 @@ int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int 
             MBP_ESF_APPEND then edit events are appended
             to any existing esf file. Any
             existing esf file will be backed up first. */
-int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int output, struct mb_esf_struct *esf, int *error) {
-	int status = MB_SUCCESS;
-	char command[MB_PATH_MAXLINE];
-	FILE *esffp;
-	struct stat file_status;
-	int fstat;
-	char fmode[16];
-	int shellstatus;
-	int header = MB_YES;
-	int nscan = 0;
-
-	/* time, user, host variables */
-	time_t right_now;
-	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
-	mb_path esf_header;
-
-	int nedit;
-
+int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, int output, struct mb_esf_struct *esf, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -185,6 +168,20 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 		fprintf(stderr, "dbg2       esf:           %p\n", (void *)esf);
 		fprintf(stderr, "dbg2       error:         %p\n", (void *)error);
 	}
+
+	int status = MB_SUCCESS;
+	char command[MB_PATH_MAXLINE];
+	FILE *esffp;
+	struct stat file_status;
+	int fstat;
+	char fmode[16];
+
+	/* time, user, host variables */
+	time_t right_now;
+	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	mb_path esf_header;
+
+	int nedit;
 
 	/* initialize the esf structure */
 	strcpy(esf->esffile, esffile);
@@ -199,7 +196,7 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 	esf->startnextsearch = 0;
 
 	/* load edits from existing esf file if requested */
-	if (load == MB_YES) {
+	if (load == true) {
 
 		/* check that esf file exists */
 		fstat = stat(esffile, &file_status);
@@ -244,8 +241,7 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 					if (strncmp(esf_header, "ESFVERSION03", 12) == 0) {
 						esf->version = 3;
 						esf->nedit -= MB_PATH_MAXLINE / (sizeof(double) + 2 * sizeof(int));
-						nscan = sscanf(&esf_header[13], "ESF Mode: %d", &esf->mode);
-//fprintf(stderr,"sscanf ESF V3 mode: nscan:%d mode:%d\n",nscan,esf->mode);
+						sscanf(&esf_header[13], "ESF Mode: %d", &esf->mode);
 					}
 					else if (strncmp(esf_header, "ESFVERSION02", 12) == 0) {
 						esf->version = 2;
@@ -263,7 +259,6 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 					esf->version = 1;
 					esf->mode = MB_ESF_MODE_EXPLICIT;
 				}
-//fprintf(stderr,"ESF file loaded:%s VERSION:%d MODE:%d\n", esf->esffile, esf->version, esf->mode);
 
 				*error = MB_ERROR_NO_ERROR;
 				nedit = 0;
@@ -274,7 +269,7 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 						status = MB_FAILURE;
 						*error = MB_ERROR_EOF;
 					}
-					else if (esf->byteswapped == MB_YES) {
+					else if (esf->byteswapped == true) {
 						mb_swap_double(&(esf->edit[nedit].time_d));
 						esf->edit[nedit].beam = mb_swap_int(esf->edit[nedit].beam);
 						esf->edit[nedit].action = mb_swap_int(esf->edit[nedit].action);
@@ -283,12 +278,8 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 						nedit++;
 					}
 					else {
-						// fprintf(stderr,"mb_open_esf() detected errant header in middle of esf file %s\n",esffile);
 						fread(esf_header, MB_PATH_MAXLINE - (sizeof(double) + 2 * sizeof(int)), 1, esffp);
 					}
-					/*fprintf(stderr,"EDITS READ: i:%d edit: %f %d %d  use:%d\n",
-					i,esf->edit[i].time_d,esf->edit[i].beam,
-					esf->edit[i].action,esf->edit[i].use);*/
 				}
 				esf->nedit = nedit;
 				if (*error == MB_ERROR_EOF) {
@@ -327,15 +318,15 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 
 	if (status == MB_SUCCESS && output != MBP_ESF_NOWRITE) {
 		/* check if esf file exists */
-		header = MB_YES;
+		bool header = true;
 		fstat = stat(esffile, &file_status);
 		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 			/* copy old edit save file to tmp file */
-			if (load == MB_YES) {
+			if (load == true) {
 				sprintf(command, "cp %s %s.tmp\n", esffile, esffile);
-				shellstatus = system(command);
+				/* shellstatus = */ system(command);
 				if (output == MBP_ESF_APPEND)
-					header = MB_NO;
+					header = false;
 			}
 		}
 
@@ -366,7 +357,7 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 		}
 
 		/* if writing a new esf file then put version header at beginning */
-		if (status == MB_SUCCESS && header == MB_YES) {
+		if (status == MB_SUCCESS && header) {
 			memset(esf_header, 0, MB_PATH_MAXLINE);
 			right_now = time((time_t *)0);
 			strcpy(date, ctime(&right_now));
@@ -520,8 +511,6 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 		firstedit = esf->startnextsearch;
 	lastedit = firstedit - 1;
 	for (j = firstedit; j < esf->nedit && time_d >= (esf->edit[j].time_d - maxtimediff); j++) {
-		// fprintf(stderr,"--in loop: j:%d maxtimediff:%f time_d: %.6f %.6f\n",
-		// j,maxtimediff,time_d,(esf->edit[j].time_d - maxtimediff));
 		if (fabs(esf->edit[j].time_d - time_d) < maxtimediff && esf->edit[j].beam >= beamoffset &&
 		    esf->edit[j].beam < beamoffsetmax) {
 			if (lastedit < firstedit)
@@ -529,8 +518,6 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 			lastedit = j;
 		}
 	}
-//fprintf(stderr,"time_d:%.9f pingmultiplicity:%d beamoffset:%d beamoffsetmax:%d   startnextsearch:%d firstedit:%d lastedit:%d\n",
-//time_d,pingmultiplicity,beamoffset,beamoffsetmax,esf->startnextsearch,firstedit,lastedit);
 
 	/* apply edits */
 	if (lastedit >= firstedit) {
@@ -546,7 +533,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 			ibeam = i + beamoffset;
 
 			/* loop over all edits for this ping */
-			apply = MB_NO;
+			apply = false;
 			beamflagorg = beamflag[i];
 			for (j = firstedit; j <= lastedit; j++) {
 				/* apply the edits for this beam in the
@@ -564,7 +551,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 							//",i,j,esf->edit[j].time_d,beamflag[i]);
 							beamflag[i] = mb_beam_set_flag_manual(beamflag[i]);
 							esf->edit[j].use++;
-							apply = MB_YES;
+							apply = true;
 							action = esf->edit[j].action;
 							//	fprintf(stderr," %d\n",beamflag[i]);
 						}
@@ -573,7 +560,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 							//",i,j,esf->edit[j].time_d,beamflag[i]);
 							beamflag[i] = mb_beam_set_flag_filter(beamflag[i]);
 							esf->edit[j].use++;
-							apply = MB_YES;
+							apply = true;
 							action = esf->edit[j].action;
 							//	fprintf(stderr," %d\n",beamflag[i]);
 						}
@@ -582,7 +569,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 							//",i,j,esf->edit[j].time_d,beamflag[i]);
 							beamflag[i] = mb_beam_set_flag_sonar(beamflag[i]);
 							esf->edit[j].use++;
-							apply = MB_YES;
+							apply = true;
 							action = esf->edit[j].action;
 							//	fprintf(stderr," %d\n",beamflag[i]);
 						}
@@ -591,7 +578,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 							//",i,j,esf->edit[j].time_d,beamflag[i]);
 							beamflag[i] = mb_beam_set_flag_none(beamflag[i]);
 							esf->edit[j].use++;
-							apply = MB_YES;
+							apply = true;
 							action = esf->edit[j].action;
 							//	fprintf(stderr," %d\n",beamflag[i]);
 						}
@@ -600,7 +587,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 							//",i,j,esf->edit[j].time_d,beamflag[i]);
 							beamflag[i] = mb_beam_set_flag_null(beamflag[i]);
 							esf->edit[j].use++;
-							apply = MB_YES;
+							apply = true;
 							action = esf->edit[j].action;
 							//	fprintf(stderr," %d\n",beamflag[i]);
 						}
@@ -625,7 +612,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 			 * using the -M4 or -M5 commands. If a beam is not set by an edit event,
 			 * set it to the implicit value
 			 */
-			if (apply == MB_NO) {
+			if (apply == false) {
 				if (esf->mode == MB_ESF_MODE_IMPLICIT_NULL) {
 					beamflag[i] = MB_FLAG_NULL;
 				}
@@ -633,11 +620,11 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 					beamflag[i] = MB_FLAG_NONE;
 				}
 				if (beamflag[i] != beamflagorg)
-					apply = MB_YES;
+					apply = true;
 			}
 
 			/* output change to stream file */
-			if (apply == MB_YES && esf->essfp != NULL && beamflag[i] != beamflagorg)
+			if (apply == true && esf->essfp != NULL && beamflag[i] != beamflagorg)
 				mb_ess_save(verbose, esf, time_d, ibeam, action, error);
 		}
 
@@ -685,8 +672,7 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 
 	/* write out the edit */
 	if (esf->esffp != NULL) {
-		/*fprintf(stderr,"OUTPUT EDIT: %f %d %d\n",time_d,beam,action);*/
-		if (esf->byteswapped == MB_YES) {
+		if (esf->byteswapped == true) {
 			mb_swap_double(&time_d);
 			beam = mb_swap_int(beam);
 			action = mb_swap_int(action);
@@ -739,8 +725,7 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 
 	/* write out the edit */
 	if (esf->essfp != NULL) {
-		/*fprintf(stderr,"OUTPUT EDIT: %f %d %d\n",time_d,beam,action);*/
-		if (esf->byteswapped == MB_YES) {
+		if (esf->byteswapped == true) {
 			mb_swap_double(&time_d);
 			beam = mb_swap_int(beam);
 			action = mb_swap_int(action);

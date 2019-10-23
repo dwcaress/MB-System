@@ -24,7 +24,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "mb_config.h"
+
+#ifdef ENABLE_GSF
 #include "gsf.h"
+#endif
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -163,13 +167,13 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	mb_io_ptr->new_ss_alongtrack = NULL;
 
 	/* initialize projection parameters */
-	mb_io_ptr->projection_initialized = MB_NO;
+	mb_io_ptr->projection_initialized = false;
 	mb_io_ptr->pjptr = NULL;
 
 	/* initialize ancillary variables used
 	    to save information in certain cases */
-	mb_io_ptr->save_flag = MB_NO;
-	mb_io_ptr->save_label_flag = MB_NO;
+	mb_io_ptr->save_flag = false;
+	mb_io_ptr->save_label_flag = false;
 	mb_io_ptr->save1 = 0;
 	mb_io_ptr->save2 = 0;
 	mb_io_ptr->save3 = 0;
@@ -359,6 +363,7 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 		status = mb_fileio_open(verbose, *mbio_ptr, error);
 	}
 
+#ifdef ENABLE_GSF
 	/* else handle gsf files to be opened with gsflib */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_GSF) {
 		status = gsfOpen(mb_io_ptr->file, GSF_CREATE, (int *)&(mb_io_ptr->gsfid));
@@ -371,7 +376,7 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 			*error = MB_ERROR_OPEN_FAIL;
 		}
 	}
-
+#endif
 	/* else handle netcdf files to be opened with libnetcdf */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_NETCDF) {
 		status = nc_create(mb_io_ptr->file, NC_CLOBBER, (int *)&(mb_io_ptr->ncid));
@@ -526,7 +531,7 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 		mb_io_ptr->ss_alongtrack[i] = 0.0;
 		mb_io_ptr->ss_num[i] = 0;
 	}
-	mb_io_ptr->need_new_ping = MB_YES;
+	mb_io_ptr->need_new_ping = true;
 
 	/* initialize variables for interpolating asynchronous data */
 	mb_io_ptr->nfix = 0;

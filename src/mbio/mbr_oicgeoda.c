@@ -70,9 +70,9 @@ int mbr_info_oicgeoda(int verbose, int *system, int *beams_bath_max, int *beams_
 	    MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -180,7 +180,6 @@ int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	struct mbf_oicgeoda_struct *dataplus = (struct mbf_oicgeoda_struct *)mb_io_ptr->raw_data;
-	struct mbf_oicgeoda_header_struct *header = &(dataplus->header);
 	struct mbf_oicgeoda_data_struct *data = &(dataplus->data);
 
 	int status = MB_SUCCESS;
@@ -253,7 +252,6 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_oicgeoda_struct *dataplus = (struct mbf_oicgeoda_struct *)mb_io_ptr->raw_data;
 	struct mbf_oicgeoda_header_struct *header = &(dataplus->header);
 	struct mbf_oicgeoda_data_struct *data = &(dataplus->data);
-	char *comment = dataplus->client;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -289,9 +287,9 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index = 3;
 		header->type = buffer[index];
 		index += 1;
-		mb_get_binary_int(MB_NO, &buffer[index], &header->proc_status);
+		mb_get_binary_int(false, &buffer[index], &header->proc_status);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], &header->data_size);
+		mb_get_binary_int(false, &buffer[index], &header->data_size);
 		index += 4;
 		header->client_size = buffer[index];
 		index += 1;
@@ -301,60 +299,60 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 1;
 		header->nav_type = buffer[index];
 		index += 1;
-		mb_get_binary_int(MB_NO, &buffer[index], &header->utm_zone);
+		mb_get_binary_int(false, &buffer[index], &header->utm_zone);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->ship_x);
+		mb_get_binary_float(false, &buffer[index], &header->ship_x);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->ship_y);
+		mb_get_binary_float(false, &buffer[index], &header->ship_y);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->ship_course);
+		mb_get_binary_float(false, &buffer[index], &header->ship_course);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->ship_speed);
+		mb_get_binary_float(false, &buffer[index], &header->ship_speed);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], &header->sec);
+		mb_get_binary_int(false, &buffer[index], &header->sec);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], &header->usec);
+		mb_get_binary_int(false, &buffer[index], &header->usec);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->spare_gain);
+		mb_get_binary_float(false, &buffer[index], &header->spare_gain);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->fish_heading);
+		mb_get_binary_float(false, &buffer[index], &header->fish_heading);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->fish_depth);
+		mb_get_binary_float(false, &buffer[index], &header->fish_depth);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->fish_range);
+		mb_get_binary_float(false, &buffer[index], &header->fish_range);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->fish_pulse_width);
+		mb_get_binary_float(false, &buffer[index], &header->fish_pulse_width);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->gain_c0);
+		mb_get_binary_float(false, &buffer[index], &header->gain_c0);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->gain_c1);
+		mb_get_binary_float(false, &buffer[index], &header->gain_c1);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->gain_c2);
+		mb_get_binary_float(false, &buffer[index], &header->gain_c2);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->fish_pitch);
+		mb_get_binary_float(false, &buffer[index], &header->fish_pitch);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->fish_roll);
+		mb_get_binary_float(false, &buffer[index], &header->fish_roll);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->fish_yaw);
+		mb_get_binary_float(false, &buffer[index], &header->fish_yaw);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->fish_x);
+		mb_get_binary_float(false, &buffer[index], &header->fish_x);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->fish_y);
+		mb_get_binary_float(false, &buffer[index], &header->fish_y);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->fish_layback);
+		mb_get_binary_float(false, &buffer[index], &header->fish_layback);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->fish_altitude);
+		mb_get_binary_float(false, &buffer[index], &header->fish_altitude);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], &header->fish_altitude_samples);
+		mb_get_binary_int(false, &buffer[index], &header->fish_altitude_samples);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->fish_ping_period);
+		mb_get_binary_float(false, &buffer[index], &header->fish_ping_period);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &header->sound_velocity);
+		mb_get_binary_float(false, &buffer[index], &header->sound_velocity);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], &header->num_chan);
+		mb_get_binary_int(false, &buffer[index], &header->num_chan);
 		index += 4;
 		for (int i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
-			mb_get_binary_int(MB_NO, &buffer[index], &header->channel[i].offset);
+			mb_get_binary_int(false, &buffer[index], &header->channel[i].offset);
 			index += 4;
 		}
 		for (int i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
@@ -366,9 +364,9 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			index += 1;
 			header->channel[i].empty = buffer[index];
 			index += 1;
-			mb_get_binary_int(MB_NO, &buffer[index], &header->channel[i].frequency);
+			mb_get_binary_int(false, &buffer[index], &header->channel[i].frequency);
 			index += 4;
-			mb_get_binary_int(MB_NO, &buffer[index], &header->channel[i].num_samples);
+			mb_get_binary_int(false, &buffer[index], &header->channel[i].num_samples);
 			index += 4;
 		}
 	}
@@ -560,7 +558,6 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  New header read in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:             %d\n", header->type);
@@ -945,7 +942,6 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && status == MB_SUCCESS) {
 		fprintf(stderr, "\ndbg5  New processed data generated in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", header->beams_bath);
@@ -1163,7 +1159,6 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_oicgeoda_struct *dataplus = (struct mbf_oicgeoda_struct *)mb_io_ptr->raw_data;
 	struct mbf_oicgeoda_header_struct *header = &(dataplus->header);
 	struct mbf_oicgeoda_data_struct *data = &(dataplus->data);
-	char *comment = dataplus->client;
 
 	int status = MB_SUCCESS;
 
@@ -1315,7 +1310,6 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			dataplus->client[i] = store->client[i];
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  New header set in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:             %d\n", header->type);
@@ -1444,9 +1438,9 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 1;
 		buffer[index] = header->type;
 		index += 1;
-		mb_put_binary_int(MB_NO, header->proc_status, &buffer[index]);
+		mb_put_binary_int(false, header->proc_status, &buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, header->data_size, &buffer[index]);
+		mb_put_binary_int(false, header->data_size, &buffer[index]);
 		index += 4;
 		buffer[index] = header->client_size;
 		index += 1;
@@ -1456,60 +1450,60 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 1;
 		buffer[index] = header->nav_type;
 		index += 1;
-		mb_put_binary_int(MB_NO, header->utm_zone, &buffer[index]);
+		mb_put_binary_int(false, header->utm_zone, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->ship_x, &buffer[index]);
+		mb_put_binary_float(false, header->ship_x, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->ship_y, &buffer[index]);
+		mb_put_binary_float(false, header->ship_y, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->ship_course, &buffer[index]);
+		mb_put_binary_float(false, header->ship_course, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->ship_speed, &buffer[index]);
+		mb_put_binary_float(false, header->ship_speed, &buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, header->sec, &buffer[index]);
+		mb_put_binary_int(false, header->sec, &buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, header->usec, &buffer[index]);
+		mb_put_binary_int(false, header->usec, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->spare_gain, &buffer[index]);
+		mb_put_binary_float(false, header->spare_gain, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->fish_heading, &buffer[index]);
+		mb_put_binary_float(false, header->fish_heading, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->fish_depth, &buffer[index]);
+		mb_put_binary_float(false, header->fish_depth, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->fish_range, &buffer[index]);
+		mb_put_binary_float(false, header->fish_range, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->fish_pulse_width, &buffer[index]);
+		mb_put_binary_float(false, header->fish_pulse_width, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->gain_c0, &buffer[index]);
+		mb_put_binary_float(false, header->gain_c0, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->gain_c1, &buffer[index]);
+		mb_put_binary_float(false, header->gain_c1, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->gain_c2, &buffer[index]);
+		mb_put_binary_float(false, header->gain_c2, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->fish_pitch, &buffer[index]);
+		mb_put_binary_float(false, header->fish_pitch, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->fish_roll, &buffer[index]);
+		mb_put_binary_float(false, header->fish_roll, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->fish_yaw, &buffer[index]);
+		mb_put_binary_float(false, header->fish_yaw, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->fish_x, &buffer[index]);
+		mb_put_binary_float(false, header->fish_x, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->fish_y, &buffer[index]);
+		mb_put_binary_float(false, header->fish_y, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->fish_layback, &buffer[index]);
+		mb_put_binary_float(false, header->fish_layback, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->fish_altitude, &buffer[index]);
+		mb_put_binary_float(false, header->fish_altitude, &buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, header->fish_altitude_samples, &buffer[index]);
+		mb_put_binary_int(false, header->fish_altitude_samples, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->fish_ping_period, &buffer[index]);
+		mb_put_binary_float(false, header->fish_ping_period, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, header->sound_velocity, &buffer[index]);
+		mb_put_binary_float(false, header->sound_velocity, &buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, header->num_chan, &buffer[index]);
+		mb_put_binary_int(false, header->num_chan, &buffer[index]);
 		index += 4;
 		for (int i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
-			mb_put_binary_int(MB_NO, header->channel[i].offset, &buffer[index]);
+			mb_put_binary_int(false, header->channel[i].offset, &buffer[index]);
 			index += 4;
 		}
 		for (int i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
@@ -1521,9 +1515,9 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			index += 1;
 			buffer[index] = header->channel[i].empty;
 			index += 1;
-			mb_put_binary_int(MB_NO, header->channel[i].frequency, &buffer[index]);
+			mb_put_binary_int(false, header->channel[i].frequency, &buffer[index]);
 			index += 4;
-			mb_put_binary_int(MB_NO, header->channel[i].num_samples, &buffer[index]);
+			mb_put_binary_int(false, header->channel[i].num_samples, &buffer[index]);
 			index += 4;
 		}
 	}

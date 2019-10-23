@@ -24,7 +24,7 @@
 #ifndef MB_STATUS_H_
 #define MB_STATUS_H_
 
-/* MBIO function boolean convention */
+/* MBIO function yes/no/maybe convention */
 #define MB_YES 1
 #define MB_NO 0
 #define MB_MAYBE -1
@@ -321,8 +321,8 @@ static char *notice_msg[] = {
     "MB_ERROR_NOT_ENOUGH_DATA (ID=-21): Not enough data to perform spline interpolation",
     "MB_ERROR_FILE_NOT_FOUND (ID=-22): Requested file cannot be found",
     "MB_ERROR_FILE_LOCKED (ID=-23): Requested file locked",
-    "MB_ERROR_FILE_NOT_FOUND (ID=-24): Initialization failed",
-    "MB_ERROR_FILE_NOT_FOUND (ID=-25): Sidescan data ignored",
+    "MB_ERROR_INIT_FAIL (ID=-24): Initialization failed",
+    "MB_ERROR_SIDESCAN_IGNORED (ID=-25): Sidescan data ignored",
 
     /* problem notices */
     "DATA PROBLEM (ID=1): No survey data found", "DATA PROBLEM (ID=2): Zero longitude or latitude in survey data",
@@ -370,10 +370,14 @@ static char *unknown_notice_msg[] = {"Unknown notice identifier detritus"};
  *   00000001 => Flagged because no detection was made by the sonar.
  *   xxxxx101 => Flagged by manual editing.
  *   xxxx1x01 => Flagged by automatic filter.
- *   xxx1xx01 => Flagged because uncertainty exceeds 1 X IHO standard.
- *   xx1xxx01 => Flagged because uncertainty exceeds 2 X IHO standard.
- *   x1xxxx01 => Flagged because footprint is too large
- *   1xxxxx01 => Flagged by sonar as unreliable.
+ *   xxx1xx01 => Flagged by automatic filter in the current program
+ *   xx1xxx01 => Flagged because this is a secondary bottom pick.
+ *   x1xxxx01 => Flagged because this is an interpolated rather than observed sounding
+ *   1xxxxx01 => Flagged as unreliable using original quality values from sonar.
+ *
+ *   xxx1xx01 => Flagged because uncertainty exceeds 1 X IHO standard. (original meaning, deprecated)
+ *   xx1xxx01 => Flagged because uncertainty exceeds 2 X IHO standard. (original meaning, deprecated)
+ *   x1xxxx01 => Flagged because footprint is too large (original meaning, deprecated)
  *
  * Selection modes:
  *   00000010 => Selected, no reason specified.
@@ -393,10 +397,11 @@ static char *unknown_notice_msg[] = {"Unknown notice identifier detritus"};
 #define MB_FLAG_MANUAL 0x04
 #define MB_FLAG_FILTER 0x08
 #define MB_FLAG_FILTER2 0x10
-#define MB_FLAG_GT_1X_IHO 0x10
-#define MB_FLAG_GT_2X_IHO 0x20
+#define MB_FLAG_SECONDARY 0x20
 #define MB_FLAG_INTERPOLATE 0x40
 #define MB_FLAG_SONAR 0x80
+//#define MB_FLAG_GT_1X_IHO 0x10 // original meaning, deprecated
+//#define MB_FLAG_GT_2X_IHO 0x20 // original meaning, deprecated
 
 /* Definitions for the SELECT category */
 #define MB_SELECT_SELECT 0x02
@@ -411,23 +416,27 @@ static char *unknown_notice_msg[] = {"Unknown notice identifier detritus"};
 #define mb_beam_ok(F) ((int)(!(F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag(F) ((int)(F & MB_FLAG_FLAG))
 #define mb_beam_check_flag_null(F) ((int)(F == MB_FLAG_NULL))
+#define mb_beam_check_flag_flagged(F) ((int)((F & MB_FLAG_FLAG) && (F & 0xFC)))
 #define mb_beam_check_flag_manual(F) ((int)((F & MB_FLAG_MANUAL) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_filter(F) ((int)((F & MB_FLAG_FILTER) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_filter2(F) ((int)((F & MB_FLAG_FILTER2) && (F & MB_FLAG_FLAG)))
-#define mb_beam_check_flag_gt_1x_iho(F) ((int)((F & MB_FLAG_GT_1X_IHO) && (F & MB_FLAG_FLAG)))
-#define mb_beam_check_flag_gt_2x_iho(F) ((int)((F & MB_FLAG_GT_2X_IHO) && (F & MB_FLAG_FLAG)))
+#define mb_beam_check_flag_secondary(F) ((int)((F & MB_FLAG_SECONDARY) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_interpolate(F) ((int)((F & MB_FLAG_INTERPOLATE) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_sonar(F) ((int)((F & MB_FLAG_SONAR) && (F & MB_FLAG_FLAG)))
-#define mb_beam_check_flag_unusable(F) ((int)(((F & MB_FLAG_INTERPOLATE) && (F & MB_FLAG_FLAG)) || (F == MB_FLAG_NULL)))
+//#define mb_beam_check_flag_gt_1x_iho(F) ((int)((F & MB_FLAG_GT_1X_IHO) && (F & MB_FLAG_FLAG)))
+//#define mb_beam_check_flag_gt_2x_iho(F) ((int)((F & MB_FLAG_GT_2X_IHO) && (F & MB_FLAG_FLAG)))
+#define mb_beam_check_flag_unusable(F) ((int)((F == MB_FLAG_NULL) || ((F & MB_FLAG_FLAG) && ((F & MB_FLAG_INTERPOLATE) || (F & MB_FLAG_SECONDARY)))))
 #define mb_beam_set_flag_null(F) (0x01)
 #define mb_beam_set_flag_none(F) (0x00)
 #define mb_beam_set_flag_manual(F) (F | 0x05)
 #define mb_beam_set_flag_filter(F) (F | 0x09)
 #define mb_beam_set_flag_filter2(F) (F | 0x11)
-#define mb_beam_set_flag_gt_1x_iho(F) (F | 0x11)
-#define mb_beam_set_flag_gt_2x_iho(F) (F | 0x21)
+#define mb_beam_set_flag_secondary(F) (F | 0x21)
 #define mb_beam_set_flag_interpolate(F) (F | 0x41)
 #define mb_beam_set_flag_sonar(F) (F | 0x81)
+//#define mb_beam_set_flag_filter2(F) (F | 0x11)
+//#define mb_beam_set_flag_gt_1x_iho(F) (F | 0x11)
+//#define mb_beam_set_flag_gt_2x_iho(F) (F | 0x21)
 #define mb_beam_check_select(F) ((int)(F & MB_SELECT_SELECT))
 #define mb_beam_check_select_least(F) ((int)((F & MB_SELECT_LEAST) && (F & MB_SELECT_SELECT)))
 #define mb_beam_check_select_maximum(F) ((int)((F & MB_SELECT_MAXIMUM) && (F & MB_SELECT_SELECT)))

@@ -44,9 +44,9 @@ int mb_swap_check() {
 	int byteswapped;
 	testchar = (char *)&testshort;
 	if (testchar[0] == 0)
-		byteswapped = MB_NO;
+		byteswapped = false;
 	else
-		byteswapped = MB_YES;
+		byteswapped = true;
 
 	return (byteswapped);
 }

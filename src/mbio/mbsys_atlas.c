@@ -441,7 +441,6 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			}
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -481,7 +480,6 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		/* copy comment */
 		strncpy(comment, store->comment, MBSYS_ATLAS_COMMENT_LENGTH);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -872,32 +870,31 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 	if (*kind == MB_DATA_DATA) {
 		/* get transducer depth and altitude */
 		*transducer_depth = store->tt_draught + store->start_heave;
-		int found = MB_NO;
+		bool found = false;
 		double bath_best = 0.0;
 		double xtrack_min = 99999999.9;
 		for (int i = 0; i < store->tt_beam_cnt; i++) {
 			if (mb_beam_ok(store->pr_beamflag[i]) && fabs(store->pr_bathacrosstrack[i]) < xtrack_min) {
 				xtrack_min = fabs(store->pr_bathacrosstrack[i]);
 				bath_best = store->pr_bath[i];
-				found = MB_YES;
+				found = true;
 			}
 		}
-		if (found == MB_NO) {
+		if (!found) {
 			xtrack_min = 99999999.9;
 			for (int i = 0; i < store->tt_beam_cnt; i++) {
 				if (store->pr_beamflag[i] != MB_FLAG_NULL && fabs(store->pr_bathacrosstrack[i]) < xtrack_min) {
 					xtrack_min = fabs(store->pr_bathacrosstrack[i]);
 					bath_best = store->pr_bath[i];
-					found = MB_YES;
+					found = true;
 				}
 			}
 		}
-		if (found == MB_YES)
+		if (found)
 			*altitude = bath_best - *transducer_depth;
 		else
 			*altitude = 0.0;
 
-		/* set status */
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 
@@ -978,7 +975,6 @@ int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		*pitch = RTD * store->start_pitch;
 		*heave = store->start_heave;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");

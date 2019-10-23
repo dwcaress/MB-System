@@ -9,14 +9,13 @@ AM_CFLAGS = ${libnetcdf_CFLAGS}
 
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
         -I${top_srcdir}/src/gsf \
-        $(MBTRNINCDIR) \
         ${libnetcdf_CPPFLAGS}
 
 AM_LDFLAGS =
 
 LIBS = ${top_builddir}/src/mbio/libmbio.la \
 	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-	$(MBTRNLIB) $(LIBM)
+	$(LIBM)
 
 mbotps_SOURCES = mbotps.c
 

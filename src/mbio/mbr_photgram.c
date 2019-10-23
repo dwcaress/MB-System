@@ -159,9 +159,9 @@ int mbr_info_photgram(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_SINGLE;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -268,7 +268,6 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	short checksum;
 	int *fileheader_initialized;
 	int *formatversion;
-	int swap = MB_YES;
 	int index;
 	int skip;
 
@@ -295,13 +294,13 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	formatversion = (int *)&mb_io_ptr->save2;
 
 	/* read file header if necessary */
-	if (*fileheader_initialized == MB_NO) {
+	if (*fileheader_initialized == false) {
 		read_len = 16;
 		buffer[read_len] = '\0';
 		status = mb_fileio_get(verbose, mbio_ptr, (char *)buffer, &read_len, error);
 		if (strncmp(buffer, "##PHOTGRAM##V", 13) == 0) {
-			int n = sscanf(buffer, "##PHOTGRAM##V%d", formatversion);
-			*fileheader_initialized = MB_YES;
+			/* int n = */ sscanf(buffer, "##PHOTGRAM##V%d", formatversion);
+			*fileheader_initialized = true;
 		}
 		else {
 			status = MB_FAILURE;
@@ -324,6 +323,8 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		skip++;
 	}
 
+
+	const bool swap = true;
 
 	/* if a valid record label has been found then read and parse it */
 	if (status == MB_SUCCESS) {
@@ -609,7 +610,6 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char buffer[MB_COMMENT_MAXLINE + 8];
 	size_t write_len;
 	int checksum = 0;
-	int swap = MB_YES;
 	int index;
 
 	if (verbose >= 2) {
@@ -628,20 +628,21 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* get saved values */
 	int *fileheader_initialized = (int *)&mb_io_ptr->save1;
-	int *formatversion = (int *)&mb_io_ptr->save2;
 
 	int status = MB_SUCCESS;
 
 	/* write file header if necessary */
-	if (*fileheader_initialized == MB_NO) {
+	if (*fileheader_initialized == false) {
 		sprintf(buffer, "##PHOTGRAM##V001");
 		write_len = 16;
 		buffer[write_len] = '\0';
 		status = mb_fileio_put(verbose, mbio_ptr, (char *)buffer, &write_len, error);
 		if (status == MB_SUCCESS) {
-			*fileheader_initialized = MB_YES;
+			*fileheader_initialized = true;
 		}
 	}
+
+	const bool swap = true;
 
 	/* now write the data record */
 	if (status == MB_SUCCESS) {
@@ -849,12 +850,6 @@ int mbr_wt_photgram(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 #ifdef MBR_PHOTGRAM_DEBUG
 	fprintf(stderr, "About to call mbr_photgram_wr_data record kind:%d\n", store->kind);

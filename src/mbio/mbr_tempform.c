@@ -69,9 +69,9 @@ int mbr_info_tempform(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_SINGLE;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -193,10 +193,10 @@ int mbr_tempform_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* loop over reading data until a record is ready for return */
-	done = MB_NO;
 	*error = MB_ERROR_NO_ERROR;
 	int status = MB_SUCCESS;
-	while (done == MB_NO) {
+        done = false;
+	while (done == false) {
 		/* read the next record header - set read_kind value */
 
 		/* if valid read the record type */
@@ -234,21 +234,21 @@ int mbr_tempform_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 			/* done if read success or EOF */
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 			}
 			else if (*error == MB_ERROR_EOF) {
-				done = MB_YES;
+				done = true;
 			}
 		}
 
 		/* set done if read failure */
 		else {
-			done = MB_YES;
+			done = true;
 		}
 	}
 
 	/* get file position */
-	if (*save_flag == MB_YES)
+	if (*save_flag == true)
 		mb_io_ptr->file_bytes = ftell(mbfp) - *size;
 	else
 		mb_io_ptr->file_bytes = ftell(mbfp);

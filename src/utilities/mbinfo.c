@@ -23,18 +23,18 @@
  *
  * Author:	D. W. Caress
  * Date:	February 1, 1993
- *
- *
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "mb_status.h"
 #include "mb_define.h"
+#include "mb_status.h"
 #include "mb_io.h"
 
 #define MBINFO_MAXPINGS 50
@@ -49,41 +49,27 @@ struct ping {
 	double *sslat;
 };
 
-/* output formats */
-#define FREE_TEXT 0
-#define JSON 1
-#define XML 2
-#define MAX_OUTPUT_FORMAT 2
+enum OutputFormat {
+  FREE_TEXT = 0,
+  JSON = 1,
+  XML = 2,
+  MAX_OUTPUT_FORMAT = 2
+};
 
+static const char program_name[] = "MBINFO";
+static const char usage_message[] =
+    "mbinfo [-Byr/mo/da/hr/mn/sc -C "
+    "-Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnx/ny "
+    "-N -O -Ppings -Rw/e/s/n -Sspeed -W -V -H -XinfFormat]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBINFO";
-	char help_message[] = "MBINFO reads a swath sonar data file and outputs\n"
-	                      "some basic statistics.  If pings are averaged (pings > 2)\n"
-	                      "MBINFO estimates the variance for each of the swath\n"
-	                      "beams by reading a set number of pings (>2) and then finding\n"
-	                      "the variance of the detrended values for each beam.\n"
-	                      "The results are dumped to stdout.";
-	char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C "
-	                       "-Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnx/ny "
-	                       "-N -O -Ppings -Rw/e/s/n -Sspeed -W -V -H -XinfFormat]";
-	extern char *optarg;
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
-	char *message;
 	char format_description[MB_DESCRIPTION_LENGTH];
 
 	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
 	char read_file[MB_PATH_MAXLINE];
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -113,9 +99,6 @@ int main(int argc, char **argv) {
 	int pixels_ss = 0;
 
 	/* MBIO read values */
-	void *mbio_ptr = NULL;
-	struct mb_io_struct *mb_io_ptr;
-	int kind;
 	struct ping data[MBINFO_MAXPINGS];
 	struct ping *datacur;
 	int time_i[7];
@@ -138,36 +121,14 @@ int main(int argc, char **argv) {
 	char comment[MB_COMMENT_MAXLINE];
 	int icomment = 0;
 
-	/* metadata controls */
-	int imetadata = 0;
-	int meta_vessel = 0;
-	int meta_institution = 0;
-	int meta_platform = 0;
-	int meta_sonar = 0;
-	int meta_sonarversion = 0;
-	int meta_cruiseid = 0;
-	int meta_cruisename = 0;
-	int meta_pi = 0;
-	int meta_piinstitution = 0;
-	int meta_client = 0;
-	int meta_svcorrected = 0;
-	int meta_tidecorrected = 0;
-	int meta_batheditmanual = 0;
-	int meta_batheditauto = 0;
-	int meta_rollbias = 0;
-	int meta_pitchbias = 0;
-	int meta_headingbias = 0;
-	int meta_draft = 0;
-
 	/* mbinfo control parameters */
-	int comments = MB_NO;
-	int good_nav_only = MB_NO;
-	int good_nav;
+	bool comments = false;
+	bool good_nav_only = false;
 	double speed_threshold = 50.0;
-	int bathy_in_feet = MB_NO;
+	bool bathy_in_feet = false;  // TODO(schwehr): Switch to bathy_in_meters.
 	double bathy_scale;
 	int lonflip_use = 0;
-	int lonflip_set = MB_NO;
+	bool lonflip_set = false;
 
 	/* limit variables */
 	double lonmin = 0.0;
@@ -236,12 +197,12 @@ int main(int argc, char **argv) {
 	double ngs_percent;
 	double nzs_percent;
 	double nfs_percent;
-	int beginnav = MB_NO;
-	int beginsdp = MB_NO;
-	int beginalt = MB_NO;
-	int beginbath = MB_NO;
-	int beginamp = MB_NO;
-	int beginss = MB_NO;
+	bool beginnav = false;
+	bool beginsdp = false;
+	bool beginalt = false;
+	bool beginbath = false;
+	bool beginamp = false;
+	bool beginss = false;
 	int nread = 0;
 
 	/* variance finding variables */
@@ -273,9 +234,7 @@ int main(int argc, char **argv) {
 	int *nssvartot = NULL;
 
 	/* coverage mask variables */
-	int coverage_mask = MB_NO;
-	int pass;
-	int done;
+	bool coverage_mask = false;
 	int mask_nx = 0;
 	int mask_ny = 0;
 	double mask_dx = 0.0;
@@ -283,32 +242,25 @@ int main(int argc, char **argv) {
 	int *mask = NULL;
 
 	/* notice variables */
-	int print_notices = MB_NO;
+	bool print_notices = false;
 	int notice_list[MB_NOTICE_MAX];
 	int notice_list_tot[MB_NOTICE_MAX];
-	int notice_total;
 	char *notice_msg;
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 	    output if verbose > 1) */
-	FILE *stream = NULL;
 	FILE *output = NULL;
-	int output_usefile = MB_NO;
-	char output_file[MB_PATH_MAXLINE];
+	bool output_usefile = false;
 	char *fileprint;
-	int output_format = FREE_TEXT;
-	int len1, len2;
+	enum OutputFormat output_format = FREE_TEXT;
+	int len1;
+	int len2;
 	char string[500];
 
-	int read_data;
 	double speed_apparent;
 	double time_d_last = 0.0;
-	int val_int;
 	double val_double;
 
-	char *getenv();
-
-	/* initialize some variables */
 	for (int i = 0; i < 7; i++) {
 		timbeg_i[i] = 0;
 		timend_i[i] = 0;
@@ -318,140 +270,124 @@ int main(int argc, char **argv) {
 		notice_list_tot[i] = 0;
 	}
 
-	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings_get, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings_get, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to stdin */
 	strcpy(read_file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:NnOoP:p:R:r:S:s:T:t:WwX:x:")) != -1)
-		switch (c) {
-		case 'B':
-		case 'b':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
-			btime_i[6] = 0;
-			flag++;
-			break;
-		case 'C':
-		case 'c':
-			comments = MB_YES;
-			flag++;
-			break;
-		case 'E':
-		case 'e':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
-			etime_i[6] = 0;
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'G':
-		case 'g':
-			good_nav_only = MB_YES;
-			flag++;
-			break;
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d", &lonflip);
-			lonflip_set = MB_YES;
-			lonflip_use = lonflip;
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			sscanf(optarg, "%d/%d", &mask_nx, &mask_ny);
-			coverage_mask = MB_YES;
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			print_notices = MB_YES;
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			output_usefile = MB_YES;
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf(optarg, "%d", &pings_read);
-			if (pings_read < 1)
-				pings_read = 1;
-			if (pings_read > MBINFO_MAXPINGS)
-				pings_read = MBINFO_MAXPINGS;
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, bounds);
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%lf", &speedmin);
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf", &timegap);
-			flag++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'W':
-		case 'w':
-			bathy_in_feet = MB_YES;
-			break;
-		case 'X':
-		case 'x':
-			sscanf(optarg, "%d", &output_format);
-			if (output_format < 0 || output_format > MAX_OUTPUT_FORMAT) {
-				errflg++;
-				fprintf(stream, "Invalid output format for inf file");
+	bool errflg = false;
+	bool help = false;
+        {
+		int c;
+		while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:NnOoP:p:R:r:S:s:T:t:WwX:x:")) != -1)
+	        {
+			switch (c) {
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
+				btime_i[6] = 0;
+				break;
+			case 'C':
+			case 'c':
+				comments = true;
+				break;
+			case 'E':
+			case 'e':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
+				etime_i[6] = 0;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+				good_nav_only = true;
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				lonflip_set = true;
+				lonflip_use = lonflip;
+				break;
+			case 'M':
+			case 'm':
+				sscanf(optarg, "%d/%d", &mask_nx, &mask_ny);
+				coverage_mask = true;
+				break;
+			case 'N':
+			case 'n':
+				print_notices = true;
+				break;
+			case 'O':
+			case 'o':
+				output_usefile = true;
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%d", &pings_read);
+				if (pings_read < 1)
+					pings_read = 1;
+				if (pings_read > MBINFO_MAXPINGS)
+					pings_read = MBINFO_MAXPINGS;
+				break;
+			case 'R':
+			case 'r':
+				mb_get_bounds(optarg, bounds);
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%lf", &speedmin);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf", &timegap);
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'W':
+			case 'w':
+				bathy_in_feet = true;
+				break;
+			case 'X':
+			case 'x':
+				sscanf(optarg, "%d", &output_format);
+				if (output_format < 0 || output_format > MAX_OUTPUT_FORMAT) {
+					errflg = true;
+					fprintf(stderr, "Invalid output format for inf file");
+				}
+				break;
+			default:
+				errflg = true;
 			}
-			flag++;
-			break;
-		case '?':
-			errflg++;
 		}
-
-	/* set output stream */
-	if (verbose <= 1)
-		stream = stdout;
-	else
-		stream = stderr;
+	}
+       
+	FILE * const stream = verbose <= 1 ? stdout : stderr;
 
 	/* if error flagged then print it and exit */
 	if (errflg) {
 		fprintf(stream, "usage: %s\n", usage_message);
 		fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
+		exit(MB_ERROR_BAD_USAGE);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stream, "\nProgram %s\n", program_name);
 		fprintf(stream, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stream, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stream, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -487,14 +423,20 @@ int main(int argc, char **argv) {
 		fprintf(stream, "dbg2       bathy feet: %d\n", bathy_in_feet);
 		fprintf(stream, "dbg2       lonflip_set:%d\n", lonflip_set);
 		fprintf(stream, "dbg2       coverage:   %d\n", coverage_mask);
-		if (coverage_mask == MB_YES) {
+		if (coverage_mask) {
 			fprintf(stream, "dbg2       mask_nx:    %d\n", mask_nx);
 			fprintf(stream, "dbg2       mask_ny:    %d\n", mask_ny);
 		}
 	}
 
-	/* if help desired then print it and exit */
 	if (help) {
+		static const char help_message[] =
+		    "MBINFO reads a swath sonar data file and outputs\n"
+	            "some basic statistics.  If pings are averaged (pings > 2)\n"
+	            "MBINFO estimates the variance for each of the swath\n"
+	            "beams by reading a set number of pings (>2) and then finding\n"
+	            "the variance of the detrended values for each beam.\n"
+	            "The results are dumped to stdout.";
 		fprintf(stream, "\n%s\n", help_message);
 		fprintf(stream, "\nusage: %s\n", usage_message);
 		exit(error);
@@ -504,23 +446,24 @@ int main(int argc, char **argv) {
 	if (format == 0)
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
-	/* set bathymetry scaling */
-	if (bathy_in_feet == MB_YES)
+	if (bathy_in_feet)
 		bathy_scale = 1.0 / 0.3048;
 	else
 		bathy_scale = 1.0;
 
+
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* if reading from datalist then variance calculations
 	    are disabled */
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		pings_read = 1;
 
 	/* Open output file if requested */
-	if (output_usefile == MB_YES) {
+	if (output_usefile) {
+		char output_file[MB_PATH_MAXLINE];
 		strcpy(output_file, read_file);
 		switch (output_format) {
 		case FREE_TEXT:
@@ -532,7 +475,7 @@ int main(int argc, char **argv) {
 		case XML:
 			strcat(output_file, "_inf.xml");
 			break;
-		case '?':
+		default:
 			break;
 		}
 		if ((output = fopen(output_file, "w")) == NULL)
@@ -551,40 +494,64 @@ int main(int argc, char **argv) {
 		fprintf(output, "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
 		fprintf(output, "<mbinfo>\n");
 		break;
-	case '?':
+	default:
 		break;
 	}
 	/* read only once unless coverage mask requested */
-	pass = 0;
-	done = MB_NO;
-	while (done == MB_NO) {
+	int pass = 0;
 
+	/* metadata controls */
+	int imetadata = 0;
+	int meta_vessel = 0;
+	int meta_institution = 0;
+	int meta_platform = 0;
+	int meta_sonar = 0;
+	int meta_sonarversion = 0;
+	int meta_cruiseid = 0;
+	int meta_cruisename = 0;
+	int meta_pi = 0;
+	int meta_piinstitution = 0;
+	int meta_client = 0;
+	int meta_svcorrected = 0;
+	int meta_tidecorrected = 0;
+	int meta_batheditmanual = 0;
+	int meta_batheditauto = 0;
+	int meta_rollbias = 0;
+	int meta_pitchbias = 0;
+	int meta_headingbias = 0;
+	int meta_draft = 0;
+
+	int val_int;  // TODO(schwehr): bool?
+	bool good_nav;
+	bool done = false;
+	while (!done) {
 		/* open file list */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-				error = MB_ERROR_OPEN_FAIL;
 				fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(error);
+				exit(MB_ERROR_OPEN_FAIL);
 			}
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		/* else copy single filename to be read */
 		else {
 			strcpy(file, read_file);
-			read_data = MB_YES;
+			read_data = true;
 		}
 
 		/* loop over all files to be read */
-		while (read_data == MB_YES) {
+		while (read_data) {
 
+			void *mbio_ptr = NULL;
 			/* initialize reading the swath file */
 			if ((status = mb_read_init(verbose, file, format, pings_get, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 			                           &mbio_ptr, &btime_d, &etime_d, &beams_bath_alloc, &beams_amp_alloc, &pixels_ss_alloc,
 			                           &error)) != MB_SUCCESS) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stream, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 				fprintf(stream, "\nSwath File <%s> not initialized for reading\n", file);
@@ -648,7 +615,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* if coverage mask requested get cell sizes */
-			if (pass == 1 && coverage_mask == MB_YES) {
+			if (pass == 1 && coverage_mask) {
 				if (mask_nx > 1 && mask_ny <= 0) {
 					if ((lonmax - lonmin) > (latmax - latmin)) {
 						mask_ny = mask_nx * (latmax - latmin) / (lonmax - lonmin);
@@ -673,6 +640,7 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
@@ -701,9 +669,9 @@ int main(int argc, char **argv) {
 					nssvar[i] = 0;
 				}
 			}
-			if (pass == 1 && coverage_mask == MB_YES) {
+			if (pass == 1 && coverage_mask) {
 				for (int i = 0; i < mask_nx * mask_ny; i++)
-					mask[i] = MB_NO;
+					mask[i] = false;
 			}
 
 			/* initialize metadata counters */
@@ -789,8 +757,8 @@ int main(int argc, char **argv) {
 					fprintf(output, "\t\t<attributes>%s</attributes>\n", &format_description[len1]);
 					fprintf(output, "\t</file_info>\n");
 					break;
-				case '?':
-					errflg++;
+				default:
+					errflg = true;
 				}
 			}
 
@@ -800,6 +768,7 @@ int main(int argc, char **argv) {
 				error = MB_ERROR_NO_ERROR;
 				while (nread < pings_read && error == MB_ERROR_NO_ERROR) {
 
+					int kind;
 					/* read a ping of data */
 					datacur = &data[nread];
 					status = mb_read(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
@@ -827,7 +796,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* print comment records */
-					if (pass == 0 && error == MB_ERROR_COMMENT && comments == MB_YES) {
+					if (pass == 0 && error == MB_ERROR_COMMENT && comments) {
 						if (strncmp(comment, "META", 4) != 0) {
 							if (icomment == 0) {
 								switch (output_format) {
@@ -835,7 +804,9 @@ int main(int argc, char **argv) {
 									fprintf(output, "\nComments in file %s:\n", file);
 									icomment++;
 									break;
-								case '?':
+								case JSON:
+								case XML:
+								default:
 									break;
 								}
 							}
@@ -849,7 +820,7 @@ int main(int argc, char **argv) {
 							case XML:
 								fprintf(output, "\t<comment>%s</comment>\n", comment);
 								break;
-							case '?':
+							default:
 								break;
 							}
 						}
@@ -916,7 +887,7 @@ int main(int argc, char **argv) {
 							else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
 								if (meta_svcorrected == 0) {
 									sscanf(comment, "METASVCORRECTED:%d", &val_int);
-									if (val_int == MB_YES)
+									if (val_int == true)
 										fprintf(output, "Corrected Depths:       YES\n");
 									else
 										fprintf(output, "Corrected Depths:       NO\n");
@@ -926,7 +897,7 @@ int main(int argc, char **argv) {
 							else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
 								if (meta_tidecorrected == 0) {
 									sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-									if (val_int == MB_YES)
+									if (val_int == true)
 										fprintf(output, "Tide Corrected:         YES\n");
 									else
 										fprintf(output, "Tide Corrected:         NO\n");
@@ -936,7 +907,7 @@ int main(int argc, char **argv) {
 							else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
 								if (meta_batheditmanual == 0) {
 									sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-									if (val_int == MB_YES)
+									if (val_int == true)
 										fprintf(output, "Depths Manually Edited: YES\n");
 									else
 										fprintf(output, "Depths Manually Edited: NO\n");
@@ -946,7 +917,7 @@ int main(int argc, char **argv) {
 							else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
 								if (meta_batheditauto == 0) {
 									sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-									if (val_int == MB_YES)
+									if (val_int == true)
 										fprintf(output, "Depths Auto-Edited:     YES\n");
 									else
 										fprintf(output, "Depths Auto-Edited:     NO\n");
@@ -1036,7 +1007,7 @@ int main(int argc, char **argv) {
 							else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
 								if (meta_svcorrected == 0) {
 									sscanf(comment, "METASVCORRECTED:%d", &val_int);
-									if (val_int == MB_YES)
+									if (val_int == true)
 										fprintf(output, "\"corrected_depths\": \"YES\",\n");
 									else
 										fprintf(output, "\"corrected_depths\": \"NO\",\n");
@@ -1046,7 +1017,7 @@ int main(int argc, char **argv) {
 							else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
 								if (meta_tidecorrected == 0) {
 									sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-									if (val_int == MB_YES)
+									if (val_int == true)
 										fprintf(output, "\"tide_corrected\": \"YES\",\n");
 									else
 										fprintf(output, "\"tide_corrected\": \"NO\",\n");
@@ -1056,7 +1027,7 @@ int main(int argc, char **argv) {
 							else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
 								if (meta_batheditmanual == 0) {
 									sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-									if (val_int == MB_YES)
+									if (val_int == true)
 										fprintf(output, "\"depths_manually_edited\": \"YES\",\n");
 									else
 										fprintf(output, "\"depths_manually_edited\": \"NO\",\n");
@@ -1066,7 +1037,7 @@ int main(int argc, char **argv) {
 							else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
 								if (meta_batheditauto == 0) {
 									sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-									if (val_int == MB_YES)
+									if (val_int == true)
 										fprintf(output, "\"depths_auto-edited\": \"YES\",\n");
 									else
 										fprintf(output, "\"depths_auto-edited\": \"NO\",\n");
@@ -1160,7 +1131,7 @@ int main(int argc, char **argv) {
 							else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
 								if (meta_svcorrected == 0) {
 									sscanf(comment, "METASVCORRECTED:%d", &val_int);
-									if (val_int == MB_YES)
+									if (val_int == true)
 										fprintf(output, "\t\t<corrected_depths>YES</corrected_depths>\n");
 									else
 										fprintf(output, "\t\t<corrected_depths>NO</corrected_depths>\n");
@@ -1170,7 +1141,7 @@ int main(int argc, char **argv) {
 							else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
 								if (meta_tidecorrected == 0) {
 									sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-									if (val_int == MB_YES)
+									if (val_int == true)
 										fprintf(output, "\t\t<tide_corrected>YES</tide_corrected>\n");
 									else
 										fprintf(output, "\t\t<tide_corrected>NO</tide_corrected>\n");
@@ -1180,7 +1151,7 @@ int main(int argc, char **argv) {
 							else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
 								if (meta_batheditmanual == 0) {
 									sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-									if (val_int == MB_YES)
+									if (val_int == true)
 										fprintf(output, "\t\t<depths_manually_edited>YES</depths_manually_edited>\n");
 									else
 										fprintf(output, "\t\t<depths_manually_edited>NO</depths_manually_edited>\n");
@@ -1190,7 +1161,7 @@ int main(int argc, char **argv) {
 							else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
 								if (meta_batheditauto == 0) {
 									sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-									if (val_int == MB_YES)
+									if (val_int == true)
 										fprintf(output, "\t\t<depths_auto_edited>YES</depths_auto_edited>\n");
 									else
 										fprintf(output, "\t\t<depths_auto_edited>NO</depths_auto_edited>\n");
@@ -1226,7 +1197,7 @@ int main(int argc, char **argv) {
 								meta_draft++;
 							}
 							break;
-						case '?':
+						default:
 							break;
 						}
 					}
@@ -1239,17 +1210,20 @@ int main(int argc, char **argv) {
 						/* do nothing */
 					}
 					else if (verbose >= 1 && error < MB_ERROR_NO_ERROR && error >= MB_ERROR_OTHER) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stream, "\nNonfatal MBIO Error:\n%s\n", message);
 						fprintf(stream, "Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4],
 						        time_i[5], time_i[6]);
 					}
 					else if (verbose >= 1 && error < MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stream, "\nNonfatal MBIO Error:\n%s\n", message);
 						fprintf(stream, "Number of good records so far: %d\n", irecfile);
 					}
 					else if (verbose >= 1 && error > MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stream, "\nFatal MBIO Error:\n%s\n", message);
 						fprintf(stream, "Last Good Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3],
@@ -1267,8 +1241,8 @@ int main(int argc, char **argv) {
 						ntsbeams += pixels_ss;
 
 						/* set lonflip if needed */
-						if (lonflip_set == MB_NO && (navlon != 0.0 || navlat != 0.0)) {
-							lonflip_set = MB_YES;
+						if (!lonflip_set && (navlon != 0.0 || navlat != 0.0)) {
+							lonflip_set = true;
 							if (navlon < -270.0)
 								lonflip_use = 0;
 							else if (navlon >= -270.0 && navlon < -90.0)
@@ -1283,7 +1257,7 @@ int main(int argc, char **argv) {
 							/* change and apply lonflip if needed */
 							if (lonflip_use != lonflip) {
 								/* change lonflip used in reading */
-								mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+								struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 								mb_io_ptr->lonflip = lonflip_use;
 								lonflip = lonflip_use;
 
@@ -1352,7 +1326,7 @@ int main(int argc, char **argv) {
 							sdpbeg = sonardepth;
 							altbeg = altitude;
 						}
-						else if (good_nav_only == MB_YES) {
+						else if (good_nav_only) {
 							if (lonbeg == 0.0 && latbeg == 0.0 && navlon != 0.0 && navlat != 0.0) {
 								lonbeg = navlon;
 								if (beams_bath > 0) {
@@ -1393,85 +1367,85 @@ int main(int argc, char **argv) {
 
 						/* check for good nav */
 						speed_apparent = 3600.0 * distance / (time_d - time_d_last);
-						if (good_nav_only == MB_YES) {
+						if (good_nav_only) {
 							//if (navlon == 0.0 || navlat == 0.0) {		// This still misses lots of trash JL
-							if ((navlon > -0.005 && navlon < 0.005) && (navlat > -0.005 && navlat < 0.005)) { 
-								good_nav = MB_NO;
+							if ((navlon > -0.005 && navlon < 0.005) && (navlat > -0.005 && navlat < 0.005)) {
+								good_nav = false;
 							}
-							else if (beginnav == MB_YES && speed_apparent >= speed_threshold) {
-								good_nav = MB_NO;
+							else if (beginnav && speed_apparent >= speed_threshold) {
+								good_nav = false;
 							}
 							else {
-								good_nav = MB_YES;
+								good_nav = true;
 							}
 						}
 						else
-							good_nav = MB_YES;
+							good_nav = true;
 
 						/* get total distance */
-						if (good_nav_only == MB_NO || (good_nav == MB_YES && speed_apparent < speed_threshold)) {
+						if (!good_nav_only || (good_nav && speed_apparent < speed_threshold)) {
 							distot += distance;
 							distotfile += distance;
 						}
 
 						/* get starting mins and maxs */
-						if (beginnav == MB_NO && good_nav == MB_YES) {
+						if (!beginnav && good_nav) {
 							lonmin = navlon;
 							lonmax = navlon;
 							latmin = navlat;
 							latmax = navlat;
-							beginnav = MB_YES;
+							beginnav = true;
 						}
-						if (beginsdp == MB_NO && sonardepth > 0.0) {
+						if (!beginsdp && sonardepth > 0.0) {
 							sdpmin = sonardepth;
 							sdpmax = sonardepth;
-							beginsdp = MB_YES;
+							beginsdp = true;
 						}
-						if (beginalt == MB_NO && altitude > 0.0) {
+						if (!beginalt && altitude > 0.0) {
 							altmin = altitude;
 							altmax = altitude;
-							beginalt = MB_YES;
+							beginalt = true;
 						}
-						if (beginbath == MB_NO && beams_bath > 0)
+						if (!beginbath && beams_bath > 0)
 							for (int i = 0; i < beams_bath; i++)
 								if (mb_beam_ok(beamflag[i])) {
 									bathmin = bath[i];
 									bathmax = bath[i];
-									beginbath = MB_YES;
+									beginbath = true;
 								}
-						if (beginamp == MB_NO && beams_amp > 0)
+						if (!beginamp && beams_amp > 0)
 							for (int i = 0; i < beams_amp; i++)
 								if (mb_beam_ok(beamflag[i])) {
 									ampmin = amp[i];
 									ampmax = amp[i];
-									beginamp = MB_YES;
+									beginamp = true;
 								}
-						if (beginss == MB_NO && pixels_ss > 0)
+						if (!beginss && pixels_ss > 0)
 							for (int i = 0; i < pixels_ss; i++)
 								if (ss[i] > MB_SIDESCAN_NULL) {
 									ssmin = ss[i];
 									ssmax = ss[i];
-									beginss = MB_YES;
+									beginss = true;
 								}
 
 						/* get mins and maxs */
-						if (good_nav == MB_YES && beginnav == MB_YES) {
+						if (good_nav && beginnav) {
 							lonmin = MIN(lonmin, navlon);
 							lonmax = MAX(lonmax, navlon);
 							latmin = MIN(latmin, navlat);
 							latmax = MAX(latmax, navlat);
 						}
-						if (beginsdp == MB_YES) {
+						if (beginsdp) {
 							sdpmin = MIN(sdpmin, sonardepth);
 							sdpmax = MAX(sdpmax, sonardepth);
 						}
-						if (beginalt == MB_YES) {
+						if (beginalt) {
 							altmin = MIN(altmin, altitude);
 							altmax = MAX(altmax, altitude);
 						}
 						for (int i = 0; i < beams_bath; i++) {
 							if (mb_beam_ok(beamflag[i])) {
-								if (good_nav == MB_YES && beginnav == MB_YES) {
+								if (good_nav && beginnav) {
 									lonmin = MIN(lonmin, bathlon[i]);
 									lonmax = MAX(lonmax, bathlon[i]);
 									latmin = MIN(latmin, bathlat[i]);
@@ -1499,7 +1473,7 @@ int main(int argc, char **argv) {
 						}
 						for (int i = 0; i < pixels_ss; i++) {
 							if (ss[i] > MB_SIDESCAN_NULL) {
-								if (good_nav == MB_YES && beginnav == MB_YES) {
+								if (good_nav && beginnav) {
 									lonmin = MIN(lonmin, sslon[i]);
 									lonmax = MAX(lonmax, sslon[i]);
 									latmin = MIN(latmin, sslat[i]);
@@ -1520,18 +1494,18 @@ int main(int argc, char **argv) {
 					}
 
 					/* update coverage mask */
-					if (pass == 1 && coverage_mask == MB_YES && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
+					if (pass == 1 && coverage_mask && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
 						int ix = (int)((navlon - lonmin) / mask_dx);
 						int iy = (int)((navlat - latmin) / mask_dy);
 						if (ix >= 0 && ix < mask_nx && iy >= 0 && iy < mask_ny) {
-							mask[ix + iy * mask_nx] = MB_YES;
+							mask[ix + iy * mask_nx] = true;
 						}
 						for (int i = 0; i < beams_bath; i++) {
 							if (mb_beam_ok(beamflag[i])) {
 								ix = (int)((bathlon[i] - lonmin) / mask_dx);
 								iy = (int)((bathlat[i] - latmin) / mask_dy);
 								if (ix >= 0 && ix < mask_nx && iy >= 0 && iy < mask_ny) {
-									mask[ix + iy * mask_nx] = MB_YES;
+									mask[ix + iy * mask_nx] = true;
 								}
 							}
 						}
@@ -1540,7 +1514,7 @@ int main(int argc, char **argv) {
 								ix = (int)((sslon[i] - lonmin) / mask_dx);
 								iy = (int)((sslat[i] - latmin) / mask_dy);
 								if (ix >= 0 && ix < mask_nx && iy >= 0 && iy < mask_ny) {
-									mask[ix + iy * mask_nx] = MB_YES;
+									mask[ix + iy * mask_nx] = true;
 								}
 							}
 						}
@@ -1550,7 +1524,7 @@ int main(int argc, char **argv) {
 					if (pass == 0 && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
 						if (navlon == 0.0 || navlat == 0.0)
 							mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_ZERO_NAV);
-						else if (beginnav == MB_YES && speed_apparent >= speed_threshold)
+						else if (beginnav && speed_apparent >= speed_threshold)
 							mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_TOO_FAST);
 						for (int i = 0; i < beams_bath; i++) {
 							if (mb_beam_ok(beamflag[i])) {
@@ -1561,7 +1535,6 @@ int main(int argc, char **argv) {
 					}
 				}
 
-				/* print debug statements */
 				if (verbose >= 2) {
 					fprintf(stream, "\ndbg2  Reading loop finished in program <%s>\n", program_name);
 					fprintf(stream, "dbg2       status:     %d\n", status);
@@ -1679,7 +1652,6 @@ int main(int argc, char **argv) {
 					}
 				}
 
-				/* print debug statements */
 				if (verbose >= 2) {
 					fprintf(stream, "\ndbg2  Processing loop finished in program <%s>\n", program_name);
 					fprintf(stream, "dbg2       status:     %d\n", status);
@@ -1699,7 +1671,7 @@ int main(int argc, char **argv) {
 				mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_AVG_TOO_FAST);
 
 			/* get notices if desired */
-			if (print_notices == MB_YES && pass == 0) {
+			if (print_notices && pass == 0) {
 				status = mb_notice_get_list(verbose, mbio_ptr, notice_list);
 				for (int i = 0; i < MB_NOTICE_MAX; i++)
 					notice_list_tot[i] += notice_list[i];
@@ -1711,11 +1683,12 @@ int main(int argc, char **argv) {
 				if (nbathtot_alloc < beams_bath_max) {
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, beams_bath_max * sizeof(double), (void **)&bathmeantot, &error);
-					status =
+					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, beams_bath_max * sizeof(double), (void **)&bathvartot, &error);
-					status =
+					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, beams_bath_max * sizeof(int), (void **)&nbathvartot, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
@@ -1733,10 +1706,11 @@ int main(int argc, char **argv) {
 				if (namptot_alloc < beams_amp_max) {
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, beams_amp_max * sizeof(double), (void **)&ampmeantot, &error);
-					status =
+					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, beams_amp_max * sizeof(double), (void **)&ampvartot, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, beams_amp_max * sizeof(int), (void **)&nampvartot, &error);
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_amp_max * sizeof(int), (void **)&nampvartot, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
@@ -1754,9 +1728,10 @@ int main(int argc, char **argv) {
 				if (nsstot_alloc < pixels_ss_max) {
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, pixels_ss_max * sizeof(double), (void **)&ssmeantot, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, pixels_ss_max * sizeof(double), (void **)&ssvartot, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, pixels_ss_max * sizeof(int), (void **)&nssvartot, &error);
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, pixels_ss_max * sizeof(double), (void **)&ssvartot, &error);
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, pixels_ss_max * sizeof(int), (void **)&nssvartot, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
@@ -1794,24 +1769,24 @@ int main(int argc, char **argv) {
 			status = mb_close(verbose, &mbio_ptr, &error);
 
 			/* figure out whether and what to read next */
-			if (read_datalist == MB_YES) {
+			if (read_datalist) {
 				if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-					read_data = MB_YES;
+					read_data = true;
 				else
-					read_data = MB_NO;
+					read_data = false;
 			}
 			else {
-				read_data = MB_NO;
+				read_data = false;
 			}
 
 			/* end loop over files in list */
 		}
-		if (read_datalist == MB_YES)
+		if (read_datalist)
 			mb_datalist_close(verbose, &datalist, &error);
 
 		/* figure out if done */
-		if (pass > 0 || coverage_mask == MB_NO)
-			done = MB_YES;
+		if (pass > 0 || !coverage_mask)
+			done = true;
 		pass++;
 
 		/* end loop over reading passes */
@@ -1913,7 +1888,7 @@ int main(int argc, char **argv) {
 		fprintf(output, "Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d (%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d)\n",
 		        timbeg_i[1], timbeg_i[2], timbeg_i[0], timbeg_i[3], timbeg_i[4], timbeg_i[5], timbeg_i[6], timbeg_j[1],
 		        timbeg_i[0], timbeg_i[1], timbeg_i[2], timbeg_i[3], timbeg_i[4], timbeg_i[5], timbeg_i[6]);
-		if (bathy_in_feet == MB_NO)
+		if (!bathy_in_feet)
 			fprintf(output, "Lon: %15.9f     Lat: %15.9f     Depth: %10.4f meters\n", lonbeg, latbeg, bathbeg);
 		else
 			fprintf(output, "Lon: %15.9f     Lat: %15.9f     Depth: %10.4f feet\n", lonbeg, latbeg, bathy_scale * bathbeg);
@@ -1923,7 +1898,7 @@ int main(int argc, char **argv) {
 		fprintf(output, "Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d (%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d)\n",
 		        timend_i[1], timend_i[2], timend_i[0], timend_i[3], timend_i[4], timend_i[5], timend_i[6], timend_j[1],
 		        timend_i[0], timend_i[1], timend_i[2], timend_i[3], timend_i[4], timend_i[5], timend_i[6]);
-		if (bathy_in_feet == MB_NO)
+		if (!bathy_in_feet)
 			fprintf(output, "Lon: %15.9f     Lat: %15.9f     Depth: %10.4f meters\n", lonend, latend, bathend);
 		else
 			fprintf(output, "Lon: %15.9f     Lat: %15.9f     Depth: %10.4f feet\n", lonend, latend, bathy_scale * bathend);
@@ -1989,7 +1964,7 @@ int main(int argc, char **argv) {
 		        timbeg_i[3], timbeg_i[4], timbeg_i[5], timbeg_i[6], timbeg_j[1]);
 		fprintf(output, "\"time_iso\": \"%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d\",\n", timbeg_i[0], timbeg_i[1], timbeg_i[2],
 		        timbeg_i[3], timbeg_i[4], timbeg_i[5], timbeg_i[6]);
-		if (bathy_in_feet == MB_NO)
+		if (!bathy_in_feet)
 			fprintf(output, "\"longitude\": \"%.9f\",\n\"latitude\": \"%.9f\",\n\"depth_meters\": \"%.4f\",\n", lonbeg, latbeg,
 			        bathbeg);
 		else
@@ -2005,7 +1980,7 @@ int main(int argc, char **argv) {
 		        timend_i[3], timend_i[4], timend_i[5], timend_i[6], timend_j[1]);
 		fprintf(output, "\"time_iso\": \"%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d\",\n", timend_i[0], timend_i[1], timend_i[2],
 		        timend_i[3], timend_i[4], timend_i[5], timend_i[6]);
-		if (bathy_in_feet == MB_NO)
+		if (!bathy_in_feet)
 			fprintf(output, "\"longitude\": \"%.9f\",\n\"latitude\": \"%.9f\",\n\"depth_meters\": \"%.4f\",\n", lonend, latend,
 			        bathend);
 		else
@@ -2091,7 +2066,7 @@ int main(int argc, char **argv) {
 		        timbeg_i[0], timbeg_i[3], timbeg_i[4], timbeg_i[5], timbeg_i[6], timbeg_j[1]);
 		fprintf(output, "\t\t<time_iso>%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d</time_iso>\n", timbeg_i[0], timbeg_i[1],
 		        timbeg_i[2], timbeg_i[3], timbeg_i[4], timbeg_i[5], timbeg_i[6]);
-		if (bathy_in_feet == MB_NO) {
+		if (!bathy_in_feet) {
 			fprintf(output, "\t\t<longitude>%.9f</longitude>\n", lonbeg);
 			fprintf(output, "\t\t<latitude>%.9f</latitude>\n", latbeg);
 			fprintf(output, "\t\t<depth_meters>%.4f</depth_meters>\n", bathbeg);
@@ -2113,7 +2088,7 @@ int main(int argc, char **argv) {
 		        timend_i[0], timend_i[3], timend_i[4], timend_i[5], timend_i[6], timend_j[1]);
 		fprintf(output, "\t\t<time_iso>%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d</time_iso>\n", timend_i[0], timend_i[1],
 		        timend_i[2], timend_i[3], timend_i[4], timend_i[5], timend_i[6]);
-		if (bathy_in_feet == MB_NO) {
+		if (!bathy_in_feet) {
 			fprintf(output, "\t\t<longitude>%.9f</longitude>\n", lonend);
 			fprintf(output, "\t\t<latitude>%.9f</latitude>\n", latend);
 			fprintf(output, "\t\t<depth_meters>%.4f</depth_meters>\n", bathend);
@@ -2153,7 +2128,7 @@ int main(int argc, char **argv) {
 		}
 		fprintf(output, "\t</limits>\n");
 		break;
-	case '?':
+	default:
 		break;
 	}
 	if (pings_read > 2 && beams_bath_max > 0 && (ngdbeams > 0 || verbose >= 1)) {
@@ -2199,7 +2174,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t\t</values>\n");
 			fprintf(output, "\t</beam_bathymetry_variances>\n");
 			break;
-		case '?':
+		default:
 			break;
 		}
 	}
@@ -2244,7 +2219,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t\t</values>\n");
 			fprintf(output, "\t</beam_amplitude_variances>\n");
 			break;
-		case '?':
+		default:
 			break;
 		}
 	}
@@ -2289,11 +2264,11 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t\t</values>\n");
 			fprintf(output, "\t</pixel_sidescan_variances>\n");
 			break;
-		case '?':
+		default:
 			break;
 		}
 	}
-	if (print_notices == MB_YES) {
+	if (print_notices) {
 		switch (output_format) {
 		case FREE_TEXT:
 			fprintf(output, "\nData Record Type Notices:\n");
@@ -2318,9 +2293,9 @@ int main(int argc, char **argv) {
 				}
 			}
 			break;
-		case JSON:
+		case JSON: {
 			fprintf(output, ",\n\"notices\": {\n");
-			notice_total = 0;
+			int notice_total = 0;
 			fprintf(output, "\"data_record_type_notices\": [\n");
 			for (int i = 0; i <= MB_DATA_KINDS; i++) {
 				if (notice_list_tot[i] > 0) {
@@ -2367,6 +2342,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "]\n");
 			fprintf(output, "}");
 			break;
+		}
 		case XML:
 			fprintf(output, "\t<data_record_type_notices>\n");
 			for (int i = 0; i <= MB_DATA_KINDS; i++) {
@@ -2396,11 +2372,11 @@ int main(int argc, char **argv) {
 			}
 			fprintf(output, "\t</problem_notices>\n");
 			break;
-		case '?':
+		default:
 			break;
 		}
 	}
-	if (coverage_mask == MB_YES) {
+	if (coverage_mask) {
 		switch (output_format) {
 		case FREE_TEXT:
 			fprintf(output, "\nCoverage Mask:\nCM dimensions: %d %d\n", mask_nx, mask_ny);
@@ -2428,7 +2404,8 @@ int main(int argc, char **argv) {
 			}
 			fprintf(output, "\"}");
 			break;
-		case '?':
+		case XML:
+		default:
 			break;
 		}
 	}
@@ -2443,12 +2420,11 @@ int main(int argc, char **argv) {
 	case XML:
 		fprintf(output, "</mbinfo>\n");
 		break;
-	case '?':
+	default:
 		break;
 	}
 
-	/* close output file */
-	if (output_usefile == MB_YES && output != NULL) {
+	if (output_usefile && output != NULL) {
 		fclose(output);
 	}
 
@@ -2464,21 +2440,18 @@ int main(int argc, char **argv) {
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&nssvartot, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&mask, &error);
 
-	/* set program status */
 	status = MB_SUCCESS;
 
 	/* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stream, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stream, "dbg2  Ending status:\n");
 		fprintf(stream, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

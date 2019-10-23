@@ -32,18 +32,20 @@
    Miscellaneous routines for MR1 post-processing software.
 */
 
-#include <stdlib.h>
-#include <string.h>
+#include <float.h>
 #include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
+#include "mbbs.h"
 #include "mbbs_defines.h"
 #include "mbbs_mem.h"
+
 #ifdef WIN32
-#include <float.h>
 #define isnan _isnan
 #endif
 
-int mbbs_pngdatabufsz(Ping *png, unsigned long long *pngsz)
 /*
    User-callable routine.
 
@@ -68,14 +70,8 @@ int mbbs_pngdatabufsz(Ping *png, unsigned long long *pngsz)
    only if the host architecture supports 8-byte (or larger) unsigned
    long long integers.
 */
+int mbbs_pngdatabufsz(Ping *png, unsigned long long *pngsz)
 {
-	int retval, npbty, npss, nsbty, nsss;
-	unsigned long long maxsignedint32, nbytes;
-	unsigned long long nfloats, nuints, nuchars, nabis, bsi, k;
-	unsigned long long ullncompass, ullndepth, ullnpitch, ullnroll;
-	unsigned long long ullpbtyc, ullpbtyp, ullpssc, ullpssp;
-	unsigned long long ullsbtyc, ullsbtyp, ullsssc, ullsssp;
-
 	if (pngsz == (unsigned long long *)0)
 		return BS_BADARG;
 
@@ -96,17 +92,17 @@ int mbbs_pngdatabufsz(Ping *png, unsigned long long *pngsz)
 		return BS_BADDATA;
 
 	/* assume success until we discover otherwise */
-	retval = BS_SUCCESS;
+	int retval = BS_SUCCESS;
 
 	/* we cannot accurately check for oversized pings
 	   on hosts where sizeof(unsigned long long) is
 	   less than 8 bytes, so adopt greater restrictions
 	   on data sizes as necessary */
 	if (sizeof(unsigned long long) < 8) {
-		npbty = png->png_sides[ACP_PORT].ps_btycount + png->png_sides[ACP_PORT].ps_btypad;
-		npss = png->png_sides[ACP_PORT].ps_sscount + png->png_sides[ACP_PORT].ps_sspad;
-		nsbty = png->png_sides[ACP_STBD].ps_btycount + png->png_sides[ACP_STBD].ps_btypad;
-		nsss = png->png_sides[ACP_STBD].ps_sscount + png->png_sides[ACP_STBD].ps_sspad;
+		const int npbty = png->png_sides[ACP_PORT].ps_btycount + png->png_sides[ACP_PORT].ps_btypad;
+		const int npss = png->png_sides[ACP_PORT].ps_sscount + png->png_sides[ACP_PORT].ps_sspad;
+		const int nsbty = png->png_sides[ACP_STBD].ps_btycount + png->png_sides[ACP_STBD].ps_btypad;
+		const int nsss = png->png_sides[ACP_STBD].ps_sscount + png->png_sides[ACP_STBD].ps_sspad;
 
 		/* negative sums here probably indicate additive
 		   overflow since the input operands were positive */
@@ -128,29 +124,32 @@ int mbbs_pngdatabufsz(Ping *png, unsigned long long *pngsz)
 			return retval;
 	}
 
+	unsigned long long bsi;
 	if (png->png_flags & PNG_XYZ)
 		bsi = 3;
 	else
 		bsi = 2;
 
 	/* explicitly cast everything to unsigned long long */
-	ullncompass = (unsigned long long)png->png_compass.sns_nsamps;
-	ullndepth = (unsigned long long)png->png_depth.sns_nsamps;
-	ullnpitch = (unsigned long long)png->png_pitch.sns_nsamps;
-	ullnroll = (unsigned long long)png->png_roll.sns_nsamps;
-	ullpbtyc = (unsigned long long)png->png_sides[ACP_PORT].ps_btycount;
-	ullpbtyp = (unsigned long long)png->png_sides[ACP_PORT].ps_btypad;
-	ullpssc = (unsigned long long)png->png_sides[ACP_PORT].ps_sscount;
-	ullpssp = (unsigned long long)png->png_sides[ACP_PORT].ps_sspad;
-	ullsbtyc = (unsigned long long)png->png_sides[ACP_STBD].ps_btycount;
-	ullsbtyp = (unsigned long long)png->png_sides[ACP_STBD].ps_btypad;
-	ullsssc = (unsigned long long)png->png_sides[ACP_STBD].ps_sscount;
-	ullsssp = (unsigned long long)png->png_sides[ACP_STBD].ps_sspad;
+	const unsigned long long ullncompass = (unsigned long long)png->png_compass.sns_nsamps;
+	const unsigned long long ullndepth = (unsigned long long)png->png_depth.sns_nsamps;
+	const unsigned long long ullnpitch = (unsigned long long)png->png_pitch.sns_nsamps;
+	const unsigned long long ullnroll = (unsigned long long)png->png_roll.sns_nsamps;
+	const unsigned long long ullpbtyc = (unsigned long long)png->png_sides[ACP_PORT].ps_btycount;
+	const unsigned long long ullpbtyp = (unsigned long long)png->png_sides[ACP_PORT].ps_btypad;
+	const unsigned long long ullpssc = (unsigned long long)png->png_sides[ACP_PORT].ps_sscount;
+	const unsigned long long ullpssp = (unsigned long long)png->png_sides[ACP_PORT].ps_sspad;
+	const unsigned long long ullsbtyc = (unsigned long long)png->png_sides[ACP_STBD].ps_btycount;
+	const unsigned long long ullsbtyp = (unsigned long long)png->png_sides[ACP_STBD].ps_btypad;
+	const unsigned long long ullsssc = (unsigned long long)png->png_sides[ACP_STBD].ps_sscount;
+	const unsigned long long ullsssp = (unsigned long long)png->png_sides[ACP_STBD].ps_sspad;
 
-	nbytes = 0;
+	unsigned long long nbytes = 0;
+	unsigned long long nuints;
+	unsigned long long nuchars;
 
 	/* sensor section */
-	nfloats = ullncompass + ullndepth + ullnpitch + ullnroll;
+	unsigned long long nfloats = ullncompass + ullndepth + ullnpitch + ullnroll;
 	nbytes += nfloats * ((unsigned long long)sizeof(float));
 
 	/* port bathymetry/sidescan data and flags */
@@ -161,8 +160,11 @@ int mbbs_pngdatabufsz(Ping *png, unsigned long long *pngsz)
 
 	/* make sure start of starboard data/flags
 	   section is properly byte-aligned */
-	if ((k = nbytes % PNG_BYTEALIGNSZ) != 0)
+	{
+	const unsigned long long k = nbytes % PNG_BYTEALIGNSZ;
+	if (k != 0)
 		nbytes += PNG_BYTEALIGNSZ - k;
+	}
 
 	/* starboard bathymetry/sidescan data and flags */
 	nfloats = (bsi * (ullsbtyc + ullsbtyp)) + ullsssc + ullsssp;
@@ -172,19 +174,22 @@ int mbbs_pngdatabufsz(Ping *png, unsigned long long *pngsz)
 
 	/* make sure start of auxiliary beam
 	   information is properly byte-aligned */
-	if ((k = nbytes % PNG_BYTEALIGNSZ) != 0)
-		nbytes += PNG_BYTEALIGNSZ - k;
+	{
+		const unsigned long long k = nbytes % PNG_BYTEALIGNSZ;
+		if (k != 0)
+			nbytes += PNG_BYTEALIGNSZ - k;
+	}
 
 	/* auxiliary beam information */
 	if (png->png_flags & PNG_ABI) {
-		nabis = ullpbtyc + ullpbtyp + ullsbtyc + ullsbtyp;
+		unsigned long long nabis = ullpbtyc + ullpbtyp + ullsbtyc + ullsbtyp;
 		nbytes += nabis * ((unsigned long long)sizeof(AuxBeamInfo));
 	}
 
 	*pngsz = nbytes;
 
 	if (sizeof(unsigned long long) >= 8) {
-		maxsignedint32 = (unsigned long long)BS_MAXSIGNEDINT32;
+		unsigned long long maxsignedint32 = (unsigned long long)BS_MAXSIGNEDINT32;
 		if (*pngsz > maxsignedint32)
 			retval = BS_HUGEPING;
 	}
@@ -192,32 +197,29 @@ int mbbs_pngdatabufsz(Ping *png, unsigned long long *pngsz)
 	return retval;
 }
 
-MemType *mbbs_pngmemalloc(Ping *png)
 /*
    User-callable routine.
    Allocates memory for ping data arrays.
    Returns a pointer to the allocated memory.
 */
+MemType *mbbs_pngmemalloc(Ping *png)
 {
-	unsigned long long ullnbytes;
-	unsigned int nbytes;
-	int err;
-
 	if (sizeof(int) < 4)
 		return (MemType *)0;
 
-	if ((err = mbbs_pngdatabufsz(png, &ullnbytes)) != BS_SUCCESS)
+	unsigned long long ullnbytes;
+	const int err = mbbs_pngdatabufsz(png, &ullnbytes);
+	if (err != BS_SUCCESS)
 		return (MemType *)0;
 
 	/* this should be safe to do if the
 	   preceding call has not returned
 	   BS_HUGEPING (or any other error) */
-	nbytes = (unsigned int)ullnbytes;
+	unsigned int nbytes = (unsigned int)ullnbytes;
 
 	return (float *)calloc((MemSizeType)nbytes, (MemSizeType)1);
 }
 
-int mbbs_pngrealloc(Ping *png, MemType **buf, unsigned int *bufsz)
 /*
    User-callable routine.
 
@@ -227,26 +229,26 @@ int mbbs_pngrealloc(Ping *png, MemType **buf, unsigned int *bufsz)
    returns a pointer to the reallocated (if necessary) buffer
    into *buf and the size in bytes of the buffer into bufsz.
 */
+int mbbs_pngrealloc(Ping *png, MemType **buf, unsigned int *bufsz)
 {
-	unsigned long long ullnbytes;
-	unsigned int nbytes;
-	int err, retval;
-
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
 	if (png == (Ping *)0)
 		return BS_BADARG;
 
-	if ((err = mbbs_pngdatabufsz(png, &ullnbytes)) != BS_SUCCESS)
+	unsigned long long ullnbytes;
+	int err = mbbs_pngdatabufsz(png, &ullnbytes);
+	if (err != BS_SUCCESS)
 		return err;
 
 	/* this should be safe to do if the
 	   preceding call has not returned
 	   BS_HUGEPING (or any other error) */
-	nbytes = (unsigned int)ullnbytes;
+	const unsigned int nbytes = (unsigned int)ullnbytes;
 
-	if ((retval = mbbs_memalloc(buf, bufsz, nbytes, (size_t)1)) != MEM_SUCCESS) {
+	int retval = mbbs_memalloc(buf, bufsz, nbytes, (size_t)1);
+	if (retval != MEM_SUCCESS) {
 		switch (retval) {
 		case MEM_BADARG:
 			return BS_BADARG;
@@ -262,7 +264,6 @@ int mbbs_pngrealloc(Ping *png, MemType **buf, unsigned int *bufsz)
 	return BS_SUCCESS;
 }
 
-int mbbs_getpngdataptrs(Ping *png, MemType *data, PingData *pd)
 /*
    User-callable routine.
 
@@ -271,20 +272,17 @@ int mbbs_getpngdataptrs(Ping *png, MemType *data, PingData *pd)
 
    Returns BS_SUCCESS or BS_BADARG.
 */
+int mbbs_getpngdataptrs(Ping *png, MemType *data, PingData *pd)
 {
-	float *fp;
-	int err, bsi, side, k;
-	unsigned long long ullnbytes;
-	unsigned int *uip, nbytes;
-	unsigned char *ucp0, *ucp1;
-
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
 	if (png == (Ping *)0)
 		return BS_BADARG;
 
-	if ((err = mbbs_pngdatabufsz(png, &ullnbytes)) != BS_SUCCESS)
+	unsigned long long ullnbytes;
+	const int err = mbbs_pngdatabufsz(png, &ullnbytes);
+	if (err != BS_SUCCESS)
 		return err;
 
 	/* this may or may not be the right thing to do,
@@ -298,7 +296,7 @@ int mbbs_getpngdataptrs(Ping *png, MemType *data, PingData *pd)
 	if (pd == (PingData *)0)
 		return BS_BADARG;
 
-	fp = (float *)data;
+	float *fp = (float *)data;
 	pd->pd_compass = fp;
 	fp += png->png_compass.sns_nsamps;
 	pd->pd_depth = fp;
@@ -308,20 +306,21 @@ int mbbs_getpngdataptrs(Ping *png, MemType *data, PingData *pd)
 	pd->pd_roll = fp;
 	fp += png->png_roll.sns_nsamps;
 	fp += png->png_snspad;
-	ucp1 = (unsigned char *)fp;
+	unsigned char *ucp1 = (unsigned char *)fp;
 
+	int bsi;
 	if (png->png_flags & PNG_XYZ)
 		bsi = 3;
 	else
 		bsi = 2;
 
-	for (side = ACP_PORT; side < ACP_NSIDES; side++) {
+	for (int side = ACP_PORT; side < ACP_NSIDES; side++) {
 		fp = (float *)ucp1;
 
 		pd->pd_bty[side] = fp;
 		fp += (bsi * (png->png_sides[side].ps_btycount + png->png_sides[side].ps_btypad));
 
-		uip = (unsigned int *)fp;
+		unsigned int *uip = (unsigned int *)fp;
 		pd->pd_btyflags[side] = uip;
 		uip += png->png_sides[side].ps_btycount + png->png_sides[side].ps_btypad;
 
@@ -335,9 +334,10 @@ int mbbs_getpngdataptrs(Ping *png, MemType *data, PingData *pd)
 
 		/* make sure start of next data
 		   section is properly byte-aligned */
-		ucp0 = (unsigned char *)data;
-		nbytes = (unsigned int)(ucp1 - ucp0);
-		if ((k = nbytes % PNG_BYTEALIGNSZ) != 0)
+		const unsigned char *ucp0 = (unsigned char *)data;
+		const unsigned int nbytes = (unsigned int)(ucp1 - ucp0);
+		const int k = nbytes % PNG_BYTEALIGNSZ;
+		if (k != 0)
 			ucp1 += PNG_BYTEALIGNSZ - k;
 	}
 
@@ -351,28 +351,27 @@ int mbbs_getpngdataptrs(Ping *png, MemType *data, PingData *pd)
 	return BS_SUCCESS;
 }
 
-int mbbs_appendstr(char **field, char *str)
 /*
    User-callable routine.
    Append a string to the specified string field.
    Returns BS_SUCCESS, BS_BADARG or BS_MEMALLOC.
 */
+int mbbs_appendstr(char **field, char *str)
 {
-	StrSizeType len;
-	char *newfield;
-
 	if (field == (char **)0)
 		return BS_BADARG;
 	if ((str == (char *)0) || (strlen(str) == 0))
 		return BS_SUCCESS;
 
+	StrSizeType len;
 	if (*field != (char *)0)
 		len = strlen(*field);
 	else
 		len = (StrSizeType)0;
 	len += strlen(str) + 1;
 
-	if ((newfield = (char *)calloc((MemSizeType)len, sizeof(char))) == (char *)0)
+	char *newfield = (char *)calloc((MemSizeType)len, sizeof(char));
+	if (newfield == NULL)
 		return BS_MEMALLOC;
 	if (*field != (char *)0)
 		(void)strcpy(newfield, *field);
@@ -384,7 +383,6 @@ int mbbs_appendstr(char **field, char *str)
 	return BS_SUCCESS;
 }
 
-int mbbs_appendlog(BSFile *bsf, char **argv)
 /*
    User-callable routine.
    Appends the specified argument list to the file log
@@ -393,12 +391,8 @@ int mbbs_appendlog(BSFile *bsf, char **argv)
    strings of the argument list and (iii) a trailing semicolon.
    Returns BS_SUCCESS, BS_BADARCH, BS_BADARG or BS_MEMALLOC.
 */
+int mbbs_appendlog(BSFile *bsf, char **argv)
 {
-	char **av;
-	int firstarg;
-	StrSizeType len;
-	char *newlog;
-
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
@@ -407,7 +401,8 @@ int mbbs_appendlog(BSFile *bsf, char **argv)
 	if (argv == (char **)0)
 		return BS_BADARG;
 
-	for (av = argv, len = 0; *av != (char *)0; av++) {
+	StrSizeType len = 0;
+	for (char **av = argv; *av != (char *)0; av++) {
 		if (strlen(*av) > 0)
 			len += strlen(*av) + 1;
 	}
@@ -419,14 +414,16 @@ int mbbs_appendlog(BSFile *bsf, char **argv)
 		len -= 1;
 	len += 2;
 
-	if ((newlog = (char *)calloc((MemSizeType)len, sizeof(char))) == (char *)0)
+	char *newlog = (char *)calloc((MemSizeType)len, sizeof(char));
+	if (newlog == NULL)
 		return BS_MEMALLOC;
 	if ((bsf->bsf_log != (char *)0) && (strlen(bsf->bsf_log) > 0))
 		(void)strcpy(newlog, bsf->bsf_log);
 	else
 		(void)strcpy(newlog, "");
 
-	for (av = argv, firstarg = 1; *av != (char *)0; av++) {
+	int firstarg = 1;
+	for (char **av = argv; *av != (char *)0; av++) {
 		if (strlen(*av) > 0) {
 			if (firstarg) {
 				if ((bsf->bsf_log != (char *)0) && (strlen(bsf->bsf_log) > 0))
@@ -447,16 +444,13 @@ int mbbs_appendlog(BSFile *bsf, char **argv)
 	return BS_SUCCESS;
 }
 
-int mbbs_replacestr(char **field, char *str)
 /*
    User-callable routine.
    Copy a string to the specified string field.
    Returns BS_SUCCESS, BS_BADARG or BS_MEMALLOC.
 */
+int mbbs_replacestr(char **field, char *str)
 {
-	StrSizeType olen, nlen;
-	char *newfield;
-
 	if (field == (char **)0)
 		return BS_BADARG;
 	if ((str == (char *)0) || (strlen(str) == 0)) {
@@ -467,14 +461,16 @@ int mbbs_replacestr(char **field, char *str)
 		return BS_SUCCESS;
 	}
 
+	StrSizeType olen;
 	if (*field != (char *)0)
 		olen = strlen(*field) + 1;
 	else
 		olen = 0;
-	nlen = strlen(str) + 1;
+	const StrSizeType nlen = strlen(str) + 1;
 
 	if (nlen != olen) {
-		if ((newfield = (char *)calloc((MemSizeType)nlen, sizeof(char))) == (char *)0)
+		char *newfield = (char *)calloc((MemSizeType)nlen, sizeof(char));
+		if (newfield == NULL)
 			return BS_MEMALLOC;
 		(void)strcpy(newfield, str);
 		if (*field != (char *)0)
@@ -487,22 +483,22 @@ int mbbs_replacestr(char **field, char *str)
 	return BS_SUCCESS;
 }
 
-int mbbs_striptail(char *str, char c)
 /*
    User-callable routine.
    Strips all consecutive instances of c from the end of str.
    Returns BS_SUCCESS or BS_BADARG.
 */
+int mbbs_striptail(char *str, char c)
 {
-	StrSizeType len;
-	char *cp;
-
-	if ((str == (char *)0) || ((len = strlen(str)) == (StrSizeType)0))
+	if (str == NULL)
+		return BS_BADARG;
+	const StrSizeType len = strlen(str);
+	if (len == 0)
 		return BS_BADARG;
 	if (c == '\0')
 		return BS_BADARG;
 
-	for (cp = str + len - 1; cp >= str; cp--) {
+	for (char *cp = str + len - 1; cp >= str; cp--) {
 		if (*cp == c)
 			*cp = '\0';
 		else
@@ -512,46 +508,39 @@ int mbbs_striptail(char *str, char c)
 	return BS_SUCCESS;
 }
 
-void *mbbs_mrkmemalloc(int size)
 /*
    User-callable routine.
    Allocates ping mark memory and sets all marks to BS_NULLMARK (i.e., 0).
 */
+void *mbbs_mrkmemalloc(int size)
 {
-	unsigned int bufsz;
-
-	bufsz = size / 2;
+	unsigned int bufsz = size / 2;
 	if (size % 2 != 0)
 		bufsz++;
 	return (void *)calloc((MemSizeType)bufsz, sizeof(char));
 }
 
-int mbbs_mrkget(void *mrkbuf, int side, int index)
 /*
    User-callable routine.
    Returns the ping mark value of the specified ping index.
 */
+int mbbs_mrkget(void *mrkbuf, int side, int index)
 {
-	char *c;
-
-	c = (char *)mrkbuf;
+	char *c = (char *)mrkbuf;
 	c += index / 2;
 	return ((*c >> (((index % 2) * 4) + (side * 2))) & 0x3);
 }
 
-void mbbs_mrkset(void *mrkbuf, int side, int index, int value)
 /*
    User-callable routine.
    Sets the ping mark value of the specified ping index.
 */
+void mbbs_mrkset(void *mrkbuf, int side, int index, int value)
 {
-	char *c;
-	unsigned char uv;
-
-	c = (char *)mrkbuf;
+	char *c = (char *)mrkbuf;
 	c += index / 2;
 	*c &= ~(0x3 << (((index % 2) * 4) + (side * 2)));
-	uv = (unsigned char)((value & 0x3) << (((index % 2) * 4) + (side * 2)));
+	unsigned char uv = (unsigned char)((value & 0x3) << (((index % 2) * 4) + (side * 2)));
 	*c |= uv;
 	return;
 }
@@ -563,52 +552,26 @@ void mbbs_mrkset(void *mrkbuf, int side, int index, int value)
    otherwise they fall back to 0./0., which hopefully will work
    in all other cases.
 */
-
 float mbbs_nanf() {
-	unsigned int ui;
+	unsigned int ui = 0xffc00000;
 	float f;
-
-	/* mbbs_misc.c(607) : error C2124: divide or mod by zero */
-	/*
-	    if (sizeof(float) != sizeof(unsigned int))
-	        f= 0./0.;
-	    else {
-	*/
-	ui = 0xffc00000;
 	MemCopy(&ui, &f, sizeof(float));
-	/*	} */
 
 	return f;
 }
 
 double mbbs_nand() {
-	unsigned long long ull;
+	unsigned long long ull = 0xfff8000000000000ULL;
 	double d;
-
-	/*	if (sizeof(double) != sizeof(unsigned long long))
-	        d= 0./0.;
-	    else {
-	*/
-	ull = 0xfff8000000000000ULL;
 	MemCopy(&ull, &d, sizeof(double));
-	/*	} */
 
 	return d;
 }
 
 int mbbs_isnanf(float f) {
-#if defined(SOLARIS) || defined(IRIX)
-	return isnanf(f);
-#else
-	/* hope this works! */
 	return isnan((double)f);
-#endif /* defined(SOLARIS) || defined(IRIX) */
 }
 
 int mbbs_isnand(double d) {
-#if defined(SOLARIS) || defined(IRIX)
-	return isnand(d);
-#else
 	return isnan(d);
-#endif /* defined(SOLARIS) || defined(IRIX) */
 }

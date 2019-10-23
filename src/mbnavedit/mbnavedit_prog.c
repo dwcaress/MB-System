@@ -160,7 +160,7 @@ static int beams_bath;
 static int beams_amp;
 static int pixels_ss;
 static void *imbio_ptr = NULL;
-static int uselockfiles = MB_YES;
+static int uselockfiles = true;
 
 /* mbio read and write values */
 static void *store_ptr = NULL;
@@ -183,8 +183,8 @@ static char comment[MB_COMMENT_MAXLINE];
 
 /* buffer control variables */
 #define MBNAVEDIT_BUFFER_SIZE 1000000
-static int file_open = MB_NO;
-static int nfile_open = MB_NO;
+static int file_open = false;
+static int nfile_open = false;
 static FILE *nfp;
 static int hold_size = 100;
 static int nload = 0;
@@ -193,7 +193,7 @@ static int nbuff = 0;
 static int current_id = 0;
 static int nload_total = 0;
 static int ndump_total = 0;
-static int first_read = MB_NO;
+static int first_read = false;
 
 /* plotting control variables */
 #define NUMBER_PLOTS_MAX 9
@@ -232,34 +232,34 @@ int mbnavedit_init_globals() {
 
 	/* set default global control parameters */
 	output_mode = OUTPUT_MODE_OUTPUT;
-	run_mbprocess = MB_NO;
-	gui_mode = MB_NO;
+	run_mbprocess = false;
+	gui_mode = false;
 	data_show_max = 2000;
 	data_show_size = 1000;
 	data_step_max = 2000;
 	data_step_size = 750;
 	mode_pick = PICK_MODE_PICK;
-	mode_set_interval = MB_NO;
-	plot_tint = MB_YES;
-	plot_tint_org = MB_YES;
-	plot_lon = MB_YES;
-	plot_lon_org = MB_YES;
-	plot_lon_dr = MB_NO;
-	plot_lat = MB_YES;
-	plot_lat_org = MB_YES;
-	plot_lat_dr = MB_NO;
-	plot_speed = MB_YES;
-	plot_speed_org = MB_YES;
-	plot_smg = MB_YES;
-	plot_heading = MB_YES;
-	plot_heading_org = MB_YES;
-	plot_cmg = MB_YES;
-	plot_draft = MB_YES;
-	plot_draft_org = MB_YES;
-	plot_draft_dr = MB_NO;
-	plot_roll = MB_NO;
-	plot_pitch = MB_NO;
-	plot_heave = MB_NO;
+	mode_set_interval = false;
+	plot_tint = true;
+	plot_tint_org = true;
+	plot_lon = true;
+	plot_lon_org = true;
+	plot_lon_dr = false;
+	plot_lat = true;
+	plot_lat_org = true;
+	plot_lat_dr = false;
+	plot_speed = true;
+	plot_speed_org = true;
+	plot_smg = true;
+	plot_heading = true;
+	plot_heading_org = true;
+	plot_cmg = true;
+	plot_draft = true;
+	plot_draft_org = true;
+	plot_draft_dr = false;
+	plot_roll = false;
+	plot_pitch = false;
+	plot_heave = false;
 	mean_time_window = 100;
 	drift_lon = 0;
 	drift_lat = 0;
@@ -267,21 +267,21 @@ int mbnavedit_init_globals() {
 	plot_width = DEFAULT_PLOT_WIDTH;
 	plot_height = DEFAULT_PLOT_HEIGHT;
 	number_plots = 0;
-	if (plot_tint == MB_YES)
+	if (plot_tint == true)
 		number_plots++;
-	if (plot_lon == MB_YES)
+	if (plot_lon == true)
 		number_plots++;
-	if (plot_lat == MB_YES)
+	if (plot_lat == true)
 		number_plots++;
-	if (plot_speed == MB_YES)
+	if (plot_speed == true)
 		number_plots++;
-	if (plot_heading == MB_YES)
+	if (plot_heading == true)
 		number_plots++;
-	if (plot_draft == MB_YES)
+	if (plot_draft == true)
 		number_plots++;
-	timestamp_problem = MB_NO;
-	use_ping_data = MB_NO;
-	strip_comments = MB_NO;
+	timestamp_problem = false;
+	use_ping_data = false;
+	strip_comments = false;
 	model_mode = MODEL_MODE_OFF;
 	weight_speed = 100.0;
 	weight_acceleration = 100.0;
@@ -380,7 +380,7 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 			break;
 		case 'G':
 		case 'g':
-			gui_mode = MB_YES;
+			gui_mode = true;
 			flag++;
 			break;
 		case 'I':
@@ -392,17 +392,17 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 			break;
 		case 'N':
 		case 'n':
-			strip_comments = MB_YES;
+			strip_comments = true;
 			flag++;
 			break;
 		case 'P':
 		case 'p':
-			use_ping_data = MB_YES;
+			use_ping_data = true;
 			flag++;
 			break;
 		case 'X':
 		case 'x':
-			run_mbprocess = MB_YES;
+			run_mbprocess = true;
 			flag++;
 			break;
 		case '?':
@@ -452,9 +452,9 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 
 	/* if file specified then use it */
 	if (fileflag > 0)
-		*startup_file = MB_YES;
+		*startup_file = true;
 	else
-		*startup_file = MB_NO;
+		*startup_file = false;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -541,7 +541,7 @@ int mbnavedit_action_open(int useprevious) {
 		do_error_dialog("No data were read from the input", "file. You may have specified an", "incorrect MB-System format id!");
 
 	/* reset data_save */
-	data_save = MB_NO;
+	data_save = false;
 
 	/* print debug statements */
 	if (verbose >= 2) {
@@ -615,7 +615,7 @@ int mbnavedit_open_file(int useprevious) {
 	strcat(nfile, ".nve");
 
 	/* try to lock file */
-	if (output_mode == OUTPUT_MODE_OUTPUT && uselockfiles == MB_YES) {
+	if (output_mode == OUTPUT_MODE_OUTPUT && uselockfiles == true) {
 		status = mb_pr_lockswathfile(verbose, ifile, MBP_LOCK_EDITNAV, program_name, &error);
 	}
 	else {
@@ -670,7 +670,7 @@ int mbnavedit_open_file(int useprevious) {
 		/* if output on and using previously edited nav first copy old nav
 		    and then read it as input instead of specified
 		    input file */
-		if (useprevious == MB_YES && output_mode != OUTPUT_MODE_BROWSE) {
+		if (useprevious == true && output_mode != OUTPUT_MODE_BROWSE) {
 			/* get temporary file name */
 			sprintf(ifile_use, "%s.tmp", nfile);
 
@@ -689,7 +689,7 @@ int mbnavedit_open_file(int useprevious) {
 
 		/* if output off and using previously edited nav
 		    reset input names */
-		else if (useprevious == MB_YES) {
+		else if (useprevious == true) {
 			sprintf(ifile_use, "%s", nfile);
 			format_use = MBF_MBPRONAV;
 		}
@@ -751,24 +751,24 @@ int mbnavedit_open_file(int useprevious) {
 
 		/* initialize the buffer */
 		nbuff = 0;
-		first_read = MB_NO;
+		first_read = false;
 
 		/* reset plotting time span */
 		plot_start_time = 0.0;
 		plot_end_time = data_show_size;
 
 		/* now deal with new nav save file */
-		nfile_open = MB_NO;
+		nfile_open = false;
 		if (status == MB_SUCCESS && output_mode != OUTPUT_MODE_BROWSE) {
 			/* get nav edit save file */
 			sprintf(nfile, "%s.nve", ifile);
 
 			/* open the nav edit save file */
 			if ((nfp = fopen(nfile, "w")) != NULL) {
-				nfile_open = MB_YES;
+				nfile_open = true;
 			}
 			else {
-				nfile_open = MB_NO;
+				nfile_open = false;
 				fprintf(stderr, "\nUnable to open new nav save file %s\n", nfile);
 				do_error_dialog("Unable to open new nav edit save file.", "You may not have write",
 				                "permission in this directory!");
@@ -777,7 +777,7 @@ int mbnavedit_open_file(int useprevious) {
 
 		/* if we got here we must have succeeded */
 		if (verbose >= 1) {
-			if (useprevious == MB_YES) {
+			if (useprevious == true) {
 				fprintf(stderr, "\nSwath data file <%s> specified for input\n", ifile);
 				fprintf(stderr, "MB-System Data Format ID: %d\n", format);
 				fprintf(stderr, "Navigation data file <%s> initialized for reading\n", ifile_use);
@@ -790,7 +790,7 @@ int mbnavedit_open_file(int useprevious) {
 			if (output_mode == OUTPUT_MODE_OUTPUT)
 				fprintf(stderr, "Navigation File <%s> initialized for writing\n", nfile);
 		}
-		file_open = MB_YES;
+		file_open = true;
 	}
 
 	/* turn off message */
@@ -825,31 +825,31 @@ int mbnavedit_close_file() {
 
 	/* close the files */
 	status = mb_close(verbose, &imbio_ptr, &error);
-	if (nfile_open == MB_YES) {
+	if (nfile_open == true) {
 		/* close navigation file */
 		fclose(nfp);
-		nfile_open = MB_NO;
+		nfile_open = false;
 	}
 
 	/* if not in browse mode, deal with locking and processing */
 	if (output_mode == OUTPUT_MODE_OUTPUT) {
 
 		/* unlock the raw swath file */
-		if (uselockfiles == MB_YES)
+		if (uselockfiles == true)
 			status = mb_pr_unlockswathfile(verbose, ifile, MBP_LOCK_EDITNAV, program_name, &error);
 
 		/* update mbprocess parameter file */
-		status = mb_pr_update_format(verbose, ifile, MB_YES, format, &error);
+		status = mb_pr_update_format(verbose, ifile, true, format, &error);
 		status = mb_pr_update_nav(verbose, ifile, MBP_NAV_ON, nfile, 9, MBP_NAV_ON, MBP_NAV_ON, MBP_NAV_ON, MBP_NAV_ON,
 		                          MBP_NAV_LINEAR, (double)0.0, &error);
 
 		/* run mbprocess if desired */
-		if (run_mbprocess == MB_YES) {
+		if (run_mbprocess == true) {
 			/* turn message on */
 			do_message_on("Navigation edits being applied using mbprocess...");
 
 			/* run mbprocess */
-			if (strip_comments == MB_YES)
+			if (strip_comments == true)
 				sprintf(command, "mbprocess -I %s -N\n", ifile);
 			else
 				sprintf(command, "mbprocess -I %s\n", ifile);
@@ -874,7 +874,7 @@ int mbnavedit_close_file() {
 		fprintf(stderr, "%d data records loaded\n", nload_total);
 		fprintf(stderr, "%d data records dumped\n", ndump_total);
 	}
-	file_open = MB_NO;
+	file_open = false;
 	nload_total = 0;
 	ndump_total = 0;
 
@@ -917,7 +917,7 @@ int mbnavedit_dump_data(int hold) {
 
 	/* write out edited data */
 
-	if (nfile_open == MB_YES) {
+	if (nfile_open == true) {
 		for (iping = 0; iping < nbuff - hold; iping++) {
 			/* write the nav out */
 			fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.3f %.3f %.4f %.3f %.3f %.4f\r\n",
@@ -989,7 +989,7 @@ int mbnavedit_load_data() {
 
 	/* turn message on */
 	nload = 0;
-	timestamp_problem = MB_NO;
+	timestamp_problem = false;
 	sprintf(string, "MBnavedit: %d records loaded so far...", nload);
 	do_message_on(string);
 
@@ -1000,7 +1000,7 @@ int mbnavedit_load_data() {
 			                    &ping[nbuff].lat, &ping[nbuff].speed, &ping[nbuff].heading, &distance, &altitude, &sonardepth,
 			                    &nbath, &namp, &nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack,
 			                    ssalongtrack, comment, &error);
-			if (error <= MB_ERROR_NO_ERROR && (kind == nav_source || (kind == MB_DATA_DATA && use_ping_data == MB_YES)) &&
+			if (error <= MB_ERROR_NO_ERROR && (kind == nav_source || (kind == MB_DATA_DATA && use_ping_data == true)) &&
 			    (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP || error == MB_ERROR_OUT_BOUNDS ||
 			     error == MB_ERROR_OUT_TIME || error == MB_ERROR_SPEED_TOO_SMALL)) {
 				status = MB_SUCCESS;
@@ -1010,16 +1010,16 @@ int mbnavedit_load_data() {
 				status = MB_FAILURE;
 				error = MB_ERROR_OTHER;
 			}
-			if (error == MB_ERROR_NO_ERROR && (kind == nav_source || (kind == MB_DATA_DATA && use_ping_data == MB_YES))) {
+			if (error == MB_ERROR_NO_ERROR && (kind == nav_source || (kind == MB_DATA_DATA && use_ping_data == true))) {
 				status = mb_extract_nav(verbose, imbio_ptr, store_ptr, &kind, ping[nbuff].time_i, &ping[nbuff].time_d,
 				                        &ping[nbuff].lon, &ping[nbuff].lat, &ping[nbuff].speed, &ping[nbuff].heading,
 				                        &ping[nbuff].draft, &ping[nbuff].roll, &ping[nbuff].pitch, &ping[nbuff].heave, &error);
 			}
 			if (status == MB_SUCCESS) {
 				/* get first time value if first record */
-				if (first_read == MB_NO) {
+				if (first_read == false) {
 					file_start_time_d = ping[nbuff].time_d;
-					first_read = MB_YES;
+					first_read = true;
 				}
 
 				/* get original values */
@@ -1037,22 +1037,22 @@ int mbnavedit_load_data() {
 				ping[nbuff].lat += offset_lat;
 
 				/* set starting dr */
-				ping[nbuff].mean_ok = MB_NO;
+				ping[nbuff].mean_ok = false;
 				ping[nbuff].lon_dr = ping[nbuff].lon;
 				ping[nbuff].lat_dr = ping[nbuff].lat;
 
 				/* set everything deselected */
-				ping[nbuff].tint_select = MB_NO;
-				ping[nbuff].lon_select = MB_NO;
-				ping[nbuff].lat_select = MB_NO;
-				ping[nbuff].speed_select = MB_NO;
-				ping[nbuff].heading_select = MB_NO;
-				ping[nbuff].draft_select = MB_NO;
-				ping[nbuff].lonlat_flag = MB_NO;
+				ping[nbuff].tint_select = false;
+				ping[nbuff].lon_select = false;
+				ping[nbuff].lat_select = false;
+				ping[nbuff].speed_select = false;
+				ping[nbuff].heading_select = false;
+				ping[nbuff].draft_select = false;
+				ping[nbuff].lonlat_flag = false;
 
 				/* select repeated data */
 				if (nbuff > 0 && ping[nbuff].lon == ping[nbuff - 1].lon && ping[nbuff].lat == ping[nbuff - 1].lat) {
-					ping[nbuff].lonlat_flag = MB_YES;
+					ping[nbuff].lonlat_flag = true;
 				}
 
 				/* print output debug statements */
@@ -1087,10 +1087,10 @@ int mbnavedit_load_data() {
 	}
 
 	/* check for time stamp repeats */
-	timestamp_problem = MB_NO;
+	timestamp_problem = false;
 	for (i = 0; i < nbuff - 1; i++) {
 		if (ping[i + 1].time_d <= ping[i].time_d) {
-			timestamp_problem = MB_YES;
+			timestamp_problem = true;
 		}
 	}
 
@@ -1141,7 +1141,7 @@ int mbnavedit_load_data() {
 	}
 
 	/* put up warning if timestamp problem detected */
-	if (timestamp_problem == MB_YES) {
+	if (timestamp_problem == true) {
 		do_error_dialog("Duplicate or reverse order time", "stamps detected!! Time interpolation",
 		                "available under Controls menu.");
 	}
@@ -1201,10 +1201,10 @@ int mbnavedit_action_next_buffer(int *quit) {
 	status = mbnavedit_clear_screen();
 
 	/* set quit off */
-	*quit = MB_NO;
+	*quit = false;
 
 	/* check if a file has been opened */
-	if (file_open == MB_YES) {
+	if (file_open == true) {
 
 		/* dump the buffer */
 		status = mbnavedit_dump_data(hold_size);
@@ -1223,13 +1223,13 @@ int mbnavedit_action_next_buffer(int *quit) {
 			/* if in normal mode last next_buffer
 			    does not mean quit,
 			    if in gui mode it does mean quit */
-			if (gui_mode == MB_YES)
-				*quit = MB_YES;
+			if (gui_mode == true)
+				*quit = true;
 			else
-				*quit = MB_NO;
+				*quit = false;
 
 			/* if quitting let the world know... */
-			if (*quit == MB_YES && verbose >= 1)
+			if (*quit == true && verbose >= 1)
 				fprintf(stderr, "\nQuitting MBnavedit\nBye Bye...\n");
 		}
 
@@ -1248,7 +1248,7 @@ int mbnavedit_action_next_buffer(int *quit) {
 	}
 
 	/* reset data_save */
-	data_save = MB_NO;
+	data_save = false;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1275,7 +1275,7 @@ int mbnavedit_action_offset() {
 	}
 
 	/* check if a file has been opened */
-	if (file_open == MB_YES) {
+	if (file_open == true) {
 		/* apply position offsets to the data */
 		for (i = 0; i < nbuff; i++) {
 			ping[i].lon += offset_lon - offset_lon_applied;
@@ -1314,7 +1314,7 @@ int mbnavedit_action_close() {
 
 	/* if file has been opened and browse mode
 	    just dump the current buffer and close the file */
-	if (file_open == MB_YES && output_mode == OUTPUT_MODE_BROWSE) {
+	if (file_open == true && output_mode == OUTPUT_MODE_BROWSE) {
 		/* dump the buffer */
 		status = mbnavedit_dump_data(0);
 
@@ -1322,7 +1322,7 @@ int mbnavedit_action_close() {
 		status = mbnavedit_close_file();
 	}
 	/* if file has been opened deal with it */
-	else if (file_open == MB_YES) {
+	else if (file_open == true) {
 
 		/* dump and load until the end of the file is reached */
 		save_ndumped = 0;
@@ -1352,7 +1352,7 @@ int mbnavedit_action_close() {
 	}
 
 	/* reset data_save */
-	data_save = MB_NO;
+	data_save = false;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1378,21 +1378,21 @@ int mbnavedit_action_done(int *quit) {
 
 	/* if in normal mode done does not mean quit,
 	    if in gui mode done does mean quit */
-	if (gui_mode == MB_YES)
-		*quit = MB_YES;
+	if (gui_mode == true)
+		*quit = true;
 	else
-		*quit = MB_NO;
+		*quit = false;
 
 	/* if quitting let the world know... */
-	if (*quit == MB_YES && verbose >= 1)
+	if (*quit == true && verbose >= 1)
 		fprintf(stderr, "\nShutting MBnavedit down without further ado...\n");
 
 	/* call routine to deal with saving the current file, if any */
-	if (file_open == MB_YES)
+	if (file_open == true)
 		status = mbnavedit_action_close();
 
 	/* if quitting let the world know... */
-	if (*quit == MB_YES && verbose >= 1)
+	if (*quit == true && verbose >= 1)
 		fprintf(stderr, "\nQuitting MBnavedit\nBye Bye...\n");
 
 	/* print output debug statements */
@@ -1423,7 +1423,7 @@ int mbnavedit_action_quit() {
 		fprintf(stderr, "\nShutting MBnavedit down without further ado...\n");
 
 	/* call routine to deal with saving the current file, if any */
-	if (file_open == MB_YES)
+	if (file_open == true)
 		status = mbnavedit_action_close();
 
 	/* let the world know... */
@@ -1458,7 +1458,7 @@ int mbnavedit_action_step(int step) {
 	}
 
 	/* check if a file has been opened */
-	if (file_open == MB_YES && nbuff > 0) {
+	if (file_open == true && nbuff > 0) {
 
 		/* if current time span includes last data don't step */
 		if (step >= 0 && plot_end_time < ping[nbuff - 1].file_time_d) {
@@ -1471,12 +1471,12 @@ int mbnavedit_action_step(int step) {
 		}
 
 		/* get current start of plotting data */
-		set = MB_NO;
+		set = false;
 		old_id = current_id;
 		for (i = 0; i < nbuff; i++) {
-			if (set == MB_NO && ping[i].file_time_d >= plot_start_time) {
+			if (set == false && ping[i].file_time_d >= plot_start_time) {
 				new_id = i;
-				set = MB_YES;
+				set = true;
 			}
 		}
 		if (new_id < 0)
@@ -1516,7 +1516,7 @@ int mbnavedit_action_step(int step) {
 	}
 
 	/* reset data_save */
-	data_save = MB_NO;
+	data_save = false;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1544,18 +1544,18 @@ int mbnavedit_action_end() {
 	}
 
 	/* check if a file has been opened */
-	if (file_open == MB_YES && nbuff > 0) {
+	if (file_open == true && nbuff > 0) {
 		/* set time span to include last data */
 		plot_end_time = ping[nbuff - 1].file_time_d;
 		plot_start_time = plot_end_time - data_show_size;
 
 		/* get current start of plotting data */
 		old_id = current_id;
-		set = MB_NO;
-		for (i = 0; i < nbuff && set == MB_NO; i++) {
+		set = false;
+		for (i = 0; i < nbuff && set == false; i++) {
 			if (ping[i].file_time_d >= plot_start_time) {
 				current_id = i;
-				set = MB_YES;
+				set = true;
 			}
 		}
 
@@ -1584,7 +1584,7 @@ int mbnavedit_action_end() {
 	}
 
 	/* reset data_save */
-	data_save = MB_NO;
+	data_save = false;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1610,7 +1610,7 @@ int mbnavedit_action_start() {
 	}
 
 	/* check if a file has been opened */
-	if (file_open == MB_YES && nbuff > 0) {
+	if (file_open == true && nbuff > 0) {
 		old_id = current_id;
 		current_id = 0;
 		plot_start_time = ping[current_id].file_time_d;
@@ -1643,7 +1643,7 @@ int mbnavedit_action_start() {
 	}
 
 	/* reset data_save */
-	data_save = MB_NO;
+	data_save = false;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1693,12 +1693,12 @@ int mbnavedit_action_mouse_pick(int xx, int yy) {
 	if (nplot > 0 && active_plot > -1) {
 
 		/* deselect everything in non-active plots */
-		deselect = MB_NO;
+		deselect = false;
 		for (iplot = 0; iplot < number_plots; iplot++) {
 			if (iplot != active_plot) {
 				status = mbnavedit_action_deselect_all(mbnavplot[iplot].type);
 				if (status == MB_SUCCESS)
-					deselect = MB_YES;
+					deselect = true;
 			}
 		}
 
@@ -1750,45 +1750,45 @@ int mbnavedit_action_mouse_pick(int xx, int yy) {
 		    and replot it */
 		if (range_min <= MBNAVEDIT_PICK_DISTANCE) {
 			if (mbnavplot[active_plot].type == PLOT_TINT) {
-				if (ping[iping].tint_select == MB_YES)
-					ping[iping].tint_select = MB_NO;
+				if (ping[iping].tint_select == true)
+					ping[iping].tint_select = false;
 				else
-					ping[iping].tint_select = MB_YES;
+					ping[iping].tint_select = true;
 				mbnavedit_plot_tint_value(active_plot, iping);
 			}
 			else if (mbnavplot[active_plot].type == PLOT_LONGITUDE) {
-				if (ping[iping].lon_select == MB_YES)
-					ping[iping].lon_select = MB_NO;
+				if (ping[iping].lon_select == true)
+					ping[iping].lon_select = false;
 				else
-					ping[iping].lon_select = MB_YES;
+					ping[iping].lon_select = true;
 				mbnavedit_plot_lon_value(active_plot, iping);
 			}
 			else if (mbnavplot[active_plot].type == PLOT_LATITUDE) {
-				if (ping[iping].lat_select == MB_YES)
-					ping[iping].lat_select = MB_NO;
+				if (ping[iping].lat_select == true)
+					ping[iping].lat_select = false;
 				else
-					ping[iping].lat_select = MB_YES;
+					ping[iping].lat_select = true;
 				mbnavedit_plot_lat_value(active_plot, iping);
 			}
 			else if (mbnavplot[active_plot].type == PLOT_SPEED) {
-				if (ping[iping].speed_select == MB_YES)
-					ping[iping].speed_select = MB_NO;
+				if (ping[iping].speed_select == true)
+					ping[iping].speed_select = false;
 				else
-					ping[iping].speed_select = MB_YES;
+					ping[iping].speed_select = true;
 				mbnavedit_plot_speed_value(active_plot, iping);
 			}
 			else if (mbnavplot[active_plot].type == PLOT_HEADING) {
-				if (ping[iping].heading_select == MB_YES)
-					ping[iping].heading_select = MB_NO;
+				if (ping[iping].heading_select == true)
+					ping[iping].heading_select = false;
 				else
-					ping[iping].heading_select = MB_YES;
+					ping[iping].heading_select = true;
 				mbnavedit_plot_heading_value(active_plot, iping);
 			}
 			else if (mbnavplot[active_plot].type == PLOT_DRAFT) {
-				if (ping[iping].draft_select == MB_YES)
-					ping[iping].draft_select = MB_NO;
+				if (ping[iping].draft_select == true)
+					ping[iping].draft_select = false;
 				else
-					ping[iping].draft_select = MB_YES;
+					ping[iping].draft_select = true;
 				mbnavedit_plot_draft_value(active_plot, iping);
 			}
 		}
@@ -1844,12 +1844,12 @@ int mbnavedit_action_mouse_select(int xx, int yy) {
 	if (nplot > 0 && active_plot > -1) {
 
 		/* deselect everything in non-active plots */
-		deselect = MB_NO;
+		deselect = false;
 		for (iplot = 0; iplot < number_plots; iplot++) {
 			if (iplot != active_plot) {
 				status = mbnavedit_action_deselect_all(mbnavplot[iplot].type);
 				if (status == MB_SUCCESS)
-					deselect = MB_YES;
+					deselect = true;
 			}
 		}
 
@@ -1895,27 +1895,27 @@ int mbnavedit_action_mouse_select(int xx, int yy) {
 			    and replot it */
 			if (range <= MBNAVEDIT_ERASE_DISTANCE) {
 				if (mbnavplot[active_plot].type == PLOT_TINT) {
-					ping[i].tint_select = MB_YES;
+					ping[i].tint_select = true;
 					mbnavedit_plot_tint_value(active_plot, i);
 				}
 				else if (mbnavplot[active_plot].type == PLOT_LONGITUDE) {
-					ping[i].lon_select = MB_YES;
+					ping[i].lon_select = true;
 					mbnavedit_plot_lon_value(active_plot, i);
 				}
 				else if (mbnavplot[active_plot].type == PLOT_LATITUDE) {
-					ping[i].lat_select = MB_YES;
+					ping[i].lat_select = true;
 					mbnavedit_plot_lat_value(active_plot, i);
 				}
 				else if (mbnavplot[active_plot].type == PLOT_SPEED) {
-					ping[i].speed_select = MB_YES;
+					ping[i].speed_select = true;
 					mbnavedit_plot_speed_value(active_plot, i);
 				}
 				else if (mbnavplot[active_plot].type == PLOT_HEADING) {
-					ping[i].heading_select = MB_YES;
+					ping[i].heading_select = true;
 					mbnavedit_plot_heading_value(active_plot, i);
 				}
 				else if (mbnavplot[active_plot].type == PLOT_DRAFT) {
-					ping[i].draft_select = MB_YES;
+					ping[i].draft_select = true;
 					mbnavedit_plot_draft_value(active_plot, i);
 				}
 			}
@@ -1972,12 +1972,12 @@ int mbnavedit_action_mouse_deselect(int xx, int yy) {
 	if (nplot > 0 && active_plot > -1) {
 
 		/* deselect everything in non-active plots */
-		deselect = MB_NO;
+		deselect = false;
 		for (iplot = 0; iplot < number_plots; iplot++) {
 			if (iplot != active_plot) {
 				status = mbnavedit_action_deselect_all(mbnavplot[iplot].type);
 				if (status == MB_SUCCESS)
-					deselect = MB_YES;
+					deselect = true;
 			}
 		}
 
@@ -2023,27 +2023,27 @@ int mbnavedit_action_mouse_deselect(int xx, int yy) {
 			    and replot it */
 			if (range <= MBNAVEDIT_ERASE_DISTANCE) {
 				if (mbnavplot[active_plot].type == PLOT_TINT) {
-					ping[i].tint_select = MB_NO;
+					ping[i].tint_select = false;
 					mbnavedit_plot_tint_value(active_plot, i);
 				}
 				else if (mbnavplot[active_plot].type == PLOT_LONGITUDE) {
-					ping[i].lon_select = MB_NO;
+					ping[i].lon_select = false;
 					mbnavedit_plot_lon_value(active_plot, i);
 				}
 				else if (mbnavplot[active_plot].type == PLOT_LATITUDE) {
-					ping[i].lat_select = MB_NO;
+					ping[i].lat_select = false;
 					mbnavedit_plot_lat_value(active_plot, i);
 				}
 				else if (mbnavplot[active_plot].type == PLOT_SPEED) {
-					ping[i].speed_select = MB_NO;
+					ping[i].speed_select = false;
 					mbnavedit_plot_speed_value(active_plot, i);
 				}
 				else if (mbnavplot[active_plot].type == PLOT_HEADING) {
-					ping[i].heading_select = MB_NO;
+					ping[i].heading_select = false;
 					mbnavedit_plot_heading_value(active_plot, i);
 				}
 				else if (mbnavplot[active_plot].type == PLOT_DRAFT) {
-					ping[i].draft_select = MB_NO;
+					ping[i].draft_select = false;
 					mbnavedit_plot_draft_value(active_plot, i);
 				}
 			}
@@ -2106,17 +2106,17 @@ int mbnavedit_action_mouse_selectall(int xx, int yy) {
 		/* select all data points in active plot */
 		for (i = current_id; i < current_id + nplot; i++) {
 			if (mbnavplot[active_plot].type == PLOT_TINT)
-				ping[i].tint_select = MB_YES;
+				ping[i].tint_select = true;
 			else if (mbnavplot[active_plot].type == PLOT_LONGITUDE)
-				ping[i].lon_select = MB_YES;
+				ping[i].lon_select = true;
 			else if (mbnavplot[active_plot].type == PLOT_LATITUDE)
-				ping[i].lat_select = MB_YES;
+				ping[i].lat_select = true;
 			else if (mbnavplot[active_plot].type == PLOT_SPEED)
-				ping[i].speed_select = MB_YES;
+				ping[i].speed_select = true;
 			else if (mbnavplot[active_plot].type == PLOT_HEADING)
-				ping[i].heading_select = MB_YES;
+				ping[i].heading_select = true;
 			else if (mbnavplot[active_plot].type == PLOT_DRAFT)
-				ping[i].draft_select = MB_YES;
+				ping[i].draft_select = true;
 		}
 
 		/* clear the screen */
@@ -2162,12 +2162,12 @@ int mbnavedit_action_mouse_deselectall(int xx, int yy) {
 		    - this logic follows from deselecting all
 		    active plots plus all non-active plots */
 		for (i = current_id; i < current_id + nplot; i++) {
-			ping[i].tint_select = MB_NO;
-			ping[i].lon_select = MB_NO;
-			ping[i].lat_select = MB_NO;
-			ping[i].speed_select = MB_NO;
-			ping[i].heading_select = MB_NO;
-			ping[i].draft_select = MB_NO;
+			ping[i].tint_select = false;
+			ping[i].lon_select = false;
+			ping[i].lat_select = false;
+			ping[i].speed_select = false;
+			ping[i].heading_select = false;
+			ping[i].draft_select = false;
 		}
 
 		/* clear the screen */
@@ -2212,28 +2212,28 @@ int mbnavedit_action_deselect_all(int type) {
 		/* deselect all data points in specified data type */
 		ndeselect = 0;
 		for (i = 0; i < nbuff; i++) {
-			if (type == PLOT_TINT && ping[i].tint_select == MB_YES) {
-				ping[i].tint_select = MB_NO;
+			if (type == PLOT_TINT && ping[i].tint_select == true) {
+				ping[i].tint_select = false;
 				ndeselect++;
 			}
-			else if (type == PLOT_LONGITUDE && ping[i].lon_select == MB_YES) {
-				ping[i].lon_select = MB_NO;
+			else if (type == PLOT_LONGITUDE && ping[i].lon_select == true) {
+				ping[i].lon_select = false;
 				ndeselect++;
 			}
-			else if (type == PLOT_LATITUDE && ping[i].lat_select == MB_YES) {
-				ping[i].lat_select = MB_NO;
+			else if (type == PLOT_LATITUDE && ping[i].lat_select == true) {
+				ping[i].lat_select = false;
 				ndeselect++;
 			}
-			else if (type == PLOT_SPEED && ping[i].speed_select == MB_YES) {
-				ping[i].speed_select = MB_NO;
+			else if (type == PLOT_SPEED && ping[i].speed_select == true) {
+				ping[i].speed_select = false;
 				ndeselect++;
 			}
-			else if (type == PLOT_HEADING && ping[i].heading_select == MB_YES) {
-				ping[i].heading_select = MB_NO;
+			else if (type == PLOT_HEADING && ping[i].heading_select == true) {
+				ping[i].heading_select = false;
 				ndeselect++;
 			}
-			else if (type == PLOT_DRAFT && ping[i].draft_select == MB_YES) {
-				ping[i].draft_select = MB_NO;
+			else if (type == PLOT_DRAFT && ping[i].draft_select == true) {
+				ping[i].draft_select = false;
 				ndeselect++;
 			}
 		}
@@ -2266,8 +2266,8 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 	static int interval_bound2;
 	static double interval_time1;
 	static double interval_time2;
-	static int interval_set1 = MB_NO;
-	static int interval_set2 = MB_NO;
+	static int interval_set1 = false;
+	static int interval_set2 = false;
 	int itmp;
 	double dtmp;
 	int set;
@@ -2288,7 +2288,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 		/* if which = 0 set first bound and draw dashed lines */
 		if (which == 0) {
 			/* unplot old line on all plots */
-			if (interval_set1 == MB_YES)
+			if (interval_set1 == true)
 				for (i = 0; i < number_plots; i++) {
 					xg_drawline(mbnavedit_xgid, interval_bound1, mbnavplot[i].iymin, interval_bound1, mbnavplot[i].iymax,
 					            pixel_values[WHITE], XG_DASHLINE);
@@ -2302,7 +2302,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 			/* get lower bound time and location */
 			interval_bound1 = xx;
 			interval_time1 = mbnavplot[0].xmin + (xx - mbnavplot[0].ixmin) / mbnavplot[0].xscale;
-			interval_set1 = MB_YES;
+			interval_set1 = true;
 
 			/* plot line on all plots */
 			for (i = 0; i < number_plots; i++) {
@@ -2314,7 +2314,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 		/* if which = 1 set second bound and draw dashed lines */
 		else if (which == 1) {
 			/* unplot old line on all plots */
-			if (interval_set1 == MB_YES)
+			if (interval_set1 == true)
 				for (i = 0; i < number_plots; i++) {
 					xg_drawline(mbnavedit_xgid, interval_bound2, mbnavplot[i].iymin, interval_bound2, mbnavplot[i].iymax,
 					            pixel_values[WHITE], XG_DASHLINE);
@@ -2328,7 +2328,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 			/* get lower bound time and location */
 			interval_bound2 = xx;
 			interval_time2 = mbnavplot[0].xmin + (xx - mbnavplot[0].ixmin) / mbnavplot[0].xscale;
-			interval_set2 = MB_YES;
+			interval_set2 = true;
 
 			/* plot line on all plots */
 			for (i = 0; i < number_plots; i++) {
@@ -2338,7 +2338,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 		}
 
 		/* if which = 2 use bounds and replot */
-		else if (which == 2 && interval_set1 == MB_YES && interval_set2 == MB_YES && interval_bound1 != interval_bound2) {
+		else if (which == 2 && interval_set1 == true && interval_set2 == true && interval_bound1 != interval_bound2) {
 			/* switch bounds if necessary */
 			if (interval_bound1 > interval_bound2) {
 				itmp = interval_bound2;
@@ -2360,11 +2360,11 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 				data_step_max = 2 * data_step_size;
 
 			/* get current start of plotting data */
-			set = MB_NO;
+			set = false;
 			for (i = 0; i < nbuff; i++) {
-				if (set == MB_NO && ping[i].file_time_d >= plot_start_time) {
+				if (set == false && ping[i].file_time_d >= plot_start_time) {
 					current_id = i;
-					set = MB_YES;
+					set = true;
 				}
 			}
 			if (current_id < 0)
@@ -2378,8 +2378,8 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 
 		/* else if which = 3 unset bounds */
 		else if (which == 3) {
-			interval_set1 = MB_NO;
-			interval_set2 = MB_NO;
+			interval_set1 = false;
+			interval_set2 = false;
 		}
 
 		/* else failure */
@@ -2430,7 +2430,7 @@ int mbnavedit_action_use_dr() {
 		/* set lonlat to dr lonlat for selected visible data */
 		if (active_plot > -1) {
 			for (i = current_id; i < current_id + nplot; i++) {
-				if (ping[i].lon_select == MB_YES || ping[i].lat_select == MB_YES) {
+				if (ping[i].lon_select == true || ping[i].lat_select == true) {
 					ping[i].lon = ping[i].lon_dr;
 					ping[i].lat = ping[i].lat_dr;
 				}
@@ -2492,16 +2492,16 @@ int mbnavedit_action_use_smg() {
 
 		/* set speed to speed made good for selected visible data */
 		if (active_plot > -1) {
-			speedheading_change = MB_NO;
+			speedheading_change = false;
 			for (i = current_id; i < current_id + nplot; i++) {
-				if (ping[i].speed_select == MB_YES) {
+				if (ping[i].speed_select == true) {
 					ping[i].speed = ping[i].speed_made_good;
-					speedheading_change = MB_YES;
+					speedheading_change = true;
 				}
 			}
 
 			/* recalculate model */
-			if (speedheading_change == MB_YES && model_mode == MODEL_MODE_DR)
+			if (speedheading_change == true && model_mode == MODEL_MODE_DR)
 				mbnavedit_get_model();
 
 			/* clear the screen */
@@ -2556,16 +2556,16 @@ int mbnavedit_action_use_cmg() {
 
 		/* set heading to course made good for selected visible data */
 		if (active_plot > -1) {
-			speedheading_change = MB_NO;
+			speedheading_change = false;
 			for (i = current_id; i < current_id + nplot; i++) {
-				if (ping[i].heading_select == MB_YES) {
+				if (ping[i].heading_select == true) {
 					ping[i].heading = ping[i].course_made_good;
-					speedheading_change = MB_YES;
+					speedheading_change = true;
 				}
 			}
 
 			/* recalculate model */
-			if (speedheading_change == MB_YES && model_mode == MODEL_MODE_DR)
+			if (speedheading_change == true && model_mode == MODEL_MODE_DR)
 				mbnavedit_get_model();
 
 			/* clear the screen */
@@ -2612,254 +2612,254 @@ int mbnavedit_action_interpolate() {
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
 		/* look for position or time changes */
-		timelonlat_change = MB_NO;
-		speedheading_change = MB_NO;
+		timelonlat_change = false;
+		speedheading_change = false;
 
 		/* do expected time */
 		for (iping = 0; iping < nbuff; iping++) {
-			if (ping[iping].tint_select == MB_YES) {
+			if (ping[iping].tint_select == true) {
 				ibefore = iping;
 				for (i = iping - 1; i >= 0; i--) {
-					if (ping[i].tint_select == MB_NO && ibefore == iping)
+					if (ping[i].tint_select == false && ibefore == iping)
 						ibefore = i;
 				}
 				iafter = iping;
 				for (i = iping + 1; i < nbuff; i++) {
-					if (ping[i].tint_select == MB_NO && iafter == iping)
+					if (ping[i].tint_select == false && iafter == iping)
 						iafter = i;
 				}
 				if (ibefore < iping && iafter > iping) {
 					ping[iping].time_d = ping[ibefore].time_d + (ping[iafter].time_d - ping[ibefore].time_d) *
 					                                                ((double)(iping - ibefore)) / ((double)(iafter - ibefore));
 					ping[iping].tint = ping[iping].time_d - ping[iping - 1].time_d;
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (ibefore < iping && ibefore > 0) {
 					ping[iping].time_d =
 					    ping[ibefore].time_d + (ping[ibefore].time_d - ping[ibefore - 1].time_d) * (iping - ibefore);
 					ping[iping].tint = ping[iping].time_d - ping[iping - 1].time_d;
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (ibefore < iping) {
 					ping[iping].time_d = ping[ibefore].time_d;
 					ping[iping].tint = ping[iping].time_d - ping[iping - 1].time_d;
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (iafter > iping && iafter < nbuff - 1) {
 					ping[iping].time_d = ping[iafter].time_d + (ping[iafter + 1].time_d - ping[iafter].time_d) * (iping - iafter);
 					ping[iping].tint = 0.0;
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (iafter > iping) {
 					ping[iping].time_d = ping[iafter].time_d;
 					ping[iping].tint = ping[iping].time_d - ping[iping - 1].time_d;
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				ping[iping].file_time_d = ping[iping].time_d - file_start_time_d;
 				status = mb_get_date(verbose, ping[iping].time_d, ping[iping].time_i);
 				if (iping < nbuff - 1)
-					if (ping[iping + 1].tint_select == MB_NO)
+					if (ping[iping + 1].tint_select == false)
 						ping[iping + 1].tint = ping[iping + 1].time_d - ping[iping].time_d;
 			}
 		}
 
 		/* do longitude */
 		for (iping = 0; iping < nbuff; iping++) {
-			if (ping[iping].lon_select == MB_YES) {
+			if (ping[iping].lon_select == true) {
 				ibefore = iping;
 				for (i = iping - 1; i >= 0; i--) {
-					if (ping[i].lon_select == MB_NO && ibefore == iping)
+					if (ping[i].lon_select == false && ibefore == iping)
 						ibefore = i;
 				}
 				iafter = iping;
 				for (i = iping + 1; i < nbuff; i++) {
-					if (ping[i].lon_select == MB_NO && iafter == iping)
+					if (ping[i].lon_select == false && iafter == iping)
 						iafter = i;
 				}
 				if (ibefore < iping && iafter > iping) {
 					ping[iping].lon = ping[ibefore].lon + (ping[iafter].lon - ping[ibefore].lon) *
 					                                          (ping[iping].time_d - ping[ibefore].time_d) /
 					                                          (ping[iafter].time_d - ping[ibefore].time_d);
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (ibefore < iping && ibefore > 0) {
 					ping[iping].lon = ping[ibefore].lon + (ping[ibefore].lon - ping[ibefore - 1].lon) *
 					                                          (ping[iping].time_d - ping[ibefore].time_d) /
 					                                          (ping[ibefore].time_d - ping[ibefore - 1].time_d);
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (ibefore < iping) {
 					ping[iping].lon = ping[ibefore].lon;
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (iafter > iping && iafter < nbuff - 1) {
 					ping[iping].lon = ping[iafter].lon + (ping[iafter + 1].lon - ping[iafter].lon) *
 					                                         (ping[iping].time_d - ping[iafter].time_d) /
 					                                         (ping[iafter + 1].time_d - ping[iafter].time_d);
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (iafter > iping) {
 					ping[iping].lon = ping[iafter].lon;
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 			}
 		}
 
 		/* do latitude */
 		for (iping = 0; iping < nbuff; iping++) {
-			if (ping[iping].lat_select == MB_YES) {
+			if (ping[iping].lat_select == true) {
 				ibefore = iping;
 				for (i = iping - 1; i >= 0; i--) {
-					if (ping[i].lat_select == MB_NO && ibefore == iping)
+					if (ping[i].lat_select == false && ibefore == iping)
 						ibefore = i;
 				}
 				iafter = iping;
 				for (i = iping + 1; i < nbuff; i++) {
-					if (ping[i].lat_select == MB_NO && iafter == iping)
+					if (ping[i].lat_select == false && iafter == iping)
 						iafter = i;
 				}
 				if (ibefore < iping && iafter > iping) {
 					ping[iping].lat = ping[ibefore].lat + (ping[iafter].lat - ping[ibefore].lat) *
 					                                          (ping[iping].time_d - ping[ibefore].time_d) /
 					                                          (ping[iafter].time_d - ping[ibefore].time_d);
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (ibefore < iping && ibefore > 0) {
 					ping[iping].lat = ping[ibefore].lat + (ping[ibefore].lat - ping[ibefore - 1].lat) *
 					                                          (ping[iping].time_d - ping[ibefore].time_d) /
 					                                          (ping[ibefore].time_d - ping[ibefore - 1].time_d);
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (ibefore < iping) {
 					ping[iping].lat = ping[ibefore].lat;
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (iafter > iping && iafter < nbuff - 1) {
 					ping[iping].lat = ping[iafter].lat + (ping[iafter + 1].lat - ping[iafter].lat) *
 					                                         (ping[iping].time_d - ping[iafter].time_d) /
 					                                         (ping[iafter + 1].time_d - ping[iafter].time_d);
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (iafter > iping) {
 					ping[iping].lat = ping[iafter].lat;
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 			}
 		}
 
 		/* do speed */
 		for (iping = 0; iping < nbuff; iping++) {
-			if (ping[iping].speed_select == MB_YES) {
+			if (ping[iping].speed_select == true) {
 				ibefore = iping;
 				for (i = iping - 1; i >= 0; i--) {
-					if (ping[i].speed_select == MB_NO && ibefore == iping)
+					if (ping[i].speed_select == false && ibefore == iping)
 						ibefore = i;
 				}
 				iafter = iping;
 				for (i = iping + 1; i < nbuff; i++) {
-					if (ping[i].speed_select == MB_NO && iafter == iping)
+					if (ping[i].speed_select == false && iafter == iping)
 						iafter = i;
 				}
 				if (ibefore < iping && iafter > iping) {
 					ping[iping].speed = ping[ibefore].speed + (ping[iafter].speed - ping[ibefore].speed) *
 					                                              (ping[iping].time_d - ping[ibefore].time_d) /
 					                                              (ping[iafter].time_d - ping[ibefore].time_d);
-					speedheading_change = MB_YES;
+					speedheading_change = true;
 				}
 				else if (ibefore < iping) {
 					ping[iping].speed = ping[ibefore].speed;
-					speedheading_change = MB_YES;
+					speedheading_change = true;
 				}
 				else if (iafter > iping) {
 					ping[iping].speed = ping[iafter].speed;
-					speedheading_change = MB_YES;
+					speedheading_change = true;
 				}
 			}
 		}
 
 		/* do heading */
 		for (iping = 0; iping < nbuff; iping++) {
-			if (ping[iping].heading_select == MB_YES) {
+			if (ping[iping].heading_select == true) {
 				ibefore = iping;
 				for (i = iping - 1; i >= 0; i--) {
-					if (ping[i].heading_select == MB_NO && ibefore == iping)
+					if (ping[i].heading_select == false && ibefore == iping)
 						ibefore = i;
 				}
 				iafter = iping;
 				for (i = iping + 1; i < nbuff; i++)
-					if (ping[i].heading_select == MB_NO && iafter == iping)
+					if (ping[i].heading_select == false && iafter == iping)
 						iafter = i;
 				if (ibefore < iping && iafter > iping) {
 					ping[iping].heading = ping[ibefore].heading + (ping[iafter].heading - ping[ibefore].heading) *
 					                                                  (ping[iping].time_d - ping[ibefore].time_d) /
 					                                                  (ping[iafter].time_d - ping[ibefore].time_d);
-					speedheading_change = MB_YES;
+					speedheading_change = true;
 				}
 				else if (ibefore < iping) {
 					ping[iping].heading = ping[ibefore].heading;
-					speedheading_change = MB_YES;
+					speedheading_change = true;
 				}
 				else if (iafter > iping) {
 					ping[iping].heading = ping[iafter].heading;
-					speedheading_change = MB_YES;
+					speedheading_change = true;
 				}
 			}
 		}
 
 		/* do draft */
 		for (iping = 0; iping < nbuff; iping++) {
-			if (ping[iping].draft_select == MB_YES) {
+			if (ping[iping].draft_select == true) {
 				ibefore = iping;
 				for (i = iping - 1; i >= 0; i--) {
-					if (ping[i].draft_select == MB_NO && ibefore == iping)
+					if (ping[i].draft_select == false && ibefore == iping)
 						ibefore = i;
 				}
 				iafter = iping;
 				for (i = iping + 1; i < nbuff; i++)
-					if (ping[i].draft_select == MB_NO && iafter == iping)
+					if (ping[i].draft_select == false && iafter == iping)
 						iafter = i;
 				if (ibefore < iping && iafter > iping) {
 					ping[iping].draft = ping[ibefore].draft + (ping[iafter].draft - ping[ibefore].draft) *
 					                                              (ping[iping].time_d - ping[ibefore].time_d) /
 					                                              (ping[iafter].time_d - ping[ibefore].time_d);
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (ibefore < iping) {
 					ping[iping].draft = ping[ibefore].draft;
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 				else if (iafter > iping) {
 					ping[iping].draft = ping[iafter].draft;
-					ping[iping].lonlat_flag = MB_YES;
-					timelonlat_change = MB_YES;
+					ping[iping].lonlat_flag = true;
+					timelonlat_change = true;
 				}
 			}
 		}
 
 		/* recalculate speed-made-good and course-made-good */
-		if (timelonlat_change == MB_YES)
+		if (timelonlat_change == true)
 			for (i = 0; i < nbuff; i++)
 				mbnavedit_get_smgcmg(i);
 
 		/* recalculate model */
-		if (speedheading_change == MB_YES && model_mode == MODEL_MODE_DR)
+		if (speedheading_change == true && model_mode == MODEL_MODE_DR)
 			mbnavedit_get_model();
 	}
 	/* if no data then set failure flag */
@@ -2897,26 +2897,26 @@ int mbnavedit_action_interpolaterepeats() {
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
 		/* look for position or time changes */
-		timelonlat_change = MB_NO;
-		speedheading_change = MB_NO;
+		timelonlat_change = false;
+		speedheading_change = false;
 
 		/* do expected time */
 		for (iping = 1; iping < nbuff - 1; iping++) {
-			if (ping[iping].tint_select == MB_YES && ping[iping].time_d == ping[iping - 1].time_d) {
+			if (ping[iping].tint_select == true && ping[iping].time_d == ping[iping - 1].time_d) {
 				/* find next changed value */
-				found = MB_NO;
+				found = false;
 				ibefore = iping - 1;
-				for (j = iping + 1; j < nbuff && found == MB_NO; j++) {
+				for (j = iping + 1; j < nbuff && found == false; j++) {
 					if (ping[iping].time_d != ping[j].time_d) {
-						found = MB_YES;
+						found = true;
 						iafter = j;
 					}
 				}
 				for (j = iping; j < iafter; j++) {
-					if (ping[j].tint_select == MB_YES) {
+					if (ping[j].tint_select == true) {
 						ping[j].time_d = ping[ibefore].time_d + (ping[iafter].time_d - ping[ibefore].time_d) *
 						                                            ((double)(iping - ibefore)) / ((double)(iafter - ibefore));
-						timelonlat_change = MB_YES;
+						timelonlat_change = true;
 					}
 				}
 			}
@@ -2924,22 +2924,22 @@ int mbnavedit_action_interpolaterepeats() {
 
 		/* do longitude */
 		for (iping = 1; iping < nbuff - 1; iping++) {
-			if (ping[iping].lon_select == MB_YES && ping[iping].lon == ping[iping - 1].lon) {
+			if (ping[iping].lon_select == true && ping[iping].lon == ping[iping - 1].lon) {
 				/* find next changed value */
-				found = MB_NO;
+				found = false;
 				ibefore = iping - 1;
-				for (j = iping + 1; j < nbuff && found == MB_NO; j++) {
+				for (j = iping + 1; j < nbuff && found == false; j++) {
 					if (ping[iping].lon != ping[j].lon) {
-						found = MB_YES;
+						found = true;
 						iafter = j;
 					}
 				}
 				for (j = iping; j < iafter; j++) {
-					if (ping[j].lon_select == MB_YES) {
+					if (ping[j].lon_select == true) {
 						ping[j].lon = ping[ibefore].lon + (ping[iafter].lon - ping[ibefore].lon) *
 						                                      (ping[j].time_d - ping[ibefore].time_d) /
 						                                      (ping[iafter].time_d - ping[ibefore].time_d);
-						timelonlat_change = MB_YES;
+						timelonlat_change = true;
 					}
 				}
 			}
@@ -2947,22 +2947,22 @@ int mbnavedit_action_interpolaterepeats() {
 
 		/* do latitude */
 		for (iping = 1; iping < nbuff - 1; iping++) {
-			if (ping[iping].lat_select == MB_YES && ping[iping].lat == ping[iping - 1].lat) {
+			if (ping[iping].lat_select == true && ping[iping].lat == ping[iping - 1].lat) {
 				/* find next changed value */
-				found = MB_NO;
+				found = false;
 				ibefore = iping - 1;
-				for (j = iping + 1; j < nbuff && found == MB_NO; j++) {
+				for (j = iping + 1; j < nbuff && found == false; j++) {
 					if (ping[iping].lat != ping[j].lat) {
-						found = MB_YES;
+						found = true;
 						iafter = j;
 					}
 				}
 				for (j = iping; j < iafter; j++) {
-					if (ping[j].lat_select == MB_YES) {
+					if (ping[j].lat_select == true) {
 						ping[j].lat = ping[ibefore].lat + (ping[iafter].lat - ping[ibefore].lat) *
 						                                      (ping[j].time_d - ping[ibefore].time_d) /
 						                                      (ping[iafter].time_d - ping[ibefore].time_d);
-						timelonlat_change = MB_YES;
+						timelonlat_change = true;
 					}
 				}
 			}
@@ -2970,22 +2970,22 @@ int mbnavedit_action_interpolaterepeats() {
 
 		/* do speed */
 		for (iping = 1; iping < nbuff - 1; iping++) {
-			if (ping[iping].speed_select == MB_YES && ping[iping].speed == ping[iping - 1].speed) {
+			if (ping[iping].speed_select == true && ping[iping].speed == ping[iping - 1].speed) {
 				/* find next changed value */
-				found = MB_NO;
+				found = false;
 				ibefore = iping - 1;
-				for (j = iping + 1; j < nbuff && found == MB_NO; j++) {
+				for (j = iping + 1; j < nbuff && found == false; j++) {
 					if (ping[iping].speed != ping[j].speed) {
-						found = MB_YES;
+						found = true;
 						iafter = j;
 					}
 				}
 				for (j = iping; j < iafter; j++) {
-					if (ping[j].speed_select == MB_YES) {
+					if (ping[j].speed_select == true) {
 						ping[j].speed = ping[ibefore].speed + (ping[iafter].speed - ping[ibefore].speed) *
 						                                          (ping[j].time_d - ping[ibefore].time_d) /
 						                                          (ping[iafter].time_d - ping[ibefore].time_d);
-						speedheading_change = MB_YES;
+						speedheading_change = true;
 					}
 				}
 			}
@@ -2993,22 +2993,22 @@ int mbnavedit_action_interpolaterepeats() {
 
 		/* do heading */
 		for (iping = 1; iping < nbuff - 1; iping++) {
-			if (ping[iping].heading_select == MB_YES && ping[iping].heading == ping[iping - 1].heading) {
+			if (ping[iping].heading_select == true && ping[iping].heading == ping[iping - 1].heading) {
 				/* find next changed value */
-				found = MB_NO;
+				found = false;
 				ibefore = iping - 1;
-				for (j = iping + 1; j < nbuff && found == MB_NO; j++) {
+				for (j = iping + 1; j < nbuff && found == false; j++) {
 					if (ping[iping].heading != ping[j].heading) {
-						found = MB_YES;
+						found = true;
 						iafter = j;
 					}
 				}
 				for (j = iping; j < iafter; j++) {
-					if (ping[j].heading_select == MB_YES) {
+					if (ping[j].heading_select == true) {
 						ping[j].heading = ping[ibefore].heading + (ping[iafter].heading - ping[ibefore].heading) *
 						                                              (ping[j].time_d - ping[ibefore].time_d) /
 						                                              (ping[iafter].time_d - ping[ibefore].time_d);
-						speedheading_change = MB_YES;
+						speedheading_change = true;
 					}
 				}
 			}
@@ -3016,34 +3016,34 @@ int mbnavedit_action_interpolaterepeats() {
 
 		/* do draft */
 		for (iping = 1; iping < nbuff - 1; iping++) {
-			if (ping[iping].draft_select == MB_YES && ping[iping].draft == ping[iping - 1].draft) {
+			if (ping[iping].draft_select == true && ping[iping].draft == ping[iping - 1].draft) {
 				/* find next changed value */
-				found = MB_NO;
+				found = false;
 				ibefore = iping - 1;
-				for (j = iping + 1; j < nbuff && found == MB_NO; j++) {
+				for (j = iping + 1; j < nbuff && found == false; j++) {
 					if (ping[iping].draft != ping[j].draft) {
-						found = MB_YES;
+						found = true;
 						iafter = j;
 					}
 				}
 				for (j = iping; j < iafter; j++) {
-					if (ping[j].draft_select == MB_YES) {
+					if (ping[j].draft_select == true) {
 						ping[j].draft = ping[ibefore].draft + (ping[iafter].draft - ping[ibefore].draft) *
 						                                          (ping[j].time_d - ping[ibefore].time_d) /
 						                                          (ping[iafter].time_d - ping[ibefore].time_d);
-						timelonlat_change = MB_YES;
+						timelonlat_change = true;
 					}
 				}
 			}
 		}
 
 		/* recalculate speed-made-good and course-made-good */
-		if (timelonlat_change == MB_YES)
+		if (timelonlat_change == true)
 			for (i = 0; i < nbuff; i++)
 				mbnavedit_get_smgcmg(i);
 
 		/* recalculate model */
-		if (speedheading_change == MB_YES && model_mode == MODEL_MODE_DR)
+		if (speedheading_change == true && model_mode == MODEL_MODE_DR)
 			mbnavedit_get_model();
 	}
 	/* if no data then set failure flag */
@@ -3080,49 +3080,49 @@ int mbnavedit_action_revert() {
 	if (nplot > 0) {
 
 		/* look for position changes */
-		timelonlat_change = MB_NO;
-		speedheading_change = MB_NO;
+		timelonlat_change = false;
+		speedheading_change = false;
 
 		/* loop over each of the plots */
 		for (iplot = 0; iplot < number_plots; iplot++) {
 			for (i = current_id; i < current_id + nplot; i++) {
 				if (mbnavplot[iplot].type == PLOT_TINT) {
-					if (ping[i].tint_select == MB_YES) {
+					if (ping[i].tint_select == true) {
 						ping[i].time_d = ping[i].time_d_org;
 						ping[i].file_time_d = ping[i].time_d - file_start_time_d;
 						ping[i].tint = ping[i].time_d - ping[i - 1].time_d;
-						timelonlat_change = MB_YES;
+						timelonlat_change = true;
 						if (i < nbuff - 1)
 							ping[i + 1].tint = ping[i + 1].time_d - ping[i].time_d;
 						status = mb_get_date(verbose, ping[i].time_d, ping[i].time_i);
 					}
 				}
 				else if (mbnavplot[iplot].type == PLOT_LONGITUDE) {
-					if (ping[i].lon_select == MB_YES) {
+					if (ping[i].lon_select == true) {
 						ping[i].lon = ping[i].lon_org;
-						timelonlat_change = MB_YES;
+						timelonlat_change = true;
 					}
 				}
 				else if (mbnavplot[iplot].type == PLOT_LATITUDE) {
-					if (ping[i].lat_select == MB_YES) {
+					if (ping[i].lat_select == true) {
 						ping[i].lat = ping[i].lat_org;
-						timelonlat_change = MB_YES;
+						timelonlat_change = true;
 					}
 				}
 				else if (mbnavplot[iplot].type == PLOT_SPEED) {
-					if (ping[i].speed_select == MB_YES) {
+					if (ping[i].speed_select == true) {
 						ping[i].speed = ping[i].speed_org;
-						speedheading_change = MB_YES;
+						speedheading_change = true;
 					}
 				}
 				else if (mbnavplot[iplot].type == PLOT_HEADING) {
-					if (ping[i].heading_select == MB_YES) {
+					if (ping[i].heading_select == true) {
 						ping[i].heading = ping[i].heading_org;
-						speedheading_change = MB_YES;
+						speedheading_change = true;
 					}
 				}
 				else if (mbnavplot[iplot].type == PLOT_DRAFT) {
-					if (ping[i].draft_select == MB_YES) {
+					if (ping[i].draft_select == true) {
 						ping[i].draft = ping[i].draft_org;
 					}
 				}
@@ -3130,12 +3130,12 @@ int mbnavedit_action_revert() {
 		}
 
 		/* recalculate speed-made-good and course-made-good */
-		if (timelonlat_change == MB_YES)
+		if (timelonlat_change == true)
 			for (i = 0; i < nbuff; i++)
 				mbnavedit_get_smgcmg(i);
 
 		/* recalculate model */
-		if (speedheading_change == MB_YES && model_mode == MODEL_MODE_DR)
+		if (speedheading_change == true && model_mode == MODEL_MODE_DR)
 			mbnavedit_get_model();
 
 		/* clear the screen */
@@ -3179,13 +3179,13 @@ int mbnavedit_action_flag() {
 		for (iplot = 0; iplot < number_plots; iplot++) {
 			for (i = current_id; i < current_id + nplot; i++) {
 				if (mbnavplot[iplot].type == PLOT_LONGITUDE) {
-					if (ping[i].lon_select == MB_YES) {
-						ping[i].lonlat_flag = MB_YES;
+					if (ping[i].lon_select == true) {
+						ping[i].lonlat_flag = true;
 					}
 				}
 				else if (mbnavplot[iplot].type == PLOT_LATITUDE) {
-					if (ping[i].lat_select == MB_YES) {
-						ping[i].lonlat_flag = MB_YES;
+					if (ping[i].lat_select == true) {
+						ping[i].lonlat_flag = true;
 					}
 				}
 			}
@@ -3232,13 +3232,13 @@ int mbnavedit_action_unflag() {
 		for (iplot = 0; iplot < number_plots; iplot++) {
 			for (i = current_id; i < current_id + nplot; i++) {
 				if (mbnavplot[iplot].type == PLOT_LONGITUDE) {
-					if (ping[i].lon_select == MB_YES) {
-						ping[i].lonlat_flag = MB_NO;
+					if (ping[i].lon_select == true) {
+						ping[i].lonlat_flag = false;
 					}
 				}
 				else if (mbnavplot[iplot].type == PLOT_LATITUDE) {
-					if (ping[i].lat_select == MB_YES) {
-						ping[i].lonlat_flag = MB_NO;
+					if (ping[i].lat_select == true) {
+						ping[i].lonlat_flag = false;
 					}
 				}
 			}
@@ -3552,7 +3552,7 @@ int mbnavedit_get_gaussianmean() {
 		nneg = 0;
 		for (j = jstart; j < nbuff && dt <= timewindow; j++) {
 			dt = ping[j].time_d - ping[i].time_d;
-			if (ping[j].lonlat_flag == MB_NO && fabs(dt) <= timewindow) {
+			if (ping[j].lonlat_flag == false && fabs(dt) <= timewindow) {
 				w = exp(a * dt * dt);
 				nsum++;
 				if (dt < 0.0)
@@ -3567,12 +3567,12 @@ int mbnavedit_get_gaussianmean() {
 			}
 		}
 		if (npos > 0 && nneg > 0) {
-			ping[i].mean_ok = MB_YES;
+			ping[i].mean_ok = true;
 			ping[i].lon_dr = sumlon / weight;
 			ping[i].lat_dr = sumlat / weight;
 		}
 		else {
-			ping[i].mean_ok = MB_NO;
+			ping[i].mean_ok = false;
 			ping[i].lon_dr = ping[i].lon;
 			ping[i].lat_dr = ping[i].lat;
 		}
@@ -3582,13 +3582,13 @@ int mbnavedit_get_gaussianmean() {
 	jbefore = -1;
 	for (i = 0; i < nbuff; i++) {
 		/* only work on nav not smoothed in first past due to lack of nearby data */
-		if (ping[i].mean_ok == MB_NO) {
+		if (ping[i].mean_ok == false) {
 			/* find valid points before and after */
 			jafter = i;
 			for (j = jbefore; j < nbuff && jafter == i; j++) {
-				if (j < i && ping[j].lonlat_flag == MB_NO)
+				if (j < i && ping[j].lonlat_flag == false)
 					jbefore = j;
-				if (j > i && ping[j].lonlat_flag == MB_NO)
+				if (j > i && ping[j].lonlat_flag == false)
 					jafter = j;
 			}
 			if (jbefore >= 0 && jafter > i) {
@@ -3725,7 +3725,7 @@ int mbnavedit_get_inversion() {
 	last = current_id;
 	for (i = current_id; i < current_id + nplot; i++) {
 		/* constrain lon unless flagged by user */
-		if (ping[i].lonlat_flag == MB_NO) {
+		if (ping[i].lonlat_flag == false) {
 			lon_avg += ping[i].lon;
 			nlon_avg++;
 			lat_avg += ping[i].lat;
@@ -3788,7 +3788,7 @@ int mbnavedit_get_inversion() {
 			ii = i - current_id;
 
 			/* constrain lon unless flagged by user */
-			if (ping[i].lonlat_flag == MB_NO) {
+			if (ping[i].lonlat_flag == false) {
 				k = nnz * nr;
 				d[nr] = (ping[i].lon_org - lon_avg) / mtodeglon;
 				nia[nr] = 1;
@@ -3919,7 +3919,7 @@ int mbnavedit_get_inversion() {
 			ii = i - current_id;
 
 			/* constrain lat unless flagged by user */
-			if (ping[i].lonlat_flag == MB_NO) {
+			if (ping[i].lonlat_flag == false) {
 				k = nnz * nr;
 				d[nr] = (ping[i].lat_org - lat_avg) / mtodeglat;
 				nia[nr] = 1;
@@ -4115,20 +4115,20 @@ int mbnavedit_plot_all() {
 
 	/* deselect data outside plots */
 	for (i = 0; i < current_id; i++) {
-		ping[i].tint_select = MB_NO;
-		ping[i].lon_select = MB_NO;
-		ping[i].lat_select = MB_NO;
-		ping[i].speed_select = MB_NO;
-		ping[i].heading_select = MB_NO;
-		ping[i].draft_select = MB_NO;
+		ping[i].tint_select = false;
+		ping[i].lon_select = false;
+		ping[i].lat_select = false;
+		ping[i].speed_select = false;
+		ping[i].heading_select = false;
+		ping[i].draft_select = false;
 	}
 	for (i = current_id + nplot; i < nbuff; i++) {
-		ping[i].tint_select = MB_NO;
-		ping[i].lon_select = MB_NO;
-		ping[i].lat_select = MB_NO;
-		ping[i].speed_select = MB_NO;
-		ping[i].heading_select = MB_NO;
-		ping[i].draft_select = MB_NO;
+		ping[i].tint_select = false;
+		ping[i].lon_select = false;
+		ping[i].lat_select = false;
+		ping[i].speed_select = false;
+		ping[i].heading_select = false;
+		ping[i].draft_select = false;
 	}
 
 	/* don't try to plot if no data */
@@ -4158,53 +4158,53 @@ int mbnavedit_plot_all() {
 		for (i = current_id + 1; i < current_id + nplot; i++) {
 			tint_min = MIN(ping[i].tint, tint_min);
 			tint_max = MAX(ping[i].tint, tint_max);
-			if (plot_tint_org == MB_YES) {
+			if (plot_tint_org == true) {
 				tint_min = MIN(ping[i].tint_org, tint_min);
 				tint_max = MAX(ping[i].tint_org, tint_max);
 			}
 			lon_min = MIN(ping[i].lon, lon_min);
 			lon_max = MAX(ping[i].lon, lon_max);
-			if (plot_lon_org == MB_YES) {
+			if (plot_lon_org == true) {
 				lon_min = MIN(ping[i].lon_org, lon_min);
 				lon_max = MAX(ping[i].lon_org, lon_max);
 			}
-			if (model_mode != MODEL_MODE_OFF && plot_lon_dr == MB_YES) {
+			if (model_mode != MODEL_MODE_OFF && plot_lon_dr == true) {
 				lon_min = MIN(ping[i].lon_dr, lon_min);
 				lon_max = MAX(ping[i].lon_dr, lon_max);
 			}
 			lat_min = MIN(ping[i].lat, lat_min);
 			lat_max = MAX(ping[i].lat, lat_max);
-			if (plot_lat_org == MB_YES) {
+			if (plot_lat_org == true) {
 				lat_min = MIN(ping[i].lat_org, lat_min);
 				lat_max = MAX(ping[i].lat_org, lat_max);
 			}
-			if (model_mode != MODEL_MODE_OFF && plot_lat_dr == MB_YES) {
+			if (model_mode != MODEL_MODE_OFF && plot_lat_dr == true) {
 				lat_min = MIN(ping[i].lat_dr, lat_min);
 				lat_max = MAX(ping[i].lat_dr, lat_max);
 			}
 			speed_min = MIN(ping[i].speed, speed_min);
 			speed_max = MAX(ping[i].speed, speed_max);
-			if (plot_speed_org == MB_YES) {
+			if (plot_speed_org == true) {
 				speed_min = MIN(ping[i].speed_org, speed_min);
 				speed_max = MAX(ping[i].speed_org, speed_max);
 			}
-			if (plot_smg == MB_YES) {
+			if (plot_smg == true) {
 				speed_min = MIN(ping[i].speed_made_good, speed_min);
 				speed_max = MAX(ping[i].speed_made_good, speed_max);
 			}
 			heading_min = MIN(ping[i].heading, heading_min);
 			heading_max = MAX(ping[i].heading, heading_max);
-			if (plot_heading_org == MB_YES) {
+			if (plot_heading_org == true) {
 				heading_min = MIN(ping[i].heading_org, heading_min);
 				heading_max = MAX(ping[i].heading_org, heading_max);
 			}
-			if (plot_cmg == MB_YES) {
+			if (plot_cmg == true) {
 				heading_min = MIN(ping[i].course_made_good, heading_min);
 				heading_max = MAX(ping[i].course_made_good, heading_max);
 			}
 			draft_min = MIN(ping[i].draft, draft_min);
 			draft_max = MAX(ping[i].draft, draft_max);
-			if (plot_draft_org == MB_YES) {
+			if (plot_draft_org == true) {
 				draft_min = MIN(ping[i].draft_org, draft_min);
 				draft_max = MAX(ping[i].draft_org, draft_max);
 			}
@@ -4257,7 +4257,7 @@ int mbnavedit_plot_all() {
 		heave_min = -heave_max;
 
 		/* make sure lon and lat scaled the same if both plotted */
-		if (plot_lon == MB_YES && plot_lat == MB_YES) {
+		if (plot_lon == true && plot_lat == true) {
 			if ((lon_max - lon_min) > (lat_max - lat_min)) {
 				center = 0.5 * (lat_min + lat_max);
 				lat_min = center - 0.5 * (lon_max - lon_min);
@@ -4336,7 +4336,7 @@ int mbnavedit_plot_all() {
 
 		/* figure out how many plots to make */
 		number_plots = 0;
-		if (plot_tint == MB_YES) {
+		if (plot_tint == true) {
 			mbnavplot[number_plots].type = PLOT_TINT;
 			mbnavplot[number_plots].ixmin = 1.25 * margin_x;
 			mbnavplot[number_plots].ixmax = plot_width - margin_x / 2;
@@ -4358,7 +4358,7 @@ int mbnavedit_plot_all() {
 			sprintf(mbnavplot[number_plots].ylabel2, "(seconds)");
 			number_plots++;
 		}
-		if (plot_lon == MB_YES) {
+		if (plot_lon == true) {
 			mbnavplot[number_plots].type = PLOT_LONGITUDE;
 			mbnavplot[number_plots].ixmin = 1.25 * margin_x;
 			mbnavplot[number_plots].ixmax = plot_width - margin_x / 2;
@@ -4380,7 +4380,7 @@ int mbnavedit_plot_all() {
 			sprintf(mbnavplot[number_plots].ylabel2, "(degrees)");
 			number_plots++;
 		}
-		if (plot_lat == MB_YES) {
+		if (plot_lat == true) {
 			mbnavplot[number_plots].type = PLOT_LATITUDE;
 			mbnavplot[number_plots].ixmin = 1.25 * margin_x;
 			mbnavplot[number_plots].ixmax = plot_width - margin_x / 2;
@@ -4402,7 +4402,7 @@ int mbnavedit_plot_all() {
 			sprintf(mbnavplot[number_plots].ylabel2, "(degrees)");
 			number_plots++;
 		}
-		if (plot_speed == MB_YES) {
+		if (plot_speed == true) {
 			mbnavplot[number_plots].type = PLOT_SPEED;
 			mbnavplot[number_plots].ixmin = 1.25 * margin_x;
 			mbnavplot[number_plots].ixmax = plot_width - margin_x / 2;
@@ -4424,7 +4424,7 @@ int mbnavedit_plot_all() {
 			sprintf(mbnavplot[number_plots].ylabel2, "(km/hr)");
 			number_plots++;
 		}
-		if (plot_heading == MB_YES) {
+		if (plot_heading == true) {
 			mbnavplot[number_plots].type = PLOT_HEADING;
 			mbnavplot[number_plots].ixmin = 1.25 * margin_x;
 			mbnavplot[number_plots].ixmax = plot_width - margin_x / 2;
@@ -4446,7 +4446,7 @@ int mbnavedit_plot_all() {
 			sprintf(mbnavplot[number_plots].ylabel2, "(degrees)");
 			number_plots++;
 		}
-		if (plot_draft == MB_YES) {
+		if (plot_draft == true) {
 			mbnavplot[number_plots].type = PLOT_DRAFT;
 			mbnavplot[number_plots].ixmin = 1.25 * margin_x;
 			mbnavplot[number_plots].ixmax = plot_width - margin_x / 2;
@@ -4468,7 +4468,7 @@ int mbnavedit_plot_all() {
 			sprintf(mbnavplot[number_plots].ylabel2, "(meters)");
 			number_plots++;
 		}
-		if (plot_roll == MB_YES) {
+		if (plot_roll == true) {
 			mbnavplot[number_plots].type = PLOT_ROLL;
 			mbnavplot[number_plots].ixmin = 1.25 * margin_x;
 			mbnavplot[number_plots].ixmax = plot_width - margin_x / 2;
@@ -4490,7 +4490,7 @@ int mbnavedit_plot_all() {
 			sprintf(mbnavplot[number_plots].ylabel2, "(degrees)");
 			number_plots++;
 		}
-		if (plot_pitch == MB_YES) {
+		if (plot_pitch == true) {
 			mbnavplot[number_plots].type = PLOT_PITCH;
 			mbnavplot[number_plots].ixmin = 1.25 * margin_x;
 			mbnavplot[number_plots].ixmax = plot_width - margin_x / 2;
@@ -4512,7 +4512,7 @@ int mbnavedit_plot_all() {
 			sprintf(mbnavplot[number_plots].ylabel2, "(degrees)");
 			number_plots++;
 		}
-		if (plot_heave == MB_YES) {
+		if (plot_heave == true) {
 			mbnavplot[number_plots].type = PLOT_HEAVE;
 			mbnavplot[number_plots].ixmin = 1.25 * margin_x;
 			mbnavplot[number_plots].ixmax = plot_width - margin_x / 2;
@@ -4713,7 +4713,7 @@ int mbnavedit_plot_tint(int iplot) {
 	yscale = mbnavplot[iplot].yscale;
 
 	/* plot original expected time data */
-	if (plot_tint_org == MB_YES) {
+	if (plot_tint_org == true) {
 		tint_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		tint_y1 = iymin + yscale * (ping[current_id].tint_org - ymin);
 		for (i = current_id + 1; i < current_id + nplot; i++) {
@@ -4729,7 +4729,7 @@ int mbnavedit_plot_tint(int iplot) {
 	for (i = current_id; i < current_id + nplot; i++) {
 		ping[i].tint_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].tint_y = iymin + yscale * (ping[i].tint - ymin);
-		if (ping[i].tint_select == MB_YES)
+		if (ping[i].tint_select == true)
 			xg_drawrectangle(mbnavedit_xgid, ping[i].tint_x - 2, ping[i].tint_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 		else if (ping[i].tint != ping[i].tint_org)
 			xg_drawrectangle(mbnavedit_xgid, ping[i].tint_x - 2, ping[i].tint_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
@@ -4779,7 +4779,7 @@ int mbnavedit_plot_lon(int iplot) {
 	yscale = mbnavplot[iplot].yscale;
 
 	/* plot original longitude data */
-	if (plot_lon_org == MB_YES) {
+	if (plot_lon_org == true) {
 		lon_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		lon_y1 = iymin + yscale * (ping[current_id].lon_org - ymin);
 		for (i = current_id + 1; i < current_id + nplot; i++) {
@@ -4792,7 +4792,7 @@ int mbnavedit_plot_lon(int iplot) {
 	}
 
 	/* plot dr longitude data */
-	if (model_mode != MODEL_MODE_OFF && plot_lon_dr == MB_YES) {
+	if (model_mode != MODEL_MODE_OFF && plot_lon_dr == true) {
 		lon_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		lon_y1 = iymin + yscale * (ping[current_id].lon_dr - ymin);
 		for (i = current_id + 1; i < current_id + nplot; i++) {
@@ -4808,7 +4808,7 @@ int mbnavedit_plot_lon(int iplot) {
 	for (i = current_id; i < current_id + nplot; i++) {
 		ping[i].lon_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].lon_y = iymin + yscale * (ping[i].lon - ymin);
-		if (ping[i].lonlat_flag == MB_YES)
+		if (ping[i].lonlat_flag == true)
 			xg_drawrectangle(mbnavedit_xgid, ping[i].lon_x - 2, ping[i].lon_y - 2, 4, 4, pixel_values[ORANGE], XG_SOLIDLINE);
 	}
 
@@ -4816,9 +4816,9 @@ int mbnavedit_plot_lon(int iplot) {
 	for (i = current_id; i < current_id + nplot; i++) {
 		ping[i].lon_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].lon_y = iymin + yscale * (ping[i].lon - ymin);
-		if (ping[i].lon_select == MB_YES)
+		if (ping[i].lon_select == true)
 			xg_drawrectangle(mbnavedit_xgid, ping[i].lon_x - 2, ping[i].lon_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
-		else if (ping[i].lonlat_flag == MB_YES) {
+		else if (ping[i].lonlat_flag == true) {
 			;
 		}
 		else if (ping[i].lon != ping[i].lon_org)
@@ -4869,7 +4869,7 @@ int mbnavedit_plot_lat(int iplot) {
 	yscale = mbnavplot[iplot].yscale;
 
 	/* plot original latitude data */
-	if (plot_lat_org == MB_YES) {
+	if (plot_lat_org == true) {
 		lat_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		lat_y1 = iymin + yscale * (ping[current_id].lat_org - ymin);
 		for (i = current_id + 1; i < current_id + nplot; i++) {
@@ -4882,7 +4882,7 @@ int mbnavedit_plot_lat(int iplot) {
 	}
 
 	/* plot dr latitude data */
-	if (model_mode != MODEL_MODE_OFF && plot_lat_dr == MB_YES) {
+	if (model_mode != MODEL_MODE_OFF && plot_lat_dr == true) {
 		lat_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		lat_y1 = iymin + yscale * (ping[current_id].lat_dr - ymin);
 		for (i = current_id + 1; i < current_id + nplot; i++) {
@@ -4898,7 +4898,7 @@ int mbnavedit_plot_lat(int iplot) {
 	for (i = current_id; i < current_id + nplot; i++) {
 		ping[i].lat_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].lat_y = iymin + yscale * (ping[i].lat - ymin);
-		if (ping[i].lonlat_flag == MB_YES)
+		if (ping[i].lonlat_flag == true)
 			xg_drawrectangle(mbnavedit_xgid, ping[i].lat_x - 2, ping[i].lat_y - 2, 4, 4, pixel_values[ORANGE], XG_SOLIDLINE);
 	}
 
@@ -4906,9 +4906,9 @@ int mbnavedit_plot_lat(int iplot) {
 	for (i = current_id; i < current_id + nplot; i++) {
 		ping[i].lat_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].lat_y = iymin + yscale * (ping[i].lat - ymin);
-		if (ping[i].lat_select == MB_YES)
+		if (ping[i].lat_select == true)
 			xg_drawrectangle(mbnavedit_xgid, ping[i].lat_x - 2, ping[i].lat_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
-		else if (ping[i].lonlat_flag == MB_YES) {
+		else if (ping[i].lonlat_flag == true) {
 			;
 		}
 		else if (ping[i].lat != ping[i].lat_org)
@@ -4959,7 +4959,7 @@ int mbnavedit_plot_speed(int iplot) {
 	yscale = mbnavplot[iplot].yscale;
 
 	/* plot original speed data */
-	if (plot_speed_org == MB_YES) {
+	if (plot_speed_org == true) {
 		speed_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		speed_y1 = iymin + yscale * (ping[current_id].speed - ymin);
 		for (i = current_id + 1; i < current_id + nplot; i++) {
@@ -4972,7 +4972,7 @@ int mbnavedit_plot_speed(int iplot) {
 	}
 
 	/* plot speed made good data */
-	if (plot_smg == MB_YES) {
+	if (plot_smg == true) {
 		speed_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		speed_y1 = iymin + yscale * (ping[current_id].speed_made_good - ymin);
 		for (i = current_id + 1; i < current_id + nplot; i++) {
@@ -4988,7 +4988,7 @@ int mbnavedit_plot_speed(int iplot) {
 	for (i = current_id; i < current_id + nplot; i++) {
 		ping[i].speed_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].speed_y = iymin + yscale * (ping[i].speed - ymin);
-		if (ping[i].speed_select == MB_YES)
+		if (ping[i].speed_select == true)
 			xg_drawrectangle(mbnavedit_xgid, ping[i].speed_x - 2, ping[i].speed_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 		else if (ping[i].speed != ping[i].speed_org)
 			xg_drawrectangle(mbnavedit_xgid, ping[i].speed_x - 2, ping[i].speed_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
@@ -5038,7 +5038,7 @@ int mbnavedit_plot_heading(int iplot) {
 	yscale = mbnavplot[iplot].yscale;
 
 	/* plot original heading data */
-	if (plot_heading_org == MB_YES) {
+	if (plot_heading_org == true) {
 		heading_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		heading_y1 = iymin + yscale * (ping[current_id].heading - ymin);
 		for (i = current_id + 1; i < current_id + nplot; i++) {
@@ -5051,7 +5051,7 @@ int mbnavedit_plot_heading(int iplot) {
 	}
 
 	/* plot course made good data */
-	if (plot_cmg == MB_YES) {
+	if (plot_cmg == true) {
 		heading_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		heading_y1 = iymin + yscale * (ping[current_id].course_made_good - ymin);
 		for (i = current_id + 1; i < current_id + nplot; i++) {
@@ -5067,7 +5067,7 @@ int mbnavedit_plot_heading(int iplot) {
 	for (i = current_id; i < current_id + nplot; i++) {
 		ping[i].heading_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].heading_y = iymin + yscale * (ping[i].heading - ymin);
-		if (ping[i].heading_select == MB_YES)
+		if (ping[i].heading_select == true)
 			xg_drawrectangle(mbnavedit_xgid, ping[i].heading_x - 2, ping[i].heading_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 		else if (ping[i].heading != ping[i].heading_org)
 			xg_drawrectangle(mbnavedit_xgid, ping[i].heading_x - 2, ping[i].heading_y - 2, 4, 4, pixel_values[PURPLE],
@@ -5119,7 +5119,7 @@ int mbnavedit_plot_draft(int iplot) {
 	yscale = mbnavplot[iplot].yscale;
 
 	/* plot original draft data */
-	if (plot_draft_org == MB_YES) {
+	if (plot_draft_org == true) {
 		draft_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		draft_y1 = iymin + yscale * (ping[current_id].draft - ymin);
 		for (i = current_id + 1; i < current_id + nplot; i++) {
@@ -5135,7 +5135,7 @@ int mbnavedit_plot_draft(int iplot) {
 	for (i = current_id; i < current_id + nplot; i++) {
 		ping[i].draft_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].draft_y = iymin + yscale * (ping[i].draft - ymin);
-		if (ping[i].draft_select == MB_YES)
+		if (ping[i].draft_select == true)
 			xg_drawrectangle(mbnavedit_xgid, ping[i].draft_x - 2, ping[i].draft_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 		else if (ping[i].draft != ping[i].draft_org)
 			xg_drawrectangle(mbnavedit_xgid, ping[i].draft_x - 2, ping[i].draft_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
@@ -5185,7 +5185,7 @@ int mbnavedit_plot_roll(int iplot) {
 	yscale = mbnavplot[iplot].yscale;
 
 	/* plot roll data */
-	if (plot_roll == MB_YES) {
+	if (plot_roll == true) {
 		roll_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		roll_y1 = iymin + yscale * (ping[current_id].roll - ymin);
 		for (i = current_id + 1; i < current_id + nplot; i++) {
@@ -5239,7 +5239,7 @@ int mbnavedit_plot_pitch(int iplot) {
 	yscale = mbnavplot[iplot].yscale;
 
 	/* plot pitch data */
-	if (plot_pitch == MB_YES) {
+	if (plot_pitch == true) {
 		pitch_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		pitch_y1 = iymin + yscale * (ping[current_id].pitch - ymin);
 		for (i = current_id + 1; i < current_id + nplot; i++) {
@@ -5293,7 +5293,7 @@ int mbnavedit_plot_heave(int iplot) {
 	yscale = mbnavplot[iplot].yscale;
 
 	/* plot heave data */
-	if (plot_heave == MB_YES) {
+	if (plot_heave == true) {
 		heave_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		heave_y1 = iymin + yscale * (ping[current_id].heave - ymin);
 		for (i = current_id + 1; i < current_id + nplot; i++) {
@@ -5335,7 +5335,7 @@ int mbnavedit_plot_tint_value(int iplot, int iping) {
 	xg_fillrectangle(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
 
 	/* replot basic expected time data value */
-	if (ping[iping].tint_select == MB_YES)
+	if (ping[iping].tint_select == true)
 		xg_drawrectangle(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 	else if (ping[iping].tint != ping[iping].tint_org)
 		xg_drawrectangle(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[PURPLE],
@@ -5373,9 +5373,9 @@ int mbnavedit_plot_lon_value(int iplot, int iping) {
 	xg_fillrectangle(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
 
 	/* replot basic lon data value */
-	if (ping[iping].lon_select == MB_YES)
+	if (ping[iping].lon_select == true)
 		xg_drawrectangle(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
-	else if (ping[iping].lonlat_flag == MB_YES)
+	else if (ping[iping].lonlat_flag == true)
 		xg_drawrectangle(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[ORANGE], XG_SOLIDLINE);
 	else if (ping[iping].lon != ping[iping].lon_org)
 		xg_drawrectangle(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
@@ -5412,9 +5412,9 @@ int mbnavedit_plot_lat_value(int iplot, int iping) {
 	xg_fillrectangle(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
 
 	/* replot basic lat data value */
-	if (ping[iping].lat_select == MB_YES)
+	if (ping[iping].lat_select == true)
 		xg_drawrectangle(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
-	else if (ping[iping].lonlat_flag == MB_YES)
+	else if (ping[iping].lonlat_flag == true)
 		xg_drawrectangle(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[ORANGE], XG_SOLIDLINE);
 	else if (ping[iping].lat != ping[iping].lat_org)
 		xg_drawrectangle(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[PURPLE], XG_SOLIDLINE);
@@ -5451,7 +5451,7 @@ int mbnavedit_plot_speed_value(int iplot, int iping) {
 	xg_fillrectangle(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
 
 	/* replot basic speed data value */
-	if (ping[iping].speed_select == MB_YES)
+	if (ping[iping].speed_select == true)
 		xg_drawrectangle(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 	else if (ping[iping].speed != ping[iping].speed_org)
 		xg_drawrectangle(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[PURPLE],
@@ -5492,7 +5492,7 @@ int mbnavedit_plot_heading_value(int iplot, int iping) {
 	                 XG_SOLIDLINE);
 
 	/* replot basic heading data value */
-	if (ping[iping].heading_select == MB_YES)
+	if (ping[iping].heading_select == true)
 		xg_drawrectangle(mbnavedit_xgid, ping[iping].heading_x - 2, ping[iping].heading_y - 2, 4, 4, pixel_values[RED],
 		                 XG_SOLIDLINE);
 	else if (ping[iping].heading != ping[iping].heading_org)
@@ -5532,7 +5532,7 @@ int mbnavedit_plot_draft_value(int iplot, int iping) {
 	xg_fillrectangle(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[WHITE], XG_SOLIDLINE);
 
 	/* replot basic draft data value */
-	if (ping[iping].draft_select == MB_YES)
+	if (ping[iping].draft_select == true)
 		xg_drawrectangle(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[RED], XG_SOLIDLINE);
 	else if (ping[iping].draft != ping[iping].draft_org)
 		xg_drawrectangle(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[PURPLE],

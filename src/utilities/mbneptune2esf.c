@@ -44,7 +44,9 @@
  * This program is based on a skeleton derived from mbclean.
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -107,29 +109,195 @@ struct mbclean_ping_struct {
 	double *bathy;
 };
 
-/* function prototypes */
-int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error);
-int find_line(int verbose, char *line_name, struct neptune_line_tree **node, int create, struct neptune_line_tree **result,
-              int *nlines, int *error);
-int find_ping(int verbose, int ping, struct neptune_ping_tree **node, int create, struct neptune_ping_tree **result, int *error);
-int line_array(struct neptune_line_tree *line, struct neptune_line_tree ***array, int *n);
-int print_pings(FILE *output, struct neptune_ping_tree *node);
-int free_pings(int verbose, struct neptune_ping_tree **node, int *error);
+static const char program_name[] = "mbneptune2esf";
+static const char help_message[] =
+    "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand "
+    "applies the flags in the rules file to the esf file of the coresponding line";
+static const char usage_message[] =
+    "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
 
+/*--------------------------------------------------------------------*/
+int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+
+		fprintf(stderr, "dbg2       sofp:            %p\n", (void *)sofp);
+		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
+		fprintf(stderr, "dbg2       beam:            %d\n", beam);
+		fprintf(stderr, "dbg2       action:          %d\n", action);
+	}
+	/* write out the edit */
+	fprintf(stderr, "OUTPUT EDIT: %f %d %d\n", time_d, beam, action);
+
+	int status = MB_SUCCESS;
+
+	if (sofp != NULL) {
+#ifdef BYTESWAPPED
+		mb_swap_double(&time_d);
+		beam = mb_swap_int(beam);
+		action = mb_swap_int(action);
+#endif
+		if (fwrite(&time_d, sizeof(double), 1, sofp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+		if (status == MB_SUCCESS && fwrite(&beam, sizeof(int), 1, sofp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+		if (status == MB_SUCCESS && fwrite(&action, sizeof(int), 1, sofp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:       %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:      %d\n", status);
+	}
+
+	/* return */
+	return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int find_line(int verbose, char *line_name, struct neptune_line_tree **node, bool create, struct neptune_line_tree **result,
+              int *nlines, int *error) {
+	int status = MB_SUCCESS;
+
+	if (NULL == *node) {
+		if (!create)
+			return MB_FAILURE;
+
+#ifdef USE_MB_MALLOC
+		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct neptune_line_tree), (void **)result, error);
+#else
+		*result = malloc(sizeof(struct neptune_line_tree));
+#endif
+		if (MB_SUCCESS == status) {
+			strncpy((*result)->name, line_name, LINE_NAME_LENGTH);
+			(*result)->name[LINE_NAME_LENGTH] = 0;
+			(*result)->prev = NULL;
+			(*result)->next = NULL;
+			(*result)->pings = NULL;
+			(*nlines)++;
+			*node = *result;
+		}
+		return status;
+	}
+
+	const int comp = strncmp(line_name, (*node)->name, LINE_NAME_LENGTH);
+	if (0 == comp) {
+		*result = *node;
+		return status;
+	}
+	if (0 > comp)
+		return find_line(verbose, line_name, &((*node)->prev), create, result, nlines, error);
+	return find_line(verbose, line_name, &((*node)->next), create, result, nlines, error);
+}
+/*--------------------------------------------------------------------*/
+int find_ping(int verbose, int ping, struct neptune_ping_tree **node, bool create, struct neptune_ping_tree **result, int *error) {
+	int status = MB_SUCCESS;
+
+	if (NULL == *node) {
+		if (!create)
+			return MB_FAILURE;
+
+#ifdef USE_MB_MALLOC
+		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct neptune_ping_tree), (void **)result, error);
+#else
+		*result = malloc(sizeof(struct neptune_ping_tree));
+#endif
+		if (MB_SUCCESS == status) {
+			(*result)->ping = ping;
+			(*result)->prev = NULL;
+			(*result)->next = NULL;
+			(*result)->beams = NULL;
+			*node = *result;
+		}
+		return status;
+	}
+
+	if (ping == (*node)->ping) {
+		*result = *node;
+		return status;
+	}
+	if ((*node)->ping > ping)
+		return find_ping(verbose, ping, &((*node)->prev), create, result, error);
+	return find_ping(verbose, ping, &((*node)->next), create, result, error);
+}
+/*--------------------------------------------------------------------*/
+
+int line_array(struct neptune_line_tree *line, struct neptune_line_tree ***array, int *n) {
+	if (NULL == line)
+		return MB_SUCCESS;
+
+	line_array(line->prev, array, n);
+	(*array)[(*n)++] = line;
+	line_array(line->next, array, n);
+	return MB_SUCCESS;
+}
+
+/*--------------------------------------------------------------------*/
+
+int print_pings(FILE *output, struct neptune_ping_tree *node) {
+	struct neptune_beam_list *beam;
+
+	if (NULL == node)
+		return MB_SUCCESS;
+
+	print_pings(output, node->prev);
+
+	fprintf(output, "\tPing %d beams: ", node->ping);
+	beam = node->beams;
+	while (NULL != beam) {
+		fprintf(output, " %d", beam->beam);
+		beam = beam->next;
+	}
+	fprintf(output, "\n");
+
+	print_pings(output, node->next);
+	return MB_SUCCESS;
+}
+
+/*--------------------------------------------------------------------*/
+
+int free_pings(int verbose, struct neptune_ping_tree **node, int *error) {
+	struct neptune_beam_list *beam;
+	struct neptune_beam_list *nextbeam;
+
+	if (NULL == *node)
+		return MB_SUCCESS;
+
+	free_pings(verbose, &(*node)->prev, error);
+	free_pings(verbose, &(*node)->next, error);
+
+	beam = (*node)->beams;
+	while (NULL != beam) {
+		nextbeam = beam->next;
+#ifdef USE_MB_MALLOC
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&beam, error);
+#else
+		free(beam);
+#endif
+		beam = nextbeam;
+	}
+#ifdef USE_MB_MALLOC
+	mb_freed(verbose, __FILE__, __LINE__, (void **)node, error);
+#else
+	free(*node);
+#endif
+
+	return MB_SUCCESS;
+}
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "mbneptune2esf";
-	char help_message[] = "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand "
-	                      "applies the flags in the rules file to the esf file of the coresponding line";
-	char usage_message[] = "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
-	extern char *optarg;
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
 	/* MBIO status variables */
 	int status;
 	int verbose = 0;
@@ -137,7 +305,6 @@ int main(int argc, char **argv) {
 	char *message = NULL;
 
 	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
 	char read_file[MB_PATH_MAXLINE];
 	char swathfile[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
@@ -199,9 +366,7 @@ int main(int argc, char **argv) {
 	struct neptune_line_tree *rule_lines = NULL;
 	int no_lines = 0;
 	FILE *rules_fp;
-	int rules_done;
 	int rule_level;
-	int usable_rule;
 	int nscan;
 	int nlines;
 	int npings;
@@ -223,12 +388,11 @@ int main(int argc, char **argv) {
 	struct neptune_beam_list *beam;
 	char *buffer_ptr;
 
-	int output_file_set = MB_NO;
+	bool output_file_set = false;
 	char output_file[MB_PATH_MAXLINE];
 	FILE *output;
 
 	/* save file control variables */
-	int esffile_open = MB_NO;
 	char esffile[MB_PATH_MAXLINE];
 	struct mb_esf_struct esf;
 
@@ -238,9 +402,7 @@ int main(int argc, char **argv) {
 	int sensorhead = 0;
 	int pingmultiplicity;
 	double time_d_lastping;
-	int read_data;
 	int start, done;
-	int i, j, k;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -271,99 +433,94 @@ int main(int argc, char **argv) {
 	strcpy(rulesfile, "-");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:M:m:O:o:R:r:")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			sscanf(optarg, "%d", &mode);
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", output_file);
-			output_file_set = MB_YES;
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			sscanf(optarg, "%s", rulesfile);
-			flag++;
-			break;
-		case '?':
-			errflg++;
+	{
+		bool errflg = false;
+		bool help = false;
+		int c;
+		while ((c = getopt(argc, argv, "VvHhF:f:I:i:M:m:O:o:R:r:")) != -1)
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'M':
+			case 'm':
+				sscanf(optarg, "%d", &mode);
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", output_file);
+				output_file_set = true;
+				break;
+			case 'R':
+			case 'r':
+				sscanf(optarg, "%s", rulesfile);
+				break;
+			case '?':
+				errflg = true;
+			}
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	/* print starting message */
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+			fprintf(stderr, "dbg2       help:           %d\n", help);
+			fprintf(stderr, "dbg2       pings:          %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
+			fprintf(stderr, "dbg2       data format:    %d\n", format);
+			fprintf(stderr, "dbg2       input file:     %s\n", read_file);
+			fprintf(stderr, "dbg2       mode:           %d\n", mode);
+		}
 
-	/* print starting debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
-		fprintf(stderr, "dbg2       help:           %d\n", help);
-		fprintf(stderr, "dbg2       pings:          %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
-		fprintf(stderr, "dbg2       data format:    %d\n", format);
-		fprintf(stderr, "dbg2       input file:     %s\n", read_file);
-		fprintf(stderr, "dbg2       mode:           %d\n", mode);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* read rules */
@@ -375,16 +532,16 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	rules_done = MB_NO;
-	usable_rule = MB_NO;
+	bool rules_done = false;
+	bool usable_rule = false;
 	rule_level = 0;
 	status = MB_SUCCESS;
-	while (MB_NO == rules_done) {
+	while (!rules_done) {
 		/* skip till we find a rule */
-		while (MB_NO == rules_done && MB_NO == usable_rule) {
+		while (!rules_done && !usable_rule) {
 			buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, rules_fp);
 			if (buffer_ptr != buffer)
-				rules_done = MB_YES;
+				rules_done = true;
 			else {
 				nscan = sscanf(buffer, "%s", word);
 				if (1 == nscan && ')' == word[0])
@@ -394,17 +551,17 @@ int main(int argc, char **argv) {
 					if (2 == rule_level) {
 						nscan = sscanf(buffer, "%s %s", buff, word);
 						if (2 == nscan && 0 == strncmp(word, "LINES_PING_BEAM_RULE", 20))
-							usable_rule = MB_YES;
+							usable_rule = true;
 					}
 				}
 			}
 		}
 
 		/* read a rule */
-		if (MB_NO == rules_done) {
+		if (!rules_done) {
 			buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, rules_fp);
 			if (buffer_ptr != buffer) {
-				rules_done = MB_YES;
+				rules_done = true;
 				status = MB_FAILURE;
 				error = MB_ERROR_EOF;
 			}
@@ -417,7 +574,7 @@ int main(int argc, char **argv) {
 					status = MB_FAILURE;
 
 				if (MB_SUCCESS == status)
-					for (i = 0; i < nlines; i++) {
+					for (int i = 0; i < nlines; i++) {
 						if (buffer != fgets(buffer, MB_PATH_MAXLINE, rules_fp))
 							status = MB_FAILURE;
 
@@ -428,7 +585,7 @@ int main(int argc, char **argv) {
 							status = MB_FAILURE;
 
 						if (MB_SUCCESS == status)
-							status = find_line(verbose, line_name, &rule_lines, MB_YES, &line, &no_lines, &error);
+							status = find_line(verbose, line_name, &rule_lines, true, &line, &no_lines, &error);
 
 						if (buffer != fgets(buffer, MB_PATH_MAXLINE, rules_fp))
 							status = MB_FAILURE;
@@ -440,7 +597,7 @@ int main(int argc, char **argv) {
 							status = MB_FAILURE;
 
 						if (MB_SUCCESS == status)
-							for (j = 0; j < npings; j++) {
+							for (int j = 0; j < npings; j++) {
 								if (buffer != fgets(buffer, MB_PATH_MAXLINE, rules_fp))
 									status = MB_FAILURE;
 
@@ -454,7 +611,7 @@ int main(int argc, char **argv) {
 									status = MB_FAILURE;
 
 								if (MB_SUCCESS == status)
-									status = find_ping(verbose, ping_no, &(line->pings), MB_YES, &ping, &error);
+									status = find_ping(verbose, ping_no, &(line->pings), true, &ping, &error);
 
 								beam = ping->beams;
 								if (NULL != beam) {
@@ -462,7 +619,7 @@ int main(int argc, char **argv) {
 										beam = beam->next;
 								}
 								if (MB_SUCCESS == status)
-									for (k = 0; k < nbeams; k++) {
+									for (int k = 0; k < nbeams; k++) {
 										if (MB_SUCCESS == status && 1 > sscanf(&buffer[used], "%d %n", &beam_no, &bytes))
 											status = MB_FAILURE;
 										used += bytes;
@@ -501,11 +658,13 @@ int main(int argc, char **argv) {
 
 	/* put lines in an array */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, no_lines * sizeof(void *), (void **)&lines, &error);
-	i = 0;
+	int i = 0;
 	line_array(rule_lines, &lines, &i);
 
+	bool esffile_open = false;
+
 	/* output rules found */
-	if (MB_YES == output_file_set) {
+	if (output_file_set) {
 		if (0 == strncmp("-", output_file, 2))
 			output = stdout;
 		else
@@ -523,48 +682,47 @@ int main(int argc, char **argv) {
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
+	bool read_data;
 
 	/* open file list */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(swathfile, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES) {
+	while (read_data) {
 
-		usable_rule = MB_NO;
+		usable_rule = false;
 		/* check if this file matches any lines */
 		if (MBF_EM300RAW == format || MBF_EM300MBA == format)
 			for (i = 0; i < no_lines; i++) {
 				strcpy(line_name, lines[i]->name);
 				nlen = strlen(line_name);
 				slen = strlen(swathfile);
-				for (j = 0; j <= slen - nlen; j++)
+				for (int j = 0; j <= slen - nlen; j++)
 					if (0 == strncmp(line_name, &swathfile[j], nlen)) {
-						usable_rule = MB_YES;
+						usable_rule = true;
 						line = lines[i];
 						j = slen;
 						i = no_lines;
 					}
 			}
 
-		if (MB_YES == usable_rule) {
+		if (usable_rule) {
 
 			/* check format and get format flags */
 			if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) !=
@@ -578,7 +736,7 @@ int main(int argc, char **argv) {
 
 			/* check that clean mode is allowed
 			    for the specified data format */
-			if (beam_flagging == MB_NO && mode <= 2) {
+			if (beam_flagging == false && mode <= 2) {
 				fprintf(stderr, "\nMBIO format %d does not allow flagging of bad data (specified by cleaning mode %d).\n", format,
 				        mode);
 				fprintf(stderr,
@@ -670,15 +828,15 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "Sorting old edits...\n");
 
 				/* handle esf edits */
-				status = mb_esf_load(verbose, program_name, swathfile, MB_YES, MB_YES, esffile, &esf, &error);
+				status = mb_esf_load(verbose, program_name, swathfile, true, true, esffile, &esf, &error);
 				if (status == MB_SUCCESS && esf.esffp != NULL)
-					esffile_open = MB_YES;
+					esffile_open = true;
 				if (status == MB_FAILURE && error == MB_ERROR_OPEN_FAIL) {
-					esffile_open = MB_NO;
+					esffile_open = false;
 					fprintf(stderr, "\nUnable to open new edit save file %s\n", esf.esffile);
 				}
 				else if (status == MB_FAILURE && error == MB_ERROR_MEMORY_FAIL) {
-					esffile_open = MB_NO;
+					esffile_open = false;
 					fprintf(stderr, "\nUnable to allocate memory for edits in esf file %s\n", esf.esffile);
 				}
 				/* reset message */
@@ -686,11 +844,11 @@ int main(int argc, char **argv) {
 			}
 
 			/* read */
-			done = MB_NO;
+			done = false;
 			start = 0;
 			time_d_lastping = 0.0;
 			fprintf(stderr, "Processing data...\n");
-			while (done == MB_NO) {
+			while (!done) {
 				if (verbose > 1)
 					fprintf(stderr, "\n");
 
@@ -759,7 +917,7 @@ int main(int argc, char **argv) {
 					ping_no = sim_ping->png_count;
 
 					/* if ping in rules get it and flag beams */
-					if (MB_SUCCESS == find_ping(verbose, ping_no, &line->pings, MB_NO, &ping, &error)) {
+					if (MB_SUCCESS == find_ping(verbose, ping_no, &line->pings, false, &ping, &error)) {
 						beam = ping->beams;
 						while (NULL != beam) {
 							beam_no = beam->beam;
@@ -786,7 +944,7 @@ int main(int argc, char **argv) {
 						}
 
 						/* write out edits from completed pings */
-						if (status == MB_SUCCESS || done == MB_YES) {
+						if (status == MB_SUCCESS || done) {
 							for (i = 0; i < cur_ping.beams_bath; i++) {
 								if (cur_ping.beamflag[i] != cur_ping.beamflagorg[i]) {
 									if (mb_beam_ok(cur_ping.beamflag[i]))
@@ -807,7 +965,7 @@ int main(int argc, char **argv) {
 					}
 				}
 				else if (error > MB_ERROR_NO_ERROR) {
-					done = MB_YES;
+					done = true;
 				}
 			}
 
@@ -818,9 +976,9 @@ int main(int argc, char **argv) {
 			status = mb_esf_close(verbose, &esf, &error);
 
 			/* update mbprocess parameter file */
-			if (esffile_open == MB_YES) {
+			if (esffile_open == true) {
 				/* update mbprocess parameter file */
-				status = mb_pr_update_format(verbose, swathfile, MB_YES, format, &error);
+				status = mb_pr_update_format(verbose, swathfile, true, format, &error);
 				status = mb_pr_update_edit(verbose, swathfile, MBP_EDIT_ON, esffile, &error);
 			}
 
@@ -852,19 +1010,19 @@ int main(int argc, char **argv) {
 		} /* if usable_rule */
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* give the total statistics */
@@ -884,7 +1042,7 @@ int main(int argc, char **argv) {
 	status = MB_SUCCESS;
 
 	/* free memory associated with lines. */
-	for (i = 0; i < no_lines; i++) {
+	for (int i = 0; i < no_lines; i++) {
 		free_pings(verbose, &lines[i]->pings, &error);
 #ifdef USE_MB_MALLOC
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&lines[i], &error);
@@ -897,196 +1055,12 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
-/*--------------------------------------------------------------------*/
-int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
-	/* local variables */
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-
-		fprintf(stderr, "dbg2       sofp:            %p\n", (void *)sofp);
-		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
-		fprintf(stderr, "dbg2       beam:            %d\n", beam);
-		fprintf(stderr, "dbg2       action:          %d\n", action);
-	}
-	/* write out the edit */
-	fprintf(stderr, "OUTPUT EDIT: %f %d %d\n", time_d, beam, action);
-	if (sofp != NULL) {
-#ifdef BYTESWAPPED
-		mb_swap_double(&time_d);
-		beam = mb_swap_int(beam);
-		action = mb_swap_int(action);
-#endif
-		if (fwrite(&time_d, sizeof(double), 1, sofp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-		if (status == MB_SUCCESS && fwrite(&beam, sizeof(int), 1, sofp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-		if (status == MB_SUCCESS && fwrite(&action, sizeof(int), 1, sofp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:       %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:      %d\n", status);
-	}
-
-	/* return */
-	return (status);
-}
-
-/*--------------------------------------------------------------------*/
-int find_line(int verbose, char *line_name, struct neptune_line_tree **node, int create, struct neptune_line_tree **result,
-              int *nlines, int *error) {
-	int status = MB_SUCCESS;
-	int comp;
-
-	if (NULL == *node) {
-		if (MB_NO == create)
-			return MB_FAILURE;
-
-#ifdef USE_MB_MALLOC
-		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct neptune_line_tree), (void **)result, error);
-#else
-		*result = malloc(sizeof(struct neptune_line_tree));
-#endif
-		if (MB_SUCCESS == status) {
-			strncpy((*result)->name, line_name, LINE_NAME_LENGTH);
-			(*result)->name[LINE_NAME_LENGTH] = 0;
-			(*result)->prev = NULL;
-			(*result)->next = NULL;
-			(*result)->pings = NULL;
-			(*nlines)++;
-			*node = *result;
-		}
-		return status;
-	}
-
-	comp = strncmp(line_name, (*node)->name, LINE_NAME_LENGTH);
-	if (0 == comp) {
-		*result = *node;
-		return status;
-	}
-	if (0 > comp)
-		return find_line(verbose, line_name, &((*node)->prev), create, result, nlines, error);
-	return find_line(verbose, line_name, &((*node)->next), create, result, nlines, error);
-}
-/*--------------------------------------------------------------------*/
-int find_ping(int verbose, int ping, struct neptune_ping_tree **node, int create, struct neptune_ping_tree **result, int *error) {
-	int status = MB_SUCCESS;
-
-	if (NULL == *node) {
-		if (MB_NO == create)
-			return MB_FAILURE;
-
-#ifdef USE_MB_MALLOC
-		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct neptune_ping_tree), (void **)result, error);
-#else
-		*result = malloc(sizeof(struct neptune_ping_tree));
-#endif
-		if (MB_SUCCESS == status) {
-			(*result)->ping = ping;
-			(*result)->prev = NULL;
-			(*result)->next = NULL;
-			(*result)->beams = NULL;
-			*node = *result;
-		}
-		return status;
-	}
-
-	if (ping == (*node)->ping) {
-		*result = *node;
-		return status;
-	}
-	if ((*node)->ping > ping)
-		return find_ping(verbose, ping, &((*node)->prev), create, result, error);
-	return find_ping(verbose, ping, &((*node)->next), create, result, error);
-}
-/*--------------------------------------------------------------------*/
-
-int line_array(struct neptune_line_tree *line, struct neptune_line_tree ***array, int *n) {
-	if (NULL == line)
-		return MB_SUCCESS;
-
-	line_array(line->prev, array, n);
-	(*array)[(*n)++] = line;
-	line_array(line->next, array, n);
-	return MB_SUCCESS;
-}
-
-/*--------------------------------------------------------------------*/
-
-int print_pings(FILE *output, struct neptune_ping_tree *node) {
-	struct neptune_beam_list *beam;
-
-	if (NULL == node)
-		return MB_SUCCESS;
-
-	print_pings(output, node->prev);
-
-	fprintf(output, "\tPing %d beams: ", node->ping);
-	beam = node->beams;
-	while (NULL != beam) {
-		fprintf(output, " %d", beam->beam);
-		beam = beam->next;
-	}
-	fprintf(output, "\n");
-
-	print_pings(output, node->next);
-	return MB_SUCCESS;
-}
-
-/*--------------------------------------------------------------------*/
-
-int free_pings(int verbose, struct neptune_ping_tree **node, int *error) {
-	struct neptune_beam_list *beam;
-	struct neptune_beam_list *nextbeam;
-
-	if (NULL == *node)
-		return MB_SUCCESS;
-
-	free_pings(verbose, &(*node)->prev, error);
-	free_pings(verbose, &(*node)->next, error);
-
-	beam = (*node)->beams;
-	while (NULL != beam) {
-		nextbeam = beam->next;
-#ifdef USE_MB_MALLOC
-		mb_freed(verbose, __FILE__, __LINE__, (void **)&beam, error);
-#else
-		free(beam);
-#endif
-		beam = nextbeam;
-	}
-#ifdef USE_MB_MALLOC
-	mb_freed(verbose, __FILE__, __LINE__, (void **)node, error);
-#else
-	free(*node);
-#endif
-
-	return MB_SUCCESS;
-}
-
 /*--------------------------------------------------------------------*/

@@ -63,9 +63,9 @@ int mbr_info_bchrtunb(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_NAV;
 	*sensordepth_source = MB_DATA_DATA;
@@ -330,7 +330,6 @@ int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 		strncpy(data->comment, line, MBF_BCHRTUNB_COMMENT_LENGTH - 1);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -479,7 +478,6 @@ int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
@@ -603,7 +601,6 @@ int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 	if (data->pos_year == 96 && data->pos_month >= 6 && data->pos_month <= 8)
 		data->pos_longitude = -data->pos_longitude;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
@@ -696,7 +693,6 @@ int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
@@ -837,7 +833,6 @@ int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
@@ -1000,7 +995,6 @@ int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
@@ -1163,7 +1157,6 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
@@ -1215,7 +1208,6 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
-	int done;
 	short int *type;
 	static char label[2];
 
@@ -1231,17 +1223,16 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_bchrtunb_struct *data = (struct mbf_bchrtunb_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
-	done = MB_NO;
 	type = (short int *)label;
 	*error = MB_ERROR_NO_ERROR;
 	int status = MB_SUCCESS;
-	while (done == MB_NO) {
+	bool done = false;
+	while (!done) {
 		/* get next record label */
 		if ((status = fread(&label[0], 1, 1, mb_io_ptr->mbfp)) != 1) {
 			status = MB_FAILURE;
@@ -1260,54 +1251,54 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE) {
-			done = MB_YES;
+			done = true;
 		}
 		else if (*type == ELAC_COMMENT) {
 			status = mbr_bchrtunb_rd_comment(verbose, mbfp, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_COMMENT;
 			}
 		}
 		else if (*type == ELAC_PARAMETER) {
 			status = mbr_bchrtunb_rd_parameter(verbose, mbfp, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_PARAMETER;
 			}
 		}
 		else if (*type == ELAC_POS) {
 			status = mbr_bchrtunb_rd_pos(verbose, mbfp, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_NAV;
 			}
 		}
 		else if (*type == ELAC_SVP) {
 			status = mbr_bchrtunb_rd_svp(verbose, mbfp, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
 			}
 		}
 		else if (*type == ELAC_BATH56) {
 			status = mbr_bchrtunb_rd_bath56(verbose, mbfp, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_DATA;
 			}
 		}
 		else if (*type == ELAC_BATH40) {
 			status = mbr_bchrtunb_rd_bath40(verbose, mbfp, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_DATA;
 			}
 		}
 		else if (*type == ELAC_BATH32) {
 			status = mbr_bchrtunb_rd_bath32(verbose, mbfp, data, error);
 			if (status == MB_SUCCESS) {
-				done = MB_YES;
+				done = true;
 				data->kind = MB_DATA_DATA;
 			}
 		}
@@ -1318,7 +1309,7 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* bail out if there is an error */
 		if (status == MB_FAILURE)
-			done = MB_YES;
+			done = true;
 	}
 
 	/* get file position */
@@ -1529,7 +1520,6 @@ int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -1598,7 +1588,6 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
@@ -1797,7 +1786,6 @@ int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
@@ -1923,7 +1911,6 @@ int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
@@ -2034,7 +2021,6 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
@@ -2214,7 +2200,6 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
@@ -2394,7 +2379,6 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
@@ -2633,7 +2617,6 @@ int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbf_bchrtunb_struct *data = (struct mbf_bchrtunb_struct *)mb_io_ptr->raw_data;
-	char *data_ptr = (char *)data;
 	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* first translate values from data storage structure */

@@ -45,8 +45,6 @@ int mbr_info_omghdcsj(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -54,7 +52,6 @@ int mbr_info_omghdcsj(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_HDCS;
 	*beams_bath_max = 1440;
@@ -69,9 +66,9 @@ int mbr_info_omghdcsj(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = -2;
 	*filetype = MB_FILETYPE_NORMAL;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -80,6 +77,8 @@ int mbr_info_omghdcsj(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -154,7 +153,7 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 		                    (void **)&dataplus->buffer, error);
 
 		/* initialize saved values */
-		*read_summary = MB_NO;
+		*read_summary = false;
 		*fileVersion = 0;
 		*toolType = MBSYS_HDCS_None;
 		*profile_size = 0;
@@ -360,7 +359,7 @@ int mbr_dem_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	struct mbf_omghdcsj_struct *dataplus = (struct mbf_omghdcsj_struct *)mb_io_ptr->raw_data;
-	struct mbf_omghdcsj_profile_struct *profile = &(dataplus->profile);
+	/* struct mbf_omghdcsj_profile_struct *profile = &(dataplus->profile); */
 	struct mbf_omghdcsj_data_struct *data = &(dataplus->data);
 
 	int status = MB_SUCCESS;
@@ -387,6 +386,14 @@ int mbr_dem_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
 	int *read_summary;
 	int *fileVersion;
 	int *toolType;
@@ -398,30 +405,21 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *comment;
 	char *buffer;
 	int read_size;
-	int buff_size;
 	short *short_ptr;
 	int *int_ptr;
 	float *float_ptr;
 	mb_u_char scaling_factor;
 	int ScaleFactor;
-	int offset, offset_start, sample_count;
-	int nrawpixels, ssrawoffset, firstgoodbeam;
+	int offset;
+	int offset_start;
+	int nrawpixels;
+	int ssrawoffset;
+	int firstgoodbeam;
 	double bathsort[MBF_OMGHDCSJ_MAX_BEAMS];
-	int nbathsort;
-	double *pixel_size, pixel_size_calc, swathwidth, xtrack, ss_spacing;
+	double *pixel_size;
 	int pixels_ss;
 	double ss[MBF_OMGHDCSJ_MAX_PIXELS];
 	double ss_alongtrack[MBF_OMGHDCSJ_MAX_PIXELS];
-	int ss_cnt[MBF_OMGHDCSJ_MAX_PIXELS];
-	int first, last, k1, k2;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
 
 	/* get pointer to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -675,7 +673,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 
 			/* set values to saved including data record sizes */
-			*read_summary = MB_YES;
+			*read_summary = true;
 			*fileVersion = summary->fileVersion;
 			*toolType = summary->toolType;
 			if (*fileVersion == 1) {
@@ -710,6 +708,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* allocate buffer at required size */
 			if (dataplus->buffer != NULL)
 				status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dataplus->buffer, error);
+			int buff_size;
 			if (*fileVersion == 4)
 				/* buff_size = MAX(*profile_size, MBF_OMGHDCSJ_SUMMARY_SIZE+MBF_OMGHDCSJ_SUMMARY_V4EXTRA_SIZE);
 				 */
@@ -3462,14 +3461,14 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* count samples and get first offset */
 			nrawpixels = 0;
 			ssrawoffset = 0;
-			firstgoodbeam = MB_YES;
+			firstgoodbeam = true;
 			for (int i = 0; i < profile->numDepths; i++) {
 				beam = &data->beams[i];
 				if (beam->no_samples > 0) {
 					nrawpixels += beam->no_samples;
-					if (firstgoodbeam == MB_YES) {
+					if (firstgoodbeam == true) {
 						ssrawoffset = beam->offset;
-						firstgoodbeam = MB_NO;
+						firstgoodbeam = false;
 					}
 				}
 			}
@@ -3532,14 +3531,11 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->new_kind = dataplus->kind;
 	mb_io_ptr->new_error = *error;
 
-	/* print debug statements */
 	if (verbose >= 5 && status == MB_FAILURE) {
 		fprintf(stderr, "\ndbg5  Read failure in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       status:     %d\n", status);
 		fprintf(stderr, "dbg5       error:      %d\n", *error);
 	}
-
-	/* print debug statements */
 	else if (verbose >= 5 && dataplus->kind == MB_DATA_SUMMARY) {
 		fprintf(stderr, "\ndbg5  Summary read in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:                   %d\n", dataplus->kind);
@@ -3570,8 +3566,6 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       status:                 %d\n", status);
 		fprintf(stderr, "dbg5       error:                  %d\n", *error);
 	}
-
-	/* print debug statements */
 	else if (verbose >= 5 && dataplus->kind == MB_DATA_COMMENT) {
 		fprintf(stderr, "\ndbg5  New header comment in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:                   %d\n", dataplus->kind);
@@ -3579,8 +3573,6 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       status:                 %d\n", status);
 		fprintf(stderr, "dbg5       error:                  %d\n", *error);
 	}
-
-	/* print debug statements */
 	else if (verbose >= 5 && dataplus->kind == MB_DATA_DATA) {
 		fprintf(stderr, "\ndbg5  New profile read in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:                   %d\n", dataplus->kind);
@@ -3668,8 +3660,8 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS && dataplus->kind == MB_DATA_DATA) {
 
 		/* read depth and beam location values into storage arrays */
-		nbathsort = 0;
-		swathwidth = 0.0;
+		int nbathsort = 0;
+		double swathwidth = 0.0;
 		for (int i = 0; i < profile->numDepths; i++) {
 			beam = &data->beams[i];
 			if (beam->observedDepth != 0 && (beam->status == 0 || beam->status == 22)) {
@@ -3685,6 +3677,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 		else {
 			/* zero arrays */
+			int ss_cnt[MBF_OMGHDCSJ_MAX_PIXELS];
 			for (int k = 0; k < MBF_OMGHDCSJ_MAX_PIXELS; k++) {
 				ss[k] = 0.0;
 				ss_alongtrack[k] = 0.0;
@@ -3693,7 +3686,8 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* get median depth and sidescan pixel size */
 			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
-			pixel_size_calc = 2 * tan(DTR * swathwidth) * bathsort[nbathsort / 2] / MBF_OMGHDCSJ_MAX_PIXELS;
+			double pixel_size_calc =
+			    2 * tan(DTR * swathwidth) * bathsort[nbathsort / 2] / MBF_OMGHDCSJ_MAX_PIXELS;
 			pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort / 2] * sin(DTR * 0.1));
 			if (*pixel_size <= 0.0)
 				*pixel_size = pixel_size_calc;
@@ -3705,6 +3699,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				*pixel_size = pixel_size_calc;
 
 			/* get raw pixel size */
+			double ss_spacing;
 			if (profile->samp_rate > 0)
 				ss_spacing = 750.0 / profile->samp_rate;
 			else if (summary->toolType == MBSYS_HDCS_EM3000 || summary->toolType == MBSYS_HDCS_EM3000D)
@@ -3733,7 +3728,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* loop over raw sidescan, putting each raw pixel into
 			    the binning arrays */
 			offset_start = -1;
-			sample_count = 0;
+			int sample_count = 0;
 			pixels_ss = MBF_OMGHDCSJ_MAX_PIXELS;
 			for (int i = 0; i < profile->numDepths; i++) {
 				beam = &data->beams[i];
@@ -3745,15 +3740,11 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					else if (beam->offset <= 0 && offset_start > 0)
 						beam->offset = offset_start + sample_count;
 					sample_count += beam->no_samples;
-					/*fprintf(stderr, "i:%d flag:%d samples:%d sample_cnt:%d offset:%d offset_start:%d\n",
-					i, mb_io_ptr->new_beamflag[i], beam->no_samples,
-					sample_count, beam->offset, offset_start);
-					*/
 					for (int j = 0; j < beam->no_samples; j++) {
 						const int jj = j + beam->offset - offset_start;
 
 						/* interpolate based on range */
-						xtrack = 0.001 * beam->acrossTrack + ss_spacing * (j - abs(beam->centre_no));
+						const double xtrack = 0.001 * beam->acrossTrack + ss_spacing * (j - abs(beam->centre_no));
 
 						const int k = MBF_OMGHDCSJ_MAX_PIXELS / 2 + (int)(xtrack / *pixel_size);
 						if (beam->status == 0 && k > 0 && k < MBF_OMGHDCSJ_MAX_PIXELS) {
@@ -3766,8 +3757,8 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 
 			/* average the sidescan */
-			first = MBF_OMGHDCSJ_MAX_PIXELS;
-			last = -1;
+			int first = MBF_OMGHDCSJ_MAX_PIXELS;
+			int last = -1;
 			for (int k = 0; k < MBF_OMGHDCSJ_MAX_PIXELS; k++) {
 				if (ss_cnt[k] > 0) {
 					ss[k] /= ss_cnt[k];
@@ -3778,8 +3769,8 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 
 			/* interpolate the sidescan */
-			k1 = first;
-			k2 = first;
+			int k1 = first;
+			int k2 = first;
 			for (int k = first + 1; k < last; k++) {
 				if (ss_cnt[k] <= 0) {
 					if (k2 <= k) {
@@ -4065,6 +4056,14 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
 	int *write_summary;
 	int *fileVersion;
 	int *toolType;
@@ -4077,23 +4076,14 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *comment;
 	char *buffer;
 	int write_size;
-	int buff_size;
 	short *short_ptr;
 	int *int_ptr;
 	float *float_ptr;
 	mb_u_char scaling_factor;
 	int ScaleFactor;
 	int MaxVal;
-	int offset, offset_start;
-	int sum_size;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
+	int offset;
+	int offset_start;
 
 	/* get pointer to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -4173,7 +4163,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		if (dataplus->kind == MB_DATA_SUMMARY) {
 			/* set values to be saved including data record sizes */
-			*write_summary = MB_YES;
+			*write_summary = true;
 			*fileVersion = summary->fileVersion;
 			*toolType = summary->toolType;
 			if (*fileVersion == 1) {
@@ -4209,6 +4199,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (dataplus->buffer != NULL)
 				status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dataplus->buffer, error);
 
+			int buff_size;
 			if (*fileVersion == 4)
 				buff_size = *profile_size;
 			else
@@ -4442,7 +4433,6 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && (dataplus->kind == MB_DATA_SUMMARY || dataplus->kind == MB_DATA_DATA)) {
 		fprintf(stderr, "\ndbg5  Summary set in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:                   %d\n", dataplus->kind);
@@ -4474,7 +4464,6 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       error:                  %d\n", *error);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && dataplus->kind == MB_DATA_DATA) {
 		fprintf(stderr, "\ndbg5  New profile read in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:                   %d\n", dataplus->kind);
@@ -4558,7 +4547,6 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       error:      %d\n", *error);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && dataplus->kind == MB_DATA_COMMENT) {
 		fprintf(stderr, "\ndbg5  Comment set in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:                   %d\n", dataplus->kind);
@@ -4762,7 +4750,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
 		/* write summary to file */
-		sum_size = MBF_OMGHDCSJ_SUMMARY_SIZE;
+		int sum_size = MBF_OMGHDCSJ_SUMMARY_SIZE;
 		if (*fileVersion == 4)
 			sum_size += MBF_OMGHDCSJ_SUMMARY_V4EXTRA_SIZE;
 
@@ -7394,7 +7382,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		buffer[offset] = '#';
 		offset += 1;
 		buffer[offset] = '#';
-		offset += 1;
+		/* offset += 1; */
 
 		/* write comment to file */
 		if ((write_size = fwrite(buffer, 1, 4, mb_io_ptr->mbfp)) == 4) {
@@ -7430,19 +7418,16 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
 
-	/* get mb_io_ptr */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_omghdcsj(
+	const int status = mbr_info_omghdcsj(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

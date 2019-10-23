@@ -19,12 +19,12 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.6beta5],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.7.6beta15],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 # AC_LANG([C++])
-AC_DEFINE(VERSION_DATE, "6 August 2019", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "21 October 2019", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -101,7 +101,7 @@ AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
 AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
 AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"])
-AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with mbtrn,mbtnav)"])
+AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)"])
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
 AS_ECHO([" "])
@@ -971,6 +971,22 @@ AM_CONDITIONAL([HAVE_PTHREADS],[test "xyes" = "xyes"])
 AC_SUBST(PTHREAD_CFLAGS)
 AC_SUBST(PTHREAD_LIBS)
 
+
+dnl--------------------------------------------------------------------
+dnl GSF Section - optionally disable inclusion of GSF format i/o module
+dnl--------------------------------------------------------------------
+
+AS_ECHO(["Check if the GSF driver should be built"])
+AC_ARG_ENABLE(gsf, [AS_HELP_STRING([--disable-gsf], [build without the GSF driver])],
+        [GOT_GSF=yes], [GOT_GSF=no])
+if test "$GOT_GSF" = "no" ; then
+  enable_gsf=yes
+fi
+AM_CONDITIONAL([BUILD_GSF], [test $enable_gsf = yes])
+if test "$enable_gsf" = "yes" ; then
+  AC_DEFINE([ENABLE_GSF], 1, [Build with GSF])
+fi
+
 dnl--------------------------------------------------------------------
 dnl Generate Makefiles
 dnl--------------------------------------------------------------------
@@ -1101,6 +1117,11 @@ if test "$build_test" = "yes" ; then
     AS_ECHO(["Build unit tests: Enabled"])
 else
     AS_ECHO(["Build unit tests: Disabled"])
+fi
+if test $enable_gsf = yes ; then
+    AS_ECHO(["Build driver gsf: Enabled"])
+else
+    AS_ECHO(["Build driver gsf: Disabled"])
 fi
 
 AS_ECHO(["------------------------------------------------------------------------------"])

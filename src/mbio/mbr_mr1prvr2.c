@@ -64,9 +64,9 @@ int mbr_info_mr1prvr2(int verbose, int *system, int *beams_bath_max, int *beams_
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_XDR;
-	*variable_beams = MB_YES;
-	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*variable_beams = true;
+	*traveltime = true;
+	*beam_flagging = true;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
@@ -129,7 +129,7 @@ int mbr_alm_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* initialize everything to zeros */
-	mb_io_ptr->fileheader = MB_NO;
+	mb_io_ptr->fileheader = false;
 	mb_io_ptr->hdr_comment_size = 0;
 	mb_io_ptr->hdr_comment = NULL;
 
@@ -189,17 +189,16 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to data */
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)mb_io_ptr->store_data;
-	char *store_ptr = (char *)store;
 	char *xdrs = mb_io_ptr->xdrs;
 
 	int status = MB_SUCCESS;
 
 	/* if first time through read file header */
-	if (mb_io_ptr->fileheader == MB_NO) {
+	if (mb_io_ptr->fileheader == false) {
 		/* read the header into memory */
 		bs_status = mbbs_rdbsfhdr(&(store->header), (XDR *)xdrs);
 		if (bs_status == BS_SUCCESS) {
-			mb_io_ptr->fileheader = MB_YES;
+			mb_io_ptr->fileheader = true;
 			status = MB_SUCCESS;
 		}
 		else {
@@ -224,7 +223,6 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			mb_io_ptr->hdr_comment_loc = 0;
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5       mf_version:       %d\n", store->header.bsf_version);
@@ -311,7 +309,6 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			store->ping.png_flags = store->ping.png_flags ^ PNG_BTYSSFLAGSABSENT;
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5       png_flags:        %u\n", store->ping.png_flags);
@@ -505,7 +502,6 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 	char *xdrs = mb_io_ptr->xdrs;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       png_flags:        %u\n", store->ping.png_flags);
@@ -642,7 +638,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* if comment and file header not written */
-	if (mb_io_ptr->fileheader == MB_NO && store->kind == MB_DATA_COMMENT) {
+	if (mb_io_ptr->fileheader == false && store->kind == MB_DATA_COMMENT) {
 		/* add comment to string mb_io_ptr->hdr_comment
 		    to be be written in file header */
 		mb_io_ptr->hdr_comment_size += strlen(store->comment) + 2;
@@ -652,7 +648,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	}
 
 	/* if data and file header not written */
-	else if (mb_io_ptr->fileheader == MB_NO && store->kind != MB_DATA_COMMENT) {
+	else if (mb_io_ptr->fileheader == false && store->kind != MB_DATA_COMMENT) {
 		/* insert new comments into file header */
 		mbbs_replacestr(&(store->header.bsf_log), mb_io_ptr->hdr_comment);
 
@@ -662,11 +658,11 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 			*error = MB_ERROR_WRITE_FAIL;
 		}
 		else
-			mb_io_ptr->fileheader = MB_YES;
+			mb_io_ptr->fileheader = true;
 	}
 
 	/* if data and file header written */
-	if (mb_io_ptr->fileheader == MB_YES && store->kind == MB_DATA_DATA) {
+	if (mb_io_ptr->fileheader == true && store->kind == MB_DATA_DATA) {
 		/* write data */
 		if ((bs_status = mbbs_wrpnghdr(&(store->ping), (XDR *)xdrs)) != BS_SUCCESS) {
 			status = MB_FAILURE;
@@ -708,12 +704,6 @@ int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_mr1prvr2_wr_data(verbose, mbio_ptr, store_ptr, error);

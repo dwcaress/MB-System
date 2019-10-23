@@ -329,7 +329,6 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			amp[i] = reflscale * store->beams[j].amplitude;
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -382,7 +381,6 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		/* get speed  */
 		*speed = 0.0;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -412,7 +410,6 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		/* copy comment */
 		strcpy(comment, store->comment);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -933,7 +930,6 @@ int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 			*heave = 0.0;
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -997,7 +993,6 @@ int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 			*heave = 0.0;
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");

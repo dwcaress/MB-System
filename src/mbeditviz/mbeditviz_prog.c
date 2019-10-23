@@ -93,8 +93,8 @@ int mbdef_uselockfiles;
 /*--------------------------------------------------------------------*/
 int mbeditviz_init(int argc, char **argv) {
 	/* local variables */
-	int input_file_set = MB_NO;
-	int delete_input_file = MB_NO;
+	int input_file_set = false;
+	int delete_input_file = false;
 	mb_path ifile;
 	mb_path shell_command;
 	int shellstatus;
@@ -226,12 +226,12 @@ int mbeditviz_init(int argc, char **argv) {
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", ifile);
-			input_file_set = MB_YES;
+			input_file_set = true;
 			flag++;
 			break;
 		case 'R':
 		case 'r':
-			delete_input_file = MB_YES;
+			delete_input_file = true;
 			flag++;
 			break;
 		case '?':
@@ -281,9 +281,9 @@ int mbeditviz_init(int argc, char **argv) {
 	}
 
 	/* If specified read input data */
-	if (input_file_set == MB_YES) {
+	if (input_file_set == true) {
 		mbev_status = mbeditviz_open_data(ifile, mbdef_format);
-		if (delete_input_file == MB_YES) {
+		if (delete_input_file == true) {
 			sprintf(shell_command, "rm %s &", ifile);
 			shellstatus = system(shell_command);
 		}
@@ -357,22 +357,22 @@ int mbeditviz_open_data(char *path, int format) {
 		mb_get_format(mbev_verbose, path, NULL, &format, &mbev_error);
 
 	/* loop until all inf files are read */
-	done = MB_NO;
-	while (done == MB_NO) {
+	done = false;
+	while (done == false) {
 		if (format > 0) {
 			mbev_status = mbeditviz_import_file(path, format);
-			done = MB_YES;
+			done = true;
 		}
 		else if (format == -1) {
 			if ((mbev_status = mb_datalist_open(mbev_verbose, &datalist, path, MB_DATALIST_LOOK_NO, &mbev_error)) == MB_SUCCESS) {
-				while (done == MB_NO) {
+				while (done == false) {
 					if ((mbev_status = mb_datalist_read2(mbev_verbose, datalist, &filestatus, fileraw, fileprocessed, dfile,
 					                                     &format, &weight, &mbev_error)) == MB_SUCCESS) {
 						mbev_status = mbeditviz_import_file(fileraw, format);
 					}
 					else {
 						mbev_status = mb_datalist_close(mbev_verbose, &datalist, &mbev_error);
-						done = MB_YES;
+						done = true;
 					}
 				}
 			}
@@ -438,15 +438,15 @@ int mbeditviz_import_file(char *path, int format) {
 	/* set new file structure */
 	if (mbev_status == MB_SUCCESS) {
 		file = &(mbev_files[mbev_num_files]);
-		file->load_status = MB_NO;
-		file->load_status_shown = MB_NO;
-		file->locked = MB_NO;
-		file->esf_exists = MB_NO;
+		file->load_status = false;
+		file->load_status_shown = false;
+		file->locked = false;
+		file->esf_exists = false;
 		strcpy(file->path, path);
 		strcpy(file->name, root);
 		file->format = format;
-		file->raw_info_loaded = MB_NO;
-		file->esf_open = MB_NO;
+		file->raw_info_loaded = false;
+		file->esf_open = false;
 		file->n_async_heading = 0;
 		file->n_async_heading_alloc = 0;
 		file->async_heading_time_d = NULL;
@@ -465,15 +465,15 @@ int mbeditviz_import_file(char *path, int format) {
 		/* load info */
 		mbev_status = mb_get_info(mbev_verbose, file->path, &(file->raw_info), mbdef_lonflip, &mbev_error);
 		if (mbev_status == MB_SUCCESS) {
-			file->raw_info_loaded = MB_YES;
+			file->raw_info_loaded = true;
 			mbev_num_files++;
 		}
 
 		/* load processing parameters */
 		if (mbev_status == MB_SUCCESS) {
-			mbev_status = mb_pr_readpar(mbev_verbose, file->path, MB_NO, &(file->process), &mbev_error);
-			if (file->process.mbp_format_specified == MB_NO) {
-				file->process.mbp_format_specified = MB_YES;
+			mbev_status = mb_pr_readpar(mbev_verbose, file->path, false, &(file->process), &mbev_error);
+			if (file->process.mbp_format_specified == false) {
+				file->process.mbp_format_specified = true;
 				file->process.mbp_format = file->format;
 			}
 		}
@@ -484,7 +484,7 @@ int mbeditviz_import_file(char *path, int format) {
 				mbev_status =
 				    mb_get_info(mbev_verbose, file->process.mbp_ofile, &(file->processed_info), mbdef_lonflip, &mbev_error);
 				if (mbev_status == MB_SUCCESS)
-					file->processed_info_loaded = MB_YES;
+					file->processed_info_loaded = true;
 			}
 		}
 	}
@@ -582,12 +582,12 @@ int mbeditviz_load_file(int ifile) {
 	/* lock the file if it needs loading */
 	mbev_status = MB_SUCCESS;
 	mbev_error = MB_ERROR_NO_ERROR;
-	if (ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status == MB_NO &&
+	if (ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status == false &&
 	    mbev_files[ifile].raw_info.nrecords > 0) {
 		file = &(mbev_files[ifile]);
 
 		/* try to lock file */
-		if (mbdef_uselockfiles == MB_YES) {
+		if (mbdef_uselockfiles == true) {
 			mbev_status = mb_pr_lockswathfile(mbev_verbose, file->path, MBP_LOCK_EDITBATHY, program_name, &mbev_error);
 		}
 		else {
@@ -640,7 +640,7 @@ int mbeditviz_load_file(int ifile) {
 	}
 
 	/* load the file if it needs loading and has been locked */
-	if (mbev_status == MB_SUCCESS && ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status == MB_NO &&
+	if (mbev_status == MB_SUCCESS && ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status == false &&
 	    mbev_files[ifile].raw_info.nrecords > 0) {
 		file = &(mbev_files[ifile]);
 
@@ -663,12 +663,12 @@ int mbeditviz_load_file(int ifile) {
 		/* open the file for reading */
 		if (mbev_status == MB_SUCCESS) {
 			/* read processed file if available, raw otherwise (fbt if possible) */
-			if (file->processed_info_loaded == MB_YES)
+			if (file->processed_info_loaded == true)
 				strcpy(swathfile, file->process.mbp_ofile);
 			else
 				strcpy(swathfile, file->path);
 			format = file->format;
-			file->esf_open = MB_NO;
+			file->esf_open = false;
 			mb_get_shortest_path(mbev_verbose, swathfile, &mbev_error);
 
 			/* use fbt file if possible */
@@ -935,7 +935,7 @@ int mbeditviz_load_file(int ifile) {
 						mbev_status = mbsys_singlebeam_swathbounds(mbev_verbose, imbio_ptr, istore_ptr, &kind, &ping->portlon,
 						                                           &ping->portlat, &ping->stbdlon, &ping->stbdlat, &mbev_error);
 						if (ping->portlon != ping->stbdlon || ping->portlat != ping->stbdlat)
-							swathbounds = MB_YES;
+							swathbounds = true;
 					}
 
 					else {
@@ -1013,7 +1013,7 @@ int mbeditviz_load_file(int ifile) {
 
 			/* if processed file read, then reset the beam edits to the original raw state
 			 * by reading in an *.resf (reverse edit save file) generated by mbprocess */
-			if (file->processed_info_loaded == MB_YES) {
+			if (file->processed_info_loaded == true) {
 				/* check if reverse edit save file (*.resf) exists and is up to date */
 				if ((fstatus = stat(file->path, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
 					rawmodtime = file_status.st_mtime;
@@ -1032,19 +1032,19 @@ int mbeditviz_load_file(int ifile) {
 
 				/* now read and apply the reverse edits */
 				mbev_status = mb_esf_open(mbev_verbose, program_name, resffile,
-										  MB_YES, MBP_ESF_NOWRITE, &(file->esf),
+										  true, MBP_ESF_NOWRITE, &(file->esf),
 										  &mbev_error);
 				if (mbev_status == MB_SUCCESS) {
-					file->esf_open = MB_YES;
+					file->esf_open = true;
 					if (mbev_verbose > 0)
 						fprintf(stderr, "%d reverse edits read from %s...\n", file->esf.nedit, resffile);
 				}
 				else {
-					file->esf_open = MB_NO;
+					file->esf_open = false;
 					mbev_status = MB_SUCCESS;
 					mbev_error = MB_ERROR_NO_ERROR;
 				}
-				if (file->esf_open == MB_YES) {
+				if (file->esf_open == true) {
 					/* loop over pings applying edits */
 					do_mbeditviz_message_on("MBeditviz is recreating original beam states...");
 					if (mbev_verbose > 0)
@@ -1067,25 +1067,25 @@ int mbeditviz_load_file(int ifile) {
 					}
 
 					/* close the esf */
-					if (file->esf_open == MB_YES) {
+					if (file->esf_open == true) {
 						mb_esf_close(mbev_verbose, &file->esf, &mbev_error);
-						file->esf_open = MB_NO;
+						file->esf_open = false;
 					}
 				}
 			}
 
 			/* attempt to load bathymetry edits */
-			mbev_status = mb_esf_load(mbev_verbose, program_name, file->path, MB_YES, MBP_ESF_NOWRITE, file->esffile,
+			mbev_status = mb_esf_load(mbev_verbose, program_name, file->path, true, MBP_ESF_NOWRITE, file->esffile,
 			                          &(file->esf), &mbev_error);
 			if (mbev_status == MB_SUCCESS) {
-				file->esf_open = MB_YES;
+				file->esf_open = true;
 			}
 			else {
-				file->esf_open = MB_NO;
+				file->esf_open = false;
 				mbev_status = MB_SUCCESS;
 				mbev_error = MB_ERROR_NO_ERROR;
 			}
-			if (file->esf_open == MB_YES) {
+			if (file->esf_open == true) {
 				/* loop over pings applying edits */
 				if (mbev_verbose > 0)
 					fprintf(stderr, "MBeditviz is applying %d saved edits from version %d esf file %s\n", file->esf.nedit,
@@ -1122,9 +1122,9 @@ int mbeditviz_load_file(int ifile) {
 					fprintf(stderr, "Total unused beam edits for file %s: %d\n", swathfile, n_unused);
 
 				/* close the esf */
-				if (file->esf_open == MB_YES) {
+				if (file->esf_open == true) {
 					mb_esf_close(mbev_verbose, &file->esf, &mbev_error);
-					file->esf_open = MB_NO;
+					file->esf_open = false;
 				}
 			}
 		}
@@ -1157,9 +1157,9 @@ int mbeditviz_load_file(int ifile) {
 					for (i = 0; i < file->n_async_heading; i++) {
 						nread = fread(buffer, read_size, 1, afp);
 						index = 0;
-						mb_get_binary_double(MB_YES, &buffer[index], &file->async_heading_time_d[i]);
+						mb_get_binary_double(true, &buffer[index], &file->async_heading_time_d[i]);
 						index += 8;
-						mb_get_binary_float(MB_YES, &buffer[index], &value_float);
+						mb_get_binary_float(true, &buffer[index], &value_float);
 						index += 4;
 						file->async_heading_heading[i] = value_float;
 					}
@@ -1266,9 +1266,9 @@ int mbeditviz_load_file(int ifile) {
 					for (i = 0; i < file->n_async_sonardepth; i++) {
 						nread = fread(buffer, read_size, 1, afp);
 						index = 0;
-						mb_get_binary_double(MB_YES, &buffer[index], &file->async_sonardepth_time_d[i]);
+						mb_get_binary_double(true, &buffer[index], &file->async_sonardepth_time_d[i]);
 						index += 8;
-						mb_get_binary_float(MB_YES, &buffer[index], &value_float);
+						mb_get_binary_float(true, &buffer[index], &value_float);
 						index += 4;
 						file->async_sonardepth_sonardepth[i] = value_float;
 					}
@@ -1383,12 +1383,12 @@ int mbeditviz_load_file(int ifile) {
 					for (i = 0; i < file->n_async_attitude; i++) {
 						if ((nread = fread(buffer, read_size, 1, afp)) == 1) {
 							index = 0;
-							mb_get_binary_double(MB_YES, &buffer[index], &file->async_attitude_time_d[i]);
+							mb_get_binary_double(true, &buffer[index], &file->async_attitude_time_d[i]);
 							index += 8;
-							mb_get_binary_float(MB_YES, &buffer[index], &value_float);
+							mb_get_binary_float(true, &buffer[index], &value_float);
 							index += 4;
 							file->async_attitude_roll[i] = value_float;
-							mb_get_binary_float(MB_YES, &buffer[index], &value_float);
+							mb_get_binary_float(true, &buffer[index], &value_float);
 							index += 4;
 							file->async_attitude_pitch[i] = value_float;
 						}
@@ -1531,12 +1531,12 @@ int mbeditviz_load_file(int ifile) {
 					for (i = 0; i < file->n_sync_attitude; i++) {
 						if ((nread = fread(buffer, read_size, 1, afp)) == 1) {
 							index = 0;
-							mb_get_binary_double(MB_YES, &buffer[index], &file->sync_attitude_time_d[i]);
+							mb_get_binary_double(true, &buffer[index], &file->sync_attitude_time_d[i]);
 							index += 8;
-							mb_get_binary_float(MB_YES, &buffer[index], &value_float);
+							mb_get_binary_float(true, &buffer[index], &value_float);
 							index += 4;
 							file->sync_attitude_roll[i] = value_float;
-							mb_get_binary_float(MB_YES, &buffer[index], &value_float);
+							mb_get_binary_float(true, &buffer[index], &value_float);
 							index += 4;
 							file->sync_attitude_pitch[i] = value_float;
 						}
@@ -1652,7 +1652,7 @@ int mbeditviz_load_file(int ifile) {
 
 		/* set the load status */
 		if (mbev_status == MB_SUCCESS) {
-			file->load_status = MB_YES;
+			file->load_status = true;
 			mbev_num_files_loaded++;
 		}
 	}
@@ -1943,7 +1943,7 @@ int mbeditviz_unload_file(int ifile) {
 	}
 
 	/* unload the file */
-	if (ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status == MB_YES) {
+	if (ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status == true) {
 
 		/* release memory */
 		file = &(mbev_files[ifile]);
@@ -2073,11 +2073,11 @@ int mbeditviz_unload_file(int ifile) {
 		}
 
 		/* reset load status */
-		file->load_status = MB_NO;
+		file->load_status = false;
 		mbev_num_files_loaded--;
 
 		/* unlock the file */
-		if (mbdef_uselockfiles == MB_YES)
+		if (mbdef_uselockfiles == true)
 			lock_status = mb_pr_unlockswathfile(mbev_verbose, file->path, MBP_LOCK_EDITBATHY, program_name, &lock_error);
 	}
 
@@ -2106,7 +2106,7 @@ int mbeditviz_delete_file(int ifile) {
 	}
 
 	/* unload the file if needed */
-	if (ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status == MB_YES) {
+	if (ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status == true) {
 		mbeditviz_unload_file(ifile);
 	}
 
@@ -2264,15 +2264,15 @@ int mbeditviz_get_grid_bounds() {
 
 	/* find lon lat bounds of loaded files */
 	if (mbev_num_files_loaded > 0) {
-		first = MB_YES;
+		first = true;
 		for (ifile = 0; ifile < mbev_num_files; ifile++) {
 			file = &mbev_files[ifile];
-			if (file->load_status == MB_YES) {
-				if (file->processed_info_loaded == MB_YES)
+			if (file->load_status == true) {
+				if (file->processed_info_loaded == true)
 					info = &(file->processed_info);
 				else
 					info = &(file->raw_info);
-				if (first == MB_YES) {
+				if (first == true) {
 					mbev_grid_bounds[0] = info->lon_min;
 					mbev_grid_bounds[1] = info->lon_max;
 					mbev_grid_bounds[2] = info->lat_min;
@@ -2281,7 +2281,7 @@ int mbeditviz_get_grid_bounds() {
 					depth_max = info->depth_max;
 					altitude_min = info->altitude_min;
 					altitude_max = info->altitude_max;
-					first = MB_NO;
+					first = false;
 					/*fprintf(stderr,"Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
 					file->processed_info_loaded,file->name,
 					mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
@@ -2569,7 +2569,7 @@ int mbeditviz_project_soundings() {
 		filecount = 0;
 		for (ifile = 0; ifile < mbev_num_files; ifile++) {
 			file = &mbev_files[ifile];
-			if (file->load_status == MB_YES) {
+			if (file->load_status == true) {
 				filecount++;
 				sprintf(message, "Projecting file %d of %d...", filecount, mbev_num_files_loaded);
 				do_mbeditviz_message_on(message);
@@ -2627,7 +2627,7 @@ int mbeditviz_make_grid() {
 	filecount = 0;
 	for (ifile = 0; ifile < mbev_num_files; ifile++) {
 		file = &mbev_files[ifile];
-		if (file->load_status == MB_YES) {
+		if (file->load_status == true) {
 			filecount++;
 			sprintf(message, "Gridding file %d of %d...", filecount, mbev_num_files_loaded);
 			do_mbeditviz_message_on(message);
@@ -2635,26 +2635,26 @@ int mbeditviz_make_grid() {
 				ping = &(file->pings[iping]);
 				for (ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
 					if (mb_beam_ok(ping->beamflag[ibeam])) {
-						mbeditviz_grid_beam(file, ping, ibeam, MB_YES, MB_NO);
+						mbeditviz_grid_beam(file, ping, ibeam, true, false);
 					}
 				}
 			}
 		}
 	}
 	mbev_grid.nodatavalue = MBEV_NODATA;
-	first = MB_YES;
+	first = true;
 	for (i = 0; i < mbev_grid.n_columns; i++)
 		for (j = 0; j < mbev_grid.n_rows; j++) {
 			k = i * mbev_grid.n_rows + j;
 			if (mbev_grid.wgt[k] > 0.0) {
 				mbev_grid.val[k] = mbev_grid.sum[k] / mbev_grid.wgt[k];
 				mbev_grid.sgm[k] = sqrt(fabs(mbev_grid.sgm[k] / mbev_grid.wgt[k] - mbev_grid.val[k] * mbev_grid.val[k]));
-				if (first == MB_YES) {
+				if (first == true) {
 					mbev_grid.min = mbev_grid.val[k];
 					mbev_grid.max = mbev_grid.val[k];
 					mbev_grid.smin = mbev_grid.sgm[k];
 					mbev_grid.smax = mbev_grid.sgm[k];
-					first = MB_NO;
+					first = false;
 				}
 				else {
 					mbev_grid.min = MIN(mbev_grid.min, mbev_grid.val[k]);
@@ -2734,7 +2734,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 			}
 
 			/* add to weights and sums */
-			if (beam_ok == MB_YES) {
+			if (beam_ok == true) {
 				mbev_grid.wgt[kk] += 1.0;
 				mbev_grid.sum[kk] += (-ping->bathcorr[ibeam]);
 				mbev_grid.sgm[kk] += ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
@@ -2748,7 +2748,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 			}
 
 			/* recalculate grid cell if desired */
-			if (apply_now == MB_YES) {
+			if (apply_now == true) {
 				/* recalculate grid cell */
 				if (mbev_grid.wgt[kk] > 0.0) {
 					mbev_grid.val[kk] = mbev_grid.sum[kk] / mbev_grid.wgt[kk];
@@ -2844,7 +2844,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 						kk = ii * mbev_grid.n_rows + jj;
 
 						/* add to weights and sums */
-						if (beam_ok == MB_YES) {
+						if (beam_ok == true) {
 							mbev_grid.wgt[kk] += weight;
 							mbev_grid.sum[kk] += weight * (-ping->bathcorr[ibeam]);
 							mbev_grid.sgm[kk] += weight * ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
@@ -2858,7 +2858,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 						}
 
 						/* recalculate grid cell if desired */
-						if (apply_now == MB_YES) {
+						if (apply_now == true) {
 							/* recalculate grid cell */
 							if (mbev_grid.wgt[kk] > 0.0) {
 								mbev_grid.val[kk] = mbev_grid.sum[kk] / mbev_grid.wgt[kk];
@@ -2920,15 +2920,15 @@ int mbeditviz_make_grid_simple() {
 
 	/* find lon lat bounds of loaded files */
 	if (mbev_num_files_loaded > 0) {
-		first = MB_YES;
+		first = true;
 		for (ifile = 0; ifile < mbev_num_files; ifile++) {
 			file = &mbev_files[ifile];
-			if (file->load_status == MB_YES) {
-				if (file->processed_info_loaded == MB_YES)
+			if (file->load_status == true) {
+				if (file->processed_info_loaded == true)
 					info = &(file->processed_info);
 				else
 					info = &(file->raw_info);
-				if (first == MB_YES) {
+				if (first == true) {
 					mbev_grid.bounds[0] = info->lon_min;
 					mbev_grid.bounds[1] = info->lon_max;
 					mbev_grid.bounds[2] = info->lat_min;
@@ -2937,7 +2937,7 @@ int mbeditviz_make_grid_simple() {
 					depth_max = info->depth_max;
 					altitude_min = info->altitude_min;
 					altitude_max = info->altitude_max;
-					first = MB_NO;
+					first = false;
 					if (mbev_verbose > 0)
 						fprintf(stderr, "Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
 						        file->processed_info_loaded, file->name, mbev_grid.bounds[0], mbev_grid.bounds[1],
@@ -3079,7 +3079,7 @@ int mbeditviz_make_grid_simple() {
 		filecount = 0;
 		for (ifile = 0; ifile < mbev_num_files; ifile++) {
 			file = &mbev_files[ifile];
-			if (file->load_status == MB_YES) {
+			if (file->load_status == true) {
 				filecount++;
 				sprintf(message, "Gridding file %d of %d...", filecount, mbev_num_files_loaded);
 				do_mbeditviz_message_on(message);
@@ -3103,19 +3103,19 @@ int mbeditviz_make_grid_simple() {
 			}
 		}
 		mbev_grid.nodatavalue = MBEV_NODATA;
-		first = MB_YES;
+		first = true;
 		for (i = 0; i < mbev_grid.n_columns; i++)
 			for (j = 0; j < mbev_grid.n_rows; j++) {
 				k = i * mbev_grid.n_rows + j;
 				if (mbev_grid.wgt[k] > 0.0) {
 					mbev_grid.val[k] = mbev_grid.sum[k] / mbev_grid.wgt[k];
 					mbev_grid.sgm[k] = sqrt(fabs(mbev_grid.sgm[k] / mbev_grid.wgt[k] - mbev_grid.val[k] * mbev_grid.val[k]));
-					if (first == MB_YES) {
+					if (first == true) {
 						mbev_grid.min = mbev_grid.val[k];
 						mbev_grid.max = mbev_grid.val[k];
 						mbev_grid.smin = mbev_grid.sgm[k];
 						mbev_grid.smax = mbev_grid.sgm[k];
-						first = MB_NO;
+						first = false;
 					}
 					else {
 						mbev_grid.min = MIN(mbev_grid.min, mbev_grid.val[k]);
@@ -3167,7 +3167,7 @@ int mbeditviz_destroy_grid() {
 		file = &mbev_files[ifile];
 		if (mbev_verbose > 0)
 			fprintf(stderr, "ifile:%d load_status:%d esf_open:%d\n", ifile, file->load_status, file->esf_open);
-		if (file->load_status == MB_YES && file->esf_open == MB_YES) {
+		if (file->load_status == true && file->esf_open == true) {
 			for (iping = 0; iping < file->num_pings; iping++) {
 				ping = &(file->pings[iping]);
 				for (ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
@@ -3198,7 +3198,7 @@ int mbeditviz_destroy_grid() {
 
 			/* close the esf file */
 			mb_esf_close(mbev_verbose, &(file->esf), &mbev_error);
-			file->esf_open = MB_NO;
+			file->esf_open = false;
 
 			/* update mbprocess parameter file */
 			mb_pr_writepar(mbev_verbose, file->path, &(file->process), &mbev_error);
@@ -3328,7 +3328,7 @@ int mbeditviz_selectregion(size_t instance) {
 		/* loop over all files */
 		for (ifile = 0; ifile < mbev_num_files; ifile++) {
 			file = &mbev_files[ifile];
-			if (file->load_status == MB_YES) {
+			if (file->load_status == true) {
 				for (iping = 0; iping < file->num_pings; iping++) {
 					ping = &(file->pings[iping]);
 					mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
@@ -3495,7 +3495,7 @@ int mbeditviz_selectarea(size_t instance) {
 		/* loop over all files */
 		for (ifile = 0; ifile < mbev_num_files; ifile++) {
 			file = &mbev_files[ifile];
-			if (file->load_status == MB_YES) {
+			if (file->load_status == true) {
 				for (iping = 0; iping < file->num_pings; iping++) {
 					ping = &(file->pings[iping]);
 					mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
@@ -3650,10 +3650,10 @@ int mbeditviz_selectnav(size_t instance) {
 		inavcount = 0;
 		for (ifile = 0; ifile < mbev_num_files; ifile++) {
 			file = &mbev_files[ifile];
-			if (file->load_status == MB_YES) {
+			if (file->load_status == true) {
 				navpts = (struct mbview_navpointw_struct *)mbviewshared->navs[inavcount].navpts;
 				for (iping = 0; iping < file->num_pings; iping++) {
-					if (navpts[iping].selected == MB_YES) {
+					if (navpts[iping].selected == true) {
 						ping = &(file->pings[iping]);
 						mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
 						                        mbev_timelag, &heading, &sonardepth, &rolldelta, &pitchdelta);
@@ -3846,27 +3846,27 @@ void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag
 		/* check for real flag state change */
 		if (mb_beam_ok(ping->beamflag[ibeam]) != mb_beam_ok(beamflag)) {
 			/* apply change to grid */
-			mbeditviz_grid_beam(file, ping, ibeam, mb_beam_ok(beamflag), MB_YES);
+			mbeditviz_grid_beam(file, ping, ibeam, mb_beam_ok(beamflag), true);
 		}
 
 		/* output edits if desired */
 		if (mbev_mode_output == MBEV_OUTPUT_MODE_EDIT) {
 			/* open esf and ess files if not already open */
-			if (file->esf_open == MB_NO) {
-				mbev_status = mb_esf_load(mbev_verbose, program_name, file->path, MB_NO, MBP_ESF_APPEND, file->esffile,
+			if (file->esf_open == false) {
+				mbev_status = mb_esf_load(mbev_verbose, program_name, file->path, false, MBP_ESF_APPEND, file->esffile,
 				                          &(file->esf), &mbev_error);
 				if (mbev_status == MB_SUCCESS) {
-					file->esf_open = MB_YES;
+					file->esf_open = true;
 				}
 				else {
-					file->esf_open = MB_NO;
+					file->esf_open = false;
 					mbev_status = MB_SUCCESS;
 					mbev_error = MB_ERROR_NO_ERROR;
 				}
 			}
 
 			/* save the edits to the esf stream */
-			if (file->esf_open == MB_YES) {
+			if (file->esf_open == true) {
 				if (mb_beam_ok(beamflag))
 					action = MBP_EDIT_UNFLAG;
 				else if (mb_beam_check_flag_filter2(beamflag))
@@ -4085,7 +4085,7 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
 	/* apply bias parameters to swath data */
 	for (ifile = 0; ifile < mbev_num_files; ifile++) {
 		file = &mbev_files[ifile];
-		if (file->load_status == MB_YES) {
+		if (file->load_status == true) {
 			for (iping = 0; iping < file->num_pings; iping++) {
 				ping = &(file->pings[iping]);
 				mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
@@ -4246,9 +4246,9 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 						for (kkk = k0; kkk <= k1; kkk++) {
 							/* is this the occupied voxel or a neighbor */
 							if (i == iii && j == jjj && k == kkk)
-								occupied_voxel = MB_YES;
+								occupied_voxel = true;
 							else
-								occupied_voxel = MB_NO;
+								occupied_voxel = false;
 
 							/* get coarse voxel */
 							ii = i / 10;
@@ -4261,19 +4261,19 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 							nvoxels_alloc = ncoarsevoxels_alloc[ll];
 							voxels = coarsevoxels[ll];
 
-							found = MB_NO;
+							found = false;
 							if (nvoxels > 0 && voxels != NULL) {
-								for (ivoxel = 0; ivoxel < nvoxels && found == MB_NO; ivoxel++) {
+								for (ivoxel = 0; ivoxel < nvoxels && found == false; ivoxel++) {
 									voxel = &voxels[ivoxel * voxel_size];
 									if (iii == voxel[0] && jjj == voxel[1] && kkk == voxel[2]) {
-										found = MB_YES;
+										found = true;
 										ivoxeluse = ivoxel;
 									}
 								}
 							}
 
 							/* if needed allocate more space for a new voxel to the list */
-							if (found == MB_NO && nvoxels_alloc <= nvoxels) {
+							if (found == false && nvoxels_alloc <= nvoxels) {
 								nvoxels_alloc += nvoxels_alloc_chunk;
 								alloc_size = nvoxels_alloc * voxel_size * sizeof(int);
 								mbev_status = mb_reallocd(mbev_verbose, __FILE__, __LINE__, alloc_size,
@@ -4288,7 +4288,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 							}
 
 							/* if needed add a new voxel to the list */
-							if (mbev_status == MB_SUCCESS && found == MB_NO) {
+							if (mbev_status == MB_SUCCESS && found == false) {
 								ivoxeluse = nvoxels;
 								voxel = &voxels[ivoxeluse * voxel_size];
 								voxel[0] = iii;
@@ -4303,7 +4303,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 							/* add sounding to voxel list */
 							if (mbev_status == MB_SUCCESS) {
 								voxel = &voxels[ivoxeluse * voxel_size];
-								if (occupied_voxel == MB_YES) {
+								if (occupied_voxel == true) {
 									nsoundingsinvoxel = voxel[3];
 									if (nsoundingsinvoxel < mbev_nsoundingthreshold) {
 										voxel[5 + nsoundingsinvoxel] = isounding;
@@ -4481,7 +4481,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 	double snell_start, snell_end, dsnell;
 	size_t size_double, size_int;
 	int niterate;
-	int first = MB_YES;
+	int first = true;
 	char *marker1 = "       ";
 	char *marker2 = " ******";
 	char *marker = NULL;
@@ -4531,7 +4531,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 	mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_int, (void **)&local_grid_num, &mbev_error);
 
 	/* set flag to set best total variance on first calculation */
-	first = MB_YES;
+	first = true;
 
 	/* now loop over all different values of bias parameters looking for the
 	 * combination that minimizes the overall variance
@@ -4571,8 +4571,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
-				first = MB_NO;
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+				first = false;
 				*rollbias_best = rollbias;
 				variance_total_best = variance_total;
 				marker = marker2;
@@ -4602,8 +4602,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
-				first = MB_NO;
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+				first = false;
 				*rollbias_best = rollbias;
 				variance_total_best = variance_total;
 				marker = marker2;
@@ -4636,8 +4636,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
-				first = MB_NO;
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+				first = false;
 				*pitchbias_best = pitchbias;
 				variance_total_best = variance_total;
 				marker = marker2;
@@ -4667,8 +4667,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
-				first = MB_NO;
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+				first = false;
 				*pitchbias_best = pitchbias;
 				variance_total_best = variance_total;
 				marker = marker2;
@@ -4701,8 +4701,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
-				first = MB_NO;
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+				first = false;
 				*headingbias_best = headingbias;
 				variance_total_best = variance_total;
 				marker = marker2;
@@ -4732,8 +4732,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
-				first = MB_NO;
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+				first = false;
 				*headingbias_best = headingbias;
 				variance_total_best = variance_total;
 				marker = marker2;
@@ -4766,8 +4766,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
-				first = MB_NO;
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+				first = false;
 				*rollbias_best = rollbias;
 				variance_total_best = variance_total;
 				marker = marker2;
@@ -4800,8 +4800,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
-				first = MB_NO;
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+				first = false;
 				*pitchbias_best = pitchbias;
 				variance_total_best = variance_total;
 				marker = marker2;
@@ -4834,8 +4834,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
-				first = MB_NO;
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+				first = false;
 				*headingbias_best = headingbias;
 				variance_total_best = variance_total;
 				marker = marker2;
@@ -4869,8 +4869,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
-				first = MB_NO;
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+				first = false;
 				*timelag_best = timelag;
 				variance_total_best = variance_total;
 				marker = marker2;
@@ -4901,8 +4901,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
-				first = MB_NO;
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+				first = false;
 				*timelag_best = timelag;
 				variance_total_best = variance_total;
 				marker = marker2;
@@ -4936,8 +4936,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
-				first = MB_NO;
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+				first = false;
 				*snell_best = snell;
 				variance_total_best = variance_total;
 				marker = marker2;
@@ -4968,8 +4968,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
-				first = MB_NO;
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+				first = false;
 				*snell_best = snell;
 				variance_total_best = variance_total;
 				marker = marker2;
