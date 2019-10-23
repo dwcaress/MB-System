@@ -1039,6 +1039,8 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
         mbtrnpp_input_open = &mbtrnpp_kemkmall_input_open;
         mbtrnpp_input_read = &mbtrnpp_kemkmall_input_read;
         mbtrnpp_input_close = &mbtrnpp_kemkmall_input_close;
+      }else{
+          fprintf(stderr,"ERR - Invalid output format [%d]\n",format);
       }
       if ((status = mb_input_init(verbose, socket_definition, format, pings, lonflip, bounds,
                                   btime_i, etime_i, speedmin, timegap,
@@ -2570,12 +2572,27 @@ int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, i
   mb_path hostname;
   int port = 0;
   size_t size = 0;
-  sscanf(definition, "%s:%d:%zd", hostname, &port, &size);
-  if (strlen(hostname) == 0)
+
+  // copy def (strtok is destructive)
+  char *defcpy = strdup(definition);
+  char *addr[2]={NULL,NULL};
+  // separate hostname, numeric tokens
+  addr[0]=strtok(defcpy,":");
+  addr[1]=strtok(NULL,"");
+    
+    // parse hostname, port, size
+    if(NULL!=addr[0])
+    strcpy(hostname, addr[0]);
+    if(NULL!=addr[1])
+    sscanf(addr[1], "%d:%zd", &port, &size);
+    // release definition copy
+    free(defcpy);
+
+    if (strlen(hostname) == 0)
     strcpy(hostname, "localhost");
-  if (port == 0)
+    if (port == 0)
     port = R7K_7KCENTER_PORT;
-  if (size <= 0)
+    if (size <= 0)
     size = SONAR_READER_CAPACITY_DFL;
 
   PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "configuring r7kr_reader using %s:%d\n", hostname, port));
