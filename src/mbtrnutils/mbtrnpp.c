@@ -247,6 +247,7 @@ trn_config_t *trn_cfg = NULL;
 #define TRN_UTM_DFL UTM_MONTEREY_BAY
 #define TRN_MTYPE_DFL TRN_MAP_BO
 #define TRN_FTYPE_DFL TRN_FILT_PARTICLE
+#define TRN_OUT_DFL      (TRNW_ODEBUG|TRNW_OLOG)
 
 bool trn_enable = false;
 long int trn_utm_zone = TRN_UTM_DFL;
@@ -257,6 +258,8 @@ char *trn_cfg_file = NULL;
 char *trn_particles_file = NULL;
 char *trn_log_dir = NULL;
 wtnav_t *tnav = NULL;
+trnw_oflags_t tnav_oflags=TRN_OUT_DFL;
+
 #endif // WITH_MBTNAV
 
 #define MBTRNPP_MEAS_MOD ((double)0.0) // 3600.0
@@ -828,7 +831,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
   mbtrnpp_init_debug(verbose);
 #ifdef WITH_MBTNAV
   if (trn_enable && NULL != (trn_cfg = trncfg_new(NULL, -1, trn_utm_zone, trn_mtype, trn_ftype, trn_map_file, trn_cfg_file,
-                                                  trn_particles_file, trn_log_dir))) {
+                                                  trn_particles_file, trn_log_dir,tnav_oflags))) {
     if (mbtrnpp_init_trn(verbose, trn_cfg) == 0) {
       fprintf(stderr, "TRN init OK\n");
     }
