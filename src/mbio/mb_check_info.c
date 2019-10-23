@@ -1048,7 +1048,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 	/* open file list */
 	char swathfile[MB_PATH_MAXLINE];
 	void *datalist = NULL;
-	int read_data;
+	bool read_data;
 	char dfile[MB_PATH_MAXLINE];
 	int status = MB_SUCCESS;
 	if (read_datalist) {
@@ -1073,7 +1073,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 
 	/* loop over all files to be read */
 	int nfile = 0;
-	while (read_data == true) {
+	while (read_data) {
 		/* read inf file */
 		struct mb_info_struct mb_info_file;
 		status = mb_get_info(verbose, swathfile, &mb_info_file, lonflip, error);
