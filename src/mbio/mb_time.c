@@ -17,8 +17,6 @@
  *
  * Author:	D. W. Caress
  * Date:	January 21, 1993
- *
- *
  */
 
 #include <math.h>
@@ -294,7 +292,6 @@ int mb_fix_y2k(int verbose, int year_short, int *year_long) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return success */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

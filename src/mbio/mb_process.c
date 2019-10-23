@@ -19,7 +19,6 @@
  *
  * Author:	D. W. Caress
  * Date:	September 11, 2000
- *
  */
 
 #include <stdio.h>
@@ -38,19 +37,6 @@
 
 /*--------------------------------------------------------------------*/
 int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
-	int ifilemodtime = 0;
-	int ofilemodtime = 0;
-	int pfilemodtime = 0;
-	int navfilemodtime = 0;
-	int navadjfilemodtime = 0;
-	int attitudefilemodtime = 0;
-	int sonardepthfilemodtime = 0;
-	int esfmodtime = 0;
-	int svpmodtime = 0;
-	struct stat file_status;
-	int fstat;
-	mb_path mbp_pfile;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -63,7 +49,9 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 	*error = MB_ERROR_NO_ERROR;
 
 	/* get existence and get mod time for the input file */
-	fstat = stat(file, &file_status);
+	int ifilemodtime = 0;
+	struct stat file_status;
+	int fstat = stat(file, &file_status);
 	if ((fstat = stat(file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		ifilemodtime = file_status.st_mtime;
 	}
@@ -72,7 +60,9 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 	}
 
 	/* check for existing parameter file */
+	int pfilemodtime = 0;
 	if (*prstatus == MB_PR_FILE_NEEDS_PROCESSING) {
+		mb_path mbp_pfile;
 		sprintf(mbp_pfile, "%s.par", file);
 		if ((fstat = stat(mbp_pfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 			pfilemodtime = file_status.st_mtime;
@@ -89,52 +79,45 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 		mb_pr_readpar(verbose, file, false, &process, error);
 
 		/* get mod time for the output file */
+		int ofilemodtime = 0;
 		if ((fstat = stat(process.mbp_ofile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
 			ofilemodtime = file_status.st_mtime;
-		else
-			ofilemodtime = 0;
 
 		/* get mod time for the navigation file if needed */
+		int navfilemodtime = 0;
 		if (process.mbp_nav_mode != MBP_NAV_OFF && (fstat = stat(process.mbp_navfile, &file_status)) == 0 &&
 		    (file_status.st_mode & S_IFMT) != S_IFDIR)
 			navfilemodtime = file_status.st_mtime;
-		else
-			navfilemodtime = 0;
 
 		/* get mod time for the navigation adjustment file if needed */
+		int navadjfilemodtime = 0;
 		if (process.mbp_navadj_mode != MBP_NAVADJ_OFF && (fstat = stat(process.mbp_navadjfile, &file_status)) == 0 &&
 		    (file_status.st_mode & S_IFMT) != S_IFDIR)
 			navadjfilemodtime = file_status.st_mtime;
-		else
-			navadjfilemodtime = 0;
 
 		/* get mod time for the attitude file if needed */
+		int attitudefilemodtime = 0;
 		if (process.mbp_attitude_mode != MBP_ATTITUDE_OFF && (fstat = stat(process.mbp_attitudefile, &file_status)) == 0 &&
 		    (file_status.st_mode & S_IFMT) != S_IFDIR)
 			attitudefilemodtime = file_status.st_mtime;
-		else
-			attitudefilemodtime = 0;
 
 		/* get mod time for the sonardepth file if needed */
+		int sonardepthfilemodtime = 0;
 		if (process.mbp_sonardepth_mode != MBP_SONARDEPTH_OFF && (fstat = stat(process.mbp_sonardepthfile, &file_status)) == 0 &&
 		    (file_status.st_mode & S_IFMT) != S_IFDIR)
 			sonardepthfilemodtime = file_status.st_mtime;
-		else
-			sonardepthfilemodtime = 0;
 
 		/* get mod time for the edit save file if needed */
+		int esfmodtime = 0;
 		if (process.mbp_edit_mode != MBP_EDIT_OFF && (fstat = stat(process.mbp_editfile, &file_status)) == 0 &&
 		    (file_status.st_mode & S_IFMT) != S_IFDIR)
 			esfmodtime = file_status.st_mtime;
-		else
-			esfmodtime = 0;
 
 		/* get mod time for the svp file if needed */
+		int svpmodtime = 0;
 		if (process.mbp_svp_mode != MBP_SVP_OFF && (fstat = stat(process.mbp_svpfile, &file_status)) == 0 &&
 		    (file_status.st_mode & S_IFMT) != S_IFDIR)
 			svpmodtime = file_status.st_mtime;
-		else
-			svpmodtime = 0;
 
 		/* now check if processed file is out of date */
 		if (ofilemodtime > 0 && ofilemodtime >= ifilemodtime && ofilemodtime >= pfilemodtime && ofilemodtime >= navfilemodtime &&
@@ -159,14 +142,6 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_struct *process, int *error) {
-	char parfile[MBP_FILENAMESIZE];
-	char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
-	char *lastslash;
-	FILE *fp;
-	struct stat statbuf;
-	int len;
-	int explicit;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -177,13 +152,13 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	}
 
 	/* get expected process parameter file name */
+	char parfile[MBP_FILENAMESIZE];
 	strcpy(parfile, file);
 	strcat(parfile, ".par");
 
 	/* initialize process parameter structure */
 
 	/* general parameters */
-	explicit = false;
 	process->mbp_ifile_specified = false;
 	process->mbp_ifile[0] = '\0';
 	process->mbp_ofile_specified = false;
@@ -345,11 +320,17 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	process->mbp_kluge009 = false;
 	process->mbp_kluge010 = false;
 
+	char dummy[MBP_FILENAMESIZE];
+
 	/* open and read parameter file */
-	if ((fp = fopen(parfile, "r")) != NULL) {
-		while ((result = fgets(buffer, MBP_FILENAMESIZE, fp)) == buffer) {
+	FILE *fp = fopen(parfile, "r");
+	if (fp != NULL) {
+		bool explicit = false;
+		char buffer[MBP_FILENAMESIZE];
+		// char *result;
+		while (/* result = */ fgets(buffer, MBP_FILENAMESIZE, fp) == buffer) {
 			if (buffer[0] != '#') {
-				len = strlen(buffer);
+				const int len = strlen(buffer);
 				if (len > 0) {
 					if (buffer[len - 1] == '\n')
 						buffer[len - 1] = '\0';
@@ -380,7 +361,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				}
 				else if (strncmp(buffer, "NAVFILE", 7) == 0) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_navfile);
-					if (explicit == false) {
+					if (!explicit) {
 						process->mbp_nav_mode = MBP_NAV_ON;
 						process->mbp_nav_heading = MBP_NAV_ON;
 						process->mbp_nav_speed = MBP_NAV_ON;
@@ -442,7 +423,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				}
 				else if (strncmp(buffer, "NAVADJFILE", 10) == 0) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_navadjfile);
-					if (explicit == false) {
+					if (!explicit) {
 						process->mbp_navadj_mode = MBP_NAVADJ_LLZ;
 					}
 				}
@@ -456,7 +437,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				}
 				else if (strncmp(buffer, "ATTITUDEFILE", 12) == 0) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_attitudefile);
-					if (explicit == false) {
+					if (!explicit) {
 						process->mbp_attitude_mode = MBP_ATTITUDE_ON;
 					}
 				}
@@ -470,7 +451,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				}
 				else if (strncmp(buffer, "SONARDEPTHFILE", 12) == 0) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_sonardepthfile);
-					if (explicit == false) {
+					if (!explicit) {
 						process->mbp_sonardepth_mode = MBP_SONARDEPTH_ON;
 					}
 				}
@@ -485,8 +466,9 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				else if (strncmp(buffer, "DATACUT", 7) == 0) {
 					if (process->mbp_cut_num < MBP_CUT_NUM_MAX) {
 						sscanf(buffer, "%s %d %d %lf %lf", dummy, &process->mbp_cut_kind[process->mbp_cut_num],
-						       &process->mbp_cut_mode[process->mbp_cut_num], &process->mbp_cut_min[process->mbp_cut_num],
-						       &process->mbp_cut_max[process->mbp_cut_num]);
+							&process->mbp_cut_mode[process->mbp_cut_num],
+							&process->mbp_cut_min[process->mbp_cut_num],
+							&process->mbp_cut_max[process->mbp_cut_num]);
 						process->mbp_cut_num++;
 					}
 				}
@@ -578,7 +560,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				}
 				else if (strncmp(buffer, "EDITSAVEFILE", 12) == 0) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_editfile);
-					if (explicit == false) {
+					if (!explicit) {
 						process->mbp_edit_mode = MBP_EDIT_ON;
 					}
 				}
@@ -592,13 +574,13 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				}
 				else if (strncmp(buffer, "SVPFILE", 7) == 0) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_svpfile);
-					if (explicit == false) {
+					if (!explicit) {
 						process->mbp_svp_mode = MBP_SVP_ON;
 					}
 				}
 				else if (strncmp(buffer, "SVP", 3) == 0) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_svpfile);
-					if (explicit == false) {
+					if (!explicit) {
 						process->mbp_svp_mode = MBP_SVP_ON;
 					}
 				}
@@ -630,7 +612,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				}
 				else if (strncmp(buffer, "STATICFILE", 10) == 0) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_staticfile);
-					if (explicit == false) {
+					if (!explicit) {
 						process->mbp_static_mode = MBP_SVP_ON;
 					}
 				}
@@ -719,7 +701,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				}
 				else if (strncmp(buffer, "TIDEFILE", 8) == 0) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_tidefile);
-					if (explicit == false) {
+					if (!explicit) {
 						process->mbp_tide_mode = MBP_TIDE_ON;
 					}
 				}
@@ -733,7 +715,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				}
 				else if (strncmp(buffer, "AMPCORRFILE", 11) == 0) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_ampcorrfile);
-					if (explicit == false) {
+					if (!explicit) {
 						process->mbp_ampcorr_mode = MBP_AMPCORR_ON;
 					}
 				}
@@ -756,7 +738,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				}
 				else if (strncmp(buffer, "SSCORRFILE", 10) == 0) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_sscorrfile);
-					if (explicit == false) {
+					if (!explicit) {
 						process->mbp_sscorr_mode = MBP_SSCORR_ON;
 					}
 				}
@@ -882,7 +864,6 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 			}
 		}
 
-		/* close file */
 		fclose(fp);
 	}
 
@@ -892,9 +873,9 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 		/* char *bufptr = */ getcwd(process->mbp_ifile, MB_PATH_MAXLINE);
 		strcat(process->mbp_ifile, "/");
 		strcat(process->mbp_ifile, file);
-	}
-	else
+	} else {
 		strcpy(process->mbp_ifile, file);
+	}
 	mb_get_shortest_path(verbose, process->mbp_ifile, error);
 
 	/* figure out data format or output filename if required */
@@ -904,7 +885,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 
 	/* Make output file global if local */
 	if (process->mbp_ofile[0] != '/' && process->mbp_ofile[1] != ':') {
-		lastslash = strrchr(process->mbp_ifile, '/');
+		char *lastslash = strrchr(process->mbp_ifile, '/');
 		if (lastslash != NULL) {
 			strcpy(dummy, process->mbp_ofile);
 			strcpy(process->mbp_ofile, process->mbp_ifile);
@@ -920,6 +901,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 		if (process->mbp_navadj_mode == MBP_NAVADJ_OFF) {
 			for (int i = 9; i >= 0 && process->mbp_navadj_mode == MBP_NAVADJ_OFF; i--) {
 				sprintf(process->mbp_navadjfile, "%s.na%d", process->mbp_ifile, i);
+				struct stat statbuf;
 				if (stat(process->mbp_navadjfile, &statbuf) == 0) {
 					process->mbp_navadj_mode = MBP_NAVADJ_LLZ;
 				}
@@ -933,6 +915,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 		if (process->mbp_nav_mode == MBP_NAV_OFF) {
 			strcpy(process->mbp_navfile, process->mbp_ifile);
 			strcat(process->mbp_navfile, ".nve");
+			struct stat statbuf;
 			if (stat(process->mbp_navfile, &statbuf) == 0) {
 				process->mbp_nav_mode = MBP_NAV_ON;
 				process->mbp_nav_format = 9;
@@ -946,16 +929,15 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 		if (process->mbp_edit_mode == MBP_EDIT_OFF) {
 			strcpy(process->mbp_editfile, process->mbp_ifile);
 			strcat(process->mbp_editfile, ".esf");
+			struct stat statbuf;
 			if (stat(process->mbp_editfile, &statbuf) == 0) {
 				process->mbp_edit_mode = MBP_EDIT_ON;
-			}
-			else {
+			} else {
 				strcpy(process->mbp_editfile, process->mbp_ifile);
 				strcat(process->mbp_editfile, ".mbesf");
 				if (stat(process->mbp_editfile, &statbuf) == 0) {
 					process->mbp_edit_mode = MBP_EDIT_ON;
-				}
-				else {
+				} else {
 					process->mbp_editfile[0] = '\0';
 				}
 			}
@@ -968,16 +950,15 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 		if (process->mbp_svp_mode == MBP_SVP_OFF) {
 			strcpy(process->mbp_svpfile, process->mbp_ifile);
 			strcat(process->mbp_svpfile, ".svp");
+			struct stat statbuf;
 			if (stat(process->mbp_svpfile, &statbuf) == 0) {
 				process->mbp_svp_mode = MBP_SVP_ON;
-			}
-			else {
+			} else {
 				strcpy(process->mbp_svpfile, process->mbp_ifile);
 				strcat(process->mbp_svpfile, "_001.svp");
 				if (stat(process->mbp_svpfile, &statbuf) == 0) {
 					process->mbp_svp_mode = MBP_SVP_ON;
-				}
-				else {
+				} else {
 					process->mbp_svpfile[0] = '\0';
 				}
 			}
@@ -991,6 +972,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 		mb_pr_default_output(verbose, process, error);
 
 		/* reset navadj file */
+		char *lastslash;
 		if ((lastslash = strrchr(process->mbp_navadjfile, '/')) != NULL && strlen(lastslash) > 1) {
 			strcpy(dummy, &(lastslash[1]));
 			strcpy(process->mbp_navadjfile, dummy);
@@ -1052,8 +1034,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	}
 
 	/* Now make filenames global if local */
-	lastslash = strrchr(process->mbp_ifile, '/');
-	len = lastslash - process->mbp_ifile + 1;
+	char *lastslash = strrchr(process->mbp_ifile, '/');
+	const int len = lastslash - process->mbp_ifile + 1;
 
 	/* reset navadj file */
 	if (len > 1 && strlen(process->mbp_navadjfile) > 1 && process->mbp_navadjfile[0] != '/' &&
@@ -1309,14 +1291,6 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, int *error) {
-	char parfile[MBP_FILENAMESIZE];
-	char pwd[MBP_FILENAMESIZE];
-	char relative_path[MBP_FILENAMESIZE];
-	char *lastslash;
-	FILE *fp;
-	time_t right_now;
-	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1450,7 +1424,8 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 	}
 
 	/* try to avoid absolute pathnames - get pwd */
-	lastslash = strrchr(file, '/');
+	char *lastslash = strrchr(file, '/');
+	char pwd[MBP_FILENAMESIZE];
 	if (file[0] == '/') {
 		strcpy(pwd, file);
 		pwd[strlen(file) - strlen(lastslash)] = '\0';
@@ -1467,25 +1442,31 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 	mb_get_shortest_path(verbose, pwd, error);
 
 	/* get expected process parameter file name */
+	char parfile[MBP_FILENAMESIZE];
 	strcpy(parfile, file);
 	strcat(parfile, ".par");
 
 	int status = MB_SUCCESS;
 
 	/* open parameter file */
-	if ((fp = fopen(parfile, "w")) != NULL) {
+	FILE *fp = fopen(parfile, "w");
+	if (fp != NULL) {
 		fprintf(fp, "## MB-System processing parameter file\n");
 		fprintf(fp, "## Written by %s\n", __func__);
 		fprintf(fp, "## MB-system Version %s\n", MB_VERSION);
-		right_now = time((time_t *)0);
+		const time_t right_now = time((time_t *)0);
+		char date[32];
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
+		const char *user_ptr = getenv("USER");
+		if (user_ptr == NULL)
 			user_ptr = getenv("LOGNAME");
+		char user[MBP_FILENAMESIZE];
 		if (user_ptr != NULL)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
+		char host[MBP_FILENAMESIZE];
 		gethostname(host, MBP_FILENAMESIZE);
 		fprintf(fp, "## Generated by user <%s> on cpu <%s> at <%s>\n##\n", user, host, date);
 
@@ -1499,6 +1480,7 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 		else {
 			fprintf(fp, "## FORMAT format\n");
 		}
+		char relative_path[MBP_FILENAMESIZE];
 		if (process->mbp_ifile_specified == true) {
 			strcpy(relative_path, process->mbp_ifile);
 			status = mb_get_relative_path(verbose, relative_path, pwd, error);
@@ -1785,9 +1767,6 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *error) {
-	char fileroot[MBP_FILENAMESIZE];
-	int format;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1800,6 +1779,8 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 	}
 
 	/* figure out data format and fileroot if possible */
+	char fileroot[MBP_FILENAMESIZE];
+	int format;
 	int status = mb_get_format(verbose, process->mbp_ifile, fileroot, &format, error);
 
 	/* deal with format */
@@ -1847,9 +1828,6 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *error) {
-	char fileroot[MBP_FILENAMESIZE];
-	int tformat;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1859,6 +1837,8 @@ int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *er
 	}
 
 	/* figure out data format and fileroot if possible */
+	char fileroot[MBP_FILENAMESIZE];
+	int tformat;
 	int status = mb_get_format(verbose, ifile, fileroot, &tformat, error);
 
 	/* use fileroot if possible */
@@ -1913,18 +1893,24 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 	    output if verbose > 1) */
 	FILE *output = verbose <= 1 ? stdout : stderr;
 
-	char ofile[MBP_FILENAMESIZE];
-	int format;
-	char line[MB_PATH_MAXLINE];
-	FILE *fp = NULL;
-	struct stat statbuf;
-
 	/* set no problem */
 	*nparproblem = 0;
 	*ndataproblem = 0;
+
+	/* check if input exists */
+	bool missing_ifile = false;
+	struct stat statbuf;
+	if (stat(ifile, &statbuf) != 0) {
+		missing_ifile = true;
+		(*nparproblem)++;
+	}
+
+	int status = MB_SUCCESS;
+	struct mb_process_struct process;
+
+	int format;
 	bool unexpected_format = false;
 	bool unexpected_output = false;
-	bool missing_ifile = false;
 	bool missing_ofile = false;
 	bool missing_navfile = false;
 	bool missing_navadjfile = false;
@@ -1934,16 +1920,8 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 	bool missing_editfile = false;
 	bool missing_tidefile = false;
 
-	/* check if input exists */
-	if (stat(ifile, &statbuf) != 0) {
-		missing_ifile = true;
-		(*nparproblem)++;
-	}
-
-	int status = MB_SUCCESS;
-	struct mb_process_struct process;
-
 	/* only check parameter file if parameter file exists */
+	char ofile[MBP_FILENAMESIZE];
 	sprintf(ofile, "%s.par", ifile);
 	if (stat(ofile, &statbuf) == 0) {
 
@@ -2026,8 +2004,10 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 	sprintf(ofile, "%s.inf", ifile);
 	if (stat(ofile, &statbuf) == 0) {
 		/* open if possible */
-		if ((fp = fopen(ofile, "r")) != NULL) {
+		FILE *fp = fopen(ofile, "r");
+		if (fp != NULL) {
 			/* read the inf file */
+			char line[MB_PATH_MAXLINE];
 			while (fgets(line, MB_PATH_MAXLINE, fp) != NULL) {
 				if (strncmp(line, "PN: ", 4) == 0) {
 					if (*ndataproblem == 0 && verbose > 0)
@@ -3126,10 +3106,6 @@ int mb_pr_update_kluges(int verbose, char *file, int mbp_kluge001, int mbp_kluge
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp_ofile, int *error) {
-	char parfile[MBP_FILENAMESIZE];
-	char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
-	FILE *fp;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3144,6 +3120,7 @@ int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp
 	 */
 
 	/* get expected process parameter file name */
+	char parfile[MBP_FILENAMESIZE];
 	strcpy(parfile, file);
 	strcat(parfile, ".par");
 
@@ -3151,7 +3128,12 @@ int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp
 	*mbp_ofile_specified = false;
 	if (mbp_ofile != NULL)
 		mbp_ofile[0] = '\0';
-	if ((fp = fopen(parfile, "r")) != NULL) {
+
+	FILE *fp = fopen(parfile, "r");
+	if (fp != NULL) {
+		char buffer[MBP_FILENAMESIZE];
+		char dummy[MBP_FILENAMESIZE];
+		char *result;
 		while ((result = fgets(buffer, MBP_FILENAMESIZE, fp)) == buffer && *mbp_ofile_specified == false) {
 			if (strncmp(buffer, "OUTFILE", 7) == 0) {
 				sscanf(buffer, "%s %s", dummy, mbp_ofile);
@@ -3159,7 +3141,6 @@ int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp
 			}
 		}
 
-		/* close file */
 		fclose(fp);
 	}
 
@@ -4056,11 +4037,6 @@ int mb_pr_get_kluges(int verbose, char *file, int *mbp_kluge001, int *mbp_kluge0
 int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag, double *bath, double *bathacrosstrack,
                             int *ndepths, double *depths, double *depthacrosstrack, int *nslopes, double *slopes,
                             double *slopeacrosstrack, double *depthsmooth, int *error) {
-	double dxtrack;
-	double weight;
-	int j1, j2;
-	int j;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4088,12 +4064,12 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 
 	/* decimate by nsmooth, averaging the values used */
 	for (int i = 0; i <= nbath / nsmooth; i++) {
-		j1 = i * nsmooth;
-		j2 = MIN((i + 1) * nsmooth, nbath);
+		const int j1 = i * nsmooth;
+		const int j2 = MIN((i + 1) * nsmooth, nbath);
 		depths[*ndepths] = 0.0;
 		depthacrosstrack[*ndepths] = 0.0;
-		weight = 0.0;
-		for (j = j1; j < j2; j++) {
+		double weight = 0.0;
+		for (int j = j1; j < j2; j++) {
 			if (mb_beam_ok(beamflag[j])) {
 				depths[*ndepths] += bath[j];
 				depthacrosstrack[*ndepths] += bathacrosstrack[j];
@@ -4113,7 +4089,7 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 		slopeacrosstrack[0] = depthacrosstrack[0];
 		slopes[0] = 0.0;
 		for (int i = 1; i < *ndepths; i++) {
-			dxtrack = depthacrosstrack[i] - depthacrosstrack[i - 1];
+			const double dxtrack = depthacrosstrack[i] - depthacrosstrack[i - 1];
 			slopeacrosstrack[i] = depthacrosstrack[i - 1] + 0.5 * dxtrack;
 			if (dxtrack > 0.0)
 				slopes[i] = (depths[i] - depths[i - 1]) / dxtrack;
@@ -4148,14 +4124,6 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int *ndepths,
                          double *depths, double *depthacrosstrack, int *nslopes, double *slopes, double *slopeacrosstrack,
                          double *depthsmooth, int *error) {
-	int first, next, last;
-	int nbathgood;
-	double depthsum;
-	double dacrosstrack;
-	double factor;
-	int j1, j2;
-	int j;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4180,10 +4148,10 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 		depthacrosstrack[i] = 0.0;
 	}
 
-	/* first fill in the existing depths */
-	first = -1;
-	last = -1;
-	nbathgood = 0;
+	/* Fill in the existing depths */
+	int first = -1;
+	int last = -1;
+	int nbathgood = 0;
 	for (int i = 0; i < nbath; i++) {
 		if (mb_beam_ok(beamflag[i])) {
 			if (first == -1) {
@@ -4200,8 +4168,8 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 	if (nbathgood > 0)
 		for (int i = first; i < last; i++) {
 			if (mb_beam_ok(beamflag[i])) {
-				next = i;
-				j = i + 1;
+				int next = i;
+				int j = i + 1;
 				while (next == i && j < nbath) {
 					if (mb_beam_ok(beamflag[j]))
 						next = j;
@@ -4209,8 +4177,9 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 						j++;
 				}
 				if (next > i) {
+					// TODO(schwehr): This j is not related to the j above.
 					for (j = i + 1; j < next; j++) {
-						factor = ((double)(j - i)) / ((double)(next - i));
+						const double factor = ((double)(j - i)) / ((double)(next - i));
 						depths[j] = bath[i] + factor * (bath[next] - bath[i]);
 						depthacrosstrack[j] = bathacrosstrack[i] + factor * (bathacrosstrack[next] - bathacrosstrack[i]);
 					}
@@ -4221,14 +4190,14 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 	/* now smooth the depths */
 	if (nbathgood > 0 && nsmooth > 0) {
 		for (int i = first; i <= last; i++) {
-			j1 = i - nsmooth;
-			j2 = i + nsmooth;
+			int j1 = i - nsmooth;
+			int j2 = i + nsmooth;
 			if (j1 < first)
 				j1 = first;
 			if (j2 > last)
 				j2 = last;
-			depthsum = 0.0;
-			for (j = j1; j <= j2; j++) {
+			double depthsum = 0.0;
+			for (int j = j1; j <= j2; j++) {
 				depthsum += depths[j];
 			}
 			if (depthsum > 0.0)
@@ -4243,6 +4212,7 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 	/* now extrapolate the depths at the ends of the swath */
 	if (nbathgood > 0) {
 		*ndepths = nbath;
+		double dacrosstrack;
 		if (last - first > 0)
 			dacrosstrack = (depthacrosstrack[last] - depthacrosstrack[first]) / (last - first);
 		else
@@ -4293,9 +4263,6 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 /*--------------------------------------------------------------------*/
 int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depthacrosstrack, int nslopes, double *slopes,
                          double *slopeacrosstrack, double acrosstrack, double *depth, double *slope, int *error) {
-	int found_depth, found_slope;
-	int idepth, islope;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4312,10 +4279,9 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
 	}
 
 	/* check if acrosstrack is in defined interval */
-	found_depth = false;
-	found_slope = false;
+	bool found_depth = false;
+	bool found_slope = false;
 	if (ndepths > 1) {
-
 		if (acrosstrack < depthacrosstrack[0]) {
 			*depth = depths[0];
 			*slope = 0.0;
@@ -4333,7 +4299,7 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
 		else if (acrosstrack >= depthacrosstrack[0] && acrosstrack <= depthacrosstrack[ndepths - 1]) {
 
 			/* look for depth */
-			idepth = -1;
+			int idepth = -1;
 			while (found_depth == false && idepth < ndepths - 2) {
 				idepth++;
 				if (acrosstrack >= depthacrosstrack[idepth] && acrosstrack <= depthacrosstrack[idepth + 1]) {
@@ -4346,7 +4312,7 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
 			}
 
 			/* look for slope */
-			islope = -1;
+			int islope = -1;
 			while (found_slope == false && islope < nslopes - 2) {
 				islope++;
 				if (acrosstrack >= slopeacrosstrack[islope] && acrosstrack <= slopeacrosstrack[islope + 1]) {
@@ -4405,34 +4371,32 @@ int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y,
 	    quad point to the candidate point - if all four cross
 	    product z components are positive, the point is inside
 	    the quad */
-	double ax, ay, bx, by;
-	double z1, z2, z3, z4, z;
 
-	ax = x[1] - x[0];
-	ay = y[1] - y[0];
-	bx = px - x[0];
-	by = py - y[0];
-	z1 = ax * by - ay * bx;
+	double ax = x[1] - x[0];
+	double ay = y[1] - y[0];
+	double bx = px - x[0];
+	double by = py - y[0];
+	const double z1 = ax * by - ay * bx;
 
 	ax = x[2] - x[1];
 	ay = y[2] - y[1];
 	bx = px - x[1];
 	by = py - y[1];
-	z2 = ax * by - ay * bx;
+	const double z2 = ax * by - ay * bx;
 
 	ax = x[3] - x[2];
 	ay = y[3] - y[2];
 	bx = px - x[2];
 	by = py - y[2];
-	z3 = ax * by - ay * bx;
+	const double z3 = ax * by - ay * bx;
 
 	ax = x[0] - x[3];
 	ay = y[0] - y[3];
 	bx = px - x[3];
 	by = py - y[3];
-	z4 = ax * by - ay * bx;
+	const double z4 = ax * by - ay * bx;
 
-	z = z1 * z2 * z3 * z4;
+	const double z = z1 * z2 * z3 * z4;
 	bool inside = true;
 	if (z <= 0.0)
 		inside = false;
@@ -4450,17 +4414,6 @@ int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y,
 /*--------------------------------------------------------------------*/
 
 int mb_pr_lockswathfile(int verbose, char *file, int purpose, const char *program_name, int *error) {
-	mb_path lockfile;
-	FILE *fp;
-
-	/* file status variables */
-	struct stat file_status;
-	int fstat;
-
-	/* time, user, host variables */
-	time_t right_now;
-	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4473,19 +4426,28 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose, const char *progra
 	int status = MB_SUCCESS;
 
 	/* proceed only if lock file does not exist */
+	mb_path lockfile;
 	sprintf(lockfile, "%s.lck", file);
-	if ((fstat = stat(lockfile, &file_status)) == -1) {
+
+	struct stat file_status;
+	const int fstat = stat(lockfile, &file_status);
+	if (fstat == -1) {
 		/* proceed only if we create the lockfile */
-		if ((fp = fopen(lockfile, "wx")) != NULL) {
-			right_now = time((time_t *)0);
+		FILE *fp = fopen(lockfile, "wx");
+		if (fp != NULL) {
+			const time_t right_now = time((time_t *)0);
+			char date[32];
 			strcpy(date, ctime(&right_now));
 			date[strlen(date) - 1] = '\0';
-			if ((user_ptr = getenv("USER")) == NULL)
+			const char *user_ptr = getenv("USER");
+			if (user_ptr == NULL)
 				user_ptr = getenv("LOGNAME");
+			char user[MBP_FILENAMESIZE];
 			if (user_ptr != NULL)
 				strcpy(user, user_ptr);
 			else
 				strcpy(user, "unknown");
+			char host[MBP_FILENAMESIZE];
 			gethostname(host, MBP_FILENAMESIZE);
 			fprintf(fp, "# File %s \n# Locked by user <%s> on cpu <%s> at <%s>\n", file, user, host, date);
 			fprintf(fp, "Locking Program: %s\n", program_name);
@@ -4529,14 +4491,6 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose, const char *progra
 
 int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *program, char *user, char *cpu, char *date,
                    int *error) {
-	mb_path lockfile;
-	FILE *fp;
-	mb_path line;
-
-	/* file status variables */
-	struct stat file_status;
-	int fstat;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4547,7 +4501,7 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *pro
 	/* initialize return parameters */
 	*locked = false;
 	*purpose = 0;
-  program[0] = '\0';
+	program[0] = '\0';
 	user[0] = '\0';
 	cpu[0] = '\0';
 	date[0] = '\0';
@@ -4555,11 +4509,16 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *pro
 	int status = MB_SUCCESS;
 
 	/* check if lock file exists */
+	mb_path lockfile;
 	sprintf(lockfile, "%s.lck", file);
-	if ((fstat = stat(lockfile, &file_status)) == 0) {
+	struct stat file_status;
+	const int fstat = stat(lockfile, &file_status);
+	if (fstat == 0) {
 		/* read the lockfile */
 		*locked = true;
-		if ((fp = fopen(lockfile, "r")) != NULL) {
+		FILE *fp = fopen(lockfile, "r");
+		if (fp != NULL) {
+			mb_path line;
 			while (fgets(line, MBP_FILENAMESIZE, fp) != NULL) {
 				line[strlen(line) - 1] = '\0';
 				if (strncmp(line, "Locking Program: ", 17) == 0) {
@@ -4610,22 +4569,6 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *pro
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_unlockswathfile(int verbose, char *file, int purpose, const char *program_name, int *error) {
-	mb_path lockfile;
-	int locked;
-	mb_path lock_program;
-	mb_path lock_user;
-	mb_path lock_cpu;
-	mb_path lock_date;
-	int lock_purpose;
-	mb_path command;
-
-	/* user, host variables */
-	char user[MBP_FILENAMESIZE], *user_ptr;
-
-	/* file status variables */
-	struct stat file_status;
-	int fstat;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4638,14 +4581,24 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose, const char *prog
 	int status = MB_SUCCESS;
 
 	/* check if lock file exists */
+	mb_path lockfile;
 	sprintf(lockfile, "%s.lck", file);
-	if ((fstat = stat(lockfile, &file_status)) == 0) {
+	struct stat file_status;
+	int fstat = stat(lockfile, &file_status);
+	if (fstat == 0) {
+		int locked;
+		int lock_purpose;
+		mb_path lock_program;
+		mb_path lock_user;
+		mb_path lock_cpu;
+		mb_path lock_date;
 		/* get lock info */
 		status = mb_pr_lockinfo(verbose, file, &locked, &lock_purpose, lock_program, lock_user, lock_cpu, lock_date, error);
 
-		/* get user and date */
-		if ((user_ptr = getenv("USER")) == NULL)
+		const char *user_ptr = getenv("USER");
+		if (user_ptr == NULL)
 			user_ptr = getenv("LOGNAME");
+		char user[MBP_FILENAMESIZE];
 		if (user_ptr != NULL)
 			strcpy(user, user_ptr);
 		else
@@ -4653,8 +4606,9 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose, const char *prog
 
 		/* if locked and everything matches remove lock file */
 		if (locked == true && strncmp(program_name, lock_program, MAX(strlen(program_name), strlen(lock_program))) == 0
-        && strncmp(user, lock_user, MAX(strlen(user), strlen(lock_user))) == 0
-        && purpose == lock_purpose) {
+		    && strncmp(user, lock_user, MAX(strlen(user), strlen(lock_user))) == 0
+		    && purpose == lock_purpose) {
+			mb_path command;
 			sprintf(command, "/bin/rm -f %s", lockfile);
 			/* int shellstatus = */ system(command);
 			status = MB_SUCCESS;
