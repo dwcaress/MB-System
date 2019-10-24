@@ -21,14 +21,12 @@
  * between IEEE values and other representations.
  * Note that the functions take pointers to float or double values
  * as arguments.
-
  *
  * Author:	D. W. Caress
  * Date:	July 6, 1994
- *
- *
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 

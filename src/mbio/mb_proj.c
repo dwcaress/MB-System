@@ -51,7 +51,6 @@
 
 /*--------------------------------------------------------------------*/
 int mb_proj_init(int verbose, char *source, char *target, void **pjptr, int *error) {
-
   if (verbose >= 0) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -64,8 +63,7 @@ int mb_proj_init(int verbose, char *source, char *target, void **pjptr, int *err
   int status = MB_SUCCESS;
 
   /* initialize the projection */
-  PJ *p;
-  p = proj_create_crs_to_crs(PJ_DEFAULT_CTX, source, target, 0);
+  PJ *p = proj_create_crs_to_crs(PJ_DEFAULT_CTX, source, target, 0);
   *pjptr = (void *)p;
 
   /* check success */
