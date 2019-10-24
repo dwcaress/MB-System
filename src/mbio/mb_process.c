@@ -21,6 +21,7 @@
  * Date:	September 11, 2000
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
