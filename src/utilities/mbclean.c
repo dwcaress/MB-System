@@ -53,6 +53,7 @@
  * program mbclean (v. 1.0) by David Caress.
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
