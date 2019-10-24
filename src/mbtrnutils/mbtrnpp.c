@@ -241,14 +241,14 @@ static double stats_prev_start = 0.0;
 static bool log_clock_res = true;
 
 #ifdef WITH_MBTNAV
-trn_config_t *trn_cfg = NULL;
 #define UTM_MONTEREY_BAY 10L
-#define UTM_AXIAL 12L
-#define TRN_UTM_DFL UTM_MONTEREY_BAY
-#define TRN_MTYPE_DFL TRN_MAP_BO
-#define TRN_FTYPE_DFL TRN_FILT_PARTICLE
+#define UTM_AXIAL        12L
+#define TRN_UTM_DFL      UTM_MONTEREY_BAY
+#define TRN_MTYPE_DFL    TRN_MAP_BO
+#define TRN_FTYPE_DFL    TRN_FILT_PARTICLE
 #define TRN_OUT_DFL      (TRNW_ODEBUG|TRNW_OLOG)
 
+trn_config_t *trn_cfg = NULL;
 bool trn_enable = false;
 long int trn_utm_zone = TRN_UTM_DFL;
 int trn_mtype = TRN_MTYPE_DFL;
