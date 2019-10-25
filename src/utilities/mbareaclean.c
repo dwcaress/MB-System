@@ -191,7 +191,6 @@ int main(int argc, char **argv) {
 	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
 
 	/* MBIO read control parameters */
 	void *mbio_ptr = NULL;
@@ -552,6 +551,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -666,6 +666,7 @@ int main(int argc, char **argv) {
 
 		/* check format and get format flags */
 		if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n", format,
 			        message);
@@ -683,6 +684,7 @@ int main(int argc, char **argv) {
 		if ((status = mb_read_init(verbose, swathfileread, formatread, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 		                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
 		    MB_SUCCESS) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swathfileread);
@@ -733,6 +735,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -747,6 +750,7 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -784,6 +788,7 @@ int main(int argc, char **argv) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, files[nfile].nsndg_alloc * sizeof(struct mbareaclean_sndg_struct),
 			                    (void **)&(files[nfile].sndg), &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -847,6 +852,7 @@ int main(int argc, char **argv) {
 						status = mb_reallocd(verbose, __FILE__, __LINE__, files[nfile - 1].nping_alloc * sizeof(double),
 						                     (void **)&(files[nfile - 1].ping_altitude), &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -918,6 +924,7 @@ int main(int argc, char **argv) {
 								                     files[nfile - 1].nsndg_alloc * sizeof(struct mbareaclean_sndg_struct),
 								                     (void **)&files[nfile - 1].sndg, &error);
 								if (error != MB_ERROR_NO_ERROR) {
+									char *message = NULL;
 									mb_error(verbose, error, &message);
 									fprintf(stderr, "\nMBIO Error allocating sounding arrays:\n%s\n", message);
 									fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -931,6 +938,7 @@ int main(int argc, char **argv) {
 								status = mb_reallocd(verbose, __FILE__, __LINE__, gsndgnum_alloc[kgrid] * sizeof(int),
 								                     (void **)&gsndg[kgrid], &error);
 								if (error != MB_ERROR_NO_ERROR) {
+									char *message = NULL;
 									mb_error(verbose, error, &message);
 									fprintf(stderr, "\nMBIO Error allocating sounding arrays:\n%s\n", message);
 									fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1021,6 +1029,7 @@ int main(int argc, char **argv) {
 		}
 	status = mb_mallocd(verbose, __FILE__, __LINE__, binnummax * sizeof(double), (void **)&(bindepths), &error);
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating sounding sorting array:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);

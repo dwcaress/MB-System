@@ -37,25 +37,24 @@
 #include "mb_segy.h"
 #include "mb_status.h"
 
-#define MBSEGYGRID_USESHOT 0
-#define MBSEGYGRID_USECMP 1
-#define MBSEGYGRID_USESHOTONLY 2
-#define MBSEGYGRID_PLOTBYTRACENUMBER 0
-#define MBSEGYGRID_PLOTBYDISTANCE 1
-#define MBSEGYGRID_WINDOW_OFF 0
-#define MBSEGYGRID_WINDOW_ON 1
-#define MBSEGYGRID_WINDOW_SEAFLOOR 2
-#define MBSEGYGRID_WINDOW_DEPTH 3
-#define MBSEGYGRID_GAIN_OFF 0
-#define MBSEGYGRID_GAIN_TZERO 1
-#define MBSEGYGRID_GAIN_SEAFLOOR 2
-#define MBSEGYGRID_GAIN_AGCSEAFLOOR 3
-#define MBSEGYGRID_GEOMETRY_VERTICAL 0
-#define MBSEGYGRID_GEOMETRY_REAL 1
-#define MBSEGYGRID_FILTER_OFF 0
-#define MBSEGYGRID_FILTER_COSINE 1
+const int MBSEGYGRID_USESHOT = 0;
+const int MBSEGYGRID_USECMP = 1;
+const int MBSEGYGRID_USESHOTONLY = 2;
+const int MBSEGYGRID_PLOTBYTRACENUMBER = 0;
+const int MBSEGYGRID_PLOTBYDISTANCE = 1;
+const int MBSEGYGRID_WINDOW_OFF = 0;
+const int MBSEGYGRID_WINDOW_ON = 1;
+const int MBSEGYGRID_WINDOW_SEAFLOOR = 2;
+const int MBSEGYGRID_WINDOW_DEPTH = 3;
+const int MBSEGYGRID_GAIN_OFF = 0;
+const int MBSEGYGRID_GAIN_TZERO = 1;
+const int MBSEGYGRID_GAIN_SEAFLOOR = 2;
+const int MBSEGYGRID_GAIN_AGCSEAFLOOR = 3;
+const int MBSEGYGRID_GEOMETRY_VERTICAL = 0;
+const int MBSEGYGRID_GEOMETRY_REAL = 1;
+const int MBSEGYGRID_FILTER_OFF = 0;
+const int MBSEGYGRID_FILTER_COSINE = 1;
 
-/* NaN value */
 float NaN;
 
 /* output stream for basic stuff (stdout if verbose <= 1,
@@ -78,25 +77,6 @@ static const char usage_message[] =
 int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart, int *traceend, int *chanstart, int *chanend,
                     double *timesweep, double *timedelay, double *startlon, double *startlat, double *endlon, double *endlat,
                     int *error) {
-	char sinffile[MB_PATH_MAXLINE] = "";
-	char command[MB_PATH_MAXLINE] = "";
-	char line[MB_PATH_MAXLINE] = "";
-	FILE *sfp;
-	int datmodtime = 0;
-	int sinfmodtime = 0;
-	struct stat file_status;
-	int fstat;
-	double delay0 = 0.0;
-	double delay1 = 0.0;
-	double delaydel = 0.0;
-	int shot0, shot1, shotdel;
-	int shottrace0, shottrace1, shottracedel;
-	int rp0, rp1;
-	int rpdel = 0;
-	int rptrace0, rptrace1, rptracedel;
-	int nscan;
-	int shellstatus;
-
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
@@ -105,15 +85,19 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 	}
 
 	/* set sinf filename */
+	char sinffile[MB_PATH_MAXLINE] = "";
 	sprintf(sinffile, "%s.sinf", segyfile);
 
 	/* check status of segy and sinf file */
-	datmodtime = 0;
-	sinfmodtime = 0;
-	if ((fstat = stat(segyfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+	int datmodtime = 0;
+	int sinfmodtime = 0;
+	struct stat file_status;
+	int fstat = stat(segyfile, &file_status);
+	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		datmodtime = file_status.st_mtime;
 	}
-	if ((fstat = stat(sinffile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+	fstat = stat(sinffile, &file_status);
+	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		sinfmodtime = file_status.st_mtime;
 	}
 
@@ -121,38 +105,57 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 	if (datmodtime > 0 && datmodtime > sinfmodtime) {
 		if (verbose >= 1)
 			fprintf(stderr, "\nGenerating sinf file for %s\n", segyfile);
+		char command[MB_PATH_MAXLINE] = "";
 		sprintf(command, "mbsegyinfo -I %s -O", segyfile);
-		shellstatus = system(command);
+		/* int shellstatus = */ system(command);
 	}
+
+	double delay0 = 0.0;
+	double delaydel = 0.0;
+	int shot0;
+	int shot1;
+	int shottrace0;
+	int shottrace1;
+	int rp0;
+	int rp1;
+	int rpdel = 0;
+	int rptrace0;
+	int rptrace1;
 
 	/* read sinf file if possible */
 	sprintf(sinffile, "%s.sinf", segyfile);
-	if ((sfp = fopen(sinffile, "r")) != NULL) {
+	FILE *sfp = fopen(sinffile, "r");
+	if (sfp != NULL) {
 		/* read the sinf file */
+		char line[MB_PATH_MAXLINE] = "";
 		while (fgets(line, MB_PATH_MAXLINE, sfp) != NULL) {
 			if (strncmp(line, "  Trace length (sec):", 21) == 0) {
-				nscan = sscanf(line, "  Trace length (sec):%lf", timesweep);
+				sscanf(line, "  Trace length (sec):%lf", timesweep);
 			}
 			else if (strncmp(line, "    Delay (sec):", 16) == 0) {
-				nscan = sscanf(line, "    Delay (sec): %lf %lf %lf", &delay0, &delay1, &delaydel);
+				double delay1 = 0.0;
+				sscanf(line, "    Delay (sec): %lf %lf %lf", &delay0, &delay1, &delaydel);
 			}
 			else if (strncmp(line, "    Shot number:", 16) == 0) {
-				nscan = sscanf(line, "    Shot number: %d %d %d", &shot0, &shot1, &shotdel);
+				int shotdel;
+				sscanf(line, "    Shot number: %d %d %d", &shot0, &shot1, &shotdel);
 			}
 			else if (strncmp(line, "    Shot trace:", 15) == 0) {
-				nscan = sscanf(line, "    Shot trace: %d %d %d", &shottrace0, &shottrace1, &shottracedel);
+				int shottracedel;
+				sscanf(line, "    Shot trace: %d %d %d", &shottrace0, &shottrace1, &shottracedel);
 			}
 			else if (strncmp(line, "    RP number:", 14) == 0) {
-				nscan = sscanf(line, "    RP number: %d %d %d", &rp0, &rp1, &rpdel);
+				sscanf(line, "    RP number: %d %d %d", &rp0, &rp1, &rpdel);
 			}
 			else if (strncmp(line, "    RP trace:", 13) == 0) {
-				nscan = sscanf(line, "    RP trace: %d %d %d", &rptrace0, &rptrace1, &rptracedel);
+				int rptracedel;
+				sscanf(line, "    RP trace: %d %d %d", &rptrace0, &rptrace1, &rptracedel);
 			}
 			else if (strncmp(line, "    Start Position:", 19) == 0) {
-				nscan = sscanf(line, "    Start Position: Lon: %lf     Lat:   %lf", startlon, startlat);
+				sscanf(line, "    Start Position: Lon: %lf     Lat:   %lf", startlon, startlat);
 			}
 			else if (strncmp(line, "    End Position:", 17) == 0) {
-				nscan = sscanf(line, "    End Position:   Lon: %lf     Lat:   %lf", endlon, endlat);
+				sscanf(line, "    End Position:   Lon: %lf     Lat:   %lf", endlon, endlat);
 			}
 		}
 		fclose(sfp);
@@ -299,7 +302,6 @@ int main(int argc, char **argv) {
 	double sinfendlon = 0.0;
 	double sinfendlat = 0.0;
 
-	int nread;
 	int tracecount, tracenum, channum;
 	double tracemin, tracemax;
 	double xwidth, ywidth;
@@ -320,9 +322,6 @@ int main(int argc, char **argv) {
 	int filtertrace_alloc;
 	int nfilter;
 	int iagchalfwindow;
-	int iyc;
-	int jstart, jend;
-	int ii;
 
 	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -685,11 +684,10 @@ int main(int argc, char **argv) {
 			gridweight[k] = 0.0;
 		}
 
-
 		bool traceok;
 
 		/* read and print data */
-		nread = 0;
+		int nread = 0;
 		while (error <= MB_ERROR_NO_ERROR) {
 			/* reset error */
 			error = MB_ERROR_NO_ERROR;
@@ -905,10 +903,10 @@ int main(int argc, char **argv) {
 						for (int i = 0; i <= traceheader.nsamps; i++) {
 							worktrace[i] = 0.0;
 							filtersum = 0.0;
-							jstart = MAX(nfilter / 2 - i, 0);
-							jend = MIN(nfilter - 1, nfilter - 1 + (traceheader.nsamps - 1 - nfilter / 2 - i));
+							const int jstart = MAX(nfilter / 2 - i, 0);
+							const int jend = MIN(nfilter - 1, nfilter - 1 + (traceheader.nsamps - 1 - nfilter / 2 - i));
 							for (int j = jstart; j <= jend; j++) {
-								ii = i - nfilter / 2 + j;
+								const int ii = i - nfilter / 2 + j;
 								worktrace[i] += filtertrace[j] * trace[ii];
 								filtersum += filtertrace[j];
 							}
@@ -978,7 +976,7 @@ int main(int argc, char **argv) {
 						for (int i = 0; i < traceheader.nsamps; i++) {
 							/* get corrected y location of this sample
 							  in the section grid using the pitch angle */
-							iyc = iys + (int)(cosfactor * ((double)i)) / decimatey;
+							const int iyc = iys + (int)(cosfactor * ((double)i)) / decimatey;
 
 							/* get the index of the sample location */
 							if (iyc >= iystart && iyc <= iyend) {

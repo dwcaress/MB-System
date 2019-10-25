@@ -48,7 +48,6 @@ int main(int argc, char **argv) {
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char format_description[MB_DESCRIPTION_LENGTH];
-	char *message = NULL;
 
 	/* MBIO read and write control parameters */
 	int format = 0;
@@ -265,6 +264,7 @@ int main(int argc, char **argv) {
 	/* initialize reading the input multibeam file */
 	if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 	                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(output, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 		fprintf(output, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -284,6 +284,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(output, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(output, "\nProgram <%s> Terminated\n", program_name);
@@ -316,10 +317,12 @@ int main(int argc, char **argv) {
 
 		/* output error messages */
 		if (verbose >= 1 && error <= MB_ERROR_OTHER) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(output, "\nNonfatal MBIO Error:\n%s\n", message);
 		}
 		else if (verbose >= 1 && error > MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(output, "\nFatal MBIO Error:\n%s\n", message);
 		}
