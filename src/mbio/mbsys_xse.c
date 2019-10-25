@@ -25,11 +25,10 @@
  * Author:	D. W. Caress
  * Date:	August 1,  1999
  * Additional Authors:	P. A. Cohen and S. Dzurenko
- *
- *
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
