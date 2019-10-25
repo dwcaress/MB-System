@@ -106,7 +106,6 @@ int main(int argc, char **argv) {
 	int status;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
 
 	/* MBIO read control parameters */
 	int format;
@@ -313,6 +312,7 @@ int main(int argc, char **argv) {
 	/* initialize reading the input multibeam file */
 	if ((status = mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
 	                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 		fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
@@ -340,6 +340,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -354,6 +355,7 @@ int main(int argc, char **argv) {
 		}
 		else if ((sofp = fopen(sofile, "w")) == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nEdit Save File <%s> not initialized for writing\n", sofile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -430,6 +432,7 @@ int main(int argc, char **argv) {
 
 		/* output error messages */
 		if (verbose >= 1 && error < MB_ERROR_NO_ERROR && error >= MB_ERROR_OTHER && error != MB_ERROR_COMMENT) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
 			fprintf(stderr, "Input Record: %d\n", idata);
@@ -437,11 +440,13 @@ int main(int argc, char **argv) {
 			        time_i[6]);
 		}
 		else if (verbose >= 1 && error < MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
 			fprintf(stderr, "Number of good records so far: %d\n", idata);
 		}
 		else if (verbose >= 1 && error != MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nFatal MBIO Error:\n%s\n", message);
 			fprintf(stderr, "Last Good Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4],

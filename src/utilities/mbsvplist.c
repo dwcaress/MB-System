@@ -86,7 +86,6 @@ int main(int argc, char **argv) {
 
 	/* MBIO read control parameters */
 	char read_file[MB_PATH_MAXLINE];
-	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
 	int format;
@@ -177,9 +176,7 @@ int main(int argc, char **argv) {
 	double *alongtrack_offset = NULL;
 	double ssv;
 
-	time_t right_now;
-	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	int j, isvp;
+	int isvp;
 
 	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -347,6 +344,7 @@ int main(int argc, char **argv) {
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
 	bool read_data;
+	void *datalist;
 
 	/* open file list */
 	if (read_datalist) {
@@ -510,7 +508,7 @@ int main(int argc, char **argv) {
 				    in the same file */
 				if (svp_loaded) {
 					svp_match_last = false;
-					for (j = 0; j < svp_save_count && svp_match_last; j++) {
+					for (int j = 0; j < svp_save_count && svp_match_last; j++) {
 						if (svp.n == svp_save[j].n && memcmp(svp.depth, svp_save[j].depth, svp.n) == 0 &&
 						    memcmp(svp.velocity, svp_save[j].velocity, svp.n) == 0) {
 							svp_match_last = true;
@@ -659,15 +657,19 @@ int main(int argc, char **argv) {
 						fprintf(svp_fp, "## Water Sound Velocity Profile (SVP)\n");
 						fprintf(svp_fp, "## Output by Program %s\n", program_name);
 						fprintf(svp_fp, "## MB-System Version %s\n", MB_VERSION);
-						right_now = time((time_t *)0);
+						const time_t right_now = time((time_t *)0);
+						char date[32];
 						strcpy(date, ctime(&right_now));
 						date[strlen(date) - 1] = '\0';
-						if ((user_ptr = getenv("USER")) == NULL)
+						char *user_ptr = getenv("USER");
+						if (user_ptr == NULL)
 							user_ptr = getenv("LOGNAME");
+						char user[MB_PATH_MAXLINE];
 						if (user_ptr != NULL)
 							strcpy(user, user_ptr);
 						else
 							strcpy(user, "unknown");
+						char host[MB_PATH_MAXLINE];
 						gethostname(host, MB_PATH_MAXLINE);
 						fprintf(svp_fp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 						fprintf(svp_fp, "## Swath File: %s\n", file);
