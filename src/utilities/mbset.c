@@ -71,15 +71,10 @@ int main(int argc, char **argv) {
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 
-	/* parameter controls */
-	struct mb_process_struct process;
-
 	/* processing variables */
 	bool explicit = false;
 	char read_file[MBP_FILENAMESIZE];
 	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_NO;
-	double file_weight;
 	bool lookforfiles = false;
 	bool removembnavadjust = false;
 	struct stat file_status;
@@ -90,7 +85,6 @@ int main(int argc, char **argv) {
 	int mbp_format;
 	bool write_parameter_file = false;
 	int nscan;
-	int i;
 
 	/* set default input and output */
 	strcpy(mbp_ifile, "\0");
@@ -135,7 +129,7 @@ int main(int argc, char **argv) {
 			case 'p':
 				if (strlen(optarg) > 1) {
 					/* Replace first '=' before ':' with ':'  */
-					for (i = 0; i < strlen(optarg); i++) {
+					for (int i = 0; i < strlen(optarg); i++) {
 						if (optarg[i] == ':') {
 							break;
 						}
@@ -184,6 +178,8 @@ int main(int argc, char **argv) {
 	bool read_data = false;
 
 	int status = MB_SUCCESS;
+	int look_processed = MB_DATALIST_LOOK_NO;
+	double file_weight;
 
 	/* open file list */
 	if (read_datalist) {
@@ -203,6 +199,8 @@ int main(int argc, char **argv) {
 		mbp_format = format;
 		read_data = true;
 	}
+
+	struct mb_process_struct process;
 
 	/* loop over all files to be read */
 	while (read_data) {
@@ -247,7 +245,7 @@ int main(int argc, char **argv) {
 			write_parameter_file = true;
 
 		/* process parameter list */
-		for (i = 0; i < pargc; i++) {
+		for (int i = 0; i < pargc; i++) {
 			/* general parameters */
 			if (strncmp(pargv[i], "OUTFILE", 7) == 0) {
 				nscan = sscanf(pargv[i], "OUTFILE:%s", process.mbp_ofile);
@@ -996,7 +994,7 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "  Data cutting enabled (%d commands).\n", process.mbp_cut_num);
 			else
 				fprintf(stderr, "  Data cutting disabled.\n");
-			for (i = 0; i < process.mbp_cut_num; i++) {
+			for (int i = 0; i < process.mbp_cut_num; i++) {
 				if (process.mbp_cut_kind[i] == MBP_CUT_DATA_BATH)
 					fprintf(stderr, "  Cut[%d]: bathymetry", i);
 				else if (process.mbp_cut_kind[i] == MBP_CUT_DATA_AMP)

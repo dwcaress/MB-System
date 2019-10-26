@@ -439,7 +439,6 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 int main(int argc, char **argv) {
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
 
 	/* MBIO read control parameters */
 	int format;
@@ -1522,6 +1521,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, nbackground_alloc * sizeof(float), (void **)&bzdata, &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating background data array:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -1534,6 +1534,7 @@ int main(int argc, char **argv) {
 #else
 		status = mb_mallocd(verbose, __FILE__, __LINE__, 3 * nbackground_alloc * sizeof(float), (void **)&bdata, &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating background interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -1651,6 +1652,7 @@ int main(int argc, char **argv) {
 						status =
 						    mb_reallocd(verbose, __FILE__, __LINE__, nbackground_alloc * sizeof(float), (void **)&bzdata, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 						fprintf(outfp, "\nMBIO Error reallocating background data array:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated at line %d in source file %s\n", program_name, __LINE__,
@@ -1668,6 +1670,7 @@ int main(int argc, char **argv) {
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, 3 * nbackground_alloc * sizeof(float), (void **)&bdata, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 						fprintf(outfp, "\nMBIO Error allocating background interpolation work arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated at line %d in source file %s\n", program_name, __LINE__,
@@ -1724,6 +1727,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -1760,6 +1764,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -1821,6 +1826,7 @@ int main(int argc, char **argv) {
 					if ((status = mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error)) != MB_SUCCESS) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -1862,6 +1868,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -1976,6 +1983,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, sxdim * sydim * sizeof(float), (void **)&sgrid, &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2017,6 +2025,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, (sxdim + sydim) * sizeof(int), (void **)&work3, &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2137,6 +2146,7 @@ int main(int argc, char **argv) {
 					if ((status = mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error)) != MB_SUCCESS) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -2178,6 +2188,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2567,6 +2578,7 @@ int main(int argc, char **argv) {
 					if ((status = mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error)) != MB_SUCCESS) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -2608,6 +2620,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2919,6 +2932,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2980,6 +2994,7 @@ int main(int argc, char **argv) {
 					if ((status = mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error)) != MB_SUCCESS) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -3015,6 +3030,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -3091,6 +3107,7 @@ int main(int argc, char **argv) {
 											if ((data[kgrid] = (double *)realloc(data[kgrid], num[kgrid] * sizeof(double))) ==
 											    NULL) {
 												error = MB_ERROR_MEMORY_FAIL;
+												char *message = NULL;
 												mb_error(verbose, error, &message);
 												fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 												fprintf(outfp, "The weighted mean algorithm uses much less\n");
@@ -3160,6 +3177,7 @@ int main(int argc, char **argv) {
 											if ((data[kgrid] = (double *)realloc(data[kgrid], num[kgrid] * sizeof(double))) ==
 											    NULL) {
 												error = MB_ERROR_MEMORY_FAIL;
+												char *message = NULL;
 												mb_error(verbose, error, &message);
 												fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 												fprintf(outfp, "The weighted mean algorithm uses much less\n");
@@ -3228,6 +3246,7 @@ int main(int argc, char **argv) {
 											if ((data[kgrid] = (double *)realloc(data[kgrid], num[kgrid] * sizeof(double))) ==
 											    NULL) {
 												error = MB_ERROR_MEMORY_FAIL;
+												char *message = NULL;
 												mb_error(verbose, error, &message);
 												fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 												fprintf(outfp, "The weighted mean algorithm uses much less\n");
@@ -3309,6 +3328,7 @@ int main(int argc, char **argv) {
 							num[kgrid] += REALLOC_STEP_SIZE;
 							if ((data[kgrid] = (double *)realloc(data[kgrid], num[kgrid] * sizeof(double))) == NULL) {
 								error = MB_ERROR_MEMORY_FAIL;
+								char *message = NULL;
 								mb_error(verbose, error, &message);
 								fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 								fprintf(outfp, "The weighted mean algorithm uses much less\n");
@@ -3419,6 +3439,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -3480,6 +3501,7 @@ int main(int argc, char **argv) {
 					if ((status = mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error)) != MB_SUCCESS) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -3515,6 +3537,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -3988,6 +4011,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -4050,6 +4074,7 @@ int main(int argc, char **argv) {
 					if ((status = mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error)) != MB_SUCCESS) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -4085,6 +4110,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -4405,6 +4431,7 @@ int main(int argc, char **argv) {
 					if ((status = mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error)) != MB_SUCCESS) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -4440,6 +4467,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -4796,6 +4824,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(float), (void **)&sgrid, &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -4877,6 +4906,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, (gxdim + gydim) * sizeof(int), (void **)&work3, &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -5171,6 +5201,7 @@ int main(int argc, char **argv) {
 #ifdef USESURFACE
 		status = mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(float), (void **)&sgrid, &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating background data array:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -5187,6 +5218,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, (gxdim + gydim) * sizeof(int), (void **)&work3, &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating background interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -5343,6 +5375,7 @@ int main(int argc, char **argv) {
 		                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 	}
 	if (status != MB_SUCCESS) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(outfp, "\nError writing output file: %s\n%s\n", ofile, message);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -5390,6 +5423,7 @@ int main(int argc, char **argv) {
 			                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 		}
 		if (status != MB_SUCCESS) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(outfp, "\nError writing output file: %s\n%s\n", ofile, message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -5436,6 +5470,7 @@ int main(int argc, char **argv) {
 			                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 		}
 		if (status != MB_SUCCESS) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(outfp, "\nError writing output file: %s\n%s\n", ofile, message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);

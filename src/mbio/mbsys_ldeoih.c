@@ -20,7 +20,6 @@
  *
  * Author:  D. W. Caress
  * Date:  February 26, 1993
- *
  */
 
 #include <math.h>
@@ -102,7 +101,6 @@ int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");

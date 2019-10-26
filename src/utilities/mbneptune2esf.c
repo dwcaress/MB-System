@@ -302,7 +302,6 @@ int main(int argc, char **argv) {
 	int status;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
 
 	/* MBIO read control parameters */
 	char read_file[MB_PATH_MAXLINE];
@@ -727,6 +726,7 @@ int main(int argc, char **argv) {
 			int beam_flagging;  // TODO(schwehr): mb_format_flags should take a bool.
 			if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) !=
 			    MB_SUCCESS) {
+				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n", format,
 				        message);
@@ -749,6 +749,7 @@ int main(int argc, char **argv) {
 			if ((status = mb_read_init(verbose, swathfile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 			                           &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
 			    MB_SUCCESS) {
+				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 				fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swathfile);
@@ -816,6 +817,7 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);

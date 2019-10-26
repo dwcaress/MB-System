@@ -21,7 +21,6 @@
  *
  * Author:	D. W. Caress
  * Date:	May 4, 2005
- *
  */
 
 #include <assert.h>

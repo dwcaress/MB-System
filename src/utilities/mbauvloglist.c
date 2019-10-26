@@ -188,7 +188,6 @@ int main(int argc, char **argv) {
 	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
 
 	/* MBIO read control parameters */
 	int pings;
@@ -468,6 +467,7 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);

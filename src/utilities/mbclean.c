@@ -53,6 +53,7 @@
  * program mbclean (v. 1.0) by David Caress.
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -129,7 +130,6 @@ int main(int argc, char **argv) {
   int status;
   int verbose = 0;
   int error = MB_ERROR_NO_ERROR;
-  char *message = NULL;
 
   /* swath file locking variables */
   int lock_status;
@@ -677,6 +677,7 @@ int main(int argc, char **argv) {
 
     /* check format and get format flags */
     if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
+      char *message = NULL;
       mb_error(verbose, error, &message);
       fprintf(stderr, "\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n", format,
               message);
@@ -748,6 +749,7 @@ int main(int argc, char **argv) {
       if ((status = mb_read_init(verbose, swathfileread, formatread, pings, lonflip, bounds, btime_i, etime_i, speedmin,
                                  timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
           MB_SUCCESS) {
+        char *message = NULL;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swathfile);
@@ -833,6 +835,7 @@ int main(int argc, char **argv) {
 
       /* if error initializing memory then quit */
       if (error != MB_ERROR_NO_ERROR) {
+        char *message = NULL;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);

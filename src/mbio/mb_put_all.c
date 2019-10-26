@@ -21,12 +21,10 @@
  *
  * Author:	D. W. Caress
  * Date:	February 4, 1993
- *
- *
- *
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
