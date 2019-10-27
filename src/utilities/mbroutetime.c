@@ -56,88 +56,22 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message;
-
-	char read_file[MB_PATH_MAXLINE] = "";
-	char output_file[MB_PATH_MAXLINE] = "";
-	bool output_file_set = false;
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
 	int format;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
-	char file[MB_PATH_MAXLINE] = "";
-	char dfile[MB_PATH_MAXLINE] = "";
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-
-	/* MBIO read values */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE] = "";
-
-	/* route and auto-line data */
-	char route_file[MB_PATH_MAXLINE] = "";
-	int nroutepoint = 0;
-	int nroutepointfound = 0;
-	int nroutepointalloc = 0;
-	double lon;
-	double lat;
-	double topo;
-	int waypoint;
-	double *routelon = NULL;
-	double *routelat = NULL;
-	double *routeheading = NULL;
-	int *routewaypoint = NULL;
-	double *routetime_d = NULL;
-	double range;
-	double rangethreshold = 25.0;
-	double rangelast;
-	int activewaypoint = 0;
-
-	double mtodeglon, mtodeglat;
-	double lastlon;
-	double lastlat;
-	double lastheading;
-	double lasttime_d;
-	double dx, dy;
-	FILE *fp = NULL;
-	char *result;
-	int nget;
-	int nread;
-
-	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	/* set default input to datalist.mb-1 */
+	char output_file[MB_PATH_MAXLINE + 14] = "";  // Needs extra padding for "_wpttime_d.txt"
+	bool output_file_set = false;
+	char route_file[MB_PATH_MAXLINE] = "";
+	double rangethreshold = 25.0;
+
+	char read_file[MB_PATH_MAXLINE] = "";
 	strcpy(read_file, "datalist.mb-1");
 
 	{
@@ -230,18 +164,35 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
 
+	double mtodeglon, mtodeglat;
+	double dx, dy;
+	int nread;
+
 	/* read route file */
-	if ((fp = fopen(route_file, "r")) == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
-		status = MB_FAILURE;
+	FILE *fp = fopen(route_file, "r");
+	if (fp == NULL) {
 		fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
-		exit(status);
+		exit(MB_FAILURE);
 	}
+
 	bool rawroutefile = false;
+	char comment[MB_COMMENT_MAXLINE] = "";
+	char *result;
+	double heading;
+
+	int nroutepoint = 0;
+	int nroutepointalloc = 0;
+	double *routelon = NULL;
+	double *routelat = NULL;
+	double *routeheading = NULL;
+	int *routewaypoint = NULL;
+	double *routetime_d = NULL;
+
+	int error = MB_ERROR_NO_ERROR;
 	while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 		if (comment[0] == '#') {
 			if (strncmp(comment, "## Route File Version", 21) == 0) {
@@ -249,7 +200,11 @@ int main(int argc, char **argv) {
 			}
 		}
 		else {
-			nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint, &heading);
+			double lon;
+			double lat;
+			double topo;
+			int waypoint;
+			const int nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint, &heading);
 			if (comment[0] == '#') {
 				fprintf(stderr, "buffer:%s", comment);
 				if (strncmp(comment, "## Route File Version", 21) == 0) {
@@ -257,12 +212,9 @@ int main(int argc, char **argv) {
 				}
 			}
 
-			bool point_ok;
-			if ((rawroutefile && nget >= 2) ||
-			    (!rawroutefile && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_TRANSIT))
-				point_ok = true;
-			else
-				point_ok = false;
+			const bool point_ok = 
+				(rawroutefile && nget >= 2) ||
+				(!rawroutefile && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_TRANSIT);
 
 			/* if good data check for need to allocate more space */
 			if (point_ok && nroutepoint + 2 > nroutepointalloc) {
@@ -276,6 +228,7 @@ int main(int argc, char **argv) {
 				status =
 				    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routetime_d, &error);
 				if (status != MB_SUCCESS) {
+					char *message;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -295,7 +248,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* close the file */
 	fclose(fp);
 	fp = NULL;
 
@@ -312,9 +264,9 @@ int main(int argc, char **argv) {
 	}
 
 	/* set starting values */
-	activewaypoint = 0;
+	int activewaypoint = 0;
 	mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
-	rangelast = 1000 * rangethreshold;
+	double rangelast = 1000 * rangethreshold;
 
 	/* output status */
 	if (verbose > 0) {
@@ -329,6 +281,10 @@ int main(int argc, char **argv) {
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
 	bool read_data;
+	void *datalist;
+	int look_processed = MB_DATALIST_LOOK_UNSET;
+	char file[MB_PATH_MAXLINE] = "";
+	char dfile[MB_PATH_MAXLINE] = "";
 
 	/* open file list */
 	if (read_datalist) {
@@ -337,6 +293,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
+		double file_weight;
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = true;
 		else
@@ -348,6 +305,41 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
+	double btime_d;
+	double etime_d;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+
+	/* MBIO read values */
+	void *mbio_ptr = NULL;
+	void *store_ptr = NULL;
+	int kind;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+
+	int nroutepointfound = 0;
+
+	double lasttime_d = 0.0;
+	double lastheading = 0.0;
+	double lastlon = 0.0;
+	double lastlat = 0.0;
+	double range = 0.0;
+
 	/* loop over all files to be read */
 	while (read_data) {
 		/* read fnv file if possible */
@@ -356,6 +348,7 @@ int main(int argc, char **argv) {
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -385,6 +378,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -455,6 +449,7 @@ int main(int argc, char **argv) {
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
+			double file_weight;
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 				read_data = true;
 			else
@@ -485,11 +480,10 @@ int main(int argc, char **argv) {
 	if (!output_file_set) {
 		sprintf(output_file, "%s_wpttime_d.txt", read_file);
 	}
-	if ((fp = fopen(output_file, "w")) == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
-		status = MB_FAILURE;
+	fp = fopen(output_file, "w");
+	if (fp == NULL) {
 		fprintf(stderr, "\nUnable to open output waypoint time list file <%s> for writing\n", output_file);
-		exit(status);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 	for (int i = 0; i < nroutepointfound; i++) {
 		fprintf(fp, "%3d %3d %11.6f %10.6f %10.6f %.6f\n", i, routewaypoint[i], routelon[i], routelat[i], routeheading[i],
@@ -502,14 +496,14 @@ int main(int argc, char **argv) {
 
 	/* deallocate route arrays */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routetime_d, &error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routetime_d, &error);
 
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
