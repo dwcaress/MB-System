@@ -42,8 +42,8 @@
 #include "mb_process.h"
 #include "mb_status.h"
 
-#define MAX_OPTIONS 25
-#define MBCTDLIST_ALLOC_CHUNK 1024
+const int MAX_OPTIONS = 25;
+const int MBCTDLIST_ALLOC_CHUNK = 1024;
 
 double NaN;
 

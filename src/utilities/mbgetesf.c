@@ -38,12 +38,12 @@
 #include "mb_status.h"
 #include "mb_swap.h"
 
-#define MBGETESF_FLAGONLY 1
-#define MBGETESF_FLAGNULL 2
-#define MBGETESF_ALL 3
-#define MBGETESF_IMPLICITBEST 4
-#define MBGETESF_IMPLICITNULL 5
-#define MBGETESF_IMPLICITGOOD 6
+const int MBGETESF_FLAGONLY = 1;
+const int MBGETESF_FLAGNULL = 2;
+const int MBGETESF_ALL = 3;
+const int MBGETESF_IMPLICITBEST = 4;
+const int MBGETESF_IMPLICITNULL = 5;
+const int MBGETESF_IMPLICITGOOD = 6;
 
 static const char program_name[] = "mbgetesf";
 static const char help_message[] =
