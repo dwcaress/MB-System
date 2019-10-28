@@ -69,18 +69,18 @@
 #include "mb_status.h"
 #include "mb_swap.h"
 
-#define MBCLEAN_FLAG_ONE 1
-#define MBCLEAN_FLAG_BOTH 2
-#define MBCLEAN_Y_MODE_DISTANCE_FLAG 1
-#define MBCLEAN_Y_MODE_DISTANCE_UNFLAG 2
-#define MBCLEAN_Y_MODE_ANGLE_FLAG 3
-#define MBCLEAN_Y_MODE_ANGLE_UNFLAG 4
+const int MBCLEAN_FLAG_ONE = 1;
+const int MBCLEAN_FLAG_BOTH = 2;
+const int MBCLEAN_Y_MODE_DISTANCE_FLAG = 1;
+const int MBCLEAN_Y_MODE_DISTANCE_UNFLAG = 2;
+const int MBCLEAN_Y_MODE_ANGLE_FLAG = 3;
+const int MBCLEAN_Y_MODE_ANGLE_UNFLAG = 4;
 
 /* MBIO buffer size default */
-#define MBCLEAN_BUFFER_DEFAULT 500
+const int MBCLEAN_BUFFER_DEFAULT = 500;
 
 /* edit action defines */
-#define MBCLEAN_NOACTION 0
+const int MBCLEAN_NOACTION = 0;
 
 /* ping structure definition */
 struct mbclean_ping_struct {

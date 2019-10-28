@@ -51,47 +51,47 @@
 #include "mb_status.h"
 
 /* gridding algorithms */
-#define MBGRID_WEIGHTED_MEAN 1
-#define MBGRID_MEDIAN_FILTER 2
-#define MBGRID_MINIMUM_FILTER 3
-#define MBGRID_MAXIMUM_FILTER 4
-#define MBGRID_WEIGHTED_FOOTPRINT_SLOPE 5
-#define MBGRID_WEIGHTED_FOOTPRINT 6
-#define MBGRID_MINIMUM_WEIGHTED_MEAN 7
-#define MBGRID_MAXIMUM_WEIGHTED_MEAN 8
+const int MBGRID_WEIGHTED_MEAN = 1;
+const int MBGRID_MEDIAN_FILTER = 2;
+const int MBGRID_MINIMUM_FILTER = 3;
+const int MBGRID_MAXIMUM_FILTER = 4;
+const int MBGRID_WEIGHTED_FOOTPRINT_SLOPE = 5;
+const int MBGRID_WEIGHTED_FOOTPRINT = 6;
+const int MBGRID_MINIMUM_WEIGHTED_MEAN = 7;
+const int MBGRID_MAXIMUM_WEIGHTED_MEAN = 8;
 
 /* grid format definitions */
-#define MBGRID_ASCII 1
-#define MBGRID_OLDGRD 2
-#define MBGRID_CDFGRD 3
-#define MBGRID_ARCASCII 4
-#define MBGRID_GMTGRD 100
+const int MBGRID_ASCII = 1;
+const int MBGRID_OLDGRD = 2;
+const int MBGRID_CDFGRD = 3;
+const int MBGRID_ARCASCII = 4;
+const int MBGRID_GMTGRD = 100;
 
 /* gridded data type */
-#define MBGRID_DATA_BATHYMETRY 1
-#define MBGRID_DATA_TOPOGRAPHY 2
-#define MBGRID_DATA_AMPLITUDE 3
-#define MBGRID_DATA_SIDESCAN 4
+const int MBGRID_DATA_BATHYMETRY = 1;
+const int MBGRID_DATA_TOPOGRAPHY = 2;
+const int MBGRID_DATA_AMPLITUDE = 3;
+const int MBGRID_DATA_SIDESCAN = 4;
 
-/* flag for no data in grid */
-#define NO_DATA_FLAG 99999
+/* flag for no data in grid */;
+const int NO_DATA_FLAG = 99999;
 
 /* number of data to be allocated at a time */
-#define REALLOC_STEP_SIZE 25
+const int REALLOC_STEP_SIZE = 25;
 
 /* usage of footprint based weight */
-#define MBGRID_USE_NO 0
-#define MBGRID_USE_YES 1
-#define MBGRID_USE_CONDITIONAL 2
+const int MBGRID_USE_NO = 0;
+const int MBGRID_USE_YES = 1;
+const int MBGRID_USE_CONDITIONAL = 2;
 
 /* interpolation mode */
-#define MBGRID_INTERP_NONE 0
-#define MBGRID_INTERP_GAP 1
-#define MBGRID_INTERP_NEAR 2
-#define MBGRID_INTERP_ALL 3
+const int MBGRID_INTERP_NONE = 0;
+const int MBGRID_INTERP_GAP = 1;
+const int MBGRID_INTERP_NEAR = 2;
+const int MBGRID_INTERP_ALL = 3;
 
-/* comparison threshold */
-#define MBGRID_TINY 0.00000001
+/* comparison threshold */;
+const int MBGRID_TINY = 0.00000001;
 
 /* interpolation algorithm
     The code is set to use either of two

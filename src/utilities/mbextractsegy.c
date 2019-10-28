@@ -33,16 +33,16 @@
 #include "mb_segy.h"
 #include "mb_status.h"
 
-#define MBES_ALLOC_NUM 128
-#define MBES_ROUTE_WAYPOINT_NONE 0
-#define MBES_ROUTE_WAYPOINT_SIMPLE 1
-#define MBES_ROUTE_WAYPOINT_TRANSIT 2
-#define MBES_ROUTE_WAYPOINT_STARTLINE 3
-#define MBES_ROUTE_WAYPOINT_ENDLINE 4
-#define MBES_ONLINE_THRESHOLD 15.0
-#define MBES_ONLINE_COUNT 30
-#define MBES_NUM_PLOT_MAX 50
-#define MBES_MAX_SWEEP 1.0
+const int MBES_ALLOC_NUM = 128;
+const int MBES_ROUTE_WAYPOINT_NONE = 0;
+const int MBES_ROUTE_WAYPOINT_SIMPLE = 1;
+const int MBES_ROUTE_WAYPOINT_TRANSIT = 2;
+const int MBES_ROUTE_WAYPOINT_STARTLINE = 3;
+const int MBES_ROUTE_WAYPOINT_ENDLINE = 4;
+const double MBES_ONLINE_THRESHOLD = 15.0;
+const int MBES_ONLINE_COUNT = 30;
+const int MBES_NUM_PLOT_MAX = 50;
+const double MBES_MAX_SWEEP = 1.0;
 
 static const char program_name[] = "MBextractsegy";
 static const char help_message[] =

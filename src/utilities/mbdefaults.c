@@ -33,23 +33,23 @@
 #include "mb_status.h"
 
 /* colortable view mode defines */
-#define MBV_COLORTABLE_HAXBY 0
-#define MBV_COLORTABLE_BRIGHT 1
-#define MBV_COLORTABLE_MUTED 2
-#define MBV_COLORTABLE_GRAY 3
-#define MBV_COLORTABLE_FLAT 4
-#define MBV_COLORTABLE_SEALEVEL1 5
-#define MBV_COLORTABLE_SEALEVEL2 6
+const int MBV_COLORTABLE_HAXBY = 0;
+const int MBV_COLORTABLE_BRIGHT = 1;
+const int MBV_COLORTABLE_MUTED = 2;
+const int MBV_COLORTABLE_GRAY = 3;
+const int MBV_COLORTABLE_FLAT = 4;
+const int MBV_COLORTABLE_SEALEVEL1 = 5;
+const int MBV_COLORTABLE_SEALEVEL2 = 6;
 
 /* colortable view mode defines */
-#define MBV_COLORTABLE_NORMAL 0
-#define MBV_COLORTABLE_REVERSED 1
+const int MBV_COLORTABLE_NORMAL = 0;
+const int MBV_COLORTABLE_REVERSED = 1;
 
 /* shade view mode defines */
-#define MBV_SHADE_VIEW_NONE 0
-#define MBV_SHADE_VIEW_ILLUMINATION 1
-#define MBV_SHADE_VIEW_SLOPE 2
-#define MBV_SHADE_VIEW_OVERLAY 3
+const int MBV_SHADE_VIEW_NONE = 0;
+const int MBV_SHADE_VIEW_ILLUMINATION = 1;
+const int MBV_SHADE_VIEW_SLOPE = 2;
+const int MBV_SHADE_VIEW_OVERLAY = 3;
 
 
 static const char program_name[] = "MBDEFAULTS";

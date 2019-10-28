@@ -37,8 +37,8 @@
 #include "mb_status.h"
 #include "mb_swap.h"
 
-#define OUTPUT_TEXT 0
-#define OUTPUT_ESF 1
+const int OUTPUT_TEXT = 0;
+const int OUTPUT_ESF = 1;
 
 static const char program_name[] = "mbdumpesf";
 static const char help_message[] =
