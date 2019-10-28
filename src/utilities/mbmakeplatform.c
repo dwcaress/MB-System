@@ -34,10 +34,10 @@
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_status.h"
-
-#define SENSOR_OFF 0
-#define SENSOR_ADD 1
-#define SENSOR_MODIFY 2
+;
+const int SENSOR_OFF = 0;
+const int SENSOR_ADD = 1;
+const int SENSOR_MODIFY = 2;
 
 static const char program_name[] = "mbmakeplatform";
 static const char help_message[] =

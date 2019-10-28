@@ -45,21 +45,22 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-#define NFIELDSMAX 50
-#define MAX_OPTIONS 50
-#define TYPE_UNKNOWN 0
-#define TYPE_TIMETAG 1
-#define TYPE_INTEGER 2
-#define TYPE_DOUBLE 3
-#define TYPE_ANGLE 4
-#define KEARFOTT_MONITOR_VALID_DVL 0x01
-#define KEARFOTT_MONITOR_RESERVED 0x02
-#define KEARFOTT_MONITOR_ZUPT_PROCESSED 0x04
-#define KEARFOTT_MONITOR_DVL_REJECTED 0x08
-#define KEARFOTT_MONITOR_DVL_PPROCESSED 0x10
-#define KEARFOTT_MONITOR_GPS_REJECTED 0x20
-#define KEARFOTT_MONITOR_GPS_PROCESSED 0x40
-#define KEARFOTT_MONITOR_DEPTH_LOOP_OPEN 0x80
+const int NFIELDSMAX = 50;
+const int MAX_OPTIONS = 50;
+const int TYPE_UNKNOWN = 0;
+const int TYPE_TIMETAG = 1;
+const int TYPE_INTEGER = 2;
+const int TYPE_DOUBLE = 3;
+const int TYPE_ANGLE = 4;
+// TODO(schwehr): Should these be unsigned values for flags?
+// const int KEARFOTT_MONITOR_VALID_DVL = 0x01;
+// const int KEARFOTT_MONITOR_RESERVED = 0x02;
+// const int KEARFOTT_MONITOR_ZUPT_PROCESSED = 0x04;
+// const int KEARFOTT_MONITOR_DVL_REJECTED = 0x08;
+const int KEARFOTT_MONITOR_DVL_PPROCESSED = 0x10;
+// const int KEARFOTT_MONITOR_GPS_REJECTED = 0x20;
+// const int KEARFOTT_MONITOR_GPS_PROCESSED = 0x40;
+// const int KEARFOTT_MONITOR_DEPTH_LOOP_OPEN = 0x80;
 
 static const char program_name[] = "MBinsreprocess";
 static const char help_message[] =
