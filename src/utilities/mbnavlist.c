@@ -35,12 +35,12 @@
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_status.h"
-
-#define MAX_OPTIONS 25
-#define MBNAVLIST_SEGMENT_MODE_NONE 0
-#define MBNAVLIST_SEGMENT_MODE_TAG 1
-#define MBNAVLIST_SEGMENT_MODE_SWATHFILE 2
-#define MBNAVLIST_SEGMENT_MODE_DATALIST 3
+;
+const int MAX_OPTIONS = 25;
+const int MBNAVLIST_SEGMENT_MODE_NONE = 0;
+const int MBNAVLIST_SEGMENT_MODE_TAG = 1;
+const int MBNAVLIST_SEGMENT_MODE_SWATHFILE = 2;
+const int MBNAVLIST_SEGMENT_MODE_DATALIST = 3;
 
 double NaN;
 

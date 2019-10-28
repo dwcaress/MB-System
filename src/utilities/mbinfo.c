@@ -37,7 +37,8 @@
 #include "mb_status.h"
 #include "mb_io.h"
 
-#define MBINFO_MAXPINGS 50
+const int MBINFO_MAXPINGS = 50;
+
 struct ping {
 	char *beamflag;
 	double *bath;

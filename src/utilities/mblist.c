@@ -43,26 +43,26 @@
 #include "mb_status.h"
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
-
-#define MAX_OPTIONS 25
-#define DUMP_MODE_LIST 1
-#define DUMP_MODE_BATH 2
-#define DUMP_MODE_TOPO 3
-#define DUMP_MODE_AMP 4
-#define DUMP_MODE_SS 5
-#define MBLIST_CHECK_ON 0
-#define MBLIST_CHECK_ON_NULL 1
-#define MBLIST_CHECK_OFF_RAW 2
-#define MBLIST_CHECK_OFF_NAN 3
-#define MBLIST_CHECK_OFF_FLAGNAN 4
-#define MBLIST_SET_OFF 0
-#define MBLIST_SET_ON 1
-#define MBLIST_SET_ALL 2
-#define MBLIST_SET_EXCLUDE_OUTER 3
-#define MBLIST_SEGMENT_MODE_NONE 0
-#define MBLIST_SEGMENT_MODE_TAG 1
-#define MBLIST_SEGMENT_MODE_SWATHFILE 2
-#define MBLIST_SEGMENT_MODE_DATALIST 3
+;
+const int MAX_OPTIONS = 25;
+const int DUMP_MODE_LIST = 1;
+const int DUMP_MODE_BATH = 2;
+const int DUMP_MODE_TOPO = 3;
+const int DUMP_MODE_AMP = 4;
+const int DUMP_MODE_SS = 5;
+const int MBLIST_CHECK_ON = 0;
+const int MBLIST_CHECK_ON_NULL = 1;
+const int MBLIST_CHECK_OFF_RAW = 2;
+const int MBLIST_CHECK_OFF_NAN = 3;
+const int MBLIST_CHECK_OFF_FLAGNAN = 4;
+const int MBLIST_SET_OFF = 0;
+const int MBLIST_SET_ON = 1;
+const int MBLIST_SET_ALL = 2;
+const int MBLIST_SET_EXCLUDE_OUTER = 3;
+const int MBLIST_SEGMENT_MODE_NONE = 0;
+const int MBLIST_SEGMENT_MODE_TAG = 1;
+const int MBLIST_SEGMENT_MODE_SWATHFILE = 2;
+const int MBLIST_SEGMENT_MODE_DATALIST = 3;
 
 double NaN;
 

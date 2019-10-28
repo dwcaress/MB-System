@@ -42,39 +42,40 @@
 #include "mb_status.h"
 
 /* gridding algorithms */
-#define MBMOSAIC_SINGLE_BEST 1
-#define MBMOSAIC_AVERAGE 2
+const int MBMOSAIC_SINGLE_BEST = 1;
+const int MBMOSAIC_AVERAGE = 2;
 
 /* grid format definitions */
-#define MBMOSAIC_ASCII 1
-#define MBMOSAIC_OLDGRD 2
-#define MBMOSAIC_CDFGRD 3
-#define MBMOSAIC_ARCASCII 4
-#define MBMOSAIC_GMTGRD 100
+const int MBMOSAIC_ASCII = 1;
+const int MBMOSAIC_OLDGRD = 2;
+const int MBMOSAIC_CDFGRD = 3;
+const int MBMOSAIC_ARCASCII = 4;
+const int MBMOSAIC_GMTGRD = 100;
 
 /* gridded data type */
-#define MBMOSAIC_DATA_AMPLITUDE 3
-#define MBMOSAIC_DATA_SIDESCAN 4
-#define MBMOSAIC_DATA_FLAT_GRAZING 5
-#define MBMOSAIC_DATA_GRAZING 6
-#define MBMOSAIC_DATA_SLOPE 7
+const int MBMOSAIC_DATA_AMPLITUDE = 3;
+const int MBMOSAIC_DATA_SIDESCAN = 4;
+const int MBMOSAIC_DATA_FLAT_GRAZING = 5;
+const int MBMOSAIC_DATA_GRAZING = 6;
+const int MBMOSAIC_DATA_SLOPE = 7;
 
 /* prioritization mode */
-#define MBMOSAIC_PRIORITY_NONE 0
-#define MBMOSAIC_PRIORITY_ANGLE 1
-#define MBMOSAIC_PRIORITY_AZIMUTH 2
-#define MBMOSAIC_PRIORITY_HEADING 4
+const int MBMOSAIC_PRIORITY_NONE = 0;
+const int MBMOSAIC_PRIORITY_ANGLE = 1;
+const int MBMOSAIC_PRIORITY_AZIMUTH = 2;
+const int MBMOSAIC_PRIORITY_HEADING = 4;
 
 /* priority tables */
-#define MBMOSAIC_PRIORITYTABLE_FILE 0
-#define MBMOSAIC_PRIORITYTABLE_60DEGREESUP 1
-#define MBMOSAIC_PRIORITYTABLE_67DEGREESUP 2
-#define MBMOSAIC_PRIORITYTABLE_75DEGREESUP 3
-#define MBMOSAIC_PRIORITYTABLE_85DEGREESUP 4
-#define MBMOSAIC_PRIORITYTABLE_60DEGREESDN 5
-#define MBMOSAIC_PRIORITYTABLE_67DEGREESDN 6
-#define MBMOSAIC_PRIORITYTABLE_75DEGREESDN 7
-#define MBMOSAIC_PRIORITYTABLE_85DEGREESDN 8
+const int MBMOSAIC_PRIORITYTABLE_FILE = 0;
+const int MBMOSAIC_PRIORITYTABLE_60DEGREESUP = 1;
+const int MBMOSAIC_PRIORITYTABLE_67DEGREESUP = 2;
+const int MBMOSAIC_PRIORITYTABLE_75DEGREESUP = 3;
+const int MBMOSAIC_PRIORITYTABLE_85DEGREESUP = 4;
+const int MBMOSAIC_PRIORITYTABLE_60DEGREESDN = 5;
+const int MBMOSAIC_PRIORITYTABLE_67DEGREESDN = 6;
+const int MBMOSAIC_PRIORITYTABLE_75DEGREESDN = 7;
+const int MBMOSAIC_PRIORITYTABLE_85DEGREESDN = 8;
+
 int n_priority_angle_60degreesup = 3;
 double priority_angle_60degreesup_angle[] = {-60, 0, 60};
 double priority_angle_60degreesup_priority[] = {1.0, 0.0, 1.0};
@@ -100,20 +101,21 @@ int n_priority_angle_85degreesdn = 3;
 double priority_angle_85degreesdn_angle[] = {-85, 0, 85};
 double priority_angle_85degreesdn_priority[] = {0.0, 1.0, 0.0};
 
-#define MB7K2SS_NUM_ANGLES 171
-#define MB7K2SS_ANGLE_MAX 85.0
+const int MB7K2SS_NUM_ANGLES = 171;
+const double MB7K2SS_ANGLE_MAX = 85.0;
 
-/* flag for no data in grid */
-#define NO_DATA_FLAG 99999
+/* flag for no data in grid */;
+const int NO_DATA_FLAG = 99999;
 
-/* interpolation mode */
-#define MBMOSAIC_INTERP_NONE 0
-#define MBMOSAIC_INTERP_GAP 1
-#define MBMOSAIC_INTERP_NEAR 2
-#define MBMOSAIC_INTERP_ALL 3
+/* interpolation mode */;
+const int MBMOSAIC_INTERP_NONE = 0;
+const int MBMOSAIC_INTERP_GAP = 1;
+const int MBMOSAIC_INTERP_NEAR = 2;
+const int MBMOSAIC_INTERP_ALL = 3;
 
-#define MBMOSAIC_FOOTPRINT_REAL 0
-#define MBMOSAIC_FOOTPRINT_SPACING 1
+const int MBMOSAIC_FOOTPRINT_REAL = 0;
+const int MBMOSAIC_FOOTPRINT_SPACING = 1;
+
 struct footprint {
 	double x[4];
 	double y[4];
