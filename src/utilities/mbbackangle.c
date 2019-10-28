@@ -41,11 +41,11 @@
 #include "mb_status.h"
 
 /* mode defines */
-#define MBBACKANGLE_AMP 1
-#define MBBACKANGLE_SS 2
-#define MBBACKANGLE_INNERSWATHLIMIT 15.0
-#define MBBACKANGLE_BEAMPATTERN_EMPIRICAL 0
-#define MBBACKANGLE_BEAMPATTERN_SIDESCAN 1
+const int MBBACKANGLE_AMP = 1;
+const int MBBACKANGLE_SS = 2;
+const double MBBACKANGLE_INNERSWATHLIMIT = 15.0;
+const int MBBACKANGLE_BEAMPATTERN_EMPIRICAL = 0;
+const int MBBACKANGLE_BEAMPATTERN_SIDESCAN = 1;
 
 /* define grid structure */
 struct mbba_grid_struct {

@@ -37,7 +37,7 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-#define NCHARMAX 256
+const int NCHARMAX = 256;
 
 /*--------------------------------------------------------------------*/
 
