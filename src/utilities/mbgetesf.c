@@ -160,9 +160,6 @@ int main(int argc, char **argv) {
 	int mode;
 	int kluge = 0;
 
-	/* time, user, host variables */
-	time_t right_now;
-	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 	mb_path esf_header;
 	int esf_mode = MB_ESF_MODE_EXPLICIT;
 
@@ -366,15 +363,19 @@ int main(int argc, char **argv) {
 	/* put version header at beginning */
 	if (status == MB_SUCCESS) {
 		memset(esf_header, 0, MB_PATH_MAXLINE);
-		right_now = time((time_t *)0);
+		const time_t right_now = time((time_t *)0);
+		char date[32];
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
+		char *user_ptr = getenv("USER");
+		if (user_ptr == NULL)
 			user_ptr = getenv("LOGNAME");
+		char user[MBP_FILENAMESIZE];
 		if (user_ptr != NULL)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
+		char host[MBP_FILENAMESIZE];
 		gethostname(host, MBP_FILENAMESIZE);
 		if (mode == MBGETESF_IMPLICITBEST) {
 			if (format == MBF_3DWISSLR || format == MBF_3DWISSLP) {

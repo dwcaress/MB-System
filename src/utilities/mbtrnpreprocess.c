@@ -385,16 +385,6 @@ int mbtrnpreprocess_openlog
   int *error
 )
 {
-  /* time, user, host variables */
-  struct timeval timeofday;
-  struct timezone timezone;
-  double time_d;
-  int time_i[7];
-  char date[32], user[128], *user_ptr;
-  mb_path host;
-  mb_path log_file;
-  mb_path log_message;
-
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -410,9 +400,13 @@ int mbtrnpreprocess_openlog
     mbtrnpreprocess_closelog(verbose, logfp, error);
 
   /* get time and user data */
+  struct timeval timeofday;
+  struct timezone timezone;
   gettimeofday(&timeofday, &timezone);
-  time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
+  const double time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
+  int time_i[7];
   const int status = mb_get_date(verbose, time_d, time_i);
+  char date[32];
   sprintf(date,
     "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d",
     time_i[0],
@@ -422,15 +416,20 @@ int mbtrnpreprocess_openlog
     time_i[4],
     time_i[5],
     time_i[6]);
-  if ((user_ptr = getenv("USER")) == NULL)
+  char *user_ptr = getenv("USER");
+  if (user_ptr == NULL)
     user_ptr = getenv("LOGNAME");
+  char user[128];
   if (user_ptr != NULL)
     strcpy(user, user_ptr);
   else
     strcpy(user, "unknown");
+  mb_path host;
   gethostname(host, sizeof(mb_path));
 
   /* open new log file */
+  mb_path log_message;
+  mb_path log_file;
   sprintf(log_file, "%s/%s_mbtrnpreprocess_log.txt", log_directory,   date);
   *logfp = fopen(log_file, "w");
   if (*logfp != NULL)
