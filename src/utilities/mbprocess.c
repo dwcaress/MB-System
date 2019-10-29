@@ -416,19 +416,129 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
   /* MBIO status variables */
-  int verbose = 0;
   int error = MB_ERROR_NO_ERROR;
 
-  /* MBIO read and write control parameters */
+  /* get current default values */
+  int verbose = 0;
+  int mbp_format;
   int pings;
   int lonflip;
   double bounds[4];
   int btime_i[7];
   int etime_i[7];
-  double btime_d;
-  double etime_d;
   double speedmin;
   double timegap;
+  int status = mb_defaults(verbose, &mbp_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+  int uselockfiles; // TODO(schwehr): Make mb_uselockfiles take a bool.
+  status &= mb_uselockfiles(verbose, &uselockfiles);
+
+  /* reset all defaults */
+  pings = 1;
+  // lonflip = 0;
+  bounds[0] = -360.;
+  bounds[1] = 360.;
+  bounds[2] = -90.;
+  bounds[3] = 90.;
+  btime_i[0] = 1962;
+  btime_i[1] = 2;
+  btime_i[2] = 21;
+  btime_i[3] = 10;
+  btime_i[4] = 30;
+  btime_i[5] = 0;
+  btime_i[6] = 0;
+  etime_i[0] = 2062;
+  etime_i[1] = 2;
+  etime_i[2] = 21;
+  etime_i[3] = 10;
+  etime_i[4] = 30;
+  etime_i[5] = 0;
+  etime_i[6] = 0;
+  speedmin = 0.0;
+  timegap = 1000000000.0;
+
+  /* set default input and output */
+  bool mbp_ifile_specified = false;
+  char mbp_ifile[MBP_FILENAMESIZE] = "";
+
+  bool mbp_ofile_specified = false;
+  char mbp_ofile[MBP_FILENAMESIZE] = "";
+  bool mbp_format_specified = false;
+  bool strip_comments = false;
+  int format = 0;
+  char read_file[MB_PATH_MAXLINE];
+  bool checkuptodate = true;
+  bool printfilestatus = false;
+  bool testonly = false;
+
+  /* process argument list */
+  {
+    bool errflg = false;
+    int c;
+    bool help = false;
+    while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpSsTt")) != -1)
+      switch (c) {
+      case 'H':
+      case 'h':
+        help = true;
+        break;
+      case 'V':
+      case 'v':
+        verbose++;
+        break;
+      case 'F':
+      case 'f':
+        sscanf(optarg, "%d", &format);
+        mbp_format_specified = true;
+        break;
+      case 'I':
+      case 'i':
+        mbp_ifile_specified = true;
+        sscanf(optarg, "%s", read_file);
+        break;
+      case 'N':
+      case 'n':
+        strip_comments = true;
+        break;
+      case 'O':
+      case 'o':
+        mbp_ofile_specified = true;
+        sscanf(optarg, "%s", mbp_ofile);
+        break;
+      case 'P':
+      case 'p':
+        checkuptodate = false;
+        break;
+      case 'S':
+      case 's':
+        printfilestatus = true;
+        break;
+      case 'T':
+      case 't':
+        testonly = true;
+        break;
+      case '?':
+        errflg = true;
+      }
+
+    if (errflg) {
+      fprintf(stderr, "usage: %s\n", usage_message);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_BAD_USAGE);
+    }
+
+    if (help) {
+      fprintf(stderr, "\nProgram %s\n", program_name);
+      fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
+      fprintf(stderr, "\n%s\n", help_message);
+      fprintf(stderr, "\nusage: %s\n", usage_message);
+      exit(error);
+    }
+  }
+
+  /* MBIO read and write control parameters */
+  double btime_d;
+  double etime_d;
   int beams_bath;
   int beams_amp;
   int pixels_ss;
@@ -490,10 +600,6 @@ int main(int argc, char **argv) {
   struct mb_process_struct process;
 
   /* processing variables */
-  bool checkuptodate = true;
-  bool testonly = false;
-  bool printfilestatus = false;
-  char read_file[MB_PATH_MAXLINE];
   void *datalist;
   int look_processed = MB_DATALIST_LOOK_NO;
   double file_weight;
@@ -520,15 +626,11 @@ int main(int argc, char **argv) {
   char str_locked_ignored[] = "locked but lock ignored";
   char str_locked_fail[] = "unlocked but set lock failed";
   char str_locked_no[] = "unlocked";
-  int format = 0;
   int variable_beams;
   int beam_flagging;
   bool calculatespeedheading = false;
-  char mbp_ifile[MBP_FILENAMESIZE];
   char mbp_pfile[MBP_FILENAMESIZE];
   char mbp_dfile[MBP_FILENAMESIZE];
-  char mbp_ofile[MBP_FILENAMESIZE];
-  int mbp_format;
   FILE *tfp;
   struct stat file_status;
   int fstat;
@@ -614,6 +716,7 @@ int main(int argc, char **argv) {
 
   /* edit save file control variables */
   struct mb_esf_struct esf;
+  memset(&esf, 0, sizeof(struct mb_esf_struct));
   int neditnull;
   int neditduplicate;
   int neditnotused;
@@ -677,10 +780,7 @@ int main(int argc, char **argv) {
 
   /* topography parameters */
   struct mbprocess_grid_struct grid;
-
-  /* output fbt and fnv files */
-  FILE *fnv_fp, *fbt_fp;
-  mb_path fnv_file, fbt_file;
+  memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
 
   char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
   char *string1, *string2, *string3;
@@ -688,117 +788,10 @@ int main(int argc, char **argv) {
   int pingmultiplicity;
   int nbeams;
   int istart, iend, icut;
-  int intstat;
   int ioff;
   int mm;
   int ix, jy, kgrid;
   int kgrid00, kgrid10, kgrid01, kgrid11;
-
-  /* get current default values */
-  int status = mb_defaults(verbose, &mbp_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-  int uselockfiles; // TODO(schwehr): Make mb_uselockfiles take a bool.
-  status &= mb_uselockfiles(verbose, &uselockfiles);
-
-  /* reset all defaults */
-  pings = 1;
-  // lonflip = 0;
-  bounds[0] = -360.;
-  bounds[1] = 360.;
-  bounds[2] = -90.;
-  bounds[3] = 90.;
-  btime_i[0] = 1962;
-  btime_i[1] = 2;
-  btime_i[2] = 21;
-  btime_i[3] = 10;
-  btime_i[4] = 30;
-  btime_i[5] = 0;
-  btime_i[6] = 0;
-  etime_i[0] = 2062;
-  etime_i[1] = 2;
-  etime_i[2] = 21;
-  etime_i[3] = 10;
-  etime_i[4] = 30;
-  etime_i[5] = 0;
-  etime_i[6] = 0;
-  speedmin = 0.0;
-  timegap = 1000000000.0;
-
-  /* set default input and output */
-  bool mbp_ifile_specified = false;
-  strcpy(mbp_ifile, "\0");
-  bool mbp_ofile_specified = false;
-  strcpy(mbp_ofile, "\0");
-  bool mbp_format_specified = false;
-  bool strip_comments = false;
-
-  /* initialize grid and esf */
-  memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
-  memset(&esf, 0, sizeof(struct mb_esf_struct));
-
-  /* process argument list */
-  {
-    bool errflg = false;
-    int c;
-    bool help = false;
-    while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpSsTt")) != -1)
-      switch (c) {
-      case 'H':
-      case 'h':
-        help = true;
-        break;
-      case 'V':
-      case 'v':
-        verbose++;
-        break;
-      case 'F':
-      case 'f':
-        sscanf(optarg, "%d", &format);
-        mbp_format_specified = true;
-        break;
-      case 'I':
-      case 'i':
-        mbp_ifile_specified = true;
-        sscanf(optarg, "%s", read_file);
-        break;
-      case 'N':
-      case 'n':
-        strip_comments = true;
-        break;
-      case 'O':
-      case 'o':
-        mbp_ofile_specified = true;
-        sscanf(optarg, "%s", mbp_ofile);
-        break;
-      case 'P':
-      case 'p':
-        checkuptodate = false;
-        break;
-      case 'S':
-      case 's':
-        printfilestatus = true;
-        break;
-      case 'T':
-      case 't':
-        testonly = true;
-        break;
-      case '?':
-        errflg = true;
-      }
-
-    if (errflg) {
-      fprintf(stderr, "usage: %s\n", usage_message);
-      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(MB_ERROR_BAD_USAGE);
-    }
-
-    if (help) {
-      fprintf(stderr, "\nProgram %s\n", program_name);
-      fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
-      fprintf(stderr, "\n%s\n", help_message);
-      fprintf(stderr, "\nusage: %s\n", usage_message);
-      exit(error);
-    }
-  }
 
   /* try datalist.mb-1 as input */
   if (!mbp_ifile_specified) {
@@ -4628,6 +4621,7 @@ int main(int argc, char **argv) {
         }
 
         /* interpolate the navigation if desired */
+        int intstat;
         if (error == MB_ERROR_NO_ERROR && process.mbp_nav_mode == MBP_NAV_ON &&
             (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
           /* interpolate navigation */
