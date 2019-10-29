@@ -46,36 +46,36 @@
 #include "mb_status.h"
 #include "mbsys_ldeoih.h"
 
-#define MBFILTER_BATH 0
-#define MBFILTER_AMP 1
-#define MBFILTER_SS 2
+const int MBFILTER_BATH = 0;
+const int MBFILTER_AMP = 1;
+const int MBFILTER_SS = 2;
 
-#define MBFILTER_HIPASS_NONE 0
-#define MBFILTER_HIPASS_MEAN 1
-#define MBFILTER_HIPASS_GAUSSIAN 2
-#define MBFILTER_HIPASS_MEDIAN 3
-#define MBFILTER_SMOOTH_NONE 0
-#define MBFILTER_SMOOTH_MEAN 1
-#define MBFILTER_SMOOTH_GAUSSIAN 2
-#define MBFILTER_SMOOTH_MEDIAN 3
-#define MBFILTER_SMOOTH_GRADIENT 4
-#define MBFILTER_CONTRAST_NONE 0
-#define MBFILTER_CONTRAST_EDGE 1
-#define MBFILTER_CONTRAST_GRADIENT 2
+const int MBFILTER_HIPASS_NONE = 0;
+const int MBFILTER_HIPASS_MEAN = 1;
+const int MBFILTER_HIPASS_GAUSSIAN = 2;
+const int MBFILTER_HIPASS_MEDIAN = 3;
+const int MBFILTER_SMOOTH_NONE = 0;
+const int MBFILTER_SMOOTH_MEAN = 1;
+const int MBFILTER_SMOOTH_GAUSSIAN = 2;
+const int MBFILTER_SMOOTH_MEDIAN = 3;
+const int MBFILTER_SMOOTH_GRADIENT = 4;
+const int MBFILTER_CONTRAST_NONE = 0;
+const int MBFILTER_CONTRAST_EDGE = 1;
+const int MBFILTER_CONTRAST_GRADIENT = 2;
 
-#define MBFILTER_A_NONE 0
-#define MBFILTER_A_HIPASS_MEAN 1
-#define MBFILTER_A_HIPASS_GAUSSIAN 2
-#define MBFILTER_A_HIPASS_MEDIAN 3
-#define MBFILTER_A_SMOOTH_MEAN 4
-#define MBFILTER_A_SMOOTH_GAUSSIAN 5
-#define MBFILTER_A_SMOOTH_MEDIAN 6
-#define MBFILTER_A_SMOOTH_GRADIENT 7
-#define MBFILTER_A_CONTRAST_EDGE 8
-#define MBFILTER_A_CONTRAST_GRADIENT 9
+const int MBFILTER_A_NONE = 0;
+const int MBFILTER_A_HIPASS_MEAN = 1;
+const int MBFILTER_A_HIPASS_GAUSSIAN = 2;
+const int MBFILTER_A_HIPASS_MEDIAN = 3;
+const int MBFILTER_A_SMOOTH_MEAN = 4;
+const int MBFILTER_A_SMOOTH_GAUSSIAN = 5;
+const int MBFILTER_A_SMOOTH_MEDIAN = 6;
+const int MBFILTER_A_SMOOTH_GRADIENT = 7;
+const int MBFILTER_A_CONTRAST_EDGE = 8;
+const int MBFILTER_A_CONTRAST_GRADIENT = 9;
 
 /* MBIO buffer size default */
-#define MBFILTER_BUFFER_DEFAULT 5000
+const int MBFILTER_BUFFER_DEFAULT = 5000;
 
 /* ping structure definition */
 struct mbfilter_ping_struct {
@@ -112,7 +112,7 @@ struct mbfilter_ping_struct {
 };
 
 /* filter structure definition */
-#define MBFILTER_NFILTER_MAX 10
+const int MBFILTER_NFILTER_MAX = 10;
 struct mbfilter_filter_struct {
 	int mode;
 	int xdim;

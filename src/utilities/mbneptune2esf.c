@@ -63,8 +63,8 @@
 #include "mbsys_simrad2.h"
 
 /* length of line name nnnn_yyyymmdd_hhmmss = 20 */
-#define LINE_NAME_LENGTH 20
-#define LINE_NAME_BUFFER LINE_NAME_LENGTH + 1
+const int LINE_NAME_LENGTH = 20;
+#define LINE_NAME_BUFFER 21 /* LINE_NAME_LENGTH + 1; */
 
 /* use MB-System memory allocation functions */
 #define USE_MB_MALLOC 1

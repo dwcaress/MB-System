@@ -48,20 +48,20 @@
 #include "mbsys_xse.h"
 
 /* defines for special copying routines */
-#define MBCOPY_PARTIAL 0
-#define MBCOPY_FULL 1
-#define MBCOPY_ELACMK2_TO_XSE 2
-#define MBCOPY_XSE_TO_ELACMK2 3
-#define MBCOPY_SIMRAD_TO_SIMRAD2 4
-#define MBCOPY_ANY_TO_MBLDEOIH 5
+const int MBCOPY_PARTIAL = 0;
+const int MBCOPY_FULL = 1;
+const int MBCOPY_ELACMK2_TO_XSE = 2;
+const int MBCOPY_XSE_TO_ELACMK2 = 3;
+const int MBCOPY_SIMRAD_TO_SIMRAD2 = 4;
+const int MBCOPY_ANY_TO_MBLDEOIH = 5;
 
-#ifdef ENABLE_GSF
-#define MBCOPY_RESON8K_TO_GSF 6
+#ifdef ENABLE_GSF;
+const int MBCOPY_RESON8K_TO_GSF = 6;
 #endif
-
-#define MBCOPY_STRIPMODE_NONE       0
-#define MBCOPY_STRIPMODE_COMMENTS   1
-#define MBCOPY_STRIPMODE_BATHYONLY  2
+;
+const int MBCOPY_STRIPMODE_NONE      = 0;
+const int MBCOPY_STRIPMODE_COMMENTS  = 1;
+const int MBCOPY_STRIPMODE_BATHYONLY = 2;
 
 static const char program_name[] = "MBcopy";
 static const char help_message[] =

@@ -46,7 +46,7 @@
 #include "mb_status.h"
 
 /* define minimum number of data to fit plane */
-#define MINIMUM_NUMBER_DATA 100
+const int MINIMUM_NUMBER_DATA = 100;
 
 /* structure definitions */
 struct bath {

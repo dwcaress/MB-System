@@ -21,8 +21,6 @@
  *
  * Author:	D. W. Caress
  * Date:	August 20, 1994
- *
- *
  */
 
 #include <math.h>
@@ -175,8 +173,6 @@ int mbsys_elac_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elac_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -186,7 +182,7 @@ int mbsys_elac_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 	}
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -231,7 +227,7 @@ int mbsys_elac_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*nss = 0;
 	}
 
-	int status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -252,8 +248,6 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                        double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                        double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                        double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	double depthscale, dacrscale, daloscale, reflscale;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -301,10 +295,10 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		*nbath = store->beams_bath;
 		*namp = store->beams_bath;
 		*nss = 0;
-		depthscale = 0.01;
-		dacrscale = -0.02;
-		daloscale = 0.01;
-		reflscale = 1.0;
+		const double depthscale = 0.01;
+		const double dacrscale = -0.02;
+		const double daloscale = 0.01;
+		const double reflscale = 1.0;
 		for (int i = 0; i < store->profile_num; i++)
 			for (int j = 0; j < 8; j++) {
 				const int ibeam = (store->profile_num - 1 - i) + store->profile_num * (7 - j);
@@ -418,9 +412,6 @@ int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
                       double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                       double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                       double *ssalongtrack, char *comment, int *error) {
-	int status = MB_SUCCESS;
-	double depthscale, dacrscale, daloscale, reflscale;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -489,10 +480,10 @@ int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 
 		/* insert distance and depth values into storage arrays */
 		if (store->beams_bath == nbath) {
-			depthscale = 0.01;
-			dacrscale = -0.02;
-			daloscale = 0.01;
-			reflscale = 1.0;
+			const double depthscale = 0.01;
+			const double dacrscale = -0.02;
+			const double daloscale = 0.01;
+			const double reflscale = 1.0;
 			for (int i = 0; i < store->profile_num; i++)
 				for (int j = 0; j < 8; j++) {
 					const int ibeam = (store->profile_num - 1 - i) + store->profile_num * (7 - j);
@@ -521,6 +512,8 @@ int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 		strncpy(store->comment, comment, 199);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -535,8 +528,6 @@ int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 int mbsys_elac_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                       double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                       double *ssv, int *error) {
-	double daloscale, ttscale, angscale;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -579,9 +570,9 @@ int mbsys_elac_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			*ssv = 1480.0; /* hard wired for UNB MB course 96 */
 
 		/* get travel times, angles */
-		daloscale = 0.01;
-		ttscale = 0.0001;
-		angscale = 0.005;
+		const double daloscale = 0.01;
+		const double ttscale = 0.0001;
+		const double angscale = 0.005;
 		for (int i = 0; i < store->profile_num; i++)
 			for (int j = 0; j < 8; j++) {
 				const int ibeam = (store->profile_num - 1 - i) + store->profile_num * (7 - j);
@@ -600,7 +591,6 @@ int mbsys_elac_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 				alongtrack_offset[ibeam] = daloscale * store->profile[i].bath_alongtrack[j];
 			}
 
-		/* set status */
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 
@@ -718,11 +708,6 @@ int mbsys_elac_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 /*--------------------------------------------------------------------*/
 int mbsys_elac_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                 double *altitude, int *error) {
-	double depthscale;
-	double dacrscale;
-	double bath_best;
-	double xtrack_min;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -746,13 +731,13 @@ int mbsys_elac_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 	if (*kind == MB_DATA_DATA) {
 		/* get draft */
 		*transducer_depth = 0.005 * (store->transducer_starboard_depth + store->transducer_port_depth);
-		depthscale = 0.01;
-		dacrscale = -0.02;
-		bath_best = 0.0;
+		double depthscale = 0.01;
+		double dacrscale = -0.02;
+		double bath_best = 0.0;
 		if (store->profile[0].quality[4] == 1)
 			bath_best = depthscale * store->profile[0].bath[4];
 		else {
-			xtrack_min = 99999999.9;
+			double xtrack_min = 99999999.9;
 			for (int i = 0; i < store->profile_num; i++)
 				for (int j = 0; j < 8; j++) {
 					if (store->profile[i].quality[j] == 1 &&
@@ -763,7 +748,7 @@ int mbsys_elac_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 				}
 		}
 		if (bath_best <= 0.0) {
-			xtrack_min = 99999999.9;
+			double xtrack_min = 99999999.9;
 			for (int i = 0; i < store->profile_num; i++)
 				for (int j = 0; j < 8; j++) {
 					if (store->profile[i].quality[j] < 8 &&
@@ -1117,7 +1102,6 @@ int mbsys_elac_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elac_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");

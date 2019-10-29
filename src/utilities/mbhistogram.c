@@ -34,9 +34,9 @@
 #include "mb_status.h"
 
 /* mode defines */
-#define MBHISTOGRAM_BATH 0
-#define MBHISTOGRAM_AMP 1
-#define MBHISTOGRAM_SS 2
+const int MBHISTOGRAM_BATH = 0;
+const int MBHISTOGRAM_AMP = 1;
+const int MBHISTOGRAM_SS = 2;
 
 static const char program_name[] = "MBHISTOGRAM";
 static const char help_message[] =

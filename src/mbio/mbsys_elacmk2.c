@@ -599,9 +599,6 @@ int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 int mbsys_elacmk2_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                          double *ssv, int *error) {
-	double angle, pitch;
-	double daloscale, ttscale, angscale;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -639,14 +636,14 @@ int mbsys_elacmk2_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		*ssv = 0.1 * store->sound_vel;
 
 		/* get travel times, angles */
-		daloscale = 0.01;
-		ttscale = 0.0001;
-		angscale = 0.005;
+		const double daloscale = 0.01;
+		const double ttscale = 0.0001;
+		const double angscale = 0.005;
 		for (int i = 0; i < *nbeams; i++) {
 			const int j = store->beams_bath - i - 1;
 			ttimes[i] = ttscale * store->beams[j].tt;
-			angle = 90.0 + angscale * store->beams[j].angle;
-			pitch = angscale * store->beams[j].pitch;
+			const double angle = 90.0 + angscale * store->beams[j].angle;
+			const double pitch = angscale * store->beams[j].pitch;
 			mb_rollpitch_to_takeoff(verbose, pitch, angle, &angles[i], &angles_forward[i], error);
 			if (store->beams[j].angle < 0) {
 				angles_null[i] = 37.5 + angscale * store->transducer_port_error;
@@ -665,17 +662,13 @@ int mbsys_elacmk2_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 
 		/* done translating values */
 	}
-
 	/* deal with comment */
 	else if (*kind == MB_DATA_COMMENT) {
-		/* set status */
 		*error = MB_ERROR_COMMENT;
 		status = MB_FAILURE;
 	}
-
 	/* deal with other record type */
 	else {
-		/* set status */
 		*error = MB_ERROR_OTHER;
 		status = MB_FAILURE;
 	}
@@ -775,11 +768,6 @@ int mbsys_elacmk2_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                    double *altitude, int *error) {
-	double depthscale;
-	double dacrscale;
-	double bath_best;
-	double xtrack_min;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -803,13 +791,13 @@ int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA) {
 		/* get draft */
 		*transducer_depth = 0.005 * (store->transducer_starboard_depth + store->transducer_port_depth);
-		depthscale = 0.01;
-		dacrscale = -0.01;
-		bath_best = 0.0;
+		const double depthscale = 0.01;
+		const double dacrscale = -0.01;
+		double bath_best = 0.0;
 		if (store->beams[store->beams_bath / 2].quality == 1)
 			bath_best = depthscale * store->beams[store->beams_bath / 2].bath;
 		else {
-			xtrack_min = 99999999.9;
+			double xtrack_min = 99999999.9;
 			for (int i = 0; i < store->beams_bath; i++) {
 				if (store->beams[i].quality == 1 && fabs(dacrscale * store->beams[i].bath_acrosstrack) < xtrack_min) {
 					xtrack_min = fabs(dacrscale * store->beams[i].bath_acrosstrack);
@@ -818,7 +806,7 @@ int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		}
 		if (bath_best <= 0.0) {
-			xtrack_min = 99999999.9;
+			double xtrack_min = 99999999.9;
 			for (int i = 0; i < store->beams_bath; i++) {
 				if (store->beams[i].quality < 8 && fabs(dacrscale * store->beams[i].bath_acrosstrack) < xtrack_min) {
 					xtrack_min = fabs(dacrscale * store->beams[i].bath_acrosstrack);
@@ -828,7 +816,6 @@ int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 		*altitude = bath_best - *transducer_depth;
 
-		/* set status */
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 

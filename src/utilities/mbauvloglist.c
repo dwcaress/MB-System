@@ -33,36 +33,36 @@
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_status.h"
+;
+const int NFIELDSMAX = 512;
+const int MAX_OPTIONS = 512;
+const int TYPE_UNKNOWN = 0;
+const int TYPE_TIMETAG = 1;
+const int TYPE_INTEGER = 2;
+const int TYPE_DOUBLE = 3;
+const int TYPE_ANGLE = 4;
 
-#define NFIELDSMAX 512
-#define MAX_OPTIONS 512
-#define TYPE_UNKNOWN 0
-#define TYPE_TIMETAG 1
-#define TYPE_INTEGER 2
-#define TYPE_DOUBLE 3
-#define TYPE_ANGLE 4
+const int INDEX_ZERO = -1;
+const int INDEX_MERGE_LON = -2;
+const int INDEX_MERGE_LAT = -3;
+const int INDEX_MERGE_HEADING = -4;
+const int INDEX_MERGE_SPEED = -5;
+const int INDEX_MERGE_SENSORDEPTH = -6;
+const int INDEX_MERGE_ROLL = -7;
+const int INDEX_MERGE_PITCH = -8;
+const int INDEX_MERGE_HEAVE = -9;
+const int INDEX_CALC_CONDUCTIVITY = -10;
+const int INDEX_CALC_TEMPERATURE = -11;
+const int INDEX_CALC_PRESSURE = -12;
+const int INDEX_CALC_SALINITY = -13;
+const int INDEX_CALC_SOUNDSPEED = -14;
+const int INDEX_CALC_POTENTIALTEMP = -15;
+const int INDEX_CALC_DENSITY = -16;
+const int INDEX_CALC_KTIME = -17;
 
-#define INDEX_ZERO -1
-#define INDEX_MERGE_LON -2
-#define INDEX_MERGE_LAT -3
-#define INDEX_MERGE_HEADING -4
-#define INDEX_MERGE_SPEED -5
-#define INDEX_MERGE_SENSORDEPTH -6
-#define INDEX_MERGE_ROLL -7
-#define INDEX_MERGE_PITCH -8
-#define INDEX_MERGE_HEAVE -9
-#define INDEX_CALC_CONDUCTIVITY -10
-#define INDEX_CALC_TEMPERATURE -11
-#define INDEX_CALC_PRESSURE -12
-#define INDEX_CALC_SALINITY -13
-#define INDEX_CALC_SOUNDSPEED -14
-#define INDEX_CALC_POTENTIALTEMP -15
-#define INDEX_CALC_DENSITY -16
-#define INDEX_CALC_KTIME -17
-
-#define OUTPUT_MODE_TAB 0
-#define OUTPUT_MODE_CSV 1
-#define OUTPUT_MODE_BINARY 2
+const int OUTPUT_MODE_TAB = 0;
+const int OUTPUT_MODE_CSV = 1;
+const int OUTPUT_MODE_BINARY = 2;
 
 struct ctd_calibration_struct {
 		double pa0;
