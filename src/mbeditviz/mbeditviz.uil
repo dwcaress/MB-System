@@ -4,7 +4,7 @@
  *
  * BuilderXcessory Version 6.1.3.
  *
- * Identification: 
+ * Identification:
  */
 module main_uil
 version = 'V2.1'
@@ -418,6 +418,69 @@ object scale_cellsize : XmScale widget {
 !(BX)    };
 };
 
+object toggleButton_weightedmean : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Weighted Mean");
+        XmNwidth = 116;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_weightedmean);
+        XmNvalueChangedCallback = procedure do_mbeditviz_weightedmean();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_shoalbias : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Shoal Bias");
+        XmNwidth = 116;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_shoalbias);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object radioBox_gridalgorithm : XmRadioBox widget {
+    arguments {
+        arguments Style_use;
+        XmNtopAttachment = XmATTACH_NONE;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 37;
+        XmNleftOffset = 310;
+        XmNx = 310;
+        XmNy = 478;
+        XmNwidth = 122;
+        XmNheight = 65;
+    };
+    controls {
+         managed XmToggleButton toggleButton_weightedmean;
+         managed XmToggleButton toggleButton_shoalbias;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_radioBox_openmode);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object form_gridparameters : XmFormDialog widget {
     arguments {
         arguments Style_use;
@@ -425,7 +488,7 @@ object form_gridparameters : XmFormDialog widget {
         XmNx = 1054;
         XmNy = 1168;
         XmNwidth = 453;
-        XmNheight = 337;
+        XmNheight = 700;
     };
     controls {
          managed XmScale scale_cellsize;

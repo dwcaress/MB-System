@@ -110,3 +110,6 @@ lib
 *~
 src/mbtrn/mb1conv
 src/mbtrnutils/mbtrnpp
+src/mbtrn/r7kr_test
+src/mbtrnav/trn-cli
+src/mbtrnav/trn-server
