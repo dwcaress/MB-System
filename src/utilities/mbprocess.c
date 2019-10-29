@@ -113,9 +113,6 @@ static const char help_message[] =
 /*--------------------------------------------------------------------*/
 int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int nss, double *ss,
                       double *ssacrosstrack, int *error) {
-  int ifirst, ilast;
-  int iss, ibath;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -129,8 +126,8 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
   }
 
   /* find limits of good bathy */
-  ifirst = -1;
-  ilast = -1;
+  int ifirst = -1;
+  int ilast = -1;
   for (int i = 0; i < nbath; i++) {
     if (mb_beam_ok(beamflag[i])) {
       if (ifirst < 0)
@@ -142,8 +139,8 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
   /* loop over sidescan looking for bathy on either side
      - zero sidescan if bathy lacking */
   if (ifirst < ilast) {
-    ibath = ifirst;
-    for (iss = 0; iss < nss; iss++) {
+    int ibath = ifirst;
+    for (int iss = 0; iss < nss; iss++) {
       /* make sure ibath sets right interval for ss */
       while (ibath < ilast - 1 && (!mb_beam_ok(beamflag[ibath]) || !mb_beam_ok(beamflag[ibath + 1]) ||
                                    (mb_beam_ok(beamflag[ibath + 1]) && ssacrosstrack[iss] > bathacrosstrack[ibath + 1])))
@@ -161,7 +158,7 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 
   /* else if no good bathy zero all sidescan */
   else {
-    for (iss = 0; iss < nss; iss++) {
+    for (int iss = 0; iss < nss; iss++) {
       ss[iss] = 0.0;
     }
   }
@@ -181,10 +178,6 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 /*--------------------------------------------------------------------*/
 int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, struct mbprocess_sscorr_struct *corrtable,
                   struct mbprocess_sscorr_struct *corrtableuse, int *error) {
-  double factor;
-  int ifirst, ilast, irecent, inext;
-  int ii, itable;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -215,12 +208,12 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
     }
   }
   else {
-    itable = 0;
+    int itable = 0;
     for (int i = 0; i < ncorrtable - 1; i++) {
       if (corrtable[i].time_d <= time_d && corrtable[i + 1].time_d > time_d)
         itable = i;
     }
-    factor = (time_d - corrtable[itable].time_d) / (corrtable[itable + 1].time_d - corrtable[itable].time_d);
+    const double factor = (time_d - corrtable[itable].time_d) / (corrtable[itable + 1].time_d - corrtable[itable].time_d);
     corrtableuse->time_d = time_d;
     corrtableuse->nangle = MIN(corrtable[itable].nangle, corrtable[itable].nangle);
     for (int i = 0; i < corrtableuse->nangle; i++) {
@@ -244,14 +237,17 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
   }
 
   /* now interpolate or extrapolate any zero values */
-  ifirst = ncorrangle;
-  ilast = -1;
+  int ifirst = ncorrangle;
+  int ilast = -1;
   for (int i = 0; i < ncorrangle; i++) {
     if (corrtableuse->amplitude[i] != 0.0) {
       ifirst = MIN(i, ifirst);
       ilast = MAX(i, ilast);
     }
   }
+
+  int irecent;
+  int inext;
   for (int i = 0; i < ncorrangle; i++) {
     if (corrtableuse->amplitude[i] != 0.0)
       irecent = i;
@@ -265,12 +261,12 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
     }
     else if (corrtableuse->amplitude[i] == 0.0) {
       inext = -1;
-      for (ii = i + 1; ii < ilast; ii++) {
+      for (int ii = i + 1; ii < ilast; ii++) {
         if (corrtableuse->amplitude[ii] != 0.0 && inext < 0)
           inext = ii;
       }
       if (irecent < i && inext > i) {
-        factor = ((double)(i - irecent)) / ((double)(inext - irecent));
+        const double factor = ((double)(i - irecent)) / ((double)(inext - irecent));
         corrtableuse->amplitude[i] = corrtableuse->amplitude[irecent] +
                                      factor * (corrtableuse->amplitude[inext] - corrtableuse->amplitude[irecent]);
         corrtableuse->sigma[i] =
@@ -299,9 +295,6 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 }
 /*--------------------------------------------------------------------*/
 int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double angle, double *corr, int *error) {
-  int iangle;
-  int ifirst, ilast;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -314,6 +307,7 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
     fprintf(stderr, "dbg2       angle:       %f\n", angle);
   }
 
+  int iangle;
   /* search for the specified angle */
   bool found = false;
   for (int i = 0; i < nangle - 1; i++)
@@ -340,8 +334,8 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
 
   /* use outermost value if angle outside nonzero range */
   if (*corr == 0.0) {
-    ifirst = nangle - 1;
-    ilast = 0;
+    int ifirst = nangle - 1;
+    int ilast = 0;
     for (int i = 0; i < nangle; i++) {
       if (corr[i] != 0.0) {
         if (ifirst > i)
@@ -491,10 +485,6 @@ int main(int argc, char **argv) {
   int pixel_int;
   double pixel_size;
   double swath_width;
-
-  /* time, user, host variables */
-  time_t right_now;
-  char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 
   /* parameter controls */
   struct mb_process_struct process;
@@ -3412,15 +3402,19 @@ int main(int argc, char **argv) {
       } else {
         /* put version header at beginning */
         memset(resf_header, 0, MB_PATH_MAXLINE);
-        right_now = time((time_t *)0);
+        const time_t right_now = time((time_t *)0);
+        char date[32];
         strcpy(date, ctime(&right_now));
         date[strlen(date) - 1] = '\0';
-        if ((user_ptr = getenv("USER")) == NULL)
+        char *user_ptr = getenv("USER");
+        if (user_ptr == NULL)
           user_ptr = getenv("LOGNAME");
+        char user[MBP_FILENAMESIZE];
         if (user_ptr != NULL)
           strcpy(user, user_ptr);
         else
           strcpy(user, "unknown");
+        char host[MBP_FILENAMESIZE];
         gethostname(host, MBP_FILENAMESIZE);
         resf_mode = MB_ESF_MODE_EXPLICIT;
         sprintf(resf_header,
@@ -3583,15 +3577,19 @@ int main(int argc, char **argv) {
         status = mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (error == MB_ERROR_NO_ERROR)
           ocomment++;
-        right_now = time((time_t *)0);
+        const time_t right_now = time((time_t *)0);
+        char date[32];
         strcpy(date, ctime(&right_now));
         date[strlen(date) - 1] = '\0';
-        if ((user_ptr = getenv("USER")) == NULL)
+        char *user_ptr = getenv("USER");
+        if (user_ptr == NULL)
           user_ptr = getenv("LOGNAME");
+        char user[MBP_FILENAMESIZE];
         if (user_ptr != NULL)
           strcpy(user, user_ptr);
         else
           strcpy(user, "unknown");
+        char host[MBP_FILENAMESIZE];
         gethostname(host, MBP_FILENAMESIZE);
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);

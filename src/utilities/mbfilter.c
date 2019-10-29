@@ -667,10 +667,6 @@ int main(int argc, char **argv) {
 	int nexpect;
 	struct mbfilter_ping_struct ping[MBFILTER_BUFFER_DEFAULT];
 
-	/* time, user, host variables */
-	time_t right_now;
-	char date[32], user[128], *user_ptr, host[MB_PATH_MAXLINE];
-
 	/* processing control variables */
 	int datakind = MBFILTER_SS;
 	int num_filters = 0;
@@ -1174,15 +1170,19 @@ int main(int argc, char **argv) {
 		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 		sprintf(comment, "MB-system Version %s", MB_VERSION);
 		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-		right_now = time((time_t *)0);
+		const time_t right_now = time((time_t *)0);
+		char date[32];
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
+		char *user_ptr = getenv("USER");
+		if (user_ptr == NULL)
 			user_ptr = getenv("LOGNAME");
+		char user[128];
 		if (user_ptr != NULL)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
+		char host[MB_PATH_MAXLINE];
 		gethostname(host, MB_PATH_MAXLINE);
 		sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
 		status = mb_put_comment(verbose, ombio_ptr, comment, &error);

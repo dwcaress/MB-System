@@ -140,11 +140,6 @@ int main(int argc, char **argv) {
 	int tideformat = 2;
 	int ngood = 0;
 
-  	/* time parameters */
-	time_t right_now;
-	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	int pid;
-
 	FILE *tfp;
 	FILE *mfp;
 	FILE *ofp;
@@ -368,15 +363,19 @@ int main(int argc, char **argv) {
 				fprintf(ofp, " %s",argv[i]);
 			}
 			fprintf(ofp, " \n");
-			right_now = time((time_t *)0);
+			const time_t right_now = time((time_t *)0);
+			char date[32];
 			strcpy(date, ctime(&right_now));
 			date[strlen(date) - 1] = '\0';
-			if ((user_ptr = getenv("USER")) == NULL)
+			char *user_ptr = getenv("USER");
+			if (user_ptr == NULL)
 				user_ptr = getenv("LOGNAME");
+			char user[MB_PATH_MAXLINE];
 			if (user_ptr != NULL)
 				strcpy(user, user_ptr);
 			else
 				strcpy(user, "unknown");
+			char host[MB_PATH_MAXLINE];
 			gethostname(host, MBP_FILENAMESIZE);
 			fprintf(ofp, "# Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 		}
@@ -469,15 +468,19 @@ int main(int argc, char **argv) {
 						fprintf(ofp, " %s",argv[i]);
 					}
 					fprintf(ofp, " \n");
-					right_now = time((time_t *)0);
+					const time_t right_now = time((time_t *)0);
+					char date[32];
 					strcpy(date, ctime(&right_now));
 					date[strlen(date) - 1] = '\0';
-					if ((user_ptr = getenv("USER")) == NULL)
+					char *user_ptr = getenv("USER");
+					if (user_ptr == NULL)
 						user_ptr = getenv("LOGNAME");
+					char user[MB_PATH_MAXLINE];
 					if (user_ptr != NULL)
 						strcpy(user, user_ptr);
 					else
 						strcpy(user, "unknown");
+					char host[MB_PATH_MAXLINE];
 					gethostname(host, MBP_FILENAMESIZE);
 					fprintf(ofp, "# Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 				}

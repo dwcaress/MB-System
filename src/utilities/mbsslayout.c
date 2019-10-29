@@ -480,9 +480,6 @@ int main(int argc, char **argv) {
 	int n_wt_data = 0;
 	int n_wt_comment = 0;
 
-	time_t right_now;
-	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-
 	mb_path command;
 	int interp_status = MB_SUCCESS;
 	int interp_error = MB_ERROR_NO_ERROR;
@@ -1400,21 +1397,25 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nUnable to open plotting script file <%s> \n", scriptfile);
 		exit(status);
 	} else {
-		right_now = time((time_t *)0);
+		const time_t right_now = time((time_t *)0);
+		char date[32];
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
+		char *user_ptr = getenv("USER");
+		if (user_ptr == NULL)
 			user_ptr = getenv("LOGNAME");
+		char user[MB_PATH_MAXLINE];
 		if (user_ptr != NULL)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
-		i = gethostname(host, MB_PATH_MAXLINE);
-        fprintf(sfp, "# Swath plot generation script\n");
-        fprintf(sfp, "#   Written by MB-System program %s\n", program_name);
+		char host[MB_PATH_MAXLINE];
+		/* i = */ gethostname(host, MB_PATH_MAXLINE);
+		fprintf(sfp, "# Swath plot generation script\n");
+		fprintf(sfp, "#   Written by MB-System program %s\n", program_name);
 		fprintf(sfp, "#   MB-system Version %s\n", MB_VERSION);
 		fprintf(sfp, "#   Run run by %s on %s at %s\n#\n", user, host, date);
-    }
+	}
 
 	/*-------------------------------------------------------------------*/
 
