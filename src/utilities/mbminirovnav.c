@@ -364,16 +364,19 @@ int main(int argc, char **argv) {
 
   /* print starting verbose */
   if (verbose == 1) {
-    char date[32], user[128], *user_ptr, host[128];
     const time_t right_now = time((time_t *)0);
+    char date[32];
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
+    char *user_ptr = getenv("USER");
+    if (user_ptr == NULL)
       user_ptr = getenv("LOGNAME");
+    char user[128];
     if (user_ptr != NULL)
       strcpy(user, user_ptr);
     else
       strcpy(user, "unknown");
+    char host[128];
     gethostname(host, 128);
     fprintf(stdout, "Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(stdout, "Control Parameters:\n");

@@ -1846,10 +1846,6 @@ int main(int argc, char **argv) {
   double time_d_last;
   unsigned int sleep_time;
 
-  /* time, user, host variables */
-  time_t right_now;
-  char date[32], user[128], *user_ptr, host[128];
-
   FILE *fp;
   char *result;
   int format;
@@ -2264,15 +2260,19 @@ int main(int argc, char **argv) {
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    right_now = time((time_t *)0);
+    const time_t right_now = time((time_t *)0);
+    char date[32];
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
+    char *user_ptr = getenv("USER");
+    if (user_ptr == NULL)
       user_ptr = getenv("LOGNAME");
+    char user[128];
     if (user_ptr != NULL)
       strcpy(user, user_ptr);
     else
       strcpy(user, "unknown");
+    char host[128];
     gethostname(host, 128);
     strncpy(comment, "\0", 256);
     sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);

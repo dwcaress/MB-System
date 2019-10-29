@@ -952,8 +952,6 @@ int main(int argc, char **argv) {
   /* netcdf variables */
   char variable[MB_PATH_MAXLINE];
   int lcount = 0;
-  time_t right_now;
-  char date[32], user[128], *user_ptr, host[128];
 
   /* get current default values */
   int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -1336,15 +1334,19 @@ int main(int argc, char **argv) {
     fprintf(outfile, "\n");
     fprintf(outfile, "\t:mbsystem_version = \"%s\";\n", MB_VERSION);
 
-    right_now = time((time_t *)0);
+    const time_t right_now = time((time_t *)0);
+    char date[32];
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
-    if ((user_ptr = (char *)getenv("USER")) == NULL)
+    char *user_ptr = (char *)getenv("USER");
+    if (user_ptr == NULL)
       user_ptr = (char *)getenv("LOGNAME");
+    char user[128];
     if (user_ptr != NULL)
       strcpy(user, user_ptr);
     else
       strcpy(user, "unknown");
+    char host[128];
     gethostname(host, 128);
 
     fprintf(outfile, "\t:run = \"by <%s> on cpu <%s> at <%s>\";\n\n", user, host, date);

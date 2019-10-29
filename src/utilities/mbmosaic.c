@@ -141,10 +141,6 @@ static const char usage_message[] =
  */
 int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                 double dx, double dy, int *error) {
-	FILE *fp = NULL;
-	time_t right_now;
-	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -163,24 +159,25 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 
 	int status = MB_SUCCESS;
 
-	/* open the file */
-	if ((fp = fopen(outfile, "w")) == NULL) {
+	FILE *fp = fopen(outfile, "w");
+	if (fp == NULL) {
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
-	}
-
-	/* output grid */
-	else {
+	} else {
 		fprintf(fp, "grid created by program mbmosaic\n");
-		right_now = time((time_t *)0);
+		const time_t right_now = time((time_t *)0);
+		char date[32];
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
+		char *user_ptr = getenv("USER");
+		if (user_ptr == NULL)
 			user_ptr = getenv("LOGNAME");
+		char user[MB_PATH_MAXLINE];
 		if (user_ptr != NULL)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
+		char host[MB_PATH_MAXLINE];
 		/* i = */ gethostname(host, MB_PATH_MAXLINE);
 		fprintf(fp, "program run by %s on %s at %s\n", user, host, date);
 		fprintf(fp, "%d %d\n%f %f %f %f\n", nx, ny, xmin, xmax, ymin, ymax);
