@@ -543,13 +543,15 @@ int  wcommst_serialize(char **pdest, wcommst_t *src, int len)
 {
     int retval=-1;
     if(NULL!=src && NULL!=pdest){
+        fprintf(stderr,"%s:%d pdest[%p/%p] len[%d]\n",__FUNCTION__,__LINE__,pdest,*pdest,len);
         char *dest = *pdest;
         if(NULL==dest){
             dest = (char *)malloc(len);
+            *pdest = dest;
         }
         commsT *obj = static_cast<commsT *>(src->obj);
         obj->serialize(dest,len);
-        retval=len;
+        retval=TRN_MSG_SIZE; //len;
     }
     return retval;
 }
@@ -1418,7 +1420,7 @@ int32_t trnw_meas_msg(char **dest, wmeast_t *src, int msg_type, int param)
         retval=ct->serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
         delete ct;
-//        retval=TRN_MSG_SIZE;
+        retval=TRN_MSG_SIZE;
     }
     return retval;
 }
@@ -1433,7 +1435,7 @@ int32_t trnw_pose_msg(char **dest, wposet_t *src, char msg_type)
         commsT ct(msg_type, *ptsrc);
         retval=ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
-//        retval=TRN_MSG_SIZE;
+        retval=TRN_MSG_SIZE;
     }
     return retval;
 }
@@ -1451,7 +1453,7 @@ int32_t trnw_init_msg(char **dest, trn_config_t *cfg)
 
         retval=ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
-//        retval=TRN_MSG_SIZE;
+        retval=TRN_MSG_SIZE;
     }
     return retval;
 }
@@ -1465,7 +1467,7 @@ int32_t trnw_vdr_msg(char **dest, char msg_type, int param, float vdr)
         commsT ct(msg_type,param,vdr);
         retval=ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
-//        retval=TRN_MSG_SIZE;
+        retval=TRN_MSG_SIZE;
     }
     return retval;
 }
@@ -1479,7 +1481,7 @@ int32_t trnw_ptype_msg(char **dest, char msg_type, int param)
         commsT ct(msg_type,param);
         retval=ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
-//        retval=TRN_MSG_SIZE;
+        retval=TRN_MSG_SIZE;
     }
     return retval;
 }
@@ -1493,7 +1495,7 @@ int32_t trnw_type_msg(char **dest, char msg_type)
         commsT ct(msg_type);
         retval=ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
-//        retval=TRN_MSG_SIZE;
+        retval=TRN_MSG_SIZE;
     }
     return retval;
 }
@@ -1507,7 +1509,7 @@ int32_t trnw_acknack_msg(char **pdest,char ACK_NACK)
         commsT ct(ACK_NACK);
         retval=ct.serialize(msg,TRN_MSG_SIZE);
         *pdest=msg;
-        //        retval=TRN_MSG_SIZE;
+                retval=TRN_MSG_SIZE;
     }
     return retval;
 }

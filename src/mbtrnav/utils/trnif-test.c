@@ -65,6 +65,8 @@
 /////////////////////////
 #include <stdio.h>
 #include <stdlib.h>
+#include <getopt.h>
+
 #include "netif.h"
 #include "trn_msg.h"
 #include "trnw.h"
@@ -101,11 +103,20 @@
 // Declarations
 /////////////////////////
 typedef struct app_cfg_s{
+    int verbose;
     netif_t *netif;
     trn_config_t *trn_cfg;
     wtnav_t *trn;
     msock_socket_t *cli;
+    char *host;
+    int port;
+    char *map;
+    char *cfg;
+    char *particles;
+    char *logdir;
 }app_cfg_t;
+
+bool g_interrupt=false;
 
 /////////////////////////
 // Imports
@@ -118,6 +129,197 @@ typedef struct app_cfg_s{
 /////////////////////////
 // Function Definitions
 /////////////////////////
+
+/// @fn void s_show_help()
+/// @brief output user help message to stdout.
+/// @return none
+static void s_show_help()
+{
+    char help_message[] = "\ntrnif unit test\n";
+    char usage_message[] = "\ntrnc [options]\n"
+    "--verbose=n    : verbose output, n>0\n"
+    "--help         : output help message\n"
+    "--version      : output version info\n"
+    "--host=ip:n    : TRN server host:port\n"
+    "--map=s        : map file/directory [*]\n"
+    "--cfg=s        : config file        [*]\n"
+    "--particles=s  : particles file     [*]\n"
+    "--logdir=s     : log directory      [*]\n"
+    "[*] - required\n"
+    "\n";
+    printf("%s",help_message);
+    printf("%s",usage_message);
+}
+// End function s_show_help
+
+
+/// @fn void parse_args(int argc, char ** argv, app_cfg_t * cfg)
+/// @brief parse command line args, set application configuration.
+/// @param[in] argc number of arguments
+/// @param[in] argv array of command line arguments (strings)
+/// @param[in] cfg application config structure
+/// @return none
+void parse_args(int argc, char **argv, app_cfg_t *cfg)
+{
+    extern char WIN_DECLSPEC *optarg;
+    int option_index;
+    int c;
+    bool help=false;
+    bool version=false;
+    
+    static struct option options[] = {
+        {"verbose", required_argument, NULL, 0},
+        {"help", no_argument, NULL, 0},
+        {"version", no_argument, NULL, 0},
+        {"host", required_argument, NULL, 0},
+        {"map", required_argument, NULL, 0},
+        {"cfg", required_argument, NULL, 0},
+        {"particles", required_argument, NULL, 0},
+        {"logdir", required_argument, NULL, 0},
+        {NULL, 0, NULL, 0}};
+    
+    // process argument list
+    while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
+        switch (c) {
+                // long options all return c=0
+            case 0:
+                // verbose
+                if (strcmp("verbose", options[option_index].name) == 0) {
+                    sscanf(optarg,"%d",&cfg->verbose);
+                }
+                
+                // help
+                else if (strcmp("help", options[option_index].name) == 0) {
+                    help = true;
+                }
+                
+                // version
+                else if (strcmp("version", options[option_index].name) == 0) {
+                    version = true;
+                }
+                
+                // host
+                else if (strcmp("host", options[option_index].name) == 0) {
+                    
+                    char *hsave=cfg->host;
+                    char *ocopy=strdup(optarg);
+                    cfg->host=strtok(ocopy,":");
+                    if (cfg->host==NULL) {
+                        cfg->host="localhost";
+                    }
+                    char *ip = strtok(NULL,":");
+                    if (ip!=NULL) {
+                        sscanf(ip,"%d",&cfg->port);
+                    }
+                    // don't free ocopy here
+                    if(hsave!=NULL){
+                        free(hsave);
+                    }
+                }
+                // map
+                else if (strcmp("map", options[option_index].name) == 0) {
+                    if(NULL!=cfg->map)free(cfg->map);
+                    cfg->map=(NULL==optarg?NULL:strdup(optarg));
+                }
+                // cfg
+                else if (strcmp("cfg", options[option_index].name) == 0) {
+                    if(NULL!=cfg->cfg)free(cfg->cfg);
+                    cfg->cfg=(NULL==optarg?NULL:strdup(optarg));
+                }
+                // particles
+                else if (strcmp("particles", options[option_index].name) == 0) {
+                    if(NULL!=cfg->particles)free(cfg->particles);
+                    cfg->particles=(NULL==optarg?NULL:strdup(optarg));
+                }
+                // logdir
+                else if (strcmp("logdir", options[option_index].name) == 0) {
+                    if(NULL!=cfg->logdir)free(cfg->logdir);
+                   cfg->logdir=(NULL==optarg?NULL:strdup(optarg));
+
+                }
+                break;
+            default:
+                help=true;
+                break;
+        }
+        if (version) {
+            fprintf(stderr,"no version\n");
+            exit(0);
+        }
+        if (help) {
+            s_show_help();
+            exit(0);
+        }
+    }// while
+   
+
+    fprintf(stderr,"verbose   [%d]\n",cfg->verbose);
+    fprintf(stderr,"host      [%s]\n",cfg->host);
+    fprintf(stderr,"port      [%d]\n",cfg->port);
+    fprintf(stderr,"map       [%s]\n",cfg->map);
+    fprintf(stderr,"cfg       [%s]\n",cfg->cfg);
+    fprintf(stderr,"particles [%s]\n",cfg->map);
+    fprintf(stderr,"logdir    [%s]\n",cfg->map);
+
+//    mconf_init(NULL,NULL);
+//    mmd_channel_set(MOD_MBTNAV,MM_ERR);
+//    mmd_channel_set(MOD_R7K,MM_ERR);
+//    mmd_channel_set(MOD_R7KR,MM_ERR);
+//    mmd_channel_set(MOD_MSOCK,MM_ERR);
+//
+//    switch (cfg->verbose) {
+//        case 0:
+//            mmd_channel_set(MOD_MBTNAV,0);
+//            mmd_channel_set(MOD_R7K,0);
+//            mmd_channel_set(MOD_R7KR,0);
+//            mmd_channel_set(MOD_MSOCK,0);
+//            break;
+//        case 1:
+//            mmd_channel_en(MOD_MBTNAV,MBTNAV_V1);
+//            mmd_channel_en(MOD_S7K,MM_DEBUG);
+//            break;
+//        case 2:
+//            mmd_channel_en(MOD_MBTNAV,MBTNAV_V1);
+//            mmd_channel_en(MOD_MBTNAV,MBTNAV_V2);
+//            mmd_channel_en(MOD_MBTNAV,MM_DEBUG);
+//            mmd_channel_en(MOD_MSOCK,MM_DEBUG);
+//            mmd_channel_en(MOD_R7K,MM_DEBUG);
+//            mmd_channel_en(MOD_R7KR,MM_DEBUG);
+//            break;
+//        default:
+//            mmd_channel_en(MOD_MBTNAV,MM_DEBUG);
+//            break;
+//    }
+//
+//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"verbose [%s]\n",(cfg->verbose?"Y":"N")));
+//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"host    [%s]\n",cfg->host));
+//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"port    [%d]\n",cfg->port));
+//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"hbeat   [%d]\n",cfg->hbeat));
+//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"block   [%s]\n",(cfg->blocking==0?"N":"Y")));
+//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"cycles  [%d]\n",cfg->cycles));
+//    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"bsize   [%d]\n",cfg->bsize));
+}
+// End function parse_args
+
+/// @fn void termination_handler (int signum)
+/// @brief termination signal handler.
+/// @param[in] signum signal number
+/// @return none
+static void s_termination_handler (int signum)
+{
+    switch (signum) {
+        case SIGINT:
+        case SIGHUP:
+        case SIGTERM:
+            fprintf(stderr,"\nsig received[%d]\n",signum);
+            g_interrupt=true;
+            break;
+        default:
+            fprintf(stderr,"\ns_termination_handler: sig not handled[%d]\n",signum);
+            break;
+    }
+}
+// End function termination_handler
 
 static int s_test_ct_xsend(msock_socket_t *cli, char *msg, int32_t len)
 {
@@ -300,8 +502,8 @@ static int s_app_main(app_cfg_t *cfg)
 {
     int retval=-1;
     double start_time=mtime_dtime();
-    netif_t *netif = netif_new(NETIF_HOST_DFL,
-                               NETIF_PORT_DFL,
+    netif_t *netif = netif_new(cfg->host,
+                               cfg->port,
                                ST_TCP,
                                IFM_REQRES,
                                3.0,
@@ -310,15 +512,19 @@ static int s_app_main(app_cfg_t *cfg)
                                NULL);
     assert(netif!=NULL);
     
-    trn_config_t *trn_cfg = trncfg_new(NULL,
-                                      -1,
+    trn_config_t *trn_cfg = trncfg_new(cfg->host,
+                                      cfg->port,
                                       10L,
                                       TRN_MAP_BO,
                                       TRN_FILT_PARTICLE,
-                                      "/home/headley/tmp/maps/PortTiles",
-                                      "/home/headley/tmp/config/mappingAUV_specs.cfg",
-                                      "/home/headley/tmp/config/particles.cfg",
-                                      "logs",
+                                       cfg->map,
+                                       cfg->cfg,
+                                       cfg->particles,
+                                       cfg->logdir,
+//                                      "/home/headley/tmp/maps/PortTiles",
+//                                      "/home/headley/tmp/config/mappingAUV_specs.cfg",
+//                                      "/home/headley/tmp/config/particles.cfg",
+//                                      "logs",
                                       0);
     
     wtnav_t *trn = wtnav_new(trn_cfg);
@@ -330,7 +536,7 @@ static int s_app_main(app_cfg_t *cfg)
     netif_show(netif,true,5);
 
     // initialize message log
-    int il = netif_init_log(netif, strdup("."));
+    int il = netif_init_log(netif, NETIF_MLOG_NAME, ".");
     mlog_tprintf(netif->mlog_id,"*** netif session start (TEST) ***\n");
     mlog_tprintf(netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
 
@@ -358,16 +564,6 @@ static int s_app_main(app_cfg_t *cfg)
     
     mlog_tprintf(netif->mlog_id,"*** netif session end (TEST) uptime[%.3lf] ***\n",(mtime_dtime()-start_time));
 
-    // client: release socket
-    msock_socket_destroy(&cli);
-    // server: close, release netif
-    netif_destroy(&netif);
-    // release trn config
-    trncfg_destroy(&trn_cfg);
-    // release trn
-    wtnav_destroy(trn);
-    // debug: release resources
-    mmd_release();
 
     retval=0;
     return retval;
@@ -377,14 +573,53 @@ int main(int argc, char **argv)
 {
     int retval=-1;
     
+//    int verbose;
+//    netif_t *netif;
+//    trn_config_t *trn_cfg;
+//    wtnav_t *trn;
+//    msock_socket_t *cli;
+//    char *host;
+//    int port;
+//    char *map;
+//    char *cfg;
+//    char *particles;
+//    char *logdir;
+
     app_cfg_t cfg_s={
+        0,
         NULL,
         NULL,
         NULL,
-        NULL
+        NULL,
+        strdup(NETIF_HOST_DFL),
+        NETIF_PORT_DFL,
+        NULL,
+        NULL,
+        NULL,
+        strdup("logs")
     }, *cfg=&cfg_s;
 
+    parse_args(argc,argv,cfg);
     s_app_main(cfg);
+    
+    if(NULL!=cfg){
+        if(NULL!=cfg->host)free(cfg->host);
+        if(NULL!=cfg->map)free(cfg->map);
+        if(NULL!=cfg->cfg)free(cfg->cfg);
+        if(NULL!=cfg->particles)free(cfg->particles);
+        if(NULL!=cfg->logdir)free(cfg->logdir);
+        // client: release socket
+        msock_socket_destroy(&cfg->cli);
+        // server: close, release netif
+        netif_destroy(&cfg->netif);
+        // release trn config
+        trncfg_destroy(&cfg->trn_cfg);
+        // release trn
+        wtnav_destroy(cfg->trn);
+        // debug: release resources
+        mmd_release();
+
+    }
 //#ifdef WITH_NETIF_TEST
 //    netif_test();
 //#else

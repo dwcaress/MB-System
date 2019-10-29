@@ -50,11 +50,23 @@ APP_CMD="/usr/local/bin/mbtrnpp"
 # log directory
 OPT_LOGDIR="--log-directory=/home/mappingauv/mbtrnpptest"
 # input source
-# [optional if --rhost is used]
+# Define socket input
+#   example: --input=socket:192.168.100.113:239.255.0.1:6020
+#              IP of host running mbtrnpp : 192.168.100.113
+#              Broadcast group : 239.255.0.1
+#              Multibeam multicast port : 6020
+# OPT_INPUT="--input=socket:192.168.100.113:239.255.0.1:6020"
 OPT_INPUT="--input=socket:192.168.100.113:239.255.0.1:6020"
+
 # output destination
-# [optional if --thost is used]
-OPT_OUTPUT="--output=mbtrnpp_$$.mb1"
+# [alternatively, use --mb-out]
+# --output     select mb1 output (similar to mb-out file, mb1svr)
+#   options: file,file:<name>,socket,socket:<host>:<port> [1]
+#    file                  - mb1 data out, mbsys default file name
+#    file:<name>           - mb1 data out, specified file name
+#    socket                - mb1 socket output, default host:port
+#    socket:<host>:<port>  - mb1 socket output, specified host:port
+OPT_OUTPUT="--output=file:mbtrnpp_$$.mb1"
 # beam swath (deg)
 OPT_SWATH="--swath=90"
 # number of beams to publish
@@ -65,13 +77,45 @@ OPT_FORMAT="--format=261"
 # median filter settings
 OPT_MFILTER="--median-filter=0.10/9/3"
 
-# Define socket input
-#   example: --input=socket:192.168.100.113:239.255.0.1:6020
-#              IP of host running mbtrnpp : 192.168.100.113
-#              Broadcast group : 239.255.0.1
-#              Multibeam multicast port : 6020
-# OPT_INPUT="--input=socket:192.168.100.113:239.255.0.1:6020"
-#
+# MB1 output selection
+# --mb-out=[options]  select mb1 output (mbsvr:host:port,mb1,reson/file)
+#   options: mb1svr:host:port - MB1 socket (e.g. MbtrnRecv) [2]
+#    mb1              - mb1 data log
+#    file             - mb1 data log, use mbsys default file name
+#    file:<name>      - mb1 data log, use specified file name
+#    reson            - reson frame (s7k)log
+#    nomb1            - disable mb1 log (if enabled by default in mbtrnpp)
+#    noreson          - disable reson log
+OPT_MBOUT="--mb-out=mb1svr"
+
+# TRN output selection
+#--trn-out=[options] select trn update output channels
+#  options: trnsvr:<host>:<port>,mlog,stdout,stderr,debug [3]
+#   trnsvr:<host>:<port> - trn_server socket
+#   mlog                 - message log
+#   ulog                 - trn estimate log
+#   stdout|stderr        - console (independent of debug settings)
+#   debug                - per debug settings
+OPT_TRNOUT="--trn-out=trnsvr,trnu"
+
+# enable TRN processing
+# (must also specify map,par,log,cfg)
+OPT_TRN_EN=""
+# set TRN UTM zone
+OPT_TRN_UTM=""
+# set TRN map file (required w/ TRN_EN)
+OPT_TRN_MAP=""
+# set TRN particles file (required w/ TRN_EN)
+OPT_TRN_PAR=""
+# set TRN log directory prefix (required w/ TRN_EN)
+OPT_TRN_LOG=""
+# set TRN config file (required w/ TRN_EN)
+OPT_TRN_CFG=""
+# set TRN map type
+OPT_TRN_MTYPE=""
+# set TRN map type
+OPT_TRN_FTYPE=""
+
 # verbose level (-5 to +2)
 # +2 is a LOT of info
 # -2 to 0 recommended for missions
@@ -84,19 +128,14 @@ OPT_HBEAT=""
 OPT_DELAY="" #"--delay=100"
 # statistics logging interval (s)
 OPT_STATS="--stats=30"
-# disable message log
-OPT_NOMLOG="" #"--no-mlog"
-# disable TRN output log
-OPT_NOBLOG="" #"--no-blog"
-# disable 7k center frame log
-OPT_NORLOG="" #"--no-rlog"
+
+# TRN processing decimation (cycles)
+OPT_TRN_DECN="" #"--trn-decn=3"
+# TRN processing decimation (sec)
+OPT_TRN_DECS="" #"--trn-decs=1"
+
 # print help and exit
 OPT_HELP="" #"--help"
-# log all 7k center frames
-# [enabled by default]
-OPT_MBRLOG="" #"--mbrlog"
-# reader capacity [deprecated]
-OPT_RCAP="" #"--rcap=600000"
 
 unset DO_HELP
 unset DO_TEST
@@ -277,12 +316,6 @@ do
     vout "ovr OPT_HBEAT: $OPT_HBEAT"
     fi
 
-    if [ ${a:2:4} == "rcap" ]
-    then
-    OPT_RCAP=$a
-    vout "ovr OPT_RCAP: $OPT_RCAP"
-    fi
-
     if [ ${a:2:11} == "swath-width" ]
     then
     OPT_SWATH=$a
@@ -313,29 +346,90 @@ do
     vout "ovr OPT_OUTPUT: $OPT_OUTPUT"
     fi
 
+    if [ ${a:2:6} == "mb-out" ]
+    then
+    OPT_MBOUT=$a
+    vout "ovr OPT_MBOUT: $OPT_MBOUT"
+    fi
+
+    if [ ${a:2:6} == "trn-out" ]
+    then
+    OPT_TRNOUT=$a
+    vout "ovr OPT_TRNOUT: $OPT_TRNOUT"
+    fi
+
     if [ ${a:2:7} == "stat" ]
     then
     OPT_STATS=$a
     vout "ovr OPT_STATS: $OPT_STATS"
     fi
 
-    if [ ${a:2:7} == "no-mlog" ]
+    if [ ${a:2:6} == "trn-en" ]
     then
-    OPT_NOMLOG=$a
-    vout "ovr OPT_NOMLOG: $OPT_NOMLOG"
+    OPT_TRN_EN=$a
+    vout "ovr OPT_TRN_EN: $OPT_TRN_EN"
     fi
 
-    if [ ${a:2:7} == "no-blog" ]
+    if [ ${a:2:7} == "trn-utm" ]
     then
-    OPT_NOBLOG=$a
-    vout "ovr OPT_NOBLOG: $OPT_NOBLOG"
+    OPT_TRN_UTM=$a
+    vout "ovr OPT_TRN_UTM: $OPT_TRN_UTM"
     fi
 
-    if [ ${a:2:7} == "no-rlog" ]
+    if [ ${a:2:7} == "trn-map" ]
     then
-    OPT_NORLOG=$a
-    vout "ovr OPT_NORLOG: $OPT_NORLOG"
+    OPT_TRN_MAP=$a
+    vout "ovr OPT_TRN_MAP: $OPT_TRN_MAP"
     fi
+
+    if [ ${a:2:7} == "trn-par" ]
+    then
+    OPT_TRN_PAR=$a
+    vout "ovr OPT_TRN_PAR: $OPT_TRN_PAR"
+    fi
+
+    if [ ${a:2:7} == "trn-cfg" ]
+    then
+    OPT_TRN_CFG=$a
+    vout "ovr OPT_TRN_CFG: $OPT_TRN_CFG"
+    fi
+
+    if [ ${a:2:7} == "trn-log" ]
+    then
+    OPT_TRN_LOG=$a
+    vout "ovr OPT_TRN_LOG: $OPT_TRN_LOG"
+    fi
+
+    if [ ${a:2:8} == "trn-mtype" ]
+    then
+    OPT_TRN_MTYPE=$a
+    vout "ovr OPT_TRN_MTYPE: $OPT_TRN_MTYPE"
+    fi
+
+    if [ ${a:2:8} == "trn-ftype" ]
+    then
+    OPT_TRN_FTYPE=$a
+    vout "ovr OPT_TRN_FTYPE: $OPT_TRN_FTYPE"
+    fi
+
+    if [ ${a:2:8} == "trn-decn" ]
+    then
+    OPT_TRN_DECN=$a
+    vout "ovr OPT_TRN_DECN: $OPT_TRN_DECN"
+    fi
+
+    if [ ${a:2:8} == "trn-decs" ]
+    then
+    OPT_TRN_DECS=$a
+    vout "ovr OPT_TRN_DECS: $OPT_TRN_DECS"
+    fi
+
+    if [ ${a:2:8} == "trn-ftype" ]
+    then
+    OPT_TRN_FTYPE=$a
+    vout "ovr OPT_TRN_FTYPE: $OPT_TRN_FTYPE"
+    fi
+
 
     if [ ${a:2:4} == "help" ]
     then
@@ -346,7 +440,7 @@ done
 
 
 # set cmdline options
-APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_MBRLOG $OPT_STATS $OPT_HBEAT $OPT_DELAY $OPT_NOMLOG $OPT_NOBLOG $OPT_NORLOG  $OPT_RCAP $OPT_HELP"
+APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATS $OPT_HBEAT $OPT_DELAY $OPT_TRN_EN $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_HELP"
 
 if [ ${DO_TEST} ]
 then

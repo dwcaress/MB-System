@@ -326,6 +326,7 @@ int mstats_update_stats(mstats_t *stats, uint32_t channels, mstats_flags flags)
     return retval;
 }
 // End function mstats_update_stats
+
 mstats_profile_t *mstats_profile_new(uint32_t ev_counters, uint32_t status_counters, uint32_t tm_channels, const char ***channel_labels, double pstart, double psec)
 {
     mstats_profile_t *self =(mstats_profile_t *)malloc(sizeof(mstats_profile_t));
@@ -338,6 +339,7 @@ mstats_profile_t *mstats_profile_new(uint32_t ev_counters, uint32_t status_count
     }
     return self;
 }
+// End function mstats_profile_new
 
 void mstats_profile_destroy(mstats_profile_t **pself)
 {
@@ -352,6 +354,7 @@ void mstats_profile_destroy(mstats_profile_t **pself)
         }
     }
 }
+// End function mstats_profile_destroy
 
 #if defined(WITH_MSTATS_TEST)
 /// @typedef enum mstats_event_id mstats_event_id

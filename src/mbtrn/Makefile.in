@@ -135,7 +135,8 @@ am_libmframe_la_OBJECTS = mframe/src/mframe.lo mframe/src/mcbuf.lo \
 	mframe/src/msocket.lo mframe/src/mthread.lo \
 	mframe/src/mfile.lo mframe/src/mtime.lo mframe/src/mmdebug.lo \
 	mframe/src/merror.lo mframe/src/mlog.lo mframe/src/mlist.lo \
-	mframe/src/mstats.lo mframe/src/mswap.lo mframe/src/mutils.lo
+	mframe/src/mstats.lo mframe/src/mswap.lo mframe/src/mutils.lo \
+	utils/mconfig.lo
 libmframe_la_OBJECTS = $(am_libmframe_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -467,7 +468,8 @@ libmframe_la_SOURCES = mframe/src/mframe.c \
                 mframe/src/mlist.c \
                 mframe/src/mstats.c \
                 mframe/src/mswap.c \
-                mframe/src/mutils.c
+                mframe/src/mutils.c \
+				utils/mconfig.c
 
 libmframe_la_LIBADD = 
 libr7kr_la_LDFLAGS = -no-undefined -version-info 0:0:0
@@ -602,9 +604,6 @@ mframe/src/mswap.lo: mframe/src/$(am__dirstamp) \
 	mframe/src/$(DEPDIR)/$(am__dirstamp)
 mframe/src/mutils.lo: mframe/src/$(am__dirstamp) \
 	mframe/src/$(DEPDIR)/$(am__dirstamp)
-
-libmframe.la: $(libmframe_la_OBJECTS) $(libmframe_la_DEPENDENCIES) $(EXTRA_libmframe_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libmframe_la_LINK) -rpath $(libdir) $(libmframe_la_OBJECTS) $(libmframe_la_LIBADD) $(LIBS)
 utils/$(am__dirstamp):
 	@$(MKDIR_P) utils
 	@: > utils/$(am__dirstamp)
@@ -613,6 +612,9 @@ utils/$(DEPDIR)/$(am__dirstamp):
 	@: > utils/$(DEPDIR)/$(am__dirstamp)
 utils/mconfig.lo: utils/$(am__dirstamp) \
 	utils/$(DEPDIR)/$(am__dirstamp)
+
+libmframe.la: $(libmframe_la_OBJECTS) $(libmframe_la_DEPENDENCIES) $(EXTRA_libmframe_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(libmframe_la_LINK) -rpath $(libdir) $(libmframe_la_OBJECTS) $(libmframe_la_LIBADD) $(LIBS)
 utils/mb1_msg.lo: utils/$(am__dirstamp) \
 	utils/$(DEPDIR)/$(am__dirstamp)
 utils/mb71_msg.lo: utils/$(am__dirstamp) \

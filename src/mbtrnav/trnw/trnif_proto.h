@@ -73,10 +73,13 @@
 #include "trnif_msg.h"
 #include "mframe.h"
 #include "msocket.h"
+#include "mb1_msg.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
+#define MBIF_MSG_SIZE 16
+#define TRNX_MSG_SIZE 16
 
 /////////////////////////
 // Type Definitions
@@ -94,10 +97,20 @@ typedef struct trnif_res_s{
 #ifdef __cplusplus
 extern "C" {
 #endif
-    int trnif_msg_read_ct(byte **dest, uint32_t len, netif_t *self, msock_connection_t *peer, int *errout);
+    int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
     int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
-    int trnif_msg_read_trnmsg(byte **dest, uint32_t len, netif_t *self, msock_connection_t *peer, int *errout);
+    
+    int trnif_msg_read_mb(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
+    int trnif_msg_handle_mb(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
+    int trnif_msg_pub_mb(netif_t *self, msock_connection_t *peer, char *data, size_t len);
+    
+    int trnif_msg_read_trnu(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
+    int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
+    int trnif_msg_pub_trnu(netif_t *self, msock_connection_t *peer, char *data, size_t len);
+
+    int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
     int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
+    
     int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t len);
 #ifdef __cplusplus
 }

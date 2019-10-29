@@ -81,7 +81,6 @@
 #define  TRN_SENSOR_HOMER   4
 #define  TRN_SENSOR_DELTAT  5
 
-
 #define TRN_FILT_NONE       0
 #define TRN_FILT_POINTMASS  1
 #define TRN_FILT_PARTICLE   2
@@ -99,7 +98,6 @@
 
 #define TRN_POSE_MLE    1
 #define TRN_POSE_MMSE   2
-
 
 #define TRN_MSG_INIT        'I'
 #define TRN_MSG_MEAS        'M'

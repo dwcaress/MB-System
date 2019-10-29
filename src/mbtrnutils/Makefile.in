@@ -348,7 +348,7 @@ top_srcdir = @top_srcdir@
 @BUILD_MBTNAV_TRUE@${top_builddir}/src/mbtrnav/libnewmat.la  ${top_builddir}/src/mbtrnav/libtnav.la  \
 @BUILD_MBTNAV_TRUE@${top_builddir}/src/mbtrnav/libgeolib.la
 
-@BUILD_MBTNAV_TRUE@MBTNAV_INC = -I${top_builddir}/src/mbtrnav/terrain-nav -I${top_builddir}/src/mbtrnav/gctp -I${top_builddir}/src/mbtrnav/newmat -I${top_builddir}/src/mbtrnav/qnx-utils -I${top_builddir}/src/mbtrnav/trnw
+@BUILD_MBTNAV_TRUE@MBTNAV_INC = -I${top_builddir}/src/mbtrnav/terrain-nav -I${top_builddir}/src/mbtrnav/gctp -I${top_builddir}/src/mbtrnav/newmat -I${top_builddir}/src/mbtrnav/qnx-utils -I${top_builddir}/src/mbtrnav/trnw -I${top_builddir}/src/mbtrnav/utils
 @BUILD_MBTNAV_TRUE@MBTNAV_OPT = -DWITH_MBTNAV
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 

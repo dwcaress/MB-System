@@ -4,6 +4,26 @@
 /// @date 2019-06-21
 
 /// C wrappers for TerrainNav API
+// TerrainNav methods called by trn_server
+//    initialized()
+//    estimatePose
+//    getFilterState
+//    getFilterType
+//    getNumReinits
+//    isConverged
+//    lastMeasSuccessful
+//    measUpdate
+//    motionUpdate
+//    outstandingMeas
+//    reinitFilter
+//    releaseMap
+//    setFilterReinit
+//    setInterpMeasAttitude()
+//    setMapInterpMethod
+//    setModifiedWeighting
+//    setVehicleDriftRate
+//    useLowGradeFilter
+//    useHighGradeFilter
 
 /// @sa doxygen-examples.c for more examples of Doxygen markup
 
@@ -217,57 +237,7 @@ extern "C" {
     // utils
     int trnw_utm_to_geo(double northing, double easting, long utmZone, double *lat_deg, double *lon_deg);
     int trnw_geo_to_utm(double lat_deg, double lon_deg, long int utmZone, double *northing, double *easting);
-
-    //    inline bool outstandingMeas(wterrain_nav_t self);
     
-    // inline?
-    //    extern inline bool outstandingMeas(){return (this->numWaitingMeas > 0);}
-    //    inline bool lastMeasSuccessful(){return this->lastMeasSuccess;}
-    //    inline void setInterpMeasAttitude(bool set){this->tNavFilter->setInterpMeasAttitude(set);}
-    //    inline void setMapInterpMethod(const int &type){this->tNavFilter->setMapInterpMethod(type);}
-    //    inline void setVehicleDriftRate(const double &driftRate){this->tNavFilter->setVehicleDriftRate(driftRate);}
-    //    inline bool isConverged(){return this->tNavFilter->isConverged();}
-    //    inline int getFilterType(){return this->filterType;}
-    //    inline void useLowGradeFilter(){this->tNavFilter->useLowGradeFilter();}
-    //    inline void useHighGradeFilter(){this->tNavFilter->useHighGradeFilter();}
-    //    inline void setFilterReinit(const bool allow){this->allowFilterReinits = allow;}
-    //    void reinitFilter(bool lowInfoTransition);
-    //    inline void setModifiedWeighting(const int use)
-    //    {
-    //        useModifiedWeighting = use;    // cache the value for use in future reinits
-    //        this->tNavFilter->setModifiedWeighting(use);
-    //        logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::modified weighting set to %i\n",
-    //             use);
-    //    }
-    //    inline int getFilterState()
-    //    inline int getNumReinits(){return this->numReinits;}
-    //    inline bool initialized() { return _initialized; }
-    //    void releaseMap()
-    //    {
-    //        if (this->terrainMap) delete this->terrainMap;
-    //        this->terrainMap = NULL;
-    //    }
-    
-    // TerrainNav methods called by trn_server
-    //    initialized()
-    //    estimatePose
-    //    getFilterState
-    //    getFilterType
-    //    getNumReinits
-    //    isConverged
-    //    lastMeasSuccessful
-    //    measUpdate
-    //    motionUpdate
-    //    outstandingMeas
-    //    reinitFilter
-    //    releaseMap
-    //    setFilterReinit
-    //    setInterpMeasAttitude()
-    //    setMapInterpMethod
-    //    setModifiedWeighting
-    //    setVehicleDriftRate
-    //    useLowGradeFilter
-    //    useHighGradeFilter
     
 #ifdef __cplusplus
 }

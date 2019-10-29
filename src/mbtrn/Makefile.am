@@ -45,7 +45,9 @@ libmframe_la_SOURCES = mframe/src/mframe.c \
                 mframe/src/mlist.c \
                 mframe/src/mstats.c \
                 mframe/src/mswap.c \
-                mframe/src/mutils.c
+                mframe/src/mutils.c \
+				utils/mconfig.c
+
 libmframe_la_LIBADD =
 
 libr7kr_la_LDFLAGS =  -no-undefined -version-info 0:0:0

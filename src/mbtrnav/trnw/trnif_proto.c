@@ -107,10 +107,65 @@
 // Function Definitions
 /////////////////////////
 
+static uint32_t s_trnif_dfl_send_tcp(msock_connection_t *peer, char *msg, int32_t send_len, int *errout)
+{
+    uint32_t retval=0;
+    if(NULL!=peer && NULL!=msg && send_len>0){
+        uint32_t send_bytes=0;
+        if( (send_bytes=msock_sendto(peer->sock,  peer->addr, (byte *)msg, send_len,0))==send_len){
+            retval=send_bytes;
+            PDPRINT((stderr,"Reply OK len[%ld] peer[%s:%s]\n",send_len, peer->chost,peer->service));
+        }else{
+            if(NULL!=errout)
+                *errout=errno;
+            PDPRINT((stderr,"Reply ERR peer[%s:%s] sock[%p/%p] len[%ld] err[%d/%s]\n",peer->chost,peer->service,peer->sock,  peer->addr, send_len,errno,strerror(errno)));
+        }
+    }
+    return retval;
+}
+
+static int s_trnif_msg_read_dfl(byte *dest, uint32_t readlen, msock_socket_t *socket, msock_connection_t *peer, int *errout)
+{
+    int retval = 0;
+    
+    if(NULL!=dest && NULL!=socket && NULL!=peer){
+ 
+        int64_t msg_bytes=0;
+        PDPRINT((stderr,"%s: READ - readlen[%d]\n",__FUNCTION__,readlen));
+        if( (msg_bytes=msock_recvfrom(socket, peer->addr,dest,readlen,0)) >0 ){
+            retval = msg_bytes;
+            PDPRINT((stderr,"%s: READ - OK read[%d]\n",__FUNCTION__,msg_bytes));
+            retval=msg_bytes;
+        }else{
+            PDPRINT((stderr,"%s: READ - ERR read[%d] [%d/%s]\n",__FUNCTION__,msg_bytes,errno,strerror(errno)));
+        }
+    }
+    return retval;
+
+}
+
+static uint32_t s_trnif_dfl_send_udp(netif_t *self,msock_connection_t *peer, char *msg, int32_t send_len, int *errout)
+{
+    uint32_t retval=0;
+    if(NULL!=peer && NULL!=msg && send_len>0){
+        uint32_t send_bytes=0;
+        if( (send_bytes=msock_sendto(self->socket,  peer->addr, (byte *)msg, send_len,0))==send_len){
+            retval=send_bytes;
+            PDPRINT((stderr,"Reply OK len[%ld] peer[%s:%s]\n",send_len, peer->chost,peer->service));
+        }else{
+            if(NULL!=errout)
+                *errout=errno;
+            PDPRINT((stderr,"Reply ERR peer[%s:%s] sock[%p/%p] len[%ld] err[%d/%s]\n",peer->chost,peer->service,peer->sock,  peer->addr, send_len,errno,strerror(errno)));
+        }
+    }
+    return retval;
+}
+
 /// @fn int trnif_msg_read_trnmsg(byte **dest, uint32_t len, netif_t *self, msock_connection_t *peer, int *errout)
 /// @brief read a message from a peer
 /// @return message len on success, 0 otherwise
-int trnif_msg_read_trnmsg(byte **dest, uint32_t len, netif_t *self, msock_connection_t *peer, int *errout)
+
+int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout)
 {
     int retval = 0;
 
@@ -122,21 +177,21 @@ int trnif_msg_read_trnmsg(byte **dest, uint32_t len, netif_t *self, msock_connec
     char *stateNames[]={"ST_START","ST_SYNC_OK","ST_HDR_OK","ST_DATA_OK", "ST_CHK_OK", "ST_SYNC", "ST_QUIT"};
 #endif
 
-    if(NULL!=dest && NULL!=self && NULL!=peer){
+    if(NULL!=pdest && NULL!=self && NULL!=peer){
         uint32_t msg_bytes=0;
         uint32_t test=0;
         uint32_t readlen=0;
-        byte *buf=*dest;
+        byte *buf=*pdest;
         if(NULL==buf){
-            buf=(byte *)malloc(len);
-            memset(buf,0,len);
+            buf=(byte *)malloc(TRNIF_MAX_SIZE);
+            memset(buf,0,TRNIF_MAX_SIZE);
         }
         byte *cur = buf;
         int err=0;
         trnmsg_header_t *pheader=(trnmsg_header_t *)buf;
         *errout=MSG_EOK;
 
-        while(msg_bytes<len && state!=ST_QUIT && !self->stop){
+        while(msg_bytes<*len && state!=ST_QUIT && !self->stop){
             switch (state) {
                 case ST_SYNC:
                     // read the sync pattern
@@ -259,9 +314,7 @@ int trnif_msg_read_trnmsg(byte **dest, uint32_t len, netif_t *self, msock_connec
 int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, int *errout)
 {
     int retval=-1;
-    PTRACE();
     if(NULL!=msg && NULL!=self && NULL!=peer){
-        PTRACE();
         
         int32_t send_len=0;
         uint32_t send_bytes=0;
@@ -393,41 +446,36 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
         
         if(NULL!=msg_out){
             send_len = trnmsg_len(msg_out);
-            if(send_len>0){
-            if( (send_bytes=msock_sendto(peer->sock,  peer->addr, (byte *)msg_out, send_len,0))==send_len){
-                retval=send_bytes;
-                PDPRINT((stderr,"Reply OK peer[%s:%s]\n",peer->chost,peer->service));
-            }else{
-                if(NULL!=errout)
-                    *errout=errno;
-                PDPRINT((stderr,"Reply ERR peer[%s:%s] err[%d/%s]\n",peer->chost,peer->service,errno,strerror(errno)));
-            }
-            }
-            trnmsg_destroy(&msg_in);
-            trnmsg_destroy(&msg_out);
+            retval=s_trnif_dfl_send_tcp(peer, (byte *)msg_out, send_len, errout);
         }
+        trnmsg_destroy(&msg_in);
+        trnmsg_destroy(&msg_out);
     }// else invalid arg
     return retval;
 }
 // End function
 
-int trnif_msg_read_ct(byte **pdest, uint32_t len, netif_t *self, msock_connection_t *peer, int *errout)
+int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout)
 {
     int retval = 0;
 
     if(NULL!=pdest && NULL!=self && NULL!=peer){
         int64_t msg_bytes=0;
-        uint32_t readlen=len;
+        uint32_t readlen=TRN_MSG_SIZE;
         byte *buf=*pdest;
         if(NULL==buf){
-            buf=(byte *)malloc(len);
-            memset(buf,0,len);
+            buf=(byte *)malloc(TRN_MSG_SIZE);
+            memset(buf,0,TRN_MSG_SIZE);
             *pdest=buf;
         }
-        if( (msg_bytes=msock_recvfrom(peer->sock, peer->addr,buf,readlen,0)) >0 ){
-            PDPRINT((stderr,"%s: READ - msg_bytes[%d]\n",__FUNCTION__,msg_bytes));
-            retval=msg_bytes;
-        }
+        int errout=0;
+        retval=s_trnif_msg_read_dfl(buf, readlen, peer->sock, peer, &errout);
+//        PDPRINT((stderr,"%s: READ - readlen[%d]\n",__FUNCTION__,readlen));
+//        if( (msg_bytes=msock_recvfrom(peer->sock, peer->addr,buf,readlen,0)) >0 ){
+//            *len = msg_bytes;
+//            PDPRINT((stderr,"%s: READ - msg_bytes[%d]\n",__FUNCTION__,msg_bytes));
+//            retval=msg_bytes;
+//        }
     }
     return retval;
 }
@@ -436,14 +484,12 @@ int trnif_msg_read_ct(byte **pdest, uint32_t len, netif_t *self, msock_connectio
 int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int *errout)
 {
     int retval=-1;
-    PTRACE();
+
     if(NULL!=msg && NULL!=self && NULL!=peer){
-        PTRACE();
 
         int32_t send_len=0;
         uint32_t send_bytes=0;
         char *msg_out=NULL;
-        char msg_in[TRN_MSG_SIZE]={0};
         int ival=0;
         wcommst_t *ct = NULL;
         // dereference resource bundle
@@ -451,8 +497,8 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
         
         // deserialize message bytes
         wcommst_unserialize(&ct,(char *)msg,TRN_MSG_SIZE);
-
         char msg_type =wcommst_get_msg_type(ct);
+        wcommst_show(ct,true,5);
 
         switch (msg_type) {
               
@@ -488,6 +534,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 commst_estimate_pose(trn, ct,TRN_POSE_MLE);
                 // serialize updated message
                 send_len=wcommst_serialize(&msg_out,ct,TRN_MSG_SIZE);
+                fprintf(stderr,"ct[%p] msg_out[%p] send_len[%ld]\n",ct,msg_out,send_len);
                 break;
                 
             case TRN_MSG_MMSE:
@@ -608,29 +655,151 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
 
             default:
                 PDPRINT((stderr,"UNSUPPORTED msg ct[%p] type [%c/%02X] from peer[%s:%s]\n",ct,msg_type,msg_type,peer->chost,peer->service));
+                send_len=trnw_nack_msg(&msg_out);
+
                 break;
         }
         
         if(send_len>0){
+        	retval=s_trnif_dfl_send_tcp(peer, msg_out, send_len, errout);
+        }
 
-            if( (send_bytes=msock_sendto(peer->sock,  peer->addr, (byte *)msg_out, send_len,0))==send_len){
-                retval=send_bytes;
-                PDPRINT((stderr,"Reply OK peer[%s:%s]\n",peer->chost,peer->service));
-            }else{
-                if(NULL!=errout)
-                    *errout=errno;
-                PDPRINT((stderr,"Reply ERR peer[%s:%s] err[%d/%s]\n",peer->chost,peer->service,errno,strerror(errno)));
-            }
-
-            if(NULL!=msg_out){
-            	free(msg_out);
-            }
-            wcommst_destroy(ct);
+        wcommst_destroy(ct);
+        if(NULL!=msg_out){
+            free(msg_out);
         }
     }// else invalid arg
     return retval;
 }
 // End function
+
+int trnif_msg_read_mb(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout)
+{
+    int retval = 0;
+    
+    if(NULL!=pdest && NULL!=self && NULL!=peer){
+        int64_t msg_bytes=0;
+        uint32_t readlen=MBIF_MSG_SIZE;
+        byte *buf=*pdest;
+        if(NULL==buf){
+            buf=(byte *)malloc(MBIF_MSG_SIZE);
+            memset(buf,0,MBIF_MSG_SIZE);
+            *pdest=buf;
+        }
+        int errout=0;
+        retval=s_trnif_msg_read_dfl(buf, readlen, peer->sock, peer, &errout);
+//        PDPRINT((stderr,"%s: READ - readlen[%d]\n",__FUNCTION__,readlen));
+//        if( (msg_bytes=msock_recvfrom(peer->sock, peer->addr,buf,readlen,0)) >0 ){
+//            *len = msg_bytes;
+//            PDPRINT((stderr,"%s: READ - msg_bytes[%d]\n",__FUNCTION__,msg_bytes));
+//            retval=msg_bytes;
+//        }
+    }
+    return retval;
+}
+// End function
+
+int trnif_msg_handle_mb(void *msg, netif_t *self, msock_connection_t *peer, int *errout)
+{
+    int retval=-1;
+
+    if(NULL!=msg && NULL!=self && NULL!=peer){
+        
+        int32_t send_len=0;
+        uint32_t send_bytes=0;
+        char *msg_out=NULL;
+
+        if(strcmp(msg,"REQ")==0){
+            msg_out=strdup("ACK");
+            send_len=4;
+        }else{
+            msg_out=strdup("NACK");
+            send_len=strlen("NACK")+1;
+        }
+
+        if(send_len>0){
+            // send response
+            retval=s_trnif_dfl_send_udp(self,peer, msg_out, send_len, errout);
+        }
+
+        
+        
+        if(NULL!=msg_out){
+            free(msg_out);
+        }
+    }
+    
+    return retval;
+}
+
+int trnif_msg_pub_mb(netif_t *self, msock_connection_t *peer, char *data, size_t len)
+{
+    // use default
+    return trnif_msg_pub(self,peer,data,len);
+}
+
+int trnif_msg_read_trnu(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout)
+{
+    int retval = 0;
+    
+    if(NULL!=pdest && NULL!=self && NULL!=peer){
+        int64_t msg_bytes=0;
+        uint32_t readlen=TRNX_MSG_SIZE;
+        byte *buf=*pdest;
+        if(NULL==buf){
+            buf=(byte *)malloc(TRNX_MSG_SIZE);
+            memset(buf,0,TRNX_MSG_SIZE);
+            *pdest=buf;
+        }
+        int errout=0;
+        retval=s_trnif_msg_read_dfl(buf, readlen, peer->sock, peer, &errout);
+
+//        PDPRINT((stderr,"%s: READ - readlen[%d]\n",__FUNCTION__,readlen));
+//        if( (msg_bytes=msock_recvfrom(peer->sock, peer->addr,buf,readlen,0)) >0 ){
+//            *len = msg_bytes;
+//            PDPRINT((stderr,"%s: READ - msg_bytes[%d]\n",__FUNCTION__,msg_bytes));
+//            retval=msg_bytes;
+//        }
+    }
+    return retval;
+}
+
+int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, int *errout)
+{
+    int retval=-1;
+    
+    if(NULL!=msg && NULL!=self && NULL!=peer){
+        
+        int32_t send_len=0;
+        uint32_t send_bytes=0;
+        char *msg_out=NULL;
+        
+        if(strcmp(msg,"REQ")==0 || strcmp(msg,"PING")==0){
+            msg_out=strdup("ACK");
+            send_len=4;
+        }else{
+            msg_out=strdup("NACK");
+            send_len=strlen("NACK")+1;
+        }
+        
+        if(send_len>0){
+            // send response
+            retval=s_trnif_dfl_send_udp(self,peer, msg_out, send_len, errout);
+        }
+
+        if(NULL!=msg_out){
+            free(msg_out);
+        }
+    }
+    
+    return retval;
+}
+int trnif_msg_pub_trnu(netif_t *self, msock_connection_t *peer, char *data, size_t len)
+{
+    // use default
+    return trnif_msg_pub(self,peer,data,len);
+}
+
 
 int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t len)
 {
@@ -640,13 +809,14 @@ int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t le
         int iobytes=0;
         if(self->ctype==ST_UDP){
             if ( (iobytes = msock_sendto(self->socket, peer->addr, data, len, 0 )) > 0) {
+                retval=iobytes;
             }
         }
         if(self->ctype==ST_TCP){
             if ( (iobytes = msock_send(peer->sock,  data, len )) > 0) {
+                retval=iobytes;
             }
         }
-        retval=0;
     }
     return retval;
     

@@ -106,7 +106,7 @@
 /////////////////////////
 // Type Definitions
 /////////////////////////
-#define NETIF_MLOG_NAME "nmsg"
+#define NETIF_MLOG_NAME "netif"
 #define NETIF_MLOG_DESC "netif message log"
 #define NETIF_LOG_EXT ".log"
 #define NETIF_LOG_DIR_DFL "."
@@ -123,7 +123,7 @@ struct netif_s;
 typedef struct netif_s netif_t;
 
 typedef int (* netifserver_action_fn)(netif_t *self);
-typedef int (* netif_msg_read_fn)(byte **dest, uint32_t len, netif_t *self, msock_connection_t *peer, int *errout);
+typedef int (* netif_msg_read_fn)(byte **dest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
 typedef int (* netif_msg_handle_fn)(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
 typedef int (* netif_msg_pub_fn)(netif_t *self, msock_connection_t *peer, char *data, size_t len);
 
@@ -232,7 +232,7 @@ extern "C" {
     /// @param[in] self netif_t instance
     /// @param[in] log_dir log output directory path
     /// @return 0 on success, -1 otherwise
-    int netif_init_log(netif_t *self, char *log_dir);
+    int netif_init_log(netif_t *self, char *log_name, char *log_dir);
     
     /// @fn int netif_configure_debug(netif_t *self, int level)
     /// @brief set debug configuration
@@ -252,6 +252,7 @@ extern "C" {
 
     int netif_connect(netif_t *self);
     int netif_update_connections(netif_t *self);
+    int netif_connections(netif_t *self);
 
     int netif_reqres(netif_t *self);
     int netif_pub(netif_t *self, char *output_buffer, size_t len);

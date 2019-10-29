@@ -82,7 +82,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = trn-server$(EXEEXT) trn-cli$(EXEEXT) \
-	netif-test$(EXEEXT) trnif-test$(EXEEXT)
+	netif-test$(EXEEXT) trnif-test$(EXEEXT) trnifsvr-test$(EXEEXT) \
+	trnclient-test$(EXEEXT)
 subdir = src/mbtrnav
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(dist_bin_SCRIPTS) $(top_srcdir)/depcomp $(include_HEADERS)
@@ -238,9 +239,17 @@ am_trn_server_OBJECTS = utils/trn_server.$(OBJEXT)
 trn_server_OBJECTS = $(am_trn_server_OBJECTS)
 trn_server_DEPENDENCIES = libtnav.la libqnx.la libnewmat.la libtnav.la \
 	libgeolib.la
+am_trnclient_test_OBJECTS = utils/trnclient_test.$(OBJEXT) \
+	utils/TrnClient.$(OBJEXT) utils/TerrainNavClient.$(OBJEXT)
+trnclient_test_OBJECTS = $(am_trnclient_test_OBJECTS)
+trnclient_test_DEPENDENCIES = libtnav.la
 am_trnif_test_OBJECTS = utils/trnif-test.$(OBJEXT)
 trnif_test_OBJECTS = $(am_trnif_test_OBJECTS)
 trnif_test_DEPENDENCIES = ${top_builddir}/src/mbtrn/libr7kr.la \
+	libtrnw.la
+am_trnifsvr_test_OBJECTS = utils/trnifsvr-test.$(OBJEXT)
+trnifsvr_test_OBJECTS = $(am_trnifsvr_test_OBJECTS)
+trnifsvr_test_DEPENDENCIES = ${top_builddir}/src/mbtrn/libr7kr.la \
 	libtrnw.la
 SCRIPTS = $(dist_bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -298,7 +307,8 @@ am__v_CXXLD_1 =
 SOURCES = $(libgeolib_la_SOURCES) $(libnewmat_la_SOURCES) \
 	$(libqnx_la_SOURCES) $(libtnav_la_SOURCES) \
 	$(libtrnw_la_SOURCES) $(netif_test_SOURCES) $(trn_cli_SOURCES) \
-	$(trn_server_SOURCES) $(trnif_test_SOURCES)
+	$(trn_server_SOURCES) $(trnclient_test_SOURCES) \
+	$(trnif_test_SOURCES) $(trnifsvr_test_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -503,7 +513,7 @@ top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la
 include_HEADERS = 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/utils -I${top_srcdir}/src/mbtrnav/terrain-nav -I${top_srcdir}/src/mbtrnav/qnx-utils -I${top_srcdir}/src/mbtrnav/newmat  -I${top_srcdir}/src/mbtrnav/gctp/source -I${top_srcdir}/src/mbtrn/mframe/src -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/utils -I${top_srcdir}/src/mbtrnav/terrain-nav -I${top_srcdir}/src/mbtrnav/qnx-utils -I${top_srcdir}/src/mbtrnav/newmat  -I${top_srcdir}/src/mbtrnav/gctp/source -I${top_srcdir}/src/mbtrn/mframe/src -I${top_srcdir}/src/mbtrn/utils -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE
 libgeolib_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libgeolib_la_SOURCES = \
                 gctp/source/gctp.c \
@@ -671,13 +681,17 @@ libtrnw_la_LIBADD = libtnav.la \
 					-lm -lpthread
 
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
-trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la libqnx.la libnewmat.la  libtnav.la  libgeolib.la
+trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la libqnx.la libnewmat.la  libtnav.la  libgeolib.la  
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 netif_test_SOURCES = utils/netif-test.c
 netif_test_LDADD = ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
 trnif_test_SOURCES = utils/trnif-test.c
 trnif_test_LDADD = ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
+trnifsvr_test_SOURCES = utils/trnifsvr-test.c
+trnifsvr_test_LDADD = ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
+trnclient_test_SOURCES = utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
+trnclient_test_LDADD = libtnav.la
 dist_bin_SCRIPTS = 
 CLEANFILES = 
 DISTCLEANFILES = 
@@ -1138,12 +1152,28 @@ utils/trn_server.$(OBJEXT): utils/$(am__dirstamp) \
 trn-server$(EXEEXT): $(trn_server_OBJECTS) $(trn_server_DEPENDENCIES) $(EXTRA_trn_server_DEPENDENCIES) 
 	@rm -f trn-server$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(trn_server_OBJECTS) $(trn_server_LDADD) $(LIBS)
+utils/trnclient_test.$(OBJEXT): utils/$(am__dirstamp) \
+	utils/$(DEPDIR)/$(am__dirstamp)
+utils/TrnClient.$(OBJEXT): utils/$(am__dirstamp) \
+	utils/$(DEPDIR)/$(am__dirstamp)
+utils/TerrainNavClient.$(OBJEXT): utils/$(am__dirstamp) \
+	utils/$(DEPDIR)/$(am__dirstamp)
+
+trnclient-test$(EXEEXT): $(trnclient_test_OBJECTS) $(trnclient_test_DEPENDENCIES) $(EXTRA_trnclient_test_DEPENDENCIES) 
+	@rm -f trnclient-test$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(trnclient_test_OBJECTS) $(trnclient_test_LDADD) $(LIBS)
 utils/trnif-test.$(OBJEXT): utils/$(am__dirstamp) \
 	utils/$(DEPDIR)/$(am__dirstamp)
 
 trnif-test$(EXEEXT): $(trnif_test_OBJECTS) $(trnif_test_DEPENDENCIES) $(EXTRA_trnif_test_DEPENDENCIES) 
 	@rm -f trnif-test$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(trnif_test_OBJECTS) $(trnif_test_LDADD) $(LIBS)
+utils/trnifsvr-test.$(OBJEXT): utils/$(am__dirstamp) \
+	utils/$(DEPDIR)/$(am__dirstamp)
+
+trnifsvr-test$(EXEEXT): $(trnifsvr_test_OBJECTS) $(trnifsvr_test_DEPENDENCIES) $(EXTRA_trnifsvr_test_DEPENDENCIES) 
+	@rm -f trnifsvr-test$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(trnifsvr_test_OBJECTS) $(trnifsvr_test_LDADD) $(LIBS)
 install-dist_binSCRIPTS: $(dist_bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	@list='$(dist_bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
@@ -1336,9 +1366,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnif_msg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnif_proto.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnw.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/TerrainNavClient.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/TrnClient.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/netif-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trn_server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trnclient_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trnif-test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trnifsvr-test.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\

@@ -507,7 +507,8 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                 
                 // request message
                 if ((test = msock_recvfrom(s, NULL, pread, readlen,0))>0) {
-                    
+                    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - received [%"PRId64"] bytes\n",__FUNCTION__,test));
+
                     trn_rx_bytes+=test;
                     trn_rx_count++;
                     
@@ -515,18 +516,18 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                     
                     // check message type
                     mb1_frame_t frame = {0},*mb1=&frame;
-                    
+
                     mb1->sounding=(mb1_sounding_t *)(msg_buf);
                     mb1->checksum=MB1_PCHECKSUM_U32(mb1);
                     
 //                    mb1->sounding = (mb1_sounding_t *)(msg_buf+sizeof(mb1_frame_t));
 //                    mb1->checksum = MB1_PCHECKSUM_U32(mb1);
                     if (mb1->sounding->type==MBTRN_MSGTYPE_ACK) {
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"received ACK ret[%"PRId64"] [%08X]\n",test,mb1->sounding->type));
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - received ACK ret[%"PRId64"] [%08X]\n",__FUNCTION__,test,mb1->sounding->type));
                         hbeat_counter=0;
                         state=TRNSM_SUBSCRIBED;
                     }else if (mb1->sounding->type==MBTRN_MSGTYPE_MB1) {
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"received MSG ret[%"PRId64"] type[%08X] size[%d] ping[%06d]\n",test,mb1->sounding->type,mb1->sounding->size,mb1->sounding->ping_number));
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - received MSG ret[%"PRId64"] type[%08X] size[%d] ping[%06d]\n",__FUNCTION__,test,mb1->sounding->type,mb1->sounding->size,mb1->sounding->ping_number));
                         trn_msg_count++;
                         trn_msg_bytes+=test;
                         
@@ -536,13 +537,13 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                             state=TRNSM_SUBSCRIBED;
                         }
                         hbeat_counter++;
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"hbeat[%d/%d]\n",hbeat_counter,cfg->hbeat));
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s -hbeat[%d/%d]\n",__FUNCTION__,hbeat_counter,cfg->hbeat));
                         if ( (hbeat_counter!=0) && (hbeat_counter%cfg->hbeat==0)) {
                             state=TRNSM_HBEAT_EXPIRED;
                         }
                     }else{
                         // response not recognized
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"invalid message [%08X]\n",mb1->sounding->type));
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - invalid message [%08X]\n",__FUNCTION__,mb1->sounding->type));
                     }
                 }else{
                     // read returned error

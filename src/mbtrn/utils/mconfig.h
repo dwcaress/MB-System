@@ -93,6 +93,7 @@ typedef enum{
     MOD_TBINX,
     MOD_MBTRNPP,
     MOD_MBTNAV,
+    MOD_NETIF,
     APP_MODULE_COUNT
 }app_module_ids;
 
@@ -261,6 +262,26 @@ typedef enum{
     MBTNAV_V1= (1<<ID_MBTNAV_V1),
     MBTNAV_V2= (1<<ID_MBTNAV_V2)
 }mbtnav_channel_mask;
+
+/// @enum netif_channel_id
+/// @brief test module channel IDs
+/// [note : starting above reserved mframe channel IDs]
+typedef enum{
+    ID_NETIF_V1=MM_CHANNEL_COUNT,
+    ID_NETIF_V2,
+    ID_NETIF_V3,
+    ID_NETIF_V4,
+    NETIF_CHAN_COUNT
+}netif_channel_id;
+
+/// @enum netif_channel_mask
+/// @brief test module channel masks
+typedef enum{
+    NETIF_V1= (1<<ID_NETIF_V1),
+    NETIF_V2= (1<<ID_NETIF_V2),
+    NETIF_V3= (1<<ID_NETIF_V3),
+    NETIF_V4= (1<<ID_NETIF_V4)
+}netif_channel_mask;
 
 /////////////////////////
 // Macros

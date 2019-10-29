@@ -38,6 +38,11 @@
 static int transitionMatrix[5][3] = {{0,0,1},{1,1,1},{1,2,2},{2,2,2},{2,2,2}};
 //force reinit with well-converged
 //static int transitionMatrix[5][3] = {{2,0,1},{1,1,1},{1,2,2},{2,2,2},{2,2,2}};
+TerrainNavClient::TerrainNavClient()
+:TerrainNav()
+{
+    
+}
 
 TerrainNavClient::TerrainNavClient(char *server_ip, int port,
 				   char *mapName, char *vehicleSpecs, char *particlefile, char *logdir,
@@ -62,6 +67,7 @@ TerrainNavClient::~TerrainNavClient()
 
 //////////////////////////////////////////////////////////////////////
 // Initialize connection to server and send state
+
 void TerrainNavClient::init_comms()
 {
   if (is_connected()) {
@@ -88,7 +94,7 @@ void TerrainNavClient::init_comms()
 
   if (connect(_sockfd, (struct sockaddr *)&_server_addr, sizeof(_server_addr))
 	      < 0) {
-    printf("TerrainNavClient: can't connect to server: %d\n", errno);
+      printf("TerrainNavClient: can't connect to server [%s:%d] %d:%s\n", _server_ip,_sockport,errno,strerror(errno));
   }
   else {
     struct timeval tv;
@@ -145,7 +151,8 @@ char TerrainNavClient::get_msg()
     int ntries = 3;
     int len = 0;
     for (len = 0; len < TRN_MSG_SIZE;) {
-      int sl = recv(_sockfd, _comms_buf+len, TRN_MSG_SIZE-len, 0);
+ 
+        int sl = recv(_sockfd, _comms_buf+len, TRN_MSG_SIZE-len, 0);
       int saveErrno=errno;
         if (sl <= 0)
         {
@@ -175,12 +182,12 @@ char TerrainNavClient::get_msg()
         }
         else
         {
-        	len += sl;
+            len += sl;
         }
     }
 
-    if (len > 0) {
-      _server_msg.unserialize(_comms_buf, TRN_MSG_SIZE);
+      if (len > 0) {
+          _server_msg.unserialize(_comms_buf, TRN_MSG_SIZE);
       //printf("TerrainNavClient got %s\n", _server_msg.to_s(_comms_buf, TRN_MSG_SIZE));
     }
     //printf("got %d bytes in response\n", len);
@@ -188,7 +195,7 @@ char TerrainNavClient::get_msg()
   }
   else
   {
-    // No connection
+      // No connection
     //
     Ok = false;
   }
@@ -198,11 +205,11 @@ char TerrainNavClient::get_msg()
   //
   if (!Ok)
   {
-    _connected = false;
+      _connected = false;
     printf("TerrainNavClient::get_msg() - server connection failed/terminated\n");
     throw Exception("TRN Server connection lost");
   }
-
+    
   return _server_msg.msg_type;
 
 }
@@ -482,7 +489,6 @@ void TerrainNavClient::setMapInterpMethod(const int &type)
   commsT mim(TRN_SET_MIM, 0);
   //printf("%s\n", mim.to_s(_comms_buf, TRN_MSG_SIZE));
   mim.serialize(_comms_buf);
-
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(mim)) {
       // Check for response

@@ -47,12 +47,12 @@ class TerrainNavClient : public TerrainNav
    * AUV specs and the Point Mass Filter algorithm are used as defaults.
    * 2016-12-15 RGH: Add particle file name & the log directory name to i/f
    */
+    TerrainNavClient();
   TerrainNavClient(char *server_ip, int server_port,
 		   char *mapName, char *vehicleSpecs, char *particlefile, char *logdir,
 		   const int &filterType,
 		   const int &mapType);
-
-
+    
 #if 0
   /* Constructor: TerrainNavClient(mapName)
    * Usage: tercom = new TerrainNavClient("canyonmap");
