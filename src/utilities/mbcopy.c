@@ -48,19 +48,23 @@
 #include "mbsys_xse.h"
 
 /* defines for special copying routines */
-#define MBCOPY_PARTIAL 0
-#define MBCOPY_FULL 1
-#define MBCOPY_ELACMK2_TO_XSE 2
-#define MBCOPY_XSE_TO_ELACMK2 3
-#define MBCOPY_SIMRAD_TO_SIMRAD2 4
-#define MBCOPY_ANY_TO_MBLDEOIH 5
-
+typedef enum {
+    MBCOPY_PARTIAL = 0,
+    MBCOPY_FULL = 1,
+    MBCOPY_ELACMK2_TO_XSE = 2,
+    MBCOPY_XSE_TO_ELACMK2 = 3,
+    MBCOPY_SIMRAD_TO_SIMRAD2 = 4,
+    MBCOPY_ANY_TO_MBLDEOIH = 5,
 #ifdef ENABLE_GSF
-#define MBCOPY_RESON8K_TO_GSF 6
+    MBCOPY_RESON8K_TO_GSF = 6,
 #endif
-const int MBCOPY_STRIPMODE_NONE      = 0;
-const int MBCOPY_STRIPMODE_COMMENTS  = 1;
-const int MBCOPY_STRIPMODE_BATHYONLY = 2;
+} copy_mode_t;
+
+typedef enum {
+    MBCOPY_STRIPMODE_NONE      = 0,
+    MBCOPY_STRIPMODE_COMMENTS  = 1,
+    MBCOPY_STRIPMODE_BATHYONLY = 2,
+} strip_mode_t;
 
 static const char program_name[] = "MBcopy";
 static const char help_message[] =
@@ -1810,10 +1814,10 @@ int main(int argc, char **argv) {
   double maltitude;
   double msonardepth;
 
-    int sensorhead_status = MB_SUCCESS;
-    int sensorhead_error = MB_ERROR_NO_ERROR;
-    int sensorhead = 0;
-    int sensortype = 0;
+  int sensorhead_status = MB_SUCCESS;
+  int sensorhead_error = MB_ERROR_NO_ERROR;
+  int sensorhead = 0;
+  int sensortype = 0;
 
   char mcomment[MB_COMMENT_MAXLINE];
   int mnbath, mnamp, mnss;
@@ -1837,8 +1841,8 @@ int main(int argc, char **argv) {
   bool insertcomments = false;
   bool bathonly = false;
   char commentfile[MB_PATH_MAXLINE];
-  int stripmode = MBCOPY_STRIPMODE_NONE;
-  int copymode = MBCOPY_PARTIAL;
+  strip_mode_t stripmode = MBCOPY_STRIPMODE_NONE;
+  copy_mode_t copymode = MBCOPY_PARTIAL;
   bool use_sleep = false;
 
   /* sleep variable */
@@ -1921,7 +1925,14 @@ int main(int argc, char **argv) {
       }
       case 'N':
       case 'n':
-        stripmode++;
+        if (stripmode == MBCOPY_STRIPMODE_NONE) {
+          stripmode = MBCOPY_STRIPMODE_COMMENTS;
+        } else if (stripmode == MBCOPY_STRIPMODE_COMMENTS) {
+          stripmode = MBCOPY_STRIPMODE_BATHYONLY;
+        } else {
+          fprintf(stderr, "Failure: Gave -n more than twice.\n");
+          exit(MB_ERROR_BAD_USAGE);
+        }
         break;
       case 'O':
       case 'o':
@@ -2671,13 +2682,11 @@ int main(int argc, char **argv) {
     }
   }
 
-  /* close the files */
-  status = mb_close(verbose, &imbio_ptr, &error);
-  status = mb_close(verbose, &ombio_ptr, &error);
+  status &= mb_close(verbose, &imbio_ptr, &error);
+  status &= mb_close(verbose, &ombio_ptr, &error);
 
-  /* check memory */
   if (verbose >= 4)
-    status = mb_memory_list(verbose, &error);
+    status &= mb_memory_list(verbose, &error);
 
   /* give the statistics */
   if (verbose >= 1) {
