@@ -631,7 +631,6 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	int contour_algorithm = MB_CONTOUR_OLD;
 	char contourfile[MB_PATH_MAXLINE];
 	int plot;
-	int done;
 	int flush;
 	int save_new;
 	int *npings = NULL;
@@ -1070,7 +1069,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 			/* loop over reading */
 			npings = &swath_plot->npings;
 			*npings = 0;
-			done = false;
+			bool done = false;
 			plotted_name = false;
 			while (done == false) {
 				/* read the next ping */

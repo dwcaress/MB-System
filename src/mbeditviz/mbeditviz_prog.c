@@ -337,7 +337,6 @@ int mbeditviz_get_format(char *file, int *form) {
 /*--------------------------------------------------------------------*/
 int mbeditviz_open_data(char *path, int format) {
 	/* local variables */
-	int done;
 	double weight;
 	int filestatus;
 	char fileraw[MB_PATH_MAXLINE];
@@ -357,15 +356,15 @@ int mbeditviz_open_data(char *path, int format) {
 		mb_get_format(mbev_verbose, path, NULL, &format, &mbev_error);
 
 	/* loop until all inf files are read */
-	done = false;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		if (format > 0) {
 			mbev_status = mbeditviz_import_file(path, format);
 			done = true;
 		}
 		else if (format == -1) {
 			if ((mbev_status = mb_datalist_open(mbev_verbose, &datalist, path, MB_DATALIST_LOOK_NO, &mbev_error)) == MB_SUCCESS) {
-				while (done == false) {
+				while (!done) {
 					if ((mbev_status = mb_datalist_read2(mbev_verbose, datalist, &filestatus, fileraw, fileprocessed, dfile,
 					                                     &format, &weight, &mbev_error)) == MB_SUCCESS) {
 						mbev_status = mbeditviz_import_file(fileraw, format);
