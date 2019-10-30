@@ -885,7 +885,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
                       char *sport = strtok(NULL,":");
                       
                       if(NULL!=shost){
-                          mb1svr_host = strdup(shost);
+                          trnsvr_host = strdup(shost);
                       }
                       if(NULL!=sport){
                           sscanf(sport,"%d",&trnsvr_port);
