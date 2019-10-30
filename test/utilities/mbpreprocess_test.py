@@ -44,9 +44,6 @@ class MbpreprocessTest(unittest.TestCase):
     self.assertIn('handles preprocessing of swath sonar data', output)
     self.assertIn('--platform-file=platform_file', output)
     self.assertIn('--kluge-fix-wissl-timestamps', output)
-    self.assertIn('dbg2', output)
-    self.assertIn('lonflip', output)
-    self.assertIn('output_sensor_fnv:', output)
 
   # TODO(schwehr): Add tests of actual usage.
 
