@@ -1977,7 +1977,6 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 	int nsegpoint;
 	double xlon1, ylat1, xlon2, ylat2;
 	double segbearing, dsegbearing, segdist, dsegdist;
-	int done;
 	int i, j, icnt;
 
 	/* print starting debug statements */
@@ -2002,8 +2001,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	/* reset done flag */
-	done = false;
+	bool done = false;
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
@@ -2055,7 +2053,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 	}
 
 	/* now calculate points along great circle arc */
-	if (seg->nls_alloc > 1 && done == false) {
+	if (seg->nls_alloc > 1 && !done) {
 		/* put begin point in list */
 		seg->nls = 0;
 		seg->lspoints[seg->nls].xgrid = seg->endpoints[0].xgrid;
@@ -2143,7 +2141,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 	int istart, iend, iadd, jstart, jend, jadd;
 	int ni, nj;
 	double mm, bb;
-	int found, done, insert;
+	int found, insert;
 	double xgrid, ygrid, zdata;
 	int global;
 	double offset_factor;
@@ -2167,8 +2165,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	/* reset done flag */
-	done = false;
+	bool done = false;
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
@@ -2228,7 +2225,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 	}
 
 	/* if points needed and space allocated do it */
-	if (done == false && ni + nj > 0) {
+	if (!done && ni + nj > 0) {
 		/* put begin point in list */
 		seg->nls = 0;
 		seg->lspoints[seg->nls].xgrid = seg->endpoints[0].xgrid;
@@ -2469,7 +2466,6 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	int nsegpoint;
 	double xlon1, ylat1, xlon2, ylat2;
 	double segbearing, dsegbearing, segdist, dsegdist;
-	int done;
 	int i, j, icnt;
 
 	/* print starting debug statements */
@@ -2493,9 +2489,6 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-
-	/* reset done flag */
-	done = false;
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
@@ -2523,6 +2516,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	                               seg->endpoints[1].ylat, &segbearing, &segdist);
 	nsegpoint = MAX(((int)((segdist / dsegdist) + 1)), 2);
 
+	bool done = false;
 	/* no need to fill in if the segment doesn't cross grid boundaries */
 	if (nsegpoint <= 2) {
 		done = true;
@@ -2547,7 +2541,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	}
 
 	/* now calculate points along great circle arc */
-	if (seg->nls_alloc > 1 && done == false) {
+	if (seg->nls_alloc > 1 && !done) {
 		/* put begin point in list */
 		seg->nls = 0;
 		seg->lspoints[seg->nls].xgrid[instance] = seg->endpoints[0].xgrid[instance];
@@ -2636,7 +2630,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	int istart, iend, iadd, jstart, jend, jadd;
 	int ni, nj;
 	double mm, bb;
-	int found, done, insert;
+	int found, insert;
 	double xgrid, ygrid, zdata;
 	double xgridstart, xgridend, ygridstart, ygridend;
 	int global;
@@ -2660,9 +2654,6 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-
-	/* reset done flag */
-	done = false;
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
@@ -2705,6 +2696,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	fprintf(stderr,"mbview_drapesegmentw_grid: istart:%d iend:%d jstart:%d jend:%d\n",istart,iend,jstart,jend);*/
 
 	/* no need to fill in if the segment doesn't cross grid boundaries */
+	bool done = false;
 	if (istart == iend && jstart == jend) {
 		done = true;
 		seg->nls = 0;
@@ -2747,7 +2739,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	ni,nj,iadd,istart,iend,jadd,jstart,jend);*/
 
 	/* if points needed and space allocated do it */
-	if (done == false && ni + nj > 0) {
+	if (!done && ni + nj > 0) {
 		/* put begin point in list */
 		seg->nls = 0;
 		seg->lspoints[seg->nls].xgrid[instance] = seg->endpoints[0].xgrid[instance];

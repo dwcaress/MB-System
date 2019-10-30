@@ -471,7 +471,6 @@ void do_mbedit_init(int argc, char **argv) {
 
 void do_parse_datalist(char *file, int form) {
 	void *datalist;
-	int done;
 	double weight;
 	int filestatus;
 	int fileformat;
@@ -501,9 +500,9 @@ void do_parse_datalist(char *file, int form) {
 	/* read in datalist if forma = -1 */
 	else if (format == -1) {
 		error = MB_ERROR_NO_ERROR;
-		done = false;
 		if ((datalist_status = mb_datalist_open(verbose, &datalist, file, MB_DATALIST_LOOK_NO, &error)) == MB_SUCCESS) {
-			while (done == false) {
+			bool done = false;
+			while (!done) {
 				if ((datalist_status = mb_datalist_read2(verbose, datalist, &filestatus, fileraw, fileprocessed, dfile,
 				                                         &fileformat, &weight, &error)) == MB_SUCCESS) {
 					if (numfiles < NUM_FILES_MAX) {

@@ -7931,7 +7931,6 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 	int iposition;
 	int iroute, jwaypoint;
 	size_t instance;
-	int done;
 	int i;
 
 	if (mbv_verbose >= 2)
@@ -7960,8 +7959,8 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 	    values to MBV_ROUTE_WAYPOINT_DELETEFLAG */
 	for (i = 0; i < position_count; i++) {
 		iposition = 0;
-		done = false;
-		for (iroute = 0; iroute < shared.shareddata.nroute && done == false; iroute++) {
+		bool done = false;
+		for (iroute = 0; iroute < shared.shareddata.nroute && !done; iroute++) {
 			iposition++;
 
 			/* delete entire route */
@@ -7974,7 +7973,7 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 
 			/* else check waypoints */
 			else {
-				for (jwaypoint = 0; jwaypoint < shared.shareddata.routes[iroute].npoints && done == false; jwaypoint++) {
+				for (jwaypoint = 0; jwaypoint < shared.shareddata.routes[iroute].npoints && !done; jwaypoint++) {
 					iposition++;
 					if (iposition == position_list[i]) {
 						shared.shareddata.routes[iroute].waypoint[jwaypoint] = MBV_ROUTE_WAYPOINT_DELETEFLAG;

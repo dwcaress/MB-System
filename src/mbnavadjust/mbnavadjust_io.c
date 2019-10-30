@@ -2757,7 +2757,6 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
   char tpath[STRING_MAX];
   int iformat;
   double tick_len_map, label_hgt_map;
-  int done;
   int i;
 
   /* print input debug statements */
@@ -2872,8 +2871,8 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
 
     /* now read the data */
     if (status == MB_SUCCESS) {
-      done = false;
-      while (done == false) {
+      bool done = false;
+      while (!done) {
         /* read the next ping */
         status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
                             &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
@@ -3131,7 +3130,6 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
   int iformat;
     int ifile, isection, isnav;
     int num_pings;
-  int done;
   int i;
 
   /* print input debug statements */
@@ -3198,10 +3196,10 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
                 /* now read the data */
                 if (status == MB_SUCCESS) {
                     imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
-                    done = false;
+                    bool done = false;
                     isnav = 0;
                     num_pings = 0;
-                    while (done == false && isnav < section->num_snav) {
+                    while (!done && isnav < section->num_snav) {
                         /* read the next ping */
                         status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
                                             &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,

@@ -4037,7 +4037,6 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr) 
   int format;
   int formatorg;
   double weight;
-  int done;
   mb_path messagestr;
   char *lastslash;
   int nfiledatalist = 0;
@@ -4054,10 +4053,10 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr) 
 
   /* read data for valid instance */
   if (instance != MBV_NO_WINDOW) {
-    done = false;
-    while (done == false) {
+    bool done = false;
+    while (!done) {
       if ((status = mb_datalist_open(verbose, &datalist, input_file_ptr, MB_DATALIST_LOOK_UNSET, &error)) == MB_SUCCESS) {
-        while (done == false) {
+        while (!done) {
           if ((status = mb_datalist_read2(verbose, datalist, &swathfilestatus, swathfileraw, swathfileprocessed, dfile,
                                           &format, &weight, &error)) == MB_SUCCESS) {
             nfiledatalist++;
@@ -4114,7 +4113,6 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr) 
     status = mbview_update(verbose, instance, &error);
   }
 
-  /* all done */
   return (status);
 }
 /*---------------------------------------------------------------------------------------*/
