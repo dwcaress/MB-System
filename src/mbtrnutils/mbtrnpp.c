@@ -175,9 +175,9 @@ int64_t mbtrnpp_loop_delay_msec = 0;
 #define MB1SVR_PORT_DFL 27000
 #define MB1SVR_MSG_CON_LEN 4
 #define MB1SVR_HBTOK_DFL 50
-#define MB1SVR_HBTO  0.0
-#define TRNSVR_HBTO  0.0
-#define TRNXSVR_HBTO 0.0
+#define MB1SVR_HBTO_DFL  0.0
+#define TRNSVR_HBTO_DFL  0.0
+#define TRNUSVR_HBTO_DFL 0.0
 
 mlog_id_t mb1_blog_id = MLOG_ID_INVALID;
 mlog_id_t mbtrnpp_mlog_id = MLOG_ID_INVALID;
@@ -201,7 +201,10 @@ mfile_mode_t mode = MFILE_RU | MFILE_WU | MFILE_RG | MFILE_WG;
 netif_t *mb1svr=NULL;
 int mb1svr_port=MB1SVR_PORT_DFL;
 char *mb1svr_host=MB1SVR_HOST_DFL;
-int mb1svr_hbtok = MB1SVR_HBTOK_DFL;
+int mbsvr_hbtok = MB1SVR_HBTOK_DFL;
+double mbsvr_hbto = MB1SVR_HBTO_DFL;
+double trnsvr_hbto = TRNSVR_HBTO_DFL;
+double trnusvr_hbto = TRNUSVR_HBTO_DFL;
 
 #ifdef WITH_MBTNAV
 trn_config_t *trn_cfg = NULL;
@@ -416,6 +419,10 @@ int main(int argc, char **argv) {
                          "\t--projection=projection_id\n"
                          "\t--stats=n\n"
                          "\t--hbeat=n\n"
+                        "\t--mbhbn=n\n"
+                        "\t--mbhbt=d.d\n"
+                        "\t--trnhbt=n\n"
+                        "\t--trnuhbt=n\n"
                          "\t--delay=n\n"
 					     "\t--stats=n\n"
                          "\t--trn-en\n"
@@ -462,7 +469,10 @@ int main(int argc, char **argv) {
   static struct option options[] = {{"help", no_argument, NULL, 0},
                                     {"verbose", required_argument, NULL, 0},
                                     {"input", required_argument, NULL, 0},
-                                    {"hbeat", required_argument, NULL, 0},
+                                    {"mbhbn", required_argument, NULL, 0},
+                                    {"mbhbt", required_argument, NULL, 0},
+                                    {"trnhbt", required_argument, NULL, 0},
+                                    {"trnuhbt", required_argument, NULL, 0},
                                     {"delay", required_argument, NULL, 0},
                                     {"stats", required_argument, NULL, 0},
                                     {"format", required_argument, NULL, 0},
@@ -934,8 +944,17 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
       }
 
      // heartbeat (pings)
-      else if (strcmp("hbeat", options[option_index].name) == 0) {
-          sscanf(optarg, "%d", &mb1svr_hbtok);
+      else if (strcmp("mbhbn", options[option_index].name) == 0) {
+          sscanf(optarg, "%d", &mbsvr_hbtok);
+      }
+      else if (strcmp("mbhbt", options[option_index].name) == 0) {
+          sscanf(optarg, "%lf", &mbsvr_hbto);
+      }
+      else if (strcmp("trnhbt", options[option_index].name) == 0) {
+          sscanf(optarg, "%lf", &trnsvr_hbto);
+      }
+      else if (strcmp("trnhbt", options[option_index].name) == 0) {
+          sscanf(optarg, "%lf", &trnusvr_hbto);
       }
       // ping delay
       else if (strcmp("delay", options[option_index].name) == 0) {
@@ -2703,11 +2722,11 @@ int mbtrnpp_init_trnsvr(netif_t **psvr, wtnav_t *trn, char *host, int port, bool
     
     PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring trn server socket using %s:%d\n",host,port));
     if(NULL!=psvr && NULL!=host){
-        netif_t *svr  = netif_new(host,
+        netif_t *svr  = netif_new("trnsvr",host,
                           port,
                           ST_TCP,
                           IFM_REQRES,
-                          TRNSVR_HBTO,
+                          trnsvr_hbto,
                           trnif_msg_read_ct,
                           trnif_msg_handle_ct,
                           NULL);
@@ -2734,13 +2753,13 @@ int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose)
 {
     int retval = -1;
     PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring MB1 server socket using %s:%d\n",host,port));
-    fprintf(stderr,"configuring MB1 server socket using %s:%d\n",host,port);
+    fprintf(stderr,"configuring MB1 server socket using %s:%d hbto[%lf]\n",host,port,mbsvr_hbto);
    if(NULL!=psvr && NULL!=host){
-        netif_t *svr = netif_new(host,
+        netif_t *svr = netif_new("mb1svr",host,
                           port,
                           ST_UDP,
                           IFM_REQRES,
-                          MB1SVR_HBTO,
+                          mbsvr_hbto,
                           trnif_msg_read_mb,
                           trnif_msg_handle_mb,
                           trnif_msg_pub_mb);
@@ -2768,11 +2787,11 @@ int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, bool verbose)
     int retval = -1;
     PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring trnu (update) server socket using %s:%d\n",host,port));
     if(NULL!=psvr && NULL!=host){
-        netif_t *svr = netif_new(host,
+        netif_t *svr = netif_new("trnusvr",host,
                                  port,
                                  ST_UDP,
                                  IFM_REQRES,
-                                 TRNXSVR_HBTO,
+                                 trnusvr_hbto,
                                  trnif_msg_read_trnu,
                                  trnif_msg_handle_trnu,
                                  trnif_msg_pub_trnu);

@@ -173,7 +173,7 @@ extern "C" {
     /// @param[in] handle_fn message handler
     /// @param[in] pub_fn publish function
     /// @return new instance on success, NULL otherwise
-    netif_t *netif_new(char *host, int port,
+    netif_t *netif_new(char *name, char *host, int port,
                        msock_socket_ctype ctype,
                        netif_mode_t mode,
                        double hbto,
@@ -181,13 +181,13 @@ extern "C" {
                        netif_msg_handle_fn handle_fn,
                        netif_msg_pub_fn pub_fn);
     
-    netif_t *netif_tcp_new(char *host, int port,
+    netif_t *netif_tcp_new(char *name, char *host, int port,
                            double hbto,
                            netif_mode_t mode,
                            netif_msg_read_fn reader,
                            netif_msg_handle_fn handler);
 
-    netif_t *netif_udp_new(char *host, int port,
+    netif_t *netif_udp_new(char *name, char *host, int port,
                            double hbto,
                            netif_mode_t mode,
                            netif_msg_read_fn reader,

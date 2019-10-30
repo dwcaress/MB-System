@@ -502,7 +502,7 @@ static int s_app_main(app_cfg_t *cfg)
 {
     int retval=-1;
     double start_time=mtime_dtime();
-    netif_t *netif = netif_new(cfg->host,
+    netif_t *netif = netif_new("trnif",cfg->host,
                                cfg->port,
                                ST_TCP,
                                IFM_REQRES,

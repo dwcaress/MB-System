@@ -205,7 +205,7 @@ static int s_app_main(app_cfg_t *cfg)
 {
     int retval=-1;
     double start_time=mtime_dtime();
-    netif_t *netif = netif_new("localhost",
+    netif_t *netif = netif_new("trnsvr","localhost",
                                27027,
                                ST_TCP,
                                IFM_REQRES,

@@ -121,9 +121,16 @@ OPT_TRN_FTYPE=""
 # -2 to 0 recommended for missions
 # <= -3 a lot of mbtrn output
 OPT_VERBOSE="--verbose=-2"
-# drop TRN clients after hbeat messages
+# drop MB1 clients after hbeat messages
 # if they haven't renewed
-OPT_HBEAT=""
+OPT_MBHBN=""
+# drop MB1 clients after OPT_MBHBT seconds
+OPT_MBHBT=""
+# drop TRN clients after OPT_MBHBT seconds
+OPT_TRNHBT=""
+# drop TRNU clients after OPT_MBHBT seconds
+OPT_TRNUHBT=""
+
 # delay between TRN messages (msec)
 OPT_DELAY="" #"--delay=100"
 # statistics logging interval (s)
@@ -310,10 +317,28 @@ do
     vout "ovr OPT_DELAY: $OPT_DELAY"
     fi
 
-    if [ ${a:2:5} == "hbeat" ]
+    if [ ${a:2:5} == "mbhbn" ]
     then
     OPT_HBEAT=$a
-    vout "ovr OPT_HBEAT: $OPT_HBEAT"
+    vout "ovr OPT_MBHBN: $OPT_MBHBN"
+    fi
+
+    if [ ${a:2:5} == "mbhbt" ]
+    then
+    OPT_HBEAT=$a
+    vout "ovr OPT_MBHBT: $OPT_MBHBT"
+    fi
+
+    if [ ${a:2:6} == "trnhbt" ]
+    then
+    OPT_HBEAT=$a
+    vout "ovr OPT_TRNHBT: $OPT_TRNHBT"
+    fi
+
+    if [ ${a:2:7} == "trnuhbt" ]
+    then
+    OPT_HBEAT=$a
+    vout "ovr OPT_TRNUHBT: $OPT_TRNUHBT"
     fi
 
     if [ ${a:2:11} == "swath-width" ]
@@ -440,7 +465,7 @@ done
 
 
 # set cmdline options
-APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATS $OPT_HBEAT $OPT_DELAY $OPT_TRN_EN $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_HELP"
+APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATS $OPT_MBHBN $OPT_MBHBT $OPT_TRNHBT $OPT_TRNUHBT $OPT_DELAY $OPT_TRN_EN $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_HELP"
 
 if [ ${DO_TEST} ]
 then
