@@ -66,9 +66,7 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
     fprintf(stderr, "dbg2       format:    %d\n", *format);
   }
 
-  /* get mb_io_ptr */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
 
   /* check for old format id and provide alias if needed */
   if (*format > 0 && (*format < 10 || *format == 44 || *format == 52 || *format == 55)) {
@@ -3511,7 +3509,6 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
     fprintf(stderr, "dbg2       imagelist_ptr:  %p\n", (void *)imagelist_ptr);
   }
 
-  /* get imagelist pointer */
   struct mb_imagelist_struct *imagelist = (struct mb_imagelist_struct *)imagelist_ptr;
 
   if (verbose >= 2) {
