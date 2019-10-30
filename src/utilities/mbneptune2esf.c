@@ -245,15 +245,13 @@ int line_array(struct neptune_line_tree *line, struct neptune_line_tree ***array
 /*--------------------------------------------------------------------*/
 
 int print_pings(FILE *output, struct neptune_ping_tree *node) {
-	struct neptune_beam_list *beam;
-
 	if (NULL == node)
 		return MB_SUCCESS;
 
 	print_pings(output, node->prev);
 
 	fprintf(output, "\tPing %d beams: ", node->ping);
-	beam = node->beams;
+	struct neptune_beam_list *beam = node->beams;
 	while (NULL != beam) {
 		fprintf(output, " %d", beam->beam);
 		beam = beam->next;
@@ -267,8 +265,6 @@ int print_pings(FILE *output, struct neptune_ping_tree *node) {
 /*--------------------------------------------------------------------*/
 
 int free_pings(int verbose, struct neptune_ping_tree **node, int *error) {
-	struct neptune_beam_list *beam;
-	struct neptune_beam_list *nextbeam;
 
 	if (NULL == *node)
 		return MB_SUCCESS;
@@ -276,7 +272,8 @@ int free_pings(int verbose, struct neptune_ping_tree **node, int *error) {
 	free_pings(verbose, &(*node)->prev, error);
 	free_pings(verbose, &(*node)->next, error);
 
-	beam = (*node)->beams;
+	struct neptune_beam_list *beam = (*node)->beams;
+	struct neptune_beam_list *nextbeam;
 	while (NULL != beam) {
 		nextbeam = beam->next;
 #ifdef USE_MB_MALLOC
@@ -298,112 +295,16 @@ int free_pings(int verbose, struct neptune_ping_tree **node, int *error) {
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
-	int status;
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
-	char read_file[MB_PATH_MAXLINE];
-	char swathfile[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
 	int format;
-	int variable_beams;
-	int traveltime;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
-	double distance;
-	double altitude;
-	double sonardepth;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	double *amp;
-	double *ss;
-	double *ssacrosstrack;
-	double *ssalongtrack;
-
-	/* mbio read and write values */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_simrad2_struct *store;
-	struct mbsys_simrad2_ping_struct *sim_ping;
-	int kind;
-	struct mbclean_ping_struct cur_ping;
-	int pingsread;
-	int nfiletot = 0;
-	int ndatatot = 0;
-	int nflagtot = 0;
-	int nzerotot = 0;
-	int nflagesftot = 0;
-	int nunflagesftot = 0;
-	int nzeroesftot = 0;
-	int ndata = 0;
-	int nflag = 0;
-	int nzero = 0;
-	int nflagesf = 0;
-	int nunflagesf = 0;
-	int nzeroesf = 0;
-	char comment[MB_COMMENT_MAXLINE];
-	int mode = 1;
-	int action;
-
-	/* rules file */
-	char rulesfile[MB_PATH_MAXLINE];
-	struct neptune_line_tree *rule_lines = NULL;
-	int no_lines = 0;
-	FILE *rules_fp;
-	int rule_level;
-	int nscan;
-	int nlines;
-	int npings;
-	int nbeams;
-	int used;
-	int bytes;
-	char buffer[MB_PATH_MAXLINE];
-	char word[MB_PATH_MAXLINE];
-	char buff[MB_PATH_MAXLINE];
-	char beams_buff[MB_PATH_MAXLINE];
-	char line_name[MB_PATH_MAXLINE];
-	int nlen;
-	int slen;
-	int ping_no;
-	int beam_no;
-	struct neptune_line_tree **lines;
-	struct neptune_line_tree *line;
-	struct neptune_ping_tree *ping;
-	struct neptune_beam_list *beam;
-	char *buffer_ptr;
-
-	bool output_file_set = false;
-	char output_file[MB_PATH_MAXLINE];
-	FILE *output;
-
-	/* save file control variables */
-	char esffile[MB_PATH_MAXLINE];
-	struct mb_esf_struct esf;
-
-	/* processing variables */
-	int sensorhead_status = MB_SUCCESS;
-	int sensorhead_error = MB_ERROR_NO_ERROR;
-	int sensorhead = 0;
-	int pingmultiplicity;
-	double time_d_lastping;
-	int start, done;
-
-	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* reset all defaults but the format and lonflip */
 	pings = 1;
@@ -427,10 +328,13 @@ int main(int argc, char **argv) {
 	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
-	strcpy(read_file, "datalist.mb-1");
-	strcpy(rulesfile, "-");
 
-	/* process argument list */
+	char rulesfile[MB_PATH_MAXLINE] = "-";
+	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
+	int mode = 1;  // 1 to flag beams; 3 to zero beams
+	bool output_file_set = false;
+	char output_file[MB_PATH_MAXLINE];
+
 	{
 		bool errflg = false;
 		bool help = false;
@@ -517,31 +421,42 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
 
 	/* read rules */
-	if (0 == strncmp("-", rulesfile, 2))
+	FILE *rules_fp;
+	if (0 == strncmp("-", rulesfile, 2)) {
 		rules_fp = stdin;
-	else if ((rules_fp = fopen(rulesfile, "r")) == NULL) {
+	} else if ((rules_fp = fopen(rulesfile, "r")) == NULL) {
 		fprintf(stderr, "\nUnable to open rules file %s\n", rulesfile);
 		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 
 	bool rules_done = false;
 	bool usable_rule = false;
-	rule_level = 0;
+	int rule_level = 0;
+	char buffer[MB_PATH_MAXLINE];
+	char word[MB_PATH_MAXLINE];
+	char buff[MB_PATH_MAXLINE];
+	int nlines;
+	char line_name[MB_PATH_MAXLINE];
+	struct neptune_line_tree *rule_lines = NULL;
+	struct neptune_line_tree *line;
+	int no_lines = 0;
+
+	int error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 	while (!rules_done) {
 		/* skip till we find a rule */
 		while (!rules_done && !usable_rule) {
-			buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, rules_fp);
+			char *buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, rules_fp);
 			if (buffer_ptr != buffer)
 				rules_done = true;
 			else {
-				nscan = sscanf(buffer, "%s", word);
+				int nscan = sscanf(buffer, "%s", word);
 				if (1 == nscan && ')' == word[0])
 					rule_level--;
 				else if (1 == nscan && '(' == word[0] && ')' != word[1]) {
@@ -557,7 +472,7 @@ int main(int argc, char **argv) {
 
 		/* read a rule */
 		if (!rules_done) {
-			buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, rules_fp);
+			char *buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, rules_fp);
 			if (buffer_ptr != buffer) {
 				rules_done = true;
 				status = MB_FAILURE;
@@ -588,6 +503,7 @@ int main(int argc, char **argv) {
 						if (buffer != fgets(buffer, MB_PATH_MAXLINE, rules_fp))
 							status = MB_FAILURE;
 
+						int npings;
 						if (MB_SUCCESS == status && 2 != sscanf(buffer, "%s %d", word, &npings))
 							status = MB_FAILURE;
 
@@ -599,6 +515,10 @@ int main(int argc, char **argv) {
 								if (buffer != fgets(buffer, MB_PATH_MAXLINE, rules_fp))
 									status = MB_FAILURE;
 
+								int ping_no;
+								int nbeams;
+								char beams_buff[MB_PATH_MAXLINE];
+								int used;
 								if (MB_SUCCESS == status &&
 								    5 > sscanf(buffer, "%s %d %s %d %s %n", word, &ping_no, buff, &nbeams, beams_buff, &used))
 									status = MB_FAILURE;
@@ -608,16 +528,20 @@ int main(int argc, char **argv) {
 								     0 != strncmp(beams_buff, "BEAMS", 5)))
 									status = MB_FAILURE;
 
+								struct neptune_ping_tree *ping;
 								if (MB_SUCCESS == status)
 									status = find_ping(verbose, ping_no, &(line->pings), true, &ping, &error);
 
-								beam = ping->beams;
+								struct neptune_beam_list *beam = ping->beams;
 								if (NULL != beam) {
 									while (NULL != beam->next)
 										beam = beam->next;
 								}
 								if (MB_SUCCESS == status)
 									for (int k = 0; k < nbeams; k++) {
+										int beam_no;
+										int bytes;
+
 										if (MB_SUCCESS == status && 1 > sscanf(&buffer[used], "%d %n", &beam_no, &bytes))
 											status = MB_FAILURE;
 										used += bytes;
@@ -655,6 +579,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* put lines in an array */
+	struct neptune_line_tree **lines;
 	status = mb_mallocd(verbose, __FILE__, __LINE__, no_lines * sizeof(void *), (void **)&lines, &error);
 	int i = 0;
 	line_array(rule_lines, &lines, &i);
@@ -663,6 +588,7 @@ int main(int argc, char **argv) {
 
 	/* output rules found */
 	if (output_file_set) {
+		FILE *output;
 		if (0 == strncmp("-", output_file, 2))
 			output = stdout;
 		else
@@ -682,9 +608,14 @@ int main(int argc, char **argv) {
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
 	bool read_data;
+	void *datalist;
+	char swathfile[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
+	double file_weight;
 
 	/* open file list */
 	if (read_datalist) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -700,6 +631,62 @@ int main(int argc, char **argv) {
 		strcpy(swathfile, read_file);
 		read_data = true;
 	}
+
+	/* MBIO read control parameters */
+	int variable_beams;
+	int traveltime;
+	double btime_d;
+	double etime_d;
+	double distance;
+	double altitude;
+	double sonardepth;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+	double *amp;
+	double *ss;
+	double *ssacrosstrack;
+	double *ssalongtrack;
+
+	/* mbio read and write values */
+	void *mbio_ptr = NULL;
+	void *store_ptr = NULL;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad2_struct *store;
+	struct mbsys_simrad2_ping_struct *sim_ping;
+	int kind;
+	struct mbclean_ping_struct cur_ping;
+	int pingsread;
+	int nfiletot = 0;
+	int ndatatot = 0;
+	int nflagtot = 0;
+	int nzerotot = 0;
+	int nflagesftot = 0;
+	int nunflagesftot = 0;
+	int nzeroesftot = 0;
+	int ndata = 0;
+	int nflag = 0;
+	int nzero = 0;
+	int nflagesf = 0;
+	int nunflagesf = 0;
+	int nzeroesf = 0;
+	char comment[MB_COMMENT_MAXLINE];
+	int action;
+
+	/* rules file */
+	int nlen;
+	int slen;
+
+	/* save file control variables */
+	char esffile[MB_PATH_MAXLINE];
+	struct mb_esf_struct esf;
+
+	/* processing variables */
+	int sensorhead_status = MB_SUCCESS;
+	int sensorhead_error = MB_ERROR_NO_ERROR;
+	int sensorhead = 0;
+	double time_d_lastping;
+	int pingmultiplicity = 0;
 
 	/* loop over all files to be read */
 	while (read_data) {
@@ -846,8 +833,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* read */
-			done = false;
-			start = 0;
+			bool done = false;
 			time_d_lastping = 0.0;
 			fprintf(stderr, "Processing data...\n");
 			while (!done) {
@@ -915,14 +901,14 @@ int main(int argc, char **argv) {
 
 					sim_ping = (struct mbsys_simrad2_ping_struct *)store->ping;
 
-					/* get ping no */
-					ping_no = sim_ping->png_count;
+					const int ping_no = sim_ping->png_count;
+					struct neptune_ping_tree *ping;
 
 					/* if ping in rules get it and flag beams */
 					if (MB_SUCCESS == find_ping(verbose, ping_no, &line->pings, false, &ping, &error)) {
-						beam = ping->beams;
+						struct neptune_beam_list *beam = beam = ping->beams;
 						while (NULL != beam) {
-							beam_no = beam->beam;
+							const int beam_no = beam->beam;
 							if (mb_beam_ok(cur_ping.beamflag[beam_no])) {
 								if (verbose >= 1)
 									fprintf(stderr, "z: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f\n", cur_ping.time_i[0],
