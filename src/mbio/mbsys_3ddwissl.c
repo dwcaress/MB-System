@@ -342,7 +342,7 @@
 #include "mb_status.h"
 #include "mbsys_3ddwissl.h"
 
-#define MBF_3DDEPTHP_DEBUG 1
+// #define MBF_3DDEPTHP_DEBUG 1
 
 /*-------------------------------------------------------------------- */
 int mbsys_3ddwissl_alloc
@@ -637,8 +637,17 @@ int mbsys_3ddwissl_preprocess
   int *error
 )
 {
-  double time_d;
-  int time_i[7], time_j[5];
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:                    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:                  %p\n", (void *)store_ptr);
+    fprintf(stderr, "dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
+    fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
+    }
+
   double navlon;
   double navlat;
   double heading;  /* heading (degrees) */
@@ -658,18 +667,6 @@ int mbsys_3ddwissl_preprocess
   /* int  jaltitude = 0; */
   int jattitude = 0;
   double amplitude_threshold;
-  double target_altitude;
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:                    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:                  %p\n", (void *)store_ptr);
-    fprintf(stderr, "dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
-    fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
-    }
 
   /* always successful */
   int status = MB_SUCCESS;
@@ -688,7 +685,7 @@ int mbsys_3ddwissl_preprocess
     {
     fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
     fprintf(stderr, "dbg2       timestamp_changed:          %d\n", pars->timestamp_changed);
-    fprintf(stderr, "dbg2       time_d:                     %f\n", pars->time_d);
+    // fprintf(stderr, "dbg2       time_d:                     %f\n", pars->time_d);
     fprintf(stderr, "dbg2       n_nav:                      %d\n", pars->n_nav);
     fprintf(stderr, "dbg2       nav_time_d:                 %p\n", pars->nav_time_d);
     fprintf(stderr, "dbg2       nav_lon:                    %p\n", pars->nav_lon);
@@ -715,6 +712,8 @@ int mbsys_3ddwissl_preprocess
         pars->kluge_id[i]);
     }
 
+  int time_i[7];
+  int time_j[5];
   /* change timestamp if indicated */
   if (pars->timestamp_changed == true)
     {
@@ -732,7 +731,7 @@ int mbsys_3ddwissl_preprocess
     }
 
   /* interpolate navigation and attitude */
-  time_d = store->time_d;
+  double time_d = store->time_d;
   mb_get_date(verbose, time_d, time_i);
 
   /* get nav sensordepth heading attitude values for record timestamp
@@ -992,6 +991,8 @@ int mbsys_3ddwissl_preprocess
       pulse->pitch_offset = (float)(pitch - store->pitch);
       }
     }
+
+  double target_altitude;
 
   /* calculate the bathymetry using the newly inserted values */
   if (pars->sounding_amplitude_filter == true)

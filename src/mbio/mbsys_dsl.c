@@ -34,7 +34,6 @@
 #include "mb_status.h"
 #include "mbsys_dsl.h"
 
-
 /*--------------------------------------------------------------------*/
 int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	if (verbose >= 2) {
