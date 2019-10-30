@@ -130,15 +130,17 @@ mb_path socket_definition;
 typedef enum { INPUT_MODE_SOCKET = 1, INPUT_MODE_FILE = 2 } input_mode_t;
 input_mode_t input_mode;
 typedef enum{
-    OUTPUT_NONE        =0x000, OUTPUT_MB1_FILE_EN =0x001, OUTPUT_MB1_SVR_EN =0x002,
-    OUTPUT_TRN_SVR_EN  =0x004, OUTPUT_TRNU_SVR_EN =0x008, OUTPUT_MB1_BIN    =0x010,
-    OUTPUT_RESON_BIN   =0x020, OUTPUT_TRNU_ASC    =0x040, OUTPUT_TRNU_SOUT = 0x080,
-    OUTPUT_TRNU_SERR   =0x100, OUTPUT_TRNU_DEBUG  =0x200,
+    OUTPUT_NONE        =0x000, OUTPUT_MB1_FILE_EN =0x001, OUTPUT_MB1_SVR_EN  =0x002,
+    OUTPUT_TRN_SVR_EN  =0x004, OUTPUT_TRNU_SVR_EN =0x008, OUTPUT_MB1_BIN     =0x010,
+    OUTPUT_RESON_BIN   =0x020, OUTPUT_TRNU_ASC    =0x040, OUTPUT_TRNU_SOUT   =0x080,
+    OUTPUT_TRNU_SERR   =0x100, OUTPUT_TRNU_DEBUG  =0x200, OUTPUT_MBTRNPP_MSG =0x400,
     OUTPUT_MBSYS_STDOUT = 0x800,
     OUTPUT_ALL         =0xFFF
 }output_mode_t;
-
-output_mode_t output_flags = OUTPUT_NONE;
+#define OUTPUT_FLAG_SET(m)  ((m&output_flags)==0 ? false : true)
+#define OUTPUT_FLAG_CLR(m)  ((m&output_flags)==0 ? true : false)
+#define OUTPUT_FLAGS_ZERO() ((output_flags==0) ? true : false)
+output_mode_t output_flags = OUTPUT_MBTRNPP_MSG;
 
 int64_t mbtrnpp_loop_delay_msec = 0;
 
@@ -177,7 +179,6 @@ int64_t mbtrnpp_loop_delay_msec = 0;
 #define TRNSVR_HBTO  0.0
 #define TRNXSVR_HBTO 0.0
 
-
 mlog_id_t mb1_blog_id = MLOG_ID_INVALID;
 mlog_id_t mbtrnpp_mlog_id = MLOG_ID_INVALID;
 mlog_id_t reson_blog_id = MLOG_ID_INVALID;
@@ -193,11 +194,7 @@ char *mb1_blog_path = NULL;
 char *mbtrnpp_mlog_path = NULL;
 char *reson_blog_path = NULL;
 char *trn_ulog_path = NULL;
-// TODO: replace w/ output_flags
-//bool mb1_blog_en = true;
-bool mbtrnpp_mlog_en = true;
-bool reson_blog_en = true;
-bool trn_ulog_en = true;
+
 mfile_flags_t flags = MFILE_RDWR | MFILE_APPEND | MFILE_CREATE;
 mfile_mode_t mode = MFILE_RU | MFILE_WU | MFILE_RG | MFILE_WG;
 
@@ -844,6 +841,10 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
                   output_flags &= ~OUTPUT_MB1_SVR_EN;
                   mb1svr_host=NULL;
               }
+              if(strcmp(tok[i],"nombtrnpp")==0){
+                  // disable mbtrnpp message log (not recommended)
+                  output_flags &= ~OUTPUT_MBTRNPP_MSG;
+              }
           }
           free(ocopy);
       }
@@ -1239,12 +1240,12 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
   }
 
   /* initialize output */
-    if ( (output_flags&OUTPUT_MBSYS_STDOUT)!=0) {
+    if ( OUTPUT_FLAG_SET(OUTPUT_MBSYS_STDOUT)) {
     }
   /* insert option to recognize and initialize ipc with TRN */
   /* else open ipc to TRN */
 
-  if ( (output_flags&OUTPUT_MB1_SVR_EN)!=0) {
+  if ( OUTPUT_FLAG_SET(OUTPUT_MB1_SVR_EN) ) {
     mmd_en_mask_t olvl;
     if (verbose != 0) {
       olvl = mmd_get_enmask(MOD_MBTRNPP, NULL);
@@ -1266,7 +1267,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
 
     /* else open output file in which the binary data otherwise communicated
    * to TRN will be saved */
- if ( (output_flags&OUTPUT_MB1_FILE_EN)!=0) {
+ if ( OUTPUT_FLAG_SET(OUTPUT_MB1_FILE_EN)) {
     output_fp = fopen(output_file, "w");
   }
 
@@ -1696,7 +1697,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
           }
 
           /* write out results to stdout as text */
-            if ( (output_flags&OUTPUT_MBSYS_STDOUT)!=0 ) {
+            if ( OUTPUT_FLAG_SET(OUTPUT_MBSYS_STDOUT) ) {
             fprintf(stdout, "Ping: %.9f %.7f %.7f %.3f %.3f %4d\n", ping[i_ping_process].time_d,
                     ping[i_ping_process].navlat, ping[i_ping_process].navlon, ping[i_ping_process].sonardepth,
                     (double)(DTR * ping[i_ping_process].heading), n_output);
@@ -1711,7 +1712,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
           }
             
           /* pack the data into a TRN MB1 packet and either send it to TRN or write it to a file */
-        if(output_flags!=0){
+        if(!OUTPUT_FLAGS_ZERO()){
             n_soundings_written++;
 
             /* make sure buffer is large enough to hold the packet */
@@ -1810,7 +1811,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MBPING_XT], mtime_dtime());
 
             /* output MB1, TRN data */
-            if ( output_flags!=0 && output_flags!=OUTPUT_MB1_FILE_EN ) {
+            if ( !OUTPUT_FLAGS_ZERO() ) {
 
                 // do MB1 processing/output
                 mbtrnpp_process_mb1(output_buffer, mb1_size, trn_cfg);
@@ -1825,7 +1826,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
             } // end MBTRNPREPROCESS_OUTPUT_TRN
 
             /* write the packet to a file */
-            if ( (output_flags&OUTPUT_MB1_FILE_EN) != 0) {
+            if ( OUTPUT_FLAG_SET(OUTPUT_MB1_FILE_EN) ) {
                 if(NULL!=output_fp && NULL!=output_buffer){
               		fwrite(output_buffer, mb1_size, 1, output_fp);
                 }else{
@@ -1966,7 +1967,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
   }
 
   /* close output */
-  if ( (output_flags&OUTPUT_MB1_FILE_EN)!=0) {
+  if ( OUTPUT_FLAG_SET(OUTPUT_MB1_FILE_EN) ) {
     fclose(output_fp);
   }
 
@@ -2474,7 +2475,7 @@ int mbtrnpp_init_debug(int verbose) {
   fprintf(stderr, "%s:%d >>> MOD_MBTRNPP  %08X\n", __FUNCTION__, __LINE__, mmd_get_enmask(MOD_MBTRNPP, NULL));
 
   // open trn data log
-  if ((output_flags&OUTPUT_MB1_BIN)!=0 ) {
+  if ( OUTPUT_FLAG_SET(OUTPUT_MB1_BIN) ) {
     mb1_blog_path = (char *)malloc(512);
     sprintf(mb1_blog_path, "%s//%s-%s%s", g_log_dir, MB1_BLOG_NAME, session_date, MBTRNPP_LOG_EXT);
     mb1_blog_id = mlog_get_instance(mb1_blog_path, &mb1_blog_conf, MB1_BLOG_NAME);
@@ -2482,7 +2483,7 @@ int mbtrnpp_init_debug(int verbose) {
     mlog_open(mb1_blog_id, flags, mode);
   }
   // open trn message log
-  if (mbtrnpp_mlog_en) {
+  if (OUTPUT_FLAG_SET(OUTPUT_MBTRNPP_MSG) ) {
     mbtrnpp_mlog_path = (char *)malloc(512);
     sprintf(mbtrnpp_mlog_path, "%s//%s-%s%s", g_log_dir, MBTRNPP_MLOG_NAME, session_date, MBTRNPP_LOG_EXT);
     mbtrnpp_mlog_id = mlog_get_instance(mbtrnpp_mlog_path, &mbtrnpp_mlog_conf, MBTRNPP_MLOG_NAME);
@@ -2837,7 +2838,7 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
     
     if(NULL!=pstate && NULL!=cfg){
         // publish to selected outputs
-        if( (output_flags&OUTPUT_TRNU_SVR_EN) != 0){
+        if( OUTPUT_FLAG_SET(OUTPUT_TRNU_SVR_EN) ){
             
             MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_PUB_XT], mtime_dtime());
             
@@ -2846,20 +2847,20 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_PUB_XT], mtime_dtime());
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TNAV_PUBN]);
         }
-        if( (output_flags&OUTPUT_TRNU_ASC) != 0){
+        if( OUTPUT_FLAG_SET(OUTPUT_TRNU_ASC) ){
             MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_LOG_XT], mtime_dtime());
             
             mbtrnpp_trn_pub_olog(pstate, trn_ulog_id);
             
             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_LOG_XT], mtime_dtime());
         }
-        if( (output_flags&OUTPUT_TRNU_DEBUG) != 0){
+        if( OUTPUT_FLAG_SET(OUTPUT_TRNU_DEBUG) ){
             mbtrnpp_trn_pub_odebug(pstate);
         }
-        if( (output_flags&OUTPUT_TRNU_SOUT) != 0){
+        if( OUTPUT_FLAG_SET(OUTPUT_TRNU_SOUT) ){
             mbtrnpp_trn_pub_ostream(pstate, stdout);
         }
-        if( (output_flags&OUTPUT_TRNU_SERR) != 0){
+        if( OUTPUT_FLAG_SET(OUTPUT_TRNU_SERR)){
             mbtrnpp_trn_pub_ostream(pstate, stderr);
         }
         retval=0;
@@ -3018,19 +3019,19 @@ int mbtrnpp_process_mb1(char *src, size_t len, trn_config_t *cfg)
     
     if(NULL!=src && NULL!=cfg){
         
-        
         // log current TRN message
-        if ( (output_flags&OUTPUT_MB1_BIN)!=0 ) {
+        if ( OUTPUT_FLAG_SET(OUTPUT_MB1_BIN) ) {
             mlog_write(mb1_blog_id, (byte *)src, len);
         }
         
-        // server: update (mb1 server) client connections
-        netif_update_connections(mb1svr);
-        // server: service (mb1 server) client requests
-        netif_reqres(mb1svr);
-        // publish mb1 sounding to all clients
-        netif_pub(mb1svr,(byte *)src, len);
-        
+        if ( OUTPUT_FLAG_SET(OUTPUT_MB1_SVR_EN) ) {
+            // server: update (mb1 server) client connections
+            netif_update_connections(mb1svr);
+            // server: service (mb1 server) client requests
+            netif_reqres(mb1svr);
+           // publish mb1 sounding to all clients
+            netif_pub(mb1svr,(byte *)src, len);
+        }
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CYCLES]);
         
         //                struct timeval stv={0};
@@ -3130,7 +3131,7 @@ int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, i
     mstats_set_period(reader_stats, app_stats->stats->stat_period_start, app_stats->stats->stat_period_sec);
 
     // configure reader data log
-    if (reson_blog_en) {
+      if ( OUTPUT_FLAG_SET(OUTPUT_RESON_BIN) ) {
       // open mbr data log
       reson_blog_path = (char *)malloc(512);
       sprintf(reson_blog_path, "%s//%s-%s%s", g_log_dir, RESON_BLOG_NAME, session_date, MBTRNPP_LOG_EXT);
