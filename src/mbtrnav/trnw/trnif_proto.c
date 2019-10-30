@@ -112,7 +112,7 @@ static uint32_t s_trnif_dfl_send_tcp(msock_connection_t *peer, char *msg, int32_
     uint32_t retval=0;
     if(NULL!=peer && NULL!=msg && send_len>0){
         uint32_t send_bytes=0;
-        if( (send_bytes=msock_sendto(peer->sock,  peer->addr, (byte *)msg, send_len,0))==send_len){
+        if( (send_bytes=msock_sendto(peer->sock,  peer->addr, (byte *)msg, send_len,MSG_NOSIGNAL))==send_len){
             retval=send_bytes;
             PDPRINT((stderr,"Reply OK len[%ld] peer[%s:%s]\n",send_len, peer->chost,peer->service));
         }else{
@@ -149,7 +149,7 @@ static uint32_t s_trnif_dfl_send_udp(netif_t *self,msock_connection_t *peer, cha
     uint32_t retval=0;
     if(NULL!=peer && NULL!=msg && send_len>0){
         uint32_t send_bytes=0;
-        if( (send_bytes=msock_sendto(self->socket,  peer->addr, (byte *)msg, send_len,0))==send_len){
+        if( (send_bytes=msock_sendto(self->socket,  peer->addr, (byte *)msg, send_len,MSG_NOSIGNAL))==send_len){
             retval=send_bytes;
             PDPRINT((stderr,"Reply OK len[%ld] peer[%s:%s]\n",send_len, peer->chost,peer->service));
         }else{
@@ -808,7 +808,7 @@ int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t le
     if(NULL!=self && NULL!=peer && NULL!=data && len>0){
         int iobytes=0;
         if(self->ctype==ST_UDP){
-            if ( (iobytes = msock_sendto(self->socket, peer->addr, data, len, 0 )) > 0) {
+            if ( (iobytes = msock_sendto(self->socket, peer->addr, data, len, MSG_NOSIGNAL )) > 0) {
                 retval=iobytes;
             }
         }

@@ -461,8 +461,6 @@ int netif_check_hbeat(netif_t *self, msock_connection_t **ppsub, int idx)
         }else{
             if(NULL!=psub)
             PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[CHKHB.%s]:OK id[%d/%s:%s] - %.3lf/%.3lf/%.3lf %lf\n",self->port_name,idx,psub->chost, psub->service, now,psub->hbtime,(now-psub->hbtime),tmout));
-            netif_show(self,true,5);
-
         }
         retval=0;
     }
@@ -950,7 +948,7 @@ static int s_netif_pub_msg(netif_t *self, msock_connection_t *peer, char *data, 
     if(NULL!=self && NULL!=peer && NULL!=data && len>0){
         int iobytes=0;
         if(self->ctype==ST_UDP){
-            if ( (iobytes = msock_sendto(self->socket, peer->addr, data, len, 0 )) > 0) {
+            if ( (iobytes = msock_sendto(self->socket, peer->addr, data, len, MSG_NOSIGNAL )) > 0) {
                 fprintf(stderr,"client PUB UDP OK len[%lld]:\n",iobytes);
             }else{
                 fprintf(stderr,"client PUB UDP ERR len[%lld][%d/%s]\n",iobytes,errno,strerror(errno));
