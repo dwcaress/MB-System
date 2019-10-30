@@ -44,10 +44,12 @@ int main(int argc, char* argv[])
     ofstream *pfile = NULL;
     long port=27027;
     int c;
+#define TRNCLI_PER_DFL 2
+    unsigned int period_sec=TRNCLI_PER_DFL;
     
     // Deal with cmd-line options
     //
-    while ( (c = getopt(argc, argv, "m:h:p:l:v:f:")) != EOF )
+    while ( (c = getopt(argc, argv, "m:h:p:l:v:f:t:")) != EOF )
     {
         if (c == 'l')
             logdir = strdup(optarg);   // Log directory
@@ -59,6 +61,11 @@ int main(int argc, char* argv[])
             port = atol(optarg);       // TRN port overrides port in config file
         else if (c == 'v')
             verbose = atoi(optarg);
+        else if (c == 't'){
+            int p=0;
+            sscanf(optarg,"%d",&p);
+            period_sec=(p>0?p:TRNCLI_PER_DFL);
+        }
     }
     
     tl_mconfig(TL_TRN_SERVER, TL_SERR, TL_ALL);
@@ -113,7 +120,7 @@ int main(int argc, char* argv[])
     while(1)
     {
         fprintf(stderr,"\n");
-        sleep(2);
+        sleep(period_sec);
  
         // System::milliSleep(0);
         // Estimate location. 1=> MLE; 2=> MMSE
