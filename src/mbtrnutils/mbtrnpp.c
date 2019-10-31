@@ -144,7 +144,6 @@ output_mode_t output_flags = OUTPUT_MBTRNPP_MSG;
 
 int64_t mbtrnpp_loop_delay_msec = 0;
 
-//TODO: rename mb*
 #define MB1_BLOG_NAME     "mb1"
 #define MB1_BLOG_DESC     "mb1 binary data"
 #define MBTRNPP_MLOG_NAME "mbtrnpp"
@@ -2366,6 +2365,12 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
 
     // update stats
     mstats_update_stats(stats->stats, MBTPP_CH_COUNT, flags);
+    mstats_t *mb1svr_stats = netif_stats(mb1svr);
+    mstats_update_stats(mb1svr_stats, NETIF_CH_COUNT, flags);
+    mstats_t *trnsvr_stats = netif_stats(trnsvr);
+    mstats_update_stats(trnsvr_stats, NETIF_CH_COUNT, flags);
+    mstats_t *trnusvr_stats = netif_stats(trnusvr);
+    mstats_update_stats(trnusvr_stats, NETIF_CH_COUNT, flags);
 
     PMPRINT(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V3,
             (stderr, "cycle_xt.p: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
@@ -2398,6 +2403,9 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
 
       mlog_tprintf(mbtrnpp_mlog_id, "%.3lf,i,uptime,%0.3lf\n", stats_now, stats->uptime);
       mstats_log_stats(stats->stats, stats_now, log_id, flags);
+      mstats_log_stats(mb1svr_stats, stats_now, netif_log(mb1svr), flags);
+      mstats_log_stats(trnsvr_stats, stats_now, netif_log(trnsvr), flags);
+      mstats_log_stats(trnusvr_stats, stats_now, netif_log(trnusvr), flags);
 
       if (flags & MSF_READER) {
         mstats_log_stats(reader_stats, stats_now, log_id, flags);
@@ -2406,6 +2414,9 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
       // reset period stats
       mstats_reset_pstats(stats->stats, MBTPP_CH_COUNT);
       mstats_reset_pstats(reader_stats, R7KR_MET_COUNT);
+      mstats_reset_pstats(mb1svr_stats, NETIF_CH_COUNT);
+      mstats_reset_pstats(trnsvr_stats, NETIF_CH_COUNT);
+      mstats_reset_pstats(trnusvr_stats, NETIF_CH_COUNT);
 
       // reset period timer
       stats->stats->stat_period_start = stats_now;

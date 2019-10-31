@@ -106,6 +106,43 @@
 /////////////////////////
 // Type Definitions
 /////////////////////////
+
+typedef enum{
+    NETIF_EV_CYCLES=0,
+    NETIF_EV_ESRC_SOCKET,
+    NETIF_EV_ESRC_CON,
+    NETIF_EV_ECLI_RXZ,
+    NETIF_EV_ECLI_RXE,
+    NETIF_EV_ECLI_TXZ,
+    NETIF_EV_ECLI_TXE,
+    NETIF_EV_EPUB_TX,
+    NETIF_EV_CLI_CONN,
+    NETIF_EV_CLI_DISN,
+    NETIF_EV_CLI_RXN,
+    NETIF_EV_CLI_TXN,
+    NETIF_EV_LOG_STATN,
+    NETIF_EV_PUBN,
+    NETIF_EV_COUNT
+}prof_event_id;
+
+typedef enum{
+    NETIF_STA_CLI_LIST_LEN=0,
+    NETIF_STA_CLI_RX_BYTES,
+    NETIF_STA_CLI_TX_BYTES,
+    NETIF_STA_CLI_PUB_BYTES,
+    NETIF_STA_COUNT
+}prof_status_id;
+
+typedef enum{
+    NETIF_CH_UDCON_XT=0,
+    NETIF_CH_CHKHB_XT,
+    NETIF_CH_READ_XT,
+    NETIF_CH_HANDLE_XT,
+    NETIF_CH_REQRES_XT,
+    NETIF_CH_PUB_XT,
+    NETIF_CH_COUNT
+}prof_chan_id;
+
 #define NETIF_MLOG_NAME "netif"
 #define NETIF_MLOG_DESC "netif message log"
 #define NETIF_LOG_EXT ".log"
@@ -261,13 +298,15 @@ extern "C" {
     /// @return version string
     const char *netif_get_version();
 
-    
     /// @fn const char *netif_get_build()
     /// @brief get build string.
     /// @return version string
     const char *netif_get_build();
 
     void netif_init_mmd();
+    
+    mstats_t *netif_stats(netif_t *self);
+    mlog_id_t netif_log(netif_t *self);
 
 #ifdef __cplusplus
 }
