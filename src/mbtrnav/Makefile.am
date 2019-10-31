@@ -170,10 +170,7 @@ libtrnw_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 libtrnw_la_SOURCES = \
                 trnw/trnw.cpp \
                 trnw/mb1_msg.c \
-                trnw/trnif_proto.c \
                 trnw/trnif_msg.c
-
-#trnw/netif.c
 
 libtrnw_la_LIBADD = libtnav.la \
 					libqnx.la \
