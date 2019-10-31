@@ -75,262 +75,143 @@ int main(int argc, char **argv) {
   int rov_dive_end_time_i[7];
   bool interpolate_position = false;
 
-  /* MBIO status variables */
   int verbose = 0;
-  int error = MB_ERROR_NO_ERROR;
-  char *message;
 
-  int num_nav_alloc = 0;
-  int num_nav = 0;
-  double *nav_time_d = NULL;
-  double *nav_lon = NULL;
-  double *nav_lat = NULL;
-
-  int num_ctd_alloc = 0;
-  int num_ctd = 0;
-  double *ctd_time_d = NULL;
-  double *ctd_depth = NULL;
-
-  int num_rov_alloc = 0;
-  int num_rov = 0;
-  double *rov_time_d = NULL;
-  double *rov_heading = NULL;
-  double *rov_roll = NULL;
-  double *rov_pitch = NULL;
-
-  int num_dvl_alloc = 0;
-  int num_dvl = 0;
-  double *dvl_time_d = NULL;
-  double *dvl_altitude = NULL;
-  double *dvl_stime = NULL;
-  double *dvl_vx = NULL;
-  double *dvl_vy = NULL;
-  double *dvl_vz = NULL;
-  double *dvl_status = NULL;
-
-  double time_d;
-  double rawlat, rawlon, dummydouble, ldegrees, lminutes;
-  double reference_lon = 0.0;
-  double reference_lat = 0.0;
+  double interval = 1.0;
   bool utm_zone_set = false;
   int utm_zone = 0;
+  char NorS;
+  char EorW;
   mb_path projection_id;
-  void *pjptr = NULL;
-  char NorS, EorW;
-  mb_path dummystring;
-  double ctd_C, ctd_T, ctd_D, ctd_S;
-  double ctd_O2uM, ctd_O2raw, ctd_DGH_T, ctd_C2_T, ctd_C2_C;
-  double rov_x, rov_y, rov_z, rov_yaw, rov_magna_amps;
-  double rov_F1, rov_F2, rov_F3, rov_F4, rov_F5;
-  double rov_Heading, rov_Pitch, rov_Roll;
-  double dvl_Altitude, dvl_Stime, dvl_Vx, dvl_Vy, dvl_Vz, dvl_Status;
-
-  double start_time_d = 0.0;
-  double end_time_d = 0.0;
-  double interval = 1.0;
-  int onav_time_i[7], onav_time_j[5];
-  int onav_year, onav_jday, onav_timetag;
-  int num_output;
-  double onav_time_d;
-  double onav_lon;
-  double onav_lat;
-  double onav_easting;
-  double onav_northing;
-  double onav_depth;
-  double onav_pressure;
-  double onav_heading;
-  double onav_altitude;
-  double onav_pitch;
-  double onav_roll;
-  int onav_position_flag;
-  int onav_pressure_flag;
-  int onav_heading_flag;
-  int onav_altitude_flag;
-  int onav_attitude_flag;
-
-  int nrecord;
-  int nget, nscan;
-  int ioutput;
-  size_t size;
-  FILE *fp;
-  int jnav = 0;
-  int jctd = 0;
-  int jdvl = 0;
-  int jrov = 0;
-  int interp_status = MB_SUCCESS;
-  int interp_error = MB_ERROR_NO_ERROR;
-  int proj_status = 0;
-
-  /* command line option definitions */
-  /* mbminirovnav
-   *     --verbose
-   *     --help
-   *
-   *     --input-nav=file
-   *     --input-ctd=file
-   *     --output=file
-   */
-  static struct option options[] = {{"help", no_argument, NULL, 0},
-                                    {"input", required_argument, NULL, 0},
-                                    {"input-nav-file", required_argument, NULL, 0},
-                                    {"input-ctd-file", required_argument, NULL, 0},
-                                    {"input-dvl-file", required_argument, NULL, 0},
-                                    {"input-rov-file", required_argument, NULL, 0},
-                                    {"interpolate-position", no_argument, NULL, 0},
-                                    {"interval", required_argument, NULL, 0},
-                                    {"output", required_argument, NULL, 0},
-                                    {"rov-dive-start", required_argument, NULL, 0},
-                                    {"rov-dive-end", required_argument, NULL, 0},
-                                    {"utm-zone", required_argument, NULL, 0},
-                    {"verbose", no_argument, NULL, 0},
-                                    {NULL, 0, NULL, 0}};
-
-    /* files */
-    mb_path input_nav_file = "";
-    mb_path input_ctd_file = "";
-    mb_path input_dvl_file = "";
-    mb_path input_rov_file = "";
-    mb_path output_file = "";
+  mb_path input_nav_file = "";
+  mb_path input_ctd_file = "";
+  mb_path input_dvl_file = "";
+  mb_path input_rov_file = "";
+  mb_path output_file = "";
 
   /* process argument list */
   {
-  int option_index;
-  bool errflg = false;
-  int c;
-  bool help = false;
-  while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
-  {
-    switch (c) {
-    /* long options all return c=0 */
-    case 0:
-      /* verbose */
-      if (strcmp("verbose", options[option_index].name) == 0) {
-        verbose++;
+    static struct option options[] = {
+      {"help", no_argument, NULL, 0},
+      {"input", required_argument, NULL, 0},
+      {"input-nav-file", required_argument, NULL, 0},
+      {"input-ctd-file", required_argument, NULL, 0},
+      {"input-dvl-file", required_argument, NULL, 0},
+      {"input-rov-file", required_argument, NULL, 0},
+      {"interpolate-position", no_argument, NULL, 0},
+      {"interval", required_argument, NULL, 0},
+      {"output", required_argument, NULL, 0},
+      {"rov-dive-start", required_argument, NULL, 0},
+      {"rov-dive-end", required_argument, NULL, 0},
+      {"utm-zone", required_argument, NULL, 0},
+      {"verbose", no_argument, NULL, 0},
+      {NULL, 0, NULL, 0}};
+
+    int option_index;
+    bool errflg = false;
+    int c;
+    bool help = false;
+    while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
+    {
+      switch (c) {
+        /* long options all return c=0 */
+        case 0:
+          if (strcmp("verbose", options[option_index].name) == 0) {
+            verbose++;
+          } else if (strcmp("help", options[option_index].name) == 0) {
+            help = true;
+          }
+          // Define input and output files
+          else if (strcmp("input-nav-file", options[option_index].name) == 0) {
+            strcpy(input_nav_file, optarg);
+          } else if (strcmp("input-rov-file", options[option_index].name) == 0) {
+            strcpy(input_rov_file, optarg);
+          } else if (strcmp("input-ctd-file", options[option_index].name) == 0) {
+            strcpy(input_ctd_file, optarg);
+          } else if (strcmp("input-dvl-file", options[option_index].name) == 0) {
+            strcpy(input_dvl_file, optarg);
+          } else if (strcmp("output", options[option_index].name) == 0) {
+            strcpy(output_file, optarg);
+          } else if (strcmp("interval", options[option_index].name) == 0) {
+            /* const int nscan = */ sscanf(optarg, "%lf", &interval);
+            if (interval <= 0.0) {
+              fprintf(stderr,"Program %s command error: %s %s\n\toutput interval reset to 1.0 seconds\n",
+                      program_name, options[option_index].name, optarg);
+            }
+          } else if (strcmp("rov-dive-start", options[option_index].name) == 0) {
+            const int nscan = sscanf(optarg, "%d/%d/%d/%d/%d/%d", &rov_dive_start_time_i[0],
+                           &rov_dive_start_time_i[1], &rov_dive_start_time_i[2],
+                           &rov_dive_start_time_i[3], &rov_dive_start_time_i[4],
+                           &rov_dive_start_time_i[5]);
+            if (nscan == 6) {
+              rov_dive_start_time_i[6] = 0;
+              mb_get_time(verbose, rov_dive_start_time_i, &rov_dive_start_time_d);
+              rov_dive_start_time_set = true;
+            } else {
+              fprintf(stderr,"Program %s command error: %s %s\n",
+                      program_name, options[option_index].name, optarg);
+            }
+          } else if (strcmp("rov-dive-end", options[option_index].name) == 0) {
+            const int nscan = sscanf(optarg, "%d/%d/%d/%d/%d/%d", &rov_dive_end_time_i[0],
+                           &rov_dive_end_time_i[1], &rov_dive_end_time_i[2],
+                           &rov_dive_end_time_i[3], &rov_dive_end_time_i[4],
+                           &rov_dive_end_time_i[5]);
+            if (nscan == 6) {
+              rov_dive_end_time_i[6] = 0;
+              mb_get_time(verbose, rov_dive_end_time_i, &rov_dive_end_time_d);
+              rov_dive_end_time_set = true;
+            } else {
+              fprintf(stderr,"Program %s command error: %s %s\n",
+                      program_name, options[option_index].name, optarg);
+            }
+          } else if (strcmp("utm-zone", options[option_index].name) == 0) {
+            int nscan = sscanf(optarg, "%d/%c", &utm_zone, &NorS);
+            if (nscan < 2)
+              nscan = sscanf(optarg, "%d%c", &utm_zone, &NorS);
+            if (nscan == 2) {
+              utm_zone_set = true;
+              if (NorS == 'N' || NorS == 'n')
+                sprintf(projection_id, "UTM%2.2dN", utm_zone);
+              else if (NorS == 'S' || NorS == 's')
+                sprintf(projection_id, "UTM%2.2dS", utm_zone);
+              else
+                sprintf(projection_id, "UTM%2.2dN", utm_zone);
+            } else {
+              fprintf(stderr,"Program %s command error: %s %s\n",
+                      program_name, options[option_index].name, optarg);
+            }
+          }
+          // Over gaps in USBL fixes (rather than repeat position values)
+          else if (strcmp("interpolate-position", options[option_index].name) == 0) {
+            interpolate_position = true;
+          }
+          break;
+        case '?':
+          errflg = true;
+          break;
       }
-
-      /* help */
-      else if (strcmp("help", options[option_index].name) == 0) {
-        help = true;
-      }
-
-      /*-------------------------------------------------------
-       * Define input and output files */
-
-      /* input-nav=file (required) */
-      else if (strcmp("input-nav-file", options[option_index].name) == 0) {
-        strcpy(input_nav_file, optarg);
-      }
-
-      /* input-rov=file (required) */
-      else if (strcmp("input-rov-file", options[option_index].name) == 0) {
-        strcpy(input_rov_file, optarg);
-      }
-
-      /* input-ctd=file (required) */
-      else if (strcmp("input-ctd-file", options[option_index].name) == 0) {
-        strcpy(input_ctd_file, optarg);
-      }
-
-      /* input-dvl=file (optional) */
-      else if (strcmp("input-dvl-file", options[option_index].name) == 0) {
-        strcpy(input_dvl_file, optarg);
-      }
-
-      /* output=file */
-      else if (strcmp("output", options[option_index].name) == 0) {
-        strcpy(output_file, optarg);
-      }
-
-      /* interval */
-      else if (strcmp("interval", options[option_index].name) == 0) {
-        nscan = sscanf(optarg, "%lf", &interval);
-        if (interval <= 0.0) {
-          fprintf(stderr,"Program %s command error: %s %s\n\toutput interval reset to 1.0 seconds\n",
-              program_name, options[option_index].name, optarg);
-
-        }
-      }
-
-      /* start rov dive time */
-      else if (strcmp("rov-dive-start", options[option_index].name) == 0) {
-        nscan = sscanf(optarg, "%d/%d/%d/%d/%d/%d", &rov_dive_start_time_i[0],
-             &rov_dive_start_time_i[1], &rov_dive_start_time_i[2],
-             &rov_dive_start_time_i[3], &rov_dive_start_time_i[4],
-             &rov_dive_start_time_i[5]);
-        if (nscan == 6) {
-          rov_dive_start_time_i[6] = 0;
-          mb_get_time(verbose, rov_dive_start_time_i, &rov_dive_start_time_d);
-          rov_dive_start_time_set = true;
-        }
-        else {
-          fprintf(stderr,"Program %s command error: %s %s\n",
-              program_name, options[option_index].name, optarg);
-        }
-      }
-
-      /* end rov dive time */
-      else if (strcmp("rov-dive-end", options[option_index].name) == 0) {
-        nscan = sscanf(optarg, "%d/%d/%d/%d/%d/%d", &rov_dive_end_time_i[0],
-             &rov_dive_end_time_i[1], &rov_dive_end_time_i[2],
-             &rov_dive_end_time_i[3], &rov_dive_end_time_i[4],
-             &rov_dive_end_time_i[5]);
-        if (nscan == 6) {
-          rov_dive_end_time_i[6] = 0;
-          mb_get_time(verbose, rov_dive_end_time_i, &rov_dive_end_time_d);
-          rov_dive_end_time_set = true;
-        }
-        else {
-          fprintf(stderr,"Program %s command error: %s %s\n",
-              program_name, options[option_index].name, optarg);
-        }
-      }
-
-      /* utm zone */
-      else if (strcmp("utm-zone", options[option_index].name) == 0) {
-        nscan = sscanf(optarg, "%d/%c", &utm_zone, &NorS);
-        if (nscan < 2)
-          nscan = sscanf(optarg, "%d%c", &utm_zone, &NorS);
-        if (nscan == 2) {
-          utm_zone_set = true;
-          if (NorS == 'N' || NorS == 'n')
-            sprintf(projection_id, "UTM%2.2dN", utm_zone);
-          else if (NorS == 'S' || NorS == 's')
-            sprintf(projection_id, "UTM%2.2dS", utm_zone);
-          else
-            sprintf(projection_id, "UTM%2.2dN", utm_zone);
-        }
-        else {
-          fprintf(stderr,"Program %s command error: %s %s\n",
-              program_name, options[option_index].name, optarg);
-        }
-      }
-
-      /* interpolate position over gaps in USBL fixes (rather than repeat position values) */
-      else if (strcmp("interpolate-position", options[option_index].name) == 0) {
-        interpolate_position = true;
-      }
-
-      /*----------------------------------------------------------------*/
-
-      break;
-    case '?':
-      errflg = true;
-      break;
     }
-  }
-  /* if error flagged then print it and exit */
-  if (errflg) {
-    fprintf(stderr, "usage: %s\n", usage_message);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(MB_ERROR_BAD_USAGE);
+    if (errflg) {
+      fprintf(stderr, "usage: %s\n", usage_message);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_BAD_USAGE);
+    }
+
+    if (verbose >= 1 || help) {
+      fprintf(stderr, "\nProgram %s\n", program_name);
+      fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+    }
+
+    if (help) {
+      fprintf(stderr, "\n%s\n", help_message);
+      fprintf(stderr, "\nusage: %s\n", usage_message);
+      exit(MB_ERROR_NO_ERROR);
+    }
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
     fprintf(stderr, "dbg2  Control Parameters:\n");
     fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
-    fprintf(stderr, "dbg2       help:                         %d\n", help);
     fprintf(stderr, "dbg2       input_nav_file:               %s\n", input_nav_file);
     fprintf(stderr, "dbg2       input_ctd_file:               %s\n", input_ctd_file);
     fprintf(stderr, "dbg2       input_dvl_file:               %s\n", input_dvl_file);
@@ -357,11 +238,6 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       interpolate_position:         %d\n", interpolate_position);
   }
 
-  else if (verbose == 1 || help) {
-    fprintf(stderr, "\nProgram %s\n", program_name);
-    fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-  }
-
   /* print starting verbose */
   if (verbose == 1) {
     const time_t right_now = time((time_t *)0);
@@ -381,7 +257,6 @@ int main(int argc, char **argv) {
     fprintf(stdout, "Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(stdout, "Control Parameters:\n");
     fprintf(stdout, "\tverbose:                      %d\n", verbose);
-    fprintf(stdout, "\thelp:                         %d\n", help);
     fprintf(stdout, "\tinput_nav_file:               %s\n", input_nav_file);
     fprintf(stdout, "\tinput_ctd_file:               %s\n", input_ctd_file);
     fprintf(stdout, "\tinput_dvl_file:               %s\n", input_dvl_file);
@@ -408,21 +283,26 @@ int main(int argc, char **argv) {
     fprintf(stdout, "\tinterpolate_position:         %d\n", interpolate_position);
   }
 
-  /* if help desired then print it and exit */
-  if (help) {
-    fprintf(stderr, "\n%s\n", help_message);
-    fprintf(stderr, "\nusage: %s\n", usage_message);
-    exit(error);
-  }
-  }
   /*-------------------------------------------------------------------*/
   /* load input nav data */
 
+  double *nav_time_d = NULL;
+  double *nav_lon = NULL;
+  double *nav_lat = NULL;
+  int num_nav = 0;
+
+  double time_d;
+  double start_time_d = 0.0;
+  double end_time_d = 0.0;
+  double reference_lon = 0.0;
+  double reference_lat = 0.0;
+
   int status = MB_SUCCESS;
+  int error = MB_ERROR_NO_ERROR;
 
   /* count the records */
-  error = MB_ERROR_NO_ERROR;
-  if ((fp = fopen(input_nav_file, "r")) != NULL) {
+  FILE *fp = fopen(input_nav_file, "r");
+  if (fp != NULL) {
     /* loop over reading the records */
     int nrecord = 0;
     char buffer[MB_PATH_MAXLINE];
@@ -431,12 +311,12 @@ int main(int argc, char **argv) {
       if (buffer[0] != '#' && strlen(buffer) > 5)
         nrecord++;
 
-    /* rewind the file */
     rewind(fp);
 
     /* allocate memory */
+    int num_nav_alloc = 0;
     if (num_nav_alloc < nrecord) {
-      size = nrecord * sizeof(double);
+      const size_t size = nrecord * sizeof(double);
       status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&nav_time_d, &error);
       if (status == MB_SUCCESS)
         status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&nav_lon, &error);
@@ -453,7 +333,11 @@ int main(int argc, char **argv) {
       char buffer[MB_PATH_MAXLINE];
       char *result = NULL;
       while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer) {
-        nget = sscanf(buffer, "%lf,$GPGLL,%lf,%c,%lf,%c,%lf,%s",
+        double rawlat;
+        double rawlon;
+        double dummydouble;
+        mb_path dummystring;
+        const int nget = sscanf(buffer, "%lf,$GPGLL,%lf,%c,%lf,%c,%lf,%s",
                 &time_d, &rawlat, &NorS, &rawlon, &EorW, &dummydouble, dummystring);
         if (nget >= 5) {
           if (start_time_d <= 0.0)
@@ -463,8 +347,8 @@ int main(int argc, char **argv) {
           if (time_d > end_time_d)
             end_time_d = time_d;
           nav_time_d[num_nav] = time_d;
-          ldegrees = floor(rawlat / 100.0);
-          lminutes = rawlat - ldegrees * 100;
+          double ldegrees = floor(rawlat / 100.0);
+          double lminutes = rawlat - ldegrees * 100;
           nav_lat[num_nav] = ldegrees + (lminutes / 60.0);
           if (NorS == 'S' || NorS == 's')
             nav_lat[num_nav] *= -1;
@@ -498,11 +382,8 @@ int main(int argc, char **argv) {
         reference_lon -= 360.0;
     }
 
-    /* close the file */
     fclose(fp);
-  }
-
-  else {
+  } else {
     if (verbose) {
       fprintf(stderr, "\nUnable to open NAV file: %s\n", input_nav_file);
     }
@@ -510,6 +391,13 @@ int main(int argc, char **argv) {
 
   /*-------------------------------------------------------------------*/
   /* load input ctd data */
+
+  int num_ctd_alloc = 0;
+  int num_ctd = 0;
+  double *ctd_time_d = NULL;
+  double *ctd_depth = NULL;
+  double ctd_C, ctd_T, ctd_D, ctd_S;
+  double ctd_O2uM, ctd_O2raw, ctd_DGH_T, ctd_C2_T, ctd_C2_C;
 
   /* count the records */
   error = MB_ERROR_NO_ERROR;
@@ -522,12 +410,11 @@ int main(int argc, char **argv) {
       if (buffer[0] != '#' && strlen(buffer) > 5)
         nrecord++;
 
-    /* rewind the file */
     rewind(fp);
 
     /* allocate memory if necessary */
     if (num_ctd_alloc < nrecord) {
-      size = nrecord * sizeof(double);
+      const size_t size = nrecord * sizeof(double);
       status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&ctd_time_d, &error);
       if (status == MB_SUCCESS)
         status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&ctd_depth, &error);
@@ -541,7 +428,7 @@ int main(int argc, char **argv) {
       char buffer[MB_PATH_MAXLINE];
       char *result = NULL;
       while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer) {
-        nget = sscanf(buffer, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
+        const int nget = sscanf(buffer, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
                 &time_d, &ctd_C, &ctd_T, &ctd_D, &ctd_S,
                 &ctd_O2uM, &ctd_O2raw, &ctd_DGH_T, &ctd_C2_T, &ctd_C2_C);
         if (nget >= 4) {
@@ -573,9 +460,19 @@ int main(int argc, char **argv) {
   /*-------------------------------------------------------------------*/
   /* load input rov data */
 
+  int num_rov_alloc = 0;
+  int num_rov = 0;
+  double *rov_time_d = NULL;
+  double *rov_heading = NULL;
+  double *rov_roll = NULL;
+  double *rov_pitch = NULL;
+  double rov_x, rov_y, rov_z, rov_yaw, rov_magna_amps;
+  double rov_F1, rov_F2, rov_F3, rov_F4, rov_F5;
+  double rov_Heading, rov_Pitch, rov_Roll;
+
   /* count the records */
   error = MB_ERROR_NO_ERROR;
-  nrecord = 0;
+  int nrecord = 0;
   if ((fp = fopen(input_rov_file, "r")) != NULL) {
     /* loop over reading the records */
     char buffer[MB_PATH_MAXLINE];
@@ -584,12 +481,11 @@ int main(int argc, char **argv) {
       if (buffer[0] != '#' && strlen(buffer) > 5)
         nrecord++;
 
-    /* rewind the file */
     rewind(fp);
 
     /* allocate memory */
     if (num_rov_alloc < nrecord) {
-      size = nrecord * sizeof(double);
+      const size_t size = nrecord * sizeof(double);
       status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&rov_time_d, &error);
       if (status == MB_SUCCESS)
         status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&rov_heading, &error);
@@ -608,7 +504,7 @@ int main(int argc, char **argv) {
       char buffer[MB_PATH_MAXLINE];
       char *result = NULL;
       while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer) {
-        nget = sscanf(buffer, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
+        const int nget = sscanf(buffer, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
                 &time_d, &rov_x, &rov_y, &rov_z, &rov_yaw, &rov_magna_amps,
                 &rov_F1, &rov_F2, &rov_F3, &rov_F4, &rov_F5,
                 &rov_Heading, &rov_Pitch, &rov_Roll);
@@ -640,6 +536,18 @@ int main(int argc, char **argv) {
     }
   }
 
+  int num_dvl_alloc = 0;
+  int num_dvl = 0;
+  double *dvl_time_d = NULL;
+  double *dvl_altitude = NULL;
+  double *dvl_stime = NULL;
+  double *dvl_vx = NULL;
+  double *dvl_vy = NULL;
+  double *dvl_vz = NULL;
+  double *dvl_status = NULL;
+
+  double dvl_Altitude, dvl_Stime, dvl_Vx, dvl_Vy, dvl_Vz, dvl_Status;
+
   /*-------------------------------------------------------------------*/
   /* load input dvl data */
 
@@ -654,12 +562,11 @@ int main(int argc, char **argv) {
       if (buffer[0] != '#' && strlen(buffer) > 5)
         nrecord++;
 
-    /* rewind the file */
     rewind(fp);
 
     /* allocate memory if necessary */
     if (status == MB_SUCCESS && num_dvl_alloc < nrecord) {
-      size = nrecord * sizeof(double);
+      const size_t size = nrecord * sizeof(double);
       status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&dvl_time_d, &error);
       if (status == MB_SUCCESS)
         status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&dvl_altitude, &error);
@@ -684,7 +591,7 @@ int main(int argc, char **argv) {
       char buffer[MB_PATH_MAXLINE];
       char *result = NULL;
       while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer) {
-        nget = sscanf(buffer, "%lf,%lf,%lf,%lf,%lf,%lf,%lf",
+        const int nget = sscanf(buffer, "%lf,%lf,%lf,%lf,%lf,%lf,%lf",
                 &time_d, &dvl_Altitude, &dvl_Stime, &dvl_Vx, &dvl_Vy, &dvl_Vz, &dvl_Status);
         if (nget == 7) {
           if (start_time_d <= 0.0)
@@ -728,7 +635,7 @@ int main(int argc, char **argv) {
     end_time_d = rov_dive_end_time_d;
   }
   start_time_d = floor(start_time_d);
-  num_output = (int)(ceil((end_time_d - start_time_d) / interval));
+  const int num_output = (int)(ceil((end_time_d - start_time_d) / interval));
   end_time_d = start_time_d + num_output * interval;
 
   /* get UTM projection for easting and northing fields */
@@ -745,7 +652,13 @@ int main(int argc, char **argv) {
     else
       sprintf(projection_id, "UTM%2.2dS", utm_zone);
   }
-  proj_status = mb_proj_init(verbose, projection_id, &(pjptr), &error);
+  void *pjptr = NULL;
+  /* int proj_status = */ mb_proj_init(verbose, projection_id, &(pjptr), &error);
+
+  int jnav = 0;
+  int jctd = 0;
+  int jdvl = 0;
+  int jrov = 0;
 
   /* write the MiniROV navigation data */
   int num_position_valid = 0;
@@ -757,34 +670,39 @@ int main(int argc, char **argv) {
     if ((fp = fopen(output_file, "w")) == NULL) {
       error = MB_ERROR_OPEN_FAIL;
       status = MB_FAILURE;
-    }
-    else {
+    } else {
+      int interp_status = MB_SUCCESS;
+      int interp_error = MB_ERROR_NO_ERROR;
+
+      bool onav_position_flag = false;
+      bool onav_pressure_flag = false;
+      bool onav_heading_flag = false;
+      bool onav_altitude_flag = false;
+      bool onav_attitude_flag = false;
+      double onav_lon = 0.0;
+      double onav_lat = 0.0;
+      double onav_easting = 0.0;
+      double onav_northing = 0.0;
+      double onav_depth = 0.0;
+      double onav_altitude = 0.0;
+      double onav_roll = 0.0;
+      double onav_pitch = 0.0;
+      double onav_pressure;
+      double onav_heading;
+
+      int onav_time_i[7];
+      int onav_time_j[5];
 
       /* loop over defined intervals (1 second by default) from start time to end time */
-      for (ioutput=0;ioutput<num_output;ioutput++) {
-
+      for (int ioutput = 0; ioutput < num_output; ioutput++) {
         /* set the output time */
-        onav_time_d = start_time_d + ioutput * interval;
+        const double onav_time_d = start_time_d + ioutput * interval;
         mb_get_date(verbose, onav_time_d, onav_time_i);
-        onav_year = onav_time_i[0];
-        onav_timetag = 10000 * onav_time_i[3] + 100 * onav_time_i[4] + onav_time_i[5];
+        const int onav_year = onav_time_i[0];
+        const int onav_timetag = 10000 * onav_time_i[3] + 100 * onav_time_i[4] + onav_time_i[5];
         mb_get_jtime(verbose, onav_time_i, onav_time_j);
-        onav_jday = onav_time_j[1];
+        const int onav_jday = onav_time_j[1];
 
-        /* interpolate values onto the target time */
-        onav_position_flag = false;
-        onav_pressure_flag = false;
-        onav_heading_flag = false;
-        onav_altitude_flag = false;
-        onav_attitude_flag = false;
-        onav_lon = 0.0;
-        onav_lat = 0.0;
-        onav_easting = 0.0;
-        onav_northing = 0.0;
-        onav_depth = 0.0;
-        onav_altitude = 0.0;
-        onav_roll = 0.0;
-        onav_pitch = 0.0;
         if (num_nav > 0) {
           interp_status &= mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_lon - 1, num_nav, onav_time_d, &onav_lon, &jnav, &interp_error);
           interp_status &= mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_lat - 1, num_nav, onav_time_d, &onav_lat, &jnav, &interp_error);
@@ -865,7 +783,6 @@ int main(int argc, char **argv) {
 
       }
 
-      /* close the file */
       fclose(fp);
     }
   }
@@ -886,9 +803,8 @@ int main(int argc, char **argv) {
         num_position_valid, num_depth_valid, num_heading_valid, num_attitude_valid, num_altitude_valid);
   }
 
-  /*-------------------------------------------------------------------*/
 
-  proj_status = mb_proj_free(verbose, &(pjptr), &error);
+  /* int proj_status = */ mb_proj_free(verbose, &(pjptr), &error);
   status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_time_d, &error);
   status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lon, &error);
   status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lat, &error);
@@ -907,7 +823,4 @@ int main(int argc, char **argv) {
   status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dvl_status, &error);
 
   exit(status);
-
-  /*-------------------------------------------------------------------*/
-
 }
