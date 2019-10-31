@@ -920,7 +920,7 @@ mstats_t *netif_stats(netif_t *self)
 }
 mlog_id_t netif_log(netif_t *self)
 {
-    mlog_id_t retval=NULL;
+    mlog_id_t retval=MLOG_ID_INVALID;
     if(NULL!=self ){
         retval = self->mlog_id;
     }
