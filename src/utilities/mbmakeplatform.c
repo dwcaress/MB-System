@@ -34,10 +34,12 @@
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_status.h"
-;
-const int SENSOR_OFF = 0;
-const int SENSOR_ADD = 1;
-const int SENSOR_MODIFY = 2;
+
+typedef enum {
+    SENSOR_OFF = 0,
+    SENSOR_ADD = 1,
+    SENSOR_MODIFY = 2,
+} sensor_mode_t;
 
 static const char program_name[] = "mbmakeplatform";
 static const char help_message[] =
@@ -208,25 +210,195 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message;
-
-	/* MBIO read control parameters */
-	const bool read_datalist = false;  // TODO(schwehr): Never changes???
-	mb_path swath_file;
-	mb_path dfile;
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
+	int input_swath_format = 0;
 	int pings = 1;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &input_swath_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	input_swath_format = 0;
+	pings = 1;
+	bounds[0] = -360.0;
+	bounds[1] = 360.0;
+	bounds[2] = -90.0;
+	bounds[3] = 90.0;
+
+	int error = MB_ERROR_NO_ERROR;
+	struct mb_platform_struct *platform = NULL;
+	status = mb_platform_init(verbose, (void **)&platform, &error);
+
+
+	/* process argument list - for this program all the action
+	    happens in this loop and the order of arguments matters
+	    - the input and output arguments must be given first */
+	static struct option options[] = {
+		{"verbose", no_argument, NULL, 0},
+		{"help", no_argument, NULL, 0},
+		{"input", required_argument, NULL, 0},
+		{"swath", required_argument, NULL, 0},
+		{"swath-format", required_argument, NULL, 0},
+		{"output", required_argument, NULL, 0},
+		{"platform-type-surface-vessel", no_argument, NULL, 0},
+		{"platform-type-tow-body", no_argument, NULL, 0},
+		{"platform-type-rov", no_argument, NULL, 0},
+		{"platform-type-auv", no_argument, NULL, 0},
+		{"platform-type-aircraft", no_argument, NULL, 0},
+		{"platform-type-satellite", no_argument, NULL, 0},
+		{"platform-name", required_argument, NULL, 0},
+		{"platform-organization", required_argument, NULL, 0},
+		{"platform-documenation-url", required_argument, NULL, 0},
+		{"platform-start-time", required_argument, NULL, 0},
+		{"platform-end-time", required_argument, NULL, 0},
+		{"add-sensor-sonar-echosounder", no_argument, NULL, 0},
+		{"add-sensor-sonar-multiechosounder", no_argument, NULL, 0},
+		{"add-sensor-sonar-sidescan", no_argument, NULL, 0},
+		{"add-sensor-sonar-interferometry", no_argument, NULL, 0},
+		{"add-sensor-sonar-multibeam", no_argument, NULL, 0},
+		{"add-sensor-sonar-multibeam-twohead", no_argument, NULL, 0},
+		{"add-sensor-sonar-subbottom", no_argument, NULL, 0},
+		{"add-sensor-camera-mono", no_argument, NULL, 0},
+		{"add-sensor-camera-stereo", no_argument, NULL, 0},
+		{"add-sensor-camera-video", no_argument, NULL, 0},
+		{"add-sensor-lidar-scan", no_argument, NULL, 0},
+		{"add-sensor-lidar-swath", no_argument, NULL, 0},
+		{"add-sensor-position", no_argument, NULL, 0},
+		{"add-sensor-compass", no_argument, NULL, 0},
+		{"add-sensor-vru", no_argument, NULL, 0},
+		{"add-sensor-imu", no_argument, NULL, 0},
+		{"add-sensor-ins", no_argument, NULL, 0},
+		{"add-sensor-ins-with-pressure", no_argument, NULL, 0},
+		{"add-sensor-ctd", no_argument, NULL, 0},
+		{"add-sensor-pressure", no_argument, NULL, 0},
+		{"add-sensor-soundspeed", no_argument, NULL, 0},
+		{"modify-sensor", required_argument, NULL, 0},
+		{"modify-sensor-bathymetry", no_argument, NULL, 0},
+		{"modify-sensor-bathymetry1", no_argument, NULL, 0},
+		{"modify-sensor-bathymetry2", no_argument, NULL, 0},
+		{"modify-sensor-bathymetry3", no_argument, NULL, 0},
+		{"modify-sensor-backscatter", no_argument, NULL, 0},
+		{"modify-sensor-backscatter1", no_argument, NULL, 0},
+		{"modify-sensor-backscatter2", no_argument, NULL, 0},
+		{"modify-sensor-backscatter3", no_argument, NULL, 0},
+		{"modify-sensor-subbottom", no_argument, NULL, 0},
+		{"modify-sensor-subbottom1", no_argument, NULL, 0},
+		{"modify-sensor-subbottom2", no_argument, NULL, 0},
+		{"modify-sensor-subbottom3", no_argument, NULL, 0},
+		{"modify-sensor-position", no_argument, NULL, 0},
+		{"modify-sensor-position1", no_argument, NULL, 0},
+		{"modify-sensor-position2", no_argument, NULL, 0},
+		{"modify-sensor-position3", no_argument, NULL, 0},
+		{"modify-sensor-depth", no_argument, NULL, 0},
+		{"modify-sensor-depth1", no_argument, NULL, 0},
+		{"modify-sensor-depth2", no_argument, NULL, 0},
+		{"modify-sensor-depth3", no_argument, NULL, 0},
+		{"modify-sensor-heading", no_argument, NULL, 0},
+		{"modify-sensor-heading1", no_argument, NULL, 0},
+		{"modify-sensor-heading2", no_argument, NULL, 0},
+		{"modify-sensor-heading3", no_argument, NULL, 0},
+		{"modify-sensor-rollpitch", no_argument, NULL, 0},
+		{"modify-sensor-rollpitch1", no_argument, NULL, 0},
+		{"modify-sensor-rollpitch2", no_argument, NULL, 0},
+		{"modify-sensor-rollpitch3", no_argument, NULL, 0},
+		{"modify-sensor-heave", no_argument, NULL, 0},
+		{"modify-sensor-heave1", no_argument, NULL, 0},
+		{"modify-sensor-heave2", no_argument, NULL, 0},
+		{"modify-sensor-heave3", no_argument, NULL, 0},
+		{"sensor-model", required_argument, NULL, 0},
+		{"sensor-manufacturer", required_argument, NULL, 0},
+		{"sensor-serialnumber", required_argument, NULL, 0},
+		{"sensor-capability-position", no_argument, NULL, 0},
+		{"sensor-capability-depth", no_argument, NULL, 0},
+		{"sensor-capability-altitude", no_argument, NULL, 0},
+		{"sensor-capability-velocity", no_argument, NULL, 0},
+		{"sensor-capability-acceleration", no_argument, NULL, 0},
+		{"sensor-capability-pressure", no_argument, NULL, 0},
+		{"sensor-capability-rollpitch", no_argument, NULL, 0},
+		{"sensor-capability-heading", no_argument, NULL, 0},
+		{"sensor-capability-magneticfield", no_argument, NULL, 0},
+		{"sensor-capability-temperature", no_argument, NULL, 0},
+		{"sensor-capability-conductivity", no_argument, NULL, 0},
+		{"sensor-capability-salinity", no_argument, NULL, 0},
+		{"sensor-capability-soundspeed", no_argument, NULL, 0},
+		{"sensor-capability-gravity", no_argument, NULL, 0},
+		{"sensor-capability-topography-echosounder", no_argument, NULL, 0},
+		{"sensor-capability-topography-interferometry", no_argument, NULL, 0},
+		{"sensor-capability-topography-sass", no_argument, NULL, 0},
+		{"sensor-capability-topography-multibeam", no_argument, NULL, 0},
+		{"sensor-capability-topography-photogrammetry", no_argument, NULL, 0},
+		{"sensor-capability-topography-structurefrommotion", no_argument, NULL, 0},
+		{"sensor-capability-topography-lidar", no_argument, NULL, 0},
+		{"sensor-capability-topography-structuredlight", no_argument, NULL, 0},
+		{"sensor-capability-topography-laserscanner", no_argument, NULL, 0},
+		{"sensor-capability-backscatter-echosounder", no_argument, NULL, 0},
+		{"sensor-capability-backscatter-sidescan", no_argument, NULL, 0},
+		{"sensor-capability-backscatter-interferometry", no_argument, NULL, 0},
+		{"sensor-capability-backscatter-sass", no_argument, NULL, 0},
+		{"sensor-capability-backscatter-multibeam", no_argument, NULL, 0},
+		{"sensor-capability-backscatter-lidar", no_argument, NULL, 0},
+		{"sensor-capability-backscatter-structuredlight", no_argument, NULL, 0},
+		{"sensor-capability-backscatter-laserscanner", no_argument, NULL, 0},
+		{"sensor-capability-photography", no_argument, NULL, 0},
+		{"sensor-capability-stereophotography", no_argument, NULL, 0},
+		{"sensor-capability-video", no_argument, NULL, 0},
+		{"sensor-capability-stereovideo", no_argument, NULL, 0},
+		{"sensor-capability1", required_argument, NULL, 0},
+		{"sensor-capability2", required_argument, NULL, 0},
+		{"sensor-offsets", required_argument, NULL, 0},
+		{"sensor-offset-positions", required_argument, NULL, 0},
+		{"sensor-offset-angles", required_argument, NULL, 0},
+		{"sensor-time-latency", required_argument, NULL, 0},
+		{"sensor-time-latency-model", required_argument, NULL, 0},
+		{"sensor-source-bathymetry", no_argument, NULL, 0},
+		{"sensor-source-bathymetry1", no_argument, NULL, 0},
+		{"sensor-source-bathymetry2", no_argument, NULL, 0},
+		{"sensor-source-bathymetry3", no_argument, NULL, 0},
+		{"sensor-source-backscatter", no_argument, NULL, 0},
+		{"sensor-source-backscatter1", no_argument, NULL, 0},
+		{"sensor-source-backscatter2", no_argument, NULL, 0},
+		{"sensor-source-backscatter3", no_argument, NULL, 0},
+		{"sensor-source-subbottom", no_argument, NULL, 0},
+		{"sensor-source-subbottom1", no_argument, NULL, 0},
+		{"sensor-source-subbottom2", no_argument, NULL, 0},
+		{"sensor-source-subbottom3", no_argument, NULL, 0},
+		{"sensor-source-position", no_argument, NULL, 0},
+		{"sensor-source-position1", no_argument, NULL, 0},
+		{"sensor-source-position2", no_argument, NULL, 0},
+		{"sensor-source-position3", no_argument, NULL, 0},
+		{"sensor-source-depth", no_argument, NULL, 0},
+		{"sensor-source-depth1", no_argument, NULL, 0},
+		{"sensor-source-depth2", no_argument, NULL, 0},
+		{"sensor-source-depth3", no_argument, NULL, 0},
+		{"sensor-source-heading", no_argument, NULL, 0},
+		{"sensor-source-heading1", no_argument, NULL, 0},
+		{"sensor-source-heading2", no_argument, NULL, 0},
+		{"sensor-source-heading3", no_argument, NULL, 0},
+		{"sensor-source-rollpitch", no_argument, NULL, 0},
+		{"sensor-source-rollpitch1", no_argument, NULL, 0},
+		{"sensor-source-rollpitch2", no_argument, NULL, 0},
+		{"sensor-source-rollpitch3", no_argument, NULL, 0},
+		{"sensor-source-heave", no_argument, NULL, 0},
+		{"sensor-source-heave1", no_argument, NULL, 0},
+		{"sensor-source-heave2", no_argument, NULL, 0},
+		{"sensor-source-heave3", no_argument, NULL, 0},
+		{"modify-offsets", required_argument, NULL, 0},
+		{"modify-offset-positions", required_argument, NULL, 0},
+		{"modify-offset-angles", required_argument, NULL, 0},
+		{"modify-time-latency", required_argument, NULL, 0},
+		{"modify-time-latency-model", required_argument, NULL, 0},
+		{"end-sensor", no_argument, NULL, 0},
+		{NULL, 0, NULL, 0}};
+
+	/* MBIO read control parameters */
+	mb_path swath_file;
+	mb_path dfile;
+	void *datalist;
+	int look_processed = MB_DATALIST_LOOK_UNSET;
+	double file_weight;
+	double btime_d;
+	double etime_d;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -246,14 +418,15 @@ int main(int argc, char **argv) {
 	int svp_source;
 
 	/* platform */
-	struct mb_platform_struct *platform = NULL;
 	struct mb_sensor_struct tmp_sensor;
+	memset(&tmp_sensor, 0, sizeof(struct mb_sensor_struct));
 	struct mb_sensor_struct *active_sensor;
 	struct mb_sensor_offset_struct tmp_offsets[4];
+	memset(tmp_offsets, 0, 4 * sizeof(struct mb_sensor_offset_struct));
+
 	int platform_num_sensors = 0;
 	mb_path input_platform_file;
 	mb_path input_swath_file;
-	int input_swath_format = 0;
 	bool input_swath_platform_defined = false;
 	mb_path output_platform_file;
 	bool output_platform_file_defined = false;
@@ -261,191 +434,14 @@ int main(int argc, char **argv) {
 	FILE *tfp = NULL;
 	char buffer[MB_PATH_MAXLINE];
 	char *result;
-	int sensor_mode = SENSOR_OFF;
+	sensor_mode_t sensor_mode = SENSOR_OFF;
 	int sensor_id;
 	int ioffset;
 
 	int nscan;
 	double d1, d2, d3, d4, d5, d6;
 	double seconds;
-	int index;
 
-	static struct option options[] = {{"verbose", no_argument, NULL, 0},
-	                                  {"help", no_argument, NULL, 0},
-	                                  {"input", required_argument, NULL, 0},
-	                                  {"swath", required_argument, NULL, 0},
-	                                  {"swath-format", required_argument, NULL, 0},
-	                                  {"output", required_argument, NULL, 0},
-	                                  {"platform-type-surface-vessel", no_argument, NULL, 0},
-	                                  {"platform-type-tow-body", no_argument, NULL, 0},
-	                                  {"platform-type-rov", no_argument, NULL, 0},
-	                                  {"platform-type-auv", no_argument, NULL, 0},
-	                                  {"platform-type-aircraft", no_argument, NULL, 0},
-	                                  {"platform-type-satellite", no_argument, NULL, 0},
-	                                  {"platform-name", required_argument, NULL, 0},
-	                                  {"platform-organization", required_argument, NULL, 0},
-	                                  {"platform-documenation-url", required_argument, NULL, 0},
-	                                  {"platform-start-time", required_argument, NULL, 0},
-	                                  {"platform-end-time", required_argument, NULL, 0},
-	                                  {"add-sensor-sonar-echosounder", no_argument, NULL, 0},
-	                                  {"add-sensor-sonar-multiechosounder", no_argument, NULL, 0},
-	                                  {"add-sensor-sonar-sidescan", no_argument, NULL, 0},
-	                                  {"add-sensor-sonar-interferometry", no_argument, NULL, 0},
-	                                  {"add-sensor-sonar-multibeam", no_argument, NULL, 0},
-	                                  {"add-sensor-sonar-multibeam-twohead", no_argument, NULL, 0},
-	                                  {"add-sensor-sonar-subbottom", no_argument, NULL, 0},
-	                                  {"add-sensor-camera-mono", no_argument, NULL, 0},
-	                                  {"add-sensor-camera-stereo", no_argument, NULL, 0},
-	                                  {"add-sensor-camera-video", no_argument, NULL, 0},
-	                                  {"add-sensor-lidar-scan", no_argument, NULL, 0},
-	                                  {"add-sensor-lidar-swath", no_argument, NULL, 0},
-	                                  {"add-sensor-position", no_argument, NULL, 0},
-	                                  {"add-sensor-compass", no_argument, NULL, 0},
-	                                  {"add-sensor-vru", no_argument, NULL, 0},
-	                                  {"add-sensor-imu", no_argument, NULL, 0},
-	                                  {"add-sensor-ins", no_argument, NULL, 0},
-	                                  {"add-sensor-ins-with-pressure", no_argument, NULL, 0},
-	                                  {"add-sensor-ctd", no_argument, NULL, 0},
-	                                  {"add-sensor-pressure", no_argument, NULL, 0},
-	                                  {"add-sensor-soundspeed", no_argument, NULL, 0},
-	                                  {"modify-sensor", required_argument, NULL, 0},
-	                                  {"modify-sensor-bathymetry", no_argument, NULL, 0},
-	                                  {"modify-sensor-bathymetry1", no_argument, NULL, 0},
-	                                  {"modify-sensor-bathymetry2", no_argument, NULL, 0},
-	                                  {"modify-sensor-bathymetry3", no_argument, NULL, 0},
-	                                  {"modify-sensor-backscatter", no_argument, NULL, 0},
-	                                  {"modify-sensor-backscatter1", no_argument, NULL, 0},
-	                                  {"modify-sensor-backscatter2", no_argument, NULL, 0},
-	                                  {"modify-sensor-backscatter3", no_argument, NULL, 0},
-	                                  {"modify-sensor-subbottom", no_argument, NULL, 0},
-	                                  {"modify-sensor-subbottom1", no_argument, NULL, 0},
-	                                  {"modify-sensor-subbottom2", no_argument, NULL, 0},
-	                                  {"modify-sensor-subbottom3", no_argument, NULL, 0},
-	                                  {"modify-sensor-position", no_argument, NULL, 0},
-	                                  {"modify-sensor-position1", no_argument, NULL, 0},
-	                                  {"modify-sensor-position2", no_argument, NULL, 0},
-	                                  {"modify-sensor-position3", no_argument, NULL, 0},
-	                                  {"modify-sensor-depth", no_argument, NULL, 0},
-	                                  {"modify-sensor-depth1", no_argument, NULL, 0},
-	                                  {"modify-sensor-depth2", no_argument, NULL, 0},
-	                                  {"modify-sensor-depth3", no_argument, NULL, 0},
-	                                  {"modify-sensor-heading", no_argument, NULL, 0},
-	                                  {"modify-sensor-heading1", no_argument, NULL, 0},
-	                                  {"modify-sensor-heading2", no_argument, NULL, 0},
-	                                  {"modify-sensor-heading3", no_argument, NULL, 0},
-	                                  {"modify-sensor-rollpitch", no_argument, NULL, 0},
-	                                  {"modify-sensor-rollpitch1", no_argument, NULL, 0},
-	                                  {"modify-sensor-rollpitch2", no_argument, NULL, 0},
-	                                  {"modify-sensor-rollpitch3", no_argument, NULL, 0},
-	                                  {"modify-sensor-heave", no_argument, NULL, 0},
-	                                  {"modify-sensor-heave1", no_argument, NULL, 0},
-	                                  {"modify-sensor-heave2", no_argument, NULL, 0},
-	                                  {"modify-sensor-heave3", no_argument, NULL, 0},
-	                                  {"sensor-model", required_argument, NULL, 0},
-	                                  {"sensor-manufacturer", required_argument, NULL, 0},
-	                                  {"sensor-serialnumber", required_argument, NULL, 0},
-	                                  {"sensor-capability-position", no_argument, NULL, 0},
-	                                  {"sensor-capability-depth", no_argument, NULL, 0},
-	                                  {"sensor-capability-altitude", no_argument, NULL, 0},
-	                                  {"sensor-capability-velocity", no_argument, NULL, 0},
-	                                  {"sensor-capability-acceleration", no_argument, NULL, 0},
-	                                  {"sensor-capability-pressure", no_argument, NULL, 0},
-	                                  {"sensor-capability-rollpitch", no_argument, NULL, 0},
-	                                  {"sensor-capability-heading", no_argument, NULL, 0},
-	                                  {"sensor-capability-magneticfield", no_argument, NULL, 0},
-	                                  {"sensor-capability-temperature", no_argument, NULL, 0},
-	                                  {"sensor-capability-conductivity", no_argument, NULL, 0},
-	                                  {"sensor-capability-salinity", no_argument, NULL, 0},
-	                                  {"sensor-capability-soundspeed", no_argument, NULL, 0},
-	                                  {"sensor-capability-gravity", no_argument, NULL, 0},
-	                                  {"sensor-capability-topography-echosounder", no_argument, NULL, 0},
-	                                  {"sensor-capability-topography-interferometry", no_argument, NULL, 0},
-	                                  {"sensor-capability-topography-sass", no_argument, NULL, 0},
-	                                  {"sensor-capability-topography-multibeam", no_argument, NULL, 0},
-	                                  {"sensor-capability-topography-photogrammetry", no_argument, NULL, 0},
-	                                  {"sensor-capability-topography-structurefrommotion", no_argument, NULL, 0},
-	                                  {"sensor-capability-topography-lidar", no_argument, NULL, 0},
-	                                  {"sensor-capability-topography-structuredlight", no_argument, NULL, 0},
-	                                  {"sensor-capability-topography-laserscanner", no_argument, NULL, 0},
-	                                  {"sensor-capability-backscatter-echosounder", no_argument, NULL, 0},
-	                                  {"sensor-capability-backscatter-sidescan", no_argument, NULL, 0},
-	                                  {"sensor-capability-backscatter-interferometry", no_argument, NULL, 0},
-	                                  {"sensor-capability-backscatter-sass", no_argument, NULL, 0},
-	                                  {"sensor-capability-backscatter-multibeam", no_argument, NULL, 0},
-	                                  {"sensor-capability-backscatter-lidar", no_argument, NULL, 0},
-	                                  {"sensor-capability-backscatter-structuredlight", no_argument, NULL, 0},
-	                                  {"sensor-capability-backscatter-laserscanner", no_argument, NULL, 0},
-	                                  {"sensor-capability-photography", no_argument, NULL, 0},
-	                                  {"sensor-capability-stereophotography", no_argument, NULL, 0},
-	                                  {"sensor-capability-video", no_argument, NULL, 0},
-	                                  {"sensor-capability-stereovideo", no_argument, NULL, 0},
-	                                  {"sensor-capability1", required_argument, NULL, 0},
-	                                  {"sensor-capability2", required_argument, NULL, 0},
-	                                  {"sensor-offsets", required_argument, NULL, 0},
-	                                  {"sensor-offset-positions", required_argument, NULL, 0},
-	                                  {"sensor-offset-angles", required_argument, NULL, 0},
-	                                  {"sensor-time-latency", required_argument, NULL, 0},
-	                                  {"sensor-time-latency-model", required_argument, NULL, 0},
-	                                  {"sensor-source-bathymetry", no_argument, NULL, 0},
-	                                  {"sensor-source-bathymetry1", no_argument, NULL, 0},
-	                                  {"sensor-source-bathymetry2", no_argument, NULL, 0},
-	                                  {"sensor-source-bathymetry3", no_argument, NULL, 0},
-	                                  {"sensor-source-backscatter", no_argument, NULL, 0},
-	                                  {"sensor-source-backscatter1", no_argument, NULL, 0},
-	                                  {"sensor-source-backscatter2", no_argument, NULL, 0},
-	                                  {"sensor-source-backscatter3", no_argument, NULL, 0},
-	                                  {"sensor-source-subbottom", no_argument, NULL, 0},
-	                                  {"sensor-source-subbottom1", no_argument, NULL, 0},
-	                                  {"sensor-source-subbottom2", no_argument, NULL, 0},
-	                                  {"sensor-source-subbottom3", no_argument, NULL, 0},
-	                                  {"sensor-source-position", no_argument, NULL, 0},
-	                                  {"sensor-source-position1", no_argument, NULL, 0},
-	                                  {"sensor-source-position2", no_argument, NULL, 0},
-	                                  {"sensor-source-position3", no_argument, NULL, 0},
-	                                  {"sensor-source-depth", no_argument, NULL, 0},
-	                                  {"sensor-source-depth1", no_argument, NULL, 0},
-	                                  {"sensor-source-depth2", no_argument, NULL, 0},
-	                                  {"sensor-source-depth3", no_argument, NULL, 0},
-	                                  {"sensor-source-heading", no_argument, NULL, 0},
-	                                  {"sensor-source-heading1", no_argument, NULL, 0},
-	                                  {"sensor-source-heading2", no_argument, NULL, 0},
-	                                  {"sensor-source-heading3", no_argument, NULL, 0},
-	                                  {"sensor-source-rollpitch", no_argument, NULL, 0},
-	                                  {"sensor-source-rollpitch1", no_argument, NULL, 0},
-	                                  {"sensor-source-rollpitch2", no_argument, NULL, 0},
-	                                  {"sensor-source-rollpitch3", no_argument, NULL, 0},
-	                                  {"sensor-source-heave", no_argument, NULL, 0},
-	                                  {"sensor-source-heave1", no_argument, NULL, 0},
-	                                  {"sensor-source-heave2", no_argument, NULL, 0},
-	                                  {"sensor-source-heave3", no_argument, NULL, 0},
-	                                  {"modify-offsets", required_argument, NULL, 0},
-	                                  {"modify-offset-positions", required_argument, NULL, 0},
-	                                  {"modify-offset-angles", required_argument, NULL, 0},
-	                                  {"modify-time-latency", required_argument, NULL, 0},
-	                                  {"modify-time-latency-model", required_argument, NULL, 0},
-	                                  {"end-sensor", no_argument, NULL, 0},
-	                                  {NULL, 0, NULL, 0}};
-
-	/* get current default values */
-	int status = mb_defaults(verbose, &input_swath_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-	input_swath_format = 0;
-	pings = 1;
-	bounds[0] = -360.0;
-	bounds[1] = 360.0;
-	bounds[2] = -90.0;
-	bounds[3] = 90.0;
-
-	/* initialize platform structure */
-	status = mb_platform_init(verbose, (void **)&platform, &error);
-
-	/* initialize tmp_sensor and tmp_offsets */
-	memset(&tmp_sensor, 0, sizeof(struct mb_sensor_struct));
-	memset(tmp_offsets, 0, 4 * sizeof(struct mb_sensor_offset_struct));
-
-	/* process argument list - for this program all the action
-	    happens in this loop and the order of arguments matters
-	    - the input and output arguments must be given first */
-	{
 	bool read_data;
 	int option_index;
 	bool errflg = false;
@@ -530,7 +526,7 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "    platform->source_heave3:               %d\n", platform->source_heave3);
 					fprintf(stderr, "    platform->num_sensors:                 %d\n", platform->num_sensors);
 					for (int i = 0; i < platform->num_sensors; i++) {
-						index = 0;
+						int index = 0;
 						for (int j = 0; j < NUM_MB_SENSOR_TYPES; j++)
 							if (mb_sensor_type_id[j] == platform->sensors[i].type)
 								index = j;
@@ -608,8 +604,9 @@ int main(int argc, char **argv) {
 				while (read_data && !input_swath_platform_defined) {
 					/* check format and get data sources */
 					if ((status =
-					         mb_format_source(verbose, &input_swath_format, &platform_source, &nav_source, &sensordepth_source,
-					                          &heading_source, &attitude_source, &svp_source, &error)) == MB_FAILURE) {
+                                             mb_format_source(verbose, &input_swath_format, &platform_source, &nav_source, &sensordepth_source,
+                                                              &heading_source, &attitude_source, &svp_source, &error)) == MB_FAILURE) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error returned from function <mb_format_source>:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -620,6 +617,7 @@ int main(int argc, char **argv) {
 					if ((status = mb_read_init(verbose, swath_file, input_swath_format, pings, lonflip, bounds, btime_i, etime_i,
 					                           speedmin, timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp,
 					                           &pixels_ss, &error)) != MB_SUCCESS) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swath_file);
@@ -651,21 +649,8 @@ int main(int argc, char **argv) {
 					/* close the swath file */
 					status = mb_close(verbose, &mbio_ptr, &error);
 
-					/* figure out whether and what to read next */
-					if (read_datalist) {
-						if ((status = mb_datalist_read(verbose, datalist, swath_file, dfile, &input_swath_format, &file_weight,
-						                               &error)) == MB_SUCCESS)
-							read_data = true;
-						else
-							read_data = false;
-					}
-					else {
-						read_data = false;
-					}
+					read_data = false;
 				}
-
-				if (read_datalist)
-					mb_datalist_close(verbose, &datalist, &error);
 
 				if (verbose > 0 && input_swath_platform_defined) {
 					fprintf(stderr, "\nExtracted platform from swath data <%s>\n", input_swath_file);
@@ -717,7 +702,7 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "    platform->source_heave3:               %d\n", platform->source_heave3);
 					fprintf(stderr, "    platform->num_sensors:                 %d\n", platform->num_sensors);
 					for (int i = 0; i < platform->num_sensors; i++) {
-						index = 0;
+						int index = 0;
 						for (int j = 0; j < NUM_MB_SENSOR_TYPES; j++)
 							if (mb_sensor_type_id[j] == platform->sensors[i].type)
 								index = j;
@@ -1224,6 +1209,7 @@ int main(int argc, char **argv) {
 						status = mb_mallocd(verbose, __FILE__, __LINE__, tmp_sensor.num_time_latency * sizeof(double),
 						                    (void **)&tmp_sensor.time_latency_value, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1597,6 +1583,7 @@ int main(int argc, char **argv) {
 							status = mb_mallocd(verbose, __FILE__, __LINE__, active_sensor->num_time_latency * sizeof(double),
 							                    (void **)&active_sensor->time_latency_value, &error);
 						if (error != MB_ERROR_NO_ERROR) {
+							char *message;
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1641,7 +1628,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_BAD_USAGE);
 	}
-	}  // process argument list
 
 	/* if an output has been specified but there are still not sensors in the
 	 * platform, make a generic null platform with one sensor that is the source
@@ -1710,7 +1696,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "    platform->source_heave3:               %d\n", platform->source_heave3);
 		fprintf(stderr, "    platform->num_sensors:                 %d\n", platform->num_sensors);
 		for (int i = 0; i < platform->num_sensors; i++) {
-			index = 0;
+			int index = 0;
 			for (int j = 0; j < NUM_MB_SENSOR_TYPES; j++)
 				if (mb_sensor_type_id[j] == platform->sensors[i].type)
 					index = j;
