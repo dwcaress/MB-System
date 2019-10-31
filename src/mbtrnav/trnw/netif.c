@@ -167,8 +167,9 @@ const char *prof_event_labels[]={ \
 const char *prof_status_labels[]={ \
     "cli_list_len",
     "cli_rx_bytes",
-    "trn_tx_bytes",
-    "trn_pub_bytes"
+    "cli_tx_bytes",
+    "cli_res_bytes",
+    "cli_pub_bytes"
 };
 
 const char *prof_chan_labels[]={ \
@@ -491,6 +492,9 @@ int netif_reqres(netif_t *self)
                             PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[SVCCLI.%s]:ERR - send id[%d/%s:%s] err[%d/%s]\n",self->port_name,cli,psub->chost, psub->service,errno,strerror(errno)));
                             break;
                     }
+                }else{
+                    MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_TX_BYTES],iobytes);
+                    MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_RES_BYTES],iobytes);
                 }// else handle msg OK
  
                 MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_HANDLE_XT], mtime_dtime());
