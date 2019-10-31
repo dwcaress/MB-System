@@ -71,6 +71,7 @@
 #include "mlist.h"
 #include "mlog.h"
 #include "mstats.h"
+// this comment is in cygfix
 
 /////////////////////////
 // Macros
