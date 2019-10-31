@@ -1184,7 +1184,8 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
         mbtrnpp_init_trn(&trn_instance,verbose, trn_cfg) ;
         
         // temporarily enable module debug
-        mmd_en_mask_t olvl;
+        mmd_en_mask_t olvl=0;
+
         if (verbose!=0) {
             olvl = mmd_get_enmask(MOD_MBTRNPP, NULL);
             mmd_channel_en(MOD_MBTRNPP,MM_DEBUG);
@@ -1208,9 +1209,10 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
             fprintf(stderr, "TRNU server netif init failed [%d] [%d %s]\n",test,errno,strerror(errno));
         }
         
-        // restore module debug
+        if (verbose != 0) {
+       // restore module debug
         mmd_channel_set(MOD_MBTRNPP,olvl);
-        
+       }
     }
 
     // release the config strings
@@ -1263,8 +1265,8 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
   /* insert option to recognize and initialize ipc with TRN */
   /* else open ipc to TRN */
 
-  if ( OUTPUT_FLAG_SET(OUTPUT_MB1_SVR_EN) ) {
-    mmd_en_mask_t olvl;
+ if ( OUTPUT_FLAG_SET(OUTPUT_MB1_SVR_EN) ) {
+    mmd_en_mask_t olvl= 0;
     if (verbose != 0) {
       olvl = mmd_get_enmask(MOD_MBTRNPP, NULL);
       mmd_channel_en(MOD_MBTRNPP, MM_DEBUG);
@@ -1824,7 +1826,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
 
             mb_put_binary_int(true, checksum, &output_buffer[index]);
             index += 4;
-            PMPRINT(MOD_MBTRNPP, MBTRNPP_V3, (stderr, "chk[%08X] idx[%zu] mb1sz[%zu]\n", checksum, index, mb1_size));
+            PMPRINT(MOD_MBTRNPP, MBTRNPP_V3, (stderr, "mb1 record chk[%08X] idx[%zu] mb1sz[%zu]\n", checksum, index, mb1_size));
 
             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MBPING_XT], mtime_dtime());
 
@@ -2358,7 +2360,7 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
     stats->stats->metrics[MBTPP_CH_THRUPUT].value =
         (stats->uptime > 0.0 ? (double)stats->stats->status[MBTPP_STA_TRN_TX_BYTES] / stats->uptime : 0.0);
 
-    PMPRINT(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V3,
+    PMPRINT(MOD_MBTRNPP, MBTRNPP_V4,
             (stderr, "cycle_xt: stat_now[%.4lf] start[%.4lf] stop[%.4lf] value[%.4lf]\n", stats_now,
              app_stats->stats->metrics[MBTPP_CH_CYCLE_XT].start, app_stats->stats->metrics[MBTPP_CH_CYCLE_XT].stop,
              app_stats->stats->metrics[MBTPP_CH_CYCLE_XT].value));
@@ -2372,13 +2374,13 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
     mstats_t *trnusvr_stats = netif_stats(trnusvr);
     mstats_update_stats(trnusvr_stats, NETIF_CH_COUNT, flags);
 
-    PMPRINT(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V3,
+    PMPRINT(MOD_MBTRNPP,  MBTRNPP_V4,
             (stderr, "cycle_xt.p: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
              app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].n, app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].sum,
              app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].min, app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].max,
              app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].avg));
 
-    PMPRINT(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V3,
+    PMPRINT(MOD_MBTRNPP, MBTRNPP_V4,
             (stderr, "cycle_xt.a: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
              app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].n, app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].sum,
              app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].min, app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].max,
@@ -2452,8 +2454,8 @@ int mbtrnpp_init_debug(int verbose) {
   mmd_initialize();
   mconf_init(NULL, NULL);
 
-  fprintf(stderr, "%s:%d >>> MOD_MBTRNPP[id=%d]  %08X\n", __FUNCTION__, __LINE__, MOD_MBTRNPP,
-          mmd_get_enmask(MOD_MBTRNPP, NULL));
+  fprintf(stderr, "%s:%d >>> MOD_MBTRNPP[id=%d]  en[%08X] verbose[%d]\n", __FUNCTION__, __LINE__, MOD_MBTRNPP,
+          mmd_get_enmask(MOD_MBTRNPP, NULL),verbose);
 
   switch (verbose) {
   case 0:
@@ -2461,6 +2463,7 @@ int mbtrnpp_init_debug(int verbose) {
     mmd_channel_set(MOD_R7K, MM_NONE);
     mmd_channel_set(MOD_R7KR, MM_NONE);
     mmd_channel_set(MOD_MSOCK, MM_NONE);
+    mmd_channel_set(MOD_NETIF, MM_NONE);
     break;
   case 1:
     mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
@@ -2474,14 +2477,17 @@ int mbtrnpp_init_debug(int verbose) {
   case -1:
     mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
     mmd_channel_en(MOD_R7KR, MM_DEBUG);
+    mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2);
     break;
   case -2:
     mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1 | MBTRNPP_V2);
+    mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2 | NETIF_V3 );
     break;
   case -3:
-    mmd_channel_en(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V1 | MBTRNPP_V2 | MBTRNPP_V3);
+    mmd_channel_en(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V1 | MBTRNPP_V2 | MBTRNPP_V3 );
     mmd_channel_en(MOD_R7KR, MM_DEBUG);
     mmd_channel_en(MOD_R7K, MM_WARN | R7K_PARSER);
+    mmd_channel_set(MOD_NETIF, MM_DEBUG | NETIF_V1 | NETIF_V2 | NETIF_V3 | NETIF_V4);
     // this enables messages from msock_recv (e.g. resource temporarily unavailable)
     msock_set_debug(1);
     break;
@@ -2490,6 +2496,7 @@ int mbtrnpp_init_debug(int verbose) {
     mmd_channel_en(MOD_R7KR, MM_DEBUG);
     mmd_channel_en(MOD_R7K, MM_WARN | R7K_PARSER | R7K_DRFCON);
     mmd_channel_en(MOD_MSOCK, MM_DEBUG);
+    mmd_channel_set(MOD_NETIF, MM_DEBUG | NETIF_V1 | NETIF_V2 | NETIF_V3 | NETIF_V4);
     msock_set_debug(1);
     break;
   case -5:
@@ -2497,12 +2504,13 @@ int mbtrnpp_init_debug(int verbose) {
     mmd_channel_en(MOD_R7KR, MM_ALL);
     mmd_channel_en(MOD_R7K, MM_ALL);
     mmd_channel_en(MOD_MSOCK, MM_ALL);
+    mmd_channel_en(MOD_NETIF, MM_ALL);
     msock_set_debug(1);
     break;
   default:
     break;
   }
-  fprintf(stderr, "%s:%d >>> MOD_MBTRNPP  %08X\n", __FUNCTION__, __LINE__, mmd_get_enmask(MOD_MBTRNPP, NULL));
+  fprintf(stderr, "%s:%d >>> MOD_MBTRNPP  en[%08X]\n", __FUNCTION__, __LINE__, mmd_get_enmask(MOD_MBTRNPP, NULL));
 
   // open trn data log
   if ( OUTPUT_FLAG_SET(OUTPUT_MB1_BIN) ) {
@@ -2745,7 +2753,6 @@ int mbtrnpp_init_trnsvr(netif_t **psvr, wtnav_t *trn, char *host, int port, bool
         if(NULL!=svr){
             *psvr = svr;
             netif_set_reqres_res(svr,trn);
-            netif_init_mmd();
             netif_show(svr,true,5);
             netif_init_log(svr, "trnsvr", ".");
             mlog_tprintf(svr->mlog_id,"*** trnsvr session start (TEST) ***\n");
@@ -2778,7 +2785,6 @@ int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose)
         if(NULL!=svr){
             *psvr = svr;
 //            netif_set_reqres_res(svr,trn);
-            netif_init_mmd();
             netif_show(svr,true,5);
             netif_init_log(svr, "mb1svr", ".");
             mlog_tprintf(svr->mlog_id,"*** mb1svr session start (TEST) ***\n");
@@ -2810,7 +2816,6 @@ int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, bool verbose)
         if(NULL!=svr){
             *psvr = svr;
             //            netif_set_reqres_res(svr,trn);
-            netif_init_mmd();
             netif_show(svr,true,5);
             netif_init_log(svr, "trnusvr", ".");
             mlog_tprintf(svr->mlog_id,"*** trnusvr session start (TEST) ***\n");

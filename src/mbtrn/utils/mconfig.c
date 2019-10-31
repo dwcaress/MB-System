@@ -219,7 +219,7 @@ static mmd_module_config_t mmd_config_defaults[]={
     {MOD_TBINX,"MOD_TBINX",TBINX_CH_COUNT,((MM_ERR|MM_WARN)|TBINX_V1),tbinx_ch_names},
     {MOD_MBTRNPP,"MOD_MBTRNPP",MBTRNPP_CH_COUNT,((MM_ERR|MM_WARN)|MBTRNPP_V1),mbtrnpp_ch_names},
     {MOD_MBTNAV,"MOD_MBTNAV",MBTNAV_CH_COUNT,((MM_ERR|MM_WARN)|MBTNAV_V1),mbtnav_ch_names},
-    {MOD_NETIF,"MOD_NETIF",NETIF_CHAN_COUNT,((MM_ERR|MM_WARN)|NETIF_V1|NETIF_V2|NETIF_V3|NETIF_V4),netif_ch_names}
+    {MOD_NETIF,"MOD_NETIF",NETIF_CHAN_COUNT,((MM_ERR|MM_WARN)|NETIF_V1),netif_ch_names}
 };
 
 /////////////////////////
