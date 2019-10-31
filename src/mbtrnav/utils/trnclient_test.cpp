@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
         // Continue to invoke tercom like a normal mission
         //
         int fs = tnav->getFilterState();
-        int nr = tnav->getNumReinits();
+        int nr =  tnav->getNumReinits();
         if (nr > numReinits)
         {
             fprintf(stderr,"REINIT[%d]\n", nr);

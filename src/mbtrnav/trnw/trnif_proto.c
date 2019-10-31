@@ -654,7 +654,8 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 break;
 
             default:
-                PDPRINT((stderr,"UNSUPPORTED msg ct[%p] type [%c/%02X] from peer[%s:%s]\n",ct,msg_type,msg_type,peer->chost,peer->service));
+                PDPRINT((stderr,"UNSUPPORTED msg ct[%p] type [%c/%02X] from peer[%s:%s] %lf\n",ct,msg_type,msg_type,peer->chost,peer->service,mtime_dtime()));
+                
                 send_len=trnw_nack_msg(&msg_out);
 
                 break;
@@ -662,6 +663,8 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
         
         if(send_len>0){
         	retval=s_trnif_dfl_send_tcp(peer, msg_out, send_len, errout);
+        }else{
+            PDPRINT((stderr,"SEND_LEN<0 type [%c/%02X] from peer[%s:%s] %lf\n",ct,msg_type,msg_type,peer->chost,peer->service,mtime_dtime()));
         }
 
         wcommst_destroy(ct);

@@ -76,7 +76,8 @@ public:
     int getNextKeyValue(FILE *cfg, char key[], char value[]);
     int setVerbose(int val);
     TerrainNav* connectTRN();
-    
+//    virtual int send_msg(commsT& msg);
+
 protected:
     char *logdir;
     double lastTime;
