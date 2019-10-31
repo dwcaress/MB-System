@@ -180,7 +180,7 @@ libtrnw_la_LIBADD = libtnav.la \
 libnetif_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
 libnetif_la_SOURCES = \
-				trnw/netif.c
+				trnw/netif.c \
 				trnw/netif_proto.c
 
 libnetif_la_LIBADD = libtrnw.la \
