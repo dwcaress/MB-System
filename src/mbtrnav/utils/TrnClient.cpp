@@ -290,9 +290,39 @@ TerrainNav* TrnClient::connectTRN()
         fprintf(stderr, "TrnClient - Not initialized. See trn_server error messages...\n");
     }
     
-
-    
     return _tercom;
-    
 }
+/*
+int TrnClient::send_msg(commsT& msg)
+{
+    int sl = 0;
+    fprintf(stderr,"%s:%d\n",__FUNCTION__,__LINE__);
+    //printf("TrnClient - send_msg(): Sending %s\n",
+    //msg.to_s(_comms_buf, sizeof(_comms_buf)));
+    
+    // Check to see if client is still connected first
+    //
+    if (is_connected()) {
+        memset(_comms_buf, 0, sizeof(_comms_buf));
+        msg.serialize(_comms_buf);
+        
+        // Send the whole message
 
+        // TerrainNavClient sends one chunk, then the rest...why?
+//        for (sl = 0; sl < TRN_CHUNK_SIZE;) {
+//            sl += send(_sockfd, _comms_buf+sl, TRN_CHUNK_SIZE-sl, 0);
+//            //printf("server:send_msg - sent %d bytes\n", sl);
+//        }
+//        for (sl = TRN_CHUNK_SIZE; sl < sizeof(_comms_buf);) {
+//            sl += send(_sockfd, _comms_buf+sl, sizeof(_comms_buf)-sl, 0);
+//            //printf("server:send_msg - sent %d bytes\n", sl);
+//        }
+        sl = send(_sockfd, _comms_buf, sizeof(_comms_buf), 0);
+    }
+    else {
+        fprintf(stderr,"%s - Can't send - no server connection!\n",__FUNCTION__);
+        throw Exception("TRN Server connection lost");
+    }
+    return sl;
+}
+*/
