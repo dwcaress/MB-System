@@ -443,7 +443,6 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int *ss_centisecond;
 	int *ss_ping_number;
 	int *ss_num_beams;
-	int navdone;
 	char *result;
 	char NorS, EorW;
 	int latdeg, londeg;
@@ -802,7 +801,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* see if nav is needed and potentially available */
 		if (*nav_available == true && (mb_io_ptr->nfix == 0 || mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] < ptime_d)) {
-			navdone = false;
+			bool navdone = false;
 			while (!navdone) {
 				if ((result = fgets(line, MBF_EM12IFRM_RECORD_SIZE, mb_io_ptr->mbfp3)) != line) {
 					navdone = true;

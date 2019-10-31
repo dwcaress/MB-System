@@ -326,7 +326,7 @@ int main(int argc, char **argv) {
   int sensorhead_status = MB_SUCCESS;
   int sensorhead_error = MB_ERROR_NO_ERROR;
   double distance_left, distance_right;
-  int start, done;
+  int start;
   double left;
   double right;
   int optiony_mode;
@@ -865,10 +865,10 @@ int main(int argc, char **argv) {
       }
 
       /* read */
-      done = false;
       start = 0;
       nrec = 0;
       fprintf(stderr, "Processing data...\n");
+      bool done = false;
       while (!done) {
         if (verbose > 1)
           fprintf(stderr, "\n");

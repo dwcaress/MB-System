@@ -246,7 +246,7 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
     }
   }
 
-  int irecent;
+  int irecent = 0;
   int inext;
   for (int i = 0; i < ncorrangle; i++) {
     if (corrtableuse->amplitude[i] != 0.0)
@@ -416,19 +416,231 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
   /* MBIO status variables */
-  int verbose = 0;
   int error = MB_ERROR_NO_ERROR;
 
-  /* MBIO read and write control parameters */
+  /* get current default values */
+  int verbose = 0;
+  int mbp_format;
   int pings;
   int lonflip;
   double bounds[4];
   int btime_i[7];
   int etime_i[7];
-  double btime_d;
-  double etime_d;
   double speedmin;
   double timegap;
+  int status = mb_defaults(verbose, &mbp_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+  int uselockfiles; // TODO(schwehr): Make mb_uselockfiles take a bool.
+  status &= mb_uselockfiles(verbose, &uselockfiles);
+
+  /* reset all defaults */
+  pings = 1;
+  // lonflip = 0;
+  bounds[0] = -360.;
+  bounds[1] = 360.;
+  bounds[2] = -90.;
+  bounds[3] = 90.;
+  btime_i[0] = 1962;
+  btime_i[1] = 2;
+  btime_i[2] = 21;
+  btime_i[3] = 10;
+  btime_i[4] = 30;
+  btime_i[5] = 0;
+  btime_i[6] = 0;
+  etime_i[0] = 2062;
+  etime_i[1] = 2;
+  etime_i[2] = 21;
+  etime_i[3] = 10;
+  etime_i[4] = 30;
+  etime_i[5] = 0;
+  etime_i[6] = 0;
+  speedmin = 0.0;
+  timegap = 1000000000.0;
+
+  /* set default input and output */
+  bool mbp_ifile_specified = false;
+  char mbp_ifile[MBP_FILENAMESIZE] = "";
+
+  bool mbp_ofile_specified = false;
+  char mbp_ofile[MBP_FILENAMESIZE] = "";
+  bool mbp_format_specified = false;
+  bool strip_comments = false;
+  int format = 0;
+  char read_file[MB_PATH_MAXLINE];
+  bool checkuptodate = true;
+  bool printfilestatus = false;
+  bool testonly = false;
+
+  /* process argument list */
+  {
+    bool errflg = false;
+    int c;
+    bool help = false;
+    while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpSsTt")) != -1)
+      switch (c) {
+      case 'H':
+      case 'h':
+        help = true;
+        break;
+      case 'V':
+      case 'v':
+        verbose++;
+        break;
+      case 'F':
+      case 'f':
+        sscanf(optarg, "%d", &format);
+        mbp_format_specified = true;
+        break;
+      case 'I':
+      case 'i':
+        mbp_ifile_specified = true;
+        sscanf(optarg, "%s", read_file);
+        break;
+      case 'N':
+      case 'n':
+        strip_comments = true;
+        break;
+      case 'O':
+      case 'o':
+        mbp_ofile_specified = true;
+        sscanf(optarg, "%s", mbp_ofile);
+        break;
+      case 'P':
+      case 'p':
+        checkuptodate = false;
+        break;
+      case 'S':
+      case 's':
+        printfilestatus = true;
+        break;
+      case 'T':
+      case 't':
+        testonly = true;
+        break;
+      case '?':
+        errflg = true;
+      }
+
+    if (errflg) {
+      fprintf(stderr, "usage: %s\n", usage_message);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_BAD_USAGE);
+    }
+
+    if (help) {
+      fprintf(stderr, "\nProgram %s\n", program_name);
+      fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
+      fprintf(stderr, "\n%s\n", help_message);
+      fprintf(stderr, "\nusage: %s\n", usage_message);
+      exit(error);
+    }
+  }
+
+  /* try datalist.mb-1 as input */
+  struct stat file_status;
+  if (!mbp_ifile_specified) {
+    const int fstat = stat("datalist.mb-1", &file_status);
+    if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      strcpy(read_file, "datalist.mb-1");
+      mbp_ifile_specified = true;
+    }
+  }
+
+  /* quit if no input file specified */
+  if (!mbp_ifile_specified) {
+    fprintf(stderr, "\nProgram <%s> requires an input data file.\n", program_name);
+    fprintf(stderr, "The input file may be specified with the -I option.\n");
+    fprintf(stderr, "The default input file is \"datalist.mb-1\".\n");
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(MB_ERROR_OPEN_FAIL);
+  }
+
+  /* get format if required */
+  if (format == 0)
+    mb_get_format(verbose, read_file, NULL, &format, &error);
+
+  /* determine whether to read one file or a list of files */
+  const bool read_datalist = format < 0;
+  bool read_data = false;
+
+  /* open file list */
+  void *datalist;
+  char mbp_dfile[MBP_FILENAMESIZE];
+  double file_weight;
+  if (read_datalist) {
+    int look_processed = MB_DATALIST_LOOK_NO;
+    if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+      fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_OPEN_FAIL);
+    }
+    if ((status = mb_datalist_read(verbose, datalist, mbp_ifile, mbp_dfile, &mbp_format, &file_weight, &error)) == MB_SUCCESS)
+      read_data = true;
+    else
+      read_data = false;
+  }
+  /* else copy single filename to be read */
+  else {
+    strcpy(mbp_ifile, read_file);
+    mbp_format = format;
+    read_data = true;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+    fprintf(stderr, "\ndbg2  MB-System Control Parameters:\n");
+    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+    fprintf(stderr, "dbg2       read_file:       %s\n", read_file);
+    fprintf(stderr, "dbg2       format:          %d\n", format);
+    fprintf(stderr, "dbg2       pings:           %d\n", pings);
+    fprintf(stderr, "dbg2       lonflip:         %d\n", lonflip);
+    fprintf(stderr, "dbg2       bounds[0]:       %f\n", bounds[0]);
+    fprintf(stderr, "dbg2       bounds[1]:       %f\n", bounds[1]);
+    fprintf(stderr, "dbg2       bounds[2]:       %f\n", bounds[2]);
+    fprintf(stderr, "dbg2       bounds[3]:       %f\n", bounds[3]);
+    fprintf(stderr, "dbg2       btime_i[0]:      %d\n", btime_i[0]);
+    fprintf(stderr, "dbg2       btime_i[1]:      %d\n", btime_i[1]);
+    fprintf(stderr, "dbg2       btime_i[2]:      %d\n", btime_i[2]);
+    fprintf(stderr, "dbg2       btime_i[3]:      %d\n", btime_i[3]);
+    fprintf(stderr, "dbg2       btime_i[4]:      %d\n", btime_i[4]);
+    fprintf(stderr, "dbg2       btime_i[5]:      %d\n", btime_i[5]);
+    fprintf(stderr, "dbg2       btime_i[6]:      %d\n", btime_i[6]);
+    fprintf(stderr, "dbg2       etime_i[0]:      %d\n", etime_i[0]);
+    fprintf(stderr, "dbg2       etime_i[1]:      %d\n", etime_i[1]);
+    fprintf(stderr, "dbg2       etime_i[2]:      %d\n", etime_i[2]);
+    fprintf(stderr, "dbg2       etime_i[3]:      %d\n", etime_i[3]);
+    fprintf(stderr, "dbg2       etime_i[4]:      %d\n", etime_i[4]);
+    fprintf(stderr, "dbg2       etime_i[5]:      %d\n", etime_i[5]);
+    fprintf(stderr, "dbg2       etime_i[6]:      %d\n", etime_i[6]);
+    fprintf(stderr, "dbg2       speedmin:        %f\n", speedmin);
+    fprintf(stderr, "dbg2       timegap:         %f\n", timegap);
+    fprintf(stderr, "dbg2       strip_comments:  %d\n", strip_comments);
+    fprintf(stderr, "dbg2       checkuptodate:   %d\n", checkuptodate);
+    fprintf(stderr, "dbg2       printfilestatus: %d\n", printfilestatus);
+    fprintf(stderr, "dbg2       testonly:        %d\n", testonly);
+    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+  }
+
+  else if (verbose > 0) {
+    fprintf(stderr, "\nProgram <%s>\n", program_name);
+    fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+    fprintf(stderr, "\nProgram Operation:\n");
+    fprintf(stderr, "  Input file:      %s\n", read_file);
+    fprintf(stderr, "  Format:          %d\n", format);
+    if (checkuptodate)
+      fprintf(stderr, "  Files processed only if out of date.\n");
+    else
+      fprintf(stderr, "  All files processed.\n");
+    if (!strip_comments)
+      fprintf(stderr, "  Comments embedded in output.\n\n");
+    else
+      fprintf(stderr, "  Comments stripped from output.\n\n");
+  }
+
+  /* MBIO read and write control parameters */
+  double btime_d;
+  double etime_d;
   int beams_bath;
   int beams_amp;
   int pixels_ss;
@@ -483,20 +695,13 @@ int main(int argc, char **argv) {
   int pixel_size_set;
   int swath_width_set;
   int pixel_int;
-  double pixel_size;
+  double pixel_size = 0;
   double swath_width;
 
   /* parameter controls */
   struct mb_process_struct process;
 
   /* processing variables */
-  bool checkuptodate = true;
-  bool testonly = false;
-  bool printfilestatus = false;
-  char read_file[MB_PATH_MAXLINE];
-  void *datalist;
-  int look_processed = MB_DATALIST_LOOK_NO;
-  double file_weight;
   bool proceedprocess = false;
   bool outofdate = false;
   double time_d_lastping = 0.0;
@@ -520,18 +725,11 @@ int main(int argc, char **argv) {
   char str_locked_ignored[] = "locked but lock ignored";
   char str_locked_fail[] = "unlocked but set lock failed";
   char str_locked_no[] = "unlocked";
-  int format = 0;
   int variable_beams;
   int beam_flagging;
   bool calculatespeedheading = false;
-  char mbp_ifile[MBP_FILENAMESIZE];
   char mbp_pfile[MBP_FILENAMESIZE];
-  char mbp_dfile[MBP_FILENAMESIZE];
-  char mbp_ofile[MBP_FILENAMESIZE];
-  int mbp_format;
   FILE *tfp;
-  struct stat file_status;
-  int fstat;
   int nnav = 0;
   int nanav = 0;
   int nattitude = 0;
@@ -614,6 +812,7 @@ int main(int argc, char **argv) {
 
   /* edit save file control variables */
   struct mb_esf_struct esf;
+  memset(&esf, 0, sizeof(struct mb_esf_struct));
   int neditnull;
   int neditduplicate;
   int neditnotused;
@@ -677,10 +876,7 @@ int main(int argc, char **argv) {
 
   /* topography parameters */
   struct mbprocess_grid_struct grid;
-
-  /* output fbt and fnv files */
-  FILE *fnv_fp, *fbt_fp;
-  mb_path fnv_file, fbt_file;
+  memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
 
   char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
   char *string1, *string2, *string3;
@@ -688,213 +884,8 @@ int main(int argc, char **argv) {
   int pingmultiplicity;
   int nbeams;
   int istart, iend, icut;
-  int intstat;
   int ioff;
   int mm;
-  int ix, jy, kgrid;
-  int kgrid00, kgrid10, kgrid01, kgrid11;
-
-  /* get current default values */
-  int status = mb_defaults(verbose, &mbp_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-  int uselockfiles; // TODO(schwehr): Make mb_uselockfiles take a bool.
-  status &= mb_uselockfiles(verbose, &uselockfiles);
-
-  /* reset all defaults */
-  pings = 1;
-  // lonflip = 0;
-  bounds[0] = -360.;
-  bounds[1] = 360.;
-  bounds[2] = -90.;
-  bounds[3] = 90.;
-  btime_i[0] = 1962;
-  btime_i[1] = 2;
-  btime_i[2] = 21;
-  btime_i[3] = 10;
-  btime_i[4] = 30;
-  btime_i[5] = 0;
-  btime_i[6] = 0;
-  etime_i[0] = 2062;
-  etime_i[1] = 2;
-  etime_i[2] = 21;
-  etime_i[3] = 10;
-  etime_i[4] = 30;
-  etime_i[5] = 0;
-  etime_i[6] = 0;
-  speedmin = 0.0;
-  timegap = 1000000000.0;
-
-  /* set default input and output */
-  bool mbp_ifile_specified = false;
-  strcpy(mbp_ifile, "\0");
-  bool mbp_ofile_specified = false;
-  strcpy(mbp_ofile, "\0");
-  bool mbp_format_specified = false;
-  bool strip_comments = false;
-
-  /* initialize grid and esf */
-  memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
-  memset(&esf, 0, sizeof(struct mb_esf_struct));
-
-  /* process argument list */
-  {
-    bool errflg = false;
-    int c;
-    bool help = false;
-    while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpSsTt")) != -1)
-      switch (c) {
-      case 'H':
-      case 'h':
-        help = true;
-        break;
-      case 'V':
-      case 'v':
-        verbose++;
-        break;
-      case 'F':
-      case 'f':
-        sscanf(optarg, "%d", &format);
-        mbp_format_specified = true;
-        break;
-      case 'I':
-      case 'i':
-        mbp_ifile_specified = true;
-        sscanf(optarg, "%s", read_file);
-        break;
-      case 'N':
-      case 'n':
-        strip_comments = true;
-        break;
-      case 'O':
-      case 'o':
-        mbp_ofile_specified = true;
-        sscanf(optarg, "%s", mbp_ofile);
-        break;
-      case 'P':
-      case 'p':
-        checkuptodate = false;
-        break;
-      case 'S':
-      case 's':
-        printfilestatus = true;
-        break;
-      case 'T':
-      case 't':
-        testonly = true;
-        break;
-      case '?':
-        errflg = true;
-      }
-
-    if (errflg) {
-      fprintf(stderr, "usage: %s\n", usage_message);
-      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(MB_ERROR_BAD_USAGE);
-    }
-
-    if (help) {
-      fprintf(stderr, "\nProgram %s\n", program_name);
-      fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
-      fprintf(stderr, "\n%s\n", help_message);
-      fprintf(stderr, "\nusage: %s\n", usage_message);
-      exit(error);
-    }
-  }
-
-  /* try datalist.mb-1 as input */
-  if (!mbp_ifile_specified) {
-    if ((fstat = stat("datalist.mb-1", &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-      strcpy(read_file, "datalist.mb-1");
-      mbp_ifile_specified = true;
-    }
-  }
-
-  /* quit if no input file specified */
-  if (!mbp_ifile_specified) {
-    fprintf(stderr, "\nProgram <%s> requires an input data file.\n", program_name);
-    fprintf(stderr, "The input file may be specified with the -I option.\n");
-    fprintf(stderr, "The default input file is \"datalist.mb-1\".\n");
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(MB_ERROR_OPEN_FAIL);
-  }
-
-  /* get format if required */
-  if (format == 0)
-    mb_get_format(verbose, read_file, NULL, &format, &error);
-
-  /* determine whether to read one file or a list of files */
-  const bool read_datalist = format < 0;
-  bool read_data = false;
-
-  /* open file list */
-  if (read_datalist) {
-    if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-      fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
-      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(MB_ERROR_OPEN_FAIL);
-    }
-    if ((status = mb_datalist_read(verbose, datalist, mbp_ifile, mbp_dfile, &mbp_format, &file_weight, &error)) == MB_SUCCESS)
-      read_data = true;
-    else
-      read_data = false;
-  }
-  /* else copy single filename to be read */
-  else {
-    strcpy(mbp_ifile, read_file);
-    mbp_format = format;
-    read_data = true;
-  }
-
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-    fprintf(stderr, "\ndbg2  MB-System Control Parameters:\n");
-    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-    fprintf(stderr, "dbg2       read_file:       %s\n", read_file);
-    fprintf(stderr, "dbg2       format:          %d\n", format);
-    fprintf(stderr, "dbg2       pings:           %d\n", pings);
-    fprintf(stderr, "dbg2       lonflip:         %d\n", lonflip);
-    fprintf(stderr, "dbg2       bounds[0]:       %f\n", bounds[0]);
-    fprintf(stderr, "dbg2       bounds[1]:       %f\n", bounds[1]);
-    fprintf(stderr, "dbg2       bounds[2]:       %f\n", bounds[2]);
-    fprintf(stderr, "dbg2       bounds[3]:       %f\n", bounds[3]);
-    fprintf(stderr, "dbg2       btime_i[0]:      %d\n", btime_i[0]);
-    fprintf(stderr, "dbg2       btime_i[1]:      %d\n", btime_i[1]);
-    fprintf(stderr, "dbg2       btime_i[2]:      %d\n", btime_i[2]);
-    fprintf(stderr, "dbg2       btime_i[3]:      %d\n", btime_i[3]);
-    fprintf(stderr, "dbg2       btime_i[4]:      %d\n", btime_i[4]);
-    fprintf(stderr, "dbg2       btime_i[5]:      %d\n", btime_i[5]);
-    fprintf(stderr, "dbg2       btime_i[6]:      %d\n", btime_i[6]);
-    fprintf(stderr, "dbg2       etime_i[0]:      %d\n", etime_i[0]);
-    fprintf(stderr, "dbg2       etime_i[1]:      %d\n", etime_i[1]);
-    fprintf(stderr, "dbg2       etime_i[2]:      %d\n", etime_i[2]);
-    fprintf(stderr, "dbg2       etime_i[3]:      %d\n", etime_i[3]);
-    fprintf(stderr, "dbg2       etime_i[4]:      %d\n", etime_i[4]);
-    fprintf(stderr, "dbg2       etime_i[5]:      %d\n", etime_i[5]);
-    fprintf(stderr, "dbg2       etime_i[6]:      %d\n", etime_i[6]);
-    fprintf(stderr, "dbg2       speedmin:        %f\n", speedmin);
-    fprintf(stderr, "dbg2       timegap:         %f\n", timegap);
-    fprintf(stderr, "dbg2       strip_comments:  %d\n", strip_comments);
-    fprintf(stderr, "dbg2       checkuptodate:   %d\n", checkuptodate);
-    fprintf(stderr, "dbg2       printfilestatus: %d\n", printfilestatus);
-    fprintf(stderr, "dbg2       testonly:        %d\n", testonly);
-    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-  }
-
-  else if (verbose > 0) {
-    fprintf(stderr, "\nProgram <%s>\n", program_name);
-    fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-    fprintf(stderr, "\nProgram Operation:\n");
-    fprintf(stderr, "  Input file:      %s\n", read_file);
-    fprintf(stderr, "  Format:          %d\n", format);
-    if (checkuptodate)
-      fprintf(stderr, "  Files processed only if out of date.\n");
-    else
-      fprintf(stderr, "  All files processed.\n");
-    if (!strip_comments)
-      fprintf(stderr, "  Comments embedded in output.\n\n");
-    else
-      fprintf(stderr, "  Comments stripped from output.\n\n");
-  }
 
   int locked;  // TODO(schwehr): Make mb_pr_lockswathfile take a bool.
   bool attitude_ok;
@@ -927,7 +918,8 @@ int main(int argc, char **argv) {
 
     /* get mod time for the input file */
     ifilemodtime = 0;
-    if ((fstat = stat(mbp_ifile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+    int fstat = stat(mbp_ifile, &file_status);
+    if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
       ifilemodtime = file_status.st_mtime;
     }
 
@@ -4628,6 +4620,7 @@ int main(int argc, char **argv) {
         }
 
         /* interpolate the navigation if desired */
+        int intstat;
         if (error == MB_ERROR_NO_ERROR && process.mbp_nav_mode == MBP_NAV_ON &&
             (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
           /* interpolate navigation */
@@ -4886,7 +4879,7 @@ int main(int argc, char **argv) {
 
         /* if survey data encountered,
             get the bathymetry */
-        if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA)) {
+        if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
 
           /*--------------------------------------------
             get travel time values
@@ -5134,19 +5127,6 @@ int main(int argc, char **argv) {
                 bath[i] = range * cos(alphar) * sin(betar);
                 bathalongtrack[i] = range * sin(alphar);
                 bathacrosstrack[i] = range * cos(alphar) * cos(betar);
-
-                /* rotate bathymetry by applying attitude biases */
-                //        status = mb_platform_math_attitude_rotate_beam (verbose,
-                //                    bathacrosstrack[i],
-                //                    bathalongtrack[i],
-                //                    bath[i],
-                //                    (roll - roll_org + process.mbp_rollbias),
-                //                    (pitch - pitch_org + process.mbp_pitchbias),
-                //                    (heading - heading_org + process.mbp_headingbias),
-                //                    &bathacrosstrack[i],
-                //                    &bathalongtrack[i],
-                //                    &bath[i],
-                //                    &error);
 
                 /* add heave and draft back in */
                 bath[i] += depth_offset_use;
@@ -5604,13 +5584,13 @@ int main(int argc, char **argv) {
                 /* get position in grid */
                 r[0] = headingy * bathacrosstrack[i] + headingx * bathalongtrack[i];
                 r[1] = -headingx * bathacrosstrack[i] + headingy * bathalongtrack[i];
-                ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
-                jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
-                kgrid = ix * grid.n_rows + jy;
-                kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
-                kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
-                kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
-                kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
+                const int ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
+                const int jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
+                const int kgrid = ix * grid.n_rows + jy;
+                const int kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
+                const int kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
+                const int kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
+                const int kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
                 if (ix > 0 && ix < grid.n_columns - 1 && jy > 0 && jy < grid.n_rows - 1 &&
                     grid.data[kgrid] > grid.nodatavalue && grid.data[kgrid00] > grid.nodatavalue &&
                     grid.data[kgrid01] > grid.nodatavalue && grid.data[kgrid10] > grid.nodatavalue &&
@@ -5691,13 +5671,13 @@ int main(int argc, char **argv) {
                 /* get position in grid */
                 r[0] = headingy * ssacrosstrack[i] + headingx * ssalongtrack[i];
                 r[1] = -headingx * ssacrosstrack[i] + headingy * ssalongtrack[i];
-                ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
-                jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
-                kgrid = ix * grid.n_rows + jy;
-                kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
-                kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
-                kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
-                kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
+                const int ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
+                const int jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
+                const int kgrid = ix * grid.n_rows + jy;
+                const int kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
+                const int kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
+                const int kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
+                const int kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
                 if (ix > 0 && ix < grid.n_columns - 1 && jy > 0 && jy < grid.n_rows - 1 &&
                     grid.data[kgrid] > grid.nodatavalue && grid.data[kgrid00] > grid.nodatavalue &&
                     grid.data[kgrid01] > grid.nodatavalue && grid.data[kgrid10] > grid.nodatavalue &&
