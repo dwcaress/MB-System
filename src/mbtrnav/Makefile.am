@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la
+lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la
 
 include_HEADERS =
 
@@ -170,15 +170,24 @@ libtrnw_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 libtrnw_la_SOURCES = \
                 trnw/trnw.cpp \
                 trnw/mb1_msg.c \
-                trnw/netif.c \
                 trnw/trnif_proto.c \
                 trnw/trnif_msg.c
+
+#trnw/netif.c
 
 libtrnw_la_LIBADD = libtnav.la \
 					libqnx.la \
 					libnewmat.la \
 					-lm -lpthread
 
+libnetif_la_LDFLAGS =  -no-undefined -version-info 0:0:0
+
+libnetif_la_SOURCES = \
+				trnw/netif.c
+
+libnetif_la_LIBADD = libtrnw.la \
+				$(top_builddir)/src/mbtrn/libmframe.la \
+				-lm -lpthread
 
 bin_PROGRAMS =   trn-server trn-cli netif-test trnif-test trnifsvr-test trnclient-test #  readlog writelog
 
@@ -189,14 +198,14 @@ trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la libqnx.la libn
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 
-netif_test_SOURCES =  utils/netif-test.c
-netif_test_LDADD = ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
+netif_test_SOURCES = utils/netif-test.c
+netif_test_LDADD = libnetif.la ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
 
 trnif_test_SOURCES =  utils/trnif-test.c
-trnif_test_LDADD = ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
+trnif_test_LDADD = libnetif.la  ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
 
-trnifsvr_test_SOURCES =  utils/trnifsvr-test.c
-trnifsvr_test_LDADD = ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
+trnifsvr_test_SOURCES = utils/trnifsvr-test.c
+trnifsvr_test_LDADD = libnetif.la  ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
 
 trnclient_test_SOURCES =  utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnclient_test_LDADD = libtnav.la
