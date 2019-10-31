@@ -176,7 +176,7 @@ libgeolib_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(libgeolib_la_LDFLAGS) $(LDFLAGS) -o $@
 libnetif_la_DEPENDENCIES = libtrnw.la \
 	$(top_builddir)/src/mbtrn/libmframe.la
-am_libnetif_la_OBJECTS = trnw/netif.lo
+am_libnetif_la_OBJECTS = trnw/netif.lo trnw/trnif_proto.lo
 libnetif_la_OBJECTS = $(am_libnetif_la_OBJECTS)
 libnetif_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -227,8 +227,7 @@ libtnav_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libtnav_la_LDFLAGS) $(LDFLAGS) -o $@
 libtrnw_la_DEPENDENCIES = libtnav.la libqnx.la libnewmat.la
-am_libtrnw_la_OBJECTS = trnw/trnw.lo trnw/mb1_msg.lo \
-	trnw/trnif_proto.lo trnw/trnif_msg.lo
+am_libtrnw_la_OBJECTS = trnw/trnw.lo trnw/mb1_msg.lo trnw/trnif_msg.lo
 libtrnw_la_OBJECTS = $(am_libtrnw_la_OBJECTS)
 libtrnw_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -679,11 +678,8 @@ libtrnw_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libtrnw_la_SOURCES = \
                 trnw/trnw.cpp \
                 trnw/mb1_msg.c \
-                trnw/trnif_proto.c \
                 trnw/trnif_msg.c
 
-
-#trnw/netif.c
 libtrnw_la_LIBADD = libtnav.la \
 					libqnx.la \
 					libnewmat.la \
@@ -691,7 +687,8 @@ libtrnw_la_LIBADD = libtnav.la \
 
 libnetif_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libnetif_la_SOURCES = \
-				trnw/netif.c
+				trnw/netif.c \
+				trnw/trnif_proto.c
 
 libnetif_la_LIBADD = libtrnw.la \
 				$(top_builddir)/src/mbtrn/libmframe.la \
@@ -935,6 +932,8 @@ trnw/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) trnw/$(DEPDIR)
 	@: > trnw/$(DEPDIR)/$(am__dirstamp)
 trnw/netif.lo: trnw/$(am__dirstamp) trnw/$(DEPDIR)/$(am__dirstamp)
+trnw/trnif_proto.lo: trnw/$(am__dirstamp) \
+	trnw/$(DEPDIR)/$(am__dirstamp)
 
 libnetif.la: $(libnetif_la_OBJECTS) $(libnetif_la_DEPENDENCIES) $(EXTRA_libnetif_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libnetif_la_LINK) -rpath $(libdir) $(libnetif_la_OBJECTS) $(libnetif_la_LIBADD) $(LIBS)
@@ -1091,8 +1090,6 @@ libtnav.la: $(libtnav_la_OBJECTS) $(libtnav_la_DEPENDENCIES) $(EXTRA_libtnav_la_
 	$(AM_V_CXXLD)$(libtnav_la_LINK) -rpath $(libdir) $(libtnav_la_OBJECTS) $(libtnav_la_LIBADD) $(LIBS)
 trnw/trnw.lo: trnw/$(am__dirstamp) trnw/$(DEPDIR)/$(am__dirstamp)
 trnw/mb1_msg.lo: trnw/$(am__dirstamp) trnw/$(DEPDIR)/$(am__dirstamp)
-trnw/trnif_proto.lo: trnw/$(am__dirstamp) \
-	trnw/$(DEPDIR)/$(am__dirstamp)
 trnw/trnif_msg.lo: trnw/$(am__dirstamp) trnw/$(DEPDIR)/$(am__dirstamp)
 
 libtrnw.la: $(libtrnw_la_OBJECTS) $(libtrnw_la_DEPENDENCIES) $(EXTRA_libtrnw_la_DEPENDENCIES) 
