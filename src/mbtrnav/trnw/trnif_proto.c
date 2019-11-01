@@ -67,6 +67,7 @@
 #include "mutils.h"
 #include "medebug.h"
 #include "mmdebug.h"
+#include "mconfig.h"
 
 /////////////////////////
 // Macros
@@ -343,6 +344,7 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
         // deserialize message bytes
         trnmsg_deserialize(&msg_in, (byte *)msg, TRNIF_MAX_SIZE);
         PDPRINT((stderr,"%s - TRNMSG received:\n",__FUNCTION__));
+        if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG | NETIF_V3 | NETIF_V4)))
         trnmsg_show(msg_in,true,5);
 
         switch (msg_in->hdr.msg_id) {
@@ -549,6 +551,8 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
         // deserialize message bytes
         wcommst_unserialize(&ct,(char *)msg,TRN_MSG_SIZE);
         char msg_type =wcommst_get_msg_type(ct);
+        
+        if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG)))
         wcommst_show(ct,true,5);
 
         switch (msg_type) {

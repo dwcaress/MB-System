@@ -2487,7 +2487,7 @@ int mbtrnpp_init_debug(int verbose) {
     mmd_channel_en(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V1 | MBTRNPP_V2 | MBTRNPP_V3 );
     mmd_channel_en(MOD_R7KR, MM_DEBUG);
     mmd_channel_en(MOD_R7K, MM_WARN | R7K_PARSER);
-    mmd_channel_set(MOD_NETIF, MM_DEBUG | NETIF_V1 | NETIF_V2 | NETIF_V3 | NETIF_V4);
+    mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2 | NETIF_V3 | NETIF_V4);
     // this enables messages from msock_recv (e.g. resource temporarily unavailable)
     msock_set_debug(1);
     break;
