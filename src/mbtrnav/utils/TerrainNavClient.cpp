@@ -17,7 +17,6 @@
 #else
 #include "myexcept.h"
 #endif
-#include "TRNUtils.h"
 #include "TerrainNavClient.h"
 
 /******************************************************************************
@@ -38,17 +37,30 @@
 static int transitionMatrix[5][3] = {{0,0,1},{1,1,1},{1,2,2},{2,2,2},{2,2,2}};
 //force reinit with well-converged
 //static int transitionMatrix[5][3] = {{2,0,1},{1,1,1},{1,2,2},{2,2,2},{2,2,2}};
+
 TerrainNavClient::TerrainNavClient()
-:TerrainNav()
+  :TerrainNav()
 {
     
+}
+
+// Just establish a connection to a server that does not need initialization.
+// Used to connect to the Trn server in mbtrnpp
+// 
+TerrainNavClient::TerrainNavClient(char *server_ip, int port)
+  :TerrainNav(), _server_ip(NULL), _sockport(port), _connected(false),
+  _mbtrn_server_type(true)
+{
+  _server_ip = strdup(server_ip);
+  init_comms();
+  _initialized = true;
 }
 
 TerrainNavClient::TerrainNavClient(char *server_ip, int port,
 				   char *mapName, char *vehicleSpecs, char *particlefile, char *logdir,
 				   const int &filterType, const int &mapType)
   : TerrainNav(mapName, vehicleSpecs, particlefile, filterType, mapType, logdir),
-    _server_ip(NULL), _sockport(port), _connected(false)
+    _server_ip(NULL), _sockport(port), _connected(false), _mbtrn_server_type(false)
 {
   _server_ip = strdup(server_ip);
   _logdir    = strdup(logdir);
@@ -67,7 +79,6 @@ TerrainNavClient::~TerrainNavClient()
 
 //////////////////////////////////////////////////////////////////////
 // Initialize connection to server and send state
-
 void TerrainNavClient::init_comms()
 {
   if (is_connected()) {
@@ -76,7 +87,8 @@ void TerrainNavClient::init_comms()
 
   _connected = false;
 
-  printf("TerrainNavClient: initializing...\n");
+  printf("TerrainNavClient: initializing...mbtrn_server_type? %s\n",
+    _mbtrn_server_type ? "yes" : "no");
 
   // Setup socket to receive the deltaT packets
   if ( (_sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0 ) {
@@ -94,7 +106,7 @@ void TerrainNavClient::init_comms()
 
   if (connect(_sockfd, (struct sockaddr *)&_server_addr, sizeof(_server_addr))
 	      < 0) {
-      printf("TerrainNavClient: can't connect to server [%s:%d] %d:%s\n", _server_ip,_sockport,errno,strerror(errno));
+    printf("TerrainNavClient: can't connect to server: %d\n", errno);
   }
   else {
     struct timeval tv;
@@ -143,7 +155,7 @@ bool TerrainNavClient::is_connected()
 //
 char TerrainNavClient::get_msg()
 {
-  bool Ok = true;
+  bool OK = true;
   _server_msg.msg_type = 0;
   if (is_connected())
   {
@@ -151,8 +163,7 @@ char TerrainNavClient::get_msg()
     int ntries = 3;
     int len = 0;
     for (len = 0; len < TRN_MSG_SIZE;) {
- 
-        int sl = recv(_sockfd, _comms_buf+len, TRN_MSG_SIZE-len, 0);
+      int sl = recv(_sockfd, _comms_buf+len, TRN_MSG_SIZE-len, 0);
       int saveErrno=errno;
         if (sl <= 0)
         {
@@ -177,17 +188,17 @@ char TerrainNavClient::get_msg()
             }
             
             // disconnected or unrecoverable error, quit loop
-            Ok=false;
+            OK=false;
             break;
         }
         else
         {
-            len += sl;
+        	len += sl;
         }
     }
 
-      if (len > 0) {
-          _server_msg.unserialize(_comms_buf, TRN_MSG_SIZE);
+    if (len > 0) {
+      _server_msg.unserialize(_comms_buf, TRN_MSG_SIZE);
       //printf("TerrainNavClient got %s\n", _server_msg.to_s(_comms_buf, TRN_MSG_SIZE));
     }
     //printf("got %d bytes in response\n", len);
@@ -195,21 +206,21 @@ char TerrainNavClient::get_msg()
   }
   else
   {
-      // No connection
+    // No connection
     //
-    Ok = false;
+    OK = false;
   }
 
 
   // Server hung-up
   //
-  if (!Ok)
+  if (!OK)
   {
-      _connected = false;
+    _connected = false;
     printf("TerrainNavClient::get_msg() - server connection failed/terminated\n");
     throw Exception("TRN Server connection lost");
   }
-    
+
   return _server_msg.msg_type;
 
 }
@@ -245,13 +256,27 @@ int TerrainNavClient::send_msg(commsT& msg)
     }
 #endif
 
-    for (sl = 0; sl < TRN_CHUNK_SIZE;) {
-      sl += send(_sockfd, _comms_buf+sl, TRN_CHUNK_SIZE-sl, 0);
-      //printf("server:send_msg - sent %d bytes\n", sl);
+    // When interacting with a mbtrn_server (as opposed to a traditional trn_server)
+    // send the message in send call. We can get away with this since the messages
+    // are relatively short (< 1 kb).
+    // Otherwise, to workaround the QNX tcp/ip bug we need to break messages up
+    // into 512-byte chunks. The bug comes into play when sending measure updates
+    // with many beams.
+    // 
+    if (_mbtrn_server_type)
+    {
+      sl = send(_sockfd, _comms_buf, sizeof(_comms_buf), 0);
     }
-    for (sl = TRN_CHUNK_SIZE; sl < sizeof(_comms_buf);) {
-      sl += send(_sockfd, _comms_buf+sl, sizeof(_comms_buf)-sl, 0);
-      //printf("server:send_msg - sent %d bytes\n", sl);
+    else
+    {
+      for (sl = 0; sl < TRN_CHUNK_SIZE;) {
+        sl += send(_sockfd, _comms_buf+sl, TRN_CHUNK_SIZE-sl, 0);
+        //printf("server:send_msg - sent %d bytes\n", sl);
+      }
+      for (sl = TRN_CHUNK_SIZE; sl < sizeof(_comms_buf);) {
+        sl += send(_sockfd, _comms_buf+sl, sizeof(_comms_buf)-sl, 0);
+        //printf("server:send_msg - sent %d bytes\n", sl);
+      }
     }
   }
   else {
@@ -274,10 +299,7 @@ void TerrainNavClient::init_server()
   char param = cmt + cft;
 
   printf("TerrainNavClient::init_server() - server initializatiing...\n");
-//  commsT init(TRN_INIT, param, this->mapFile, this->vehicleSpecFile, this->particlesFile, _logdir);
-  commsT init(TRN_INIT, param,
-    TRNUtils::basename(this->mapFile), TRNUtils::basename(this->vehicleSpecFile),
-    TRNUtils::basename(this->particlesFile), TRNUtils::basename(_logdir));
+  commsT init(TRN_INIT, param, this->mapFile, this->vehicleSpecFile, this->particlesFile, this->saveDirectory);
 
   _initialized = false;
   if (0 != send_msg(init)) {
@@ -313,7 +335,12 @@ void TerrainNavClient::estimatePose(poseT* estimate, const int &type)
       // Check for response
       //
       char ret_msg = get_msg();
-      if (TRN_MLE != ret_msg && TRN_MMSE != ret_msg) {
+      if (TRN_NACK == ret_msg)
+      {
+        printf("TerrainNavClient::estimatePose() - server NACKed\n");
+        continue;
+      }
+      else if (TRN_MLE != ret_msg && TRN_MMSE != ret_msg) {
         printf("TerrainNavClient::estimatePose() - server choked on estimate\n");
         printf("%s\n", _server_msg.to_s(_comms_buf, TRN_MSG_SIZE));
       }
@@ -489,6 +516,7 @@ void TerrainNavClient::setMapInterpMethod(const int &type)
   commsT mim(TRN_SET_MIM, 0);
   //printf("%s\n", mim.to_s(_comms_buf, TRN_MSG_SIZE));
   mim.serialize(_comms_buf);
+
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(mim)) {
       // Check for response

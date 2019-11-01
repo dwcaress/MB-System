@@ -154,15 +154,18 @@ const char *prof_event_labels[]={ \
     "e_src_con",
     "e_cli_rx_z",
     "e_cli_rx_e",
+    "e_eagain",
     "e_cli_tx_z",
     "e_cli_tx_e",
     "e_pub_tx",
+    "e_proto_rd",
+    "e_proto_hnd",
     "cli_con",
     "cli_dis",
     "cli_rx",
     "cli_tx",
-    "log_stat",
-    "pubn"
+    "cli_rr",
+    "cli_pub"
 };
 const char *prof_status_labels[]={ \
     "cli_list_len",
@@ -251,9 +254,10 @@ static bool s_peer_idval_cmp(void *item, void *value)
 
             break;// fall thru - OK(?)
         case -1:
-            if(errsave!=EAGAIN)
+            if(errsave!=EAGAIN){
             PMPRINT(MOD_NETIF,NETIF_V2,(stderr,"[UDPCON.%s]:ERR - recvfrom ret[-1] err[%d/%s]\n",self->port_name,errsave,strerror(errsave)));
-//            sleep(UDPS_RCVERR_DELAY_SEC);
+                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EAGAIN]);
+            }
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ECLI_RXE]);
             break;
             
@@ -333,15 +337,15 @@ int netif_tcp_update_connections(netif_t *self)
     
     switch(new_fd){
         case -1:
-            
-            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ERR - accept ret[-1] sfd[%d] nfd[%d] err[%d/%s]\n",self->port_name,socket->fd,new_fd,errsave,strerror(errsave)));
-//            if(mlist_size(list)<=0)
-//                delay_msec=cfg->edelay_msec;
+            if(errsave!=EAGAIN){
+                PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ERR - accept ret[-1] sfd[%d] nfd[%d] err[%d/%s]\n",self->port_name,socket->fd,new_fd,errsave,strerror(errsave)));
+            }else{
+                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EAGAIN]);
+            }
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ECLI_RXE]);
                break;
         case 0:
             PMPRINT(MOD_NETIF,MM_ALL,(stderr,"[TCPCON.%s]:ERR - ret[0] (no input) err[%d/%s]\n",self->port_name,errsave,strerror(errsave)));
-//            delay_msec=cfg->edelay_msec;
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ECLI_RXZ]);
            break;
             
@@ -432,6 +436,7 @@ int netif_reqres(netif_t *self)
     int retval=-1;
     int iobytes = 0;
     int cli=0;
+    MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_REQRESN]);
     MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_REQRES_XT], mtime_dtime());
 
     if(NULL!=self && NULL!=self->read_fn && NULL!=self->handle_fn){
@@ -463,8 +468,10 @@ int netif_reqres(netif_t *self)
                 psub->hbtime=mtime_dtime();
 
                 MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_RX_BYTES],iobytes);
+                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_TXN]);
 
             }else{
+                if(errno!=EAGAIN)
                 PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[SVCCLI.%s]:ERR - recvfrom ret[%d] id[%d/%s:%s] err[%d/%s]\n",self->port_name,iobytes,cli,psub->chost, psub->service,errno,strerror(errno)));
            }
 
@@ -495,7 +502,8 @@ int netif_reqres(netif_t *self)
                 }else{
                     MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_TX_BYTES],iobytes);
                     MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_RES_BYTES],iobytes);
-                }// else handle msg OK
+                    MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_RXN]);
+              }// else handle msg OK
  
                 MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_HANDLE_XT], mtime_dtime());
 
@@ -537,7 +545,7 @@ int netif_pub(netif_t *self, char *output_buffer, size_t len)
                 // update stats if publish successful
                 MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_TXN]);
                 MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_TX_BYTES],iobytes);
-                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_PUBN]);
+                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_PUBN]);
                 MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_PUB_BYTES],iobytes);
 
                 PMPRINT(MOD_NETIF,NETIF_V2,(stderr,"[SVCPUB.%s]:TX - ret[%5d] bytes id[%d/%s:%s] hbtime[%.2lf]\n", self->port_name,iobytes, idx, psub->chost, psub->service, psub->hbtime));
@@ -589,26 +597,36 @@ int netif_connect(netif_t *self)
     switch(self->ctype){
     case ST_UDP:
         self->socket = msock_socket_new(self->host, self->port, ST_UDP);
-        msock_set_blocking(self->socket,false);
-        if ( (test=msock_bind(self->socket))==0) {
-            PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN udp socket bind OK [%s:%d]\n",self->host,self->port));
-            retval=0;
-        }else{
-            fprintf(stderr, "\nTRN udp socket bind failed [%d] [%d %s]\n",test,errno,strerror(errno));
-        }
+            if(NULL!=socket){
+                msock_set_blocking(self->socket,false);
+                if ( (test=msock_bind(self->socket))==0) {
+                    PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN udp socket bind OK [%s:%d]\n",self->host,self->port));
+                    retval=0;
+                }else{
+                    fprintf(stderr, "\nTRN udp socket bind failed [%d] [%d %s]\n",test,errno,strerror(errno));
+                    MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ESRC_CON]);
+                }
+            }else{
+                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ESRC_SOCKET]);
+            }
         break;
     case ST_TCP:
         self->socket = msock_socket_new(self->host, self->port, ST_TCP);
-        msock_set_blocking(self->socket,false);
-        if ( (test=msock_bind(self->socket))==0) {
-            PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN tcp socket bind OK [%s:%d]\n",self->host,self->port));
-            if ( (test=msock_listen(self->socket,NETIF_QUEUE_DFL))==0) {
-                PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN tcp socket listen OK [%s:%d]\n",self->host,self->port));
-                retval=0;
+            if(NULL!=socket){
+                msock_set_blocking(self->socket,false);
+                if ( (test=msock_bind(self->socket))==0) {
+                    PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN tcp socket bind OK [%s:%d]\n",self->host,self->port));
+                    if ( (test=msock_listen(self->socket,NETIF_QUEUE_DFL))==0) {
+                        PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN tcp socket listen OK [%s:%d]\n",self->host,self->port));
+                        retval=0;
+                    }
+                }else{
+                    fprintf(stderr, "\nTRN tcp socket bind failed [%d] [%d %s]\n",test,errno,strerror(errno));
+                    MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ESRC_CON]);
+                }
+            }else{
+                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ESRC_SOCKET]);
             }
-        }else{
-            fprintf(stderr, "\nTRN tcp socket bind failed [%d] [%d %s]\n",test,errno,strerror(errno));
-        }
         break;
     default:
         break;

@@ -40,6 +40,15 @@ class TerrainNavClient : public TerrainNav
 {
  public:
 
+  /* Default Constructor:
+   */
+  TerrainNavClient();
+
+  /* Server constructor: Just establish a connection to a server.
+   */
+  TerrainNavClient(char *server_ip, int server_port);
+
+
   /* Constructor: TerrainNavClient(mapName)
    * Usage: tercom = new TerrainNavClient("canyonmap");
    * -------------------------------------------------------------------------*/
@@ -47,12 +56,12 @@ class TerrainNavClient : public TerrainNav
    * AUV specs and the Point Mass Filter algorithm are used as defaults.
    * 2016-12-15 RGH: Add particle file name & the log directory name to i/f
    */
-    TerrainNavClient();
   TerrainNavClient(char *server_ip, int server_port,
 		   char *mapName, char *vehicleSpecs, char *particlefile, char *logdir,
 		   const int &filterType,
 		   const int &mapType);
-    
+
+
 #if 0
   /* Constructor: TerrainNavClient(mapName)
    * Usage: tercom = new TerrainNavClient("canyonmap");
@@ -276,6 +285,7 @@ class TerrainNavClient : public TerrainNav
   //////////////////////////////////////////////////////////////////////
   // Initialize connection to server and send state
   bool _connected;
+  bool _mbtrn_server_type;
   char *_server_ip;
   int _sockfd;
   int _sockport;
