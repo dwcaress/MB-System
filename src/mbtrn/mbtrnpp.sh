@@ -32,28 +32,15 @@ SESSION_NAME="mbtrnpp-console-${SESSION_ID}"
 CONLOG="${SESSION_NAME}.log"
 CONLOG_PATH_DFL="./"
 
-# constants
-MB1SVR_PORT="27000"
-TRNSVR_PORT="27027"
-TRNUSVR_PORT="8000"
-# UTM MONTEREY : 10
-# UTM AXIAL    : 12
-UTM_ZONE="10"
-
+# info
 # MVC-MB1 134.89.32.35
 # MVC-MB2 134.89.32.36
 # RESON1  134.89.32.107
 # RESON2  134.89.32.108
 # RESON3  134.89.32.110
-RESON_HOST="134.89.32.107"
-RESON_PORT="7000"
-RESON_SIZE="0"
-FORMAT_RESON="88"
 
-KONGSBERG_HOST="192.168.100.113"
-KONGSBERG_BCAST="239.255.0.1"
-KONGSBERG_PORT="6020"
-FORMAT_EMKM="261"
+# variables for command line overrides
+RESON_HOST="134.89.32.107"
 
 #################################
 # Script variable initialization
@@ -84,8 +71,16 @@ init_vars(){
     #              IP of host running mbtrnpp : 192.168.100.113
     #              Broadcast group : 239.255.0.1
     #              Multibeam multicast port : 6020
+    # KONGSBERG_HOST="192.168.100.113"
+    # KONGSBERG_BCAST="239.255.0.1"
+    # KONGSBERG_PORT="6020"
 	# OPT_INPUT="--input=socket:${KONGSBERG_HOST}:${KONGSBERG_BCAST}:${KONGSBERG_PORT}"
-	OPT_INPUT="--input=socket:${RESON_HOST}:${RESON_PORT}:${RESON_SIZE}"
+    # RESON1  134.89.32.107
+    # RESON2  134.89.32.108
+    # RESON3  134.89.32.110
+    # RESON_PORT 7000
+    # RESON_SIZE 0:default or size in bytes
+	OPT_INPUT="--input=socket:${RESON_HOST}:7000:0"
 
     # output destination
     # [alternatively, use --mb-out]
@@ -102,7 +97,9 @@ init_vars(){
     OPT_SOUNDINGS="--soundings=21"
     # input data format
     # [do not use with datalist input]
-    OPT_FORMAT="--format=${FORMAT_RESON}"
+	# FORMAT_RESON 88
+	# FORMAT_EMKM 261
+    OPT_FORMAT="--format=88"
     # median filter settings
     OPT_MFILTER="--median-filter=0.10/9/3"
 
@@ -115,7 +112,11 @@ init_vars(){
     #    reson            - reson frame (s7k)log
     #    nomb1            - disable mb1 log (if enabled by default in mbtrnpp)
     #    noreson          - disable reson log
-	OPT_MBOUT="--mb-out=mb1svr:${RESON_HOST}:${RESON_PORT}"
+    # RESON1  134.89.32.107
+    # RESON2  134.89.32.108
+    # RESON3  134.89.32.110
+    # MB1SVR_PORT 27000
+	OPT_MBOUT="--mb-out=mb1svr:${RESON_HOST}:27000"
 
     # TRN output selection
     #--trn-out=[options] select trn update output channels
@@ -125,7 +126,12 @@ init_vars(){
     #   trnu                  - trn estimate log
     #   sout|serr             - console (independent of debug settings)
     #   debug                 - per debug settings
-    OPT_TRNOUT="--trn-out=trnsvr:${RESON_HOST}:${TRNSVR_PORT},trnu"
+    # RESON1  134.89.32.107
+    # RESON2  134.89.32.108
+    # RESON3  134.89.32.110
+    # TRNSVR_PORT  27027
+    # TRNUSVR_PORT 8000
+    OPT_TRNOUT="--trn-out=trnsvr:${RESON_HOST}:27027,trnu"
 
     # enable TRN processing
     # (requires map,par,log,cfg)
@@ -133,7 +139,7 @@ init_vars(){
     # set TRN UTM zone
     # Monterey Bay 10
     # Axial        12
-    OPT_TRN_UTM="--trn-utm=${UTM_ZONE}"
+    OPT_TRN_UTM="--trn-utm=10"
     # set TRN map file (required w/ TRN_EN)
     OPT_TRN_MAP="--trn-map=TBD_map_name"
     # set TRN particles file (required w/ TRN_EN)
@@ -210,7 +216,7 @@ printUsage(){
     echo "  -t      : test [print cmdine]"
     echo "  -v      : verbose output         [$VERBOSE]"
 	echo "  -w n    : loop delay (s)         [$LOOP_DELAY_SEC]"
-	echo "  -R ip   : override reson host    [$RESON_HOST]"
+	echo "  -R addr : override reson host    [$RESON_HOST]"
     echo "  -h      : print use message"
     echo ""
 }
@@ -266,8 +272,8 @@ while getopts a:c:d:e:hR:tvw: Option
         ;;
         e ) CFG_SEL=$OPTARG
         ;;
-		R ) RESON_HOST=$OPTARG
-		;;
+        R ) RESON_HOST=$OPTARG
+        ;;
         t ) DO_TEST="Y"
         ;;
         v ) VERBOSE="Y"
@@ -313,7 +319,8 @@ fi
 echo ""
 
 # call init vars
-# [delay variable init until after command line processing]
+# delaying variable init until after command line processing
+# enables command line overrides (e.g. see RESON_HOST)
 init_vars
 
 if [ ! -z ${DO_HELP} ] && [ ${DO_HELP} == "Y" ]
