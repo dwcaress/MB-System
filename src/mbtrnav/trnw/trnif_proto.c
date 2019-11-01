@@ -509,12 +509,13 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
                 pread     += read_bytes;
             }else{
                 int errsave=errno;
-                if(errsave!=EAGAIN)
-                fprintf(stderr,"%s:%d ERR recv[%d/%s]\n",__FUNCTION__,__LINE__,errsave,strerror(errsave));
+                if(errsave!=EAGAIN){
+	                fprintf(stderr,"%s:%d ERR recv[%d/%s]\n",__FUNCTION__,__LINE__,errsave,strerror(errsave));
+                    MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
+                }
                 if(NULL!=errout){
                		*errout = errsave;
                 }
-                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
             }
             if(msg_bytes==0 && retries==TRNIF_READ_RETRIES_CT)
                 break;

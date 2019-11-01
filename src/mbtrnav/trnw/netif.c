@@ -149,7 +149,6 @@ static mmd_module_config_t mmd_config_defaults[]={
 #endif
 
 const char *prof_event_labels[]={ \
-    "cycles",
     "e_src_socket",
     "e_src_con",
     "e_cli_rx_z",
@@ -458,7 +457,9 @@ int netif_reqres(netif_t *self)
 
             msock_set_blocking(psub->sock, false);
 
+            MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_READ_XT], mtime_dtime());
             iobytes=self->read_fn(&pmsg,&msg_len,self,psub, &merr);
+            MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_READ_XT], mtime_dtime());
 
 
             if (  (iobytes > 0) && (self->hbto > 0.0) ) {

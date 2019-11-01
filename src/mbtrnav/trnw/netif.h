@@ -108,8 +108,7 @@
 /////////////////////////
 
 typedef enum{
-    NETIF_EV_CYCLES=0,
-    NETIF_EV_ESRC_SOCKET,
+    NETIF_EV_ESRC_SOCKET=0,
     NETIF_EV_ESRC_CON,
     NETIF_EV_ECLI_RXZ,
     NETIF_EV_ECLI_RXE,
