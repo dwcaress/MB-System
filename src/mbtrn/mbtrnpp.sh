@@ -32,117 +32,151 @@ SESSION_NAME="mbtrnpp-console-${SESSION_ID}"
 CONLOG="${SESSION_NAME}.log"
 CONLOG_PATH_DFL="./"
 
+# constants
+MB1SVR_PORT="27000"
+TRNSVR_PORT="27027"
+TRNUSVR_PORT="8000"
+# UTM MONTEREY : 10
+# UTM AXIAL    : 12
+UTM_ZONE="10"
+
+#RESON_HOST="134.89.32.107"
+RESON_HOST="134.89.32.107"
+RESON_PORT="7000"
+RESON_SIZE="0"
+FORMAT_RESON="88"
+
+KONGSBERG_HOST="192.168.100.113"
+KONGSBERG_BCAST="239.255.0.1"
+KONGSBERG_PORT="6020"
+FORMAT_EMKM="261"
+
 #################################
 # Script variable initialization
 #################################
-# verbose wrapper script output
-VERBOSE="N"
-# delay before restarting app (s)
-LOOP_DELAY_SEC=${LOOP_DELAY_SEC_DFL}
-# console log path
-CONLOG_PATH=${CONLOG_PATH:-"$CONLOG_PATH_DFL"}
-# number of cycles (app restarts)
-# use -1 to loop indefinitely
-let CYCLES="${CYCLES_DFL}"
 
-# application path
-APP_CMD="/usr/local/bin/mbtrnpp"
-# log directory
-OPT_LOGDIR="--log-directory=/home/mappingauv/mbtrnpptest"
-# input source
-# Define socket input
-#   example: --input=socket:192.168.100.113:239.255.0.1:6020
-#              IP of host running mbtrnpp : 192.168.100.113
-#              Broadcast group : 239.255.0.1
-#              Multibeam multicast port : 6020
-# OPT_INPUT="--input=socket:192.168.100.113:239.255.0.1:6020"
-OPT_INPUT="--input=socket:192.168.100.113:239.255.0.1:6020"
+# init_vars()
+# initialize variables
+# called *after* command line processing
+# to support value overrides
+init_vars(){
+    # verbose wrapper script output
+    VERBOSE="N"
+    # delay before restarting app (s)
+    LOOP_DELAY_SEC=${LOOP_DELAY_SEC_DFL}
+    # console log path
+    CONLOG_PATH=${CONLOG_PATH:-"$CONLOG_PATH_DFL"}
+    # number of cycles (app restarts)
+    # use -1 to loop indefinitely
+    let CYCLES="${CYCLES_DFL}"
 
-# output destination
-# [alternatively, use --mb-out]
-# --output     select mb1 output (similar to mb-out file, mb1svr)
-#   options: file,file:<name>,socket,socket:<host>:<port> [1]
-#    file                  - mb1 data out, mbsys default file name
-#    file:<name>           - mb1 data out, specified file name
-#    socket                - mb1 socket output, default host:port
-#    socket:<host>:<port>  - mb1 socket output, specified host:port
-OPT_OUTPUT="--output=file:mbtrnpp_$$.mb1"
-# beam swath (deg)
-OPT_SWATH="--swath=90"
-# number of beams to publish
-OPT_SOUNDINGS="--soundings=21"
-# input data format
-# [do not use with datalist input]
-OPT_FORMAT="--format=261"
-# median filter settings
-OPT_MFILTER="--median-filter=0.10/9/3"
+    # application path
+    APP_CMD="/usr/local/bin/mbtrnpp"
+    # log directory
+    OPT_LOGDIR="--log-directory=/home/mappingauv/mbtrnpptest"
+    # input source
+    # Define socket input
+    #   example: --input=socket:192.168.100.113:239.255.0.1:6020
+    #              IP of host running mbtrnpp : 192.168.100.113
+    #              Broadcast group : 239.255.0.1
+    #              Multibeam multicast port : 6020
+	# OPT_INPUT="--input=socket:${KONGSBERG_HOST}:${KONGSBERG_BCAST}:${KONGSBERG_PORT}"
+	OPT_INPUT="--input=socket:${RESON_HOST}:${RESON_PORT}:${RESON_SIZE}"
 
-# MB1 output selection
-# --mb-out=[options]  select mb1 output (mbsvr:host:port,mb1,reson/file)
-#   options: mb1svr:host:port - MB1 socket (e.g. MbtrnRecv) [2]
-#    mb1              - mb1 data log
-#    file             - mb1 data log, use mbsys default file name
-#    file:<name>      - mb1 data log, use specified file name
-#    reson            - reson frame (s7k)log
-#    nomb1            - disable mb1 log (if enabled by default in mbtrnpp)
-#    noreson          - disable reson log
-OPT_MBOUT="--mb-out=mb1svr"
+    # output destination
+    # [alternatively, use --mb-out]
+    # --output     select mb1 output (similar to mb-out file, mb1svr)
+    #   options: file,file:<name>,socket,socket:<host>:<port> [1]
+    #    file                  - mb1 data out, mbsys default file name
+    #    file:<name>           - mb1 data out, specified file name
+    #    socket                - mb1 socket output, default host:port
+    #    socket:<host>:<port>  - mb1 socket output, specified host:port
+    OPT_OUTPUT="--output=file:mbtrnpp_$$.mb1"
+    # beam swath (deg)
+    OPT_SWATH="--swath=90"
+    # number of beams to publish
+    OPT_SOUNDINGS="--soundings=21"
+    # input data format
+    # [do not use with datalist input]
+    OPT_FORMAT="--format=${FORMAT_RESON}"
+    # median filter settings
+    OPT_MFILTER="--median-filter=0.10/9/3"
 
-# TRN output selection
-#--trn-out=[options] select trn update output channels
-#  options: trnsvr:<host>:<port>,mlog,stdout,stderr,debug [3]
-#   trnsvr:<host>:<port> - trn_server socket
-#   mlog                 - message log
-#   ulog                 - trn estimate log
-#   stdout|stderr        - console (independent of debug settings)
-#   debug                - per debug settings
-OPT_TRNOUT="--trn-out=trnsvr,trnu"
+    # MB1 output selection
+    # --mb-out=[options]  select mb1 output (mbsvr:host:port,mb1,reson/file)
+    #   options: mb1svr:host:port - MB1 socket (e.g. MbtrnRecv) [2]
+    #    mb1              - mb1 data log
+    #    file             - mb1 data log, use mbsys default file name
+    #    file:<name>      - mb1 data log, use specified file name
+    #    reson            - reson frame (s7k)log
+    #    nomb1            - disable mb1 log (if enabled by default in mbtrnpp)
+    #    noreson          - disable reson log
+	OPT_MBOUT="--mb-out=mb1svr:${RESON_HOST}:${RESON_PORT}"
 
-# enable TRN processing
-# (must also specify map,par,log,cfg)
-OPT_TRN_EN=""
-# set TRN UTM zone
-OPT_TRN_UTM=""
-# set TRN map file (required w/ TRN_EN)
-OPT_TRN_MAP=""
-# set TRN particles file (required w/ TRN_EN)
-OPT_TRN_PAR=""
-# set TRN log directory prefix (required w/ TRN_EN)
-OPT_TRN_LOG=""
-# set TRN config file (required w/ TRN_EN)
-OPT_TRN_CFG=""
-# set TRN map type
-OPT_TRN_MTYPE=""
-# set TRN map type
-OPT_TRN_FTYPE=""
+    # TRN output selection
+    #--trn-out=[options] select trn update output channels
+    #  options: trnsvr:<host>:<port>,mlog,stdout,stderr,debug [3]
+    #   trnsvr:<host>:<port>  - trn_server socket
+    #   trnusvr:<host>:<port> - trnu_server socket
+    #   trnu                  - trn estimate log
+    #   sout|serr             - console (independent of debug settings)
+    #   debug                 - per debug settings
+    OPT_TRNOUT="--trn-out=trnsvr:${RESON_HOST}:${TRNSVR_PORT},trnu"
 
-# verbose level (-5 to +2)
-# +2 is a LOT of info
-# -2 to 0 recommended for missions
-# <= -3 a lot of mbtrn output
-OPT_VERBOSE="--verbose=-2"
-# drop MB1 clients after hbeat messages
-# if they haven't renewed
-OPT_MBHBN=""
-# drop MB1 clients after OPT_MBHBT seconds
-OPT_MBHBT=""
-# drop TRN clients after OPT_MBHBT seconds
-OPT_TRNHBT=""
-# drop TRNU clients after OPT_MBHBT seconds
-OPT_TRNUHBT=""
+    # enable TRN processing
+    # (requires map,par,log,cfg)
+    OPT_TRN_EN="--trn-en"
+    # set TRN UTM zone
+    # Monterey Bay 10
+    # Axial        12
+    OPT_TRN_UTM="--trn-utm=${UTM_ZONE}"
+    # set TRN map file (required w/ TRN_EN)
+    OPT_TRN_MAP="--trn-map=TBD_map_name"
+    # set TRN particles file (required w/ TRN_EN)
+    OPT_TRN_PAR="--trn-par=TBD_particles_name"
+    # set TRN log directory prefix (required w/ TRN_EN)
+    OPT_TRN_LOG="--trn-log=mbtrnpp"
+    # set TRN config file (required w/ TRN_EN)
+    OPT_TRN_CFG="--trn-cfg=TBD_cfg_name"
+    # set TRN map type
+    # TRN_MAP_DEM  1
+    # TRN_MAP_BO   2 (dfl)
+    #OPT_TRN_MTYPE="--trn-mtype=2"
+    # set TRN map type
+    # TRN_FILT_NONE       0
+    # TRN_FILT_POINTMASS  1
+    # TRN_FILT_PARTICLE   2 (dfl)
+    # TRN_FILT_BANK       3
+    #OPT_TRN_FTYPE="--trn-ftype=2"
 
-# delay between TRN messages (msec)
-OPT_DELAY="" #"--delay=100"
-# statistics logging interval (s)
-OPT_STATS="--stats=30"
+    # verbose level (-5 to +2)
+    # +2 is a LOT of info
+    # -2 to 0 recommended for missions
+    # <= -3 a lot of mbtrn output
+    OPT_VERBOSE="--verbose=-2"
+    # drop MB1 clients after hbeat messages
+    # if they haven't renewed
+    #OPT_MBHBN="--mbhbn=0"
+    # drop MB1 clients after OPT_MBHBT seconds
+    OPT_MBHBT="--mbhbt=15"
+    # drop TRN clients after OPT_MBHBT seconds
+    OPT_TRNHBT="--trnhbt=15"
+    # drop TRNU clients after OPT_MBHBT seconds
+    #OPT_TRNUHBT="--trnuhbt=0"
 
-# TRN processing decimation (cycles)
-OPT_TRN_DECN="" #"--trn-decn=3"
-# TRN processing decimation (sec)
-OPT_TRN_DECS="" #"--trn-decs=1"
+    # delay between TRN messages (msec)
+    #OPT_DELAY="--delay=0"
+    # statistics logging interval (s)
+    OPT_STATS="--stats=30"
 
-# print help and exit
-OPT_HELP="" #"--help"
+    # TRN processing decimation (cycles)
+    #OPT_TRN_DECN="--decn=0"
+    # TRN processing decimation (sec)
+    #OPT_TRN_DECS="--trn-decs=0"
+
+    # print help and exit
+    OPT_HELP="" #"--help"
+}
 
 unset DO_HELP
 unset DO_TEST
@@ -171,7 +205,8 @@ printUsage(){
     echo "  -d path : enable console log, set directory"
     echo "  -t      : test [print cmdine]"
     echo "  -v      : verbose output         [$VERBOSE]"
-    echo "  -w n    : loop delay (s)         [$LOOP_DELAY_SEC]"
+	echo "  -w n    : loop delay (s)         [$LOOP_DELAY_SEC]"
+	echo "  -R ip   : override reson host    [$RESON_HOST]"
     echo "  -h      : print use message"
     echo ""
 }
@@ -214,7 +249,7 @@ processCmdLine(){
     OPTIND=1
     #    vout "`basename $0` all args[$*]"
 
-while getopts a:c:d:e:htvw: Option
+while getopts a:c:d:e:hR:tvw: Option
     do
         #    vout "processing $Option[$OPTARG]"
         case $Option in
@@ -227,6 +262,8 @@ while getopts a:c:d:e:htvw: Option
         ;;
         e ) CFG_SEL=$OPTARG
         ;;
+		R ) RESON_HOST=$OPTARG
+		;;
         t ) DO_TEST="Y"
         ;;
         v ) VERBOSE="Y"
@@ -271,6 +308,9 @@ fi
 
 echo ""
 
+# call init vars
+# [delay variable init until after command line processing]
+init_vars
 
 if [ ! -z ${DO_HELP} ] && [ ${DO_HELP} == "Y" ]
 then
