@@ -47,11 +47,13 @@
 
 const int NFIELDSMAX = 50;
 const int MAX_OPTIONS = 50;
-const int TYPE_UNKNOWN = 0;
-const int TYPE_TIMETAG = 1;
-const int TYPE_INTEGER = 2;
-const int TYPE_DOUBLE = 3;
-const int TYPE_ANGLE = 4;
+typedef enum {
+    TYPE_UNKNOWN = 0,
+    TYPE_TIMETAG = 1,
+    TYPE_INTEGER = 2,
+    TYPE_DOUBLE = 3,
+    TYPE_ANGLE = 4,
+} field_type_t;
 // TODO(schwehr): Should these be unsigned values for flags?
 // const int KEARFOTT_MONITOR_VALID_DVL = 0x01;
 // const int KEARFOTT_MONITOR_RESERVED = 0x02;
@@ -97,7 +99,7 @@ int main(int argc, char **argv) {
 
 	/* auv log data */
 	struct field {
-		int type;
+		field_type_t type;
 		int size;
 		int index;
 		char name[MB_PATH_MAXLINE];

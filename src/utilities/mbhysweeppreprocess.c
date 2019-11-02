@@ -40,17 +40,24 @@
 #include "mbsys_hysweep.h"
 
 const int MBHYSWEEPPREPROCESS_ALLOC_CHUNK = 1000;
-// TODO(schwehr): enums
-static const int MBHYSWEEPPREPROCESS_PROCESS = 1;
-static const int MBHYSWEEPPREPROCESS_TIMESTAMPLIST = 2;
-static const int MBHYSWEEPPREPROCESS_TIMELAG_OFF = 0;
-static const int MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT = 1;
-static const int MBHYSWEEPPREPROCESS_TIMELAG_MODEL = 2;
 
-// static const int MBHYSWEEPPREPROCESS_SONAR_OFFSET_NONE = 0;
-static const int MBHYSWEEPPREPROCESS_SONAR_OFFSET_SONAR = 1;
-static const int MBHYSWEEPPREPROCESS_SONAR_OFFSET_MRU = 2;
-static const int MBHYSWEEPPREPROCESS_SONAR_OFFSET_NAVIGATION = 3;
+typedef enum {
+    MBHYSWEEPPREPROCESS_PROCESS = 1,
+    MBHYSWEEPPREPROCESS_TIMESTAMPLIST = 2,
+} hysweep_mode_t;
+
+typedef enum {
+    MBHYSWEEPPREPROCESS_TIMELAG_OFF = 0,
+    MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT = 1,
+    MBHYSWEEPPREPROCESS_TIMELAG_MODEL = 2,
+} timelag_t;
+
+typedef enum {
+    // MBHYSWEEPPREPROCESS_SONAR_OFFSET_NONE = 0,
+    MBHYSWEEPPREPROCESS_SONAR_OFFSET_SONAR = 1,
+    MBHYSWEEPPREPROCESS_SONAR_OFFSET_MRU = 2,
+    MBHYSWEEPPREPROCESS_SONAR_OFFSET_NAVIGATION = 3,
+} sonar_offset_t;
 
 const int MBHYSWEEPPREPROCESS_OFFSET_MAX = 12;
 
@@ -144,7 +151,7 @@ int main(int argc, char **argv) {
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* program mode */
-	int mode = MBHYSWEEPPREPROCESS_PROCESS;
+	hysweep_mode_t mode = MBHYSWEEPPREPROCESS_PROCESS;
 
 	/* counting variables */
 	int nrec_POS = 0;
@@ -218,7 +225,7 @@ int main(int argc, char **argv) {
 	double *dat_altitude_altitude = NULL;
 
 	/* timelag parameters */
-	int timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_OFF;
+	timelag_t timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_OFF;
 	double timelag = 0.0;
 	double timelagm = 0.0;
 	double timelagconstant = 0.0;
@@ -277,7 +284,7 @@ int main(int argc, char **argv) {
 	double second, yearsecond;
 	double easting, northing;
 	int testformat;
-	int type;
+	sonar_offset_t type;
 	double offset_roll, offset_pitch, offset_heading;
 	double offset_x, offset_y, offset_z, offset_t;
 
@@ -304,7 +311,10 @@ int main(int argc, char **argv) {
 				break;
 			case 'A':
 			case 'a':
-				nscan = sscanf(optarg, "%d/%lf/%lf/%lf/%lf", &type, &offset_x, &offset_y, &offset_z, &offset_t);
+                        {
+				int tmp;
+				nscan = sscanf(optarg, "%d/%lf/%lf/%lf/%lf", &tmp, &offset_x, &offset_y, &offset_z, &offset_t);
+				type = (sonar_offset_t)tmp;
 				if (nscan >= 4) {
 					if (type == MBHYSWEEPPREPROCESS_SONAR_OFFSET_SONAR) {
 						offset_sonar_mode = true;
@@ -326,6 +336,7 @@ int main(int argc, char **argv) {
 					}
 				}
 				break;
+                        }
 			case 'B':
 			case 'b':
 				nscan = sscanf(optarg, "%lf/%lf/%lf", &offset_roll, &offset_pitch, &offset_heading);

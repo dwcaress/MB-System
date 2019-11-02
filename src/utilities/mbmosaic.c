@@ -42,15 +42,19 @@
 #include "mb_status.h"
 
 /* gridding algorithms */
-const int MBMOSAIC_SINGLE_BEST = 1;
-const int MBMOSAIC_AVERAGE = 2;
+typedef enum {
+    MBMOSAIC_SINGLE_BEST = 1,
+    MBMOSAIC_AVERAGE = 2,
+} grid_mode_t;
 
 /* grid format definitions */
-const int MBMOSAIC_ASCII = 1;
-const int MBMOSAIC_OLDGRD = 2;
-const int MBMOSAIC_CDFGRD = 3;
-const int MBMOSAIC_ARCASCII = 4;
-const int MBMOSAIC_GMTGRD = 100;
+typedef enum {
+    MBMOSAIC_ASCII = 1,
+    MBMOSAIC_OLDGRD = 2,
+    MBMOSAIC_CDFGRD = 3,
+    MBMOSAIC_ARCASCII = 4,
+    MBMOSAIC_GMTGRD = 100,
+} grid_kind_t;
 
 /* gridded data type */
 const int MBMOSAIC_DATA_AMPLITUDE = 3;
@@ -1064,11 +1068,11 @@ int main(int argc, char **argv) {
 	int clip = 0;
 	int clipmode = MBMOSAIC_INTERP_NONE;
 	double tension = 0.0;
-	int grid_mode = MBMOSAIC_SINGLE_BEST;
+	grid_mode_t grid_mode = MBMOSAIC_SINGLE_BEST;
 	int datatype = MBMOSAIC_DATA_SIDESCAN;
 	bool usefiltered = false;
 	char gridkindstring[MB_PATH_MAXLINE];
-	int gridkind = MBMOSAIC_GMTGRD;
+	grid_kind_t gridkind = MBMOSAIC_GMTGRD;
 	bool more = false;
 	bool use_NaN = false;
 	double clipvalue = NO_DATA_FLAG;
@@ -1325,7 +1329,10 @@ int main(int argc, char **argv) {
 					strcpy(gridkindstring, optarg);
 				}
 				else {
-					sscanf(optarg, "%d", &gridkind);
+					int tmp;
+					sscanf(optarg, "%d", &tmp);
+					// TODO(schwehr): Make sure that the number is valid.
+					gridkind = (grid_kind_t)tmp;
 					if (gridkind == MBMOSAIC_CDFGRD) {
 						gridkind = MBMOSAIC_GMTGRD;
 						gridkindstring[0] = '\0';
