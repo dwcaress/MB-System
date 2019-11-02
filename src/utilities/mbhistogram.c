@@ -34,9 +34,12 @@
 #include "mb_status.h"
 
 /* mode defines */
-const int MBHISTOGRAM_BATH = 0;
-const int MBHISTOGRAM_AMP = 1;
-const int MBHISTOGRAM_SS = 2;
+
+typedef enum {
+    MBHISTOGRAM_BATH = 0,
+    MBHISTOGRAM_AMP = 1,
+    MBHISTOGRAM_SS = 2,
+} histogram_mode_t;
 
 static const char program_name[] = "MBHISTOGRAM";
 static const char help_message[] =
@@ -149,7 +152,7 @@ int main(int argc, char **argv) {
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* histogram variables */
-	int mode = MBHISTOGRAM_SS;
+	histogram_mode_t mode = MBHISTOGRAM_SS;
 	bool gaussian = false;
 	int nbins = 0;
 	int nintervals = 0;
@@ -196,8 +199,13 @@ int main(int argc, char **argv) {
 			switch (c) {
 			case 'A':
 			case 'a':
+			{
+				int tmp;
 				sscanf(optarg, "%d", &mode);
+				// TODO(schwehr): Range check.
+				mode = (histogram_mode_t)tmp;
 				break;
+			}
 			case 'B':
 			case 'b':
 				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);

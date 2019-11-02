@@ -51,27 +51,35 @@
 #include "mb_status.h"
 
 /* gridding algorithms */
-const int MBGRID_WEIGHTED_MEAN = 1;
-const int MBGRID_MEDIAN_FILTER = 2;
-const int MBGRID_MINIMUM_FILTER = 3;
-const int MBGRID_MAXIMUM_FILTER = 4;
-const int MBGRID_WEIGHTED_FOOTPRINT_SLOPE = 5;
-const int MBGRID_WEIGHTED_FOOTPRINT = 6;
-const int MBGRID_MINIMUM_WEIGHTED_MEAN = 7;
-const int MBGRID_MAXIMUM_WEIGHTED_MEAN = 8;
+
+typedef enum {
+    MBGRID_WEIGHTED_MEAN = 1,
+    MBGRID_MEDIAN_FILTER = 2,
+    MBGRID_MINIMUM_FILTER = 3,
+    MBGRID_MAXIMUM_FILTER = 4,
+    MBGRID_WEIGHTED_FOOTPRINT_SLOPE = 5,
+    MBGRID_WEIGHTED_FOOTPRINT = 6,
+    MBGRID_MINIMUM_WEIGHTED_MEAN = 7,
+    MBGRID_MAXIMUM_WEIGHTED_MEAN = 8,
+} grid_alg_t;
 
 /* grid format definitions */
-const int MBGRID_ASCII = 1;
-const int MBGRID_OLDGRD = 2;
-const int MBGRID_CDFGRD = 3;
-const int MBGRID_ARCASCII = 4;
-const int MBGRID_GMTGRD = 100;
+typedef enum {
+    MBGRID_ASCII = 1,
+    MBGRID_OLDGRD = 2,
+    MBGRID_CDFGRD = 3,
+    MBGRID_ARCASCII = 4,
+    MBGRID_GMTGRD = 100,
+} grid_type_t;
 
 /* gridded data type */
-const int MBGRID_DATA_BATHYMETRY = 1;
-const int MBGRID_DATA_TOPOGRAPHY = 2;
-const int MBGRID_DATA_AMPLITUDE = 3;
-const int MBGRID_DATA_SIDESCAN = 4;
+
+typedef enum {
+    MBGRID_DATA_BATHYMETRY = 1,
+    MBGRID_DATA_TOPOGRAPHY = 2,
+    MBGRID_DATA_AMPLITUDE = 3,
+    MBGRID_DATA_SIDESCAN = 4,
+} grid_data_t;
 
 /* flag for no data in grid */;
 const int NO_DATA_FLAG = 99999;
@@ -482,10 +490,10 @@ int main(int argc, char **argv) {
 #else
 	double tension = 0.0;
 #endif
-	int grid_mode = MBGRID_WEIGHTED_MEAN;
-	int datatype = MBGRID_DATA_BATHYMETRY;
+	grid_alg_t grid_mode = MBGRID_WEIGHTED_MEAN;
+	grid_data_t datatype = MBGRID_DATA_BATHYMETRY;
 	char gridkindstring[MB_PATH_MAXLINE];
-	int gridkind = MBGRID_GMTGRD;
+	grid_type_t gridkind = MBGRID_GMTGRD;
 	bool more = false;
 	bool use_NaN = false;
 	double clipvalue = NO_DATA_FLAG;
@@ -662,8 +670,12 @@ int main(int argc, char **argv) {
 			switch (c) {
 			case 'A':
 			case 'a':
-				sscanf(optarg, "%d", &datatype);
+			{
+				int tmp;
+				sscanf(optarg, "%d", &tmp);
+				datatype = (grid_data_t)tmp;
 				break;
+			}
 			case 'B':
 			case 'b':
 				sscanf(optarg, "%lf", &border);
@@ -710,7 +722,9 @@ int main(int argc, char **argv) {
 			case 'F':
 			case 'f':
 			{
-				const int n = sscanf(optarg, "%d/%lf", &grid_mode, &dvalue);
+				int tmp;
+				const int n = sscanf(optarg, "%d/%lf", &tmp, &dvalue);
+				grid_mode = (grid_alg_t)tmp;
 				if (n == 2) {
 				  if (grid_mode == MBGRID_MINIMUM_FILTER) {
 				    minormax_weighted_mean_threshold = dvalue;
@@ -731,7 +745,10 @@ int main(int argc, char **argv) {
 					strcpy(gridkindstring, optarg);
 				}
 				else {
-					sscanf(optarg, "%d", &gridkind);
+					int tmp;
+					sscanf(optarg, "%d", &tmp);
+					// TODO)schwehr): Range check
+					gridkind = (grid_type_t)tmp; // TODO)schwehr): Range check
 					if (gridkind == MBGRID_CDFGRD) {
 						gridkind = MBGRID_GMTGRD;
 						gridkindstring[0] = '\0';
@@ -1442,8 +1459,8 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "Gaussian filter 1/e length: %f grid intervals\n", scale);
 		if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT_SLOPE || grid_mode == MBGRID_WEIGHTED_FOOTPRINT)
 			fprintf(outfp, "Footprint 1/e distance: %f times footprint\n", scale);
-    if (grid_mode == MBGRID_MINIMUM_WEIGHTED_MEAN)
-      fprintf(outfp, "Minimum filter threshold for Minimum Weighted Mean: %f\n", minormax_weighted_mean_threshold);
+		if (grid_mode == MBGRID_MINIMUM_WEIGHTED_MEAN)
+			fprintf(outfp, "Minimum filter threshold for Minimum Weighted Mean: %f\n", minormax_weighted_mean_threshold);
 		if (check_time && !first_in_stays)
 			fprintf(outfp, "Swath overlap handling:       Last data used\n");
 		if (check_time && first_in_stays)
