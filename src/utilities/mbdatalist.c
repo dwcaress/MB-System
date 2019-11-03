@@ -43,55 +43,7 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int option_index;
-
-	/* command line option definitions */
-	/* mbdatalist
-	 * 		--verbose
-	 * 		--help
-	 * 		--copy 					-C
-	 * 		--report				-D
-	 * 		--format=FORMATID		-F format
-	 * 		--input=FILE			-I inputfile
-	 * 		--make-ancilliary		-N
-	 * 		--update-ancilliary		-O
-	 * 		--processed				-P
-	 * 		--problem				-Q
-	 * 		--bounds=W/E/S/N		-R west/east/south/north
-	 * 		--status				-S
-	 * 		--raw					-U
-	 * 		--unlock				-Y
-	 * 		--datalistp				-Z
-	 */
-	static struct option options[] = {{"verbose", no_argument, NULL, 0},
-	                                  {"help", no_argument, NULL, 0},
-	                                  {"copy", no_argument, NULL, 0},
-	                                  {"report", no_argument, NULL, 0},
-	                                  {"format", required_argument, NULL, 0},
-	                                  {"input", required_argument, NULL, 0},
-	                                  {"make-ancilliary", no_argument, NULL, 0},
-	                                  {"update-ancilliary", no_argument, NULL, 0},
-	                                  {"processed", no_argument, NULL, 0},
-	                                  {"problem", no_argument, NULL, 0},
-	                                  {"bounds", required_argument, NULL, 0},
-	                                  {"status", no_argument, NULL, 0},
-	                                  {"raw", no_argument, NULL, 0},
-	                                  {"unlock", no_argument, NULL, 0},
-	                                  {"datalistp", no_argument, NULL, 0},
-	                                  {NULL, 0, NULL, 0}};
-
-	/* MBIO status variables */
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
-	char read_file[MB_PATH_MAXLINE];
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	bool look_bounds = false;
-	bool copyfiles = false;
-	bool reportdatalists = false;
-	double file_weight = 1.0;
 	int format;
 	int pings;
 	int lonflip;
@@ -100,53 +52,45 @@ int main(int argc, char **argv) {
 	int etime_i[7];
 	double speedmin;
 	double timegap;
-	char fileroot[MB_PATH_MAXLINE];
-	char file[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	char dfilelast[MB_PATH_MAXLINE];
-	char pwd[MB_PATH_MAXLINE];
-	char command[MB_PATH_MAXLINE];
-	char *filename;
-	int nfile = 0;
-	bool make_inf = false;
-	bool force_update = false;
-	bool status_report = false;
-	bool problem_report = false;
-	int nparproblem;
-	int ndataproblem;
-	int nparproblemtot = 0;
-	int ndataproblemtot = 0;
-	int nproblemfiles = 0;
-	bool remove_locks = false;
-	bool make_datalistp = false;
-	int recursion = -1;
-
-	int prstatus = MB_PR_FILE_UP_TO_DATE;
-	int lock_status = MB_SUCCESS;
-	int lock_error = MB_ERROR_NO_ERROR;
-	int lock_purpose = 0;
-	mb_path lock_program = "";
-	mb_path lock_cpu = "";
-	mb_path lock_user = "";
-	char lock_date[25] = "";
-	mb_path lockfile = "";
-
-	char *bufptr;
-	int shellstatus;
-
-	/* output stream for basic stuff (stdout if verbose <= 1,
-	    output if verbose > 1) */
-	FILE *output;
-	FILE *fp;
-
-	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to stdin */
+	char read_file[MB_PATH_MAXLINE];
 	strcpy(read_file, "datalist.mb-1");
 
-	/* process argument list */
+	bool copyfiles = false;
+	bool force_update = false;
+	bool make_inf = false;
+	int look_processed = MB_DATALIST_LOOK_UNSET;
+	bool problem_report = false;
+	bool look_bounds = false;
+	bool status_report = false;
+	bool remove_locks = false;
+	bool make_datalistp = false;
+	bool reportdatalists = false;
+	FILE *output = NULL;
+
 	{
+		int option_index;
+
+		const struct option options[] = {
+			{"verbose", no_argument, NULL, 0},
+	                {"help", no_argument, NULL, 0},
+	                {"copy", no_argument, NULL, 0},
+	                {"report", no_argument, NULL, 0},
+	                {"format", required_argument, NULL, 0},
+	                {"input", required_argument, NULL, 0},
+	                {"make-ancilliary", no_argument, NULL, 0},
+	                {"update-ancilliary", no_argument, NULL, 0},
+	                {"processed", no_argument, NULL, 0},
+	                {"problem", no_argument, NULL, 0},
+	                {"bounds", required_argument, NULL, 0},
+	                {"status", no_argument, NULL, 0},
+	                {"raw", no_argument, NULL, 0},
+	                {"unlock", no_argument, NULL, 0},
+	                {"datalistp", no_argument, NULL, 0},
+	                {NULL, 0, NULL, 0}};
+
 		bool errflg = false;
 		int c;
 		bool help = false;
@@ -333,9 +277,42 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(output, "\n%s\n", help_message);
 			fprintf(output, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
+
+	/* MBIO status variables */
+	int error = MB_ERROR_NO_ERROR;
+
+	/* MBIO read control parameters */
+	void *datalist;
+	double file_weight = 1.0;
+	char fileroot[MB_PATH_MAXLINE];
+	char file[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
+	char dfilelast[MB_PATH_MAXLINE];
+	char pwd[MB_PATH_MAXLINE];
+	char command[MB_PATH_MAXLINE];
+	char *filename;
+	int nfile = 0;
+	int nparproblem;
+	int ndataproblem;
+	int nparproblemtot = 0;
+	int ndataproblemtot = 0;
+	int nproblemfiles = 0;
+	int recursion = -1;
+
+	int prstatus = MB_PR_FILE_UP_TO_DATE;
+	int lock_error = MB_ERROR_NO_ERROR;
+	int lock_purpose = 0;
+	mb_path lock_program = "";
+	mb_path lock_cpu = "";
+	mb_path lock_user = "";
+	char lock_date[25] = "";
+	mb_path lockfile = "";
+
+	/* output stream for basic stuff (stdout if verbose <= 1,
+	    output if verbose > 1) */
 
 	/* if make_datalistp desired then make it */
 	if (make_datalistp) {
@@ -343,7 +320,8 @@ int main(int argc, char **argv) {
 		status = mb_get_format(verbose, read_file, fileroot, &format, &error);
 		sprintf(file, "%sp.mb-1", fileroot);
 
-		if ((fp = fopen(file, "w")) == NULL) {
+		FILE *fp = fopen(file, "w");
+		if (fp == NULL) {
 			fprintf(stderr, "\nUnable to open output file %s\n", file);
 			fprintf(stderr, "Program %s aborted!\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -424,7 +402,7 @@ int main(int argc, char **argv) {
 
 				/* check locks if desired */
 				if (status_report || remove_locks) {
-					lock_status = mb_pr_lockinfo(verbose, read_file, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
+					/* int lock_status = */ mb_pr_lockinfo(verbose, read_file, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
 					                             lock_date, &lock_error);
 					if (locked && status_report) {
 						if (verbose > 0)
@@ -454,7 +432,7 @@ int main(int argc, char **argv) {
 		}
 		while ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS) {
 			nfile++;
-			bufptr = getcwd(pwd, MB_PATH_MAXLINE);
+			/* char *bufptr = */ getcwd(pwd, MB_PATH_MAXLINE);
 			mb_get_relative_path(verbose, file, pwd, &error);
 			mb_get_relative_path(verbose, dfile, pwd, &error);
 
@@ -488,15 +466,15 @@ int main(int argc, char **argv) {
 				if (!look_bounds || file_in_bounds) {
 					fprintf(output, "Copying %s %d %f\n", file, format, file_weight);
 					sprintf(command, "cp %s* .", file);
-					shellstatus = system(command);
+					/* shellstatus = */ system(command);
 					if ((filename = strrchr(file, '/')) != NULL)
 						filename++;
 					else
 						filename = file;
 					if (nfile == 1)
-						shellstatus = system("rm datalist.mb-1");
+						/* shellstatus = */ system("rm datalist.mb-1");
 					sprintf(command, "echo %s %d %f >> datalist.mb-1", filename, format, file_weight);
-					shellstatus = system(command);
+					/* shellstatus = */ system(command);
 				}
 			}
 
@@ -554,7 +532,7 @@ int main(int argc, char **argv) {
 
 					/* check locks if desired */
 					if (status_report || remove_locks) {
-						lock_status = mb_pr_lockinfo(verbose, file, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
+						/* int lock_status = */ mb_pr_lockinfo(verbose, file, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
 						                             lock_date, &lock_error);
 						if (locked && status_report) {
 							if (verbose > 0)
@@ -567,7 +545,7 @@ int main(int argc, char **argv) {
 							sprintf(lockfile, "%s.lck", file);
 							fprintf(output, "\tRemoving lock file %s\n", lockfile);
 							sprintf(command, "/bin/rm -f %s", lockfile);
-							shellstatus = system(command);
+							/* shellstatus = */ system(command);
 						}
 					}
 
