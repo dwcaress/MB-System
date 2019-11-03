@@ -88,15 +88,19 @@ const int NO_DATA_FLAG = 99999;
 const int REALLOC_STEP_SIZE = 25;
 
 /* usage of footprint based weight */
-const int MBGRID_USE_NO = 0;
-const int MBGRID_USE_YES = 1;
-const int MBGRID_USE_CONDITIONAL = 2;
+typedef enum {
+    MBGRID_USE_NO = 0,
+    MBGRID_USE_YES = 1,
+    MBGRID_USE_CONDITIONAL = 2,
+} grid_use_t;
 
 /* interpolation mode */
-const int MBGRID_INTERP_NONE = 0;
-const int MBGRID_INTERP_GAP = 1;
-const int MBGRID_INTERP_NEAR = 2;
-const int MBGRID_INTERP_ALL = 3;
+typedef enum {
+    MBGRID_INTERP_NONE = 0,
+    MBGRID_INTERP_GAP = 1,
+    MBGRID_INTERP_NEAR = 2,
+    MBGRID_INTERP_ALL = 3,
+} grid_interp_t;
 
 /* comparison threshold */;
 const int MBGRID_TINY = 0.00000001;
@@ -357,7 +361,7 @@ int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double
  * given the footprint of a sounding
  */
 int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double pcy, double dx, double dy, double *px, double *py,
-                  double *weight, int *use, int *error) {
+                  double *weight, grid_use_t *use, int *error) {
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
@@ -484,7 +488,7 @@ int main(int argc, char **argv) {
 	double dy = 0.0;
 	char units[MB_PATH_MAXLINE];
 	int clip = 0;
-	int clipmode = MBGRID_INTERP_NONE;
+	grid_interp_t clipmode = MBGRID_INTERP_NONE;
 #ifdef USESURFACE
 	double tension = 0.35;
 #else
@@ -636,7 +640,7 @@ int main(int argc, char **argv) {
 	double sbath;
 	double xx0, yy0, bdx, bdy, xx1, xx2, yy1, yy2;
 	double prx[5], pry[5];
-	int use_weight;
+	grid_use_t use_weight;
 	double dvalue;
 
 	/* get current default values */
@@ -684,7 +688,9 @@ int main(int argc, char **argv) {
 			case 'C':
 			case 'c':
 			{
-				const int n = sscanf(optarg, "%d/%d", &clip, &clipmode);
+				int tmp;
+				const int n = sscanf(optarg, "%d/%d", &clip, &tmp);
+				clipmode = (grid_interp_t)clipmode;
 				if (n < 1)
 					clipmode = MBGRID_INTERP_NONE;
 				else if (n == 1 && clip > 0)
