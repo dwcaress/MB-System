@@ -46,33 +46,45 @@
 #include "mb_status.h"
 #include "mbsys_ldeoih.h"
 
-const int MBFILTER_BATH = 0;
-const int MBFILTER_AMP = 1;
-const int MBFILTER_SS = 2;
+typedef enum {
+    MBFILTER_BATH = 0,
+    MBFILTER_AMP = 1,
+    MBFILTER_SS = 2,
+} filter_kind_t;
 
-const int MBFILTER_HIPASS_NONE = 0;
-const int MBFILTER_HIPASS_MEAN = 1;
-const int MBFILTER_HIPASS_GAUSSIAN = 2;
-const int MBFILTER_HIPASS_MEDIAN = 3;
-const int MBFILTER_SMOOTH_NONE = 0;
-const int MBFILTER_SMOOTH_MEAN = 1;
-const int MBFILTER_SMOOTH_GAUSSIAN = 2;
-const int MBFILTER_SMOOTH_MEDIAN = 3;
-const int MBFILTER_SMOOTH_GRADIENT = 4;
-const int MBFILTER_CONTRAST_NONE = 0;
-const int MBFILTER_CONTRAST_EDGE = 1;
-const int MBFILTER_CONTRAST_GRADIENT = 2;
+typedef enum {
+    MBFILTER_HIPASS_NONE = 0,
+    MBFILTER_HIPASS_MEAN = 1,
+    MBFILTER_HIPASS_GAUSSIAN = 2,
+    MBFILTER_HIPASS_MEDIAN = 3,
+} hipass_mode_t;
 
-const int MBFILTER_A_NONE = 0;
-const int MBFILTER_A_HIPASS_MEAN = 1;
-const int MBFILTER_A_HIPASS_GAUSSIAN = 2;
-const int MBFILTER_A_HIPASS_MEDIAN = 3;
-const int MBFILTER_A_SMOOTH_MEAN = 4;
-const int MBFILTER_A_SMOOTH_GAUSSIAN = 5;
-const int MBFILTER_A_SMOOTH_MEDIAN = 6;
-const int MBFILTER_A_SMOOTH_GRADIENT = 7;
-const int MBFILTER_A_CONTRAST_EDGE = 8;
-const int MBFILTER_A_CONTRAST_GRADIENT = 9;
+typedef enum {
+    MBFILTER_SMOOTH_NONE = 0,
+    MBFILTER_SMOOTH_MEAN = 1,
+    MBFILTER_SMOOTH_GAUSSIAN = 2,
+    MBFILTER_SMOOTH_MEDIAN = 3,
+    MBFILTER_SMOOTH_GRADIENT = 4,
+} smooth_mode_t;
+
+typedef enum {
+    MBFILTER_CONTRAST_NONE = 0,
+    MBFILTER_CONTRAST_EDGE = 1,
+    MBFILTER_CONTRAST_GRADIENT = 2,
+} contrast_mode_t;
+
+typedef enum {
+    MBFILTER_A_NONE = 0,
+    MBFILTER_A_HIPASS_MEAN = 1,
+    MBFILTER_A_HIPASS_GAUSSIAN = 2,
+    MBFILTER_A_HIPASS_MEDIAN = 3,
+    MBFILTER_A_SMOOTH_MEAN = 4,
+    MBFILTER_A_SMOOTH_GAUSSIAN = 5,
+    MBFILTER_A_SMOOTH_MEDIAN = 6,
+    MBFILTER_A_SMOOTH_GRADIENT = 7,
+    MBFILTER_A_CONTRAST_EDGE = 8,
+    MBFILTER_A_CONTRAST_GRADIENT = 9,
+} filter_a_mode_t;
 
 /* MBIO buffer size default */
 const int MBFILTER_BUFFER_DEFAULT = 5000;
@@ -114,7 +126,7 @@ struct mbfilter_ping_struct {
 /* filter structure definition */
 const int MBFILTER_NFILTER_MAX = 10;
 struct mbfilter_filter_struct {
-	int mode;
+	filter_a_mode_t mode;
 	int xdim;
 	int ldim;
 	int iteration;
@@ -668,15 +680,15 @@ int main(int argc, char **argv) {
 	struct mbfilter_ping_struct ping[MBFILTER_BUFFER_DEFAULT];
 
 	/* processing control variables */
-	int datakind = MBFILTER_SS;
+	filter_kind_t datakind = MBFILTER_SS;
 	int num_filters = 0;
 	struct mbfilter_filter_struct filters[MBFILTER_NFILTER_MAX];
-	int hipass_mode = MBFILTER_HIPASS_NONE;
+	hipass_mode_t hipass_mode = MBFILTER_HIPASS_NONE;
 	int hipass_xdim = 10;
 	int hipass_ldim = 3;
 	int hipass_iter = 1;
 	double hipass_offset = 1000.0;
-	int smooth_mode = MBFILTER_SMOOTH_NONE;
+	smooth_mode_t smooth_mode = MBFILTER_SMOOTH_NONE;
 	int smooth_xdim = 3;
 	int smooth_ldim = 3;
 	int smooth_iter = 1;
@@ -742,10 +754,14 @@ int main(int argc, char **argv) {
 			switch (c) {
 			case 'A':
 			case 'a':
-				sscanf(optarg, "%d", &datakind);
+			{
+				int tmp;
+				sscanf(optarg, "%d", &tmp);
+				datakind = (filter_kind_t)tmp;
 				if (datakind != MBFILTER_SS && datakind != MBFILTER_AMP)
 					datakind = MBFILTER_SS;
 				break;
+			}
 			case 'B':
 			case 'b':
 				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
@@ -754,7 +770,9 @@ int main(int argc, char **argv) {
 			case 'C':
 			case 'c':
 			{
-				const int n = sscanf(optarg, "%d/%d/%d/%d", &contrast_mode, &contrast_xdim, &contrast_ldim, &contrast_iter);
+				int tmp;
+				const int n = sscanf(optarg, "%d/%d/%d/%d", &tmp, &contrast_xdim, &contrast_ldim, &contrast_iter);
+				contrast_mode = (contrast_mode_t)tmp;
 				if (n >= 3) {
 					filters[num_filters].mode = contrast_mode + 7;
 					filters[num_filters].xdim = contrast_xdim;
@@ -772,7 +790,9 @@ int main(int argc, char **argv) {
 			case 'D':
 			case 'd':
 			{
-				const int n = sscanf(optarg, "%d/%d/%d/%d/%lf", &hipass_mode, &hipass_xdim, &hipass_ldim, &hipass_iter, &hipass_offset);
+				int tmp;
+				const int n = sscanf(optarg, "%d/%d/%d/%d/%lf", &tmp, &hipass_xdim, &hipass_ldim, &hipass_iter, &hipass_offset);
+				hipass_mode = (hipass_mode_t)tmp;  // TODO(schwehr): Range check.
 				if (n >= 3) {
 					filters[num_filters].mode = hipass_mode;
 					filters[num_filters].xdim = hipass_xdim;
@@ -821,8 +841,10 @@ int main(int argc, char **argv) {
 			case 'S':
 			case 's':
 			{
-				const int n = sscanf(optarg, "%d/%d/%d/%d/%lf/%lf", &smooth_mode, &smooth_xdim, &smooth_ldim, &smooth_iter, &threshold_lo,
+				int tmp;
+				const int n = sscanf(optarg, "%d/%d/%d/%d/%lf/%lf", &tmp, &smooth_xdim, &smooth_ldim, &smooth_iter, &threshold_lo,
 				           &threshold_hi);
+				smooth_mode = (smooth_mode_t)tmp;  // TODO(schwehr): Range check.
 				if (n >= 3) {
 					filters[num_filters].mode = smooth_mode + 3;
 					filters[num_filters].xdim = smooth_xdim;

@@ -34,11 +34,13 @@
 #include "mb_status.h"
 
 const int MBES_ALLOC_NUM = 128;
-const int MBES_ROUTE_WAYPOINT_NONE = 0;
-const int MBES_ROUTE_WAYPOINT_SIMPLE = 1;
-const int MBES_ROUTE_WAYPOINT_TRANSIT = 2;
-const int MBES_ROUTE_WAYPOINT_STARTLINE = 3;
-const int MBES_ROUTE_WAYPOINT_ENDLINE = 4;
+typedef enum {
+    MBES_ROUTE_WAYPOINT_NONE = 0,
+    MBES_ROUTE_WAYPOINT_SIMPLE = 1,
+    MBES_ROUTE_WAYPOINT_TRANSIT = 2,
+    MBES_ROUTE_WAYPOINT_STARTLINE = 3,
+    MBES_ROUTE_WAYPOINT_ENDLINE = 4,
+} waypoint_t;
 const double MBES_ONLINE_THRESHOLD = 15.0;
 const int MBES_ONLINE_COUNT = 30;
 const int MBES_NUM_PLOT_MAX = 50;
@@ -134,7 +136,7 @@ int main(int argc, char **argv) {
 	double lon;
 	double lat;
 	double topo;
-	int waypoint;
+	waypoint_t waypoint;
 	double *routelon = NULL;
 	double *routelat = NULL;
 	double *routeheading = NULL;
@@ -390,7 +392,7 @@ int main(int argc, char **argv) {
 	nshotmax = (int)(maxwidth / xscale);
 
 	bool rawroutefile = false;
-	int rangeok;
+	bool rangeok;
 
 	/* if specified read route time list file */
 	if (timelist_file_set) {

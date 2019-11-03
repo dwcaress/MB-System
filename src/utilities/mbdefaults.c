@@ -42,8 +42,10 @@ const int MBV_COLORTABLE_SEALEVEL1 = 5;
 const int MBV_COLORTABLE_SEALEVEL2 = 6;
 
 /* colortable view mode defines */
-const int MBV_COLORTABLE_NORMAL = 0;
-const int MBV_COLORTABLE_REVERSED = 1;
+typedef enum {
+    MBV_COLORTABLE_NORMAL = 0,
+    MBV_COLORTABLE_REVERSED = 1,
+} colortable_mode_t;
 
 /* shade view mode defines */
 const int MBV_SHADE_VIEW_NONE = 0;
@@ -79,12 +81,12 @@ int main(int argc, char **argv) {
 	int fileiobuffer = 0;
 	char *HOME = "HOME";
 	int primary_colortable;
-	int primary_colortable_mode;
+	colortable_mode_t primary_colortable_mode;
 	int primary_shade_mode;
 	int slope_colortable;
 	int slope_colortable_mode;
 	int secondary_colortable;
-	int secondary_colortable_mode;
+	colortable_mode_t secondary_colortable_mode;
 	double illuminate_magnitude;
 	double illuminate_elevation;
 	double illuminate_azimuth;
@@ -106,10 +108,16 @@ int main(int argc, char **argv) {
 	/* now get current mb environment values */
 	status = mb_env(verbose, psdisplay, imgdisplay, mbproject);
 
-	/* now get current mbview default display values */
-	status = mb_mbview_defaults(verbose, &primary_colortable, &primary_colortable_mode, &primary_shade_mode, &slope_colortable,
-	                            &slope_colortable_mode, &secondary_colortable, &secondary_colortable_mode, &illuminate_magnitude,
-	                            &illuminate_elevation, &illuminate_azimuth, &slope_magnitude);
+	{
+		int primary_colortable_mode_tmp;
+		int secondary_colortable_mode_tmp;
+		status = mb_mbview_defaults(
+			verbose, &primary_colortable, &primary_colortable_mode_tmp, &primary_shade_mode, &slope_colortable,
+	                &slope_colortable_mode, &secondary_colortable, &secondary_colortable_mode_tmp, &illuminate_magnitude,
+	                &illuminate_elevation, &illuminate_azimuth, &slope_magnitude);
+		primary_colortable_mode = (colortable_mode_t)primary_colortable_mode_tmp;
+		secondary_colortable_mode = (colortable_mode_t)secondary_colortable_mode_tmp;
+	}
 
 	/* now get current fbtversion value */
 	status = mb_fbtversion(verbose, &fbtversion);
@@ -167,28 +175,31 @@ int main(int argc, char **argv) {
 				break;
 			case 'M':
 			case 'm':
+			{
 				/* default primary colortable and modes */
-				if (optarg[0] == 'P' || optarg[0] == 'p')
-					/* n = */ sscanf(&optarg[1], "%d/%d/%d", &primary_colortable, &primary_colortable_mode, &primary_shade_mode);
-
-				/* default slope colortable and mode */
-				else if (optarg[0] == 'G' || optarg[0] == 'g')
+				if (optarg[0] == 'P' || optarg[0] == 'p') {
+					int tmp;
+					/* n = */ sscanf(&optarg[1], "%d/%d/%d", &primary_colortable, &tmp, &primary_shade_mode);
+					primary_colortable_mode = (colortable_mode_t)tmp;
+				} else if (optarg[0] == 'G' || optarg[0] == 'g') {
+					/* default slope colortable and mode */
 					/* n = */ sscanf(&optarg[1], "%d/%d", &slope_colortable, &slope_colortable_mode);
-
-				/* default overlay colortable and mode */
-				else if (optarg[0] == 'O' || optarg[0] == 'o')
-					/* n = */ sscanf(&optarg[1], "%d/%d", &secondary_colortable, &secondary_colortable_mode);
-
-				/* default illumination parameters */
-				else if (optarg[0] == 'I' || optarg[0] == 'i')
+				} else if (optarg[0] == 'O' || optarg[0] == 'o') {
+					/* default overlay colortable and mode */
+					int tmp;
+					/* n = */ sscanf(&optarg[1], "%d/%d", &secondary_colortable, &tmp);
+					secondary_colortable_mode = (colortable_mode_t)tmp;
+				} else if (optarg[0] == 'I' || optarg[0] == 'i') {
+					/* default illumination parameters */
 					/* n = */ sscanf(&optarg[1], "%lf/%lf/%lf", &illuminate_magnitude, &illuminate_elevation, &illuminate_azimuth);
-
-				/* default slope shading magnitude */
-				else if (optarg[0] == 'S' || optarg[0] == 'S')
+				} else if (optarg[0] == 'S' || optarg[0] == 'S') {
+					/* default slope shading magnitude */
 					/* n = */ sscanf(&optarg[1], "%lf", &slope_magnitude);
+				}
 
 				flag = true;
 				break;
+			}
 			case 'T':
 			case 't':
 				sscanf(optarg, "%lf", &timegap);
