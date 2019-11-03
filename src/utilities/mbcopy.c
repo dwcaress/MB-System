@@ -1726,21 +1726,25 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
 
 int main(int argc, char **argv) {
   int verbose = 0;
-  int error = MB_ERROR_NO_ERROR;
-  char *message;
-
-  /* MBIO read control parameters */
-  int iformat = 0;
+  int format;
   int pings;
   int lonflip;
   double bounds[4];
   int btime_i[7];
   int etime_i[7];
-  double btime_d;
-  double etime_d;
   double speedmin;
   double timegap;
+  int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
   int fbtversion;
+  status &= mb_fbtversion(verbose, &fbtversion);
+
+  int error = MB_ERROR_NO_ERROR;
+
+  /* MBIO read control parameters */
+  int iformat = 0;
+  double btime_d;
+  double etime_d;
   char ifile[MB_PATH_MAXLINE];
   int ibeams_bath;
   int ibeams_amp;
@@ -1852,12 +1856,7 @@ int main(int argc, char **argv) {
 
   FILE *fp;
   char *result;
-  int format;
   double seconds;
-
-  /* get current default values */
-  int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-  status &= mb_fbtversion(verbose, &fbtversion);
 
   /* set default input and output */
   iformat = 0;
@@ -2046,18 +2045,21 @@ int main(int argc, char **argv) {
   /* obtain format array locations - format ids will
       be aliased to current ids if old format ids given */
   if ((status = mb_format(verbose, &iformat, &error)) != MB_SUCCESS) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding input format %d:\n%s\n", iformat, message);
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
     exit(error);
   }
   if ((status = mb_format(verbose, &oformat, &error)) != MB_SUCCESS) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding output format %d:\n%s\n", oformat, message);
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
     exit(error);
   }
   if (merge && (status = mb_format(verbose, &mformat, &error)) != MB_SUCCESS) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding merge format %d:\n%s\n", mformat, message);
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2067,6 +2069,7 @@ int main(int argc, char **argv) {
   /* initialize reading the input swath sonar file */
   if ((status = mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
                              &btime_d, &etime_d, &ibeams_bath, &ibeams_amp, &ipixels_ss, &error)) != MB_SUCCESS) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
     fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
@@ -2079,6 +2082,7 @@ int main(int argc, char **argv) {
   if (merge &&
       (status = mb_read_init(verbose, mfile, mformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mmbio_ptr,
                              &btime_d, &etime_d, &mbeams_bath, &mbeams_amp, &mpixels_ss, &error)) != MB_SUCCESS) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
     fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", mfile);
@@ -2089,6 +2093,7 @@ int main(int argc, char **argv) {
   /* initialize writing the output swath sonar file */
   if ((status = mb_write_init(verbose, ofile, oformat, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error)) !=
       MB_SUCCESS) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
     fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
@@ -2218,6 +2223,7 @@ int main(int argc, char **argv) {
 
   /* if error initializing memory then quit */
   if (error != MB_ERROR_NO_ERROR) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2459,6 +2465,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%s\n", comment);
       }
       else if (kind == MB_DATA_DATA && error < MB_ERROR_NO_ERROR && error >= MB_ERROR_OTHER) {
+        char *message;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
         fprintf(stderr, "Input Record: %d\n", idata);
@@ -2466,11 +2473,13 @@ int main(int argc, char **argv) {
                 time_i[6]);
       }
       else if (kind == MB_DATA_DATA && error < MB_ERROR_NO_ERROR) {
+        char *message;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
         fprintf(stderr, "Number of good records so far: %d\n", idata);
       }
       else if (error > MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
+        char *message;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nFatal MBIO Error:\n%s\n", message);
         fprintf(stderr, "Last Good Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4],
@@ -2667,6 +2676,7 @@ int main(int argc, char **argv) {
           ocomment++;
       }
       else {
+        char *message;
         mb_error(verbose, error, &message);
         if (copymode != MBCOPY_PARTIAL)
           fprintf(stderr, "\nMBIO Error returned from function <mb_put_all>:\n%s\n", message);

@@ -152,27 +152,33 @@ int printNaN(int verbose, bool ascii, bool *invert, bool *flipsign, int *error) 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int interp_status = MB_SUCCESS;
 	int verbose = 0;
+	int format;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	pings = 1;
+	bounds[0] = -360.0;
+	bounds[1] = 360.0;
+	bounds[2] = -90.0;
+	bounds[3] = 90.0;
+
+	int interp_status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
-	char *message;
 
 	/* MBIO read control parameters */
 	char read_file[MB_PATH_MAXLINE];
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
-	int format;
-	int pings;
 	int decimate;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
 	double btime_d;
 	double etime_d;
-	double speedmin;
-	double timegap;
 	char file[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
 	int beams_bath;
@@ -230,8 +236,6 @@ int main(int argc, char **argv) {
 	double *nav_altitude = NULL;
 
 	/* CTD values */
-	int ctd_count = 0;
-	int ctd_count_tot = 0;
 	int nctd;
 	double ctd_time_d[MB_CTD_MAX];
 	double ctd_conductivity[MB_CTD_MAX];
@@ -280,14 +284,8 @@ int main(int argc, char **argv) {
 	int ictd;
 
 	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-	pings = 1;
-	bounds[0] = -360.0;
-	bounds[1] = 360.0;
-	bounds[2] = -90.0;
-	bounds[3] = 90.0;
-	ctd_count = 0;
-	ctd_count_tot = 0;
+	int ctd_count = 0;
+	int ctd_count_tot = 0;
 
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");
@@ -457,6 +455,7 @@ int main(int argc, char **argv) {
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -486,6 +485,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -533,6 +533,7 @@ int main(int argc, char **argv) {
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_altitude, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -612,6 +613,7 @@ int main(int argc, char **argv) {
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -641,6 +643,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);

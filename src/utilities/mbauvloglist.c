@@ -91,6 +91,24 @@ struct ctd_calibration_struct {
 		double ctcor;
 		};
 
+struct field {
+	int type;
+	int size;
+	int index;
+	char name[MB_PATH_MAXLINE];
+	char format[MB_PATH_MAXLINE];
+	char description[MB_PATH_MAXLINE];
+	char units[MB_PATH_MAXLINE];
+	double scale;
+};
+
+struct printfield {
+	char name[MB_PATH_MAXLINE];
+	int index;
+	bool formatset;
+	char format[MB_PATH_MAXLINE];
+};
+
 static const char program_name[] = "MBauvloglist";
 static const char help_message[] = "MBauvloglist lists table data from an MBARI AUV mission log file.";
 static const char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonflip -Olist -Rid -S -H -V]";
@@ -102,13 +120,13 @@ static const char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonfli
 double calcPressure(struct ctd_calibration_struct *calibration_ptr,
 				double presCounts, double temperature)
 {
-  double t = calibration_ptr->ptempa0
+  const double t = calibration_ptr->ptempa0
 								+ calibration_ptr->ptempa1*temperature
 								+ calibration_ptr->ptempa2*temperature*temperature;
-  double x = (double)presCounts - calibration_ptr->ptca0
+  const double x = (double)presCounts - calibration_ptr->ptca0
 								- calibration_ptr->ptca1*t
 								- calibration_ptr->ptca2*t*t;
-  double n = x*calibration_ptr->ptcb0 / (calibration_ptr->ptcb0
+  const double n = x*calibration_ptr->ptcb0 / (calibration_ptr->ptcb0
 								+ calibration_ptr->ptcb1*t
 								+ calibration_ptr->ptcb2*t*t);
   double pres = calibration_ptr->pa0
@@ -185,11 +203,7 @@ void calibration_MAUV1_2017(struct ctd_calibration_struct *calibration_ptr)
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
 	int pings;
 	int format;
 	int lonflip;
@@ -198,26 +212,12 @@ int main(int argc, char **argv) {
 	int etime_i[7];
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int error = MB_ERROR_NO_ERROR;
 
 	/* auv log data */
 	FILE *fp;
 	char file[MB_PATH_MAXLINE];
-	struct field {
-		int type;
-		int size;
-		int index;
-		char name[MB_PATH_MAXLINE];
-		char format[MB_PATH_MAXLINE];
-		char description[MB_PATH_MAXLINE];
-		char units[MB_PATH_MAXLINE];
-		double scale;
-	};
-	struct printfield {
-		char name[MB_PATH_MAXLINE];
-		int index;
-		bool formatset;
-		char format[MB_PATH_MAXLINE];
-	};
 	int nfields = 0;
 	struct field fields[NFIELDSMAX];
 	int nprintfields = 0;
@@ -293,8 +293,6 @@ int main(int argc, char **argv) {
 	int index;
 	int jinterp = 0;
 
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set file to null */
 	file[0] = '\0';

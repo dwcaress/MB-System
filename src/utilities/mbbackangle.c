@@ -250,16 +250,7 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int status = MB_SUCCESS;
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message;
-
-	/* MBIO read control parameters */
-	char read_file[MB_PATH_MAXLINE];
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
 	int format;
 	int pings;
 	int lonflip;
@@ -270,6 +261,15 @@ int main(int argc, char **argv) {
 	double etime_d;
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	int error = MB_ERROR_NO_ERROR;
+
+	/* MBIO read control parameters */
+	char read_file[MB_PATH_MAXLINE];
+	void *datalist;
+	int look_processed = MB_DATALIST_LOOK_UNSET;
+	double file_weight;
 	char swathfile[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
 	char amptablefile[MB_PATH_MAXLINE];
@@ -413,8 +413,6 @@ int main(int argc, char **argv) {
 	int ix, jy, kgrid;
 	int kgrid00, kgrid10, kgrid01, kgrid11;
 
-	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* reset pings and timegap */
 	pings = 1;
@@ -679,6 +677,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating angle arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -797,6 +796,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -810,6 +810,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -859,6 +860,7 @@ int main(int argc, char **argv) {
 		/* initialize reading the swath sonar file */
 		if ((status = mb_read_init(verbose, swathfile, format, 1, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swathfile);
@@ -944,6 +946,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -981,6 +984,7 @@ int main(int argc, char **argv) {
 				strcpy(amptablefile, swathfile);
 				strcat(amptablefile, ".aga");
 				if ((atfp = fopen(amptablefile, "w")) == NULL) {
+					char *message;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nUnable to open output table file %s\n", amptablefile);
 					fprintf(stderr, "Program %s aborted!\n", program_name);
@@ -991,6 +995,7 @@ int main(int argc, char **argv) {
 				strcpy(sstablefile, swathfile);
 				strcat(sstablefile, ".sga");
 				if ((stfp = fopen(sstablefile, "w")) == NULL) {
+					char *message;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nUnable to open output table file %s\n", sstablefile);
 					fprintf(stderr, "Program %s aborted!\n", program_name);
@@ -1557,6 +1562,7 @@ int main(int argc, char **argv) {
 		strcat(amptablefile, "_tot.aga");
 		if ((atfp = fopen(amptablefile, "w")) == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nUnable to open output table file %s\n", amptablefile);
 			fprintf(stderr, "Program %s aborted!\n", program_name);
@@ -1601,6 +1607,7 @@ int main(int argc, char **argv) {
 		strcat(sstablefile, "_tot.sga");
 		if ((stfp = fopen(sstablefile, "w")) == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nUnable to open output table file %s\n", sstablefile);
 			fprintf(stderr, "Program %s aborted!\n", program_name);
