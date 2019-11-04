@@ -222,7 +222,6 @@ int main(int argc, char **argv) {
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	int error = MB_ERROR_NO_ERROR;
-	char *message;
 
 	/* segy data */
 	char segyfile[MB_PATH_MAXLINE] = "";
@@ -558,6 +557,7 @@ int main(int argc, char **argv) {
 
 	/* initialize reading the segy file */
 	if (mb_segy_read_init(verbose, segyfile, &mbsegyioptr, &asciiheader, &fileheader, &error) != MB_SUCCESS) {
+		char *message;
 		mb_error(verbose, error, &message);
 		fprintf(outfp, "\nMBIO Error returned from function <mb_segy_read_init>:\n%s\n", message);
 		fprintf(outfp, "\nSEGY File <%s> not initialized for reading\n", segyfile);

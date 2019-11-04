@@ -91,7 +91,6 @@ int main(int argc, char **argv) {
 
 	int option_index;
 	int error = MB_ERROR_NO_ERROR;
-	char *message;
 
 	/* Files and formats */
 	char ifile[MB_PATH_MAXLINE];
@@ -361,6 +360,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
