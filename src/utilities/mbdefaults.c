@@ -66,20 +66,22 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int status;
-	int error = MB_ERROR_NO_ERROR;
 	int verbose = 0;
-	bool flag = false;
-	FILE *fp;
-	char file[MB_PATH_MAXLINE];
+	int format;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
 	char psdisplay[MB_PATH_MAXLINE];
 	char imgdisplay[MB_PATH_MAXLINE];
 	char mbproject[MB_PATH_MAXLINE];
-	char argstring[MB_PATH_MAXLINE];
-	int fbtversion = 3;
-	int uselockfiles = 1;
-	int fileiobuffer = 0;
-	char *HOME = "HOME";
+	status = mb_env(verbose, psdisplay, imgdisplay, mbproject);
+
 	int primary_colortable;
 	colortable_mode_t primary_colortable_mode;
 	int primary_shade_mode;
@@ -91,23 +93,6 @@ int main(int argc, char **argv) {
 	double illuminate_elevation;
 	double illuminate_azimuth;
 	double slope_magnitude;
-
-	/* MBIO control parameters */
-	int format;
-	int pings;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
-	double speedmin;
-	double timegap;
-
-	/* get current default mbio values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
-	/* now get current mb environment values */
-	status = mb_env(verbose, psdisplay, imgdisplay, mbproject);
-
 	{
 		int primary_colortable_mode_tmp;
 		int secondary_colortable_mode_tmp;
@@ -119,16 +104,17 @@ int main(int argc, char **argv) {
 		secondary_colortable_mode = (colortable_mode_t)secondary_colortable_mode_tmp;
 	}
 
-	/* now get current fbtversion value */
-	status = mb_fbtversion(verbose, &fbtversion);
+	int fbtversion = 3;
+	status &= mb_fbtversion(verbose, &fbtversion);
 
-	/* now get current uselockfiles value */
-	status = mb_uselockfiles(verbose, &uselockfiles);
+	int uselockfiles = 1;
+	status &= mb_uselockfiles(verbose, &uselockfiles);
 
-	/* now get current fileio buffering values */
-	status = mb_fileiobuffer(verbose, &fileiobuffer);
+	int fileiobuffer = 0;
+	status &= mb_fileiobuffer(verbose, &fileiobuffer);
 
-	/* process argument list */
+	bool flag = false;
+
 	{
 		bool errflg = false;
 		bool help = false;
@@ -148,6 +134,8 @@ int main(int argc, char **argv) {
 				break;
 			case 'F':
 			case 'f':
+			{
+				char argstring[MB_PATH_MAXLINE];
 				sscanf(optarg, "%s", argstring);
 				if (strncmp(argstring, "new", 3) == 0 || strncmp(argstring, "NEW", 3) == 0)
 					fbtversion = 3;
@@ -159,6 +147,7 @@ int main(int argc, char **argv) {
 					fbtversion = 3;
 				flag = true;
 				break;
+			}
 			case 'I':
 			case 'i':
 				sscanf(optarg, "%s", imgdisplay);
@@ -207,6 +196,8 @@ int main(int argc, char **argv) {
 				break;
 			case 'U':
 			case 'u':
+			{
+				char argstring[MB_PATH_MAXLINE];
 				sscanf(optarg, "%s", argstring);
 				if (strncmp(argstring, "yes", 3) == 0 || strncmp(argstring, "YES", 3) == 0)
 					uselockfiles = 1;
@@ -218,6 +209,7 @@ int main(int argc, char **argv) {
 					uselockfiles = 0;
 				flag = true;
 				break;
+			}
 			case 'V':
 			case 'v':
 				verbose++;
@@ -293,15 +285,17 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
 
 	/* write out new ~/.mbio_defaults file if needed */
 	if (flag) {
-		strcpy(file, getenv(HOME));
+		char file[MB_PATH_MAXLINE];
+		strcpy(file, getenv("HOME"));
 		strcat(file, "/.mbio_defaults");
-		if ((fp = fopen(file, "w")) == NULL) {
+		FILE *fp = fopen(file, "w");
+		if (fp == NULL) {
 			fprintf(stderr, "Could not open file %s\n", file);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
@@ -414,10 +408,9 @@ int main(int argc, char **argv) {
 		printf("mbview illumination elevation:    %f degrees\n", illuminate_elevation);
 		printf("mbview illumination azimuth:      %f degrees\n", illuminate_azimuth);
 		printf("mbview slope magnitude:           %f\n", slope_magnitude);
-	}
+	} else {
+		/* else just list the current defaults */
 
-	/* else just list the current defaults */
-	else {
 		printf("\nCurrent MBIO Default Control Parameters:\n");
 		printf("lonflip:    %d\n", lonflip);
 		printf("timegap:    %f\n", timegap);
@@ -513,6 +506,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	exit(error);
+	exit(MB_ERROR_NO_ERROR);
 }
 /*--------------------------------------------------------------------*/
