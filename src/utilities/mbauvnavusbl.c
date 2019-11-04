@@ -70,13 +70,9 @@ int main(int argc, char **argv) {
 	}
 
 	/* Files and formats */
-	char ifile[MB_PATH_MAXLINE];
-	char ofile[MB_PATH_MAXLINE];
-	char ufile[MB_PATH_MAXLINE];
-	/* set default input and output */
-	strcpy(ifile, "stdin");
-	strcpy(ofile, "stdout");
-	strcpy(ufile, "\0");
+	char ifile[MB_PATH_MAXLINE] = "stdin";
+	char ofile[MB_PATH_MAXLINE] = "stdout";
+	char ufile[MB_PATH_MAXLINE] = "";
 	int navformat = 9;
 	int usblformat = 165;
 
@@ -219,14 +215,6 @@ int main(int argc, char **argv) {
 	int nstime_i[7], nftime_i[7];
 	int ustime_i[7], uftime_i[7];
 
-	int year;
-	int jday;
-	double timetag;
-	double easting, northing;
-	double rov_altitude, rov_roll, rov_pitch;
-	int position_flag, heading_flag, altitude_flag, attitude_flag, pressure_flag;
-	double sec;
-
 	/* allocate space for the nav points */
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&ntime, &error);
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nlon, &error);
@@ -264,6 +252,13 @@ int main(int argc, char **argv) {
 		exit(MB_ERROR_OPEN_FAIL);
 	}
 	strncpy(buffer, "\0", sizeof(buffer));
+	int year;
+	int jday;
+	double timetag;
+	double easting, northing;
+	double rov_altitude, rov_roll, rov_pitch;
+	int position_flag, heading_flag, altitude_flag, attitude_flag, pressure_flag;
+	double sec;
 	int nget = 0;
 	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer) {
 		bool nav_ok = false;

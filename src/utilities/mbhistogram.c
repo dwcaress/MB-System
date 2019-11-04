@@ -116,7 +116,6 @@ int main(int argc, char **argv) {
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	int error = MB_ERROR_NO_ERROR;
-	char *message;
 
 	/* MBIO read control parameters */
 	char read_file[MB_PATH_MAXLINE];
@@ -351,6 +350,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message;
 		mb_error(verbose, error, &message);
 		fprintf(output, "\nMBIO Error allocating histogram arrays:\n%s\n", message);
 		fprintf(output, "\nProgram <%s> Terminated\n", program_name);
@@ -413,6 +413,7 @@ int main(int argc, char **argv) {
 		/* initialize reading the swath sonar data file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(output, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(output, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -442,6 +443,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(output, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(output, "\nProgram <%s> Terminated\n", program_name);
