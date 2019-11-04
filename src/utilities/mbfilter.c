@@ -659,7 +659,6 @@ int main(int argc, char **argv) {
 	timegap = 1000000000.0;
 
 	int error = MB_ERROR_NO_ERROR;
-	char *message;
 
 	/* MBIO read control parameters */
 	char read_file[MB_PATH_MAXLINE];
@@ -1064,6 +1063,7 @@ int main(int argc, char **argv) {
 		/* initialize reading the input swath sonar file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -1081,6 +1081,7 @@ int main(int argc, char **argv) {
 			sprintf(ofile, "%s.ffs", file);
 		if ((status = mb_write_init(verbose, ofile, 71, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error)) !=
 		    MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
@@ -1179,6 +1180,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
