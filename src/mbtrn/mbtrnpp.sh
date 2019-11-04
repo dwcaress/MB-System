@@ -141,13 +141,13 @@ init_vars(){
     # Axial        12
     OPT_TRN_UTM="--trn-utm=10"
     # set TRN map file (required w/ TRN_EN)
-    OPT_TRN_MAP="--trn-map=TBD_map_name"
+	OPT_TRN_MAP="--trn-map=${TRN_MAPFILES:-.}/PortTiles"
     # set TRN particles file (required w/ TRN_EN)
-    OPT_TRN_PAR="--trn-par=TBD_particles_name"
+    OPT_TRN_PAR="--trn-par=${TRN_DATAFILES:-.}/particles.cfg"
     # set TRN log directory prefix (required w/ TRN_EN)
     OPT_TRN_LOG="--trn-log=mbtrnpp"
     # set TRN config file (required w/ TRN_EN)
-    OPT_TRN_CFG="--trn-cfg=TBD_cfg_name"
+    OPT_TRN_CFG="--trn-cfg=${TRN_DATAFILES:-.}/mappingAUV_specs.cfg"
     # set TRN map type
     # TRN_MAP_DEM  1
     # TRN_MAP_BO   2 (dfl)
@@ -517,6 +517,25 @@ done
 
 # set cmdline options
 APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATS $OPT_MBHBN $OPT_MBHBT $OPT_TRNHBT $OPT_TRNUHBT $OPT_DELAY $OPT_TRN_EN $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_HELP"
+
+# check required TRN options
+if [ ! -z "${OPT_TRN_EN}" ]
+then
+
+    if [ -z "${OPT_TRN_MAP}" ]
+    then
+    echo "WARNING: --trn-map required with --trn-en"
+    fi
+    if [ -z "${OPT_TRN_CFG}" ]
+    then
+	echo "WARNING: --trn-cfg required with --trn-en"
+    fi
+    if [ -z "${OPT_TRN_PAR}" ]
+    then
+    echo "WARNING: --trn-par required with --trn-en"
+    fi
+
+fi
 
 if [ ${DO_TEST} ]
 then
