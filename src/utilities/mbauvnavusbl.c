@@ -236,8 +236,8 @@ int main(int argc, char **argv) {
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&tsonardepth, &error);
 
 	/* if error initializing memory then quit */
-	char *message;
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -334,6 +334,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
