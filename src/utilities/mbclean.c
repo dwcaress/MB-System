@@ -135,8 +135,6 @@ int main(int argc, char **argv) {
   double bounds[4];
   int btime_i[7];
   int etime_i[7];
-  double btime_d;
-  double etime_d;
   double speedmin;
   double timegap;
   status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -166,6 +164,8 @@ int main(int argc, char **argv) {
   speedmin = 0.0;
   timegap = 1000000000.0;
 
+  double btime_d;
+  double etime_d;
   int error = MB_ERROR_NO_ERROR;
 
   /* swath file locking variables */

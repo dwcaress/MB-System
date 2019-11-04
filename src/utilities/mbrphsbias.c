@@ -98,9 +98,41 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int status;
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
+	int format;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	/* reset all defaults but the format and lonflip */
+	format = 0;
+	pings = 1;
+	bounds[0] = -360.;
+	bounds[1] = 360.;
+	bounds[2] = -90.;
+	bounds[3] = 90.;
+	btime_i[0] = 1962;
+	btime_i[1] = 2;
+	btime_i[2] = 21;
+	btime_i[3] = 10;
+	btime_i[4] = 30;
+	btime_i[5] = 0;
+	btime_i[6] = 0;
+	etime_i[0] = 2062;
+	etime_i[1] = 2;
+	etime_i[2] = 21;
+	etime_i[3] = 10;
+	etime_i[4] = 30;
+	etime_i[5] = 0;
+	etime_i[6] = 0;
+	speedmin = 0.0;
+	timegap = 1000000000.0;
+	int error = MB_ERROR_NO_ERROR;
 
 	/* MBIO read control parameters */
 	void *mbio_ptr = NULL;
@@ -113,20 +145,12 @@ int main(int argc, char **argv) {
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
-	int format;
 	int formatread;
 	int variable_beams;
 	int traveltime;
 	int beam_flagging;
-	int pings;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
 	double btime_d;
 	double etime_d;
-	double speedmin;
-	double timegap;
 	struct mb_info_struct mb_info;
 
 	int time_i[7];
@@ -190,33 +214,7 @@ int main(int argc, char **argv) {
 
 	int nbeams;
 
-	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
-	/* reset all defaults but the format and lonflip */
 	strcpy(read_file, "datalist.mb-1");
-	format = 0;
-	pings = 1;
-	bounds[0] = -360.;
-	bounds[1] = 360.;
-	bounds[2] = -90.;
-	bounds[3] = 90.;
-	btime_i[0] = 1962;
-	btime_i[1] = 2;
-	btime_i[2] = 21;
-	btime_i[3] = 10;
-	btime_i[4] = 30;
-	btime_i[5] = 0;
-	btime_i[6] = 0;
-	etime_i[0] = 2062;
-	etime_i[1] = 2;
-	etime_i[2] = 21;
-	etime_i[3] = 10;
-	etime_i[4] = 30;
-	etime_i[5] = 0;
-	etime_i[6] = 0;
-	speedmin = 0.0;
-	timegap = 1000000000.0;
 
 	/* process argument list */
 	{

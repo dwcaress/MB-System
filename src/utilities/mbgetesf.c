@@ -102,22 +102,44 @@ int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int act
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
-	int status;
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
 	int format;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	/* reset all defaults but the format and lonflip */
+	pings = 1;
+	bounds[0] = -360.;
+	bounds[1] = 360.;
+	bounds[2] = -90.;
+	bounds[3] = 90.;
+	btime_i[0] = 1962;
+	btime_i[1] = 2;
+	btime_i[2] = 21;
+	btime_i[3] = 10;
+	btime_i[4] = 30;
+	btime_i[5] = 0;
+	btime_i[6] = 0;
+	etime_i[0] = 2062;
+	etime_i[1] = 2;
+	etime_i[2] = 21;
+	etime_i[3] = 10;
+	etime_i[4] = 30;
+	etime_i[5] = 0;
+	etime_i[6] = 0;
+	speedmin = 0.0;
+	timegap = 1000000000.0;
+
+	int error = MB_ERROR_NO_ERROR;
+
+	double btime_d;
+	double etime_d;
 	char ifile[MB_PATH_MAXLINE];
 	int beams_bath;
 	int beams_amp;
@@ -168,31 +190,6 @@ int main(int argc, char **argv) {
 	mb_path sofile = "";
 	FILE *sofp = NULL;
 
-	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
-	/* reset all defaults but the format and lonflip */
-	pings = 1;
-	bounds[0] = -360.;
-	bounds[1] = 360.;
-	bounds[2] = -90.;
-	bounds[3] = 90.;
-	btime_i[0] = 1962;
-	btime_i[1] = 2;
-	btime_i[2] = 21;
-	btime_i[3] = 10;
-	btime_i[4] = 30;
-	btime_i[5] = 0;
-	btime_i[6] = 0;
-	etime_i[0] = 2062;
-	etime_i[1] = 2;
-	etime_i[2] = 21;
-	etime_i[3] = 10;
-	etime_i[4] = 30;
-	etime_i[5] = 0;
-	etime_i[6] = 0;
-	speedmin = 0.0;
-	timegap = 1000000000.0;
 	mode = MBGETESF_FLAGONLY;
 
 	/* set default input and output */

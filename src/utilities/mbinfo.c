@@ -67,27 +67,28 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char format_description[MB_DESCRIPTION_LENGTH];
-
-	/* MBIO read control parameters */
-	char read_file[MB_PATH_MAXLINE];
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
 	int format;
-	int pings;
+	int pings_get = 1;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &format, &pings_get, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	int error = MB_ERROR_NO_ERROR;
+	char format_description[MB_DESCRIPTION_LENGTH];
+
+	int pings;
+	char read_file[MB_PATH_MAXLINE];
+	void *datalist;
+	int look_processed = MB_DATALIST_LOOK_UNSET;
+	double file_weight;
+	double btime_d;
+	double etime_d;
 	char file[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
-	int pings_get = 1;
 	int pings_read = 1;
 	int beams_bath_alloc = 0;
 	int beams_amp_alloc = 0;
@@ -270,8 +271,6 @@ int main(int argc, char **argv) {
 		notice_list[i] = 0;
 		notice_list_tot[i] = 0;
 	}
-
-	int status = mb_defaults(verbose, &format, &pings_get, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to stdin */
 	strcpy(read_file, "stdin");

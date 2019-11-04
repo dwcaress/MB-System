@@ -55,8 +55,7 @@ int main(int argc, char **argv) {
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to stdin */
-	char read_file[MB_PATH_MAXLINE];
-	strcpy(read_file, "datalist.mb-1");
+	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
 
 	bool copyfiles = false;
 	bool force_update = false;

@@ -75,6 +75,16 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
+	int verbose = 0;
+	int format;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
 	int errflg = 0;
 	int c;
 	int help = 0;
@@ -106,21 +116,12 @@ int main(int argc, char **argv) {
 	int a, b, rotate;
 	double x, y, z;
 
-	/* MBIO status variables */
-	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
 
 	/* MBIO read control parameters */
-	int format;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
 	double btime_d;
 	double etime_d;
-	double speedmin;
-	double timegap;
 	char file[MB_PATH_MAXLINE];
 	int pings = 1;
 	int beams_bath;
@@ -169,9 +170,6 @@ int main(int argc, char **argv) {
 		timbeg_i[i] = 0;
 		timend_i[i] = 0;
 	}
-
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to stdin */
 	strcpy(file, "stdin");

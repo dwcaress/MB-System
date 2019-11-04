@@ -64,7 +64,6 @@ const int MBHYSWEEPPREPROCESS_OFFSET_MAX = 12;
 // static const int MBHYSWEEPPREPROCESS_NAVFORMAT_NONE = 0;
 static const int MBHYSWEEPPREPROCESS_NAVFORMAT_OFG = 1;
 
-
 static const char program_name[] = "mbhysweeppreprocess";
 static const char help_message[] =
     "mbhysweeppreprocess reads a Hysweep HSX format file, interpolates the\nasynchronous navigation and "
@@ -78,6 +77,16 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
 	int verbose = 0;
+	int format = 0;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
 
@@ -86,16 +95,8 @@ int main(int argc, char **argv) {
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
-	int format = 0;
-	int pings;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
 	double btime_d;
 	double etime_d;
-	double speedmin;
-	double timegap;
 	char ifile[MB_PATH_MAXLINE] = "";
 	char dfile[MB_PATH_MAXLINE] = "";
 	char ofile[MB_PATH_MAXLINE] = "";
@@ -287,8 +288,6 @@ int main(int argc, char **argv) {
 	sonar_offset_t type;
 	double offset_roll, offset_pitch, offset_heading;
 	double offset_x, offset_y, offset_z, offset_t;
-
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");
