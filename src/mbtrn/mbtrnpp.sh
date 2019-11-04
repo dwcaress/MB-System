@@ -64,7 +64,9 @@ init_vars(){
     # application path
     APP_CMD="/usr/local/bin/mbtrnpp"
     # log directory
-    OPT_LOGDIR="--log-directory=/home/mappingauv/mbtrnpptest"
+#    OPT_LOGDIR="--log-directory=/home/mappingauv/mbtrnpptest"
+	OPT_LOGDIR="--log-directory=/cygdrive/d/cygwin64/mbtrnpp-logs"
+
     # input source
     # Define socket input
     #   example: --input=socket:192.168.100.113:239.255.0.1:6020

@@ -1288,6 +1288,15 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
     /* else open output file in which the binary data otherwise communicated
    * to TRN will be saved */
  if ( OUTPUT_FLAG_SET(OUTPUT_MB1_FILE_EN)) {
+     if(NULL!=g_log_dir){
+         if(output_file[0]!='/' && output_file[0]!='.'){
+             char *ocopy = strdup(output_file);
+             if(NULL!=ocopy){
+             sprintf(output_file,"%s/%s",g_log_dir,ocopy);
+             free(ocopy);
+             }
+         }
+     }
     output_fp = fopen(output_file, "w");
   }
 
@@ -2754,7 +2763,7 @@ int mbtrnpp_init_trnsvr(netif_t **psvr, wtnav_t *trn, char *host, int port, bool
             *psvr = svr;
             netif_set_reqres_res(svr,trn);
             netif_show(svr,true,5);
-            netif_init_log(svr, "trnsvr", ".");
+            netif_init_log(svr, "trnsvr", (NULL!=g_log_dir?g_log_dir:"."));
             mlog_tprintf(svr->mlog_id,"*** trnsvr session start (TEST) ***\n");
             mlog_tprintf(svr->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
             retval = netif_connect(svr);
@@ -2786,7 +2795,7 @@ int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose)
             *psvr = svr;
 //            netif_set_reqres_res(svr,trn);
             netif_show(svr,true,5);
-            netif_init_log(svr, "mb1svr", ".");
+            netif_init_log(svr, "mb1svr", (NULL!=g_log_dir?g_log_dir:"."));
             mlog_tprintf(svr->mlog_id,"*** mb1svr session start (TEST) ***\n");
             mlog_tprintf(svr->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
             retval = netif_connect(svr);
@@ -2817,7 +2826,7 @@ int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, bool verbose)
             *psvr = svr;
             //            netif_set_reqres_res(svr,trn);
             netif_show(svr,true,5);
-            netif_init_log(svr, "trnusvr", ".");
+            netif_init_log(svr, "trnusvr", (NULL!=g_log_dir?g_log_dir:"."));
             mlog_tprintf(svr->mlog_id,"*** trnusvr session start (TEST) ***\n");
             mlog_tprintf(svr->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
             retval = netif_connect(svr);
