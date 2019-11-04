@@ -168,130 +168,9 @@ int main(int argc, char **argv) {
 	bounds[2] = -90.0;
 	bounds[3] = 90.0;
 
-	int interp_status = MB_SUCCESS;
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
-	char read_file[MB_PATH_MAXLINE];
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
-	int decimate;
-	double btime_d;
-	double etime_d;
-	char file[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-
-	/* output format list controls */
-	char list[MAX_OPTIONS];
-	int n_list;
-	double distance_total = 0.0;
-	int time_j[5];
-	bool mblist_next_value = false;
-	bool invert_next_value = false;
-	bool signflip_next_value = false;
-	bool first = true;
-	bool ascii = true;
-	bool segment = false;
-	char segment_tag[MB_PATH_MAXLINE];
-	char delimiter[MB_PATH_MAXLINE];
-
-	/* MBIO read values */
-	void *mbio_ptr = NULL;
-	void *store_ptr;
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-
-	/* navigation, heading, attitude data */
-	int survey_count = 0;
-	int survey_count_tot = 0;
-	int nnav = 0;
-	int nnav_alloc = 0;
-	double *nav_time_d = NULL;
-	double *nav_lon = NULL;
-	double *nav_lat = NULL;
-	double *nav_sonardepth = NULL;
-	double *nav_heading = NULL;
-	double *nav_speed = NULL;
-	double *nav_altitude = NULL;
-
-	/* CTD values */
-	int nctd;
-	double ctd_time_d[MB_CTD_MAX];
-	double ctd_conductivity[MB_CTD_MAX];
-	double ctd_temperature[MB_CTD_MAX];
-	double ctd_depth[MB_CTD_MAX];
-	double ctd_salinity[MB_CTD_MAX];
-	double ctd_soundspeed[MB_CTD_MAX];
-	int nsensor;
-	double sensor_time_d[MB_CTD_MAX];
-	double sensor1[MB_CTD_MAX];
-	double sensor2[MB_CTD_MAX];
-	double sensor3[MB_CTD_MAX];
-	double sensor4[MB_CTD_MAX];
-	double sensor5[MB_CTD_MAX];
-	double sensor6[MB_CTD_MAX];
-	double sensor7[MB_CTD_MAX];
-	double sensor8[MB_CTD_MAX];
-	double conductivity;
-	double temperature;
-	double potentialtemperature;
-	double depth;
-	double salinity;
-	double soundspeed;
-
-	/* additional time variables */
-	bool first_m = true;
-	double time_d_ref;
-	bool first_u = true;
-	time_t time_u;
-	time_t time_u_ref;
-	double seconds;
-
-	/* course calculation variables */
-	double dlon, dlat, minutes;
-	int degrees;
-	char hemi;
-	double headingx, headingy, mtodeglon, mtodeglat;
-	double course, course_old;
-	double time_d_old;
-	double time_interval;
-	double speed_made_good, speed_made_good_old;
-	double navlon_old, navlat_old;
-	double dx, dy;
-	double b;
-
-	int ictd;
-
-	/* get current default values */
-	int ctd_count = 0;
-	int ctd_count_tot = 0;
-
-	/* set default input to datalist.mb-1 */
-	strcpy(read_file, "datalist.mb-1");
-
 	/* set up the default list controls
 	    (Time, lon, lat, conductivity, temperature, depth, salinity, sound speed) */
+	char list[MAX_OPTIONS];
 	list[0] = 'T';
 	list[1] = 'X';
 	list[2] = 'Y';
@@ -302,11 +181,15 @@ int main(int argc, char **argv) {
 	list[7] = 'c';
 	list[8] = 'S';
 	list[9] = 's';
-	n_list = 10;
-	sprintf(delimiter, "\t");
-	decimate = 1;
+	int n_list = 10;
 
-	/* process argument list */
+	bool ascii = true;
+	char delimiter[MB_PATH_MAXLINE] = "\t";
+	int decimate = 1;
+	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
+	bool segment = false;
+	char segment_tag[MB_PATH_MAXLINE];
+
 	{
 		bool errflg = false;
 		int c;
@@ -407,7 +290,6 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2       segment:        %d\n", segment);
 			fprintf(stderr, "dbg2       segment_tag:    %s\n", segment_tag);
 			fprintf(stderr, "dbg2       delimiter:      %s\n", delimiter);
-			fprintf(stderr, "dbg2       file:           %s\n", file);
 			fprintf(stderr, "dbg2       n_list:         %d\n", n_list);
 			for (int i = 0; i < n_list; i++)
 				fprintf(stderr, "dbg2         list[%d]:      %c\n", i, list[i]);
@@ -416,20 +298,129 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
 
-	/* get format if required */
+	int error = MB_ERROR_NO_ERROR;
+
 	if (format == 0)
 		mb_get_format(verbose, read_file, NULL, &format, &error);
+
+	int interp_status = MB_SUCCESS;
+
+	/* MBIO read control parameters */
+	int look_processed = MB_DATALIST_LOOK_UNSET;
+	double file_weight;
+	double btime_d;
+	double etime_d;
+	char dfile[MB_PATH_MAXLINE];
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+
+	/* output format list controls */
+	double distance_total = 0.0;
+	int time_j[5];
+	bool mblist_next_value = false;
+	bool invert_next_value = false;
+	bool signflip_next_value = false;
+	bool first = true;
+
+	/* MBIO read values */
+	void *mbio_ptr = NULL;
+	void *store_ptr;
+	int kind;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	char comment[MB_COMMENT_MAXLINE];
+
+	/* navigation, heading, attitude data */
+	int survey_count = 0;
+	int survey_count_tot = 0;
+	int nnav = 0;
+	int nnav_alloc = 0;
+	double *nav_time_d = NULL;
+	double *nav_lon = NULL;
+	double *nav_lat = NULL;
+	double *nav_sonardepth = NULL;
+	double *nav_heading = NULL;
+	double *nav_speed = NULL;
+	double *nav_altitude = NULL;
+
+	/* CTD values */
+	int nctd;
+	double ctd_time_d[MB_CTD_MAX];
+	double ctd_conductivity[MB_CTD_MAX];
+	double ctd_temperature[MB_CTD_MAX];
+	double ctd_depth[MB_CTD_MAX];
+	double ctd_salinity[MB_CTD_MAX];
+	double ctd_soundspeed[MB_CTD_MAX];
+	int nsensor;
+	double sensor_time_d[MB_CTD_MAX];
+	double sensor1[MB_CTD_MAX];
+	double sensor2[MB_CTD_MAX];
+	double sensor3[MB_CTD_MAX];
+	double sensor4[MB_CTD_MAX];
+	double sensor5[MB_CTD_MAX];
+	double sensor6[MB_CTD_MAX];
+	double sensor7[MB_CTD_MAX];
+	double sensor8[MB_CTD_MAX];
+	double conductivity;
+	double temperature;
+	double potentialtemperature;
+	double depth;
+	double salinity;
+	double soundspeed;
+
+	/* additional time variables */
+	bool first_m = true;
+	double time_d_ref;
+	bool first_u = true;
+	time_t time_u;
+	time_t time_u_ref;
+	double seconds;
+
+	/* course calculation variables */
+	double dlon, dlat, minutes;
+	int degrees;
+	char hemi;
+	double headingx, headingy, mtodeglon, mtodeglat;
+	double course, course_old;
+	double time_d_old;
+	double time_interval;
+	double speed_made_good, speed_made_good_old;
+	double navlon_old, navlat_old;
+	double dx, dy;
+	double b;
+
+	int ictd;
+
+	int ctd_count = 0;
+	int ctd_count_tot = 0;
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
 	bool read_data;
+	void *datalist;
+	char file[MB_PATH_MAXLINE];
 
 	/**************************************************************************************/
-
 	/* section 1 - read all data and save nav etc for interpolation onto ctd data */
 
 	/* open file list */

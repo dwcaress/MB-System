@@ -280,43 +280,16 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* MBIO status variables */
 	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
-	void *datalist;
-	double file_weight = 1.0;
-	char fileroot[MB_PATH_MAXLINE];
-	char file[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	char dfilelast[MB_PATH_MAXLINE];
-	char pwd[MB_PATH_MAXLINE];
-	char command[MB_PATH_MAXLINE];
-	char *filename;
-	int nfile = 0;
-	int nparproblem;
-	int ndataproblem;
-	int nparproblemtot = 0;
-	int ndataproblemtot = 0;
-	int nproblemfiles = 0;
-	int recursion = -1;
-
-	int prstatus = MB_PR_FILE_UP_TO_DATE;
-	int lock_error = MB_ERROR_NO_ERROR;
-	int lock_purpose = 0;
-	mb_path lock_program = "";
-	mb_path lock_cpu = "";
-	mb_path lock_user = "";
-	char lock_date[25] = "";
-	mb_path lockfile = "";
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 	    output if verbose > 1) */
 
-	/* if make_datalistp desired then make it */
 	if (make_datalistp) {
 		/* figure out data format and fileroot if possible */
+		char fileroot[MB_PATH_MAXLINE];
 		status = mb_get_format(verbose, read_file, fileroot, &format, &error);
+		char file[MB_PATH_MAXLINE];
 		sprintf(file, "%sp.mb-1", fileroot);
 
 		FILE *fp = fopen(file, "w");
@@ -339,6 +312,29 @@ int main(int argc, char **argv) {
 	if (format == 0)
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
+	void *datalist;
+	double file_weight = 1.0;
+	char dfile[MB_PATH_MAXLINE];
+	char dfilelast[MB_PATH_MAXLINE];
+	char pwd[MB_PATH_MAXLINE];
+	char command[MB_PATH_MAXLINE];
+	char *filename;
+	int nfile = 0;
+	int nparproblem;
+	int ndataproblem;
+	int nparproblemtot = 0;
+	int ndataproblemtot = 0;
+	int nproblemfiles = 0;
+	int recursion = -1;
+
+	int prstatus = MB_PR_FILE_UP_TO_DATE;
+	int lock_error = MB_ERROR_NO_ERROR;
+	int lock_purpose = 0;
+	mb_path lock_program = "";
+	mb_path lock_cpu = "";
+	mb_path lock_user = "";
+	char lock_date[25] = "";
+	mb_path lockfile = "";
 	int file_in_bounds = false;  // TODO(schwehr): Convert mb_check_info to bool.
 	int locked = false;  // TODO(schwehr): Convert mb_pr_lockinfo to bool.
 
@@ -411,6 +407,7 @@ int main(int argc, char **argv) {
 							fprintf(output, "\t<Locked>");
 					}
 					if (locked && remove_locks) {
+						char file[MB_PATH_MAXLINE];
 						sprintf(lockfile, "%s.lck", file);
 						sprintf(command, "/bin/rm -f %s", lockfile);
 					}
@@ -429,6 +426,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
+		char file[MB_PATH_MAXLINE];
 		while ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS) {
 			nfile++;
 			/* char *bufptr = */ getcwd(pwd, MB_PATH_MAXLINE);
