@@ -42,6 +42,11 @@ CONLOG_PATH_DFL="./"
 # variables for command line overrides
 RESON_HOST="134.89.32.107"
 
+# override environment settings
+#TRN_MAPFILES=/cygdrive/d/cygwin64/maps
+#TRN_LOGFILES=/cygdrive/d/cygwin64/config
+#TRN_DATAFILES=/cygdrive/d/cygwin64/logs
+
 #################################
 # Script variable initialization
 #################################
@@ -65,7 +70,7 @@ init_vars(){
     APP_CMD="/usr/local/bin/mbtrnpp"
     # log directory
 #    OPT_LOGDIR="--log-directory=/home/mappingauv/mbtrnpptest"
-	OPT_LOGDIR="--log-directory=/cygdrive/d/cygwin64/mbtrnpp-logs"
+	OPT_LOGDIR="--log-directory=${TRN_LOGFILES:-/cygdrive/d/cygwin64/mbtrnpp-logs}"
 
     # input source
     # Define socket input
