@@ -81,6 +81,21 @@ static const char usage_message[] = "mbsvplist [-C -D -Fformat -H -Ifile -Mmode 
 
 int main(int argc, char **argv) {
 	int verbose = 0;
+	int format;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	pings = 1;
+	bounds[0] = -360.0;
+	bounds[1] = 360.0;
+	bounds[2] = -90.0;
+	bounds[3] = 90.0;
+
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
 
@@ -88,16 +103,8 @@ int main(int argc, char **argv) {
 	char read_file[MB_PATH_MAXLINE];
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
-	int format;
-	int pings;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
 	double btime_d;
 	double etime_d;
-	double speedmin;
-	double timegap;
 	char file[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
 	int beams_bath;
@@ -178,13 +185,6 @@ int main(int argc, char **argv) {
 
 	int isvp;
 
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-	pings = 1;
-	bounds[0] = -360.0;
-	bounds[1] = 360.0;
-	bounds[2] = -90.0;
-	bounds[3] = 90.0;
 	svp_printmode = MBSVPLIST_PRINTMODE_CHANGE;
 	bool svp_file_output = false;
 	bool svp_setprocess = false;

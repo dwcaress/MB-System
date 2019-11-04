@@ -75,12 +75,9 @@ int main(int argc, char **argv) {
 	double speedmin;
 	double timegap;
 
-	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	/* set default input to datalist.mb-1 */
-	char read_file[MB_PATH_MAXLINE];
-	strcpy(read_file, "datalist.mb-1");
+	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
 
 	int startline = 1;
 	char lineroot[MB_PATH_MAXLINE];

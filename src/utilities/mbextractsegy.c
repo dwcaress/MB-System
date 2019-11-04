@@ -57,27 +57,27 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
-	mb_path read_file = "";
-	mb_path output_file = "";
-	bool output_file_set = false;
-	void *datalist = NULL;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight = 1.0;
 	int format;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	int error = MB_ERROR_NO_ERROR;
+
+	mb_path read_file = "";
+	mb_path output_file = "";
+	bool output_file_set = false;
+	void *datalist = NULL;
+	int look_processed = MB_DATALIST_LOOK_UNSET;
+	double file_weight = 1.0;
+	double btime_d;
+	double etime_d;
 	mb_path file = "";
 	mb_path dfile = "";
 	int beams_bath;
@@ -195,9 +195,6 @@ int main(int argc, char **argv) {
 	double linetracemin, linetracemax, linetracelength, endofdata;
 	double draft, roll, pitch, heave;
 	int shellstatus;
-
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");

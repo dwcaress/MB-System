@@ -105,6 +105,16 @@ double qsnorm(double p) {
 
 int main(int argc, char **argv) {
 	int verbose = 0;
+	int format;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
 
@@ -113,16 +123,8 @@ int main(int argc, char **argv) {
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
-	int format;
-	int pings;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
 	double btime_d;
 	double etime_d;
-	double speedmin;
-	double timegap;
 	char file[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
 	int beams_bath;
@@ -182,9 +184,6 @@ int main(int argc, char **argv) {
 	int nrec, nvalue;
 	int nrectot = 0;
 	int nvaluetot = 0;
-
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to stdin */
 	strcpy(read_file, "stdin");

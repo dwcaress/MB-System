@@ -130,8 +130,17 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int verbose = 0;
+	int format = 0;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
 	int error = MB_ERROR_NO_ERROR;
 
 	bool read_datalist = false;  // TODO(schwehr): Probable bug with this var.
@@ -141,16 +150,8 @@ int main(int argc, char **argv) {
 	bool output_file_set = false;
 	int look_processed = MB_DATALIST_LOOK_YES;
 	double file_weight;
-	int format = 0;
-	int pings;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
 	double btime_d;
 	double etime_d;
-	double speedmin;
-	double timegap;
 	mb_path file;
 	mb_path dfile;
 	int beams_bath;
@@ -160,7 +161,6 @@ int main(int argc, char **argv) {
 	int startline = 1;
 	mb_path lineroot = "sidescan";
 
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	mb_path read_file = "datalist.mb-1";

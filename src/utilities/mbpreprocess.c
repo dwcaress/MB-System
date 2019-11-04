@@ -139,10 +139,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-  /* MBIO status variables */
-  int error = MB_ERROR_NO_ERROR;
-  char *message;
-
   int verbose = 0;
   int format = 0;
   int pings;
@@ -154,6 +150,7 @@ int main(int argc, char **argv) {
   double timegap;
   int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
+  int error = MB_ERROR_NO_ERROR;
   bool use_platform_file = false;
   int target_sensor = -1;
   mb_path nav_file = "";
@@ -1387,6 +1384,7 @@ int main(int argc, char **argv) {
     /* initialize reading the swath file */
     if ((status = mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
                                &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+      char *message;
       mb_error(verbose, error, &message);
       fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
       fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
@@ -1423,6 +1421,7 @@ int main(int argc, char **argv) {
 
     /* if error initializing memory then quit */
     if (error != MB_ERROR_NO_ERROR) {
+      char *message;
       mb_error(verbose, error, &message);
       fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1520,6 +1519,7 @@ int main(int argc, char **argv) {
           status = mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlat, &error);
           status = mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_speed, &error);
           if (error != MB_ERROR_NO_ERROR) {
+            char *message;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1555,6 +1555,7 @@ int main(int argc, char **argv) {
           status = mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
                                (void **)&sensordepth_sensordepth, &error);
           if (error != MB_ERROR_NO_ERROR) {
+            char *message;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1586,6 +1587,7 @@ int main(int argc, char **argv) {
           status = mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_heading,
                                &error);
           if (error != MB_ERROR_NO_ERROR) {
+            char *message;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1616,6 +1618,7 @@ int main(int argc, char **argv) {
           status = mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
                                (void **)&altitude_altitude, &error);
           if (error != MB_ERROR_NO_ERROR) {
+            char *message;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1649,6 +1652,7 @@ int main(int argc, char **argv) {
           status = mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_heave,
                                &error);
           if (error != MB_ERROR_NO_ERROR) {
+            char *message;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1679,6 +1683,7 @@ int main(int argc, char **argv) {
                             num_indextable_alloc * sizeof(struct mb_io_indextable_struct),
                             (void **)(&indextable), &error);
         if (error != MB_ERROR_NO_ERROR) {
+          char *message;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2369,6 +2374,7 @@ int main(int argc, char **argv) {
       /* initialize reading the input file */
       if ((status = mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
                      &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+        char *message;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
@@ -2382,6 +2388,7 @@ int main(int argc, char **argv) {
       /* initialize writing the output swath file */
       if ((status = mb_write_init(verbose, ofile, oformat, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error)) !=
         MB_SUCCESS) {
+        char *message;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
@@ -2418,6 +2425,7 @@ int main(int argc, char **argv) {
 
       /* if error initializing memory then quit */
       if (error != MB_ERROR_NO_ERROR) {
+        char *message;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2827,6 +2835,7 @@ int main(int argc, char **argv) {
                     obeams_bath, obeams_amp, opixels_ss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
                     ssacrosstrack, ssalongtrack, comment, &error);
           if (status != MB_SUCCESS) {
+            char *message;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
             fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", ofile);

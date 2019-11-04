@@ -77,16 +77,7 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int option_index;
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message;
-
-	/* Files and formats */
-	char ifile[MB_PATH_MAXLINE];
-	char ofile[MB_PATH_MAXLINE];
-	FILE *fp;
-
 	/* MBIO default parameters - only use lonflip */
 	int format;
 	int pings;
@@ -96,6 +87,16 @@ int main(int argc, char **argv) {
 	int etime_i[7];
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	int option_index;
+	int error = MB_ERROR_NO_ERROR;
+	char *message;
+
+	/* Files and formats */
+	char ifile[MB_PATH_MAXLINE];
+	char ofile[MB_PATH_MAXLINE];
+	FILE *fp;
 
 	/* auv log data */
 	struct field {
@@ -152,9 +153,6 @@ int main(int argc, char **argv) {
 	int ivalue;
 	char dvl_char, jump_char;
 	double dx, dy, rr;
-
-	/* get current default values - only interested in lonflip */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input and output */
 	strcpy(ifile, "stdin");

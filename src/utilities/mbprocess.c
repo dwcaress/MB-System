@@ -415,10 +415,6 @@ static const char usage_message[] =
     "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -S -T -V -H]";
 
 int main(int argc, char **argv) {
-  /* MBIO status variables */
-  int error = MB_ERROR_NO_ERROR;
-
-  /* get current default values */
   int verbose = 0;
   int mbp_format;
   int pings;
@@ -456,6 +452,8 @@ int main(int argc, char **argv) {
   etime_i[6] = 0;
   speedmin = 0.0;
   timegap = 1000000000.0;
+
+  int error = MB_ERROR_NO_ERROR;
 
   /* set default input and output */
   bool mbp_ifile_specified = false;

@@ -450,19 +450,20 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
 	int format;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	int error = MB_ERROR_NO_ERROR;
+
+	double btime_d;
+	double etime_d;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -642,9 +643,6 @@ int main(int argc, char **argv) {
 	double prx[5], pry[5];
 	grid_use_t use_weight;
 	double dvalue;
-
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input and output */
 	strcpy(filelist, "datalist.mb-1");

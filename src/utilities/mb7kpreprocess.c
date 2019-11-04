@@ -76,6 +76,16 @@ static const char usage_message[] =
 int main(int argc, char **argv) {
 	/* MBIO status variables */
 	int verbose = 0;
+	int format = 0;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
 
@@ -83,8 +93,6 @@ int main(int argc, char **argv) {
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
-	int format = 0;
-	int pings;
 	double btime_d;
 	double etime_d;
 	char ifile[MB_PATH_MAXLINE];
@@ -585,14 +593,6 @@ int main(int argc, char **argv) {
 	int year, month, day, hour, minute;
 	int source, type;
 	double second, id;
-
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
-	double speedmin;
-	double timegap;
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	char read_file[MB_PATH_MAXLINE];

@@ -759,14 +759,6 @@ int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *
 
 int main(int argc, char **argv) {
   int verbose = 0;
-  int error = MB_ERROR_NO_ERROR;
-  char *message;
-
-  /* MBIO read control parameters */
-  char read_file[MB_PATH_MAXLINE];
-  void *datalist;
-  int look_processed = MB_DATALIST_LOOK_UNSET;
-  double file_weight;
   int format;
   int pings;
   int pings_read;
@@ -775,10 +767,20 @@ int main(int argc, char **argv) {
   double bounds[4];
   int btime_i[7];
   int etime_i[7];
-  double btime_d;
-  double etime_d;
   double speedmin;
   double timegap;
+  int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+  int error = MB_ERROR_NO_ERROR;
+  char *message;
+
+  /* MBIO read control parameters */
+  char read_file[MB_PATH_MAXLINE];
+  void *datalist;
+  int look_processed = MB_DATALIST_LOOK_UNSET;
+  double file_weight;
+  double btime_d;
+  double etime_d;
   char file[MB_PATH_MAXLINE];
   char dfile[MB_PATH_MAXLINE];
   int beams_bath;
@@ -959,9 +961,6 @@ int main(int argc, char **argv) {
   /* netcdf variables */
   char variable[MB_PATH_MAXLINE];
   int lcount = 0;
-
-  /* get current default values */
-  int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
   /* set default input to datalist.mb-1 */
   strcpy(read_file, "datalist.mb-1");

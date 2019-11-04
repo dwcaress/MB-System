@@ -77,10 +77,18 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int option_index;
-
-	/* MBIO status variables */
 	int verbose = 0;
+	int format;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	int option_index;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
 
@@ -92,12 +100,6 @@ int main(int argc, char **argv) {
 	mb_path swath_file;
 	mb_path file;
 	mb_path dfile;
-	int format;
-	int pings;
-	int lonflip;
-	double bounds[4];
-	double speedmin;
-	double timegap;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -129,8 +131,6 @@ int main(int argc, char **argv) {
 	double tidelat;
 	double btime_d;
 	double etime_d;
-	int btime_i[7];
-	int etime_i[7];
 	double interval = 300.0;
 	mb_path tide_file;
 	mb_path nav_file;
@@ -175,9 +175,6 @@ int main(int argc, char **argv) {
 #ifdef ENABLE_GSF
 	struct mbsys_gsf_struct *gsf_ptr;
 #endif
-
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");
