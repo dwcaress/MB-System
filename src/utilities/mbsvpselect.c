@@ -31,7 +31,7 @@
  * the seletion of the appropriate SVP for each survey profile is still
  * missing in MB-System.
  *
- * After finding the appropriate svp for each profile based on the choosed
+ * After finding the appropriate svp for each profile based on the chosen
  * method, the results are copied to a txt file that shows each survey
  * profile with the corresponding SVP. the tool also calls mbset automatically
  * so no need to assign SVP to the data. it is done automatically.
@@ -41,7 +41,7 @@
  *
  * 1. Nearest SVP in position: the middle position of each survey profile
  *    is calculated and the geodesics (shortest distance on the ellipsoid)
- *    to all SVPs are calcualted. and the SVP with the shortest distance is
+ *    to all SVPs are calculated. and the SVP with the shortest distance is
  *    chosen. when the middle position of the survey profile is calculated
  *    there is an option to check for 0 lat 0 long wrong values. if it is
  *    found at the starting the geodesic will be calculated to the end of
@@ -1277,7 +1277,7 @@ void read_list(char *list, char *list_2) {
 					dist[0][j] -= p_4_range;
 					// if the SVP is within the range
 					puts("==================================================");
-					printf("year day diffrence %d is : %d\n", j, day_hold[0][j]);
+					printf("year day difference %d is : %d\n", j, day_hold[0][j]);
 					printf("hour difference %d is : %d\n", j, hour_hold[0][j]);
 					printf("minute difference %d is : %d\n", j, min_hold[0][j]);
 					printf("Time difference %d is : %lf\n", j, time_hold[0][j]);

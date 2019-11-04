@@ -190,7 +190,7 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
       ostore->svp_velocity[i] = 0.1 * istore->svp_vel[i]; /* m/s */
       ostore->svp_conductivity[i] = 0.0;                  /* mmho/cm */
       ostore->svp_salinity[i] = 0.0;                      /* o/oo */
-      ostore->svp_temperature[i] = 0.0;                   /* degree celcius */
+      ostore->svp_temperature[i] = 0.0;                   /* degrees Celsius */
       ostore->svp_pressure[i] = 0.0;                      /* bar */
     }
 

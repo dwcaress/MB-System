@@ -1665,7 +1665,7 @@ int main(int argc, char **argv) {
 			exit(error);
 		}
 
-		/* tranlate lon lat bounds from UTM if required */
+		/* translate lon lat bounds from UTM if required */
 		if (gbnd[0] < -360.0 || gbnd[0] > 360.0 || gbnd[1] < -360.0 || gbnd[1] > 360.0 || gbnd[2] < -90.0 || gbnd[2] > 90.0 ||
 		    gbnd[3] < -90.0 || gbnd[3] > 90.0) {
 			/* first point */

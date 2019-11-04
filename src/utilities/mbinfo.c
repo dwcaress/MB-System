@@ -373,7 +373,7 @@ int main(int argc, char **argv) {
 			}
 		}
 	}
-       
+
 	FILE * const stream = verbose <= 1 ? stdout : stderr;
 
 	/* if error flagged then print it and exit */

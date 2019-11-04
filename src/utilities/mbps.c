@@ -267,7 +267,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* check that otions are allowed */
+	/* check that options are allowed */
 	if ((viewdir != 'P') && (viewdir != 'S') && (viewdir != 'B') && (viewdir != 'p') && (viewdir != 's') && (viewdir != 'b')) {
 		fprintf(stderr, "viewdir must be either P/p (port) S/s (stbd) or B/b (back)\n");
 		errflg++;

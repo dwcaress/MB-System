@@ -90,7 +90,7 @@ struct mbareaclean_sndg_struct {
 	bool sndg_edit;
 };
 
-/* sounding atorage values and arrays */
+/* sounding storage values and arrays */
 int nfile = 0;
 int nfile_alloc = 0;
 struct mbareaclean_file_struct *files = NULL;

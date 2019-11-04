@@ -4498,7 +4498,7 @@ int main(int argc, char **argv) {
           }
         }
 
-        /* save the orignal beamflag states */
+        /* save the original beamflag states */
         if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
           for (int i = 0; i < nbath; i++) {
             beamflagorg[i] = beamflag[i];
