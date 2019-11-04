@@ -135,7 +135,7 @@ static const char usage_message[] =
     "          -Rfactor  -Sspeed  -Ttension  -Utime  -V -Wscale -Xextend]";
 
 /*--------------------------------------------------------------------*/
-/* approximate complementary error function from numerical recipies */
+/* approximate complementary error function from numerical recipes */
 double erfcc(double x) {
 	const double z = fabs(x);
 	const double t = 1.0 / (1.0 + 0.5 * z);
@@ -150,7 +150,7 @@ double erfcc(double x) {
 	return x >= 0.0 ? ans : 2.0 - ans;
 }
 /*--------------------------------------------------------------------*/
-/* approximate error function altered from numerical recipies */
+/* approximate error function altered from numerical recipes */
 double mbgrid_erf(double x) {
 	const double z = fabs(x);
 	const double t = 1.0 / (1.0 + 0.5 * z);
@@ -1030,7 +1030,7 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_BAD_PARAMETER);
 		}
 
-		/* tranlate lon lat bounds from UTM if required */
+		/* translate lon lat bounds from UTM if required */
 		if (gbnd[0] < -360.0 || gbnd[0] > 360.0 || gbnd[1] < -360.0 || gbnd[1] > 360.0 || gbnd[2] < -90.0 || gbnd[2] > 90.0 ||
 		    gbnd[3] < -90.0 || gbnd[3] > 90.0) {
 			/* first point */

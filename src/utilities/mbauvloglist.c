@@ -129,12 +129,12 @@ double calcPressure(struct ctd_calibration_struct *calibration_ptr,
   const double n = x*calibration_ptr->ptcb0 / (calibration_ptr->ptcb0
 								+ calibration_ptr->ptcb1*t
 								+ calibration_ptr->ptcb2*t*t);
-  double pres = calibration_ptr->pa0
+  double pressure = calibration_ptr->pa0
 								+ calibration_ptr->pa1*n
 								+ calibration_ptr->pa2*n*n;
 
-  pres = (pres-14.7)*.6894757; //per note on page 34 of the SBE49 Manual
-  return pres;
+  pressure = (pressure-14.7)*.6894757; //per note on page 34 of the SBE49 Manual
+  return pressure;
 }
 /*--------------------------------------------------------------------*/
 

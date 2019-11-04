@@ -1267,7 +1267,7 @@ int main(int argc, char **argv) {
   }
 
   /* set the initial along track distance here so */
-  /* it's cummulative over multiple files*/
+  /* it is cumulative over multiple files */
   distance_total = 0.0;
 
   /* initialize output files */

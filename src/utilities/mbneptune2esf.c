@@ -111,8 +111,8 @@ struct mbclean_ping_struct {
 
 static const char program_name[] = "mbneptune2esf";
 static const char help_message[] =
-    "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand "
-    "applies the flags in the rules file to the esf file of the coresponding line";
+    "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\n"
+    "and applies the flags in the rules file to the esf file of the corresponding line";
 static const char usage_message[] =
     "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
 

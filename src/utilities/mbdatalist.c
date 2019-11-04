@@ -367,7 +367,7 @@ int main(int argc, char **argv) {
 				}
 			}
 
-			/* ouput file if no bounds checking or in bounds */
+			/* output file if no bounds checking or in bounds */
 			if (!look_bounds || file_in_bounds) {
 				if (verbose > 0)
 					fprintf(output, "%s %d %f\n", read_file, format, file_weight);
@@ -497,7 +497,7 @@ int main(int argc, char **argv) {
 					}
 				}
 
-				/* ouput file if no bounds checking or in bounds */
+				/* output file if no bounds checking or in bounds */
 				if (!look_bounds || file_in_bounds) {
 					if (verbose > 0)
 						fprintf(output, "%s %d %f\n", file, format, file_weight);
