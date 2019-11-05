@@ -358,7 +358,47 @@ int netif_tcp_update_connections(netif_t *self)
             msock_connection_addr2str(peer);
             peer->hbtime=connect_time;
             
-//            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ADD_CLI - id[%p/%s:%s] fd[%d] sfd[%d] nfd[%d] \n",self->port_name,peer,peer->chost, peer->service,peer->s->fd,socket->fd,new_fd));
+            if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+                int sndbuf=0;
+                int rcvbuf=0;
+                socklen_t bsz=sizeof(int);
+                int newsz=16*1024;
+                // read TCP buffer sizes
+                if(msock_get_opt(peer->sock,SO_SNDBUF,&sndbuf,&bsz)<0){
+                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]: ERR getopt SNDBUF failed [%d/%s]\n",self->port_name,errno,strerror(errno)));
+                }
+                
+                if(msock_get_opt(peer->sock,SO_RCVBUF,&rcvbuf,&bsz)<0){
+                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]: ERR getopt RCVBUF failed [%d/%s]\n",self->port_name,errno,strerror(errno)));
+                }
+                
+                PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[TCPCON.%s]:ADD_CLI - SNDBUF[%d] RCVBUF[%d]\n",self->port_name,sndbuf,rcvbuf));
+
+//                // resize if too small
+//                if(newsz>sndbuf)
+//                if(msock_set_opt(peer->sock,SO_SNDBUF,&newsz,bsz)<0){
+//                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]: ERR setopt SNDBUF failed [%d/%s]\n",self->port_name,errno,strerror(errno)));
+//                }
+//                
+//                if(newsz>sndbuf)
+//                if(msock_set_opt(peer->sock,SO_RCVBUF,&newsz,bsz)<0){
+//                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]: ERR setopt RCVBUF failed [%d/%s]\n",self->port_name,errno,strerror(errno)));
+//                }
+//                
+//                // confirm new size
+//                if(msock_get_opt(peer->sock,SO_SNDBUF,&sndbuf,&bsz)<0){
+//                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]: ERR getopt SNDBUF failed [%d/%s]\n",self->port_name,errno,strerror(errno)));
+//                }
+//                
+//                if(msock_get_opt(peer->sock,SO_RCVBUF,&rcvbuf,&bsz)<0){
+//                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]: ERR getopt RCVBUF failed [%d/%s]\n",self->port_name,errno,strerror(errno)));
+//                }
+//                
+//                PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[TCPCON.%s]:ADD_CLI - SNDBUF[%d] RCVBUF[%d]\n",self->port_name,sndbuf,rcvbuf));
+
+            }
+            
+            //            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ADD_CLI - id[%p/%s:%s] fd[%d] sfd[%d] nfd[%d] \n",self->port_name,peer,peer->chost, peer->service,peer->s->fd,socket->fd,new_fd));
             
             mlist_add(list,(void *)peer);
             self->peer = msock_connection_new();
