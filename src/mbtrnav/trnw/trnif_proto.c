@@ -771,7 +771,10 @@ int trnif_msg_handle_mb(void *msg, netif_t *self, msock_connection_t *peer, int 
         uint32_t send_bytes=0;
         char *msg_out=NULL;
 
-        if(strcmp(msg,"REQ")==0){
+        if(strcmp(msg,"CON")==0){
+            msg_out=strdup("ACK");
+            send_len=4;
+        }else if(strcmp(msg,"REQ")==0){
             msg_out=strdup("ACK");
             send_len=4;
         }else{
