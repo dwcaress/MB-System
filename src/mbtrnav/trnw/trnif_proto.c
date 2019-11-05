@@ -473,10 +473,13 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
 
 int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout)
 {
+#define TRNIF_READ_RETRIES_CT 40
+#define TRNIF_READ_DELAY_CT  10
     int retval = 0;
 
-    if(NULL!=pdest && NULL!=self && NULL!=peer){
-        int64_t msg_bytes=0;
+    int64_t msg_bytes=0;
+    int retries = 0;
+   if(NULL!=pdest && NULL!=self && NULL!=peer){
         uint32_t readlen=TRN_MSG_SIZE;
         byte *buf=*pdest;
         if(NULL==buf){
@@ -495,32 +498,29 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
         // - if no bytes received on first attempt, return
         // - if any bytes received, keep reading w/ brief delay until
         //   message complete or retries expire
-#define TRNIF_READ_RETRIES_CT 8
-#define TRNIF_READ_DELAY_CT 10
         byte *pread = buf;
-        int retries = TRNIF_READ_RETRIES_CT;
         int64_t read_sz = readlen;
         int64_t read_bytes = 0;
-        while(retries>0  && msg_bytes<read_sz ){
+       while(retries<TRNIF_READ_RETRIES_CT  && msg_bytes<read_sz ){
 //            fprintf(stderr,"%s:%d msg_bytes[%lld] retries[%d/%d] readlen[%u]\n",__FUNCTION__,__LINE__,msg_bytes,TRNIF_READ_RETRIES_CT-retries,TRNIF_READ_RETRIES_CT,readlen);
-            if( (read_bytes=msock_recvfrom(peer->sock, peer->addr,pread,readlen,0)) > 0 ){
+            if( (read_bytes=msock_recv(peer->sock, pread,readlen,0)) > 0 ){
                 readlen   -= read_bytes;
                 msg_bytes += read_bytes;
                 pread     += read_bytes;
             }else{
                 int errsave=errno;
                 if(errsave!=EAGAIN){
-	                fprintf(stderr,"%s:%d ERR recv[%d/%s]\n",__FUNCTION__,__LINE__,errsave,strerror(errsave));
+	                fprintf(stderr,"%s:%d ERR recv msg_bytes[%d] [%d/%s]\n",__FUNCTION__,__LINE__,msg_bytes,errsave,strerror(errsave));
                     MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
                 }
                 if(NULL!=errout){
                		*errout = errsave;
                 }
             }
-            if(msg_bytes==0 && retries==TRNIF_READ_RETRIES_CT)
+            if(msg_bytes==0 && retries==0)
                 break;
             mtime_delay_ms(TRNIF_READ_DELAY_CT);
-            retries--;
+            retries++;
         }
         
 //        fprintf(stderr,"%s:%d msg_bytes[%lld] retries[%d/%d] readlen[%u]\n",__FUNCTION__,__LINE__,msg_bytes,TRNIF_READ_RETRIES_CT-retries,TRNIF_READ_RETRIES_CT,readlen);
@@ -530,7 +530,10 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
     }else{
         MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
     }
-
+    
+    if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+   	 PDPRINT((stderr,"%s:%d RET msg_bytes[%d] retries[%d]\n",__FUNCTION__,__LINE__,msg_bytes,retries));
+    }
     return retval;
 }
 // End function
@@ -548,13 +551,13 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
         wcommst_t *ct = NULL;
         // dereference resource bundle
         wtnav_t *trn = (wtnav_t *) self->rr_res;
-        
         // deserialize message bytes
         wcommst_unserialize(&ct,(char *)msg,TRN_MSG_SIZE);
         char msg_type =wcommst_get_msg_type(ct);
         
-        if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG)))
-        wcommst_show(ct,true,5);
+        if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+        	wcommst_show(ct,true,5);
+        }
 
         switch (msg_type) {
               
@@ -590,7 +593,11 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 commst_estimate_pose(trn, ct,TRN_POSE_MLE);
                 // serialize updated message
                 send_len=wcommst_serialize(&msg_out,ct,TRN_MSG_SIZE);
-                fprintf(stderr,"ct[%p] msg_out[%p] send_len[%ld]\n",ct,msg_out,send_len);
+                
+                if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+                    PDPRINT((stderr,"MLE ct[%p] msg_out[%p] send_len[%ld]\n",ct,msg_out,send_len));
+//                    wcommst_show(ct,true,5);
+                }
                 break;
                 
             case TRN_MSG_MMSE:
@@ -598,7 +605,12 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 commst_estimate_pose(trn, ct,TRN_POSE_MMSE);
                 // serialize updated message
                 send_len=wcommst_serialize(&msg_out,ct,TRN_MSG_SIZE);
-                break;
+                
+                if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+                    PDPRINT((stderr,"MMSE ct[%p] msg_out[%p] send_len[%ld]\n",ct,msg_out,send_len));
+//                    wcommst_show(ct,true,5);
+                }
+               break;
                 
             case TRN_MSG_LAST_MEAS:
                 // get status, return ACK
@@ -614,6 +626,10 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 // get status, return ACK
                 // (parameter set accordingly)
                 send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, wtnav_get_num_reinits(trn));
+                if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+                    PDPRINT((stderr,"N_REINITS ct[%p] msg_out[%p] send_len[%ld]\n",ct,msg_out,send_len));
+//                    mfu_hex_show(msg_out, 128, 16, true, 5);
+                }
                 break;
 
             case TRN_MSG_FILT_TYPE:
@@ -718,9 +734,13 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
         }
         
         if(send_len>0){
-        	retval=s_trnif_dfl_send_tcp(peer, msg_out, send_len, errout);
+            retval=s_trnif_dfl_send_tcp(peer, msg_out, send_len, errout);
+            if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
+                PDPRINT((stderr,"SEND_LEN>0 msg_type[%c/%02X] peer[%s:%s] %lf\n",(msg_type>0x20?msg_type:'.'), msg_type, peer->chost, peer->service, mtime_dtime()));
+                mfu_hex_show(msg_out, 128, 16, true, 5);
+            }
         }else{
-            PDPRINT((stderr,"SEND_LEN<=0 type [%c/%02X] from peer[%s:%s] %lf\n",ct,msg_type,msg_type,peer->chost,peer->service,mtime_dtime()));
+            PDPRINT((stderr,"SEND_LEN<=0 type [%c/%02X] peer[%s:%s] %lf\n",(msg_type>0x20?msg_type:'.'),msg_type, peer->chost, peer->service, mtime_dtime()));
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_HND]);
 		 }
 
