@@ -70,7 +70,7 @@ init_vars(){
     APP_CMD="/usr/local/bin/mbtrnpp"
     # log directory
 #    OPT_LOGDIR="--log-directory=/home/mappingauv/mbtrnpptest"
-	OPT_LOGDIR="--log-directory=${TRN_LOGFILES:-/cygdrive/d/cygwin64/mbtrnpp-logs}"
+	OPT_LOGDIR="--log-directory=${TRN_LOGFILES:-/cygdrive/d/cygwin64/mbtrnpp-logs}/mbtrnpp"
 
     # input source
     # Define socket input
