@@ -301,6 +301,9 @@ extern "C" {
     
     void msock_set_debug(int level);
     
+    int msock_get_opt(msock_socket_t *self, int opt_name, void *optval, socklen_t *optlen);
+    int msock_set_opt(msock_socket_t *self, int opt_name, const void *optval, socklen_t optlen);
+    
     int msock_test();
     
 #ifdef __cplusplus

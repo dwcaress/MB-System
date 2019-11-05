@@ -894,6 +894,16 @@ msock_socket_t *msock_wrap_fd(int fd)
 }
 // End function msock_wrap_fd
 
+
+int msock_get_opt(msock_socket_t *self, int opt_name, void *optval, socklen_t *optlen)
+{
+    return getsockopt(self->fd,SOL_SOCKET,opt_name,optval,(socklen_t *)optlen);
+}
+int msock_set_opt(msock_socket_t *self, int opt_name, const void *optval, socklen_t optlen)
+{
+    return setsockopt(self->fd,SOL_SOCKET,opt_name,optval,(socklen_t)optlen);
+}
+
 #ifdef WITH_MSOCKET_TEST
 /// @fn int32_t msock_test()
 /// @brief test socket API
