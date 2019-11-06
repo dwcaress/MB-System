@@ -16,7 +16,7 @@
 
 #define MAX_CROSS_BEAM_COMPARISONS  5
 
-double
+double 
 WeightArray::
 operator[](int index){
 	if(index < 0 || index >= this->size){
@@ -66,38 +66,38 @@ setModifiedWeighting(const int use)
   TNavFilter::setModifiedWeighting(TRN_FORCE_SUBCL);
   logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::setModifiedWeighting umw: %d \n",
        useModifiedWeighting);
-
-
+  
+  
   //filter configuration set by 1s digit
   //filter comparison set by 10s digit
   //Threshold for inter-filter distance (in stdev) set by 100s digit
   //threshold for inter filter weight ratio set by 10000s and 1000s digits
-
+  
   //0 means use current value for the thresholds
-
+  
   int slice;
   slice = (use % 100000 / 1000);//2 decimil digits
   if(slice > 0){
 	  this->filterComparisonWeightRatioThreshold = (double) slice / 100.0;
   }
-
+  
   slice = (use % 1000) / 100;
   if(slice > 0){
 	  this->filterComparisonGaussianDistanceThreshold = (double) slice;
   }
-
+  
   slice = (use % 100) / 10;
   this->filterComparison = slice;
-
+  
   slice = use % 10;
   this->filterConfiguration = slice;
-
-
+  
+  
   logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),
 	"TNavBF::Filter configuration: %d Filter comparison: %d Distance threshold %0.1f Weight ratio threshold %0.2f\n",
-	this->filterConfiguration, this->filterComparison,
+	this->filterConfiguration, this->filterComparison, 
 	this->filterComparisonGaussianDistanceThreshold, this->filterComparisonWeightRatioThreshold);
-
+  
   int currentNF;
   switch(filterConfiguration){
 	  case 0:
@@ -194,9 +194,9 @@ initFilter(poseT& initNavPose) {
 		}
 		this->depthBiasCov[filterIndex] = 25;
 	}
+	
 
-
-
+	
 	// So that terrainMap->loadSubMap can tell when to switch tiles.
 	navData_x_ = initNavPose.x;
 	navData_y_ = initNavPose.y;
@@ -209,7 +209,7 @@ bool
 TNavBankFilter::
 measUpdate(measT& currMeas) {
 	this->useModifiedWeighting = TRN_FORCE_SUBCL;
-
+	
 	Matrix beamsVF(3, currMeas.numMeas);
 	Matrix tempBeamsVF(3, currMeas.numMeas);
 	Matrix beamsIF(3, currMeas.numMeas);
@@ -228,7 +228,7 @@ measUpdate(measT& currMeas) {
 	double totalVar[currMeas.numMeas];
 	double mapVar = 1;//map variance for adding into sensor variance
 	double modMapVar = 0.01;//map variance for calculating delta_rms and alpha
-
+	
 	// initialize beamIndices
 	// some C versions may not permit array[n]={0} initialization
 	for(int i=0;i<currMeas.numMeas;i++)beamIndices[i]=0;
@@ -250,7 +250,7 @@ measUpdate(measT& currMeas) {
 
 	logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::Measurements Projected \n");
 	logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::Beam Correspondances %i %i %i %i %i %i %i %i %i %i %i\n",
-	beamIndices[0], beamIndices[1], beamIndices[2], beamIndices[3], beamIndices[4],
+	beamIndices[0], beamIndices[1], beamIndices[2], beamIndices[3], beamIndices[4], 
 	beamIndices[5], beamIndices[6], beamIndices[7], beamIndices[8], beamIndices[9], beamIndices[10] );
 
 	logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG), "TNavBF:: *** beamsVF.Ncols() = %d ***", beamsVF.Ncols());
@@ -322,7 +322,7 @@ measUpdate(measT& currMeas) {
 				//Edit to allow using only one beam from a measurement
 				// sets this->tempUseBeam
 
-
+				
 				getExpectedMeasDiffParticle(allParticles[i], beamsVF, currMeas.ranges, beamIndices, mapVar);
 
 				for( int indx=0; indx < beamsVF.Ncols(); indx++ )
@@ -397,7 +397,7 @@ measUpdate(measT& currMeas) {
 				logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),
 					"Forcing Subcloud Comparison\n");
 			}
-
+			
 			for(int filterIndex = 0; filterIndex < this->numFilters; filterIndex++){
 
 				bfLogs[filterIndex]->setUsedBeams(nBeamsUsed);
@@ -405,29 +405,29 @@ measUpdate(measT& currMeas) {
 				sumMeasWeights = 0;
 				sumWeights = 0;
 				sumSquaresWeights = 0;
-
+				
 				bool conditionForUsingBeamInFilter[TRN_MAX_BEAMS];
 				for(int indexM = 0; indexM < beamsVF.Ncols(); indexM++){
 					//Beam-Filter selection goes here
 					//two stage selection:
 					//- stage 1 is beam based; if doing area selection, filters use all beams
 					//- stage 2 is area based; the filter selects the regions of the map to treat the expected measurements as if they were Nan
-
-
+					
+					
 					//filterConfiguration sets numFilters
 					//switch(configuration) sets conditionForUsingBeamInFilter
 					//switch(configuration) sets AreaCheckFunction
 					//- each AreaCheckFunction takes filterIndex and beamEndPoint and returns bool treatExpectedMeasurementAsNan
 					//configuration sets bool reinitOnConvergence
-
+					
 					/* DVL
-					#
-					#                  x
-					#                  ^
-					#                  |
-					#                1 | 3
-					#                  |------> y
-					#                4   2
+					#                                                                        
+					#                  x                                                     
+					#                  ^                                                          
+					#                  |                                                     
+					#                1 | 3                                                   
+					#                  |------> y                                            
+					#                4   2                                                   
 #                       */
 					switch(this->filterConfiguration){
 					//configurations:
@@ -435,7 +435,7 @@ measUpdate(measT& currMeas) {
 						case 0:
 							conditionForUsingBeamInFilter[indexM] = true;
 							break;
-
+						
 						//2 beam detection L/R
 						case 1:
 							//dvl test is different from reson test
@@ -464,7 +464,7 @@ measUpdate(measT& currMeas) {
 									conditionForUsingBeamInFilter[indexM] = (filterIndex == 1);
 								}
 							}
-							//3 filter only with
+							//3 filter only with 
 							else if(currMeas.dataType == TRN_SENSOR_MB){
 								if(beamIndices[indexM] < 5){
 									conditionForUsingBeamInFilter[indexM] = (filterIndex == 0);
@@ -495,51 +495,51 @@ measUpdate(measT& currMeas) {
 					//3 along track stripes L/M/R
 					//across track reinit once converged -- init new filter every N meters
 					//mix of across track reinit once converged and 3 along track
-
+					
 					}
 				}
-
-
-
+				
+				
+				
 				for(int indexM = 0; indexM < beamsVF.Ncols(); indexM++){
 					double K = this->depthBiasCov[filterIndex] / (this->depthBiasCov[filterIndex] + mapVar + currMeas.covariance[beamIndices[indexM]]);
 					if(conditionForUsingBeamInFilter[indexM]){
-
+						
 						bool loggedNan = false;
 						for(int indexP = 0; indexP < nParticles; indexP++){
 							if(this->treatBeamAsNan(filterIndex, beamsIF.SubMatrix(1,3,indexM+1,indexM+1), allParticles[indexP])){
 								continue;
 							}
 							double temp = (1-K) * this->depthBias[filterIndex][indexP] + K * allParticles[indexP].expectedMeasDiff[indexM];
-
+							
 							if(ISNIN(temp)){
 								if(!loggedNan){
 									logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),
 										"Filter %i\tdeapthBias would have been set to Nan. indexP: %i\tindexM: %i\n", filterIndex, indexP, indexM);
 									logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),
-										"Old Depth Bias: %0.2f\tDepthBiasCov: %0.2f\tK: %0.3f\tExpectedMeasDiff: %0.2f\tcurrMeas.covariance: %0.2f\n",
+										"Old Depth Bias: %0.2f\tDepthBiasCov: %0.2f\tK: %0.3f\tExpectedMeasDiff: %0.2f\tcurrMeas.covariance: %0.2f\n", 
 										this->depthBias[filterIndex][indexP], this->depthBiasCov[filterIndex], K, allParticles[indexP].expectedMeasDiff[indexM], currMeas.covariance[beamIndices[indexM]]);
 									loggedNan = true;
 								}
 							}else{
 								this->depthBias[filterIndex][indexP] = temp;
 							}
-
+							
 							if(ISNIN(this->depthBias[filterIndex][indexP])){
 								this->depthBias[filterIndex][indexP] = 0.0;
 								logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),
 									"Filter %i\tdeapthBias set to zero to clear nan issue. indexP: %i\n", filterIndex, indexP);
 							}
-
+							
 						}
 						this->depthBiasCov[filterIndex] = (1-K) * this->depthBiasCov[filterIndex];
 					}
 				}
-
-
-
-
-
+				
+				
+				
+				
+				
 				//BEGIN SUBCLOUD COMPARISON
 				//if(!temp && USE_SUBCLOUD_COMPARISON){
 				if((!temp && TRN_WT_SUBCL == this->useModifiedWeighting ) || (TRN_FORCE_SUBCL == this->useModifiedWeighting)){
@@ -590,7 +590,7 @@ measUpdate(measT& currMeas) {
 						}
 						logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),
 							"Filter %i\tbeam number: %i\tnum in subcloud: %i\tnum not in subcloud: %i\n", filterIndex, indexM, numParticlesWithBeamM, nonSubcloudCount);
-
+						
   					bfLogs[filterIndex]->setSubcloudCounts(indexM, numParticlesWithBeamM);
 
 						if((numParticlesWithBeamM < 0.001 * nParticles) || (sumWeightsInSubcloud < 0.001)){
@@ -606,11 +606,11 @@ measUpdate(measT& currMeas) {
 						double partialDeltaRmsComputation = 0;
 						double partialOneMinusSumSquareWeights = 1;
 						double subcloudInnovationVariance = 0.0;
-
+						
 						double adjustedInnovation;
 						for(int indexS = 0; indexS < numParticlesWithBeamM; indexS++){
 							adjustedInnovation = allParticles[particleIndicies[indexS]].expectedMeasDiff[indexM] - this->depthBias[filterIndex][particleIndicies[indexS]];//averageInnovation[particleIndicies[indexS]];
-
+							
 							//weight update
 							weightUpdatesForSubcloud[indexS] = exp(-0.5 * pow(adjustedInnovation,2) / totalVariance);
 
@@ -621,21 +621,21 @@ measUpdate(measT& currMeas) {
 							meanExpectedMeasurementDifference += adjustedInnovation * tempSubcloudWeights[indexS];
 							partialDeltaRmsComputation += adjustedInnovation * adjustedInnovation * tempSubcloudWeights[indexS];
 							partialOneMinusSumSquareWeights -= tempSubcloudWeights[indexS] * tempSubcloudWeights[indexS];
-
+							
 							if(ISNIN(meanExpectedMeasurementDifference)){
 								logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),
-									"Filter %i\tSubcloudIndex: %i\ttempSubcloudWeight: %f\tadjustedInnovaiton: %f\texpectedMeasDiff: %f\tdepthBias: %f\tdepthCov: %f\n",
-									filterIndex, indexS, tempSubcloudWeights[indexS], adjustedInnovation, allParticles[particleIndicies[indexS]].expectedMeasDiff[indexM],
+									"Filter %i\tSubcloudIndex: %i\ttempSubcloudWeight: %f\tadjustedInnovaiton: %f\texpectedMeasDiff: %f\tdepthBias: %f\tdepthCov: %f\n", 
+									filterIndex, indexS, tempSubcloudWeights[indexS], adjustedInnovation, allParticles[particleIndicies[indexS]].expectedMeasDiff[indexM], 
 									this->depthBias[filterIndex][particleIndicies[indexS]], this->depthBiasCov[filterIndex]);
 								break;
 							}
-
+							
 							//for particle NIS calculations; part of Subcloud NIS
-							subcloudInnovationVariance += pow(adjustedInnovation, 2) * this->weights[filterIndex].weights[particleIndicies[indexS]] -
+							subcloudInnovationVariance += pow(adjustedInnovation, 2) * this->weights[filterIndex].weights[particleIndicies[indexS]] - 
 								pow(adjustedInnovation * this->weights[filterIndex].weights[particleIndicies[indexS]], 2);
-
+							
 							tempWindowedNis[particleIndicies[indexS]] += pow(adjustedInnovation,2) / (totalVariance + subcloudInnovationVariance);
-
+							
 							/*
 							if(indexS == 0){
 								printf("averageInnovation: %f\tinnovation: %f\tadjustedInnovaiton%f\n", averageInnovation[particleIndicies[indexS]],
@@ -648,20 +648,20 @@ measUpdate(measT& currMeas) {
 						double delta_rms_squared = partialDeltaRmsComputation - meanExpectedMeasurementDifference * meanExpectedMeasurementDifference - (partialOneMinusSumSquareWeights * modMapVar);
 						logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),
 							"Filter %i\tpartialDeltaRmsComputation: %f\tterrainVariance: %f\t1-SumSquareWeights: %f\n", filterIndex, partialDeltaRmsComputation, partialDeltaRmsComputation - meanExpectedMeasurementDifference * meanExpectedMeasurementDifference, partialOneMinusSumSquareWeights);
-
+						
 						if(delta_rms_squared <= 0){
 							alpha = 0;
 						}
 						else{
-							alpha = (delta_rms_squared *(mapVar + currMeas.covariance[beamIndices[indexM]]))
+							alpha = (delta_rms_squared *(mapVar + currMeas.covariance[beamIndices[indexM]])) 
 								/ ((delta_rms_squared + modMapVar) * (mapVar + currMeas.covariance[beamIndices[indexM]]) + (modMapVar * (currMeas.covariance[beamIndices[indexM]] + mapVar)));
 						}
 						logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),
 							"Filter %i\tmeanExpectedMeasDiff: %f\tdelta_rms_squared: %f\talpha: %f\n", filterIndex, meanExpectedMeasurementDifference, delta_rms_squared, alpha);
-
+						
 						bfLogs[filterIndex]->setMeanExpMeasDif(indexM, meanExpectedMeasurementDifference);
 						bfLogs[filterIndex]->setAlpha(indexM, alpha);
-
+						
 						//apply alpha
 						for(int indexS = 0; indexS < numParticlesWithBeamM; indexS++){
 							weightUpdatesForSubcloud[indexS] = pow(weightUpdatesForSubcloud[indexS], alpha);
@@ -701,17 +701,17 @@ measUpdate(measT& currMeas) {
 						for(int indexW = 0; indexW < 20; indexW ++){
 							//old particleNisValue += allParticles[indexP].windowedNis[indexW];
 							particleNisValue += this->windowedNis[filterIndex][indexP][indexW];
-
+							
 						}
-
+						
 						this->SubcloudNIS += this->weights[filterIndex].weights[indexP] * particleNisValue/20.0;
-
+						
 					}
 					logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),
 						"Filter %i\tSubcloudNIS: %f\n", filterIndex, this->SubcloudNIS);
 
 					bfLogs[filterIndex]->setSubcloudNIS(this->SubcloudNIS);
-
+				
 
 					//check for nan values before allowing the update into the filter weights
 					bool nanWeights = false;
@@ -756,12 +756,12 @@ measUpdate(measT& currMeas) {
 				if((!temp && TRN_WT_XBEAM == this->useModifiedWeighting) &&
 					!(SEARCH_ALIGN_STATE || ALLOW_ATTITUDE_SEARCH || SEARCH_PSI_BERG)){
 					// !temp means no beams are good for normal comparison
-					//the SEARCH_* flags would have each particle have a different orientation relative to the map,
+					//the SEARCH_* flags would have each particle have a different orientation relative to the map, 
 					//	which isn't accounted for yet.
 					logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),
 						"Filter %i\tWeighting particles with cross beam comparison.\n", filterIndex);
 
-					//compile a list of beams to use for cross beam comparison
+					//compile a list of beams to use for cross beam comparison 
 					//	can be different beams for each particle (thats the point)
 					//	max of MAX_CROSS_BEAM_COMPARISONS
 					//	Also find the particle with the fewest good beams in case it's less
@@ -775,7 +775,7 @@ measUpdate(measT& currMeas) {
 					int minNumBeams = beamsVF.Ncols();
 					for(int indexP = 0; indexP < nParticles; indexP++) {
 						for(int indexM=0; indexM < beamsVF.Ncols(); indexM++){
-
+							
 							// No nan beams, and no beams which can be used normaly
 							// if(!(isnan(allParticles[indexP].expectedMeasDiff[indexM]) || useBeam[indexM])){
 							if(!(ISNIN(allParticles[indexP].expectedMeasDiff[indexM]) || useBeam[indexM] || !conditionForUsingBeamInFilter[indexM])){
@@ -819,7 +819,7 @@ measUpdate(measT& currMeas) {
 								maxSensorVar = currMeas.covariance[beamIndices[goodBeamIndicies[indexP * MAX_CROSS_BEAM_COMPARISONS + beamNumber]]];
 							}
 
-							tempWeightUpdate[indexP] = exp(-0.5 * pow(allParticles[indexP].expectedMeasDiff[goodBeamIndicies[indexP * MAX_CROSS_BEAM_COMPARISONS + beamNumber]] -
+							tempWeightUpdate[indexP] = exp(-0.5 * pow(allParticles[indexP].expectedMeasDiff[goodBeamIndicies[indexP * MAX_CROSS_BEAM_COMPARISONS + beamNumber]] - 
 																		this->depthBias[filterIndex][indexP],2) / totalVariance);
 							double beamEndpointTerrainDepth = 0;
 							beamEndpointTerrainDepth = allParticles[indexP].position[2] + beamsVF(3, goodBeamIndicies[indexP * MAX_CROSS_BEAM_COMPARISONS + beamNumber] + 1);
@@ -889,7 +889,7 @@ measUpdate(measT& currMeas) {
 						totalVar[i] = mapVar + currMeas.covariance[beamIndices[i]];
 						logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBankFilter::Filter %i\tVariance for beam %i is %.2f \n", filterIndex, beamIndices[i-1], totalVar[i]);
 					}
-				}
+				}				
 				else
 				{
 					//Implement modified algorithm
@@ -946,7 +946,7 @@ measUpdate(measT& currMeas) {
 						//ALPHA
 						// Valid values are 0 <= alpha <= 1
 						// Use -0.1 as an encoding for NaN
-						//
+						// 
 						if(totalVar[i] > 0.0){
 							//logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"Alpha[%u]\t%f\n", i, currMeas.alphas[i]);
 							currMeas.alphas[i] = (baseSensorVar + beamVar[i] + modMapVar) / totalVar[i];
@@ -954,7 +954,7 @@ measUpdate(measT& currMeas) {
 
 						}else{
 							// NaN is encoded as a value < 0
-							//
+							// 
 							currMeas.alphas[i] = -0.1;
 
 						}
@@ -1081,8 +1081,8 @@ measUpdate(measT& currMeas) {
 				else{
 					for(i = 0; i < nParticles; i++) {
 						this->weights[filterIndex].weights[i] *= currMeasWeights[i] / sumWeights;
-						//TODO if inovations are too large, particle weights go nan.
-						//currMeasWeight was not nan for the particular failure I examined.
+						//TODO if inovations are too large, particle weights go nan.  
+						//currMeasWeight was not nan for the particular failure I examined.  
 						//sumWeights == 0.0
 
 						sumSquaresWeights += pow(this->weights[filterIndex].weights[i], 2);
@@ -1096,16 +1096,16 @@ measUpdate(measT& currMeas) {
 					}
 				}
 				//effSampSize = 1.0 / sumSquaresWeights;
-
+			
 			bfLogs[filterIndex]->write();
 
 			}
 			if(saveDirectory != NULL) {
 				measWeightsFile << endl;
 			}
-
+			
 		}
-
+		
 	}
 
 #ifdef USE_MATLAB
@@ -1118,18 +1118,18 @@ measUpdate(measT& currMeas) {
 	//if measurement successfully added, recheck estimator convergence
 	//if(successfulMeas)
 	//   checkConvergence();
-
-
+	
+	
 	poseT biasPose;
 	for(int filterIndex = 0; filterIndex < this->numFilters; filterIndex++){
 		this->computeMMSE(&biasPose, filterIndex);
 		biasPose -= *lastNavPose;
-
+	
 		logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),
-			"Filter %i\tNorthBias: %0.1f\tEastBias: %0.1f\tDepthBias: %0.1f\tNorthVariance: %0.1f\tEastVariance: %0.1f\tDepthVariance: %0.1f\tthis->DepthBiasCov: %0.1f\n",
+			"Filter %i\tNorthBias: %0.1f\tEastBias: %0.1f\tDepthBias: %0.1f\tNorthVariance: %0.1f\tEastVariance: %0.1f\tDepthVariance: %0.1f\tthis->DepthBiasCov: %0.1f\n", 
 			filterIndex, biasPose.x, biasPose.y, biasPose.z, biasPose.covariance[0], biasPose.covariance[2], biasPose.covariance[5], this->depthBiasCov[filterIndex]);
 	}
-
+	
 	return successfulMeas;
 
 }
@@ -1187,44 +1187,44 @@ motionUpdate(poseT& currNavPose) {
 	double driftStddev;
 	double fractionProbMassAdjacent, fractionProbMassCorner, fractionProbMassRemaining;
 	double sumWeights;
-
+	
 	//Update each particle's position individually
 	cep = (this->vehicle->driftRate / 100.0) * (sqrt(diffPose.x * diffPose.x + diffPose.y * diffPose.y));
 
 	//TODO:  check conversion from CEP to Stddev, I don't feel like there should be a sqrt outside the CEP
 	driftStddev = MOTION_NOISE_MULTIPLIER * sqrt(cep / sqrt(-2 * (log(1 - 0.5))));
-
+	
 	for(int filterIndex = 0; filterIndex < numFilters; filterIndex++){
 		this->depthBiasCov[filterIndex] += driftStddev * driftStddev;
 	}
-
+	
 	// Assumes: driftStddev << histogram resolution (2m)
 	fractionProbMassAdjacent = driftStddev * 0.0362526;
 	fractionProbMassCorner = driftStddev * 0.00155204;
 	fractionProbMassRemaining = 1.0 - 4 * fractionProbMassCorner - 4 * fractionProbMassAdjacent;
 	//printf("FIND THIS %f\t%f\t%f\t%f\n",fractionProbMassRemaining, fractionProbMassAdjacent, fractionProbMassCorner, driftStddev);
-
-
+	
+	
 	for(i = 0; i < nParticles; i++) {
 		motionUpdateParticle(allParticles[i], diffPose);//, velocity_sf_sigma, gyroStddev);
 	}
-
+	
 	for(int filterIndex = 0; filterIndex < this->numFilters; filterIndex++){
 		WeightArray tempWeights(this->nParticles);
 		sumWeights = 0;
-
+		
 		for(i = 0; i < nParticles; i++) {
 			tempWeights.weights[i] = this->weights[filterIndex].weights[i];
 		}
 		for(i = 0; i < nParticles; i++) {
-			this->weights[filterIndex].weights[i] = fractionProbMassRemaining * tempWeights[i] +
-									fractionProbMassAdjacent * tempWeights[i + this->PmfGridSize] +
-									fractionProbMassAdjacent * tempWeights[i - this->PmfGridSize] +
-									fractionProbMassAdjacent * tempWeights[i + 1] +
-									fractionProbMassAdjacent * tempWeights[i - 1] +
-									fractionProbMassCorner * tempWeights[i + (this->PmfGridSize + 1)] +
-									fractionProbMassCorner * tempWeights[i + (this->PmfGridSize - 1)] +
-									fractionProbMassCorner * tempWeights[i - (this->PmfGridSize + 1)] +
+			this->weights[filterIndex].weights[i] = fractionProbMassRemaining * tempWeights[i] + 
+									fractionProbMassAdjacent * tempWeights[i + this->PmfGridSize] + 
+									fractionProbMassAdjacent * tempWeights[i - this->PmfGridSize] + 
+									fractionProbMassAdjacent * tempWeights[i + 1] + 
+									fractionProbMassAdjacent * tempWeights[i - 1] + 
+									fractionProbMassCorner * tempWeights[i + (this->PmfGridSize + 1)] + 
+									fractionProbMassCorner * tempWeights[i + (this->PmfGridSize - 1)] + 
+									fractionProbMassCorner * tempWeights[i - (this->PmfGridSize + 1)] + 
 									fractionProbMassCorner * tempWeights[i - (this->PmfGridSize - 1)];
 			sumWeights += this->weights[filterIndex].weights[i];
 		}
@@ -1232,7 +1232,7 @@ motionUpdate(poseT& currNavPose) {
 			this->weights[filterIndex].weights[i] = this->weights[filterIndex].weights[i] / sumWeights;
 		}
 	}
-
+	
 	//Apply attitude measurement update if integrating for phi/theta states
 	if(INTEG_PHI_THETA) {
 		attitudeMeasUpdate(currNavPose);
@@ -1258,13 +1258,13 @@ motionUpdate(poseT& currNavPose) {
 
 	plotParticleDistMatlab(allParticles, "figure(3)");
 #endif
-
+	
 	return;
 }
 
 //********************************************************************************
 //
-// Maxiumum Likelihood, the particle with the highest weight.
+// Maxiumum Likelihood, the particle with the highest weight.  
 
 void
 TNavBankFilter::
@@ -1299,11 +1299,11 @@ TNavBankFilter::
 computeMMSE(poseT* mmsePose) {
 	//logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG), "TNavBF::MMSE all\n");
 	poseT mmseArray[MAX_NUM_FILTERS];
-
+	
 	for(int filterIndex = 0; filterIndex < this->numFilters; filterIndex++){
 		computeMMSE(&mmseArray[filterIndex], filterIndex);
 	}
-
+	
 	//normed Gaussian approximation fIlter distances calculations
 	double gaussianFilterDistances[MAX_NUM_FILTERS][MAX_NUM_FILTERS];
 	poseT distancePose;
@@ -1314,20 +1314,20 @@ computeMMSE(poseT* mmsePose) {
 		for(int secondFilterIndex = filterIndex+1; secondFilterIndex < this->numFilters; secondFilterIndex++){
 			distancePose = mmseArray[filterIndex];
 			distancePose -= mmseArray[secondFilterIndex];
-
+			
 			tempCov.Row(1) << mmseArray[filterIndex].covariance[0] + mmseArray[secondFilterIndex].covariance[0];
 			tempCov.Row(2) << mmseArray[filterIndex].covariance[1] + mmseArray[secondFilterIndex].covariance[1] << mmseArray[filterIndex].covariance[2] + mmseArray[secondFilterIndex].covariance[2];
 			tempCov.Row(3) << 0.0 << 0.0 << mmseArray[filterIndex].covariance[5] + mmseArray[secondFilterIndex].covariance[5];
-
+			
 			tempDist(1) = distancePose.x;
 			tempDist(2) = distancePose.y;
 			tempDist(3) = distancePose.z;
-
+			
 			ColumnVector temp(1);
 			temp = (tempDist.t() * (tempCov.i() * tempDist));
-
+			
 			normedDistance = pow(temp(1), 0.5);
-
+			
 			gaussianFilterDistances[filterIndex][secondFilterIndex] = normedDistance;
 			logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG), "filterIndex: %d\tindex2: %d\tnormedDistance: %0.2f\n", filterIndex, secondFilterIndex, normedDistance);
 			/*logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG), "|%3.1f|\t|%3.1f\t%3.1f\t%3.1f|\t|%3.1f|\n", tempDist(1), tempCov(1,1), tempCov(1,2), tempCov(1,3), tempDist(1));
@@ -1341,7 +1341,7 @@ computeMMSE(poseT* mmsePose) {
 			*/
 		}
 	}
-
+	
 	//weight ratio metric calculations
 	//high weight particle (of filter 1) weight ratio to same locations of filter 2
 	double highWeightParticleWeightRatio[MAX_NUM_FILTERS][MAX_NUM_FILTERS];
@@ -1361,7 +1361,7 @@ computeMMSE(poseT* mmsePose) {
 				//Earth Movers Distance
 				//	~150,000 element simplex problem after size reducing approximations
 			}
-
+			
 			//log results of filter comparisons
 			if(sumWeightsInFilterOne >0){
 				logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG), "TNavBF::ratio of weights for high weight particles in filter %d and %d is %0.2f\n", filterIndex, secondFilterIndex, sumWeightsInFilterTwo/sumWeightsInFilterOne);
@@ -1370,10 +1370,10 @@ computeMMSE(poseT* mmsePose) {
 				logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG), "TNavBF::ratio of weights for high weight particles -- filter %d had non-positive sumWeights: %0.2f", filterIndex, sumWeightsInFilterOne);
 				highWeightParticleWeightRatio[filterIndex][secondFilterIndex] = 0;
 			}
-
+			
 		}
 	}
-
+	
 	//filter agreement calculations
 	int agreementCounts[MAX_NUM_FILTERS];
 	for(int index=0; index < this->numFilters; index++){agreementCounts[index] = 0;}
@@ -1382,7 +1382,7 @@ computeMMSE(poseT* mmsePose) {
 	int minAgreements = 0;
 	double covarianceOfMinAgreements = 0;
 	int bestIndex = -1;
-
+	
 	switch(this->filterComparison){
 		case 0://use neither; return tightest converged (trace of covariance)
 			*mmsePose = mmseArray[0];
@@ -1394,14 +1394,14 @@ computeMMSE(poseT* mmsePose) {
 			}
 			logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG), "TNavBF::mmse selected from filter %d\n", bestIndex);
 			break;
-
+		
 		case 1://use Gaussian Approximation normed distance
 			for(int filterIndex = 0; filterIndex < this->numFilters; filterIndex++){
 				for(int secondFilterIndex = filterIndex+1; secondFilterIndex < this->numFilters; secondFilterIndex++){
 					if(gaussianFilterDistances[filterIndex][secondFilterIndex] <= this->filterComparisonGaussianDistanceThreshold){
 						if((mmseArray[filterIndex].covariance[0] < 50) & (mmseArray[filterIndex].covariance[2] < 50) &
 								(mmseArray[secondFilterIndex].covariance[0] < 50) & (mmseArray[secondFilterIndex].covariance[2] < 50)){// both converged
-
+							
 							agreementCounts[filterIndex]++;
 							agreementCounts[secondFilterIndex]++;
 						}else{//not converged enough to count as agreement
@@ -1410,7 +1410,7 @@ computeMMSE(poseT* mmsePose) {
 						}
 					}
 				}
-
+				
 				//track filter with the most agreements
 				if(agreementCounts[filterIndex] > minAgreements){//return the filter with the most agreements
 					minAgreements = agreementCounts[filterIndex];
@@ -1423,7 +1423,7 @@ computeMMSE(poseT* mmsePose) {
 					}
 				}
 			}
-
+			
 			//return the mmse from the filter with the most converged agreements
 			if(minAgreements >0){
 				logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG), "TNavBF::mmse selected from filter %d with agreement count: %d\n", bestIndex, minAgreements);
@@ -1452,7 +1452,7 @@ computeMMSE(poseT* mmsePose) {
 				}
 			}
 			break;
-
+		
 		case 2://use weight ratio
 			for(int filterIndex = 0; filterIndex < this->numFilters; filterIndex++){
 				for(int secondFilterIndex = filterIndex+1; secondFilterIndex < this->numFilters; secondFilterIndex++){
@@ -1462,9 +1462,9 @@ computeMMSE(poseT* mmsePose) {
 					if(highWeightParticleWeightRatio[secondFilterIndex][filterIndex] >= this->filterComparisonWeightRatioThreshold){
 						agreementCounts[secondFilterIndex]++;
 					}
-
+					
 				}
-
+				
 				//track filter with highest number of agreements
 				if(agreementCounts[filterIndex] > minAgreements){//return the filter with the most agreements
 					minAgreements = agreementCounts[filterIndex];
@@ -1476,9 +1476,9 @@ computeMMSE(poseT* mmsePose) {
 						bestIndex = filterIndex;
 					}
 				}
-
+				
 			}
-
+			
 			//return mmse from filter with most agreements
 			if(minAgreements >0){
 				logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG), "TNavBF::mmse selected from filter %d with agreement count: %d\n", bestIndex, minAgreements);
@@ -1489,7 +1489,7 @@ computeMMSE(poseT* mmsePose) {
 				logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG), "TNavBF::no agreement; returning last nav pose\n");
 			}
 			break;
-
+		
 		default:
 			*mmsePose = mmseArray[0];
 			break;
@@ -1504,7 +1504,7 @@ computeMMSE(poseT* mmsePose, int filterIndex){
 	double weight, alpha, temp1, temp2;
 	double sumWeights = 0;
 	poseT tempPose;
-
+	
 	for(i = 0; i < nParticles; i++) {
 		weight = this->weights[filterIndex].weights[i];
 		sumWeights += weight;
@@ -1533,7 +1533,7 @@ computeMMSE(poseT* mmsePose, int filterIndex){
 			tempPose.wy += weight * allParticles[i].gyroBias[0];
 			tempPose.wz += weight * allParticles[i].gyroBias[1];
 		}
-
+		
 	}
 
 	if(sumWeights != 1) {
@@ -1552,7 +1552,7 @@ computeMMSE(poseT* mmsePose, int filterIndex){
 			tempPose.wz /= sumWeights;
 		}
 	}
-
+	
 	for(i = 0; i < nParticles; i++) {
 		weight = this->weights[filterIndex].weights[i];
 		alpha = weight / sumWeights;
@@ -1585,7 +1585,7 @@ computeMMSE(poseT* mmsePose, int filterIndex){
 			tempPose.covariance[44] += temp1 * temp1 * alpha;
 		}
 	}
-
+	
 	tempPose.covariance[5] += this->depthBiasCov[filterIndex];
 	//      logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"\n variance(psi_berg) = %f\n",tempPose.covariance[44]);
 
@@ -1785,16 +1785,16 @@ initVariables() {
 	this->PmfGridResolution = PMF_GRID_RESOLUTION;
 	this->PmfGridSize = PMF_GRID_SIZE;
 	this->nParticles = PMF_GRID_SIZE * PMF_GRID_SIZE;
-
+	
 	this->filterComparisonGaussianDistanceThreshold = 3.0;
     this->filterComparisonWeightRatioThreshold = 0.2;
 	this->filterComparison = 0;
 	this->filterConfiguration = 0;
-
-	logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::nParticles: %d\tnumFilters: %d\tPMF Grid Resolution: %0.1f\tPMF Grid Size: %d\n",
+	
+	logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::nParticles: %d\tnumFilters: %d\tPMF Grid Resolution: %0.1f\tPMF Grid Size: %d\n", 
 		this->nParticles, this->numFilters, this->PmfGridResolution, this->PmfGridSize);
-
-
+	
+	
 	if(this->nParticles > MAX_NUM_PARTICLES){
 		logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::nParticles > MAX_NUM_PARTICLES \n");
 		this->nParticles = MAX_NUM_PARTICLES;
@@ -1803,7 +1803,7 @@ initVariables() {
 		logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::nParticles > MAX_NUM_FILTERS \n");
 		this->numFilters = MAX_NUM_FILTERS;
 	}
-
+	
 }
 
 //********************************************************************************
@@ -1849,7 +1849,7 @@ initParticleDist(particleT& initialGuess) {
 		if(particleFile.is_open()){
 			//Read the number of particles in the file
 			particleFile.getline(temp,10); //First line is the total number of particles in the file
-
+			
 			/*nParticles = atoi(temp);
 			if(nParticles > MAX_PARTICLES){
 				nParticles = MAX_PARTICLES;
@@ -1872,9 +1872,9 @@ initParticleDist(particleT& initialGuess) {
 				particleFile.getline(temp,20,',');
 				this->allParticles[i].position[1] = atof(temp);
 				if(nStates > 2){
-					particleFile.getline(temp,20, ',');
+					particleFile.getline(temp,20, ','); 
 					this->allParticles[i].position[2] = atof(temp);
-				}
+				}		
 				// Estimation of psiBerg
 				if(nStates > 3){
 					particleFile.getline(temp,20); //particleFile.getline(temp,20, ','); //If not the final state specified
@@ -1893,10 +1893,9 @@ initParticleDist(particleT& initialGuess) {
 			sprintf(temp,
 			"TNavBankFilter::initParticleDist() - Error opening file: %s\n",
 			pfname);
-			if(pfname!=NULL)
-        free(pfname);
-			fprintf(stderr, "%s", temp);
-			throw Exception(temp);
+			if(pfname!=NULL)free(pfname);
+				fprintf(stderr, temp);
+				throw Exception(temp);
 		}
 		particleFile.close();
 		if(pfname!=NULL)free(pfname);
@@ -1905,7 +1904,7 @@ initParticleDist(particleT& initialGuess) {
 		// If not using the particle file:
 		//Initialize the particle distribution to a gaussian around the intial guess
 		//Variances defined in particleFilterDefs.h
-
+		
 		for(i = 0; i < nParticles; i++) {
 			allParticles[i] = initialGuess;
 			for(int filterIndex = 0; filterIndex < this->numFilters; filterIndex++){
@@ -1913,23 +1912,23 @@ initParticleDist(particleT& initialGuess) {
 			}
 
 			//initialize positions with uniform distribution (or reinitialize with gaussian)
-
+			
 			/*old fixed 61x61 grid
 			this->allParticles[i].position[0] += (i/61)*2-60;//120m x 120m area at 2m spacing with 3721 (61x61) particles
 			this->allParticles[i].position[1] += (i%61)*2-60;
 			*/
-
+			
 			this->allParticles[i].position[0] += (i/this->PmfGridSize)*this->PmfGridResolution - (this->PmfGridSize - 1.0)/2.0 * this->PmfGridResolution;
 			this->allParticles[i].position[1] += (i%this->PmfGridSize)*this->PmfGridResolution - (this->PmfGridSize - 1.0)/2.0 * this->PmfGridResolution;
-
+			
 			//printf("%f\t%f\n",(i/this->PmfGridSize)*this->PmfGridResolution - (this->PmfGridSize - 1.0)/2.0 * this->PmfGridResolution, (i%this->PmfGridSize)*this->PmfGridResolution - (this->PmfGridSize - 1.0)/2.0 * this->PmfGridResolution);
-
+			
 			this->allParticles[i].position[2] += 0;
-
+			
 		}
-
+		
 	}
-
+	
 	//set size for each weight array
 	for(int filterIndex = 0; filterIndex < this->numFilters; filterIndex++){
 		this->weights[filterIndex].size = this->nParticles;
@@ -1941,7 +1940,7 @@ initParticleDist(particleT& initialGuess) {
 			this->windowIndex[filterIndex][i] = 0;
 			for(int indexW = 0; indexW < 20; indexW ++){
 				//old this->allParticles[i].windowedNis[indexW] = 0;
-				this->windowedNis[filterIndex][i][indexW] = 0;
+				this->windowedNis[filterIndex][i][indexW] = 0; 
 			}
 		}
 	}
@@ -2109,7 +2108,7 @@ homerMeasUpdate(const measT& currMeas) {
 
 //********************************************************************************
 
-bool
+bool 
 TNavBankFilter::
 treatBeamAsNan(int filterIndex, Matrix beamIF, const particleT &particle){
 	//printf("%f\t%f\t%f\n", beamIF(1,1), beamIF(2,1), beamIF(3,1));
@@ -2119,8 +2118,8 @@ treatBeamAsNan(int filterIndex, Matrix beamIF, const particleT &particle){
 		case 2: // three filter beam based
 			return false;
 			break;
-
-
+		
+		
 		case 3: // 6x 20m overlaping stripes; 3 N-S, 3 E-W
 			return ((int)((10*filterIndex + beamIF(1,1) + particle.position[0]) * (filterIndex<3) + (10*filterIndex + beamIF(2,1) + particle.position[1]) * (filterIndex>=3)) % 30) >= 10;
 			break;
@@ -2130,13 +2129,13 @@ treatBeamAsNan(int filterIndex, Matrix beamIF, const particleT &particle){
 		default:
 			return false;
 			break;
-
-
+	
+	
 	//three along track stripes
 	//3 sets of along track stripes (10m wide each)
 	//up to 11 sets of tiles (cardinal, 20m?)
-
-
+	
+	
 	}
 	return false;
 }
@@ -2177,7 +2176,7 @@ getExpectedMeasDiffParticle(particleT& particle, const Matrix& beamsSF, double* 
 	double currAttitude[3] = {particle.attitude[0], particle.attitude[1],
 		particle.attitude[2]
 	};
-
+	
 	//!double beamU[3];		//Used for octree, range
 	double beamVector[3];
 	//float estRange;
@@ -2208,7 +2207,7 @@ getExpectedMeasDiffParticle(particleT& particle, const Matrix& beamsSF, double* 
 
 
 	// Return value: false if no beams should be used; otherwise true.
-	//
+	//	
 	bool goodBeams = false;
 
 	for(i = 0; i < beamsMF.Ncols(); i++) {
@@ -2216,7 +2215,7 @@ getExpectedMeasDiffParticle(particleT& particle, const Matrix& beamsSF, double* 
 		beamVector[1] = beamsMF(2, i + 1);
 		beamVector[2] = beamsMF(3, i + 1);
 
-		tempExpectedMeasDiff[i] =
+		tempExpectedMeasDiff[i] = 
 		terrainMap->GetRangeError(mapVar, particle.position, beamVector, beamRanges[beamIndices[i]]);
 
 		// if(isnan(tempExpectedMeasDiff[i])){
@@ -2254,7 +2253,7 @@ motionUpdateParticle(particleT& particle, poseT& diffPose) {
 		particle.attitude[2]
 	};
 	double vehicleDisp[3];
-
+	
 	//double psiDot, phiDot, thetaDot;
 	Matrix velocity_sf(3, 1);
 	Matrix velocity_vf(3, 1);
@@ -2269,10 +2268,10 @@ motionUpdateParticle(particleT& particle, poseT& diffPose) {
 	double tanTheta = tan(particle.attitude[1]);
 	int i;
 	*/
-
+	
 	//Depth update is given by INS delta z
 	vehicleDisp[2] = diffPose.z;
-
+	
 	//If there is valid GPS data, use the stored INS pose information to perform
 	// the motion update.  Otherwise, use the stored velocity data (from DVL) and
 	// vehicle attitude information from the previous time step to perform the
@@ -2292,11 +2291,11 @@ motionUpdateParticle(particleT& particle, poseT& diffPose) {
 	} else {
 		//Apply bias and scale factor corrections IFF DVL is returning ground
 		//velocity and we are searching over dvl bias/scale factor
-
+		
 		velocity_sf(1, 1) = lastNavPose->vx;
 		velocity_sf(2, 1) = lastNavPose->vy;
 		velocity_sf(3, 1) = lastNavPose->vz;
-
+	
 
 		//Transform sensor frame velocities to vehicle frame:
 		velocity_vf = applyRotation(currDvlAttitude, velocity_sf);
@@ -2313,15 +2312,15 @@ motionUpdateParticle(particleT& particle, poseT& diffPose) {
 		//Compute vehicle displacement based on inertial velocity
 		vehicleDisp[0] = velocity_if(1, 1) * diffPose.time;
 		vehicleDisp[1] = velocity_if(2, 1) * diffPose.time;
-
+	
 	}
-
+	
 	particle.position[0] += vehicleDisp[0];
 	particle.position[1] += vehicleDisp[1];
 	particle.position[2] += vehicleDisp[2];
 
 	//Compute new heading of the particle
-
+	
 	// Not SEARCH_GYRO_BIAS
 	particle.attitude[2] += diffPose.psi;
 
@@ -2332,7 +2331,7 @@ motionUpdateParticle(particleT& particle, poseT& diffPose) {
 		particle.attitude[1] += diffPose.theta;
 	}
 
-
+	
 	return;
 }
 
@@ -2420,7 +2419,7 @@ getDistBounds(double& Nmin, double& Nmax, double& Emin, double& Emax) {
 
 //********************************************************************************
 
-void
+void 
 TNavBankFilter::
 getParticlePose(const particleT& particle, poseT* particlePose) {
 	particlePose->x = particle.position[0];
@@ -2861,3 +2860,5 @@ writeHistDistribToFile(particleT* particles, ofstream& particlesFile) {
 	particlesFile << likeP;
 
 }
+
+

@@ -39,12 +39,12 @@ void mapT::clean() {
 		delete [] xpts;
 		xpts = NULL;
 	}
-
+	
 	if(ypts != NULL) {
 		delete [] ypts;
 		ypts = NULL;
 	}
-
+	
 	depths.CleanUp();
 	depthVariance.CleanUp();
 }
@@ -57,24 +57,24 @@ void mapT::reSampleMap(const double newRes) {
 	Matrix depthVarNew;
 	int i, j, subRes;
 	Matrix subDepthMap;
-
+	
 	//Fill in new xpts/ypts vectors
 	newNumX = int(round(fabs(xpts[numX - 1] - xpts[0]) / newRes)) + 1;
 	newNumY = int(round(fabs(ypts[numY - 1] - ypts[0]) / newRes)) + 1;
 	depthsNew.ReSize(newNumX, newNumY);
 	depthVariance.ReSize(newNumX, newNumY);
-
+	
 	xptsNew = new double[newNumX];
 	yptsNew = new double[newNumY];
-
+	
 	for(i = 0; i < newNumX; i++) {
 		xptsNew[i] = xpts[0] + newRes * i;
 	}
-
+	
 	for(j = 0; j < newNumY; j++) {
 		yptsNew[j] = ypts[0] + newRes * j;
 	}
-
+	
 	//Fill in new depth values
 	if((newRes > dx) | (newRes > dy)) {
 		//TO DO: Fix this so it actually computes correct average for newRes!!
@@ -86,7 +86,7 @@ void mapT::reSampleMap(const double newRes) {
 				subDepthMap = depths.SubMatrix((i - 1) * subRes + 1, i * subRes,
 											   (j - 1) * subRes + 1, j * subRes);
 				depthsNew(i, j) = double((1.0 / (subRes * subRes))) * subDepthMap.Sum();
-
+				
 				//fill in new depth variance values
 				subDepthMap = depthVariance.SubMatrix((i - 1) * subRes + 1, i * subRes,
 													  (j - 1) * subRes + 1, j * subRes);
@@ -96,7 +96,7 @@ void mapT::reSampleMap(const double newRes) {
 	} else {
 		interp2mat(xpts, ypts, depths, xptsNew, yptsNew, depthsNew);
 	}
-
+	
 	//Remove old map and assign new values;
 	clean();
 	dx = newRes;
@@ -120,28 +120,28 @@ void mapT::subSampleMap(const int subRes) {
 	Matrix depthsNew;
 	Matrix depthVarNew;
 	Matrix subDepthMap(subRes, subRes);
-
+	
 	//Fill in new xpts/ypts vectors
 	newNumX = int(numX / subRes);
 	newNumY = int(numY / subRes);
 	depthsNew.ReSize(newNumX, newNumY);
 	depthVarNew.ReSize(newNumX, newNumY);
-
+	
 	xptsNew = new double[newNumX];
 	yptsNew = new double[newNumY];
-
+	
 	count = 0;
 	for(i = 0; i < numX && count < newNumX; i = i + subRes) {
 		xptsNew[count] = xpts[i];
 		count++;
 	}
-
+	
 	count = 0;
 	for(j = 0; j < numY && count < newNumY; j = j + subRes) {
 		yptsNew[count] = ypts[j];
 		count++;
 	}
-
+	
 	//Fill in new depths matrix by averaging depths in the cells;
 	for(i = 1; i <= newNumX; i++) {
 		for(j = 1; j <= newNumY; j++) {
@@ -149,7 +149,7 @@ void mapT::subSampleMap(const int subRes) {
 			subDepthMap = depths.SubMatrix((i - 1) * subRes + 1, i * subRes,
 										   (j - 1) * subRes + 1, j * subRes);
 			depthsNew(i, j) = double((1.0 / (subRes * subRes))) * subDepthMap.Sum();
-
+			
 			//fill in new depth variance values
 			subDepthMap = depths.SubMatrix((i - 1) * subRes + 1, i * subRes,
 										   (j - 1) * subRes + 1, j * subRes)
@@ -158,10 +158,10 @@ void mapT::subSampleMap(const int subRes) {
 			depthVarNew(i, j) = double((1.0 / (subRes * subRes))) * subDepthMap.Sum();
 		}
 	}
-
+	
 	newResX = dx * subRes;
 	newResY = dy * subRes;
-
+	
 	//Remove old map and assign new values;
 	clean();
 	dx = newResX;
@@ -179,17 +179,17 @@ void mapT::subSampleMap(const int subRes) {
 //display map values in a more readable format
 void mapT::displayMap() {
 	int i;
-
+	
 	//print a blank space in upper left corner
 	LOGM("%5s", "");
 	LOGM("y:");
-
+	
 	//display ypt values
 	for(i = 0; i < numY; i++) {
 		LOGM("%5.2f", ypts[i]);
 	}
 	LOGM("\n x: \n");
-
+	
 	//display xpt values and depth values
 	for(i = 0; i < numX; i++) {
 		LOGM("%5.2f", xpts[i]);
@@ -197,7 +197,7 @@ void mapT::displayMap() {
 		for(int j = 0; j < numY; j++) {
 			LOGM("%5.2f", depths(i + 1, j + 1));
 		}
-
+		
 		LOGM("\n");
 	}
 }
@@ -206,7 +206,7 @@ void mapT::displayMap() {
 mapT& mapT::operator=(mapT& rhs) {
 	if(this != &rhs) {
 		this->clean();
-
+		
 		//copy non-array values
 		dx = rhs.dx;
 		dy = rhs.dy;
@@ -216,7 +216,7 @@ mapT& mapT::operator=(mapT& rhs) {
 		numY = rhs.numY;
 		depths = rhs.depths;
 		depthVariance = rhs.depthVariance;
-
+		
 		//copy array values
 		xpts = new double[numX];
 		ypts = new double[numY];
@@ -226,7 +226,7 @@ mapT& mapT::operator=(mapT& rhs) {
 		for(int j = 0; j < numY; j++) {
 			ypts[j] = rhs.ypts[j];
 		}
-
+		
 	}
 	return(*this);
 }
@@ -237,7 +237,7 @@ mapT& mapT::operator=(mapT& rhs) {
 /----------------------------------------------------------------------------*/
 poseT::poseT() {
 	int i;
-
+	
 	//initialize values to zero
 	x = y = z = 0.0;
 	vx = vy = vz = ve = 0.0;
@@ -341,9 +341,9 @@ int poseT::serialize(char* buf, int buflen) {
 	if(len > buflen) {
 		return (buflen - len);    // Space mismatch is returned to caller
 	}
-
+	
 	//printf("Serializing poseT of size: %d\n",len);
-
+	
 	// Copy contents of m into buf
 	//
 	len = 0;
@@ -390,7 +390,7 @@ int poseT::serialize(char* buf, int buflen) {
 	buf[len++] = dvlValid   ? 0x01 : 0x00;
 	buf[len++] = gpsValid   ? 0x01 : 0x00;
 	buf[len++] = bottomLock ? 0x01 : 0x00;
-
+	
 	return len;
 }
 
@@ -405,9 +405,9 @@ int poseT::unserialize(char* buf, int buflen) {
 	if(len > buflen) {
 		return (buflen - len);
 	}
-
+	
 	//printf("UnSerializing poseT of size: %d\n", len);
-
+	
 	// Copy contents of m into buf
 	//
 	len = 0;
@@ -453,7 +453,7 @@ int poseT::unserialize(char* buf, int buflen) {
 	dvlValid   = buf[len++] == 0x01;
 	gpsValid   = buf[len++] == 0x01;
 	bottomLock = buf[len++] == 0x01;
-
+	
 	return len;
 }
 
@@ -478,8 +478,8 @@ measT::~measT() {
     // maybe preferable not to
     // call methods in destructor
     delete [] covariance;
-    delete [] ranges;
-    delete [] crossTrack;
+    delete [] ranges;	
+    delete [] crossTrack;	
     delete [] alongTrack;
     delete [] altitudes;
     delete [] alphas;
@@ -493,44 +493,44 @@ void measT::clean() {
 		delete [] covariance;
 	}
 	covariance = NULL;
-
+	
 	if(ranges != NULL) {
 		delete [] ranges;
 	}
 	ranges = NULL;
-
+	
 	if(crossTrack != NULL) {
 		delete [] crossTrack;
 	}
 	crossTrack = NULL;
-
+	
 	if(alongTrack != NULL) {
 		delete [] alongTrack;
 	}
 	alongTrack = NULL;
-
+	
 	if(altitudes != NULL) {
 		delete [] altitudes;
 	}
 	altitudes = NULL;
-
+	
 	if(alphas != NULL) {
 		delete [] alphas;
 	}
 	alphas = NULL;
-
+	
 	if(measStatus != NULL) {
 		delete [] measStatus;
 	}
 	measStatus = NULL;
-
+	
 	if(beamNums != NULL) {
 		delete [] beamNums;
 	}
 	beamNums = NULL;
-
+	
 	time = 0.;
-
+	
 	ping_number = 0;
 	numMeas = 0;
 }
@@ -557,7 +557,7 @@ measT& measT::operator=(measT& rhs) {
 			// MB-sys beam numbers
 			if(rhs.dataType == TRN_SENSOR_MB)
 			  beamNums = new int[rhs.numMeas];
-
+			
    		alphas = new double[rhs.numMeas];
 			measStatus = new bool[rhs.numMeas];
 		}
@@ -601,7 +601,7 @@ measT& measT::operator=(measT& rhs) {
 				covariance[i] = rhs.covariance[i];
 			}
 		}
-
+		
 	}
 	return(*this);
 }
@@ -616,7 +616,7 @@ int measT::serialize(char* buf, int buflen) {
 	//
 	// Fixed length parts
 	int nm = numMeas;
-	int len = sizeof(this->time) +
+	int len = sizeof(this->time) + 
 						sizeof(dataType) +
 						sizeof(phi) +
 						sizeof(theta) +
@@ -637,7 +637,7 @@ int measT::serialize(char* buf, int buflen) {
 
 	// Status flags
 	len += nm * sizeof(char);
-
+	
 	// alphas
 	len += sizeof(double);
 
@@ -650,15 +650,15 @@ int measT::serialize(char* buf, int buflen) {
 	} else {
 		dataType = 0 - dataType;    // Signal lack of covariances with a dataType < 0
 	}
-
+	
 	// fprintf(stderr, "...with %d measurements, size: %d\n", nm, len);
 
 	// If the buffer has insufficient starage, return the difference
-	//
+	//	
 	if(len > buflen) {
 		return (buflen - len);
 	}
-
+	
 	// Copy contents into buf. Order is significant!
 	//
 	len = 0;
@@ -682,7 +682,7 @@ int measT::serialize(char* buf, int buflen) {
 	len += sizeof(unsigned int);
 	memcpy(&buf[len], &numMeas,  sizeof(int));
 	len += sizeof(int);
-
+	
 	// Use one byte for serialized booleans
 #if BEAM_DEBUG
 	printf("\nSend measT %.2f ping# %d\n", time, ping_number);
@@ -709,10 +709,10 @@ int measT::serialize(char* buf, int buflen) {
 	   abs(dataType) == TRN_SENSOR_HOMER) {
 
 #if BEAM_DEBUG
-		crossTrack[nm-1] = 1.23; alongTrack[nm-1] = 2.34; altitudes[nm-1] = 3.45; ranges[nm-1] = 4.56;
+		crossTrack[nm-1] = 1.23; alongTrack[nm-1] = 2.34; altitudes[nm-1] = 3.45; ranges[nm-1] = 4.56; 
 		printf("\t\t%.2f ping # %d ct: %.2f at: %.2f a: %.2f r: %.2f ",
 			this->time, ping_number,
-			crossTrack[nm-1], alongTrack[nm-1], altitudes[nm-1], ranges[nm-1]);
+			crossTrack[nm-1], alongTrack[nm-1], altitudes[nm-1], ranges[nm-1]); 
 #endif
 
 		memcpy(&buf[len], crossTrack, nm * sizeof(double));
@@ -730,7 +730,7 @@ int measT::serialize(char* buf, int buflen) {
 		memcpy(&buf[len], ranges,     nm * sizeof(double));
 		len += nm * sizeof(double);
 	}
-
+	
 	// MB-sys beam numbers
 	if(abs(dataType) == TRN_SENSOR_MB && beamNums != NULL)
 	{
@@ -755,7 +755,7 @@ int measT::serialize(char* buf, int buflen) {
 	len += nm * sizeof(double);
 
 	// printf("\t\t\tserialize - alphas[0] = %f, len = %d\n", alphas[0], len);
-
+		
 #if BEAM_DEBUG
 	printf("\nSend measT length %d with %d beams\n", len, nm);
 #endif
@@ -772,7 +772,7 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 	//
 	int len = 0;
 	clean();
-
+	
 	// Order is significant - must match serialize!
 	//
 	memcpy(&time,    &buf[len], sizeof(double));
@@ -795,12 +795,12 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 	len += sizeof(unsigned int);
 	memcpy(&numMeas, &buf[len], sizeof(int));
 	len += sizeof(int);
-
+	
 	int nm = numMeas;
 	//printf("UnSerializing measT with %d measurements, fixed len:%d...", nm, len);
-
+	
 	if(nm > 0) {
-
+	
 		// Serialized booleans are single bytes
 		//
 #if BEAM_DEBUG
@@ -828,7 +828,7 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 			alongTrack = new double[nm];
 			altitudes  = new double[nm];
 			ranges     = new double[nm];
-
+			
 			// Again, order is significant
 			//
 			memcpy(crossTrack, &buf[len], nm * sizeof(double));
@@ -845,7 +845,7 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 			memcpy(ranges,     &buf[len], nm * sizeof(double));
 			len += nm * sizeof(double);
 		}
-
+		
 		// MB-sys beam numbers
 		if(abs(dataType) == TRN_SENSOR_MB) {
 			beamNums = new int[nm];
@@ -867,7 +867,7 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 			printf("\t\t%.2f ping # %d ct: %.2f at: %.2f a: %.2f r: %.2f beam %d\n",
 				this->time, ping_number,
 				crossTrack[nm-1], alongTrack[nm-1], altitudes[nm-1], ranges[nm-1],
-				beamNums[nm-1]);
+				beamNums[nm-1]); 
 #endif
 
 
@@ -887,7 +887,7 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 		// printf("\t\t\tunserialize - alphas[0] = %f, len = %d\n", alphas[0], len);
 
 	}
-
+	
 	return len;
 }
 
@@ -925,56 +925,56 @@ void sensorT::parseSensorSpecs(char* fileName) {
 	fstream sensorFile;
 	char temp[512];
 	int i;
-
+	
 	strcpy(filename, fileName);
 	sensorFile.open(fileName);
 	if(sensorFile.is_open()) {
 		//read in sensor name
 		sensorFile.ignore(256, ':');
 		sensorFile.getline(name, 256);
-
+		
 		//read in sensor type
 		sensorFile.ignore(256, ':');
 		sensorFile.getline(temp, 256);
 		type = atoi(temp);
 		LOGM("parseSensorSpecs parsing sensor of type %d.\n",
 		       type);
-
+		
 		//read in number of beams
 		sensorFile.ignore(256, ':');
 		sensorFile.getline(temp, 256);
 		numBeams = atoi(temp);
-
+		
 		//read in percent range error
 		sensorFile.ignore(256, ':');
 		sensorFile.getline(temp, 256);
 		percentRangeError = atof(temp);
-
+		
 		//read in beam width
 		sensorFile.ignore(256, ':');
 		sensorFile.getline(temp, 256);
 		beamWidth = atof(temp) * PI / 180.0;
-
+		
 		//read in beam information
 		T_bs = new transformT[numBeams];
-
+		
 		if(type == 2) {
 			sensorFile.ignore(256, ':');
 			sensorFile.getline(temp, 256);
 			T_bs[0].rotation[1] = atof(temp) * PI / 180.0;
-
+			
 			sensorFile.ignore(256, ':');
 			sensorFile.getline(temp, 256);
 			double dphi = atof(temp) * PI / 180.0;
-
+			
 			sensorFile.ignore(256, ':');
 			sensorFile.getline(temp, 256);
 			T_bs[0].rotation[2] = atof(temp) * PI / 180.0;
-
+			
 			sensorFile.ignore(256, ':');
 			sensorFile.getline(temp, 256);
 			double dpsi = atof(temp) * PI / 180.0;
-
+			
 			for(i = 0; i < numBeams; i++) {
 				T_bs[i].rotation[1] = T_bs[0].rotation[1] + i * dphi;
 				T_bs[i].rotation[2] = T_bs[0].rotation[2] + i * dpsi;
@@ -983,8 +983,8 @@ void sensorT::parseSensorSpecs(char* fileName) {
 				T_bs[i].translation[1] = 0.0;
 				T_bs[i].translation[2] = 0.0;
 			}
-		}
-
+		} 
+		
 		else if(type==5)
 		{
 			sensorFile.ignore(256,':');
@@ -994,7 +994,7 @@ void sensorT::parseSensorSpecs(char* fileName) {
 			sensorFile.ignore(256,':');
 			sensorFile.getline(temp,256);
 			double dphi = atof(temp)*PI/180.0;
-
+         
 			// Centered on middle beam pointing down with beam 1 at the back
 			for(i = 0; i < numBeams; i++)
 			{
@@ -1022,7 +1022,7 @@ void sensorT::parseSensorSpecs(char* fileName) {
 				T_bs[i].translation[1] = 0.0;
 				T_bs[i].translation[2] = 0.0;
 			}
-
+			
 			//beam yaw angle
 			sensorFile.ignore(256, ':');
 			for(i = 0; i < numBeams; i++) {
@@ -1034,16 +1034,16 @@ void sensorT::parseSensorSpecs(char* fileName) {
 				T_bs[i].rotation[2] = atof(temp) * PI / 180.0;
 			}
 		}
-
+		
 		sensorFile.close();
 
 	} else {
       // Throw exception on file open error rather than exit
       sprintf(temp, "Error opening sensor file %s...\n", fileName);
-      fprintf(stderr, "%s", temp);
+      fprintf(stderr, temp);
       throw Exception(temp);
 	}
-
+	
 	return;
 }
 
@@ -1073,7 +1073,7 @@ vehicleT::~vehicleT() {
 		delete [] T_sv;
 	}
 	T_sv = NULL;
-
+	
 	if(sensors != NULL) {
 		delete [] sensors;
 	}
@@ -1106,7 +1106,7 @@ void vehicleT::parseVehicleSpecs(char* fileName) {
          vehicleFile.ignore(256, ':');
          vehicleFile.getline(temp, 256);
          driftRate = atof(temp);
-
+			
          //read in sensor information
          sensors = new sensorT[numSensors];
          T_sv = new transformT[numSensors];
@@ -1151,7 +1151,7 @@ void vehicleT::parseVehicleSpecs(char* fileName) {
         vehicleFile.close();
      } else {
         sprintf(temp,"Error opening file %s...\n", fileName);
-        fprintf(stderr, "%s", temp);
+        fprintf(stderr, temp);
         throw Exception(temp);
      }
 
@@ -1160,7 +1160,7 @@ void vehicleT::parseVehicleSpecs(char* fileName) {
    catch (Exception e)
    {
       // Report, close specs file, re-throw
-      //
+      // 
       fprintf(stderr, "structDefs::parseVehicleSpecs() - %s\n", EXP_MSG);
       if (vehicleFile.is_open()) vehicleFile.close();
       throw(e);
@@ -1182,21 +1182,22 @@ void vehicleT::displayVehicleInfo() {
     LOGM(obuf);
 //	LOGM("Vehicle name: %s\n", name);
 //	LOGM("Number of sensors: %i\n\n", numSensors);
-
+	
 	for(i = 0; i < numSensors; i++) {
 		LOGM("Sensor #%i: \n", i + 1);
 		sensors[i].displaySensorInfo();
-
+		
 		LOGM("Sensor #%i to vehicle transformation information: \n", i + 1);
 		T_sv[i].displayTransformInfo();
 		LOGM("\n");
 	}
-
+	
 }
 
 /*----------------------------------------------------------------------------
 /commsT member functions
 /----------------------------------------------------------------------------*/
+
 commsT::commsT()
 	: msg_type(0), parameter(0), vdr(0.0),
 	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
@@ -1232,7 +1233,7 @@ commsT::commsT(char type, int param, measT& m)
 	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
 	// Measure update message?
 	//
-	if(msg_type == TRN_MEAS) {
+	if((msg_type == TRN_MEAS)) {
 		mt = m;
 	} else {
 		fprintf(stderr,"MU msg NOT created\n");
@@ -1284,7 +1285,7 @@ int commsT::serialize(char* buf, int buf_length) {
 	len += sizeof(parameter);
 	p_ml = buf + len;
 	len += sizeof(unsigned int); // reserve spot for msg length
-
+	
 	// Estimated position message?
 	//
 	if(msg_type == TRN_MOTN || msg_type == TRN_MLE || msg_type == TRN_MMSE) {
@@ -1313,10 +1314,10 @@ int commsT::serialize(char* buf, int buf_length) {
 		strcpy(buf + len, logname);
 		len += strlen(logname) + 1;
 	}
-
+	
 	ml = len - sizeof(msg_type) + sizeof(parameter) - sizeof(unsigned int);
 	memcpy(p_ml, &ml, sizeof(ml));
-
+	
 	return len;
 }
 
@@ -1324,7 +1325,7 @@ int commsT::unserialize(char* buf, int buf_length) {
 	//printf("Unserializing commsT\n");
 	int len = 0;
 	unsigned int ml;
-
+	
 	memcpy(&msg_type,  buf + len, sizeof(msg_type));
 	len += sizeof(msg_type);
 	//printf("msg_type:%c\n", msg_type);
@@ -1334,7 +1335,7 @@ int commsT::unserialize(char* buf, int buf_length) {
 	memcpy(&ml, buf + len, sizeof(ml));
 	len += sizeof(ml);
 	//printf("remaining:%d\n", ml);
-
+	
 	// Estimated position message?
 	//
 	if((msg_type == TRN_MOTN || msg_type == TRN_MLE || msg_type == TRN_MMSE) && ml > 0) {
@@ -1367,7 +1368,7 @@ int commsT::unserialize(char* buf, int buf_length) {
         LOGM("commsT::serialize - setting log name [%s]\n",logname);
 
 	}
-
+	
 	return len;
 }
 
@@ -1388,7 +1389,7 @@ char* commsT::to_s(char* buf, int buflen) {
 //			if (msg_type == TRN_MEAS) printf("alphas[0] = %f\n", mt.alphas[0]);
 		}
 	}
-
+	
 	return buf;
 }
 
@@ -1407,7 +1408,7 @@ void commsT::clean() {
         free(cfgname);
     }
     mapname=NULL;
-    cfgname=NULL;
+    cfgname=NULL;	
 }
 
 // Release resources
@@ -1433,3 +1434,4 @@ void commsT::release() {
     particlename=NULL;
     logname=NULL;
 }
+

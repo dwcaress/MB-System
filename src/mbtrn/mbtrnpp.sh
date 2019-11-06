@@ -32,71 +32,168 @@ SESSION_NAME="mbtrnpp-console-${SESSION_ID}"
 CONLOG="${SESSION_NAME}.log"
 CONLOG_PATH_DFL="./"
 
+# info
+# MVC-MB1 134.89.32.35
+# MVC-MB2 134.89.32.36
+# RESON1  134.89.32.107
+# RESON2  134.89.32.108
+# RESON3  134.89.32.110
+
+# variables for command line overrides
+RESON_HOST="134.89.32.107"
+
+# override environment settings
+#TRN_MAPFILES=/cygdrive/d/cygwin64/maps
+#TRN_LOGFILES=/cygdrive/d/cygwin64/config
+#TRN_DATAFILES=/cygdrive/d/cygwin64/logs
+
 #################################
 # Script variable initialization
 #################################
-# verbose wrapper script output
-VERBOSE="N"
-# delay before restarting app (s)
-LOOP_DELAY_SEC=${LOOP_DELAY_SEC_DFL}
-# console log path
-CONLOG_PATH=${CONLOG_PATH:-"$CONLOG_PATH_DFL"}
-# number of cycles (app restarts)
-# use -1 to loop indefinitely
-let CYCLES="${CYCLES_DFL}"
 
-# application path
-APP_CMD="/usr/local/bin/mbtrnpp"
-# log directory
-OPT_LOGDIR="--log-directory=/home/mappingauv/mbtrnpptest"
-# input source
-# [optional if --rhost is used]
-OPT_INPUT="--input=socket:192.168.100.113:239.255.0.1:6020"
-# output destination
-# [optional if --thost is used]
-OPT_OUTPUT="--output=mbtrnpp_$$.mb1"
-# beam swath (deg)
-OPT_SWATH="--swath=90"
-# number of beams to publish
-OPT_SOUNDINGS="--soundings=21"
-# input data format
-# [do not use with datalist input]
-OPT_FORMAT="--format=261"
-# median filter settings
-OPT_MFILTER="--median-filter=0.10/9/3"
+# init_vars()
+# initialize variables
+# called *after* command line processing
+# to support value overrides
+init_vars(){
+    # verbose wrapper script output
+    VERBOSE="N"
+    # delay before restarting app (s)
+    LOOP_DELAY_SEC=${LOOP_DELAY_SEC_DFL}
+    # console log path
+    CONLOG_PATH=${CONLOG_PATH:-"$CONLOG_PATH_DFL"}
+    # number of cycles (app restarts)
+    # use -1 to loop indefinitely
+    let CYCLES="${CYCLES_DFL}"
 
-# Define socket input
-#   example: --input=socket:192.168.100.113:239.255.0.1:6020
-#              IP of host running mbtrnpp : 192.168.100.113
-#              Broadcast group : 239.255.0.1
-#              Multibeam multicast port : 6020
-# OPT_INPUT="--input=socket:192.168.100.113:239.255.0.1:6020"
-#
-# verbose level (-5 to +2)
-# +2 is a LOT of info
-# -2 to 0 recommended for missions
-# <= -3 a lot of mbtrn output
-OPT_VERBOSE="--verbose=-2"
-# drop TRN clients after hbeat messages
-# if they haven't renewed
-OPT_HBEAT=""
-# delay between TRN messages (msec)
-OPT_DELAY="" #"--delay=100"
-# statistics logging interval (s)
-OPT_STATS="--stats=30"
-# disable message log
-OPT_NOMLOG="" #"--no-mlog"
-# disable TRN output log
-OPT_NOBLOG="" #"--no-blog"
-# disable 7k center frame log
-OPT_NORLOG="" #"--no-rlog"
-# print help and exit
-OPT_HELP="" #"--help"
-# log all 7k center frames
-# [enabled by default]
-OPT_MBRLOG="" #"--mbrlog"
-# reader capacity [deprecated]
-OPT_RCAP="" #"--rcap=600000"
+    # application path
+    APP_CMD="/usr/local/bin/mbtrnpp"
+    # log directory
+#    OPT_LOGDIR="--log-directory=/home/mappingauv/mbtrnpptest"
+	OPT_LOGDIR="--log-directory=${TRN_LOGFILES:-/cygdrive/d/cygwin64/mbtrnpp-logs}/mbtrnpp"
+
+    # input source
+    # Define socket input
+    #   example: --input=socket:192.168.100.113:239.255.0.1:6020
+    #              IP of host running mbtrnpp : 192.168.100.113
+    #              Broadcast group : 239.255.0.1
+    #              Multibeam multicast port : 6020
+    # KONGSBERG_HOST="192.168.100.113"
+    # KONGSBERG_BCAST="239.255.0.1"
+    # KONGSBERG_PORT="6020"
+	# OPT_INPUT="--input=socket:${KONGSBERG_HOST}:${KONGSBERG_BCAST}:${KONGSBERG_PORT}"
+    # RESON1  134.89.32.107
+    # RESON2  134.89.32.108
+    # RESON3  134.89.32.110
+    # RESON_PORT 7000
+    # RESON_SIZE 0:default or size in bytes
+	OPT_INPUT="--input=socket:${RESON_HOST}:7000:0"
+
+    # output destination
+    # [alternatively, use --mb-out]
+    # --output     select mb1 output (similar to mb-out file, mb1svr)
+    #   options: file,file:<name>,socket,socket:<host>:<port> [1]
+    #    file                  - mb1 data out, mbsys default file name
+    #    file:<name>           - mb1 data out, specified file name
+    #    socket                - mb1 socket output, default host:port
+    #    socket:<host>:<port>  - mb1 socket output, specified host:port
+    OPT_OUTPUT="--output=file:mbtrnpp_$$.mb1"
+    # beam swath (deg)
+    OPT_SWATH="--swath=90"
+    # number of beams to publish
+    OPT_SOUNDINGS="--soundings=21"
+    # input data format
+    # [do not use with datalist input]
+	# FORMAT_RESON 88
+	# FORMAT_EMKM 261
+    OPT_FORMAT="--format=88"
+    # median filter settings
+    OPT_MFILTER="--median-filter=0.10/9/3"
+
+    # MB1 output selection
+    # --mb-out=[options]  select mb1 output (mbsvr:host:port,mb1,reson/file)
+    #   options: mb1svr:host:port - MB1 socket (e.g. MbtrnRecv) [2]
+    #    mb1              - mb1 data log
+    #    file             - mb1 data log, use mbsys default file name
+    #    file:<name>      - mb1 data log, use specified file name
+    #    reson            - reson frame (s7k)log
+    #    nomb1            - disable mb1 log (if enabled by default in mbtrnpp)
+    #    noreson          - disable reson log
+    # RESON1  134.89.32.107
+    # RESON2  134.89.32.108
+    # RESON3  134.89.32.110
+    # MB1SVR_PORT 27000
+	OPT_MBOUT="--mb-out=mb1svr:${RESON_HOST}:27000"
+
+    # TRN output selection
+    #--trn-out=[options] select trn update output channels
+    #  options: trnsvr:<host>:<port>,mlog,stdout,stderr,debug [3]
+    #   trnsvr:<host>:<port>  - trn_server socket
+    #   trnusvr:<host>:<port> - trnu_server socket
+    #   trnu                  - trn estimate log
+    #   sout|serr             - console (independent of debug settings)
+    #   debug                 - per debug settings
+    # RESON1  134.89.32.107
+    # RESON2  134.89.32.108
+    # RESON3  134.89.32.110
+    # TRNSVR_PORT  27027
+    # TRNUSVR_PORT 8000
+    OPT_TRNOUT="--trn-out=trnsvr:${RESON_HOST}:27027,trnu"
+
+    # enable TRN processing
+    # (requires map,par,log,cfg)
+    OPT_TRN_EN="--trn-en"
+    # set TRN UTM zone
+    # Monterey Bay 10
+    # Axial        12
+    OPT_TRN_UTM="--trn-utm=10"
+    # set TRN map file (required w/ TRN_EN)
+	OPT_TRN_MAP="--trn-map=${TRN_MAPFILES:-.}/PortTiles"
+    # set TRN particles file (required w/ TRN_EN)
+    OPT_TRN_PAR="--trn-par=${TRN_DATAFILES:-.}/particles.cfg"
+    # set TRN log directory prefix (required w/ TRN_EN)
+    OPT_TRN_LOG="--trn-log=mbtrnpp"
+    # set TRN config file (required w/ TRN_EN)
+    OPT_TRN_CFG="--trn-cfg=${TRN_DATAFILES:-.}/mappingAUV_specs.cfg"
+    # set TRN map type
+    # TRN_MAP_DEM  1
+    # TRN_MAP_BO   2 (dfl)
+    #OPT_TRN_MTYPE="--trn-mtype=2"
+    # set TRN map type
+    # TRN_FILT_NONE       0
+    # TRN_FILT_POINTMASS  1
+    # TRN_FILT_PARTICLE   2 (dfl)
+    # TRN_FILT_BANK       3
+    #OPT_TRN_FTYPE="--trn-ftype=2"
+
+    # verbose level (-5 to +2)
+    # +2 is a LOT of info
+    # -2 to 0 recommended for missions
+    # <= -3 a lot of mbtrn output
+    OPT_VERBOSE="--verbose=-2"
+    # drop MB1 clients after hbeat messages
+    # if they haven't renewed
+    #OPT_MBHBN="--mbhbn=0"
+    # drop MB1 clients after OPT_MBHBT seconds
+    OPT_MBHBT="--mbhbt=15"
+    # drop TRN clients after OPT_MBHBT seconds
+    OPT_TRNHBT="--trnhbt=15"
+    # drop TRNU clients after OPT_MBHBT seconds
+    #OPT_TRNUHBT="--trnuhbt=0"
+
+    # delay between TRN messages (msec)
+    #OPT_DELAY="--delay=0"
+    # statistics logging interval (s)
+    OPT_STATS="--stats=30"
+
+    # TRN processing decimation (cycles)
+    #OPT_TRN_DECN="--decn=0"
+    # TRN processing decimation (sec)
+    #OPT_TRN_DECS="--trn-decs=0"
+
+    # print help and exit
+    OPT_HELP="" #"--help"
+}
 
 unset DO_HELP
 unset DO_TEST
@@ -125,7 +222,8 @@ printUsage(){
     echo "  -d path : enable console log, set directory"
     echo "  -t      : test [print cmdine]"
     echo "  -v      : verbose output         [$VERBOSE]"
-    echo "  -w n    : loop delay (s)         [$LOOP_DELAY_SEC]"
+	echo "  -w n    : loop delay (s)         [$LOOP_DELAY_SEC]"
+	echo "  -R addr : override reson host    [$RESON_HOST]"
     echo "  -h      : print use message"
     echo ""
 }
@@ -168,7 +266,7 @@ processCmdLine(){
     OPTIND=1
     #    vout "`basename $0` all args[$*]"
 
-while getopts a:c:d:e:htvw: Option
+while getopts a:c:d:e:hR:tvw: Option
     do
         #    vout "processing $Option[$OPTARG]"
         case $Option in
@@ -180,6 +278,8 @@ while getopts a:c:d:e:htvw: Option
         CONLOG_PATH=$OPTARG
         ;;
         e ) CFG_SEL=$OPTARG
+        ;;
+        R ) RESON_HOST=$OPTARG
         ;;
         t ) DO_TEST="Y"
         ;;
@@ -225,6 +325,10 @@ fi
 
 echo ""
 
+# call init vars
+# delaying variable init until after command line processing
+# enables command line overrides (e.g. see RESON_HOST)
+init_vars
 
 if [ ! -z ${DO_HELP} ] && [ ${DO_HELP} == "Y" ]
 then
@@ -271,16 +375,28 @@ do
     vout "ovr OPT_DELAY: $OPT_DELAY"
     fi
 
-    if [ ${a:2:5} == "hbeat" ]
+    if [ ${a:2:5} == "mbhbn" ]
     then
     OPT_HBEAT=$a
-    vout "ovr OPT_HBEAT: $OPT_HBEAT"
+    vout "ovr OPT_MBHBN: $OPT_MBHBN"
     fi
 
-    if [ ${a:2:4} == "rcap" ]
+    if [ ${a:2:5} == "mbhbt" ]
     then
-    OPT_RCAP=$a
-    vout "ovr OPT_RCAP: $OPT_RCAP"
+    OPT_HBEAT=$a
+    vout "ovr OPT_MBHBT: $OPT_MBHBT"
+    fi
+
+    if [ ${a:2:6} == "trnhbt" ]
+    then
+    OPT_HBEAT=$a
+    vout "ovr OPT_TRNHBT: $OPT_TRNHBT"
+    fi
+
+    if [ ${a:2:7} == "trnuhbt" ]
+    then
+    OPT_HBEAT=$a
+    vout "ovr OPT_TRNUHBT: $OPT_TRNUHBT"
     fi
 
     if [ ${a:2:11} == "swath-width" ]
@@ -313,29 +429,90 @@ do
     vout "ovr OPT_OUTPUT: $OPT_OUTPUT"
     fi
 
+    if [ ${a:2:6} == "mb-out" ]
+    then
+    OPT_MBOUT=$a
+    vout "ovr OPT_MBOUT: $OPT_MBOUT"
+    fi
+
+    if [ ${a:2:6} == "trn-out" ]
+    then
+    OPT_TRNOUT=$a
+    vout "ovr OPT_TRNOUT: $OPT_TRNOUT"
+    fi
+
     if [ ${a:2:7} == "stat" ]
     then
     OPT_STATS=$a
     vout "ovr OPT_STATS: $OPT_STATS"
     fi
 
-    if [ ${a:2:7} == "no-mlog" ]
+    if [ ${a:2:6} == "trn-en" ]
     then
-    OPT_NOMLOG=$a
-    vout "ovr OPT_NOMLOG: $OPT_NOMLOG"
+    OPT_TRN_EN=$a
+    vout "ovr OPT_TRN_EN: $OPT_TRN_EN"
     fi
 
-    if [ ${a:2:7} == "no-blog" ]
+    if [ ${a:2:7} == "trn-utm" ]
     then
-    OPT_NOBLOG=$a
-    vout "ovr OPT_NOBLOG: $OPT_NOBLOG"
+    OPT_TRN_UTM=$a
+    vout "ovr OPT_TRN_UTM: $OPT_TRN_UTM"
     fi
 
-    if [ ${a:2:7} == "no-rlog" ]
+    if [ ${a:2:7} == "trn-map" ]
     then
-    OPT_NORLOG=$a
-    vout "ovr OPT_NORLOG: $OPT_NORLOG"
+    OPT_TRN_MAP=$a
+    vout "ovr OPT_TRN_MAP: $OPT_TRN_MAP"
     fi
+
+    if [ ${a:2:7} == "trn-par" ]
+    then
+    OPT_TRN_PAR=$a
+    vout "ovr OPT_TRN_PAR: $OPT_TRN_PAR"
+    fi
+
+    if [ ${a:2:7} == "trn-cfg" ]
+    then
+    OPT_TRN_CFG=$a
+    vout "ovr OPT_TRN_CFG: $OPT_TRN_CFG"
+    fi
+
+    if [ ${a:2:7} == "trn-log" ]
+    then
+    OPT_TRN_LOG=$a
+    vout "ovr OPT_TRN_LOG: $OPT_TRN_LOG"
+    fi
+
+    if [ ${a:2:8} == "trn-mtype" ]
+    then
+    OPT_TRN_MTYPE=$a
+    vout "ovr OPT_TRN_MTYPE: $OPT_TRN_MTYPE"
+    fi
+
+    if [ ${a:2:8} == "trn-ftype" ]
+    then
+    OPT_TRN_FTYPE=$a
+    vout "ovr OPT_TRN_FTYPE: $OPT_TRN_FTYPE"
+    fi
+
+    if [ ${a:2:8} == "trn-decn" ]
+    then
+    OPT_TRN_DECN=$a
+    vout "ovr OPT_TRN_DECN: $OPT_TRN_DECN"
+    fi
+
+    if [ ${a:2:8} == "trn-decs" ]
+    then
+    OPT_TRN_DECS=$a
+    vout "ovr OPT_TRN_DECS: $OPT_TRN_DECS"
+    fi
+
+    if [ ${a:2:8} == "trn-ftype" ]
+    then
+    OPT_TRN_FTYPE=$a
+    vout "ovr OPT_TRN_FTYPE: $OPT_TRN_FTYPE"
+    fi
+
 
     if [ ${a:2:4} == "help" ]
     then
@@ -346,7 +523,26 @@ done
 
 
 # set cmdline options
-APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_MBRLOG $OPT_STATS $OPT_HBEAT $OPT_DELAY $OPT_NOMLOG $OPT_NOBLOG $OPT_NORLOG  $OPT_RCAP $OPT_HELP"
+APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATS $OPT_MBHBN $OPT_MBHBT $OPT_TRNHBT $OPT_TRNUHBT $OPT_DELAY $OPT_TRN_EN $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_LOG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_HELP"
+
+# check required TRN options
+if [ ! -z "${OPT_TRN_EN}" ]
+then
+
+    if [ -z "${OPT_TRN_MAP}" ]
+    then
+    echo "WARNING: --trn-map required with --trn-en"
+    fi
+    if [ -z "${OPT_TRN_CFG}" ]
+    then
+	echo "WARNING: --trn-cfg required with --trn-en"
+    fi
+    if [ -z "${OPT_TRN_PAR}" ]
+    then
+    echo "WARNING: --trn-par required with --trn-en"
+    fi
+
+fi
 
 if [ ${DO_TEST} ]
 then

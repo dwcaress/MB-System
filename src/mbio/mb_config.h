@@ -23,7 +23,7 @@
 #define HAVE_LIBM 1
 
 /* Have malloc.h */
-/* #undef HAVE_MALLOC_H */
+#define HAVE_MALLOC_H 1
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -68,10 +68,10 @@
 #define MBSYSTEM_CONFIG_DEFINED 1
 
 /* Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h */
-#define MBSYSTEM_INSTALL_PREFIX "/usr/local"
+#define MBSYSTEM_INSTALL_PREFIX "NONE"
 
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
-#define MBSYSTEM_OTPS_LOCATION "/usr/local/src/OTPS2"
+#define MBSYSTEM_OTPS_LOCATION "/usr/local/OTPS2"
 
 /* Build libmbtnav */
 #define MBTNAV_ENABLED 1
@@ -80,7 +80,10 @@
 #define MBTRN_ENABLED 1
 
 /* Build graphical tools */
-#define MBUTILS_ENABLED 1
+/* #undef MBUTILS_ENABLED */
+
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+/* #undef NO_MINUS_C_MINUS_O */
 
 /* Name of package */
 #define PACKAGE "mbsystem"

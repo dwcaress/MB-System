@@ -156,8 +156,8 @@ class TerrainNavLog;
 class TerrainNav
 {
  public:
-
-	TerrainNav() {};
+    
+    TerrainNav();
 
   /* Constructor: TerrainNav(mapName)
    * Usage: tercom = new TerrainNav("canyonmap");
@@ -439,7 +439,7 @@ class TerrainNav
    */
   virtual inline int getNumReinits(){return this->numReinits;}
 
-	virtual inline bool initialized() { return _initialized; }
+    virtual inline bool initialized() { return _initialized; }
 
   //Public structures and components of a TerrainNav object:
   /*********************************************************/

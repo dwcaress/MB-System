@@ -2,8 +2,8 @@
 if BUILD_MBTNAV
 TRNWLIBS = ${top_builddir}/src/mbtrnav/libtrnw.la ${top_builddir}/src/mbtrnav/libqnx.la \
 ${top_builddir}/src/mbtrnav/libnewmat.la  ${top_builddir}/src/mbtrnav/libtnav.la  \
-${top_builddir}/src/mbtrnav/libgeolib.la
-MBTNAV_INC=-I${top_builddir}/src/mbtrnav/terrain-nav -I${top_builddir}/src/mbtrnav/gctp -I${top_builddir}/src/mbtrnav/newmat -I${top_builddir}/src/mbtrnav/qnx-utils -I${top_builddir}/src/mbtrnav/trnw
+${top_builddir}/src/mbtrnav/libgeolib.la ${top_builddir}/src/mbtrnav/libnetif.la
+MBTNAV_INC=-I${top_builddir}/src/mbtrnav/terrain-nav -I${top_builddir}/src/mbtrnav/gctp -I${top_builddir}/src/mbtrnav/newmat -I${top_builddir}/src/mbtrnav/qnx-utils -I${top_builddir}/src/mbtrnav/trnw -I${top_builddir}/src/mbtrnav/utils
 MBTNAV_OPT=-DWITH_MBTNAV
 endif
 

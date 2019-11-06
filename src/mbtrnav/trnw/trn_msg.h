@@ -81,7 +81,6 @@
 #define  TRN_SENSOR_HOMER   4
 #define  TRN_SENSOR_DELTAT  5
 
-
 #define TRN_FILT_NONE       0
 #define TRN_FILT_POINTMASS  1
 #define TRN_FILT_PARTICLE   2
@@ -99,7 +98,6 @@
 
 #define TRN_POSE_MLE    1
 #define TRN_POSE_MMSE   2
-
 
 #define TRN_MSG_INIT        'I'
 #define TRN_MSG_MEAS        'M'
@@ -122,6 +120,9 @@
 #define TRN_MSG_FILT_STATE  'H'
 #define TRN_MSG_N_REINITS   'R'
 #define TRN_MSG_FILT_REINIT 'r'
+// extension
+#define TRN_MSG_PING        '?'
+#define TRN_MSG_IS_INIT     'i'
 
 // TRN_MSG_FILT_GRD param
 typedef enum{
@@ -160,25 +161,81 @@ typedef enum
 // Type Definitions
 /////////////////////////
 
+#pragma pack(push,1)
 typedef struct pt_cdata_s{
-    double x, y, z;                //North, East, Down position (m)
-    double vx, vy, vz, ve;         //Vehicle velocity wrto iceberg, coordinatized in Body Frame(m/s)
-    double vw_x, vw_y, vw_z;       //Vehicle velocity wrto water, coordinatized in Body (m/s)
-    double vn_x, vn_y, vn_z;       //Vehicle velocity wrto an inertial frame, coordinatized in Body (m/s)
-    double wx, wy, wz;             //Vehicle angular velocity wrto an inertial frame, coordinatized in Body (rad/sec)
-    double ax, ay, az;             //Vehicle aceleration wrto an inertial frame coordinatized in Body (m/s^2)
-    double phi, theta, psi;        //3-2-1 Euler angles relating the B frame to an inertial NED frame (rad).
-    double psi_berg, psi_dot_berg; //TRN states
+    //North, East, Down position (m)
+    double x, y, z;
+    //Vehicle velocity wrto iceberg, coordinatized in Body Frame(m/s)
+    double vx, vy, vz, ve;
+    //Vehicle velocity wrto water, coordinatized in Body (m/s)
+    double vw_x, vw_y, vw_z;
+    //Vehicle velocity wrto an inertial frame, coordinatized in Body (m/s)
+    double vn_x, vn_y, vn_z;
+	//Vehicle angular velocity wrto an inertial frame, coordinatized in Body (rad/sec)
+    double wx, wy, wz;
+    //Vehicle aceleration wrto an inertial frame coordinatized in Body (m/s^2)
+    double ax, ay, az;
+    //3-2-1 Euler angles relating the B frame to an inertial NED frame (rad).
+    double phi, theta, psi;
+    //TRN states
+    double psi_berg, psi_dot_berg;
     
-    double time;                                    //Time (s)
+    //Time (s)
+    double time;
     
-    bool dvlValid;                              //Validity flag for dvl motion measurment
-    bool gpsValid;                              //Validity flag for GPS measurement
-    bool bottomLock;                          //Validity flag for DVL lock onto seafloor
+    //Validity flag for dvl motion measurment
+    unsigned char dvlValid;
+    //Validity flag for GPS measurement
+    unsigned char gpsValid;
+    //Validity flag for DVL lock onto seafloor
+    unsigned char bottomLock;
     
-    double covariance[N_COVAR];   //XYZ, phi, theta, psi, wy, wz covariance (passively stable in roll) (see above units)
+    //XYZ, phi, theta, psi, wy, wz covariance (passively stable in roll) (see above units)
+    double covariance[N_COVAR];
     
 }pt_cdata_t;
+#pragma pack(pop)
+
+#define TRNW_PUB_PT  0
+#define TRNW_PUB_MLE 1
+#define TRNW_PUB_MSE 2
+#define TRNW_PUB_SYNC 0x53445400
+#pragma pack(push,1)
+typedef struct trn_estimate_s{
+    // Time (epoch? s)
+    double time;
+    // North
+    double x;
+    // East
+    double y;
+    // Down
+    double z;
+    // Covariance matrix
+    // - symmetric 3x3 matrix
+    // - only (4) elements needed: diagonal and COV(XY) elements
+    // [0] : x : poset.covariance[0]
+    // [1] : y : poset.covariance[2]
+    // [2] : z : poset.covariance[5]
+    // [3] : xy: poset.covariance[1]
+    double cov[4];
+}trn_estimate_t;
+
+typedef struct trn_offset_pub_s{
+    uint32_t sync;
+    trn_estimate_t est[3];
+    int reinit_count;
+}trn_offset_pub_t;
+#pragma pack(pop)
+
+#define TRN_OFFSET_PUB_BYTES (sizeof(trn_offset_pub_t))
+
+typedef struct trn_update_s{
+    pt_cdata_t *pt_dat;
+    pt_cdata_t *mle_dat;
+    pt_cdata_t *mse_dat;
+    int reinit_count;
+    double reinit_tlast;
+}trn_update_t;
 
 typedef struct mt_cdata_s{
     //Measurement time (s)

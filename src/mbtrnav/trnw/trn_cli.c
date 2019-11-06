@@ -298,7 +298,7 @@ bool trncli_last_meas_valid(trncli_t *self)
 #endif
 
         retval=s_trncli_send_recv(self, msg, mlen, true);
-        if( wcommst_msg_to_cdata(&lmv_dat,(char *)msg)==0 && NULL!=lmv_dat){
+        if( wcommst_cdata_unserialize(&lmv_dat,(char *)msg)==0 && NULL!=lmv_dat){
             retval = (lmv_dat->parameter==0?false:true);
         }
         

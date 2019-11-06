@@ -40,6 +40,15 @@ class TerrainNavClient : public TerrainNav
 {
  public:
 
+  /* Default Constructor:
+   */
+  TerrainNavClient();
+
+  /* Server constructor: Just establish a connection to a server.
+   */
+  TerrainNavClient(char *server_ip, int server_port);
+
+
   /* Constructor: TerrainNavClient(mapName)
    * Usage: tercom = new TerrainNavClient("canyonmap");
    * -------------------------------------------------------------------------*/
@@ -276,6 +285,7 @@ class TerrainNavClient : public TerrainNav
   //////////////////////////////////////////////////////////////////////
   // Initialize connection to server and send state
   bool _connected;
+  bool _mbtrn_server_type;
   char *_server_ip;
   int _sockfd;
   int _sockport;

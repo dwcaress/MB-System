@@ -13,24 +13,24 @@
 /////////////////////////
 /*
  Copyright Information
-
+ 
  Copyright 2002-2019 MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
-
+ 
  Terms of Use
-
+ 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version. You can access the GPLv3 license at
  http://www.gnu.org/licenses/gpl-3.0.html
-
+ 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details
  (http://www.gnu.org/licenses/gpl-3.0.html)
-
+ 
  MBARI provides the documentation and software code "as is", with no warranty,
  express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
@@ -38,7 +38,7 @@
  assume the entire risk associated with use of the code, and you agree to be
  responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
-
+ 
  In no event shall MBARI be liable for any damages, whether general, special,
  incidental or consequential damages, arising out of your use of the software,
  including, but not limited to, the loss or corruption of your data or damages
@@ -48,11 +48,11 @@
  liability or expense, including attorneys' fees, resulting from loss of or
  damage to property or the injury to or death of any person arising out of the
  use of the software.
-
+ 
  The MBARI software is provided without obligation on the part of the
  Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
-
+ 
  MBARI assumes no responsibility or liability for any third party and/or
  commercial software required for the database or applications. Licensee agrees
  to obtain and maintain valid licenses for any additional third party software
@@ -60,7 +60,7 @@
  */
 
 /////////////////////////
-// Headers
+// Headers 
 /////////////////////////
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,13 +85,13 @@
 #define MB1CONV_BUILD ""VERSION_STRING(APP_BUILD)
 #endif
 
-// These macros should only be defined for
+// These macros should only be defined for 
 // application main files rather than general C files
 /*
  /// @def PRODUCT
  /// @brief header software product name
  #define PRODUCT "TBD_PRODUCT"
-
+ 
  /// @def COPYRIGHT
  /// @brief header software copyright info
  #define COPYRIGHT "Copyright 2002-2019 MBARI Monterey Bay Aquarium Research Institute, all rights reserved."
@@ -109,7 +109,7 @@
 #endif
 
 /////////////////////////
-// Declarations
+// Declarations 
 /////////////////////////
 
 /// @typedef struct app_cfg_s app_cfg_t
@@ -186,7 +186,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"ifile", required_argument, NULL, 0},
         {"ofile", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
-
+    
     // process argument list
     while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
         char *scpy = NULL;
@@ -203,7 +203,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 if (strcmp("no-swap", options[option_index].name) == 0) {
                     cfg->bswap=false;
                 }
-
+                
                 // help
                 else if (strcmp("help", options[option_index].name) == 0) {
                     help = true;
@@ -242,17 +242,17 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             exit(0);
         }
     }// while
-
+    
     if(NULL==cfg->ofile){
         cfg->ofile = (char *)malloc(strlen(cfg->ifile)+6);
         memset(cfg->ofile,0,strlen(cfg->ifile)+6);
         sprintf(cfg->ofile,"%s",cfg->ifile);
         char *cp=strrchr(cfg->ofile,'.');
-
+        
         if(NULL==cp){
             cp=cfg->ofile+strlen(cfg->ofile);
         }
-        sprintf(cp,".mb71");
+        sprintf(cp,".mb71\x00");
     }
     if( cfg->verbose>0){
     PDPRINT((stderr,"verbose   [%d]\n",(cfg->verbose)));
@@ -287,7 +287,7 @@ static void s_termination_handler (int signum)
 static app_cfg_t *app_cfg_new()
 {
     app_cfg_t *instance = (app_cfg_t *)malloc(sizeof(app_cfg_t));
-
+    
     if(NULL!=instance){
         memset(instance,0,sizeof(app_cfg_t));
         instance->verbose=MB1CONV_VERBOSE_DFL;
@@ -319,14 +319,14 @@ static void app_cfg_destroy(app_cfg_t **pself)
 static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
 {
     int32_t retval=-1;
-
+    
     if(NULL!=src && NULL!=pdest){
         byte *bp = NULL;
         uint32_t readlen = 1;
         uint32_t record_bytes=0;
         int64_t read_bytes=0;
         mb1_frame_t *dest = *pdest;
-
+        
         // sync to start of record
         bp = (byte *)dest->sounding;
 
@@ -341,7 +341,7 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
                 break;
             }
         }
-
+        
 //        fprintf(stderr,"%d: read sync err[%d/%s]\n",__LINE__,errno,strerror(errno));
 //        fprintf(stderr,"%d: frame[%p]\n",__LINE__,dest);
 //        fprintf(stderr,"%d: sounding[%p]\n",__LINE__,dest->sounding);
@@ -349,12 +349,12 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
 
         // if start of sync found, read header (fixed-length sounding bytes)
         if(record_bytes>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
-
+            
             record_bytes+=read_bytes;
             bp=NULL;
             readlen=0;
             if(NULL!=dest && NULL!=dest->sounding && dest->sounding->nbeams>0 && dest->sounding->nbeams<=MB1_MAX_BEAMS){
-
+      
                 if(mb1_frame_resize(&dest, dest->sounding->nbeams, MB1_RS_BEAMS)!=NULL){
                     bp=(byte *)&dest->sounding->beams[0];
                     readlen = dest->sounding->size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
@@ -362,7 +362,7 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
                 }
             }
 
-
+            
 //                        fprintf(stderr,"%d: sounding->sz[%u] readlen[%u] err[%d/%s]\n",__LINE__,dest->sounding->size,readlen,errno,strerror(errno));
 
              // if header OK, read sounding data (variable length)
@@ -398,9 +398,9 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
 static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_cfg_t *cfg)
 {
     int32_t retval=-1;
-
+    
     if(NULL!=dest && NULL!=src){
-
+        
         int32_t mb71_size = (98+7*src->sounding->nbeams);
         byte *bp = *dest;
         int32_t msize = size;
@@ -440,7 +440,7 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
             pmb71->ss_type       = 0x00;
             pmb71->imagery_type  = 0x02;
             pmb71->topo_type     = 0x02;
-
+            
             int i=0;
             int nbeams = src->sounding->nbeams;
             // get scaling
@@ -452,12 +452,12 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
                 distmax  = MAX(distmax, fabs(src->sounding->beams[i].rhoy));
                 distmax  = MAX(distmax, fabs(src->sounding->beams[i].rhox));
             }
-
+            
             if (depthmax > 0.0)
                 pmb71->depth_scale = 0.001 * (float)(MAX((depthmax / 30.0), 1.0));
             if (distmax > 0.0)
                 pmb71->distance_scale = 0.001 * (float)(MAX((distmax / 30.0), 1.0));
-
+            
             if(NULL!=cfg && cfg->verbose>0){
                 //            fprintf(stderr,"size double[%d] float[%d] int[%d] uchar[%d] ushort[%d] short[%d] mbf71v5_hdr_t[%d]\r\n",sizeof(double),sizeof(float),sizeof(int),sizeof(unsigned char),sizeof(unsigned short),sizeof(short),sizeof(mbf71v5_hdr_t));
                 fprintf(stderr,"nb[%2d] mb71_sz[%d] beams[%p/%ld]\r\n", nbeams,mb71_size,&pmb71->beam_bytes[0],((long)&pmb71->beam_bytes[0]-(long)pmb71));
@@ -488,8 +488,8 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
             //        pmb71->ss_acrosstrack;
             //        pmb71->ss_alongtrack;            }
         }
-
-
+        
+        
     }// else invalid arg
     return retval;
 }
@@ -497,7 +497,7 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
 static int s_app_main(app_cfg_t *cfg)
 {
     int retval=-1;
-
+    
     if(NULL!=cfg){
         int32_t test[2]={0};
         int64_t input_bytes=0;
@@ -509,24 +509,24 @@ static int s_app_main(app_cfg_t *cfg)
         byte *mb71_bytes=NULL;
         mb1_frame_t *mb1=NULL;
         mb71v5_t *pmb71 = NULL;
-
+        
         if( (test[0]=mfile_open(ifile, MFILE_RONLY))>0 &&
            (test[1]=mfile_mopen(ofile, MFILE_RDWR|MFILE_CREATE,MFILE_RU|MFILE_WU|MFILE_RG|MFILE_WG))>0){
-
+            
             int record_size=0;
             int64_t file_size=mfile_fsize(ifile);;
             int32_t mb71_size=0;
             bool quit=false;
-
+            
             while( !g_interrupt && !quit && input_bytes<file_size){
-
+                
                 // reset frame (or create if NULL)
                 mb1_frame_resize(&mb1,0,MB1_RS_ALL);
-
+                
                 if((test[0]=s_read_mb1_rec(&mb1, ifile))>0){
                     rec_count++;
                     input_bytes+=test[0];
-
+                    
                     if((mb71_size=s_mb1_to_mb71v5(&mb71_bytes,mb71_size,mb1, cfg))>0){
                         // cast bytes to mb71 record frame
                         pmb71 = (mb71v5_t *)mb71_bytes;
@@ -537,13 +537,13 @@ static int s_app_main(app_cfg_t *cfg)
                         if( cfg->verbose>1){
                             mb71v5_show(pmb71,5,true);
                         }
-
+                        
                         // byte swap mb71 frame, per config
                         // (once swapped, don't use data members)
                         if(cfg->bswap){
                             mb71v5_bswap(NULL, pmb71);
                         }
-
+                        
                         // write the bytes
                         mfile_write(ofile,(byte *)pmb71,mb71_size);
                     }else{
@@ -557,14 +557,14 @@ static int s_app_main(app_cfg_t *cfg)
                     fprintf(stderr,"s_read_mb1_rec failed [%d] ecount[%u]\n",test[0],err_count);
                     quit=true;
                 }
-
+                
             }// while
-
+            
         }else{
             fprintf(stderr,"mfile_open failed i/o[%d/%d]\n",test[0],test[1]);
             err_count++;
         }
-
+        
         mfile_file_destroy(&ifile);
         mfile_file_destroy(&ofile);
         if(NULL!=mb71_bytes){
@@ -572,9 +572,9 @@ static int s_app_main(app_cfg_t *cfg)
         }
         mb1_frame_destroy(&mb1);
         retval=0;
-
+        
         if(cfg->verbose>0){
-            fprintf(stderr,"%s:%d rec/in/out/err[%u/%lld/%u/%u]\n",__FUNCTION__,__LINE__,rec_count,input_bytes,output_bytes,err_count);
+            fprintf(stderr,"%s:%d rec/in/out/err[%u/%ld/%u/%u]\n",__FUNCTION__,__LINE__,rec_count,input_bytes,output_bytes,err_count);
         }
     }// else NULL cfg
     return retval;
@@ -589,9 +589,9 @@ static int s_app_main(app_cfg_t *cfg)
 int main(int argc, char **argv)
 {
     int retval=-1;
-
+    
     app_cfg_t *cfg = app_cfg_new();
-
+    
     // configure signal handling
     // for main thread
     struct sigaction saStruct;
@@ -599,14 +599,14 @@ int main(int argc, char **argv)
     saStruct.sa_flags = 0;
     saStruct.sa_handler = s_termination_handler;
     sigaction(SIGINT, &saStruct, NULL);
-
+    
     // parse command line args (update config)
     parse_args(argc, argv, cfg);
-
+    
     retval=s_app_main(cfg);
-
+    
     app_cfg_destroy(&cfg);
-
+ 
     return retval;
 }
 // End function main

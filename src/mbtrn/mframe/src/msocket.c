@@ -228,7 +228,7 @@ char *msock_addr2str(msock_socket_t *s, char *dest, size_t len)
 /// @fn int msock_connection_addr2str(msock_connection_t *self)
 /// @brief convert address to host and service strings
 /// @param[in] self socket reference
-/// @return 0 on success, -1 otherwise
+/// @return >0 on success, -1 otherwise
 int msock_connection_addr2str(msock_connection_t *self)
 {
     int retval=-1;
@@ -248,7 +248,7 @@ int msock_connection_addr2str(msock_connection_t *self)
             int svc = port;
             
             snprintf(self->service,NI_MAXSERV,"%d",svc);
-            retval=0;
+            retval=svc;
         }else{
             PEPRINT((stderr,"inet_ntop failed peer [%d %s]\n",errno,strerror(errno)));
         }
@@ -515,7 +515,7 @@ int msock_bind(msock_socket_t *s)
             fprintf(stderr,"bind failed fd[%d] [%d/%s] %s \n",s->fd,errno,strerror(errno),(errno==EINVAL?"already bound?":""));
         }
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s - invalid arguments\n",__FUNCTION__);
     }
     return retval;
 }
@@ -544,7 +544,7 @@ int msock_listen(msock_socket_t *s, int queue)
             fprintf(stderr,"listen failed fd[%d] [%d/%s]\n",s->fd,errno,strerror(errno));
         }
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s - invalid arguments\n",__FUNCTION__);
     }
     return retval;
 }
@@ -573,7 +573,7 @@ int msock_accept(msock_socket_t *s,msock_addr_t *addr)
 //            PDPRINT((stderr,"accept failed fd[%d] dest_addr[%p] addrlen[%d] [%d/%s]\n",s->fd,dest_addr,addrlen,errno,strerror(errno)));
         }
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s - invalid arguments\n",__FUNCTION__);
     }
     return retval;
 }
@@ -607,7 +607,7 @@ int64_t msock_send(msock_socket_t *s,byte *buf, uint32_t len)
             fprintf(stderr,"invalid arguments (!TCP)\n");
         }
     }else{
-        fprintf(stderr,"invalid arguments\n");
+        fprintf(stderr,"%s - invalid arguments\n",__FUNCTION__);
     }
     return retval;
 }
@@ -636,7 +636,7 @@ if (NULL != s && NULL != buf && len>0) {
         //                    fprintf(stderr,"ERR - sendto returned %lld [%d/%s]\n",retval,errno,strerror(errno));
     }
 }else{
-        fprintf(stderr,"invalid arguments\n");
+        fprintf(stderr,"%s - invalid arguments\n",__FUNCTION__);
     }
     return retval;
 }
@@ -654,7 +654,7 @@ int64_t msock_recv(msock_socket_t *s, byte *buf, uint32_t len, int flags)
     if (NULL != s && NULL!= buf && len>0) {
         retval = recv(s->fd,buf,len,flags);
     }else{
-        fprintf(stderr,"invalid arguments\n");
+        fprintf(stderr,"%s - invalid arguments\n",__FUNCTION__);
     }
     return retval;
 }
@@ -673,8 +673,7 @@ int64_t msock_recvfrom(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_
     int64_t retval= 0;
     
     if (NULL != s && NULL!=buf && len>0) {
-        
-        struct sockaddr *dest_addr=(addr==NULL?NULL:addr->ainfo->ai_addr);
+        struct sockaddr *dest_addr=(addr==NULL || addr->ainfo==NULL ? NULL:addr->ainfo->ai_addr);
         socklen_t addrlen = (addr==NULL?0:MSOCK_ADDR_LEN);
         
 //        fprintf(stderr,"recvfrom connection[%p] dest_addr[%p] ai_family[%d] addrlen[%d]\n",addr,(addr?addr->ainfo->ai_addr:NULL),(int)(addr?addr->ainfo->ai_family:-1),(int)(addr?addr->ainfo->ai_addrlen:-1));
@@ -687,7 +686,7 @@ int64_t msock_recvfrom(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_
             PDPRINT((stderr,"recvfrom failed [%d %s]\n",errno,strerror(errno)));
         }
     }else{
-        fprintf(stderr,"invalid arguments\n");
+        fprintf(stderr,"%s - invalid arguments\n",__FUNCTION__);
     }
     return retval;
 }
@@ -894,6 +893,16 @@ msock_socket_t *msock_wrap_fd(int fd)
     return s;
 }
 // End function msock_wrap_fd
+
+
+int msock_get_opt(msock_socket_t *self, int opt_name, void *optval, socklen_t *optlen)
+{
+    return getsockopt(self->fd,SOL_SOCKET,opt_name,optval,(socklen_t *)optlen);
+}
+int msock_set_opt(msock_socket_t *self, int opt_name, const void *optval, socklen_t optlen)
+{
+    return setsockopt(self->fd,SOL_SOCKET,opt_name,optval,(socklen_t)optlen);
+}
 
 #ifdef WITH_MSOCKET_TEST
 /// @fn int32_t msock_test()

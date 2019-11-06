@@ -1,0 +1,70 @@
+August 1998
+
+                         ******** Disclaimer ********
+
+The General Cartographic Transformation Package (GCTP) is a system of
+software routines designed to permit the transformation of coordinate
+pairs from one map projection to another.  The GCTP is the standard
+computer software used by the National Mapping Division for map
+projection computations.  
+
+Because of requirements internal to the EROS Data Center, the GCTP software
+was converted from FORTRAN to the C programming language, and several new
+projections were added.  During the conversion process, the software was 
+tested on the following UNIX systems:  Data General running DG/UX Release
+5.4R2.01 AViiON, SUN running SunOS Release 4.1.3, and Silicon Graphics
+running IRIX Release 5.3 IP7.  In addition, the software has also been
+verified against the current National Mapping Division (NMD) GCTP
+software.  This new version, GCTPc, is being made available informally
+on a 'user-beware' basis.  EDC assumes no responsibility for the accuracy
+of the routines in this package.
+
+Because of decreasing budgets and impacts on software development staff, 
+EDC will not be responsible for supporting this software package.  The 
+user is responsible for using the package correctly.  A set of validation
+data is provided so that each user/facility may perform its' own testing
+of the programs.  A description of this data set and instructions for its
+use are in the test/README file.  EDC will welcome any questions, comments, 
+or suggestions, and will respond on a time-available basis based on our 
+interests and requirements.  Communications concerning the GCTPc package 
+may be directed to this email address:
+
+	gctpc@edcmail.cr.usgs.gov
+
+
+--------------------------------------------------------------------------------
+
+                         ******** Announcement ********
+
+
+The General Cartographic Transformation Package (GCTP) was converted to the
+C programming language, and several new projections were added.  This new
+version, GCTPc, is being made available informally by EDC.  The directories
+and files containing this package are available via anonymous ftp.
+
+Periodic updates and corrections will be put in this directory for access
+by the science community.  Descriptions of these updates will be added to
+the README file in the main directory.
+
+The Package has been tar'd and compressed under the directory name gctpc.
+To access GCTPc, retrieve the file gctpc20.tar.Z by anonymous ftp from
+
+	edcftp.cr.usgs.gov
+
+This file can be retrieved by following these steps:
+
+	ftp> cd pub/software/gctpc
+	ftp> bin
+	ftp> get gctpc20.tar.Z
+	ftp> quit
+
+Then on a UNIX system type:
+
+	% uncompress gctpc20.tar
+	% tar -xvf gctpc20.tar
+
+The uncompressed gctpc20.tar file is approximately 38 megabytes in size.
+A gctpc directory will be created and the files copied into it.  Since the
+gctpc20.tar file is not automatically deleted, the installation will
+require approximately 76 megabytes of disk space.  This will allow
+the actual package files and gctpc20.tar to be on disk at the same time.

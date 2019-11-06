@@ -120,7 +120,7 @@ AS_ECHO(["MB-System Version $PACKAGE_VERSION"])
 AS_ECHO(["HOST System Type: ${host}"])
 AS_ECHO([" "])
 
-AM_INIT_AUTOMAKE([no-dist subdir-objects])
+AM_INIT_AUTOMAKE([no-dist subdir-objects foreign])
 AM_MAINTAINER_MODE
 AC_CONFIG_HEADERS([src/mbio/mb_config.h])
 
