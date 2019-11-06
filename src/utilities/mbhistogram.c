@@ -33,8 +33,6 @@
 #include "mb_define.h"
 #include "mb_status.h"
 
-/* mode defines */
-
 typedef enum {
     MBHISTOGRAM_BATH = 0,
     MBHISTOGRAM_AMP = 1,
@@ -43,9 +41,11 @@ typedef enum {
 
 static const char program_name[] = "MBHISTOGRAM";
 static const char help_message[] =
-    "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n\tof the bathymetry,  amplitude, "
-    " or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up "
-    "the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
+    "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n"
+    "\tof the bathymetry,  amplitude, or sidescan values. Alternatively,\n"
+    "\tmbhistogram can output a list of values which break up the\n"
+    "\tdistribution into equal sized regions.\n"
+    "\tThe results are dumped to stdout.";
 static const char usage_message[] =
     "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip "
     "-Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -78,118 +78,49 @@ static const char usage_message[] =
  */
 
 double qsnorm(double p) {
-	double t, z;
-
 	if (p <= 0.0) {
 		return (-1.0e6);
 	}
-	else if (p >= 1.0) {
+	if (p >= 1.0) {
 		return (1.0e6);
 	}
-	else if (p == 0.5) {
+	if (p == 0.5) {
 		return (0.0);
 	}
-	else if (p > 0.5) {
-		t = sqrt(-2.0 * log(1.0 - p));
-		z = t - (2.515517 + t * (0.802853 + t * 0.010328)) / (1.0 + t * (1.432788 + t * (0.189269 + t * 0.001308)));
+	if (p > 0.5) {
+		const double t = sqrt(-2.0 * log(1.0 - p));
+		const double z = t - (2.515517 + t * (0.802853 + t * 0.010328)) / (1.0 + t * (1.432788 + t * (0.189269 + t * 0.001308)));
 		return (z);
 	}
-	else {
-		t = sqrt(-2.0 * log(p));
-		z = t - (2.515517 + t * (0.802853 + t * 0.010328)) / (1.0 + t * (1.432788 + t * (0.189269 + t * 0.001308)));
-		return (-z);
-	}
+
+	const double t = sqrt(-2.0 * log(p));
+	const double z = t - (2.515517 + t * (0.802853 + t * 0.010328)) / (1.0 + t * (1.432788 + t * (0.189269 + t * 0.001308)));
+	return (-z);
 }
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message;
-
-	/* MBIO read control parameters */
-	char read_file[MB_PATH_MAXLINE];
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
 	int format;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
-	char file[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-
-	/* MBIO read values */
-	void *mbio_ptr = NULL;
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-
-	/* histogram variables */
-	histogram_mode_t mode = MBHISTOGRAM_SS;
-	bool gaussian = false;
-	int nbins = 0;
-	int nintervals = 0;
-	double value_min = 0.0;
-	double value_max = 128.0;
-	double dvalue_bin;
-	double value_bin_min;
-	double value_bin_max;
-	double data_min;
-	double data_max;
-	double target_min;
-	double target_max;
-	double *histogram = NULL;
-	double *intervals = NULL;
-	double total;
-	double sum;
-	double p;
-	double target;
-	double dinterval;
-	double bin_fraction;
-	int ibin;
-
-	/* output stream for basic stuff (stdout if verbose <= 1,
-	    stderr if verbose > 1) */
-	FILE *output;
-
-	int nrec, nvalue;
-	int nrectot = 0;
-	int nvaluetot = 0;
-
-	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	/* set default input to stdin */
-	strcpy(read_file, "stdin");
+	char read_file[MB_PATH_MAXLINE] = "stdin";
+	histogram_mode_t mode = MBHISTOGRAM_SS;
+	double value_min = 0.0;
+	double value_max = 128.0;
+	bool gaussian = false;
+	int nintervals = 0;
+	int nbins = 0;
+	FILE *output;
 
-	/* process argument list */
 	{
 		bool errflg = false;
 		bool help = false;
@@ -201,7 +132,7 @@ int main(int argc, char **argv) {
 			case 'a':
 			{
 				int tmp;
-				sscanf(optarg, "%d", &mode);
+				sscanf(optarg, "%d", &tmp);
 				// TODO(schwehr): Range check.
 				mode = (histogram_mode_t)tmp;
 				break;
@@ -289,60 +220,113 @@ int main(int argc, char **argv) {
 			fprintf(output, "MB-system Version %s\n", MB_VERSION);
 		}
 
-		/* get format if required */
-		if (format == 0)
-			mb_get_format(verbose, read_file, NULL, &format, &error);
-
-		/* figure out histogram dimensions */
-		if (nintervals > 0 && nbins <= 0)
-			nbins = 50 * nintervals;
-		if (nbins <= 0)
-			nbins = 16;
-
-		if (verbose >= 2) {
-			fprintf(output, "\ndbg2  Program <%s>\n", program_name);
-			fprintf(output, "dbg2  MB-system Version %s\n", MB_VERSION);
-			fprintf(output, "dbg2  Control Parameters:\n");
-			fprintf(output, "dbg2       verbose:    %d\n", verbose);
-			fprintf(output, "dbg2       help:       %d\n", help);
-			fprintf(output, "dbg2       format:     %d\n", format);
-			fprintf(output, "dbg2       pings:      %d\n", pings);
-			fprintf(output, "dbg2       lonflip:    %d\n", lonflip);
-			fprintf(output, "dbg2       bounds[0]:  %f\n", bounds[0]);
-			fprintf(output, "dbg2       bounds[1]:  %f\n", bounds[1]);
-			fprintf(output, "dbg2       bounds[2]:  %f\n", bounds[2]);
-			fprintf(output, "dbg2       bounds[3]:  %f\n", bounds[3]);
-			fprintf(output, "dbg2       btime_i[0]: %d\n", btime_i[0]);
-			fprintf(output, "dbg2       btime_i[1]: %d\n", btime_i[1]);
-			fprintf(output, "dbg2       btime_i[2]: %d\n", btime_i[2]);
-			fprintf(output, "dbg2       btime_i[3]: %d\n", btime_i[3]);
-			fprintf(output, "dbg2       btime_i[4]: %d\n", btime_i[4]);
-			fprintf(output, "dbg2       btime_i[5]: %d\n", btime_i[5]);
-			fprintf(output, "dbg2       btime_i[6]: %d\n", btime_i[6]);
-			fprintf(output, "dbg2       etime_i[0]: %d\n", etime_i[0]);
-			fprintf(output, "dbg2       etime_i[1]: %d\n", etime_i[1]);
-			fprintf(output, "dbg2       etime_i[2]: %d\n", etime_i[2]);
-			fprintf(output, "dbg2       etime_i[3]: %d\n", etime_i[3]);
-			fprintf(output, "dbg2       etime_i[4]: %d\n", etime_i[4]);
-			fprintf(output, "dbg2       etime_i[5]: %d\n", etime_i[5]);
-			fprintf(output, "dbg2       etime_i[6]: %d\n", etime_i[6]);
-			fprintf(output, "dbg2       speedmin:   %f\n", speedmin);
-			fprintf(output, "dbg2       timegap:    %f\n", timegap);
-			fprintf(output, "dbg2       file:       %s\n", read_file);
-			fprintf(output, "dbg2       mode:       %d\n", mode);
-			fprintf(output, "dbg2       gaussian:   %d\n", gaussian);
-			fprintf(output, "dbg2       nbins:      %d\n", nbins);
-			fprintf(output, "dbg2       nintervals: %d\n", nintervals);
-			fprintf(output, "dbg2       value_min:  %f\n", value_min);
-			fprintf(output, "dbg2       value_max:  %f\n", value_max);
-		}
-
 		if (help) {
 			fprintf(output, "\n%s\n", help_message);
 			fprintf(output, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
+
+	int error = MB_ERROR_NO_ERROR;
+
+	if (format == 0)
+		mb_get_format(verbose, read_file, NULL, &format, &error);
+
+	/* figure out histogram dimensions */
+	if (nintervals > 0 && nbins <= 0)
+		nbins = 50 * nintervals;
+	if (nbins <= 0)
+		nbins = 16;
+
+	if (verbose >= 2) {
+		fprintf(output, "\ndbg2  Program <%s>\n", program_name);
+		fprintf(output, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(output, "dbg2  Control Parameters:\n");
+		fprintf(output, "dbg2       verbose:    %d\n", verbose);
+		fprintf(output, "dbg2       format:     %d\n", format);
+		fprintf(output, "dbg2       pings:      %d\n", pings);
+		fprintf(output, "dbg2       lonflip:    %d\n", lonflip);
+		fprintf(output, "dbg2       bounds[0]:  %f\n", bounds[0]);
+		fprintf(output, "dbg2       bounds[1]:  %f\n", bounds[1]);
+		fprintf(output, "dbg2       bounds[2]:  %f\n", bounds[2]);
+		fprintf(output, "dbg2       bounds[3]:  %f\n", bounds[3]);
+		fprintf(output, "dbg2       btime_i[0]: %d\n", btime_i[0]);
+		fprintf(output, "dbg2       btime_i[1]: %d\n", btime_i[1]);
+		fprintf(output, "dbg2       btime_i[2]: %d\n", btime_i[2]);
+		fprintf(output, "dbg2       btime_i[3]: %d\n", btime_i[3]);
+		fprintf(output, "dbg2       btime_i[4]: %d\n", btime_i[4]);
+		fprintf(output, "dbg2       btime_i[5]: %d\n", btime_i[5]);
+		fprintf(output, "dbg2       btime_i[6]: %d\n", btime_i[6]);
+		fprintf(output, "dbg2       etime_i[0]: %d\n", etime_i[0]);
+		fprintf(output, "dbg2       etime_i[1]: %d\n", etime_i[1]);
+		fprintf(output, "dbg2       etime_i[2]: %d\n", etime_i[2]);
+		fprintf(output, "dbg2       etime_i[3]: %d\n", etime_i[3]);
+		fprintf(output, "dbg2       etime_i[4]: %d\n", etime_i[4]);
+		fprintf(output, "dbg2       etime_i[5]: %d\n", etime_i[5]);
+		fprintf(output, "dbg2       etime_i[6]: %d\n", etime_i[6]);
+		fprintf(output, "dbg2       speedmin:   %f\n", speedmin);
+		fprintf(output, "dbg2       timegap:    %f\n", timegap);
+		fprintf(output, "dbg2       file:       %s\n", read_file);
+		fprintf(output, "dbg2       mode:       %d\n", mode);
+		fprintf(output, "dbg2       gaussian:   %d\n", gaussian);
+		fprintf(output, "dbg2       nbins:      %d\n", nbins);
+		fprintf(output, "dbg2       nintervals: %d\n", nintervals);
+		fprintf(output, "dbg2       value_min:  %f\n", value_min);
+		fprintf(output, "dbg2       value_max:  %f\n", value_max);
+	}
+
+
+	/* MBIO read control parameters */
+	void *datalist;
+	int look_processed = MB_DATALIST_LOOK_UNSET;
+	double file_weight;
+	double btime_d;
+	double etime_d;
+	char file[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+
+	/* MBIO read values */
+	void *mbio_ptr = NULL;
+	int kind;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	char comment[MB_COMMENT_MAXLINE];
+
+	/* histogram variables */
+	double dvalue_bin;
+	double target_min;
+	double target_max;
+	double *histogram = NULL;
+	double *intervals = NULL;
+	double total;
+	double sum;
+	double p;
+	double target;
+	double dinterval;
+	double bin_fraction;
+	int ibin;
+
+	int nrec, nvalue;
+	int nrectot = 0;
+	int nvaluetot = 0;
 
 	/* allocate memory for histogram arrays */
 	if (error == MB_ERROR_NO_ERROR)
@@ -352,6 +336,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message;
 		mb_error(verbose, error, &message);
 		fprintf(output, "\nMBIO Error allocating histogram arrays:\n%s\n", message);
 		fprintf(output, "\nProgram <%s> Terminated\n", program_name);
@@ -373,8 +358,8 @@ int main(int argc, char **argv) {
 
 	/* get size of bins */
 	dvalue_bin = (value_max - value_min) / (nbins - 1);
-	value_bin_min = value_min - 0.5 * dvalue_bin;
-	value_bin_max = value_max + 0.5 * dvalue_bin;
+	const double value_bin_min = value_min - 0.5 * dvalue_bin;
+	// const double value_bin_max = value_max + 0.5 * dvalue_bin;
 
 	/* initialize histogram */
 	for (int i = 0; i < nbins; i++)
@@ -402,6 +387,8 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
+	double data_min = INFINITY;
+	double data_max = -INFINITY;
 	bool data_first = true;
 
 	/* loop over all files to be read */
@@ -414,6 +401,7 @@ int main(int argc, char **argv) {
 		/* initialize reading the swath sonar data file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(output, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(output, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -443,6 +431,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(output, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(output, "\nProgram <%s> Terminated\n", program_name);

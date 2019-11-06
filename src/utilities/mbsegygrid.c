@@ -211,10 +211,6 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message;
-
-	/* MBIO read control parameters */
 	int format;
 	int pings;
 	int lonflip;
@@ -223,6 +219,9 @@ int main(int argc, char **argv) {
 	int etime_i[7];
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	int error = MB_ERROR_NO_ERROR;
 
 	/* segy data */
 	char segyfile[MB_PATH_MAXLINE] = "";
@@ -322,9 +321,6 @@ int main(int argc, char **argv) {
 	int filtertrace_alloc;
 	int nfilter;
 	int iagchalfwindow;
-
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set file to null */
 	segyfile[0] = '\0';
@@ -561,6 +557,7 @@ int main(int argc, char **argv) {
 
 	/* initialize reading the segy file */
 	if (mb_segy_read_init(verbose, segyfile, &mbsegyioptr, &asciiheader, &fileheader, &error) != MB_SUCCESS) {
+		char *message;
 		mb_error(verbose, error, &message);
 		fprintf(outfp, "\nMBIO Error returned from function <mb_segy_read_init>:\n%s\n", message);
 		fprintf(outfp, "\nSEGY File <%s> not initialized for reading\n", segyfile);

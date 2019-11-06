@@ -38,12 +38,14 @@
 #include "mb_status.h"
 #include "mb_swap.h"
 
-const int MBGETESF_FLAGONLY = 1;
-const int MBGETESF_FLAGNULL = 2;
-const int MBGETESF_ALL = 3;
-const int MBGETESF_IMPLICITBEST = 4;
-const int MBGETESF_IMPLICITNULL = 5;
-const int MBGETESF_IMPLICITGOOD = 6;
+typedef enum {
+    MBGETESF_FLAGONLY = 1,
+    MBGETESF_FLAGNULL = 2,
+    MBGETESF_ALL = 3,
+    MBGETESF_IMPLICITBEST = 4,
+    MBGETESF_IMPLICITNULL = 5,
+    MBGETESF_IMPLICITGOOD = 6,
+} getesf_mode_t;
 
 static const char program_name[] = "mbgetesf";
 static const char help_message[] =
@@ -102,74 +104,16 @@ int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int act
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
-	int status;
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
 	int format;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
-	char ifile[MB_PATH_MAXLINE];
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	void *imbio_ptr = NULL;
-
-	/* mbio read and write values */
-	void *store_ptr;
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	int nbath;
-	int namp;
-	int nss;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	int idata = 0;
-	int beam_ok = 0;
-	int beam_null = 0;
-	int beam_ok_write = 0;
-	int beam_null_write = 0;
-	int beam_flag = 0;
-	int beam_flag_manual = 0;
-	int beam_flag_filter = 0;
-	int beam_flag_sonar = 0;
-	char comment[MB_COMMENT_MAXLINE];
-	int mode;
-	int kluge = 0;
-
-	mb_path esf_header;
-	int esf_mode = MB_ESF_MODE_EXPLICIT;
-
-	/* save file control variables */
-	bool sofile_set = false;
-	mb_path sofile = "";
-	FILE *sofp = NULL;
-
-	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* reset all defaults but the format and lonflip */
 	pings = 1;
@@ -193,12 +137,13 @@ int main(int argc, char **argv) {
 	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
-	mode = MBGETESF_FLAGONLY;
 
-	/* set default input and output */
-	strcpy(ifile, "stdin");
+	getesf_mode_t mode = MBGETESF_FLAGONLY;
+	char ifile[MB_PATH_MAXLINE] = "stdin";
+	int kluge = 0;
+	bool sofile_set = false;
+	mb_path sofile = "";
 
-	/* process argument list */
 	{
 		bool errflg = false;
 		int c;
@@ -238,8 +183,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'M':
 			case 'm':
-				sscanf(optarg, "%d", &mode);
+			{
+				int tmp;
+				sscanf(optarg, "%d", &tmp);
+				mode = (getesf_mode_t)tmp;  // TODO(schwehr): Range check
 				break;
+			}
 			case 'O':
 			case 'o':
 				sscanf(optarg, "%s", sofile);
@@ -298,15 +247,22 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
 
-	/* get format if required */
+	int error = MB_ERROR_NO_ERROR;
+
 	if (format == 0)
 		mb_get_format(verbose, ifile, NULL, &format, &error);
 
-	/* initialize reading the input multibeam file */
+	void *imbio_ptr = NULL;
+	double btime_d;
+	double etime_d;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+
 	if ((status = mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
 	                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
 		char *message = NULL;
@@ -318,22 +274,30 @@ int main(int argc, char **argv) {
 	}
 
 	/* allocate memory for data arrays */
+	char *beamflag = NULL;
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+	double *bath = NULL;
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+	double *amp = NULL;
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+	double *bathacrosstrack = NULL;
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
+		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
+	double *bathalongtrack = NULL;
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
+		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
+	double *ss = NULL;
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+	double *ssacrosstrack = NULL;
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
+		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
+	double *ssalongtrack = NULL;
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
+		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
@@ -343,6 +307,9 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(error);
 	}
+
+	/* save file control variables */
+	FILE *sofp = NULL;
 
 	/* now deal with new edit save file */
 	if (status == MB_SUCCESS) {
@@ -359,6 +326,9 @@ int main(int argc, char **argv) {
 			exit(error);
 		}
 	}
+
+	mb_path esf_header;
+	int esf_mode = MB_ESF_MODE_EXPLICIT;
 
 	/* put version header at beginning */
 	if (status == MB_SUCCESS) {
@@ -399,6 +369,31 @@ int main(int argc, char **argv) {
 			error = MB_ERROR_WRITE_FAIL;
 		}
 	}
+
+	void *store_ptr;
+	int kind;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	int nbath;
+	int namp;
+	int nss;
+	int idata = 0;
+	int beam_ok = 0;
+	int beam_null = 0;
+	int beam_ok_write = 0;
+	int beam_null_write = 0;
+	int beam_flag = 0;
+	int beam_flag_manual = 0;
+	int beam_flag_filter = 0;
+	int beam_flag_sonar = 0;
+	char comment[MB_COMMENT_MAXLINE];
 
 	/* read and write */
 	while (error <= MB_ERROR_NO_ERROR) {
@@ -500,9 +495,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* close the file */
 	status = mb_close(verbose, &imbio_ptr, &error);
-
 	/* close edit save file */
 	fclose(sofp);
 

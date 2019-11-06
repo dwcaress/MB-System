@@ -50,12 +50,12 @@ struct ping {
 	double *sslat;
 };
 
-enum OutputFormat {
+typedef enum {
   FREE_TEXT = 0,
   JSON = 1,
   XML = 2,
   MAX_OUTPUT_FORMAT = 2
-};
+} output_format_t ;
 
 static const char program_name[] = "MBINFO";
 static const char usage_message[] =
@@ -67,214 +67,29 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char format_description[MB_DESCRIPTION_LENGTH];
-
-	/* MBIO read control parameters */
-	char read_file[MB_PATH_MAXLINE];
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
 	int format;
-	int pings;
+	int pings_get = 1;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
-	char file[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	int pings_get = 1;
-	int pings_read = 1;
-	int beams_bath_alloc = 0;
-	int beams_amp_alloc = 0;
-	int pixels_ss_alloc = 0;
-	int beams_bath_max = 0;
-	int beams_amp_max = 0;
-	int pixels_ss_max = 0;
-	int beams_bath = 0;
-	int beams_amp = 0;
-	int pixels_ss = 0;
-
-	/* MBIO read values */
-	struct ping data[MBINFO_MAXPINGS];
-	struct ping *datacur;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathlon = NULL;
-	double *bathlat = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *sslon = NULL;
-	double *sslat = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-	int icomment = 0;
-
-	/* mbinfo control parameters */
-	bool comments = false;
-	bool good_nav_only = false;
-	double speed_threshold = 50.0;
-	bool bathy_in_feet = false;  // TODO(schwehr): Switch to bathy_in_meters.
-	double bathy_scale;
-	int lonflip_use = 0;
-	bool lonflip_set = false;
-
-	/* limit variables */
-	double lonmin = 0.0;
-	double lonmax = 0.0;
-	double latmin = 0.0;
-	double latmax = 0.0;
-	double sdpmin = 0.0;
-	double sdpmax = 0.0;
-	double altmin = 0.0;
-	double altmax = 0.0;
-	double bathmin = 0.0;
-	double bathmax = 0.0;
-	double ampmin = 0.0;
-	double ampmax = 0.0;
-	double ssmin = 0.0;
-	double ssmax = 0.0;
-	double bathbeg = 0.0;
-	double bathend = 0.0;
-	double lonbeg = 0.0;
-	double latbeg = 0.0;
-	double lonend = 0.0;
-	double latend = 0.0;
-	double spdbeg = 0.0;
-	double hdgbeg = 0.0;
-	double sdpbeg = 0.0;
-	double altbeg = 0.0;
-	double spdend = 0.0;
-	double hdgend = 0.0;
-	double sdpend = 0.0;
-	double altend = 0.0;
-	double timbeg = 0.0;
-	double timend = 0.0;
-	int timbeg_i[7];
-	int timend_i[7];
-	int timbeg_j[5];
-	int timend_j[5];
-	double distot = 0.0;
-	double timtot = 0.0;
-	double spdavg = 0.0;
-	int irec = 0;
-	int isbtmrec = 0;
-	double timbegfile = 0.0;
-	double timendfile = 0.0;
-	double distotfile = 0.0;
-	double timtotfile = 0.0;
-	double spdavgfile = 0.0;
-	int irecfile = 0;
-	int ntdbeams = 0;
-	int ngdbeams = 0;
-	int nzdbeams = 0;
-	int nfdbeams = 0;
-	int ntabeams = 0;
-	int ngabeams = 0;
-	int nzabeams = 0;
-	int nfabeams = 0;
-	int ntsbeams = 0;
-	int ngsbeams = 0;
-	int nzsbeams = 0;
-	int nfsbeams = 0;
-	double ngd_percent;
-	double nzd_percent;
-	double nfd_percent;
-	double nga_percent;
-	double nza_percent;
-	double nfa_percent;
-	double ngs_percent;
-	double nzs_percent;
-	double nfs_percent;
-	bool beginnav = false;
-	bool beginsdp = false;
-	bool beginalt = false;
-	bool beginbath = false;
-	bool beginamp = false;
-	bool beginss = false;
-	int nread = 0;
-
-	/* variance finding variables */
-	int nbath;
-	int namp;
-	int nss;
-	double sumx, sumxx, sumy, sumxy, delta;
-	double a, b, dev, mean, variance;
-	double *bathmean = NULL;
-	double *bathvar = NULL;
-	int *nbathvar = NULL;
-	double *ampmean = NULL;
-	double *ampvar = NULL;
-	int *nampvar = NULL;
-	double *ssmean = NULL;
-	double *ssvar = NULL;
-	int *nssvar = NULL;
-	int nbathtot_alloc = 0;
-	int namptot_alloc = 0;
-	int nsstot_alloc = 0;
-	double *bathmeantot = NULL;
-	double *bathvartot = NULL;
-	int *nbathvartot = NULL;
-	double *ampmeantot = NULL;
-	double *ampvartot = NULL;
-	int *nampvartot = NULL;
-	double *ssmeantot = NULL;
-	double *ssvartot = NULL;
-	int *nssvartot = NULL;
-
-	/* coverage mask variables */
-	bool coverage_mask = false;
-	int mask_nx = 0;
-	int mask_ny = 0;
-	double mask_dx = 0.0;
-	double mask_dy = 0.0;
-	int *mask = NULL;
-
-	/* notice variables */
-	bool print_notices = false;
-	int notice_list[MB_NOTICE_MAX];
-	int notice_list_tot[MB_NOTICE_MAX];
-	char *notice_msg;
-
-	/* output stream for basic stuff (stdout if verbose <= 1,
-	    output if verbose > 1) */
-	FILE *output = NULL;
-	bool output_usefile = false;
-	char *fileprint;
-	enum OutputFormat output_format = FREE_TEXT;
-	int len1;
-	int len2;
-	char string[500];
-
-	double speed_apparent;
-	double time_d_last = 0.0;
-	double val_double;
-
-	for (int i = 0; i < 7; i++) {
-		timbeg_i[i] = 0;
-		timend_i[i] = 0;
-	}
-	for (int i = 0; i < MB_NOTICE_MAX; i++) {
-		notice_list[i] = 0;
-		notice_list_tot[i] = 0;
-	}
-
 	int status = mb_defaults(verbose, &format, &pings_get, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	/* set default input to stdin */
-	strcpy(read_file, "stdin");
+	char read_file[MB_PATH_MAXLINE] = "stdin";
+	bool comments = false;
+	bool good_nav_only = false;
+	bool lonflip_set = false;
+	int lonflip_use = 0;
+	int mask_nx = 0;
+	int mask_ny = 0;
+	bool coverage_mask = false;
+	bool print_notices = false;
+	bool output_usefile = false;
+	int pings_read = 1;
+	bool bathy_in_feet = false;  // TODO(schwehr): Switch to bathy_in_meters.
+	output_format_t output_format = FREE_TEXT;
 
 	/* process argument list */
 	bool errflg = false;
@@ -363,21 +178,24 @@ int main(int argc, char **argv) {
 				break;
 			case 'X':
 			case 'x':
-				sscanf(optarg, "%d", &output_format);
+			{
+				int tmp;
+				sscanf(optarg, "%d", &tmp);
+				output_format = (output_format_t)tmp;
 				if (output_format < 0 || output_format > MAX_OUTPUT_FORMAT) {
 					errflg = true;
 					fprintf(stderr, "Invalid output format for inf file");
 				}
 				break;
+			}
 			default:
 				errflg = true;
 			}
 		}
 	}
-       
+
 	FILE * const stream = verbose <= 1 ? stdout : stderr;
 
-	/* if error flagged then print it and exit */
 	if (errflg) {
 		fprintf(stream, "usage: %s\n", usage_message);
 		fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
@@ -440,13 +258,27 @@ int main(int argc, char **argv) {
 	            "The results are dumped to stdout.";
 		fprintf(stream, "\n%s\n", help_message);
 		fprintf(stream, "\nusage: %s\n", usage_message);
-		exit(error);
+		exit(MB_ERROR_NO_ERROR);
 	}
 
-	/* get format if required */
+	int timbeg_i[7];
+	int timend_i[7];
+	for (int i = 0; i < 7; i++) {
+		timbeg_i[i] = 0;
+		timend_i[i] = 0;
+	}
+	int notice_list[MB_NOTICE_MAX];
+	int notice_list_tot[MB_NOTICE_MAX];
+	for (int i = 0; i < MB_NOTICE_MAX; i++) {
+		notice_list[i] = 0;
+		notice_list_tot[i] = 0;
+	}
+
+	int error = MB_ERROR_NO_ERROR;
 	if (format == 0)
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
+	double bathy_scale;
 	if (bathy_in_feet)
 		bathy_scale = 1.0 / 0.3048;
 	else
@@ -461,6 +293,10 @@ int main(int argc, char **argv) {
 	    are disabled */
 	if (read_datalist)
 		pings_read = 1;
+
+	/* output stream for basic stuff (stdout if verbose <= 1,
+	    output if verbose > 1) */
+	FILE *output = NULL;
 
 	/* Open output file if requested */
 	if (output_usefile) {
@@ -498,6 +334,168 @@ int main(int argc, char **argv) {
 	default:
 		break;
 	}
+
+	char format_description[MB_DESCRIPTION_LENGTH];
+
+	int pings;
+	int look_processed = MB_DATALIST_LOOK_UNSET;
+	double file_weight;
+	double btime_d;
+	double etime_d;
+	char file[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
+	int beams_bath_alloc = 0;
+	int beams_amp_alloc = 0;
+	int pixels_ss_alloc = 0;
+	int beams_bath_max = 0;
+	int beams_amp_max = 0;
+	int pixels_ss_max = 0;
+	int beams_bath = 0;
+	int beams_amp = 0;
+	int pixels_ss = 0;
+
+	/* MBIO read values */
+	struct ping data[MBINFO_MAXPINGS];
+	struct ping *datacur;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathlon = NULL;
+	double *bathlat = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *sslon = NULL;
+	double *sslat = NULL;
+	char comment[MB_COMMENT_MAXLINE];
+	int icomment = 0;
+
+	/* mbinfo control parameters */
+	double speed_threshold = 50.0;
+
+	/* limit variables */
+	double lonmin = 0.0;
+	double lonmax = 0.0;
+	double latmin = 0.0;
+	double latmax = 0.0;
+	double sdpmin = 0.0;
+	double sdpmax = 0.0;
+	double altmin = 0.0;
+	double altmax = 0.0;
+	double bathmin = 0.0;
+	double bathmax = 0.0;
+	double ampmin = 0.0;
+	double ampmax = 0.0;
+	double ssmin = 0.0;
+	double ssmax = 0.0;
+	double bathbeg = 0.0;
+	double bathend = 0.0;
+	double lonbeg = 0.0;
+	double latbeg = 0.0;
+	double lonend = 0.0;
+	double latend = 0.0;
+	double spdbeg = 0.0;
+	double hdgbeg = 0.0;
+	double sdpbeg = 0.0;
+	double altbeg = 0.0;
+	double spdend = 0.0;
+	double hdgend = 0.0;
+	double sdpend = 0.0;
+	double altend = 0.0;
+	double timbeg = 0.0;
+	double timend = 0.0;
+	int timbeg_j[5];
+	int timend_j[5];
+	double distot = 0.0;
+	double timtot = 0.0;
+	double spdavg = 0.0;
+	int irec = 0;
+	int isbtmrec = 0;
+	double timbegfile = 0.0;
+	double timendfile = 0.0;
+	double distotfile = 0.0;
+	double timtotfile = 0.0;
+	double spdavgfile = 0.0;
+	int irecfile = 0;
+	int ntdbeams = 0;
+	int ngdbeams = 0;
+	int nzdbeams = 0;
+	int nfdbeams = 0;
+	int ntabeams = 0;
+	int ngabeams = 0;
+	int nzabeams = 0;
+	int nfabeams = 0;
+	int ntsbeams = 0;
+	int ngsbeams = 0;
+	int nzsbeams = 0;
+	int nfsbeams = 0;
+	double ngd_percent;
+	double nzd_percent;
+	double nfd_percent;
+	double nga_percent;
+	double nza_percent;
+	double nfa_percent;
+	double ngs_percent;
+	double nzs_percent;
+	double nfs_percent;
+	bool beginnav = false;
+	bool beginsdp = false;
+	bool beginalt = false;
+	bool beginbath = false;
+	bool beginamp = false;
+	bool beginss = false;
+	int nread = 0;
+
+	/* variance finding variables */
+	int nbath;
+	int namp;
+	int nss;
+	double sumx, sumxx, sumy, sumxy, delta;
+	double a, b, dev, mean, variance;
+	double *bathmean = NULL;
+	double *bathvar = NULL;
+	int *nbathvar = NULL;
+	double *ampmean = NULL;
+	double *ampvar = NULL;
+	int *nampvar = NULL;
+	double *ssmean = NULL;
+	double *ssvar = NULL;
+	int *nssvar = NULL;
+	int nbathtot_alloc = 0;
+	int namptot_alloc = 0;
+	int nsstot_alloc = 0;
+	double *bathmeantot = NULL;
+	double *bathvartot = NULL;
+	int *nbathvartot = NULL;
+	double *ampmeantot = NULL;
+	double *ampvartot = NULL;
+	int *nampvartot = NULL;
+	double *ssmeantot = NULL;
+	double *ssvartot = NULL;
+	int *nssvartot = NULL;
+
+	/* coverage mask variables */
+	double mask_dx = 0.0;
+	double mask_dy = 0.0;
+	int *mask = NULL;
+
+	/* notice variables */
+	char *notice_msg;
+
+	char *fileprint;
+	char string[500];
+
+	double speed_apparent;
+	double time_d_last = 0.0;
+	double val_double;
+
 	/* read only once unless coverage mask requested */
 	int pass = 0;
 
@@ -525,6 +523,8 @@ int main(int argc, char **argv) {
 	int val_int;  // TODO(schwehr): bool?
 	bool good_nav;
 	bool done = false;
+
+	void *datalist;
 	while (!done) {
 		/* open file list */
 		if (read_datalist) {
@@ -709,11 +709,12 @@ int main(int argc, char **argv) {
 					fprintf(output, "%s", format_description);
 					break;
 				case JSON:
+				{
 					fprintf(output, "\"file_info\": {\n");
 					fprintf(output, "\"swath_data_file\": \"%s\",\n", fileprint);
 					fprintf(output, "\"mbio_data_format_id\": \"%d\",\n", format);
-					len1 = strspn(format_description, "Formatname: ");
-					len2 = strcspn(&format_description[len1], "\n");
+					size_t len1 = strspn(format_description, "Formatname: ");
+					size_t len2 = strcspn(&format_description[len1], "\n");
 					strncpy(string, &format_description[len1], len2);
 					string[len2] = '\0';
 					fprintf(output, "\"format_name\": \"%s\",\n", string);
@@ -733,12 +734,14 @@ int main(int argc, char **argv) {
 					fprintf(output, "\"attributes\": \"%s\"\n", &format_description[len1]);
 					fprintf(output, "},\n");
 					break;
+				}
 				case XML:
+				{
 					fprintf(output, "\t<file_info>\n");
 					fprintf(output, "\t\t<swath_data_file>%s</swath_data_file>\n", fileprint);
 					fprintf(output, "\t\t<mbio_data_format_id>%d</mbio_data_format_id>\n", format);
-					len1 = strspn(format_description, "Formatname: ");
-					len2 = strcspn(&format_description[len1], "\n");
+					size_t len1 = strspn(format_description, "Formatname: ");
+					size_t len2 = strcspn(&format_description[len1], "\n");
 					strncpy(string, &format_description[len1], len2);
 					string[len2] = '\0';
 					fprintf(output, "\t\t<format_name>%s</format_name>\n", string);
@@ -758,6 +761,7 @@ int main(int argc, char **argv) {
 					fprintf(output, "\t\t<attributes>%s</attributes>\n", &format_description[len1]);
 					fprintf(output, "\t</file_info>\n");
 					break;
+				}
 				default:
 					errflg = true;
 				}

@@ -151,18 +151,20 @@ int printNaN(int verbose, bool ascii, bool *invert, bool *flipsign, int *error) 
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
-
-	/* MBIO read control parameters */
 	int pings;
-	int decimate;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
 	double speedmin;
 	double timegap;
+	int format;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	int error = MB_ERROR_NO_ERROR;
+	char *message = NULL;
+
+	int decimate;
 
 	/* segy data */
 	void *mbsegyioptr;
@@ -199,10 +201,6 @@ int main(int argc, char **argv) {
 	double delay, interval;
 	double seconds;
 
-	int format;
-
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set file to null */
 	char file[MB_PATH_MAXLINE] = "";

@@ -1116,25 +1116,21 @@ static int print_counts(int verbose, counts *recs, int *error) {
 
 /*----------------------------------------------------------------------*/
 int main(int argc, char **argv) {
+	options opts;
+	default_options(&opts);
+	mbdefaults mbdflts;
+	int status = mb_defaults(opts.verbose, &(mbdflts.format), &(mbdflts.pings_get), &(mbdflts.lonflip), mbdflts.bounds,
+	                     mbdflts.btime_i, mbdflts.etime_i, &(mbdflts.speedmin), &(mbdflts.timegap));
+
 	int error = MB_ERROR_NO_ERROR;
 
 	double file_weight;
 	mb_path ifile;
 	mb_path dfile;
 
-	/* counting variables */
 	counts totrecs;
 
-	mbdefaults mbdflts;
-
-	options opts;
-	default_options(&opts);
-
 	/* mb_mem_debug_on(opts.verbose, &error); */
-
-	/* get mbsystem default values */
-	int status = mb_defaults(opts.verbose, &(mbdflts.format), &(mbdflts.pings_get), &(mbdflts.lonflip), mbdflts.bounds,
-	                     mbdflts.btime_i, mbdflts.etime_i, &(mbdflts.speedmin), &(mbdflts.timegap));
 
 	if (status == MB_SUCCESS) {
 		parse_options(opts.verbose, argc, argv, &opts, &error);

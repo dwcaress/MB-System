@@ -57,189 +57,39 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
-	mb_path read_file = "";
-	mb_path output_file = "";
-	bool output_file_set = false;
-	void *datalist = NULL;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight = 1.0;
 	int format;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
-	mb_path file = "";
-	mb_path dfile = "";
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	double timeshift = 0.0;
-
-	/* MBIO read values */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
-	int kind;
-	int time_i[7];
-	int time_j[5];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-	int icomment = 0;
-
-	/* segy data */
-	int sampleformat = MB_SEGY_SAMPLEFORMAT_ENVELOPE;
-	int samplesize = 0;
-	struct mb_segyasciiheader_struct segyasciiheader;
-	struct mb_segyfileheader_struct segyfileheader;
-	struct mb_segytraceheader_struct segytraceheader;
-	int segydata_alloc = 0;
-	float *segydata = NULL;
-	int buffer_alloc = 0;
-	char *buffer = NULL;
-
-	/* route and auto-line data */
-	mb_path timelist_file = "";
-	bool timelist_file_set = false;
-	int ntimepoint = 0;
-	int ntimepointalloc = 0;
-	double *routetime_d = NULL;
-	mb_path route_file = "";
-	bool route_file_set = false;
-	bool checkroutebearing = false;
-	mb_path lineroot = "";
-	int nroutepoint = 0;
-	int nroutepointalloc = 0;
-	double lon;
-	double lat;
-	double topo;
-	waypoint_t waypoint;
-	double *routelon = NULL;
-	double *routelat = NULL;
-	double *routeheading = NULL;
-	int *routewaypoint = NULL;
-	double range = 0.0;
-	double rangethreshold = 25.0;
-	double rangelast = 0.0;
-	int activewaypoint = 0;
-	int startline = 1;
-	int linenumber = 0;
-
-	/* auto plotting */
-	FILE *sfp = NULL;
-	mb_path scriptfile = "";
-	double seafloordepthmin = -1.0;
-	double seafloordepthmax = -1.0;
-	double seafloordepthminplot[MBES_NUM_PLOT_MAX];
-	double seafloordepthmaxplot[MBES_NUM_PLOT_MAX];
-	double sweep;
-	double delay;
-	double startlon;
-	double startlat;
-	int startshot;
-	double endlon;
-	double endlat;
-	int endshot;
-	double linedistance;
-	double linebearing;
-	int nshot;
-	int nshotmax;
-	int nplot = 0;
-	double xscale = 0.01;
-	double yscale = 50.0;
-	double maxwidth = 30.0;
-	mb_path zbounds = "";
-	double zmax = 50;
-
-	mb_path command = "";
-	mb_path scale = "";
-	double mtodeglon, mtodeglat;
-	double lastlon;
-	double lastlat;
-	double lastheading;
-	double headingdiff;
-	double lastdistance;
-	int oktowrite;
-	double dx, dy;
-	FILE *fp = NULL;
-	char *result;
-	int nget;
-	int nread;
-	int nwrite;
-	int first;
-	int index;
-	double tracemin, tracemax, tracerms, tracelength;
-	double linetracemin, linetracemax, linetracelength, endofdata;
-	double draft, roll, pitch, heave;
-	int shellstatus;
-
-	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	/* set default input to datalist.mb-1 */
-	strcpy(read_file, "datalist.mb-1");
+	mb_path read_file = "datalist.mb-1";
 
-	/* set default lineroot to sbp */
-	strcpy(lineroot, "sbp");
+	mb_path lineroot = "sbp";
+	int startline = 1;
 
-	/* initialize output segy structures */
-	for (int j = 0; j < 40; j++)
-		for (int i = 0; i < 80; i++)
-			segyasciiheader.line[j][i] = 0;
-	segyfileheader.jobid = 0;
-	segyfileheader.line = 0;
-	segyfileheader.reel = 0;
-	segyfileheader.channels = 0;
-	segyfileheader.aux_channels = 0;
-	segyfileheader.sample_interval = 0;
-	segyfileheader.sample_interval_org = 0;
-	segyfileheader.number_samples = 0;
-	segyfileheader.number_samples_org = 0;
-	segyfileheader.format = 5;
-	segyfileheader.cdp_fold = 0;
-	segyfileheader.trace_sort = 0;
-	segyfileheader.vertical_sum = 0;
-	segyfileheader.sweep_start = 0;
-	segyfileheader.sweep_end = 0;
-	segyfileheader.sweep_length = 0;
-	segyfileheader.sweep_type = 0;
-	segyfileheader.sweep_trace = 0;
-	segyfileheader.sweep_taper_start = 0;
-	segyfileheader.sweep_taper_end = 0;
-	segyfileheader.sweep_taper = 0;
-	segyfileheader.correlated = 0;
-	segyfileheader.binary_gain = 0;
-	segyfileheader.amplitude = 0;
-	segyfileheader.units = 0;
-	segyfileheader.impulse_polarity = 0;
-	segyfileheader.domain = 0;
-	for (int i = 0; i < 338; i++)
-		segyfileheader.extra[i] = 0;
+	int sampleformat = MB_SEGY_SAMPLEFORMAT_ENVELOPE;
 
-	/* process argument list */
+	mb_path route_file = "";
+	bool route_file_set = false;
+	double timeshift = 0.0;
+	double maxwidth = 30.0;
+	double xscale = 0.01;
+	double yscale = 50.0;
+	double zmax = 50;
+	bool checkroutebearing = false;
+	double rangethreshold = 25.0;
+	mb_path timelist_file = "";
+	bool timelist_file_set = false;
+	mb_path output_file = "";
+	bool output_file_set = false;
+	waypoint_t waypoint;
+
 	{
 		bool errflg = false;
 		int c;
@@ -363,7 +213,6 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2       timegap:           %f\n", timegap);
 			fprintf(stderr, "dbg2       sampleformat:      %d\n", sampleformat);
 			fprintf(stderr, "dbg2       timeshift:         %f\n", timeshift);
-			fprintf(stderr, "dbg2       file:              %s\n", file);
 			fprintf(stderr, "dbg2       timelist_file_set: %d\n", timelist_file_set);
 			fprintf(stderr, "dbg2       timelist_file:     %s\n", timelist_file);
 			fprintf(stderr, "dbg2       route_file_set:    %d\n", route_file_set);
@@ -381,18 +230,123 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
 
+	void *datalist = NULL;
+	int look_processed = MB_DATALIST_LOOK_UNSET;
+	double file_weight = 1.0;
+	double btime_d;
+	double etime_d;
+	mb_path file = "";
+	mb_path dfile = "";
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+
+	/* MBIO read values */
+	void *mbio_ptr = NULL;
+	void *store_ptr = NULL;
+	int kind;
+	int time_i[7];
+	int time_j[5];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	char comment[MB_COMMENT_MAXLINE];
+	int icomment = 0;
+
+	/* segy data */
+	int samplesize = 0;
+	struct mb_segytraceheader_struct segytraceheader;
+	int segydata_alloc = 0;
+	float *segydata = NULL;
+	int buffer_alloc = 0;
+	char *buffer = NULL;
+
+	/* route and auto-line data */
+	int ntimepoint = 0;
+	int ntimepointalloc = 0;
+	double *routetime_d = NULL;
+	int nroutepoint = 0;
+	int nroutepointalloc = 0;
+	double lon;
+	double lat;
+	double topo;
+	double *routelon = NULL;
+	double *routelat = NULL;
+	double *routeheading = NULL;
+	int *routewaypoint = NULL;
+	double range = 0.0;
+	double rangelast = 0.0;
+	int activewaypoint = 0;
+
+	/* auto plotting */
+	FILE *sfp = NULL;
+	mb_path scriptfile = "";
+	double seafloordepthmin = -1.0;
+	double seafloordepthmax = -1.0;
+	double seafloordepthminplot[MBES_NUM_PLOT_MAX];
+	double seafloordepthmaxplot[MBES_NUM_PLOT_MAX];
+	double sweep;
+	double delay;
+	double startlon;
+	double startlat;
+	int startshot;
+	double endlon;
+	double endlat;
+	int endshot;
+	double linedistance;
+	double linebearing;
+	int nshot;
+	int nplot = 0;
+	mb_path zbounds = "";
+
+	mb_path command = "";
+	mb_path scale = "";
+	double mtodeglon, mtodeglat;
+	double lastlon;
+	double lastlat;
+	double lastheading;
+	double headingdiff;
+	double lastdistance;
+	int oktowrite;
+	double dx, dy;
+	FILE *fp = NULL;
+	char *result;
+	int nget;
+	int nread;
+	int nwrite;
+	int first;
+	int index;
+	double tracemin, tracemax, tracerms, tracelength;
+	double linetracemin, linetracemax, linetracelength, endofdata;
+	double draft, roll, pitch, heave;
+	int shellstatus;
+
 	/* set starting line number */
-	linenumber = startline;
+	int linenumber = startline;
 
 	/* set maximum number of shots per plot */
-	nshotmax = (int)(maxwidth / xscale);
+	int nshotmax = (int)(maxwidth / xscale);
 
 	bool rawroutefile = false;
 	bool rangeok;
+	int error = MB_ERROR_NO_ERROR;
 
 	/* if specified read route time list file */
 	if (timelist_file_set) {
@@ -609,6 +563,42 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nUnable to open plotting script file <%s> \n", scriptfile);
 		exit(status);
 	}
+
+	struct mb_segyasciiheader_struct segyasciiheader;
+	for (int j = 0; j < 40; j++)
+		for (int i = 0; i < 80; i++)
+			segyasciiheader.line[j][i] = 0;
+
+	struct mb_segyfileheader_struct segyfileheader;
+	segyfileheader.jobid = 0;
+	segyfileheader.line = 0;
+	segyfileheader.reel = 0;
+	segyfileheader.channels = 0;
+	segyfileheader.aux_channels = 0;
+	segyfileheader.sample_interval = 0;
+	segyfileheader.sample_interval_org = 0;
+	segyfileheader.number_samples = 0;
+	segyfileheader.number_samples_org = 0;
+	segyfileheader.format = 5;
+	segyfileheader.cdp_fold = 0;
+	segyfileheader.trace_sort = 0;
+	segyfileheader.vertical_sum = 0;
+	segyfileheader.sweep_start = 0;
+	segyfileheader.sweep_end = 0;
+	segyfileheader.sweep_length = 0;
+	segyfileheader.sweep_type = 0;
+	segyfileheader.sweep_trace = 0;
+	segyfileheader.sweep_taper_start = 0;
+	segyfileheader.sweep_taper_end = 0;
+	segyfileheader.sweep_taper = 0;
+	segyfileheader.correlated = 0;
+	segyfileheader.binary_gain = 0;
+	segyfileheader.amplitude = 0;
+	segyfileheader.units = 0;
+	segyfileheader.impulse_polarity = 0;
+	segyfileheader.domain = 0;
+	for (int i = 0; i < 338; i++)
+		segyfileheader.extra[i] = 0;
 
 	bool recalculatesweep = false;
 	bool linechange;

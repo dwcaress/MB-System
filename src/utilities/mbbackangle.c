@@ -257,12 +257,12 @@ int main(int argc, char **argv) {
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
+	double btime_d;
+	double etime_d;
 	int error = MB_ERROR_NO_ERROR;
 
 	/* MBIO read control parameters */

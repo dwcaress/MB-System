@@ -422,7 +422,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* set auxiliary nav source if requested
-		    - note this is superceded by data_kind if the -K option is used */
+		    - note this is superseded by data_kind if the -K option is used */
 		if (aux_nav_channel > 0) {
 			if (aux_nav_channel == 1)
 				nav_source = MB_DATA_NAV1;

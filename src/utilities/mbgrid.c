@@ -135,7 +135,7 @@ static const char usage_message[] =
     "          -Rfactor  -Sspeed  -Ttension  -Utime  -V -Wscale -Xextend]";
 
 /*--------------------------------------------------------------------*/
-/* approximate complementary error function from numerical recipies */
+/* approximate complementary error function from numerical recipes */
 double erfcc(double x) {
 	const double z = fabs(x);
 	const double t = 1.0 / (1.0 + 0.5 * z);
@@ -150,7 +150,7 @@ double erfcc(double x) {
 	return x >= 0.0 ? ans : 2.0 - ans;
 }
 /*--------------------------------------------------------------------*/
-/* approximate error function altered from numerical recipies */
+/* approximate error function altered from numerical recipes */
 double mbgrid_erf(double x) {
 	const double z = fabs(x);
 	const double t = 1.0 / (1.0 + 0.5 * z);
@@ -450,220 +450,59 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
 	int format;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	char file[MB_PATH_MAXLINE];
-	void *mbio_ptr = NULL;
-	struct mb_io_struct *mb_io_ptr = NULL;
-	int topo_type;
-
-	/* mbgrid control variables */
-	char filelist[MB_PATH_MAXLINE];
-	char fileroot[MB_PATH_MAXLINE];
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
-	int xdim = 0;
-	int ydim = 0;
-	bool spacing_priority = false;
-	bool set_dimensions = false;
-	bool set_spacing = false;
-	double dx_set = 0.0;
-	double dy_set = 0.0;
-	double dx = 0.0;
-	double dy = 0.0;
-	char units[MB_PATH_MAXLINE];
-	int clip = 0;
-	grid_interp_t clipmode = MBGRID_INTERP_NONE;
-#ifdef USESURFACE
-	double tension = 0.35;
-#else
-	double tension = 0.0;
-#endif
-	grid_alg_t grid_mode = MBGRID_WEIGHTED_MEAN;
-	grid_data_t datatype = MBGRID_DATA_BATHYMETRY;
-	char gridkindstring[MB_PATH_MAXLINE];
-	grid_type_t gridkind = MBGRID_GMTGRD;
-	bool more = false;
-	bool use_NaN = false;
-	double clipvalue = NO_DATA_FLAG;
-	float outclipvalue = NO_DATA_FLAG;
-	double scale = 1.0;
-	double boundsfactor = 0.0;
-	bool setborder = false;
-	double border = 0.0;
-	double extend = 0.0;
-	bool check_time = false;
-	bool first_in_stays = true;
-	double timediff = 300.0;
-	double minormax_weighted_mean_threshold = 1.0;
-	int rformat;
-	int pstatus;
-	char path[MB_PATH_MAXLINE];
-	char ppath[MB_PATH_MAXLINE];
-	char dpath[MB_PATH_MAXLINE];
-	char rfile[MB_PATH_MAXLINE];
-	char ofile[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	char plot_cmd[MB_COMMENT_MAXLINE];
-	char plot_stdout[MB_COMMENT_MAXLINE];
-	int plot_status;
-
-	int grdrasterid = 0;
-	char backgroundfile[MB_PATH_MAXLINE];
-	char backgroundfileuse[MB_PATH_MAXLINE];
-
-	/* mbio read values */
-	int rpings;
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathlon = NULL;
-	double *bathlat = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *sslon = NULL;
-	double *sslat = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-	struct mb_info_struct mb_info;
-	int formatread;
-
-	/* lon,lat,value triples variables */
-	double tlon;
-	double tlat;
-	double tvalue;
-
-	/* grid variables */
-	double gbnd[4], wbnd[4], obnd[4];
-	bool gbndset = false;
-	double xlon, ylat, xx, yy;
-	double factor, weight, topofactor;
-	int gxdim, gydim, offx, offy, xtradim;
-	double sbnd[4], sdx, sdy;
-	int sclip;
-	int sxdim, sydim;
-	double *grid = NULL;
-	double *norm = NULL;
-	double *sigma = NULL;
-	double *firsttime = NULL;
-	double *gridsmall = NULL;
-  double *minormax = NULL;
-#ifdef USESURFACE
-	float *bxdata = NULL;
-	float *bydata = NULL;
-	float *bzdata = NULL;
-	float *sxdata = NULL;
-	float *sydata = NULL;
-	float *szdata = NULL;
-#else
-	float *bdata = NULL;
-	float *sdata = NULL;
-	float *work1 = NULL;
-	int *work2 = NULL;
-	int *work3 = NULL;
-#endif
-	double bdata_origin_x, bdata_origin_y;
-	float *output = NULL;
-	float *sgrid = NULL;
-	int *cnt = NULL;
-	float xmin, ymin, ddx, ddy, zflag, cay;
-	double **data;
-	double *value = NULL;
-	int ndata, ndatafile, nbackground, nbackground_alloc;
-	double zmin, zmax, zclip;
-	int nmax;
-	double smin, smax;
-	int nbinset, nbinzero, nbinspline, nbinbackground;
-	bool bathy_in_feet = false;
-
-	/* projected grid parameters */
-	bool projection_pars_f = false;
-	double reference_lon, reference_lat;
-	int utm_zone = 1;
-	char projection_pars[MB_PATH_MAXLINE];
-	char projection_id[MB_PATH_MAXLINE];
-	int proj_status;
-	void *pjptr;
-	double deglontokm, deglattokm;
-	double mtodeglon, mtodeglat;
-
-	/* output char strings */
-	char xlabel[MB_PATH_MAXLINE];
-	char ylabel[MB_PATH_MAXLINE];
-	char zlabel[MB_PATH_MAXLINE];
-	char title[MB_PATH_MAXLINE];
-	char nlabel[MB_PATH_MAXLINE];
-	char sdlabel[MB_PATH_MAXLINE];
-
-	/* variables needed to handle Not-a-Number values */
-	float NaN;
-
-	/* other variables */
-	FILE *dfp = NULL;
-	FILE *rfp = NULL;
-	int ii, jj, iii, jjj, kkk, ir;
-	int i1, i2, j1, j2, k1, k2;
-	double r;
-	int dmask[9];
-	int kgrid, kout, kint, ib, ix, iy;
-	int ix1, ix2, iy1, iy2, isx, isy;
-	int pid;
-
-	double foot_dx, foot_dy, foot_dxn, foot_dyn;
-	double foot_lateral, foot_range, foot_theta;
-	double foot_dtheta, foot_dphi;
-	double foot_hwidth, foot_hlength;
-	int foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy;
-	double sbath;
-	double xx0, yy0, bdx, bdy, xx1, xx2, yy1, yy2;
-	double prx[5], pry[5];
-	grid_use_t use_weight;
-	double dvalue;
-
-	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	/* set default input and output */
-	strcpy(filelist, "datalist.mb-1");
+	grid_data_t datatype = MBGRID_DATA_BATHYMETRY;
+	double border = 0.0;
+	bool setborder = false;
+	char gridkindstring[MB_PATH_MAXLINE] = "";
+	int clip = 0;
+	int xdim = 101;
+	int ydim = 101;
+	char fileroot[MB_PATH_MAXLINE] = "grid";
+	char projection_id[MB_PATH_MAXLINE] = "Geographic";
+	double gbnd[4] = {0.0, 0.0, 0.0, 0.0};
+	bool gbndset = false;
+	double extend = 0.0;
+	double scale = 1.0;
+	bool first_in_stays = true;
+	bool check_time = false;
+	double timediff = 300.0;
+	double tension =
+#ifdef USESURFACE
+	    0.35;
+#else
+	    0.0;
+#endif
+        ;
+	double boundsfactor = 0.0;
+	bool bathy_in_feet = false;
+	bool more = false;
+	bool use_NaN = false;
+	int grdrasterid = 0;
+	char projection_pars[MB_PATH_MAXLINE];
+	bool projection_pars_f = false;
+	char filelist[MB_PATH_MAXLINE] = "datalist.mb-1";
+	char backgroundfile[MB_PATH_MAXLINE];
+	grid_type_t gridkind = MBGRID_GMTGRD;
+	double minormax_weighted_mean_threshold = 1.0;
+	grid_alg_t grid_mode = MBGRID_WEIGHTED_MEAN;
+	bool set_spacing = false;
+	char units[MB_PATH_MAXLINE];
+	double dx_set = 0.0;
+	double dy_set = 0.0;
+	bool spacing_priority = false;
+	bool set_dimensions = false;
+	grid_interp_t clipmode = MBGRID_INTERP_NONE;
 
-	/* initialize some values */
-	gridkindstring[0] = '\0';
-	strcpy(fileroot, "grid");
-	strcpy(projection_id, "Geographic");
-	gbnd[0] = 0.0;
-	gbnd[1] = 0.0;
-	gbnd[2] = 0.0;
-	gbnd[3] = 0.0;
-	xdim = 101;
-	ydim = 101;
-	gxdim = 0;
-	gydim = 0;
-	pid = getpid();
-
-	/* process argument list */
 	{
 		bool errflg = false;
 		int c;
@@ -729,6 +568,7 @@ int main(int argc, char **argv) {
 			case 'f':
 			{
 				int tmp;
+				double dvalue;
 				const int n = sscanf(optarg, "%d/%lf", &tmp, &dvalue);
 				grid_mode = (grid_alg_t)tmp;
 				if (n == 2) {
@@ -899,8 +739,6 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "dbg2       output file root:     %s\n", fileroot);
 			fprintf(outfp, "dbg2       grid x dimension:     %d\n", xdim);
 			fprintf(outfp, "dbg2       grid y dimension:     %d\n", ydim);
-			fprintf(outfp, "dbg2       grid x spacing:       %f\n", dx);
-			fprintf(outfp, "dbg2       grid y spacing:       %f\n", dy);
 			fprintf(outfp, "dbg2       grid bounds[0]:       %f\n", gbnd[0]);
 			fprintf(outfp, "dbg2       grid bounds[1]:       %f\n", gbnd[1]);
 			fprintf(outfp, "dbg2       grid bounds[2]:       %f\n", gbnd[2]);
@@ -927,7 +765,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "dbg2       projection_pars:      %s\n", projection_pars);
 			fprintf(outfp, "dbg2       proj flag 1:          %d\n", projection_pars_f);
 			fprintf(outfp, "dbg2       projection_id:        %s\n", projection_id);
-			fprintf(outfp, "dbg2       utm_zone:             %d\n", utm_zone);
+			// fprintf(outfp, "dbg2       utm_zone:             %d\n", utm_zone);
 			fprintf(outfp, "dbg2       minormax_weighted_mean_threshold: %f\n", minormax_weighted_mean_threshold);
 
 		}
@@ -935,9 +773,154 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(outfp, "\n%s\n", help_message);
 			fprintf(outfp, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
+
+	int error = MB_ERROR_NO_ERROR;
+
+	double btime_d;
+	double etime_d;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+	char file[MB_PATH_MAXLINE];
+	void *mbio_ptr = NULL;
+	struct mb_io_struct *mb_io_ptr = NULL;
+	int topo_type;
+
+	/* mbgrid control variables */
+	void *datalist;
+	int look_processed = MB_DATALIST_LOOK_UNSET;
+	double file_weight;
+	double dx = 0.0;
+	double dy = 0.0;
+	double clipvalue = NO_DATA_FLAG;
+	float outclipvalue = NO_DATA_FLAG;
+	int rformat;
+	int pstatus;
+	char path[MB_PATH_MAXLINE];
+	char ppath[MB_PATH_MAXLINE];
+	char dpath[MB_PATH_MAXLINE];
+	char rfile[MB_PATH_MAXLINE];
+	char ofile[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
+	char plot_cmd[MB_COMMENT_MAXLINE];
+	char plot_stdout[MB_COMMENT_MAXLINE];
+	int plot_status;
+
+	char backgroundfileuse[MB_PATH_MAXLINE];
+
+	/* mbio read values */
+	int rpings;
+	int kind;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathlon = NULL;
+	double *bathlat = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *sslon = NULL;
+	double *sslat = NULL;
+	char comment[MB_COMMENT_MAXLINE];
+	struct mb_info_struct mb_info;
+	int formatread;
+
+	/* lon,lat,value triples variables */
+	double tlon;
+	double tlat;
+	double tvalue;
+
+	/* grid variables */
+	double wbnd[4], obnd[4];
+	double xlon, ylat, xx, yy;
+	double factor, weight, topofactor;
+	int offx, offy, xtradim;
+	double sdx, sdy;
+	int sclip;
+	int sxdim, sydim;
+	double *grid = NULL;
+	double *norm = NULL;
+	double *sigma = NULL;
+	double *firsttime = NULL;
+	double *gridsmall = NULL;
+	double *minormax = NULL;
+#ifdef USESURFACE
+	float *bxdata = NULL;
+	float *bydata = NULL;
+	float *bzdata = NULL;
+	float *sxdata = NULL;
+	float *sydata = NULL;
+	float *szdata = NULL;
+#else
+	float *bdata = NULL;
+	float *sdata = NULL;
+	float *work1 = NULL;
+	int *work2 = NULL;
+	int *work3 = NULL;
+#endif
+	double bdata_origin_x, bdata_origin_y;
+	float *output = NULL;
+	float *sgrid = NULL;
+	int *cnt = NULL;
+	float xmin, ymin, ddx, ddy, zflag, cay;
+	double **data;
+	double *value = NULL;
+	int ndata, ndatafile, nbackground, nbackground_alloc;
+	double zmin, zmax, zclip;
+	int nmax;
+	double smin, smax;
+	int nbinset, nbinzero, nbinspline, nbinbackground;
+
+	/* projected grid parameters */
+	double reference_lon, reference_lat;
+	int proj_status;
+	void *pjptr;
+	double deglontokm, deglattokm;
+	double mtodeglon, mtodeglat;
+
+	/* output char strings */
+	char xlabel[MB_PATH_MAXLINE];
+	char ylabel[MB_PATH_MAXLINE];
+	char zlabel[MB_PATH_MAXLINE];
+	char title[MB_PATH_MAXLINE];
+	char nlabel[MB_PATH_MAXLINE];
+	char sdlabel[MB_PATH_MAXLINE];
+
+	/* variables needed to handle Not-a-Number values */
+	float NaN;
+
+	/* other variables */
+	FILE *dfp = NULL;
+	FILE *rfp = NULL;
+	int ii, jj, iii, jjj, kkk, ir;
+	int i1, i2, j1, j2, k1, k2;
+	double r;
+	int dmask[9];
+	int kgrid, kout, kint, ib, ix, iy;
+	int ix1, ix2, iy1, iy2, isx, isy;
+
+	double foot_dx, foot_dy, foot_dxn, foot_dyn;
+	double foot_lateral, foot_range, foot_theta;
+	double foot_dtheta, foot_dphi;
+	double foot_hwidth, foot_hlength;
+	int foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy;
+	double sbath;
+	double xx0, yy0, bdx, bdy, xx1, xx2, yy1, yy2;
+	double prx[5], pry[5];
+	grid_use_t use_weight;
+
+	int gxdim = 0;
+	int gydim = 0;
 
 	/* if bounds not set get bounds of input data */
 	if (!gbndset || (!set_spacing && !set_dimensions)) {
@@ -1010,7 +993,7 @@ int main(int argc, char **argv) {
 				reference_lon += 360.0;
 			if (reference_lon >= 180.0)
 				reference_lon -= 360.0;
-			utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
+			const int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
 			reference_lat = 0.5 * (gbnd[2] + gbnd[3]);
 			if (reference_lat >= 0.0)
 				sprintf(projection_id, "UTM%2.2dN", utm_zone);
@@ -1032,7 +1015,7 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_BAD_PARAMETER);
 		}
 
-		/* tranlate lon lat bounds from UTM if required */
+		/* translate lon lat bounds from UTM if required */
 		if (gbnd[0] < -360.0 || gbnd[0] > 360.0 || gbnd[1] < -360.0 || gbnd[1] > 360.0 || gbnd[2] < -90.0 || gbnd[2] > 90.0 ||
 		    gbnd[3] < -90.0 || gbnd[3] > 90.0) {
 			/* first point */
@@ -1567,6 +1550,8 @@ int main(int argc, char **argv) {
 		memset((char *)bdata, 0, 3 * nbackground_alloc * sizeof(float));
 #endif
 
+		const int pid = getpid();
+
 		/* get initial grid using grdraster */
 		if (grdrasterid > 0) {
 			sprintf(backgroundfile, "tmpgrdraster%d.grd", pid);
@@ -1587,10 +1572,10 @@ int main(int argc, char **argv) {
 		strcpy(backgroundfileuse, backgroundfile);
 		if ((rfp = popen(plot_cmd, "r")) != NULL) {
 			/* parse the grdinfo results */
-			char *bufptr = fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
-			bufptr = fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
-			bufptr = fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
-			bufptr = fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+			/* char *bufptr = */ fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+			/* bufptr = */ fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+			/* bufptr = */ fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+			/* bufptr = */ fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
 			pclose(rfp);
 			if (strncmp(plot_stdout, "Pixel node registration used", 28) == 0) {
 				sprintf(backgroundfileuse, "tmpgrdsampleT%d.grd", pid);
@@ -1651,8 +1636,8 @@ int main(int argc, char **argv) {
 			/* loop over reading */
 			nbackground = 0;
 			while (fread(&tlon, sizeof(double), 1, rfp) == 1) {
-				size_t freadsize = fread(&tlat, sizeof(double), 1, rfp);
-				freadsize = fread(&tvalue, sizeof(double), 1, rfp);
+				/* size_t freadsize = */ fread(&tlat, sizeof(double), 1, rfp);
+				/* freadsize = */ fread(&tvalue, sizeof(double), 1, rfp);
 				if (lonflip == -1 && tlon > 0.0)
 					tlon -= 360.0;
 				else if (lonflip == 0 && tlon < -180.0)
@@ -1773,8 +1758,7 @@ int main(int argc, char **argv) {
 	/***** do weighted footprint slope gridding *****/
 	if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT_SLOPE) {
 		/* set up parameters for first cut low resolution slope grid */
-		for (int i = 0; i < 4; i++)
-			sbnd[i] = wbnd[i];
+		// sbnd[4]; for (int i = 0; i < 4; i++) sbnd[i] = wbnd[i];
 		sdx = 2.0 * dx;
 		sdy = 2.0 * dy;
 		sxdim = gxdim / 2;

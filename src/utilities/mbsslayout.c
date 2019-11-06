@@ -153,8 +153,17 @@ int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, d
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int verbose = 0;
+	int format = 0;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
 	int error = MB_ERROR_NO_ERROR;
 
 	/* command line option definitions */
@@ -321,19 +330,11 @@ int main(int argc, char **argv) {
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
-	int format = 0;
 	int iformat;
-	int pings;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
 	double btime_d;
 	double etime_d;
-	double speedmin;
-	double timegap;
 	mb_path ifile;
-    mb_path ifileroot;
+	mb_path ifileroot;
 	mb_path dfile;
 	mb_path ofile;
 	int beams_bath;
@@ -522,14 +523,11 @@ int main(int argc, char **argv) {
 	int jport, jstbd;
 	int previous, interpable;
 	double dss, dssl;
-    int error_format = MB_ERROR_NO_ERROR;
-    int status_format = MB_SUCCESS;
-    int format_nottobeused = 0;
+	int error_format = MB_ERROR_NO_ERROR;
+	int status_format = MB_SUCCESS;
+	int format_nottobeused = 0;
 
 	int i, jj, n;
-
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");

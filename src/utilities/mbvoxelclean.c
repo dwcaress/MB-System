@@ -109,8 +109,19 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
 	int verbose = 0;
+	int format;
+	int defaultpings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &defaultpings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	/* MBIO read control parameters */
+	int uselockfiles = true;  // TODO(schwehr): mb_uselockfiles should use a bool
+	status = mb_uselockfiles(verbose, &uselockfiles);
+
 	int kind = MB_DATA_NONE;
 	char read_file[MB_PATH_MAXLINE];
 	char swathfile[MB_PATH_MAXLINE];
@@ -119,7 +130,6 @@ int main(int argc, char **argv) {
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_NO;
 	double file_weight;
-	int format;
 	int variable_beams;
 	int traveltime;
 	double btime_d;
@@ -152,7 +162,6 @@ int main(int argc, char **argv) {
 	double *ssacrosstrack = NULL;
 	double *ssalongtrack = NULL;
 	char comment[MB_COMMENT_MAXLINE];
-
 
 	/* other mbvoxelclean control parameters */
 	double voxel_size_xy = 0.05;
@@ -222,18 +231,6 @@ int main(int argc, char **argv) {
 	double headingx, headingy;
 
 	int formatread;
-	int btime_i[7];
-	int defaultpings;
-	int lonflip;
-	double bounds[4];
-	int etime_i[7];
-	double speedmin;
-	double timegap;
-
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &defaultpings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-	int uselockfiles = true;  // TODO(schwehr): mb_uselockfiles should use a bool
-	status = mb_uselockfiles(verbose, &uselockfiles);
 
 	/* reset all defaults but the format and lonflip */
 	defaultpings = 1;
