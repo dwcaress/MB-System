@@ -183,8 +183,8 @@ int mbview_drawdata(size_t instance, int rez) {
 	int nxrange, nyrange;
 	int stride;
 	double secondary_value;
-	int use_histogram;
-	int make_histogram;
+	bool use_histogram;
+	bool make_histogram;
 	float *histogram;
 	int which_data;
 	int i, j, k, l, ikk, ill, kk, ll;
@@ -253,7 +253,7 @@ int mbview_drawdata(size_t instance, int rez) {
 		}
 		histogram = view->secondary_histogram;
 	}
-	if (make_histogram == true)
+	if (make_histogram)
 		mbview_make_histogram(view, data, which_data);
 	if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY && data->secondary_histogram == true &&
 	    view->secondary_histogram_set == false)
@@ -412,10 +412,10 @@ int mbview_drawdata(size_t instance, int rez) {
 					if (!(data->primary_stat_z[kk / 8] & statmask[kk % 8]))
 						mbview_zscalegridpoint(instance, kk);
 					if (!(data->primary_stat_color[kk / 8] & statmask[kk % 8])) {
-						if (use_histogram == false)
-							mbview_colorpoint(view, data, ikk, j, kk);
-						else
+						if (use_histogram)
 							mbview_colorpoint_histogram(view, data, histogram, ikk, j, kk);
+						else
+							mbview_colorpoint(view, data, ikk, j, kk);
 					}
 					glColor3f(data->primary_r[kk], data->primary_g[kk], data->primary_b[kk]);
 					glVertex3f(data->primary_x[kk], data->primary_y[kk], data->primary_z[kk]);
@@ -445,10 +445,10 @@ int mbview_drawdata(size_t instance, int rez) {
 					if (!(data->primary_stat_z[ll / 8] & statmask[ll % 8]))
 						mbview_zscalegridpoint(instance, ll);
 					if (!(data->primary_stat_color[ll / 8] & statmask[ll % 8])) {
-						if (use_histogram == false)
-							mbview_colorpoint(view, data, ill, j, ll);
-						else
+						if (use_histogram)
 							mbview_colorpoint_histogram(view, data, histogram, ill, j, ll);
+						else
+							mbview_colorpoint(view, data, ill, j, ll);
 					}
 					glColor3f(data->primary_r[ll], data->primary_g[ll], data->primary_b[ll]);
 					glVertex3f(data->primary_x[ll], data->primary_y[ll], data->primary_z[ll]);
@@ -472,18 +472,18 @@ int mbview_drawdata(size_t instance, int rez) {
 				on = false;
 				flip = false;
 			}
-	
+
 			/* check for pending event */
 			if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0) {
 				do_mbview_xevents();
 			}
-	
+
 			/* dump out of loop if plotting already done at a higher recursion */
 			if (view->plot_done == true)
 				i = data->primary_n_columns;
 		}
 	}
-	
+
 	else /* if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) */ {
 		for (i = data->viewbounds[0]; i < data->viewbounds[1] - stride; i += stride) {
 			on = false;
@@ -503,7 +503,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					ill = i;
 					ll = k;
 				}
-				if (data->secondary_sameas_primary == true)
+				if (data->secondary_sameas_primary)
 					secondary_value = data->secondary_data[kk];
 				else
 					mbview_getsecondaryvalue(view, data, ikk, j, &secondary_value);
@@ -520,10 +520,10 @@ int mbview_drawdata(size_t instance, int rez) {
 					if (!(data->primary_stat_z[kk / 8] & statmask[kk % 8]))
 						mbview_zscalegridpoint(instance, kk);
 					if (!(data->primary_stat_color[kk / 8] & statmask[kk % 8])) {
-						if (use_histogram == false)
-							mbview_colorpoint(view, data, ikk, j, kk);
-						else
+						if (use_histogram)
 							mbview_colorpoint_histogram(view, data, histogram, ikk, j, kk);
+						else
+							mbview_colorpoint(view, data, ikk, j, kk);
 					}
 					glColor3f(data->primary_r[kk], data->primary_g[kk], data->primary_b[kk]);
 					glVertex3f(data->primary_x[kk], data->primary_y[kk], data->primary_z[kk]);
@@ -541,7 +541,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					}
 					flip = false;
 				}
-				if (data->secondary_sameas_primary == true)
+				if (data->secondary_sameas_primary)
 					secondary_value = data->secondary_data[ll];
 				else
 					mbview_getsecondaryvalue(view, data, ill, j, &secondary_value);
@@ -558,10 +558,10 @@ int mbview_drawdata(size_t instance, int rez) {
 					if (!(data->primary_stat_z[ll / 8] & statmask[ll % 8]))
 						mbview_zscalegridpoint(instance, ll);
 					if (!(data->primary_stat_color[ll / 8] & statmask[ll % 8])) {
-						if (use_histogram == false)
-							mbview_colorpoint(view, data, ill, j, ll);
-						else
+						if (use_histogram)
 							mbview_colorpoint_histogram(view, data, histogram, ill, j, ll);
+						else
+							mbview_colorpoint(view, data, ill, j, ll);
 					}
 					glColor3f(data->primary_r[ll], data->primary_g[ll], data->primary_b[ll]);
 					glVertex3f(data->primary_x[ll], data->primary_y[ll], data->primary_z[ll]);
@@ -585,12 +585,12 @@ int mbview_drawdata(size_t instance, int rez) {
 				on = false;
 				flip = false;
 			}
-	
+
 			/* check for pending event */
 			if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0) {
 				do_mbview_xevents();
 			}
-	
+
 			/* dump out of loop if plotting already done at a higher recursion */
 			if (view->plot_done == true)
 				i = data->primary_n_columns;

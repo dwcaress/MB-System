@@ -333,6 +333,11 @@ MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 
 -------------------------------------------------------------------------------
 
+MBeditviz: Added GUI elements to support multiple modes of gridding.
+
+Mbm_route2mission: Modified to output waypoint_bottom behaviors with the
+current suite of options specified.
+
 -----> 5.7.6beta16 (October 29, 2019)
 
 MBnavadjust: Fixed bug in calculating the range of contour values and the size

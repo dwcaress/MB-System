@@ -75,6 +75,7 @@ extern void do_mb3dsdg_view_noprofile(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_view_goodprofile(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_view_allprofile(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_view_scalewithflagged(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_view_colorbytopo(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_applybias(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_flagsparsevoxels_A(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_flagsparsevoxels_B(Widget, XtPointer, XtPointer);
@@ -798,6 +799,36 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	              (XtPointer)0);
 
 	ac = 0;
+	class_in->separator3 = XmCreateSeparator(class_in->pulldownMenu_view, (char *)"separator3", args, ac);
+	XtManageChild(class_in->separator3);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Color by Topography", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList,
+		                    0, &argok));
+		if (argok)
+			ac++;
+		class_in->toggleButton_view_colorbytopo =
+		    XmCreateToggleButton(class_in->pulldownMenu_view, (char *)"toggleButton_view_colorbytopo", args, ac);
+		XtManageChild(class_in->toggleButton_view_colorbytopo);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->toggleButton_view_colorbytopo, XmNvalueChangedCallback, do_mb3dsdg_view_colorbytopo,
+	              (XtPointer)0);
+
+	ac = 0;
 	XtSetArg(args[ac], XmNsubMenuId, class_in->pulldownMenu_view);
 	ac++;
 	XtSetValues(class_in->cascadeButton_view, args, ac);
@@ -967,8 +998,8 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	XtAddCallback(class_in->pushButton_action_applybias, XmNactivateCallback, do_mb3dsdg_action_applybias, (XtPointer)0);
 
 	ac = 0;
-	class_in->separator3 = XmCreateSeparator(class_in->pulldownMenu_action, (char *)"separator3", args, ac);
-	XtManageChild(class_in->separator3);
+	class_in->separator4 = XmCreateSeparator(class_in->pulldownMenu_action, (char *)"separator4", args, ac);
+	XtManageChild(class_in->separator4);
 
 	ac = 0;
 	{
@@ -1133,8 +1164,8 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	              (XtPointer)0);
 
 	ac = 0;
-	class_in->separator4 = XmCreateSeparator(class_in->pulldownMenu_action, (char *)"separator4", args, ac);
-	XtManageChild(class_in->separator4);
+	class_in->separator5 = XmCreateSeparator(class_in->pulldownMenu_action, (char *)"separator5", args, ac);
+	XtManageChild(class_in->separator5);
 
 	ac = 0;
 	{
@@ -1326,8 +1357,8 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	              (XtPointer)0);
 
 	ac = 0;
-	class_in->separator5 = XmCreateSeparator(class_in->pulldownMenu_action, (char *)"separator5", args, ac);
-	XtManageChild(class_in->separator5);
+	class_in->separator6 = XmCreateSeparator(class_in->pulldownMenu_action, (char *)"separator6", args, ac);
+	XtManageChild(class_in->separator6);
 
 	ac = 0;
 	{

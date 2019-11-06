@@ -590,7 +590,7 @@ struct mbview_struct {
 	float *primary_b;
 	char *primary_stat_color;
 	char *primary_stat_z;
-	int secondary_sameas_primary;
+	bool secondary_sameas_primary;
 	float secondary_nodatavalue;
 	int secondary_nxy;
 	int secondary_n_columns;
@@ -650,6 +650,9 @@ struct mb3dsoundings_sounding_struct {
 	float glx;
 	float gly;
 	float glz;
+  float r;
+  float g;
+  float b;
 	int winx;
 	int winy;
 };

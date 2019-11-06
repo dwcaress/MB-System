@@ -220,7 +220,7 @@ int mbeditviz_init(int argc, char **argv) {
 			break;
 		case 'G':
 		case 'g':
-			mbev_grid_algorithm = MBEV_GRID_ALGORITH_SIMPLE;
+			mbev_grid_algorithm = MBEV_GRID_ALGORITHM_SIMPLEMEAN;
 			flag++;
 			break;
 		case 'I':
@@ -2718,7 +2718,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 	/* proceed if beam in grid */
 	if (i >= 0 && i < mbev_grid.n_columns && j >= 0 && j < mbev_grid.n_rows) {
 		/* simple gridding mode */
-		if (file->topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM || mbev_grid_algorithm == MBEV_GRID_ALGORITH_SIMPLE) {
+		if (file->topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM || mbev_grid_algorithm == MBEV_GRID_ALGORITHM_SIMPLEMEAN) {
 			/* get location in grid arrays */
 			kk = i * mbev_grid.n_rows + j;
 
@@ -3740,9 +3740,7 @@ int mbeditviz_selectnav(size_t instance) {
 		dy = ymax - ymin;
 		mbev_selected.xorigin = 0.5 * (xmin + xmax);
 		mbev_selected.yorigin = 0.5 * (ymin + ymax);
-		;
 		mbev_selected.zorigin = 0.5 * (zmin + zmax);
-		;
 		mbev_selected.scale = 2.0 / sqrt(dy * dy + dx * dx);
 		mbev_selected.zscale = mbev_selected.scale;
 		mbev_selected.xmin = -0.5 * dx;
