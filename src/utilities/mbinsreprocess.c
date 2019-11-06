@@ -128,25 +128,16 @@ int main(int argc, char **argv) {
 			switch (c) {
 			/* long options all return c=0 */
 			case 0:
-				/* verbose */
 				if (strcmp("verbose", options[option_index].name) == 0) {
 					verbose++;
 				}
-
-				/* help */
 				else if (strcmp("help", options[option_index].name) == 0) {
 					help = true;
 				}
-
-				/*-------------------------------------------------------
-				 * Define input and output files */
-
-				/* input */
+				// Define input and output files
 				else if (strcmp("input", options[option_index].name) == 0) {
 					strcpy(ifile, optarg);
 				}
-
-				/* output */
 				else if (strcmp("output", options[option_index].name) == 0) {
 					strcpy(ofile, optarg);
 				}
