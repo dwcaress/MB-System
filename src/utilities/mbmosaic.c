@@ -42,39 +42,44 @@
 #include "mb_status.h"
 
 /* gridding algorithms */
-#define MBMOSAIC_SINGLE_BEST 1
-#define MBMOSAIC_AVERAGE 2
+typedef enum {
+    MBMOSAIC_SINGLE_BEST = 1,
+    MBMOSAIC_AVERAGE = 2,
+} grid_mode_t;
 
 /* grid format definitions */
-#define MBMOSAIC_ASCII 1
-#define MBMOSAIC_OLDGRD 2
-#define MBMOSAIC_CDFGRD 3
-#define MBMOSAIC_ARCASCII 4
-#define MBMOSAIC_GMTGRD 100
+typedef enum {
+    MBMOSAIC_ASCII = 1,
+    MBMOSAIC_OLDGRD = 2,
+    MBMOSAIC_CDFGRD = 3,
+    MBMOSAIC_ARCASCII = 4,
+    MBMOSAIC_GMTGRD = 100,
+} grid_kind_t;
 
 /* gridded data type */
-#define MBMOSAIC_DATA_AMPLITUDE 3
-#define MBMOSAIC_DATA_SIDESCAN 4
-#define MBMOSAIC_DATA_FLAT_GRAZING 5
-#define MBMOSAIC_DATA_GRAZING 6
-#define MBMOSAIC_DATA_SLOPE 7
+const int MBMOSAIC_DATA_AMPLITUDE = 3;
+const int MBMOSAIC_DATA_SIDESCAN = 4;
+const int MBMOSAIC_DATA_FLAT_GRAZING = 5;
+const int MBMOSAIC_DATA_GRAZING = 6;
+const int MBMOSAIC_DATA_SLOPE = 7;
 
 /* prioritization mode */
-#define MBMOSAIC_PRIORITY_NONE 0
-#define MBMOSAIC_PRIORITY_ANGLE 1
-#define MBMOSAIC_PRIORITY_AZIMUTH 2
-#define MBMOSAIC_PRIORITY_HEADING 4
+const int MBMOSAIC_PRIORITY_NONE = 0;
+const int MBMOSAIC_PRIORITY_ANGLE = 1;
+const int MBMOSAIC_PRIORITY_AZIMUTH = 2;
+const int MBMOSAIC_PRIORITY_HEADING = 4;
 
 /* priority tables */
-#define MBMOSAIC_PRIORITYTABLE_FILE 0
-#define MBMOSAIC_PRIORITYTABLE_60DEGREESUP 1
-#define MBMOSAIC_PRIORITYTABLE_67DEGREESUP 2
-#define MBMOSAIC_PRIORITYTABLE_75DEGREESUP 3
-#define MBMOSAIC_PRIORITYTABLE_85DEGREESUP 4
-#define MBMOSAIC_PRIORITYTABLE_60DEGREESDN 5
-#define MBMOSAIC_PRIORITYTABLE_67DEGREESDN 6
-#define MBMOSAIC_PRIORITYTABLE_75DEGREESDN 7
-#define MBMOSAIC_PRIORITYTABLE_85DEGREESDN 8
+const int MBMOSAIC_PRIORITYTABLE_FILE = 0;
+const int MBMOSAIC_PRIORITYTABLE_60DEGREESUP = 1;
+const int MBMOSAIC_PRIORITYTABLE_67DEGREESUP = 2;
+const int MBMOSAIC_PRIORITYTABLE_75DEGREESUP = 3;
+const int MBMOSAIC_PRIORITYTABLE_85DEGREESUP = 4;
+const int MBMOSAIC_PRIORITYTABLE_60DEGREESDN = 5;
+const int MBMOSAIC_PRIORITYTABLE_67DEGREESDN = 6;
+const int MBMOSAIC_PRIORITYTABLE_75DEGREESDN = 7;
+const int MBMOSAIC_PRIORITYTABLE_85DEGREESDN = 8;
+
 int n_priority_angle_60degreesup = 3;
 double priority_angle_60degreesup_angle[] = {-60, 0, 60};
 double priority_angle_60degreesup_priority[] = {1.0, 0.0, 1.0};
@@ -100,20 +105,21 @@ int n_priority_angle_85degreesdn = 3;
 double priority_angle_85degreesdn_angle[] = {-85, 0, 85};
 double priority_angle_85degreesdn_priority[] = {0.0, 1.0, 0.0};
 
-#define MB7K2SS_NUM_ANGLES 171
-#define MB7K2SS_ANGLE_MAX 85.0
+const int MB7K2SS_NUM_ANGLES = 171;
+const double MB7K2SS_ANGLE_MAX = 85.0;
 
-/* flag for no data in grid */
-#define NO_DATA_FLAG 99999
+/* flag for no data in grid */;
+const int NO_DATA_FLAG = 99999;
 
-/* interpolation mode */
-#define MBMOSAIC_INTERP_NONE 0
-#define MBMOSAIC_INTERP_GAP 1
-#define MBMOSAIC_INTERP_NEAR 2
-#define MBMOSAIC_INTERP_ALL 3
+/* interpolation mode */;
+const int MBMOSAIC_INTERP_NONE = 0;
+const int MBMOSAIC_INTERP_GAP = 1;
+const int MBMOSAIC_INTERP_NEAR = 2;
+const int MBMOSAIC_INTERP_ALL = 3;
 
-#define MBMOSAIC_FOOTPRINT_REAL 0
-#define MBMOSAIC_FOOTPRINT_SPACING 1
+const int MBMOSAIC_FOOTPRINT_REAL = 0;
+const int MBMOSAIC_FOOTPRINT_SPACING = 1;
+
 struct footprint {
 	double x[4];
 	double y[4];
@@ -139,10 +145,6 @@ static const char usage_message[] =
  */
 int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                 double dx, double dy, int *error) {
-	FILE *fp = NULL;
-	time_t right_now;
-	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -161,24 +163,25 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 
 	int status = MB_SUCCESS;
 
-	/* open the file */
-	if ((fp = fopen(outfile, "w")) == NULL) {
+	FILE *fp = fopen(outfile, "w");
+	if (fp == NULL) {
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
-	}
-
-	/* output grid */
-	else {
+	} else {
 		fprintf(fp, "grid created by program mbmosaic\n");
-		right_now = time((time_t *)0);
+		const time_t right_now = time((time_t *)0);
+		char date[32];
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
+		char *user_ptr = getenv("USER");
+		if (user_ptr == NULL)
 			user_ptr = getenv("LOGNAME");
+		char user[MB_PATH_MAXLINE];
 		if (user_ptr != NULL)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
+		char host[MB_PATH_MAXLINE];
 		/* i = */ gethostname(host, MB_PATH_MAXLINE);
 		fprintf(fp, "program run by %s on %s at %s\n", user, host, date);
 		fprintf(fp, "%d %d\n%f %f %f %f\n", nx, ny, xmin, xmax, ymin, ymax);
@@ -1025,25 +1028,24 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
-
-	/* MBIO read control parameters */
 	int format;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	int error = MB_ERROR_NO_ERROR;
+
+	double btime_d;
+	double etime_d;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
 	mb_path file = "";
-	int file_in_bounds;
 	void *mbio_ptr = NULL;
 	struct mb_io_struct *mb_io_ptr = NULL;
 	void *store_ptr = NULL;
@@ -1067,11 +1069,11 @@ int main(int argc, char **argv) {
 	int clip = 0;
 	int clipmode = MBMOSAIC_INTERP_NONE;
 	double tension = 0.0;
-	int grid_mode = MBMOSAIC_SINGLE_BEST;
+	grid_mode_t grid_mode = MBMOSAIC_SINGLE_BEST;
 	int datatype = MBMOSAIC_DATA_SIDESCAN;
 	bool usefiltered = false;
 	char gridkindstring[MB_PATH_MAXLINE];
-	int gridkind = MBMOSAIC_GMTGRD;
+	grid_kind_t gridkind = MBMOSAIC_GMTGRD;
 	bool more = false;
 	bool use_NaN = false;
 	double clipvalue = NO_DATA_FLAG;
@@ -1237,9 +1239,6 @@ int main(int argc, char **argv) {
 	int ix1, ix2, iy1, iy2;
 	double t1, t2;
 
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
 	/* set default input and output */
 	strcpy(filelist, "datalist.mb-1");
 
@@ -1328,7 +1327,10 @@ int main(int argc, char **argv) {
 					strcpy(gridkindstring, optarg);
 				}
 				else {
-					sscanf(optarg, "%d", &gridkind);
+					int tmp;
+					sscanf(optarg, "%d", &tmp);
+					// TODO(schwehr): Make sure that the number is valid.
+					gridkind = (grid_kind_t)tmp;
 					if (gridkind == MBMOSAIC_CDFGRD) {
 						gridkind = MBMOSAIC_GMTGRD;
 						gridkindstring[0] = '\0';
@@ -1663,7 +1665,7 @@ int main(int argc, char **argv) {
 			exit(error);
 		}
 
-		/* tranlate lon lat bounds from UTM if required */
+		/* translate lon lat bounds from UTM if required */
 		if (gbnd[0] < -360.0 || gbnd[0] > 360.0 || gbnd[1] < -360.0 || gbnd[1] > 360.0 || gbnd[2] < -90.0 || gbnd[2] > 90.0 ||
 		    gbnd[3] < -90.0 || gbnd[3] > 90.0) {
 			/* first point */
@@ -1973,6 +1975,7 @@ int main(int argc, char **argv) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, n_priority_angle * sizeof(double), (void **)&priority_angle_priority,
 			                    &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2002,6 +2005,7 @@ int main(int argc, char **argv) {
 	if (usetopogrid) {
 		status = mb_topogrid_init(verbose, topogridfile, &lonflip, &topogrid_ptr, &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error loading topography grid: %s\n%s\n", topogridfile, message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2180,6 +2184,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2205,6 +2210,8 @@ int main(int argc, char **argv) {
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp, "\nUnable to open datalist file: %s\n", dfile);
 	}
+
+	int file_in_bounds;  // TODO(schwehr): Make mb_check_info a bool.
 
 	/***** do first pass gridding *****/
 	if (grid_mode == MBMOSAIC_SINGLE_BEST || priority_mode != MBMOSAIC_PRIORITY_NONE) {
@@ -2238,10 +2245,11 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the multibeam file */
-				if (file_in_bounds == true) {
+				if (file_in_bounds) {
 					/* check for filtered amplitude or sidescan file */
 					if (usefiltered && datatype == MBMOSAIC_DATA_AMPLITUDE) {
 						if ((status = mb_get_ffa(verbose, file, &format, &error)) != MB_SUCCESS) {
+							char *message = NULL;
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error returned from function <mb_get_ffa>:\n%s\n", message);
 							fprintf(stderr, "Requested filtered amplitude file missing\n");
@@ -2252,6 +2260,7 @@ int main(int argc, char **argv) {
 					}
 					else if (usefiltered && datatype == MBMOSAIC_DATA_SIDESCAN) {
 						if ((status = mb_get_ffs(verbose, file, &format, &error)) != MB_SUCCESS) {
+							char *message = NULL;
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error returned from function <mb_get_ffs>:\n%s\n", message);
 							fprintf(stderr, "Requested filtered sidescan file missing\n");
@@ -2265,6 +2274,7 @@ int main(int argc, char **argv) {
 					if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 					                           &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
 					    MB_SUCCESS) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -2347,6 +2357,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2574,6 +2585,7 @@ int main(int argc, char **argv) {
 									                                         table_angle, table_xtrack, table_ltrack,
 									                                         table_altitude, table_range, &table_error);
 									if (table_status == MB_FAILURE) {
+										char *message = NULL;
 										mb_error(verbose, table_error, &message);
 										fprintf(outfp, "\nMBIO Error extracting topography from grid for sidescan:\n%s\n",
 										        message);
@@ -2684,7 +2696,7 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds == true)
+				if (verbose > 0 || file_in_bounds)
 					fprintf(outfp, "%u data points processed in %s\n", ndatafile, file);
 
 				/* add to datalist if data actually contributed */
@@ -2748,10 +2760,11 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the multibeam file */
-				if (file_in_bounds == true) {
+				if (file_in_bounds) {
 					/* check for filtered amplitude or sidescan file */
 					if (usefiltered && datatype == MBMOSAIC_DATA_AMPLITUDE) {
 						if ((status = mb_get_ffa(verbose, file, &format, &error)) != MB_SUCCESS) {
+							char *message = NULL;
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error returned from function <mb_get_ffa>:\n%s\n", message);
 							fprintf(stderr, "Requested filtered amplitude file missing\n");
@@ -2762,6 +2775,7 @@ int main(int argc, char **argv) {
 					}
 					else if (usefiltered && datatype == MBMOSAIC_DATA_SIDESCAN) {
 						if ((status = mb_get_ffs(verbose, file, &format, &error)) != MB_SUCCESS) {
+							char *message = NULL;
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error returned from function <mb_get_ffa>:\n%s\n", message);
 							fprintf(stderr, "Requested filtered sidescan file missing\n");
@@ -2775,6 +2789,7 @@ int main(int argc, char **argv) {
 					if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 					                           &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
 					    MB_SUCCESS) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -2854,6 +2869,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -3093,6 +3109,7 @@ int main(int argc, char **argv) {
 									                                         table_angle, table_xtrack, table_ltrack,
 									                                         table_altitude, table_range, &table_error);
 									if (table_status == MB_FAILURE) {
+										char *message = NULL;
 										mb_error(verbose, table_error, &message);
 										fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 										fprintf(outfp, "\nNonfatal error in program <%s>\n", program_name);
@@ -3208,7 +3225,7 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds == true)
+				if (verbose > 0 || file_in_bounds)
 					fprintf(outfp, "%u data points processed in %s\n", ndatafile, file);
 
 				/* add to datalist if data actually contributed */
@@ -3296,6 +3313,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, (gxdim + gydim) * sizeof(int), (void **)&work3, &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -3711,6 +3729,7 @@ int main(int argc, char **argv) {
 		                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 	}
 	if (status != MB_SUCCESS) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nError writing output file: %s\n%s\n", ofile, message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3758,6 +3777,7 @@ int main(int argc, char **argv) {
 			                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 		}
 		if (status != MB_SUCCESS) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nError writing output file: %s\n%s\n", ofile, message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3804,6 +3824,7 @@ int main(int argc, char **argv) {
 			                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 		}
 		if (status != MB_SUCCESS) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nError writing output file: %s\n%s\n", ofile, message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);

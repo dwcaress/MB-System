@@ -43,6 +43,7 @@
 
 #include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -66,43 +67,61 @@ struct mbvoxelclean_ping_struct {
 	double navlon;
 	double navlat;
 	double heading;
-    double sensordepth;
+	double sensordepth;
 	int beams_bath;
-    int beams_bath_alloc;
-	char *beamflag;
-	char *beamflagorg;
+	int beams_bath_alloc;
+	char *beamflag;  // TODO(schwehr): bool?
+	char *beamflagorg;  // TODO(schwehr): bool?
 	double *bathz;
 	double *bathx;
 	double *bathy;
-    double *bathr;
+	double *bathr;
 };
 
-#define MBVC_EMPTY_IGNORE       0
-#define MBVC_EMPTY_FLAG         1
-#define MBVC_OCCUPIED_IGNORE    0
-#define MBVC_OCCUPIED_UNFLAG    1
+const int MBVC_EMPTY_IGNORE = 0;
+const int MBVC_EMPTY_FLAG = 1;
+const int MBVC_OCCUPIED_IGNORE = 0;
+const int MBVC_OCCUPIED_UNFLAG = 1;
 
 static const char program_name[] = "mbvoxelclean";
 static const char help_message[] =
-    "mbvoxelclean parses recursive datalist files and outputs the\ncomplete list of data files and formats. "
-    "\nThe results are dumped to stdout.";
+    "mbvoxelclean parses recursive datalist files and outputs the\n"
+    "complete list of data files and formats.\n"
+    "The results are dumped to stdout.";
 static const char usage_message[] =
-    "mbvoxelclean \n\t[\n\t--verbose\n\t--help\n"
-    "\t--input=datalist\n\t--format=value\n\t--voxel-size=xysize[/zsize]\n"
-    "\t--occupy-threshold=value\n\t--count-flagged\n\t--flag-empty\n\t--ignore-empty\n\t--unflag-occupied\n"
-    "\t--ignore-occupied\n\t--range-minimum=value\n\t--range-maximum=value]";
+    "mbvoxelclean \n"
+    "\t[\n"
+    "\t--verbose\n"
+    "\t--help\n"
+    "\t--input=datalist\n"
+    "\t--format=value\n"
+    "\t--voxel-size=xysize[/zsize]\n"
+    "\t--occupy-threshold=value\n"
+    "\t--count-flagged\n"
+    "\t--flag-empty\n"
+    "\t--ignore-empty\n"
+    "\t--unflag-occupied\n"
+    "\t--ignore-occupied\n"
+    "\t--range-minimum=value\n"
+    "\t--range-maximum=value]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int status;
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
+	int format;
+	int defaultpings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &defaultpings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	/* MBIO read control parameters */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
+	int uselockfiles = true;  // TODO(schwehr): mb_uselockfiles should use a bool
+	status = mb_uselockfiles(verbose, &uselockfiles);
+
 	int kind = MB_DATA_NONE;
 	char read_file[MB_PATH_MAXLINE];
 	char swathfile[MB_PATH_MAXLINE];
@@ -111,38 +130,28 @@ int main(int argc, char **argv) {
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_NO;
 	double file_weight;
-	int format;
-	int formatread;
 	int variable_beams;
 	int traveltime;
-	int beam_flagging;
-	int defaultpings;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
 	double btime_d;
 	double etime_d;
-	double speedmin;
-	double timegap;
 
 	/* processing variables */
 	int sensorhead = 0;
 	int sensorhead_status = MB_SUCCESS;
 	int sensorhead_error = MB_ERROR_NO_ERROR;
-    int pingsread = 0;
-    int time_i[7];
-    double time_d = 0.0;
-    double navlon = 0.0;
-    double navlat = 0.0;
-    double speed = 0.0;
-    double heading = 0.0;
-    double distance = 0.0;
-    double altitude = 0.0;
-    double sensordepth = 0.0;
-    int beams_bath = 0;
-    int beams_amp = 0;
-    int pixels_ss = 0;
+	int pingsread = 0;
+	int time_i[7];
+	double time_d = 0.0;
+	double navlon = 0.0;
+	double navlat = 0.0;
+	double speed = 0.0;
+	double heading = 0.0;
+	double distance = 0.0;
+	double altitude = 0.0;
+	double sensordepth = 0.0;
+	int beams_bath = 0;
+	int beams_amp = 0;
+	int pixels_ss = 0;
 	char *beamflag = NULL;
 	char *beamflagorg = NULL;
 	double *bath = NULL;
@@ -154,96 +163,60 @@ int main(int argc, char **argv) {
 	double *ssalongtrack = NULL;
 	char comment[MB_COMMENT_MAXLINE];
 
-    double d1, d2;
+	/* other mbvoxelclean control parameters */
+	double voxel_size_xy = 0.05;
+	double voxel_size_z = 0.05;
+	int occupy_threshold = 5;
+	bool count_flagged = false;
+	int empty_mode = MBVC_EMPTY_FLAG;
+	int occupied_mode = MBVC_OCCUPIED_IGNORE;
+	bool apply_range_minimum = false;
+	double range_minimum = 0.0;
+	bool apply_range_maximum = false;
+	double range_maximum = 0.0;
 
-	/* command line option definitions */
-	/* mbvoxelclean
-     *     [
-     *     --verbose
-     *     --help
-     *     --input=datalist
-     *     --format=value
-     *     --voxel-size=xysize[/zsize]
-     *     --occupy-threshold
-     *     --count-flagged
-     *     --flag-empty
-     *     --ignore-empty
-     *     --unflag-occupied
-     *     --ignore-occupied
-     *     --range-minimum=value
-     *     --range-maximum=value
-     *     ]
-     */
-	static struct option options[] = {{"verbose", no_argument, NULL, 0},
-	                                  {"help", no_argument, NULL, 0},
-	                                  {"input", required_argument, NULL, 0},
-	                                  {"format", required_argument, NULL, 0},
-	                                  {"voxel-size", required_argument, NULL, 0},
-	                                  {"occupy-threshold", required_argument, NULL, 0},
-	                                  {"count-flagged", required_argument, NULL, 0},
-	                                  {"flag-empty", no_argument, NULL, 0},
-	                                  {"ignore-empty", no_argument, NULL, 0},
-	                                  {"unflag-occupied", no_argument, NULL, 0},
-	                                  {"ignore-occupied", no_argument, NULL, 0},
-	                                  {"range-minimum", required_argument, NULL, 0},
-	                                  {"range-maximum", required_argument, NULL, 0},
-	                                  {NULL, 0, NULL, 0}};
-
-    /* other mbvoxelclean control parameters */
-    double voxel_size_xy = 0.05;
-    double voxel_size_z = 0.05;
-    int occupy_threshold = 5;
-    bool count_flagged = false;
-    int empty_mode = MBVC_EMPTY_FLAG;
-    int occupied_mode = MBVC_OCCUPIED_IGNORE;
-    bool apply_range_minimum = false;
-    double range_minimum = 0.0;
-    bool apply_range_maximum = false;
-    double range_maximum = 0.0;
-
-    /* swath data storage */
+	/* swath data storage */
 	struct mb_info_struct mb_info;
-    int npings_alloc = 0;
-    struct mbvoxelclean_ping_struct *pings = NULL;
+	int npings_alloc = 0;
+	struct mbvoxelclean_ping_struct *pings = NULL;
 
-    /* voxel storage */
-    int n_voxel = 0;
-    int n_voxel_alloc = 0;
-    unsigned char *voxel_count = NULL;
-    int n_voxel_x;
-    int n_voxel_y;
-    int n_voxel_z;
-    double x_min, x_max, y_min, y_max, z_min, z_max;
-    int action;
+	/* voxel storage */
+	int n_voxel = 0;
+	int n_voxel_alloc = 0;
+	unsigned char *voxel_count = NULL;  // TODO(schwehr): Make this a bool
+	int n_voxel_x;
+	int n_voxel_y;
+	int n_voxel_z;
+	int action;
 
-    /* save file control variables */
-    char esffile[MB_PATH_MAXLINE];
-    struct mb_esf_struct esf;
+	/* save file control variables */
+	char esffile[MB_PATH_MAXLINE];
+	struct mb_esf_struct esf;
 
-    int n_pings = 0;
-    int n_beams = 0;
-    int n_beamflag_null = 0;
-    int n_beamflag_good = 0;
-    int n_beamflag_flag = 0;
-    int n_esf_flag = 0;
-    int n_esf_unflag = 0;
-    int n_density_flag = 0;
-    int n_density_unflag = 0;
-    int n_minrange_flag = 0;
-    int n_maxrange_flag = 0;
+	int n_pings = 0;
+	int n_beams = 0;
+	int n_beamflag_null = 0;
+	int n_beamflag_good = 0;
+	int n_beamflag_flag = 0;
+	int n_esf_flag = 0;
+	int n_esf_unflag = 0;
+	int n_density_flag = 0;
+	int n_density_unflag = 0;
+	int n_minrange_flag = 0;
+	int n_maxrange_flag = 0;
 
-    int n_files_tot = 0;
-    int n_pings_tot = 0;
-    int n_beams_tot = 0;
-    int n_beamflag_null_tot = 0;
-    int n_beamflag_good_tot = 0;
-    int n_beamflag_flag_tot = 0;
-    int n_esf_flag_tot = 0;
-    int n_esf_unflag_tot = 0;
-    int n_density_flag_tot = 0;
-    int n_density_unflag_tot = 0;
-    int n_minrange_flag_tot = 0;
-    int n_maxrange_flag_tot = 0;
+	int n_files_tot = 0;
+	int n_pings_tot = 0;
+	int n_beams_tot = 0;
+	int n_beamflag_null_tot = 0;
+	int n_beamflag_good_tot = 0;
+	int n_beamflag_flag_tot = 0;
+	int n_esf_flag_tot = 0;
+	int n_esf_unflag_tot = 0;
+	int n_density_flag_tot = 0;
+	int n_density_unflag_tot = 0;
+	int n_minrange_flag_tot = 0;
+	int n_maxrange_flag_tot = 0;
 
 	int prstatus = MB_PR_FILE_UP_TO_DATE;
 	int lock_status = MB_SUCCESS;
@@ -252,27 +225,15 @@ int main(int argc, char **argv) {
 	mb_path lock_program = "";
 	mb_path lock_cpu = "";
 	mb_path lock_user = "";
-	char lock_date[25] = "";
-	mb_path lockfile = "";
 
-	/* output stream for basic stuff (stdout if verbose <= 1,
-	    stderr if verbose > 1) */
-	FILE *outfp, *fp;
+	int nscan = 0;
+	double mtodeglon, mtodeglat;
+	double headingx, headingy;
 
-    int nscan = 0;
-    int uselockfiles = true;
-    double mtodeglon, mtodeglat;
-    double headingx, headingy;
-    double sensorx, sensory, sensorz;
-    int first, done;
-    int ix, iy, iz, kk;
-
-	/* get current default values */
-	status = mb_defaults(verbose, &format, &defaultpings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-	status = mb_uselockfiles(verbose, &uselockfiles);
+	int formatread;
 
 	/* reset all defaults but the format and lonflip */
-    defaultpings = 1;
+	defaultpings = 1;
 	bounds[0] = -360.;
 	bounds[1] = 360.;
 	bounds[2] = -90.;
@@ -295,8 +256,26 @@ int main(int argc, char **argv) {
 	timegap = 1000000000.0;
 	strcpy(read_file, "datalist.mb-1");
 
+	/* output stream for basic stuff (stdout if verbose <= 1, stderr if verbose > 1) */
+	FILE *outfp;
+
 	/* process argument list */
 	{
+		static struct option options[] = {
+                    {"verbose", no_argument, NULL, 0},
+                    {"help", no_argument, NULL, 0},
+                    {"input", required_argument, NULL, 0},
+                    {"format", required_argument, NULL, 0},
+                    {"voxel-size", required_argument, NULL, 0},
+                    {"occupy-threshold", required_argument, NULL, 0},
+                    {"count-flagged", required_argument, NULL, 0},
+                    {"flag-empty", no_argument, NULL, 0},
+                    {"ignore-empty", no_argument, NULL, 0},
+                    {"unflag-occupied", no_argument, NULL, 0},
+                    {"ignore-occupied", no_argument, NULL, 0},
+                    {"range-minimum", required_argument, NULL, 0},
+                    {"range-maximum", required_argument, NULL, 0},
+                    {NULL, 0, NULL, 0}};
 		int option_index;
 		bool errflg = false;
 		int c;
@@ -318,6 +297,8 @@ int main(int argc, char **argv) {
 					sscanf(optarg, "%d", &format);
 				}
 				else if (strcmp("voxel-size", options[option_index].name) == 0) {
+					double d1;
+					double d2;
 					nscan = sscanf(optarg, "%lf/%lf", &d1, &d2);
 					if (nscan > 0) {
 						voxel_size_xy = d1;
@@ -418,9 +399,11 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(outfp, "\n%s\n", help_message);
 			fprintf(outfp, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
+
+	int error = MB_ERROR_NO_ERROR;
 
 	/* get format if required */
 	if (format == 0)
@@ -449,14 +432,17 @@ int main(int argc, char **argv) {
 	}
 
 	bool esffile_open = false;
-	int locked = false;  // TODO(schwehr): Make mb_pr_lockinfo take a bool locked
+	int locked = false;  // TODO(schwehr): Make mb_pr_lockinfo take a bool
+	void *mbio_ptr = NULL;
 
 	/* loop over all files to be read */
 	while (read_data) {
 		bool oktoprocess = true;
+		int beam_flagging;  // TODO(schwehr): Make mb_format_flags take a bool
 
 		/* check format and get format flags */
 		if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n", format,
 			        message);
@@ -467,17 +453,18 @@ int main(int argc, char **argv) {
 		}
 
 		/* warn if beam flagging not supported for the current data format */
-		if (beam_flagging == false) {
+		if (!beam_flagging) {
 			fprintf(stderr, "\nWarning:\nMBIO format %d does not allow flagging of bad bathymetry data.\n", format);
 			fprintf(stderr,
 			        "\nWhen mbprocess applies edits to file:\n\t%s\nthe soundings will be nulled (zeroed) rather than flagged.\n",
 			        swathfile);
 		}
 
+		char lock_date[25] = "";
 		/* try to lock file */
-		if (uselockfiles == true)
+		if (uselockfiles) {
 			status = mb_pr_lockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
-		else {
+		} else {
 			lock_status =
 			    mb_pr_lockinfo(verbose, swathfile, &locked, &lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &error);
 
@@ -518,7 +505,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* proceed if file locked and format ok */
-		if (oktoprocess == true) {
+		if (oktoprocess) {
             /* check for *inf file, create if necessary, and load metadata */
             status = mb_get_info_datalist(verbose, swathfile, &formatread, &mb_info, lonflip, &error);
 
@@ -527,6 +514,7 @@ int main(int argc, char **argv) {
                 status = mb_reallocd(verbose, __FILE__, __LINE__, mb_info.nrecords * sizeof(struct mbvoxelclean_ping_struct),
                                      (void **)&pings, &error);
                 if (error != MB_ERROR_NO_ERROR) {
+                    char *message = NULL;
                     mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
                     fprintf(outfp, "\nMBIO Error allocating pings array:\n%s\n", message);
                     fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -557,6 +545,7 @@ int main(int argc, char **argv) {
                         status = mb_reallocd(verbose, __FILE__, __LINE__, mb_info.nbeams_bath * sizeof(double),
                                      (void **)&pings[i].bathr, &error);
                     if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
                         mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
                         fprintf(outfp, "\nMBIO Error allocating data arrays within the ping structure:\n%s\n", message);
                         fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -587,6 +576,7 @@ int main(int argc, char **argv) {
 			if ((status = mb_read_init(verbose, swathfileread, formatread, defaultpings, lonflip, bounds, btime_i, etime_i, speedmin,
 			                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
 			    MB_SUCCESS) {
+				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 				fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swathfile);
@@ -638,11 +628,20 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 				exit(error);
 			}
+
+	void *store_ptr = NULL;
+	double x_min;
+	double x_max;
+	double y_min;
+	double y_max;
+	double z_min;
+	double z_max;
 
 			/* now deal with old edit save file */
 			if (status == MB_SUCCESS) {
@@ -668,8 +667,8 @@ int main(int argc, char **argv) {
 			}
 
 			/* read */
-			done = false;
-            first = true;
+			bool done = false;
+			bool first = true;
 			while (!done) {
 				if (verbose > 1)
 					fprintf(stderr, "\n");
@@ -708,6 +707,7 @@ int main(int argc, char **argv) {
                             status = mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
                                          (void **)&pings[n_pings].bathr, &error);
                         if (error != MB_ERROR_NO_ERROR) {
+                            char *message = NULL;
                             mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
                             fprintf(outfp, "\nMBIO Error allocating data arrays within the ping structure:\n%s\n", message);
                             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -737,9 +737,9 @@ int main(int argc, char **argv) {
                     pings[n_pings].heading = heading;
                     pings[n_pings].sensordepth = sensordepth;
                     pings[n_pings].beams_bath = beams_bath;
-                    sensorx = (navlon - mb_info.lon_start) / mtodeglon;
-                    sensory = (navlat - mb_info.lat_start) / mtodeglat;
-                    sensorz = -sensordepth;
+                    const double sensorx = (navlon - mb_info.lon_start) / mtodeglon;
+                    const double sensory = (navlat - mb_info.lat_start) / mtodeglat;
+                    const double sensorz = -sensordepth;
 					for (int j = 0; j < beams_bath; j++) {
                         pings[n_pings].beamflag[j] = beamflag[j];
                         pings[n_pings].beamflagorg[j] = beamflag[j];
@@ -755,7 +755,7 @@ int main(int argc, char **argv) {
                                                             * (pings[n_pings].bathy[j] - sensory)
                                                            + (pings[n_pings].bathz[j] - sensorz)
                                                             * (pings[n_pings].bathz[j] - sensorz));
-                            if (first == true) {
+                            if (first) {
                                 x_min = pings[n_pings].bathx[j];
                                 x_max = pings[n_pings].bathx[j];
                                 y_min = pings[n_pings].bathy[j];
@@ -878,6 +878,7 @@ int main(int argc, char **argv) {
                 status = mb_reallocd(verbose, __FILE__, __LINE__, (size_t)n_voxel,
                                      (void **)&voxel_count, &error);
                 if (error != MB_ERROR_NO_ERROR) {
+                    char *message = NULL;
                     mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
                     fprintf(outfp, "\nMBIO Error allocating voxel counting arrays:\n%s\n", message);
                     fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -892,10 +893,10 @@ int main(int argc, char **argv) {
             for (int i = 0; i < n_pings; i++) {
                 for (int j = 0; j< pings[i].beams_bath; j++) {
                     if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
-                        ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
-                        iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
-                        iz = (pings[i].bathz[j] - z_min) / voxel_size_z;
-                        kk = (ix * n_voxel_y + iy) * n_voxel_z + iz;
+                        const int ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
+                        const int iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
+                        const int iz = (pings[i].bathz[j] - z_min) / voxel_size_z;
+                        const int kk = (ix * n_voxel_y + iy) * n_voxel_z + iz;
                         if (mb_beam_ok(pings[i].beamflag[j]) || count_flagged) {
                             voxel_count[kk] = MIN(voxel_count[kk] + 1, (unsigned char) 255);
                         }
@@ -904,7 +905,7 @@ int main(int argc, char **argv) {
             }
 
             /* apply threshold to generate binary mask of occupied voxels */
-            for (kk=0; kk < n_voxel; kk++) {
+            for (int kk = 0; kk < n_voxel; kk++) {
                 if (voxel_count[kk] >= occupy_threshold) {
                     voxel_count[kk] = true;
                 } else {
@@ -917,12 +918,12 @@ int main(int argc, char **argv) {
                 for (int i = 0; i < n_pings; i++) {
                     for (int j = 0; j < pings[i].beams_bath; j++) {
                         if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
-                            ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
-                            iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
-                            iz = (pings[i].bathz[j] - z_min) / voxel_size_z;
-                            kk = (ix * n_voxel_y + iy) * n_voxel_z + iz;
+                            const int ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
+                            const int iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
+                            const int iz = (pings[i].bathz[j] - z_min) / voxel_size_z;
+                            const int kk = (ix * n_voxel_y + iy) * n_voxel_z + iz;
                             if (occupied_mode == MBVC_OCCUPIED_UNFLAG
-                                && voxel_count[kk] == true
+                                && voxel_count[kk]
                                 && !mb_beam_ok(pings[i].beamflag[j])) {
                                 pings[i].beamflag[j] = MB_FLAG_NONE;
                                 action = MBP_EDIT_UNFLAG;
@@ -932,7 +933,7 @@ int main(int argc, char **argv) {
                                 n_density_unflag++;
                             }
                             if (empty_mode == MBVC_EMPTY_FLAG
-                                && voxel_count[kk] == false
+                                && !voxel_count[kk]
                                 && mb_beam_ok(pings[i].beamflag[j])) {
                                 pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                                 action = MBP_EDIT_FILTER;
@@ -979,14 +980,14 @@ int main(int argc, char **argv) {
 			status = mb_esf_close(verbose, &esf, &error);
 
 			/* update mbprocess parameter file */
-			if (esffile_open == true) {
+			if (esffile_open) {
 				/* update mbprocess parameter file */
 				status = mb_pr_update_format(verbose, swathfile, true, format, &error);
 				status = mb_pr_update_edit(verbose, swathfile, MBP_EDIT_ON, esffile, &error);
 			}
 
 			/* unlock the raw swath file */
-			if (uselockfiles == true)
+			if (uselockfiles)
 				status = mb_pr_unlockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
 
 			/* check memory */

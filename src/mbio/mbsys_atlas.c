@@ -26,9 +26,6 @@
  * Author:	D. W. Caress
  * Author:	D. N. Chayes
  * Date:	June 25, 2001
- *
- *
- *
  */
 
 #include <math.h>

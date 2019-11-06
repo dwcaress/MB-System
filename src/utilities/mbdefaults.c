@@ -33,23 +33,25 @@
 #include "mb_status.h"
 
 /* colortable view mode defines */
-#define MBV_COLORTABLE_HAXBY 0
-#define MBV_COLORTABLE_BRIGHT 1
-#define MBV_COLORTABLE_MUTED 2
-#define MBV_COLORTABLE_GRAY 3
-#define MBV_COLORTABLE_FLAT 4
-#define MBV_COLORTABLE_SEALEVEL1 5
-#define MBV_COLORTABLE_SEALEVEL2 6
+const int MBV_COLORTABLE_HAXBY = 0;
+const int MBV_COLORTABLE_BRIGHT = 1;
+const int MBV_COLORTABLE_MUTED = 2;
+const int MBV_COLORTABLE_GRAY = 3;
+const int MBV_COLORTABLE_FLAT = 4;
+const int MBV_COLORTABLE_SEALEVEL1 = 5;
+const int MBV_COLORTABLE_SEALEVEL2 = 6;
 
 /* colortable view mode defines */
-#define MBV_COLORTABLE_NORMAL 0
-#define MBV_COLORTABLE_REVERSED 1
+typedef enum {
+    MBV_COLORTABLE_NORMAL = 0,
+    MBV_COLORTABLE_REVERSED = 1,
+} colortable_mode_t;
 
 /* shade view mode defines */
-#define MBV_SHADE_VIEW_NONE 0
-#define MBV_SHADE_VIEW_ILLUMINATION 1
-#define MBV_SHADE_VIEW_SLOPE 2
-#define MBV_SHADE_VIEW_OVERLAY 3
+const int MBV_SHADE_VIEW_NONE = 0;
+const int MBV_SHADE_VIEW_ILLUMINATION = 1;
+const int MBV_SHADE_VIEW_SLOPE = 2;
+const int MBV_SHADE_VIEW_OVERLAY = 3;
 
 
 static const char program_name[] = "MBDEFAULTS";
@@ -64,33 +66,7 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int status;
-	int error = MB_ERROR_NO_ERROR;
 	int verbose = 0;
-	bool flag = false;
-	FILE *fp;
-	char file[MB_PATH_MAXLINE];
-	char psdisplay[MB_PATH_MAXLINE];
-	char imgdisplay[MB_PATH_MAXLINE];
-	char mbproject[MB_PATH_MAXLINE];
-	char argstring[MB_PATH_MAXLINE];
-	int fbtversion = 3;
-	int uselockfiles = 1;
-	int fileiobuffer = 0;
-	char *HOME = "HOME";
-	int primary_colortable;
-	int primary_colortable_mode;
-	int primary_shade_mode;
-	int slope_colortable;
-	int slope_colortable_mode;
-	int secondary_colortable;
-	int secondary_colortable_mode;
-	double illuminate_magnitude;
-	double illuminate_elevation;
-	double illuminate_azimuth;
-	double slope_magnitude;
-
-	/* MBIO control parameters */
 	int format;
 	int pings;
 	int lonflip;
@@ -99,28 +75,46 @@ int main(int argc, char **argv) {
 	int etime_i[7];
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	/* get current default mbio values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
-	/* now get current mb environment values */
+	char psdisplay[MB_PATH_MAXLINE];
+	char imgdisplay[MB_PATH_MAXLINE];
+	char mbproject[MB_PATH_MAXLINE];
 	status = mb_env(verbose, psdisplay, imgdisplay, mbproject);
 
-	/* now get current mbview default display values */
-	status = mb_mbview_defaults(verbose, &primary_colortable, &primary_colortable_mode, &primary_shade_mode, &slope_colortable,
-	                            &slope_colortable_mode, &secondary_colortable, &secondary_colortable_mode, &illuminate_magnitude,
-	                            &illuminate_elevation, &illuminate_azimuth, &slope_magnitude);
+	int primary_colortable;
+	colortable_mode_t primary_colortable_mode;
+	int primary_shade_mode;
+	int slope_colortable;
+	int slope_colortable_mode;
+	int secondary_colortable;
+	colortable_mode_t secondary_colortable_mode;
+	double illuminate_magnitude;
+	double illuminate_elevation;
+	double illuminate_azimuth;
+	double slope_magnitude;
+	{
+		int primary_colortable_mode_tmp;
+		int secondary_colortable_mode_tmp;
+		status = mb_mbview_defaults(
+			verbose, &primary_colortable, &primary_colortable_mode_tmp, &primary_shade_mode, &slope_colortable,
+	                &slope_colortable_mode, &secondary_colortable, &secondary_colortable_mode_tmp, &illuminate_magnitude,
+	                &illuminate_elevation, &illuminate_azimuth, &slope_magnitude);
+		primary_colortable_mode = (colortable_mode_t)primary_colortable_mode_tmp;
+		secondary_colortable_mode = (colortable_mode_t)secondary_colortable_mode_tmp;
+	}
 
-	/* now get current fbtversion value */
-	status = mb_fbtversion(verbose, &fbtversion);
+	int fbtversion = 3;
+	status &= mb_fbtversion(verbose, &fbtversion);
 
-	/* now get current uselockfiles value */
-	status = mb_uselockfiles(verbose, &uselockfiles);
+	int uselockfiles = 1;
+	status &= mb_uselockfiles(verbose, &uselockfiles);
 
-	/* now get current fileio buffering values */
-	status = mb_fileiobuffer(verbose, &fileiobuffer);
+	int fileiobuffer = 0;
+	status &= mb_fileiobuffer(verbose, &fileiobuffer);
 
-	/* process argument list */
+	bool flag = false;
+
 	{
 		bool errflg = false;
 		bool help = false;
@@ -140,6 +134,8 @@ int main(int argc, char **argv) {
 				break;
 			case 'F':
 			case 'f':
+			{
+				char argstring[MB_PATH_MAXLINE];
 				sscanf(optarg, "%s", argstring);
 				if (strncmp(argstring, "new", 3) == 0 || strncmp(argstring, "NEW", 3) == 0)
 					fbtversion = 3;
@@ -151,6 +147,7 @@ int main(int argc, char **argv) {
 					fbtversion = 3;
 				flag = true;
 				break;
+			}
 			case 'I':
 			case 'i':
 				sscanf(optarg, "%s", imgdisplay);
@@ -167,28 +164,31 @@ int main(int argc, char **argv) {
 				break;
 			case 'M':
 			case 'm':
+			{
 				/* default primary colortable and modes */
-				if (optarg[0] == 'P' || optarg[0] == 'p')
-					/* n = */ sscanf(&optarg[1], "%d/%d/%d", &primary_colortable, &primary_colortable_mode, &primary_shade_mode);
-
-				/* default slope colortable and mode */
-				else if (optarg[0] == 'G' || optarg[0] == 'g')
+				if (optarg[0] == 'P' || optarg[0] == 'p') {
+					int tmp;
+					/* n = */ sscanf(&optarg[1], "%d/%d/%d", &primary_colortable, &tmp, &primary_shade_mode);
+					primary_colortable_mode = (colortable_mode_t)tmp;
+				} else if (optarg[0] == 'G' || optarg[0] == 'g') {
+					/* default slope colortable and mode */
 					/* n = */ sscanf(&optarg[1], "%d/%d", &slope_colortable, &slope_colortable_mode);
-
-				/* default overlay colortable and mode */
-				else if (optarg[0] == 'O' || optarg[0] == 'o')
-					/* n = */ sscanf(&optarg[1], "%d/%d", &secondary_colortable, &secondary_colortable_mode);
-
-				/* default illumination parameters */
-				else if (optarg[0] == 'I' || optarg[0] == 'i')
+				} else if (optarg[0] == 'O' || optarg[0] == 'o') {
+					/* default overlay colortable and mode */
+					int tmp;
+					/* n = */ sscanf(&optarg[1], "%d/%d", &secondary_colortable, &tmp);
+					secondary_colortable_mode = (colortable_mode_t)tmp;
+				} else if (optarg[0] == 'I' || optarg[0] == 'i') {
+					/* default illumination parameters */
 					/* n = */ sscanf(&optarg[1], "%lf/%lf/%lf", &illuminate_magnitude, &illuminate_elevation, &illuminate_azimuth);
-
-				/* default slope shading magnitude */
-				else if (optarg[0] == 'S' || optarg[0] == 'S')
+				} else if (optarg[0] == 'S' || optarg[0] == 'S') {
+					/* default slope shading magnitude */
 					/* n = */ sscanf(&optarg[1], "%lf", &slope_magnitude);
+				}
 
 				flag = true;
 				break;
+			}
 			case 'T':
 			case 't':
 				sscanf(optarg, "%lf", &timegap);
@@ -196,6 +196,8 @@ int main(int argc, char **argv) {
 				break;
 			case 'U':
 			case 'u':
+			{
+				char argstring[MB_PATH_MAXLINE];
 				sscanf(optarg, "%s", argstring);
 				if (strncmp(argstring, "yes", 3) == 0 || strncmp(argstring, "YES", 3) == 0)
 					uselockfiles = 1;
@@ -207,6 +209,7 @@ int main(int argc, char **argv) {
 					uselockfiles = 0;
 				flag = true;
 				break;
+			}
 			case 'V':
 			case 'v':
 				verbose++;
@@ -282,15 +285,17 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
 
 	/* write out new ~/.mbio_defaults file if needed */
 	if (flag) {
-		strcpy(file, getenv(HOME));
+		char file[MB_PATH_MAXLINE];
+		strcpy(file, getenv("HOME"));
 		strcat(file, "/.mbio_defaults");
-		if ((fp = fopen(file, "w")) == NULL) {
+		FILE *fp = fopen(file, "w");
+		if (fp == NULL) {
 			fprintf(stderr, "Could not open file %s\n", file);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
@@ -403,10 +408,9 @@ int main(int argc, char **argv) {
 		printf("mbview illumination elevation:    %f degrees\n", illuminate_elevation);
 		printf("mbview illumination azimuth:      %f degrees\n", illuminate_azimuth);
 		printf("mbview slope magnitude:           %f\n", slope_magnitude);
-	}
+	} else {
+		/* else just list the current defaults */
 
-	/* else just list the current defaults */
-	else {
 		printf("\nCurrent MBIO Default Control Parameters:\n");
 		printf("lonflip:    %d\n", lonflip);
 		printf("timegap:    %f\n", timegap);
@@ -502,6 +506,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	exit(error);
+	exit(MB_ERROR_NO_ERROR);
 }
 /*--------------------------------------------------------------------*/

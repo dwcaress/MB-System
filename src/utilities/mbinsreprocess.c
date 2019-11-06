@@ -45,21 +45,42 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-#define NFIELDSMAX 50
-#define MAX_OPTIONS 50
-#define TYPE_UNKNOWN 0
-#define TYPE_TIMETAG 1
-#define TYPE_INTEGER 2
-#define TYPE_DOUBLE 3
-#define TYPE_ANGLE 4
-#define KEARFOTT_MONITOR_VALID_DVL 0x01
-#define KEARFOTT_MONITOR_RESERVED 0x02
-#define KEARFOTT_MONITOR_ZUPT_PROCESSED 0x04
-#define KEARFOTT_MONITOR_DVL_REJECTED 0x08
-#define KEARFOTT_MONITOR_DVL_PPROCESSED 0x10
-#define KEARFOTT_MONITOR_GPS_REJECTED 0x20
-#define KEARFOTT_MONITOR_GPS_PROCESSED 0x40
-#define KEARFOTT_MONITOR_DEPTH_LOOP_OPEN 0x80
+const int NFIELDSMAX = 50;
+const int MAX_OPTIONS = 50;
+typedef enum {
+    TYPE_UNKNOWN = 0,
+    TYPE_TIMETAG = 1,
+    TYPE_INTEGER = 2,
+    TYPE_DOUBLE = 3,
+    TYPE_ANGLE = 4,
+} field_type_t;
+// TODO(schwehr): Should these be unsigned values for flags?
+// const int KEARFOTT_MONITOR_VALID_DVL = 0x01;
+// const int KEARFOTT_MONITOR_RESERVED = 0x02;
+// const int KEARFOTT_MONITOR_ZUPT_PROCESSED = 0x04;
+// const int KEARFOTT_MONITOR_DVL_REJECTED = 0x08;
+const int KEARFOTT_MONITOR_DVL_PPROCESSED = 0x10;
+// const int KEARFOTT_MONITOR_GPS_REJECTED = 0x20;
+// const int KEARFOTT_MONITOR_GPS_PROCESSED = 0x40;
+// const int KEARFOTT_MONITOR_DEPTH_LOOP_OPEN = 0x80;
+
+/* auv log data */
+struct field {
+	field_type_t type;
+	int size;
+	int index;
+	char name[MB_PATH_MAXLINE];
+	char format[MB_PATH_MAXLINE];
+	char description[MB_PATH_MAXLINE];
+	char units[MB_PATH_MAXLINE];
+	double scale;
+};
+struct printfield {
+	char name[MB_PATH_MAXLINE];
+	int index;
+	int formatset;
+	char format[MB_PATH_MAXLINE];
+};
 
 static const char program_name[] = "MBinsreprocess";
 static const char help_message[] =
@@ -74,16 +95,7 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int option_index;
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message;
-
-	/* Files and formats */
-	char ifile[MB_PATH_MAXLINE];
-	char ofile[MB_PATH_MAXLINE];
-	FILE *fp;
-
 	/* MBIO default parameters - only use lonflip */
 	int format;
 	int pings;
@@ -93,71 +105,11 @@ int main(int argc, char **argv) {
 	int etime_i[7];
 	double speedmin;
 	double timegap;
-
-	/* auv log data */
-	struct field {
-		int type;
-		int size;
-		int index;
-		char name[MB_PATH_MAXLINE];
-		char format[MB_PATH_MAXLINE];
-		char description[MB_PATH_MAXLINE];
-		char units[MB_PATH_MAXLINE];
-		double scale;
-	};
-	struct printfield {
-		char name[MB_PATH_MAXLINE];
-		int index;
-		int formatset;
-		char format[MB_PATH_MAXLINE];
-	};
-	int nfields = 0;
-	struct field fields[NFIELDSMAX];
-
-	/* read and write values */
-	double *time = NULL;
-	int *mCyclesK = NULL;
-	int *mModeK = NULL;
-	int *mMonK = NULL;
-	double *mLatK = NULL;
-	double *mLonK = NULL;
-	double *mNorthK = NULL;
-	double *mEastK = NULL;
-	double *mDepthK = NULL;
-	double *mRollK = NULL;
-	double *mPitchK = NULL;
-	double *mHeadK = NULL;
-	double *mVbodyxK = NULL;
-	double *mVbodyyK = NULL;
-	double *mVbodyzK = NULL;
-	double *mAccelxK = NULL;
-	double *mAccelyK = NULL;
-	double *mAccelzK = NULL;
-	double *mPrateK = NULL;
-	double *mQrateK = NULL;
-	double *mRrateK = NULL;
-	double *utcTime = NULL;
-
-	int time_i[7];
-	int nrecord, irecord, nscan, ifield;
-	size_t recordsize = 0;
-	size_t fp_startpos = 0;
-	char *result;
-	char buffer[MB_PATH_MAXLINE];
-	char type[MB_PATH_MAXLINE];
-	double dvalue;
-	int ivalue;
-	char dvl_char, jump_char;
-	double dx, dy, rr;
-
-	/* get current default values - only interested in lonflip */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	/* set default input and output */
-	strcpy(ifile, "stdin");
-	strcpy(ofile, "stdout");
+	char ifile[MB_PATH_MAXLINE] = "stdin";
+	char ofile[MB_PATH_MAXLINE] = "stdout";
 
-	/* process argument list */
 	{
 		const struct option options[] =
 		    {{"verbose", no_argument, NULL, 0},
@@ -170,30 +122,22 @@ int main(int argc, char **argv) {
 		bool errflg = false;
 		int c;
 		bool help = false;
+		int option_index;
 		while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
 		{
 			switch (c) {
 			/* long options all return c=0 */
 			case 0:
-				/* verbose */
 				if (strcmp("verbose", options[option_index].name) == 0) {
 					verbose++;
 				}
-
-				/* help */
 				else if (strcmp("help", options[option_index].name) == 0) {
 					help = true;
 				}
-
-				/*-------------------------------------------------------
-				 * Define input and output files */
-
-				/* input */
+				// Define input and output files
 				else if (strcmp("input", options[option_index].name) == 0) {
 					strcpy(ifile, optarg);
 				}
-
-				/* output */
 				else if (strcmp("output", options[option_index].name) == 0) {
 					strcpy(ofile, optarg);
 				}
@@ -230,26 +174,29 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
 
 	/* count the number of records in the  */
 
 	/* open the input file */
-	if ((fp = fopen(ifile, "r")) == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
-		status = MB_FAILURE;
+	FILE *fp = fopen(ifile, "r");
+	if (fp == NULL) {
 		fprintf(stderr, "\nUnable to open log file <%s> for reading\n", ifile);
 		exit(status);
 	}
 
 	/* parse the ascii header listing the included data fields */
-	nfields = 0;
-	recordsize = 0;
+	struct field fields[NFIELDSMAX];
+	int nfields = 0;
+	size_t recordsize = 0;
 	bool angles_in_degrees = true;
+	char *result;
+	char buffer[MB_PATH_MAXLINE];
+	char type[MB_PATH_MAXLINE];
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer && strncmp(buffer, "# begin", 7) != 0) {
-		nscan = sscanf(buffer, "# %s %s %s", type, fields[nfields].name, fields[nfields].format);
+		const int nscan = sscanf(buffer, "# %s %s %s", type, fields[nfields].name, fields[nfields].format);
 		if (nscan == 3) {
 			result = (char *)strchr(buffer, ',');
 			strcpy(fields[nfields].description, &(result[1]));
@@ -304,14 +251,38 @@ int main(int argc, char **argv) {
 	}
 
 	/* count the data records in the auv log file */
-	nrecord = 0;
-	fp_startpos = ftell(fp);
+	int nrecord = 0;
+	size_t fp_startpos = ftell(fp);
 	while (fread(buffer, recordsize, 1, fp) == 1) {
 		nrecord++;
 	}
 	fseek(fp, fp_startpos, SEEK_SET);
 
-	/* allocate arrays */
+	int error = MB_ERROR_NO_ERROR;
+
+	double *time = NULL;
+	int *mCyclesK = NULL;
+	int *mModeK = NULL;
+	int *mMonK = NULL;
+	double *mLatK = NULL;
+	double *mLonK = NULL;
+	double *mNorthK = NULL;
+	double *mEastK = NULL;
+	double *mDepthK = NULL;
+	double *mRollK = NULL;
+	double *mPitchK = NULL;
+	double *mHeadK = NULL;
+	double *mVbodyxK = NULL;
+	double *mVbodyyK = NULL;
+	double *mVbodyzK = NULL;
+	double *mAccelxK = NULL;
+	double *mAccelyK = NULL;
+	double *mAccelzK = NULL;
+	double *mPrateK = NULL;
+	double *mQrateK = NULL;
+	double *mRrateK = NULL;
+	double *utcTime = NULL;
+
 	if (nrecord > 0) {
 		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&time, &error);
 		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(int), (void **)&mCyclesK, &error);
@@ -360,6 +331,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -368,11 +340,12 @@ int main(int argc, char **argv) {
 	}
 
 	/* read the records */
-	irecord = 0;
+	int irecord = 0;
 	while (fread(buffer, recordsize, 1, fp) == 1) {
 		/* loop over the fields in the record */
-		for (ifield = 0; ifield < nfields; ifield++) {
+		for (int ifield = 0; ifield < nfields; ifield++) {
 			if (fields[ifield].type == TYPE_DOUBLE) {
+				double dvalue;
 				mb_get_binary_double(true, &buffer[fields[ifield].index], &dvalue);
 				dvalue *= fields[ifield].scale;
 				if ((strcmp(fields[ifield].name, "mHeadK") == 0 || strcmp(fields[ifield].name, "mYawK") == 0) &&
@@ -416,6 +389,7 @@ int main(int argc, char **argv) {
 					utcTime[irecord] = dvalue;
 			}
 			else if (fields[ifield].type == TYPE_INTEGER) {
+				int ivalue;
 				mb_get_binary_int(true, &buffer[fields[ifield].index], &ivalue);
 				if (strcmp(fields[ifield].name, "mCyclesK") == 0)
 					mCyclesK[irecord] = ivalue;
@@ -425,11 +399,13 @@ int main(int argc, char **argv) {
 					mMonK[irecord] = ivalue;
 			}
 			else if (fields[ifield].type == TYPE_TIMETAG) {
+				double dvalue;
 				mb_get_binary_double(true, &buffer[fields[ifield].index], &dvalue);
 				if (strcmp(fields[ifield].name, "time") == 0)
 					time[irecord] = dvalue;
 			}
 			else if (fields[ifield].type == TYPE_ANGLE) {
+				double dvalue;
 				mb_get_binary_double(true, &buffer[fields[ifield].index], &dvalue);
 				dvalue *= fields[ifield].scale;
 				if (strcmp(fields[ifield].name, "mYawCB") == 0 && angles_in_degrees && dvalue < 0.0)
@@ -437,24 +413,27 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		/* increment record */
 		irecord++;
 	}
 	fclose(fp);
 
 	/* output the data */
-	dx = 0.0;
-	dy = 0.0;
+	double dx = 0.0;
+	double dy = 0.0;
+	double rr = 0.0;
+	int time_i[7];
 	for (irecord = 0; irecord < nrecord; irecord++) {
 		if (irecord > 0) {
 			dx = mEastK[irecord] - mEastK[irecord - 1];
 			dy = mNorthK[irecord] - mNorthK[irecord - 1];
 			rr = sqrt(dx * dx + dy * dy);
 		}
+		char dvl_char;
 		if (mMonK[irecord] & KEARFOTT_MONITOR_DVL_PPROCESSED)
 			dvl_char = 'X';
 		else
 			dvl_char = ' ';
+		char jump_char;
 		if (rr > 1.0)
 			jump_char = '*';
 		else

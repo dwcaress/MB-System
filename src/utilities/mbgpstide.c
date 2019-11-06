@@ -77,117 +77,29 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int option_index;
-
-	/* MBIO status variables */
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message;
-
-	/* MBIO read control parameters */
-	mb_path read_file;
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
-	mb_path swath_file;
-	mb_path file;
-	mb_path dfile;
 	int format;
 	int pings;
 	int lonflip;
 	double bounds[4];
-	double speedmin;
-	double timegap;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-
-	/* MBIO read values */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-
-	double tidelon;
-	double tidelat;
-	double btime_d;
-	double etime_d;
 	int btime_i[7];
 	int etime_i[7];
-	double interval = 300.0;
-	mb_path tide_file;
-	mb_path nav_file;
-	bool file_output = false;
-	bool mbprocess_update = false;
-	bool skip_existing = false;
-	int tideformat = 2;
-	int ngood = 0;
-
-  	/* time parameters */
-	time_t right_now;
-	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	int pid;
-
-	FILE *tfp;
-	FILE *mfp;
-	FILE *ofp;
-	struct stat file_status;
-	int fstat;
-	bool proceed = true;
-	int input_size, input_modtime, output_size, output_modtime;
-	mb_path line = "";
-	mb_path geoidgrid = "";
-	int nread;
-	double lasttime_d = 0.0;
-	double last_heave = 0.0;
-	double tide;
-
-	int gps_source = 0;
-	double tide_offset = 0.0;
-	double geoid_offset = 0.0;
-	bool geoid_set = false;
-	double height = 0.0;
-	double ttime_d;
-	double atime_d;
-	double geoid_time = 0.0;
-
-	double this_interval = 0.0;
-	double next_interval = 0.0;
-	int count_tide = 0;
-	double sum_tide = 0.0;
-	double atide = 0.0;
-
-	struct mb_io_struct *mb_io_ptr = NULL;
-	struct mbsys_simrad2_struct *simrad2_ptr;
-	struct mbsys_simrad3_struct *simrad3_ptr;
-#ifdef ENABLE_GSF
-	struct mbsys_gsf_struct *gsf_ptr;
-#endif
-
-	/* get current default values */
+	double speedmin;
+	double timegap;
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	/* set default input to datalist.mb-1 */
-	strcpy(read_file, "datalist.mb-1");
+	mb_path read_file = "datalist.mb-1";
+	int tideformat = 2;
+	double interval = 300.0;
+	bool mbprocess_update = false;
+	mb_path tide_file;
+	bool file_output = false;
+	double tide_offset = 0.0;
+	bool skip_existing = false;
+	mb_path geoidgrid = "";
+	bool geoid_set = false;
+	int gps_source = 0;
 
-	/* process argument list */
 	{
 		bool errflg = false;
 		int c;
@@ -207,6 +119,7 @@ int main(int argc, char **argv) {
 		     {"geoid",required_argument , NULL, 0},
 		     {"use", required_argument, NULL, 0},
 		     {NULL, 0, NULL, 0}};
+		int option_index;
 		while ((c = getopt_long(argc, argv, "A:a:D:d:F:f:I:i:MmO:o:R:r:SsT:t:U:u:VvHh", options, &option_index)) != -1)
 		{
 			switch (c) {
@@ -341,9 +254,79 @@ int main(int argc, char **argv) {
 		}
 
 		if (help) {
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
+
+	int error = MB_ERROR_NO_ERROR;
+
+	/* MBIO read control parameters */
+	void *datalist;
+	int look_processed = MB_DATALIST_LOOK_UNSET;
+	double file_weight;
+	mb_path swath_file;
+	mb_path file;
+	mb_path dfile;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+
+	/* MBIO read values */
+	void *mbio_ptr = NULL;
+	void *store_ptr = NULL;
+	int kind;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	char comment[MB_COMMENT_MAXLINE];
+
+	double tidelon;
+	double tidelat;
+	double btime_d;
+	double etime_d;
+	mb_path nav_file;
+	int ngood = 0;
+
+	FILE *tfp;
+	FILE *ofp;
+	struct stat file_status;
+	int fstat;
+	bool proceed = true;
+	int input_size, input_modtime, output_size, output_modtime;
+	mb_path line = "";
+	int nread;
+
+	double geoid_offset = 0.0;
+	double height = 0.0;
+	double ttime_d;
+	double geoid_time = 0.0;
+
+	double this_interval = 0.0;
+	double next_interval = 0.0;
+	int count_tide = 0;
+	double sum_tide = 0.0;
+	double atide = 0.0;
+
+	struct mb_io_struct *mb_io_ptr = NULL;
+	struct mbsys_simrad2_struct *simrad2_ptr;
+	struct mbsys_simrad3_struct *simrad3_ptr;
+#ifdef ENABLE_GSF
+	struct mbsys_gsf_struct *gsf_ptr;
+#endif
 
 	/* If a single output file is specified, open and initialise it */
 	if (file_output) {
@@ -368,15 +351,19 @@ int main(int argc, char **argv) {
 				fprintf(ofp, " %s",argv[i]);
 			}
 			fprintf(ofp, " \n");
-			right_now = time((time_t *)0);
+			const time_t right_now = time((time_t *)0);
+			char date[32];
 			strcpy(date, ctime(&right_now));
 			date[strlen(date) - 1] = '\0';
-			if ((user_ptr = getenv("USER")) == NULL)
+			char *user_ptr = getenv("USER");
+			if (user_ptr == NULL)
 				user_ptr = getenv("LOGNAME");
+			char user[MB_PATH_MAXLINE];
 			if (user_ptr != NULL)
 				strcpy(user, user_ptr);
 			else
 				strcpy(user, "unknown");
+			char host[MB_PATH_MAXLINE];
 			gethostname(host, MBP_FILENAMESIZE);
 			fprintf(ofp, "# Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 		}
@@ -469,15 +456,19 @@ int main(int argc, char **argv) {
 						fprintf(ofp, " %s",argv[i]);
 					}
 					fprintf(ofp, " \n");
-					right_now = time((time_t *)0);
+					const time_t right_now = time((time_t *)0);
+					char date[32];
 					strcpy(date, ctime(&right_now));
 					date[strlen(date) - 1] = '\0';
-					if ((user_ptr = getenv("USER")) == NULL)
+					char *user_ptr = getenv("USER");
+					if (user_ptr == NULL)
 						user_ptr = getenv("LOGNAME");
+					char user[MB_PATH_MAXLINE];
 					if (user_ptr != NULL)
 						strcpy(user, user_ptr);
 					else
 						strcpy(user, "unknown");
+					char host[MB_PATH_MAXLINE];
 					gethostname(host, MBP_FILENAMESIZE);
 					fprintf(ofp, "# Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 				}
@@ -492,6 +483,7 @@ int main(int argc, char **argv) {
 			if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 										&mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
 				MB_SUCCESS) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 				fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -523,6 +515,7 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);

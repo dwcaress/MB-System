@@ -53,6 +53,7 @@
  * program mbclean (v. 1.0) by David Caress.
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -68,18 +69,18 @@
 #include "mb_status.h"
 #include "mb_swap.h"
 
-#define MBCLEAN_FLAG_ONE 1
-#define MBCLEAN_FLAG_BOTH 2
-#define MBCLEAN_Y_MODE_DISTANCE_FLAG 1
-#define MBCLEAN_Y_MODE_DISTANCE_UNFLAG 2
-#define MBCLEAN_Y_MODE_ANGLE_FLAG 3
-#define MBCLEAN_Y_MODE_ANGLE_UNFLAG 4
+const int MBCLEAN_FLAG_ONE = 1;
+const int MBCLEAN_FLAG_BOTH = 2;
+const int MBCLEAN_Y_MODE_DISTANCE_FLAG = 1;
+const int MBCLEAN_Y_MODE_DISTANCE_UNFLAG = 2;
+const int MBCLEAN_Y_MODE_ANGLE_FLAG = 3;
+const int MBCLEAN_Y_MODE_ANGLE_UNFLAG = 4;
 
 /* MBIO buffer size default */
-#define MBCLEAN_BUFFER_DEFAULT 500
+const int MBCLEAN_BUFFER_DEFAULT = 500;
 
 /* edit action defines */
-#define MBCLEAN_NOACTION 0
+const int MBCLEAN_NOACTION = 0;
 
 /* ping structure definition */
 struct mbclean_ping_struct {
@@ -128,8 +129,44 @@ static const char usage_message[] =
 int main(int argc, char **argv) {
   int status;
   int verbose = 0;
+  int format;
+  int pings;
+  int lonflip;
+  double bounds[4];
+  int btime_i[7];
+  int etime_i[7];
+  double speedmin;
+  double timegap;
+  status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+  int uselockfiles;  // TODO(schwehr): Make mb_uselockfiles take a bool.
+  status = mb_uselockfiles(verbose, &uselockfiles);
+
+  /* reset all defaults but the format and lonflip */
+  pings = 1;
+  bounds[0] = -360.;
+  bounds[1] = 360.;
+  bounds[2] = -90.;
+  bounds[3] = 90.;
+  btime_i[0] = 1962;
+  btime_i[1] = 2;
+  btime_i[2] = 21;
+  btime_i[3] = 10;
+  btime_i[4] = 30;
+  btime_i[5] = 0;
+  btime_i[6] = 0;
+  etime_i[0] = 2062;
+  etime_i[1] = 2;
+  etime_i[2] = 21;
+  etime_i[3] = 10;
+  etime_i[4] = 30;
+  etime_i[5] = 0;
+  etime_i[6] = 0;
+  speedmin = 0.0;
+  timegap = 1000000000.0;
+
+  double btime_d;
+  double etime_d;
   int error = MB_ERROR_NO_ERROR;
-  char *message = NULL;
 
   /* swath file locking variables */
   int lock_status;
@@ -148,19 +185,9 @@ int main(int argc, char **argv) {
   void *datalist;
   int look_processed = MB_DATALIST_LOOK_UNSET;
   double file_weight;
-  int format;
   int formatread;
   int variable_beams;
   int traveltime;
-  int pings;
-  int lonflip;
-  double bounds[4];
-  int btime_i[7];
-  int etime_i[7];
-  double btime_d;
-  double etime_d;
-  double speedmin;
-  double timegap;
   double distance;
   double altitude;
   double sonardepth;
@@ -326,39 +353,12 @@ int main(int argc, char **argv) {
   int sensorhead_status = MB_SUCCESS;
   int sensorhead_error = MB_ERROR_NO_ERROR;
   double distance_left, distance_right;
-  int start, done;
+  int start;
   double left;
   double right;
   int optiony_mode;
   int n, p, b;
 
-  /* get current default values */
-  status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-  int uselockfiles;  // TODO(schwehr): Make mb_uselockfiles take a bool.
-  status = mb_uselockfiles(verbose, &uselockfiles);
-
-  /* reset all defaults but the format and lonflip */
-  pings = 1;
-  bounds[0] = -360.;
-  bounds[1] = 360.;
-  bounds[2] = -90.;
-  bounds[3] = 90.;
-  btime_i[0] = 1962;
-  btime_i[1] = 2;
-  btime_i[2] = 21;
-  btime_i[3] = 10;
-  btime_i[4] = 30;
-  btime_i[5] = 0;
-  btime_i[6] = 0;
-  etime_i[0] = 2062;
-  etime_i[1] = 2;
-  etime_i[2] = 21;
-  etime_i[3] = 10;
-  etime_i[4] = 30;
-  etime_i[5] = 0;
-  etime_i[6] = 0;
-  speedmin = 0.0;
-  timegap = 1000000000.0;
   strcpy(read_file, "datalist.mb-1");
 
   /* process argument list */
@@ -677,6 +677,7 @@ int main(int argc, char **argv) {
 
     /* check format and get format flags */
     if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
+      char *message = NULL;
       mb_error(verbose, error, &message);
       fprintf(stderr, "\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n", format,
               message);
@@ -748,6 +749,7 @@ int main(int argc, char **argv) {
       if ((status = mb_read_init(verbose, swathfileread, formatread, pings, lonflip, bounds, btime_i, etime_i, speedmin,
                                  timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
           MB_SUCCESS) {
+        char *message = NULL;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swathfile);
@@ -833,6 +835,7 @@ int main(int argc, char **argv) {
 
       /* if error initializing memory then quit */
       if (error != MB_ERROR_NO_ERROR) {
+        char *message = NULL;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -862,10 +865,10 @@ int main(int argc, char **argv) {
       }
 
       /* read */
-      done = false;
       start = 0;
       nrec = 0;
       fprintf(stderr, "Processing data...\n");
+      bool done = false;
       while (!done) {
         if (verbose > 1)
           fprintf(stderr, "\n");

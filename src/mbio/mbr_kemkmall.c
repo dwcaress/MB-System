@@ -114,9 +114,6 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
-  char **bufferptr = NULL;
-  int *bufferalloc = NULL;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -136,8 +133,8 @@ int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
   int status = mbsys_kmbes_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
   /* allocate starting memory for data record buffer */
-  bufferptr = (char **)&mb_io_ptr->raw_data;
-  bufferalloc = (int *)&mb_io_ptr->structure_size;
+  char **bufferptr = (char **)&mb_io_ptr->raw_data;
+  int *bufferalloc = (int *)&mb_io_ptr->structure_size;
 
   *bufferptr = NULL;
   *bufferalloc = 0;
@@ -3686,6 +3683,13 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index *dgm_index = NULL;
   struct mbsys_kmbes_header header;
@@ -3694,17 +3698,8 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   char *buffer = NULL;
   int *bufferalloc = NULL;
   int *dgm_id = NULL;
-  int done = false;
   int jmrz, jmwc, jxmt, isounding;
   int numSoundings, numBackscatterSamples;
-
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
 
   /* get pointer to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -3726,6 +3721,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   *error = MB_ERROR_NO_ERROR;
 
   /* check index to see if more datagrams can be read */
+  bool done = false;
   if (mb_io_ptr->mbfp != NULL) {
     if (*dgm_id < dgm_index_table->dgm_count) {
       done = false;

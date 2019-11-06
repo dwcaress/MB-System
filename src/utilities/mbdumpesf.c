@@ -37,8 +37,10 @@
 #include "mb_status.h"
 #include "mb_swap.h"
 
-#define OUTPUT_TEXT 0
-#define OUTPUT_ESF 1
+typedef enum {
+    OUTPUT_TEXT = 0,
+    OUTPUT_ESF = 1,
+} omode_t;
 
 static const char program_name[] = "mbdumpesf";
 static const char help_message[] =
@@ -57,7 +59,7 @@ int main(int argc, char **argv) {
 	/* MBIO read and write control parameters */
 	char iesffile[MB_PATH_MAXLINE];
 	char oesffile[MB_PATH_MAXLINE];
-	int omode = OUTPUT_TEXT;
+	omode_t omode = OUTPUT_TEXT;
 	FILE *iesffp = NULL;
 	FILE *oesffp = NULL;
 
@@ -321,7 +323,6 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		/* close the edit save file */
 		fclose(iesffp);
 		if (omode == OUTPUT_ESF)
 			fclose(oesffp);

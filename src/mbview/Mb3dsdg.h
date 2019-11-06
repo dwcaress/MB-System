@@ -62,6 +62,8 @@ typedef struct _Mb3dsdgData {
 	Widget toggleButton_view_connectall;
 	Widget separator2;
 	Widget toggleButton_view_scalewithflagged;
+	Widget separator3;
+	Widget toggleButton_view_colorbytopo;
 	Widget cascadeButton_mouse;
 	Widget pulldownMenu_mouse;
 	Widget toggleButton_mouse_rotate;
@@ -69,14 +71,14 @@ typedef struct _Mb3dsdgData {
 	Widget cascadeButton_action;
 	Widget pulldownMenu_action;
 	Widget pushButton_action_applybias;
-	Widget separator3;
+	Widget separator4;
 	Widget pushButton_action_flagsparsevoxels_A;
 	Widget pushButton_action_flagsparsevoxels_B;
 	Widget pushButton_action_flagsparsevoxels_C;
 	Widget pushButton_action_flagsparsevoxels_D;
 	Widget pushButton_action_flagsparsevoxels_E;
 	Widget pushButton_action_flagsparsevoxels_F;
-	Widget separator4;
+	Widget separator5;
 	Widget cascadeButton_action_colorsoundings;
 	Widget pulldownMenu_action_colorsoundings;
 	Widget pushButton_action_colorsoundingsblack;
@@ -86,7 +88,7 @@ typedef struct _Mb3dsdgData {
 	Widget pushButton_action_colorsoundingsbluegreen;
 	Widget pushButton_action_colorsoundingsblue;
 	Widget pushButton_action_colorsoundingspurple;
-	Widget separator5;
+	Widget separator6;
 	Widget cascadeButton_action_optimizebiasvalues;
 	Widget pulldownMenu_action_optimizebiasvalues;
 	Widget pushButton_action_optimizebiasvalues_r;

@@ -38,12 +38,12 @@
 #include "mb_segy.h"
 #include "mb_status.h"
 
-#define MBSEGYPSD_USESHOT 0
-#define MBSEGYPSD_USECMP 1
-#define MBSEGYPSD_WINDOW_OFF 0
-#define MBSEGYPSD_WINDOW_ON 1
-#define MBSEGYPSD_WINDOW_SEAFLOOR 2
-#define MBSEGYPSD_WINDOW_DEPTH 3
+const int MBSEGYPSD_USESHOT = 0;
+const int MBSEGYPSD_USECMP = 1;
+const int MBSEGYPSD_WINDOW_OFF = 0;
+const int MBSEGYPSD_WINDOW_ON = 1;
+const int MBSEGYPSD_WINDOW_SEAFLOOR = 2;
+const int MBSEGYPSD_WINDOW_DEPTH = 3;
 
 /* NaN value */
 float NaN;
@@ -67,32 +67,6 @@ static const char usage_message[] =
  */
 int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart, int *traceend, int *chanstart, int *chanend,
                     double *timesweep, double *timedelay, int *error) {
-	char sinffile[MB_PATH_MAXLINE] = "";
-	char command[MB_PATH_MAXLINE] = "";
-	char line[MB_PATH_MAXLINE] = "";
-	FILE *sfp;
-	int datmodtime = 0;
-	int sinfmodtime = 0;
-	struct stat file_status;
-	int fstat;
-	double delay0 = 0.0;
-	double delay1 = 0.0;
-	double delaydel = 0.0;
-	int shot0 = 0;
-	int shot1 = 0;
-	int shotdel = 0;
-	int shottrace0 = 0;
-	int shottrace1 = 0;
-	int shottracedel = 0;
-	int rp0 = 0;
-	int rp1 = 0;
-	int rpdel = 0;
-	int rptrace0 = 0;
-	int rptrace1 = 0;
-	int rptracedel = 0;
-	int nscan;
-	int shellstatus;
-
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
@@ -101,15 +75,19 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 	}
 
 	/* set sinf filename */
+	char sinffile[MB_PATH_MAXLINE] = "";
 	sprintf(sinffile, "%s.sinf", segyfile);
 
 	/* check status of segy and sinf file */
-	datmodtime = 0;
-	sinfmodtime = 0;
-	if ((fstat = stat(segyfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+	int datmodtime = 0;
+	int sinfmodtime = 0;
+	struct stat file_status;
+	int fstat = stat(segyfile, &file_status);
+	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		datmodtime = file_status.st_mtime;
 	}
-	if ((fstat = stat(sinffile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+        fstat = stat(sinffile, &file_status);
+	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		sinfmodtime = file_status.st_mtime;
 	}
 
@@ -117,32 +95,51 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 	if (datmodtime > 0 && datmodtime > sinfmodtime) {
 		if (verbose >= 1)
 			fprintf(stderr, "\nGenerating sinf file for %s\n", segyfile);
+		char command[MB_PATH_MAXLINE] = "";
 		sprintf(command, "mbsegyinfo -I %s -O", segyfile);
-		shellstatus = system(command);
+		/* int shellstatus = */ system(command);
 	}
+
+	double delay0 = 0.0;
+	double delaydel = 0.0;
+	int shot0 = 0;
+	int shot1 = 0;
+	int shottrace0 = 0;
+	int shottrace1 = 0;
+	int rp0 = 0;
+	int rp1 = 0;
+	int rpdel = 0;
+	int rptrace0 = 0;
+	int rptrace1 = 0;
 
 	/* read sinf file if possible */
 	sprintf(sinffile, "%s.sinf", segyfile);
-	if ((sfp = fopen(sinffile, "r")) != NULL) {
+	FILE *sfp = fopen(sinffile, "r");
+	if (sfp != NULL) {
 		/* read the sinf file */
+		char line[MB_PATH_MAXLINE] = "";
 		while (fgets(line, MB_PATH_MAXLINE, sfp) != NULL) {
 			if (strncmp(line, "  Trace length (sec):", 21) == 0) {
-				nscan = sscanf(line, "  Trace length (sec):%lf", timesweep);
+				/* nscan = */ sscanf(line, "  Trace length (sec):%lf", timesweep);
 			}
 			else if (strncmp(line, "    Delay (sec):", 16) == 0) {
-				nscan = sscanf(line, "    Delay (sec): %lf %lf %lf", &delay0, &delay1, &delaydel);
+				double delay1 = 0.0;
+				/* nscan = */ sscanf(line, "    Delay (sec): %lf %lf %lf", &delay0, &delay1, &delaydel);
 			}
 			else if (strncmp(line, "    Shot number:", 16) == 0) {
-				nscan = sscanf(line, "    Shot number: %d %d %d", &shot0, &shot1, &shotdel);
+				int shotdel = 0;
+				/* nscan = */ sscanf(line, "    Shot number: %d %d %d", &shot0, &shot1, &shotdel);
 			}
 			else if (strncmp(line, "    Shot trace:", 15) == 0) {
-				nscan = sscanf(line, "    Shot trace: %d %d %d", &shottrace0, &shottrace1, &shottracedel);
+				int shottracedel = 0;
+				/* nscan = */ sscanf(line, "    Shot trace: %d %d %d", &shottrace0, &shottrace1, &shottracedel);
 			}
 			else if (strncmp(line, "    RP number:", 14) == 0) {
-				nscan = sscanf(line, "    RP number: %d %d %d", &rp0, &rp1, &rpdel);
+				/* nscan = */ sscanf(line, "    RP number: %d %d %d", &rp0, &rp1, &rpdel);
 			}
 			else if (strncmp(line, "    RP trace:", 13) == 0) {
-				nscan = sscanf(line, "    RP trace: %d %d %d", &rptrace0, &rptrace1, &rptracedel);
+				int rptracedel = 0;
+				/* nscan = */ sscanf(line, "    RP trace: %d %d %d", &rptrace0, &rptrace1, &rptracedel);
 			}
 		}
 		fclose(sfp);
@@ -195,7 +192,6 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 int main(int argc, char **argv) {
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
-	char *message;
 
 	/* segy data */
 	char segyfile[MB_PATH_MAXLINE] = "";
@@ -271,7 +267,7 @@ int main(int argc, char **argv) {
 
 	FILE *fp;
 	int nread;
-	int tracecount, tracenum, channum, traceok;
+	int tracecount, tracenum, channum;
 	double tracemin, tracemax;
 	double xwidth, ywidth;
 	int ix, iy, iys;
@@ -281,8 +277,6 @@ int main(int argc, char **argv) {
 	double stimesave = 0.0;
 	double dtimesave = 0.0;
 	int plot_status;
-	int kstart, kend;
-	int i, k, n;
 
 	/* set file to null */
 	segyfile[0] = '\0';
@@ -307,13 +301,15 @@ int main(int argc, char **argv) {
 				break;
 			case 'A':
 			case 'a':
-				n = sscanf(optarg, "%lf/%lf", &shotscale, &frequencyscale);
+			{
+				const int n = sscanf(optarg, "%lf/%lf", &shotscale, &frequencyscale);
 				if (n == 2)
 					scale2distance = true;
 				break;
+			}
 			case 'D':
 			case 'd':
-				n = sscanf(optarg, "%d", &decimatex);
+				sscanf(optarg, "%d", &decimatex);
 				break;
 			case 'I':
 			case 'i':
@@ -325,7 +321,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'N':
 			case 'n':
-				n = sscanf(optarg, "%d", &nfft);
+				sscanf(optarg, "%d", &nfft);
 				break;
 			case 'G':
 			case 'O':
@@ -334,7 +330,8 @@ int main(int argc, char **argv) {
 				break;
 			case 'S':
 			case 's':
-				n = sscanf(optarg, "%d/%d/%d/%d/%d", &tracemode, &tracestart, &traceend, &chanstart, &chanend);
+			{
+				const int n = sscanf(optarg, "%d/%d/%d/%d/%d", &tracemode, &tracestart, &traceend, &chanstart, &chanend);
 				if (n < 5) {
 					chanstart = 0;
 					chanend = -1;
@@ -347,15 +344,18 @@ int main(int argc, char **argv) {
 					tracemode = MBSEGYPSD_USESHOT;
 				}
 				break;
+			}
 			case 'T':
 			case 't':
-				n = sscanf(optarg, "%lf/%lf", &timesweep, &timedelay);
+			{
+				const int n = sscanf(optarg, "%lf/%lf", &timesweep, &timedelay);
 				if (n < 2)
 					timedelay = 0.0;
 				break;
+			}
 			case 'W':
 			case 'w':
-				n = sscanf(optarg, "%d/%lf/%lf", &windowmode, &windowstart, &windowend);
+				sscanf(optarg, "%d/%lf/%lf", &windowmode, &windowstart, &windowend);
 				break;
 			case '?':
 				errflg = true;
@@ -446,6 +446,7 @@ int main(int argc, char **argv) {
 
 	/* initialize reading the segy file */
 	if (mb_segy_read_init(verbose, segyfile, &mbsegyioptr, &asciiheader, &fileheader, &error) != MB_SUCCESS) {
+		char *message;
 		mb_error(verbose, error, &message);
 		fprintf(outfp, "\nMBIO Error returned from function <mb_segy_read_init>:\n%s\n", message);
 		fprintf(outfp, "\nSEGY File <%s> not initialized for reading\n", segyfile);
@@ -539,13 +540,15 @@ int main(int argc, char **argv) {
 	if (status == MB_SUCCESS) {
 
 		/* fill grid with NaNs */
-		for (i = 0; i < ngridxy; i++)
+		for (int i = 0; i < ngridxy; i++)
 			grid[i] = NaN;
 
 		/* generate the fftw plan */
 		fftw_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * nfft);
 		fftw_out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * nfft);
 		plan = fftw_plan_dft_1d(nfft, fftw_in, fftw_out, FFTW_FORWARD, FFTW_MEASURE);
+
+		bool traceok;
 
 		/* read and print data */
 		nread = 0;
@@ -615,13 +618,13 @@ int main(int argc, char **argv) {
 				/* get trace min and max */
 				tracemin = trace[0];
 				tracemax = trace[0];
-				for (i = 0; i < traceheader.nsamps; i++) {
+				for (int i = 0; i < traceheader.nsamps; i++) {
 					tracemin = MIN(tracemin, trace[i]);
 					tracemax = MAX(tracemin, trace[i]);
 				}
 
 				if ((verbose == 0 && nread % 250 == 0) || (nread % 25 == 0)) {
-					if (traceok == true)
+					if (traceok)
 						fprintf(outfp, "PROCESS ");
 					else
 						fprintf(outfp, "IGNORE  ");
@@ -635,7 +638,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* now actually process traces of interest */
-				if (traceok == true) {
+				if (traceok) {
 					/* zero working psd array */
 					for (iy = 0; iy < ngridy; iy++) {
 						spsd[iy] = 0.0;
@@ -665,10 +668,10 @@ int main(int argc, char **argv) {
 						normfft = 0.0;
 
 						/* extract data section to be fft'd with taper */
-						kstart = itstart + j * nfft;
-						kend = MIN(kstart + nfft, itend);
-						for (i = 0; i < nfft; i++) {
-							k = itstart + j * nfft + i;
+						const int kstart = itstart + j * nfft;
+						const int kend = MIN(kstart + nfft, itend);
+						for (int i = 0; i < nfft; i++) {
+							const int k = itstart + j * nfft + i;
 							if (k <= kend) {
 								sint = sin(M_PI * ((double)(k - kstart)) / ((double)(kend - kstart)));
 								taper = sint * sint;
@@ -690,13 +693,13 @@ int main(int argc, char **argv) {
 						fftw_execute(plan);
 
 						/* get normalization factor - require variance of transform to equal variance of input */
-						for (i = 1; i < nfft; i++) {
+						for (int i = 1; i < nfft; i++) {
 							normfft += fftw_out[i][0] * fftw_out[i][0] + fftw_out[i][1] * fftw_out[i][1];
 						}
 						norm = normraw / normfft;
 
 						/* apply normalization factor */
-						for (i = 1; i < nfft; i++) {
+						for (int i = 1; i < nfft; i++) {
 							fftw_out[i][0] = norm * fftw_out[i][0];
 							fftw_out[i][1] = norm * fftw_out[i][1];
 						}
@@ -704,7 +707,9 @@ int main(int argc, char **argv) {
 						/* calculate psd from result of transform */
 						spsd[0] += fftw_out[0][0] * fftw_out[0][0] + fftw_out[0][1] * fftw_out[0][1];
 						wpsd[0] += 1.0;
-						for (i = 1; i < nfft / 2; i++) {
+
+						int i = 1;  // Used after for.
+						for (; i < nfft / 2; i++) {
 							spsd[i] += 2.0 * (fftw_out[i][0] * fftw_out[i][0] + fftw_out[i][1] * fftw_out[i][1]);
 							wpsd[i] += 1.0;
 						}
@@ -717,7 +722,7 @@ int main(int argc, char **argv) {
 
 					/* output psd for this trace to the grid */
 					for (iy = 0; iy < ngridy; iy++) {
-						k = (ngridy - 1 - iy) * ngridx + ix;
+						const int k = (ngridy - 1 - iy) * ngridx + ix;
 						if (wpsd[iy] > 0.0) {
 							if (!logscale)
 								grid[k] = spsd[iy] / wpsd[iy];

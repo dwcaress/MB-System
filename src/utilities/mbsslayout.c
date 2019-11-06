@@ -41,51 +41,51 @@
 #define MBSSLAYOUT_ALLOC_CHUNK 1024
 #define MBSSLAYOUT_ALLOC_NUM 128
 
-#define MBSSLAYOUT_LINE_OFF 0
-#define MBSSLAYOUT_LINE_TIME 1
-#define MBSSLAYOUT_LINE_ROUTE 2
+const int MBSSLAYOUT_LINE_OFF = 0;
+const int MBSSLAYOUT_LINE_TIME = 1;
+const int MBSSLAYOUT_LINE_ROUTE = 2;
 
-#define MBSSLAYOUT_LAYOUT_FLATBOTTOM 0
-#define MBSSLAYOUT_LAYOUT_3DTOPO 1
-#define MBSSLAYOUT_ALTITUDE_ALTITUDE 0
-#define MBSSLAYOUT_ALTITUDE_BOTTOMPICK 1
-#define MBSSLAYOUT_ALTITUDE_TOPO_GRID 2
-#define MBSSLAYOUT_GAIN_OFF 0
-#define MBSSLAYOUT_GAIN_TVG 1
-#define MBSSLAYOUT_SWATHWIDTH_VARIABLE 0
-#define MBSSLAYOUT_SWATHWIDTH_CONSTANT 1
+const int MBSSLAYOUT_LAYOUT_FLATBOTTOM = 0;
+const int MBSSLAYOUT_LAYOUT_3DTOPO = 1;
+const int MBSSLAYOUT_ALTITUDE_ALTITUDE = 0;
+const int MBSSLAYOUT_ALTITUDE_BOTTOMPICK = 1;
+const int MBSSLAYOUT_ALTITUDE_TOPO_GRID = 2;
+const int MBSSLAYOUT_GAIN_OFF = 0;
+const int MBSSLAYOUT_GAIN_TVG = 1;
+const int MBSSLAYOUT_SWATHWIDTH_VARIABLE = 0;
+const int MBSSLAYOUT_SWATHWIDTH_CONSTANT = 1;
 
-#define MBSSLAYOUT_MERGE_OFF 0
-#define MBSSLAYOUT_MERGE_FILE 1
-#define MBSSLAYOUT_MERGE_ASYNC 2
+const int MBSSLAYOUT_MERGE_OFF = 0;
+const int MBSSLAYOUT_MERGE_FILE = 1;
+const int MBSSLAYOUT_MERGE_ASYNC = 2;
 
-#define MBSSLAYOUT_TIME_LATENCY_OFF 0
-#define MBSSLAYOUT_TIME_LATENCY_FILE 1
-#define MBSSLAYOUT_TIME_LATENCY_CONSTANT 2
-#define MBSSLAYOUT_TIME_LATENCY_APPLY_NONE 0x00
-#define MBSSLAYOUT_TIME_LATENCY_APPLY_NAV 0x01
-#define MBSSLAYOUT_TIME_LATENCY_APPLY_SENSORDEPTH 0x02
-#define MBSSLAYOUT_TIME_LATENCY_APPLY_ALTITUDE 0x04
-#define MBSSLAYOUT_TIME_LATENCY_APPLY_HEADING 0x08
-#define MBSSLAYOUT_TIME_LATENCY_APPLY_ATTITUDE 0x10
-#define MBSSLAYOUT_TIME_LATENCY_APPLY_SOUNDSPEED 0x20
-#define MBSSLAYOUT_TIME_LATENCY_APPLY_UNUSED 0x40
-#define MBSSLAYOUT_TIME_LATENCY_APPLY_ALL_ANCILLIARY 0x7F
-#define MBSSLAYOUT_TIME_LATENCY_APPLY_SURVEY 0x80
-#define MBSSLAYOUT_TIME_LATENCY_APPLY_ALL 0xFF
+const int MBSSLAYOUT_TIME_LATENCY_OFF = 0;
+const int MBSSLAYOUT_TIME_LATENCY_FILE = 1;
+const int MBSSLAYOUT_TIME_LATENCY_CONSTANT = 2;
+const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_NONE = 0x00;
+const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_NAV = 0x01;
+const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SENSORDEPTH = 0x02;
+const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALTITUDE = 0x04;
+const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_HEADING = 0x08;
+const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ATTITUDE = 0x10;
+const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SOUNDSPEED = 0x20;
+const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_UNUSED = 0x40;
+const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALL_ANCILLIARY = 0x7F;
+const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SURVEY = 0x80;
+const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALL = 0xFF;
 
-#define MBSSLAYOUT_ROUTE_WAYPOINT_NONE 0
-#define MBSSLAYOUT_ROUTE_WAYPOINT_SIMPLE 1
-#define MBSSLAYOUT_ROUTE_WAYPOINT_TRANSIT 2
-#define MBSSLAYOUT_ROUTE_WAYPOINT_STARTLINE 3
-#define MBSSLAYOUT_ROUTE_WAYPOINT_ENDLINE 4
-#define MBSSLAYOUT_ONLINE_THRESHOLD 15.0
-#define MBSSLAYOUT_ONLINE_COUNT 30
+const int MBSSLAYOUT_ROUTE_WAYPOINT_NONE = 0;
+const int MBSSLAYOUT_ROUTE_WAYPOINT_SIMPLE = 1;
+const int MBSSLAYOUT_ROUTE_WAYPOINT_TRANSIT = 2;
+const int MBSSLAYOUT_ROUTE_WAYPOINT_STARTLINE = 3;
+const int MBSSLAYOUT_ROUTE_WAYPOINT_ENDLINE = 4;
+// #define MBSSLAYOUT_ONLINE_THRESHOLD 15.0
+// #define MBSSLAYOUT_ONLINE_COUNT 30
 
 #define MBSSLAYOUT_SSDIMENSION 4001
 
 #define MBSSLAYOUT_NUM_ANGLES 171
-#define MBSSLAYOUT_ANGLE_MAX 85.0
+const double MBSSLAYOUT_ANGLE_MAX = 85.0;
 
 static const char program_name[] = "mbsslayout";
 static const char help_message[] =
@@ -98,11 +98,6 @@ static const char usage_message[] =
 int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max, double navlon, double navlat,
                                     double altitude, double pitch, double *table_angle, double *table_xtrack,
                                     double *table_ltrack, double *table_altitude, double *table_range, int *error) {
-	double dangle;
-	double rr, xx, zz;
-	double alpha, beta, theta, phi;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSSLAYOUT function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -116,20 +111,22 @@ int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, d
 	}
 
 	/* loop over all of the angles */
-	dangle = (angle_max - angle_min) / (nangle - 1);
-	alpha = pitch;
-	zz = altitude;
-	for (i = 0; i < nangle; i++) {
+	const double dangle = (angle_max - angle_min) / (nangle - 1);
+	const double alpha = pitch;
+	const double zz = altitude;
+
+	double theta, phi;
+	for (int i = 0; i < nangle; i++) {
 		/* get angles in takeoff coordinates */
 		table_angle[i] = angle_min + dangle * i;
-		beta = 90.0 - table_angle[i];
+		const double beta = 90.0 - table_angle[i];
 		mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
 
 		/* calculate range required to achieve desired altitude */
-		rr = zz / cos(DTR * theta);
+		const double rr = zz / cos(DTR * theta);
 
 		/* get the position */
-		xx = rr * sin(DTR * theta);
+		const double xx = rr * sin(DTR * theta);
 		table_xtrack[i] = xx * cos(DTR * phi);
 		table_ltrack[i] = xx * sin(DTR * phi);
 		table_altitude[i] = zz;
@@ -142,7 +139,7 @@ int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, d
 		fprintf(stderr, "\ndbg2  MBSSLAYOUT function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       Lookup tables:\n");
-		for (i = 0; i < nangle; i++)
+		for (int i = 0; i < nangle; i++)
 			fprintf(stderr, "dbg2         %d %f %f %f %f %f\n", i, table_angle[i], table_xtrack[i], table_ltrack[i],
 			        table_altitude[i], table_range[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -156,69 +153,20 @@ int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, d
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int verbose = 0;
+	int format = 0;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
 	int error = MB_ERROR_NO_ERROR;
-	char *message;
 
 	/* command line option definitions */
-	/* mbsslayout
-	 * 		--verbose
-	 * 		--help
-	 *
-	 * 		--input=datalist
-	 * 		--format=format
-	 *
-	 * 		--platform-file
-	 * 		--platform-target-sensor
-	 * 		--output-source=record_kind
-	 *
-	 * 		--line-time-list=filename
-	 * 		--line-route=filename
-	 * 		--line-range-threshold=value
-	 * 		--line-name1=name
-	 * 		--line-name2=name
-	 *
-	 * 		--topo-grid-file=filename
-	 * 		--altitude-altitude
-	 * 		--altitude-bottompick
-	 * 		--altitude-bottompick-threshold=value
-	 * 		--altitude-topo-grid
-	 * 		--channel-swap
-	 * 		--swath-width=value
-	 * 		--gain=value
-	 * 		--interpolation=value
-	 *
-	 * 		--nav-file=filename
-	 * 		--nav-file-format=format_id
-	 * 		--nav-async=record_kind
-	 * 		--sensordepth-file=filename
-	 * 		--sensordepth-file-format=format_id
-	 * 		--sensordepth-async=record_kind
-	 * 		--altitude-file=filename
-	 * 		--altitude-file-format=format_id
-	 * 		--altitude-async=record_kind
-	 * 		--heading-file=filename
-	 * 		--heading-file-format=format_id
-	 * 		--heading-async=record_kind
-	 * 		--attitude-file=filename
-	 * 		--attitude-file-format=format_id
-	 * 		--attitude-async=record_kind
-	 * 		--soundspeed-constant=value
-	 * 		--soundspeed-file=filename
-	 * 		--soundspeed-file-format=format_id
-	 * 		--soundspeed-async=record_kind
-	 * 		--time-latency-file=filename
-	 * 		--time-latency-constant=value
-	 * 		--time-latency-apply-nav
-	 * 		--time-latency-apply-sensordepth
-	 * 		--time-latency-apply-altitude
-	 * 		--time-latency-apply-heading
-	 * 		--time-latency-apply-attitude
-	 * 		--time-latency-apply-all-ancilliary
-	 * 		--time-latency-apply-survey
-	 * 		--time-latency-apply-all
-	 */
 	static struct option options[] = {{"verbose", no_argument, NULL, 0},
 	                                  {"help", no_argument, NULL, 0},
 	                                  {"verbose", no_argument, NULL, 0},
@@ -382,19 +330,11 @@ int main(int argc, char **argv) {
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
-	int format = 0;
 	int iformat;
-	int pings;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
 	double btime_d;
 	double etime_d;
-	double speedmin;
-	double timegap;
 	mb_path ifile;
-    mb_path ifileroot;
+	mb_path ifileroot;
 	mb_path dfile;
 	mb_path ofile;
 	int beams_bath;
@@ -541,9 +481,6 @@ int main(int argc, char **argv) {
 	int n_wt_data = 0;
 	int n_wt_comment = 0;
 
-	time_t right_now;
-	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-
 	mb_path command;
 	int interp_status = MB_SUCCESS;
 	int interp_error = MB_ERROR_NO_ERROR;
@@ -586,14 +523,11 @@ int main(int argc, char **argv) {
 	int jport, jstbd;
 	int previous, interpable;
 	double dss, dssl;
-    int error_format = MB_ERROR_NO_ERROR;
-    int status_format = MB_SUCCESS;
-    int format_nottobeused = 0;
+	int error_format = MB_ERROR_NO_ERROR;
+	int status_format = MB_SUCCESS;
+	int format_nottobeused = 0;
 
 	int i, jj, n;
-
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");
@@ -1236,6 +1170,7 @@ int main(int argc, char **argv) {
 	if (layout_mode == MBSSLAYOUT_LAYOUT_3DTOPO) {
 		status = mb_topogrid_init(verbose, topo_grid_file, &lonflip, &topogrid_ptr, &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error loading topography grid: %s\n%s\n", topo_grid_file, message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1336,6 +1271,7 @@ int main(int argc, char **argv) {
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routetime_d, &error);
 					if (status != MB_SUCCESS) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1414,6 +1350,7 @@ int main(int argc, char **argv) {
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int), (void **)&routewaypoint, &error);
 					if (status != MB_SUCCESS) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1458,21 +1395,25 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nUnable to open plotting script file <%s> \n", scriptfile);
 		exit(status);
 	} else {
-		right_now = time((time_t *)0);
+		const time_t right_now = time((time_t *)0);
+		char date[32];
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
+		char *user_ptr = getenv("USER");
+		if (user_ptr == NULL)
 			user_ptr = getenv("LOGNAME");
+		char user[MB_PATH_MAXLINE];
 		if (user_ptr != NULL)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
-		i = gethostname(host, MB_PATH_MAXLINE);
-        fprintf(sfp, "# Swath plot generation script\n");
-        fprintf(sfp, "#   Written by MB-System program %s\n", program_name);
+		char host[MB_PATH_MAXLINE];
+		/* i = */ gethostname(host, MB_PATH_MAXLINE);
+		fprintf(sfp, "# Swath plot generation script\n");
+		fprintf(sfp, "#   Written by MB-System program %s\n", program_name);
 		fprintf(sfp, "#   MB-system Version %s\n", MB_VERSION);
 		fprintf(sfp, "#   Run run by %s on %s at %s\n#\n", user, host, date);
-    }
+	}
 
 	/*-------------------------------------------------------------------*/
 
@@ -1513,6 +1454,7 @@ int main(int argc, char **argv) {
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 		                           &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
@@ -1549,6 +1491,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1641,6 +1584,7 @@ int main(int argc, char **argv) {
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlat, &error);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_speed, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1650,7 +1594,7 @@ int main(int argc, char **argv) {
 
 				/* copy the nav data */
 				if (status == MB_SUCCESS && nanav > 0) {
-					for (i = 0; i < nanav; i++) {
+					for (int i = 0; i < nanav; i++) {
 						nav_time_d[n_nav] = antime_d[i];
 						nav_navlon[n_nav] = anlon[i];
 						nav_navlat[n_nav] = anlat[i];
@@ -1674,6 +1618,7 @@ int main(int argc, char **argv) {
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
 					                     (void **)&sensordepth_sensordepth, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1683,7 +1628,7 @@ int main(int argc, char **argv) {
 
 				/* copy the sensordepth data */
 				if (status == MB_SUCCESS && nanav > 0) {
-					for (i = 0; i < nanav; i++) {
+					for (int i = 0; i < nanav; i++) {
 						sensordepth_time_d[n_sensordepth] = antime_d[i];
 						sensordepth_sensordepth[n_sensordepth] = ansensordraft[i] + anheave[i];
 						n_sensordepth++;
@@ -1706,6 +1651,7 @@ int main(int argc, char **argv) {
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
 					                     (void **)&altitude_altitude, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1735,6 +1681,7 @@ int main(int argc, char **argv) {
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_heading,
 					                     &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1744,7 +1691,7 @@ int main(int argc, char **argv) {
 
 				/* copy the heading data */
 				if (status == MB_SUCCESS && nanav > 0) {
-					for (i = 0; i < nanav; i++) {
+					for (int i = 0; i < nanav; i++) {
 						heading_time_d[n_heading] = antime_d[i];
 						heading_heading[n_heading] = anheading[i];
 						n_heading++;
@@ -1770,6 +1717,7 @@ int main(int argc, char **argv) {
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_heave,
 					                     &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1779,7 +1727,7 @@ int main(int argc, char **argv) {
 
 				/* copy the attitude data */
 				if (status == MB_SUCCESS && nanav > 0) {
-					for (i = 0; i < nanav; i++) {
+					for (int i = 0; i < nanav; i++) {
 						attitude_time_d[n_attitude] = antime_d[i];
 						attitude_roll[n_attitude] = anroll[i];
 						attitude_pitch[n_attitude] = anpitch[i];
@@ -1803,6 +1751,7 @@ int main(int argc, char **argv) {
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_soundspeed_alloc * sizeof(double),
 					                     (void **)&soundspeed_soundspeed, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1812,7 +1761,7 @@ int main(int argc, char **argv) {
 
 				/* copy the soundspeed data */
 				if (status == MB_SUCCESS && nactd > 0) {
-					for (i = 0; i < nactd; i++) {
+					for (int i = 0; i < nactd; i++) {
 						soundspeed_time_d[n_soundspeed] = actime_d[i];
 						soundspeed_soundspeed[n_soundspeed] = acsoundspeed[i];
 						n_soundspeed++;
@@ -2056,6 +2005,7 @@ int main(int argc, char **argv) {
 		/* initialize reading the input file */
 		if ((status = mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 		                           &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
@@ -2103,6 +2053,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2249,6 +2200,7 @@ int main(int argc, char **argv) {
 						fprintf(stderr, "Pass 2: Opening output file:  %s %d\n", output_file, MBF_MBLDEOIH);
 					if ((status = mb_write_init(verbose, output_file, MBF_MBLDEOIH, &ombio_ptr, &obeams_bath, &obeams_amp,
 					                            &opixels_ss, &error)) != MB_SUCCESS) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
 						fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", output_file);
@@ -2281,6 +2233,7 @@ int main(int argc, char **argv) {
 					status = mb_reallocd(verbose, __FILE__, __LINE__, num_samples_port_alloc * sizeof(double),
 					                     (void **)&raw_samples_port, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2292,6 +2245,7 @@ int main(int argc, char **argv) {
 					status = mb_reallocd(verbose, __FILE__, __LINE__, num_samples_stbd_alloc * sizeof(double),
 					                     (void **)&raw_samples_stbd, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2393,24 +2347,24 @@ int main(int argc, char **argv) {
 				if (ss_altitude_mode == MBSSLAYOUT_ALTITUDE_BOTTOMPICK) {
 					/* get bottom arrival in port trace */
 					channelmax = 0.0;
-					for (i = 0; i < num_samples_port; i++) {
+					for (int i = 0; i < num_samples_port; i++) {
 						channelmax = MAX(raw_samples_port[i], channelmax);
 					}
 					portchannelpick = 0;
 					threshold = bottompick_threshold * channelmax;
-					for (i = 0; i < num_samples_port && portchannelpick == 0; i++) {
+					for (int i = 0; i < num_samples_port && portchannelpick == 0; i++) {
 						if (raw_samples_port[i] >= threshold)
 							portchannelpick = i;
 					}
 
 					/* get bottom arrival in starboard trace */
 					channelmax = 0.0;
-					for (i = 0; i < num_samples_stbd; i++) {
+					for (int i = 0; i < num_samples_stbd; i++) {
 						channelmax = MAX(raw_samples_stbd[i], channelmax);
 					}
 					stbdchannelpick = 0;
 					threshold = bottompick_threshold * channelmax;
-					for (i = 0; i < num_samples_stbd && stbdchannelpick == 0; i++) {
+					for (int i = 0; i < num_samples_stbd && stbdchannelpick == 0; i++) {
 						if (raw_samples_stbd[i] >= threshold)
 							stbdchannelpick = i;
 					}
@@ -2481,7 +2435,7 @@ int main(int argc, char **argv) {
 
 				/* bin port trace */
 				istart = rangemin / (soundspeed * sample_interval);
-				for (i = istart; i < num_samples_port; i++) {
+				for (int i = istart; i < num_samples_port; i++) {
 					/* get sample range */
 					rr = 0.5 * soundspeed * sample_interval * i;
 
@@ -2534,7 +2488,7 @@ int main(int argc, char **argv) {
 
 				/* bin stbd trace */
 				istart = rangemin / (soundspeed * sample_interval);
-				for (i = istart; i < num_samples_stbd; i++) {
+				for (int i = istart; i < num_samples_stbd; i++) {
 					/* get sample range */
 					rr = 0.5 * soundspeed * sample_interval * i;
 
@@ -2626,6 +2580,7 @@ int main(int argc, char **argv) {
 				/* write the record */
 				status = mb_write_ping(verbose, ombio_ptr, (void *)ostore, &error);
 				if (status != MB_SUCCESS) {
+					char *message;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
 					fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", ofile);

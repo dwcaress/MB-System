@@ -2666,7 +2666,7 @@ int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *da
 		value = sqrt(data->primary_dzdx[k] * data->primary_dzdx[k] + data->primary_dzdy[k] * data->primary_dzdy[k]);
 	}
 	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		if (data->secondary_sameas_primary == true)
+		if (data->secondary_sameas_primary)
 			value = data->secondary_data[k];
 		else {
 			mbview_getsecondaryvalue(view, data, i, j, &value);
@@ -2787,7 +2787,7 @@ int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *da
 				mbview_applyshade(intensity, &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
 			}
 			else if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY) {
-				if (data->secondary_sameas_primary == true)
+				if (data->secondary_sameas_primary)
 					svalue = data->secondary_data[k];
 				else
 					mbview_getsecondaryvalue(view, data, i, j, &svalue);
@@ -2842,7 +2842,7 @@ int mbview_colorpoint_histogram(struct mbview_world_struct *view, struct mbview_
 		value = sqrt(data->primary_dzdx[k] * data->primary_dzdx[k] + data->primary_dzdy[k] * data->primary_dzdy[k]);
 	}
 	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		if (data->secondary_sameas_primary == true)
+		if (data->secondary_sameas_primary)
 			value = data->secondary_data[k];
 		else
 			mbview_getsecondaryvalue(view, data, i, j, &value);
@@ -2964,7 +2964,7 @@ int mbview_colorpoint_histogram(struct mbview_world_struct *view, struct mbview_
 			mbview_applyshade(intensity, &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
 		}
 		else if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY) {
-			if (data->secondary_sameas_primary == true)
+			if (data->secondary_sameas_primary)
 				svalue = data->secondary_data[k];
 			else
 				mbview_getsecondaryvalue(view, data, i, j, &svalue);

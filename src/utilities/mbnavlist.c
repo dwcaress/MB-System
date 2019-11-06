@@ -19,8 +19,6 @@
  *
  * Author:	D. W. Caress
  * Date:	November 11, 1999
- *
- *
  */
 
 #include <getopt.h>
@@ -37,10 +35,12 @@
 #include "mb_status.h"
 
 #define MAX_OPTIONS 25
-#define MBNAVLIST_SEGMENT_MODE_NONE 0
-#define MBNAVLIST_SEGMENT_MODE_TAG 1
-#define MBNAVLIST_SEGMENT_MODE_SWATHFILE 2
-#define MBNAVLIST_SEGMENT_MODE_DATALIST 3
+typedef enum {
+    MBNAVLIST_SEGMENT_MODE_NONE = 0,
+    MBNAVLIST_SEGMENT_MODE_TAG = 1,
+    MBNAVLIST_SEGMENT_MODE_SWATHFILE = 2,
+    MBNAVLIST_SEGMENT_MODE_DATALIST = 3,
+} segment_mode_t;
 
 double NaN;
 
@@ -113,142 +113,34 @@ int printsimplevalue(int verbose, double value, int width, int precision, bool a
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
-	char read_file[MB_PATH_MAXLINE];
-	void *datalist;
-	double file_weight;
 	int format;
 	int pings;
-	int decimate;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
-	char file[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-
-	/* data record source types */
-	int platform_source;
-	int nav_source;
-	int heading_source;
-	int sensordepth_source;
-	int attitude_source;
-	int svp_source;
-	int aux_nav_channel = -1;
-	int data_kind = -1;
-
-	/* output format list controls */
-	char list[MAX_OPTIONS];
-	int n_list;
-	int time_j[5];
-	bool projectednav_next_value = false;
-	bool ascii = true;
-	bool segment = false;
-	int segment_mode = MBNAVLIST_SEGMENT_MODE_NONE;
-	char segment_tag[MB_PATH_MAXLINE];
-	char delimiter[MB_PATH_MAXLINE];
-
-	/* MBIO read values */
-	void *mbio_ptr = NULL;
-	void *store_ptr;
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	double draft;
-	double roll;
-	double pitch;
-	double heave;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-	int atime_i[7 * MB_ASYNCH_SAVE_MAX];
-	double atime_d[MB_ASYNCH_SAVE_MAX];
-	double anavlon[MB_ASYNCH_SAVE_MAX];
-	double anavlat[MB_ASYNCH_SAVE_MAX];
-	double aspeed[MB_ASYNCH_SAVE_MAX];
-	double aheading[MB_ASYNCH_SAVE_MAX];
-	double adraft[MB_ASYNCH_SAVE_MAX];
-	double aroll[MB_ASYNCH_SAVE_MAX];
-	double apitch[MB_ASYNCH_SAVE_MAX];
-	double aheave[MB_ASYNCH_SAVE_MAX];
-
-	/* additional time variables */
-	bool first_m = true;
-	double time_d_ref;
-	bool first_u = true;
-	time_t time_u;
-	time_t time_u_ref;
-	double seconds;
-
-	/* course calculation variables */
-	double dlon, dlat, minutes;
-	int degrees;
-	char hemi;
-	double mtodeglon;
-	double mtodeglat;
-	double course;
-	double course_old;
-	double time_d_old;
-	double time_interval;
-	double speed_made_good, speed_made_good_old;
-	double navlon_old, navlat_old;
-	double dx, dy;
-	double b;
-
-	/* projected coordinate system */
-	bool use_projection = false;
-	char projection_pars[MB_PATH_MAXLINE];
-	char projection_id[MB_PATH_MAXLINE];
-	int proj_status;
-	void *pjptr = NULL;
-	double reference_lon, reference_lat;
-	int utm_zone;
-	double naveasting, navnorthing, deasting, dnorthing;
-
-	int inav;
-
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	/* set default input to datalist.mb-1 */
-	strcpy(read_file, "datalist.mb-1");
+	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
+	int decimate = 1;
+	int data_kind = -1;
+	int aux_nav_channel = -1;
+	bool ascii = true;
+	bool segment = false;
+	char segment_tag[MB_PATH_MAXLINE];
+	bool use_projection = false;
 
 	/* set up the default list controls
 	    (lon, lat, along-track distance, center beam depth) */
-	list[0] = 't';
-	list[1] = 'M';
-	list[2] = 'X';
-	list[3] = 'Y';
-	list[4] = 'H';
-	list[5] = 's';
-	n_list = 6;
-	delimiter[0] = '\t';
-	delimiter[1] = '\0';
-	projection_pars[0] = '\0';
-	decimate = 1;
+	char list[MAX_OPTIONS] = "tMXYHs";
+	int n_list = 6;
+	char delimiter[MB_PATH_MAXLINE] = "\t";
+	char projection_pars[MB_PATH_MAXLINE] = "";
 
-	/* process argument list */
+	segment_mode_t segment_mode = MBNAVLIST_SEGMENT_MODE_NONE;
+
 	{
 		bool errflg = false;
 		bool help = false;
@@ -396,7 +288,6 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2       segment_mode:   %d\n", segment_mode);
 			fprintf(stderr, "dbg2       segment_tag:    %s\n", segment_tag);
 			fprintf(stderr, "dbg2       delimiter:      %s\n", delimiter);
-			fprintf(stderr, "dbg2       file:           %s\n", file);
 			fprintf(stderr, "dbg2       use_projection: %d\n", use_projection);
 			fprintf(stderr, "dbg2       projection_pars:%s\n", projection_pars);
 			fprintf(stderr, "dbg2       n_list:         %d\n", n_list);
@@ -407,9 +298,10 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
+	int error = MB_ERROR_NO_ERROR;
 
 	/* get format if required */
 	if (format == 0)
@@ -418,6 +310,10 @@ int main(int argc, char **argv) {
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
 	bool read_data;
+	char file[MB_PATH_MAXLINE];
+	void *datalist;
+	double file_weight;
+	char dfile[MB_PATH_MAXLINE];
 
 	/* open file list */
 	if (read_datalist) {
@@ -441,6 +337,78 @@ int main(int argc, char **argv) {
 	bool invert_next_value = false;
 	bool signflip_next_value = false;
 
+	double btime_d;
+	double etime_d;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+
+	/* data record source types */
+	int platform_source;
+	int nav_source;
+	int heading_source;
+	int sensordepth_source;
+	int attitude_source;
+	int svp_source;
+
+	/* output format list controls */
+	int time_j[5];
+	bool projectednav_next_value = false;
+
+	/* MBIO read values */
+	void *mbio_ptr = NULL;
+	void *store_ptr;
+	int time_i[7];
+	double draft;
+	double roll;
+	double pitch;
+	double heave;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	char comment[MB_COMMENT_MAXLINE];
+	int atime_i[7 * MB_ASYNCH_SAVE_MAX];
+	double atime_d[MB_ASYNCH_SAVE_MAX];
+	double anavlon[MB_ASYNCH_SAVE_MAX];
+	double anavlat[MB_ASYNCH_SAVE_MAX];
+	double aspeed[MB_ASYNCH_SAVE_MAX];
+	double aheading[MB_ASYNCH_SAVE_MAX];
+	double adraft[MB_ASYNCH_SAVE_MAX];
+	double aroll[MB_ASYNCH_SAVE_MAX];
+	double apitch[MB_ASYNCH_SAVE_MAX];
+	double aheave[MB_ASYNCH_SAVE_MAX];
+
+	/* additional time variables */
+	bool first_m = true;
+	double time_d_ref;
+	bool first_u = true;
+	time_t time_u;
+	time_t time_u_ref;
+	double seconds;
+
+	/* course calculation variables */
+	double dlon, dlat, minutes;
+	int degrees;
+	double mtodeglon;
+	double mtodeglat;
+	double course;
+	double course_old;
+	double time_d_old;
+	double time_interval;
+	double speed_made_good, speed_made_good_old;
+	double navlon_old, navlat_old;
+
+	/* projected coordinate system */
+	int proj_status;
+	void *pjptr = NULL;
+	double reference_lon, reference_lat;
+	double naveasting, navnorthing, deasting, dnorthing;
+
 	/* loop over all files to be read */
 	while (read_data) {
 		/* check format and get data sources */
@@ -454,7 +422,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* set auxiliary nav source if requested
-		    - note this is superceded by data_kind if the -K option is used */
+		    - note this is superseded by data_kind if the -K option is used */
 		if (aux_nav_channel > 0) {
 			if (aux_nav_channel == 1)
 				nav_source = MB_DATA_NAV1;
@@ -521,6 +489,15 @@ int main(int argc, char **argv) {
 		bool first = true;
 		while (error <= MB_ERROR_NO_ERROR) {
 			/* read a ping of data */
+			int kind;
+			double navlon;
+			double navlat;
+			double time_d;
+			double speed;
+			double heading;
+			double distance;
+			double altitude;
+			double sonardepth;
 			status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
 			                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 			                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
@@ -580,7 +557,7 @@ int main(int argc, char **argv) {
 			/* loop over the n navigation points, outputting each one */
 			/* calculate course made good and distance */
 			if (error == MB_ERROR_NO_ERROR && n > 0) {
-				for (inav = 0; inav < n; inav++) {
+				for (int inav = 0; inav < n; inav++) {
 					/* get data */
 					for (int j = 0; j < 7; j++)
 						time_i[j] = atime_i[inav * 7 + j];
@@ -607,8 +584,8 @@ int main(int argc, char **argv) {
 					}
 					else {
 						time_interval = time_d - time_d_old;
-						dx = (navlon - navlon_old) / mtodeglon;
-						dy = (navlat - navlat_old) / mtodeglat;
+						const double dx = (navlon - navlon_old) / mtodeglon;
+						const double dy = (navlat - navlat_old) / mtodeglat;
 						distance = sqrt(dx * dx + dy * dy);
 						if (distance > 0.0)
 							course = RTD * atan2(dx / distance, dy / distance);
@@ -631,6 +608,7 @@ int main(int argc, char **argv) {
 							if (strlen(projection_pars) == 0)
 								strcpy(projection_pars, "U");
 
+							char projection_id[MB_PATH_MAXLINE];
 							/* check for UTM with undefined zone */
 							if (strcmp(projection_pars, "UTM") == 0 || strcmp(projection_pars, "U") == 0 ||
 							    strcmp(projection_pars, "utm") == 0 || strcmp(projection_pars, "u") == 0) {
@@ -639,7 +617,7 @@ int main(int argc, char **argv) {
 									reference_lon += 360.0;
 								if (reference_lon >= 180.0)
 									reference_lon -= 360.0;
-								utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
+								const int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
 								reference_lat = navlat;
 								if (reference_lat >= 0.0)
 									sprintf(projection_id, "UTM%2.2dN", utm_zone);
@@ -699,7 +677,7 @@ int main(int argc, char **argv) {
 									printf("%.4d %.3d %.2d %.2d %9.6f", time_j[0], time_j[1], time_i[3], time_i[4], seconds);
 								}
 								else {
-									b = time_j[0];
+									double b = time_j[0];
 									fwrite(&b, sizeof(double), 1, stdout);
 									b = time_j[1];
 									fwrite(&b, sizeof(double), 1, stdout);
@@ -720,7 +698,7 @@ int main(int argc, char **argv) {
 									printf("%.4d %.3d %.4d %9.6f", time_j[0], time_j[1], time_j[2], seconds);
 								}
 								else {
-									b = time_j[0];
+									double b = time_j[0];
 									fwrite(&b, sizeof(double), 1, stdout);
 									b = time_j[1];
 									fwrite(&b, sizeof(double), 1, stdout);
@@ -750,7 +728,7 @@ int main(int argc, char **argv) {
 									time_d_ref = time_d;
 									first_m = false;
 								}
-								b = time_d - time_d_ref;
+								double b = time_d - time_d_ref;
 								printsimplevalue(verbose, b, 0, 6, ascii, &invert_next_value, &signflip_next_value, &error);
 								break;
 							case 'P': /* pitch */
@@ -861,6 +839,7 @@ int main(int argc, char **argv) {
 								break;
 							case 'x': /* longitude degress + decimal minutes */
 								dlon = navlon;
+								char hemi;
 								if (dlon < 0.0) {
 									hemi = 'W';
 									dlon = -dlon;
@@ -869,7 +848,7 @@ int main(int argc, char **argv) {
 									hemi = 'E';
 								degrees = (int)dlon;
 								minutes = 60.0 * (dlon - degrees);
-								if (ascii == true) {
+								if (ascii) {
 									printf("%3d %11.8f%c", degrees, minutes, hemi);
 								}
 								else {
@@ -934,7 +913,6 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		/* close the swath file */
 		status = mb_close(verbose, &mbio_ptr, &error);
 
 		/* figure out whether and what to read next */

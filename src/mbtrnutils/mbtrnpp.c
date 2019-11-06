@@ -551,7 +551,6 @@ int main(int argc, char **argv) {
   /* buffer handling parameters */
   int n_buffer_max = 1;
   struct mbtrnpp_ping_struct ping[MBTRNPREPROCESS_BUFFER_DEFAULT];
-  int done;
 
   /* counting parameters */
   int n_pings_read = 0;
@@ -1546,7 +1545,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
     n_ping_process = n_buffer_max / 2;
 
     /* loop over reading data */
-    done = false;
+    bool done = false;
     idataread = 0;
 
     while (!done) {

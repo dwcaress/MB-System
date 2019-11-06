@@ -113,9 +113,6 @@ static const char help_message[] =
 /*--------------------------------------------------------------------*/
 int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int nss, double *ss,
                       double *ssacrosstrack, int *error) {
-  int ifirst, ilast;
-  int iss, ibath;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -129,8 +126,8 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
   }
 
   /* find limits of good bathy */
-  ifirst = -1;
-  ilast = -1;
+  int ifirst = -1;
+  int ilast = -1;
   for (int i = 0; i < nbath; i++) {
     if (mb_beam_ok(beamflag[i])) {
       if (ifirst < 0)
@@ -142,8 +139,8 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
   /* loop over sidescan looking for bathy on either side
      - zero sidescan if bathy lacking */
   if (ifirst < ilast) {
-    ibath = ifirst;
-    for (iss = 0; iss < nss; iss++) {
+    int ibath = ifirst;
+    for (int iss = 0; iss < nss; iss++) {
       /* make sure ibath sets right interval for ss */
       while (ibath < ilast - 1 && (!mb_beam_ok(beamflag[ibath]) || !mb_beam_ok(beamflag[ibath + 1]) ||
                                    (mb_beam_ok(beamflag[ibath + 1]) && ssacrosstrack[iss] > bathacrosstrack[ibath + 1])))
@@ -161,7 +158,7 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 
   /* else if no good bathy zero all sidescan */
   else {
-    for (iss = 0; iss < nss; iss++) {
+    for (int iss = 0; iss < nss; iss++) {
       ss[iss] = 0.0;
     }
   }
@@ -181,10 +178,6 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 /*--------------------------------------------------------------------*/
 int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, struct mbprocess_sscorr_struct *corrtable,
                   struct mbprocess_sscorr_struct *corrtableuse, int *error) {
-  double factor;
-  int ifirst, ilast, irecent, inext;
-  int ii, itable;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -215,12 +208,12 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
     }
   }
   else {
-    itable = 0;
+    int itable = 0;
     for (int i = 0; i < ncorrtable - 1; i++) {
       if (corrtable[i].time_d <= time_d && corrtable[i + 1].time_d > time_d)
         itable = i;
     }
-    factor = (time_d - corrtable[itable].time_d) / (corrtable[itable + 1].time_d - corrtable[itable].time_d);
+    const double factor = (time_d - corrtable[itable].time_d) / (corrtable[itable + 1].time_d - corrtable[itable].time_d);
     corrtableuse->time_d = time_d;
     corrtableuse->nangle = MIN(corrtable[itable].nangle, corrtable[itable].nangle);
     for (int i = 0; i < corrtableuse->nangle; i++) {
@@ -244,14 +237,17 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
   }
 
   /* now interpolate or extrapolate any zero values */
-  ifirst = ncorrangle;
-  ilast = -1;
+  int ifirst = ncorrangle;
+  int ilast = -1;
   for (int i = 0; i < ncorrangle; i++) {
     if (corrtableuse->amplitude[i] != 0.0) {
       ifirst = MIN(i, ifirst);
       ilast = MAX(i, ilast);
     }
   }
+
+  int irecent = 0;
+  int inext;
   for (int i = 0; i < ncorrangle; i++) {
     if (corrtableuse->amplitude[i] != 0.0)
       irecent = i;
@@ -265,12 +261,12 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
     }
     else if (corrtableuse->amplitude[i] == 0.0) {
       inext = -1;
-      for (ii = i + 1; ii < ilast; ii++) {
+      for (int ii = i + 1; ii < ilast; ii++) {
         if (corrtableuse->amplitude[ii] != 0.0 && inext < 0)
           inext = ii;
       }
       if (irecent < i && inext > i) {
-        factor = ((double)(i - irecent)) / ((double)(inext - irecent));
+        const double factor = ((double)(i - irecent)) / ((double)(inext - irecent));
         corrtableuse->amplitude[i] = corrtableuse->amplitude[irecent] +
                                      factor * (corrtableuse->amplitude[inext] - corrtableuse->amplitude[irecent]);
         corrtableuse->sigma[i] =
@@ -299,9 +295,6 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 }
 /*--------------------------------------------------------------------*/
 int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double angle, double *corr, int *error) {
-  int iangle;
-  int ifirst, ilast;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -314,6 +307,7 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
     fprintf(stderr, "dbg2       angle:       %f\n", angle);
   }
 
+  int iangle;
   /* search for the specified angle */
   bool found = false;
   for (int i = 0; i < nangle - 1; i++)
@@ -340,8 +334,8 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
 
   /* use outermost value if angle outside nonzero range */
   if (*corr == 0.0) {
-    ifirst = nangle - 1;
-    ilast = 0;
+    int ifirst = nangle - 1;
+    int ilast = 0;
     for (int i = 0; i < nangle; i++) {
       if (corr[i] != 0.0) {
         if (ifirst > i)
@@ -421,299 +415,18 @@ static const char usage_message[] =
     "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -S -T -V -H]";
 
 int main(int argc, char **argv) {
-  /* MBIO status variables */
   int verbose = 0;
-  int error = MB_ERROR_NO_ERROR;
-  char *message = NULL;
-
-  /* MBIO read and write control parameters */
+  int mbp_format;
   int pings;
   int lonflip;
   double bounds[4];
   int btime_i[7];
   int etime_i[7];
-  double btime_d;
-  double etime_d;
   double speedmin;
   double timegap;
-  int beams_bath;
-  int beams_amp;
-  int pixels_ss;
-  void *imbio_ptr = NULL;
-  void *ombio_ptr = NULL;
-  int platform_source;
-  int nav_source;
-  int sensordepth_source;
-  int heading_source;
-  int attitude_source;
-  int svp_source;
-
-  /* mbio read and write values */
-  void *store_ptr = NULL;
-  int kind;
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double speed;
-  double heading;
-  double distance;
-  double altitude;
-  double sonardepth;
-  double draft;
-  double roll;
-  double pitch;
-  double heave;
-  int nbath;
-  int namp;
-  int nss;
-  char *beamflag = NULL;
-  char *beamflagorg = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
-  int idata = 0;
-  int inav = 0;
-  int icomment = 0;
-  int iother = 0;
-  int odata = 0;
-  int onav = 0;
-  int ocomment = 0;
-  int oother = 0;
-  char comment[MB_COMMENT_MAXLINE];
-
-  /* sidescan recalculation */
-  int pixel_size_set;
-  int swath_width_set;
-  int pixel_int;
-  double pixel_size;
-  double swath_width;
-
-  /* time, user, host variables */
-  time_t right_now;
-  char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
-
-  /* parameter controls */
-  struct mb_process_struct process;
-
-  /* processing variables */
-  bool checkuptodate = true;
-  bool testonly = false;
-  bool printfilestatus = false;
-  char read_file[MB_PATH_MAXLINE];
-  void *datalist;
-  int look_processed = MB_DATALIST_LOOK_NO;
-  double file_weight;
-  bool proceedprocess = false;
-  bool outofdate = false;
-  double time_d_lastping = 0.0;
-  int ifilemodtime = 0;
-  int ofilemodtime = 0;
-  int pfilemodtime = 0;
-  int navfilemodtime = 0;
-  int navadjfilemodtime = 0;
-  int attitudefilemodtime = 0;
-  int sonardepthfilemodtime = 0;
-  int esfmodtime = 0;
-  int svpmodtime = 0;
-  char str_process_yes[] = "**: Data processed";
-  char str_process_no[] = "--: Data not processed";
-  char str_process_yes_test[] = "Data processed (test-only mode)";
-  char str_process_no_test[] = "Data not processed (test-only mode)";
-  char str_outofdate_yes[] = "out of date";
-  char str_outofdate_overridden[] = "up to date but overridden";
-  char str_outofdate_no[] = "up to date";
-  char str_locked_yes[] = "locked";
-  char str_locked_ignored[] = "locked but lock ignored";
-  char str_locked_fail[] = "unlocked but set lock failed";
-  char str_locked_no[] = "unlocked";
-  int format = 0;
-  int variable_beams;
-  int traveltime;
-  int beam_flagging;
-  bool calculatespeedheading = false;
-  int mbp_ifile_specified;
-  char mbp_ifile[MBP_FILENAMESIZE];
-  char mbp_pfile[MBP_FILENAMESIZE];
-  char mbp_dfile[MBP_FILENAMESIZE];
-  int mbp_ofile_specified;
-  char mbp_ofile[MBP_FILENAMESIZE];
-  int mbp_format_specified;
-  int mbp_format;
-  int strip_comments;
-  FILE *tfp;
-  struct stat file_status;
-  int fstat;
-  int nnav = 0;
-  int nanav = 0;
-  int nattitude = 0;
-  int nsonardepth = 0;
-  int ntide = 0;
-  int nstatic = 0;
-  int size, nchar, len, nget, nav_ok, attitude_ok, sonardepth_ok, tide_ok, static_ok;
-  int time_j[5], stime_i[7], ftime_i[7];
-  int ihr;
-  double sec, hr;
-  int quality, nsatellite, dilution, gpsheight;
-  char *bufftmp;
-  char NorS[2], EorW[2];
-  double mlon, llon, mlat, llat;
-  int degree, time_set;
-  double dminute;
-  double splineflag;
-  double *ntime = NULL;
-  double *nlon = NULL;
-  double *nlat = NULL;
-  double *nheading = NULL;
-  double *nspeed = NULL;
-  double *ndraft = NULL;
-  double *nroll = NULL;
-  double *npitch = NULL;
-  double *nheave = NULL;
-  double *natime = NULL;
-  double *nalon = NULL;
-  double *nalat = NULL;
-  double *naz = NULL;
-  double zoffset;
-  double *nlonspl = NULL;
-  double *nlatspl = NULL;
-  double *nalonspl = NULL;
-  double *nalatspl = NULL;
-  double *nazspl = NULL;
-  double *attitudetime = NULL;
-  double *attituderoll = NULL;
-  double *attitudepitch = NULL;
-  double *attitudeheave = NULL;
-  double *fsonardepthtime = NULL;
-  double *fsonardepth = NULL;
-  double *tidetime = NULL;
-  double *tide = NULL;
-  double tideval;
-  int *staticbeam = NULL;
-  double *staticangle;
-  double *staticoffset = NULL;
-  int itime, iatime;
-  double headingx, headingy;
-  double mtodeglon, mtodeglat;
-  double del_time, dx, dy, dist;
-  double headingcalc, speedcalc;
-  double lever_x = 0.0;
-  double lever_y = 0.0;
-  double lever_heave = 0.0;
-  double time_d_old = 0.0;
-  double navlon_old = 0.0;
-  double navlat_old = 0.0;
-  double speed_old = 0.0;
-  double heading_old = 0.0;
-  int nsvp = 0;
-  double *depth = NULL;
-  double *velocity = NULL;
-  double *velocity_sum = NULL;
-  void *rt_svp = NULL;
-  double ssv;
-  int sensorhead = 0;
-  int sensorhead_status = MB_SUCCESS;
-  int sensorhead_error = MB_ERROR_NO_ERROR;
-
-  /* swath file locking variables */
-  int uselockfiles;
-  int lock_status;
-  int lock_error;
-  int locked;
-  int lock_purpose;
-  mb_path lock_program;
-  mb_path lock_cpu;
-  mb_path lock_user;
-  mb_path lock_date;
-
-  /* edit save file control variables */
-  struct mb_esf_struct esf;
-  int neditnull;
-  int neditduplicate;
-  int neditnotused;
-  int neditused;
-
-  /* output reverse edit save file control variables */
-  mb_path resf_file;
-  FILE *resf_fp = NULL;
-  mb_path resf_header;
-  int resf_mode = MB_ESF_MODE_EXPLICIT;
-  int action;
-
-  double draft_org, depth_offset_use, depth_offset_change, depth_offset_org, static_shift;
-  double roll_org, pitch_org, heave_org, heading_org;
-  double ttime, range;
-  double xx, zz, rr, vsum, vavg;
-  double alpha, beta;
-  double alphar, betar;
-  int ray_stat;
-  double *ttimes = NULL;
-  double *angles = NULL;
-  double *angles_forward = NULL;
-  double *angles_null = NULL;
-  double *bheave = NULL;
-  double *alongtrack_offset = NULL;
-
-  /* ssv handling variables */
-  bool ssv_prelimpass = false;
-  double ssv_default;
-  double ssv_start;
-
-  /* sidescan correction */
-  double altitude_default = 1000.0;
-  int nsmooth = 5;
-  double reference_amp;
-  double reference_amp_port;
-  double reference_amp_stbd;
-  int itable;
-  int nsscorrtable = 0;
-  int nsscorrangle = 0;
-  struct mbprocess_sscorr_struct *sscorrtable = NULL;
-  struct mbprocess_sscorr_struct sscorrtableuse;
-  int nampcorrtable = 0;
-  int nampcorrangle = 0;
-  struct mbprocess_sscorr_struct *ampcorrtable = NULL;
-  struct mbprocess_sscorr_struct ampcorrtableuse;
-  int ndepths;
-  double *depths = NULL;
-  double *depthsmooth = NULL;
-  double *depthacrosstrack = NULL;
-  int nslopes;
-  double *slopes = NULL;
-  double *slopeacrosstrack = NULL;
-  double r[3];
-  double v1[3], v2[3], v[3], vv;
-  double slope;
-  double bathy;
-  double altitude_use;
-  double angle;
-  double correction;
-
-  /* topography parameters */
-  struct mbprocess_grid_struct grid;
-
-  /* output fbt and fnv files */
-  FILE *fnv_fp, *fbt_fp;
-  mb_path fnv_file, fbt_file;
-
-  char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
-  char *string1, *string2, *string3;
-  double factor;
-  int pingmultiplicity;
-  int nbeams;
-  int istart, iend, icut;
-  int intstat;
-  int ioff;
-  int mm;
-  int ix, jy, kgrid;
-  int kgrid00, kgrid10, kgrid01, kgrid11;
-
-  /* get current default values */
   int status = mb_defaults(verbose, &mbp_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+  int uselockfiles; // TODO(schwehr): Make mb_uselockfiles take a bool.
   status &= mb_uselockfiles(verbose, &uselockfiles);
 
   /* reset all defaults */
@@ -740,17 +453,21 @@ int main(int argc, char **argv) {
   speedmin = 0.0;
   timegap = 1000000000.0;
 
-  /* set default input and output */
-  mbp_ifile_specified = false;
-  strcpy(mbp_ifile, "\0");
-  mbp_ofile_specified = false;
-  strcpy(mbp_ofile, "\0");
-  mbp_format_specified = false;
-  strip_comments = false;
+  int error = MB_ERROR_NO_ERROR;
 
-  /* initialize grid and esf */
-  memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
-  memset(&esf, 0, sizeof(struct mb_esf_struct));
+  /* set default input and output */
+  bool mbp_ifile_specified = false;
+  char mbp_ifile[MBP_FILENAMESIZE] = "";
+
+  bool mbp_ofile_specified = false;
+  char mbp_ofile[MBP_FILENAMESIZE] = "";
+  bool mbp_format_specified = false;
+  bool strip_comments = false;
+  int format = 0;
+  char read_file[MB_PATH_MAXLINE];
+  bool checkuptodate = true;
+  bool printfilestatus = false;
+  bool testonly = false;
 
   /* process argument list */
   {
@@ -818,15 +535,17 @@ int main(int argc, char **argv) {
   }
 
   /* try datalist.mb-1 as input */
-  if (mbp_ifile_specified == false) {
-    if ((fstat = stat("datalist.mb-1", &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+  struct stat file_status;
+  if (!mbp_ifile_specified) {
+    const int fstat = stat("datalist.mb-1", &file_status);
+    if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
       strcpy(read_file, "datalist.mb-1");
       mbp_ifile_specified = true;
     }
   }
 
   /* quit if no input file specified */
-  if (mbp_ifile_specified == false) {
+  if (!mbp_ifile_specified) {
     fprintf(stderr, "\nProgram <%s> requires an input data file.\n", program_name);
     fprintf(stderr, "The input file may be specified with the -I option.\n");
     fprintf(stderr, "The default input file is \"datalist.mb-1\".\n");
@@ -843,7 +562,11 @@ int main(int argc, char **argv) {
   bool read_data = false;
 
   /* open file list */
+  void *datalist;
+  char mbp_dfile[MBP_FILENAMESIZE];
+  double file_weight;
   if (read_datalist) {
+    int look_processed = MB_DATALIST_LOOK_NO;
     if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
       fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -907,29 +630,283 @@ int main(int argc, char **argv) {
       fprintf(stderr, "  Files processed only if out of date.\n");
     else
       fprintf(stderr, "  All files processed.\n");
-    if (strip_comments == false)
+    if (!strip_comments)
       fprintf(stderr, "  Comments embedded in output.\n\n");
     else
       fprintf(stderr, "  Comments stripped from output.\n\n");
   }
 
+  /* MBIO read and write control parameters */
+  double btime_d;
+  double etime_d;
+  int beams_bath;
+  int beams_amp;
+  int pixels_ss;
+  void *imbio_ptr = NULL;
+  void *ombio_ptr = NULL;
+  int platform_source;
+  int nav_source;
+  int sensordepth_source;
+  int heading_source;
+  int attitude_source;
+  int svp_source;
+
+  /* mbio read and write values */
+  void *store_ptr = NULL;
+  int kind;
+  int time_i[7];
+  double time_d;
+  double navlon;
+  double navlat;
+  double speed;
+  double heading;
+  double distance;
+  double altitude;
+  double sonardepth;
+  double draft;
+  double roll;
+  double pitch;
+  double heave;
+  int nbath;
+  int namp;
+  int nss;
+  char *beamflag = NULL;
+  char *beamflagorg = NULL;
+  double *bath = NULL;
+  double *bathacrosstrack = NULL;
+  double *bathalongtrack = NULL;
+  double *amp = NULL;
+  double *ss = NULL;
+  double *ssacrosstrack = NULL;
+  double *ssalongtrack = NULL;
+  int idata = 0;
+  int inav = 0;
+  int icomment = 0;
+  int iother = 0;
+  int odata = 0;
+  int onav = 0;
+  int ocomment = 0;
+  int oother = 0;
+  char comment[MB_COMMENT_MAXLINE];
+
+  /* sidescan recalculation */
+  int pixel_size_set;
+  int swath_width_set;
+  int pixel_int;
+  double pixel_size = 0;
+  double swath_width;
+
+  /* parameter controls */
+  struct mb_process_struct process;
+
+  /* processing variables */
+  bool proceedprocess = false;
+  bool outofdate = false;
+  double time_d_lastping = 0.0;
+  int ifilemodtime = 0;
+  int ofilemodtime = 0;
+  int pfilemodtime = 0;
+  int navfilemodtime = 0;
+  int navadjfilemodtime = 0;
+  int attitudefilemodtime = 0;
+  int sonardepthfilemodtime = 0;
+  int esfmodtime = 0;
+  int svpmodtime = 0;
+  char str_process_yes[] = "**: Data processed";
+  char str_process_no[] = "--: Data not processed";
+  char str_process_yes_test[] = "Data processed (test-only mode)";
+  char str_process_no_test[] = "Data not processed (test-only mode)";
+  char str_outofdate_yes[] = "out of date";
+  char str_outofdate_overridden[] = "up to date but overridden";
+  char str_outofdate_no[] = "up to date";
+  char str_locked_yes[] = "locked";
+  char str_locked_ignored[] = "locked but lock ignored";
+  char str_locked_fail[] = "unlocked but set lock failed";
+  char str_locked_no[] = "unlocked";
+  int variable_beams;
+  int beam_flagging;
+  bool calculatespeedheading = false;
+  char mbp_pfile[MBP_FILENAMESIZE];
+  FILE *tfp;
+  int nnav = 0;
+  int nanav = 0;
+  int nattitude = 0;
+  int nsonardepth = 0;
+  int ntide = 0;
+  int nstatic = 0;
+  int size, nchar, len, nget;
+  int time_j[5], stime_i[7], ftime_i[7];
+  int ihr;
+  double sec, hr;
+  int quality, nsatellite, dilution, gpsheight;
+  char *bufftmp;
+  char NorS[2], EorW[2];
+  double mlon, llon, mlat, llat;
+  int degree;
+  double dminute;
+  double splineflag;
+  double *ntime = NULL;
+  double *nlon = NULL;
+  double *nlat = NULL;
+  double *nheading = NULL;
+  double *nspeed = NULL;
+  double *ndraft = NULL;
+  double *nroll = NULL;
+  double *npitch = NULL;
+  double *nheave = NULL;
+  double *natime = NULL;
+  double *nalon = NULL;
+  double *nalat = NULL;
+  double *naz = NULL;
+  double zoffset;
+  double *nlonspl = NULL;
+  double *nlatspl = NULL;
+  double *nalonspl = NULL;
+  double *nalatspl = NULL;
+  double *nazspl = NULL;
+  double *attitudetime = NULL;
+  double *attituderoll = NULL;
+  double *attitudepitch = NULL;
+  double *attitudeheave = NULL;
+  double *fsonardepthtime = NULL;
+  double *fsonardepth = NULL;
+  double *tidetime = NULL;
+  double *tide = NULL;
+  double tideval;
+  int *staticbeam = NULL;
+  double *staticangle;
+  double *staticoffset = NULL;
+  int itime, iatime;
+  double headingx, headingy;
+  double mtodeglon, mtodeglat;
+  double del_time, dx, dy, dist;
+  double headingcalc, speedcalc;
+  double lever_x = 0.0;
+  double lever_y = 0.0;
+  double lever_heave = 0.0;
+  double time_d_old = 0.0;
+  double navlon_old = 0.0;
+  double navlat_old = 0.0;
+  double speed_old = 0.0;
+  double heading_old = 0.0;
+  int nsvp = 0;
+  double *depth = NULL;
+  double *velocity = NULL;
+  double *velocity_sum = NULL;
+  void *rt_svp = NULL;
+  double ssv;
+  int sensorhead = 0;
+  int sensorhead_status = MB_SUCCESS;
+  int sensorhead_error = MB_ERROR_NO_ERROR;
+
+  /* swath file locking variables */
+  int lock_status;
+  int lock_error;
+  int lock_purpose;
+  mb_path lock_program;
+  mb_path lock_cpu;
+  mb_path lock_user;
+  mb_path lock_date;
+
+  /* edit save file control variables */
+  struct mb_esf_struct esf;
+  memset(&esf, 0, sizeof(struct mb_esf_struct));
+  int neditnull;
+  int neditduplicate;
+  int neditnotused;
+  int neditused;
+
+  /* output reverse edit save file control variables */
+  mb_path resf_file;
+  FILE *resf_fp = NULL;
+  mb_path resf_header;
+  int resf_mode = MB_ESF_MODE_EXPLICIT;
+  int action;
+
+  double draft_org, depth_offset_use, depth_offset_change, depth_offset_org, static_shift;
+  double roll_org, pitch_org, heave_org, heading_org;
+  double ttime, range;
+  double xx, zz, rr, vsum, vavg;
+  double alpha, beta;
+  double alphar, betar;
+  int ray_stat;
+  double *ttimes = NULL;
+  double *angles = NULL;
+  double *angles_forward = NULL;
+  double *angles_null = NULL;
+  double *bheave = NULL;
+  double *alongtrack_offset = NULL;
+
+  /* ssv handling variables */
+  bool ssv_prelimpass = false;
+  double ssv_default;
+  double ssv_start;
+
+  /* sidescan correction */
+  double altitude_default = 1000.0;
+  int nsmooth = 5;
+  double reference_amp;
+  double reference_amp_port;
+  double reference_amp_stbd;
+  int itable;
+  int nsscorrtable = 0;
+  int nsscorrangle = 0;
+  struct mbprocess_sscorr_struct *sscorrtable = NULL;
+  struct mbprocess_sscorr_struct sscorrtableuse;
+  int nampcorrtable = 0;
+  int nampcorrangle = 0;
+  struct mbprocess_sscorr_struct *ampcorrtable = NULL;
+  struct mbprocess_sscorr_struct ampcorrtableuse;
+  int ndepths;
+  double *depths = NULL;
+  double *depthsmooth = NULL;
+  double *depthacrosstrack = NULL;
+  int nslopes;
+  double *slopes = NULL;
+  double *slopeacrosstrack = NULL;
+  double r[3];
+  double v1[3], v2[3], v[3], vv;
+  double slope;
+  double bathy;
+  double altitude_use;
+  double angle;
+  double correction;
+
+  /* topography parameters */
+  struct mbprocess_grid_struct grid;
+  memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
+
+  char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
+  char *string1, *string2, *string3;
+  double factor;
+  int pingmultiplicity;
+  int nbeams;
+  int istart, iend, icut;
+  int ioff;
+  int mm;
+
+  int locked;  // TODO(schwehr): Make mb_pr_lockswathfile take a bool.
+  bool attitude_ok;
+  bool nav_ok;
+  bool time_set;
+
   /* loop over all files to be read */
-  while (read_data == true) {
+  while (read_data) {
     /* load parameters */
     status = mb_pr_readpar(verbose, mbp_ifile, false, &process, &error);
 
     /* reset output file and format if not reading from datalist */
     if (!read_datalist) {
-      if (mbp_ofile_specified == true) {
+      if (mbp_ofile_specified) {
         strcpy(process.mbp_ofile, mbp_ofile);
       }
-      if (mbp_format_specified == true) {
+      if (mbp_format_specified) {
         process.mbp_format = mbp_format;
       }
     }
 
     /* make output file path global if needed */
-    if (status == MB_SUCCESS && mbp_ofile_specified == false && process.mbp_ofile[0] != '/' && process.mbp_ofile[1] != ':' &&
+    if (status == MB_SUCCESS && !mbp_ofile_specified && process.mbp_ofile[0] != '/' && process.mbp_ofile[1] != ':' &&
         strrchr(process.mbp_ifile, '/') != NULL && (len = strrchr(process.mbp_ifile, '/') - process.mbp_ifile + 1) > 1) {
       strcpy(mbp_ofile, process.mbp_ofile);
       strncpy(process.mbp_ofile, process.mbp_ifile, len);
@@ -939,7 +916,8 @@ int main(int argc, char **argv) {
 
     /* get mod time for the input file */
     ifilemodtime = 0;
-    if ((fstat = stat(mbp_ifile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+    int fstat = stat(mbp_ifile, &file_status);
+    if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
       ifilemodtime = file_status.st_mtime;
     }
 
@@ -1028,7 +1006,7 @@ int main(int argc, char **argv) {
         /* not testing - do it for real */
         if (!testonly) {
           /* want to process, now try to set a lock of the file to be processed */
-          if (uselockfiles == true) {
+          if (uselockfiles) {
             lock_status =
                 mb_pr_lockswathfile(verbose, process.mbp_ifile, MBP_LOCK_PROCESS, program_name, &lock_error);
             if (lock_status == MB_SUCCESS) {
@@ -1059,7 +1037,7 @@ int main(int argc, char **argv) {
           /* want to process, check lock status of the file to be processed */
           lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program, lock_user,
                                        lock_cpu, lock_date, &lock_error);
-          if (locked == false || uselockfiles == false) {
+          if (!locked || !uselockfiles) {
             proceedprocess = true;
           }
           else {
@@ -1088,21 +1066,21 @@ int main(int argc, char **argv) {
       }
       if (outofdate)
         string2 = str_outofdate_yes;
-      else if (!outofdate && checkuptodate == false)
+      else if (!outofdate && !checkuptodate)
         string2 = str_outofdate_overridden;
       else
         string2 = str_outofdate_no;
-      if (locked == true && uselockfiles == false)
+      if (locked && !uselockfiles)
         string3 = str_locked_ignored;
-      else if (locked == true)
+      else if (locked)
         string3 = str_locked_yes;
-      else if (locked == false && lock_error == MB_ERROR_OPEN_FAIL)
+      else if (!locked && lock_error == MB_ERROR_OPEN_FAIL)
         string3 = str_locked_fail;
       else
         string3 = str_locked_no;
       fprintf(stderr, "%s - %s - %s: \n\tInput:  %s\n\tOutput: %s\n", string1, string2, string3, process.mbp_ifile,
               process.mbp_ofile);
-      if (locked == true)
+      if (locked)
         fprintf(stderr, "\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", lock_program, lock_user, lock_cpu,
                 lock_date);
       if (testonly || verbose > 0 || printfilestatus) {
@@ -1212,10 +1190,12 @@ int main(int argc, char **argv) {
         }
       }
 
+      int traveltime;  // TODO(schwehr): Make mb_format_flags take bools.
+
       /* check for format with travel time data */
       if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE) {
         status = mb_format_flags(verbose, &process.mbp_format, &variable_beams, &traveltime, &beam_flagging, &error);
-        if (traveltime != true) {
+        if (!traveltime) {
           fprintf(stderr, "\nWarning:\n\tFormat %d does not include travel time data.\n", process.mbp_format);
           fprintf(stderr, "\tTravel times and angles estimated assuming\n");
           fprintf(stderr, "\t1500 m/s water sound speed.\n");
@@ -1236,11 +1216,11 @@ int main(int argc, char **argv) {
 
       if (verbose == 1) {
         fprintf(stderr, "\nInput and Output Files:\n");
-        if (process.mbp_format_specified == true)
+        if (process.mbp_format_specified)
           fprintf(stderr, "  Format:                        %d\n", process.mbp_format);
         fprintf(stderr, "  Input file:                    %s\n", process.mbp_ifile);
         fprintf(stderr, "  Output file:                   %s\n", process.mbp_ofile);
-        if (strip_comments == true)
+        if (strip_comments)
           fprintf(stderr, "  Comments in output:            OFF\n");
         else
           fprintf(stderr, "  Comments in output:            ON\n");
@@ -1641,6 +1621,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1783,6 +1764,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1804,6 +1786,7 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
         }
+
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
           nav_ok = false;
 
@@ -1950,7 +1933,7 @@ int main(int argc, char **argv) {
               }
               else if (((process.mbp_nav_format == 6 && strncmp(&buffer[3], "GLL", 3) == 0) ||
                         (process.mbp_nav_format == 7 && strncmp(&buffer[3], "GGA", 3) == 0)) &&
-                       time_set == true && len > 26) {
+                       time_set && len > 26) {
                 time_set = false;
                 /* find start of ",ddmm.mm,N,ddmm.mm,E" */
                 if ((bufftmp = strchr(buffer, ',')) != NULL) {
@@ -2023,7 +2006,7 @@ int main(int argc, char **argv) {
               nav_ok = true;
             if (nnav > 0 && ntime[nnav] <= ntime[nnav - 1])
               nav_ok = false;
-            if (nav_ok == true) {
+            if (nav_ok) {
               if (process.mbp_nav_heading == MBP_NAV_ON && nget < 10) {
                 fprintf(stderr, "\nHeading data missing from nav file.\nMerging of heading data disabled.\n");
                 process.mbp_nav_heading = MBP_NAV_OFF;
@@ -2085,7 +2068,7 @@ int main(int argc, char **argv) {
           }
 
           /* make sure longitude is defined according to lonflip */
-          if (nav_ok == true) {
+          if (nav_ok) {
             if (lonflip == -1 && nlon[nnav] > 0.0)
               nlon[nnav] = nlon[nnav] - 360.0;
             else if (lonflip == 0 && nlon[nnav] < -180.0)
@@ -2097,7 +2080,7 @@ int main(int argc, char **argv) {
           }
 
           /* output some debug values */
-          if (verbose >= 5 && nav_ok == true) {
+          if (verbose >= 5 && nav_ok) {
             fprintf(stderr, "\ndbg5  New navigation point read in program <%s>\n", program_name);
             fprintf(stderr, "dbg5       nav[%d]: %f %f %f\n", nnav, ntime[nnav], nlon[nnav], nlat[nnav]);
           }
@@ -2107,7 +2090,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for reverses or repeats in time */
-          if (nav_ok == true) {
+          if (nav_ok) {
             if (nnav == 0)
               nnav++;
             else if (ntime[nnav] > ntime[nnav - 1])
@@ -2188,6 +2171,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2224,7 +2208,7 @@ int main(int argc, char **argv) {
           }
 
           /* make sure longitude is defined according to lonflip */
-          if (nav_ok == true) {
+          if (nav_ok) {
             if (lonflip == -1 && nalon[nanav] > 0.0)
               nalon[nanav] = nalon[nanav] - 360.0;
             else if (lonflip == 0 && nalon[nanav] < -180.0)
@@ -2236,7 +2220,7 @@ int main(int argc, char **argv) {
           }
 
           /* output some debug values */
-          if (verbose >= 5 && nav_ok == true) {
+          if (verbose >= 5 && nav_ok) {
             fprintf(stderr, "\ndbg5  New adjusted navigation point read in program <%s>\n", program_name);
             fprintf(stderr, "dbg5       nav[%d]: %f %f %f\n", nanav, natime[nanav], nalon[nanav], nalat[nanav]);
           }
@@ -2246,7 +2230,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for reverses or repeats in time */
-          if (nav_ok == true) {
+          if (nav_ok) {
             if (nanav == 0)
               nanav++;
             else if (natime[nanav] > natime[nanav - 1])
@@ -2320,6 +2304,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2397,7 +2382,7 @@ int main(int argc, char **argv) {
           }
 
           /* output some debug values */
-          if (verbose >= 5 && attitude_ok == true) {
+          if (verbose >= 5 && attitude_ok) {
             fprintf(stderr, "\ndbg5  New attitude point read in program <%s>\n", program_name);
             fprintf(stderr, "dbg5       attitude[%d]: %f %f %f %f\n", nattitude, attitudetime[nattitude],
                     attituderoll[nattitude], attitudepitch[nattitude], attitudeheave[nattitude]);
@@ -2408,7 +2393,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for reverses or repeats in time */
-          if (attitude_ok == true) {
+          if (attitude_ok) {
             if (nattitude == 0)
               nattitude++;
             else if (attitudetime[nattitude] > attitudetime[nattitude - 1])
@@ -2475,6 +2460,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2497,7 +2483,7 @@ int main(int argc, char **argv) {
           exit(MB_ERROR_OPEN_FAIL);
         }
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-          sonardepth_ok = false;
+	  bool sonardepth_ok = false;
 
           /* ignore comments */
           if (buffer[0] != '#') {
@@ -2550,7 +2536,7 @@ int main(int argc, char **argv) {
           }
 
           /* output some debug values */
-          if (verbose >= 5 && sonardepth_ok == true) {
+          if (verbose >= 5 && sonardepth_ok) {
             fprintf(stderr, "\ndbg5  New sonardepth point read in program <%s>\n", program_name);
             fprintf(stderr, "dbg5       sonardepth[%d]: %f %f\n", nsonardepth, fsonardepthtime[nsonardepth],
                     fsonardepth[nsonardepth]);
@@ -2561,7 +2547,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for reverses or repeats in time */
-          if (sonardepth_ok == true) {
+          if (sonardepth_ok) {
             if (nsonardepth == 0)
               nsonardepth++;
             else if (fsonardepthtime[nsonardepth] > fsonardepthtime[nsonardepth - 1])
@@ -2628,6 +2614,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2650,7 +2637,7 @@ int main(int argc, char **argv) {
           exit(MB_ERROR_OPEN_FAIL);
         }
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-          tide_ok = false;
+          bool tide_ok = false;
 
           /* ignore comments */
           if (buffer[0] != '#') {
@@ -2702,7 +2689,7 @@ int main(int argc, char **argv) {
           }
 
           /* output some debug values */
-          if (verbose >= 5 && tide_ok == true) {
+          if (verbose >= 5 && tide_ok) {
             fprintf(stderr, "\ndbg5  New tide point read in program <%s>\n", program_name);
             fprintf(stderr, "dbg5       tide[%d]: %f %f\n", ntide, tidetime[ntide], tide[ntide]);
           }
@@ -2712,7 +2699,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for reverses or repeats in time */
-          if (tide_ok == true) {
+          if (tide_ok) {
             if (ntide == 0)
               ntide++;
             else if (tidetime[ntide] > tidetime[ntide - 1])
@@ -2796,6 +2783,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2818,7 +2806,7 @@ int main(int argc, char **argv) {
           exit(MB_ERROR_OPEN_FAIL);
         }
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-          static_ok = false;
+          bool static_ok = false;
 
           /* deal with static in form: beam_# offset */
           if (buffer[0] != '#') {
@@ -2829,7 +2817,7 @@ int main(int argc, char **argv) {
             }
 
             /* output some debug values */
-            if (verbose >= 5 && static_ok == true) {
+            if (verbose >= 5 && static_ok) {
               fprintf(stderr, "\ndbg5  New static beam correction read in program <%s>\n", program_name);
               fprintf(stderr, "dbg5       beam:%d offset:%f\n", staticbeam[nstatic], staticoffset[nstatic]);
             }
@@ -2880,6 +2868,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2902,7 +2891,7 @@ int main(int argc, char **argv) {
           exit(MB_ERROR_OPEN_FAIL);
         }
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-          static_ok = false;
+          bool static_ok = false;
 
           /* deal with static in form: angle offset */
           if (buffer[0] != '#') {
@@ -2913,7 +2902,7 @@ int main(int argc, char **argv) {
             }
 
             /* output some debug values */
-            if (verbose >= 5 && static_ok == true) {
+            if (verbose >= 5 && static_ok) {
               fprintf(stderr, "\ndbg5  New static angle correction read in program <%s>\n", program_name);
               fprintf(stderr, "dbg5       angle:%f offset:%f\n", staticangle[nstatic], staticoffset[nstatic]);
             }
@@ -2987,6 +2976,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3111,6 +3101,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3195,6 +3186,7 @@ int main(int argc, char **argv) {
       if ((status = mb_read_init(verbose, process.mbp_ifile, process.mbp_format, pings, lonflip, bounds, btime_i, etime_i,
                                  speedmin, timegap, &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
                                  &error)) != MB_SUCCESS) {
+        char *message = NULL;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", process.mbp_ifile);
@@ -3205,6 +3197,7 @@ int main(int argc, char **argv) {
       /* initialize writing the output swath sonar file */
       if ((status = mb_write_init(verbose, process.mbp_ofile, process.mbp_format, &ombio_ptr, &beams_bath, &beams_amp,
                                   &pixels_ss, &error)) != MB_SUCCESS) {
+        char *message = NULL;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", process.mbp_ofile);
@@ -3253,6 +3246,7 @@ int main(int argc, char **argv) {
 
       /* if error initializing memory then quit */
       if (error != MB_ERROR_NO_ERROR) {
+        char *message = NULL;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3270,7 +3264,7 @@ int main(int argc, char **argv) {
           is obtained, then close and reopen the file
           this provides the starting surface sound velocity
           for recalculating the bathymetry */
-      if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE && traveltime == true &&
+      if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE && traveltime &&
           process.mbp_ssv_mode != MBP_SSV_SET) {
         ssv_start = 0.0;
         ssv_prelimpass = true;
@@ -3317,6 +3311,7 @@ int main(int argc, char **argv) {
         if ((status = mb_read_init(verbose, process.mbp_ifile, process.mbp_format, pings, lonflip, bounds, btime_i,
                                    etime_i, speedmin, timegap, &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp,
                                    &pixels_ss, &error)) != MB_SUCCESS) {
+          char *message = NULL;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
           fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", process.mbp_ifile);
@@ -3371,6 +3366,7 @@ int main(int argc, char **argv) {
 
         /* if error initializing memory then quit */
         if (error != MB_ERROR_NO_ERROR) {
+          char *message = NULL;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3388,6 +3384,7 @@ int main(int argc, char **argv) {
       sprintf(resf_file, "%s.resf", process.mbp_ifile);
       if ((resf_fp = fopen(resf_file, "w")) == NULL) {
         error = MB_ERROR_OPEN_FAIL;
+        char *message = NULL;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nReverse edit save file <%s> not initialized for writing\n", resf_file);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3395,15 +3392,19 @@ int main(int argc, char **argv) {
       } else {
         /* put version header at beginning */
         memset(resf_header, 0, MB_PATH_MAXLINE);
-        right_now = time((time_t *)0);
+        const time_t right_now = time((time_t *)0);
+        char date[32];
         strcpy(date, ctime(&right_now));
         date[strlen(date) - 1] = '\0';
-        if ((user_ptr = getenv("USER")) == NULL)
+        char *user_ptr = getenv("USER");
+        if (user_ptr == NULL)
           user_ptr = getenv("LOGNAME");
+        char user[MBP_FILENAMESIZE];
         if (user_ptr != NULL)
           strcpy(user, user_ptr);
         else
           strcpy(user, "unknown");
+        char host[MBP_FILENAMESIZE];
         gethostname(host, MBP_FILENAMESIZE);
         resf_mode = MB_ESF_MODE_EXPLICIT;
         sprintf(resf_header,
@@ -3441,7 +3442,7 @@ int main(int argc, char **argv) {
         --------------------------------------------*/
 
       /* write comments to beginning of output file */
-      if (strip_comments == false) {
+      if (!strip_comments) {
         /* insert metadata */
         if (strlen(process.mbp_meta_vessel) > 0) {
           sprintf(comment, "METAVESSEL:%s", process.mbp_meta_vessel);
@@ -3566,15 +3567,19 @@ int main(int argc, char **argv) {
         status = mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (error == MB_ERROR_NO_ERROR)
           ocomment++;
-        right_now = time((time_t *)0);
+        const time_t right_now = time((time_t *)0);
+        char date[32];
         strcpy(date, ctime(&right_now));
         date[strlen(date) - 1] = '\0';
-        if ((user_ptr = getenv("USER")) == NULL)
+        char *user_ptr = getenv("USER");
+        if (user_ptr == NULL)
           user_ptr = getenv("LOGNAME");
+        char user[MBP_FILENAMESIZE];
         if (user_ptr != NULL)
           strcpy(user, user_ptr);
         else
           strcpy(user, "unknown");
+        char host[MBP_FILENAMESIZE];
         gethostname(host, MBP_FILENAMESIZE);
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
@@ -4493,7 +4498,7 @@ int main(int argc, char **argv) {
           }
         }
 
-        /* save the orignal beamflag states */
+        /* save the original beamflag states */
         if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
           for (int i = 0; i < nbath; i++) {
             beamflagorg[i] = beamflag[i];
@@ -4532,6 +4537,7 @@ int main(int argc, char **argv) {
           fprintf(stderr, "%s\n", comment);
         }
         else if (verbose >= 1 && error < MB_ERROR_NO_ERROR && error > MB_ERROR_OTHER) {
+          char *message = NULL;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
           fprintf(stderr, "Input Record: %d\n", idata);
@@ -4539,11 +4545,13 @@ int main(int argc, char **argv) {
                   time_i[5]);
         }
         else if (verbose >= 1 && error < MB_ERROR_NO_ERROR) {
+          char *message = NULL;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
           fprintf(stderr, "Input Record: %d\n", idata);
         }
         else if (verbose >= 1 && error != MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
+          char *message = NULL;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nFatal MBIO Error:\n%s\n", message);
           fprintf(stderr, "Last Good Time: %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4],
@@ -4610,6 +4618,7 @@ int main(int argc, char **argv) {
         }
 
         /* interpolate the navigation if desired */
+        int intstat;
         if (error == MB_ERROR_NO_ERROR && process.mbp_nav_mode == MBP_NAV_ON &&
             (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
           /* interpolate navigation */
@@ -4868,14 +4877,14 @@ int main(int argc, char **argv) {
 
         /* if survey data encountered,
             get the bathymetry */
-        if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA)) {
+        if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
 
           /*--------------------------------------------
             get travel time values
             --------------------------------------------*/
 
           /* extract travel times if they exist */
-          if (traveltime == true) {
+          if (traveltime) {
             status = mb_ttimes(verbose, imbio_ptr, store_ptr, &kind, &nbeams, ttimes, angles, angles_forward,
                                angles_null, bheave, alongtrack_offset, &draft_org, &ssv, &error);
           }
@@ -5116,19 +5125,6 @@ int main(int argc, char **argv) {
                 bath[i] = range * cos(alphar) * sin(betar);
                 bathalongtrack[i] = range * sin(alphar);
                 bathacrosstrack[i] = range * cos(alphar) * cos(betar);
-
-                /* rotate bathymetry by applying attitude biases */
-                //        status = mb_platform_math_attitude_rotate_beam (verbose,
-                //                    bathacrosstrack[i],
-                //                    bathalongtrack[i],
-                //                    bath[i],
-                //                    (roll - roll_org + process.mbp_rollbias),
-                //                    (pitch - pitch_org + process.mbp_pitchbias),
-                //                    (heading - heading_org + process.mbp_headingbias),
-                //                    &bathacrosstrack[i],
-                //                    &bathalongtrack[i],
-                //                    &bath[i],
-                //                    &error);
 
                 /* add heave and draft back in */
                 bath[i] += depth_offset_use;
@@ -5586,13 +5582,13 @@ int main(int argc, char **argv) {
                 /* get position in grid */
                 r[0] = headingy * bathacrosstrack[i] + headingx * bathalongtrack[i];
                 r[1] = -headingx * bathacrosstrack[i] + headingy * bathalongtrack[i];
-                ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
-                jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
-                kgrid = ix * grid.n_rows + jy;
-                kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
-                kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
-                kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
-                kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
+                const int ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
+                const int jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
+                const int kgrid = ix * grid.n_rows + jy;
+                const int kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
+                const int kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
+                const int kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
+                const int kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
                 if (ix > 0 && ix < grid.n_columns - 1 && jy > 0 && jy < grid.n_rows - 1 &&
                     grid.data[kgrid] > grid.nodatavalue && grid.data[kgrid00] > grid.nodatavalue &&
                     grid.data[kgrid01] > grid.nodatavalue && grid.data[kgrid10] > grid.nodatavalue &&
@@ -5673,13 +5669,13 @@ int main(int argc, char **argv) {
                 /* get position in grid */
                 r[0] = headingy * ssacrosstrack[i] + headingx * ssalongtrack[i];
                 r[1] = -headingx * ssacrosstrack[i] + headingy * ssalongtrack[i];
-                ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
-                jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
-                kgrid = ix * grid.n_rows + jy;
-                kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
-                kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
-                kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
-                kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
+                const int ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
+                const int jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
+                const int kgrid = ix * grid.n_rows + jy;
+                const int kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
+                const int kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
+                const int kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
+                const int kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
                 if (ix > 0 && ix < grid.n_columns - 1 && jy > 0 && jy < grid.n_rows - 1 &&
                     grid.data[kgrid] > grid.nodatavalue && grid.data[kgrid00] > grid.nodatavalue &&
                     grid.data[kgrid01] > grid.nodatavalue && grid.data[kgrid10] > grid.nodatavalue &&
@@ -5792,7 +5788,7 @@ int main(int argc, char **argv) {
           --------------------------------------------*/
 
         /* write some data */
-        if (error == MB_ERROR_NO_ERROR || (kind == MB_DATA_COMMENT && strip_comments == false)) {
+        if (error == MB_ERROR_NO_ERROR || (kind == MB_DATA_COMMENT && !strip_comments)) {
           status = mb_put_all(verbose, ombio_ptr, store_ptr, false, kind, time_i, time_d, navlon, navlat, speed,
                               heading, nbath, namp, nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
                               ssacrosstrack, ssalongtrack, comment, &error);
@@ -5807,6 +5803,7 @@ int main(int argc, char **argv) {
               oother++;
           }
           else {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
             fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", process.mbp_ofile);
@@ -5868,7 +5865,7 @@ int main(int argc, char **argv) {
       status = mb_close(verbose, &ombio_ptr, &error);
 
       /* unlock the raw swath file */
-      if (uselockfiles == true)
+      if (uselockfiles)
         lock_status = mb_pr_unlockswathfile(verbose, process.mbp_ifile, MBP_LOCK_PROCESS, program_name, &lock_error);
 
       /* close the *.resf file */

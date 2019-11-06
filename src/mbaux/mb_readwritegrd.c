@@ -443,7 +443,7 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	}
 
 	struct GMT_GRID_HEADER *header = G->header;
-	/* Rely on GDAL to tell us the proj4 string of this EPSG code */
+	/* Rely on GDAL to tell us the Proj string of this EPSG code */
 	{
 		OGRErr eErr = OGRERR_NONE;
 		OGRSpatialReferenceH hSRS = OSRNewSpatialReference(NULL);
@@ -451,7 +451,7 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 			fprintf(stderr, "Did not get the SRS from input EPSG  %d\n", epsgid);
 		}
 		if ((eErr = OSRExportToProj4(hSRS, &header->ProjRefPROJ4)) != OGRERR_NONE) {
-			fprintf(stderr, "Failed to convert the SRS to proj4 syntax\n");
+			fprintf(stderr, "Failed to convert the SRS to Proj syntax\n");
 		}
 		OSRDestroySpatialReference(hSRS);
 	}

@@ -57,6 +57,7 @@
  */
 
 #include <getopt.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -84,17 +85,17 @@ typedef struct mbdefaults_struct {
 
 typedef struct options_struct {
 	int errflg;
-	int split_txers;
-	int help;
+	bool split_txers;
+	bool help;
 	int verbose;
 	int format;
-	int ofile_set;
-	int projection_set;
-	int write_output;
-	int print_ascii;
-	int remove_rejected;
-	int flip_rejected;
-	int copy_rawamp;
+	bool ofile_set;
+	bool projection_set;
+	bool write_output;
+	bool print_ascii;
+	bool remove_rejected;
+	bool flip_rejected;
+	bool copy_rawamp;
 	mb_path proj4command;
 	mb_path read_file;
 	mb_path basename;
@@ -210,7 +211,7 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 			break;
 		case 'H':
 		case 'h':
-			opts->help++;
+			opts->help = true;
 			break;
 		case 'I':
 		case 'i':
@@ -259,10 +260,6 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 } /* parse_options */
 /*---------------------------------------------------------------*/
 static int print_mbdefaults(int verbose, options *opts, mbdefaults *dflts, int *error) {
-	char *tagdebug2 = "dbg2 ";
-	char *tagdebug0 = "";
-	char *tag = NULL;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -270,10 +267,9 @@ static int print_mbdefaults(int verbose, options *opts, mbdefaults *dflts, int *
 		fprintf(stderr, "dbg2       options:    %p\n", (void *)opts);
 	}
 
-	if (verbose > 1)
-		tag = tagdebug2;
-	else
-		tag = tagdebug0;
+	const char *tagdebug2 = "dbg2 ";
+	const char *tagdebug0 = "";
+	const char *tag = verbose > 1 ? tagdebug2 : tagdebug0;
 
 	fprintf(stderr, "\n%sProgram <%s>\n", tag, program_name);
 	fprintf(stderr, "%sMB-system Version %s\n", tag, MB_VERSION);
@@ -326,7 +322,7 @@ static int print_mbdefaults(int verbose, options *opts, mbdefaults *dflts, int *
 	return (status);
 } /* print_mbdefaults */
 /*---------------------------------------------------------------*/
-static void error_exit(int verbose, int error, char *funcname, char *message) {
+static void error_exit(int verbose, int error, const char *funcname, const char *message) {
 	char *errmsg;
 
 	mb_error(verbose, error, &errmsg);
@@ -337,8 +333,6 @@ static void error_exit(int verbose, int error, char *funcname, char *message) {
 }
 /*----------------------------------------------------------------------*/
 static int print_latest_record(int verbose, struct mbsys_swathplus_struct *store, int *error) {
-	FILE *stream;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -346,7 +340,7 @@ static int print_latest_record(int verbose, struct mbsys_swathplus_struct *store
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	stream = (verbose > 0) ? stderr : stdout;
+	FILE *stream = (verbose > 0) ? stderr : stdout;
 
 	if (store->type == SWPLS_ID_SXP_HEADER_DATA) {
 		swpls_pr_sxpheader(verbose, stream, &(store->sxp_header), error);
@@ -598,9 +592,6 @@ static int flip_sample_flags(int verbose, swpls_sxpping *ping, int *error) {
 
 /*----------------------------------------------------------------------*/
 static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
-	swpls_point *points;
-	int valid;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -609,7 +600,7 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 	}
 
 	/* count the number of valid samples */
-	valid = 0;
+	int valid = 0;
 	for (int i = 0; i < ping->nosampsfile; i++) {
 		if (ping->points[i].status != SWPLS_POINT_REJECTED) {
 			valid++;
@@ -617,6 +608,7 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 	}
 
 	/* create a temporary array to hold the valid samples */
+	swpls_point *points;
 	int status = mb_mallocd(verbose, __FILE__, __LINE__, valid * sizeof(swpls_point), (void **)&points, error);
 	if (status != MB_SUCCESS) {
 		char message[MAX_ERROR_STRING] = {0};
@@ -654,11 +646,8 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 } /* remove_rejected_samps */
 
 /*----------------------------------------------------------------------*/
-static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path *basename, int ofile_set, int split_txers,
+static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path *basename, bool ofile_set, bool split_txers,
                              int *error) {
-	mb_path fileroot;
-	int format;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -673,9 +662,11 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 	}
 
 	/* get the fileroot name and format from the input name */
+	mb_path fileroot;
+	int format;
 	int status = mb_get_format(verbose, ifile, fileroot, &format, error);
 
-	if ((ofile_set == false) && (split_txers == false)) {
+	if (!ofile_set && !split_txers) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			sprintf(ofile[0], "%s.mb%d", fileroot, format);
 		}
@@ -686,7 +677,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 			sprintf(ofile[0], "%s.mb%d", ifile, format);
 		}
 	}
-	else if ((ofile_set == false) && (split_txers == true)) {
+	else if (!ofile_set && split_txers) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 				sprintf(ofile[i], "%s_txer%d.mb%d", fileroot, i + 1, format);
@@ -703,7 +694,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 			}
 		}
 	}
-	else if ((ofile_set == true) && (split_txers == false)) {
+	else if (ofile_set && !split_txers) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			sprintf(ofile[0], "%s.mb%d", *basename, format);
 		}
@@ -714,7 +705,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 			sprintf(ofile[0], "%s.mb%d", ifile, format);
 		}
 	}
-	else if ((ofile_set == true) && (split_txers == true)) {
+	else if (ofile_set && split_txers) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 				sprintf(ofile[i], "%s_txer%d.mb%d", *basename, i + 1, format);
@@ -810,16 +801,6 @@ static int copy_rawamp(int verbose, swpls_sxpping *ping, int *error) {
 
 /*---------------------------------------------------------------*/
 static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_path ifile, counts *recs, int *error) {
-	void *imbio_ptr = NULL;
-	double btime_d, etime_d;
-	int beams_bath_alloc, beams_amp_alloc, pixels_ss_alloc;
-	void *ombio_ptr[SWPLS_MAX_TXERS];
-	struct mb_io_struct *imb_io_ptr = NULL;
-	void *istore_ptr = NULL;
-	int ofile_init[SWPLS_MAX_TXERS];
-	mb_path ofile[SWPLS_MAX_TXERS];
-	struct mbsys_swathplus_struct *istore = NULL;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -828,6 +809,15 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	}
 
 	int status = MB_SUCCESS;
+
+	void *imbio_ptr = NULL;
+	double btime_d;
+	double etime_d;
+	int beams_bath_alloc;
+	int beams_amp_alloc;
+	int pixels_ss_alloc;
+	mb_path ofile[SWPLS_MAX_TXERS];
+	struct mbsys_swathplus_struct *istore = NULL;
 
 	/* open the input file */
 	if ((status = mb_read_init(opts->verbose, ifile, opts->format, mbdflts->pings_get, mbdflts->lonflip, mbdflts->bounds,
@@ -839,11 +829,11 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	}
 
 	/* get mbio and data structure descriptors */
-	imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
-	istore_ptr = imb_io_ptr->store_data;
+	struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+	void *istore_ptr = imb_io_ptr->store_data;
 
 	/* set the projection for nav data */
-	if (opts->projection_set == true) {
+	if (opts->projection_set) {
 		mb_proj_init(opts->verbose, opts->proj4command, &(imb_io_ptr->pjptr), error);
 		strncpy(imb_io_ptr->projection_id, opts->proj4command, MB_NAME_LENGTH);
 		imb_io_ptr->projection_initialized = true;
@@ -851,6 +841,9 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 
 	/* setup the output filename(s) for writing */
 	status = set_outfile_names(opts->verbose, ofile, ifile, &opts->basename, opts->ofile_set, opts->split_txers, error);
+
+	bool ofile_init[SWPLS_MAX_TXERS];
+	void *ombio_ptr[SWPLS_MAX_TXERS];
 	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 		ombio_ptr[i] = NULL;
 		ofile_init[i] = false;
@@ -875,7 +868,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 			status = count_record(opts->verbose, recs, istore, error);
 		}
 
-		if ((status == MB_SUCCESS) && (opts->print_ascii == true)) {
+		if (status == MB_SUCCESS && opts->print_ascii) {
 			status = print_latest_record(opts->verbose, istore, error);
 		}
 
@@ -889,25 +882,25 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 			int txno = 0;
 			int txidx = 0;
 
-			if ((status == MB_SUCCESS) && (opts->flip_rejected == true)) {
+			if (status == MB_SUCCESS && opts->flip_rejected) {
 				status = flip_sample_flags(opts->verbose, &(istore->sxp_ping), error);
 			}
 
-			if ((status == MB_SUCCESS) && (opts->remove_rejected == true)) {
+			if (status == MB_SUCCESS && opts->remove_rejected) {
 				status = remove_rejected_samps(opts->verbose, &(istore->sxp_ping), error);
 			}
 
-			if ((status == MB_SUCCESS) && (opts->copy_rawamp == true)) {
+			if (status == MB_SUCCESS && opts->copy_rawamp) {
 				status = copy_rawamp(opts->verbose, &(istore->sxp_ping), error);
 			}
 
-			if ((status == MB_SUCCESS) && (opts->write_output == true)) {
+			if (status == MB_SUCCESS && opts->write_output) {
 				/* select the output file based on the txer channel */
 				status = ping_txno(opts->verbose, istore, &txno, error);
-				txidx = (opts->split_txers == true) ? txno - 1 : 0;
+				txidx = opts->split_txers ? txno - 1 : 0;
 
 				/* initialize the output file if necessary */
-				if (ofile_init[txidx] == false) {
+				if (!ofile_init[txidx]) {
 					status = mb_write_init(opts->verbose, ofile[txidx], opts->format, &ombio_ptr[txidx], &obeams_bath,
 					                       &obeams_amp, &opixels_ss, error);
 					if (status != MB_SUCCESS) {
@@ -951,7 +944,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	/* close the files */
 	status = mb_close(opts->verbose, &imbio_ptr, error);
 	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
-		if (ofile_init[i] == true) {
+		if (ofile_init[i]) {
 			status = mb_close(opts->verbose, &ombio_ptr[i], error);
 			ofile_init[i] = false;
 		}
@@ -1123,30 +1116,21 @@ static int print_counts(int verbose, counts *recs, int *error) {
 
 /*----------------------------------------------------------------------*/
 int main(int argc, char **argv) {
+	options opts;
+	default_options(&opts);
+	mbdefaults mbdflts;
+	int status = mb_defaults(opts.verbose, &(mbdflts.format), &(mbdflts.pings_get), &(mbdflts.lonflip), mbdflts.bounds,
+	                     mbdflts.btime_i, mbdflts.etime_i, &(mbdflts.speedmin), &(mbdflts.timegap));
+
 	int error = MB_ERROR_NO_ERROR;
 
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
 	mb_path ifile;
 	mb_path dfile;
 
-	/* counting variables */
-	counts filerecs;
 	counts totrecs;
 
-	/* processing variables */
-	options opts;
-	mbdefaults mbdflts;
-
-	/* set default options */
-	default_options(&opts);
-
 	/* mb_mem_debug_on(opts.verbose, &error); */
-
-	/* get mbsystem default values */
-	int status = mb_defaults(opts.verbose, &(mbdflts.format), &(mbdflts.pings_get), &(mbdflts.lonflip), mbdflts.bounds,
-	                     mbdflts.btime_i, mbdflts.etime_i, &(mbdflts.speedmin), &(mbdflts.timegap));
 
 	if (status == MB_SUCCESS) {
 		parse_options(opts.verbose, argc, argv, &opts, &error);
@@ -1162,7 +1146,6 @@ int main(int argc, char **argv) {
 		print_mbdefaults(opts.verbose, &opts, &mbdflts, &error);
 	}
 
-	/* if help desired then print it and exit */
 	if (opts.help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
@@ -1179,6 +1162,9 @@ int main(int argc, char **argv) {
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = opts.format < 0;
 	bool read_data;
+
+	void *datalist;
+	int look_processed = MB_DATALIST_LOOK_UNSET;
 
 	/* open file list */
 	if (read_datalist) {
@@ -1204,6 +1190,8 @@ int main(int argc, char **argv) {
 
 	/* reset total record counter */
 	zero_counts(opts.verbose, &totrecs, &error);
+
+       	counts filerecs;
 
 	/* loop over files to be read */
 	while (read_data) {

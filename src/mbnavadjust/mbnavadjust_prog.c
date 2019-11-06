@@ -881,7 +881,6 @@ int mbnavadjust_import_data(char *path, int iformat) {
   int status = MB_SUCCESS;
   struct mbna_file *file;
   struct mbna_section *section;
-  int done;
   char filename[STRING_MAX];
   char dfile[STRING_MAX];
   double weight;
@@ -897,9 +896,9 @@ int mbnavadjust_import_data(char *path, int iformat) {
   }
 
   /* loop until all files read */
-  done = false;
+  bool done = false;
   firstfile = true;
-  while (done == false) {
+  while (!done) {
     if (iformat > 0) {
       status = mbnavadjust_import_file(path, iformat, firstfile);
       done = true;
@@ -907,7 +906,7 @@ int mbnavadjust_import_data(char *path, int iformat) {
     }
     else if (iformat == -1) {
       if ((status = mb_datalist_open(mbna_verbose, &datalist, path, MB_DATALIST_LOOK_NO, &error)) == MB_SUCCESS) {
-        while (done == false) {
+        while (!done) {
           if ((status = mb_datalist_read(mbna_verbose, datalist, filename, dfile, &form, &weight, &error)) ==
               MB_SUCCESS) {
             status = mbnavadjust_import_file(filename, form, firstfile);
@@ -10638,7 +10637,6 @@ int mbnavadjust_updategrid() {
   double factor;
   double zoffset;
   char ostring[STRING_MAX];
-  int done;
   int isection, isnav;
   double seconds;
   double lon_min, lon_max, lat_min, lat_max;
@@ -10770,8 +10768,8 @@ int mbnavadjust_updategrid() {
           isection = 0;
           section = &file->sections[isection];
           isnav = 0;
-          done = false;
-          while (done == false) {
+          bool done = false;
+          while (!done) {
             if ((result = fgets(buffer, BUFFER_MAX, nfp)) != buffer) {
               done = true;
             }
@@ -10942,7 +10940,6 @@ int mbnavadjust_applynav() {
   double mbp_rollbias;
   double mbp_rollbias_port;
   double mbp_rollbias_stbd;
-  int done;
   int isection, isnav;
   double seconds;
   int i;
@@ -11043,8 +11040,8 @@ int mbnavadjust_applynav() {
         isection = 0;
         section = &file->sections[isection];
         isnav = 0;
-        done = false;
-        while (done == false) {
+        bool done = false;
+        while (!done) {
           if ((result = fgets(buffer, BUFFER_MAX, nfp)) != buffer) {
             done = true;
           }
@@ -15271,9 +15268,6 @@ int mbnavadjust_open_visualization(int which_grid) {
 
   /* set sensitivity of widgets that require an mbview instance to be active */
   do_visualize_sensitivity();
-
-  /* all done */
-  return (status);
 
   /* print output debug statements */
   if (mbna_verbose >= 2) {

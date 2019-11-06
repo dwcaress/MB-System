@@ -183,8 +183,8 @@ int mbview_drawdata(size_t instance, int rez) {
 	int nxrange, nyrange;
 	int stride;
 	double secondary_value;
-	int use_histogram;
-	int make_histogram;
+	bool use_histogram;
+	bool make_histogram;
 	float *histogram;
 	int which_data;
 	int i, j, k, l, ikk, ill, kk, ll;
@@ -253,7 +253,7 @@ int mbview_drawdata(size_t instance, int rez) {
 		}
 		histogram = view->secondary_histogram;
 	}
-	if (make_histogram == true)
+	if (make_histogram)
 		mbview_make_histogram(view, data, which_data);
 	if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY && data->secondary_histogram == true &&
 	    view->secondary_histogram_set == false)
@@ -412,10 +412,10 @@ int mbview_drawdata(size_t instance, int rez) {
 					if (!(data->primary_stat_z[kk / 8] & statmask[kk % 8]))
 						mbview_zscalegridpoint(instance, kk);
 					if (!(data->primary_stat_color[kk / 8] & statmask[kk % 8])) {
-						if (use_histogram == false)
-							mbview_colorpoint(view, data, ikk, j, kk);
-						else
+						if (use_histogram)
 							mbview_colorpoint_histogram(view, data, histogram, ikk, j, kk);
+						else
+							mbview_colorpoint(view, data, ikk, j, kk);
 					}
 					glColor3f(data->primary_r[kk], data->primary_g[kk], data->primary_b[kk]);
 					glVertex3f(data->primary_x[kk], data->primary_y[kk], data->primary_z[kk]);
@@ -445,10 +445,10 @@ int mbview_drawdata(size_t instance, int rez) {
 					if (!(data->primary_stat_z[ll / 8] & statmask[ll % 8]))
 						mbview_zscalegridpoint(instance, ll);
 					if (!(data->primary_stat_color[ll / 8] & statmask[ll % 8])) {
-						if (use_histogram == false)
-							mbview_colorpoint(view, data, ill, j, ll);
-						else
+						if (use_histogram)
 							mbview_colorpoint_histogram(view, data, histogram, ill, j, ll);
+						else
+							mbview_colorpoint(view, data, ill, j, ll);
 					}
 					glColor3f(data->primary_r[ll], data->primary_g[ll], data->primary_b[ll]);
 					glVertex3f(data->primary_x[ll], data->primary_y[ll], data->primary_z[ll]);
@@ -472,18 +472,18 @@ int mbview_drawdata(size_t instance, int rez) {
 				on = false;
 				flip = false;
 			}
-	
+
 			/* check for pending event */
 			if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0) {
 				do_mbview_xevents();
 			}
-	
+
 			/* dump out of loop if plotting already done at a higher recursion */
 			if (view->plot_done == true)
 				i = data->primary_n_columns;
 		}
 	}
-	
+
 	else /* if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) */ {
 		for (i = data->viewbounds[0]; i < data->viewbounds[1] - stride; i += stride) {
 			on = false;
@@ -503,7 +503,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					ill = i;
 					ll = k;
 				}
-				if (data->secondary_sameas_primary == true)
+				if (data->secondary_sameas_primary)
 					secondary_value = data->secondary_data[kk];
 				else
 					mbview_getsecondaryvalue(view, data, ikk, j, &secondary_value);
@@ -520,10 +520,10 @@ int mbview_drawdata(size_t instance, int rez) {
 					if (!(data->primary_stat_z[kk / 8] & statmask[kk % 8]))
 						mbview_zscalegridpoint(instance, kk);
 					if (!(data->primary_stat_color[kk / 8] & statmask[kk % 8])) {
-						if (use_histogram == false)
-							mbview_colorpoint(view, data, ikk, j, kk);
-						else
+						if (use_histogram)
 							mbview_colorpoint_histogram(view, data, histogram, ikk, j, kk);
+						else
+							mbview_colorpoint(view, data, ikk, j, kk);
 					}
 					glColor3f(data->primary_r[kk], data->primary_g[kk], data->primary_b[kk]);
 					glVertex3f(data->primary_x[kk], data->primary_y[kk], data->primary_z[kk]);
@@ -541,7 +541,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					}
 					flip = false;
 				}
-				if (data->secondary_sameas_primary == true)
+				if (data->secondary_sameas_primary)
 					secondary_value = data->secondary_data[ll];
 				else
 					mbview_getsecondaryvalue(view, data, ill, j, &secondary_value);
@@ -558,10 +558,10 @@ int mbview_drawdata(size_t instance, int rez) {
 					if (!(data->primary_stat_z[ll / 8] & statmask[ll % 8]))
 						mbview_zscalegridpoint(instance, ll);
 					if (!(data->primary_stat_color[ll / 8] & statmask[ll % 8])) {
-						if (use_histogram == false)
-							mbview_colorpoint(view, data, ill, j, ll);
-						else
+						if (use_histogram)
 							mbview_colorpoint_histogram(view, data, histogram, ill, j, ll);
+						else
+							mbview_colorpoint(view, data, ill, j, ll);
 					}
 					glColor3f(data->primary_r[ll], data->primary_g[ll], data->primary_b[ll]);
 					glVertex3f(data->primary_x[ll], data->primary_y[ll], data->primary_z[ll]);
@@ -585,12 +585,12 @@ int mbview_drawdata(size_t instance, int rez) {
 				on = false;
 				flip = false;
 			}
-	
+
 			/* check for pending event */
 			if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0) {
 				do_mbview_xevents();
 			}
-	
+
 			/* dump out of loop if plotting already done at a higher recursion */
 			if (view->plot_done == true)
 				i = data->primary_n_columns;
@@ -1977,7 +1977,6 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 	int nsegpoint;
 	double xlon1, ylat1, xlon2, ylat2;
 	double segbearing, dsegbearing, segdist, dsegdist;
-	int done;
 	int i, j, icnt;
 
 	/* print starting debug statements */
@@ -2002,8 +2001,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	/* reset done flag */
-	done = false;
+	bool done = false;
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
@@ -2055,7 +2053,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 	}
 
 	/* now calculate points along great circle arc */
-	if (seg->nls_alloc > 1 && done == false) {
+	if (seg->nls_alloc > 1 && !done) {
 		/* put begin point in list */
 		seg->nls = 0;
 		seg->lspoints[seg->nls].xgrid = seg->endpoints[0].xgrid;
@@ -2143,7 +2141,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 	int istart, iend, iadd, jstart, jend, jadd;
 	int ni, nj;
 	double mm, bb;
-	int found, done, insert;
+	int found, insert;
 	double xgrid, ygrid, zdata;
 	int global;
 	double offset_factor;
@@ -2167,8 +2165,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	/* reset done flag */
-	done = false;
+	bool done = false;
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
@@ -2228,7 +2225,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 	}
 
 	/* if points needed and space allocated do it */
-	if (done == false && ni + nj > 0) {
+	if (!done && ni + nj > 0) {
 		/* put begin point in list */
 		seg->nls = 0;
 		seg->lspoints[seg->nls].xgrid = seg->endpoints[0].xgrid;
@@ -2469,7 +2466,6 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	int nsegpoint;
 	double xlon1, ylat1, xlon2, ylat2;
 	double segbearing, dsegbearing, segdist, dsegdist;
-	int done;
 	int i, j, icnt;
 
 	/* print starting debug statements */
@@ -2493,9 +2489,6 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-
-	/* reset done flag */
-	done = false;
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
@@ -2523,6 +2516,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	                               seg->endpoints[1].ylat, &segbearing, &segdist);
 	nsegpoint = MAX(((int)((segdist / dsegdist) + 1)), 2);
 
+	bool done = false;
 	/* no need to fill in if the segment doesn't cross grid boundaries */
 	if (nsegpoint <= 2) {
 		done = true;
@@ -2547,7 +2541,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	}
 
 	/* now calculate points along great circle arc */
-	if (seg->nls_alloc > 1 && done == false) {
+	if (seg->nls_alloc > 1 && !done) {
 		/* put begin point in list */
 		seg->nls = 0;
 		seg->lspoints[seg->nls].xgrid[instance] = seg->endpoints[0].xgrid[instance];
@@ -2636,7 +2630,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	int istart, iend, iadd, jstart, jend, jadd;
 	int ni, nj;
 	double mm, bb;
-	int found, done, insert;
+	int found, insert;
 	double xgrid, ygrid, zdata;
 	double xgridstart, xgridend, ygridstart, ygridend;
 	int global;
@@ -2660,9 +2654,6 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-
-	/* reset done flag */
-	done = false;
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
@@ -2705,6 +2696,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	fprintf(stderr,"mbview_drapesegmentw_grid: istart:%d iend:%d jstart:%d jend:%d\n",istart,iend,jstart,jend);*/
 
 	/* no need to fill in if the segment doesn't cross grid boundaries */
+	bool done = false;
 	if (istart == iend && jstart == jend) {
 		done = true;
 		seg->nls = 0;
@@ -2747,7 +2739,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	ni,nj,iadd,istart,iend,jadd,jstart,jend);*/
 
 	/* if points needed and space allocated do it */
-	if (done == false && ni + nj > 0) {
+	if (!done && ni + nj > 0) {
 		/* put begin point in list */
 		seg->nls = 0;
 		seg->lspoints[seg->nls].xgrid[instance] = seg->endpoints[0].xgrid[instance];

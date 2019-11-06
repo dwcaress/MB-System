@@ -19,7 +19,6 @@
  *
  * Author:	D. W. Caress
  * Date:	December 23, 2011
- *
  */
 
 #include "mbsys_hysweep.h"

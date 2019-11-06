@@ -340,7 +340,6 @@ int main(int argc, char **argv) {
   mb_path tmp_mb_path = "";
   int tmp_int;
   double tmp_double;
-  int done;
   int i, j, k;
 
   memset(project_inputbase_path, 0, sizeof(mb_path));
@@ -2966,10 +2965,10 @@ int main(int argc, char **argv) {
     }
 
     /* read and process the ties */
-    done = false;
+    bool done = false;
     num_import_tie = 0;
     num_import_globaltie = 0;
-    while (done == false) {
+    while (!done) {
       import_status = IMPORT_NONE;
 
       /* read the next line  */
@@ -3004,7 +3003,7 @@ int main(int argc, char **argv) {
       }
 
       /* apply the new global tie if it has been read */
-      if (done == false && import_status == IMPORT_GLOBALTIE) {
+      if (!done && import_status == IMPORT_GLOBALTIE) {
         fprintf(stderr, "\nAttempting to import global tie from list: \n\t%s\n%1d %16.6f %13.8f %13.8f %13.8f\n",
                 import_globaltie_file_path, import_globaltie_status, import_globaltie_snav_time_d,
                 import_globaltie_offset_x_m, import_globaltie_offset_y_m, import_globaltie_offset_z_m);
@@ -3088,7 +3087,7 @@ int main(int argc, char **argv) {
       }
 
       /* apply the new tie if it has been read */
-      if (done == false && import_status == IMPORT_TIE) {
+      if (!done && import_status == IMPORT_TIE) {
         fprintf(stderr, "\nAttempting to import tie from list: \n\t%s\n\t%s\n%1d %16.6f %16.6f %13.8f %13.8f %13.8f\n",
                 import_tie_file_1_path, import_tie_file_2_path, import_tie_status, import_tie_snav_1_time_d,
                 import_tie_snav_2_time_d, import_tie_offset_x_m, import_tie_offset_y_m, import_tie_offset_z_m);

@@ -31,7 +31,7 @@
  * the seletion of the appropriate SVP for each survey profile is still
  * missing in MB-System.
  *
- * After finding the appropriate svp for each profile based on the choosed
+ * After finding the appropriate svp for each profile based on the chosen
  * method, the results are copied to a txt file that shows each survey
  * profile with the corresponding SVP. the tool also calls mbset automatically
  * so no need to assign SVP to the data. it is done automatically.
@@ -41,7 +41,7 @@
  *
  * 1. Nearest SVP in position: the middle position of each survey profile
  *    is calculated and the geodesics (shortest distance on the ellipsoid)
- *    to all SVPs are calcualted. and the SVP with the shortest distance is
+ *    to all SVPs are calculated. and the SVP with the shortest distance is
  *    chosen. when the middle position of the survey profile is calculated
  *    there is an option to check for 0 lat 0 long wrong values. if it is
  *    found at the starting the geodesic will be calculated to the end of
@@ -199,7 +199,7 @@
  * that are created from mbdatalist command */
 
 struct info_holder {
-	int flag;
+	int flag;  // TODO(schwehr): Make this an enum
 	char *file_name;
 	long double s_lat;
 	long double s_lon;
@@ -229,8 +229,8 @@ typedef struct svp_holder svp;
 
 
 /* global variables */
-int counter_i_i2 = 0;
-int p_flag = 0;
+// int counter_i_i2 = 0;
+int p_flag = 0;  // TODO(schwehr): Make this an enum
 int p_3_time = 10;
 int p_4_range = 10000;
 int p_4_flage = 0;
@@ -267,15 +267,14 @@ static const char usage_message[] =
 
 /* ---------------------------------------------------------------- */
 /* Is leap old */
-int Is_Leap(int year) {
+bool Is_Leap(int year) {
 	if (year % 400 == 0)
-		return 0;
+		return false;
 	else if (year % 100 == 0)
-		return 1;
+		return true;
 	else if (year % 4 == 0)
-		return 0;
-	else
-		return 1;
+		return false;
+	return true;
 }
 /* ---------------------------------------------------------------- */
 /*
@@ -300,7 +299,7 @@ int Is_Leap(int year) {
 /* ---------------------------------------------------------------- */
 void JulianToGregorian(int year, int yearDay, int *year_tm, int *month, int *wDay) {
 	*year_tm = year - 1900;
-	if (Is_Leap(year) == 0) {
+	if (!Is_Leap(year)) {
 		if (yearDay > 335) {
 			*month = 11;
 			*wDay = yearDay - 335;
@@ -492,12 +491,12 @@ void GregorianToJulian(int year, int month, int day, int *yearDay) {
 /* calculate the average position of two points */
 /* http://www.movable-type.co.uk/scripts/latlong.html */
 void mid_point(long double lat1, long double lon1, long double lat2, long double lon2, long double *lat3, long double *lon3) {
-	double dLon = DTR * ((lon2) - (lon1));
-	double lat1_rad = DTR * ((lat1));
-	double lat2_rad = DTR * ((lat2));
-	double lon1_rad = DTR * ((lon1));
-	double bx = cos(lat2_rad) * cos(dLon);
-	double by = cos(lat2_rad) * sin(dLon);
+	const double dLon = DTR * ((lon2) - (lon1));
+	const double lat1_rad = DTR * ((lat1));
+	const double lat2_rad = DTR * ((lat2));
+	const double lon1_rad = DTR * ((lon1));
+	const double bx = cos(lat2_rad) * cos(dLon);
+	const double by = cos(lat2_rad) * sin(dLon);
 	*(lat3) = atan2(sin(lat1_rad) + sin(lat2_rad), sqrt((((cos(lat1_rad)) + bx) * ((cos(lat1_rad)) + bx)) + (by * by))) * RTD;
 	*(lon3) = (lon1_rad + atan2(by, (cos(lat1_rad) + bx))) * RTD;
 }
@@ -506,15 +505,11 @@ void mid_point(long double lat1, long double lon1, long double lat2, long double
  * it takes a pointer to the inf_struct and the file_name (file_name.inf) to read information from
  */
 void fill_struct_inf(inf *inf_hold, char *holder) {
-	int mon, year;
-	double s_sec;
 	inf_hold->flag = 0;
-	FILE *fileName;
 	inf_hold->file_name = holder;
-	struct tm *ptr;
 
 	/* reading relative inf file */
-	fileName = fopen(inf_hold->file_name, "r");
+	FILE *fileName = fopen(inf_hold->file_name, "r");
 	if (fileName == NULL) {
 		printf("%s could not be opened Please check the datalist files\n", inf_hold->file_name);
 		exit(1);
@@ -528,6 +523,9 @@ void fill_struct_inf(inf *inf_hold, char *holder) {
 	/* parsing date and time*/
 	fgets(buffer, sizeof buffer, fileName);
 
+	int mon;
+	int year;
+	double s_sec;
 	sscanf(buffer, "%*s %d %d %d %i:%i:%lf %*s %*s", &mon, &inf_hold->s_datum_time.tm_mday, &year,
 	       &inf_hold->s_datum_time.tm_hour, &inf_hold->s_datum_time.tm_min, &s_sec);
 	inf_hold->s_datum_time.tm_mon = mon - 1;
@@ -537,7 +535,7 @@ void fill_struct_inf(inf *inf_hold, char *holder) {
 	GregorianToJulian(inf_hold->s_datum_time.tm_year, inf_hold->s_datum_time.tm_mon, inf_hold->s_datum_time.tm_mday,
 	                  &inf_hold->s_datum_time.tm_yday);
 
-	ptr = &inf_hold->s_datum_time;
+	struct tm *ptr = &inf_hold->s_datum_time;
 	inf_hold->s_Time = mktime(ptr);
 
 	/* Lon and Lat processing*/
@@ -609,7 +607,18 @@ double convert_decimal(int deg, int min, int sec) {
 
 /* ------------------------------------------------------------------- */
 void fill_struct_svp(svp *svp_hold, char *holder) {
-	int yearDay, month, year;
+	svp_hold->file_name = holder;
+
+	/* reading relative svp file */
+	FILE *fileName = fopen(svp_hold->file_name, "r");
+	if (fileName == NULL) {
+		printf("%s could not be opend\n", svp_hold->file_name);
+		exit(1);
+	}
+
+	int yearDay;
+	int month;
+	int year;
 	double seconds;
 	int s_lat_min = 0;
 	int s_lat_deg = 0;
@@ -617,8 +626,6 @@ void fill_struct_svp(svp *svp_hold, char *holder) {
 	int s_lon_min = 0;
 	int s_lon_deg = 0;
 	int s_lon_sec = 0;
-	FILE *fileName;
-	svp_hold->file_name = holder;
 	char caris_str[] = "Section";
 	char mb1_str[] = "## MB-SVP";
 	char mb2_str[] = "# MB-SVP";
@@ -626,16 +633,7 @@ void fill_struct_svp(svp *svp_hold, char *holder) {
 	char *ptr_mb1 = NULL;
 	char *ptr_mb2 = NULL;
 
-	/* reading relative svp file */
-	fileName = fopen(svp_hold->file_name, "r");
-
-	if (fileName == NULL) {
-		printf("%s could not be opend\n", svp_hold->file_name);
-		exit(1);
-	}
-
 	/* reaching start of data */
-
 	while ((fgets(buffer, sizeof buffer, fileName)) != NULL) {
 		ptr_caris = strstr(buffer, caris_str);
 		ptr_mb1 = strstr(buffer, mb1_str);
@@ -700,7 +698,6 @@ void fill_struct_svp(svp *svp_hold, char *holder) {
 /* --------------------------------------------------------------- */
 /*copy string and handle possible buffer overlap*/
 char *my_strcpy(char *a, char *b) {
-
 	if (a == NULL || b == NULL) {
 		return NULL;
 	}
@@ -719,17 +716,13 @@ void trim_newline(char string[]) {
 }
 /*---------------------------------------------------------------------*/
 int read_recursive2(char *fname) {
-	//char original[strlen(fname)];		This no valid C  JL
 	char original[1024] = {""};
 	my_strcpy(original, fname);
 	const char *result = fname;
-	char *ret;
 	int counter = 0;
-	// int spaceIndex = 0;
 	trim_newline(fname);
 	strcat(fname, ".inf");
-	FILE *dataFile;
-	dataFile = fopen(fname, "r");
+	FILE *dataFile = fopen(fname, "r");
 	if (dataFile != NULL) {
 		my_strcpy(holder[surveyLines_total], fname);
 		counter += 1;
@@ -737,86 +730,75 @@ int read_recursive2(char *fname) {
 		fclose(dataFile);
 		return counter;
 	}
-	else {
-		ret = strchr(result, ' ');
-		if (ret == NULL) {
-			//char file2[strlen(original)];		NOT VALID C  JL
-			char file2[1024] = {""};
-			my_strcpy(file2, original);
-			// char *file2= original;
-			trim_newline(file2);
-			FILE *dataFile2;
-			dataFile2 = fopen(file2, "r");
-			if (dataFile2 == NULL) {
-				printf("Could not open the file %s", file2);
-				return counter;
-			}
-			else {
-				// char *result2;
-				while ((fgets(dBuffer, sizeof dBuffer, dataFile2)) != NULL) {
-					//char strHolder[strlen(original)];		INVALID JL
-					char strHolder[1024];
-					my_strcpy(strHolder, original);
-					while (strHolder[strlen(strHolder) - 1] != '/')
-						strHolder[strlen(strHolder) - 1] = 0;
-					strcat(strHolder, dBuffer);
-					int tmp = read_recursive2(strHolder);
-					if (tmp == 0) {
-						tmp = read_recursive2(dBuffer);
-					}
-					// counter +=tmp;
-				}
-				fclose(dataFile2);
-			}
+
+	char *ret = strchr(result, ' ');
+	if (ret == NULL) {
+		char file2[1024] = {""};
+		my_strcpy(file2, original);
+		trim_newline(file2);
+		FILE *dataFile2 = fopen(file2, "r");
+		if (dataFile2 == NULL) {
+			printf("Could not open the file %s", file2);
+			return counter;
 		}
-		else {
+		while ((fgets(dBuffer, sizeof dBuffer, dataFile2)) != NULL) {
 			//char strHolder[strlen(original)];		INVALID JL
 			char strHolder[1024];
 			my_strcpy(strHolder, original);
-			while (strHolder[strlen(strHolder) - 1] != ' ')
+			while (strHolder[strlen(strHolder) - 1] != '/')
 				strHolder[strlen(strHolder) - 1] = 0;
-			strHolder[strlen(strHolder) - 1] = 0;
-			int tmp2 = read_recursive2(strHolder);
-			counter += tmp2;
+			strcat(strHolder, dBuffer);
+			int tmp = read_recursive2(strHolder);
+			if (tmp == 0) {
+				tmp = read_recursive2(dBuffer);
+			}
+			// counter +=tmp;
 		}
+		fclose(dataFile2);
 	}
+	else {
+		char strHolder[1024];
+		my_strcpy(strHolder, original);
+		while (strHolder[strlen(strHolder) - 1] != ' ')
+			strHolder[strlen(strHolder) - 1] = 0;
+		strHolder[strlen(strHolder) - 1] = 0;
+		const int tmp2 = read_recursive2(strHolder);
+		counter += tmp2;
+	}
+
 	return counter;
 }
 /*---------------------------------------------------------------------*/
 int read_recursive(char *fileName) {
 	trim_newline(fileName);
-	int counter = 0;
-	char str[BUFSIZ];
-	FILE *dataFile;
-	char caris_str[] = "Section";
-	char mb1_str[] = "## MB-SVP";
-	char mb2_str[] = "MB-SVP";
-	char *ptr_caris = NULL;
-	char *ptr_mb1 = NULL;
-	char *ptr_mb2 = NULL;
-	dataFile = fopen(fileName, "r");
+	FILE *dataFile = fopen(fileName, "r");
 	if (dataFile == NULL) {
 		printf("Could not open the file %s", fileName);
+		return 0;
 	}
-	else {
-		fgets(str, sizeof str, dataFile);
-		trim_newline(dBuffer);
-		// initialize the end condition for the svps
-		ptr_caris = strstr(str, caris_str);
-		ptr_mb1 = strstr(str, mb1_str);
-		ptr_mb2 = strstr(str, mb2_str);
 
-		// initialize the end condition for the swaths
+	char str[BUFSIZ];
+	fgets(str, sizeof str, dataFile);
+	trim_newline(dBuffer);
+	// initialize the end condition for the svps
+	const char caris_str[] = "Section";
+	const char *ptr_caris = strstr(str, caris_str);
+	const char mb1_str[] = "## MB-SVP";
+	const char *ptr_mb1 = strstr(str, mb1_str);
+	const char mb2_str[] = "MB-SVP";
+	const char *ptr_mb2 = strstr(str, mb2_str);
 
-		if ((ptr_caris != NULL) || (ptr_mb1 != NULL) || (ptr_mb2 != NULL)) {
-			my_strcpy(svps[svp_total], fileName);
-			counter += 1;
-		}
-		else {
-			read_recursive(str);
-		}
-		fclose(dataFile);
+	// initialize the end condition for the swaths
+
+	int counter = 0;
+	if ((ptr_caris != NULL) || (ptr_mb1 != NULL) || (ptr_mb2 != NULL)) {
+		my_strcpy(svps[svp_total], fileName);
+		counter += 1;
+	} else {
+		read_recursive(str);
 	}
+	fclose(dataFile);
+
 	return counter;
 }
 /* ---------------------------------------------------------------- */
@@ -827,7 +809,7 @@ void print_inf(inf *cd) {
 	printf("file_name: %s\n", cd->file_name);
 	puts("starting Date and time");
 	printf("\n%s\n", asctime(temp));
-	temp = NULL;
+
 	temp = &cd->e_datum_time;
 	puts("ending Date and time");
 	printf("\n%s\n", asctime(temp));
@@ -841,7 +823,6 @@ void print_inf(inf *cd) {
 	printf("ave_lat: %Lf\t", cd->ave_lat);
 	printf("ave_lon: %Lf\n", cd->ave_lon);
 	puts("==================================================");
-	temp = NULL;
 }
 /* --------------------------------------------------------------- */
 /* print the svp information on the screen */
@@ -851,11 +832,6 @@ void print_svp(svp *cd) {
 	printf("file_name: %s\n", cd->file_name);
 	puts("Date and time");
 	printf("\n%s\n", asctime(temp));
-	/*printf("%d-",cd->svp_datum_time.tm_year);
-	 printf("%d\t",cd->svp_datum_time.tm_yday);
-	 printf("%d:",cd->svp_datum_time.tm_hour);
-	 printf("%d:",cd->svp_datum_time.tm_min);
-	 printf("%d\n",cd->svp_datum_time.tm_sec);*/
 	puts("position");
 	printf("lat: %Lf\t", cd->s_lat);
 	printf("lon: %Lf\n", cd->s_lon);
@@ -873,41 +849,26 @@ void pause_screen() {
 }
 /* ------------------------------------------------------------------- */
 void read_list(char *list, char *list_2) {
-	int size = 0;
-	int i = 0;
-	int i2 = 0;
-	/* int counter_i2 = 0; */
-	int j = 0;
-	FILE *fDatalist;
-	FILE *fSvp;
-	FILE *fresult;
-	inf *inf_hold = NULL;
-	svp *svp_hold = NULL;
-	int n = 0;
-	struct geod_geodesic g;
-	double azi1, azi2;
-	int shellstatus;
-	int count_size2;
-
 	atexit(pause_screen); /* pause the screen */
 
 	/* open datalist.mb-1 for names of the files */
-	fDatalist = fopen(list, "r");
-	fSvp = fopen(list_2, "r");
+	FILE *fDatalist = fopen(list, "r");
 	if (fDatalist == NULL) {
 		printf("%s Could not be found", list);
 		exit(1);
 	}
 
+	FILE *fSvp = fopen(list_2, "r");
 	if (fSvp == NULL) {
 		printf("%s Could not be found", list_2);
 		exit(1);
 	}
-	fresult = fopen("result.txt", "w+");
+	FILE *fresult = fopen("result.txt", "w+");
 	if (fresult == NULL) {
 		printf("result.txt could not be found");
 		exit(1);
 	}
+	int count_size2;
 	/* ------------------------------ */
 	while ((fgets(dBuffer, sizeof dBuffer, fDatalist)) != NULL) {
 		count_size2 = read_recursive2(dBuffer);
@@ -918,21 +879,19 @@ void read_list(char *list, char *list_2) {
 	/* fill size */
 
 	/* Allocate memory for inf_struct */
-	inf_hold = malloc((surveyLines_total) * sizeof(inf));
+	inf *inf_hold = malloc((surveyLines_total) * sizeof(inf));
 	if (inf_hold == NULL) {
 		printf("no memory for the process end of process");
 		exit(1);
 	}
-	size = surveyLines_total;
-	for (i = 0; i < surveyLines_total; i++) {
+	int size = surveyLines_total;
+	for (int i = 0; i < surveyLines_total; i++) {
 		fill_struct_inf(&inf_hold[i], holder[i]);
 		if (verbose == 1)
 			print_inf(&inf_hold[i]);
 	}
 
 	/* reset for svp_hold */
-	i = 0;
-	i2 = 0;
 	/* ------------------------ */
 
 	while ((fgets(sdBuffer, sizeof sdBuffer, fSvp) != NULL)) {
@@ -945,7 +904,7 @@ void read_list(char *list, char *list_2) {
 	size_2 = svp_total;
 
 	/* Allocate memory for svp_struct */
-	svp_hold = malloc((svp_total) * sizeof(svp));
+	svp *svp_hold = malloc((svp_total) * sizeof(svp));
 	if (svp_hold == NULL) {
 		printf("no memory for the process end of process");
 		exit(1);
@@ -959,7 +918,7 @@ void read_list(char *list, char *list_2) {
 	int min_hold[size][size_2];
 	int day_hold[size][size_2];
 #endif
-	for (i = 0; i < size_2; i++) {
+	for (int i = 0; i < size_2; i++) {
 		fill_struct_svp(&svp_hold[i], svps[i]);
 		if (verbose == 1)
 			print_svp(&svp_hold[i]);
@@ -988,9 +947,13 @@ void read_list(char *list, char *list_2) {
 			       "specified range the SVP with the nearest month to the profile regardless of the year. This is the seasonal "
 			       "interpretation \n");
 	}
+	int n = 0;
+	struct geod_geodesic g;
+	double azi1, azi2;
+
 	geod_init(&g, A_, F_);
 	size = surveyLines_total;
-	for (i = 0; i < size; i++) {
+	for (int i = 0; i < size; i++) {
 #ifdef _WIN32
 		double dist[100][100];				// Have no idea if it's enough JL
 		double time_hold[100][100];
@@ -1008,9 +971,7 @@ void read_list(char *list, char *list_2) {
 				if (verbose == 1)
 					printf("\nCalculating the distances to all svp profiles for %s\n", inf_hold[i].file_name);
 				double temp_dist = 0;
-				for (j = 0; j < size_2; j++) {
-					// print_inf(&inf_hold[i]);
-					// print_svp(&svp_hold[j]);
+				for (int j = 0; j < size_2; j++) {
 					geod_inverse(&g, inf_hold[i].ave_lat, inf_hold[i].ave_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
 					             &azi1, &azi2);
 					if (j == 0) {
@@ -1046,7 +1007,7 @@ void read_list(char *list, char *list_2) {
 				strcat(all_in_sys, " -PSVPFILE:");
 				strcat(all_in_sys, svp_hold[n].file_name);
 				printf("%s\n", all_in_sys);
-				shellstatus = system(all_in_sys);
+				/* int shellstatus = */ system(all_in_sys);
 				break;
 			case 1:
 				if (verbose == 1)
@@ -1056,7 +1017,7 @@ void read_list(char *list, char *list_2) {
 					printf("\nThe file %s has no navigation information at the start position and the svp profile will be "
 					       "assigned to the end point of the file\n",
 					       inf_hold[i].file_name);
-				for (j = 0; j < size_2; j++) {
+				for (int j = 0; j < size_2; j++) {
 					geod_inverse(&g, inf_hold[i].s_lat, inf_hold[i].s_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
 					             &azi1, &azi2);
 					if (j == 0) {
@@ -1092,7 +1053,7 @@ void read_list(char *list, char *list_2) {
 				strcat(all_in_sys, " -P ");
 				strcat(all_in_sys, svp_hold[n].file_name);
 				printf("%s\n", all_in_sys);
-				shellstatus = system(all_in_sys);
+				/* int shellstatus = */ system(all_in_sys);
 				break;
 			case 2:
 				if (verbose == 1)
@@ -1102,7 +1063,7 @@ void read_list(char *list, char *list_2) {
 					printf("\nThe file %s has no navigation information at the end position and the svp profile will be assigned "
 					       "to the start point of the file\n",
 					       inf_hold[i].file_name);
-				for (j = 0; j < size_2; j++) {
+				for (int j = 0; j < size_2; j++) {
 					geod_inverse(&g, inf_hold[i].e_lat, inf_hold[i].e_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
 					             &azi1, &azi2);
 					if (j == 0) {
@@ -1136,7 +1097,7 @@ void read_list(char *list, char *list_2) {
 				strcat(all_in_sys, " -P ");
 				strcat(all_in_sys, svp_hold[n].file_name);
 				printf("%s\n", all_in_sys);
-				shellstatus = system(all_in_sys);
+				/* int shellstatus = */ system(all_in_sys);
 				fprintf(fresult, "%s\n", "=============================================================");
 				break;
 			case 3:
@@ -1162,7 +1123,7 @@ void read_list(char *list, char *list_2) {
 				if (verbose == 1)
 					printf("\nCalculating the nearest svp in time for for %s\n", inf_hold[i].file_name);
 				double temp_time = 0;
-				for (j = 0; j < size_2; j++) {
+				for (int j = 0; j < size_2; j++) {
 					time_hold[0][j] = fabs(difftime(inf_hold[i].s_Time, svp_hold[j].svp_Time));
 					if (j == 0) {
 						temp_time = time_hold[0][j];
@@ -1197,7 +1158,7 @@ void read_list(char *list, char *list_2) {
 				strcat(all_in_sys, " -PSVPFILE:");
 				strcat(all_in_sys, svp_hold[n].file_name);
 				printf("%s\n", all_in_sys);
-				shellstatus = system(all_in_sys);
+				/* int shellstatus = */ system(all_in_sys);
 			}
 			/************calculate the nearest in position within time***************************/
 			if (p_flag == 2) {
@@ -1211,7 +1172,7 @@ void read_list(char *list, char *list_2) {
 				int count = 0;
 				int n_pos_time = 0;
 				int n_pos = 0;
-				for (j = 0; j < size_2; j++) {
+				for (int j = 0; j < size_2; j++) {
 					time_hold[0][j] = fabs(difftime(inf_hold[i].s_Time, svp_hold[j].svp_Time)) - (p_3_time * 3600);
 
 					/* dist[i][j] = distVincenty(inf_hold[i].ave_lat, inf_hold[i].ave_lon,
@@ -1277,7 +1238,7 @@ void read_list(char *list, char *list_2) {
 				strcat(all_in_sys, " -PSVPFILE:");
 				strcat(all_in_sys, svp_hold[n].file_name);
 				printf("%s\n", all_in_sys);
-				shellstatus = system(all_in_sys);
+				/* int shellstatus = */ system(all_in_sys);
 			}
 			if (p_flag == 3) {
 				// SVP nearest in time within range
@@ -1304,7 +1265,7 @@ void read_list(char *list, char *list_2) {
 				int n_pos_seasn = 0;
 				int n_pos_noSeason = 0;
 
-				for (j = 0; j < size_2; j++) {
+				for (int j = 0; j < size_2; j++) {
 					// processing time differences
 					day_hold[0][j] = abs(inf_hold[i].s_datum_time.tm_yday - svp_hold[j].svp_datum_time.tm_yday);
 					hour_hold[0][j] = abs(inf_hold[i].s_datum_time.tm_hour - svp_hold[j].svp_datum_time.tm_hour);
@@ -1316,7 +1277,7 @@ void read_list(char *list, char *list_2) {
 					dist[0][j] -= p_4_range;
 					// if the SVP is within the range
 					puts("==================================================");
-					printf("year day diffrence %d is : %d\n", j, day_hold[0][j]);
+					printf("year day difference %d is : %d\n", j, day_hold[0][j]);
 					printf("hour difference %d is : %d\n", j, hour_hold[0][j]);
 					printf("minute difference %d is : %d\n", j, min_hold[0][j]);
 					printf("Time difference %d is : %lf\n", j, time_hold[0][j]);
@@ -1456,18 +1417,16 @@ void read_list(char *list, char *list_2) {
 				fprintf(fresult, "%s\n", svp_hold[n].file_name);
 				fprintf(fresult, "%s\n", "=============================================================");
 				printf("Building the parameters to call mbset\n");
-				/* printf("%s\n", all_in_sys); */
 				strcat(all_in_sys, " -I ");
 				inf_hold[i].file_name[strlen(inf_hold[i].file_name) - 1] = '\0';
 				inf_hold[i].file_name[strlen(inf_hold[i].file_name) - 1] = '\0';
 				inf_hold[i].file_name[strlen(inf_hold[i].file_name) - 1] = '\0';
 				inf_hold[i].file_name[strlen(inf_hold[i].file_name) - 1] = '\0';
 				strcat(all_in_sys, inf_hold[i].file_name);
-				/* printf("%s\n", all_in_sys); */
 				strcat(all_in_sys, " -PSVPFILE:");
 				strcat(all_in_sys, svp_hold[n].file_name);
 				printf("%s\n", all_in_sys);
-				shellstatus = system(all_in_sys);
+				/* int shellstatus = */ system(all_in_sys);
 			}
 		}
 	}
@@ -1484,9 +1443,6 @@ int main(int argc, char **argv) {
 
 	char datalist[BUFSIZ];
 	char svplist[BUFSIZ];
-
-	int n;
-	int n1, n2, n3;
 
 	my_strcpy(datalist, "datalist.mb-1");
 	my_strcpy(svplist, "svplist.mb-1");
@@ -1511,7 +1467,11 @@ int main(int argc, char **argv) {
 				break;
 			case 'P':
 			case 'p':
-				n = sscanf(optarg, "%d/%d/%d", &n1, &n2, &n3);
+			{
+				int n1;
+				int n2;
+				int n3;
+				const int n = sscanf(optarg, "%d/%d/%d", &n1, &n2, &n3);
 				n_p2 = n;
 				/* printf("\nthis is n %d \n", n); */
 				if ((n1 != 0) && (n1 != 1) && (n1 != 2) && (n1 != 3)) {
@@ -1564,6 +1524,7 @@ int main(int argc, char **argv) {
 					}
 				}
 				break;
+			}
 			case 'S':
 			case 's':
 				sscanf(optarg, "%s", svplist);
@@ -1609,7 +1570,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* do the work */
 	read_list(datalist, svplist);
 
 	const int status = MB_SUCCESS;

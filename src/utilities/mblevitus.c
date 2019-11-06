@@ -51,11 +51,12 @@
 #include <windows.h>
 #endif
 
-#define MBLEVITUS_NO_DATA -1000000000.0
-#define NDEPTH_MAX 46
-#define NLEVITUS_MAX 33
+const double MBLEVITUS_NO_DATA = -1000000000.0;;
+const int NDEPTH_MAX = 46;
+const int NLEVITUS_MAX = 33;
 
-static const float depth[NDEPTH_MAX] =
+// TODO(schwehr): warning: excess elements in array initializer
+const float depth[48 /* NDEPTH_MAX + 2 */] =
     {0.0,    10.0,    20.0,    30.0,    50.0,    75.0,   100.0,  125.0,
      150.0,  200.0,   250.0,   300.0,   400.0,   500.0,  600.0,  700.0,
      800.0,  900.0,   1000.0,  1100.0,  1200.0,  1300.0, 1400.0, 1500.0,

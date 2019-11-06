@@ -220,7 +220,7 @@ int mbeditviz_init(int argc, char **argv) {
 			break;
 		case 'G':
 		case 'g':
-			mbev_grid_algorithm = MBEV_GRID_ALGORITH_SIMPLE;
+			mbev_grid_algorithm = MBEV_GRID_ALGORITHM_SIMPLEMEAN;
 			flag++;
 			break;
 		case 'I':
@@ -337,7 +337,6 @@ int mbeditviz_get_format(char *file, int *form) {
 /*--------------------------------------------------------------------*/
 int mbeditviz_open_data(char *path, int format) {
 	/* local variables */
-	int done;
 	double weight;
 	int filestatus;
 	char fileraw[MB_PATH_MAXLINE];
@@ -357,15 +356,15 @@ int mbeditviz_open_data(char *path, int format) {
 		mb_get_format(mbev_verbose, path, NULL, &format, &mbev_error);
 
 	/* loop until all inf files are read */
-	done = false;
-	while (done == false) {
+	bool done = false;
+	while (!done) {
 		if (format > 0) {
 			mbev_status = mbeditviz_import_file(path, format);
 			done = true;
 		}
 		else if (format == -1) {
 			if ((mbev_status = mb_datalist_open(mbev_verbose, &datalist, path, MB_DATALIST_LOOK_NO, &mbev_error)) == MB_SUCCESS) {
-				while (done == false) {
+				while (!done) {
 					if ((mbev_status = mb_datalist_read2(mbev_verbose, datalist, &filestatus, fileraw, fileprocessed, dfile,
 					                                     &format, &weight, &mbev_error)) == MB_SUCCESS) {
 						mbev_status = mbeditviz_import_file(fileraw, format);
@@ -2719,7 +2718,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 	/* proceed if beam in grid */
 	if (i >= 0 && i < mbev_grid.n_columns && j >= 0 && j < mbev_grid.n_rows) {
 		/* simple gridding mode */
-		if (file->topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM || mbev_grid_algorithm == MBEV_GRID_ALGORITH_SIMPLE) {
+		if (file->topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM || mbev_grid_algorithm == MBEV_GRID_ALGORITHM_SIMPLEMEAN) {
 			/* get location in grid arrays */
 			kk = i * mbev_grid.n_rows + j;
 
@@ -3741,9 +3740,7 @@ int mbeditviz_selectnav(size_t instance) {
 		dy = ymax - ymin;
 		mbev_selected.xorigin = 0.5 * (xmin + xmax);
 		mbev_selected.yorigin = 0.5 * (ymin + ymax);
-		;
 		mbev_selected.zorigin = 0.5 * (zmin + zmax);
-		;
 		mbev_selected.scale = 2.0 / sqrt(dy * dy + dx * dx);
 		mbev_selected.zscale = mbev_selected.scale;
 		mbev_selected.xmin = -0.5 * dx;

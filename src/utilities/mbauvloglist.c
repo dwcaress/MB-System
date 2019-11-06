@@ -33,36 +33,36 @@
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_status.h"
+;
+const int NFIELDSMAX = 512;
+const int MAX_OPTIONS = 512;
+const int TYPE_UNKNOWN = 0;
+const int TYPE_TIMETAG = 1;
+const int TYPE_INTEGER = 2;
+const int TYPE_DOUBLE = 3;
+const int TYPE_ANGLE = 4;
 
-#define NFIELDSMAX 512
-#define MAX_OPTIONS 512
-#define TYPE_UNKNOWN 0
-#define TYPE_TIMETAG 1
-#define TYPE_INTEGER 2
-#define TYPE_DOUBLE 3
-#define TYPE_ANGLE 4
+const int INDEX_ZERO = -1;
+const int INDEX_MERGE_LON = -2;
+const int INDEX_MERGE_LAT = -3;
+const int INDEX_MERGE_HEADING = -4;
+const int INDEX_MERGE_SPEED = -5;
+const int INDEX_MERGE_SENSORDEPTH = -6;
+const int INDEX_MERGE_ROLL = -7;
+const int INDEX_MERGE_PITCH = -8;
+const int INDEX_MERGE_HEAVE = -9;
+const int INDEX_CALC_CONDUCTIVITY = -10;
+const int INDEX_CALC_TEMPERATURE = -11;
+const int INDEX_CALC_PRESSURE = -12;
+const int INDEX_CALC_SALINITY = -13;
+const int INDEX_CALC_SOUNDSPEED = -14;
+const int INDEX_CALC_POTENTIALTEMP = -15;
+const int INDEX_CALC_DENSITY = -16;
+const int INDEX_CALC_KTIME = -17;
 
-#define INDEX_ZERO -1
-#define INDEX_MERGE_LON -2
-#define INDEX_MERGE_LAT -3
-#define INDEX_MERGE_HEADING -4
-#define INDEX_MERGE_SPEED -5
-#define INDEX_MERGE_SENSORDEPTH -6
-#define INDEX_MERGE_ROLL -7
-#define INDEX_MERGE_PITCH -8
-#define INDEX_MERGE_HEAVE -9
-#define INDEX_CALC_CONDUCTIVITY -10
-#define INDEX_CALC_TEMPERATURE -11
-#define INDEX_CALC_PRESSURE -12
-#define INDEX_CALC_SALINITY -13
-#define INDEX_CALC_SOUNDSPEED -14
-#define INDEX_CALC_POTENTIALTEMP -15
-#define INDEX_CALC_DENSITY -16
-#define INDEX_CALC_KTIME -17
-
-#define OUTPUT_MODE_TAB 0
-#define OUTPUT_MODE_CSV 1
-#define OUTPUT_MODE_BINARY 2
+const int OUTPUT_MODE_TAB = 0;
+const int OUTPUT_MODE_CSV = 1;
+const int OUTPUT_MODE_BINARY = 2;
 
 struct ctd_calibration_struct {
 		double pa0;
@@ -91,6 +91,24 @@ struct ctd_calibration_struct {
 		double ctcor;
 		};
 
+struct field {
+	int type;
+	int size;
+	int index;
+	char name[MB_PATH_MAXLINE];
+	char format[MB_PATH_MAXLINE];
+	char description[MB_PATH_MAXLINE];
+	char units[MB_PATH_MAXLINE];
+	double scale;
+};
+
+struct printfield {
+	char name[MB_PATH_MAXLINE];
+	int index;
+	bool formatset;
+	char format[MB_PATH_MAXLINE];
+};
+
 static const char program_name[] = "MBauvloglist";
 static const char help_message[] = "MBauvloglist lists table data from an MBARI AUV mission log file.";
 static const char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonflip -Olist -Rid -S -H -V]";
@@ -102,21 +120,21 @@ static const char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonfli
 double calcPressure(struct ctd_calibration_struct *calibration_ptr,
 				double presCounts, double temperature)
 {
-  double t = calibration_ptr->ptempa0
+  const double t = calibration_ptr->ptempa0
 								+ calibration_ptr->ptempa1*temperature
 								+ calibration_ptr->ptempa2*temperature*temperature;
-  double x = (double)presCounts - calibration_ptr->ptca0
+  const double x = (double)presCounts - calibration_ptr->ptca0
 								- calibration_ptr->ptca1*t
 								- calibration_ptr->ptca2*t*t;
-  double n = x*calibration_ptr->ptcb0 / (calibration_ptr->ptcb0
+  const double n = x*calibration_ptr->ptcb0 / (calibration_ptr->ptcb0
 								+ calibration_ptr->ptcb1*t
 								+ calibration_ptr->ptcb2*t*t);
-  double pres = calibration_ptr->pa0
+  double pressure = calibration_ptr->pa0
 								+ calibration_ptr->pa1*n
 								+ calibration_ptr->pa2*n*n;
 
-  pres = (pres-14.7)*.6894757; //per note on page 34 of the SBE49 Manual
-  return pres;
+  pressure = (pressure-14.7)*.6894757; //per note on page 34 of the SBE49 Manual
+  return pressure;
 }
 /*--------------------------------------------------------------------*/
 
@@ -185,12 +203,7 @@ void calibration_MAUV1_2017(struct ctd_calibration_struct *calibration_ptr)
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
-
-	/* MBIO read control parameters */
 	int pings;
 	int format;
 	int lonflip;
@@ -199,26 +212,12 @@ int main(int argc, char **argv) {
 	int etime_i[7];
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int error = MB_ERROR_NO_ERROR;
 
 	/* auv log data */
 	FILE *fp;
 	char file[MB_PATH_MAXLINE];
-	struct field {
-		int type;
-		int size;
-		int index;
-		char name[MB_PATH_MAXLINE];
-		char format[MB_PATH_MAXLINE];
-		char description[MB_PATH_MAXLINE];
-		char units[MB_PATH_MAXLINE];
-		double scale;
-	};
-	struct printfield {
-		char name[MB_PATH_MAXLINE];
-		int index;
-		bool formatset;
-		char format[MB_PATH_MAXLINE];
-	};
 	int nfields = 0;
 	struct field fields[NFIELDSMAX];
 	int nprintfields = 0;
@@ -294,8 +293,6 @@ int main(int argc, char **argv) {
 	int index;
 	int jinterp = 0;
 
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set file to null */
 	file[0] = '\0';
@@ -468,6 +465,7 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);

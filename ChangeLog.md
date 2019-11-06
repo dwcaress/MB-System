@@ -23,6 +23,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
 
+- Version 5.7.6beta16    October 29, 2019
 - Version 5.7.6beta15    October 21, 2019
 - Version 5.7.6beta14    October 8, 2019
 - Version 5.7.6beta12    September 20, 2019
@@ -331,6 +332,22 @@ announced releases.
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 
 -------------------------------------------------------------------------------
+
+MBeditviz: Added GUI elements to support multiple modes of gridding.
+
+Mbm_route2mission: Modified to output waypoint_bottom behaviors with the
+current suite of options specified.
+
+-----> 5.7.6beta16 (October 29, 2019)
+
+MBnavadjust: Fixed bug in calculating the range of contour values and the size
+of the memory allocation for contours.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices. Current changes include replacing MB_YES/MB_NO with boolean
+true and false, and changing the type of the associated variables from int to
+bool.
 
 -----> 5.7.6beta15 (October 21, 2019)
 

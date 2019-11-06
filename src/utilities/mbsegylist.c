@@ -36,16 +36,15 @@
 #include "mb_status.h"
 
 #define MAX_OPTIONS 25
-#define MBLIST_CHECK_ON 0
-#define MBLIST_CHECK_ON_NULL 1
-#define MBLIST_CHECK_OFF_RAW 2
-#define MBLIST_CHECK_OFF_NAN 3
-#define MBLIST_CHECK_OFF_FLAGNAN 4
-#define MBLIST_SET_OFF 0
-#define MBLIST_SET_ON 1
-#define MBLIST_SET_ALL 2
+const int MBLIST_CHECK_ON = 0;
+const int MBLIST_CHECK_ON_NULL = 1;
+const int MBLIST_CHECK_OFF_RAW = 2;
+const int MBLIST_CHECK_OFF_NAN = 3;
+const int MBLIST_CHECK_OFF_FLAGNAN = 4;
+const int MBLIST_SET_OFF = 0;
+const int MBLIST_SET_ON = 1;
+const int MBLIST_SET_ALL = 2;
 
-/* NaN value */
 double NaN;
 
 static const char program_name[] = "MBsegylist";
@@ -56,8 +55,6 @@ static const char usage_message[] =
 
 /*--------------------------------------------------------------------*/
 int printsimplevalue(int verbose, double value, int width, int precision, bool ascii, bool *invert, bool *flipsign, int *error) {
-	char format[24] = "";
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -71,7 +68,7 @@ int printsimplevalue(int verbose, double value, int width, int precision, bool a
 	}
 
 	/* make print format */
-	format[0] = '%';
+	char format[24] = "%";
 	if (*invert)
 		strcpy(format, "%g");
 	else if (width > 0)
@@ -154,19 +151,20 @@ int printNaN(int verbose, bool ascii, bool *invert, bool *flipsign, int *error) 
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
-
-	/* MBIO read control parameters */
-	char file[MB_PATH_MAXLINE] = "";
 	int pings;
-	int decimate;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
 	double speedmin;
 	double timegap;
+	int format;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	int error = MB_ERROR_NO_ERROR;
+	char *message = NULL;
+
+	int decimate;
 
 	/* segy data */
 	void *mbsegyioptr;
@@ -176,8 +174,6 @@ int main(int argc, char **argv) {
 	float *trace;
 
 	/* output format list controls */
-	char list[MAX_OPTIONS] = "";
-	int n_list;
 	int nread;
 	bool invert_next_value = false;
 	bool signflip_next_value = false;  // TODO(schwehr): signflip or flipsign.  Be consistent.
@@ -205,20 +201,15 @@ int main(int argc, char **argv) {
 	double delay, interval;
 	double seconds;
 
-	double b;
-	int format;
-	int i;
-
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set file to null */
-	file[0] = '\0';
+	char file[MB_PATH_MAXLINE] = "";
 
 	/* set up the default list controls: TiXYSsCcDINL
 	    (time, time interval, lon, lat, shot, shot trace #, cmp, cmp trace #,
 	        delay, sample length, number samples, trace length) */
-	n_list = 0;
+	int n_list = 0;
+	char list[MAX_OPTIONS] = "";
 	list[n_list] = 'T';
 	n_list++;
 	list[n_list] = 'i';
@@ -344,7 +335,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2       segment_tag:    %s\n", segment_tag);
 			fprintf(stderr, "dbg2       delimiter:      %s\n", delimiter);
 			fprintf(stderr, "dbg2       n_list:         %d\n", n_list);
-			for (i = 0; i < n_list; i++)
+			for (int i = 0; i < n_list; i++)
 				fprintf(stderr, "dbg2         list[%d]:      %c\n", i, list[i]);
 		}
 
@@ -444,7 +435,7 @@ int main(int argc, char **argv) {
 
 		/* print out info */
 		if (status == MB_SUCCESS && (nread - 1) % decimate == 0) {
-			for (i = 0; i < n_list; i++) {
+			for (int i = 0; i < n_list; i++) {
 				switch (list[i]) {
 				case '/': /* Inverts next simple value */
 					invert_next_value = true;
@@ -456,7 +447,7 @@ int main(int argc, char **argv) {
 					if (ascii)
 						printf("%6d", traceheader.rp_num);
 					else {
-						b = traceheader.rp_num;
+						const double b = traceheader.rp_num;
 						fwrite(&b, sizeof(double), 1, stdout);
 					}
 					break;
@@ -464,7 +455,7 @@ int main(int argc, char **argv) {
 					if (ascii)
 						printf("%6d", traceheader.rp_tr);
 					else {
-						b = traceheader.rp_tr;
+						const double b = traceheader.rp_tr;
 						fwrite(&b, sizeof(double), 1, stdout);
 					}
 					break;
@@ -487,7 +478,7 @@ int main(int argc, char **argv) {
 						printf("%.4d %.3d %.2d %.2d %9.6f", time_j[0], time_j[1], time_i[3], time_i[4], seconds);
 					}
 					else {
-						b = time_j[0];
+						double b = time_j[0];
 						fwrite(&b, sizeof(double), 1, stdout);
 						b = time_j[1];
 						fwrite(&b, sizeof(double), 1, stdout);
@@ -508,7 +499,7 @@ int main(int argc, char **argv) {
 						printf("%.4d %.3d %.4d %9.6f", time_j[0], time_j[1], time_j[2], seconds);
 					}
 					else {
-						b = time_j[0];
+						double b = time_j[0];
 						fwrite(&b, sizeof(double), 1, stdout);
 						b = time_j[1];
 						fwrite(&b, sizeof(double), 1, stdout);
@@ -534,14 +525,14 @@ int main(int argc, char **argv) {
 						time_d_ref = time_d;
 						first_m = false;
 					}
-					b = time_d - time_d_ref;
+					const double b = time_d - time_d_ref;
 					printsimplevalue(verbose, b, 0, 6, ascii, &invert_next_value, &signflip_next_value, &error);
 					break;
 				case 'N': /* number of samples in trace */
 					if (ascii)
 						printf("%6d", traceheader.nsamps);
 					else {
-						b = traceheader.nsamps;
+						const double b = traceheader.nsamps;
 						fwrite(&b, sizeof(double), 1, stdout);
 					}
 					break;
@@ -549,7 +540,7 @@ int main(int argc, char **argv) {
 					if (ascii)
 						printf("%6d", nread);
 					else {
-						b = nread;
+						const double b = nread;
 						fwrite(&b, sizeof(double), 1, stdout);
 					}
 					break;
@@ -557,7 +548,7 @@ int main(int argc, char **argv) {
 					if (ascii)
 						printf("%6d", traceheader.range);
 					else {
-						b = traceheader.range;
+						const double b = traceheader.range;
 						fwrite(&b, sizeof(double), 1, stdout);
 					}
 					break;
@@ -565,7 +556,7 @@ int main(int argc, char **argv) {
 					if (ascii)
 						printf("%6d", traceheader.shot_num);
 					else {
-						b = traceheader.shot_num;
+						const double b = traceheader.shot_num;
 						fwrite(&b, sizeof(double), 1, stdout);
 					}
 					break;
@@ -573,7 +564,7 @@ int main(int argc, char **argv) {
 					if (ascii)
 						printf("%6d", traceheader.shot_tr);
 					else {
-						b = traceheader.shot_tr;
+						const double b = traceheader.shot_tr;
 						fwrite(&b, sizeof(double), 1, stdout);
 					}
 					break;
@@ -582,7 +573,7 @@ int main(int argc, char **argv) {
 					if (ascii)
 						printf("%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], seconds);
 					else {
-						b = time_i[0];
+						double b = time_i[0];
 						fwrite(&b, sizeof(double), 1, stdout);
 						b = time_i[1];
 						fwrite(&b, sizeof(double), 1, stdout);
@@ -601,7 +592,7 @@ int main(int argc, char **argv) {
 					if (ascii)
 						printf("%.4d %.2d %.2d %.2d %.2d %9.6f", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], seconds);
 					else {
-						b = time_i[0];
+						double b = time_i[0];
 						fwrite(&b, sizeof(double), 1, stdout);
 						b = time_i[1];
 						fwrite(&b, sizeof(double), 1, stdout);
@@ -620,7 +611,7 @@ int main(int argc, char **argv) {
 					if (ascii)
 						printf("%ld", time_u);
 					else {
-						b = time_u;
+						const double b = time_u;
 						fwrite(&b, sizeof(double), 1, stdout);
 					}
 					break;
@@ -633,7 +624,7 @@ int main(int argc, char **argv) {
 					if (ascii)
 						printf("%ld", time_u - time_u_ref);
 					else {
-						b = time_u - time_u_ref;
+						const double b = time_u - time_u_ref;
 						fwrite(&b, sizeof(double), 1, stdout);
 					}
 					break;
@@ -666,7 +657,7 @@ int main(int argc, char **argv) {
 						printf("%3d %8.5f%c", degrees, minutes, hemi);
 					}
 					else {
-						b = degrees;
+						double b = degrees;
 						if (hemi == 'W')
 							b = -b;
 						fwrite(&b, sizeof(double), 1, stdout);
@@ -690,7 +681,7 @@ int main(int argc, char **argv) {
 						printf("%3d %8.5f%c", degrees, minutes, hemi);
 					}
 					else {
-						b = degrees;
+						double b = degrees;
 						if (hemi == 'S')
 							b = -b;
 						fwrite(&b, sizeof(double), 1, stdout);

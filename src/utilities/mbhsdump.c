@@ -46,74 +46,14 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char format_description[MB_DESCRIPTION_LENGTH];
-	char *message = NULL;
-
-	/* MBIO read and write control parameters */
 	int format = 0;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	char file[MB_PATH_MAXLINE];
-	void *mbio_ptr = NULL;
-
-	/* mbio read and write values */
-	void *store_ptr;
-	struct mbsys_hsds_struct *store;
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	int nbath;
-	int namp;
-	int nss;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-
-	/* dump control parameters */
-	bool mb_data_data_list = false;
-	bool mb_data_comment_list = false;
-	bool mb_data_calibrate_list = false;
-	bool mb_data_mean_velocity_list = false;
-	bool mb_data_velocity_profile_list = false;
-	bool mb_data_standby_list = false;
-	bool mb_data_nav_source_list = false;
-	int mb_data_data_count = 0;
-	int mb_data_comment_count = 0;
-	int mb_data_calibrate_count = 0;
-	int mb_data_mean_velocity_count = 0;
-	int mb_data_velocity_profile_count = 0;
-	int mb_data_standby_count = 0;
-	int mb_data_nav_source_count = 0;
-
-	/* output stream for basic stuff (stdout if verbose <= 1,
-	    stderr if verbose > 1) */
-	FILE *output;
-
-	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* reset all defaults */
@@ -141,8 +81,18 @@ int main(int argc, char **argv) {
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 
-	/* set default input and output */
-	strcpy(file, "stdin");
+	/* output stream for basic stuff (stdout if verbose <= 1,
+	    stderr if verbose > 1) */
+	FILE *output;
+	char file[MB_PATH_MAXLINE] = "stdin";
+	int kind;
+	bool mb_data_data_list = false;
+	bool mb_data_comment_list = false;
+	bool mb_data_calibrate_list = false;
+	bool mb_data_mean_velocity_list = false;
+	bool mb_data_velocity_profile_list = false;
+	bool mb_data_standby_list = false;
+	bool mb_data_nav_source_list = false;
 
 	/* process argument list */
 	{
@@ -249,9 +199,11 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(output, "\n%s\n", help_message);
 			fprintf(output, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
+
+	int error = MB_ERROR_NO_ERROR;
 
 	/* if bad format specified then print it and exit */
 	status = mb_format(verbose, &format, &error);
@@ -262,9 +214,16 @@ int main(int argc, char **argv) {
 		exit(MB_ERROR_BAD_FORMAT);
 	}
 
-	/* initialize reading the input multibeam file */
+	double btime_d;
+	double etime_d;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+	void *mbio_ptr = NULL;
+
 	if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 	                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(output, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 		fprintf(output, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -272,29 +231,66 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* allocate memory for data arrays */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&beamflag, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathacrosstrack, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathalongtrack, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_amp * sizeof(double), (void **)&amp, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ss, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ssacrosstrack, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ssalongtrack, &error);
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&beamflag, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathacrosstrack, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathalongtrack, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_amp * sizeof(double), (void **)&amp, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ss, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ssacrosstrack, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ssalongtrack, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(output, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(output, "\nProgram <%s> Terminated\n", program_name);
 		exit(error);
 	}
 
-	/* printf out file and format */
+	char format_description[MB_DESCRIPTION_LENGTH];
+
 	mb_format_description(verbose, &format, format_description, &error);
 	fprintf(output, "\nHydrosweep DS Data File:  %s\n", file);
 	fprintf(output, "MBIO Data Format ID:  %d\n", format);
 	fprintf(output, "%s", format_description);
+
+
+	/* mbio read and write values */
+	void *store_ptr;
+	struct mbsys_hsds_struct *store;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	int nbath;
+	int namp;
+	int nss;
+	char comment[MB_COMMENT_MAXLINE];
+
+	/* dump control parameters */
+	int mb_data_data_count = 0;
+	int mb_data_comment_count = 0;
+	int mb_data_calibrate_count = 0;
+	int mb_data_mean_velocity_count = 0;
+	int mb_data_velocity_profile_count = 0;
+	int mb_data_standby_count = 0;
+	int mb_data_nav_source_count = 0;
 
 	/* read and list */
 	while (error <= MB_ERROR_NO_ERROR) {
@@ -316,10 +312,12 @@ int main(int argc, char **argv) {
 
 		/* output error messages */
 		if (verbose >= 1 && error <= MB_ERROR_OTHER) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(output, "\nNonfatal MBIO Error:\n%s\n", message);
 		}
 		else if (verbose >= 1 && error > MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(output, "\nFatal MBIO Error:\n%s\n", message);
 		}
@@ -520,10 +518,8 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* close the file */
 	status = mb_close(verbose, &mbio_ptr, &error);
 
-	/* deallocate memory for data arrays */
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bathacrosstrack, &error);
