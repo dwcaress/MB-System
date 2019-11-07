@@ -1037,220 +1037,53 @@ int main(int argc, char **argv) {
 	double timegap;
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	double btime_d;
-	double etime_d;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	mb_path file = "";
-	void *mbio_ptr = NULL;
-	struct mb_io_struct *mb_io_ptr = NULL;
-	void *store_ptr = NULL;
-
-	/* mbmosaic control variables */
-	mb_path filelist = "";
-	mb_path fileroot = "";
-	void *datalist = NULL;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight = 1.0;
-	int xdim = 0;
-	int ydim = 0;
-	bool spacing_priority = false;
-	bool set_dimensions = false;
-	bool set_spacing = false;
-	double dx_set = 0.0;
-	double dy_set = 0.0;
-	double dx = 0.0;
-	double dy = 0.0;
-	mb_path units = "";
+	datatype_t datatype = MBMOSAIC_DATA_SIDESCAN;
+	bool usefiltered = false;
+	double border = 0.0;
 	int clip = 0;
 	int clipmode = MBMOSAIC_INTERP_NONE;
 	double tension = 0.0;
+	int xdim = 101;
+	int ydim = 101;
+	bool spacing_priority = false;
+	bool set_dimensions = false;
+	double dx_set = 0.0;
+	double dy_set = 0.0;
+	mb_path units = "";
+	bool set_spacing = false;
+	double priority_range = 0.0;
+	int weight_priorities = 0;
 	grid_mode_t grid_mode = MBMOSAIC_SINGLE_BEST;
-	datatype_t datatype = MBMOSAIC_DATA_SIDESCAN;
-	bool usefiltered = false;
-	char gridkindstring[MB_PATH_MAXLINE];
+	char gridkindstring[MB_PATH_MAXLINE] = "";
 	grid_kind_t gridkind = MBMOSAIC_GMTGRD;
 	bool more = false;
+	mb_path filelist = "datalist.mb-1";
+	bool projection_pars_f = false;
+	mb_path projection_pars = "";
 	bool use_NaN = false;
-	double clipvalue = NO_DATA_FLAG;
-	float outclipvalue = NO_DATA_FLAG;
-	double scale = 1.0;
+	mb_path fileroot = "grid";
 	double boundsfactor = 0.0;
-	double border = 0.0;
-	double extend = 0.0;
-	priority_t priority_mode = MBMOSAIC_PRIORITY_NONE;
-	priority_table_t priority_source = MBMOSAIC_PRIORITYTABLE_FILE;
-	double priority_range = 0.0;
-	double priority_azimuth = 0.0;
-	double priority_azimuth_factor = 1.0;
+	double gbnd[4] = {0.0, 0.0, 0.0, 0.0};
+	bool gbndset = false;
+	mb_path topogridfile = "";
+	bool usetopogrid = false;
 	double priority_heading = 0.0;
 	double priority_heading_factor = 1.0;
+	int k_mode;  // For option "u"
+	priority_t priority_mode = MBMOSAIC_PRIORITY_NONE;
+	double priority_azimuth = 0.0;
+	double priority_azimuth_factor = 1.0;
+	double scale = 1.0;
+	double extend = 0.0;
+	priority_table_t priority_source = MBMOSAIC_PRIORITYTABLE_FILE;
 	char pfile[MB_PATH_MAXLINE];
 	int n_priority_angle = 0;
 	double *priority_angle_angle = NULL;
 	double *priority_angle_priority = NULL;
-	int weight_priorities = 0;
-	bool usetopogrid = false;
 	double altitude_default = 1000.0;
-	int pstatus;
-	mb_path path = "";
-	mb_path ppath = "";
-	mb_path dpath = "";
-	mb_path ifile = "";
-	mb_path ofile = "";
-	mb_path dfile = "";
-	char plot_cmd[MB_COMMENT_MAXLINE] = "";
-	int plot_status;
-	bool use_beams = false;
-	bool use_slope = false;
-
-	/* topography parameters */
-	mb_path topogridfile = "";
-	void *topogrid_ptr = NULL;
-
-	/* mbio read values */
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *bathlon = NULL;
-	double *bathlat = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	double *sslon = NULL;
-	double *sslat = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-	double *gangles = NULL;
-	double *slopes = NULL;
-	double *priorities = NULL;
-	struct footprint *footprints = NULL;
-	struct mb_info_struct mb_info;
-	int formatread;
-	double beamwidth_xtrack;
-	double beamwidth_ltrack;
-	double draft;
-	double roll;
-	double pitch;
-	double heave;
-
-	/* grid variables */
-	double gbnd[4], wbnd[4], obnd[4];
-	bool gbndset = false;
-	double xlon, ylat, xx, yy;
-	double gaussian_factor;
-	int gxdim, gydim, offx, offy;
-	double *grid = NULL;
-	double *norm = NULL;
-	double *maxpriority = NULL;
-	int *cnt = NULL;
-	int *num = NULL;
-	double *sigma = NULL;
-	float *sdata = NULL;
-	float *output = NULL;
-	float *sgrid = NULL;
-	double bdata_origin_x, bdata_origin_y;
-	double sxmin, symin;
-	float xmin, ymin, ddx, ddy, zflag, cay;
-	void *work1 = NULL;
-	void *work2 = NULL;
-	void *work3 = NULL;
-	int ndata, ndatafile;
-	double zmin, zmax, zclip;
-	int nmax;
-	double smin, smax;
-	int nbinset, nbinzero, nbinspline;
-
-	/* bottom layout parameters */
-	int nangle = MB7K2SS_NUM_ANGLES;
-	double angle_min = -MB7K2SS_ANGLE_MAX;
-	double angle_max = MB7K2SS_ANGLE_MAX;
-	double table_angle[MB7K2SS_NUM_ANGLES];
-	double table_xtrack[MB7K2SS_NUM_ANGLES];
-	double table_ltrack[MB7K2SS_NUM_ANGLES];
-	double table_altitude[MB7K2SS_NUM_ANGLES];
-	double table_range[MB7K2SS_NUM_ANGLES];
-	int table_status = MB_SUCCESS;
-	int table_error = MB_ERROR_NO_ERROR;
-
-	/* projected grid parameters */
-	bool use_projection = false;
-	bool projection_pars_f = false;
-	double reference_lon, reference_lat;
-	int utm_zone = 1;
-	mb_path projection_pars = "";
-	mb_path projection_id = "";
-	int proj_status;
-	void *pjptr;
-	double deglontokm, deglattokm;
-	double mtodeglon, mtodeglat;
-	double headingx, headingy;
-
-	/* output char strings */
-	mb_path xlabel = "";
-	mb_path ylabel = "";
-	mb_path zlabel = "";
-	mb_path title = "";
-	mb_path nlabel = "";
-	mb_path sdlabel = "";
-
 	/* output stream for basic stuff (stdout if verbose <= 1,
 	    stderr if verbose > 1) */
-	FILE *outfp;
-
-	/* variables needed to handle Not-a-Number values */
-	float NaN;
-
-	/* other variables */
-	FILE *dfp = NULL;
-	FILE *fp = NULL;
-	mb_path buffer = "";
-	char *result = NULL;
-	double norm_weight;
-	double xsmin, xsmax;
-	double xx1, yy1;
-	int ismin, ismax;
-	int footprint_mode;
-	int inside;
-	double acrosstrackspacing;
-	double slope;
-	int ii, jj, iii, jjj, kkk;
-	int i1, i2, j1, j2;
-	int ir;
-	double r;
-	int dmask[9];
-	int kgrid, kout, kint, ib;
-	int ixx[4], iyy[4];
-	int ix1, ix2, iy1, iy2;
-	double t1, t2;
-
-	/* set default input and output */
-	strcpy(filelist, "datalist.mb-1");
-
-	/* initialize some values */
-	gridkindstring[0] = '\0';
-	strcpy(fileroot, "grid");
-	strcpy(projection_id, "Geographic");
-	gbnd[0] = 0.0;
-	gbnd[1] = 0.0;
-	gbnd[2] = 0.0;
-	gbnd[3] = 0.0;
-	xdim = 101;
-	ydim = 101;
-	gxdim = 0;
-	gydim = 0;
+	FILE *outfp = NULL;
 
 	{
 		bool errflg = false;
@@ -1398,8 +1231,10 @@ int main(int argc, char **argv) {
 			case 'U':
 			case 'u':
 			{
-				const int n = sscanf(optarg, "%lf/%lf/%d", &t1, &t2, &kkk);
-				if (n == 3 && kkk == 1) {
+				double t1;  // bearing
+				double t2;  // factor
+				const int n = sscanf(optarg, "%lf/%lf/%d", &t1, &t2, &k_mode);
+				if (n == 3 && k_mode == 1) {
 					priority_heading = t1;
 					priority_heading_factor = t2;
 					if ((priority_mode & MBMOSAIC_PRIORITY_HEADING) == 0)
@@ -1528,12 +1363,9 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
 			fprintf(outfp, "dbg2       speedmin:             %f\n", speedmin);
 			fprintf(outfp, "dbg2       timegap:              %f\n", timegap);
-			fprintf(outfp, "dbg2       file list:            %s\n", ifile);
 			fprintf(outfp, "dbg2       output file root:     %s\n", fileroot);
 			fprintf(outfp, "dbg2       grid x dimension:     %d\n", xdim);
 			fprintf(outfp, "dbg2       grid y dimension:     %d\n", ydim);
-			fprintf(outfp, "dbg2       grid x spacing:       %f\n", dx);
-			fprintf(outfp, "dbg2       grid y spacing:       %f\n", dy);
 			fprintf(outfp, "dbg2       grid bounds[0]:       %f\n", gbnd[0]);
 			fprintf(outfp, "dbg2       grid bounds[1]:       %f\n", gbnd[1]);
 			fprintf(outfp, "dbg2       grid bounds[2]:       %f\n", gbnd[2]);
@@ -1564,8 +1396,6 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "dbg2       altitude_default:     %f\n", altitude_default);
 			fprintf(outfp, "dbg2       projection_pars:      %s\n", projection_pars);
 			fprintf(outfp, "dbg2       proj flag 1:          %d\n", projection_pars_f);
-			fprintf(outfp, "dbg2       projection_id:        %s\n", projection_id);
-			fprintf(outfp, "dbg2       utm_zone:             %d\n", utm_zone);
 			fprintf(stderr, "dbg2      usetopogrid:          %d\n", usetopogrid);
 			fprintf(stderr, "dbg2      topogridfile:         %s\n", topogridfile);
 		}
@@ -1581,7 +1411,8 @@ int main(int argc, char **argv) {
 
 	/* if bounds not set get bounds of input data */
 	if (!gbndset) {
-		formatread = -1;
+		int formatread = -1;
+		struct mb_info_struct mb_info;
 		status = mb_get_info_datalist(verbose, filelist, &formatread, &mb_info, lonflip, &error);
 
 		gbnd[0] = mb_info.lon_min;
@@ -1600,8 +1431,8 @@ int main(int argc, char **argv) {
 
 	/* if requested expand the grid bounds */
 	if (boundsfactor > 1.0) {
-		xx1 = 0.5 * (boundsfactor - 1.0) * (gbnd[1] - gbnd[0]);
-		yy1 = 0.5 * (boundsfactor - 1.0) * (gbnd[3] - gbnd[2]);
+		const double xx1 = 0.5 * (boundsfactor - 1.0) * (gbnd[1] - gbnd[0]);
+		const double yy1 = 0.5 * (boundsfactor - 1.0) * (gbnd[3] - gbnd[2]);
 		gbnd[0] -= xx1;
 		gbnd[1] += xx1;
 		gbnd[2] -= yy1;
@@ -1616,28 +1447,178 @@ int main(int argc, char **argv) {
 	}
 
 	/* use bathymetry/amplitude beams for types other than sidescan */
+	bool use_beams = false;
 	if (datatype == MBMOSAIC_DATA_SIDESCAN)
 		use_beams = false;
 	else
 		use_beams = true;
 
 	/* use bathymetry slope for slope and slope corrected grazing angle */
-	if (datatype == MBMOSAIC_DATA_GRAZING || datatype == MBMOSAIC_DATA_SLOPE)
-		use_slope = true;
+	const bool use_slope = datatype == MBMOSAIC_DATA_GRAZING || datatype == MBMOSAIC_DATA_SLOPE;
 
 	/* more option not available with single best algorithm */
 	if (more && grid_mode == MBMOSAIC_SINGLE_BEST)
 		more = false;
 
 	/* NaN cannot be used for ASCII grids */
+	float NaN;
 	if (use_NaN && (gridkind == MBMOSAIC_ASCII || gridkind == MBMOSAIC_ARCASCII))
 		use_NaN = false;
 
+	float outclipvalue = NO_DATA_FLAG;
 	/* define NaN in case it's needed */
 	if (use_NaN) {
 		MB_MAKE_FNAN(NaN);
 		outclipvalue = NaN;
 	}
+
+	double btime_d;
+	double etime_d;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+	mb_path file = "";
+	void *mbio_ptr = NULL;
+	struct mb_io_struct *mb_io_ptr = NULL;
+	void *store_ptr = NULL;
+
+	/* mbmosaic control variables */
+	void *datalist = NULL;
+	int look_processed = MB_DATALIST_LOOK_UNSET;
+	double file_weight = 1.0;
+	double dx = 0.0;
+	double dy = 0.0;
+	double clipvalue = NO_DATA_FLAG;
+	int pstatus;
+	mb_path path = "";
+	mb_path ppath = "";
+	mb_path dpath = "";
+	// mb_path ifile = "";
+	mb_path ofile = "";
+	mb_path dfile = "";
+	char plot_cmd[MB_COMMENT_MAXLINE] = "";
+	int plot_status;
+
+	/* topography parameters */
+	void *topogrid_ptr = NULL;
+
+	/* mbio read values */
+	int kind;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *bathlon = NULL;
+	double *bathlat = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	double *sslon = NULL;
+	double *sslat = NULL;
+	char comment[MB_COMMENT_MAXLINE];
+	double *gangles = NULL;
+	double *slopes = NULL;
+	double *priorities = NULL;
+	struct footprint *footprints = NULL;
+	double beamwidth_xtrack;
+	double beamwidth_ltrack;
+	double draft;
+	double roll;
+	double pitch;
+	double heave;
+
+	/* grid variables */
+	double wbnd[4];
+	double obnd[4];
+	double xlon, ylat, xx, yy;
+	double gaussian_factor;
+	int gxdim = 0;
+	int gydim = 0;
+	int offx;
+	int offy;
+	double *grid = NULL;
+	double *norm = NULL;
+	double *maxpriority = NULL;
+	int *cnt = NULL;
+	int *num = NULL;
+	double *sigma = NULL;
+	float *sdata = NULL;
+	float *output = NULL;
+	float *sgrid = NULL;
+	double bdata_origin_x, bdata_origin_y;
+	double sxmin, symin;
+	float xmin, ymin, ddx, ddy, zflag, cay;
+	void *work1 = NULL;
+	void *work2 = NULL;
+	void *work3 = NULL;
+	int ndata, ndatafile;
+	double zmin, zmax, zclip;
+	int nmax;
+	double smin, smax;
+	int nbinset, nbinzero, nbinspline;
+
+	/* bottom layout parameters */
+	int nangle = MB7K2SS_NUM_ANGLES;
+	double angle_min = -MB7K2SS_ANGLE_MAX;
+	double angle_max = MB7K2SS_ANGLE_MAX;
+	double table_angle[MB7K2SS_NUM_ANGLES];
+	double table_xtrack[MB7K2SS_NUM_ANGLES];
+	double table_ltrack[MB7K2SS_NUM_ANGLES];
+	double table_altitude[MB7K2SS_NUM_ANGLES];
+	double table_range[MB7K2SS_NUM_ANGLES];
+	int table_status = MB_SUCCESS;
+	int table_error = MB_ERROR_NO_ERROR;
+
+	/* projected grid parameters */
+	bool use_projection = false;
+	double reference_lon, reference_lat;
+	int utm_zone = 1;
+	mb_path projection_id = "Geographic";
+	int proj_status;
+	void *pjptr;
+	double deglontokm, deglattokm;
+	double mtodeglon, mtodeglat;
+	double headingx, headingy;
+
+	/* output char strings */
+	mb_path xlabel = "";
+	mb_path ylabel = "";
+	mb_path zlabel = "";
+	mb_path title = "";
+	mb_path nlabel = "";
+	mb_path sdlabel = "";
+
+
+	/* other variables */
+	FILE *dfp = NULL;
+	FILE *fp = NULL;
+	mb_path buffer = "";
+	char *result = NULL;
+	double norm_weight;
+	double xsmin, xsmax;
+	int ismin, ismax;
+	int footprint_mode;
+	int inside;
+	double acrosstrackspacing;
+	double slope;
+	int ii, jj, iii, jjj;
+	int i1, i2, j1, j2;
+	int ir;
+	double r;
+	int dmask[9];
+	int kgrid, kout, kint, ib;
+	int ixx[4], iyy[4];
+	int ix1, ix2, iy1, iy2;
 
 	/* deal with projected gridding */
 	if (projection_pars_f) {
@@ -3430,8 +3411,8 @@ int main(int argc, char **argv) {
 									r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
 									iii = rint((ii - i) / r) + 1;
 									jjj = rint((jj - j) / r) + 1;
-									kkk = iii * 3 + jjj;
-									dmask[kkk] = true;
+									k_mode = iii * 3 + jjj;
+									dmask[k_mode] = true;
 									if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
 									    (dmask[1] && dmask[7]))
 										num[kgrid] = true;
@@ -3444,8 +3425,8 @@ int main(int argc, char **argv) {
 									r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
 									iii = rint((ii - i) / r) + 1;
 									jjj = rint((jj - j) / r) + 1;
-									kkk = iii * 3 + jjj;
-									dmask[kkk] = true;
+									k_mode = iii * 3 + jjj;
+									dmask[k_mode] = true;
 									if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
 									    (dmask[1] && dmask[7]))
 										num[kgrid] = true;
@@ -3458,8 +3439,8 @@ int main(int argc, char **argv) {
 									r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
 									iii = rint((ii - i) / r) + 1;
 									jjj = rint((jj - j) / r) + 1;
-									kkk = iii * 3 + jjj;
-									dmask[kkk] = true;
+									k_mode = iii * 3 + jjj;
+									dmask[k_mode] = true;
 									if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
 									    (dmask[1] && dmask[7]))
 										num[kgrid] = true;
@@ -3472,8 +3453,8 @@ int main(int argc, char **argv) {
 									r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
 									iii = rint((ii - i) / r) + 1;
 									jjj = rint((jj - j) / r) + 1;
-									kkk = iii * 3 + jjj;
-									dmask[kkk] = true;
+									k_mode = iii * 3 + jjj;
+									dmask[k_mode] = true;
 									if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
 									    (dmask[1] && dmask[7]))
 										num[kgrid] = true;
