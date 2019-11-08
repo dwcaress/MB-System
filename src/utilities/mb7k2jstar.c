@@ -34,23 +34,31 @@
 #include "mb_status.h"
 #include "mbsys_jstar.h"
 #include "mbsys_reson7k.h"
-;
-const int MB7K2JSTAR_SSLOW = 1;
-const int MB7K2JSTAR_SSHIGH = 2;
-const int MB7K2JSTAR_SBP = 3;
-const int MB7K2JSTAR_ALL = 4;
-const int MB7K2JSTAR_BOTTOMPICK_NONE = 0;
-const int MB7K2JSTAR_BOTTOMPICK_BATHYMETRY = 1;
-const int MB7K2JSTAR_BOTTOMPICK_ALTITUDE = 2;
-const int MB7K2JSTAR_BOTTOMPICK_ARRIVAL = 3;
-const int MB7K2JSTAR_SSGAIN_OFF = 0;
-const int MB7K2JSTAR_SSGAIN_TVG_1OVERR = 1;
+
+typedef enum {
+    MB7K2JSTAR_SSLOW = 1,
+    MB7K2JSTAR_SSHIGH = 2,
+    MB7K2JSTAR_SBP = 3,
+    MB7K2JSTAR_ALL = 4,
+} mb7k2jstar_mode;
+typedef enum {
+    MB7K2JSTAR_BOTTOMPICK_NONE = 0,
+    MB7K2JSTAR_BOTTOMPICK_BATHYMETRY = 1,
+    MB7K2JSTAR_BOTTOMPICK_ALTITUDE = 2,
+    MB7K2JSTAR_BOTTOMPICK_ARRIVAL = 3,
+} bottompick_t;
+typedef enum {
+    MB7K2JSTAR_SSGAIN_OFF = 0,
+    MB7K2JSTAR_SSGAIN_TVG_1OVERR = 1,
+} ssgain_t;
 const int MBES_ALLOC_NUM = 128;
-const int MBES_ROUTE_WAYPOINT_NONE = 0;
-const int MBES_ROUTE_WAYPOINT_SIMPLE = 1;
-const int MBES_ROUTE_WAYPOINT_TRANSIT = 2;
-const int MBES_ROUTE_WAYPOINT_STARTLINE = 3;
-const int MBES_ROUTE_WAYPOINT_ENDLINE = 4;
+typedef enum {
+    MBES_ROUTE_WAYPOINT_NONE = 0,
+    MBES_ROUTE_WAYPOINT_SIMPLE = 1,
+    MBES_ROUTE_WAYPOINT_TRANSIT = 2,
+    MBES_ROUTE_WAYPOINT_STARTLINE = 3,
+    MBES_ROUTE_WAYPOINT_ENDLINE = 4,
+} waypoint_t;
 const int MBES_ONLINE_THRESHOLD = 15.0;
 const int MBES_ONLINE_COUNT = 30;
 
@@ -88,15 +96,13 @@ int main(int argc, char **argv) {
 	bool extract_sbp = false;
 	bool print_comments = false;
 
-	int mode;
+	mb7k2jstar_mode mode;
 
-	/* bottompick mode */
-	int bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
+	bottompick_t bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
 	double bottompickthreshold = 0.4;
 
-	/* sidescan gain mode */
 	bool ssflip = false;
-	int gainmode = MB7K2JSTAR_SSGAIN_OFF;
+	ssgain_t gainmode = MB7K2JSTAR_SSGAIN_OFF;
 	double gainfactor = 1.0;
 
 	bool checkroutebearing = false;
@@ -146,7 +152,9 @@ int main(int argc, char **argv) {
 					extract_sbp = true;
 				}
 				else {
-					sscanf(optarg, "%d", &mode);
+					int tmp;
+					sscanf(optarg, "%d", &tmp);
+					mode = (mb7k2jstar_mode)tmp;
 					if (mode == MB7K2JSTAR_SSLOW)
 						extract_sslow = true;
 					else if (mode == MB7K2JSTAR_SSHIGH)
@@ -162,7 +170,9 @@ int main(int argc, char **argv) {
 				break;
 			case 'B':
 			case 'b': {
-				const int n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
+				int tmp;
+				const int n = sscanf(optarg, "%d/%lf", &tmp, &bottompickthreshold);
+				bottompickmode = (bottompick_t)tmp;
 				if (n == 0)
 					bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
 				else if (n == 1 && bottompickmode == MB7K2JSTAR_BOTTOMPICK_ARRIVAL)
@@ -179,8 +189,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'G':
 			case 'g':
-				sscanf(optarg, "%d/%lf", &gainmode, &gainfactor);
+			{
+				int tmp;
+				sscanf(optarg, "%d/%lf", &tmp, &gainfactor);
+				gainmode = (ssgain_t)tmp;
 				break;
+			}
 			case 'I':
 			case 'i':
 				sscanf(optarg, "%s", read_file);
@@ -285,89 +299,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* MBIO read values */
-	void *ombio_ptr = NULL;
-	struct mb_io_struct *omb_io_ptr = NULL;
-	void *ostore_ptr = NULL;
-	struct mbsys_jstar_struct *ostore = NULL;
-	double roll;
-	double pitch;
-	double heave;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	double *ttimes = NULL;
-	double *angles = NULL;
-	double *angles_forward = NULL;
-	double *angles_null = NULL;
-	double *bheave = NULL;
-	double *alongtrack_offset = NULL;
-	double draft;
-	double ssv;
-
-	char comment[MB_COMMENT_MAXLINE];
-	int icomment = 0;
-
-	/* jstar data */
-	s7k_fsdwchannel *s7kchannel;       /* Channel header and data */
-	s7k_fsdwssheader *s7kssheader;     /* Edgetech sidescan header */
-	s7k_fsdwsegyheader *s7ksegyheader = NULL; /* Segy header for subbottom trace */
-	struct mbsys_jstar_channel_struct *channel;
-	int obeams_bath;
-	int obeams_amp;
-	int opixels_ss;
-
-	/* route and auto-line data */
-	int nroutepoint = 0;
-	double lon;
-	double lat;
-	double topo;
-	int waypoint;
-	double *routelon = NULL;
-	double *routelat = NULL;
-	double *routeheading = NULL;
-	int *routewaypoint = NULL;
-	double range;
-	double rangethreshold = 50.0;
-	double rangelast;
-	int activewaypoint = 0;
-
-	/* counting variables */
-	int nwritesbp = 0;
-	int nwritesslo = 0;
-	int nwritesshi = 0;
-	int nreaddatatot = 0;
-	int nreadheadertot = 0;
-	int nreadssvtot = 0;
-	int nreadnav1tot = 0;
-	int nreadsbptot = 0;
-	int nreadsslotot = 0;
-	int nreadsshitot = 0;
-	int nwritesbptot = 0;
-	int nwritesslotot = 0;
-	int nwritesshitot = 0;
-
-	int format_status, format_guess;
-	int format_output = MBF_EDGJSTAR;
-	int shortspersample;
-	char *data;
-	unsigned short *datashort;
-	double value, threshold;
-	double channelmax;
-	int channelpick;
-	double ttime_min;
-	double factor;
-	double mtodeglon, mtodeglat;
-	double headingdiff;
-	int oktowrite;
-	double dx, dy;
-	FILE *fp = NULL;
-
 	/* set output types if needed */
 	if (!extract_sbp && !extract_sslow && !extract_sshigh) {
 		extract_sbp = true;
@@ -396,16 +327,30 @@ int main(int argc, char **argv) {
 	/* new output file obviously needed */
 	bool new_output_file = true;
 
+	int nroutepoint = 0;
+	double *routelon = NULL;
+	double *routelat = NULL;
+	double *routeheading = NULL;
+	int *routewaypoint = NULL;
+	int activewaypoint = 0;
+	double mtodeglon;
+	double mtodeglat;
+	double rangelast;
+	double rangethreshold = 50.0;
+	int oktowrite;
+
 	/* if specified read route file */
 	if (route_file_set) {
 		/* open the input file */
-		if ((fp = fopen(route_file, "r")) == NULL) {
+		FILE *fp = fopen(route_file, "r");
+		if (fp == NULL) {
 			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
 			exit(MB_FAILURE);
 		}
 		bool rawroutefile = false;
 		int nroutepointalloc = 0;
 		char *result;
+		char comment[MB_COMMENT_MAXLINE];
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] == '#') {
 				if (strncmp(comment, "## Route File Version", 21) == 0) {
@@ -414,7 +359,13 @@ int main(int argc, char **argv) {
 			}
 			else {
 				double heading;
-				const int nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint, &heading);
+				double lon;
+				double lat;
+				double topo;
+				waypoint_t waypoint;
+				int waypoint_tmp;
+				const int nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint_tmp, &heading);
+				waypoint = (waypoint_t)waypoint_tmp;
 				if (comment[0] == '#') {
 					fprintf(stderr, "buffer:%s", comment);
 					if (strncmp(comment, "## Route File Version", 21) == 0) {
@@ -503,6 +454,73 @@ int main(int argc, char **argv) {
 		strcpy(file, read_file);
 		read_data = true;
 	}
+
+	/* MBIO read values */
+	void *ombio_ptr = NULL;
+	struct mb_io_struct *omb_io_ptr = NULL;
+	void *ostore_ptr = NULL;
+	struct mbsys_jstar_struct *ostore = NULL;
+	double roll;
+	double pitch;
+	double heave;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	double *ttimes = NULL;
+	double *angles = NULL;
+	double *angles_forward = NULL;
+	double *angles_null = NULL;
+	double *bheave = NULL;
+	double *alongtrack_offset = NULL;
+	double draft;
+	double ssv;
+
+	int icomment = 0;
+
+	/* jstar data */
+	s7k_fsdwchannel *s7kchannel;       /* Channel header and data */
+	s7k_fsdwssheader *s7kssheader;     /* Edgetech sidescan header */
+	s7k_fsdwsegyheader *s7ksegyheader = NULL; /* Segy header for subbottom trace */
+	struct mbsys_jstar_channel_struct *channel;
+	int obeams_bath;
+	int obeams_amp;
+	int opixels_ss;
+
+	/* route and auto-line data */
+	double range;
+
+	/* counting variables */
+	int nwritesbp = 0;
+	int nwritesslo = 0;
+	int nwritesshi = 0;
+	int nreaddatatot = 0;
+	int nreadheadertot = 0;
+	int nreadssvtot = 0;
+	int nreadnav1tot = 0;
+	int nreadsbptot = 0;
+	int nreadsslotot = 0;
+	int nreadsshitot = 0;
+	int nwritesbptot = 0;
+	int nwritesslotot = 0;
+	int nwritesshitot = 0;
+
+	int format_status, format_guess;
+	int format_output = MBF_EDGJSTAR;
+	int shortspersample;
+	char *data;
+	unsigned short *datashort;
+	double value, threshold;
+	double channelmax;
+	int channelpick;
+	double ttime_min;
+	double factor;
+	double headingdiff;
+	double dx, dy;
 
 	char current_output_file[MB_PATH_MAXLINE];
 
@@ -643,6 +661,7 @@ int main(int argc, char **argv) {
 			double altitude;
 			double sonardepth;
 			double heading;
+			char comment[MB_COMMENT_MAXLINE];
 			status &= mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
 			                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 			                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
