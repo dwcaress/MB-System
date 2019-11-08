@@ -1762,7 +1762,7 @@ int main(int argc, char **argv) {
   /* MBIO merge control parameters */
   bool merge = false;
   int mformat = 0;
-  char mfile[MB_PATH_MAXLINE];
+  char mfile[MB_PATH_MAXLINE] = "";
   int mbeams_bath;
   int mbeams_amp;
   int mpixels_ss;
