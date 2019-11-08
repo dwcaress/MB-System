@@ -2084,31 +2084,33 @@ int main(int argc, char **argv) {
 		fprintf(outfp, "\nUnable to open datalist file: %s\n", dfile);
 	}
 
+	mb_path file = "";
+	void *mbio_ptr = NULL;
 	double btime_d;
 	double etime_d;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
-	mb_path file = "";
-	void *mbio_ptr = NULL;
 	struct mb_io_struct *mb_io_ptr = NULL;
 	void *store_ptr = NULL;
-
-	/* mbmosaic control variables */
-	void *datalist = NULL;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight = 1.0;
-	double clipvalue = NO_DATA_FLAG;
-	int pstatus;
-	mb_path path = "";
-	mb_path ppath = "";
-	mb_path dpath = "";
-	// mb_path ifile = "";
-	mb_path ofile = "";
-	char plot_cmd[MB_COMMENT_MAXLINE] = "";
-	int plot_status;
-
-	/* mbio read values */
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *amp = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *bathlon = NULL;
+	double *bathlat = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	double *sslon = NULL;
+	double *sslat = NULL;
+	double *gangles = NULL;
+	double *slopes = NULL;
+	double *priorities = NULL;
+	struct footprint *footprints = NULL;
+	void *work1 = NULL;
+	void *work2 = NULL;
 	int kind;
 	int time_i[7];
 	double time_d;
@@ -2119,43 +2121,20 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *bathlon = NULL;
-	double *bathlat = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	double *sslon = NULL;
-	double *sslat = NULL;
 	char comment[MB_COMMENT_MAXLINE];
-	double *gangles = NULL;
-	double *slopes = NULL;
-	double *priorities = NULL;
-	struct footprint *footprints = NULL;
-	double beamwidth_xtrack;
-	double beamwidth_ltrack;
 	double draft;
 	double roll;
 	double pitch;
 	double heave;
+	double headingx = 0.0;
+	double headingy = 0.0;
+	double beamwidth_xtrack;
+	double beamwidth_ltrack;
 
-	/* grid variables */
-	float *sdata = NULL;
-	float *sgrid = NULL;
-	double sxmin, symin;
-	float xmin, ymin, ddx, ddy, zflag, cay;
-	void *work1 = NULL;
-	void *work2 = NULL;
-	void *work3 = NULL;
-	int ndata, ndatafile;
-	double zmin, zmax, zclip;
-	int nmax;
-	double smin, smax;
-	int nbinset, nbinzero, nbinspline;
+	int ii;
+	int jj;
+	int iii;
+	int jjj;
 
 	/* bottom layout parameters */
 	int nangle = MB7K2SS_NUM_ANGLES;
@@ -2166,37 +2145,6 @@ int main(int argc, char **argv) {
 	double table_ltrack[MB7K2SS_NUM_ANGLES];
 	double table_altitude[MB7K2SS_NUM_ANGLES];
 	double table_range[MB7K2SS_NUM_ANGLES];
-	int table_status = MB_SUCCESS;
-	int table_error = MB_ERROR_NO_ERROR;
-
-	/* projected grid parameters */
-	double headingx = 0.0;
-	double headingy = 0.0;
-
-	/* output char strings */
-	mb_path xlabel = "";
-	mb_path ylabel = "";
-	mb_path zlabel = "";
-	mb_path title = "";
-	mb_path nlabel = "";
-	mb_path sdlabel = "";
-
-	/* other variables */
-	double norm_weight;
-	double xsmin, xsmax;
-	int ismin, ismax;
-	int footprint_mode;
-	int inside;
-	double acrosstrackspacing;
-	double slope;
-	int ii, jj, iii, jjj;
-	int i1, i2, j1, j2;
-	int ir;
-	double r;
-	int dmask[9];
-	int kint, ib;
-	int ixx[4], iyy[4];
-	int ix1, ix2, iy1, iy2;
 
 	int file_in_bounds;  // TODO(schwehr): Make mb_check_info a bool.
 
@@ -2204,16 +2152,23 @@ int main(int argc, char **argv) {
 	if (grid_mode == MBMOSAIC_SINGLE_BEST || priority_mode != MBMOSAIC_PRIORITY_NONE) {
 
 		/* read in data */
-		ndata = 0;
+		void *datalist = NULL;
+		int ndata = 0;
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if ((status = mb_datalist_open(verbose, &datalist, filelist, look_processed, &error)) != MB_SUCCESS) {
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
+		int pstatus;
+		mb_path path = "";
+		mb_path ppath = "";
+		mb_path dpath = "";
+		double file_weight = 1.0;
 		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
 		       MB_SUCCESS) {
-			ndatafile = 0;
+			int ndatafile = 0;
 
 			/* if format > 0 then input is multibeam file */
 			if (format > 0) {
@@ -2394,7 +2349,7 @@ int main(int argc, char **argv) {
 							/* mosaic beam based data (amplitude, grazing angle, slope) */
 							if (use_beams && error == MB_ERROR_NO_ERROR) {
 								/* translate beam locations to lon/lat */
-								for (ib = 0; ib < beams_amp; ib++) {
+								for (int ib = 0; ib < beams_amp; ib++) {
 									if (mb_beam_ok(beamflag[ib])) {
 										/* handle regular beams */
 										bathlon[ib] = navlon + headingy * mtodeglon * bathacrosstrack[ib] +
@@ -2433,7 +2388,7 @@ int main(int argc, char **argv) {
 
 								/* reproject beam positions if necessary */
 								if (use_projection) {
-									for (ib = 0; ib < beams_amp; ib++)
+									for (int ib = 0; ib < beams_amp; ib++)
 										if (mb_beam_ok(beamflag[ib])) {
 											mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
 											                &error);
@@ -2445,29 +2400,25 @@ int main(int argc, char **argv) {
 								}
 
 								/* deal with data */
-								for (ib = 0; ib < beams_amp; ib++)
+								for (int ib = 0; ib < beams_amp; ib++)
 									if (mb_beam_ok(beamflag[ib])) {
+										int ixx[4];
+										int iyy[4];
 										/* get position in grid */
 										for (int j = 0; j < 4; j++) {
 											ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5 * dx) / dx;
 											iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5 * dy) / dy;
 										}
-										ix1 = ixx[0];
-										iy1 = iyy[0];
-										ix2 = ixx[0];
-										iy2 = iyy[0];
+										int ix1 = ixx[0];
+										int iy1 = iyy[0];
+										int ix2 = ixx[0];
+										int iy2 = iyy[0];
 										for (int j = 1; j < 4; j++) {
 											ix1 = MIN(ix1, ixx[j]);
 											iy1 = MIN(iy1, iyy[j]);
 											ix2 = MAX(ix2, ixx[j]);
 											iy2 = MAX(iy2, iyy[j]);
 										}
-										/*		              dix = (int)(scale * (ix2 - ix1));
-										                              diy = (int)(scale * (iy2 - iy1));
-										                              ix1 = MAX(ix1 - dix, 0);
-										                              ix2 = MIN(ix2 + dix, gxdim - 1);
-										                              iy1 = MAX(iy1 - diy, 0);
-										                              iy2 = MIN(iy2 + diy, gydim - 1);*/
 										ix1 = MAX(ix1, 0);
 										ix2 = MIN(ix2, gxdim - 1);
 										iy1 = MAX(iy1, 0);
@@ -2480,9 +2431,9 @@ int main(int argc, char **argv) {
 												const int kgrid = ii * gydim + jj;
 												xx = dx * ii + wbnd[0];
 												yy = dy * jj + wbnd[2];
-												inside = mb_pr_point_in_quad(verbose, xx, yy, footprints[ib].x, footprints[ib].y,
+												const int inside = mb_pr_point_in_quad(verbose, xx, yy, footprints[ib].x, footprints[ib].y,
 												                             &error);
-												if (inside == true && priorities[ib] > maxpriority[kgrid]) {
+												if (inside && priorities[ib] > maxpriority[kgrid]) {
 													if (datatype == MBMOSAIC_DATA_AMPLITUDE)
 														grid[kgrid] = amp[ib];
 													else if (datatype == MBMOSAIC_DATA_FLAT_GRAZING) {
@@ -2492,13 +2443,13 @@ int main(int argc, char **argv) {
 															grid[kgrid] = -gangles[ib];
 													}
 													else if (datatype == MBMOSAIC_DATA_GRAZING) {
-														slope = slopes[ib] + gangles[ib];
+														double slope = slopes[ib] + gangles[ib];
 														if (slope < 0)
 															slope = -slope;
 														grid[kgrid] = slope;
 													}
 													else if (datatype == MBMOSAIC_DATA_SLOPE) {
-														slope = slopes[ib];
+														double slope = slopes[ib];
 														if (slope < 0)
 															slope = -slope;
 														grid[kgrid] = slope;
@@ -2516,11 +2467,11 @@ int main(int argc, char **argv) {
 							/* mosaic sidescan */
 							else if (datatype == MBMOSAIC_DATA_SIDESCAN && error == MB_ERROR_NO_ERROR) {
 								/* get spacing */
-								xsmin = 0.0;
-								xsmax = 0.0;
-								ismin = pixels_ss / 2;
-								ismax = pixels_ss / 2;
-								for (ib = 0; ib < pixels_ss; ib++) {
+								double xsmin = 0.0;
+								double xsmax = 0.0;
+								int ismin = pixels_ss / 2;
+								int ismax = pixels_ss / 2;
+								for (int ib = 0; ib < pixels_ss; ib++) {
 									if (ss[ib] > MB_SIDESCAN_NULL) {
 										if (ssacrosstrack[ib] < xsmin) {
 											xsmin = ssacrosstrack[ib];
@@ -2532,6 +2483,8 @@ int main(int argc, char **argv) {
 										}
 									}
 								}
+								int footprint_mode;
+								double acrosstrackspacing;
 								if (ismax > ismin) {
 									footprint_mode = MBMOSAIC_FOOTPRINT_SPACING;
 									acrosstrackspacing = (xsmax - xsmin) / (ismax - ismin);
@@ -2542,7 +2495,7 @@ int main(int argc, char **argv) {
 								}
 
 								/* translate pixel locations to lon/lat */
-								for (ib = 0; ib < pixels_ss; ib++) {
+								for (int ib = 0; ib < pixels_ss; ib++) {
 									if (ss[ib] > MB_SIDESCAN_NULL) {
 										sslon[ib] = navlon + headingy * mtodeglon * ssacrosstrack[ib] +
 										            headingx * mtodeglon * ssalongtrack[ib];
@@ -2565,7 +2518,8 @@ int main(int argc, char **argv) {
 								}
 
 								/* get angle vs acrosstrack distance table using topographic grid */
-								table_error = MB_ERROR_NO_ERROR;
+								int table_error = MB_ERROR_NO_ERROR;
+								int table_status = MB_SUCCESS;
 								if (usetopogrid) {
 									table_status = mb_topogrid_getangletable(verbose, topogrid_ptr, nangle, angle_min, angle_max,
 									                                         navlon, navlat, heading, altitude, sonardepth, pitch,
@@ -2617,7 +2571,7 @@ int main(int argc, char **argv) {
 
 								/* reproject pixel positions if necessary */
 								if (use_projection) {
-									for (ib = 0; ib < pixels_ss; ib++)
+									for (int ib = 0; ib < pixels_ss; ib++)
 										if (ss[ib] > MB_SIDESCAN_NULL) {
 											mb_proj_forward(verbose, pjptr, sslon[ib], sslat[ib], &sslon[ib], &sslat[ib], &error);
 											for (int j = 0; j < 4; j++) {
@@ -2628,29 +2582,25 @@ int main(int argc, char **argv) {
 								}
 
 								/* deal with data */
-								for (ib = 0; ib < pixels_ss; ib++)
+								for (int ib = 0; ib < pixels_ss; ib++)
 									if (ss[ib] > MB_SIDESCAN_NULL) {
+										int ixx[4];
+										int iyy[4];
 										/* get position in grid */
 										for (int j = 0; j < 4; j++) {
 											ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5 * dx) / dx;
 											iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5 * dy) / dy;
 										}
-										ix1 = ixx[0];
-										iy1 = iyy[0];
-										ix2 = ixx[0];
-										iy2 = iyy[0];
+										int ix1 = ixx[0];
+										int iy1 = iyy[0];
+										int ix2 = ixx[0];
+										int iy2 = iyy[0];
 										for (int j = 1; j < 4; j++) {
 											ix1 = MIN(ix1, ixx[j]);
 											iy1 = MIN(iy1, iyy[j]);
 											ix2 = MAX(ix2, ixx[j]);
 											iy2 = MAX(iy2, iyy[j]);
 										}
-										/*		              dix = (int)(scale * (ix2 - ix1));
-										                              diy = (int)(scale * (iy2 - iy1));
-										                              ix1 = MAX(ix1 - dix, 0);
-										                              ix2 = MIN(ix2 + dix, gxdim - 1);
-										                              iy1 = MAX(iy1 - diy, 0);
-										                              iy2 = MIN(iy2 + diy, gydim - 1);*/
 										ix1 = MAX(ix1, 0);
 										ix2 = MIN(ix2, gxdim - 1);
 										iy1 = MAX(iy1, 0);
@@ -2663,9 +2613,9 @@ int main(int argc, char **argv) {
 												const int kgrid = ii * gydim + jj;
 												xx = dx * ii + wbnd[0];
 												yy = dy * jj + wbnd[2];
-												inside = mb_pr_point_in_quad(verbose, xx, yy, footprints[ib].x, footprints[ib].y,
+												const int inside = mb_pr_point_in_quad(verbose, xx, yy, footprints[ib].x, footprints[ib].y,
 												                             &error);
-												if (inside == true && priorities[ib] > maxpriority[kgrid]) {
+												if (inside && priorities[ib] > maxpriority[kgrid]) {
 													grid[kgrid] = ss[ib];
 													cnt[kgrid] = 1;
 													maxpriority[kgrid] = priorities[ib];
@@ -2706,6 +2656,40 @@ int main(int argc, char **argv) {
 	}
 	/***** end of first pass gridding *****/
 
+	double clipvalue = NO_DATA_FLAG;
+	mb_path ofile = "";
+	char plot_cmd[MB_COMMENT_MAXLINE] = "";
+	int plot_status;
+
+
+	/* grid variables */
+	float *sdata = NULL;
+	float *sgrid = NULL;
+	double sxmin, symin;
+	float xmin, ymin, ddx, ddy, zflag, cay;
+	void *work3 = NULL;
+	double zmin, zmax, zclip;
+	int nmax;
+	double smin, smax;
+	int nbinset, nbinzero, nbinspline;
+
+	/* output char strings */
+	mb_path xlabel = "";
+	mb_path ylabel = "";
+	mb_path zlabel = "";
+	mb_path title = "";
+	mb_path nlabel = "";
+	mb_path sdlabel = "";
+
+	/* other variables */
+	double norm_weight;
+	int i1, i2, j1, j2;
+	int ir;
+	double r;
+	int dmask[9];
+	int kint;
+	// int ix1, ix2, iy1, iy2;
+
 	/***** do second pass gridding *****/
 	if (grid_mode == MBMOSAIC_AVERAGE) {
 		/* initialize arrays */
@@ -2718,7 +2702,9 @@ int main(int argc, char **argv) {
 			}
 
 		/* read in data */
-		ndata = 0;
+		int ndata = 0;
+		void *datalist = NULL;
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if ((status = mb_datalist_open(verbose, &datalist, filelist, look_processed, &error)) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
@@ -2726,9 +2712,14 @@ int main(int argc, char **argv) {
 			mb_memory_clear(verbose, &error);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
+		int pstatus;
+		mb_path path = "";
+		mb_path ppath = "";
+		mb_path dpath = "";
+		double file_weight = 1.0;
 		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
 		       MB_SUCCESS) {
-			ndatafile = 0;
+			int ndatafile = 0;
 
 			/* if format > 0 then input is multibeam file */
 			if (format > 0 && file[0] != '#') {
@@ -2907,7 +2898,7 @@ int main(int argc, char **argv) {
 							if (use_beams && error == MB_ERROR_NO_ERROR) {
 
 								/* translate beam locations to lon/lat */
-								for (ib = 0; ib < beams_amp; ib++) {
+								for (int ib = 0; ib < beams_amp; ib++) {
 									if (mb_beam_ok(beamflag[ib])) {
 										bathlon[ib] = navlon + headingy * mtodeglon * bathacrosstrack[ib] +
 										              headingx * mtodeglon * bathalongtrack[ib];
@@ -2945,7 +2936,7 @@ int main(int argc, char **argv) {
 
 								/* reproject beam positions if necessary */
 								if (use_projection) {
-									for (ib = 0; ib < beams_amp; ib++)
+									for (int ib = 0; ib < beams_amp; ib++)
 										if (mb_beam_ok(beamflag[ib])) {
 											mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
 											                &error);
@@ -2957,29 +2948,25 @@ int main(int argc, char **argv) {
 								}
 
 								/* deal with data */
-								for (ib = 0; ib < beams_amp; ib++)
+								for (int ib = 0; ib < beams_amp; ib++)
 									if (mb_beam_ok(beamflag[ib])) {
+										int ixx[4];
+										int iyy[4];
 										/* get position in grid */
 										for (int j = 0; j < 4; j++) {
 											ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5 * dx) / dx;
 											iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5 * dy) / dy;
 										}
-										ix1 = ixx[0];
-										iy1 = iyy[0];
-										ix2 = ixx[0];
-										iy2 = iyy[0];
+										int ix1 = ixx[0];
+										int iy1 = iyy[0];
+										int ix2 = ixx[0];
+										int iy2 = iyy[0];
 										for (int j = 1; j < 4; j++) {
 											ix1 = MIN(ix1, ixx[j]);
 											iy1 = MIN(iy1, iyy[j]);
 											ix2 = MAX(ix2, ixx[j]);
 											iy2 = MAX(iy2, iyy[j]);
 										}
-										/*		              dix = (int)(scale * (ix2 - ix1));
-										                              diy = (int)(scale * (iy2 - iy1));
-										                              ix1 = MAX(ix1 - dix, 0);
-										                              ix2 = MIN(ix2 + dix, gxdim - 1);
-										                              iy1 = MAX(iy1 - diy, 0);
-										                              iy2 = MIN(iy2 + diy, gydim - 1);*/
 										ix1 = MAX(ix1, 0);
 										ix2 = MIN(ix2, gxdim - 1);
 										iy1 = MAX(iy1, 0);
@@ -2992,9 +2979,9 @@ int main(int argc, char **argv) {
 												const int kgrid = ii * gydim + jj;
 												xx = dx * ii + wbnd[0];
 												yy = dy * jj + wbnd[2];
-												inside = mb_pr_point_in_quad(verbose, xx, yy, footprints[ib].x, footprints[ib].y,
+												const int inside = mb_pr_point_in_quad(verbose, xx, yy, footprints[ib].x, footprints[ib].y,
 												                             &error);
-												if (inside == true && priorities[ib] > 0.0 &&
+												if (inside && priorities[ib] > 0.0 &&
 												    priorities[ib] >= maxpriority[kgrid] - priority_range) {
 													xx = wbnd[0] + ii * dx - bathlon[ib];
 													yy = wbnd[2] + jj * dy - bathlat[ib];
@@ -3016,14 +3003,14 @@ int main(int argc, char **argv) {
 														sigma[kgrid] += norm_weight * gangles[ib] * gangles[ib];
 													}
 													else if (datatype == MBMOSAIC_DATA_GRAZING) {
-														slope = slopes[ib] + gangles[ib];
+														double slope = slopes[ib] + gangles[ib];
 														if (slope < 0)
 															slope = -slope;
 														grid[kgrid] += norm_weight * slope;
 														sigma[kgrid] += norm_weight * slope * slope;
 													}
 													else if (datatype == MBMOSAIC_DATA_SLOPE) {
-														slope = slopes[ib];
+														double slope = slopes[ib];
 														if (slope < 0)
 															slope = -slope;
 														grid[kgrid] += norm_weight * slope;
@@ -3040,11 +3027,11 @@ int main(int argc, char **argv) {
 							/* mosaic sidescan */
 							else if (datatype == MBMOSAIC_DATA_SIDESCAN && error == MB_ERROR_NO_ERROR) {
 								/* get spacing */
-								xsmin = 0.0;
-								xsmax = 0.0;
-								ismin = pixels_ss / 2;
-								ismax = pixels_ss / 2;
-								for (ib = 0; ib < pixels_ss; ib++) {
+								double xsmin = 0.0;
+								double xsmax = 0.0;
+								int ismin = pixels_ss / 2;
+								int ismax = pixels_ss / 2;
+								for (int ib = 0; ib < pixels_ss; ib++) {
 									if (ss[ib] > MB_SIDESCAN_NULL) {
 										if (ssacrosstrack[ib] < xsmin) {
 											xsmin = ssacrosstrack[ib];
@@ -3056,6 +3043,8 @@ int main(int argc, char **argv) {
 										}
 									}
 								}
+								int footprint_mode;
+								double acrosstrackspacing;
 								if (ismax > ismin) {
 									footprint_mode = MBMOSAIC_FOOTPRINT_SPACING;
 									acrosstrackspacing = (xsmax - xsmin) / (ismax - ismin);
@@ -3066,7 +3055,7 @@ int main(int argc, char **argv) {
 								}
 
 								/* translate pixel locations to lon/lat */
-								for (ib = 0; ib < pixels_ss; ib++) {
+								for (int ib = 0; ib < pixels_ss; ib++) {
 									if (ss[ib] > MB_SIDESCAN_NULL) {
 										sslon[ib] = navlon + headingy * mtodeglon * ssacrosstrack[ib] +
 										            headingx * mtodeglon * ssalongtrack[ib];
@@ -3089,7 +3078,8 @@ int main(int argc, char **argv) {
 								}
 
 								/* get angle vs acrosstrack distance table using topographic grid */
-								table_error = MB_ERROR_NO_ERROR;
+								int table_error = MB_ERROR_NO_ERROR;
+								int table_status = MB_SUCCESS;
 								if (usetopogrid) {
 									table_status = mb_topogrid_getangletable(verbose, topogrid_ptr, nangle, angle_min, angle_max,
 									                                         navlon, navlat, heading, altitude, sonardepth, pitch,
@@ -3137,7 +3127,7 @@ int main(int argc, char **argv) {
 
 								/* reproject pixel positions if necessary */
 								if (use_projection) {
-									for (ib = 0; ib < pixels_ss; ib++)
+									for (int ib = 0; ib < pixels_ss; ib++)
 										if (ss[ib] > MB_SIDESCAN_NULL) {
 											mb_proj_forward(verbose, pjptr, sslon[ib], sslat[ib], &sslon[ib], &sslat[ib], &error);
 											for (int j = 0; j < 4; j++) {
@@ -3148,29 +3138,25 @@ int main(int argc, char **argv) {
 								}
 
 								/* deal with data */
-								for (ib = 0; ib < pixels_ss; ib++)
+								for (int ib = 0; ib < pixels_ss; ib++)
 									if (ss[ib] > MB_SIDESCAN_NULL) {
+										int ixx[4];
+										int iyy[4];
 										/* get position in grid */
 										for (int j = 0; j < 4; j++) {
 											ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5 * dx) / dx;
 											iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5 * dy) / dy;
 										}
-										ix1 = ixx[0];
-										iy1 = iyy[0];
-										ix2 = ixx[0];
-										iy2 = iyy[0];
+										int ix1 = ixx[0];
+										int iy1 = iyy[0];
+										int ix2 = ixx[0];
+										int iy2 = iyy[0];
 										for (int j = 1; j < 4; j++) {
 											ix1 = MIN(ix1, ixx[j]);
 											iy1 = MIN(iy1, iyy[j]);
 											ix2 = MAX(ix2, ixx[j]);
 											iy2 = MAX(iy2, iyy[j]);
 										}
-										/*		              dix = (int)(scale * (ix2 - ix1));
-										                              diy = (int)(scale * (iy2 - iy1));
-										                              ix1 = MAX(ix1 - dix, 0);
-										                              ix2 = MIN(ix2 + dix, gxdim - 1);
-										                              iy1 = MAX(iy1 - diy, 0);
-										                              iy2 = MIN(iy2 + diy, gydim - 1);*/
 										ix1 = MAX(ix1, 0);
 										ix2 = MIN(ix2, gxdim - 1);
 										iy1 = MAX(iy1, 0);
@@ -3183,9 +3169,9 @@ int main(int argc, char **argv) {
 												const int kgrid = ii * gydim + jj;
 												xx = dx * ii + wbnd[0];
 												yy = dy * jj + wbnd[2];
-												inside = mb_pr_point_in_quad(verbose, xx, yy, footprints[ib].x, footprints[ib].y,
+												const int inside = mb_pr_point_in_quad(verbose, xx, yy, footprints[ib].x, footprints[ib].y,
 												                             &error);
-												if (inside == true && priorities[ib] > 0.0 &&
+												if (inside && priorities[ib] > 0.0 &&
 												    priorities[ib] >= maxpriority[kgrid] - priority_range) {
 													xx = wbnd[0] + ii * dx - sslon[ib];
 													yy = wbnd[2] + jj * dy - sslat[ib];
@@ -3279,7 +3265,7 @@ int main(int argc, char **argv) {
 	/* if clip set do smooth interpolation */
 	if (clipmode != MBMOSAIC_INTERP_NONE && clip > 0 && nbinset > 0) {
 		/* set up data vector */
-		ndata = 0;
+		int ndata = 0;
 		if (border > 0.0)
 			ndata = 2 * gxdim + 2 * gydim - 2;
 		for (int i = 0; i < gxdim; i++)
