@@ -163,7 +163,7 @@ int64_t mbtrnpp_loop_delay_msec = 0;
 #define TRNU_HOST_DFL    "localhost"
 #define TRNU_PORT_DFL    8000
 #define TRNSVR_HOST_DFL  "localhost"
-#define TRNSVR_PORT_DFL  27027
+#define TRNSVR_PORT_DFL  28000
 #endif //WITH_MBTNAV
 #define SZ_1M (1024 * 1024)
 #define SZ_1G (1024 * 1024 * 1024)
@@ -2971,87 +2971,87 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
             // (trn_decs<=0 && trn_decn<=0 )
             do_process=true;
         }
-    }
-    
-    // server: update (trn_server) client connections
-    netif_update_connections(trnsvr);
-    // server: service (trn_server) client requests
-    netif_reqres(trnsvr);
-    // server: update (trnu server) client connections
-    netif_update_connections(trnusvr);
-    // server: service (trnu server) client requests
-    netif_reqres(trnusvr);
-
-    if (do_process) {
         
-        if(NULL!=tnav && NULL!=mb1 && NULL!=cfg){
-            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_CYCLE_XT], mtime_dtime());
-            int test=-1;
-            
-            wmeast_t *mt = NULL;
-            wposet_t *pt = NULL;
-            trn_update_t trn_state={NULL,NULL,NULL,0},*pstate=&trn_state;
+        
+        // server: update (trn_server) client connections
+        netif_update_connections(trnsvr);
+        // server: service (trn_server) client requests
+        netif_reqres(trnsvr);
+        // server: update (trnu server) client connections
+        netif_update_connections(trnusvr);
+        // server: service (trnu server) client requests
+        netif_reqres(trnusvr);
+        
+        if (do_process) {
             
             if(NULL!=tnav && NULL!=mb1 && NULL!=cfg){
+                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_CYCLE_XT], mtime_dtime());
+                int test=-1;
                 
-                // get TRN update
-                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_UPDATE_XT], mtime_dtime());
+                wmeast_t *mt = NULL;
+                wposet_t *pt = NULL;
+                trn_update_t trn_state={NULL,NULL,NULL,0},*pstate=&trn_state;
                 
-                test=mbtrnpp_trn_update(tnav, mb1, &pt, &mt,cfg);
-                
-                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_UPDATE_XT], mtime_dtime());
-                
-                if( test==0){
-                    // get TRN bias estimates
-                    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_BIASEST_XT], mtime_dtime());
+                if(NULL!=tnav && NULL!=mb1 && NULL!=cfg){
                     
-                    test=mbtrnpp_trn_get_bias_estimates(tnav, pt, &pstate->pt_dat, &pstate->mle_dat, &pstate->mse_dat);
+                    // get TRN update
+                    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_UPDATE_XT], mtime_dtime());
                     
-                    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_BIASEST_XT], mtime_dtime());
+                    test=mbtrnpp_trn_update(tnav, mb1, &pt, &mt,cfg);
+                    
+                    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_UPDATE_XT], mtime_dtime());
                     
                     if( test==0){
-                        if(NULL!=pstate->pt_dat &&  NULL!= pstate->mle_dat && NULL!=pstate->mse_dat ){
-                            
-                            // get number of reinits
-                            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_REINIT_XT], mtime_dtime());
-                            
-                            pstate->reinit_count = wtnav_get_num_reinits(tnav);
-                            
-                            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_REINIT_XT], mtime_dtime());
-                            
-                            // publish to selected outputs
-                            mbtrnpp_trn_publish(pstate, cfg);
-                            
-                            retval=0;
-                            
+                        // get TRN bias estimates
+                        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_BIASEST_XT], mtime_dtime());
+                        
+                        test=mbtrnpp_trn_get_bias_estimates(tnav, pt, &pstate->pt_dat, &pstate->mle_dat, &pstate->mse_dat);
+                        
+                        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_BIASEST_XT], mtime_dtime());
+                        
+                        if( test==0){
+                            if(NULL!=pstate->pt_dat &&  NULL!= pstate->mle_dat && NULL!=pstate->mse_dat ){
+                                
+                                // get number of reinits
+                                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_REINIT_XT], mtime_dtime());
+                                
+                                pstate->reinit_count = wtnav_get_num_reinits(tnav);
+                                
+                                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_REINIT_XT], mtime_dtime());
+                                
+                                // publish to selected outputs
+                                mbtrnpp_trn_publish(pstate, cfg);
+                                
+                                retval=0;
+                                
+                            }else{
+                                PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat));
+                                mlog_tprintf(trn_ulog_id,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat);
+                                mlog_tprintf(trn_ulog_id,"ERR: ts[%.3lf] beams[%u] ping[%d] \n",mb1->sounding.ts, mb1->sounding.nbeams, mb1->sounding.ping_number);
+                                mlog_tprintf(trn_ulog_id,"ERR: lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n\n",mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.hdg, mb1->sounding.depth);
+                                
+                            }
                         }else{
-                            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat));
-                            mlog_tprintf(trn_ulog_id,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat);
-                            mlog_tprintf(trn_ulog_id,"ERR: ts[%.3lf] beams[%u] ping[%d] \n",mb1->sounding.ts, mb1->sounding.nbeams, mb1->sounding.ping_number);
-                            mlog_tprintf(trn_ulog_id,"ERR: lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n\n",mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.hdg, mb1->sounding.depth);
-                            
+                            PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_get_bias_estimates failed [%d]\n",test));
+                            //                mlog_tprintf(mbtrnpp_mlog_id,"ERR: trncli_get_bias_estimates failed [%d]\n",test);
                         }
                     }else{
-                        PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_get_bias_estimates failed [%d]\n",test));
-                        //                mlog_tprintf(mbtrnpp_mlog_id,"ERR: trncli_get_bias_estimates failed [%d]\n",test);
+                        PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_send_update failed [%d]\n",test));
+                        //            mlog_tprintf(mbtrnpp_mlog_id,"ERR: trncli_send_update failed [%d]\n",test);
                     }
-                }else{
-                    PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_send_update failed [%d]\n",test));
-                    //            mlog_tprintf(mbtrnpp_mlog_id,"ERR: trncli_send_update failed [%d]\n",test);
-                }
-                wmeast_destroy(mt);
-                wposet_destroy(pt);
-                if(NULL!=pstate->pt_dat)
+                    wmeast_destroy(mt);
+                    wposet_destroy(pt);
+                    if(NULL!=pstate->pt_dat)
                     free(pstate->pt_dat);
-                if(NULL!=pstate->mse_dat)
+                    if(NULL!=pstate->mse_dat)
                     free(pstate->mse_dat);
-                if(NULL!=pstate->mle_dat)
+                    if(NULL!=pstate->mle_dat)
                     free(pstate->mle_dat);
+                }
+                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_CYCLE_XT], mtime_dtime());
             }
-            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_CYCLE_XT], mtime_dtime());
         }
     }
-    
 
     return retval;
 }
