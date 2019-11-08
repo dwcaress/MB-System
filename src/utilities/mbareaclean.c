@@ -223,114 +223,32 @@ int main(int argc, char **argv) {
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
-	int kind;
-	char read_file[MB_PATH_MAXLINE];
-	char swathfile[MB_PATH_MAXLINE];
-	char swathfileread[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	void *datalist;
-	double file_weight;
-	int formatread;
-	int variable_beams;
-	int traveltime;
-	int beam_flagging;
-	double btime_d;
-	double etime_d;
-	struct mb_info_struct mb_info;
-
-	int time_i[7];
-	double time_d;
-	int pingsread;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	char *beamflag;
-	char *beamflagorg;
-	int *detect;
-	double *bath;
-	double *amp;
-	double *bathlon;
-	double *bathlat;
-	double *ss;
-	double *sslon;
-	double *sslat;
-	char comment[MB_COMMENT_MAXLINE];
-
-	/* mbareaclean control parameters */
+	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
+	bool output_bad = false;
+	bool std_dev_filter = false;
+	double std_dev_threshold = 2.0;
+	int std_dev_nmin = 10;
 	bool median_filter = false;
 	double median_filter_threshold = 0.25;
 	int median_filter_nmin = 10;
 	bool mediandensity_filter = false;
 	int mediandensity_filter_nmax = 0;
-	bool plane_fit = false;
-	double plane_fit_threshold = 0.05;
-	int plane_fit_nmin = 10;
-	bool std_dev_filter = false;
-	double std_dev_threshold = 2.0;
-	int std_dev_nmin = 10;
-	bool output_good = false;
-	bool output_bad = false;
-	int flag_detect = MB_DETECT_AMPLITUDE;
-	bool use_detect = false;
 	bool limit_beams = false;
+	bool output_good = false;
 	bool beam_in = true;
 	int min_beam = 0;
 	int max_beam = 0;
 	int max_beam_no = 0;
+	bool plane_fit = false;
+	double plane_fit_threshold = 0.05;
+	int plane_fit_nmin = 10;
 	double areabounds[4];
 	bool areaboundsset = false;
 	double binsize = 0.0;
 	bool binsizeset = false;
-	double dx, dy;
-	int nx, ny;
-	double mtodeglon;
-	double mtodeglat;
-	int pingmultiplicity;
-	int detect_status;
-	int detect_error;
-	int sensorhead;
-	int sensorhead_status = MB_SUCCESS;
-	int sensorhead_error = MB_ERROR_NO_ERROR;
+	int flag_detect = MB_DETECT_AMPLITUDE;
+	bool use_detect = false;
 
-	/* median filter parameters */
-	int binnum;
-	int binnummax;
-	double *bindepths;
-	double threshold;
-
-	/* counting parameters */
-	int files_tot = 0;
-	int pings_tot = 0;
-	int beams_tot = 0;
-	int beams_good_org_tot = 0;
-	int beams_flag_org_tot = 0;
-	int beams_null_org_tot = 0;
-
-	/* save file control variables */
-	char esffile[MB_PATH_MAXLINE];
-	struct mb_esf_struct esf;
-	int action;
-
-	double xx, yy;
-	int ix, iy, ib, kgrid;
-	double d1, d2;
-	int i1, i2;
-
-	strcpy(read_file, "datalist.mb-1");
-
-	/* process argument list */
 	{
 		bool errflg = false;
 		int c;
@@ -371,6 +289,9 @@ int main(int argc, char **argv) {
 			case 'm':
 			{
 				median_filter = true;
+				double d1;
+				int i1;
+				int i2;
 				const int n = sscanf(optarg, "%lf/%d/%d", &d1, &i1, &i2);
 				if (n > 0)
 					median_filter_threshold = d1;
@@ -401,6 +322,9 @@ int main(int argc, char **argv) {
 			{
 				plane_fit = true;
 				sscanf(optarg, "%lf", &plane_fit_threshold);
+				double d1;
+				double d2;
+				int i1;
 				const int n = sscanf(optarg, "%lf/%d/%lf", &d1, &i1, &d2);
 				if (n > 0)
 					plane_fit_threshold = d1;
@@ -508,13 +432,18 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
+
+	int error = MB_ERROR_NO_ERROR;
+	int formatread;
+	void *datalist;
 
 	/* if bounds not set get bounds of input data */
 	if (!areaboundsset) {
 		formatread = format;
+		struct mb_info_struct mb_info;
 		memset(&mb_info, 0, sizeof(struct mb_info_struct));
 		status = mb_get_info_datalist(verbose, read_file, &formatread, &mb_info, lonflip, &error);
 
@@ -528,13 +457,15 @@ int main(int argc, char **argv) {
 	}
 
 	/* calculate grid properties */
+	double mtodeglon;
+	double mtodeglat;
 	mb_coor_scale(verbose, 0.5 * (areabounds[2] + areabounds[3]), &mtodeglon, &mtodeglat);
 	if (binsize <= 0.0)
 		binsize = (areabounds[1] - areabounds[0]) / 101 / mtodeglon;
-	dx = binsize * mtodeglon;
-	dy = binsize * mtodeglat;
-	nx = 1 + (int)((areabounds[1] - areabounds[0]) / dx);
-	ny = 1 + (int)((areabounds[3] - areabounds[2]) / dy);
+	double dx = binsize * mtodeglon;
+	double dy = binsize * mtodeglat;
+	const int nx = 1 + (int)((areabounds[1] - areabounds[0]) / dx);
+	const int ny = 1 + (int)((areabounds[3] - areabounds[2]) / dy);
 	if (nx > 1 && ny > 1) {
 		dx = (areabounds[1] - areabounds[0]) / (nx - 1);
 		dy = (areabounds[3] - areabounds[2]) / (ny - 1);
@@ -640,6 +571,10 @@ int main(int argc, char **argv) {
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
 	bool read_data;
+	char swathfile[MB_PATH_MAXLINE];
+	char swathfileread[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
+	double file_weight;
 
 	/* open file list */
 	if (read_datalist) {
@@ -661,10 +596,57 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
+	void *mbio_ptr = NULL;
+	double btime_d;
+	double etime_d;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+	char *beamflag;
+	char *beamflagorg;
+	int *detect;
+	double *bath;
+	double *amp;
+	double *bathlon;
+	double *bathlat;
+	double *ss;
+	double *sslon;
+	double *sslat;
+
+	/* save file control variables */
+	char esffile[MB_PATH_MAXLINE];
+	struct mb_esf_struct esf;
+	int files_tot = 0;
+
+	int kind;
+	int pingsread;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char comment[MB_COMMENT_MAXLINE];
+
+       	void *store_ptr = NULL;
+
+	int pingmultiplicity;
+	int pings_tot = 0;
+	int beams_tot = 0;
+	int beams_good_org_tot = 0;
+	int beams_flag_org_tot = 0;
+	int beams_null_org_tot = 0;
+
 	/* loop over all files to be read */
 	while (read_data) {
 
 		/* check format and get format flags */
+		int variable_beams;
+		int traveltime;
+		int beam_flagging;
 		if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
 			char *message = NULL;
 			mb_error(verbose, error, &message);
@@ -831,14 +813,17 @@ int main(int argc, char **argv) {
 
 				/* get detections and ping multiplicity */
 				status = mb_get_store(verbose, mbio_ptr, &store_ptr, &error);
-				detect_status = mb_detects(verbose, mbio_ptr, store_ptr, &kind, &beams_bath, detect, &detect_error);
+				int detect_error;
+				const int detect_status = mb_detects(verbose, mbio_ptr, store_ptr, &kind, &beams_bath, detect, &detect_error);
 				if (detect_status != MB_SUCCESS) {
 					status = MB_SUCCESS;
 					for (int i = 0; i < beams_bath; i++) {
 						detect[i] = MB_DETECT_UNKNOWN;
 					}
 				}
-				sensorhead_status = mb_sensorhead(verbose, mbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
+				int sensorhead;
+				int sensorhead_error = MB_ERROR_NO_ERROR;
+				const int sensorhead_status = mb_sensorhead(verbose, mbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
 
 				/* allocate memory if necessary */
 				if (files[nfile - 1].nping >= files[nfile - 1].nping_alloc) {
@@ -909,12 +894,12 @@ int main(int argc, char **argv) {
 					max_beam = beams_bath - min_beam;
 
 				/* now loop over the beams and store the soundings in the grid bins */
-				for (ib = 0; ib < beams_bath; ib++) {
+				for (int ib = 0; ib < beams_bath; ib++) {
 					if (beamflagorg[ib] != MB_FLAG_NULL) {
 						/* get bin for current beam */
-						ix = (bathlon[ib] - areabounds[0] - 0.5 * dx) / dx;
-						iy = (bathlat[ib] - areabounds[2] - 0.5 * dy) / dy;
-						kgrid = ix * ny + iy;
+						const int ix = (bathlon[ib] - areabounds[0] - 0.5 * dx) / dx;
+						const int iy = (bathlat[ib] - areabounds[2] - 0.5 * dy) / dy;
+						const int kgrid = ix * ny + iy;
 
 						/* add sounding */
 						if (ix >= 0 && ix < nx && iy >= 0 && iy < ny) {
@@ -1017,12 +1002,21 @@ int main(int argc, char **argv) {
 	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
+
+	/* median filter parameters */
+	double *bindepths;
+	double threshold;
+
+	/* counting parameters */
+
 	/* loop over grid cells to find maximum number of soundings */
-	binnummax = 0;
-	for (ix = 0; ix < nx; ix++)
-		for (iy = 0; iy < ny; iy++) {
+	int binnummax = 0;
+	double xx;
+	double yy;
+	for (int ix = 0; ix < nx; ix++)
+		for (int iy = 0; iy < ny; iy++) {
 			/* get cell id */
-			kgrid = ix * ny + iy;
+			const int kgrid = ix * ny + iy;
 			xx = areabounds[0] + 0.5 * dx + ix * dx;
 			yy = areabounds[3] + 0.5 * dy + iy * dy;
 			binnummax = MAX(binnummax, gsndgnum[kgrid]);
@@ -1039,15 +1033,15 @@ int main(int argc, char **argv) {
 	/* deal with median filter */
 	if (median_filter) {
 		/* loop over grid cells applying median filter test */
-		for (ix = 0; ix < nx; ix++)
-			for (iy = 0; iy < ny; iy++) {
+		for (int ix = 0; ix < nx; ix++)
+			for (int iy = 0; iy < ny; iy++) {
 				/* get cell id */
-				kgrid = ix * ny + iy;
+				const int kgrid = ix * ny + iy;
 				xx = areabounds[0] + 0.5 * dx + ix * dx;
 				yy = areabounds[3] + 0.5 * dy + iy * dy;
 
 				/* load up array */
-				binnum = 0;
+				int binnum = 0;
 				for (int i = 0; i < gsndgnum[kgrid]; i++) {
 					getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
 					if (mb_beam_ok(sndg->sndg_beamflag)) {
@@ -1091,16 +1085,16 @@ int main(int argc, char **argv) {
 	/* deal with standard deviation filter */
 	if (std_dev_filter) {
 		/* loop over grid cells applying std dev filter test */
-		for (ix = 0; ix < nx; ix++)
-			for (iy = 0; iy < ny; iy++) {
+		for (int ix = 0; ix < nx; ix++)
+			for (int iy = 0; iy < ny; iy++) {
 				/* get cell id */
-				kgrid = ix * ny + iy;
+				const int kgrid = ix * ny + iy;
 				xx = areabounds[0] + 0.5 * dx + ix * dx;
 				yy = areabounds[3] + 0.5 * dy + iy * dy;
 
 				/* get mean */
 				double mean = 0.0;
-				binnum = 0;
+				int binnum = 0;
 				for (int i = 0; i < gsndgnum[kgrid]; i++) {
 					getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
 					if (mb_beam_ok(sndg->sndg_beamflag)) {
@@ -1155,6 +1149,7 @@ int main(int argc, char **argv) {
 		for (int j = 0; j < files[i].nsndg; j++) {
 			sndg = &(files[i].sndg[j]);
 			if (sndg->sndg_beamflag != sndg->sndg_beamflag_org) {
+				int action;
 				if (mb_beam_ok(sndg->sndg_beamflag)) {
 					action = MBP_EDIT_UNFLAG;
 				}
@@ -1195,7 +1190,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* free arrays */
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bindepths, &error);
 	for (int i = 0; i < nx * ny; i++)
 		if (gsndg[i] != NULL)
