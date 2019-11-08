@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
 	char output_file[MB_PATH_MAXLINE+12] = "";
 	bool output_file_set = false;
 
-	char route_file[MB_PATH_MAXLINE];
+	char route_file[MB_PATH_MAXLINE] = "";
 	bool route_file_set = false;
 
 	int smooth = 0;
