@@ -39,28 +39,36 @@
 #include "mb_process.h"
 #include "mb_status.h"
 #include "mbsys_reson7k.h"
-;
+
 const int MB7KPREPROCESS_ALLOC_CHUNK = 1000;
 const int MB7KPREPROCESS_PROCESS = 1;
 const int MB7KPREPROCESS_TIMESTAMPLIST = 2;
-const int MB7KPREPROCESS_TIMEFIX_NONE = 0;
-const int MB7KPREPROCESS_TIMEFIX_RESON = 1;
-const int MB7KPREPROCESS_TIMEFIX_EDGETECH = 2;
-const int MB7KPREPROCESS_TIMEDELAY_UNDEFINED = -1;
-const int MB7KPREPROCESS_TIMEDELAY_OFF = 0;
-const int MB7KPREPROCESS_TIMEDELAY_ON = 1;
-const int MB7KPREPROCESS_TIMELAG_OFF = 0;
-const int MB7KPREPROCESS_TIMELAG_CONSTANT = 1;
-const int MB7KPREPROCESS_TIMELAG_MODEL = 2;
-const int MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH = 1;
-const int MB7KPREPROCESS_KLUGE_ZEROALONGTRACKANGLES = 2;
-const int MB7KPREPROCESS_KLUGE_ZEROATTITUDECORRECTION = 3;
-const int MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE = 4;
-const int MB7KPREPROCESS_KLUGE_BEAMPATTERNTWEAK = 5;
-const int MB7KPREPROCESS_KLUGE_FIXTIMEJUMP = 6;
-const int MB7KPREPROCESS_KLUGE_FIXTIMEJUMPBEAMEDITS = 7;
-const int MB7KPREPROCESS_KLUGE_DONOTRECALCULATEBATHY = 8;
-const int MB7KPREPROCESS_KLUGE_BEAMPATTERNSNELLTWEAK = 9;
+typedef enum {
+    MB7KPREPROCESS_TIMEFIX_NONE = 0,
+    MB7KPREPROCESS_TIMEFIX_RESON = 1,
+    MB7KPREPROCESS_TIMEFIX_EDGETECH = 2,
+} timefix_t;
+typedef enum {
+    MB7KPREPROCESS_TIMEDELAY_UNDEFINED = -1,
+    MB7KPREPROCESS_TIMEDELAY_OFF = 0,
+    MB7KPREPROCESS_TIMEDELAY_ON = 1,
+} timedelay_t;
+typedef enum {
+    MB7KPREPROCESS_TIMELAG_OFF = 0,
+    MB7KPREPROCESS_TIMELAG_CONSTANT = 1,
+    MB7KPREPROCESS_TIMELAG_MODEL = 2,
+} timelag_t;
+typedef enum {
+    MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH = 1,
+    MB7KPREPROCESS_KLUGE_ZEROALONGTRACKANGLES = 2,
+    MB7KPREPROCESS_KLUGE_ZEROATTITUDECORRECTION = 3,
+    MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE = 4,
+    MB7KPREPROCESS_KLUGE_BEAMPATTERNTWEAK = 5,
+    MB7KPREPROCESS_KLUGE_FIXTIMEJUMP = 6,
+    MB7KPREPROCESS_KLUGE_FIXTIMEJUMPBEAMEDITS = 7,
+    MB7KPREPROCESS_KLUGE_DONOTRECALCULATEBATHY = 8,
+    MB7KPREPROCESS_KLUGE_BEAMPATTERNSNELLTWEAK = 9,
+} kluge_t;
 
 static const char program_name[] = "mb7kpreprocess";
 static const char help_message[] =
@@ -143,7 +151,7 @@ int main(int argc, char **argv) {
 
 	/* program mode */
 	int mode = MB7KPREPROCESS_PROCESS;
-	int fix_time_stamps = MB7KPREPROCESS_TIMEFIX_NONE;
+	timefix_t fix_time_stamps = MB7KPREPROCESS_TIMEFIX_NONE;
 	bool goodnavattitudeonly = true;
 
 	/* data structure pointers */
@@ -410,11 +418,11 @@ int main(int argc, char **argv) {
 	int *edget_ping_offset = NULL;
 
 	/* timedelay parameters */
-	int timedelaymode = MB7KPREPROCESS_TIMEDELAY_UNDEFINED;
+	timedelay_t timedelaymode = MB7KPREPROCESS_TIMEDELAY_UNDEFINED;
 	char timedelayfile[MB_PATH_MAXLINE];
 
 	/* timelag parameters */
-	int timelagmode = MB7KPREPROCESS_TIMELAG_OFF;
+	timelag_t timelagmode = MB7KPREPROCESS_TIMELAG_OFF;
 	double timelag = 0.0;
 	double timelagm = 0.0;
 	double timelagconstant = 0.0;
@@ -626,8 +634,13 @@ int main(int argc, char **argv) {
 				break;
 			case 'B':
 			case 'b':
-				sscanf(optarg, "%d", &fix_time_stamps);
+			{
+				int tmp;
+				sscanf(optarg, "%d", &tmp);
+				// TODO(schwehr): Range check
+				fix_time_stamps = (timefix_t)tmp;
 				break;
+			}
 			case 'C':
 			case 'c':
 				nscan = sscanf(optarg, "%lf/%lf", &mbtransmit_offset_roll, &mbtransmit_offset_pitch);
