@@ -482,7 +482,7 @@ static void *s_server_publish(void *arg)
         
         while (NULL!=source_file && !svr->stop) {
             double min_delay = ((double)svr->cfg->min_delay)/1000.0;
-            double max_delay = MAX_DELAY_DFL_SEC;
+            double max_delay = ((double)svr->cfg->max_delay)/1000.0;//MAX_DELAY_DFL_SEC;
 
             PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"running file[%s]\n",source_file->path));
             PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"min_delay[%.3lf] max_delay[%.3lf]\n",min_delay,max_delay));
@@ -1070,6 +1070,7 @@ static void s_show_help()
     "  --host=s       : host IP address or name\n"
     "  --port=n       : TCP/IP port\n"
     "  --min-delay=n  : minimum packet processing delay (msec)\n"
+    "  --max-delay=n  : maximum packet processing delay (msec)\n"
     "  --restart      : restart data when end of file is reached\n"
     "  --no-restart   : stop when end of file is reached\n"
     "  --statn=n      : output stats every n records\n"
@@ -1105,6 +1106,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"port", required_argument, NULL, 0},
         {"file", required_argument, NULL, 0},
         {"min-delay", required_argument, NULL, 0},
+        {"max-delay", required_argument, NULL, 0},
         {"statn", required_argument, NULL, 0},
         {"restart", no_argument, NULL, 0},
         {"no-restart", no_argument, NULL, 0},
@@ -1151,6 +1153,10 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                 // min-delay
                 else if (strcmp("min-delay", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->min_delay);
+                }
+                // max-delay
+                else if (strcmp("max-delay", options[option_index].name) == 0) {
+                    sscanf(optarg,"%d",&cfg->max_delay);
                 }
                 // statn
                 else if (strcmp("statn", options[option_index].name) == 0) {
@@ -1206,6 +1212,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
         fprintf(stderr,"restart   [%c]\n",(cfg->restart?'Y':'N'));
         fprintf(stderr,"statn     [%u]\n",cfg->statn);
         fprintf(stderr,"min-delay [%d]\n",cfg->min_delay);
+        fprintf(stderr,"max-delay [%d]\n",cfg->max_delay);
         fprintf(stderr,"nf        [%c]\n",(cfg->netframe_input?'Y':'N'));
         fprintf(stderr,"offset    [%"PRIu32"]\n",cfg->start_offset);
         fprintf(stderr,"xds       [%d]\n",cfg->xds);
@@ -1311,6 +1318,7 @@ int main(int argc, char **argv)
         strdup(EMU_HOST_DFL),
         EMU_PORT_DFL,
         MIN_DELAY_DFL_MSEC,
+        MAX_DELAY_DFL_MSEC,
         RESTART_DFL,
         STATN_DFL_REC,
         0,0,0,
