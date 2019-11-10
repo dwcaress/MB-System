@@ -356,7 +356,6 @@ int main(int argc, char **argv) {
 	bool projectednav_next_value = false;
 
 	/* MBIO read values */
-	void *mbio_ptr = NULL;
 	void *store_ptr;
 	int time_i[7];
 	double draft;
@@ -392,7 +391,9 @@ int main(int argc, char **argv) {
 	double seconds;
 
 	/* course calculation variables */
-	double dlon, dlat, minutes;
+	double dlon;
+	double dlat;
+	double minutes;
 	int degrees;
 	double mtodeglon;
 	double mtodeglat;
@@ -400,14 +401,19 @@ int main(int argc, char **argv) {
 	double course_old;
 	double time_d_old;
 	double time_interval;
-	double speed_made_good, speed_made_good_old;
-	double navlon_old, navlat_old;
+	double speed_made_good;
+	double speed_made_good_old;
+	double navlon_old;
+	double navlat_old;
 
 	/* projected coordinate system */
 	int proj_status;
 	void *pjptr = NULL;
-	double reference_lon, reference_lat;
-	double naveasting, navnorthing, deasting, dnorthing;
+	double reference_lon;
+	double reference_lat;
+	double naveasting;
+	double navnorthing;
+	double deasting;
 
 	/* loop over all files to be read */
 	while (read_data) {
@@ -433,6 +439,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* initialize reading the swath file */
+		void *mbio_ptr = NULL;
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
 			char *message;
@@ -445,23 +452,23 @@ int main(int argc, char **argv) {
 
 		/* allocate memory for data arrays */
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status =
+			status &=
 			    mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status =
+			status &=
 			    mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
@@ -542,7 +549,6 @@ int main(int argc, char **argv) {
 				                         anavlat, aspeed, aheading, adraft, aroll, apitch, aheave, &error);
 			}
 
-			/* increment counter */
 			if (error == MB_ERROR_NO_ERROR)
 				nread++;
 
@@ -867,7 +873,7 @@ int main(int argc, char **argv) {
 									                 &error);
 								}
 								else {
-									dnorthing = navnorthing;
+									const double dnorthing = navnorthing;
 									printsimplevalue(verbose, dnorthing, 15, 3, ascii, &invert_next_value, &signflip_next_value,
 									                 &error);
 								}
@@ -913,7 +919,7 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		status = mb_close(verbose, &mbio_ptr, &error);
+		status &= mb_close(verbose, &mbio_ptr, &error);
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
