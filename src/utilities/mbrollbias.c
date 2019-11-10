@@ -61,153 +61,159 @@ struct bathptr {
 
 static const char program_name[] = "MBROLLBIAS";
 static const char help_message[] =
-    "MBROLLBIAS is an utility used to assess roll bias of swath \nsonar systems using bathymetry data from two "
-    "swaths covering the \nsame seafloor in opposite directions. The program takes two input  \nfiles and "
-    "calculates best fitting planes for each dataset.   \nThe roll bias is calculated by solving for a common "
-    "roll bias\nfactor which explains the difference between the seafloor\nslopes observed on the two swaths.  "
-    "This approach assumes that \npitch bias is not a factor; this assumption is most correct when\nthe "
-    "heading of the two shiptracks are exactly opposite. The area is\ndivided into a number of rectangular "
-    "regions and calculations are done  \nin each region containing a sufficient number of data from both "
-    "\nswaths.  A positive roll bias value means that the the vertical \nreference used by the swath system is "
-    "biased to starboard, \ngiving rise to shallow bathymetry to port and deep bathymetry \nto starboard.";
+    "MBROLLBIAS is an utility used to assess roll bias of swath\n"
+    "sonar systems using bathymetry data from two swaths covering the\n"
+    "same seafloor in opposite directions. The program takes two input\n"
+    "files and calculates best fitting planes for each dataset.\n"
+    "The roll bias is calculated by solving for a common roll bias\n"
+    "factor which explains the difference between the seafloor\n"
+    "slopes observed on the two swaths.  This approach assumes that\n"
+    "pitch bias is not a factor; this assumption is most correct when\n"
+    "the heading of the two shiptracks are exactly opposite. The area is\n"
+    "divided into a number of rectangular regions and calculations are done\n"
+    "in each region containing a sufficient number of data from both\n"
+    "swaths.  A positive roll bias value means that the the vertical\n"
+    "reference used by the swath system is biased to starboard,\n"
+    "giving rise to shallow bathymetry to port and deep bathymetry\n"
+    "to starboard.";
 static const char usage_message[] =
     "mbrollbias -Dxdim/ydim -Fformat1/format2 -Ifile1 -Jfile2 -Llonflip -Rw/e/s/n -V -H]";
 
 /*--------------------------------------------------------------------*/
+// Subroutine by William Menke 1978
+// Solve a system of n linear equations in n unknowns
+// where n doesn't exceed 10
+// gaussian reduction with partial pivoting is used
+//      a               (sent, destroyed)       n by n matrix
+//      vec             (sent, overwritten)     n vector, replaced w/ solution
+//      nstore          (sent)                  dimension of a
+//      test            (sent)                  div by zero check number
+//      ierror          (returned)              zero on no error
+//      itriag          (sent)                  matrix triangularized only
+//                                               on TRUE useful when solving
+//                                               multiple systems with same a
 void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, int itriag) {
-	/* subroutine gauss, by william menke */
-	/* july 1978 (modified feb 1983, nov 85) */
+	// TODO(schwehr): Why are these static?
+	static int l1;
+	static int isub[10];
 
-	/* a subroutine to solve a system of n linear equations in n unknowns*/
-	/* where n doesn't exceed 10 */
-	/* gaussian reduction with partial pivoting is used */
-	/*      a               (sent, destroyed)       n by n matrix           */
-	/*      vec             (sent, overwritten)     n vector, replaced w/ solution*/
-	/*      nstore          (sent)                  dimension of a  */
-	/*      test            (sent)                  div by zero check number*/
-	/*      ierror          (returned)              zero on no error*/
-	/*      itriag          (sent)                  matrix triangularized only*/
-	/*                                               on TRUE useful when solving*/
-	/*                                               multiple systems with same a */
-	static int isub[10], l1;
-	int line[10], iet, ieb;
+	int line[10];
 	int i = 0;
-	int j, l, j2;
-	double big, testa, b, sum;
+	int j2;
+	int l;
 
-	iet = 0; /* initial error flags, one for triagularization*/
-	ieb = 0; /* one for backsolving */
+	int iet = 0; // initial error flags, one for triagularization
+	int ieb = 0; // one for backsolving
 
-	/* triangularize the matrix a*/
-	/* replacing the zero elements of the triangularized matrix */
-	/* with the coefficients needed to transform the vector vec */
+	// triangularize the matrix a
+	// replacing the zero elements of the triangularized matrix
+	// with the coefficients needed to transform the vector vec
 
-	if (itriag) { /* triangularize matrix */
-
-		for (j = 0; j < n; j++) { /*line is an array of flags*/
+	if (itriag) {  // triangularize matrix
+		for (int j = 0; j < n; j++) {  // line is an array of flags
 			line[j] = 0;
-			/* elements of a are not moved during pivoting*/
-			/* line=0 flags unused lines */
-		} /*end for j*/
+			// elements of a are not moved during pivoting
+			// line=0 flags unused lines
+		}
 
-		for (j = 0; j < n - 1; j++) {
-			/*  triangularize matrix by partial pivoting */
-			big = 0.0; /* find biggest element in j-th column*/
-			           /* of unused portion of matrix*/
+		for (int j = 0; j < n - 1; j++) {
+			//  triangularize matrix by partial pivoting
+			double big = 0.0; // find biggest element in j-th column
+			                  // of unused portion of matrix
 			for (l1 = 0; l1 < n; l1++) {
 				if (line[l1] == 0) {
-					testa = (double)fabs((double)(*(a + l1 * nstore + j)));
+					const double testa = (double)fabs((double)(*(a + l1 * nstore + j)));
 					if (testa > big) {
 						i = l1;
 						big = testa;
-					}          /*end if*/
-				}              /*end if*/
-			}                  /*end for l1*/
-			if (big <= test) { /* test for div by 0 */
+					}
+				}
+			}
+			if (big <= test) { // test for div by 0
 				iet = 1;
-			} /*end if*/
+			}
 
-			line[i] = 1; /* selected unused line becomes used line */
-			isub[j] = i; /* isub points to j-th row of tri. matrix */
+			line[i] = 1; // selected unused line becomes used line
+			isub[j] = i; // isub points to j-th row of tri. matrix
 
-			sum = 1.0 / (*(a + i * nstore + j));
-			/*reduce matrix towards triangle */
+			const double sum = 1.0 / (*(a + i * nstore + j));
+			// reduce matrix towards triangle
 			for (int k = 0; k < n; k++) {
 				if (line[k] == 0) {
-					b = (*(a + k * nstore + j)) * sum;
+					const double b = (*(a + k * nstore + j)) * sum;
 					for (l = j + 1; l < n; l++) {
 						*(a + k * nstore + l) = (*(a + k * nstore + l)) - b * (*(a + i * nstore + l));
-					} /*end for l*/
+					}
 					*(a + k * nstore + j) = b;
-				} /*end if*/
-			}     /*end for k*/
-		}         /*end for j*/
+				}
+			}
+		}
 
-		for (j = 0; j < n; j++) {
-			/*find last unused row and set its pointer*/
-			/*  this row contains the apex of the triangle*/
+		for (int j = 0; j < n; j++) {
+			// find last unused row and set its pointer
+			// this row contains the apex of the triangle
 			if (line[j] == 0) {
-				l1 = j; /*apex of triangle*/
+				l1 = j;  // apex of triangle
 				isub[n - 1] = j;
 				break;
-			} /*end if*/
-		}     /*end for j*/
+			}
+		}
+	}
 
-	} /*end if itriag true*/
+	// start backsolving
 
-	/*start backsolving*/
-
-	for (i = 0; i < n; i++) { /* invert pointers. line(i) now gives*/
-		                      /* row no in triang matrix of i-th row*/
-		                      /* of actual matrix */
+	for (i = 0; i < n; i++) { // invert pointers. line(i) now gives
+		                  // row no in triang matrix of i-th row
+		                  // of actual matrix
 		line[isub[i]] = i;
-	} /*end for i*/
+	}
 
-	for (j = 0; j < n - 1; j++) { /*transform the vector to match triang. matrix*/
-		b = vec[isub[j]];
+	for (int j = 0; j < n - 1; j++) { // transform the vector to match triang. matrix
+		const double b = vec[isub[j]];
 		for (int k = 0; k < n; k++) {
-			if (line[k] > j) { /* skip elements outside of triangle*/
+			if (line[k] > j) {  // skip elements outside of triangle
 				vec[k] = vec[k] - (*(a + k * nstore + j)) * b;
-			} /*end if*/
-		}     /*end for k*/
-	}         /*end for j*/
+			}
+		}
+	}
 
-	b = *(a + l1 * nstore + (n - 1)); /*apex of triangle*/
+	double b = *(a + l1 * nstore + (n - 1));  // apex of triangle
 	if (((double)fabs((double)b)) <= test) {
-		/*check for div by zero in backsolving*/
+		// check for div by zero in backsolving
 		ieb = 2;
-	} /*end if*/
+	}
 	vec[isub[n - 1]] = vec[isub[n - 1]] / b;
 
-	for (j = n - 2; j >= 0; j--) { /* backsolve rest of triangle*/
-		sum = vec[isub[j]];
+	for (int j = n - 2; j >= 0; j--) {  // backsolve rest of triangle
+		double sum = vec[isub[j]];
 		for (j2 = j + 1; j2 < n; j2++) {
 			sum = sum - vec[isub[j2]] * (*(a + isub[j] * nstore + j2));
-		} /*end for j2*/
+		}
 		b = *(a + isub[j] * nstore + j);
 		if (((double)fabs((double)b)) <= test) {
-			/* test for div by 0 in backsolving */
+			// test for div by 0 in backsolving
 			ieb = 2;
-		}                       /*end if*/
-		vec[isub[j]] = sum / b; /*solution returned in vec*/
-	}                           /*end for j*/
+		}
+		vec[isub[j]] = sum / b; // solution returned in vec
+	}
 
-	/*put the solution vector into the proper order*/
-
-	for (i = 0; i < n; i++) {     /* reorder solution */
-		for (int k = i; k < n; k++) { /* search for i-th solution element */
+	// put the solution vector into the proper order
+	// reorder solution
+	for (i = 0; i < n; i++) {
+		int j = 0;
+		for (int k = i; k < n; k++) { // search for i-th solution element
 			if (line[k] == i) {
 				j = k;
 				break;
-			}       /*end if*/
-		}           /*end for k*/
-		b = vec[j]; /* swap solution and pointer elements*/
+			}
+		}
+		b = vec[j]; // swap solution and pointer elements
 		vec[j] = vec[i];
 		vec[i] = b;
 		line[j] = line[i];
-	} /*end for i*/
+	}
 
-	*ierror = iet + ieb; /* set final error flag*/
+	*ierror = iet + ieb; // set final error flag
 }
 
 /*--------------------------------------------------------------------*/
@@ -247,84 +253,19 @@ int main(int argc, char **argv) {
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 
-	int error = MB_ERROR_NO_ERROR;
+	int iformat = format;
+	int jformat = format;
 
-	/* MBIO read control parameters */
-	double btime_d;
-	double etime_d;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	void *mbio_ptr = NULL;
+	char ifile[MB_PATH_MAXLINE] = "";
+	char jfile[MB_PATH_MAXLINE] = "";
 
-	/* mbrollbias control variables */
-	int iformat;
-	int jformat;
-	char ifile[MB_PATH_MAXLINE];
-	char jfile[MB_PATH_MAXLINE];
-	int xdim, ydim;
-
-	/* mbio read values */
-	int rpings;
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathlon = NULL;
-	double *bathlat = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *sslon = NULL;
-	double *sslat = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-
-	/* grid variables */
-	double deglontokm, deglattokm;
-	double mtodeglon, mtodeglat;
-	double dx, dy;
-	int *icount = NULL;
-	int *jcount = NULL;
-	struct bathptr *idata = NULL;
-	struct bathptr *jdata = NULL;
-	struct bath *zone = NULL;
-	int ndatafile;
-	double iaa, ibb, icc, ihh;
-	double jaa, jbb, jcc, jhh;
-	double hx, hy, dd;
-	double isine, icosine, jsine, jcosine;
-	double roll_bias;
-
-	/* matrix parameters */
-	int nmatrix = 3;
-	double matrix[3][3];
-	double vector[3];
-	double xx[3];
+	int xdim = 5;
+	int ydim = 5;
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 	    stderr if verbose > 1) */
 	FILE *outfp;
 
-	/* other variables */
-	int ii, jj, kk;
-	int ib, ix, iy, indx;
-
-	/* set default input and output */
-	iformat = format;
-	jformat = format;
-	strcpy(ifile, "\0");
-	strcpy(jfile, "\0");
-	xdim = 5;
-	ydim = 5;
-
-	/* process argument list */
 	{
 		bool errflg = false;
 		int c;
@@ -422,13 +363,66 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(outfp, "\n%s\n", help_message);
 			fprintf(outfp, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
 
-	/* get format if required */
+	int error = MB_ERROR_NO_ERROR;
+
 	if (format == 0)
 		mb_get_format(verbose, ifile, NULL, &format, &error);
+
+	double btime_d;
+	double etime_d;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+	void *mbio_ptr = NULL;
+
+	/* mbio read values */
+	int rpings;
+	int kind;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathlon = NULL;
+	double *bathlat = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *sslon = NULL;
+	double *sslat = NULL;
+	char comment[MB_COMMENT_MAXLINE];
+
+	/* grid variables */
+	int *icount = NULL;
+	int *jcount = NULL;
+	struct bathptr *idata = NULL;
+	struct bathptr *jdata = NULL;
+	struct bath *zone = NULL;
+	int ndatafile;
+	double iaa, ibb, icc, ihh;
+	double jaa, jbb, jcc, jhh;
+	double hx, hy, dd;
+	double isine, icosine, jsine, jcosine;
+	double roll_bias;
+
+	/* matrix parameters */
+	int nmatrix = 3;
+	double matrix[3][3];
+	double vector[3];
+	double xx[3];
+
+	/* other variables */
+	int jj, kk;
+	int ib, ix, iy, indx;
 
 	/* if bounds not specified then quit */
 	if (bounds[0] >= bounds[1] || bounds[2] >= bounds[3] || bounds[2] <= -90.0 || bounds[3] >= 90.0) {
@@ -438,11 +432,13 @@ int main(int argc, char **argv) {
 	}
 
 	/* calculate grid properties and other values */
+	double mtodeglon;
+	double mtodeglat;
 	mb_coor_scale(verbose, 0.5 * (bounds[2] + bounds[3]), &mtodeglon, &mtodeglat);
-	deglontokm = 0.001 / mtodeglon;
-	deglattokm = 0.001 / mtodeglat;
-	dx = (bounds[1] - bounds[0]) / (xdim);
-	dy = (bounds[3] - bounds[2]) / (ydim);
+	double deglontokm = 0.001 / mtodeglon;
+	double deglattokm = 0.001 / mtodeglat;
+	const double dx = (bounds[1] - bounds[0]) / (xdim);
+	const double dy = (bounds[3] - bounds[2]) / (ydim);
 
 	/* output info */
 	if (verbose >= 0) {
@@ -869,7 +865,7 @@ int main(int argc, char **argv) {
 				ihh = 0.0;
 				hx = 0.0;
 				hy = 0.0;
-				for (ii = 0; ii < nmatrix; ii++) {
+				for (int ii =  0; ii < nmatrix; ii++) {
 					vector[ii] = 0.0;
 					for (jj = 0; jj < nmatrix; jj++)
 						matrix[ii][jj] = 0.0;
@@ -883,7 +879,7 @@ int main(int argc, char **argv) {
 					xx[0] = 1.0;
 					xx[1] = zone[kk].x;
 					xx[2] = zone[kk].y;
-					for (ii = 0; ii < nmatrix; ii++) {
+					for (int ii = 0; ii < nmatrix; ii++) {
 						vector[ii] += zone[kk].d * xx[ii];
 						for (jj = 0; jj < nmatrix; jj++) {
 							matrix[ii][jj] += xx[ii] * xx[jj];
@@ -917,7 +913,7 @@ int main(int argc, char **argv) {
 				jhh = 0.0;
 				hx = 0.0;
 				hy = 0.0;
-				for (ii = 0; ii < nmatrix; ii++) {
+				for (int ii = 0; ii < nmatrix; ii++) {
 					vector[ii] = 0.0;
 					for (jj = 0; jj < nmatrix; jj++)
 						matrix[ii][jj] = 0.0;
@@ -931,7 +927,7 @@ int main(int argc, char **argv) {
 					xx[0] = 1.0;
 					xx[1] = zone[kk].x;
 					xx[2] = zone[kk].y;
-					for (ii = 0; ii < nmatrix; ii++) {
+					for (int ii = 0; ii < nmatrix; ii++) {
 						vector[ii] += zone[kk].d * xx[ii];
 						for (jj = 0; jj < nmatrix; jj++) {
 							matrix[ii][jj] += xx[ii] * xx[jj];
