@@ -138,7 +138,7 @@ static void s_wmeast_to_omeas(measT *dest, mt_cdata_t *src);
 
 wtnav_t *wtnav_dnew()
 {
-    wtnav_t *m = (typeof(m))malloc(sizeof(*m));
+    wtnav_t *m = (wtnav_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         TerrainNav *obj    = new TerrainNav();
@@ -152,7 +152,7 @@ wtnav_t *wtnav_dnew()
 //                   const int filterType, const int mapType, char* directory)
 wtnav_t *wtnav_new(trn_config_t *cfg)
 {
-    wtnav_t *m = (typeof(m))malloc(sizeof(*m));
+    wtnav_t *m = (wtnav_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         TerrainNav *obj = new TerrainNav(cfg->map_file, cfg->cfg_file, cfg->particles_file, cfg->filter_type, cfg->map_type, cfg->log_dir);
@@ -388,7 +388,7 @@ void *wtnav_obj_addr(wtnav_t *self)
 
 wcommst_t *wcommst_dnew()
 {
-    wcommst_t *m = (typeof(m))malloc(sizeof(*m));
+    wcommst_t *m = (wcommst_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         commsT *obj = new commsT();
@@ -865,7 +865,7 @@ static void s_wmeast_to_omeas(measT *dest, mt_cdata_t *src)
 
 wposet_t *wposet_dnew()
 {
-    wposet_t *m = (typeof(m))malloc(sizeof(*m));
+    wposet_t *m = (wposet_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         poseT *obj = new poseT();
@@ -877,7 +877,7 @@ wposet_t *wposet_dnew()
 
 wposet_t *wposet_cnew(poseT *pt)
 {
-    wposet_t *m  = (typeof(m))malloc(sizeof(*m));
+    wposet_t *m  = (wposet_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         poseT *pnew = new poseT();
@@ -1120,7 +1120,7 @@ int  wposet_unserialize(wposet_t **pdest, char *src, int len)
 
 wmeast_t *wmeast_dnew()
 {
-    wmeast_t *m  = (typeof(m))malloc(sizeof(*m));
+    wmeast_t *m  = (wmeast_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         measT *obj = new measT();
@@ -1132,7 +1132,7 @@ wmeast_t *wmeast_dnew()
 
 wmeast_t *wmeast_cnew(measT *mt)
 {
-    wmeast_t *m  = (typeof(m))malloc(sizeof(*m));
+    wmeast_t *m  = (wmeast_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         measT *mnew = new measT();
