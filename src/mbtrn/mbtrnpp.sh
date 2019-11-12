@@ -97,7 +97,7 @@ init_vars(){
     #    file:<name>           - mb1 data out, specified file name
     #    socket                - mb1 socket output, default host:port
     #    socket:<host>:<port>  - mb1 socket output, specified host:port
-    OPT_OUTPUT="--output=file:mbtrnpp_$$.mb1"
+	OPT_OUTPUT="--output=file:mbtrnpp_${SESSION_ID}.mb1"
     # beam swath (deg)
     OPT_SWATH="--swath=90"
     # number of beams to publish
@@ -136,7 +136,7 @@ init_vars(){
     # RESON1  134.89.32.107
     # RESON2  134.89.32.108
     # RESON3  134.89.32.110
-    # TRNSVR_PORT  27027
+    # TRNSVR_PORT  28000
     # TRNUSVR_PORT 8000
     OPT_TRNOUT="--trn-out=trnsvr:${RESON_HOST}:28000,trnu"
 
@@ -164,7 +164,10 @@ init_vars(){
     # TRN_FILT_POINTMASS  1
     # TRN_FILT_PARTICLE   2 (dfl)
     # TRN_FILT_BANK       3
-    #OPT_TRN_FTYPE="--trn-ftype=2"
+	#OPT_TRN_FTYPE="--trn-ftype=2"
+
+	# ignore multibeam gain threshold
+	#OPT_TRN_NOMBGAIN="--trn-nombgain"
 
     # verbose level (-5 to +2)
     # +2 is a LOT of info
@@ -177,7 +180,7 @@ init_vars(){
     # drop MB1 clients after OPT_MBHBT seconds
     OPT_MBHBT="--mbhbt=15"
     # drop TRN clients after OPT_MBHBT seconds
-    OPT_TRNHBT="--trnhbt=15"
+	#OPT_TRNHBT="--trnhbt=15"
     # drop TRNU clients after OPT_MBHBT seconds
     #OPT_TRNUHBT="--trnuhbt=0"
 
@@ -513,6 +516,11 @@ do
     vout "ovr OPT_TRN_FTYPE: $OPT_TRN_FTYPE"
     fi
 
+    if [ ${a:2:12} == "trn-nombgain" ]
+    then
+    OPT_TRN_NOMBGAIN=$a
+    vout "ovr OPT_TRN_NOMBGAIN: $OPT_TRN_NOMBGAIN"
+    fi
 
     if [ ${a:2:4} == "help" ]
     then
@@ -523,7 +531,7 @@ done
 
 
 # set cmdline options
-APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATS $OPT_MBHBN $OPT_MBHBT $OPT_TRNHBT $OPT_TRNUHBT $OPT_DELAY $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_LOG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT  $OPT_TRN_EN  $OPT_HELP"
+APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATS $OPT_MBHBN $OPT_MBHBT $OPT_TRNHBT $OPT_TRNUHBT $OPT_DELAY $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_LOG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_TRN_NOMBGAIN $OPT_TRN_EN  $OPT_HELP"
 
 # check required TRN options
 if [ ! -z "${OPT_TRN_EN}" ]
