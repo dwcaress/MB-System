@@ -819,7 +819,7 @@ int trnif_msg_handle_mb(void *msg, netif_t *self, msock_connection_t *peer, int 
 
 int trnif_msg_pub_mb(netif_t *self, msock_connection_t *peer, char *data, size_t len)
 {
-    // use default
+    // use default    
     return trnif_msg_pub(self,peer,data,len);
 }
 
