@@ -660,7 +660,7 @@ static void *s_server_publish(void *arg)
                                     int64_t status=-1;
                                     if( (status=msock_send(client->sock_if, cur_frame, pnf[CUR_FRAME]->packet_size))<=0){
                                         PEPRINT((stderr,"send failed [%"PRId64"] [%d/%s]\n",status,errno,strerror(errno)));
-                                        if ( errno==EPIPE || errno==ECONNRESET ) {
+                                        if ( errno==EPIPE || errno==ECONNRESET || errno==EBADF) {
                                             delete_client=true;
                                         }
                                     }
@@ -962,7 +962,7 @@ void *s_server_main(void *arg)
                                 do_close=false;
                                 PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"server waiting for client data fd[%d]\n",i));
                                 if (( nbytes = recv(i, iobuf, sizeof iobuf, 0)) <= 0) {
-                                    PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"handle client data fd[%d] nbytes[%d]\n",i,nbytes));
+                                    PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"ERR - recv failed fd[%d] nbytes[%d] [%d/%s]\n",i,nbytes,errno, strerror(errno)));
                                     // got error or connection closed by client
                                     if (nbytes == 0) {
                                         // connection closed
@@ -970,11 +970,13 @@ void *s_server_main(void *arg)
                                     } else if(nbytes<0) {
                                         fprintf(stderr,"ERR - recv failed socket[%d] [%d/%s]\n",i,errno,strerror(errno));
                                     }
+                                    do_close=true;
                                 }else{
                                     PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"server received request on socket [%d] len[%d]\n",i,nbytes));
                                     s_server_handle_request(svr,iobuf,nbytes,i);
                                 }
                                 if (do_close) {
+                                    fprintf(stderr,"ERR - closing fd[%d]\n", i);
                                     close(i); // bye!
                                 }
                                 FD_CLR(i, &master); // remove from master set
