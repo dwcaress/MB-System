@@ -65,7 +65,8 @@ BaseException::BaseException(const char* a_what)
          what_error = (char *)"No heap space for exception message\n";
       }
    }
-   AddMessage("\n\nAn exception has been thrown\n");
+   //AddMessage("\n\nAn exception has been thrown\n");
+   AddMessage("Exception: ");
    AddMessage(a_what);
    if (a_what) Tracer::AddTrace();
 }
