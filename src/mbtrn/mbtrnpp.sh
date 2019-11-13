@@ -41,11 +41,13 @@ CONLOG_PATH_DFL="./"
 
 # variables for command line overrides
 RESON_HOST="134.89.32.107"
+LOCAL_HOST="134.89.32.107"
+MBTRNPP_BIN_DFL="/usr/local/bin"
 
 # override environment settings
-#TRN_MAPFILES=/cygdrive/d/cygwin64/maps
-#TRN_LOGFILES=/cygdrive/d/cygwin64/config
-#TRN_DATAFILES=/cygdrive/d/cygwin64/logs
+TRN_MAPFILES_DFL=/cygdrive/d/cygwin64/maps
+TRN_DATAFILES_DFL=/cygdrive/d/cygwin64/config
+TRN_LOGFILES_DFL=/cygdrive/d/cygwin64/logs/mbtrnpp
 
 #################################
 # Script variable initialization
@@ -67,10 +69,10 @@ init_vars(){
     let CYCLES="${CYCLES_DFL}"
 
     # application path
-    APP_CMD="/usr/local/bin/mbtrnpp"
+	APP_CMD="${APP_CMD:-${MBTRNPP_BIN_DIR:-$MBTRNPP_BIN_DFL}/mbtrnpp}"
     # log directory
 #    OPT_LOGDIR="--log-directory=/home/mappingauv/mbtrnpptest"
-	OPT_LOGDIR="--log-directory=${TRN_LOGFILES:-/cygdrive/d/cygwin64/mbtrnpp-logs}/mbtrnpp"
+	OPT_LOGDIR="--log-directory=${TRN_LOGFILES:-$TRN_LOGFILES_DFL}"
 
     # input source
     # Define socket input
@@ -123,7 +125,7 @@ init_vars(){
     # RESON2  134.89.32.108
     # RESON3  134.89.32.110
     # MB1SVR_PORT 27000
-	OPT_MBOUT="--mb-out=mb1svr:${RESON_HOST}:27000"
+	OPT_MBOUT="--mb-out=mb1svr:${LOCAL_HOST}:27000"
 
     # TRN output selection
     #--trn-out=[options] select trn update output channels
@@ -138,7 +140,7 @@ init_vars(){
     # RESON3  134.89.32.110
     # TRNSVR_PORT  28000
     # TRNUSVR_PORT 8000
-    OPT_TRNOUT="--trn-out=trnsvr:${RESON_HOST}:28000,trnu"
+    OPT_TRNOUT="--trn-out=trnsvr:${LOCAL_HOST}:28000,trnu"
 
     # enable TRN processing
     # (requires map,par,log,cfg)
@@ -148,13 +150,13 @@ init_vars(){
     # Axial        12
     OPT_TRN_UTM="--trn-utm=10"
     # set TRN map file (required w/ TRN_EN)
-	OPT_TRN_MAP="--trn-map=${TRN_MAPFILES:-.}/PortTiles"
+	OPT_TRN_MAP="--trn-map=${TRN_MAPFILES:-$TRN_MAPFILES_DFL}/PortTiles"
     # set TRN particles file (required w/ TRN_EN)
-    OPT_TRN_PAR="--trn-par=${TRN_DATAFILES:-.}/particles.cfg"
+    OPT_TRN_PAR="--trn-par=${TRN_DATAFILES:-$TRN_DATAFILES_DFL}/particles.cfg"
     # set TRN log directory prefix (required w/ TRN_EN)
     OPT_TRN_LOG="--trn-log=mbtrnpp"
     # set TRN config file (required w/ TRN_EN)
-    OPT_TRN_CFG="--trn-cfg=${TRN_DATAFILES:-.}/mappingAUV_specs.cfg"
+    OPT_TRN_CFG="--trn-cfg=${TRN_DATAFILES:-$TRN_DATAFILES_DFL}/mappingAUV_specs.cfg"
     # set TRN map type
     # TRN_MAP_DEM  1
     # TRN_MAP_BO   2 (dfl)
@@ -223,12 +225,21 @@ printUsage(){
     echo "  -a cmd  : app command            [$APP_CMD]"
     echo "  -c n    : cycles (<=0 forever)   [$CYCLES]"
     echo "  -d path : enable console log, set directory"
-    echo "  -t      : test [print cmdine]"
+    echo "  -t      : test [print cmdline]"
     echo "  -v      : verbose output         [$VERBOSE]"
 	echo "  -w n    : loop delay (s)         [$LOOP_DELAY_SEC]"
 	echo "  -R addr : override reson host    [$RESON_HOST]"
+	echo "             affects: [--input]"
+	echo "  -L addr : override local host    [$LOCAL_HOST]"
+	echo "             affects : [--trn-out, --mb-out]"
+	echo "  -M path : override mbtrnpp dir   [$MBTRNPP_BIN_DIR]"
     echo "  -h      : print use message"
     echo ""
+	echo " Environment variables:"
+    echo "  TRN_MAPFILES - TRN map directory    [--trn-maps]"
+    echo "  TRN_CFGFILES - TRN config directory [--trn-cfg, --trn-par]"
+    echo "  TRN_LOGFILES - TRN log directory    [--trn-log]"
+	echo ""
 }
 
 ########################################
@@ -269,12 +280,12 @@ processCmdLine(){
     OPTIND=1
     #    vout "`basename $0` all args[$*]"
 
-while getopts a:c:d:e:hR:tvw: Option
+while getopts a:M:c:d:e:hL:R:tvw: Option
     do
         #    vout "processing $Option[$OPTARG]"
         case $Option in
-    a ) APP_CMD=$OPTARG
-    ;;
+        a ) APP_CMD=$OPTARG
+        ;;
         c ) let "CYCLES=$OPTARG"
         ;;
         d ) DO_CONLOG="Y"
@@ -283,6 +294,10 @@ while getopts a:c:d:e:hR:tvw: Option
         e ) CFG_SEL=$OPTARG
         ;;
         R ) RESON_HOST=$OPTARG
+        ;;
+        L ) LOCAL_HOST=$OPTARG
+        ;;
+        M ) MBTRNPP_BIN_DIR=$OPTARG
         ;;
         t ) DO_TEST="Y"
         ;;
