@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#define MB_NEED_SENSOR_TYPE
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
