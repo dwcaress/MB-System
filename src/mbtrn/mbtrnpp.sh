@@ -31,23 +31,18 @@ SESSION_ID=`date +"%Y%m%d-%H%M%S"`
 SESSION_NAME="mbtrnpp-console-${SESSION_ID}"
 CONLOG="${SESSION_NAME}.log"
 CONLOG_PATH_DFL="./"
+unset MBTRNPP_ENV
 
-# info
-# MVC-MB1 134.89.32.35
-# MVC-MB2 134.89.32.36
-# RESON1  134.89.32.107
-# RESON2  134.89.32.108
-# RESON3  134.89.32.110
-
-# variables for command line overrides
-RESON_HOST="134.89.32.107"
-LOCAL_HOST="134.89.32.107"
-MBTRNPP_BIN_DFL="/usr/local/bin"
-
-# override environment settings
-TRN_MAPFILES_DFL="/cygdrive/d/cygwin64/maps"
-TRN_DATAFILES_DFL="/cygdrive/d/cygwin64/config"
-TRN_LOGFILES_DFL="/cygdrive/d/cygwin64/logs/mbtrnpp"
+# set environment defaults
+# variables use environment values if set
+# and may be overriden on the command line
+# using an environment file or options
+TRN_RESONHOST=${TRN_RESONHOST:-134.89.32.107}
+TRN_OUTHOST=${TRN_OUTHOST:-134.89.32.107}
+TRN_MBTRNDIR=${TRN_MBTRNDIR:-/usr/local/bin}
+TRN_MAPFILES=${TRN_MAPFILES:-/cygdrive/d/cygwin64/maps}
+TRN_DATAFILES=${TRN_DATAFILES:-/cygdrive/d/cygwin64/config}
+TRN_LOGFILES=${TRN_LOGFILES:-}/cygdrive/d/cygwin64/logs/mbtrnpp}
 
 #################################
 # Script variable initialization
@@ -69,10 +64,10 @@ init_vars(){
     let CYCLES="${CYCLES_DFL}"
 
     # application path
-	APP_CMD="${APP_CMD:-${MBTRNPP_BIN_DIR:-$MBTRNPP_BIN_DFL}/mbtrnpp}"
+	APP_CMD="${APP_CMD:-${TRN_MBTRNDIR}/mbtrnpp}"
     # log directory
 #    OPT_LOGDIR="--log-directory=/home/mappingauv/mbtrnpptest"
-	OPT_LOGDIR="--log-directory=${TRN_LOGFILES:-$TRN_LOGFILES_DFL}"
+	OPT_LOGDIR="--log-directory=${TRN_LOGFILES}"
 
     # input source
     # Define socket input
@@ -89,7 +84,7 @@ init_vars(){
     # RESON3  134.89.32.110
     # RESON_PORT 7000
     # RESON_SIZE 0:default or size in bytes
-	OPT_INPUT="--input=socket:${RESON_HOST}:7000:0"
+	OPT_INPUT="--input=socket:${TRN_RESONHOST}:7000:0"
 
     # output destination
     # [alternatively, use --mb-out]
@@ -125,7 +120,7 @@ init_vars(){
     # RESON2  134.89.32.108
     # RESON3  134.89.32.110
     # MB1SVR_PORT 27000
-	OPT_MBOUT="--mb-out=mb1svr:${LOCAL_HOST}:27000"
+	OPT_MBOUT="--mb-out=mb1svr:${TRN_OUTHOST}:27000"
 
     # TRN output selection
     #--trn-out=[options] select trn update output channels
@@ -140,23 +135,26 @@ init_vars(){
     # RESON3  134.89.32.110
     # TRNSVR_PORT  28000
     # TRNUSVR_PORT 8000
-    OPT_TRNOUT="--trn-out=trnsvr:${LOCAL_HOST}:28000,trnu"
+    OPT_TRNOUT="--trn-out=trnsvr:${TRN_OUTHOST}:28000,trnu"
 
-    # enable TRN processing
+    # enable/disable TRN processing
     # (requires map,par,log,cfg)
-#   OPT_TRN_EN="--trn-en"
-    # set TRN UTM zone
+    OPT_TRN_EN="--trn-en"
+	OPT_TRN_DIS="--trn-dis"
+	OPT_TRN_SEL=${OPT_TRN_DIS}
+
+	# set TRN UTM zone
     # Monterey Bay 10
     # Axial        12
     OPT_TRN_UTM="--trn-utm=10"
     # set TRN map file (required w/ TRN_EN)
-	OPT_TRN_MAP="--trn-map=${TRN_MAPFILES:-$TRN_MAPFILES_DFL}/PortTiles"
+	OPT_TRN_MAP="--trn-map=${TRN_MAPFILES}/PortTiles"
     # set TRN particles file (required w/ TRN_EN)
-    OPT_TRN_PAR="--trn-par=${TRN_DATAFILES:-$TRN_DATAFILES_DFL}/particles.cfg"
+    OPT_TRN_PAR="--trn-par=${TRN_DATAFILES}/particles.cfg"
     # set TRN log directory prefix (required w/ TRN_EN)
     OPT_TRN_LOG="--trn-log=mbtrnpp"
     # set TRN config file (required w/ TRN_EN)
-    OPT_TRN_CFG="--trn-cfg=${TRN_DATAFILES:-$TRN_DATAFILES_DFL}/mappingAUV_specs.cfg"
+    OPT_TRN_CFG="--trn-cfg=${TRN_DATAFILES}/mappingAUV_specs.cfg"
     # set TRN map type
     # TRN_MAP_DEM  1
     # TRN_MAP_BO   2 (dfl)
@@ -192,7 +190,7 @@ init_vars(){
     OPT_STATS="--stats=30"
 
     # TRN processing decimation (cycles)
-     OPT_TRN_DECN="--decn=9"
+     OPT_TRN_DECN="--trn-decn=9"
     # TRN processing decimation (sec)
     #OPT_TRN_DECS="--trn-decs=0"
 
@@ -225,21 +223,25 @@ printUsage(){
     echo "  -a cmd  : app command            [$APP_CMD]"
     echo "  -c n    : cycles (<=0 forever)   [$CYCLES]"
     echo "  -d path : enable console log, set directory"
-    echo "  -t      : test [print cmdline]"
-    echo "  -v      : verbose output         [$VERBOSE]"
-	echo "  -w n    : loop delay (s)         [$LOOP_DELAY_SEC]"
-	echo "  -R addr : override reson host    [$RESON_HOST]"
-	echo "             affects: [--input]"
-	echo "  -L addr : override local host    [$LOCAL_HOST]"
-	echo "             affects : [--trn-out, --mb-out]"
-	echo "  -M path : override mbtrnpp dir   [$MBTRNPP_BIN_DIR]"
+    echo "  -e path : environment file"
     echo "  -h      : print use message"
+    echo "  -m path : override mbtrnpp dir   [$TRN_MBTRNDIR]"
+    echo "  -o addr : override local host    [$TRN_OUTHOST]"
+    echo "             affects : [--trn-out, --mb-out]"
+    echo "  -r addr : override reson host    [$TRN_RESONHOST]"
+    echo "             affects: [--input]"
+    echo "  -t      : test [print cmdlin e]"
+    echo "  -v      : verbose output         [$VERBOSE]"
+    echo "  -w n    : loop delay (s)         [$LOOP_DELAY_SEC]"
     echo ""
-	echo " Environment variables:"
-    echo "  TRN_MAPFILES - TRN map directory    [--trn-maps]"
-    echo "  TRN_CFGFILES - TRN config directory [--trn-cfg, --trn-par]"
-    echo "  TRN_LOGFILES - TRN log directory    [--trn-log]"
-	echo ""
+    echo " Environment variables:"
+    echo "  TRN_MAPFILES  - TRN map directory       [--trn-maps]"
+    echo "  TRN_CFGFILES  - TRN config directory    [--trn-cfg, --trn-par]"
+    echo "  TRN_LOGFILES  - TRN log directory       [--trn-log]"
+    echo "  TRN_RESONHOST - TRN reson (or emu7k) IP [--input]"
+    echo "  TRN_OUTHOST   - TRN server IP           [--trn-out, --mb-out]"
+    echo "  TRN_MBTRNDIR  - mbtrnpp directory       [mbtrnpp path]"
+    echo ""
 }
 
 ########################################
@@ -280,7 +282,7 @@ processCmdLine(){
     OPTIND=1
     #    vout "`basename $0` all args[$*]"
 
-while getopts a:M:c:d:e:hL:R:tvw: Option
+while getopts a:c:d:e:hm:o:r:tvw: Option
     do
         #    vout "processing $Option[$OPTARG]"
         case $Option in
@@ -291,21 +293,21 @@ while getopts a:M:c:d:e:hL:R:tvw: Option
         d ) DO_CONLOG="Y"
         CONLOG_PATH=$OPTARG
         ;;
-        e ) CFG_SEL=$OPTARG
+        e ) MBTRNPP_ENV=$OPTARG
         ;;
-        R ) RESON_HOST=$OPTARG
+        h) DO_HELP="Y"
         ;;
-        L ) LOCAL_HOST=$OPTARG
+        m ) TRN_MBTRNDIR=$OPTARG
         ;;
-        M ) MBTRNPP_BIN_DIR=$OPTARG
+        o ) TRN_OUTHOST=$OPTARG
+        ;;
+        r ) TRN_RESONHOST=$OPTARG
         ;;
         t ) DO_TEST="Y"
         ;;
         v ) VERBOSE="Y"
         ;;
         w ) LOOP_DELAY_SEC=$OPTARG
-        ;;
-        h) DO_HELP="Y"
         ;;
         *) exit 0 # getopts outputs error message
         ;;
@@ -323,7 +325,16 @@ while getopts a:M:c:d:e:hL:R:tvw: Option
 # Comand line settings override config
 # file settings
 
-# process command line args
+# pre-process cmdline to get env file
+processCmdLine "$@"
+
+# apply TRN environment file
+if [ "${MBTRNPP_ENV}" ]
+then
+source ${MBTRNPP_ENV}
+fi
+
+# process command line args (may override env)
 if [ "$#" -eq 0 ];then
     printUsage
     #  exit -1
@@ -345,7 +356,7 @@ echo ""
 
 # call init vars
 # delaying variable init until after command line processing
-# enables command line overrides (e.g. see RESON_HOST)
+# enables command line overrides (e.g. see TRN_RESONHOST)
 init_vars
 
 if [ ! -z ${DO_HELP} ] && [ ${DO_HELP} == "Y" ]
@@ -467,8 +478,14 @@ do
 
     if [ ${a:2:6} == "trn-en" ]
     then
-    OPT_TRN_EN=$a
-    vout "ovr OPT_TRN_EN: $OPT_TRN_EN"
+	OPT_TRN_SEL=${OPT_TRN_EN}
+    vout "ovr OPT_TRN_SEL: $OPT_TRN_SEL"
+    fi
+
+    if [ ${a:2:6} == "trn-dis" ]
+    then
+    OPT_TRN_SEL=${OPT_TRN_DIS}
+    vout "ovr OPT_TRN_SEL: $OPT_TRN_SEL"
     fi
 
     if [ ${a:2:7} == "trn-utm" ]
@@ -546,7 +563,7 @@ done
 
 
 # set cmdline options
-APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATS $OPT_MBHBN $OPT_MBHBT $OPT_TRNHBT $OPT_TRNUHBT $OPT_DELAY $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_LOG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_TRN_NOMBGAIN $OPT_TRN_EN  $OPT_HELP"
+APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATS $OPT_MBHBN $OPT_MBHBT $OPT_TRNHBT $OPT_TRNUHBT $OPT_DELAY $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_LOG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_TRN_NOMBGAIN $OPT_TRN_SEL  $OPT_HELP"
 
 # check required TRN options
 if [ ! -z "${OPT_TRN_EN}" ]
@@ -577,7 +594,7 @@ fi
 
 vout "Using options:"
 vout "config file  [$CFG_FILE]"
-vout "config name  [$CFG_SEL]"
+vout "env name     [$MBTRNPP_ENV]"
 vout "cycles       [$CYCLES]"
 vout "loop delay   [$LOOP_DELAY_SEC]"
 

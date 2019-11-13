@@ -391,6 +391,7 @@ int main(int argc, char **argv) {
                          "\t--delay=n\n"
                          "\t--stats=n\n"
                          "\t--trn-en\n"
+                         "\t--trn-dis\n"
                          "\t--trn-utm\n"
                          "\t--trn-map\n"
                          "\t--trn-par\n"
@@ -451,6 +452,7 @@ int main(int argc, char **argv) {
                                     {"soundings", required_argument, NULL, 0},
                                     {"median-filter", required_argument, NULL, 0},
                                     {"trn-en", no_argument, NULL, 0},
+                                    {"trn-dis", no_argument, NULL, 0},
                                     {"trn-utm", required_argument, NULL, 0},
                                     {"trn-map", required_argument, NULL, 0},
                                     {"trn-cfg", required_argument, NULL, 0},
@@ -932,10 +934,14 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
         sscanf(optarg, "%lf", &trn_status_interval_sec);
       }
 #ifdef WITH_MBTNAV
-      /* TRN enable */
-      else if (strcmp("trn-en", options[option_index].name) == 0) {
-        trn_enable = true;
-      }
+        /* TRN enable */
+        else if (strcmp("trn-en", options[option_index].name) == 0) {
+            trn_enable = true;
+        }
+        /* TRN disable */
+        else if (strcmp("trn-dis", options[option_index].name) == 0) {
+            trn_enable = false;
+        }
       /* TRN UTM zone */
       else if (strcmp("trn-utm", options[option_index].name) == 0) {
         sscanf(optarg, "%ld", &trn_utm_zone);
