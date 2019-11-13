@@ -105,7 +105,6 @@ int main(int argc, char **argv) {
 	char ifile[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
 	char ofile[MB_PATH_MAXLINE];
-	char ctdfile[MB_PATH_MAXLINE];
 	bool ofile_set = false;
 	int beams_bath;
 	int beams_amp;
@@ -135,7 +134,7 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	double heading, beamheading, beamheadingr;
+	double heading, beamheading;
 	double roll, rollr, beamroll, beamrollr;
 	double pitch, pitchr, beampitch, beampitchr;
 	double heave, beamheave;
@@ -591,10 +590,8 @@ int main(int argc, char **argv) {
 	int sonardepth_len;
 	int nhalffilter;
 	double sonardepth_filterweight;
-	double dtime, dtol, weight;
-	double factor;
+	double dtime;
 	double velocityx, velocityy;
-	int type_save;
 	char valuetype[MB_PATH_MAXLINE];
 	char value[MB_PATH_MAXLINE];
 	int year, month, day, hour, minute;
@@ -612,7 +609,6 @@ int main(int argc, char **argv) {
 	int sonardepth_source = MB_DATA_HEIGHT;
 	int ss_source = R7KRECID_7kV2SnippetData;
 
-	/* process argument list */
 	{
 		bool errflg = false;
 		int c;
@@ -3764,8 +3760,8 @@ int main(int argc, char **argv) {
 				j1 = MAX(i - nhalffilter, 0);
 				j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
 				for (int j = j1; j <= j2; j++) {
-					dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
-					weight = exp(-dtol * dtol);
+					const double dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
+					const double weight = exp(-dtol * dtol);
 					dat_sonardepth_sonardepthfilter[i] += weight * dat_sonardepth_sonardepth[j];
 					sonardepth_filterweight += weight;
 				}
@@ -3773,6 +3769,7 @@ int main(int argc, char **argv) {
 					dat_sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
 			for (int i = 0; i < ndat_sonardepth; i++) {
+				double factor;
 				if (dat_sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 					factor = 1.0;
 				else
@@ -3792,8 +3789,8 @@ int main(int argc, char **argv) {
 				j1 = MAX(i - nhalffilter, 0);
 				j2 = MIN(i + nhalffilter, nsonardepth - 1);
 				for (int j = j1; j <= j2; j++) {
-					dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
-					weight = exp(-dtol * dtol);
+					const double dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
+					const double weight = exp(-dtol * dtol);
 					sonardepth_sonardepthfilter[i] += weight * sonardepth_sonardepth[j];
 					sonardepth_filterweight += weight;
 				}
@@ -3801,6 +3798,7 @@ int main(int argc, char **argv) {
 					sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
 			for (int i = 0; i < nsonardepth; i++) {
+				double factor;
 				if (sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 					factor = 1.0;
 				else
@@ -3819,8 +3817,8 @@ int main(int argc, char **argv) {
 				j1 = MAX(i - nhalffilter, 0);
 				j2 = MIN(i + nhalffilter, nins - 1);
 				for (int j = j1; j <= j2; j++) {
-					dtol = (ins_time_d[j] - ins_time_d[i]) / sonardepthfilterlength;
-					weight = exp(-dtol * dtol);
+					const double dtol = (ins_time_d[j] - ins_time_d[i]) / sonardepthfilterlength;
+					const double weight = exp(-dtol * dtol);
 					ins_sonardepthfilter[i] += weight * ins_sonardepth[j];
 					sonardepth_filterweight += weight;
 				}
@@ -3828,6 +3826,7 @@ int main(int argc, char **argv) {
 					ins_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
 			for (int i = 0; i < nins; i++) {
+				double factor;
 				if (ins_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 					factor = 1.0;
 				else
@@ -3846,8 +3845,8 @@ int main(int argc, char **argv) {
 				j1 = MAX(i - nhalffilter, 0);
 				j2 = MIN(i + nhalffilter, ndsl - 1);
 				for (int j = j1; j <= j2; j++) {
-					dtol = (dsl_time_d[j] - dsl_time_d[i]) / sonardepthfilterlength;
-					weight = exp(-dtol * dtol);
+					const double dtol = (dsl_time_d[j] - dsl_time_d[i]) / sonardepthfilterlength;
+					const double weight = exp(-dtol * dtol);
 					dsl_sonardepthfilter[i] += weight * dsl_sonardepth[j];
 					sonardepth_filterweight += weight;
 				}
@@ -3855,6 +3854,7 @@ int main(int argc, char **argv) {
 					dsl_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
 			for (int i = 0; i < ndsl; i++) {
+				double factor;
 				if (dsl_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 					factor = 1.0;
 				else
@@ -3873,8 +3873,8 @@ int main(int argc, char **argv) {
 				j1 = MAX(i - nhalffilter, 0);
 				j2 = MIN(i + nhalffilter, ndsl - 1);
 				for (int j = j1; j <= j2; j++) {
-					dtol = (rock_time_d[j] - rock_time_d[i]) / sonardepthfilterlength;
-					weight = exp(-dtol * dtol);
+					const double dtol = (rock_time_d[j] - rock_time_d[i]) / sonardepthfilterlength;
+					const double weight = exp(-dtol * dtol);
 					rock_sonardepthfilter[i] += weight * rock_sonardepth[j];
 					sonardepth_filterweight += weight;
 				}
@@ -3882,6 +3882,7 @@ int main(int argc, char **argv) {
 					rock_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
 			for (int i = 0; i < nrock; i++) {
+				double factor;
 				if (rock_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 					factor = 1.0;
 				else
@@ -4221,6 +4222,7 @@ int main(int argc, char **argv) {
 				nfile_write++;
 
 				/* initialize ctd output file */
+				char ctdfile[MB_PATH_MAXLINE];
 				sprintf(ctdfile, "%s_ctd.txt", fileroot);
 				if ((tfp = fopen(ctdfile, "w")) == NULL) {
 					fprintf(stderr, "\nUnable to open ctd data file <%s> for writing\n", ctdfile);
@@ -4467,7 +4469,7 @@ int main(int argc, char **argv) {
 						header = &(bathymetry->header);
 						found = false;
 						for (int i = iping; i < nbatht && !found; i++) {
-							if (bathymetry->ping_number == batht_ping[i]) {
+                                                  if (bathymetry->ping_number == (unsigned int)batht_ping[i]) {
 								iping = i;
 								found = true;
 							}
@@ -5259,7 +5261,7 @@ int main(int argc, char **argv) {
 									else {
 										beamheading = heading;
 									}
-									beamheadingr = DTR * beamheading;
+									const double beamheadingr = DTR * beamheading;
 
 									/*
 									 * calculate beam angles for raytracing
@@ -5418,7 +5420,7 @@ int main(int argc, char **argv) {
 									else {
 										beamheading = heading;
 									}
-									beamheadingr = DTR * beamheading;
+									const double beamheadingr = DTR * beamheading;
 
 									/*
 									 * calculate beam angles for raytracing
@@ -5574,7 +5576,7 @@ int main(int argc, char **argv) {
 									else {
 										beamheading = heading;
 									}
-									beamheadingr = DTR * beamheading;
+									const double beamheadingr = DTR * beamheading;
 
 									/*
 									 * calculate beam angles for raytracing
@@ -5732,7 +5734,7 @@ int main(int argc, char **argv) {
 										else {
 											beamheading = heading;
 										}
-										beamheadingr = DTR * beamheading;
+										const double beamheadingr = DTR * beamheading;
 
 										/*
 										 * compensate for heave at bottom return time if not already compensated
@@ -7040,7 +7042,7 @@ int main(int argc, char **argv) {
 					if (time_d > ins_time_d[ins_output_index]) {
 						bluefin = &(istore->bluefin);
 						header = &(bluefin->header);
-						type_save = istore->type;
+						const int type_save = istore->type;
 						const int kind_save = istore->kind;
 						istore->kind = MB_DATA_NAV2;
 						istore->type = R7KRECID_Bluefin;
