@@ -554,6 +554,8 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
         // deserialize message bytes
         wcommst_unserialize(&ct,(char *)msg,TRN_MSG_SIZE);
         char msg_type =wcommst_get_msg_type(ct);
+        int param=0;
+        double dparam=0.0;
         
         if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
         	wcommst_show(ct,true,5);
@@ -567,8 +569,10 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 // return ACK/NACK
                 if(wtnav_initialized(trn)){
                     send_len=trnw_ack_msg(&msg_out);
+                    mlog_tprintf(self->mlog_id,"trn_init ACK id[%s:%s]\n", peer->chost, peer->service);
                 }else{
                     send_len=trnw_nack_msg(&msg_out);
+                    mlog_tprintf(self->mlog_id,"trn_init NACK id[%s:%s]\n", peer->chost, peer->service);
                 }
 
                 break;
@@ -668,47 +672,60 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 // reinit, return ACK
                 wtnav_reinit_filter(trn,true);
                 send_len=trnw_ack_msg(&msg_out);
+                mlog_tprintf(self->mlog_id,"reinit_filter id[%s:%s]\n", peer->chost, peer->service);
                 break;
 
             case TRN_MSG_SET_MW:
                 // set modified weighting, return ACK
-                wtnav_set_modified_weighting(trn, wcommst_get_parameter(ct));
+                param = wcommst_get_parameter(ct);
+                wtnav_set_modified_weighting(trn, param);
                 send_len=trnw_ack_msg(&msg_out);
-                break;
+                mlog_tprintf(self->mlog_id,"set_mw %d id[%s:%s]\n", param, peer->chost, peer->service);
+               break;
                 
             case TRN_MSG_SET_FR:
                 // set filter reinit, return ACK
-                wtnav_set_filter_reinit(trn, (wcommst_get_parameter(ct)==0?false:true));
+                param = wcommst_get_parameter(ct);
+                wtnav_set_filter_reinit(trn, (param==0?false:true));
                 send_len=trnw_ack_msg(&msg_out);
+                mlog_tprintf(self->mlog_id,"set_fr %d id[%s:%s]\n", param, peer->chost, peer->service);
                 break;
                 
             case TRN_MSG_SET_IMA:
                 // set filter reinit, return ACK
-                wtnav_set_interp_meas_attitude(trn, (wcommst_get_parameter(ct)==0?false:true));
+                param = wcommst_get_parameter(ct);
+                wtnav_set_interp_meas_attitude(trn, (param==0?false:true));
                 send_len=trnw_ack_msg(&msg_out);
+                mlog_tprintf(self->mlog_id,"set_ima %d id[%s:%s]\n", param, peer->chost, peer->service);
                 break;
 
             case TRN_MSG_SET_MIM:
                 // set modified weighting, return ACK
-                wtnav_set_map_interp_method(trn, wcommst_get_parameter(ct));
+                param = wcommst_get_parameter(ct);
+                wtnav_set_map_interp_method(trn, param);
                 send_len=trnw_ack_msg(&msg_out);
-                break;
+                mlog_tprintf(self->mlog_id,"set_mim %d id[%s:%s]\n", param, peer->chost, peer->service);
+               break;
 
             case TRN_MSG_SET_VDR:
                 // set vehicle drift rate, return ACK
-                wtnav_set_vehicle_drift_rate(trn, wcommst_get_vdr(ct));
+                dparam =wcommst_get_vdr(ct);
+                wtnav_set_vehicle_drift_rate(trn, dparam);
                 send_len=trnw_ack_msg(&msg_out);
+                mlog_tprintf(self->mlog_id,"set_vdr %lf id[%s:%s]\n", dparam, peer->chost, peer->service);
                 break;
 
             case TRN_MSG_FILT_GRD:
                 // set filter gradient, return ACK
-                if(wcommst_get_parameter(ct)==0){
+                param = wcommst_get_parameter(ct);
+               if(param==0){
                 	wtnav_use_highgrade_filter(trn);
                 }else{
                     wtnav_use_lowgrade_filter(trn);
                 }
                 send_len=trnw_ack_msg(&msg_out);
-                break;
+                mlog_tprintf(self->mlog_id,"set_filtgrd %d id[%s:%s]\n", param, peer->chost, peer->service);
+               break;
 
             case TRN_MSG_PING:
                 PDPRINT((stderr,"PING from peer[%s:%s]\n",peer->chost,peer->service));
