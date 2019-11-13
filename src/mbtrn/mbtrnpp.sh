@@ -45,9 +45,9 @@ LOCAL_HOST="134.89.32.107"
 MBTRNPP_BIN_DFL="/usr/local/bin"
 
 # override environment settings
-TRN_MAPFILES_DFL=/cygdrive/d/cygwin64/maps
-TRN_DATAFILES_DFL=/cygdrive/d/cygwin64/config
-TRN_LOGFILES_DFL=/cygdrive/d/cygwin64/logs/mbtrnpp
+TRN_MAPFILES_DFL="/cygdrive/d/cygwin64/maps"
+TRN_DATAFILES_DFL="/cygdrive/d/cygwin64/config"
+TRN_LOGFILES_DFL="/cygdrive/d/cygwin64/logs/mbtrnpp"
 
 #################################
 # Script variable initialization
