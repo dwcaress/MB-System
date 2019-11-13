@@ -41,8 +41,10 @@
 #include "mb_status.h"
 
 /* mode defines */
-const int MBBACKANGLE_AMP = 1;
-const int MBBACKANGLE_SS = 2;
+typedef enum {
+    MBBACKANGLE_AMP = 1,
+    MBBACKANGLE_SS = 2,
+} backangle_kind_t;
 const double MBBACKANGLE_INNERSWATHLIMIT = 15.0;
 const int MBBACKANGLE_BEAMPATTERN_EMPIRICAL = 0;
 const int MBBACKANGLE_BEAMPATTERN_SIDESCAN = 1;
@@ -124,7 +126,6 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 			i1 = i;
 		}
 		double amean = 0.0;
-		double asigma = 0.0;
 		double sum = 0.0;
 		double sumsq = 0.0;
 		double sumn = 0.0;
@@ -139,6 +140,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 				sumn += nmean[jj];
 			}
 		}
+		double asigma = 0.0;
 		if (sumn > 0.0) {
 			amean = sum / sumn;
 			asigma = sqrt((sumsq / sumn) - amean * amean);
@@ -202,7 +204,7 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 		sumsq += sigma[jj];
 		sumn += nmean[jj];
 	}
-	double asigma;
+	double asigma = 0.0;
 	if (sumn > 0.0) {
 		ref_amp = sum / sumn;
 		asigma = sqrt((sumsq / sumn) - ref_amp * ref_amp);
@@ -268,7 +270,6 @@ int main(int argc, char **argv) {
 	/* MBIO read control parameters */
 	char read_file[MB_PATH_MAXLINE];
 	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
 	char swathfile[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
@@ -281,7 +282,6 @@ int main(int argc, char **argv) {
 	int pixels_ss;
 
 	/* ESF File read */
-	char esffile[MB_PATH_MAXLINE];
 	struct mb_esf_struct esf;
 
 	/* MBIO read values */
@@ -329,7 +329,6 @@ int main(int argc, char **argv) {
 	double dangle;
 	double angle_start;
 	int pings_avg = 50;
-	int navg = 0;
 	int ntotavg = 0;
 	int *nmeanamp = NULL;
 	double *meanamp = NULL;
@@ -344,8 +343,6 @@ int main(int argc, char **argv) {
 	double *meantotss = NULL;
 	double *sigmatotss = NULL;
 	double altitude_default = 0.0;
-	double time_d_avg;
-	double altitude_avg;
 	double time_d_totavg;
 	double altitude_totavg;
 	int beammode = MBBACKANGLE_BEAMPATTERN_EMPIRICAL;
@@ -359,7 +356,6 @@ int main(int argc, char **argv) {
 	int ss_corr_slope = MBP_SSCORR_IGNORESLOPE;
 	int ss_type;
 	int ss_corr_type;
-	double ref_angle;
 	double ref_angle_default = 30.0;
 
 	/* amp vs angle grid variables */
@@ -389,19 +385,17 @@ int main(int argc, char **argv) {
 	char plot_cmd[MB_PATH_MAXLINE];
 	char *projection = "GenericLinear";
 
-	int ampkind;
+	backangle_kind_t ampkind;
 	double mtodeglon, mtodeglat;
 	double headingx, headingy;
 	double r[3], rr;
 	double v1[3], v2[3], v[3], vv;
 	double slope;
 	double bathy;
-	double altitude_use;
 	double angle;
 	double ampmin;
 	double ampmax;
 	double norm;
-	int nrec, namp, nss, ntable;
 	int nrectot = 0;
 	int namptot = 0;
 	int nsstot = 0;
@@ -412,7 +406,6 @@ int main(int argc, char **argv) {
 	double d1, d2;
 	int ix, jy, kgrid;
 	int kgrid00, kgrid10, kgrid01, kgrid11;
-
 
 	/* reset pings and timegap */
 	pings = 1;
@@ -435,12 +428,16 @@ int main(int argc, char **argv) {
 			switch (c) {
 			case 'A':
 			case 'a':
-				sscanf(optarg, "%d", &ampkind);
+			{
+				int tmp;
+				sscanf(optarg, "%d", &tmp);
+				ampkind = (backangle_kind_t)tmp;
 				if (ampkind == MBBACKANGLE_SS)
 					sidescan_on = true;
 				if (ampkind == MBBACKANGLE_AMP)
 					amplitude_on = true;
 				break;
+			}
 			case 'B':
 			case 'b':
 			{
@@ -623,7 +620,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       beammode:     %d\n", beammode);
 		fprintf(stderr, "dbg2       ssbeamwidth:  %f\n", ssbeamwidth);
 		fprintf(stderr, "dbg2       ssdepression: %f\n", ssdepression);
-		fprintf(stderr, "dbg2       ref_angle:    %f\n", ref_angle_default);
 		fprintf(stderr, "dbg2       pings_avg:    %d\n", pings_avg);
 		fprintf(stderr, "dbg2       angle_max:    %f\n", angle_max);
 		fprintf(stderr, "dbg2       altitude:     %f\n", altitude_default);
@@ -829,6 +825,7 @@ int main(int argc, char **argv) {
 
 	/* open file list */
 	if (read_datalist) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -847,19 +844,21 @@ int main(int argc, char **argv) {
 
 	/* Deal with ESF File if avialable */
 	if (status == MB_SUCCESS) {
+		char esffile[MB_PATH_MAXLINE];
 		status = mb_esf_load(verbose, program_name, swathfile, true, false, esffile, &esf, &error);
 	}
+	double ref_angle = 0.0;
 
 	/* loop over all files to be read */
 	while (read_data) {
 
 		/* obtain format array location - format id will
 		    be aliased to current id if old format id given */
-		status = mb_format(verbose, &format, &error);
+		status &= mb_format(verbose, &format, &error);
 
 		/* initialize reading the swath sonar file */
-		if ((status = mb_read_init(verbose, swathfile, format, 1, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
-		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+		if (mb_read_init(verbose, swathfile, format, 1, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
+		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
 			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
@@ -876,72 +875,72 @@ int main(int argc, char **argv) {
 			ss_corr_type = MBP_SSCORR_UNKNOWN;
 		else
 			ss_corr_type = MBP_SSCORR_SUBTRACTION;
-        if (format == MBF_3DWISSLR || format == MBF_3DWISSLP)
-            amp_corr_type = MBP_AMPCORR_DIVISION;
-        else
-            amp_corr_type = MBP_AMPCORR_SUBTRACTION;
+                if (format == MBF_3DWISSLR || format == MBF_3DWISSLP)
+			amp_corr_type = MBP_AMPCORR_DIVISION;
+	        else
+			amp_corr_type = MBP_AMPCORR_SUBTRACTION;
 		ref_angle = ref_angle_default;
 
 		/* allocate memory for data arrays */
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&beamflag, &error);
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, &error);
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_amp * sizeof(double), (void **)&amp, &error);
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_amp * sizeof(double), (void **)&amp, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathacrosstrack, &error);
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathalongtrack, &error);
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathalongtrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ss, &error);
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ssacrosstrack, &error);
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ssacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ssalongtrack, &error);
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ssalongtrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&depths, &error);
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&depths, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&depthsmooth, &error);
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&depthsmooth, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&depthacrosstrack, &error);
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&depthacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, (beams_bath + 1) * sizeof(double), (void **)&slopes, &error);
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, (beams_bath + 1) * sizeof(double), (void **)&slopes, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status =
+			status &=
 			    mb_mallocd(verbose, __FILE__, __LINE__, (beams_bath + 1) * sizeof(double), (void **)&slopeacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status =
+			status &=
 			    mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status =
+			status &=
 			    mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&depths, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&depths, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&depthsmooth, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&depthsmooth, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status =
+			status &=
 			    mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&depthacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&slopes, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&slopes, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 2 * sizeof(double), (void **)&slopeacrosstrack,
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 2 * sizeof(double), (void **)&slopeacrosstrack,
 			                           &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 2 * sizeof(double), (void **)&bathalongtrack,
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 2 * sizeof(double), (void **)&bathalongtrack,
 			                           &error);
 
 		/* if error initializing memory then quit */
@@ -1069,23 +1068,25 @@ int main(int argc, char **argv) {
 		}
 
 		/* initialize counting variables */
-		nrec = 0;
-		namp = 0;
-		nss = 0;
-		navg = 0;
-		ntable = 0;
+		int nrec = 0;
+		int namp = 0;
+		int nss = 0;
+		int navg = 0;
+		int ntable = 0;
+		double time_d_avg = 0.0;
+		double altitude_avg = 0.0;
 
 		/* read and process data */
 		while (error <= MB_ERROR_NO_ERROR) {
 
 			/* read a ping of data */
-			status = mb_get(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
+			status &= mb_get(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
 			                &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathacrosstrack,
 			                bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
 			/* Apply ESF Edits if available */
 			if (esf.nedit > 0 && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
-				status = mb_esf_apply(verbose, &esf, time_d, 0, beams_bath, beamflag, &error);
+				status &= mb_esf_apply(verbose, &esf, time_d, 0, beams_bath, beamflag, &error);
 			}
 
 			if ((navg > 0 && (error == MB_ERROR_TIME_GAP || error == MB_ERROR_EOF)) || (navg >= pings_avg) ||
@@ -1133,7 +1134,7 @@ int main(int argc, char **argv) {
 			if (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP) {
 				/* if needed, attempt to get sidescan correction type */
 				if (ss_corr_type == MBP_SSCORR_UNKNOWN) {
-					status = mb_sidescantype(verbose, mbio_ptr, NULL, &ss_type, &error);
+					status &= mb_sidescantype(verbose, mbio_ptr, NULL, &ss_type, &error);
 					if (status == MB_SUCCESS) {
 						if (ss_type == MB_SIDESCAN_LINEAR)
 							ss_corr_type = MBP_SSCORR_DIVISION;
@@ -1169,6 +1170,7 @@ int main(int argc, char **argv) {
 				headingy = cos(heading * DTR);
 
 				/* do the amplitude */
+				double altitude_use = 0.0;
 				if (amplitude_on)
 					for (int i = 0; i < beams_amp; i++) {
 						if (mb_beam_ok(beamflag[i])) {
@@ -1417,7 +1419,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* close the swath sonar file */
-		status = mb_close(verbose, &mbio_ptr, &error);
+		status &= mb_close(verbose, &mbio_ptr, &error);
 		/* Close ESF file if avialable and open */
 		if (esf.edit != NULL || esf.esffp != NULL)
 			mb_esf_close(verbose, &esf, &error);
@@ -1517,12 +1519,12 @@ int main(int argc, char **argv) {
 
 		/* set amplitude correction in parameter file */
 		if (amplitude_on)
-			status = mb_pr_update_ampcorr(verbose, swathfile, true, amptablefile, amp_corr_type, corr_symmetry, ref_angle,
+			status &= mb_pr_update_ampcorr(verbose, swathfile, true, amptablefile, amp_corr_type, corr_symmetry, ref_angle,
 			                              amp_corr_slope, grid.file, &error);
 
 		/* set sidescan correction in parameter file */
 		if (sidescan_on)
-			status = mb_pr_update_sscorr(verbose, swathfile, true, sstablefile, ss_corr_type, corr_symmetry, ref_angle,
+			status &= mb_pr_update_sscorr(verbose, swathfile, true, sstablefile, ss_corr_type, corr_symmetry, ref_angle,
 			                             ss_corr_slope, grid.file, &error);
 
 		/* output information */
@@ -1540,7 +1542,7 @@ int main(int argc, char **argv) {
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
-			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
+			if ((status &= mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 				read_data = true;
 			else
 				read_data = false;
@@ -1688,8 +1690,7 @@ int main(int argc, char **argv) {
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&grid.data, &error);
 	}
 
-	/* set program status */
-	status = MB_SUCCESS;
+	// status = MB_SUCCESS;
 
 	/* check memory */
 	if (verbose >= 4)
