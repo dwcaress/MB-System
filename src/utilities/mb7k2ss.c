@@ -458,7 +458,7 @@ int main(int argc, char **argv) {
 	if (ssflip)
 		fprintf(stdout, "     Sidescan port and starboard exchanged\n");
 
-	int linenumber;
+	int linenumber = 0;
 	/* set starting line number and output file if route read */
 	if (route_file_set || timelist_file_set) {
 		linenumber = startline;
@@ -482,7 +482,7 @@ int main(int argc, char **argv) {
 	double mtodeglon;
 	double mtodeglat;
 	int activewaypoint = 0;
-	double rangelast;
+	double rangelast = 0.0;  // TODO(schwehr): Might not be always set correctly.
 	int oktowrite;
 	double topo;
 	int nroutepoint = 0;
@@ -971,10 +971,10 @@ int main(int argc, char **argv) {
 	double pixel_width;
 
 	/* sidescan layout mode */
-	double ss_altitude;
+	double ss_altitude = 0.0;  // TODO(schwehr): Might not always be set correctly.
 
 	/* route and auto-line data */
-	double range;
+	double range = 0.0;  // TODO(schwehr): Might not always be set correctly.
 
 	/* bottom layout parameters */
 	int nangle = MB7K2SS_NUM_ANGLES;
@@ -1010,7 +1010,7 @@ int main(int argc, char **argv) {
 	int stbdchannelpick;
 	double ttime;
 	double ttime_min;
-	double ttime_min_use;
+	double ttime_min_use = 0.0;  // TODO(schwehr): Might not be properly set in all cases.
 	int istart;
 	double weight;
 	double factor;
