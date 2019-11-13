@@ -46,8 +46,10 @@ typedef enum {
     MBBACKANGLE_SS = 2,
 } backangle_kind_t;
 const double MBBACKANGLE_INNERSWATHLIMIT = 15.0;
-const int MBBACKANGLE_BEAMPATTERN_EMPIRICAL = 0;
-const int MBBACKANGLE_BEAMPATTERN_SIDESCAN = 1;
+typedef enum {
+    MBBACKANGLE_BEAMPATTERN_EMPIRICAL = 0,
+    MBBACKANGLE_BEAMPATTERN_SIDESCAN = 1,
+} beampattern_t;
 
 /* define grid structure */
 struct mbba_grid_struct {
@@ -345,7 +347,7 @@ int main(int argc, char **argv) {
 	double altitude_default = 0.0;
 	double time_d_totavg;
 	double altitude_totavg;
-	int beammode = MBBACKANGLE_BEAMPATTERN_EMPIRICAL;
+	beampattern_t beammode = MBBACKANGLE_BEAMPATTERN_EMPIRICAL;
 	double ssbeamwidth = 50.0;
 	double ssdepression = 20.0;
 	bool corr_slope = false;
@@ -403,7 +405,6 @@ int main(int argc, char **argv) {
 	int mode;
 	int plot_status;
 
-	double d1, d2;
 	int ix, jy, kgrid;
 	int kgrid00, kgrid10, kgrid01, kgrid11;
 
@@ -417,7 +418,6 @@ int main(int argc, char **argv) {
 	/* initialize grid */
 	memset(&grid, 0, sizeof(struct mbba_grid_struct));
 
-	/* process argument list */
 	{
 		bool errflg = false;
 		int c;
@@ -441,12 +441,16 @@ int main(int argc, char **argv) {
 			case 'B':
 			case 'b':
 			{
-				const int n = sscanf(optarg, "%d/%lf/%lf", &beammode, &d1, &d2);
+				double d1;
+				double d2;
+				int tmp;
+				const int n = sscanf(optarg, "%d/%lf/%lf", &tmp, &d1, &d2);
+				beammode = (beampattern_t)tmp;  // TODO(schwehr): Range check
 				if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN) {
 					if (n >= 2)
-						ssbeamwidth = d1;
+						ssbeamwidth = d1;  // TODO(schwehr): Range check
 					if (n >= 3)
-						ssdepression = d2;
+						ssdepression = d2;  // TODO(schwehr): Range check
 				}
 				break;
 			}
