@@ -905,7 +905,7 @@ int64_t r7kr_read_nf(r7kr_reader_t *self, byte *dest, uint32_t len,
 /// @param[in] self reader reference
 /// @param[in] dest data buffer
 /// @param[in] flags option flags
-/// @param[in] newer_than reject packets older than this (epoch time, decimal seconds)
+/// @param[in] newer_than reject packets older than this (decimal seconds)
 /// @param[in] timeout_msec read timeout
 /// @param[out] sync_bytes number of bytes skipped
 /// @return number of bytes returned on success, -1 otherwise (me_errno set)
@@ -1141,6 +1141,30 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
 //                    PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"drf time valid (unchecked)\n"));
                     state=R7KR_STATE_TIMESTAMP_VALID;
                 }else{
+#if 0 // TODO: switch after nov2019 cruises
+                    struct tm tm7k = {0};
+                    tm7k.tm_year = pdrf->_7ktime.year-1900;
+                    tm7k.tm_yday = pdrf->_7ktime.day+1;
+                    tm7k.tm_hour = pdrf->_7ktime.hours;
+                    tm7k.tm_min  = pdrf->_7ktime.minutes;
+                    tm7k.tm_sec  = pdrf->_7ktime.seconds;
+                    time_t tt7k  = mktime(&tm7k);
+                    time_t ttnow = time(NULL);
+                    // is this conversion needed if system time is UTC?
+                    struct tm tmnow;
+                    gmtime_r(&ttnow,&tmnow);
+                    ttnow = mktime(&tmnow);
+
+                    if(tt7k>=0 && ( (ttnow-tt7k)<newer_than ) ){
+                        //                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"drf time valid\n"));
+                        state=R7KR_STATE_TIMESTAMP_VALID;
+                    }else{
+                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - drf time invalid (stale) [%lu/%lu/%.3lf]\n",(unsigned long)tt7k,(unsigned long)ttnow,newer_than));
+                        MST_COUNTER_INC(self->stats->events[R7KR_EV_EDRFTIME]);
+                    }
+#endif
+
+                    // TODO: this won't compare to epoch time; use struct tm
                     double dtime = 0.0;
                     dtime += pdrf->_7ktime.day*SEC_PER_DAY;
                     dtime += pdrf->_7ktime.hours*SEC_PER_HOUR;
@@ -1150,7 +1174,7 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
 //                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"drf time valid\n"));
                         state=R7KR_STATE_TIMESTAMP_VALID;
                     }else{
-                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - drf time invalid [%.4lf/%.4lf]\n",dtime,newer_than));
+                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - drf time invalid (stale) [%.4lf/%.4lf]\n",dtime,newer_than));
                         MST_COUNTER_INC(self->stats->events[R7KR_EV_EDRFTIME]);
                     }
                 }

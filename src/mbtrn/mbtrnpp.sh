@@ -98,7 +98,7 @@ init_vars(){
     # beam swath (deg)
     OPT_SWATH="--swath=90"
     # number of beams to publish
-    OPT_SOUNDINGS="--soundings=21"
+    OPT_SOUNDINGS="--soundings=11"
     # input data format
     # [do not use with datalist input]
 	# FORMAT_RESON 88
