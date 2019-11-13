@@ -192,7 +192,7 @@ init_vars(){
     OPT_STATS="--stats=30"
 
     # TRN processing decimation (cycles)
-    #OPT_TRN_DECN="--decn=0"
+     OPT_TRN_DECN="--decn=9"
     # TRN processing decimation (sec)
     #OPT_TRN_DECS="--trn-decs=0"
 
