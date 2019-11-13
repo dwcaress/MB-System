@@ -42,7 +42,7 @@ TRN_OUTHOST=${TRN_OUTHOST:-134.89.32.107}
 TRN_MBTRNDIR=${TRN_MBTRNDIR:-/usr/local/bin}
 TRN_MAPFILES=${TRN_MAPFILES:-/cygdrive/d/cygwin64/maps}
 TRN_DATAFILES=${TRN_DATAFILES:-/cygdrive/d/cygwin64/config}
-TRN_LOGFILES=${TRN_LOGFILES:-}/cygdrive/d/cygwin64/logs/mbtrnpp}
+TRN_LOGFILES=${TRN_LOGFILES:-/cygdrive/d/cygwin64/logs/mbtrnpp}
 
 #################################
 # Script variable initialization
