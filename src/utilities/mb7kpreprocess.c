@@ -635,7 +635,407 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	char *result;  // TODO(schwehr): Localize
+	char valuetype[MB_PATH_MAXLINE];
+	char value[MB_PATH_MAXLINE];
+	double *ins_time_d = NULL;
+	double *ins_lon = NULL;
+	double *ins_lat = NULL;
+	double *ins_heading = NULL;
+	double *ins_roll = NULL;
+	double *ins_pitch = NULL;
+	double *ins_sonardepth = NULL;
+	double *ins_sonardepthfilter = NULL;
+	double *ins_altitude_time_d = NULL;
+	double *ins_altitude = NULL;
+	double *ins_speed_time_d = NULL;
+	double *ins_speed = NULL;
+
+	/* merge navigation and attitude from separate ins data file */
+	int nins = 0;
+	int nins_altitude = 0;
+	int nins_speed = 0;
+
 	int error = MB_ERROR_NO_ERROR;
+
+	/* read navigation and attitude data from AUV log file if specified */
+	if (insdata) {
+		/* count the data points in the auv log file */
+		FILE *tfp = fopen(insfile, "r");
+		if (tfp == NULL) {
+			fprintf(stderr, "\nUnable to open ins data file <%s> for reading\n", insfile);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_OPEN_FAIL);
+		}
+
+		// Read the ascii header to determine how to parse the binary data
+		int ins_len = 0;
+		int ins_altitude_index = -1;
+		int ins_time_d_index = -1;
+		int ins_lon_index = -1;
+		int ins_lat_index = -1;
+		int ins_roll_index = -1;
+		int ins_pitch_index = -1;
+		int ins_heading_index = -1;
+		int ins_sonardepth_index = -1;
+		int ins_speed_index = -1;
+		int ins_velocityx_index = -1;
+		int ins_velocityy_index = -1;
+		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer && strncmp(buffer, "# begin", 7) != 0) {
+			nscan = sscanf(buffer, "# %s %s", valuetype, value);
+			if (nscan == 2) {
+				if (strcmp(value, "time") == 0)
+					ins_time_d_index = ins_len;
+				if (strcmp(value, "mLonK") == 0)
+					ins_lon_index = ins_len;
+				if (strcmp(value, "mLatK") == 0)
+					ins_lat_index = ins_len;
+				if (strcmp(value, "longitude") == 0)
+					ins_lon_index = ins_len;
+				if (strcmp(value, "latitude") == 0)
+					ins_lat_index = ins_len;
+				if (strcmp(value, "mPhi") == 0)
+					ins_roll_index = ins_len;
+				if (strcmp(value, "mTheta") == 0)
+					ins_pitch_index = ins_len;
+				if (strcmp(value, "mPsi") == 0)
+					ins_heading_index = ins_len;
+				if (strcmp(value, "mDepth") == 0)
+					ins_sonardepth_index = ins_len;
+				if (strcmp(value, "mDepthK") == 0)
+					ins_sonardepth_index = ins_len;
+				if (strcmp(value, "mRollK") == 0)
+					ins_roll_index = ins_len;
+				if (strcmp(value, "mPitchK") == 0)
+					ins_pitch_index = ins_len;
+				if (strcmp(value, "mHeadK") == 0)
+					ins_heading_index = ins_len;
+				if (strcmp(value, "mAltitude") == 0)
+					ins_altitude_index = ins_len;
+				if (strcmp(value, "mWaterSpeed") == 0)
+					ins_speed_index = ins_len;
+				if (strcmp(value, "mVbodyxK") == 0)
+					ins_velocityx_index = ins_len;
+				if (strcmp(value, "mVbodyyK") == 0)
+					ins_velocityy_index = ins_len;
+				// if (strcmp(value, "mVbodyzK") == 0)
+				// 	ins_velocityz_index = ins_len;
+
+				if (strcmp(valuetype, "double") == 0)
+					ins_len += 8;
+				else if (strcmp(valuetype, "integer") == 0)
+					ins_len += 4;
+				else if (strcmp(valuetype, "timeTag") == 0)
+					ins_len += 8;
+			}
+		}
+
+		/*
+		 * count the binary data records described by the header then
+		 * rewind the file to the start of the binary data
+		 */
+		const int startdata = ftell(tfp);
+		nins = 0;
+		while (fread(buffer, ins_len, 1, tfp) == 1) {
+			nins++;
+		}
+		fseek(tfp, startdata, 0);
+
+		/* allocate arrays for ins data */
+		if (nins > 0) {
+			status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_time_d, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_lon, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_lat, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_heading, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_roll, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_pitch, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_sonardepth, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_sonardepthfilter, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_altitude_time_d, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_altitude, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_speed_time_d, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_speed, &error);
+			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
+				mb_error(verbose, error, &message);
+				fprintf(stderr, "\nMBIO Error allocating ins data arrays:\n%s\n", message);
+				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				exit(error);
+			}
+		}
+
+		/* if no ins data then quit */
+		else {
+			fprintf(stderr, "\nUnable to read data from MBARI AUV navigation file <%s>\n", insfile);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_DATA);
+		}
+
+		/* read the data points in the auv log file */
+		nins = 0;
+		nins_altitude = 0;
+		nins_speed = 0;
+		while (fread(buffer, ins_len, 1, tfp) == 1) {
+			if (ins_time_d_index >= 0)
+				mb_get_binary_double(true, &buffer[ins_time_d_index], &(ins_time_d[nins]));
+
+			if (ins_lon_index >= 0)
+				mb_get_binary_double(true, &buffer[ins_lon_index], &(ins_lon[nins]));
+			ins_lon[nins] *= RTD;
+
+			if (ins_lat_index >= 0)
+				mb_get_binary_double(true, &buffer[ins_lat_index], &(ins_lat[nins]));
+			ins_lat[nins] *= RTD;
+
+			if (ins_roll_index >= 0)
+				mb_get_binary_double(true, &buffer[ins_roll_index], &(ins_roll[nins]));
+			ins_roll[nins] *= RTD;
+
+			if (ins_pitch_index >= 0)
+				mb_get_binary_double(true, &buffer[ins_pitch_index], &(ins_pitch[nins]));
+			ins_pitch[nins] *= RTD;
+
+			if (ins_heading_index >= 0)
+				mb_get_binary_double(true, &buffer[ins_heading_index], &(ins_heading[nins]));
+			ins_heading[nins] *= RTD;
+
+			if (ins_sonardepth_index >= 0)
+				mb_get_binary_double(true, &buffer[ins_sonardepth_index], &(ins_sonardepth[nins]));
+			ins_sonardepth[nins] += sonardepthoffset;
+
+			if (ins_altitude_index >= 0)
+				mb_get_binary_double(true, &buffer[ins_altitude_index], &(ins_altitude[nins_altitude]));
+			ins_altitude_time_d[nins_altitude] = ins_time_d[nins];
+
+			if (ins_speed_index >= 0)
+				mb_get_binary_double(true, &buffer[ins_speed_index], &(ins_speed[nins_speed]));
+			ins_speed_time_d[nins_speed] = ins_time_d[nins];
+
+			if (ins_velocityx_index >= 0 && ins_velocityy_index >= 0) {
+				double velocityx;
+				double velocityy;
+				mb_get_binary_double(true, &buffer[ins_velocityx_index], &velocityx);
+				mb_get_binary_double(true, &buffer[ins_velocityy_index], &velocityy);
+				ins_speed[nins_speed] = sqrt(velocityx * velocityx + velocityy * velocityy);
+				ins_speed_time_d[nins_speed] = ins_time_d[nins];
+			}
+			nins++;
+			if (ins_altitude[nins_altitude] < 1000.0)
+				nins_altitude++;
+			if (ins_speed[nins_speed] > 0.0)
+				nins_speed++;
+		}
+		fclose(tfp);
+
+		/* output info */
+		if (nins > 0) {
+			mb_get_date(verbose, ins_time_d[0], btime_i);
+			mb_get_date(verbose, ins_time_d[nins - 1], etime_i);
+			fprintf(stderr,
+			        "%d INS data records read from %s  Start:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  End:%4.4d/%2.2d/%2.2d "
+			        "%2.2d:%2.2d:%2.2d.%6.6d\n",
+			        nins, insfile, btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6], etime_i[0],
+			        etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
+		}
+		else
+			fprintf(stderr, "No INS data read from %s....\n", insfile);
+	}
+
+	/* merge navigation and attitude from separate Steve Rock data file */
+	int nrock = 0;
+	double *rock_time_d = NULL;
+	double *rock_lon = NULL;
+	double *rock_lat = NULL;
+	double *rock_heading = NULL;
+	double *rock_roll = NULL;
+	double *rock_pitch = NULL;
+	double *rock_sonardepth = NULL;
+	double *rock_sonardepthfilter = NULL;
+
+	/* read navigation and attitude data from rock file if specified */
+	if (rockdata) {
+		/* count the data points in the rock file */
+		FILE *tfp = fopen(rockfile, "r");
+		if (tfp == NULL) {
+			fprintf(stderr, "\nUnable to open rock data file <%s> for reading\n", rockfile);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_OPEN_FAIL);
+		}
+		/* count the data records */
+		nrock = 0;
+		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer)
+			if (buffer[0] != '#')
+				nrock++;
+		rewind(tfp);
+
+		/* allocate arrays for rock data */
+		if (nrock > 0) {
+			status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_time_d, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_lon, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_lat, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_sonardepth, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_sonardepthfilter, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_heading, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_roll, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_pitch, &error);
+			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
+				mb_error(verbose, error, &message);
+				fprintf(stderr, "\nMBIO Error allocating rock data arrays:\n%s\n", message);
+				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				exit(error);
+			}
+		}
+		/* if no rock data then quit */
+		else {
+			fprintf(stderr, "\nUnable to read data from rock file <%s>\n", rockfile);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_DATA);
+		}
+
+		/* read the data points in the rock file */
+		nrock = 0;
+		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer) {
+			if (buffer[0] != '#')
+				if (sscanf(buffer, "%lf %lf %lf %lf %lf %lf %lf", &rock_time_d[nrock], &rock_lon[nrock], &rock_lat[nrock],
+				           &rock_sonardepth[nrock], &rock_heading[nrock], &rock_roll[nrock], &rock_pitch[nrock]) == 7) {
+					nrock++;
+				}
+		}
+		fclose(tfp);
+
+		/* output info */
+		if (nrock > 0) {
+			mb_get_date(verbose, rock_time_d[0], btime_i);
+			mb_get_date(verbose, rock_time_d[nrock - 1], etime_i);
+			fprintf(stderr,
+			        "%d Rock format nav records read from %s  Start:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  "
+			        "End:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+			        nrock, rockfile, btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
+			        etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
+		}
+		else
+			fprintf(stderr, "No Rock format nav data read from %s....\n", rockfile);
+	}
+
+	/* merge navigation and attitude from separate WHOI DSL data file */
+	int ndsl = 0;
+	double *dsl_time_d = NULL;
+	double *dsl_lon = NULL;
+	double *dsl_lat = NULL;
+	double *dsl_heading = NULL;
+	double *dsl_roll = NULL;
+	double *dsl_pitch = NULL;
+	double *dsl_sonardepth = NULL;
+	double *dsl_sonardepthfilter = NULL;
+
+	int time_i[7];
+
+	/* read navigation and attitude data from dsl file if specified */
+	if (dsldata) {
+		/* count the data points in the dsl file */
+		FILE *tfp = fopen(dslfile, "r");
+		if (tfp == NULL) {
+			fprintf(stderr, "\nUnable to open dsl data file <%s> for reading\n", dslfile);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_OPEN_FAIL);
+		}
+		/* count the data records */
+		ndsl = 0;
+		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer)
+			if (buffer[0] != '#')
+				ndsl++;
+		rewind(tfp);
+
+		/* allocate arrays for dsl data */
+		if (ndsl > 0) {
+			status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_time_d, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_lon, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_lat, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_sonardepth, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_sonardepthfilter, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_heading, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_roll, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_pitch, &error);
+			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
+				mb_error(verbose, error, &message);
+				fprintf(stderr, "\nMBIO Error allocating dsl data arrays:\n%s\n", message);
+				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				exit(error);
+			}
+		}
+		/* if no dsl data then quit */
+		else {
+			fprintf(stderr, "\nUnable to read data from dsl file <%s>\n", dslfile);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_DATA);
+		}
+
+		/* read the data points in the dsl file */
+		ndsl = 0;
+		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer) {
+			if (buffer[0] != '#') {
+	int year, month, day, hour, minute;
+	double second;
+	double id;
+				char sensor[24];
+				nscan = sscanf(buffer, "PPL %d/%d/%d %d:%d:%lf %s %lf %lf %lf %lf %lf %lf %lf", &year, &month, &day, &hour,
+				               &minute, &second, sensor, &dsl_lat[ndsl], &dsl_lon[ndsl], &dsl_sonardepth[ndsl],
+				               &dsl_heading[ndsl], &dsl_pitch[ndsl], &dsl_roll[ndsl], &id);
+				if (nscan == 14) {
+					time_i[0] = year;
+					time_i[1] = month;
+					time_i[2] = day;
+					time_i[3] = hour;
+					time_i[4] = minute;
+					time_i[5] = (int)second;
+					time_i[6] = (int)((second - time_i[5]) * 1000000);
+					mb_get_time(verbose, time_i, &dsl_time_d[ndsl]);
+					ndsl++;
+				}
+			}
+		}
+		fclose(tfp);
+
+		/* output info */
+		if (ndsl > 0) {
+			mb_get_date(verbose, dsl_time_d[0], btime_i);
+			mb_get_date(verbose, dsl_time_d[ndsl - 1], etime_i);
+			fprintf(stderr,
+			        "%d DLS format nav records read from %s  Start:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  "
+			        "End:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+			        ndsl, dslfile, btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6], etime_i[0],
+			        etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
+		}
+		else
+			fprintf(stderr, "No DSL format nav data read from %s....\n", dslfile);
+	}
 
 	/* MBIO read control parameters */
 	void *datalist;
@@ -661,7 +1061,6 @@ int main(int argc, char **argv) {
 	struct mbsys_reson7k_struct *istore = NULL;
 	void *ombio_ptr = NULL;
 	int kind;
-	int time_i[7];
 	int time_j[5];
 	double time_d;
 	double navlon;
@@ -835,44 +1234,6 @@ int main(int argc, char **argv) {
 	double last_fsdwsslo_time_d = 0.0;
 	double last_fsdwsshi_time_d = 0.0;
 
-	/* merge navigation and attitude from separate Steve Rock data file */
-	int nrock = 0;
-	double *rock_time_d = NULL;
-	double *rock_lon = NULL;
-	double *rock_lat = NULL;
-	double *rock_heading = NULL;
-	double *rock_roll = NULL;
-	double *rock_pitch = NULL;
-	double *rock_sonardepth = NULL;
-	double *rock_sonardepthfilter = NULL;
-
-	/* merge navigation and attitude from separate WHOI DSL data file */
-	int ndsl = 0;
-	double *dsl_time_d = NULL;
-	double *dsl_lon = NULL;
-	double *dsl_lat = NULL;
-	double *dsl_heading = NULL;
-	double *dsl_roll = NULL;
-	double *dsl_pitch = NULL;
-	double *dsl_sonardepth = NULL;
-	double *dsl_sonardepthfilter = NULL;
-
-	/* merge navigation and attitude from separate ins data file */
-	int nins = 0;
-	int nins_altitude = 0;
-	int nins_speed = 0;
-	double *ins_time_d = NULL;
-	double *ins_lon = NULL;
-	double *ins_lat = NULL;
-	double *ins_heading = NULL;
-	double *ins_roll = NULL;
-	double *ins_pitch = NULL;
-	double *ins_sonardepth = NULL;
-	double *ins_sonardepthfilter = NULL;
-	double *ins_altitude_time_d = NULL;
-	double *ins_altitude = NULL;
-	double *ins_speed_time_d = NULL;
-	double *ins_speed = NULL;
 	int ins_output_index = -1;
 
 	int nsonardepth = 0;
@@ -1005,367 +1366,15 @@ int main(int argc, char **argv) {
 	int time7k_j[5];
 	double time7k_d;
 
-	FILE *tfp = NULL;
-	char *result;
 	int testformat;
 	int sslo_last_ping;
 	int start, end;
-	int startdata;
-	double velocityx, velocityy;
-	char valuetype[MB_PATH_MAXLINE];
-	char value[MB_PATH_MAXLINE];
-	int year, month, day, hour, minute;
-	double second;
-	double id;
 
-	/* read navigation and attitude data from AUV log file if specified */
-	if (insdata) {
-		/* count the data points in the auv log file */
-		if ((tfp = fopen(insfile, "r")) == NULL) {
-			fprintf(stderr, "\nUnable to open ins data file <%s> for reading\n", insfile);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(MB_ERROR_OPEN_FAIL);
-		}
-
-		// Read the ascii header to determine how to parse the binary data
-		int ins_len = 0;
-		int ins_altitude_index = -1;
-		int ins_time_d_index = -1;
-		int ins_lon_index = -1;
-		int ins_lat_index = -1;
-		int ins_roll_index = -1;
-		int ins_pitch_index = -1;
-		int ins_heading_index = -1;
-		int ins_sonardepth_index = -1;
-		int ins_speed_index = -1;
-		int ins_velocityx_index = -1;
-		int ins_velocityy_index = -1;
-		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer && strncmp(buffer, "# begin", 7) != 0) {
-			nscan = sscanf(buffer, "# %s %s", valuetype, value);
-			if (nscan == 2) {
-				if (strcmp(value, "time") == 0)
-					ins_time_d_index = ins_len;
-				if (strcmp(value, "mLonK") == 0)
-					ins_lon_index = ins_len;
-				if (strcmp(value, "mLatK") == 0)
-					ins_lat_index = ins_len;
-				if (strcmp(value, "longitude") == 0)
-					ins_lon_index = ins_len;
-				if (strcmp(value, "latitude") == 0)
-					ins_lat_index = ins_len;
-				if (strcmp(value, "mPhi") == 0)
-					ins_roll_index = ins_len;
-				if (strcmp(value, "mTheta") == 0)
-					ins_pitch_index = ins_len;
-				if (strcmp(value, "mPsi") == 0)
-					ins_heading_index = ins_len;
-				if (strcmp(value, "mDepth") == 0)
-					ins_sonardepth_index = ins_len;
-				if (strcmp(value, "mDepthK") == 0)
-					ins_sonardepth_index = ins_len;
-				if (strcmp(value, "mRollK") == 0)
-					ins_roll_index = ins_len;
-				if (strcmp(value, "mPitchK") == 0)
-					ins_pitch_index = ins_len;
-				if (strcmp(value, "mHeadK") == 0)
-					ins_heading_index = ins_len;
-				if (strcmp(value, "mAltitude") == 0)
-					ins_altitude_index = ins_len;
-				if (strcmp(value, "mWaterSpeed") == 0)
-					ins_speed_index = ins_len;
-				if (strcmp(value, "mVbodyxK") == 0)
-					ins_velocityx_index = ins_len;
-				if (strcmp(value, "mVbodyyK") == 0)
-					ins_velocityy_index = ins_len;
-				// if (strcmp(value, "mVbodyzK") == 0)
-				// 	ins_velocityz_index = ins_len;
-
-				if (strcmp(valuetype, "double") == 0)
-					ins_len += 8;
-				else if (strcmp(valuetype, "integer") == 0)
-					ins_len += 4;
-				else if (strcmp(valuetype, "timeTag") == 0)
-					ins_len += 8;
-			}
-		}
-
-		/*
-		 * count the binary data records described by the header then
-		 * rewind the file to the start of the binary data
-		 */
-		startdata = ftell(tfp);
-		nins = 0;
-		while (fread(buffer, ins_len, 1, tfp) == 1) {
-			nins++;
-		}
-		fseek(tfp, startdata, 0);
-
-		/* allocate arrays for ins data */
-		if (nins > 0) {
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_time_d, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_lon, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_lat, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_heading, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_roll, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_pitch, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_sonardepth, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_sonardepthfilter, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_altitude_time_d, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_altitude, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_speed_time_d, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_speed, &error);
-			if (error != MB_ERROR_NO_ERROR) {
-				char *message;
-				mb_error(verbose, error, &message);
-				fprintf(stderr, "\nMBIO Error allocating ins data arrays:\n%s\n", message);
-				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(error);
-			}
-		}
-
-		/* if no ins data then quit */
-		else {
-			fprintf(stderr, "\nUnable to read data from MBARI AUV navigation file <%s>\n", insfile);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(MB_ERROR_BAD_DATA);
-		}
-
-		/* read the data points in the auv log file */
-		nins = 0;
-		nins_altitude = 0;
-		nins_speed = 0;
-		while (fread(buffer, ins_len, 1, tfp) == 1) {
-			if (ins_time_d_index >= 0)
-				mb_get_binary_double(true, &buffer[ins_time_d_index], &(ins_time_d[nins]));
-
-			if (ins_lon_index >= 0)
-				mb_get_binary_double(true, &buffer[ins_lon_index], &(ins_lon[nins]));
-			ins_lon[nins] *= RTD;
-
-			if (ins_lat_index >= 0)
-				mb_get_binary_double(true, &buffer[ins_lat_index], &(ins_lat[nins]));
-			ins_lat[nins] *= RTD;
-
-			if (ins_roll_index >= 0)
-				mb_get_binary_double(true, &buffer[ins_roll_index], &(ins_roll[nins]));
-			ins_roll[nins] *= RTD;
-
-			if (ins_pitch_index >= 0)
-				mb_get_binary_double(true, &buffer[ins_pitch_index], &(ins_pitch[nins]));
-			ins_pitch[nins] *= RTD;
-
-			if (ins_heading_index >= 0)
-				mb_get_binary_double(true, &buffer[ins_heading_index], &(ins_heading[nins]));
-			ins_heading[nins] *= RTD;
-
-			if (ins_sonardepth_index >= 0)
-				mb_get_binary_double(true, &buffer[ins_sonardepth_index], &(ins_sonardepth[nins]));
-			ins_sonardepth[nins] += sonardepthoffset;
-
-			if (ins_altitude_index >= 0)
-				mb_get_binary_double(true, &buffer[ins_altitude_index], &(ins_altitude[nins_altitude]));
-			ins_altitude_time_d[nins_altitude] = ins_time_d[nins];
-
-			if (ins_speed_index >= 0)
-				mb_get_binary_double(true, &buffer[ins_speed_index], &(ins_speed[nins_speed]));
-			ins_speed_time_d[nins_speed] = ins_time_d[nins];
-
-			if (ins_velocityx_index >= 0 && ins_velocityy_index >= 0) {
-				mb_get_binary_double(true, &buffer[ins_velocityx_index], &velocityx);
-				mb_get_binary_double(true, &buffer[ins_velocityy_index], &velocityy);
-				ins_speed[nins_speed] = sqrt(velocityx * velocityx + velocityy * velocityy);
-				ins_speed_time_d[nins_speed] = ins_time_d[nins];
-			}
-			nins++;
-			if (ins_altitude[nins_altitude] < 1000.0)
-				nins_altitude++;
-			if (ins_speed[nins_speed] > 0.0)
-				nins_speed++;
-		}
-		fclose(tfp);
-
-		/* output info */
-		if (nins > 0) {
-			mb_get_date(verbose, ins_time_d[0], btime_i);
-			mb_get_date(verbose, ins_time_d[nins - 1], etime_i);
-			fprintf(stderr,
-			        "%d INS data records read from %s  Start:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  End:%4.4d/%2.2d/%2.2d "
-			        "%2.2d:%2.2d:%2.2d.%6.6d\n",
-			        nins, insfile, btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6], etime_i[0],
-			        etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
-		}
-		else
-			fprintf(stderr, "No INS data read from %s....\n", insfile);
-	}
-	/* read navigation and attitude data from rock file if specified */
-	if (rockdata) {
-		/* count the data points in the rock file */
-		if ((tfp = fopen(rockfile, "r")) == NULL) {
-			fprintf(stderr, "\nUnable to open rock data file <%s> for reading\n", rockfile);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(MB_ERROR_OPEN_FAIL);
-		}
-		/* count the data records */
-		nrock = 0;
-		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer)
-			if (buffer[0] != '#')
-				nrock++;
-		rewind(tfp);
-
-		/* allocate arrays for rock data */
-		if (nrock > 0) {
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_time_d, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_lon, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_lat, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_sonardepth, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_sonardepthfilter, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_heading, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_roll, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_pitch, &error);
-			if (error != MB_ERROR_NO_ERROR) {
-				char *message;
-				mb_error(verbose, error, &message);
-				fprintf(stderr, "\nMBIO Error allocating rock data arrays:\n%s\n", message);
-				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(error);
-			}
-		}
-		/* if no rock data then quit */
-		else {
-			fprintf(stderr, "\nUnable to read data from rock file <%s>\n", rockfile);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(MB_ERROR_BAD_DATA);
-		}
-
-		/* read the data points in the rock file */
-		nrock = 0;
-		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer) {
-			if (buffer[0] != '#')
-				if (sscanf(buffer, "%lf %lf %lf %lf %lf %lf %lf", &rock_time_d[nrock], &rock_lon[nrock], &rock_lat[nrock],
-				           &rock_sonardepth[nrock], &rock_heading[nrock], &rock_roll[nrock], &rock_pitch[nrock]) == 7) {
-					nrock++;
-				}
-		}
-		fclose(tfp);
-
-		/* output info */
-		if (nrock > 0) {
-			mb_get_date(verbose, rock_time_d[0], btime_i);
-			mb_get_date(verbose, rock_time_d[nrock - 1], etime_i);
-			fprintf(stderr,
-			        "%d Rock format nav records read from %s  Start:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  "
-			        "End:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-			        nrock, rockfile, btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
-			        etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
-		}
-		else
-			fprintf(stderr, "No Rock format nav data read from %s....\n", rockfile);
-	}
-	/* read navigation and attitude data from dsl file if specified */
-	if (dsldata) {
-		/* count the data points in the dsl file */
-		if ((tfp = fopen(dslfile, "r")) == NULL) {
-			fprintf(stderr, "\nUnable to open dsl data file <%s> for reading\n", dslfile);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(MB_ERROR_OPEN_FAIL);
-		}
-		/* count the data records */
-		ndsl = 0;
-		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer)
-			if (buffer[0] != '#')
-				ndsl++;
-		rewind(tfp);
-
-		/* allocate arrays for dsl data */
-		if (ndsl > 0) {
-			status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_time_d, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_lon, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_lat, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_sonardepth, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_sonardepthfilter, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_heading, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_roll, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_pitch, &error);
-			if (error != MB_ERROR_NO_ERROR) {
-				char *message;
-				mb_error(verbose, error, &message);
-				fprintf(stderr, "\nMBIO Error allocating dsl data arrays:\n%s\n", message);
-				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(error);
-			}
-		}
-		/* if no dsl data then quit */
-		else {
-			fprintf(stderr, "\nUnable to read data from dsl file <%s>\n", dslfile);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(MB_ERROR_BAD_DATA);
-		}
-
-		/* read the data points in the dsl file */
-		ndsl = 0;
-		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer) {
-			if (buffer[0] != '#') {
-	char sensor[24];
-				nscan = sscanf(buffer, "PPL %d/%d/%d %d:%d:%lf %s %lf %lf %lf %lf %lf %lf %lf", &year, &month, &day, &hour,
-				               &minute, &second, sensor, &dsl_lat[ndsl], &dsl_lon[ndsl], &dsl_sonardepth[ndsl],
-				               &dsl_heading[ndsl], &dsl_pitch[ndsl], &dsl_roll[ndsl], &id);
-				if (nscan == 14) {
-					time_i[0] = year;
-					time_i[1] = month;
-					time_i[2] = day;
-					time_i[3] = hour;
-					time_i[4] = minute;
-					time_i[5] = (int)second;
-					time_i[6] = (int)((second - time_i[5]) * 1000000);
-					mb_get_time(verbose, time_i, &dsl_time_d[ndsl]);
-					ndsl++;
-				}
-			}
-		}
-		fclose(tfp);
-
-		/* output info */
-		if (ndsl > 0) {
-			mb_get_date(verbose, dsl_time_d[0], btime_i);
-			mb_get_date(verbose, dsl_time_d[ndsl - 1], etime_i);
-			fprintf(stderr,
-			        "%d DLS format nav records read from %s  Start:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  "
-			        "End:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-			        ndsl, dslfile, btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6], etime_i[0],
-			        etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
-		}
-		else
-			fprintf(stderr, "No DSL format nav data read from %s....\n", dslfile);
-	}
 	/* read sonardepth data from AUV log file if specified */
 	if (sonardepthdata) {
 		/* count the data points in the auv log file */
-		if ((tfp = fopen(sonardepthfile, "r")) == NULL) {
+		FILE *tfp = fopen(sonardepthfile, "r");
+		if (tfp == NULL) {
 			fprintf(stderr, "\nUnable to open sonardepth data file <%s> for reading\n", sonardepthfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -1398,7 +1407,7 @@ int main(int argc, char **argv) {
 		 * count the binary data records described by the header then
 		 * rewind the file to the start of the binary data
 		 */
-		startdata = ftell(tfp);
+		const int startdata = ftell(tfp);
 		nsonardepth = 0;
 		while (fread(buffer, sonardepth_len, 1, tfp) == 1) {
 			nsonardepth++;
@@ -1456,7 +1465,8 @@ int main(int argc, char **argv) {
 	if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL) {
 		/* count the data points in the timelag file */
 		ntimelag = 0;
-		if ((tfp = fopen(timelagfile, "r")) == NULL) {
+		FILE *tfp = fopen(timelagfile, "r");
+		if (tfp == NULL) {
 			fprintf(stderr, "\nUnable to open time lag model File <%s> for reading\n", timelagfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -1515,7 +1525,7 @@ int main(int argc, char **argv) {
 	 * which only happens for MBARI AUV data with navigation and attitude
 	 * in "bluefin" records
 	 */
-	tfp = NULL;
+	FILE *tfp = NULL;
 
 	/*
 	 * load platform definition if specified or if offsets otherwise
