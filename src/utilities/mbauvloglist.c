@@ -222,7 +222,6 @@ int main(int argc, char **argv) {
 
 	bool printheader = false;
 	char file[MB_PATH_MAXLINE] = "";
-	char printformat[MB_PATH_MAXLINE] = "default";
 	mb_path nav_file = "";
 	bool nav_merge = false;
 	output_t output_mode = OUTPUT_MODE_TAB;
@@ -240,6 +239,7 @@ int main(int argc, char **argv) {
 		bool errflg = false;
 		int c;
 		bool help = false;
+		char printformat[MB_PATH_MAXLINE] = "default";  // TODO(schwehr): Is this used correctly?
 		while ((c = getopt(argc, argv, "F:f:I:i:L:l:M:m:N:n:O:o:PpR:r:SsVvWwHh")) != -1)
 		{
 			switch (c) {
@@ -253,11 +253,11 @@ int main(int argc, char **argv) {
 				break;
 			case 'F':
 			case 'f':
-				sscanf(optarg, "%s", printformat);
+				sscanf(optarg, "%1023s", printformat);
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", file);
+				sscanf(optarg, "%1023s", file);
 				break;
 			case 'L':
 			case 'l':
@@ -273,13 +273,13 @@ int main(int argc, char **argv) {
 			}
 			case 'N':
 			case 'n':
-				sscanf(optarg, "%s", nav_file);
+				sscanf(optarg, "%1023s", nav_file);
 				nav_merge = true;
 				break;
 			case 'O':
 			case 'o':
 			{
-				/* const int nscan = */ sscanf(optarg, "%s", printfields[nprintfields].name);
+				/* const int nscan = */ sscanf(optarg, "%1023s", printfields[nprintfields].name);
 				if (strlen(printformat) > 0 && strcmp(printformat, "default") != 0) {
 					printfields[nprintfields].formatset = true;
 					strcpy(printfields[nprintfields].format, printformat);
@@ -288,14 +288,14 @@ int main(int argc, char **argv) {
 					printfields[nprintfields].formatset = false;
 					strcpy(printfields[nprintfields].format, "");
 				}
-            if (strcmp(printfields[nprintfields].name, "calcPotentialTemperature") == 0)
-                calc_potentialtemp = true;
-            if (strcmp(printfields[nprintfields].name, "calcSoundspeed") == 0)
-                calc_soundspeed = true;
-            if (strcmp(printfields[nprintfields].name, "calcDensity") == 0)
-                calc_density = true;
-            if (strcmp(printfields[nprintfields].name, "calcKTime") == 0)
-                calc_ktime = true;
+				if (strcmp(printfields[nprintfields].name, "calcPotentialTemperature") == 0)
+					calc_potentialtemp = true;
+				if (strcmp(printfields[nprintfields].name, "calcSoundspeed") == 0)
+					calc_soundspeed = true;
+				if (strcmp(printfields[nprintfields].name, "calcDensity") == 0)
+					calc_density = true;
+				if (strcmp(printfields[nprintfields].name, "calcKTime") == 0)
+					calc_ktime = true;
 				printfields[nprintfields].index = -1;
 				nprintfields++;
 				break;
@@ -415,15 +415,15 @@ int main(int argc, char **argv) {
 		/* allocate arrays for nav */
 		if (nav_num > 0) {
 			nav_alloc = nav_num;
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_time_d, &error);
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_navlon, &error);
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_navlat, &error);
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_heading, &error);
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_speed, &error);
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_sensordepth, &error);
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_roll, &error);
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_pitch, &error);
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_heave, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_time_d, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_navlon, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_navlat, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_heading, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_speed, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_sensordepth, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_roll, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_pitch, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nav_alloc * sizeof(double), (void **)&nav_heave, &error);
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
@@ -488,7 +488,7 @@ int main(int argc, char **argv) {
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer &&
                strncmp(buffer, "# begin", 7) != 0) {
 		char type[MB_PATH_MAXLINE];
-		const int nscan = sscanf(buffer, "# %s %s %s", type, fields[nfields].name, fields[nfields].format);
+		const int nscan = sscanf(buffer, "# %1023s %1023s %1023s", type, fields[nfields].name, fields[nfields].format);
 		if (nscan == 2) {
 			if (printheader)
 				fprintf(stdout, "# csv %s\n", fields[nfields].name);
@@ -1012,7 +1012,7 @@ int main(int argc, char **argv) {
 					fprintf(stdout, printfields[i].format, dvalue);
 			}
 			else if (fields[index].type == TYPE_INTEGER) {
-				int ivalue;
+				int ivalue = 0;
 				mb_get_binary_int(true, &buffer[fields[index].index], &ivalue);
 				if (output_mode == OUTPUT_MODE_BINARY)
 					fwrite(&ivalue, sizeof(int), 1, stdout);
