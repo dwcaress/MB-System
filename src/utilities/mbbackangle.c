@@ -74,13 +74,13 @@ struct mbba_grid_struct {
 
 static const char program_name[] = "mbbackangle";
 static const char help_message[] =
-    "MBbackangle reads a swath sonar data file and generates a set \n\t"
-    "of tables containing the average amplitude an/or sidescan values\n\t"
-    "as a function of the angle of interaction (grazing angle) \n\t"
-    "with the seafloor. Each table represents the symmetrical \n\t"
-    "average function for a user defined number of pings. The tables \n\t"
-    "are output to a \".aga\" and \".sga\" files that can be applied \n\t"
-    "by MBprocess.";
+    "MBbackangle reads a swath sonar data file and generates a set\n"
+    "  of tables containing the average amplitude an/or sidescan values\n"
+    "  as a function of the angle of interaction (grazing angle)\n"
+    "  with the seafloor. Each table represents the symmetrical\n"
+    "  average function for a user defined number of pings. The tables\n"
+    "  are output to a \".aga\" and \".sga\" files that can be applied\n"
+    "  by MBprocess.";
 static const char usage_message[] =
     "mbbackangle -Ifile "
     "[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/min/max/n_columns/n_rows "
@@ -264,103 +264,23 @@ int main(int argc, char **argv) {
 	double speedmin;
 	double timegap;
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	/* reset pings and timegap */
+	pings = 1;
+	timegap = 10000000.0;
 
-	double btime_d;
-	double etime_d;
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
-	char read_file[MB_PATH_MAXLINE];
-	void *datalist;
-	double file_weight;
-	char swathfile[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	char amptablefile[MB_PATH_MAXLINE];
-	char sstablefile[MB_PATH_MAXLINE];
-	FILE *atfp = NULL;
-	FILE *stfp = NULL;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-
-	/* ESF File read */
-	struct mb_esf_struct esf;
-
-	/* MBIO read values */
-	void *mbio_ptr = NULL;
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-
-	/* slope calculation variables */
-	int nsmooth = 5;
-	int ndepths;
-	double *depths = NULL;
-	double *depthsmooth = NULL;
-	double *depthacrosstrack = NULL;
-	int nslopes;
-	double *slopes = NULL;
-	double *slopeacrosstrack = NULL;
-
-	/* topography parameters */
-	struct mbba_grid_struct grid;
-
-	/* angle function variables */
-	bool amplitude_on = false;
+	backangle_kind_t ampkind;
 	bool sidescan_on = false;
-	bool dump = false;
-	bool symmetry = false;
-	int nangles = 81;
-	double angle_max = 80.0;
-	double dangle;
-	double angle_start;
-	int pings_avg = 50;
-	int ntotavg = 0;
-	int *nmeanamp = NULL;
-	double *meanamp = NULL;
-	double *sigmaamp = NULL;
-	int *nmeanss = NULL;
-	double *meanss = NULL;
-	double *sigmass = NULL;
-	int *nmeantotamp = NULL;
-	double *meantotamp = NULL;
-	double *sigmatotamp = NULL;
-	int *nmeantotss = NULL;
-	double *meantotss = NULL;
-	double *sigmatotss = NULL;
-	double altitude_default = 0.0;
-	double time_d_totavg;
-	double altitude_totavg;
+	bool amplitude_on = false;
 	beampattern_t beammode = MBBACKANGLE_BEAMPATTERN_EMPIRICAL;
 	double ssbeamwidth = 50.0;
 	double ssdepression = 20.0;
-	bool corr_slope = false;
-	bool corr_topogrid = false;
-	int corr_symmetry = MBP_SSCORR_ASYMMETRIC; /* BOB */
-	int amp_corr_type;
-	int amp_corr_slope = MBP_AMPCORR_IGNORESLOPE;
-	int ss_corr_slope = MBP_SSCORR_IGNORESLOPE;
-	int ss_type;
-	int ss_corr_type;
-	double ref_angle_default = 30.0;
-
-	/* amp vs angle grid variables */
+	bool dump = false;
+	bool symmetry = false;
+	int corr_symmetry = MBP_SSCORR_ASYMMETRIC;
+	int mode;
+	double angle;
+	double ampmin;
+	double ampmax;
 	bool gridamp = false;
 	double gridampangle = 0.0;
 	double gridampmin = 0.0;
@@ -369,7 +289,6 @@ int main(int argc, char **argv) {
 	int gridampn_rows = 0;
 	double gridampdx = 0.0;
 	double gridampdy = 0.0;
-	float *gridamphist = NULL;
 	bool gridss = false;
 	double gridssangle = 0.0;
 	double gridssmin = 0.0;
@@ -378,45 +297,17 @@ int main(int argc, char **argv) {
 	int gridssn_rows = 0;
 	double gridssdx = 0.0;
 	double gridssdy = 0.0;
-	float *gridsshist = NULL;
-	char gridfile[MB_PATH_MAXLINE];
-	char *xlabel = "Grazing Angle (degrees)";
-	char *ylabel = "Amplitude";
-	char zlabel[MB_PATH_MAXLINE];
-	char title[MB_PATH_MAXLINE];
-	char plot_cmd[MB_PATH_MAXLINE];
-	char *projection = "GenericLinear";
-
-	backangle_kind_t ampkind;
-	double mtodeglon, mtodeglat;
-	double headingx, headingy;
-	double r[3], rr;
-	double v1[3], v2[3], v[3], vv;
-	double slope;
-	double bathy;
-	double angle;
-	double ampmin;
-	double ampmax;
-	double norm;
-	int nrectot = 0;
-	int namptot = 0;
-	int nsstot = 0;
-	int ntabletot = 0;
-	int mode;
-	int plot_status;
-
-	int ix, jy, kgrid;
-	int kgrid00, kgrid10, kgrid01, kgrid11;
-
-	/* reset pings and timegap */
-	pings = 1;
-	timegap = 10000000.0;
-
-	/* set default input to stdin */
-	strcpy(read_file, "datalist.mb-1");
-
-	/* initialize grid */
+	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
+	int nangles = 81;
+	double angle_max = 80.0;
+	int pings_avg = 50;
+	bool corr_slope = false;
+	double ref_angle_default = 30.0;
+	/* topography parameters */
+	struct mbba_grid_struct grid;
 	memset(&grid, 0, sizeof(struct mbba_grid_struct));
+	bool corr_topogrid = false;
+	double altitude_default = 0.0;
 
 	{
 		bool errflg = false;
@@ -474,7 +365,7 @@ int main(int argc, char **argv) {
 				int j;
 				int n = sscanf(optarg, "%d/%lf/%lf/%lf/%d/%d", &mode, &angle, &ampmin, &ampmax, &i, &j);
 				if (n == 5) {
-					n = sscanf(optarg, "%d/%lf/%lf/%d/%d", &mode, &angle, &ampmax, &i, &j);
+					/* n = */ sscanf(optarg, "%d/%lf/%lf/%d/%d", &mode, &angle, &ampmax, &i, &j);
 					ampmin = 0.0;
 					n = 6;
 				}
@@ -506,7 +397,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);  // MB_PATH_MAXLINE - 1
 				break;
 			case 'N':
 			case 'n':
@@ -526,7 +417,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'T':
 			case 't':
-				sscanf(optarg, "%s", grid.file);
+				sscanf(optarg, "%1023s", grid.file);  // MB_PATH_MAXLINE - 1
 				corr_topogrid = true;
 				break;
 			case 'V':
@@ -556,9 +447,110 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	} // end command line arg parsing
+
+	double btime_d;
+	double etime_d;
+
+	void *datalist;
+	double file_weight;
+	char swathfile[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
+	char amptablefile[MB_PATH_MAXLINE];
+	char sstablefile[MB_PATH_MAXLINE];
+	FILE *atfp = NULL;
+	FILE *stfp = NULL;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+
+	/* ESF File read */
+	struct mb_esf_struct esf;
+
+	/* MBIO read values */
+	void *mbio_ptr = NULL;
+	int kind;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	char comment[MB_COMMENT_MAXLINE];
+
+	/* slope calculation variables */
+	int nsmooth = 5;
+	int ndepths;
+	double *depths = NULL;
+	double *depthsmooth = NULL;
+	double *depthacrosstrack = NULL;
+	int nslopes;
+	double *slopes = NULL;
+	double *slopeacrosstrack = NULL;
+
+	/* angle function variables */
+	double dangle;
+	double angle_start;
+	int ntotavg = 0;
+	int *nmeanamp = NULL;
+	double *meanamp = NULL;
+	double *sigmaamp = NULL;
+	int *nmeanss = NULL;
+	double *meanss = NULL;
+	double *sigmass = NULL;
+	int *nmeantotamp = NULL;
+	double *meantotamp = NULL;
+	double *sigmatotamp = NULL;
+	int *nmeantotss = NULL;
+	double *meantotss = NULL;
+	double *sigmatotss = NULL;
+	double time_d_totavg;
+	double altitude_totavg;
+	int amp_corr_type;
+	int amp_corr_slope = MBP_AMPCORR_IGNORESLOPE;
+	int ss_corr_slope = MBP_SSCORR_IGNORESLOPE;
+	int ss_type;
+	int ss_corr_type;
+
+	/* amp vs angle grid variables */
+	float *gridamphist = NULL;
+	float *gridsshist = NULL;
+	char gridfile[MB_PATH_MAXLINE];
+	char *xlabel = "Grazing Angle (degrees)";
+	char *ylabel = "Amplitude";
+	char zlabel[MB_PATH_MAXLINE];
+	char title[MB_PATH_MAXLINE];
+	char plot_cmd[MB_PATH_MAXLINE];
+	char *projection = "GenericLinear";
+
+	double mtodeglon, mtodeglat;
+	double headingx, headingy;
+	double r[3], rr;
+	double v1[3], v2[3], v[3], vv;
+	double slope;
+	double bathy;
+	double norm;
+	int nrectot = 0;
+	int namptot = 0;
+	int nsstot = 0;
+	int ntabletot = 0;
+	int plot_status;
+
+	int ix, jy, kgrid;
+	int kgrid00, kgrid10, kgrid01, kgrid11;
 
 	/* set mode if necessary */
 	if (!amplitude_on && !sidescan_on) {
@@ -645,34 +637,36 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       gridssdy:     %f\n", gridssdy);
 	}
 
+	int error = MB_ERROR_NO_ERROR;
+
 	/* allocate memory for angle arrays */
 	if (amplitude_on) {
+		// if (error == MB_ERROR_NO_ERROR)
+		/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(int), (void **)&nmeanamp, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(int), (void **)&nmeanamp, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&meanamp, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&meanamp, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&sigmaamp, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&sigmaamp, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(int), (void **)&nmeantotamp, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(int), (void **)&nmeantotamp, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&meantotamp, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&meantotamp, &error);
-		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&sigmatotamp, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&sigmatotamp, &error);
 	}
 	if (sidescan_on) {
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(int), (void **)&nmeanss, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(int), (void **)&nmeanss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&meanss, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&meanss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&sigmass, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&sigmass, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(int), (void **)&nmeantotss, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(int), (void **)&nmeantotss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&meantotss, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&meantotss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&sigmatotss, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nangles * sizeof(double), (void **)&sigmatotss, &error);
 	}
 
 	/* if error initializing memory then quit */
