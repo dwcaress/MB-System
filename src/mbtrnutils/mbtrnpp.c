@@ -300,7 +300,7 @@ const char *mbtrnpp_ststatus_labels[] = {
 
 const char *mbtrnpp_stchan_labels[] = {
     "mb_getall_xt",  "mb_ping_xt", "mb_log_xt", "mb_dtime_xt",
-    "mb_getfail_xt", "mb_post_xt", "mb_stats_xt", "mb_cycle_xt", "mb_fwrite",
+    "mb_getfail_xt", "mb_post_xt", "mb_stats_xt", "mb_cycle_xt", "mb_fwrite_xt",
     "mb_proc_mb1_xt"
 #ifdef WITH_MBTNAV
     , "trn_update_xt", "trn_biasest_xt", "trn_nreinits_xt",
