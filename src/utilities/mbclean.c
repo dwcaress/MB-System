@@ -69,8 +69,11 @@
 #include "mb_status.h"
 #include "mb_swap.h"
 
-const int MBCLEAN_FLAG_ONE = 1;
-const int MBCLEAN_FLAG_BOTH = 2;
+typedef enum {
+    MBCLEAN_FLAG_ONE = 1,
+    MBCLEAN_FLAG_BOTH = 2,
+} clean_mode_t;
+
 typedef enum {
     MBCLEAN_Y_MODE_DISTANCE_FLAG = 1,
     MBCLEAN_Y_MODE_DISTANCE_UNFLAG = 2,
@@ -227,7 +230,7 @@ int main(int argc, char **argv) {
   bool check_fraction = false;
   double range_min;
   bool check_range_min = false;
-  int mode = MBCLEAN_FLAG_ONE;
+  clean_mode_t mode = MBCLEAN_FLAG_ONE;
   double ping_deviation_tolerance = 1.0;
   bool check_ping_deviation = false;
   double speed_low;
@@ -338,8 +341,12 @@ int main(int argc, char **argv) {
         break;
       case 'M':
       case 'm':
-        sscanf(optarg, "%d", &mode);
+      {
+        int tmp;
+        sscanf(optarg, "%d", &tmp);
+        mode = (clean_mode_t)tmp;  // TODO(schwehr): Range check.
         break;
+      }
       case 'N':
       case 'n':
         sscanf(optarg, "%lf", &ping_deviation_tolerance);
@@ -608,17 +615,12 @@ int main(int argc, char **argv) {
   int beams_bath;
   int beams_amp;
   int pixels_ss;
-  double *amp;
-  double *ss;
-  double *ssacrosstrack;
-  double *ssalongtrack;
 
   /* mbio read and write values */
   void *mbio_ptr = NULL;
   void *store_ptr = NULL;
   int kind;
   struct mbclean_ping_struct ping[3];
-  int nrec;
   int pingsread;
   int nfiletot = 0;
   int ndatatot = 0;
@@ -663,7 +665,6 @@ int main(int argc, char **argv) {
   double mtodeglon;
   double mtodeglat;
   int nlist;
-  double *list = NULL;
   double median = 0.0;
 
   /* save file control variables */
@@ -820,11 +821,11 @@ int main(int argc, char **argv) {
           status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&ping[i].bathy,
                                      &error);
       }
-      amp = NULL;
-      ss = NULL;
-      ssacrosstrack = NULL;
-      ssalongtrack = NULL;
-      list = NULL;
+      double *amp = NULL;
+      double *ss = NULL;
+      double *ssacrosstrack = NULL;
+      double *ssalongtrack = NULL;
+      double *list = NULL;
       if (error == MB_ERROR_NO_ERROR)
         status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
       if (error == MB_ERROR_NO_ERROR)
@@ -870,7 +871,7 @@ int main(int argc, char **argv) {
       }
 
       /* read */
-      nrec = 0;
+      int nrec = 0;
       fprintf(stderr, "Processing data...\n");
       bool done = false;
       while (!done) {
