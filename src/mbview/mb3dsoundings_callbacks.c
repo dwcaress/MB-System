@@ -447,10 +447,10 @@ int mb3dsoundings_updatestatus() {
 		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
 		(mb3dsoundings.mb3dsoundings_info_notify)(sounding->ifile, sounding->iping, sounding->ibeam, value_text);
 		fprintf(stderr, "\n%s\n", value_text);
-		fprintf(stderr, "xyzorigin: %f %f %f bounds:%f %f %f %f %f %f  bearing:%f scale:%f zscale:%f\n", soundingdata->xorigin,
-		        soundingdata->yorigin, soundingdata->zorigin, soundingdata->xmin, soundingdata->xmax, soundingdata->ymin,
+		fprintf(stderr, "xyz bounds:%f %f %f %f %f %f  bearing:%f scale:%f zscale:%f zorigin:%f\n",
+		        soundingdata->xmin, soundingdata->xmax, soundingdata->ymin,
 		        soundingdata->ymax, soundingdata->zmin, soundingdata->zmax, soundingdata->bearing, soundingdata->scale,
-		        soundingdata->zscale);
+		        soundingdata->zscale, soundingdata->zorigin);
 		fprintf(stderr, "SOUNDING: xyz: %f %f %f   glxyz: %f %f %f  winxy: %d %d\n", sounding->x, sounding->y, sounding->z,
 		        sounding->glx, sounding->gly, sounding->glz, sounding->winx, sounding->winy);
 		XtUnmanageChild(mb3dsoundings.mb3dsdg.scale_rollbias);
@@ -1813,7 +1813,7 @@ int mb3dsoundings_scale(int verbose, int *error) {
 		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 		sounding->glx = soundingdata->scale * sounding->x;
 		sounding->gly = soundingdata->scale * sounding->y;
-		sounding->glz = mb3dsoundings.exageration * soundingdata->zscale * sounding->z;
+		sounding->glz = mb3dsoundings.exageration * soundingdata->zscale * (sounding->z - soundingdata->zorigin);
 	}
 
 	/* return */
@@ -1833,7 +1833,7 @@ int mb3dsoundings_scalez(int verbose, int *error) {
 	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 	for (i = 0; i < soundingdata->num_soundings; i++) {
 		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-		sounding->glz = mb3dsoundings.exageration * soundingdata->zscale * sounding->z;
+		sounding->glz = mb3dsoundings.exageration * soundingdata->zscale * (sounding->z - soundingdata->zorigin);
 	}
 
 	/* return */
@@ -2470,58 +2470,49 @@ int mb3dsoundings_good_ping() {
 
 int mb3dsoundings_setzscale(int verbose, int *error) {
 	struct mb3dsoundings_struct *soundingdata;
-	struct mb3dsoundings_sounding_struct *sounding;
-	int nunflagged = 0;
-	double zmin, zmax, dz;
-	int i;
 
 	/* get sounding data structure */
 	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 	/* fprintf(stderr,"Called mb3dsoundings_setzscale: %d soundings\n",soundingdata->num_soundings); */
 
 	/* initialize zmin and zmax */
-	zmin = 0.0;
-	zmax = 0.0;
+	double zmin = 0.0;
+	double zmax = 0.0;
 
 	/* get vertical min maxes for scaling of all soundings */
 	if (mb3dsoundings.view_scalewithflagged == true && soundingdata->num_soundings > 0) {
-		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[0]);
-		zmin = sounding->z;
-		zmax = sounding->z;
-		for (i = 1; i < soundingdata->num_soundings; i++) {
-			sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-			zmin = MIN(sounding->z, zmin);
-			zmax = MAX(sounding->z, zmax);
+		zmin = soundingdata->soundings[0].z;
+		zmax = soundingdata->soundings[0].z;
+		for (int i = 0; i < soundingdata->num_soundings; i++) {
+			zmin = MIN(soundingdata->soundings[i].z, zmin);
+			zmax = MAX(soundingdata->soundings[i].z, zmax);
 		}
 	}
 
 	/* else get vertical min maxes for scaling of only unflagged soundings */
 	else if (soundingdata->num_soundings > 0) {
-		nunflagged = 0;
-		for (i = 1; i < soundingdata->num_soundings; i++) {
-			sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-			if (mb_beam_ok(sounding->beamflag)) {
+		int nunflagged = 0;
+		for (int i = 1; i < soundingdata->num_soundings; i++) {
+			if (mb_beam_ok(soundingdata->soundings[i].beamflag)) {
 				if (nunflagged == 0) {
-					zmin = sounding->z;
-					zmax = sounding->z;
+					zmin = soundingdata->soundings[i].z;
+					zmax = soundingdata->soundings[i].z;
 				}
 				else {
-					zmin = MIN(sounding->z, zmin);
-					zmax = MAX(sounding->z, zmax);
+					zmin = MIN(soundingdata->soundings[i].z, zmin);
+					zmax = MAX(soundingdata->soundings[i].z, zmax);
 				}
 				nunflagged++;
 			}
 		}
 	}
 
-	dz = zmax - zmin;
 	soundingdata->zorigin = 0.5 * (zmin + zmax);
-	soundingdata->zmin = -0.5 * dz;
-	soundingdata->zmax = 0.5 * dz;
-	for (i = 0; i < soundingdata->num_soundings; i++) {
-		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-		sounding->z = sounding->z - soundingdata->zorigin;
-		sounding->glz = mb3dsoundings.exageration * soundingdata->zscale * sounding->z;
+	soundingdata->zmin = -0.5 * (zmax - zmin);
+	soundingdata->zmax = 0.5 * (zmax - zmin);
+	for (int i = 0; i < soundingdata->num_soundings; i++) {
+		soundingdata->soundings[i].glz = mb3dsoundings.exageration * soundingdata->zscale
+                                      * (soundingdata->soundings[i].z - soundingdata->zorigin);
 	}
 
 	/* return */
@@ -2756,19 +2747,34 @@ soundingdata->num_soundings); */
 	glPointSize(3.0);
 	glColor3f(0.0, 0.0, 0.0);
 	glBegin(GL_POINTS);
-	for (i = 0; i < soundingdata->num_soundings; i++) {
-		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-		/*fprintf(stderr,"%d %f %f %f  %f %f %f %d", i,
-		sounding->x, sounding->y, sounding->z,
-		sounding->glx, sounding->gly, sounding->glz, sounding->beamflag);*/
-		if (mb_beam_ok(sounding->beamflag)) {
-			glColor3f(colortable_object_red[sounding->beamcolor], colortable_object_green[sounding->beamcolor],
-			          colortable_object_blue[sounding->beamcolor]);
-			glVertex3f(sounding->glx, sounding->gly, sounding->glz);
-			/* fprintf(stderr," PLOTTED");*/
-		}
-		/*fprintf(stderr,"\n");*/
-	}
+  if (mb3dsoundings.view_colorbytopo) {
+  	for (i = 0; i < soundingdata->num_soundings; i++) {
+  		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+  		/*fprintf(stderr,"%d %f %f %f  %f %f %f %d", i,
+  		sounding->x, sounding->y, sounding->z,
+  		sounding->glx, sounding->gly, sounding->glz, sounding->beamflag);*/
+  		if (mb_beam_ok(sounding->beamflag)) {
+  			glColor3f(sounding->r, sounding->g, sounding->b);
+  			glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+  			/* fprintf(stderr," PLOTTED");*/
+  		}
+  		/*fprintf(stderr,"\n");*/
+  	}
+  } else {
+  	for (i = 0; i < soundingdata->num_soundings; i++) {
+  		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+  		/*fprintf(stderr,"%d %f %f %f  %f %f %f %d", i,
+  		sounding->x, sounding->y, sounding->z,
+  		sounding->glx, sounding->gly, sounding->glz, sounding->beamflag);*/
+  		if (mb_beam_ok(sounding->beamflag)) {
+  			glColor3f(colortable_object_red[sounding->beamcolor], colortable_object_green[sounding->beamcolor],
+  			          colortable_object_blue[sounding->beamcolor]);
+  			glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+  			/* fprintf(stderr," PLOTTED");*/
+  		}
+  		/*fprintf(stderr,"\n");*/
+  	}
+  }
 	glEnd();
 
 	/* If in info mode and sounding picked plot it green */
@@ -3227,7 +3233,7 @@ void do_mb3dsdg_view_colorbytopo(Widget w, XtPointer client_data, XtPointer call
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
-	/* fprintf(stderr,"Called do_mb3dsdg_view_colorbytopo\n"); */
+	// fprintf(stderr,"Called do_mb3dsdg_view_colorbytopo\n");
 
 	mb3dsoundings.view_colorbytopo = XmToggleButtonGetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbytopo);
 

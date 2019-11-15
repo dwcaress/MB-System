@@ -1338,6 +1338,9 @@ void do_mbeditviz_viewgrid() {
     /* add action button */
     mbview_addaction(mbev_verbose, mbev_instance, do_mbeditviz_regrid_notify, "Update Bathymetry Grid", MBV_PICKMASK_NONE,
                      &mbev_error);
+
+    /* add colorchange notify function */
+    mbview_setcolorchangenotify(mbev_verbose, mbev_instance, do_mbeditviz_colorchange_notify, &mbev_error);
   }
 
   /* reset the gui */
@@ -1805,6 +1808,8 @@ void do_mbeditviz_pickarea_notify(size_t instance) {
 
   mbeditviz_selectarea(instance);
   mbev_status = mb3dsoundings_open(mbev_verbose, &mbev_selected, &mbev_error);
+  if (mbev_status == MB_SUCCESS)
+    mbev_selected.displayed = true;
   mbev_status = mb3dsoundings_set_dismiss_notify(mbev_verbose, &mbeditviz_mb3dsoundings_dismiss, &mbev_error);
   mbev_status = mb3dsoundings_set_edit_notify(mbev_verbose, &mbeditviz_mb3dsoundings_edit, &mbev_error);
   mbev_status = mb3dsoundings_set_info_notify(mbev_verbose, &mbeditviz_mb3dsoundings_info, &mbev_error);
@@ -1835,6 +1840,8 @@ void do_mbeditviz_pickregion_notify(size_t instance) {
 
   mbeditviz_selectregion(instance);
   mbev_status = mb3dsoundings_open(mbev_verbose, &mbev_selected, &mbev_error);
+  if (mbev_status == MB_SUCCESS)
+    mbev_selected.displayed = true;
   mbev_status = mb3dsoundings_set_dismiss_notify(mbev_verbose, &mbeditviz_mb3dsoundings_dismiss, &mbev_error);
   mbev_status = mb3dsoundings_set_edit_notify(mbev_verbose, &mbeditviz_mb3dsoundings_edit, &mbev_error);
   mbev_status = mb3dsoundings_set_info_notify(mbev_verbose, &mbeditviz_mb3dsoundings_info, &mbev_error);
@@ -1908,6 +1915,8 @@ void do_mbeditviz_picknav_notify(size_t instance) {
 
   /* open mb3dsoundings 3d editor */
   mbev_status = mb3dsoundings_open(mbev_verbose, &mbev_selected, &mbev_error);
+  if (mbev_status == MB_SUCCESS)
+    mbev_selected.displayed = true;
   mbev_status = mb3dsoundings_set_dismiss_notify(mbev_verbose, &mbeditviz_mb3dsoundings_dismiss, &mbev_error);
   mbev_status = mb3dsoundings_set_edit_notify(mbev_verbose, &mbeditviz_mb3dsoundings_edit, &mbev_error);
   mbev_status = mb3dsoundings_set_info_notify(mbev_verbose, &mbeditviz_mb3dsoundings_info, &mbev_error);
@@ -1955,6 +1964,36 @@ void do_mbeditviz_regrid_notify(Widget w, XtPointer client_data, XtPointer call_
 
 #ifdef MBEDITVIZ_GUI_DEBUG
   fprintf(stderr, "return do_mbeditviz_regrid_notify status:%d\n", mbev_status);
+#endif
+}
+/*------------------------------------------------------------------------------*/
+void do_mbeditviz_colorchange_notify(size_t instance) {
+
+  /* print input debug statements */
+  if (mbev_verbose >= 0) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       instance:    %zu\n", instance);
+  }
+
+#ifdef MBEDITVIZ_GUI_DEBUG
+  fprintf(stderr, "do_mbeditviz_colorchange_notify\n");
+#endif
+
+  /* recolor any selected soundings and then replot */
+  if (mbev_selected.displayed == true && mbev_selected.num_soundings > 0) {
+  	for (int isounding = 0; isounding < mbev_selected.num_soundings; isounding++) {
+  		struct mb3dsoundings_sounding_struct *sounding = &mbev_selected.soundings[isounding];
+  		if (mb_beam_ok(sounding->beamflag)) {
+        mbview_colorvalue_instance(instance, sounding->z, &(sounding->r), &(sounding->g), &(sounding->b));
+      }
+    }
+    mbev_status = mb3dsoundings_plot(mbev_verbose, &mbev_error);
+  }
+
+
+#ifdef MBEDITVIZ_GUI_DEBUG
+  fprintf(stderr, "return do_mbeditviz_colorchange_notify status:%d\n", mbev_status);
 #endif
 }
 

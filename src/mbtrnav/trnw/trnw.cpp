@@ -13,24 +13,24 @@
 /////////////////////////
 /*
  Copyright Information
- 
+
  Copyright 2002-2019 MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
- 
+
  Terms of Use
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version. You can access the GPLv3 license at
  http://www.gnu.org/licenses/gpl-3.0.html
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details
  (http://www.gnu.org/licenses/gpl-3.0.html)
- 
+
  MBARI provides the documentation and software code "as is", with no warranty,
  express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
@@ -38,7 +38,7 @@
  assume the entire risk associated with use of the code, and you agree to be
  responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
- 
+
  In no event shall MBARI be liable for any damages, whether general, special,
  incidental or consequential damages, arising out of your use of the software,
  including, but not limited to, the loss or corruption of your data or damages
@@ -48,11 +48,11 @@
  liability or expense, including attorneys' fees, resulting from loss of or
  damage to property or the injury to or death of any person arising out of the
  use of the software.
- 
+
  The MBARI software is provided without obligation on the part of the
  Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
- 
+
  MBARI assumes no responsibility or liability for any third party and/or
  commercial software required for the database or applications. Licensee agrees
  to obtain and maintain valid licenses for any additional third party software
@@ -60,7 +60,7 @@
  */
 
 /////////////////////////
-// Headers 
+// Headers
 /////////////////////////
 #include <stdlib.h>
 #include <stdio.h>
@@ -76,7 +76,7 @@
 // Macros
 /////////////////////////
 
-// These macros should only be defined for 
+// These macros should only be defined for
 // application main files rather than general C files
 /*
 /// @def PRODUCT
@@ -96,7 +96,7 @@
 */
 
 /////////////////////////
-// Declarations 
+// Declarations
 /////////////////////////
 
 struct wtnav_s {
@@ -138,7 +138,7 @@ static void s_wmeast_to_omeas(measT *dest, mt_cdata_t *src);
 
 wtnav_t *wtnav_dnew()
 {
-    wtnav_t *m = (typeof(m))malloc(sizeof(*m));
+    wtnav_t *m = (wtnav_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         TerrainNav *obj    = new TerrainNav();
@@ -152,13 +152,13 @@ wtnav_t *wtnav_dnew()
 //                   const int filterType, const int mapType, char* directory)
 wtnav_t *wtnav_new(trn_config_t *cfg)
 {
-    wtnav_t *m = (typeof(m))malloc(sizeof(*m));
+    wtnav_t *m = (wtnav_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         TerrainNav *obj = new TerrainNav(cfg->map_file, cfg->cfg_file, cfg->particles_file, cfg->filter_type, cfg->map_type, cfg->log_dir);
         m->obj = obj;
     }
-    
+
     return m;
 }
 
@@ -388,13 +388,13 @@ void *wtnav_obj_addr(wtnav_t *self)
 
 wcommst_t *wcommst_dnew()
 {
-    wcommst_t *m = (typeof(m))malloc(sizeof(*m));
+    wcommst_t *m = (wcommst_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         commsT *obj = new commsT();
         m->obj = obj;
     }
-    
+
     return m;
 }
 
@@ -457,7 +457,7 @@ void wcommst_cdata_destroy(ct_cdata_t **pself)
             if(NULL!=self->cfgname)free(self->cfgname);
             if(NULL!=self->particlename)free(self->particlename);
             if(NULL!=self->logname)free(self->logname);
-            
+
             free(self);
             *pself=NULL;
         }
@@ -466,7 +466,7 @@ void wcommst_cdata_destroy(ct_cdata_t **pself)
 uint32_t  wcommst_cdata_serialize(char *dest, ct_cdata_t *src, int len)
 {
     uint32_t retval=0;
-    
+
     if(NULL!=dest && NULL!=src && len>0){
         // convert to commsT, then serialize
         // it's good in that it uses the
@@ -475,34 +475,34 @@ uint32_t  wcommst_cdata_serialize(char *dest, ct_cdata_t *src, int len)
         // a lot of copying/conversion b/c
         // commsT implements poseT and measT
         // instances instead of refernces (pointers)
-        
+
         commsT *ct = new commsT();
-        
+
         ct->msg_type = src->msg_type;
         ct->parameter = src->parameter;
         ct->vdr = src->vdr;
-        
+
         pt_cdata_t *pptc = NULL;
         wposet_pose_to_cdata(&pptc,src->pt);
         s_wposet_to_opose(&ct->pt, pptc);
-        
+
         mt_cdata_t *pmtc = NULL;
         wmeast_meas_to_cdata(&pmtc,src->mt);
         s_wmeast_to_omeas(&ct->mt, pmtc);
-        
+
         ct->mapname = (NULL!=src->mapname?strdup(src->mapname):NULL);
         ct->cfgname = (NULL!=src->cfgname?strdup(src->cfgname):NULL);
         ct->particlename = (NULL!=src->particlename?strdup(src->particlename):NULL);
         ct->logname = (NULL!=src->logname?strdup(src->mapname):NULL);
-        
+
         ct->serialize(dest,len);
-        
+
         //destroy the commsT object
         delete ct;
         free(pmtc);
         free(pptc);
-        
-        
+
+
     }
     return retval;
 }
@@ -524,7 +524,7 @@ int wcommst_cdata_unserialize(ct_cdata_t **dest, char *src)
             cdata->msg_type = ct->msg_type;
             cdata->parameter = ct->parameter;
             cdata->vdr = ct->vdr;
-    
+
             cdata->pt = wposet_cnew(&ct->pt);
             cdata->mt = wmeast_cnew(&ct->mt);
             cdata->mapname = (NULL!=ct->mapname?strdup(ct->mapname):NULL);
@@ -567,7 +567,7 @@ int  wcommst_unserialize(wcommst_t **dest, char *src, int len)
         }
         commsT *obj = static_cast<commsT *>(ct->obj);
         retval = obj->unserialize(src,len);
-        
+
     }
     return retval;
 }
@@ -577,7 +577,7 @@ int wcommst_get_pt(wposet_t **dest, wcommst_t *src)
     int retval=-1;
     if(NULL!=src && NULL!=dest){
         commsT *ct = static_cast<commsT *>(src->obj);
-        
+
         wposet_t *pose = (wposet_t *)(*dest);
         if(NULL==pose){
             pose=wposet_dnew();
@@ -586,7 +586,7 @@ int wcommst_get_pt(wposet_t **dest, wcommst_t *src)
         poseT *obj = static_cast<poseT *>(pose->obj);
         *obj = ct->pt;
         retval=0;
-        
+
     }
     return retval;
 }
@@ -595,7 +595,7 @@ int wcommst_set_pt(wcommst_t *self, wposet_t *wpt)
     int retval=-1;
     if(NULL!=self && NULL!=wpt){
         commsT *ct = static_cast<commsT *>(self->obj);
-        
+
         poseT *obj = static_cast<poseT *>(wpt->obj);
         ct->pt = *obj;
         retval=0;
@@ -608,7 +608,7 @@ int wcommst_get_mt(wmeast_t **dest, wcommst_t *src)
     int retval=-1;
     if(NULL!=src && NULL!=dest){
         commsT *ct = static_cast<commsT *>(src->obj);
-        
+
         wmeast_t *meas = (wmeast_t *)(*dest);
         if(NULL==meas){
             meas=wmeast_dnew();
@@ -625,7 +625,7 @@ int wcommst_set_mt(wcommst_t *self, wmeast_t *wmt)
     int retval=-1;
     if(NULL!=self && NULL!=wmt){
         commsT *ct = static_cast<commsT *>(self->obj);
-        
+
         measT *obj = static_cast<measT *>(wmt->obj);
         ct->mt = *obj;
         retval=0;
@@ -700,7 +700,7 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
 
         TerrainNav *trn = static_cast<TerrainNav *>(self->obj);
         commsT *ct = static_cast<commsT *>(msg->obj);
-        
+
         if(NULL!=ct && NULL!=trn){
 
             int errors=0;
@@ -708,22 +708,22 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
             char cfgname[512]={0};
             char particlename[512]={0};
             char logname[300]={0};
-            
+
             char* mapPath = getenv("TRN_MAPFILES");
             char* cfgPath = getenv("TRN_DATAFILES");
             char* logPath = getenv("TRN_LOGFILES");
-            
+
             fprintf(stderr, "ENV: maps:%s, cfgs:%s, and logs:%s\n", mapPath, cfgPath, logPath);
-            
+
             char dotSlash[] = "./";
-            
+
             if(mapPath == NULL) {
                 mapPath = dotSlash;
             }
             if(cfgPath == NULL) {
                 cfgPath = dotSlash;
             }
-            
+
             if(ct->mapname[0]=='/'){
                 sprintf(mapname, "%s", ct->mapname);
             }else{
@@ -739,7 +739,7 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
             }else{
                 sprintf(particlename, "%s/%s", cfgPath, ct->particlename);
             }
-            
+
             // Let's see if these files exist right now as
             // this will save headaaches later
             //
@@ -748,13 +748,13 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
                 fprintf(stderr,"%s : map %s not found\n",__FUNCTION__,mapname);
                 errors++;
             }
-            
+
             if (0 != access(cfgname, F_OK))
             {
                 fprintf(stderr,"%s : cfg %s not found\n",__FUNCTION__, cfgname);
                 errors++;
             }
-            
+
             if (0 != access(particlename, F_OK))
             {
                 fprintf(stderr,"%s : particles %s not found\n",__FUNCTION__, particlename);
@@ -769,7 +769,7 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
                 TerrainNav *trn_new = new TerrainNav(mapname, cfgname, particlename, ftype, mtype, ct->logname);
                 if(NULL!=trn_new){
                    fprintf(stderr,"%s : OK replacing wtnav trn[%p] trn->obj[%p] w/ trn_new[%p]\n",__FUNCTION__,self,self->obj,trn_new);
-                    
+
                     delete static_cast<TerrainNav *>(self->obj);
                     self->obj = trn_new;
                 }
@@ -834,7 +834,7 @@ static void s_wmeast_to_omeas(measT *dest, mt_cdata_t *src)
         size_t double_sz = dest->numMeas * sizeof(double);
         size_t int_sz = dest->numMeas * sizeof(int);
         size_t bool_sz = dest->numMeas * sizeof(bool);
-        
+
         dest->covariance = new double[dest->numMeas];
         memcpy(dest->covariance,src->covariance,double_sz);
 
@@ -865,19 +865,19 @@ static void s_wmeast_to_omeas(measT *dest, mt_cdata_t *src)
 
 wposet_t *wposet_dnew()
 {
-    wposet_t *m = (typeof(m))malloc(sizeof(*m));
+    wposet_t *m = (wposet_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         poseT *obj = new poseT();
         m->obj = obj;
     }
-    
+
     return m;
 }
 
 wposet_t *wposet_cnew(poseT *pt)
 {
-    wposet_t *m  = (typeof(m))malloc(sizeof(*m));
+    wposet_t *m  = (wposet_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         poseT *pnew = new poseT();
@@ -945,7 +945,7 @@ int wposet_cdata_to_pose(wposet_t **dest, pt_cdata_t *src)
             obj->gpsValid=src->gpsValid;
             obj->bottomLock=src->bottomLock;
             obj->dvlValid=src->dvlValid;
-            
+
             obj->vx=src->vx;
             obj->vy=src->vy;
             obj->vz=src->vz;
@@ -968,7 +968,7 @@ int wposet_cdata_to_pose(wposet_t **dest, pt_cdata_t *src)
             for(i=0;i<N_COVAR;i++)
                 obj->covariance[i]=src->covariance[i];
           retval=0;
-            
+
         }
     }
     return retval;
@@ -999,7 +999,7 @@ int wposet_pose_to_cdata(pt_cdata_t **dest, wposet_t *src)
             cdata->gpsValid=obj->gpsValid;
             cdata->bottomLock=obj->bottomLock;
             cdata->dvlValid=obj->dvlValid;
-            
+
             cdata->vx=obj->vx;
             cdata->vy=obj->vy;
             cdata->vz=obj->vz;
@@ -1023,7 +1023,7 @@ int wposet_pose_to_cdata(pt_cdata_t **dest, wposet_t *src)
                 cdata->covariance[i]=obj->covariance[i];
             }
             retval=sizeof(*cdata);
-            
+
         }
     }
     return retval;
@@ -1056,10 +1056,10 @@ int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, long int utmZone)
             obj->wy = -9.155e-003;
             obj->wz = -3.076e-002;
             obj->vx = obj->vy = obj->vz = 0.01;
-            
+
             retval=0;
         }
-        
+
     }
     return retval;
 }
@@ -1120,26 +1120,26 @@ int  wposet_unserialize(wposet_t **pdest, char *src, int len)
 
 wmeast_t *wmeast_dnew()
 {
-    wmeast_t *m  = (typeof(m))malloc(sizeof(*m));
+    wmeast_t *m  = (wmeast_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         measT *obj = new measT();
         m->obj = obj;
     }
-    
+
     return m;
 }
 
 wmeast_t *wmeast_cnew(measT *mt)
 {
-    wmeast_t *m  = (typeof(m))malloc(sizeof(*m));
+    wmeast_t *m  = (wmeast_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
         measT *mnew = new measT();
         *mnew = *mt;
         m->obj=mnew;
     }
-    
+
     return m;
 }
 
@@ -1251,7 +1251,7 @@ int wmeast_cdata_to_meas(wmeast_t **dest, mt_cdata_t *src)
                 obj->beamNums[i]=src->beamNums[i];
             }
             retval=0;
-            
+
         }
     }
     return retval;
@@ -1321,7 +1321,7 @@ int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
             NavUtils::geoToUtm( Math::degToRad(src->sounding.lat),
                                Math::degToRad(src->sounding.lon),
                                utmZone, &(obj->x), &(obj->y));
-            
+
             for(i=0;i<obj->numMeas;i++){
                 // TODO: fill in measT from ping...
                 obj->beamNums[i] = src->sounding.beams[i].beam_num;
@@ -1339,7 +1339,7 @@ int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
 
             retval=0;
         }
-        
+
     }
     return retval;
 }
@@ -1559,9 +1559,9 @@ void trnw_msg_show(char *msg, bool verbose, int indent)
 trn_config_t *trncfg_dnew()
 {
     trn_config_t *instance = (trn_config_t *)calloc(1,sizeof(*instance));
-    
+
     if(NULL!=instance){
-        
+
         instance->trn_host=strdup(TRNW_TRN_HOST_DFL);
         instance->trn_port=TRNW_TRN_PORT_DFL;
         instance->map_file=NULL;
@@ -1583,7 +1583,7 @@ trn_config_t *trncfg_new(char *host,int port,
                          trnw_oflags_t oflags)
 {
     trn_config_t *instance = (trn_config_t *)calloc(1,sizeof(*instance));
-    
+
     if(NULL!=instance){
         instance->trn_host=(NULL!=host?strdup(host):NULL);
         instance->trn_port=port;
@@ -1616,12 +1616,12 @@ void trncfg_destroy(trn_config_t **pself)
                 free(self->cfg_file);
             if(NULL!=self->log_dir)
                 free(self->log_dir);
-            
+
             free(self);
             *pself=NULL;
         }
     }
-    
+
 }
 void trncfg_show(trn_config_t *obj, bool verbose, int indent)
 {
@@ -1660,5 +1660,3 @@ int trnw_geo_to_utm(double lat_deg, double lon_deg, long int utmZone, double *no
                                utmZone, northing, easting);
 }
 // End function trnw_utmToGeo
-
-

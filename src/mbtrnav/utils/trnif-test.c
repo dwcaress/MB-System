@@ -14,24 +14,24 @@
 /////////////////////////
 /*
  Copyright Information
- 
+
  Copyright 2002-2019 MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
- 
+
  Terms of Use
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version. You can access the GPLv3 license at
  http://www.gnu.org/licenses/gpl-3.0.html
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details
  (http://www.gnu.org/licenses/gpl-3.0.html)
- 
+
  MBARI provides the documentation and software code "as is", with no warranty,
  express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
@@ -39,7 +39,7 @@
  assume the entire risk associated with use of the code, and you agree to be
  responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
- 
+
  In no event shall MBARI be liable for any damages, whether general, special,
  incidental or consequential damages, arising out of your use of the software,
  including, but not limited to, the loss or corruption of your data or damages
@@ -49,11 +49,11 @@
  liability or expense, including attorneys' fees, resulting from loss of or
  damage to property or the injury to or death of any person arising out of the
  use of the software.
- 
+
  The MBARI software is provided without obligation on the part of the
  Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
- 
+
  MBARI assumes no responsibility or liability for any third party and/or
  commercial software required for the database or applications. Licensee agrees
  to obtain and maintain valid licenses for any additional third party software
@@ -86,7 +86,7 @@
  /// @def PRODUCT
  /// @brief header software product name
  #define PRODUCT "TBD_PRODUCT"
- 
+
  /// @def COPYRIGHT
  /// @brief header software copyright info
  #define COPYRIGHT "Copyright 2002-2013 MBARI Monterey Bay Aquarium Research Institute, all rights reserved."
@@ -166,7 +166,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     int c;
     bool help=false;
     bool version=false;
-    
+
     static struct option options[] = {
         {"verbose", required_argument, NULL, 0},
         {"help", no_argument, NULL, 0},
@@ -177,7 +177,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"particles", required_argument, NULL, 0},
         {"logdir", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
-    
+
     // process argument list
     while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
         switch (c) {
@@ -187,20 +187,20 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 if (strcmp("verbose", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->verbose);
                 }
-                
+
                 // help
                 else if (strcmp("help", options[option_index].name) == 0) {
                     help = true;
                 }
-                
+
                 // version
                 else if (strcmp("version", options[option_index].name) == 0) {
                     version = true;
                 }
-                
+
                 // host
                 else if (strcmp("host", options[option_index].name) == 0) {
-                    
+
                     char *hsave=cfg->host;
                     char *ocopy=strdup(optarg);
                     cfg->host=strtok(ocopy,":");
@@ -251,7 +251,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             exit(0);
         }
     }// while
-   
+
 
     fprintf(stderr,"verbose   [%d]\n",cfg->verbose);
     fprintf(stderr,"host      [%s]\n",cfg->host);
@@ -323,10 +323,10 @@ static void s_termination_handler (int signum)
 
 static int s_test_ct_xsend(msock_socket_t *cli, char *msg, int32_t len)
 {
-    
+
     int retval=-1;
     if(NULL!=cli){
-        
+
         if( len>0 && NULL!=msg && msock_send(cli,(byte *)msg,len)==len){
             retval=len;
             fprintf(stderr,"client CT xsend OK [%d]\n",len);
@@ -341,11 +341,11 @@ static int s_test_ct_send(msock_socket_t *cli)
 {
     int retval=-1;
     char *msg_out=NULL;
-    
+
     if(NULL!=cli){
-        
+
         int32_t len = trnw_type_msg(&msg_out, TRN_MSG_PING);
-        
+
         if( len>0 && NULL!=msg_out && msock_send(cli,(byte *)msg_out,len)==len){
             fprintf(stderr,"client CT send OK [%d]\n",len);
         }else{
@@ -359,13 +359,13 @@ static int s_test_ct_send(msock_socket_t *cli)
 static int s_test_ct_recv(msock_socket_t *cli)
 {
     int retval=-1;
-    
+
     if(NULL!=cli){
         int64_t test=0;
         char reply[TRN_MSG_SIZE]={0};
-        
+
         msock_set_blocking(cli,false);
-        if( (test=msock_recv(cli,reply,TRN_MSG_SIZE,0))>0){
+        if( (test=msock_recv(cli,(byte *)reply,TRN_MSG_SIZE,0))>0){
             wcommst_t *ct = NULL;
             wcommst_unserialize(&ct, reply, TRN_MSG_SIZE);
             char mtype = wcommst_get_msg_type(ct);
@@ -383,12 +383,12 @@ static int s_test_ct_recv(msock_socket_t *cli)
 static int s_test_trnmsg_send(msock_socket_t *cli)
 {
     int retval=-1;
-    
+
     if(NULL!=cli){
-        
+
         trnmsg_t *msg_out = trnmsg_new_type_msg(TRNIF_PING, 0x1234);
         int32_t len = trnmsg_len(msg_out);
-        
+
         if( len>0 && NULL!=msg_out && msock_send(cli,(byte *)msg_out,len)==len){
             fprintf(stderr,"client TRNMSG send OK [%d]\n",len);
             trnmsg_show(msg_out,true,5);
@@ -404,22 +404,22 @@ static int s_test_trnmsg_send(msock_socket_t *cli)
 static int s_test_trnmsg_recv(msock_socket_t *cli)
 {
     int retval=-1;
-    
+
     if(NULL!=cli){
         int64_t test=0;
         char reply[TRNIF_MAX_SIZE]={0};
-        
+
         msock_set_blocking(cli,false);
-        if( (test=msock_recv(cli,reply,TRNIF_MAX_SIZE,0))>0){
+        if( (test=msock_recv(cli,(byte *)reply,TRNIF_MAX_SIZE,0))>0){
             trnmsg_t *msg_in = NULL;
             int len = trnmsg_deserialize(&msg_in,(byte *)reply,TRNIF_MAX_SIZE);
             if(NULL!=msg_in){
                 trnmsg_id_t mtype = msg_in->hdr.msg_id;
-                fprintf(stderr,"client TRNMSG recv OK len[%lld] msg_type[%hu/%s]:\n",test,mtype,TRNIF_IDSTR(mtype));
+                fprintf(stderr,"client TRNMSG recv OK len[%lld] msg_type[%u/%s]:\n",test,mtype,TRNIF_IDSTR(mtype));
                 trnmsg_show(msg_in, true, 5);
                 trnmsg_destroy(&msg_in);
                 retval=len;
-                
+
             }
         }else{
             fprintf(stderr,"client TRNMSG recv failed len[%lld][%d/%s]\n",test,errno,strerror(errno));
@@ -433,24 +433,24 @@ static int s_test_ct(app_cfg_t *cfg)
 {
     int retval=-1;
     if(NULL!=cfg){
-        
+
         cfg->netif->read_fn   = trnif_msg_read_ct;
         cfg->netif->handle_fn = trnif_msg_handle_ct;
-        
+
         // client: send TRN_MSG_PING
         s_test_ct_send(cfg->cli);
-        
+
         // server: connect to client
         int uc = netif_update_connections(cfg->netif);
-        
+
         // server: get TRN_MSG_PING, return TRN_MSG_ACK
         int sc = netif_reqres(cfg->netif);
-        
+
         // client: get TRN_MSG_ACK
         s_test_ct_recv(cfg->cli);
-        
+
         fprintf(stderr,"%s : BEFORE INIT trn[%p] trn->obj[%p]\n",__FUNCTION__,cfg->trn,wtnav_obj_addr(cfg->trn));
-        
+
         // client: send TRN_MSG_INIT
         char *init_msg=NULL;
         int32_t len = trnw_init_msg(&init_msg, cfg->trn_cfg);
@@ -459,13 +459,13 @@ static int s_test_ct(app_cfg_t *cfg)
             s_test_ct_xsend(cfg->cli,init_msg,len);
             free(init_msg);
         }
-        
+
         // server: connect to client
         uc = netif_update_connections(cfg->netif);
-        
+
         // server: get TRN_MSG_INIT, return TRN_MSG_ACK
         sc = netif_reqres(cfg->netif);
-        
+
         // client: get TRN_MSG_ACK
         s_test_ct_recv(cfg->cli);
         fprintf(stderr,"%s : AFTER INIT trn[%p] trn->obj[%p]\n",__FUNCTION__,cfg->trn,wtnav_obj_addr(cfg->trn));
@@ -482,16 +482,16 @@ static int s_test_trnmsg(app_cfg_t *cfg)
         // change message handler
         cfg->netif->read_fn   = trnif_msg_read_trnmsg;
         cfg->netif->handle_fn = trnif_msg_handle_trnmsg;
-        
+
         // client: send TRNMSG PING
         s_test_trnmsg_send(cfg->cli);
-        
+
         // server: get MSG_PING, return TRNMSG_ACK
         int sc = netif_reqres(cfg->netif);
-        
+
         // client: get TRNMSG_ACK
         s_test_trnmsg_recv(cfg->cli);
-        
+
         retval=0;
     }
     return retval;
@@ -511,7 +511,7 @@ static int s_app_main(app_cfg_t *cfg)
                                NULL,
                                NULL);
     assert(netif!=NULL);
-    
+
     trn_config_t *trn_cfg = trncfg_new(cfg->host,
                                       cfg->port,
                                       10L,
@@ -526,11 +526,11 @@ static int s_app_main(app_cfg_t *cfg)
 //                                      "/home/headley/tmp/config/particles.cfg",
 //                                      "logs",
                                       0);
-    
+
     wtnav_t *trn = wtnav_new(trn_cfg);
-    
+
     netif_set_reqres_res(netif,trn);
-    
+
 //    mmd_module_configure(&mmd_config_defaults[0]);
     netif_init_mmd();
     netif_show(netif,true,5);
@@ -542,26 +542,26 @@ static int s_app_main(app_cfg_t *cfg)
 
     // server: open socket, listen
     int nc = netif_connect(netif);
-    
+
     // client: connect
     msock_socket_t *cli = msock_socket_new(NETIF_HOST_DFL,NETIF_PORT_DFL, ST_TCP);
     msock_connect(cli);
- 
+
     // fill in config
     cfg->netif = netif;
     cfg->trn_cfg = trn_cfg;
     cfg->trn = trn;
     cfg->cli = cli;
-    
+
     // test trn_server/commsT protocol
     s_test_ct(cfg);
     // test trnmsg protocol
     s_test_trnmsg(cfg);
-        
+
     // client: force expire, check, prune
     sleep(3);
     int uc = netif_reqres(netif);
-    
+
     mlog_tprintf(netif->mlog_id,"*** netif session end (TEST) uptime[%.3lf] ***\n",(mtime_dtime()-start_time));
 
 
@@ -572,7 +572,7 @@ static int s_app_main(app_cfg_t *cfg)
 int main(int argc, char **argv)
 {
     int retval=-1;
-    
+
 //    int verbose;
 //    netif_t *netif;
 //    trn_config_t *trn_cfg;
@@ -601,7 +601,7 @@ int main(int argc, char **argv)
 
     parse_args(argc,argv,cfg);
     s_app_main(cfg);
-    
+
     if(NULL!=cfg){
         if(NULL!=cfg->host)free(cfg->host);
         if(NULL!=cfg->map)free(cfg->map);

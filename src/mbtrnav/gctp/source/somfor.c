@@ -61,7 +61,7 @@ if (flag != 0)
   {
   alf = alf_in;
   p21 = time / 1440.0;
-  lon_center = lon; 
+  lon_center = lon;
   start =  start1;
   }
 else
@@ -180,7 +180,7 @@ if (delta_lat>1.570796) delta_lat=1.570796;
 if (delta_lat<-1.570796) delta_lat= -1.570796;
 radlt=delta_lat;
 radln=delta_lon;
-if(delta_lat>=0.0)tlamp=PI/2.0; 
+if(delta_lat>=0.0)tlamp=PI/2.0;
 if(start!= 0.0)tlamp=2.5*PI;
 if(delta_lat<0.0) tlamp=1.5*PI;
 n=0;
@@ -270,4 +270,5 @@ sq=sqrt(xj*xj+s*s);
 fc=s*(h+xj)/sq;
 *fc1=fc*cos(*dlam);
 *fc3=fc*cos(3.0* *dlam);
+return 0.0;
 }

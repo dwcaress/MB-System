@@ -268,6 +268,7 @@ void do_mbeditviz_picksite_notify(size_t instance);
 void do_mbeditviz_pickroute_notify(size_t instance);
 void do_mbeditviz_picknav_notify(size_t instance);
 void do_mbeditviz_regrid_notify(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_colorchange_notify(size_t instance);
 int do_mbeditviz_message_on(char *message);
 int do_mbeditviz_message_off(void);
 int do_error_dialog(char *s1, char *s2, char *s3);

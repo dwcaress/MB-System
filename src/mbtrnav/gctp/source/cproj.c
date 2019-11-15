@@ -58,7 +58,7 @@ double *cos_val;
 return;
 }
 #endif //WITH_GCTP_SINCOS
- 
+
 /* Function to eliminate roundoff errors in asin
 ----------------------------------------------*/
 double asinz (con)
@@ -89,8 +89,8 @@ double con;
       return((cosphi / (sqrt (1.0 - con * con))));
 }
 
-/* Function to compute constant small q which is the radius of a 
-   parallel of latitude, phi, divided by the semimajor axis. 
+/* Function to compute constant small q which is the radius of a
+   parallel of latitude, phi, divided by the semimajor axis.
 ------------------------------------------------------------*/
 double qsfnz (eccent,sinphi,cosphi)
    double eccent;
@@ -127,15 +127,15 @@ double phi;
 long i;
 
       phi = asinz(.5 * qs);
-      if (eccent < EPSLN) 
+      if (eccent < EPSLN)
          return(phi);
-      eccnts = eccent * eccent; 
+      eccnts = eccent * eccent;
       for (i = 1; i <= 25; i++)
         {
         sincos(phi,&sinpi,&cospi);
-        con = eccent * sinpi; 
+        con = eccent * sinpi;
         com = 1.0 - con * con;
-        dphi = .5 * com * com / cospi * (qs / (1.0 - eccnts) - sinpi / com + 
+        dphi = .5 * com * com / cospi * (qs / (1.0 - eccnts) - sinpi / com +
                .5 / eccent * log ((1.0 - con) / (1.0 + con)));
        phi = phi + dphi;
        if (fabs(dphi) <= 1e-7)
@@ -154,7 +154,7 @@ double phi2z(eccent,ts,flag)
 double eccent;		/* Spheroid eccentricity		*/
 double ts;		/* Constant value t			*/
 long *flag;		/* Error flag number			*/
- 
+
 {
 double eccnth;
 double phi;
@@ -170,9 +170,9 @@ long i;
     {
     sinpi = sin(phi);
     con = eccent * sinpi;
-    dphi = HALF_PI - 2 * atan(ts *(pow(((1.0 - con)/(1.0 + con)),eccnth))) - 
+    dphi = HALF_PI - 2 * atan(ts *(pow(((1.0 - con)/(1.0 + con)),eccnth))) -
 	   phi;
-    phi += dphi; 
+    phi += dphi;
     if (fabs(dphi) <= .0000000001)
        return(phi);
     }
@@ -180,7 +180,7 @@ long i;
   *flag = 002;
   return(002);
 }
- 
+
 /* Function to compute latitude, phi3, for the inverse of the Equidistant
    Conic projection.
 -----------------------------------------------------------------*/
@@ -218,7 +218,7 @@ return(3);
 /* Function to compute, phi4, the latitude for the inverse of the
    Polyconic projection.
 ------------------------------------------------------------*/
-double phi4z (eccent,e0,e1,e2,e3,a,b,c,phi) 
+double phi4z (eccent,e0,e1,e2,e3,a,b,c,phi)
 
 double eccent;		/* Spheroid eccentricity squared	*/
 double e0;
@@ -253,7 +253,7 @@ long i;
         mlp = e0 - 2.0 * e1 * cos (2.0 *  *phi) + 4.0 * e2 *
               cos (4.0 *  *phi);
 */
-        ml = e0 * *phi - e1 * sin2ph + e2 * sin (4.0 *  *phi) - e3 * 
+        ml = e0 * *phi - e1 * sin2ph + e2 * sin (4.0 *  *phi) - e3 *
  	     sin (6.0 *  *phi);
         mlp = e0 - 2.0 * e1 * cos (2.0 *  *phi) + 4.0 * e2 *
               cos (4.0 *  *phi) - 6.0 * e3 * cos (6.0 *  *phi);
@@ -282,7 +282,7 @@ double pakcz(pak)
       char sgna;
 
       sgna = ' ';
-      if (pak < 0.0) 
+      if (pak < 0.0)
 	 sgna = '-';
       con = fabs (pak);
       degs = (long) ((con / 10000.0) + .001);
@@ -290,9 +290,9 @@ double pakcz(pak)
       mins = (long) ((con / 100.0) + .001);
       secs = con  - mins * 100;
       con = (double) (degs) * 1000000.0 + (double) (mins) * 1000.0 + secs;
-      if (sgna == '-') 
+      if (sgna == '-')
 	  con = - con;
-      return(con); 
+      return(con);
       }
 
 /* Function to convert radians to 3 digit packed DMS format (+/-)DDDMMMSSS.SSS
@@ -308,7 +308,7 @@ double pakr2dm(pak)
 
       sgna = ' ';
       pak *= R2D;
-      if (pak < 0.0) 
+      if (pak < 0.0)
 	 sgna = '-';
       con = fabs (pak);
       degs = (long) (con);
@@ -316,9 +316,9 @@ double pakr2dm(pak)
       mins = (long) con;
       secs = (con  - mins) * 60;
       con = (double) (degs) * 1000000.0 + (double) (mins) * 1000.0 + secs;
-      if (sgna == '-') 
+      if (sgna == '-')
 	  con = - con;
-      return(con); 
+      return(con);
       }
 
 /* Function to compute the constant small t for use in the forward
@@ -332,9 +332,9 @@ double tsfnz(eccent,phi,sinphi)
   {
   double con;
   double com;
-  
+
   con = eccent * sinphi;
-  com = .5 * eccent; 
+  com = .5 * eccent;
   con = pow(((1.0 - con) / (1.0 + con)),com);
   return (tan(.5 * (HALF_PI - phi))/con);
   }
@@ -342,7 +342,7 @@ double tsfnz(eccent,phi,sinphi)
 
 /* Function to return the sign of an argument
   ------------------------------------------*/
-sign(x)
+int sign(x)
 double x;
 {
 if (x < 0.0)
@@ -352,9 +352,9 @@ else
 }
 
 /* Function to adjust a longitude angle to range from -180 to 180 radians
-   added if statments 
+   added if statments
   -----------------------------------------------------------------------*/
-double adjust_lon(x) 
+double adjust_lon(x)
 
 double x;		/* Angle in radians			*/
 {
@@ -411,7 +411,7 @@ double x;
 {
 return(0.05859375*x*x*(1.0+0.75*x));
 }
-double e3fn(x) 
+double e3fn(x)
 double x;
 {
 return(x*x*x*(35.0/3072.0));

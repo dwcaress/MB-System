@@ -729,7 +729,7 @@ int main(int argc, char **argv) {
 				const int n = sscanf(optarg, "%d/%d/%d/%d/%lf", &tmp, &hipass_xdim, &hipass_ldim, &hipass_iter, &hipass_offset);
 				hipass_mode = (hipass_mode_t)tmp;  // TODO(schwehr): Range check.
 				if (n >= 3) {
-					filters[num_filters].mode = hipass_mode;
+					filters[num_filters].mode = hipass_mode + 0;
 					filters[num_filters].xdim = hipass_xdim;
 					filters[num_filters].ldim = hipass_ldim;
 					filters[num_filters].threshold = false;

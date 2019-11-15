@@ -103,7 +103,7 @@ typedef enum {
 } grid_interp_t;
 
 /* comparison threshold */;
-const int MBGRID_TINY = 0.00000001;
+const double MBGRID_TINY = 0.00000001;
 
 /* interpolation algorithm
     The code is set to use either of two

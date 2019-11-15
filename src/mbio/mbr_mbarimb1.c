@@ -310,7 +310,7 @@ int mbr_rt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     store->latitude = navlat;
     store->sonardepth = sonardepth;
     store->altitude = 0.0;
-    store->heading = heading;
+    store->heading = RTD * heading;
     store->speed = 0.0;
     store->roll = 0.0;
     store->pitch = 0.0;
@@ -521,7 +521,7 @@ int mbr_wt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     double navlon = store->longitude;
     double navlat = store->latitude;
     double sonardepth = store->sonardepth;
-    double heading = store->heading;
+    double heading = DTR * store->heading;
     int ping_number = 0;
     int beams_bath = store->beams_bath;
 

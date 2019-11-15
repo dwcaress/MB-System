@@ -149,6 +149,7 @@ int mbeditviz_init(int argc, char **argv) {
 	mbev_grid_cellsize = 0.0;
 	mbev_grid_n_columns = 0;
 	mbev_grid_n_rows = 0;
+  mbev_selected.displayed = false;
 	mbev_selected.xorigin = 0.0;
 	mbev_selected.yorigin = 0.0;
 	mbev_selected.zorigin = 0.0;
@@ -2616,6 +2617,23 @@ int mbeditviz_make_grid() {
 		fprintf(stderr, "dbg2  Input arguments:\n");
 	}
 
+	fprintf(stderr, "\nGenerating Grid:\n----------------\n");
+	fprintf(stderr, "Grid bounds (longitude latitude): %.7f %.7f %.7f %.7f\n",
+          mbev_grid_bounds[0], mbev_grid_bounds[1],
+	        mbev_grid_bounds[2], mbev_grid_bounds[3]);
+	fprintf(stderr, "Grid bounds (eastings northings): %.3f %.3f %.3f %.3f\n",
+          mbev_grid_boundsutm[0], mbev_grid_boundsutm[1],
+	        mbev_grid_boundsutm[2], mbev_grid_boundsutm[3]);
+	fprintf(stderr, "Cell size:%.3f\nGrid Dimensions: %d %d\n",
+          mbev_grid_cellsize, mbev_grid_n_columns, mbev_grid_n_rows);
+  if (mbev_grid_algorithm == MBEV_GRID_ALGORITHM_SIMPLEMEAN)
+    fprintf(stderr, "Algorithm: Simple Mean\n");
+  else if (mbev_grid_algorithm == MBEV_GRID_ALGORITHM_FOOTPRINT)
+    fprintf(stderr, "Algorithm: Footprint\n");
+  else //if (mbev_grid_algorithm == MBEV_GRID_ALGORITHM_SHOALBIAS)
+    fprintf(stderr, "Algorithm: Shoal Bias\n");
+  fprintf(stderr, "Interpolation: %d\n\n", mbev_grid_interpolation);
+
 	/* zero the grid arrays */
 	memset(mbev_grid.sum, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
 	memset(mbev_grid.wgt, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
@@ -2717,8 +2735,51 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 
 	/* proceed if beam in grid */
 	if (i >= 0 && i < mbev_grid.n_columns && j >= 0 && j < mbev_grid.n_rows) {
+    /* shoal bias gridding mode */
+    if (mbev_grid_algorithm == MBEV_GRID_ALGORITHM_SHOALBIAS) {
+			/* get location in grid arrays */
+			kk = i * mbev_grid.n_rows + j;
+
+			if (isnan(ping->bathcorr[ibeam])) {
+				fprintf(stderr, "\nFunction mbeditviz_grid_beam(): Encountered NaN value in swath data from file: %s\n",
+				        file->path);
+				fprintf(stderr, "     Ping time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", ping->time_i[0], ping->time_i[1],
+				        ping->time_i[2], ping->time_i[3], ping->time_i[4], ping->time_i[5], ping->time_i[6]);
+				fprintf(stderr, "     Beam bathymetry: beam:%d flag:%d bath:<%f %f> acrosstrack:%f alongtrack:%f\n", ibeam,
+				        ping->beamflag[ibeam], ping->bath[ibeam], ping->bathcorr[ibeam], ping->bathacrosstrack[ibeam],
+				        ping->bathalongtrack[ibeam]);
+			}
+
+			/* add to weights and sums */
+			if (beam_ok == true && (-ping->bathcorr[ibeam]) >  mbev_grid.sum[kk]) {
+				mbev_grid.wgt[kk] = 1.0;
+				mbev_grid.sum[kk] = (-ping->bathcorr[ibeam]);
+				mbev_grid.sgm[kk] = ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
+			}
+
+			/* recalculate grid cell if desired */
+			if (apply_now == true) {
+				/* recalculate grid cell */
+				if (mbev_grid.wgt[kk] > 0.0) {
+					mbev_grid.val[kk] = mbev_grid.sum[kk] / mbev_grid.wgt[kk];
+					mbev_grid.sgm[kk] = sqrt(fabs(mbev_grid.sgm[kk] / mbev_grid.wgt[kk] - mbev_grid.val[kk] * mbev_grid.val[kk]));
+					mbev_grid.min = MIN(mbev_grid.min, mbev_grid.val[kk]);
+					mbev_grid.max = MAX(mbev_grid.max, mbev_grid.val[kk]);
+					mbev_grid.smin = MIN(mbev_grid.smin, mbev_grid.sgm[kk]);
+					mbev_grid.smax = MAX(mbev_grid.smax, mbev_grid.sgm[kk]);
+				}
+				else {
+					mbev_grid.val[kk] = mbev_grid.nodatavalue;
+					mbev_grid.sgm[kk] = mbev_grid.nodatavalue;
+				}
+
+				/* update grid in mbview display */
+				mbview_updateprimarygridcell(mbev_verbose, 0, i, j, mbev_grid.val[kk], &mbev_error);
+			}
+		}
+
 		/* simple gridding mode */
-		if (file->topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM || mbev_grid_algorithm == MBEV_GRID_ALGORITHM_SIMPLEMEAN) {
+		else if (file->topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM || mbev_grid_algorithm == MBEV_GRID_ALGORITHM_SIMPLEMEAN) {
 			/* get location in grid arrays */
 			kk = i * mbev_grid.n_rows + j;
 
@@ -3252,10 +3313,11 @@ int mbeditviz_destroy_grid() {
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_selectregion(size_t instance) {
-	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
-	struct mbview_struct *mbviewdata;
-	struct mbview_region_struct *region;
+	struct mbview_struct *mbviewdata = NULL;
+	struct mbev_file_struct *file = NULL;
+	struct mbev_ping_struct *ping = NULL;
+	struct mbview_region_struct *region = NULL;
+	float *histogram = NULL;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	double dx, dy, dz;
 	double x, y;
@@ -3392,6 +3454,14 @@ int mbeditviz_selectregion(size_t instance) {
 									zmin = MIN(zmin, -ping->bathcorr[ibeam]);
 									zmax = MAX(zmax, -ping->bathcorr[ibeam]);
 								}
+
+                /* get sounding color to be used if displayed colored by topography */
+                mbview_colorvalue_instance(instance,
+                      mbev_selected.soundings[mbev_selected.num_soundings].z,
+                      &(mbev_selected.soundings[mbev_selected.num_soundings].r),
+                      &(mbev_selected.soundings[mbev_selected.num_soundings].g),
+                      &(mbev_selected.soundings[mbev_selected.num_soundings].b));
+
 								/*fprintf(stderr,"SELECTED SOUNDING: %d %d %d  %f %f  |  %d %f %f %f\n",
 								ifile,iping,ibeam,ping->bathx[ibeam],ping->bathy[ibeam],
 								mbev_selected.num_soundings,
@@ -3417,8 +3487,6 @@ int mbeditviz_selectregion(size_t instance) {
 		mbev_selected.zorigin = 0.5 * (zmin + zmax);
 		mbev_selected.zmin = -0.5 * dz;
 		mbev_selected.zmax = 0.5 * dz;
-		for (i = 0; i < mbev_selected.num_soundings; i++)
-			mbev_selected.soundings[i].z = mbev_selected.soundings[i].z - mbev_selected.zorigin;
 		if (mbev_verbose > 0)
 			fprintf(stderr, "mbeditviz_selectregion: num_soundings:%d\n", mbev_selected.num_soundings);
 	}
@@ -3443,7 +3511,7 @@ int mbeditviz_selectarea(size_t instance) {
 	struct mbview_area_struct *area;
 	int ifile, iping, ibeam;
 	double x, y, xx, yy;
-	double zmin, zmax, dz;
+	double zmin, zmax;
 	double heading, sonardepth;
 	double rolldelta, pitchdelta;
 	double mtodeglon, mtodeglat;
@@ -3476,9 +3544,7 @@ int mbeditviz_selectarea(size_t instance) {
 		/* get sounding bounds */
 		mbev_selected.xorigin = 0.5 * (area->endpoints[0].xgrid + area->endpoints[1].xgrid);
 		mbev_selected.yorigin = 0.5 * (area->endpoints[0].ygrid + area->endpoints[1].ygrid);
-		;
 		mbev_selected.zorigin = 0.5 * (area->endpoints[0].zdata + area->endpoints[1].zdata);
-		;
 		mbev_selected.xmin = -0.5 * area->length;
 		mbev_selected.ymin = -0.5 * area->width;
 		mbev_selected.xmax = 0.5 * area->length;
@@ -3559,6 +3625,14 @@ int mbeditviz_selectarea(size_t instance) {
 									zmin = MIN(zmin, -ping->bathcorr[ibeam]);
 									zmax = MAX(zmax, -ping->bathcorr[ibeam]);
 								}
+
+                /* get sounding color to be used if displayed colored by topography */
+                mbview_colorvalue_instance(instance,
+                      mbev_selected.soundings[mbev_selected.num_soundings].z,
+                      &(mbev_selected.soundings[mbev_selected.num_soundings].r),
+                      &(mbev_selected.soundings[mbev_selected.num_soundings].g),
+                      &(mbev_selected.soundings[mbev_selected.num_soundings].b));
+
 								/*fprintf(stderr,"SELECTED SOUNDING: %d %d %d  %f %f  |  %d %f %f %f\n",
 								ifile,iping,ibeam,ping->bathx[ibeam],ping->bathy[ibeam],
 								mbev_selected.num_soundings,
@@ -3579,12 +3653,10 @@ int mbeditviz_selectarea(size_t instance) {
 
 		/* get zscaling */
 		mbev_selected.zscale = mbev_selected.scale;
-		dz = zmax - zmin;
+		double dz = zmax - zmin;
 		mbev_selected.zorigin = 0.5 * (zmin + zmax);
 		mbev_selected.zmin = -0.5 * dz;
 		mbev_selected.zmax = 0.5 * dz;
-		for (i = 0; i < mbev_selected.num_soundings; i++)
-			mbev_selected.soundings[i].z = mbev_selected.soundings[i].z - mbev_selected.zorigin;
 		if (mbev_verbose > 0)
 			fprintf(stderr, "mbeditviz_selectarea: num_soundings:%d\n", mbev_selected.num_soundings);
 	}
@@ -3609,7 +3681,6 @@ int mbeditviz_selectnav(size_t instance) {
 	struct mbview_navpointw_struct *navpts;
 	int inavcount;
 	int ifile, iping, ibeam;
-	double dx, dy, dz;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	double heading, sonardepth;
 	double rolldelta, pitchdelta;
@@ -3714,6 +3785,14 @@ int mbeditviz_selectnav(size_t instance) {
 									zmin = MIN(zmin, -ping->bathcorr[ibeam]);
 									zmax = MAX(zmax, -ping->bathcorr[ibeam]);
 								}
+
+                /* get sounding color to be used if displayed colored by topography */
+                mbview_colorvalue_instance(instance,
+                      mbev_selected.soundings[mbev_selected.num_soundings].z,
+                      &(mbev_selected.soundings[mbev_selected.num_soundings].r),
+                      &(mbev_selected.soundings[mbev_selected.num_soundings].g),
+                      &(mbev_selected.soundings[mbev_selected.num_soundings].b));
+
 								/*fprintf(stderr,"SELECTED SOUNDING: %d %d %d  %f %f  |  %d %f %f %f\n",
 								ifile,iping,ibeam,ping->bathx[ibeam],ping->bathy[ibeam],
 								mbev_selected.num_soundings,
@@ -3735,11 +3814,11 @@ int mbeditviz_selectnav(size_t instance) {
 		}
 
 		/* get origin and scaling */
-		dz = zmax - zmin;
-		dx = xmax - xmin;
-		dy = ymax - ymin;
-		mbev_selected.xorigin = 0.5 * (xmin + xmax);
-		mbev_selected.yorigin = 0.5 * (ymin + ymax);
+		double dx = xmax - xmin;
+		double dy = ymax - ymin;
+		double dz = zmax - zmin;
+		double xorigin = 0.5 * (xmin + xmax);
+		double yorigin = 0.5 * (ymin + ymax);
 		mbev_selected.zorigin = 0.5 * (zmin + zmax);
 		mbev_selected.scale = 2.0 / sqrt(dy * dy + dx * dx);
 		mbev_selected.zscale = mbev_selected.scale;
@@ -3750,9 +3829,8 @@ int mbeditviz_selectnav(size_t instance) {
 		mbev_selected.zmin = -0.5 * dz;
 		mbev_selected.zmax = 0.5 * dz;
 		for (i = 0; i < mbev_selected.num_soundings; i++) {
-			mbev_selected.soundings[i].x = mbev_selected.soundings[i].x - mbev_selected.xorigin;
-			mbev_selected.soundings[i].y = mbev_selected.soundings[i].y - mbev_selected.yorigin;
-			mbev_selected.soundings[i].z = mbev_selected.soundings[i].z - mbev_selected.zorigin;
+			mbev_selected.soundings[i].x = mbev_selected.soundings[i].x - xorigin;
+			mbev_selected.soundings[i].y = mbev_selected.soundings[i].y - yorigin;
 		}
 		if (mbev_verbose > 0)
 			fprintf(stderr, "mbeditviz_selectarea: num_soundings:%d\n", mbev_selected.num_soundings);
@@ -3782,6 +3860,7 @@ void mbeditviz_mb3dsoundings_dismiss() {
 	}
 
 	/* release the memory of the soundings */
+  mbev_selected.displayed = false;
 	if (mbev_selected.num_soundings_alloc > 0) {
 		if (mbev_selected.soundings != NULL) {
 			free(mbev_selected.soundings);
