@@ -37,28 +37,40 @@
 #include "mbsys_ldeoih.h"
 #include "mbsys_reson7k.h"
 
-const int MB7K2SS_SS_FLAT_BOTTOM = 0;
-const int MB7K2SS_SS_3D_BOTTOM = 1;
+typedef enum {
+    MB7K2SS_SS_FLAT_BOTTOM = 0,
+    MB7K2SS_SS_3D_BOTTOM = 1,
+} layout_t;
 const int MB7K2SS_SSDIMENSION = 4001;
-const int MB7K2SS_SSLOW = 1;
-const int MB7K2SS_SSHIGH = 2;
+typedef enum {
+    MB7K2SS_SSLOW = 1,
+    MB7K2SS_SSHIGH = 2,
+} extract_t;
 
-const int MB7K2SS_BOTTOMPICK_NONE = 0;
-const int MB7K2SS_BOTTOMPICK_BATHYMETRY = 1;
-const int MB7K2SS_BOTTOMPICK_ALTITUDE = 2;
-const int MB7K2SS_BOTTOMPICK_ARRIVAL = 3;
-const int MB7K2SS_BOTTOMPICK_3DBATHY = 4;
+typedef enum {
+    MB7K2SS_BOTTOMPICK_NONE = 0,
+    MB7K2SS_BOTTOMPICK_BATHYMETRY = 1,
+    MB7K2SS_BOTTOMPICK_ALTITUDE = 2,
+    MB7K2SS_BOTTOMPICK_ARRIVAL = 3,
+    MB7K2SS_BOTTOMPICK_3DBATHY = 4,
+} bottompick_t;
 
-const int MB7K2SS_SSGAIN_OFF = 0;
-const int MB7K2SS_SSGAIN_TVG_1OVERR = 1;
+typedef enum {
+    MB7K2SS_SSGAIN_OFF = 0,
+    MB7K2SS_SSGAIN_TVG_1OVERR = 1,
+} ssgain_t;
+
 const int MB7K2SS_ALLOC_NUM = 128;
 const int MB7K2SS_ALLOC_CHUNK = 1024;
 
-const int MB7K2SS_ROUTE_WAYPOINT_NONE = 0;
-const int MB7K2SS_ROUTE_WAYPOINT_SIMPLE = 1;
-const int MB7K2SS_ROUTE_WAYPOINT_TRANSIT = 2;
-const int MB7K2SS_ROUTE_WAYPOINT_STARTLINE = 3;
-const int MB7K2SS_ROUTE_WAYPOINT_ENDLINE = 4;
+typedef enum {
+    MB7K2SS_ROUTE_WAYPOINT_NONE = 0,
+    MB7K2SS_ROUTE_WAYPOINT_SIMPLE = 1,
+    MB7K2SS_ROUTE_WAYPOINT_TRANSIT = 2,
+    MB7K2SS_ROUTE_WAYPOINT_STARTLINE = 3,
+    MB7K2SS_ROUTE_WAYPOINT_ENDLINE = 4,
+} waypoint_t;
+
 const double MB7K2SS_ONLINE_THRESHOLD = 15.0;
 const int MB7K2SS_ONLINE_COUNT = 30;
 
@@ -168,19 +180,19 @@ int main(int argc, char **argv) {
 	int mode;
 
 	/* extract modes */
-	int extract_type = MB7K2SS_SSLOW;
+	extract_t  extract_type = MB7K2SS_SSLOW;
 	int target_kind = MB_DATA_SIDESCAN2;
 	bool print_comments = false;
 
 	/* bottompick mode */
-	int bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
+	bottompick_t bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
 	double bottompickthreshold = 0.4;
 
 	/* sidescan interpolation scale */
 	int interpbins = 0;
 
 	/* sidescan gain mode */
-	int gainmode = MB7K2SS_SSGAIN_OFF;
+	ssgain_t gainmode = MB7K2SS_SSGAIN_OFF;  // TODO(schwehr): Not used.
 	double gainfactor = 1.0;
 
 	bool checkroutebearing = false;
@@ -190,7 +202,7 @@ int main(int argc, char **argv) {
 	bool route_file_set = false;
 	int smooth = 0;
 	mb_path topogridfile;
-	int sslayoutmode = MB7K2SS_SS_FLAT_BOTTOM;
+	layout_t sslayoutmode = MB7K2SS_SS_FLAT_BOTTOM;
 	double rangethreshold = 50.0;
 	bool swath_width_set = false;
 	double swath_width = -1.0;
@@ -237,7 +249,9 @@ int main(int argc, char **argv) {
 			case 'B':
 			case 'b':
 			{
-				const int n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
+				int tmp;
+				const int n = sscanf(optarg, "%d/%lf", &tmp, &bottompickthreshold);
+				bottompickmode = (bottompick_t)tmp;
 				if (n == 0)
 					bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
 				else if (n == 1 && bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL)
@@ -258,8 +272,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'G':
 			case 'g':
-				sscanf(optarg, "%d/%lf", &gainmode, &gainfactor);
+			{
+				int tmp;
+				sscanf(optarg, "%d/%lf", &tmp, &gainfactor);
+				gainmode = (ssgain_t)tmp;
 				break;
+			}
 			case 'I':
 			case 'i':
 				sscanf(optarg, "%s", read_file);
@@ -440,7 +458,7 @@ int main(int argc, char **argv) {
 	if (ssflip)
 		fprintf(stdout, "     Sidescan port and starboard exchanged\n");
 
-	int linenumber;
+	int linenumber = 0;
 	/* set starting line number and output file if route read */
 	if (route_file_set || timelist_file_set) {
 		linenumber = startline;
@@ -464,7 +482,7 @@ int main(int argc, char **argv) {
 	double mtodeglon;
 	double mtodeglat;
 	int activewaypoint = 0;
-	double rangelast;
+	double rangelast = 0.0;  // TODO(schwehr): Might not be always set correctly.
 	int oktowrite;
 	double topo;
 	int nroutepoint = 0;
@@ -565,10 +583,11 @@ int main(int argc, char **argv) {
 				}
 			}
 			else {
-				int waypoint;
+				int waypoint_tmp;
 				double lon;
 				double lat;
-				const int nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint, &heading);
+				const int nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint_tmp, &heading);
+				const waypoint_t waypoint = (waypoint_t)waypoint_tmp;
 				if (comment[0] == '#') {
 					fprintf(stderr, "buffer:%s", comment);
 					if (strncmp(comment, "## Route File Version", 21) == 0) {
@@ -669,6 +688,27 @@ int main(int argc, char **argv) {
 	if (format < 0)
 		read_datalist = true;
 
+	bool read_data;
+	void *datalist;
+
+	/* open file list */
+	if (read_datalist) {
+		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_OPEN_FAIL);
+		}
+		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
+			read_data = true;
+		else
+			read_data = false;
+	}
+	/* else copy single filename to be read */
+	else {
+		strcpy(file, read_file);
+		read_data = true;
+	}
+
 	void *imbio_ptr = NULL;
 	struct mb_io_struct *imb_io_ptr = NULL;
 	void *istore_ptr = NULL;
@@ -719,27 +759,6 @@ int main(int argc, char **argv) {
 	double *dat_heave = NULL;
 	double *dat_altitude = NULL;
 
-	bool read_data;
-	void *datalist;
-
-	/* open file list */
-	if (read_datalist) {
-		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(MB_ERROR_OPEN_FAIL);
-		}
-		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
-		strcpy(file, read_file);
-		read_data = true;
-	}
-
 	/* first read and store all navigation, attitude, heading, sonar depth, and altitude
 	   data from the survey (multibeam) records - loop over all files to be read
 	   - use fbt files if available */
@@ -758,7 +777,6 @@ int main(int argc, char **argv) {
 			exit(error);
 		}
 
-		/* get pointers to data storage */
 		imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
 		istore_ptr = imb_io_ptr->store_data;
 		istore = (struct mbsys_reson7k_struct *)istore_ptr;
@@ -953,10 +971,10 @@ int main(int argc, char **argv) {
 	double pixel_width;
 
 	/* sidescan layout mode */
-	double ss_altitude;
+	double ss_altitude = 0.0;  // TODO(schwehr): Might not always be set correctly.
 
 	/* route and auto-line data */
-	double range;
+	double range = 0.0;  // TODO(schwehr): Might not always be set correctly.
 
 	/* bottom layout parameters */
 	int nangle = MB7K2SS_NUM_ANGLES;
@@ -992,7 +1010,7 @@ int main(int argc, char **argv) {
 	int stbdchannelpick;
 	double ttime;
 	double ttime_min;
-	double ttime_min_use;
+	double ttime_min_use = 0.0;  // TODO(schwehr): Might not be properly set in all cases.
 	int istart;
 	double weight;
 	double factor;

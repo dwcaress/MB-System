@@ -129,6 +129,10 @@ const char *mb_platform_type(mb_platform_enum platform);
 #define MB_SENSOR_TYPE_CTD 110
 #define MB_SENSOR_TYPE_PRESSURE 111
 #define MB_SENSOR_TYPE_SOUNDSPEED 120
+
+#ifdef MB_NEED_SENSOR_TYPE
+// TODO(schwehr): Convert these from static header variables to
+// an accessor function.
 static int mb_sensor_type_id[] = {
     MB_SENSOR_TYPE_NONE,                    // 0
     MB_SENSOR_TYPE_SONAR_ECHOSOUNDER,       // 10
@@ -175,6 +179,7 @@ static char *mb_sensor_type_string[] = {"Unknown sensor type",
                                         "CTD",
                                         "Pressure",
                                         "Soundspeed"};
+#endif  // MB_NEED_SENSOR_TYPE
 
 /* survey platform sensor capability bitmask defines */
 #define MB_SENSOR_CAPABILITY1_NONE 0x00000000          // All bits = 0

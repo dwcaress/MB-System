@@ -103,8 +103,9 @@
 
 static const char program_name[] = "MBabsorption";
 static const char help_message[] =
-    "MBabsorption calculates the absorption of sound in sea water\nin dB/km as a function of frequency, "
-    "temperature, salinity, \nsound speed, pH, and depth.";
+    "MBabsorption calculates the absorption of sound in sea water\n"
+    "in dB/km as a function of frequency, temperature, salinity,\n"
+    "sound speed, pH, and depth.";
 static const char usage_message[] =
     "mbabsorption [-Csoundspeed -Ddepth -Ffrequency -Pph -Ssalinity -Ttemperature -V -H]";
 
