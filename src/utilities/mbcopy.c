@@ -68,13 +68,15 @@ typedef enum {
 
 static const char program_name[] = "MBcopy";
 static const char help_message[] =
-    "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified "
-    "conversions.  Options include \nwindowing in time and space and ping averaging.  The input and "
-    "\noutput data formats may differ, though not all possible combinations \nmake sense.  The default "
-    "input and output streams are stdin and stdout.";
+    "MBcopy copies an input swath sonar data file to an output\n"
+    "swath sonar data file with the specified conversions.  Options include\n"
+    "windowing in time and space and ping averaging.  The input and\n"
+    "output data formats may differ, though not all possible combinations\n"
+    "make sense.  The default input and output streams are stdin and stdout.";
 static const char usage_message[] =
-    "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  "
-    "-Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
+    "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc\n"
+    "\t-Fiformat/oformat/mformat -H -Iinfile -Llonflip -Mmergefile -N -Ooutfile\n"
+    "\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
 
 /*--------------------------------------------------------------------*/
 int setup_transfer_rules(int verbose, int ibeams, int obeams, int *istart, int *iend, int *offset, int *error) {
@@ -1436,9 +1438,6 @@ int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype
 /*--------------------------------------------------------------------*/
 #ifdef ENABLE_GSF
 int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *error) {
-  int status = MB_SUCCESS;
-  struct mb_io_struct *imb_io_ptr;
-  struct mb_io_struct *omb_io_ptr;
   struct mbsys_reson8k_struct *istore;
   struct mbsys_gsf_struct *ostore;
   gsfDataID *dataID; /* pointers withinin gsf data */
@@ -1452,8 +1451,8 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
   double theta;
   double phi;
 
-  imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
-  omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
+  struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+  struct mb_io_struct *omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
 
   /* get reson data structure pointer */
   istore = imb_io_ptr->store_data;
@@ -1471,6 +1470,8 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
     fprintf(stderr, "dbg2       ostore:     %p\n", (void *)ostore);
     fprintf(stderr, "dbg2       kind:       %d\n", istore->kind);
   }
+
+  int status = MB_SUCCESS;
 
   /* copy the data  */
   if (istore != NULL && ostore != NULL) {
@@ -1804,7 +1805,6 @@ int main(int argc, char **argv) {
   double pitch;
   double heave;
 
-  int mstatus;
   int merror = MB_ERROR_NO_ERROR;
   int mkind = MB_DATA_NONE;
   int mpings = 0;
@@ -1818,7 +1818,6 @@ int main(int argc, char **argv) {
   double maltitude;
   double msonardepth;
 
-  int sensorhead_status = MB_SUCCESS;
   int sensorhead_error = MB_ERROR_NO_ERROR;
   int sensorhead = 0;
   int sensortype = 0;
@@ -2427,9 +2426,10 @@ int main(int argc, char **argv) {
       while (merror <= MB_ERROR_NO_ERROR && (mkind != MB_DATA_DATA || time_d - .001 > mtime_d)) {
         /* find merge record */
 
-        mstatus = mb_get(verbose, mmbio_ptr, &mkind, &mpings, mtime_i, &mtime_d, &mnavlon, &mnavlat, &mspeed, &mheading,
-                         &mdistance, &maltitude, &msonardepth, &mnbath, &mnamp, &mnss, mbeamflag, mbath, mamp,
-                         mbathacrosstrack, mbathalongtrack, mss, mssacrosstrack, mssalongtrack, mcomment, &merror);
+        /* int mstatus = */
+        mb_get(verbose, mmbio_ptr, &mkind, &mpings, mtime_i, &mtime_d, &mnavlon, &mnavlat, &mspeed, &mheading,
+               &mdistance, &maltitude, &msonardepth, &mnbath, &mnamp, &mnss, mbeamflag, mbath, mamp,
+               mbathacrosstrack, mbathalongtrack, mss, mssacrosstrack, mssalongtrack, mcomment, &merror);
       }
 
       if (time_d + .001 < mtime_d || merror > 0) {
@@ -2592,8 +2592,8 @@ int main(int argc, char **argv) {
       if (kind == MB_DATA_DATA) {
         mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading, &draft,
                        &roll, &pitch, &heave, &error);
-        sensorhead_status = mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &sensorhead_error);
-        sensorhead_status = mb_sonartype(verbose, imbio_ptr, istore_ptr, &sensortype, &sensorhead_error);
+        /* int sensorhead_status = */ mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &sensorhead_error);
+        /* sensorhead_status = */ mb_sonartype(verbose, imbio_ptr, istore_ptr, &sensortype, &sensorhead_error);
       }
       ostore_ptr = omb_io_ptr->store_data;
       if (kind == MB_DATA_DATA || kind == MB_DATA_COMMENT) {
