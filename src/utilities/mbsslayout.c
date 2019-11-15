@@ -47,11 +47,14 @@ const int MBSSLAYOUT_LINE_ROUTE = 2;
 
 const int MBSSLAYOUT_LAYOUT_FLATBOTTOM = 0;
 const int MBSSLAYOUT_LAYOUT_3DTOPO = 1;
+
 const int MBSSLAYOUT_ALTITUDE_ALTITUDE = 0;
 const int MBSSLAYOUT_ALTITUDE_BOTTOMPICK = 1;
 const int MBSSLAYOUT_ALTITUDE_TOPO_GRID = 2;
+
 const int MBSSLAYOUT_GAIN_OFF = 0;
 const int MBSSLAYOUT_GAIN_TVG = 1;
+
 const int MBSSLAYOUT_SWATHWIDTH_VARIABLE = 0;
 const int MBSSLAYOUT_SWATHWIDTH_CONSTANT = 1;
 
@@ -62,6 +65,7 @@ const int MBSSLAYOUT_MERGE_ASYNC = 2;
 const int MBSSLAYOUT_TIME_LATENCY_OFF = 0;
 const int MBSSLAYOUT_TIME_LATENCY_FILE = 1;
 const int MBSSLAYOUT_TIME_LATENCY_CONSTANT = 2;
+
 const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_NONE = 0x00;
 const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_NAV = 0x01;
 const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SENSORDEPTH = 0x02;
@@ -79,6 +83,7 @@ const int MBSSLAYOUT_ROUTE_WAYPOINT_SIMPLE = 1;
 const int MBSSLAYOUT_ROUTE_WAYPOINT_TRANSIT = 2;
 const int MBSSLAYOUT_ROUTE_WAYPOINT_STARTLINE = 3;
 const int MBSSLAYOUT_ROUTE_WAYPOINT_ENDLINE = 4;
+
 // #define MBSSLAYOUT_ONLINE_THRESHOLD 15.0
 // #define MBSSLAYOUT_ONLINE_COUNT 30
 
@@ -229,8 +234,8 @@ int main(int argc, char **argv) {
 
 	/* survey line variables */
 	int line_mode = MBSSLAYOUT_LINE_OFF;
-	mb_path line_time_list;
-	mb_path line_route;
+	mb_path line_time_list = "";
+	mb_path line_route = "";
 	double line_range_threshold = 50.0;
 	mb_path line_name1 = "Survey";
 	mb_path line_name2 = "sidescan";
@@ -238,7 +243,7 @@ int main(int argc, char **argv) {
 	/* sidescan layout variables */
 	int layout_mode = MBSSLAYOUT_LAYOUT_FLATBOTTOM;
 	int ss_altitude_mode = MBSSLAYOUT_ALTITUDE_ALTITUDE;
-	mb_path topo_grid_file;
+	mb_path topo_grid_file = "";
 	double bottompick_threshold = 0.5;
 	bool channel_swap = false;
 	int swath_mode = MBSSLAYOUT_SWATHWIDTH_VARIABLE;
@@ -249,7 +254,7 @@ int main(int argc, char **argv) {
 
 	/* asynchronous navigation, heading, attitude data */
 	int nav_mode = MBSSLAYOUT_MERGE_OFF;
-	mb_path nav_file;
+	mb_path nav_file = "";
 	int nav_file_format = 0;
 	int nav_async = MB_DATA_DATA;
 	int nav_sensor = -1;
@@ -261,7 +266,7 @@ int main(int argc, char **argv) {
 	double *nav_speed = NULL;
 
 	int sensordepth_mode = MBSSLAYOUT_MERGE_OFF;
-	mb_path sensordepth_file;
+	mb_path sensordepth_file = "";
 	int sensordepth_file_format = 0;
 	int sensordepth_async = MB_DATA_DATA;
 	int sensordepth_sensor = -1;
@@ -271,7 +276,7 @@ int main(int argc, char **argv) {
 	double *sensordepth_sensordepth = NULL;
 
 	int heading_mode = MBSSLAYOUT_MERGE_OFF;
-	mb_path heading_file;
+	mb_path heading_file = "";
 	int heading_file_format = 0;
 	int heading_async = MB_DATA_DATA;
 	int heading_sensor = -1;
@@ -281,7 +286,7 @@ int main(int argc, char **argv) {
 	double *heading_heading = NULL;
 
 	int altitude_mode = MBSSLAYOUT_MERGE_OFF;
-	mb_path altitude_file;
+	mb_path altitude_file = "";
 	int altitude_file_format = 0;
 	int altitude_async = MB_DATA_DATA;
 	int altitude_sensor = -1;
@@ -291,7 +296,7 @@ int main(int argc, char **argv) {
 	double *altitude_altitude = NULL;
 
 	int attitude_mode = MBSSLAYOUT_MERGE_OFF;
-	mb_path attitude_file;
+	mb_path attitude_file = "";
 	int attitude_file_format = 0;
 	int attitude_async = MB_DATA_DATA;
 	int attitude_sensor = -1;
@@ -304,7 +309,7 @@ int main(int argc, char **argv) {
 
 	int time_latency_mode = MB_SENSOR_TIME_LATENCY_NONE;
 	mb_u_char time_latency_apply = MBSSLAYOUT_TIME_LATENCY_APPLY_NONE;
-	mb_path time_latency_file;
+	mb_path time_latency_file = "";
 	int time_latency_format = 1;
 	int time_latency_num = 0;
 	int time_latency_alloc = 0;
@@ -314,7 +319,7 @@ int main(int argc, char **argv) {
 
 	int soundspeed_mode = MBSSLAYOUT_MERGE_OFF;
 	double soundspeed_constant = 1500.0;
-	mb_path soundspeed_file;
+	mb_path soundspeed_file = "";
 	int soundspeed_file_format = 0;
 	int soundspeed_async = MB_DATA_DATA;
 	int n_soundspeed = 0;
@@ -327,18 +332,18 @@ int main(int argc, char **argv) {
 	double filter_length = 0.0;
 
 	/* MBIO read control parameters */
-	mb_path read_file;
-	mb_path output_file;
+	mb_path read_file = "datalist.mb-1";
+	mb_path output_file = "";
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
 	int iformat;
 	double btime_d;
 	double etime_d;
-	mb_path ifile;
+	mb_path ifile = "";
 	mb_path ifileroot;
-	mb_path dfile;
-	mb_path ofile;
+	mb_path dfile = "";
+	mb_path ofile = "";
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -388,7 +393,7 @@ int main(int argc, char **argv) {
 	double ss_altitude;
 
 	/* platform definition file */
-	mb_path platform_file;
+	mb_path platform_file = "";
 	bool use_platform_file = false;
 	struct mb_platform_struct *platform = NULL;
 	struct mb_sensor_struct *sensor_position = NULL;
@@ -476,7 +481,7 @@ int main(int argc, char **argv) {
 	int n_wt_data = 0;
 	int n_wt_comment = 0;
 
-	mb_path command;
+	mb_path command = "";
 	int interp_error = MB_ERROR_NO_ERROR;
 	double time_latency;
 	int jsurvey = 0;
@@ -501,7 +506,7 @@ int main(int argc, char **argv) {
 	int *routewaypoint = NULL;
 	double mtodeglon, mtodeglat;
 	void *topogrid_ptr = NULL;
-	mb_path scriptfile;
+	mb_path scriptfile = "";
 	char *result = NULL;
 	FILE *fp, *sfp;
 	double dx, dy, range;
@@ -516,34 +521,6 @@ int main(int argc, char **argv) {
 	int error_format = MB_ERROR_NO_ERROR;
 	int format_nottobeused = 0;
 
-	/* set default input to datalist.mb-1 */
-	strcpy(read_file, "datalist.mb-1");
-
-	/* initialize some other things */
-	memset(line_name1, 0, sizeof(mb_path));
-	memset(line_name2, 0, sizeof(mb_path));
-	memset(line_time_list, 0, sizeof(mb_path));
-	memset(line_route, 0, sizeof(mb_path));
-	memset(topo_grid_file, 0, sizeof(mb_path));
-	memset(nav_file, 0, sizeof(mb_path));
-	memset(sensordepth_file, 0, sizeof(mb_path));
-	memset(altitude_file, 0, sizeof(mb_path));
-	memset(heading_file, 0, sizeof(mb_path));
-	memset(attitude_file, 0, sizeof(mb_path));
-	memset(soundspeed_file, 0, sizeof(mb_path));
-	memset(time_latency_file, 0, sizeof(mb_path));
-	//memset(read_file, 0, sizeof(mb_path));
-	memset(output_file, 0, sizeof(mb_path));
-	memset(ifile, 0, sizeof(mb_path));
-	memset(dfile, 0, sizeof(mb_path));
-	memset(ofile, 0, sizeof(mb_path));
-	memset(platform_file, 0, sizeof(mb_path));
-	memset(command, 0, sizeof(mb_path));
-	memset(scriptfile, 0, sizeof(mb_path));
-	strcpy(line_name1, "Survey");
-	strcpy(line_name2, "sidescan");
-
-	/* process argument list */
 	{
 		int option_index;
 		bool errflg = false;
