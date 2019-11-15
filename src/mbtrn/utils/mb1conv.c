@@ -574,7 +574,8 @@ static int s_app_main(app_cfg_t *cfg)
         retval=0;
 
         if(cfg->verbose>0){
-            fprintf(stderr,"%s:%d rec/in/out/err[%u/%lld/%u/%u]\n",__FUNCTION__,__LINE__,rec_count,input_bytes,output_bytes,err_count);
+            fprintf(stderr,"%s:%d rec/in/out/err[%u/%lld/%u/%u]\n",
+            __FUNCTION__,__LINE__,rec_count,input_bytes,output_bytes,err_count);
         }
     }// else NULL cfg
     return retval;

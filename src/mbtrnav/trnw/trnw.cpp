@@ -64,9 +64,9 @@
 /////////////////////////
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include "trnw.h"
-//#include "mmdebug.h"
-#//include "medebug.h"
+
 #include "TerrainNav.h"
 #include "NavUtils.h"
 #include "MathP.h"
@@ -120,6 +120,9 @@ void trncfg_show(trn_config_t *obj, bool verbose, int indent);
 wposet_t *wposet_cnew(poseT *pt);
 wmeast_t *wmeast_cnew(measT *pt);
 
+static void s_wposet_to_opose(poseT *dest, pt_cdata_t *src);
+static void s_wmeast_to_omeas(measT *dest, mt_cdata_t *src);
+
 /////////////////////////
 // Imports
 /////////////////////////
@@ -172,7 +175,9 @@ void wtnav_estimate_pose(wtnav_t *self, wposet_t *estimate, const int type)
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
         poseT *ptobj = static_cast<poseT *>(estimate->obj);
+        if(NULL!=obj && NULL!=ptobj){
         obj->estimatePose(ptobj, type);
+        }
         return ;
     }
 }
@@ -182,7 +187,9 @@ void wtnav_meas_update(wtnav_t *self, wmeast_t *incomingMeas, const int type)
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
         measT *mtobj = static_cast<measT *>(incomingMeas->obj);
-        obj->measUpdate(mtobj, type);
+        if(NULL!=obj && NULL!=mtobj){
+       obj->measUpdate(mtobj, type);
+        }
         return ;
     }
 }
@@ -192,7 +199,9 @@ void wtnav_motion_update(wtnav_t *self, wposet_t *incomingNav)
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
         poseT *ptobj = static_cast<poseT *>(incomingNav->obj);
+        if(NULL!=obj && NULL!=ptobj){
         obj->motionUpdate(ptobj);
+        }
         return ;
     }
 }
@@ -201,7 +210,9 @@ bool wtnav_last_meas_successful(wtnav_t *self)
     bool retval=false;
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         retval = obj->lastMeasSuccessful();
+        }
     }
     return retval;
 }
@@ -210,7 +221,9 @@ bool wtnav_outstanding_meas(wtnav_t *self)
     bool retval=false;
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         retval = obj->outstandingMeas();
+        }
     }
     return retval;
 }
@@ -219,7 +232,9 @@ bool wtnav_initialized(wtnav_t *self)
     bool retval=false;
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
-        retval = obj->initialized();
+        if(NULL!=obj){
+            retval = obj->initialized();
+        }
     }
     return retval;
 }
@@ -228,7 +243,9 @@ bool wtnav_is_converged(wtnav_t *self)
     bool retval=false;
    if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
-        retval = obj->tNavFilter->isConverged();
+       if(NULL!=obj){
+       retval = obj->tNavFilter->isConverged();
+       }
     }
     return retval;
 }
@@ -237,7 +254,9 @@ void wtnav_reinit_filter(wtnav_t *self, bool lowInfoTransition)
 {
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         obj->reinitFilter(lowInfoTransition);
+        }
         return ;
     }
 }
@@ -247,7 +266,9 @@ int wtnav_get_filter_type(wtnav_t *self)
     int retval = -1;
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         retval = obj->getFilterType();
+        }
     }
     return retval;
 }
@@ -256,7 +277,9 @@ int wtnav_get_filter_state(wtnav_t *self)
     int retval = -1;
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         retval = obj->getFilterState();
+        }
     }
     return retval;
 }
@@ -264,7 +287,9 @@ void wtnav_use_highgrade_filter(wtnav_t *self)
 {
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         obj->useHighGradeFilter();
+        }
     }
     return ;
 }
@@ -272,7 +297,9 @@ void wtnav_use_lowgrade_filter(wtnav_t *self)
 {
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         obj->useHighGradeFilter();
+        }
     }
     return ;
 }
@@ -280,7 +307,9 @@ void wtnav_set_filter_reinit(wtnav_t *self, const bool allow)
 {
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         obj->setFilterReinit(allow);
+        }
     }
     return ;
 }
@@ -289,7 +318,9 @@ int wtnav_get_num_reinits(wtnav_t *self)
     int retval=-1;
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         retval = obj->getNumReinits();
+        }
     }
     return retval;
 }
@@ -297,7 +328,9 @@ void wtnav_set_interp_meas_attitude(wtnav_t *self, const bool set)
 {
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         obj->setInterpMeasAttitude(set);
+        }
     }
     return ;
 }
@@ -306,7 +339,9 @@ void wtnav_set_map_interp_method(wtnav_t *self, const int type)
 {
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         obj->setMapInterpMethod(type);
+        }
     }
     return ;
 }
@@ -314,7 +349,9 @@ void wtnav_set_vehicle_drift_rate(wtnav_t *self, const double driftRate)
 {
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         obj->setVehicleDriftRate(driftRate);
+        }
     }
     return ;
 }
@@ -322,7 +359,9 @@ void wtnav_set_modified_weighting(wtnav_t *self, const int use)
 {
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         obj->setModifiedWeighting(use);
+        }
     }
     return ;
 }
@@ -330,11 +369,22 @@ void wtnav_release_map(wtnav_t *self)
 {
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
         obj->releaseMap();
+        }
     }
     return ;
 }
 
+void *wtnav_obj_addr(wtnav_t *self)
+{
+    void *retval=NULL;
+    if(NULL!=self){
+        TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        retval = obj;
+    }
+    return retval;
+}
 
 wcommst_t *wcommst_dnew()
 {
@@ -396,10 +446,10 @@ ct_cdata_t *wcommst_cdata_new()
     }
     return instance;
 }
-void wcommst_cdata_destroy(ct_cdata_t **dest)
+void wcommst_cdata_destroy(ct_cdata_t **pself)
 {
-    if(NULL!=dest){
-    	ct_cdata_t *self = *dest;
+    if(NULL!=pself){
+    	ct_cdata_t *self = *pself;
         if(NULL!=self){
             if(NULL!=self->pt)wposet_destroy(self->pt);
             if(NULL!=self->mt)wmeast_destroy(self->mt);
@@ -409,12 +459,55 @@ void wcommst_cdata_destroy(ct_cdata_t **dest)
             if(NULL!=self->logname)free(self->logname);
 
             free(self);
-            *dest=NULL;
+            *pself=NULL;
         }
     }
 }
+uint32_t  wcommst_cdata_serialize(char *dest, ct_cdata_t *src, int len)
+{
+    uint32_t retval=0;
 
-int wcommst_msg_to_cdata(ct_cdata_t **dest, char *src)
+    if(NULL!=dest && NULL!=src && len>0){
+        // convert to commsT, then serialize
+        // it's good in that it uses the
+        // underlying commsT.serialize()
+        // on the down side, it requires
+        // a lot of copying/conversion b/c
+        // commsT implements poseT and measT
+        // instances instead of refernces (pointers)
+
+        commsT *ct = new commsT();
+
+        ct->msg_type = src->msg_type;
+        ct->parameter = src->parameter;
+        ct->vdr = src->vdr;
+
+        pt_cdata_t *pptc = NULL;
+        wposet_pose_to_cdata(&pptc,src->pt);
+        s_wposet_to_opose(&ct->pt, pptc);
+
+        mt_cdata_t *pmtc = NULL;
+        wmeast_meas_to_cdata(&pmtc,src->mt);
+        s_wmeast_to_omeas(&ct->mt, pmtc);
+
+        ct->mapname = (NULL!=src->mapname?strdup(src->mapname):NULL);
+        ct->cfgname = (NULL!=src->cfgname?strdup(src->cfgname):NULL);
+        ct->particlename = (NULL!=src->particlename?strdup(src->particlename):NULL);
+        ct->logname = (NULL!=src->logname?strdup(src->mapname):NULL);
+
+        ct->serialize(dest,len);
+
+        //destroy the commsT object
+        delete ct;
+        free(pmtc);
+        free(pptc);
+
+
+    }
+    return retval;
+}
+
+int wcommst_cdata_unserialize(ct_cdata_t **dest, char *src)
 {
     int retval=-1;
     //    fprintf(stderr,"%s:%d d[%p] s[%p]\n",__FUNCTION__,__LINE__,dest,src);
@@ -445,6 +538,330 @@ int wcommst_msg_to_cdata(ct_cdata_t **dest, char *src)
     }
     return retval;
 }
+
+int  wcommst_serialize(char **pdest, wcommst_t *src, int len)
+{
+    int retval=-1;
+    if(NULL!=src && NULL!=pdest){
+        fprintf(stderr,"%s:%d pdest[%p/%p] len[%d]\n",__FUNCTION__,__LINE__,pdest,*pdest,len);
+        char *dest = *pdest;
+        if(NULL==dest){
+            dest = (char *)malloc(len);
+            *pdest = dest;
+        }
+        commsT *obj = static_cast<commsT *>(src->obj);
+        obj->serialize(dest,len);
+        retval=TRN_MSG_SIZE; //len;
+    }
+    return retval;
+}
+
+int  wcommst_unserialize(wcommst_t **dest, char *src, int len)
+{
+    int retval=-1;
+    if(NULL!=src && NULL!=dest){
+        wcommst_t *ct = *dest;
+        if(NULL==ct){
+            ct = wcommst_dnew();
+            *dest = ct;
+        }
+        commsT *obj = static_cast<commsT *>(ct->obj);
+        retval = obj->unserialize(src,len);
+
+    }
+    return retval;
+}
+
+int wcommst_get_pt(wposet_t **dest, wcommst_t *src)
+{
+    int retval=-1;
+    if(NULL!=src && NULL!=dest){
+        commsT *ct = static_cast<commsT *>(src->obj);
+
+        wposet_t *pose = (wposet_t *)(*dest);
+        if(NULL==pose){
+            pose=wposet_dnew();
+            *dest=pose;
+        }
+        poseT *obj = static_cast<poseT *>(pose->obj);
+        *obj = ct->pt;
+        retval=0;
+
+    }
+    return retval;
+}
+int wcommst_set_pt(wcommst_t *self, wposet_t *wpt)
+{
+    int retval=-1;
+    if(NULL!=self && NULL!=wpt){
+        commsT *ct = static_cast<commsT *>(self->obj);
+
+        poseT *obj = static_cast<poseT *>(wpt->obj);
+        ct->pt = *obj;
+        retval=0;
+    }
+    return retval;
+}
+
+int wcommst_get_mt(wmeast_t **dest, wcommst_t *src)
+{
+    int retval=-1;
+    if(NULL!=src && NULL!=dest){
+        commsT *ct = static_cast<commsT *>(src->obj);
+
+        wmeast_t *meas = (wmeast_t *)(*dest);
+        if(NULL==meas){
+            meas=wmeast_dnew();
+            *dest=meas;
+        }
+        measT *obj = static_cast<measT *>(meas->obj);
+        *obj = ct->mt;
+        retval=0;
+    }
+    return retval;
+}
+int wcommst_set_mt(wcommst_t *self, wmeast_t *wmt)
+{
+    int retval=-1;
+    if(NULL!=self && NULL!=wmt){
+        commsT *ct = static_cast<commsT *>(self->obj);
+
+        measT *obj = static_cast<measT *>(wmt->obj);
+        ct->mt = *obj;
+        retval=0;
+    }
+    return retval;
+}
+int wcommst_get_parameter(wcommst_t *self)
+{
+    int retval=-1;
+    if(NULL!=self){
+        commsT *ct = static_cast<commsT *>(self->obj);
+        retval = ct->parameter;
+    }
+    return retval;
+}
+float wcommst_get_vdr(wcommst_t *self)
+{
+    float retval=-1;
+    if(NULL!=self){
+        commsT *ct = static_cast<commsT *>(self->obj);
+        retval = ct->vdr;
+    }
+    return retval;
+}
+
+char wcommst_get_msg_type(wcommst_t *self)
+{
+    int retval=-1;
+    if(NULL!=self){
+        commsT *ct = static_cast<commsT *>(self->obj);
+        retval = ct->msg_type;
+    }
+    return retval;
+}
+
+void commst_meas_update(wtnav_t *self, wcommst_t *msg)
+{
+    if(NULL!=self && NULL!=msg){
+        TerrainNav *trn = static_cast<TerrainNav *>(self->obj);
+        commsT *ct = static_cast<commsT *>(msg->obj);
+        if(NULL!=trn && NULL!=ct){
+            trn->measUpdate(&ct->mt, ct->parameter);
+        }
+    }
+}
+
+void commst_motion_update(wtnav_t *self, wcommst_t *msg)
+{
+    if(NULL!=self && NULL!=msg){
+        TerrainNav *trn = static_cast<TerrainNav *>(self->obj);
+        commsT *ct = static_cast<commsT *>(msg->obj);
+        if(NULL!=trn && NULL!=ct){
+            trn->motionUpdate(&ct->pt);
+        }
+    }
+}
+
+void commst_estimate_pose(wtnav_t *self, wcommst_t *msg, const int type)
+{
+    if(NULL!=self && NULL!=msg){
+        TerrainNav *trn = static_cast<TerrainNav *>(self->obj);
+        commsT *ct = static_cast<commsT *>(msg->obj);
+        if(NULL!=trn && NULL!=ct){
+            trn->estimatePose(&ct->pt,type);
+        }
+    }
+}
+
+void commst_initialize(wtnav_t *self, wcommst_t *msg)
+{
+    if(NULL!=self && NULL!=msg){
+
+        TerrainNav *trn = static_cast<TerrainNav *>(self->obj);
+        commsT *ct = static_cast<commsT *>(msg->obj);
+
+        if(NULL!=ct && NULL!=trn){
+
+            int errors=0;
+            char mapname[512]={0};
+            char cfgname[512]={0};
+            char particlename[512]={0};
+            char logname[300]={0};
+
+            char* mapPath = getenv("TRN_MAPFILES");
+            char* cfgPath = getenv("TRN_DATAFILES");
+            char* logPath = getenv("TRN_LOGFILES");
+
+            fprintf(stderr, "ENV: maps:%s, cfgs:%s, and logs:%s\n", mapPath, cfgPath, logPath);
+
+            char dotSlash[] = "./";
+
+            if(mapPath == NULL) {
+                mapPath = dotSlash;
+            }
+            if(cfgPath == NULL) {
+                cfgPath = dotSlash;
+            }
+
+            if(ct->mapname[0]=='/'){
+                sprintf(mapname, "%s", ct->mapname);
+            }else{
+                sprintf(mapname, "%s/%s", mapPath, ct->mapname);
+            }
+            if(ct->cfgname[0]=='/'){
+                sprintf(cfgname, "%s", ct->cfgname);
+            }else{
+                sprintf(cfgname, "%s/%s", cfgPath, ct->mapname);
+            }
+            if(ct->particlename[0]=='/'){
+                sprintf(particlename, "%s", ct->cfgname);
+            }else{
+                sprintf(particlename, "%s/%s", cfgPath, ct->particlename);
+            }
+
+            // Let's see if these files exist right now as
+            // this will save headaaches later
+            //
+            if (0 != access(mapname, F_OK))
+            {
+                fprintf(stderr,"%s : map %s not found\n",__FUNCTION__,mapname);
+                errors++;
+            }
+
+            if (0 != access(cfgname, F_OK))
+            {
+                fprintf(stderr,"%s : cfg %s not found\n",__FUNCTION__, cfgname);
+                errors++;
+            }
+
+            if (0 != access(particlename, F_OK))
+            {
+                fprintf(stderr,"%s : particles %s not found\n",__FUNCTION__, particlename);
+                errors++;
+            }
+
+            int mtype = ct->parameter / 10;
+            int ftype = ct->parameter % 10;
+
+            if(errors==0){
+                fprintf(stderr,"%s : allocating new wtnav TRN\n",__FUNCTION__);
+                TerrainNav *trn_new = new TerrainNav(mapname, cfgname, particlename, ftype, mtype, ct->logname);
+                if(NULL!=trn_new){
+                   fprintf(stderr,"%s : OK replacing wtnav trn[%p] trn->obj[%p] w/ trn_new[%p]\n",__FUNCTION__,self,self->obj,trn_new);
+
+                    delete static_cast<TerrainNav *>(self->obj);
+                    self->obj = trn_new;
+                }
+            }else{
+                fprintf(stderr,"%s : errors, aborting TRN init\n",__FUNCTION__);
+
+            }
+
+        }
+    }
+}
+
+static void s_wposet_to_opose(poseT *dest, pt_cdata_t *src)
+{
+    if(NULL!=dest && NULL!=src){
+        dest->x = src->x;
+        dest->y = src->x;
+        dest->z = src->x;
+        dest->vx = src->vx;
+        dest->vy = src->vy;
+        dest->vz = src->vz;
+        dest->ve = src->ve;
+        dest->vw_x = src->vw_x;
+        dest->vw_y = src->vw_y;
+        dest->vw_z = src->vw_z;
+        dest->vn_x = src->vn_x;
+        dest->vn_y = src->vn_y;
+        dest->vn_z = src->vn_z;
+        dest->wx = src->wx;
+        dest->wy = src->wy;
+        dest->wz = src->wz;
+        dest->ax = src->ax;
+        dest->ay = src->ay;
+        dest->az = src->az;
+        dest->phi = src->phi;
+        dest->theta = src->theta;
+        dest->psi = src->psi;
+        dest->psi_berg = src->psi_berg;
+        dest->psi_dot_berg = src->psi_dot_berg;
+        dest->time = src->time;
+        dest->dvlValid = src->dvlValid;
+        dest->gpsValid = src->gpsValid;
+        dest->bottomLock = src->bottomLock;
+        memcpy(dest->covariance,src->covariance,N_COVAR*sizeof(double));
+    }
+}
+
+static void s_wmeast_to_omeas(measT *dest, mt_cdata_t *src)
+{
+    if(NULL!=dest && NULL!=src){
+        dest->time = src->time;
+        dest->dataType = src->dataType;
+        dest->phi = src->phi;
+        dest->theta = src->theta;
+        dest->psi = src->psi;
+        dest->x = src->x;
+        dest->y = src->x;
+        dest->z = src->x;
+        dest->numMeas = src->numMeas;
+        dest->ping_number = src->ping_number;
+
+        size_t double_sz = dest->numMeas * sizeof(double);
+        size_t int_sz = dest->numMeas * sizeof(int);
+        size_t bool_sz = dest->numMeas * sizeof(bool);
+
+        dest->covariance = new double[dest->numMeas];
+        memcpy(dest->covariance,src->covariance,double_sz);
+
+        dest->ranges = new double[dest->numMeas];
+        memcpy(dest->ranges,src->ranges,double_sz);
+
+        dest->crossTrack = new double[dest->numMeas];
+        memcpy(dest->crossTrack,src->crossTrack,double_sz);
+
+        dest->alongTrack = new double[dest->numMeas];
+        memcpy(dest->alongTrack,src->alongTrack,double_sz);
+
+        dest->altitudes = new double[dest->numMeas];
+        memcpy(dest->altitudes,src->altitudes,double_sz);
+
+        dest->alphas = new double[dest->numMeas];
+        memcpy(dest->alphas,src->alphas,double_sz);
+
+        dest->measStatus = new bool[dest->numMeas];
+        memcpy(dest->measStatus,src->measStatus,bool_sz);
+
+        dest->beamNums = new int[dest->numMeas];
+        memcpy(dest->beamNums,src->beamNums,int_sz);
+
+    }
+}
+
 
 wposet_t *wposet_dnew()
 {
@@ -605,7 +1022,7 @@ int wposet_pose_to_cdata(pt_cdata_t **dest, wposet_t *src)
             for(i=0;i<N_COVAR;i++)
                 cdata->covariance[i]=obj->covariance[i];
             }
-            retval=0;
+            retval=sizeof(*cdata);
 
         }
     }
@@ -667,6 +1084,36 @@ int wposet_msg_to_pose(wposet_t **dest, char *src)
             delete ct;
             retval=0;
         }
+    }
+    return retval;
+}
+
+int  wposet_serialize(char **pdest, wposet_t *src, int len)
+{
+    int retval=0;
+    if(NULL!=pdest && NULL!=src && len>0){
+        char *obuf = *pdest;
+        if(NULL==obuf){
+            obuf = (char *)calloc(1,sizeof(len));
+            *pdest = obuf;
+        }
+        poseT *obj = static_cast<poseT *>(src->obj);
+        retval = obj->serialize(obuf,len);
+    }
+    return retval;
+}
+
+int  wposet_unserialize(wposet_t **pdest, char *src, int len)
+{
+    int retval=0;
+    if(NULL!=pdest && NULL!=src && len>0){
+        wposet_t *dest = *pdest;
+        if(NULL==dest){
+            dest = wposet_dnew();
+            *pdest = dest;
+        }
+        poseT *obj = static_cast<poseT *>(dest->obj);
+        retval = obj->unserialize(src,len);
     }
     return retval;
 }
@@ -817,7 +1264,9 @@ int wmeast_meas_to_cdata(mt_cdata_t **dest, wmeast_t *src)
     if(NULL!=dest && NULL!=src){
         mt_cdata_t *cdata = (mt_cdata_t *)(*dest);
         if(NULL==cdata){
-            cdata=(mt_cdata_t *)calloc(1,sizeof(*cdata));
+            measT *obj = static_cast<measT *>(src->obj);
+            size_t vsize = obj->numMeas*(6*sizeof(double)+sizeof(bool)+sizeof(int));
+            cdata=(mt_cdata_t *)calloc(1,sizeof(*cdata)+vsize);
             *dest=cdata;
         }
         //        fprintf(stderr,"%s:%d cdata[%p] src[%p]\n",__FUNCTION__,__LINE__,cdata,src);
@@ -894,6 +1343,70 @@ int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
     }
     return retval;
 }
+int wmeast_msg_to_meas(wmeast_t **dest, char *src)
+{
+    int retval=-1;
+    //    fprintf(stderr,"%s:%d d[%p] s[%p]\n",__FUNCTION__,__LINE__,dest,src);
+    if(NULL!=dest && NULL!=src){
+        wmeast_t *meas = (wmeast_t *)(*dest);
+        if(NULL==meas){
+            meas=wmeast_dnew();
+            *dest=meas;
+        }
+        //        fprintf(stderr,"%s:%d pose[%p] s[%p]\n",__FUNCTION__,__LINE__,pose,src);
+        if(NULL!=meas){
+            commsT *ct = new commsT();
+            retval=ct->unserialize(src);
+            measT *obj = static_cast<measT *>(meas->obj);
+            //            fprintf(stderr,"%s:%d ct[%p] obj[%p] dest[%p]\n",__FUNCTION__,__LINE__,ct,obj,dest);
+            *obj = ct->mt;
+            delete ct;
+//            retval=0;
+        }
+    }
+    return retval;
+}
+
+
+int  wmeast_serialize(char **pdest, wmeast_t *src, int len)
+{
+    int retval=0;
+    if(NULL!=pdest && NULL!=src && len>0){
+        char *obuf = *pdest;
+        if(NULL==obuf){
+            obuf = (char *)calloc(1,sizeof(len));
+            *pdest = obuf;
+        }
+        measT *obj = static_cast<measT *>(src->obj);
+        retval = obj->serialize(obuf,len);
+    }
+    return retval;
+}
+
+int  wmeast_unserialize(wmeast_t **pdest, char *src, int len)
+{
+    int retval=0;
+    if(NULL!=pdest && NULL!=src && len>0){
+        wmeast_t *dest = *pdest;
+        if(NULL==dest){
+            dest = wmeast_dnew();
+            *pdest = dest;
+        }
+        measT *obj = static_cast<measT *>(dest->obj);
+        retval = obj->unserialize(src,len);
+    }
+    return retval;
+}
+
+int wmeast_get_nmeas(wmeast_t *self)
+{
+    int retval=-1;
+    if(NULL!=self){
+        measT *mt = static_cast<measT *>(self->obj);
+        retval = mt->numMeas;
+    }
+    return retval;
+}
 
 int32_t trnw_meas_msg(char **dest, wmeast_t *src, int msg_type, int param)
 {
@@ -904,7 +1417,7 @@ int32_t trnw_meas_msg(char **dest, wmeast_t *src, int msg_type, int param)
         measT *mtsrc = static_cast<measT *>(src->obj);
 
         commsT *ct = new commsT(msg_type, param, *mtsrc);
-        ct->serialize(msg,TRN_MSG_SIZE);
+        retval=ct->serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
         delete ct;
         retval=TRN_MSG_SIZE;
@@ -920,7 +1433,7 @@ int32_t trnw_pose_msg(char **dest, wposet_t *src, char msg_type)
         memset(msg,0,TRN_MSG_SIZE);
         poseT *ptsrc = static_cast<poseT *>(src->obj);
         commsT ct(msg_type, *ptsrc);
-        ct.serialize(msg,TRN_MSG_SIZE);
+        retval=ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
         retval=TRN_MSG_SIZE;
     }
@@ -938,7 +1451,7 @@ int32_t trnw_init_msg(char **dest, trn_config_t *cfg)
         int param = cfg->map_type*10+cfg->filter_type;
         commsT ct(TRN_INIT, param, cfg->map_file,cfg->cfg_file,cfg->particles_file,cfg->log_dir);
 
-        ct.serialize(msg,TRN_MSG_SIZE);
+        retval=ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
         retval=TRN_MSG_SIZE;
     }
@@ -952,7 +1465,7 @@ int32_t trnw_vdr_msg(char **dest, char msg_type, int param, float vdr)
     if(NULL!=msg){
         memset(msg,0,TRN_MSG_SIZE);
         commsT ct(msg_type,param,vdr);
-        ct.serialize(msg,TRN_MSG_SIZE);
+        retval=ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
         retval=TRN_MSG_SIZE;
     }
@@ -966,7 +1479,7 @@ int32_t trnw_ptype_msg(char **dest, char msg_type, int param)
     if(NULL!=msg){
         memset(msg,0,TRN_MSG_SIZE);
         commsT ct(msg_type,param);
-        ct.serialize(msg,TRN_MSG_SIZE);
+        retval=ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
         retval=TRN_MSG_SIZE;
     }
@@ -975,30 +1488,40 @@ int32_t trnw_ptype_msg(char **dest, char msg_type, int param)
 
 int32_t trnw_type_msg(char **dest, char msg_type)
 {
-    int retval=-1;
+    int32_t retval=-1;
     char *msg = (char *)malloc(TRN_MSG_SIZE);
     if(NULL!=msg){
         memset(msg,0,TRN_MSG_SIZE);
         commsT ct(msg_type);
-        ct.serialize(msg,TRN_MSG_SIZE);
+        retval=ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
         retval=TRN_MSG_SIZE;
     }
     return retval;
 }
 
-int32_t trnw_ack_msg(char **dest)
+int32_t trnw_acknack_msg(char **pdest,char ACK_NACK)
 {
     int retval=-1;
     char *msg = (char *)malloc(TRN_MSG_SIZE);
-    if(NULL!=msg){
+    if(NULL!=msg && NULL!=pdest){
         memset(msg,0,TRN_MSG_SIZE);
-        commsT ct(TRN_ACK);
-        ct.serialize(msg,TRN_MSG_SIZE);
-        *dest=msg;
-        retval=TRN_MSG_SIZE;
+        commsT ct(ACK_NACK);
+        retval=ct.serialize(msg,TRN_MSG_SIZE);
+        *pdest=msg;
+                retval=TRN_MSG_SIZE;
     }
     return retval;
+}
+
+int32_t trnw_ack_msg(char **pdest)
+{
+    return trnw_type_msg(pdest,TRN_ACK);
+}
+
+int32_t trnw_nack_msg(char **pdest)
+{
+    return trnw_type_msg(pdest,TRN_NACK);
 }
 
 void trnw_msg_show(char *msg, bool verbose, int indent)
@@ -1056,7 +1579,8 @@ trn_config_t *trncfg_new(char *host,int port,
                          char *map_file,
                          char *cfg_file,
                          char *particles_file,
-                         char *log_dir)
+                         char *log_dir,
+                         trnw_oflags_t oflags)
 {
     trn_config_t *instance = (trn_config_t *)calloc(1,sizeof(*instance));
 
@@ -1070,6 +1594,7 @@ trn_config_t *trncfg_new(char *host,int port,
         instance->filter_type=filter_type;
         instance->map_type=map_type;
         instance->utm_zone=utm_zone;
+        instance->oflags=oflags;
    }
     return instance;
 }

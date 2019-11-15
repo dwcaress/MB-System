@@ -1,0 +1,90 @@
+%!PS-Adobe-2.0
+%%Creator: overview.ps
+%%Pages: atend
+%%EndComments
+save 20 dict begin
+
+/sf {   % scale /fontName => -  (set current font)
+    {findfont} stopped {pop /Courier findfont} if
+    exch scalefont setfont
+} def
+
+/ws {
+    4 index 6 4 roll moveto sub
+    2 index stringwidth pop sub
+    exch div 0 8#40 4 3 roll
+    widthshow
+} def
+
+/as {
+    4 index 6 4 roll moveto sub
+    2 index stringwidth pop sub
+    exch div 0 3 2 roll
+    ashow
+} def
+
+%%EndProlog
+%%Page:  1
+37.88 15.16 translate
+0 0 0 setrgbcolor
+14 /Times-Bold sf
+69.7597 693.44(General  Cartographic  Transformation  Package  Interface  \(GCTP\)  ) 12 466.24 ws
+190.72 664.64(GENERAL  OVERVIEW  ) 4 345.28 ws
+14 /Times-BoldItalic sf
+16 617.84(1.    What  has  Changed  and  Why?  ) 14 205.122 ws
+14 /Times-Roman sf
+26 585.44(GCTP  has  been  converted  to  C  from  the  latest  \(March,  1993\)    FORTRAN  version  of) 28 520 ws
+26 571.04(GCTP  as  required  by  an  EDC  project.  ) 14 238.162 ws
+26 538.64(Initialization  routines  for  each  projection  were  separated    into  forward  and  inverse) 22 520 ws
+26 524.24(initialization  routines.    Thus,  forward  and  inverse  routines  can  now  be  initialized  separately.) 24 520 ws
+26 509.84(For  example,  if  a  transformation  is  between  the  same  projection  with  slightly  different) 24 520 ws
+26 495.44(parameters,  say  Albers  with  different  Central  Meridians,  the  FORTRAN  version  forces  an) 22 520 ws
+26 481.04(initialization  step  each  time.    In  the  new  version,  forward  and  inverse  routines  are  initialized) 28 520 ws
+26 466.64(separately.    The  re-init  is  not  necessary,  resulting  in  a    significant  run-time  savings.  ) 28 484.881 ws
+26 434.24(The  initialization  of  the  Universal  Transverse  Mercator  \(UTM\)  has  been  changed  so  that) 24 520 ws
+26 419.84(if  a  positive  zone  is  specified  and  the  input  latitude  is  negative  the  zone  stays  positive.    If) 34 520 ws
+26 405.44(the  user  assigns  a  nonzero  zone  value,  the  sign  will  not  change  with  the  latitude.    This) 32 520 ws
+26 391.04(eliminates  the  changing  of  a  zone's  sign  without  the  user's  knowledge.  ) 22 410.961 ws
+26 358.64(The  FORTRAN  logical  unit  numbers  for  informational  and  error  messages  have  been) 22 520 ws
+26 344.24(replaced  by  file  names.    All  messages  are    routed  through  a  separate  report  routine  which) 30 520 ws
+26 329.84(can  be  easily    modified  to  control  the  format  of  the  reports  and  the  output  device  for  reports) 34 520 ws
+26 315.44(so  that  the  GCTP  may  be  tailored  more  closely  to  the  calling  application  package.  ) 28 472.401 ws
+26 283.04(The  FORTRAN  logical  unit  numbers  for  the  State  Plane  Parameter  Files  have  been) 24 520 ws
+26 268.64(removed.    These  files  can  still  be  accessed  by  using  the  appropriate  file  names.  ) 28 457.041 ws
+14 /Times-BoldItalic sf
+16 236.24(2.    Methods  to  access  transformation  routines.  ) 14 281.922 ws
+14 /Times-Roman sf
+26 203.84(There  are  two  ways  to  access  the  projection  conversion  routines  included  with  this) 24 520 ws
+26 189.44(package.    The  first  and  most  common  method  is  to  pass  the  necessary  projection) 26 520 ws
+26 175.04(information  into  the  subroutine  GCTP.    The  second  method  is  to  initialize  the  projections) 26 520 ws
+26 160.64(as  needed  and  to  pass  the  coordinates  directly  to  the  conversion  routines.  ) 24 427.281 ws
+26 128.24(Method  I.    The  first  method  is  the  more  general  of  the  two  methods.    For  this  method,  the) 36 520 ws
+26 113.84(programmer  need  only  pass  the  coordinates  to  the  subroutine  GCTP.    The  proper  flags  are) 28 520 ws
+26 99.4397(checked  to  determine  if  initialization  is  required.    The  coordinates  are  converted  to  the) 26 520 ws
+26 85.0397(proper  units.    Finally,  the  proper  transformation  routines  are  used  and  the  transformed) 24 520 ws
+26 70.6397(coordinates  are  returned.    This  method  has  the  disadvantage  of  being  slower  then  method) 26 520 ws
+showpage
+%%Page:  2
+37.88 15.16 translate
+0 0 0 setrgbcolor
+14 /Times-Roman sf
+26 693.44(two,  but  is  nearly  identical  to  the  FORTRAN  calling  sequence.    ) 22 371.602 ws
+26 661.04(Method  II.    The  second  method  is  the  more  complicated  of  the  two.    For  this  method,  the) 34 520 ws
+26 646.639(programmer  is  responsible  for  converting  the  input  coordinates  to  meters  or  radians,  and) 24 520 ws
+26 632.239(calling  the  initialization  and  transformation  routines.    This  method  has  the  advantage  of) 24 520 ws
+26 617.838(being  faster  and  may  be  considered  when  only  one  or  two  projections  are  used  by  a  given) 32 520 ws
+26 603.438(application.  For  example,  to  transform  geographic  coordinates  to  Transverse  Mercator,) 18 520 ws
+26 589.038(the  user  would:  ) 6 113.361 ws
+46 556.637(        1.  Initialize  the  Transverse  Mercator  projection  with  FOR_INIT.  ) 24 413.681 ws
+46 542.237(        2.  Convert  the  input  coordinates  to  radians.  ) 22 294.643 ws
+46 527.836(        3.  Transform  coordinates  to  TM  by  calling  TMFOR.  ) 24 343.602 ws
+46 513.436(        4.  Convert  returned  coordinates  to  desired  units.  ) 22 323.443 ws
+26 499.036(  ) 2 28.8804 ws
+48.8804 499.036(      5.  Loop  to  step  2.  ) 16 153.524 ws
+26 466.635(A  similar  method  would  be  used  to  transform  from  Transverse  Mercator  to  geographic) 24 520 ws
+26 452.235(coordinates  except  call  INV_INIT  in  step  1,  convert  to  meters  in  step  2,  and  call  TMINV) 30 520 ws
+26 437.835(in  step  3.  ) 6 76.8815 ws
+showpage
+%%Trailer
+end restore
+%%Pages: 2

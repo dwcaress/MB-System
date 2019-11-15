@@ -183,6 +183,7 @@ struct mb3dsoundings_world_struct {
 	int view_flagged;
 	int view_profiles;
 	int view_scalewithflagged;
+	int view_colorbytopo;
 
 	/* last sounding edited */
 	int last_sounding_defined;
@@ -289,6 +290,7 @@ void do_mb3dsdg_action_optimizebiasvalues_t(Widget w, XtPointer client_data, XtP
 void do_mb3dsdg_action_optimizebiasvalues_s(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_boundingbox(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_scalewithflagged(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_view_colorbytopo(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_reset(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_mouse_panzoom(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_mouse_rotate(Widget w, XtPointer client_data, XtPointer call_data);

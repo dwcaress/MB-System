@@ -1893,10 +1893,9 @@ initParticleDist(particleT& initialGuess) {
 			sprintf(temp,
 			"TNavBankFilter::initParticleDist() - Error opening file: %s\n",
 			pfname);
-			if(pfname!=NULL)
-        free(pfname);
-			fprintf(stderr, "%s", temp);
-			throw Exception(temp);
+			if(pfname!=NULL)free(pfname);
+				fprintf(stderr, "%s", temp);
+				throw Exception(temp);
 		}
 		particleFile.close();
 		if(pfname!=NULL)free(pfname);

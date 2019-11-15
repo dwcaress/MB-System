@@ -82,6 +82,7 @@ struct poseT {
 
   double covariance[N_COVAR];   //XYZ, phi, theta, psi, wy, wz covariance (passively stable in roll) (see above units)
   
+
   poseT();
   poseT& operator=(poseT& rhs);
   poseT& operator-=(poseT& rhs);
@@ -195,8 +196,8 @@ struct commsT
   char msg_type;
   int  parameter;
   float vdr;
-  poseT pt;
-  measT mt;
+    poseT pt;
+    measT mt;
   char *mapname;
   char *cfgname;
   char *particlename;

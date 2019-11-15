@@ -516,6 +516,7 @@ int mbview_reset(size_t instance) {
 		data->mbview_pickroute_notify = NULL;
 		data->mbview_picknav_notify = NULL;
 		data->mbview_sensitivity_notify = NULL;
+		data->mbview_colorchange_notify = NULL;
 
 		/* initialize data structure */
 		data->active = false;
@@ -2940,6 +2941,43 @@ int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensit
 }
 
 /*------------------------------------------------------------------------------*/
+int mbview_setcolorchangenotify(int verbose, size_t instance, void(mbview_colorchange_notify)(size_t), int *error) {
+	/* local variables */
+	int status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* print starting debug statements */
+	if (verbose >= 0) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
+		fprintf(stderr, "dbg2       instance:                  %zu\n", instance);
+		fprintf(stderr, "dbg2       mbview_colorchange_notify: %p\n", mbview_colorchange_notify);
+	}
+
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* set the pick notify function */
+	data->mbview_colorchange_notify = mbview_colorchange_notify;
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:        %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	/* return */
+	return (status);
+}
+
+/*------------------------------------------------------------------------------*/
 void mbview_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unused) {
 	size_t instance;
 	Dimension width;
@@ -5095,6 +5133,12 @@ void do_mbview_data_primary(Widget w, XtPointer client_data, XtPointer call_data
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_data_primary\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -5136,6 +5180,12 @@ void do_mbview_data_primaryslope(Widget w, XtPointer client_data, XtPointer call
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_data_primaryslope\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -5177,6 +5227,12 @@ void do_mbview_data_secondary(Widget w, XtPointer client_data, XtPointer call_da
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_data_secondary\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -5225,6 +5281,12 @@ void do_mbview_histogram(Widget w, XtPointer client_data, XtPointer call_data) {
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_histogram\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -5270,6 +5332,12 @@ void do_mbview_overlay_none(Widget w, XtPointer client_data, XtPointer call_data
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_overlay_none\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -5315,6 +5383,13 @@ void do_mbview_overlay_slope(Widget w, XtPointer client_data, XtPointer call_dat
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_overlay_slope\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
+
 }
 
 /*------------------------------------------------------------------------------*/
@@ -5360,6 +5435,12 @@ void do_mbview_overlay_illumination(Widget w, XtPointer client_data, XtPointer c
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_overlay_illumination\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -5405,6 +5486,12 @@ void do_mbview_overlay_secondary(Widget w, XtPointer client_data, XtPointer call
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_overlay_secondary\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -5711,6 +5798,12 @@ void do_mbview_colortable_haxby(Widget w, XtPointer client_data, XtPointer call_
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_haxby\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -5759,6 +5852,12 @@ void do_mbview_colortable_bright(Widget w, XtPointer client_data, XtPointer call
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_bright\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -5807,6 +5906,12 @@ void do_mbview_colortable_muted(Widget w, XtPointer client_data, XtPointer call_
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_muted\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -5855,6 +5960,12 @@ void do_mbview_colortable_gray(Widget w, XtPointer client_data, XtPointer call_d
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_gray\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -5903,6 +6014,12 @@ void do_mbview_colortable_flat(Widget w, XtPointer client_data, XtPointer call_d
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_flat\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -5952,6 +6069,12 @@ void do_mbview_colortable_sealevel1(Widget w, XtPointer client_data, XtPointer c
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_sealevel1\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -6000,6 +6123,12 @@ void do_mbview_colortable_sealevel2(Widget w, XtPointer client_data, XtPointer c
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_sealevel2\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -6912,6 +7041,12 @@ void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colorboundsapply\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -7086,6 +7221,12 @@ void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_d
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_shadeparmsapply\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -7292,6 +7433,12 @@ void do_mbview_3dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_3dparmsapply\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -7430,6 +7577,12 @@ void do_mbview_2dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_2dparmsapply\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -7547,6 +7700,12 @@ void do_mbview_resolutionchange(Widget w, XtPointer client_data, XtPointer call_
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_resolutionchange\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -8217,6 +8376,12 @@ void do_mbview_reset_view(Widget w, XtPointer client_data, XtPointer call_data) 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_reset_view\n");
 	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
+        __FILE__, __LINE__, instance,data->mbview_colorchange_notify);
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -8684,8 +8849,6 @@ int do_mbview_workfunction(XtPointer client_data) {
 	int plotting;
 	int found;
 	int mode;
-	int use_histogram;
-	float *histogram;
 	int ncalc;
 	int i, j, k;
 
@@ -8802,17 +8965,14 @@ int do_mbview_workfunction(XtPointer client_data) {
 			view->colordonecount,data->primary_nxy);*/
 
 			/* use histogram equalization if needed */
-			use_histogram = false;
+			float *histogram = NULL;
 			if (data->grid_mode == MBV_GRID_VIEW_PRIMARY && data->primary_histogram == true) {
-				use_histogram = true;
 				histogram = view->primary_histogram;
 			}
 			else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && data->primaryslope_histogram == true) {
-				use_histogram = true;
 				histogram = view->primaryslope_histogram;
 			}
 			else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY && data->secondary_histogram == true) {
-				use_histogram = true;
 				histogram = view->secondary_histogram;
 			}
 
@@ -8822,10 +8982,7 @@ int do_mbview_workfunction(XtPointer client_data) {
 				if (!(data->primary_stat_color[k / 8] & statmask[k % 8])) {
 					i = k / data->primary_n_columns;
 					j = k % data->primary_n_rows;
-					if (use_histogram == false)
-						mbview_colorpoint(view, data, i, j, k);
-					else
-						mbview_colorpoint_histogram(view, data, histogram, i, j, k);
+					mbview_colorpoint(view, data, histogram, i, j, k);
 					ncalc++;
 				}
 				view->colordonecount = k;

@@ -1197,6 +1197,7 @@ void vehicleT::displayVehicleInfo() {
 /*----------------------------------------------------------------------------
 /commsT member functions
 /----------------------------------------------------------------------------*/
+
 commsT::commsT()
 	: msg_type(0), parameter(0), vdr(0.0),
 	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {

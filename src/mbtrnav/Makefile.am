@@ -1,10 +1,10 @@
-lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libmframe.la
+lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la
 
 include_HEADERS =
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/terrain-nav -I${top_srcdir}/src/mbtrnav/qnx-utils -I${top_srcdir}/src/mbtrnav/newmat  -I${top_srcdir}/src/mbtrnav/gctp/source -I${top_srcdir}/src/mbtrnav/mframe/src -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/utils -I${top_srcdir}/src/mbtrnav/terrain-nav -I${top_srcdir}/src/mbtrnav/qnx-utils -I${top_srcdir}/src/mbtrnav/newmat  -I${top_srcdir}/src/mbtrnav/gctp/source -I${top_srcdir}/src/mbtrn/mframe/src -I${top_srcdir}/src/mbtrn/utils -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE  -DWITH_MST_MSTATS -DMST_STATS_EN
 
 
 libgeolib_la_LDFLAGS =  -no-undefined -version-info 0:0:0
@@ -160,24 +160,6 @@ libtnav_la_SOURCES = \
                 terrain-nav/OctreeNode.cpp \
                 terrain-nav/TRNUtils.cpp
 
-libmframe_la_LDFLAGS =  -no-undefined -version-info 0:0:0
-
-libmframe_la_SOURCES = \
-                mframe/src/mframe.c \
-                mframe/src/mfile.c \
-                mframe/src/msocket.c \
-                mframe/src/mlist.c \
-                mframe/src/mmdebug.c \
-                mframe/src/mutils.c \
-                mframe/src/mthread.c \
-                mframe/src/merror.c \
-                mframe/src/mtime.c \
-                mframe/src/mstats.c \
-                mframe/src/mlog.c
-
-libmframe_la_LIBADD =
-
-
 libtnav_la_LIBADD = libgeolib.la \
 					libnewmat.la \
 					libqnx.la \
@@ -187,24 +169,46 @@ libtrnw_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
 libtrnw_la_SOURCES = \
                 trnw/trnw.cpp \
-                trnw/mb1_msg.c
+                trnw/mb1_msg.c \
+                trnw/trnif_msg.c
 
 libtrnw_la_LIBADD = libtnav.la \
 					libqnx.la \
 					libnewmat.la \
 					-lm -lpthread
 
+libnetif_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
-bin_PROGRAMS =   trn-server trn-cli #  readlog writelog
+libnetif_la_SOURCES = \
+				trnw/netif.c \
+				trnw/trnif_proto.c
+
+libnetif_la_LIBADD = libtrnw.la \
+				$(top_builddir)/src/mbtrn/libmframe.la \
+				-lm -lpthread
+
+bin_PROGRAMS =   trn-server trn-cli netif-test trnif-test trnifsvr-test trnclient-test #  readlog writelog
 
 
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
-trn_cli_LDADD = libmframe.la libtrnw.la libqnx.la libnewmat.la  libtnav.la  libgeolib.la
+trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la libqnx.la libnewmat.la  libtnav.la  libgeolib.la
 
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 
-dist_bin_SCRIPTS = 
+netif_test_SOURCES = utils/netif-test.c
+netif_test_LDADD = libnetif.la ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
+
+trnif_test_SOURCES =  utils/trnif-test.c
+trnif_test_LDADD = libnetif.la  ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
+
+trnifsvr_test_SOURCES = utils/trnifsvr-test.c
+trnifsvr_test_LDADD = libnetif.la  ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
+
+trnclient_test_SOURCES =  utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
+trnclient_test_LDADD = libtnav.la
+
+dist_bin_SCRIPTS =
 
 CLEANFILES =
 DISTCLEANFILES =

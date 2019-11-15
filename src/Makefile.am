@@ -21,8 +21,8 @@ SUBDIRS += gsf
 endif
 SUBDIRS += surf
 SUBDIRS += bsio
-SUBDIRS += $(XBUILD_SUB_MBTNAV)
 SUBDIRS += $(XBUILD_SUB_MBTRN)
+SUBDIRS += $(XBUILD_SUB_MBTNAV)
 SUBDIRS += mbio
 SUBDIRS += mbaux
 SUBDIRS += utilities

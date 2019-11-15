@@ -1,7 +1,7 @@
 /*******************************************************************************
 NAME                    Projection support routines listed below
 
-PURPOSE:	The following functions are included in REPORT.C	
+PURPOSE:	The following functions are included in REPORT.C
 
 		INIT:
 			Initializes the output device for error messages and
@@ -14,7 +14,7 @@ PURPOSE:	The following functions are included in REPORT.C
 		PTITLE, RADIUS, RADIUS2, CENLON, CENLONMER, CENLAT, ORIGIN,
 		STANPARL, STPARL1, OFFSET, GENRPT, GENRPT_LONG, PBLANK:
 			Reports projection parameters to the terminal,
-			specified file, or both. 
+			specified file, or both.
 
 
 PROGRAMMER              DATE		REASON
@@ -22,7 +22,7 @@ PROGRAMMER              DATE		REASON
 D. Steinwand, EROS      July, 1991	Initial development.
 T. Mittan		Mar,  1993	Adapted code to new "C" version of
 					GCTP library.
-S. Nelson		Jun, 1993	Added inline code. 
+S. Nelson		Jun, 1993	Added inline code.
 					Added error messages if no filename
 					was specified.
 S. Nelson		Jan, 1998	Returned OK instead of 0.
@@ -136,14 +136,14 @@ if (fptr_p != NULL)
 /* Functions to report projection parameters
   -----------------------------------------*/
 void ptitle(A)
-  char *A; 
-      {  
+  char *A;
+      {
       if (terminal_p)
-           printf("\n%s PROJECTION PARAMETERS:\n\n",A); 
+           printf("\n%s PROJECTION PARAMETERS:\n\n",A);
       if (file_p)
 	   {
            fptr_p = (FILE *)fopen(parm_file,"a");
-           fprintf(fptr_p,"\n%s PROJECTION PARAMETERS:\n\n",A); 
+           fprintf(fptr_p,"\n%s PROJECTION PARAMETERS:\n\n",A);
 	   fclose(fptr_p);
 	   }
       }
@@ -152,11 +152,11 @@ void radius(A)
   double A;
       {
       if (terminal_p)
-         printf("   Radius of Sphere:     %lf meters\n",A); 
+         printf("   Radius of Sphere:     %lf meters\n",A);
       if (file_p)
 	 {
          fptr_p = (FILE *)fopen(parm_file,"a");
-         fprintf(fptr_p,"   Radius of Sphere:     %lf meters\n",A); 
+         fprintf(fptr_p,"   Radius of Sphere:     %lf meters\n",A);
 	 fclose(fptr_p);
 	 }
       }
@@ -173,14 +173,14 @@ void radius2(A,B)
          {
          fptr_p = (FILE *)fopen(parm_file,"a");
          fprintf(fptr_p,"   Semi-Major Axis of Ellipsoid:     %lf meters\n",A);
-         fprintf(fptr_p,"   Semi-Minor Axis of Ellipsoid:     %lf meters\n",B); 
+         fprintf(fptr_p,"   Semi-Minor Axis of Ellipsoid:     %lf meters\n",B);
 	 fclose(fptr_p);
          }
       }
 
 void cenlon(A)
   double A;
-   { 
+   {
    if (terminal_p)
        printf("   Longitude of Center:     %lf degrees\n",A*R2D);
    if (file_p)
@@ -190,10 +190,10 @@ void cenlon(A)
        fclose(fptr_p);
        }
    }
- 
+
 void cenlonmer(A)
   double A;
-   { 
+   {
    if (terminal_p)
      printf("   Longitude of Central Meridian:     %lf degrees\n",A*R2D);
    if (file_p)
@@ -275,7 +275,7 @@ void offsetp(A,B)
       fprintf(fptr_p,"   False Easting:      %lf meters \n",A);
       fprintf(fptr_p,"   False Northing:     %lf meters \n",B);
       fclose(fptr_p);
-      }      
+      }
    }
 
 void genrpt(A,S)
@@ -294,15 +294,15 @@ void genrpt_long(A,S)
   long A; char *S;
    {
    if (terminal_p)
-      printf("   %s %d\n", S, A);
+      printf("   %s %ld\n", S, A);
    if (file_p)
       {
       fptr_p = (FILE *)fopen(parm_file,"a");
-      fprintf(fptr_p,"   %s %d\n", S, A);
+      fprintf(fptr_p,"   %s %ld\n", S, A);
       fclose(fptr_p);
       }
    }
-void pblank() 
+void pblank()
    {
    if (terminal_p)
       printf("\n");
@@ -314,11 +314,11 @@ void pblank()
       }
    }
 
-/* Function to report errors 
+/* Function to report errors
   -------------------------*/
-void p_error(what, where) 
+void p_error(what, where)
    char *what;
-   char *where; 
+   char *where;
    {
    if (terminal_e)
       printf("[%s] %s\n",where,what);

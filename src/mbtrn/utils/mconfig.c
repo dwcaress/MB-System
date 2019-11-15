@@ -185,6 +185,30 @@ char *mbtrnpp_ch_names[MBTRNPP_CH_COUNT]={
     "mbtrnpp.v4"
 };
 
+/// @var char *mbtnav_ch_names[MBTNAV_CH_COUNT]
+/// @brief module channel names
+char *mbtnav_ch_names[MBTNAV_CH_COUNT]={
+    "trace.mbtnav",
+    "debug.mbtnav",
+    "warn.mbtnav",
+    "err.mbtnav",
+    "mbtnav.v1",
+    "mbtnav.v2"
+};
+
+/// @var char *netif_ch_names[NETIF_CH_COUNT]
+/// @brief module channel names
+char *netif_ch_names[NETIF_CHAN_COUNT]={
+    "trace.netif",
+    "debug.netif",
+    "warn.netif",
+    "err.netif",
+    "netif.v1",
+    "netif.v2",
+    "netif.v3",
+    "netif.v4"
+};
+
 static mmd_module_config_t mmd_config_defaults[]={
     {MOD_R7KR,"MOD_R7KR",R7KR_CH_COUNT,((MM_ERR|MM_WARN)|R7KR_V1),r7kr_ch_names},
     {MOD_R7K,"MOD_R7K",R7K_CH_COUNT,((MM_ERR|MM_WARN)|R7K_V1),r7k_ch_names},
@@ -193,7 +217,9 @@ static mmd_module_config_t mmd_config_defaults[]={
     {MOD_TRNC,"MOD_TRNC",TRNC_CH_COUNT,((MM_ERR|MM_WARN)),trnc_ch_names},
     {MOD_EMU7K,"MOD_EMU7K",EMU7K_CH_COUNT,((MM_ERR|MM_WARN)),emu7k_ch_names},
     {MOD_TBINX,"MOD_TBINX",TBINX_CH_COUNT,((MM_ERR|MM_WARN)|TBINX_V1),tbinx_ch_names},
-    {MOD_MBTRNPP,"MOD_MBTRNPP",MBTRNPP_CH_COUNT,((MM_ERR|MM_WARN)|MBTRNPP_V1),mbtrnpp_ch_names}
+    {MOD_MBTRNPP,"MOD_MBTRNPP",MBTRNPP_CH_COUNT,((MM_ERR|MM_WARN)|MBTRNPP_V1),mbtrnpp_ch_names},
+    {MOD_MBTNAV,"MOD_MBTNAV",MBTNAV_CH_COUNT,((MM_ERR|MM_WARN)|MBTNAV_V1),mbtnav_ch_names},
+    {MOD_NETIF,"MOD_NETIF",NETIF_CHAN_COUNT,((MM_ERR|MM_WARN)|NETIF_V1),netif_ch_names}
 };
 
 /////////////////////////

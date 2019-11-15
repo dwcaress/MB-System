@@ -4,6 +4,26 @@
 /// @date 2019-06-21
 
 /// C wrappers for TerrainNav API
+// TerrainNav methods called by trn_server
+//    initialized()
+//    estimatePose
+//    getFilterState
+//    getFilterType
+//    getNumReinits
+//    isConverged
+//    lastMeasSuccessful
+//    measUpdate
+//    motionUpdate
+//    outstandingMeas
+//    reinitFilter
+//    releaseMap
+//    setFilterReinit
+//    setInterpMeasAttitude()
+//    setMapInterpMethod
+//    setModifiedWeighting
+//    setVehicleDriftRate
+//    useLowGradeFilter
+//    useHighGradeFilter
 
 /// @sa doxygen-examples.c for more examples of Doxygen markup
 
@@ -76,7 +96,7 @@
 // Macros
 /////////////////////////
 #define TRNW_MSG_SIZE TRN_MSG_SIZE
-
+#define TRNW_WMEAST_SERIAL_LEN(nmeas)  ( (2+1*nmeas)*sizeof(int) + (7+6*nmeas)*sizeof(double) + (0+1*nmeas)*sizeof(bool) + (0+1*nmeas)*sizeof(unsigned int) )
 struct wtnav_s;
 typedef struct wtnav_s wtnav_t;
 
@@ -89,6 +109,14 @@ typedef struct wmeast_s wmeast_t;
 struct wcommst_s;
 typedef struct wcommst_s wcommst_t;
 
+typedef enum {
+    TRNW_OSOUT=0x1,
+    TRNW_OSERR=0x2,
+    TRNW_OLOG=0x4,
+    TRNW_ODEBUG=0x8,
+    TRNW_OSOCKET=0x10,
+}trnw_oflags_t;
+
 typedef struct trn_config_s{
     char *trn_host;
     int  trn_port;
@@ -99,6 +127,7 @@ typedef struct trn_config_s{
     int  filter_type;
     int  map_type;
     long int utm_zone;
+    trnw_oflags_t oflags;
 }trn_config_t;
 
 /////////////////////////
@@ -107,9 +136,21 @@ typedef struct trn_config_s{
 #ifdef __cplusplus
 extern "C" {
 #endif
+    // TRN config API
+    trn_config_t *trncfg_dnew();
+    trn_config_t *trncfg_new(char *host, int port,
+                             long int utm_zone,int map_type, int filter_type,
+                             char *map_file,
+                             char *cfg_file,
+                             char *particles_file,
+                             char *logdir,
+                             trnw_oflags_t oflags);
+    
+    void trncfg_destroy(trn_config_t **pself);
+    void trncfg_show(trn_config_t *obj, bool verbose, int indent);
+
     // TerrainNav API
     wtnav_t *wtnav_dnew();
-//    wtnav_t *wtnav_new(char* mapName, char* vehicleSpecs, char* particles,const int filterType, const int mapType, char* directory);
     wtnav_t *wtnav_new(trn_config_t *cfg);
     void wtnav_destroy(wtnav_t *self);
     
@@ -132,6 +173,8 @@ extern "C" {
     void wtnav_set_vehicle_drift_rate(wtnav_t *self, const double driftRate);
     void wtnav_set_modified_weighting(wtnav_t *self, const int use);
     void wtnav_release_map(wtnav_t *self);
+    void *wtnav_obj_addr(wtnav_t *self);
+
 
     // comms (msg) API
     wcommst_t *wcommst_dnew();
@@ -139,8 +182,23 @@ extern "C" {
     void wcommst_show(wcommst_t *self, bool verbose, int indent);
     
     ct_cdata_t *wcommst_cdata_new();
-    void wcommst_cdata_destroy(ct_cdata_t **dest);
-	int  wcommst_msg_to_cdata(ct_cdata_t **dest, char *src);
+    void wcommst_cdata_destroy(ct_cdata_t **pself);
+    uint32_t  wcommst_cdata_serialize(char *dest, ct_cdata_t *src, int len);
+    int  wcommst_cdata_unserialize(ct_cdata_t **dest, char *src);
+    int wcommst_get_pt(wposet_t **dest, wcommst_t *src);
+    int wcommst_set_pt(wcommst_t *self, wposet_t *wpt);
+    int wcommst_get_mt(wmeast_t **dest, wcommst_t *src);
+    int wcommst_set_mt(wcommst_t *self, wmeast_t *wmt);
+    int wcommst_get_parameter(wcommst_t *self);
+    float wcommst_get_vdr(wcommst_t *self);
+    char wcommst_get_msg_type(wcommst_t *self);
+    int  wcommst_serialize(char **dest, wcommst_t *src, int len);
+    int  wcommst_unserialize(wcommst_t **dest, char *src, int len);
+
+    void commst_meas_update(wtnav_t *self, wcommst_t *msg);
+    void commst_motion_update(wtnav_t *self, wcommst_t *msg);
+    void commst_estimate_pose(wtnav_t *self, wcommst_t *msg, const int type);
+    void commst_initialize(wtnav_t *self, wcommst_t *msg);
 
     // pose API
     wposet_t *wposet_dnew();
@@ -150,6 +208,8 @@ extern "C" {
     int  wposet_pose_to_cdata(pt_cdata_t **dest, wposet_t *src);
     int  wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, long int utmZone);
     int  wposet_msg_to_pose(wposet_t **dest, char *src);
+    int  wposet_serialize(char **dest, wposet_t *src, int len);
+    int  wposet_unserialize(wposet_t **dest, char *src, int len);
 
     // measurement API
     wmeast_t *wmeast_dnew();
@@ -159,6 +219,10 @@ extern "C" {
     int  wmeast_cdata_to_meas(wmeast_t **dest, mt_cdata_t *src);
     int  wmeast_meas_to_cdata(mt_cdata_t **dest, wmeast_t *src);
     int  wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone);
+    int  wmeast_msg_to_meas(wmeast_t **dest, char *src);
+    int  wmeast_serialize(char **dest, wmeast_t *src, int len);
+    int  wmeast_unserialize(wmeast_t **dest, char *src, int len);
+    int  wmeast_get_nmeas(wmeast_t *self);
 
     // message API
     int32_t trnw_meas_msg(char **dest, wmeast_t *src, int msg_type, int param);
@@ -166,75 +230,14 @@ extern "C" {
     int32_t trnw_init_msg(char **dest, trn_config_t *cfg);
     int32_t trnw_ptype_msg(char **dest, char msg_type, int param);
     int32_t trnw_type_msg(char **dest, char type);
-	int32_t trnw_ack_msg(char **dest);
+    int32_t trnw_ack_msg(char **dest);
+    int32_t trnw_nack_msg(char **dest);
     void trnw_msg_show(char *msg, bool verbose, int indent);
 
     // utils
-    
-    trn_config_t *trncfg_dnew();
-    trn_config_t *trncfg_new(char *host, int port,
-                             long int utm_zone,int map_type, int filter_type,
-                             char *map_file,
-                             char *cfg_file,
-                             char *particles_file,
-                             char *logdir);
-    
-    void trncfg_destroy(trn_config_t **pself);
-    void trncfg_show(trn_config_t *obj, bool verbose, int indent);
-
     int trnw_utm_to_geo(double northing, double easting, long utmZone, double *lat_deg, double *lon_deg);
     int trnw_geo_to_utm(double lat_deg, double lon_deg, long int utmZone, double *northing, double *easting);
-
-    //    inline bool outstandingMeas(wterrain_nav_t self);
     
-    // inline?
-    //    extern inline bool outstandingMeas(){return (this->numWaitingMeas > 0);}
-    //    inline bool lastMeasSuccessful(){return this->lastMeasSuccess;}
-    //    inline void setInterpMeasAttitude(bool set){this->tNavFilter->setInterpMeasAttitude(set);}
-    //    inline void setMapInterpMethod(const int &type){this->tNavFilter->setMapInterpMethod(type);}
-    //    inline void setVehicleDriftRate(const double &driftRate){this->tNavFilter->setVehicleDriftRate(driftRate);}
-    //    inline bool isConverged(){return this->tNavFilter->isConverged();}
-    //    inline int getFilterType(){return this->filterType;}
-    //    inline void useLowGradeFilter(){this->tNavFilter->useLowGradeFilter();}
-    //    inline void useHighGradeFilter(){this->tNavFilter->useHighGradeFilter();}
-    //    inline void setFilterReinit(const bool allow){this->allowFilterReinits = allow;}
-    //    void reinitFilter(bool lowInfoTransition);
-    //    inline void setModifiedWeighting(const int use)
-    //    {
-    //        useModifiedWeighting = use;    // cache the value for use in future reinits
-    //        this->tNavFilter->setModifiedWeighting(use);
-    //        logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::modified weighting set to %i\n",
-    //             use);
-    //    }
-    //    inline int getFilterState()
-    //    inline int getNumReinits(){return this->numReinits;}
-    //    inline bool initialized() { return _initialized; }
-    //    void releaseMap()
-    //    {
-    //        if (this->terrainMap) delete this->terrainMap;
-    //        this->terrainMap = NULL;
-    //    }
-    
-    // TerrainNav methods called by trn_server
-    //    initialized()
-    //    estimatePose
-    //    getFilterState
-    //    getFilterType
-    //    getNumReinits
-    //    isConverged
-    //    lastMeasSuccessful
-    //    measUpdate
-    //    motionUpdate
-    //    outstandingMeas
-    //    reinitFilter
-    //    releaseMap
-    //    setFilterReinit
-    //    setInterpMeasAttitude()
-    //    setMapInterpMethod
-    //    setModifiedWeighting
-    //    setVehicleDriftRate
-    //    useLowGradeFilter
-    //    useHighGradeFilter
     
 #ifdef __cplusplus
 }

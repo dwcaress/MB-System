@@ -1098,7 +1098,7 @@ int main(int argc, char **argv) {
 			{
 				int tmp;
 				sscanf(optarg, "%d", &tmp);
-				datatype = (priority_table_t)tmp;
+				datatype = (datatype_t)tmp;
 				if (optarg[1] == 'f' || optarg[1] == 'F')
 					usefiltered = true;
 				break;

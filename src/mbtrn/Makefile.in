@@ -93,7 +93,7 @@ build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = stream7k$(EXEEXT) frames7k$(EXEEXT) emu7k$(EXEEXT) \
 	trnc$(EXEEXT) tbinx$(EXEEXT) udps$(EXEEXT) udpc$(EXEEXT) \
-	mb1conv$(EXEEXT) r7kr_test$(EXEEXT)
+	mb1conv$(EXEEXT) r7kr_test$(EXEEXT) mbtnav-cli$(EXEEXT)
 subdir = src/mbtrn
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -140,20 +140,26 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libr7kr_la_DEPENDENCIES =
+libmframe_la_DEPENDENCIES =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_libr7kr_la_OBJECTS = mframe/src/mframe.lo mframe/src/mcbuf.lo \
+am_libmframe_la_OBJECTS = mframe/src/mframe.lo mframe/src/mcbuf.lo \
 	mframe/src/msocket.lo mframe/src/mthread.lo \
 	mframe/src/mfile.lo mframe/src/mtime.lo mframe/src/mmdebug.lo \
 	mframe/src/merror.lo mframe/src/mlog.lo mframe/src/mlist.lo \
 	mframe/src/mstats.lo mframe/src/mswap.lo mframe/src/mutils.lo \
-	utils/mconfig.lo utils/mb1_msg.lo utils/mb71_msg.lo \
-	r7kr/r7k-reader.lo r7kr/r7kc.lo
-libr7kr_la_OBJECTS = $(am_libr7kr_la_OBJECTS)
+	utils/mconfig.lo
+libmframe_la_OBJECTS = $(am_libmframe_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+libmframe_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libmframe_la_LDFLAGS) $(LDFLAGS) -o $@
+libr7kr_la_DEPENDENCIES = libmframe.la
+am_libr7kr_la_OBJECTS = utils/mconfig.lo utils/mb1_msg.lo \
+	utils/mb71_msg.lo r7kr/r7k-reader.lo r7kr/r7kc.lo
+libr7kr_la_OBJECTS = $(am_libr7kr_la_OBJECTS)
 libr7kr_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libr7kr_la_LDFLAGS) $(LDFLAGS) -o $@
@@ -166,6 +172,9 @@ frames7k_DEPENDENCIES = libr7kr.la
 am_mb1conv_OBJECTS = utils/mb1conv.$(OBJEXT)
 mb1conv_OBJECTS = $(am_mb1conv_OBJECTS)
 mb1conv_DEPENDENCIES = libr7kr.la
+am_mbtnav_cli_OBJECTS = utils/mbtnav_cli.$(OBJEXT)
+mbtnav_cli_OBJECTS = $(am_mbtnav_cli_OBJECTS)
+mbtnav_cli_DEPENDENCIES = libr7kr.la
 am_r7kr_test_OBJECTS = r7kr/r7kr-test.$(OBJEXT)
 r7kr_test_OBJECTS = $(am_r7kr_test_OBJECTS)
 r7kr_test_DEPENDENCIES = libr7kr.la
@@ -212,9 +221,10 @@ am__depfiles_remade = mframe/src/$(DEPDIR)/mcbuf.Plo \
 	r7kr/$(DEPDIR)/r7kr-test.Po utils/$(DEPDIR)/emu7k.Po \
 	utils/$(DEPDIR)/frames7k.Po utils/$(DEPDIR)/mb1_msg.Plo \
 	utils/$(DEPDIR)/mb1conv.Po utils/$(DEPDIR)/mb71_msg.Plo \
-	utils/$(DEPDIR)/mconfig.Plo utils/$(DEPDIR)/stream7k.Po \
-	utils/$(DEPDIR)/tbinx.Po utils/$(DEPDIR)/trnc.Po \
-	utils/$(DEPDIR)/udpc.Po utils/$(DEPDIR)/udps.Po
+	utils/$(DEPDIR)/mbtnav_cli.Po utils/$(DEPDIR)/mconfig.Plo \
+	utils/$(DEPDIR)/stream7k.Po utils/$(DEPDIR)/tbinx.Po \
+	utils/$(DEPDIR)/trnc.Po utils/$(DEPDIR)/udpc.Po \
+	utils/$(DEPDIR)/udps.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -234,8 +244,9 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libr7kr_la_SOURCES) $(emu7k_SOURCES) $(frames7k_SOURCES) \
-	$(mb1conv_SOURCES) $(r7kr_test_SOURCES) $(stream7k_SOURCES) \
+SOURCES = $(libmframe_la_SOURCES) $(libr7kr_la_SOURCES) \
+	$(emu7k_SOURCES) $(frames7k_SOURCES) $(mb1conv_SOURCES) \
+	$(mbtnav_cli_SOURCES) $(r7kr_test_SOURCES) $(stream7k_SOURCES) \
 	$(tbinx_SOURCES) $(trnc_SOURCES) $(udpc_SOURCES) \
 	$(udps_SOURCES)
 am__can_run_installinfo = \
@@ -439,7 +450,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-lib_LTLIBRARIES = libr7kr.la
+lib_LTLIBRARIES = libmframe.la libr7kr.la
 include_HEADERS = \
 				mframe/src/mframe.h \
 				mframe/src/mcbuf.h \
@@ -467,13 +478,13 @@ MFRAME_VERSIONS = -DMFRAME_BUILD="${BUILD_DATE}" -DTRNC_VER=1.0 -DFRAMES7K_VER=1
 MFRAME_TESTS = -DWITH_TESTS -DWITH_R7KR_TEST
 MFRAME_FEATURES = -DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_PDEBUG -DWITH_MMDEBUG
 MFRAME_OPTS = $(MFRAME_VERSIONS) $(MFRAME_FEATURES) $(MFRAME_TESTS)
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src \
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src -I${top_srcdir}/src/mbtrnav/trnw \
  -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
 
-libr7kr_la_LDFLAGS = -no-undefined -version-info 0:0:0
-libr7kr_la_SOURCES = mframe/src/mframe.c \
-                mframe/src/mcbuf.c \
-                mframe/src/msocket.c \
+libmframe_la_LDFLAGS = -no-undefined -version-info 0:0:0
+libmframe_la_SOURCES = mframe/src/mframe.c \
+				mframe/src/mcbuf.c \
+				mframe/src/msocket.c \
                 mframe/src/mthread.c \
                 mframe/src/mfile.c \
                 mframe/src/mtime.c\
@@ -484,13 +495,17 @@ libr7kr_la_SOURCES = mframe/src/mframe.c \
                 mframe/src/mstats.c \
                 mframe/src/mswap.c \
                 mframe/src/mutils.c \
-				utils/mconfig.c \
+				utils/mconfig.c
+
+libmframe_la_LIBADD = 
+libr7kr_la_LDFLAGS = -no-undefined -version-info 0:0:0
+libr7kr_la_SOURCES = utils/mconfig.c \
 				utils/mb1_msg.c \
 				utils/mb71_msg.c \
                 r7kr/r7k-reader.c \
                 r7kr/r7kc.c
 
-libr7kr_la_LIBADD = -lpthread
+libr7kr_la_LIBADD = libmframe.la -lpthread
 stream7k_SOURCES = utils/stream7k.c
 stream7k_LDADD = libr7kr.la
 frames7k_SOURCES = utils/frames7k.c
@@ -509,6 +524,8 @@ mb1conv_SOURCES = utils/mb1conv.c
 mb1conv_LDADD = libr7kr.la
 r7kr_test_SOURCES = r7kr/r7kr-test.c
 r7kr_test_LDADD = libr7kr.la
+mbtnav_cli_SOURCES = utils/mbtnav_cli.c
+mbtnav_cli_LDADD = libr7kr.la
 dist_bin_SCRIPTS = mbtrnpp.sh emu7k.sh
 CLEANFILES = 
 DISTCLEANFILES = 
@@ -525,9 +542,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/mbtrn/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/mbtrn/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu src/mbtrn/Makefile
+	  $(AUTOMAKE) --foreign src/mbtrn/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -669,6 +686,9 @@ utils/$(DEPDIR)/$(am__dirstamp):
 	@: > utils/$(DEPDIR)/$(am__dirstamp)
 utils/mconfig.lo: utils/$(am__dirstamp) \
 	utils/$(DEPDIR)/$(am__dirstamp)
+
+libmframe.la: $(libmframe_la_OBJECTS) $(libmframe_la_DEPENDENCIES) $(EXTRA_libmframe_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(libmframe_la_LINK) -rpath $(libdir) $(libmframe_la_OBJECTS) $(libmframe_la_LIBADD) $(LIBS)
 utils/mb1_msg.lo: utils/$(am__dirstamp) \
 	utils/$(DEPDIR)/$(am__dirstamp)
 utils/mb71_msg.lo: utils/$(am__dirstamp) \
@@ -703,6 +723,12 @@ utils/mb1conv.$(OBJEXT): utils/$(am__dirstamp) \
 mb1conv$(EXEEXT): $(mb1conv_OBJECTS) $(mb1conv_DEPENDENCIES) $(EXTRA_mb1conv_DEPENDENCIES) 
 	@rm -f mb1conv$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mb1conv_OBJECTS) $(mb1conv_LDADD) $(LIBS)
+utils/mbtnav_cli.$(OBJEXT): utils/$(am__dirstamp) \
+	utils/$(DEPDIR)/$(am__dirstamp)
+
+mbtnav-cli$(EXEEXT): $(mbtnav_cli_OBJECTS) $(mbtnav_cli_DEPENDENCIES) $(EXTRA_mbtnav_cli_DEPENDENCIES) 
+	@rm -f mbtnav-cli$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mbtnav_cli_OBJECTS) $(mbtnav_cli_LDADD) $(LIBS)
 r7kr/r7kr-test.$(OBJEXT): r7kr/$(am__dirstamp) \
 	r7kr/$(DEPDIR)/$(am__dirstamp)
 
@@ -808,6 +834,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/mb1_msg.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/mb1conv.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/mb71_msg.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/mbtnav_cli.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/mconfig.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/stream7k.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/tbinx.Po@am__quote@ # am--include-marker
@@ -1000,6 +1027,7 @@ distclean: distclean-am
 	-rm -f utils/$(DEPDIR)/mb1_msg.Plo
 	-rm -f utils/$(DEPDIR)/mb1conv.Po
 	-rm -f utils/$(DEPDIR)/mb71_msg.Plo
+	-rm -f utils/$(DEPDIR)/mbtnav_cli.Po
 	-rm -f utils/$(DEPDIR)/mconfig.Plo
 	-rm -f utils/$(DEPDIR)/stream7k.Po
 	-rm -f utils/$(DEPDIR)/tbinx.Po
@@ -1073,6 +1101,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f utils/$(DEPDIR)/mb1_msg.Plo
 	-rm -f utils/$(DEPDIR)/mb1conv.Po
 	-rm -f utils/$(DEPDIR)/mb71_msg.Plo
+	-rm -f utils/$(DEPDIR)/mbtnav_cli.Po
 	-rm -f utils/$(DEPDIR)/mconfig.Plo
 	-rm -f utils/$(DEPDIR)/stream7k.Po
 	-rm -f utils/$(DEPDIR)/tbinx.Po

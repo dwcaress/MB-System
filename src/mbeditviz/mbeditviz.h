@@ -62,11 +62,22 @@
 #define MBEV_GRID_ALGORITH_SIMPLE 0
 #define MBEV_GRID_ALGORITH_FOOTPRINT 1
 #define MBEV_GRID_WEIGHT_TINY 0.0000001
-#define MBEV_OUTPUT_MODE_EDIT 0
-#define MBEV_OUTPUT_MODE_BROWSE 1
 #define MBEV_ALLOC_NUM 24
 #define MBEV_ALLOCK_NUM 1024
 #define MBEV_NODATA -10000000.0
+
+typedef enum {
+     MBEV_GRID_ALGORITHM_SIMPLEMEAN = 0,
+     MBEV_GRID_ALGORITHM_FOOTPRINT = 1,
+     MBEV_GRID_ALGORITHM_SHOALBIAS = 2,
+ } gridalgorithm_t;
+static char *mbev_grid_algorithm_label[] = {"Simple Mean", "Footprint", "Shoal Bias"};
+
+typedef enum {
+     MBEV_OUTPUT_MODE_EDIT = 0,
+     MBEV_OUTPUT_MODE_BROWSE = 1,
+ } output_mode_t;
+
 
 /* usage of footprint based weight */
 #define MBEV_USE_NO 0
@@ -192,7 +203,6 @@ MBVIEW_EXTERNAL int mbev_message_on;
 
 /* mode parameters */
 MBVIEW_EXTERNAL int mbev_mode_output;
-MBVIEW_EXTERNAL int mbev_grid_algorithm;
 
 /* data parameters */
 MBVIEW_EXTERNAL int mbev_num_files;
@@ -209,6 +219,8 @@ MBVIEW_EXTERNAL size_t mbev_instance;
 MBVIEW_EXTERNAL double mbev_grid_bounds[4];
 MBVIEW_EXTERNAL double mbev_grid_boundsutm[4];
 MBVIEW_EXTERNAL double mbev_grid_cellsize;
+MBVIEW_EXTERNAL gridalgorithm_t mbev_grid_algorithm;
+MBVIEW_EXTERNAL int mbev_grid_interpolation;
 MBVIEW_EXTERNAL int mbev_grid_n_columns;
 MBVIEW_EXTERNAL int mbev_grid_n_rows;
 
@@ -256,6 +268,7 @@ void do_mbeditviz_picksite_notify(size_t instance);
 void do_mbeditviz_pickroute_notify(size_t instance);
 void do_mbeditviz_picknav_notify(size_t instance);
 void do_mbeditviz_regrid_notify(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_colorchange_notify(size_t instance);
 int do_mbeditviz_message_on(char *message);
 int do_mbeditviz_message_off(void);
 int do_error_dialog(char *s1, char *s2, char *s3);
@@ -307,7 +320,7 @@ void mbeditviz_mb3dsoundings_getbiasvariance(double local_grid_xmin, double loca
                                              double local_grid_ymax, int local_grid_nx, int local_grid_ny, double local_grid_dx,
                                              double local_grid_dy, double *local_grid_first, double *local_grid_sum,
                                              double *local_grid_sum2, double *local_grid_variance, int *local_grid_num,
-                                             double rollbias, double pitchbias, double headingbias, double timelag, double snell, 
+                                             double rollbias, double pitchbias, double headingbias, double timelag, double snell,
                                              int *variance_total_num, double *variance_total);
 
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);

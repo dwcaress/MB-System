@@ -817,9 +817,9 @@ int main(int argc, char** argv) {
 	_server_addr.sin_port = htons(port);
 
 	len = ::bind(_servfd, (struct sockaddr*)&_server_addr, sizeof(_server_addr));
-  err=errno;
+    err=errno;
 	if(len < 0) {
-    fprintf(stderr,"trn_server: bind failed [%d - %s]\n",err,strerror(err));
+        fprintf(stderr,"trn_server: bind failed [%d - %s]\n",err,strerror(err));
 		exit(1);
 	}
 

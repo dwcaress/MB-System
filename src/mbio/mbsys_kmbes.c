@@ -41,6 +41,7 @@
 
 /* Based on https://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows */
 #include <Windows.h>
+#define CLOCK_REALTIME 0
 #if defined(_MSC_VER) && (_MSC_VER <= 1800)
 struct timespec { long tv_sec; long tv_nsec; };
 #endif
@@ -691,7 +692,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 
         ttime = mrz->sounding[i].twoWayTravelTime_sec
                                   + mrz->sounding[i].twoWayTravelTimeCorrection_sec;
-                                  
+
         /* calculate Bathymetry */
         rr = 0.5 * soundspeed * ttime;
         xx = rr * sin(DTR * theta);
@@ -1299,7 +1300,6 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
     /* insert current time as timestamp if needed (time_d close to zero) */
     if (fabs(time_d) < 1.0) {
       struct timespec right_now_nsec;
-#define CLOCK_REALTIME 0    // Not used in this clock_gettime() port (first arg)
       clock_gettime(CLOCK_REALTIME, &right_now_nsec);
       time_d = right_now_nsec.tv_sec + 0.000000001 * right_now_nsec.tv_nsec;
       mb_get_date(verbose, time_d, time_i);

@@ -57,7 +57,7 @@ long zone;			/* zone number				*/
 {
 double temp;			/* temprorary variables			*/
 
-if ((abs(zone) < 1) || (abs(zone) > 60))
+if ((abs((int)zone) < 1) || (abs((int)zone) > 60))
    {
    p_error("Illegal zone number","utm-invint");
    return(11);
@@ -66,7 +66,7 @@ r_major = r_maj;
 r_minor = r_min;
 scale_factor = scale_fact;
 lat_origin = 0.0;
-lon_center = ((6 * abs(zone)) - 183) * D2R;
+lon_center = ((6 * abs((int)zone)) - 183) * D2R;
 false_easting = 500000.0;
 false_northing = (zone < 0) ? 10000000.0 : 0.0;
 
@@ -82,12 +82,12 @@ esp = es / (1.0 - es);
 
 if (es < .00001)
    ind = 1;
-else 
+else
    ind = 0;
 
 /* Report parameters to the user
   -----------------------------*/
-ptitle("UNIVERSAL TRANSVERSE MERCATOR (UTM)"); 
+ptitle("UNIVERSAL TRANSVERSE MERCATOR (UTM)");
 genrpt_long(zone,   "Zone:     ");
 radius2(r_major, r_minor);
 genrpt(scale_factor,"Scale Factor at C. Meridian:     ");
@@ -95,7 +95,7 @@ cenlonmer(lon_center);
 return(OK);
 }
 
-/* Universal Transverse Mercator inverse equations--mapping x,y to lat,long 
+/* Universal Transverse Mercator inverse equations--mapping x,y to lat,long
    Note:  The algorithm for UTM is exactly the same as TM and therefore
 	  if a change is implemented, also make the change to TMINV.c
   -----------------------------------------------------------------------*/
@@ -113,7 +113,7 @@ double c, cs, t, ts, n, r, d, ds;	/* temporary variables		*/
 double f, h, g, temp;			/* temporary variables		*/
 long max_iter = 6;			/* maximun number of iterations	*/
 
-/* fortran code for spherical form 
+/* fortran code for spherical form
 --------------------------------*/
 if (ind != 0)
    {
@@ -153,9 +153,9 @@ for (i=0;;i++)
 */
    phi += delta_phi;
    if (fabs(delta_phi) <= EPSLN) break;
-   if (i >= max_iter) 
-      { 
-      p_error("Latitude failed to converge","UTM-INVERSE"); 
+   if (i >= max_iter)
+      {
+      p_error("Latitude failed to converge","UTM-INVERSE");
       return(95);
       }
    }
@@ -167,12 +167,12 @@ if (fabs(phi) < HALF_PI)
    cs   = SQUARE(c);
    t    = SQUARE(tan_phi);
    ts   = SQUARE(t);
-   con  = 1.0 - es * SQUARE(sin_phi); 
+   con  = 1.0 - es * SQUARE(sin_phi);
    n    = r_major / sqrt(con);
    r    = n * (1.0 - es) / con;
    d    = x / (n * scale_factor);
    ds   = SQUARE(d);
-   *lat = phi - (n * tan_phi * ds / r) * (0.5 - ds / 24.0 * (5.0 + 3.0 * t + 
+   *lat = phi - (n * tan_phi * ds / r) * (0.5 - ds / 24.0 * (5.0 + 3.0 * t +
           10.0 * c - 4.0 * cs - 9.0 * esp - ds / 30.0 * (61.0 + 90.0 * t +
           298.0 * c + 45.0 * ts - 252.0 * esp - 3.0 * cs)));
    *lon = adjust_lon(lon_center + (d * (1.0 - ds / 6.0 * (1.0 + 2.0 * t +

@@ -47,7 +47,7 @@ S. Nelson, EROS		Jan, 1998	Changed misspelled error message
    computer systems which don`t implement this function
   ----------------------------------------------------*/
 // conflicts w/ existing definiion [klh 06/2019]
-//#ifdef WITH_GCTP_SINCOS
+#ifdef WITH_GCTP_SINCOS
 void sincos(val, sin_val, cos_val)
 double val;
 double *sin_val;
@@ -57,7 +57,7 @@ double *cos_val;
 *cos_val = cos(val);
 return;
 }
-//#endif //WITH_GCTP_SINCOS
+#endif //WITH_GCTP_SINCOS
 
 /* Function to eliminate roundoff errors in asin
 ----------------------------------------------*/
@@ -342,7 +342,7 @@ double tsfnz(eccent,phi,sinphi)
 
 /* Function to return the sign of an argument
   ------------------------------------------*/
-sign(x)
+int sign(x)
 double x;
 {
 if (x < 0.0)

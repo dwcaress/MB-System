@@ -1,0 +1,52 @@
+February 1996
+
+Appendix B -- UTM Zone Codes
+
+The Universal Transverse Mercator (UTM) Coordinate System uses zone codes 
+instead of specific projection parameters.  The table that follows lists 
+UTM zone codes as used by GCTPc Projection Transformation Package.
+
+
+    Zone    C.M.       Range      Zone         C.M.            Range
+    ----    ----       -----      ----         ----            -----  
+     01     177W     180W-174W     31          003E          000E-006E
+     02     171W     174W-168W     32          009E          006E-012E
+     03	    165W     168W-162W	   33	       015E	     012E-018E
+     04	    159W     162W-156W	   34	       021E	     018E-024E
+     05     153W     156W-150W     35          027E          024E-030E
+     06     147W     150W-144W     36          033E          030E-036E
+     07     141W     144W-138W     37          039E          036E-042E
+     08     135W     138W-132W     38          045E          042E-048E
+     09     129W     132W-126W     39          051E          048E-054E
+     10     123W     126W-120W     40          057E          054E-060E
+     11     117W     120W-114W     41          063E          060E-066E
+     12     111W     114W-108W     42          069E          066E-072E
+     13     105W     108W-102W     43          075E          072E-078E
+     14     099W     102W-096W     44          081E          078E-084E
+     15     093W     096W-090W     45          087E          084E-090E
+     16     087W     090W-084W     46          093E          090E-096E
+     17     081W     084W-078W     47          099E          096E-102E
+     18     075W     078W-072W     48          105E          102E-108E
+     19     069W     072W-066W     49          111E          108E-114E
+     20     063W     066W-060W     50          117E          114E-120E
+     21     057W     060W-054W     51          123E          120E-126E
+     22     051W     054W-048W     52          129E          126E-132E
+     23     045W     048W-042W     53          135E          132E-138E
+     24     039W     042W-036W     54          141E          138E-144E
+     25     033W     036W-030W     55          147E          144E-150E
+     26     027W     030W-024W     56          153E          150E-156E
+     27     021W     024W-018W     57          159E          156E-162E
+     28     015W     018W-012W     58          165E          162E-168E
+     29     009W     012W-006W     59          171E          168E-174E
+     30     003W     006W-000E     60          177E          174E-180W
+
+     Obtained from Software Documentation for GCTP General Cartographic
+     Transformation Package: National Mapping Program Technical Instructions,
+     U.S. Geological Survey, National Mapping Division, Oct 1990,
+
+     Note:  The following source contains UTM zones plotted on a world map:
+
+        Snyder, John P.  Map Projections--A Working Manual:  U.S.
+        Geological Survey Professional Paper 1395 (Supersedes USGS
+        Bulletin 1532), United States Government Printing Office,
+        Washington D.C. 1987. p. 42.
