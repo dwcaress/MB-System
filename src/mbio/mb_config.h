@@ -74,7 +74,7 @@
 #define MBSYSTEM_OTPS_LOCATION "/usr/local/src/OTPS2"
 
 /* Build libmbtnav */
-/* #undef MBTNAV_ENABLED */
+#define MBTNAV_ENABLED 1
 
 /* Build libmbtrn and mbtrnpreprocess */
 #define MBTRN_ENABLED 1
