@@ -1202,169 +1202,11 @@ int main(int argc, char **argv) {
 		}
 	}
 
-
-	/* MBIO read control parameters */
-	mb_path output_file = "";
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
-	int iformat;
-	double btime_d;
-	double etime_d;
-	mb_path ifile = "";
-	mb_path ifileroot;
-	mb_path dfile = "";
-	mb_path ofile = "";
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-
-	/* MBIO read values */
-	void *imbio_ptr = NULL;
-	void *ombio_ptr = NULL;
-	struct mb_io_struct *omb_io_ptr;
-	void *istore_ptr = NULL;
-	void *ostore_ptr = NULL;
-	struct mbsys_ldeoih_struct *ostore;
-
-	int kind;
-	int time_i[7];
-	double speed;
-	double distance;
-	double altitude;
-	double sensordraft;
-	double sensordepth;
-	double roll;
-	double pitch;
-	double heave;
-	double soundspeed;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	double navlon_org;
-	double navlat_org;
-	double speed_org;
-	double heading_org;
-	double altitude_org;
-	double sensordepth_org;
-	double draft_org;
-	double roll_org;
-	double pitch_org;
-	double heave_org;
-	double ss_altitude;
-
-	/* arrays for asynchronous data accessed using mb_extract_nnav() */
-	int nanavmax = MB_NAV_MAX;
-	int nanav;
-	int antime_i[7 * MB_NAV_MAX];
-	double antime_d[MB_NAV_MAX];
-	double anlon[MB_NAV_MAX];
-	double anlat[MB_NAV_MAX];
-	double anspeed[MB_NAV_MAX];
-	double anheading[MB_NAV_MAX];
-	double ansensordraft[MB_NAV_MAX];
-	double anroll[MB_NAV_MAX];
-	double anpitch[MB_NAV_MAX];
-	double anheave[MB_NAV_MAX];
-
-	/* arrays for asynchronous data accessed using mb_ctd() */
-	int nactd;
-	double actime_d[MB_CTD_MAX];
-	double acconductivity[MB_CTD_MAX];
-	double actemperature[MB_CTD_MAX];
-	double acdepth[MB_CTD_MAX];
-	double acsalinity[MB_CTD_MAX];
-	double acsoundspeed[MB_CTD_MAX];
-
-	/* raw sidescan */
-	int sidescan_type = MB_SIDESCAN_LINEAR;
-	double sample_interval;
-	double beamwidth_xtrack = 0.0;
-	double beamwidth_ltrack = 0.0;
-	int num_samples_port = 0;
-	double *raw_samples_port = NULL;
-	int num_samples_stbd = 0;
-	double *raw_samples_stbd = NULL;
-
-	/* bottom layout parameters */
-	int nangle = MBSSLAYOUT_NUM_ANGLES;
-	double angle_min = -MBSSLAYOUT_ANGLE_MAX;
-	double angle_max = MBSSLAYOUT_ANGLE_MAX;
-	double table_angle[MBSSLAYOUT_NUM_ANGLES];
-	double table_xtrack[MBSSLAYOUT_NUM_ANGLES];
-	double table_ltrack[MBSSLAYOUT_NUM_ANGLES];
-	double table_altitude[MBSSLAYOUT_NUM_ANGLES];
-	double table_range[MBSSLAYOUT_NUM_ANGLES];
-
-	/* output sidescan data */
-	int obeams_bath;
-	int obeams_amp;
-	int opixels_ss;
-	double oss[MBSSLAYOUT_SSDIMENSION];
-	double ossacrosstrack[MBSSLAYOUT_SSDIMENSION];
-	double ossalongtrack[MBSSLAYOUT_SSDIMENSION];
-	int ossbincount[MBSSLAYOUT_SSDIMENSION];
-	double pixel_width;
-
-	/* counts of records read and written */
-	int n_rf_data = 0;
-	int n_rf_comment = 0;
-	int n_rf_ss2 = 0;
-	int n_rf_ss3 = 0;
-	int n_rf_sbp = 0;
-	int n_rf_nav = 0;
-	int n_rf_nav1 = 0;
-	int n_rf_nav2 = 0;
-	int n_rf_nav3 = 0;
-
-	int n_rt_data = 0;
-	int n_rt_comment = 0;
-	int n_rt_ss2 = 0;
-	int n_rt_ss3 = 0;
-	int n_rt_sbp = 0;
-	int n_rt_nav = 0;
-	int n_rt_nav1 = 0;
-	int n_rt_nav2 = 0;
-	int n_rt_nav3 = 0;
-
-	int n_wf_data = 0;
-	int n_wf_comment = 0;
-	int n_wt_data = 0;
-	int n_wt_comment = 0;
-
-	mb_path command = "";
-	int interp_error = MB_ERROR_NO_ERROR;
-	double time_latency;
-	int jsurvey = 0;
-	int jnav = 0;
-	int jsensordepth = 0;
-	int jaltitude = 0;
-	int jheading = 0;
-	int jattitude = 0;
-	int jsoundspeed = 0;
-	int line_number = 0;
-	mb_path scriptfile = "";
-	FILE *sfp;
-	double dx, dy, range;
-	double channelmax, threshold, ttime;
-	int portchannelpick, stbdchannelpick;
-	int kangle, kstart;
-	double xtrack, ltrack, rr, rangemin, factor, fraction;
-	int istart;
-	int jport;
-	int previous, interpable;
-	double dss, dssl;
-	int error_format = MB_ERROR_NO_ERROR;
-	int format_nottobeused = 0;
-
 	/* set up plotting script file */
+	mb_path scriptfile = "";
 	sprintf(scriptfile, "%s_%s_ssswathplot.cmd", line_name1, line_name2);
-	if ((sfp = fopen(scriptfile, "w")) == NULL) {
+	FILE *sfp = fopen(scriptfile, "w");
+	if (sfp == NULL) {
 		error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 		fprintf(stderr, "\nUnable to open plotting script file <%s> \n", scriptfile);
@@ -1401,9 +1243,15 @@ int main(int argc, char **argv) {
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
 	bool read_data;
+	void *datalist;
+	mb_path ifile = "";
+	mb_path dfile = "";
+	int iformat;
+	double file_weight;
 
 	/* open file list */
 	if (read_datalist) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1420,6 +1268,78 @@ int main(int argc, char **argv) {
 		iformat = format;
 		read_data = true;
 	}
+
+	void *imbio_ptr = NULL;
+	double btime_d;
+	double etime_d;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+
+	/* counts of records read and written */
+	int n_rf_data = 0;
+	int n_rf_comment = 0;
+	int n_rf_ss2 = 0;
+	int n_rf_ss3 = 0;
+	int n_rf_sbp = 0;
+	int n_rf_nav = 0;
+	int n_rf_nav1 = 0;
+	int n_rf_nav2 = 0;
+	int n_rf_nav3 = 0;
+
+	void *istore_ptr = NULL;
+
+	int kind;
+	int time_i[7];
+	double speed;
+	double distance;
+	double altitude;
+	double sensordepth;
+
+	int n_rt_data = 0;
+	int n_rt_comment = 0;
+	int n_rt_ss2 = 0;
+	int n_rt_ss3 = 0;
+	int n_rt_sbp = 0;
+	int n_rt_nav = 0;
+	int n_rt_nav1 = 0;
+	int n_rt_nav2 = 0;
+	int n_rt_nav3 = 0;
+
+	/* arrays for asynchronous data accessed using mb_extract_nnav() */
+	int nanavmax = MB_NAV_MAX;
+	int nanav;
+	int antime_i[7 * MB_NAV_MAX];
+	double antime_d[MB_NAV_MAX];
+	double anlon[MB_NAV_MAX];
+	double anlat[MB_NAV_MAX];
+	double anspeed[MB_NAV_MAX];
+	double anheading[MB_NAV_MAX];
+	double ansensordraft[MB_NAV_MAX];
+	double anroll[MB_NAV_MAX];
+	double anpitch[MB_NAV_MAX];
+	double anheave[MB_NAV_MAX];
+
+	double sensordraft;
+	double roll;
+	double pitch;
+	double heave;
+
+	int nactd;
+	double actime_d[MB_CTD_MAX];
+	double acconductivity[MB_CTD_MAX];
+	double actemperature[MB_CTD_MAX];
+	double acdepth[MB_CTD_MAX];
+	double acsalinity[MB_CTD_MAX];
+	double acsoundspeed[MB_CTD_MAX];
 
 	/* loop over all files to be read */
 	while (read_data) {
@@ -1941,12 +1861,13 @@ int main(int argc, char **argv) {
 	n_rt_nav1 = 0;
 	n_rt_nav2 = 0;
 	n_rt_nav3 = 0;
-	n_wf_data = 0;
-	n_wf_comment = 0;
-	n_wt_data = 0;
-	n_wt_comment = 0;
+	int n_wf_data = 0;
+	int n_wf_comment = 0;
+	int n_wt_data = 0;
+	int n_wt_comment = 0;
 
 	/* if generating survey line files the line number is initialized to 0 so the first line is 1 */
+	int line_number = 0;
 	if (line_mode != MBSSLAYOUT_LINE_OFF) {
 		line_number = activewaypoint;
 		new_output_file = true;
@@ -1957,6 +1878,7 @@ int main(int argc, char **argv) {
 
 	/* open file list */
 	if (read_datalist) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1974,6 +1896,60 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
+	/* MBIO read control parameters */
+	mb_path output_file = "";
+	mb_path ifileroot;
+	mb_path ofile = "";
+
+	/* MBIO read values */
+	void *ombio_ptr = NULL;
+	struct mb_io_struct *omb_io_ptr;
+	void *ostore_ptr = NULL;
+	struct mbsys_ldeoih_struct *ostore;
+
+	double soundspeed;
+	double navlon_org;
+	double navlat_org;
+	double speed_org;
+	double heading_org;
+	double altitude_org;
+	double sensordepth_org;
+	double draft_org;
+	double roll_org;
+	double pitch_org;
+	double heave_org;
+	double ss_altitude;
+
+	/* raw sidescan */
+	int sidescan_type = MB_SIDESCAN_LINEAR;
+	double sample_interval;
+	double beamwidth_xtrack = 0.0;
+	double beamwidth_ltrack = 0.0;
+	int num_samples_port = 0;
+	double *raw_samples_port = NULL;
+	int num_samples_stbd = 0;
+	double *raw_samples_stbd = NULL;
+
+	/* bottom layout parameters */
+	int nangle = MBSSLAYOUT_NUM_ANGLES;
+	double angle_min = -MBSSLAYOUT_ANGLE_MAX;
+	double angle_max = MBSSLAYOUT_ANGLE_MAX;
+	double table_angle[MBSSLAYOUT_NUM_ANGLES];
+	double table_xtrack[MBSSLAYOUT_NUM_ANGLES];
+	double table_ltrack[MBSSLAYOUT_NUM_ANGLES];
+	double table_altitude[MBSSLAYOUT_NUM_ANGLES];
+	double table_range[MBSSLAYOUT_NUM_ANGLES];
+
+	/* output sidescan data */
+	int obeams_bath;
+	int obeams_amp;
+	int opixels_ss;
+	double oss[MBSSLAYOUT_SSDIMENSION];
+	double ossacrosstrack[MBSSLAYOUT_SSDIMENSION];
+	double ossalongtrack[MBSSLAYOUT_SSDIMENSION];
+	int ossbincount[MBSSLAYOUT_SSDIMENSION];
+	double pixel_width;
+
 	/* loop over all files to be read */
 	while (read_data) {
 		if (verbose > 0)
@@ -1990,12 +1966,28 @@ int main(int argc, char **argv) {
 			exit(error);
 		}
 
-        /* get the fileroot (but don't use the format id returned here, we already
-            know the format, probably from a datalist) */
-        error_format = MB_ERROR_NO_ERROR;
-        const int status_format = mb_get_format(verbose, ifile, ifileroot, &format_nottobeused, &error_format);
-        if (status_format != MB_SUCCESS)
-            strcpy(ifileroot, ifile);
+	int interp_error = MB_ERROR_NO_ERROR;
+	double time_latency;
+	int jsurvey = 0;
+	int jnav = 0;
+	int jsensordepth = 0;
+	int jaltitude = 0;
+	int jheading = 0;
+	int jattitude = 0;
+	int jsoundspeed = 0;
+	double channelmax, threshold, ttime;
+	int portchannelpick, stbdchannelpick;
+	double xtrack, ltrack, rr, rangemin, factor, fraction;
+	int format_nottobeused = 0;
+
+	        // get the fileroot (but don't use the format id returned here, we already
+		// know the format, probably from a datalist)
+		int error_format = MB_ERROR_NO_ERROR;
+
+	        const int status_format = mb_get_format(verbose, ifile, ifileroot, &format_nottobeused, &error_format);
+
+	        if (status_format != MB_SUCCESS)
+			strcpy(ifileroot, ifile);
 
 		/* if not generating survey line files then open output file to coincide with this input file */
 		if (line_mode == MBSSLAYOUT_LINE_OFF)
@@ -2118,9 +2110,9 @@ int main(int argc, char **argv) {
 
 				/* check waypoint position list */
 				else if (line_mode == MBSSLAYOUT_LINE_ROUTE) {
-					dx = (navlon - routelon[activewaypoint]) / mtodeglon;
-					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
-					range = sqrt(dx * dx + dy * dy);
+					const double dx = (navlon - routelon[activewaypoint]) / mtodeglon;
+					const double dy = (navlat - routelat[activewaypoint]) / mtodeglat;
+					const double range = sqrt(dx * dx + dy * dy);
 					if (range < line_range_threshold && (activewaypoint == 0 || range > rangelast) &&
 					    activewaypoint < nroutepoint - 1) {
 						new_output_file = true;
@@ -2403,8 +2395,8 @@ int main(int argc, char **argv) {
 
 				/* find minimum range */
 				rangemin = table_range[0];
-				kstart = 0;
-				for (kangle = 1; kangle < nangle; kangle++) {
+				int kstart = 0;
+				for (int kangle = 1; kangle < nangle; kangle++) {
 					if (table_range[kangle] < rangemin) {
 						rangemin = table_range[kangle];
 						kstart = kangle;
@@ -2412,14 +2404,14 @@ int main(int argc, char **argv) {
 				}
 
 				/* bin port trace */
-				istart = rangemin / (soundspeed * sample_interval);
+				int istart = rangemin / (soundspeed * sample_interval);
 				for (int i = istart; i < num_samples_port; i++) {
 					/* get sample range */
 					rr = 0.5 * soundspeed * sample_interval * i;
 
 					/* look up position(s) for this range */
 					bool done = false;
-					for (kangle = kstart; kangle > 0 && !done; kangle--) {
+					for (int kangle = kstart; kangle > 0 && !done; kangle--) {
 						bool found = false;
 						if (rr <= table_range[kstart]) {
 							xtrack = table_xtrack[kstart];
@@ -2457,7 +2449,7 @@ int main(int argc, char **argv) {
 				/* find minimum range */
 				rangemin = table_range[0];
 				kstart = 0;
-				for (kangle = 1; kangle < nangle; kangle++) {
+				for (int kangle = 1; kangle < nangle; kangle++) {
 					if (table_range[kangle] < rangemin) {
 						rangemin = table_range[kangle];
 						kstart = kangle;
@@ -2472,7 +2464,7 @@ int main(int argc, char **argv) {
 
 					/* look up position for this range */
 					bool done = false;
-					for (kangle = kstart; kangle < nangle - 1 && !done; kangle++) {
+					for (int kangle = kstart; kangle < nangle - 1 && !done; kangle++) {
 						bool found = false;
 						if (rr <= table_range[kstart]) {
 							xtrack = table_xtrack[kstart];
@@ -2508,7 +2500,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* calculate the output sidescan */
-				jport = -1;
+				int jport = -1;
 				// int jstbd = -1;
 				for (int j = 0; j < opixels_ss; j++) {
 					if (ossbincount[j] > 0) {
@@ -2523,13 +2515,13 @@ int main(int argc, char **argv) {
 				}
 
 				/* interpolate gaps in the output sidescan */
-				previous = opixels_ss;
+				int previous = opixels_ss;
 				for (int j = 0; j < opixels_ss; j++) {
 					if (ossbincount[j] > 0) {
-						interpable = j - previous - 1;
+						const int interpable = j - previous - 1;
 						if (interpable > 0 && interpable <= interpolation) {
-							dss = oss[j] - oss[previous];
-							dssl = ossalongtrack[j] - ossalongtrack[previous];
+							const double dss = oss[j] - oss[previous];
+							const double dssl = ossalongtrack[j] - ossalongtrack[previous];
 							for (int jj = previous + 1; jj < j; jj++) {
 								fraction = ((double)(jj - previous)) / ((double)(j - previous));
 								oss[jj] = oss[previous] + fraction * dss;
@@ -2639,6 +2631,7 @@ int main(int argc, char **argv) {
 
 	/* close plotting script file */
 	fclose(sfp);
+	mb_path command = "";
 	sprintf(command, "chmod +x %s", scriptfile);
 	/* int shellstatus = */ system(command);
 
