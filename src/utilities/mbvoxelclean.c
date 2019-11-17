@@ -142,111 +142,23 @@ int main(int argc, char **argv) {
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 
-	int uselockfiles = true;  // TODO(schwehr): mb_uselockfiles should use a bool
-	status &= mb_uselockfiles(verbose, &uselockfiles);
-
-	int kind = MB_DATA_NONE;
 	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
-	char swathfile[MB_PATH_MAXLINE];
-	char swathfileread[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	void *datalist;
-	double file_weight;
-	int variable_beams;
-	int traveltime;
-	double btime_d;
-	double etime_d;
-
-	/* processing variables */
-	int sensorhead = 0;
-	int sensorhead_status = MB_SUCCESS;
-	int sensorhead_error = MB_ERROR_NO_ERROR;
-	int pingsread = 0;
-	int time_i[7];
-	double time_d = 0.0;
-	double navlon = 0.0;
-	double navlat = 0.0;
-	double speed = 0.0;
-	double heading = 0.0;
-	double distance = 0.0;
-	double altitude = 0.0;
-	double sensordepth = 0.0;
-	int beams_bath = 0;
-	int beams_amp = 0;
-	int pixels_ss = 0;
-	char *beamflag = NULL;
-	char *beamflagorg = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-
-	/* other mbvoxelclean control parameters */
 	double voxel_size_xy = 0.05;
 	double voxel_size_z = 0.05;
 	int occupy_threshold = 5;
 	bool count_flagged = false;
 	int empty_mode = MBVC_EMPTY_FLAG;
 	int occupied_mode = MBVC_OCCUPIED_IGNORE;
+
+	/* other mbvoxelclean control parameters */
 	bool apply_range_minimum = false;
 	double range_minimum = 0.0;
 	bool apply_range_maximum = false;
 	double range_maximum = 0.0;
 
-	/* swath data storage */
-	struct mb_info_struct mb_info;
-	struct mbvoxelclean_ping_struct *pings = NULL;
-
-	/* voxel storage */
-	int n_voxel = 0;
-	unsigned char *voxel_count = NULL;  // TODO(schwehr): Make this a bool
-	int n_voxel_x;
-	int n_voxel_y;
-	int n_voxel_z;
-	int action;
-
-	/* save file control variables */
-	char esffile[MB_PATH_MAXLINE];
-	struct mb_esf_struct esf;
-
-	int n_pings = 0;
-	int n_beamflag_null = 0;
-	int n_beamflag_good = 0;
-	int n_beamflag_flag = 0;
-	int n_esf_flag = 0;
-	int n_esf_unflag = 0;
-	int n_density_flag = 0;
-	int n_density_unflag = 0;
-	int n_minrange_flag = 0;
-	int n_maxrange_flag = 0;
-
-	int n_files_tot = 0;
-	int n_pings_tot = 0;
-	int n_beamflag_null_tot = 0;
-	int n_beamflag_good_tot = 0;
-	int n_beamflag_flag_tot = 0;
-	int n_density_flag_tot = 0;
-	int n_density_unflag_tot = 0;
-
-	int lock_purpose = 0;
-	mb_path lock_program = "";
-	mb_path lock_cpu = "";
-	mb_path lock_user = "";
-
-	double mtodeglon, mtodeglat;
-	double headingx, headingy;
-
-	int formatread;
-
-
 	/* output stream for basic stuff (stdout if verbose <= 1, stderr if verbose > 1) */
 	FILE *outfp;
 
-	/* process argument list */
 	{
 		static struct option options[] = {
 		    {"verbose", no_argument, NULL, 0},
@@ -392,6 +304,9 @@ int main(int argc, char **argv) {
 
 	int error = MB_ERROR_NO_ERROR;
 
+	int uselockfiles = true;  // TODO(schwehr): mb_uselockfiles should use a bool
+	status &= mb_uselockfiles(verbose, &uselockfiles);
+
 	/* get format if required */
 	if (format == 0)
 		mb_get_format(verbose, read_file, NULL, &format, &error);
@@ -399,6 +314,10 @@ int main(int argc, char **argv) {
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
 	bool read_data;
+	void *datalist;
+	char swathfile[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
+	double file_weight;
 
 	/* open file list */
 	if (read_datalist) {
@@ -418,6 +337,73 @@ int main(int argc, char **argv) {
 		strcpy(swathfile, read_file);
 		read_data = true;
 	}
+
+	int kind = MB_DATA_NONE;
+	char swathfileread[MB_PATH_MAXLINE];
+	int variable_beams;
+	int traveltime;
+	double btime_d;
+	double etime_d;
+
+	/* processing variables */
+	int sensorhead = 0;
+	int sensorhead_error = MB_ERROR_NO_ERROR;
+	int pingsread = 0;
+	int time_i[7];
+	double time_d = 0.0;
+	double navlon = 0.0;
+	double navlat = 0.0;
+	double speed = 0.0;
+	double heading = 0.0;
+	double distance = 0.0;
+	double altitude = 0.0;
+	double sensordepth = 0.0;
+	int beams_bath = 0;
+	int beams_amp = 0;
+	int pixels_ss = 0;
+	char *beamflag = NULL;
+	char *beamflagorg = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	char comment[MB_COMMENT_MAXLINE];
+
+	/* swath data storage */
+	struct mb_info_struct mb_info;
+	struct mbvoxelclean_ping_struct *pings = NULL;
+
+	/* voxel storage */
+	unsigned char *voxel_count = NULL;  // TODO(schwehr): Make this a bool
+	int n_voxel_x;
+	int n_voxel_y;
+	int n_voxel_z;
+	int action;
+
+	/* save file control variables */
+	char esffile[MB_PATH_MAXLINE];
+	struct mb_esf_struct esf;
+
+	int n_files_tot = 0;
+	int n_pings_tot = 0;
+	int n_beamflag_null_tot = 0;
+	int n_beamflag_good_tot = 0;
+	int n_beamflag_flag_tot = 0;
+	int n_density_flag_tot = 0;
+	int n_density_unflag_tot = 0;
+
+	int lock_purpose = 0;
+	mb_path lock_program = "";
+	mb_path lock_cpu = "";
+	mb_path lock_user = "";
+
+	double mtodeglon, mtodeglat;
+	double headingx, headingy;
+
+	int formatread;
 
 	bool esffile_open = false;
 	int locked = false;  // TODO(schwehr): Make mb_pr_lockinfo take a bool
@@ -576,17 +562,15 @@ int main(int argc, char **argv) {
 			}
 
 			/* initialize per-file counting variables */
-			n_pings = 0;
+			int n_pings = 0;
 			// int n_beams = 0;
-			n_beamflag_null = 0;
-			n_beamflag_good = 0;
-			n_beamflag_flag = 0;
-			n_esf_flag = 0;
-			n_esf_unflag = 0;
-			n_density_flag = 0;
-			n_density_unflag = 0;
-			n_minrange_flag = 0;
-			n_maxrange_flag = 0;
+			int n_beamflag_null = 0;
+			int n_beamflag_good = 0;
+			int n_beamflag_flag = 0;
+			int n_esf_flag = 0;
+			int n_esf_unflag = 0;
+			int n_density_flag = 0;
+			int n_density_unflag = 0;
 
 			/* allocate memory for mb_get() data arrays */
 			if (error == MB_ERROR_NO_ERROR)
@@ -678,39 +662,39 @@ int main(int argc, char **argv) {
 				}
 				if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
 					/* allocate space for data if needed */
-		    if (beams_bath > pings[n_pings].beams_bath_alloc) {
-			if (error == MB_ERROR_NO_ERROR)
-			    status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char),
-					 (void **)&pings[n_pings].beamflag, &error);
-			if (error == MB_ERROR_NO_ERROR)
-			    status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char),
-					 (void **)&pings[n_pings].beamflagorg, &error);
-			if (error == MB_ERROR_NO_ERROR)
-			    status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-					 (void **)&pings[n_pings].bathx, &error);
-			if (error == MB_ERROR_NO_ERROR)
-			    status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-					 (void **)&pings[n_pings].bathy, &error);
-			if (error == MB_ERROR_NO_ERROR)
-			    status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-					 (void **)&pings[n_pings].bathz, &error);
-			if (error == MB_ERROR_NO_ERROR)
-			    status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-					 (void **)&pings[n_pings].bathr, &error);
-			if (error != MB_ERROR_NO_ERROR) {
-			    char *message = NULL;
-			    mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
-			    fprintf(outfp, "\nMBIO Error allocating data arrays within the ping structure:\n%s\n", message);
-			    fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-			    mb_memory_clear(verbose, &error);
-			    exit(error);
-			}
-			pings[n_pings].beams_bath_alloc = beams_bath;
-		    }
+					if (beams_bath > pings[n_pings].beams_bath_alloc) {
+						if (error == MB_ERROR_NO_ERROR)
+							status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char),
+							 (void **)&pings[n_pings].beamflag, &error);
+						if (error == MB_ERROR_NO_ERROR)
+							status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char),
+							 (void **)&pings[n_pings].beamflagorg, &error);
+						if (error == MB_ERROR_NO_ERROR)
+							status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
+							 (void **)&pings[n_pings].bathx, &error);
+						if (error == MB_ERROR_NO_ERROR)
+							status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
+							 (void **)&pings[n_pings].bathy, &error);
+						if (error == MB_ERROR_NO_ERROR)
+							status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
+							 (void **)&pings[n_pings].bathz, &error);
+						if (error == MB_ERROR_NO_ERROR)
+							status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
+							 (void **)&pings[n_pings].bathr, &error);
+						if (error != MB_ERROR_NO_ERROR) {
+							char *message = NULL;
+							mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
+							fprintf(outfp, "\nMBIO Error allocating data arrays within the ping structure:\n%s\n", message);
+							fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+							mb_memory_clear(verbose, &error);
+							exit(error);
+						}
+						pings[n_pings].beams_bath_alloc = beams_bath;
+					}
 
 					/* check for ping multiplicity */
 					status &= mb_get_store(verbose, mbio_ptr, &store_ptr, &error);
-					sensorhead_status = mb_sensorhead(verbose, mbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
+					const int sensorhead_status = mb_sensorhead(verbose, mbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
 					if (sensorhead_status == MB_SUCCESS) {
 						pings[n_pings].multiplicity = sensorhead;
 					}
@@ -722,52 +706,52 @@ int main(int argc, char **argv) {
 					}
 
 					/* save relevant data */
-				pings[n_pings].time_d = time_d;
-				pings[n_pings].navlon = navlon;
-				pings[n_pings].navlat = navlat;
-				pings[n_pings].heading = heading;
-				pings[n_pings].sensordepth = sensordepth;
-				pings[n_pings].beams_bath = beams_bath;
-				const double sensorx = (navlon - mb_info.lon_start) / mtodeglon;
-				const double sensory = (navlat - mb_info.lat_start) / mtodeglat;
-				const double sensorz = -sensordepth;
+					pings[n_pings].time_d = time_d;
+					pings[n_pings].navlon = navlon;
+					pings[n_pings].navlat = navlat;
+					pings[n_pings].heading = heading;
+					pings[n_pings].sensordepth = sensordepth;
+					pings[n_pings].beams_bath = beams_bath;
+					const double sensorx = (navlon - mb_info.lon_start) / mtodeglon;
+					const double sensory = (navlat - mb_info.lat_start) / mtodeglat;
+					const double sensorz = -sensordepth;
 					for (int j = 0; j < beams_bath; j++) {
-				    pings[n_pings].beamflag[j] = beamflag[j];
-				    pings[n_pings].beamflagorg[j] = beamflag[j];
-				    if (!mb_beam_check_flag_null(beamflag[j])) {
-					pings[n_pings].bathx[j] = (navlon - mb_info.lon_start) / mtodeglon +
+					    pings[n_pings].beamflag[j] = beamflag[j];
+					    pings[n_pings].beamflagorg[j] = beamflag[j];
+					    if (!mb_beam_check_flag_null(beamflag[j])) {
+						pings[n_pings].bathx[j] = (navlon - mb_info.lon_start) / mtodeglon +
 							       headingy * bathacrosstrack[j] + headingx * bathalongtrack[j];
-					pings[n_pings].bathy[j] = (navlat - mb_info.lat_start) / mtodeglat -
+						pings[n_pings].bathy[j] = (navlat - mb_info.lat_start) / mtodeglat -
 							       headingx * bathacrosstrack[j] + headingy * bathalongtrack[j];
-					pings[n_pings].bathz[j] = -bath[j];
-					pings[n_pings].bathr[j] = sqrt((pings[n_pings].bathx[j] - sensorx)
+						pings[n_pings].bathz[j] = -bath[j];
+						pings[n_pings].bathr[j] = sqrt((pings[n_pings].bathx[j] - sensorx)
 									* (pings[n_pings].bathx[j] - sensorx)
 								       + (pings[n_pings].bathy[j] - sensory)
 									* (pings[n_pings].bathy[j] - sensory)
 								       + (pings[n_pings].bathz[j] - sensorz)
 									* (pings[n_pings].bathz[j] - sensorz));
-					if (first) {
-					    x_min = pings[n_pings].bathx[j];
-					    x_max = pings[n_pings].bathx[j];
-					    y_min = pings[n_pings].bathy[j];
-					    y_max = pings[n_pings].bathy[j];
-					    z_min = pings[n_pings].bathz[j];
-					    z_max = pings[n_pings].bathz[j];
-					    first = false;
-					} else {
-					    x_min = MIN(x_min, pings[n_pings].bathx[j]);
-					    x_max = MAX(x_max, pings[n_pings].bathx[j]);
-					    y_min = MIN(y_min, pings[n_pings].bathy[j]);
-					    y_max = MAX(y_max, pings[n_pings].bathy[j]);
-					    z_min = MIN(z_min, pings[n_pings].bathz[j]);
-					    z_max = MAX(z_max, pings[n_pings].bathz[j]);
-					}
-				    } else {
-					pings[n_pings].bathx[j] = 0.0;
-					pings[n_pings].bathy[j] = 0.0;
-					pings[n_pings].bathz[j] = 0.0;
-					pings[n_pings].bathr[j] = 0.0;
-				    }
+						if (first) {
+						    x_min = pings[n_pings].bathx[j];
+						    x_max = pings[n_pings].bathx[j];
+						    y_min = pings[n_pings].bathy[j];
+						    y_max = pings[n_pings].bathy[j];
+						    z_min = pings[n_pings].bathz[j];
+						    z_max = pings[n_pings].bathz[j];
+						    first = false;
+						} else {
+						    x_min = MIN(x_min, pings[n_pings].bathx[j]);
+						    x_max = MAX(x_max, pings[n_pings].bathx[j]);
+						    y_min = MIN(y_min, pings[n_pings].bathy[j]);
+						    y_max = MAX(y_max, pings[n_pings].bathy[j]);
+						    z_min = MIN(z_min, pings[n_pings].bathz[j]);
+						    z_max = MAX(z_max, pings[n_pings].bathz[j]);
+						}
+					    } else {
+						pings[n_pings].bathx[j] = 0.0;
+						pings[n_pings].bathy[j] = 0.0;
+						pings[n_pings].bathz[j] = 0.0;
+						pings[n_pings].bathr[j] = 0.0;
+					    }
 					}
 					if (verbose >= 2) {
 						fprintf(stderr, "\ndbg2  beam locations (ping:beam xxx.xxx yyy.yyy zzz.zzz)\n");
@@ -789,12 +773,12 @@ int main(int argc, char **argv) {
 					/* update counters */
 					for (int j = 0; j < pings[n_pings].beams_bath; j++) {
 						if (mb_beam_ok(pings[n_pings].beamflag[j]))
-			     n_beamflag_good++;
-			else if (pings[n_pings].beamflag[j] == MB_FLAG_NULL)
-			    n_beamflag_null++;
-			else
-			    n_beamflag_flag++;
-		    }
+						     n_beamflag_good++;
+						else if (pings[n_pings].beamflag[j] == MB_FLAG_NULL)
+						    n_beamflag_null++;
+						else
+						    n_beamflag_flag++;
+					}
 
 					/* apply saved edits */
 					status &= mb_esf_apply(verbose, &esf, pings[n_pings].time_d, pings[n_pings].multiplicity, pings[n_pings].beams_bath,
@@ -809,8 +793,8 @@ int main(int argc, char **argv) {
 								n_esf_flag++;
 						}
 					}
-		    // n_beams += pings[n_pings].beams_bath;
-		    n_pings++;
+					// n_beams += pings[n_pings].beams_bath;
+					n_pings++;
 
 				}
 				else if (error > MB_ERROR_NO_ERROR) {
@@ -821,133 +805,133 @@ int main(int argc, char **argv) {
 			/* close the swath file */
 			status &= mb_close(verbose, &mbio_ptr, &error);
 
-	    /* allocate arrays of voxel beam counts - use unsigned char so that beam
-	     * counts are capped at 255 - ergo the maximum occupied count threshold
-	     * is 254 */
-	    n_voxel_x = (x_max - x_min) / voxel_size_xy + 3;
-	    x_min = x_min - 0.5 * voxel_size_xy;
-	    x_max = x_min + n_voxel_x * voxel_size_xy;
-	    n_voxel_y = (x_max - y_min) / voxel_size_xy + 3;
-	    y_min = y_min - 0.5 * voxel_size_xy;
-	    y_max = y_min + n_voxel_y * voxel_size_xy;
-	    n_voxel_z = (z_max - z_min) / voxel_size_z + 3;
-	    z_min = z_min - 0.5 * voxel_size_z;
-	    z_max = z_min + n_voxel_z * voxel_size_z;
-	    n_voxel = n_voxel_x * n_voxel_y * n_voxel_z;
-	    if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  final voxel bounds:\n");
-		fprintf(stderr, "dbg2    x_min:	    %10.3f m\n", x_min);
-		fprintf(stderr, "dbg2    x_max:	    %10.3f m\n", x_max);
-		fprintf(stderr, "dbg2    y_min:	    %10.3f m\n", y_min);
-		fprintf(stderr, "dbg2    y_max:	    %10.3f m\n", y_max);
-		fprintf(stderr, "dbg2    z_min:	    %10.3f m\n", z_min);
-		fprintf(stderr, "dbg2    z_max:	    %10.3f m\n", z_max);
-		fprintf(stderr, "dbg2    n_voxel_x:	%d\n", n_voxel_x);
-		fprintf(stderr, "dbg2    n_voxel_y:	%d\n", n_voxel_y);
-		fprintf(stderr, "dbg2    n_voxel_z:	%d\n", n_voxel_z);
-		fprintf(stderr, "dbg2    n_voxel:	  %d\n", n_voxel);
-	    }
-	    if (n_voxel_alloc < n_voxel) {
-		status &= mb_reallocd(verbose, __FILE__, __LINE__, (size_t)n_voxel,
+			// allocate arrays of voxel beam counts - use unsigned char so that beam
+			// counts are capped at 255 - ergo the maximum occupied count threshold
+			// is 254
+			n_voxel_x = (x_max - x_min) / voxel_size_xy + 3;
+			x_min = x_min - 0.5 * voxel_size_xy;
+			x_max = x_min + n_voxel_x * voxel_size_xy;
+			n_voxel_y = (x_max - y_min) / voxel_size_xy + 3;
+			y_min = y_min - 0.5 * voxel_size_xy;
+			y_max = y_min + n_voxel_y * voxel_size_xy;
+			n_voxel_z = (z_max - z_min) / voxel_size_z + 3;
+			z_min = z_min - 0.5 * voxel_size_z;
+			z_max = z_min + n_voxel_z * voxel_size_z;
+			int n_voxel = n_voxel_x * n_voxel_y * n_voxel_z;
+			if (verbose >= 2) {
+				fprintf(stderr, "\ndbg2  final voxel bounds:\n");
+				fprintf(stderr, "dbg2    x_min:	    %10.3f m\n", x_min);
+				fprintf(stderr, "dbg2    x_max:	    %10.3f m\n", x_max);
+				fprintf(stderr, "dbg2    y_min:	    %10.3f m\n", y_min);
+				fprintf(stderr, "dbg2    y_max:	    %10.3f m\n", y_max);
+				fprintf(stderr, "dbg2    z_min:	    %10.3f m\n", z_min);
+				fprintf(stderr, "dbg2    z_max:	    %10.3f m\n", z_max);
+				fprintf(stderr, "dbg2    n_voxel_x:	%d\n", n_voxel_x);
+				fprintf(stderr, "dbg2    n_voxel_y:	%d\n", n_voxel_y);
+				fprintf(stderr, "dbg2    n_voxel_z:	%d\n", n_voxel_z);
+				fprintf(stderr, "dbg2    n_voxel:	  %d\n", n_voxel);
+			}
+			if (n_voxel_alloc < n_voxel) {
+				status &= mb_reallocd(verbose, __FILE__, __LINE__, (size_t)n_voxel,
 				     (void **)&voxel_count, &error);
-		if (error != MB_ERROR_NO_ERROR) {
-		    char *message = NULL;
-		    mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
-		    fprintf(outfp, "\nMBIO Error allocating voxel counting arrays:\n%s\n", message);
-		    fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		    mb_memory_clear(verbose, &error);
-		    exit(error);
-		}
-		memset((void *)voxel_count, 0, (size_t)n_voxel);
-		n_voxel_alloc = n_voxel;
-	    }
-
-	    /* count the soundings in each voxel */
-	    for (int i = 0; i < n_pings; i++) {
-		for (int j = 0; j< pings[i].beams_bath; j++) {
-		    if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
-			const int ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
-			const int iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
-			const int iz = (pings[i].bathz[j] - z_min) / voxel_size_z;
-			const int kk = (ix * n_voxel_y + iy) * n_voxel_z + iz;
-			if (mb_beam_ok(pings[i].beamflag[j]) || count_flagged) {
-			    voxel_count[kk] = MIN(voxel_count[kk] + 1, (unsigned char) 255);
+				if (error != MB_ERROR_NO_ERROR) {
+					char *message = NULL;
+					mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
+					fprintf(outfp, "\nMBIO Error allocating voxel counting arrays:\n%s\n", message);
+					fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+					mb_memory_clear(verbose, &error);
+					exit(error);
+				}
+				memset((void *)voxel_count, 0, (size_t)n_voxel);
+				n_voxel_alloc = n_voxel;
 			}
-		    }
-		}
-	    }
 
-	    /* apply threshold to generate binary mask of occupied voxels */
-	    for (int kk = 0; kk < n_voxel; kk++) {
-		if (voxel_count[kk] >= occupy_threshold) {
-		    voxel_count[kk] = true;
-		} else {
-		    voxel_count[kk] = false;
-		}
-	    }
-
-	    /* apply density filter to the soundings  */
-	    if (occupied_mode == MBVC_OCCUPIED_UNFLAG || empty_mode == MBVC_EMPTY_FLAG) {
-		for (int i = 0; i < n_pings; i++) {
-		    for (int j = 0; j < pings[i].beams_bath; j++) {
-			if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
-			    const int ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
-			    const int iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
-			    const int iz = (pings[i].bathz[j] - z_min) / voxel_size_z;
-			    const int kk = (ix * n_voxel_y + iy) * n_voxel_z + iz;
-			    if (occupied_mode == MBVC_OCCUPIED_UNFLAG
-				&& voxel_count[kk]
-				&& !mb_beam_ok(pings[i].beamflag[j])) {
-				pings[i].beamflag[j] = MB_FLAG_NONE;
-				action = MBP_EDIT_UNFLAG;
-				mb_esf_save(verbose, &esf, pings[i].time_d,
-					    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
-					    action, &error);
-				n_density_unflag++;
-			    }
-			    if (empty_mode == MBVC_EMPTY_FLAG
-				&& !voxel_count[kk]
-				&& mb_beam_ok(pings[i].beamflag[j])) {
-				pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-				action = MBP_EDIT_FILTER;
-				mb_esf_save(verbose, &esf, pings[i].time_d,
-					    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
-					    action, &error);
-				n_density_flag++;
-			    }
+			/* count the soundings in each voxel */
+			for (int i = 0; i < n_pings; i++) {
+				for (int j = 0; j< pings[i].beams_bath; j++) {
+					if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
+						const int ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
+						const int iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
+						const int iz = (pings[i].bathz[j] - z_min) / voxel_size_z;
+						const int kk = (ix * n_voxel_y + iy) * n_voxel_z + iz;
+						if (mb_beam_ok(pings[i].beamflag[j]) || count_flagged) {
+							voxel_count[kk] = MIN(voxel_count[kk] + 1, (unsigned char) 255);
+						}
+					}
+				}
 			}
-		    }
-		}
-	    }
 
-	    /* apply range filter to the soundings */
-	    if (apply_range_minimum || apply_range_maximum) {
-		for (int i = 0; i < n_pings; i++) {
-		    for (int j = 0; j< pings[i].beams_bath; j++) {
-			if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
-			    if (apply_range_minimum
-				&& mb_beam_ok(pings[i].beamflag[j])
-				&& pings[i].bathr[j] < range_minimum) {
-				pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-				action = MBP_EDIT_FILTER;
-				mb_esf_save(verbose, &esf, pings[i].time_d,
-					    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
-					    action, &error);
-				n_density_flag++;
-			    } else if (apply_range_maximum
-				&& mb_beam_ok(pings[i].beamflag[j])
-				&& pings[i].bathr[j] > range_maximum) {
-				pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-				action = MBP_EDIT_FILTER;
-				mb_esf_save(verbose, &esf, pings[i].time_d,
-					    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
-					    action, &error);
-				n_density_flag++;
-			    }
+			// apply threshold to generate binary mask of occupied voxels
+			for (int kk = 0; kk < n_voxel; kk++) {
+				if (voxel_count[kk] >= occupy_threshold) {
+					voxel_count[kk] = true;
+				} else {
+					voxel_count[kk] = false;
+				}
 			}
-		    }
-		}
-	    }
+
+			/* apply density filter to the soundings  */
+			if (occupied_mode == MBVC_OCCUPIED_UNFLAG || empty_mode == MBVC_EMPTY_FLAG) {
+				for (int i = 0; i < n_pings; i++) {
+					for (int j = 0; j < pings[i].beams_bath; j++) {
+						if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
+							const int ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
+							const int iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
+							const int iz = (pings[i].bathz[j] - z_min) / voxel_size_z;
+							const int kk = (ix * n_voxel_y + iy) * n_voxel_z + iz;
+							if (occupied_mode == MBVC_OCCUPIED_UNFLAG
+								&& voxel_count[kk]
+								&& !mb_beam_ok(pings[i].beamflag[j])) {
+								pings[i].beamflag[j] = MB_FLAG_NONE;
+								action = MBP_EDIT_UNFLAG;
+								mb_esf_save(verbose, &esf, pings[i].time_d,
+								    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+								    action, &error);
+								n_density_unflag++;
+							}
+							if (empty_mode == MBVC_EMPTY_FLAG
+								&& !voxel_count[kk]
+								&& mb_beam_ok(pings[i].beamflag[j])) {
+								pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+								action = MBP_EDIT_FILTER;
+								mb_esf_save(verbose, &esf, pings[i].time_d,
+									    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+									    action, &error);
+								n_density_flag++;
+							}
+						}
+					}
+				}
+			}
+
+			/* apply range filter to the soundings */
+			if (apply_range_minimum || apply_range_maximum) {
+				for (int i = 0; i < n_pings; i++) {
+					for (int j = 0; j< pings[i].beams_bath; j++) {
+						if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
+							if (apply_range_minimum
+								&& mb_beam_ok(pings[i].beamflag[j])
+								&& pings[i].bathr[j] < range_minimum) {
+								pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+								action = MBP_EDIT_FILTER;
+								mb_esf_save(verbose, &esf, pings[i].time_d,
+								    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+								    action, &error);
+								n_density_flag++;
+							} else if (apply_range_maximum
+								&& mb_beam_ok(pings[i].beamflag[j])
+								&& pings[i].bathr[j] > range_maximum) {
+								pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+								action = MBP_EDIT_FILTER;
+								mb_esf_save(verbose, &esf, pings[i].time_d,
+								    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+								    action, &error);
+								n_density_flag++;
+							}
+						}
+					}
+				}
+			}
 
 			/* close edit save file */
 			status &= mb_esf_close(verbose, &esf, &error);
@@ -989,8 +973,10 @@ int main(int argc, char **argv) {
 				}
 				fprintf(stderr, "%d beams flagged by density filter\n", n_density_flag);
 				fprintf(stderr, "%d beams unflagged by density filter\n", n_density_unflag);
-				fprintf(stderr, "%d beams flagged by minimum range filter\n", n_minrange_flag);
-				fprintf(stderr, "%d beams unflagged by maximum range filter\n", n_maxrange_flag);
+				// int n_minrange_flag = 0;
+				// fprintf(stderr, "%d beams flagged by minimum range filter\n", n_minrange_flag);
+				// int n_maxrange_flag = 0;
+				// fprintf(stderr, "%d beams unflagged by maximum range filter\n", n_maxrange_flag);
 			}
 		}
 
