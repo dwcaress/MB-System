@@ -388,6 +388,8 @@ void emu7k_stat_show(emu7k_stat_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[pub_total  %10"PRId64"]\n",indent,(indent>0?" ":""), self->pub_total);
         fprintf(stderr,"%*s[rec_cycle  %10"PRId64"]\n",indent,(indent>0?" ":""), self->rec_cycle);
         fprintf(stderr,"%*s[pub_cycle  %10"PRId64"]\n",indent,(indent>0?" ":""), self->pub_cycle);
+        fprintf(stderr,"%*s[frame_err  %10"PRId64"]\n",indent,(indent>0?" ":""), self->frame_err);
+        fprintf(stderr,"%*s[sync_bytes %10"PRId64"]\n",indent,(indent>0?" ":""), self->sync_bytes);
     }
 }
 // End function emu7k_stat_show
@@ -424,7 +426,7 @@ void emu7k_show(emu7k_t *self, bool verbose, uint16_t indent)
 }
 // End function emu7k_show
 
-static int64_t read_s7k_frame(emu7k_t *self, byte *dest, uint32_t len, uint32_t *sync_bytes)
+static int64_t read_s7k_frame(emu7k_t *self, byte *dest, uint32_t len, uint32_t *sync_bytes, emu7k_stat_t *stats)
 {
     int64_t retval=-1;
  
@@ -444,6 +446,11 @@ static int64_t read_s7k_frame(emu7k_t *self, byte *dest, uint32_t len, uint32_t 
 //            }else{
 //                r7k_drf_show((r7k_drf_t *)(dest),false,5);
 //            }
+        }else{
+            if(NULL!=stats){
+            stats->frame_err++;
+            stats->sync_bytes=*sync_bytes;
+            }
         }
     }else{
         PEPRINT((stderr,"invalid argument\n"));
@@ -531,11 +538,11 @@ static void *s_server_publish(void *arg)
                 // seed the frame buffer
                 // [need to look ahead for timing]
                 pframe = ( svr->cfg->netframe_input ? cur_frame : (cur_frame+R7K_NF_BYTES));
-                if ( (rbytes=read_s7k_frame(svr, pframe, R7K_MAX_FRAME_BYTES, &sync_bytes)) > 0) {
+                if ( (rbytes=read_s7k_frame(svr, pframe, R7K_MAX_FRAME_BYTES, &sync_bytes,stats)) > 0) {
                     
                     sync_bytes=0;
                     pframe = ( svr->cfg->netframe_input ? nxt_frame : (nxt_frame+R7K_NF_BYTES));
-                    if ( (rbytes=read_s7k_frame(svr, pframe, R7K_MAX_FRAME_BYTES, &sync_bytes)) > 0) {
+                    if ( (rbytes=read_s7k_frame(svr, pframe, R7K_MAX_FRAME_BYTES, &sync_bytes,stats)) > 0) {
                         stop_req=false;
                         
                     }else{
@@ -627,6 +634,17 @@ static void *s_server_publish(void *arg)
                                             // min_delay overrides max_delay
                                             // if it is larger
                                             twait = max_delay;
+                                            
+                                            if( svr->cfg->verbose>=2) {
+                                                char isostr[64]={0};
+                                                time_t tt_pkt=(time_t)0+pkt_time;
+                                                struct tm tm_pkt;
+                                                // should already be UTC; use localtime not gmtime
+                                                localtime_r(&tt_pkt,&tm_pkt);
+                                                
+                                                strftime(isostr,64,"%FT%H:%M:%S",&tm_pkt);
+                                                PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"WARN: possible data gap twait[%lf] ending @ %0.3lf [%s]\n",twait,pkt_time,isostr));
+                                            }
                                         }
                                         if(twait<min_delay){
                                             twait = min_delay;
@@ -725,13 +743,13 @@ static void *s_server_publish(void *arg)
                             // read next record
                             sync_bytes=0;
                             pframe = ( svr->cfg->netframe_input ? nxt_frame : (nxt_frame+R7K_NF_BYTES));
-                            if ( (rbytes=read_s7k_frame(svr, pframe, R7K_MAX_FRAME_BYTES, &sync_bytes)) > 0) {
+                            if ( (rbytes=read_s7k_frame(svr, pframe, R7K_MAX_FRAME_BYTES, &sync_bytes,stats)) > 0) {
                                 stop_req=false;
                             }else{
-                                PEPRINT((stderr,"ERR - read next returned[%"PRId64"] [%d/%s]\n",rbytes,me_errno,me_strerror(me_errno)));
+                                PEPRINT((stderr,"ERR - read next returned[%"PRId64"] syncbytes[%"PRIu32"] [%d/%s]\n",rbytes,sync_bytes,me_errno,me_strerror(me_errno)));
                                 PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"setting stop_req\n"));
                                 stop_req=true;
-                            }
+                             }
                             
                             PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"read frame at ofs[%"PRId32"/x%08X] rbytes[%"PRId64"] sbytes[%"PRIu32"]\n",(int32_t)file_cur,(unsigned int)file_cur,rbytes,sync_bytes));
                             
