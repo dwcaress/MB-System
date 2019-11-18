@@ -78,10 +78,14 @@ struct mbvoxelclean_ping_struct {
 	double *bathr;
 };
 
-const int MBVC_EMPTY_IGNORE = 0;
-const int MBVC_EMPTY_FLAG = 1;
-const int MBVC_OCCUPIED_IGNORE = 0;
-const int MBVC_OCCUPIED_UNFLAG = 1;
+typedef enum {
+    MBVC_EMPTY_IGNORE = 0,
+    MBVC_EMPTY_FLAG = 1,
+} empty_mode_t;
+typedef enum {
+    MBVC_OCCUPIED_IGNORE = 0,
+    MBVC_OCCUPIED_UNFLAG = 1,
+} occupied_mode_t;
 
 static const char program_name[] = "mbvoxelclean";
 static const char help_message[] =
@@ -147,8 +151,8 @@ int main(int argc, char **argv) {
 	double voxel_size_z = 0.05;
 	int occupy_threshold = 5;
 	bool count_flagged = false;
-	int empty_mode = MBVC_EMPTY_FLAG;
-	int occupied_mode = MBVC_OCCUPIED_IGNORE;
+	empty_mode_t empty_mode = MBVC_EMPTY_FLAG;
+	occupied_mode_t occupied_mode = MBVC_OCCUPIED_IGNORE;
 
 	/* other mbvoxelclean control parameters */
 	bool apply_range_minimum = false;
@@ -378,10 +382,6 @@ int main(int argc, char **argv) {
 
 	/* voxel storage */
 	unsigned char *voxel_count = NULL;  // TODO(schwehr): Make this a bool
-	int n_voxel_x;
-	int n_voxel_y;
-	int n_voxel_z;
-	int action;
 
 	/* save file control variables */
 	char esffile[MB_PATH_MAXLINE];
@@ -399,11 +399,6 @@ int main(int argc, char **argv) {
 	mb_path lock_program = "";
 	mb_path lock_cpu = "";
 	mb_path lock_user = "";
-
-	double mtodeglon, mtodeglat;
-	double headingx, headingy;
-
-	int formatread;
 
 	bool esffile_open = false;
 	int locked = false;  // TODO(schwehr): Make mb_pr_lockinfo take a bool
@@ -484,6 +479,7 @@ int main(int argc, char **argv) {
 		/* proceed if file locked and format ok */
 		if (oktoprocess) {
 			/* check for *inf file, create if necessary, and load metadata */
+			int formatread;
 			status = mb_get_info_datalist(verbose, swathfile, &formatread, &mb_info, lonflip, &error);
 
 			/* allocate space to store the bathymetry data */
@@ -534,9 +530,11 @@ int main(int argc, char **argv) {
 			}
 
 			/* define local cartesian coordinate system based on first ping navigation and heading */
+			double mtodeglon;
+			double mtodeglat;
 			mb_coor_scale(verbose, mb_info.lat_start, &mtodeglon, &mtodeglat);
-			headingx = sin(mb_info.heading_start * DTR);
-			headingy = cos(mb_info.heading_start * DTR);
+			const double headingx = sin(mb_info.heading_start * DTR);
+			const double headingy = cos(mb_info.heading_start * DTR);
 
 			/* check for "fast bathymetry" or "fbt" file */
 			strcpy(swathfileread, swathfile);
@@ -808,13 +806,13 @@ int main(int argc, char **argv) {
 			// allocate arrays of voxel beam counts - use unsigned char so that beam
 			// counts are capped at 255 - ergo the maximum occupied count threshold
 			// is 254
-			n_voxel_x = (x_max - x_min) / voxel_size_xy + 3;
+			const int n_voxel_x = (x_max - x_min) / voxel_size_xy + 3;
 			x_min = x_min - 0.5 * voxel_size_xy;
 			x_max = x_min + n_voxel_x * voxel_size_xy;
-			n_voxel_y = (x_max - y_min) / voxel_size_xy + 3;
+			const int n_voxel_y = (x_max - y_min) / voxel_size_xy + 3;
 			y_min = y_min - 0.5 * voxel_size_xy;
 			y_max = y_min + n_voxel_y * voxel_size_xy;
-			n_voxel_z = (z_max - z_min) / voxel_size_z + 3;
+			const int n_voxel_z = (z_max - z_min) / voxel_size_z + 3;
 			z_min = z_min - 0.5 * voxel_size_z;
 			z_max = z_min + n_voxel_z * voxel_size_z;
 			int n_voxel = n_voxel_x * n_voxel_y * n_voxel_z;
@@ -883,7 +881,7 @@ int main(int argc, char **argv) {
 								&& voxel_count[kk]
 								&& !mb_beam_ok(pings[i].beamflag[j])) {
 								pings[i].beamflag[j] = MB_FLAG_NONE;
-								action = MBP_EDIT_UNFLAG;
+								const int action = MBP_EDIT_UNFLAG;
 								mb_esf_save(verbose, &esf, pings[i].time_d,
 								    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 								    action, &error);
@@ -893,7 +891,7 @@ int main(int argc, char **argv) {
 								&& !voxel_count[kk]
 								&& mb_beam_ok(pings[i].beamflag[j])) {
 								pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-								action = MBP_EDIT_FILTER;
+								const int action = MBP_EDIT_FILTER;
 								mb_esf_save(verbose, &esf, pings[i].time_d,
 									    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 									    action, &error);
@@ -913,7 +911,7 @@ int main(int argc, char **argv) {
 								&& mb_beam_ok(pings[i].beamflag[j])
 								&& pings[i].bathr[j] < range_minimum) {
 								pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-								action = MBP_EDIT_FILTER;
+								const int action = MBP_EDIT_FILTER;
 								mb_esf_save(verbose, &esf, pings[i].time_d,
 								    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 								    action, &error);
@@ -922,7 +920,7 @@ int main(int argc, char **argv) {
 								&& mb_beam_ok(pings[i].beamflag[j])
 								&& pings[i].bathr[j] > range_maximum) {
 								pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-								action = MBP_EDIT_FILTER;
+								const int action = MBP_EDIT_FILTER;
 								mb_esf_save(verbose, &esf, pings[i].time_d,
 								    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 								    action, &error);
