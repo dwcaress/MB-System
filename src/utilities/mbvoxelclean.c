@@ -377,7 +377,6 @@ int main(int argc, char **argv) {
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* swath data storage */
-	struct mb_info_struct mb_info;
 	struct mbvoxelclean_ping_struct *pings = NULL;
 
 	/* voxel storage */
@@ -395,14 +394,8 @@ int main(int argc, char **argv) {
 	int n_density_flag_tot = 0;
 	int n_density_unflag_tot = 0;
 
-	int lock_purpose = 0;
-	mb_path lock_program = "";
-	mb_path lock_cpu = "";
-	mb_path lock_user = "";
-
 	bool esffile_open = false;
 	int locked = false;  // TODO(schwehr): Make mb_pr_lockinfo take a bool
-	void *mbio_ptr = NULL;
 	int n_voxel_alloc = 0;
 	int npings_alloc = 0;
 
@@ -438,6 +431,10 @@ int main(int argc, char **argv) {
 			status = mb_pr_lockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
 		} else {
 			/* lock_status = */
+			int lock_purpose = 0;
+			mb_path lock_program = "";
+			mb_path lock_user = "";
+			mb_path lock_cpu = "";
 			mb_pr_lockinfo(verbose, swathfile, &locked, &lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &error);
 
 			/* if locked get lock info */
@@ -453,6 +450,10 @@ int main(int argc, char **argv) {
 		if (status == MB_FAILURE) {
 			/* if locked get lock info */
 			if (error == MB_ERROR_FILE_LOCKED) {
+				int lock_purpose = 0;
+				mb_path lock_program = "";
+				mb_path lock_user = "";
+				mb_path lock_cpu = "";
 				/* lock_status = */ mb_pr_lockinfo(verbose, swathfile, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
 							     lock_date, &error);
 
@@ -480,6 +481,7 @@ int main(int argc, char **argv) {
 		if (oktoprocess) {
 			/* check for *inf file, create if necessary, and load metadata */
 			int formatread;
+			struct mb_info_struct mb_info;
 			status = mb_get_info_datalist(verbose, swathfile, &formatread, &mb_info, lonflip, &error);
 
 			/* allocate space to store the bathymetry data */
@@ -548,6 +550,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* initialize reading the input swath sonar file */
+			void *mbio_ptr = NULL;
 			if (mb_read_init(verbose, swathfileread, formatread, defaultpings, lonflip, bounds, btime_i, etime_i, speedmin,
 						   timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) !=
 			    MB_SUCCESS) {
