@@ -4414,7 +4414,7 @@ int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y,
 }
 /*--------------------------------------------------------------------*/
 
-int mb_pr_lockswathfile(int verbose, char *file, int purpose, const char *program_name, int *error) {
+int mb_pr_lockswathfile(int verbose, const char *file, int purpose, const char *program_name, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4490,7 +4490,8 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose, const char *progra
 }
 /*--------------------------------------------------------------------*/
 
-int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *program, char *user, char *cpu, char *date,
+int mb_pr_lockinfo(int verbose, const char *file, int *locked, int *purpose,
+                   char *program, char *user, char *cpu, char *date,
                    int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4569,7 +4570,7 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *pro
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_unlockswathfile(int verbose, char *file, int purpose, const char *program_name, int *error) {
+int mb_pr_unlockswathfile(int verbose, const char *file, int purpose, const char *program_name, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
