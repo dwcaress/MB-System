@@ -342,7 +342,7 @@ double tsfnz(eccent,phi,sinphi)
 
 /* Function to return the sign of an argument
   ------------------------------------------*/
-sign(x)
+int sign(x)
 double x;
 {
 if (x < 0.0)
