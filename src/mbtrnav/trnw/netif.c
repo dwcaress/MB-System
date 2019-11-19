@@ -996,7 +996,7 @@ static int s_netif_pub_msg(netif_t *self, msock_connection_t *peer, char *data, 
     int retval=-1;
 
     if(NULL!=self && NULL!=peer && NULL!=data && len>0){
-        int iobytes=0;
+        int64_t iobytes=0;
         if(self->ctype==ST_UDP){
             if ( (iobytes = msock_sendto(self->socket, peer->addr, data, len, MSG_NOSIGNAL )) > 0) {
                 fprintf(stderr,"client PUB UDP OK len[%lld]:\n",iobytes);
