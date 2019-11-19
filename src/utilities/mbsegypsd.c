@@ -38,12 +38,17 @@
 #include "mb_segy.h"
 #include "mb_status.h"
 
-const int MBSEGYPSD_USESHOT = 0;
-const int MBSEGYPSD_USECMP = 1;
-const int MBSEGYPSD_WINDOW_OFF = 0;
-const int MBSEGYPSD_WINDOW_ON = 1;
-const int MBSEGYPSD_WINDOW_SEAFLOOR = 2;
-const int MBSEGYPSD_WINDOW_DEPTH = 3;
+typedef enum {
+    MBSEGYPSD_USESHOT = 0,
+    MBSEGYPSD_USECMP = 1,
+} tracemode_t;
+
+typedef enum {
+    MBSEGYPSD_WINDOW_OFF = 0,
+    MBSEGYPSD_WINDOW_ON = 1,
+    MBSEGYPSD_WINDOW_SEAFLOOR = 2,
+    MBSEGYPSD_WINDOW_DEPTH = 3,
+} windowmode_t;
 
 float NaN;
 /* output stream for basic stuff (stdout if verbose <= 1,
@@ -64,8 +69,10 @@ static const char usage_message[] =
 /*
  * function get_segy_limits gets info for default segy gridding
  */
-int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart, int *traceend, int *chanstart, int *chanend,
-                    double *timesweep, double *timedelay, int *error) {
+int get_segy_limits(int verbose, char *segyfile, tracemode_t *tracemode,
+                    int *tracestart, int *traceend, int *chanstart,
+                    int *chanend, double *timesweep, double *timedelay,
+                    int *error) {
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
@@ -198,14 +205,14 @@ int main(int argc, char **argv) {
 	bool logscale = false;
 	int nfft = 1024;
 	char fileroot[MB_PATH_MAXLINE] = "";
-	int tracemode = MBSEGYPSD_USESHOT;
+	tracemode_t tracemode = MBSEGYPSD_USESHOT;
 	int tracestart = 0;
 	int traceend = 0;
 	int chanstart = 0;
 	int chanend = -1;
 	double timesweep = 0.0;
 	double timedelay = 0.0;
-	int windowmode = MBSEGYPSD_WINDOW_OFF;
+	windowmode_t windowmode = MBSEGYPSD_WINDOW_OFF;
 	double windowstart;
 	double windowend;
 	int ngridx = 0;
@@ -258,7 +265,9 @@ int main(int argc, char **argv) {
 			case 'S':
 			case 's':
 			{
-				const int n = sscanf(optarg, "%d/%d/%d/%d/%d", &tracemode, &tracestart, &traceend, &chanstart, &chanend);
+				int tracemode_tmp;
+				const int n = sscanf(optarg, "%d/%d/%d/%d/%d", &tracemode_tmp, &tracestart, &traceend, &chanstart, &chanend);
+				tracemode = (tracemode_t)tracemode_tmp;  // TODO(Schwehr): Range check.
 				if (n < 5) {
 					chanstart = 0;
 					chanend = -1;
@@ -282,8 +291,12 @@ int main(int argc, char **argv) {
 			}
 			case 'W':
 			case 'w':
-				sscanf(optarg, "%d/%lf/%lf", &windowmode, &windowstart, &windowend);
+			{
+				int windowmode_tmp;
+				sscanf(optarg, "%d/%lf/%lf", &windowmode_tmp, &windowstart, &windowend);
+				windowmode = (windowmode_t)windowmode_tmp;  // TODO(Schwehr): Range check.
 				break;
+			}
 			case '?':
 				errflg = true;
 			}
@@ -342,7 +355,7 @@ int main(int argc, char **argv) {
 
 	int error = MB_ERROR_NO_ERROR;
 
-	int sinftracemode = MBSEGYPSD_USESHOT;
+	tracemode_t sinftracemode = MBSEGYPSD_USESHOT;
 	int sinftracestart = 0;
 	int sinftraceend = 0;
 	int sinfchanstart = 0;
