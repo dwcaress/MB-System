@@ -166,6 +166,7 @@ const char *prof_event_labels[]={ \
     "cli_rr",
     "cli_pub"
 };
+
 const char *prof_status_labels[]={ \
     "cli_list_len",
     "cli_rx_bytes",
