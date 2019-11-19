@@ -2155,7 +2155,7 @@ int main(int argc, char **argv) {
 		void *datalist = NULL;
 		int ndata = 0;
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
-		if ((status = mb_datalist_open(verbose, &datalist, filelist, look_processed, &error)) != MB_SUCCESS) {
+		if (mb_datalist_open(verbose, &datalist, filelist, look_processed, &error) != MB_SUCCESS) {
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
@@ -2166,7 +2166,7 @@ int main(int argc, char **argv) {
 		mb_path ppath = "";
 		mb_path dpath = "";
 		double file_weight = 1.0;
-		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
+		while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
 		       MB_SUCCESS) {
 			int ndatafile = 0;
 
@@ -2705,7 +2705,7 @@ int main(int argc, char **argv) {
 		int ndata = 0;
 		void *datalist = NULL;
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
-		if ((status = mb_datalist_open(verbose, &datalist, filelist, look_processed, &error)) != MB_SUCCESS) {
+		if (mb_datalist_open(verbose, &datalist, filelist, look_processed, &error) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2717,7 +2717,7 @@ int main(int argc, char **argv) {
 		mb_path ppath = "";
 		mb_path dpath = "";
 		double file_weight = 1.0;
-		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
+		while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
 		       MB_SUCCESS) {
 			int ndatafile = 0;
 

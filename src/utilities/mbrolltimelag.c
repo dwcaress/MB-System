@@ -272,19 +272,15 @@ int main(int argc, char **argv) {
 	char dfile[MB_PATH_MAXLINE];
 	if (read_datalist) {
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
-		if ((status = mb_datalist_open(verbose, &datalist, swathdata, look_processed, &error)) != MB_SUCCESS) {
+		if (mb_datalist_open(verbose, &datalist, swathdata, look_processed, &error) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", swathdata);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		double file_weight;
-		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
+		read_data = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+	} else {
+		/* else copy single filename to be read */
 		strcpy(swathfile, swathdata);
 		read_data = true;
 	}
