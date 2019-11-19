@@ -180,15 +180,15 @@ int main(int argc, char **argv) {
 				break;
 			case 'G':
 			case 'g':
-				sscanf(optarg, "%s", delimiter);
+				sscanf(optarg, "%1023s", delimiter);
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'J':
 			case 'j':
-				sscanf(optarg, "%s", projection_pars);
+				sscanf(optarg, "%1023s", projection_pars);
 				use_projection = true;
 				break;
 			case 'K':
@@ -227,7 +227,7 @@ int main(int argc, char **argv) {
 			case 'Z':
 			case 'z':
 				segment = true;
-				sscanf(optarg, "%s", segment_tag);
+				sscanf(optarg, "%1023s", segment_tag);
 				if (strcmp(segment_tag, "swathfile") == 0)
 					segment_mode = MBNAVLIST_SEGMENT_MODE_SWATHFILE;
 				else if (strcmp(segment_tag, "datalist") == 0)

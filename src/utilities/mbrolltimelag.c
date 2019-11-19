@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", swathdata);
+				sscanf(optarg, "%1023s", swathdata);
 				break;
 			case 'K':
 			case 'k':
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", outroot);
+				sscanf(optarg, "%1023s", outroot);
 				outroot_defined = true;
 				break;
 			case 'S':

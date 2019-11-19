@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", file);
+				sscanf(optarg, "%1023s", file);
 				break;
 			case 'O':
 			case 'o':

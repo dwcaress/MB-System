@@ -355,7 +355,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'M':
 			case 'm':
@@ -363,12 +363,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", output_file);
+				sscanf(optarg, "%1023s", output_file);
 				output_file_set = true;
 				break;
 			case 'R':
 			case 'r':
-				sscanf(optarg, "%s", rulesfile);
+				sscanf(optarg, "%1023s", rulesfile);
 				break;
 			case '?':
 				errflg = true;
@@ -456,13 +456,13 @@ int main(int argc, char **argv) {
 			if (buffer_ptr != buffer)
 				rules_done = true;
 			else {
-				int nscan = sscanf(buffer, "%s", word);
+				int nscan = sscanf(buffer, "%1023s", word);
 				if (1 == nscan && ')' == word[0])
 					rule_level--;
 				else if (1 == nscan && '(' == word[0] && ')' != word[1]) {
 					rule_level++;
 					if (2 == rule_level) {
-						nscan = sscanf(buffer, "%s %s", buff, word);
+						nscan = sscanf(buffer, "%1023s %1023s", buff, word);
 						if (2 == nscan && 0 == strncmp(word, "LINES_PING_BEAM_RULE", 20))
 							usable_rule = true;
 					}
@@ -480,7 +480,7 @@ int main(int argc, char **argv) {
 			}
 			else {
 
-				if (MB_SUCCESS == status && 2 != sscanf(buffer, "%s %d", word, &nlines))
+				if (MB_SUCCESS == status && 2 != sscanf(buffer, "%1023s %d", word, &nlines))
 					status = MB_FAILURE;
 
 				if (MB_SUCCESS == status && 0 != strncmp(word, "NO_OF_LINES", 11))
@@ -491,7 +491,7 @@ int main(int argc, char **argv) {
 						if (buffer != fgets(buffer, MB_PATH_MAXLINE, rules_fp))
 							status = MB_FAILURE;
 
-						if (MB_SUCCESS == status && 2 != sscanf(buffer, "%s '%s'", word, line_name))
+						if (MB_SUCCESS == status && 2 != sscanf(buffer, "%1023s '%1023s'", word, line_name))
 							status = MB_FAILURE;
 
 						if (MB_SUCCESS == status && 0 != strncmp(word, "LINE_NAME", 9))
@@ -504,7 +504,7 @@ int main(int argc, char **argv) {
 							status = MB_FAILURE;
 
 						int npings;
-						if (MB_SUCCESS == status && 2 != sscanf(buffer, "%s %d", word, &npings))
+						if (MB_SUCCESS == status && 2 != sscanf(buffer, "%1023s %d", word, &npings))
 							status = MB_FAILURE;
 
 						if (MB_SUCCESS == status && 0 != strncmp(word, "NO_OF_PINGS", 11))
@@ -520,7 +520,7 @@ int main(int argc, char **argv) {
 								char beams_buff[MB_PATH_MAXLINE];
 								int used;
 								if (MB_SUCCESS == status &&
-								    5 > sscanf(buffer, "%s %d %s %d %s %n", word, &ping_no, buff, &nbeams, beams_buff, &used))
+								    5 > sscanf(buffer, "%1023s %d %1023s %d %1023s %n", word, &ping_no, buff, &nbeams, beams_buff, &used))
 									status = MB_FAILURE;
 
 								if (MB_SUCCESS == status &&

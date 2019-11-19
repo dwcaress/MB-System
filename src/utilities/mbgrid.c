@@ -557,7 +557,7 @@ int main(int argc, char **argv) {
 					spacing_priority = true;
 					optarg[strlen(optarg) - 1] = '\0';
 				}
-				const int n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
+				const int n = sscanf(optarg, "%lf/%lf/%1023s", &dx_set, &dy_set, units);
 				if (n > 1)
 					set_spacing = true;
 				if (n < 3)
@@ -611,16 +611,16 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", filelist);
+				sscanf(optarg, "%1023s", filelist);
 				break;
 			case 'J':
 			case 'j':
-				sscanf(optarg, "%s", projection_pars);
+				sscanf(optarg, "%1023s", projection_pars);
 				projection_pars_f = true;
 				break;
 			case 'K':
 			case 'k':
-				sscanf(optarg, "%s", backgroundfile);
+				sscanf(optarg, "%1023s", backgroundfile);
 				if ((grdrasterid = atoi(backgroundfile)) <= 0)
 					grdrasterid = -1;
 				break;
@@ -638,7 +638,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", fileroot);
+				sscanf(optarg, "%1023s", fileroot);
 				break;
 			case 'P':
 			case 'p':

@@ -1141,7 +1141,7 @@ int main(int argc, char **argv) {
 					spacing_priority = true;
 					optarg[strlen(optarg) - 1] = '\0';
 				}
-				const int n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
+				const int n = sscanf(optarg, "%lf/%lf/%1023s", &dx_set, &dy_set, units);
 				if (n > 1)
 					set_spacing = true;
 				if (n < 3)
@@ -1180,11 +1180,11 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", filelist);
+				sscanf(optarg, "%1023s", filelist);
 				break;
 			case 'J':
 			case 'j':
-				sscanf(optarg, "%s", projection_pars);
+				sscanf(optarg, "%1023s", projection_pars);
 				projection_pars_f = true;
 				break;
 			case 'L':
@@ -1201,7 +1201,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", fileroot);
+				sscanf(optarg, "%1023s", fileroot);
 				break;
 			case 'P':
 			case 'p':
@@ -1225,7 +1225,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'T':
 			case 't':
-				sscanf(optarg, "%s", topogridfile);
+				sscanf(optarg, "%1023s", topogridfile);
 				usetopogrid = true;
 				break;
 			case 'U':
@@ -1308,7 +1308,7 @@ int main(int argc, char **argv) {
 					priority_angle_priority = priority_angle_85degreesdn_priority;
 				}
 				else {
-					sscanf(optarg, "%s", pfile);
+					sscanf(optarg, "%1023s", pfile);
 				}
 				if ((priority_mode & MBMOSAIC_PRIORITY_ANGLE) == 0)
 					priority_mode += MBMOSAIC_PRIORITY_ANGLE;

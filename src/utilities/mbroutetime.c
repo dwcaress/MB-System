@@ -96,16 +96,16 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", output_file);
+				sscanf(optarg, "%1023s", output_file);
 				output_file_set = true;
 				break;
 			case 'R':
 			case 'r':
-				sscanf(optarg, "%s", route_file);
+				sscanf(optarg, "%1023s", route_file);
 				break;
 			case 'U':
 			case 'u':

@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
 					sscanf(optarg, "%d", &format);
 				}
 				else if (strcmp("input", options[option_index].name) == 0) {
-					sscanf(optarg, "%s", read_file);
+					sscanf(optarg, "%1023s", read_file);
 				}
 				else if (strcmp("make-ancilliary", options[option_index].name) == 0) {
 					force_update = true;
@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'N':
 			case 'n':

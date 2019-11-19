@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'L':
 			case 'l':
@@ -248,7 +248,7 @@ int main(int argc, char **argv) {
 		for (int i = 0; i < pargc; i++) {
 			/* general parameters */
 			if (strncmp(pargv[i], "OUTFILE", 7) == 0) {
-				nscan = sscanf(pargv[i], "OUTFILE:%s", process.mbp_ofile);
+				nscan = sscanf(pargv[i], "OUTFILE:%1023s", process.mbp_ofile);
 				if (nscan == 1)
 					process.mbp_ofile_specified = true;
 				else {
@@ -273,7 +273,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else if (strncmp(pargv[i], "NAVFILE", 7) == 0) {
-				sscanf(pargv[i], "NAVFILE:%s", process.mbp_navfile);
+				sscanf(pargv[i], "NAVFILE:%1023s", process.mbp_navfile);
 				if (!explicit) {
 					process.mbp_nav_mode = MBP_NAV_ON;
 					process.mbp_nav_heading = MBP_NAV_ON;
@@ -345,7 +345,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else if (strncmp(pargv[i], "NAVADJFILE", 10) == 0) {
-				sscanf(pargv[i], "NAVADJFILE:%s", process.mbp_navadjfile);
+				sscanf(pargv[i], "NAVADJFILE:%1023s", process.mbp_navadjfile);
 				if (!explicit) {
 					process.mbp_navadj_mode = MBP_NAVADJ_LLZ;
 				}
@@ -362,7 +362,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else if (strncmp(pargv[i], "ATTITUDEFILE", 12) == 0) {
-				sscanf(pargv[i], "ATTITUDEFILE:%s", process.mbp_attitudefile);
+				sscanf(pargv[i], "ATTITUDEFILE:%1023s", process.mbp_attitudefile);
 				if (!explicit) {
 					process.mbp_attitude_mode = MBP_ATTITUDE_ON;
 				}
@@ -379,7 +379,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else if (strncmp(pargv[i], "SONARDEPTHFILE", 14) == 0) {
-				sscanf(pargv[i], "SONARDEPTHFILE:%s", process.mbp_sonardepthfile);
+				sscanf(pargv[i], "SONARDEPTHFILE:%1023s", process.mbp_sonardepthfile);
 				if (!explicit) {
 					process.mbp_sonardepth_mode = MBP_SONARDEPTH_ON;
 				}
@@ -490,7 +490,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else if (strncmp(pargv[i], "EDITSAVEFILE", 12) == 0) {
-				sscanf(pargv[i], "EDITSAVEFILE:%s", process.mbp_editfile);
+				sscanf(pargv[i], "EDITSAVEFILE:%1023s", process.mbp_editfile);
 				if (!explicit) {
 					process.mbp_edit_mode = MBP_EDIT_ON;
 				}
@@ -507,7 +507,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else if (strncmp(pargv[i], "SVPFILE", 7) == 0) {
-				sscanf(pargv[i], "SVPFILE:%s", process.mbp_svpfile);
+				sscanf(pargv[i], "SVPFILE:%1023s", process.mbp_svpfile);
 				if (!explicit) {
 					process.mbp_svp_mode = MBP_SVP_ON;
 				}
@@ -542,7 +542,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else if (strncmp(pargv[i], "STATICFILE", 10) == 0) {
-				sscanf(pargv[i], "STATICFILE:%s", process.mbp_staticfile);
+				sscanf(pargv[i], "STATICFILE:%1023s", process.mbp_staticfile);
 				if (!explicit) {
 					process.mbp_static_mode = MBP_SVP_ON;
 				}
@@ -697,7 +697,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else if (strncmp(pargv[i], "TIDEFILE", 8) == 0) {
-				sscanf(pargv[i], "TIDEFILE:%s", process.mbp_tidefile);
+				sscanf(pargv[i], "TIDEFILE:%1023s", process.mbp_tidefile);
 				if (!explicit) {
 					process.mbp_tide_mode = MBP_TIDE_ON;
 				}
@@ -714,7 +714,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else if (strncmp(pargv[i], "AMPCORRFILE", 11) == 0) {
-				sscanf(pargv[i], "AMPCORRFILE:%s", process.mbp_ampcorrfile);
+				sscanf(pargv[i], "AMPCORRFILE:%1023s", process.mbp_ampcorrfile);
 				if (!explicit) {
 					process.mbp_ampcorr_mode = MBP_AMPCORR_ON;
 				}
@@ -732,7 +732,7 @@ int main(int argc, char **argv) {
 				sscanf(pargv[i], "AMPCORRSLOPE:%d", &process.mbp_ampcorr_slope);
 			}
 			else if (strncmp(pargv[i], "AMPSSCORRTOPOFILE", 17) == 0) {
-				sscanf(pargv[i], "AMPSSCORRTOPOFILE:%s", process.mbp_ampsscorr_topofile);
+				sscanf(pargv[i], "AMPSSCORRTOPOFILE:%1023s", process.mbp_ampsscorr_topofile);
 			}
 
 			/* sidescan correction */
@@ -743,7 +743,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else if (strncmp(pargv[i], "SSCORRFILE", 10) == 0) {
-				sscanf(pargv[i], "SSCORRFILE:%s", process.mbp_sscorrfile);
+				sscanf(pargv[i], "SSCORRFILE:%1023s", process.mbp_sscorrfile);
 				if (!explicit) {
 					process.mbp_sscorr_mode = MBP_SSCORR_ON;
 				}
@@ -761,7 +761,7 @@ int main(int argc, char **argv) {
 				sscanf(pargv[i], "SSCORRSLOPE:%d", &process.mbp_sscorr_slope);
 			}
 			else if (strncmp(pargv[i], "AMPSSCORRTOPOFILE", 17) == 0) {
-				sscanf(pargv[i], "AMPSSCORRTOPOFILE:%s", process.mbp_ampsscorr_topofile);
+				sscanf(pargv[i], "AMPSSCORRTOPOFILE:%1023s", process.mbp_ampsscorr_topofile);
 			}
 
 			/* sidescan recalculation */
