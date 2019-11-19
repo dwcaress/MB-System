@@ -213,7 +213,7 @@ int main(int argc, char **argv) {
 			break;
 		case 'I':
 		case 'i':
-			sscanf(optarg, "%s", file);
+			sscanf(optarg, "%1023s", file);
 			break;
 		case 'K':
 		case 'k':
@@ -235,7 +235,7 @@ int main(int argc, char **argv) {
 			break;
 		case 'T':
 		case 't':
-			sscanf(optarg, "%s", title);
+			sscanf(optarg, "%1023s", title);
 			break;
 		case 'X':
 		case 'x':

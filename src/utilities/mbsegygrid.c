@@ -388,11 +388,11 @@ int main(int argc, char **argv) {
 			}
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", segyfile);
+				sscanf(optarg, "%1023s", segyfile);
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", fileroot);
+				sscanf(optarg, "%1023s", fileroot);
 				break;
 			case 'R':
 			case 'r':

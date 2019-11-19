@@ -215,11 +215,11 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 			break;
 		case 'I':
 		case 'i':
-			sscanf(optarg, "%s", &opts->read_file[0]);
+			sscanf(optarg, "%1023s", &opts->read_file[0]);
 			break;
 		case 'J':
 		case 'j':
-			sscanf(optarg, "%s", &opts->proj4command[0]);
+			sscanf(optarg, "%1023s", &opts->proj4command[0]);
 			opts->projection_set = true;
 			break;
 		case 'N':
@@ -228,7 +228,7 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 			break;
 		case 'O':
 		case 'o':
-			sscanf(optarg, "%s", &opts->basename[0]);
+			sscanf(optarg, "%1023s", &opts->basename[0]);
 			opts->ofile_set = true;
 			break;
 		case 'R':

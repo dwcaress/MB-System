@@ -129,14 +129,14 @@ int main(int argc, char **argv) {
 				break;
 			case 'D':
 			case 'd':
-				sscanf(optarg, "%s", psdisplay);
+				sscanf(optarg, "%1023s", psdisplay);
 				flag = true;
 				break;
 			case 'F':
 			case 'f':
 			{
 				char argstring[MB_PATH_MAXLINE];
-				sscanf(optarg, "%s", argstring);
+				sscanf(optarg, "%1023s", argstring);
 				if (strncmp(argstring, "new", 3) == 0 || strncmp(argstring, "NEW", 3) == 0)
 					fbtversion = 3;
 				else if (strncmp(argstring, "old", 2) == 0 || strncmp(argstring, "OLD", 2) == 0)
@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
 			}
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", imgdisplay);
+				sscanf(optarg, "%1023s", imgdisplay);
 				flag = true;
 				break;
 			case 'H':
@@ -198,7 +198,7 @@ int main(int argc, char **argv) {
 			case 'u':
 			{
 				char argstring[MB_PATH_MAXLINE];
-				sscanf(optarg, "%s", argstring);
+				sscanf(optarg, "%1023s", argstring);
 				if (strncmp(argstring, "yes", 3) == 0 || strncmp(argstring, "YES", 3) == 0)
 					uselockfiles = 1;
 				else if (strncmp(argstring, "no", 2) == 0 || strncmp(argstring, "NO", 2) == 0)
@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'W':
 			case 'w':
-				sscanf(optarg, "%s", mbproject);
+				sscanf(optarg, "%1023s", mbproject);
 				flag = true;
 				break;
 			case '?':

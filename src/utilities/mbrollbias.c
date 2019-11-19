@@ -294,11 +294,11 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", ifile);
+				sscanf(optarg, "%1023s", ifile);
 				break;
 			case 'J':
 			case 'j':
-				sscanf(optarg, "%s", jfile);
+				sscanf(optarg, "%1023s", jfile);
 				break;
 			case 'D':
 			case 'd':

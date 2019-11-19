@@ -1880,7 +1880,7 @@ int main(int argc, char **argv) {
         break;
       case 'C':
       case 'c':
-        sscanf(optarg, "%s", commentfile);
+        sscanf(optarg, "%1023s", commentfile);
         insertcomments = true;
         break;
       case 'D':
@@ -1907,7 +1907,7 @@ int main(int argc, char **argv) {
         break;
       case 'I':
       case 'i':
-        sscanf(optarg, "%s", ifile);
+        sscanf(optarg, "%1023s", ifile);
         break;
       case 'L':
       case 'l':
@@ -1916,7 +1916,7 @@ int main(int argc, char **argv) {
       case 'M':
       case 'm':
       {
-        const int i = sscanf(optarg, "%s", mfile);
+        const int i = sscanf(optarg, "%1023s", mfile);
         if (i == 1)
           merge = true;
         break;
@@ -1934,7 +1934,7 @@ int main(int argc, char **argv) {
         break;
       case 'O':
       case 'o':
-        sscanf(optarg, "%s", ofile);
+        sscanf(optarg, "%1023s", ofile);
         break;
       case 'P':
       case 'p':

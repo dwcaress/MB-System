@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
 	char buffer[MB_PATH_MAXLINE];
 	char type[MB_PATH_MAXLINE];
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer && strncmp(buffer, "# begin", 7) != 0) {
-		const int nscan = sscanf(buffer, "# %s %s %s", type, fields[nfields].name, fields[nfields].format);
+		const int nscan = sscanf(buffer, "# %1023s %1023s %1023s", type, fields[nfields].name, fields[nfields].format);
 		if (nscan == 3) {
 			result = (char *)strchr(buffer, ',');
 			strcpy(fields[nfields].description, &(result[1]));

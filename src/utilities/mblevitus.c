@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
 			}
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", ofile);
+				sscanf(optarg, "%1023s", ofile);
 				break;
 			case '?':
 				errflg = true;

@@ -280,11 +280,11 @@ int main(int argc, char **argv) {
 			}
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'L':
 			case 'l':
-				sscanf(optarg, "%d/%s", &startline, lineroot);
+				sscanf(optarg, "%d/%1023s", &startline, lineroot);
 				break;
 			case 'M':
 			case 'm':
@@ -292,17 +292,17 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", output_file);
+				sscanf(optarg, "%1023s", output_file);
 				output_file_set = true;
 				break;
 			case 'Q':
 			case 'q':
-				sscanf(optarg, "%s", timelist_file);
+				sscanf(optarg, "%1023s", timelist_file);
 				timelist_file_set = true;
 				break;
 			case 'R':
 			case 'r':
-				sscanf(optarg, "%s", route_file);
+				sscanf(optarg, "%1023s", route_file);
 				route_file_set = true;
 				break;
 			case 'S':
@@ -311,7 +311,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'T':
 			case 't':
-				sscanf(optarg, "%s", topogridfile);
+				sscanf(optarg, "%1023s", topogridfile);
 				sslayoutmode = MB7K2SS_SS_3D_BOTTOM;
 				break;
 			case 'U':

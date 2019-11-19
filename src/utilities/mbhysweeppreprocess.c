@@ -347,7 +347,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'D':
 			case 'd':
-				sscanf(optarg, "%s", buffer);
+				sscanf(optarg, "%1023s", buffer);
 				if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					sonardepthdata = true;
 					strcpy(sonardepthfile, buffer);
@@ -359,16 +359,16 @@ int main(int argc, char **argv) {
 				break;
 			case 'G':
 			case 'g':
-				sscanf(optarg, "%s", platform_file);
+				sscanf(optarg, "%1023s", platform_file);
 				use_platform_file = true;
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'J':
 			case 'j':
-				sscanf(optarg, "%s", proj4command);
+				sscanf(optarg, "%1023s", proj4command);
 				projection_set = true;
 				break;
 			case 'K':
@@ -389,7 +389,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'N':
 			case 'n':
-				sscanf(optarg, "%s", buffer);
+				sscanf(optarg, "%1023s", buffer);
 				if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					navdata = true;
 					strcpy(navfile, buffer);
@@ -397,12 +397,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", ofile);
+				sscanf(optarg, "%1023s", ofile);
 				ofile_set = true;
 				break;
 			case 'T':
 			case 't':
-				sscanf(optarg, "%s", timelagfile);
+				sscanf(optarg, "%1023s", timelagfile);
 				if ((fstat = stat(timelagfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_MODEL;
 				}

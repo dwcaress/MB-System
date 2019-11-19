@@ -314,7 +314,7 @@ int main(int argc, char **argv) {
           /* n = */ sscanf(optarg, "%d", &format);
         }
         else if (strcmp("platform-file", options[option_index].name) == 0) {
-          const int n = sscanf(optarg, "%s", platform_file);
+          const int n = sscanf(optarg, "%1023s", platform_file);
           if (n == 1)
             use_platform_file = true;
         }
