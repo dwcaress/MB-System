@@ -321,23 +321,23 @@ int netif_tcp_update_connections(netif_t *self)
     
     PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ACC\n",self->port_name));
     
-    msock_socket_t *socket =self->socket;
+    msock_socket_t *sock_inst =self->socket;
     msock_connection_t *peer =self->peer;
     mlist_t *list = self->list;
     int new_fd=-1;
     int errsave=0;
     double connect_time=0.0;
     
-    msock_set_blocking(socket,false);
-    new_fd = msock_accept(socket,peer->addr);
+    msock_set_blocking(sock_inst,false);
+    new_fd = msock_accept(sock_inst,peer->addr);
     errsave=errno;
-    msock_set_blocking(socket,true);
+    msock_set_blocking(sock_inst,true);
     
     
     switch(new_fd){
         case -1:
             if(errsave!=EAGAIN){
-                PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ERR - accept ret[-1] sfd[%d] nfd[%d] err[%d/%s]\n",self->port_name,socket->fd,new_fd,errsave,strerror(errsave)));
+                PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ERR - accept ret[-1] sfd[%d] nfd[%d] err[%d/%s]\n",self->port_name,sock_inst->fd,new_fd,errsave,strerror(errsave)));
             }else{
                 MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EAGAIN]);
             }
@@ -350,7 +350,7 @@ int netif_tcp_update_connections(netif_t *self)
             
         default:
             connect_time = mtime_dtime();
-            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:CONNECTED -  sfd[%d] nfd[%d]\n",self->port_name,socket->fd,new_fd));
+            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:CONNECTED -  sfd[%d] nfd[%d]\n",self->port_name,sock_inst->fd,new_fd));
             // generate a socket (wrapper) for the client connection
             peer->sock = msock_wrap_fd(new_fd);
             // record connect time
@@ -398,7 +398,7 @@ int netif_tcp_update_connections(netif_t *self)
 
             }
             
-            //            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ADD_CLI - id[%p/%s:%s] fd[%d] sfd[%d] nfd[%d] \n",self->port_name,peer,peer->chost, peer->service,peer->s->fd,socket->fd,new_fd));
+            //            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ADD_CLI - id[%p/%s:%s] fd[%d] sfd[%d] nfd[%d] \n",self->port_name,peer,peer->chost, peer->service,peer->s->fd,sock_inst->fd,new_fd));
             
             mlist_add(list,(void *)peer);
             self->peer = msock_connection_new();
@@ -638,7 +638,7 @@ int netif_connect(netif_t *self)
     switch(self->ctype){
     case ST_UDP:
         self->socket = msock_socket_new(self->host, self->port, ST_UDP);
-            if(NULL!=socket){
+            if(NULL!=self->socket){
                 msock_set_blocking(self->socket,false);
                 if ( (test=msock_bind(self->socket))==0) {
                     PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN udp socket bind OK [%s:%d]\n",self->host,self->port));
@@ -653,7 +653,7 @@ int netif_connect(netif_t *self)
         break;
     case ST_TCP:
         self->socket = msock_socket_new(self->host, self->port, ST_TCP);
-            if(NULL!=socket){
+            if(NULL!=self->socket){
                 msock_set_blocking(self->socket,false);
                 if ( (test=msock_bind(self->socket))==0) {
                     PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN tcp socket bind OK [%s:%d]\n",self->host,self->port));
