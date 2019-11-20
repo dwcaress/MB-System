@@ -19138,9 +19138,6 @@ fi
 fi
 CPPFLAGS=$save_CPPFLAGS
 CFLAGS=$save_CFLAGS
-if test "$FOUND_PROJ6" = "yes"; then
-  CFLAGS="$CFLAGS $libproj_CPPFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
-fi
 
 libproj_LIBS=$libproj_LIBS
 
@@ -23247,6 +23244,12 @@ if test $BYTESWAP = "yes" ; then
 else
     $as_echo "Byteswapping: Disabled"
 fi
+if test "$FOUND_PROJ6" = "yes"; then
+    $as_echo "PROJ: Using PROJ 6 API"
+else
+    $as_echo "PROJ: Using PROJ 4/5 API"
+fi
+
 $as_echo "libgmt_CPPFLAGS:     $libgmt_CPPFLAGS"
 $as_echo "libgmt_LIBS:         $libgmt_LIBS"
 $as_echo "libgmt_LDFLAGS:      $libgmt_LDFLAGS"

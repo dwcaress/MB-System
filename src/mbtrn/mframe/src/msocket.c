@@ -787,6 +787,8 @@ int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t ti
                         break;
                     case EBADF:
                         fprintf(stderr,"EBADF socket %d\n", s->fd);
+                        me_errno=ME_ESOCK;
+                        retval=-1;
                         break;
                     case EIO:
                         fprintf(stderr,"EIO socket %d\n", s->fd);

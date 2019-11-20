@@ -5845,8 +5845,10 @@ int main(int argc, char **argv) {
       }
 
       /*--------------------------------------------
-        close files and deallocate memory
+        reset status/error, close files and deallocate memory
         --------------------------------------------*/
+      status = MB_SUCCESS;
+      error = MB_ERROR_NO_ERROR;
 
       status &= mb_close(verbose, &imbio_ptr, &error);
       status &= mb_close(verbose, &ombio_ptr, &error);
@@ -5863,15 +5865,15 @@ int main(int argc, char **argv) {
 
       /* deallocate arrays for amplitude correction tables */
       if (nampcorrtable > 0) {
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.angle), &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.amplitude), &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.sigma), &error);
+        status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.angle), &error);
+        status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.amplitude), &error);
+        status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.sigma), &error);
         for (int i = 0; i < nampcorrtable; i++) {
-          mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].angle), &error);
-          mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].amplitude), &error);
-          mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].sigma), &error);
+          status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].angle), &error);
+          status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].amplitude), &error);
+          status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].sigma), &error);
         }
-        status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ampcorrtable, &error);
+        status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ampcorrtable, &error);
       }
 
       /* deallocate arrays for sidescan correction tables */

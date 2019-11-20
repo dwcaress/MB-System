@@ -1,2 +1,3 @@
-This file is required to exist by the Autotools build system. The information intended to be in this file is in fact contained in the Markdown format file ChangeLog.md.
-
+This file is required to exist by the Autotools build system.
+The information intended to be in this file is in fact contained in the
+Markdown format file ChangeLog.md.

@@ -119,57 +119,63 @@ int main(int argc, char* argv[])
     
     while(1)
     {
-        fprintf(stderr,"\n");
-        sleep(period_sec);
- 
-        // System::milliSleep(0);
-        // Estimate location. 1=> MLE; 2=> MMSE
-        //
-        mse.covariance[0] = mse.covariance[1] =
-        mse.covariance[2] = mse.covariance[3] = 0.;
-        
-        if(verbose>0)
-        fprintf(stderr, "%s:%d - req MLE est\n",__FUNCTION__,__LINE__);
-
-        tnav->estimatePose( &mle, 1);
-
-        if(verbose>0)
-        fprintf(stderr, "%s:%d - req MSE est\n",__FUNCTION__,__LINE__);
-
-        tnav->estimatePose( &mse, 2);
-
-        if(verbose>0)
-        fprintf(stderr, "%s:%d - req lastMeasSuccessful\n",__FUNCTION__,__LINE__);
-
-        // Spew if requested
-        //
+        try{
+            fprintf(stderr,"\n");
+            sleep(period_sec);
+            
+            // System::milliSleep(0);
+            // Estimate location. 1=> MLE; 2=> MMSE
+            //
+            mse.covariance[0] = mse.covariance[1] =
+            mse.covariance[2] = mse.covariance[3] = 0.;
+            
+            if(verbose>0)
+            fprintf(stderr, "%s:%d - req MLE est\n",__FUNCTION__,__LINE__);
+            
+            tnav->estimatePose( &mle, 1);
+            
+            if(verbose>0)
+            fprintf(stderr, "%s:%d - req MSE est\n",__FUNCTION__,__LINE__);
+            
+            tnav->estimatePose( &mse, 2);
+            
+            if(verbose>0)
+            fprintf(stderr, "%s:%d - req lastMeasSuccessful\n",__FUNCTION__,__LINE__);
+            
+            // Spew if requested
+            //
             char goodMeas = tnav->lastMeasSuccessful();
-        if (verbose)
-        {
-            print(&mt, &pt, &mle, &mse, goodMeas);
+            if (verbose)
+            {
+                print(&mt, &pt, &mle, &mse, goodMeas);
+            }
+            
+            //display tercom estimate biases
+            fprintf(stderr,"MLE[t,x,y,z] [ %.2f , %.4f , %.4f , %.4f ]\n",mle.time, mle.x-pt.x, mle.y-pt.y, mle.z-pt.z);
+            fprintf(stderr,"MSE[t,x,y,z] [ %.2f , %.4f , %.4f , %.4f ]\n",mse.time, mse.x-pt.x, mse.y-pt.y, mse.z-pt.z);
+            
+            if (N_COVAR >= 6){
+                fprintf(stderr,"COVAR        [ %.2f , %.2f , %.2f ]\n",
+                       sqrt(mse.covariance[0]),
+                       sqrt(mse.covariance[2]),
+                       sqrt(mse.covariance[5]));
+            }
+            
+            // Continue to invoke tercom like a normal mission
+            //
+            int fs = tnav->getFilterState();
+            fprintf(stderr,"FSTATE       [%d]\n", fs);
+            int nr =  tnav->getNumReinits();
+            if (nr > numReinits)
+            {
+                fprintf(stderr,"REINIT       [%d]\n", nr);
+                numReinits = nr;
+            }
+        }catch(Exception e){
+            fprintf(stderr,"\n%s\n", e.what());
+           break;
         }
-        
-        //display tercom estimate biases
-        printf("MLE[t,x,y,z] [ %.2f , %.4f , %.4f , %.4f ]\n",mle.time, mle.x-pt.x, mle.y-pt.y, mle.z-pt.z);
-        printf("MSE[t,x,y,z] [ %.2f , %.4f , %.4f , %.4f ]\n",mse.time, mse.x-pt.x, mse.y-pt.y, mse.z-pt.z);
-        
-        if (N_COVAR >= 6){
-	        printf("COVAR        [ %.2f , %.2f , %.2f ]\n",
-                   sqrt(mse.covariance[0]),
-                   sqrt(mse.covariance[2]),
-                   sqrt(mse.covariance[5]));
-        }
-        
-        // Continue to invoke tercom like a normal mission
-        //
-        int fs = tnav->getFilterState();
-        int nr =  tnav->getNumReinits();
-        if (nr > numReinits)
-        {
-            fprintf(stderr,"REINIT[%d]\n", nr);
-            numReinits = nr;
-        }
-     }
+    }
     
     // Done
     //

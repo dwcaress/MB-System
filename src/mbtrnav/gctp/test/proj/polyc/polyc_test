@@ -1,5 +1,0 @@
-#!/bin/csh
-$CMPGCTP/testproj < parm7a > testfile
-$CMPGCTP/testproj < parm7b >> testfile
-$CMPGCTP/testproj < parm7c >> testfile
-$CMPGCTP/testproj < parm7d >> testfile

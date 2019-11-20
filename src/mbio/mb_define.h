@@ -604,7 +604,6 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error);
 int mb_proj_free(int verbose, void **pjptr, int *error);
 int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *easting, double *northing, int *error);
 int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, double *lon, double *lat, int *error);
-int mb_proj_transform(int verbose, void *pjsrcptr, void *pjdstptr, int npoint, double *x, double *y, double *z, int *error);
 
 /* mb_spline function prototypes */
 int mb_spline_init(int verbose, const double *x, const double *y, int n, double yp1, double ypn, double *y2, int *error);

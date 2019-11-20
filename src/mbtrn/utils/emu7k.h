@@ -129,6 +129,9 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::min_delay
     /// @brief minimum publish delay
     int32_t min_delay;
+    /// @var app_cfg_s::max_delay
+    /// @brief maximum publish delay
+    int32_t max_delay;
     /// @var app_cfg_s::restart
     /// @brief restart at file end
     bool restart;
@@ -238,6 +241,10 @@ typedef struct emu7k_s
 /// @def MIN_DELAY_DFL_SEC
 /// @brief min inter-packet delay
 #define MIN_DELAY_DFL_MSEC 0
+
+/// @def MAX_DELAY_DFL_SEC
+/// @brief max inter-packet delay
+#define MAX_DELAY_DFL_MSEC 3000
 
 /// @def STATN_DFL_RECORDS
 /// @brief default stats output interval

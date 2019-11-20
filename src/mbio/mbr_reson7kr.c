@@ -2970,8 +2970,8 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 #ifdef MBR_RESON7KR_DEBUG
   for (int i = 0; i < fsdwsslo->number_channels; i++) {
     mb_get_date(verbose, s7k_time_d, time_i);
-    fsdwchannel = &(fsdwsslo->channel[i]);
-    fsdwssheader = &(fsdwsslo->ssheader[i]);
+    s7k_fsdwchannel *fsdwchannel = &(fsdwsslo->channel[i]);
+    s7k_fsdwssheader *fsdwssheader = &(fsdwsslo->ssheader[i]);
     fprintf(stderr,
             "R7KRECID_FSDWsidescanLo:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d "
             "%2.2d:%2.2d:%2.2d.%3.3d) ping:%d %d chan:%d %d sampint:%d %d\n",
