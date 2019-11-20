@@ -998,8 +998,12 @@ static int s_netif_pub_msg(netif_t *self, msock_connection_t *peer, char *data, 
 
     if(NULL!=self && NULL!=peer && NULL!=data && len>0){
         int64_t iobytes=0;
+        int flags=0;
+#if !defined(__APPLE__)
+        flags=MSG_NOSIGNAL;
+#endif
         if(self->ctype==ST_UDP){
-            if ( (iobytes = msock_sendto(self->socket, peer->addr, data, len, MSG_NOSIGNAL )) > 0) {
+            if ( (iobytes = msock_sendto(self->socket, peer->addr, data, len, flags )) > 0) {
                 fprintf(stderr,"client PUB UDP OK len[%lld]:\n",iobytes);
             }else{
                 fprintf(stderr,"client PUB UDP ERR len[%lld][%d/%s]\n",iobytes,errno,strerror(errno));
@@ -1030,9 +1034,9 @@ static int s_test_pub_recv(msock_socket_t *cli)
         char reply[TRN_MSG_SIZE]={0};
 
         msock_set_blocking(cli,false);
-        if( (test=msock_recv(cli,reply,TRN_MSG_SIZE,0))>0){
+        if( (test=msock_recv(cli,(byte *)reply,TRN_MSG_SIZE,0))>0){
             fprintf(stderr,"client PUB recv OK len[%lld]:\n",test);
-            mfu_hex_show(reply,test,16,true,5);
+            mfu_hex_show((byte *)reply,test,16,true,5);
             retval=test;
         }else{
             fprintf(stderr,"client PUB recv ERR len[%lld][%d/%s]\n",test,errno,strerror(errno));
@@ -1056,7 +1060,7 @@ int s_netif_test_read(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
             *pdest=buf;
         }
         if( (msg_bytes=msock_recvfrom(peer->sock, peer->addr,buf,readlen,0)) >0 ){
-            PDPRINT((stderr,"%s: READ - msg_bytes[%d]\n",__FUNCTION__,msg_bytes));
+            PDPRINT((stderr,"%s: READ - msg_bytes[%lld]\n",__FUNCTION__,msg_bytes));
             retval=msg_bytes;
         }
     }
@@ -1086,31 +1090,35 @@ int s_netif_test_handle(void *msg, netif_t *self, msock_connection_t *peer, int 
 }
 static int s_netif_test_send(msock_socket_t *cli)
 {
+    int retval=-1;
 
     if(NULL!=cli){
-
         char *msg_out=strdup("PING");
         size_t len=strlen(msg_out)+1;
         if( len>0 && NULL!=msg_out && msock_send(cli,(byte *)msg_out,len)==len){
-            fprintf(stderr,"client REQ send OK [%s/%d]\n",msg_out,len);
+            fprintf(stderr,"client REQ send OK [%s/%zu]\n",msg_out,len);
+            retval=0;
         }else{
             fprintf(stderr,"client REQ send failed\n");
         }
         free(msg_out);
     }
+    return retval;
 }
 
 static int s_netif_test_recv(msock_socket_t *cli)
 {
+    int retval=-1;
 
     if(NULL!=cli){
         int64_t test=0;
         char reply[16]={0};
 
         msock_set_blocking(cli,false);
-        if( (test=msock_recv(cli,reply,16,0))>0){
+        if( (test=msock_recv(cli,(byte *)reply,16,0))>0){
             if(test==4 && strcmp(reply,"ACK")==0){
                 fprintf(stderr,"client ACK recv OK len[%s/%lld]\n",reply,test);
+                retval=0;
             }else if(test==5 && strcmp(reply,"NACK")==0){
                 fprintf(stderr,"client NACK recv OK len[%s/%lld]\n",reply,test);
             }else{
@@ -1120,6 +1128,7 @@ static int s_netif_test_recv(msock_socket_t *cli)
             fprintf(stderr,"client ACK recv ERR len[%lld][%d/%s]\n",test,errno,strerror(errno));
         }
     }
+    return retval;
 }
 
 int netif_test()

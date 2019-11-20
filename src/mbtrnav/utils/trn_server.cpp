@@ -33,7 +33,7 @@
 #include "TerrainNav.h"
 #include "TNavConfig.h"
 #include "genFilterDefs.h"
-#include "trn_log.h" 
+#include "trn_log.h"
 
 // Use a macro to standardize extracting the message from an exception
 //
@@ -76,18 +76,18 @@ bool is_connected() {
 	if(!_connected) {
 		return _connected;
 	}
-	
+
 	struct timeval tv;
 	tv.tv_sec = 0;
 	tv.tv_usec = 1000L;
-	
+
 	// Use select to see if the client closed the connection
 	//
 	fd_set clientfd;
 	FD_ZERO(&clientfd);
 	FD_SET(_connfd, &clientfd);
 	char temp[5];
-	
+
 	// If the socket is readable but there are no bytes, the client sent FIN
 	//
 	int nready = select(_connfd + 1, &clientfd, 0, 0, &tv);
@@ -113,7 +113,7 @@ bool is_connected() {
 int get_msg() {
 	bool debug = false;
 	int len = 0;
-	
+
 	// Get a message as long as client is still connected
 	//
 	if(is_connected()) {
@@ -129,7 +129,7 @@ int get_msg() {
 						"get_msg timeout, errno[%d] sl[%d] - %s", errno, sl,strerror(errno)); // or error
 				//perror(logbuf);
 				logs(TL_OMASK(TL_TRN_SERVER, TL_LOG|TL_SERR),"%s\n",logbuf);
-				
+
 				if(errno == EINTR && ntries-- > 0) {  // try again
 					sprintf(logbuf,
 							"%d: recv call interrupt after %d bytes.\n",
@@ -142,7 +142,7 @@ int get_msg() {
 			}
 			len += sl;
 		}
-		
+
 		// Verbose debugging output
 		//
 		if(len > 0 && (debug || TRN_DEBUG)) {
@@ -155,7 +155,7 @@ int get_msg() {
                 }else{
                     fprintf(stderr,"WARN: get_msg - debug sprintf failed\n");
                 }
-                
+
                 if (bp>(obuf+512)) {
                     fprintf(stderr,"WARN: get_msg - debug buffer full, truncating\n");
                     break;
@@ -175,13 +175,13 @@ int send_msg(commsT& msg) {
 	sprintf(logbuf, "Sending:%s", msg.to_s(_sock_buf, sizeof(_sock_buf)));
 	if (msg.msg_type == TRN_NACK) logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"%s",logbuf);
 	//logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"%s",logbuf);
-	
+
 	// Check to see if client is still connected first
 	//
 	if(is_connected()) {
 		memset(_sock_buf, 0, sizeof(_sock_buf));
 		msg.serialize(_sock_buf);
-		
+
 		// Send the whole message
 		//
 		for(sl = 0; sl < sizeof(_sock_buf);) {
@@ -202,7 +202,7 @@ int init() {
 		delete _tercom;
 		_tercom = 0;
 	}
-	
+
 	// Construct a TerrainNav object using the info from the client
 	// Use environment variables to find location of maps and datafiles.
 	//
@@ -262,7 +262,7 @@ int init() {
             if (err != EEXIST)
             {
                // If the error is about something other than EEXIST
-               // 
+               //
                fprintf(stderr,"\n\n\ttrn_server::init()-ERR! mkdir(%s) failed"
                   " [%d,%s]\n\n", trnLogDir, err,strerror(err));
                // if unable to create due to error,
@@ -287,14 +287,14 @@ int init() {
       int n = 0;
 
       // mkdir() fails (!= 0) if the directory already exists
-      // 
+      //
       while (mkdir(logname, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0)
       {
          err = errno;
          if ( err != EEXIST )
          {
             // If the error is about something other than EEXIST
-            // 
+            //
             fprintf(stderr,"\n\n\t\ttrn_server::init() - ERR: mkdir(%s) failed"
             " [%d,%s]\n\n", logname, err,strerror(err));
             // if unable to create due to error,
@@ -311,7 +311,7 @@ int init() {
 	//
 	int mapType    = _ct.parameter / 10;
 	int filterType = _ct.parameter % 10;
-	
+
     fprintf(stderr, "Constructing tercom with map:%s, cfg:%s, map type: %d, and filter:%d\n",
          mapname, cfgname, mapType, filterType);
 
@@ -332,11 +332,11 @@ int init() {
         // TL_LOG file now created in TerrainNav object, can be used for
         // trn_server and trn_replay.
         // tl_new_logfile(logname);
-        
+
 	 logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"TerrainNav initialize - done");
-	 
+
 	 send_msg(_ack);
-	 
+
       } else {
          logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"Failed to initialized TerrainNav object, map:%s cfg:%s",
               mapname, cfgname);
@@ -350,13 +350,13 @@ int init() {
 	catch (Exception e)
 	{
 		// init exceptions are usually errors opening or loading config files
-		// 
+		//
 		fprintf(stderr, "trn_server.cpp - init(): %s\n", e.what());
 		delete _tercom;
 		_tercom = NULL;
 		send_msg(_nack);
 	}
-	
+
 	return 0;
 }
 
@@ -366,7 +366,7 @@ int init() {
 int set_ima() {
 
 	logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Setting IMA to %d", _ct.parameter);
-	
+
 	if(_tercom) {
 		bool ima = _ct.parameter == 0 ? false : true;
 		_tercom->setInterpMeasAttitude(ima);
@@ -375,9 +375,9 @@ int set_ima() {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -386,7 +386,7 @@ int set_ima() {
 int set_vdr() {
 
 	logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Setting VDR to %f", _ct.vdr);
-	
+
 	if(_tercom) {
 		_tercom->setVehicleDriftRate(_ct.vdr);
 		send_msg(_ack);
@@ -394,9 +394,9 @@ int set_vdr() {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -405,7 +405,7 @@ int set_vdr() {
 int set_mw() {
 
 	logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Setting weighting to %d", _ct.parameter);
-	
+
 	if(_tercom) {
 		_tercom->setModifiedWeighting(_ct.parameter);
 		send_msg(_ack);
@@ -413,9 +413,9 @@ int set_mw() {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -433,9 +433,9 @@ int set_fr() {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -444,7 +444,7 @@ int set_fr() {
 int set_mim() {
 
 	logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Setting map interp method to %d", _ct.parameter);
-	
+
 	if(_tercom) {
 		int mim = _ct.parameter;
 		_tercom->setMapInterpMethod(mim);
@@ -453,9 +453,9 @@ int set_mim() {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -464,22 +464,22 @@ int set_mim() {
 int filter_grd() {
 
 	logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Setting filter gradiant to %d", _ct.parameter);
-	
+
 	if(_tercom) {
 		if(_ct.parameter == 0) {
 			_tercom->useLowGradeFilter();
 		} else {
 			_tercom->useHighGradeFilter();
 		}
-		
+
 		send_msg(_ack);
 	} else {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -490,16 +490,16 @@ int filter_type() {
 	logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Returning filter type...");
 	if(_tercom) {
 		_ack.parameter = _tercom->getFilterType();
-		
+
 		logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"parameter = %d", _ack.parameter);
 		send_msg(_ack);
 	} else {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -510,16 +510,16 @@ int filter_state() {
 	logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Returning filter state...");
 	if(_tercom) {
 		_ack.parameter = _tercom->getFilterState();
-		
+
 		logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"parameter = %d\n", _ack.parameter);
 		send_msg(_ack);
 	} else {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -530,16 +530,16 @@ int num_reinits() {
 	logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Returning number of reinits...");
 	if(_tercom) {
 		_ack.parameter = _tercom->getNumReinits();
-		
+
 		logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"parameter = %d\n", _ack.parameter);
 		send_msg(_ack);
 	} else {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -554,16 +554,16 @@ int out_meas() {
 		} else {
 			_ack.parameter = 0;
 		}
-		
+
 		logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"parameter = %d", _ack.parameter);
 		send_msg(_ack);
 	} else {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -578,16 +578,16 @@ int last_meas() {
 		} else {
 			_ack.parameter = 0;
 		}
-		
+
 		logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"parameter = %d\n", _ack.parameter);
 		send_msg(_ack);
 	} else {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -602,16 +602,16 @@ int is_conv() {
 		} else {
 			_ack.parameter = 0;
 		}
-		
+
 		logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"parameter = %d", _ack.parameter);
 		send_msg(_ack);
 	} else {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -620,20 +620,20 @@ static poseT _currEst;
 //
 int measure_update() {
     static char obuf[256],*bp=NULL;
-    
+
 	logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Received measure update with time %f and %d measurements.",
 	     _ct.mt.time, _ct.mt.numMeas );
-	
+
 	if(_tercom) {
 		_tercom->measUpdate(&_ct.mt, _ct.parameter);
 		// Some debugging output from Stanford ARL
-		// 
+		//
 		if (_tercom->lastMeasSuccessful())
 		{
 			poseT mleEst, mmseEst;
 
          // Don't perform estimates here. Client should trigger these
-         // 
+         //
 			// _tercom->estimatePose(&mleEst,  1);
 			// _tercom->estimatePose(&mmseEst, 2);
 
@@ -657,7 +657,7 @@ int measure_update() {
 		// send_msg(_ack);
 		// Send the measT object back to the client. The measT object
 		// will contain the updated alphas
-		// 
+		//
 		// printf("Alphas[0] = %f\n", _ct.mt.alphas[0]);
 		send_msg(_ct);
       //_tercom->log();     // Log data
@@ -666,9 +666,9 @@ int measure_update() {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -677,7 +677,7 @@ int measure_update() {
 int motion_update() {
 
 	logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Received motion update with time %f", _ct.pt.time);
-	
+
 	if(_tercom) {
 		_tercom->motionUpdate(&_ct.pt);
 
@@ -686,17 +686,17 @@ int motion_update() {
 			_currEst.x, _currEst.y, _currEst.z);
 
 		send_msg(_ack);
-		
+
 		logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"motion update completed");
       //_tercom->log();     // Log data
-		
+
 	} else {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -714,9 +714,9 @@ int send_mle() {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -734,9 +734,9 @@ int send_mmse() {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
 		send_msg(_nack);
 	}
-	
+
 	return 1;
-	
+
 }
 
 
@@ -752,7 +752,7 @@ int main(int argc, char** argv) {
 	char c;
 	int port = 27027;
     int exit_after_n_cycles=-1;
-    
+
 	while((c = getopt(argc, argv, "ihp:x:")) != -1)
 		switch(c) {
 			case 'p':
@@ -801,7 +801,7 @@ int main(int argc, char** argv) {
 	_tercom = 0;
 	int len = 0;
     int err=0;
-    
+
 	// Socket setup section
 	//
 	_servfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -810,45 +810,45 @@ int main(int argc, char** argv) {
         fprintf(stderr,"trn_server: socket failed [%d - %s]\n",err,strerror(err));
 		exit(1);
 	}
-	
+
 	memset(&_server_addr, '0', sizeof(_server_addr));
 	_server_addr.sin_family = AF_INET;
 	_server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	_server_addr.sin_port = htons(port);
-	
-	len = bind(_servfd, (struct sockaddr*)&_server_addr, sizeof(_server_addr));
+
+	len = ::bind(_servfd, (struct sockaddr*)&_server_addr, sizeof(_server_addr));
     err=errno;
 	if(len < 0) {
         fprintf(stderr,"trn_server: bind failed [%d - %s]\n",err,strerror(err));
 		exit(1);
 	}
-    
+
 	/////////////////////////////////////////////////////////////////////
 	// Server loop: Accept connection, service client until client is
 	// done, repeat.
 	//
 	while(true) {
 		time_t ticks;
-		
+
       char *maps = getenv("TRN_MAPFILES");
 
       // Release the Map that was allocated
       // the last connection cycle (if any)
-      // 
+      //
       if (_tercom) _tercom->releaseMap();
 
 //		logg("Listen for TerrainNavClient connection - message size[%d]...\n", TRN_MSG_SIZE);
 //		logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Listen for TerrainNavClient connection - message size[%d]...\n", TRN_MSG_SIZE);
 		logs(TL_SERR,"Listen for TerrainNavClient connection - message size[%d], maps %s...\n", TRN_MSG_SIZE, maps);
 		listen(_servfd, 10);
-		
+
 		_connfd = accept(_servfd, (struct sockaddr*)NULL, NULL);
 		_connected = true;
-		
+
 		struct timeval tv;
 		tv.tv_sec = 180;
 		tv.tv_usec = 0;
-		
+
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG)),"Listen and accept\n");
 		setsockopt(_connfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
       int sockopt = 1;
@@ -864,14 +864,14 @@ int main(int argc, char** argv) {
 		//
 		while(_connected) {
 			memset(_sock_buf, '0', sizeof(TRN_MSG_SIZE));
-			
+
 			// Get a msg from the client
 			//
 			int len;
 			if((len = get_msg()) < TRN_MSG_SIZE) {
 				continue;
 			}
-			
+
 			// Determine message type and respond
 			//
 			_ct.clean();
@@ -899,7 +899,7 @@ int main(int argc, char** argv) {
 				logs(TL_OMASK(TL_TRN_SERVER, TL_BOTH),"Unable to accept reqests: server not initialized\n");
 				continue;
 			}
-			
+
 			try
 			{
 			switch(_ct.msg_type) {
@@ -910,82 +910,82 @@ int main(int argc, char** argv) {
 					//close(_connfd);
 					//_connected = false;
 					break;
-					
+
 				case TRN_INIT:
                fprintf(stderr, "init()...\n");
  					init();
 					break;
-					
+
 				case TRN_SET_IMA:
 					set_ima();
 					break;
-					
+
 				case TRN_SET_VDR:
 					set_vdr();
 					break;
-					
+
 				case TRN_MEAS:
 					measure_update();
 					break;
-					
+
 				case TRN_MOTN:
 					motion_update();
 					break;
-					
+
 				case TRN_MLE:
 					send_mle();
 					break;
-					
+
 				case TRN_MMSE:
 					send_mmse();
 					break;
-					
+
 				case TRN_SET_MW:
 					set_mw();
 					break;
-					
+
 				case TRN_SET_FR:
 					set_fr();
 					break;
-					
+
 				case TRN_SET_MIM:
 					set_mim();
 					break;
-					
+
 				case TRN_FILT_GRD:
 					filter_grd();
 					break;
-					
+
 				case TRN_OUT_MEAS:
 					out_meas();
 					break;
-					
+
 				case TRN_LAST_MEAS:
 					last_meas();
 					break;
-					
+
 				case TRN_IS_CONV:
 					is_conv();
 					break;
-					
+
 				case TRN_FILT_TYPE:
 					filter_type();
 					break;
-					
+
 				case TRN_FILT_STATE:
 					filter_state();
 					break;
-					
+
 				case TRN_N_REINITS:
 					num_reinits();
 					break;
-					
+
 				case TRN_FILT_REINIT:
 				   _tercom->reinitFilter(true);
 					logs(TL_OMASK(TL_TRN_SERVER, TL_BOTH),"Filter reinitialized: id[%0x]\n", _ct.msg_type);
 					send_msg(_ack);
 					break;
-					
+
 				case TRN_ACK:
 				case TRN_NACK:
 				default:
@@ -1001,7 +1001,7 @@ int main(int argc, char** argv) {
 				logs(TL_OMASK(TL_TRN_SERVER, TL_BOTH), "%s\n", logbuf);
 				send_msg(_nack);
 			}
-			
+
 		}
 
       // release commsT resources allocated
@@ -1015,7 +1015,7 @@ int main(int argc, char** argv) {
           break;
       }
 	}
-    
+
     // release allocated resources
     // (otherwise, valgrind will flag them as issues)
     close(_connfd);

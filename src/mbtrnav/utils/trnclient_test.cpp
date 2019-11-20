@@ -32,7 +32,7 @@
 static int numReinits = 0;
 
 // Verbose mode print facility
-// 
+//
 void print(measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas);
 
 int main(int argc, char* argv[])
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     int c;
 #define TRNCLI_PER_DFL 2
     unsigned int period_sec=TRNCLI_PER_DFL;
-    
+
     // Deal with cmd-line options
     //
     while ( (c = getopt(argc, argv, "m:h:p:l:v:f:t:")) != EOF )
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
             period_sec=(p>0?p:TRNCLI_PER_DFL);
         }
     }
-    
+
     tl_mconfig(TL_TRN_SERVER, TL_SERR, TL_ALL);
     //    tl_mconfig(TL_STRUCT_DEFS, TL_SERR, TL_NC);
     //    tl_mconfig(TL_TERRAIN_NAV, TL_SERR, TL_NC);
@@ -75,13 +75,13 @@ int main(int argc, char* argv[])
     //    tl_mconfig(TL_TNAV_CONFIG, TL_SERR, TL_NC);
     tl_mconfig(TL_TNAV_PARTICLE_FILTER, TL_SERR, TL_NC);
     tl_mconfig(TL_TNAV_FILTER, TL_SERR, TL_NC);
-    
+
     // Create and initialize the Replay object
     //
     TrnClient *trncli = new TrnClient(host, port);
-    
+
     trncli->setVerbose(verbose);
-    
+
     // Open connection to the TRN server. The server
     // initialization will fail unless the correct
     // map and vehicle configuration files are present
@@ -93,15 +93,15 @@ int main(int argc, char* argv[])
         fprintf(stderr," TRN server connection failed.\n");
         return 1;
     }
-    
-    
+
+
     // ********************** MAIN LOOP *******************
     //
     // Use the data files in the log directory to get the
     // motion and measure updates that were used by TRN in
     // this mission, and send them again.
     //
-    
+
     poseT pt, mle, mse;
     measT mt;
     mt.numMeas    = 4;
@@ -112,36 +112,36 @@ int main(int argc, char* argv[])
     mt.altitudes  = new double[11];
     mt.alphas     = new double[11];
     mt.measStatus = new bool[11];   //mt.numMeas];
-    
+
     // Conntinue as long as measure and motion update
     // data remains in the mission log files.
     //
-    
+
     while(1)
     {
         try{
             fprintf(stderr,"\n");
             sleep(period_sec);
-            
+
             // System::milliSleep(0);
             // Estimate location. 1=> MLE; 2=> MMSE
             //
             mse.covariance[0] = mse.covariance[1] =
             mse.covariance[2] = mse.covariance[3] = 0.;
-            
+
             if(verbose>0)
             fprintf(stderr, "%s:%d - req MLE est\n",__FUNCTION__,__LINE__);
-            
+
             tnav->estimatePose( &mle, 1);
-            
+
             if(verbose>0)
             fprintf(stderr, "%s:%d - req MSE est\n",__FUNCTION__,__LINE__);
-            
+
             tnav->estimatePose( &mse, 2);
-            
+
             if(verbose>0)
             fprintf(stderr, "%s:%d - req lastMeasSuccessful\n",__FUNCTION__,__LINE__);
-            
+
             // Spew if requested
             //
             char goodMeas = tnav->lastMeasSuccessful();
@@ -149,18 +149,18 @@ int main(int argc, char* argv[])
             {
                 print(&mt, &pt, &mle, &mse, goodMeas);
             }
-            
+
             //display tercom estimate biases
             fprintf(stderr,"MLE[t,x,y,z] [ %.2f , %.4f , %.4f , %.4f ]\n",mle.time, mle.x-pt.x, mle.y-pt.y, mle.z-pt.z);
             fprintf(stderr,"MSE[t,x,y,z] [ %.2f , %.4f , %.4f , %.4f ]\n",mse.time, mse.x-pt.x, mse.y-pt.y, mse.z-pt.z);
-            
+
             if (N_COVAR >= 6){
                 fprintf(stderr,"COVAR        [ %.2f , %.2f , %.2f ]\n",
                        sqrt(mse.covariance[0]),
                        sqrt(mse.covariance[2]),
                        sqrt(mse.covariance[5]));
             }
-            
+
             // Continue to invoke tercom like a normal mission
             //
             int fs = tnav->getFilterState();
@@ -176,18 +176,18 @@ int main(int argc, char* argv[])
            break;
         }
     }
-    
+
     // Done
     //
     fprintf(stderr,"Done. Close the connection "
             " reinits[%d]\n",  numReinits);
     delete tnav;
-    
+
     return 0;
 }
 
 // Verbose mode print facility
-// 
+//
 void print(measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas)
 {
     fprintf(stderr,"\nposeT: %.6f\n"
@@ -203,7 +203,7 @@ void print(measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas)
             pt->time, pt->x, pt->y, pt->z,
             pt->phi, pt->theta, pt->psi,
             pt->dvlValid, pt->gpsValid, pt->bottomLock);
-    
+
     if (mt->numMeas >= 4)
         fprintf(stderr,"\nmeasT: %.6f\n"
                 "  beam1: %.6f\n"
@@ -215,7 +215,7 @@ void print(measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas)
                 "  psi  : %.6f\n",
                 mt->time, mt->ranges[0], mt->ranges[1], mt->ranges[2], mt->ranges[3],
                 mt->phi, mt->theta, mt->psi);
-    
+
     // Print position estimates only when they were successful
     //
     if (goodMeas && N_COVAR >= 4)
@@ -239,7 +239,7 @@ void print(measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas)
 
 #if 0
 // Extra poseT fields if needed
-// 
+//
 "  vx   : %.6f\n"
 "  vy   : %.6f\n"
 "  vz   : %.6f\n"
