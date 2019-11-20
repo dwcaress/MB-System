@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", iesffile);
+				sscanf(optarg, "%1023s", iesffile);
 				break;
 			case '?':
 				errflg = true;

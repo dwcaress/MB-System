@@ -337,7 +337,7 @@ int main(int argc, char **argv) {
         double rawlon;
         double dummydouble;
         mb_path dummystring;
-        const int nget = sscanf(buffer, "%lf,$GPGLL,%lf,%c,%lf,%c,%lf,%s",
+        const int nget = sscanf(buffer, "%lf,$GPGLL,%lf,%c,%lf,%c,%lf,%1023s",
                 &time_d, &rawlat, &NorS, &rawlon, &EorW, &dummydouble, dummystring);
         if (nget >= 5) {
           if (start_time_d <= 0.0)

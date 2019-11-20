@@ -857,7 +857,7 @@ int main(int argc, char **argv) {
         break;
       case 'G':
       case 'g':
-        sscanf(optarg, "%s", delimiter);
+        sscanf(optarg, "%1023s", delimiter);
         break;
       case 'F':
       case 'f':
@@ -865,11 +865,11 @@ int main(int argc, char **argv) {
         break;
       case 'I':
       case 'i':
-        sscanf(optarg, "%s", read_file);
+        sscanf(optarg, "%1023s", read_file);
         break;
       case 'J':
       case 'j':
-        sscanf(optarg, "%s", projection_pars);
+        sscanf(optarg, "%1023s", projection_pars);
         use_projection = true;
         break;
       case 'K':
@@ -957,12 +957,12 @@ int main(int argc, char **argv) {
         break;
       case 'X':
       case 'x':
-        sscanf(optarg, "%s", output_file);
+        sscanf(optarg, "%1023s", output_file);
         break;
       case 'Z':
       case 'z':
         segment = true;
-        sscanf(optarg, "%s", segment_tag);
+        sscanf(optarg, "%1023s", segment_tag);
         if (strcmp(segment_tag, "swathfile") == 0)
           segment_mode = MBLIST_SEGMENT_MODE_SWATHFILE;
         else if (strcmp(segment_tag, "datalist") == 0)
@@ -1064,25 +1064,21 @@ int main(int argc, char **argv) {
   const bool read_datalist = format < 0;
   bool read_data;
   void *datalist;
-  int look_processed = MB_DATALIST_LOOK_UNSET;
   char file[MB_PATH_MAXLINE];
   char dfile[MB_PATH_MAXLINE];
   double file_weight;
 
   /* open file list */
   if (read_datalist) {
-    if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+    const int look_processed = MB_DATALIST_LOOK_UNSET;
+    if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
       fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_ERROR_OPEN_FAIL);
     }
-    if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-      read_data = true;
-    else
-      read_data = false;
-  }
-  /* else copy single filename to be read */
-  else {
+    read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+  } else {
+    // else copy single filename to be read
     strcpy(file, read_file);
     read_data = true;
   }

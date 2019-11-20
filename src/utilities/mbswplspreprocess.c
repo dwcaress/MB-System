@@ -215,11 +215,11 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 			break;
 		case 'I':
 		case 'i':
-			sscanf(optarg, "%s", &opts->read_file[0]);
+			sscanf(optarg, "%1023s", &opts->read_file[0]);
 			break;
 		case 'J':
 		case 'j':
-			sscanf(optarg, "%s", &opts->proj4command[0]);
+			sscanf(optarg, "%1023s", &opts->proj4command[0]);
 			opts->projection_set = true;
 			break;
 		case 'N':
@@ -228,7 +228,7 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 			break;
 		case 'O':
 		case 'o':
-			sscanf(optarg, "%s", &opts->basename[0]);
+			sscanf(optarg, "%1023s", &opts->basename[0]);
 			opts->ofile_set = true;
 			break;
 		case 'R':
@@ -340,7 +340,7 @@ static int print_latest_record(int verbose, struct mbsys_swathplus_struct *store
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	FILE *stream = (verbose > 0) ? stderr : stdout;
+	FILE *stream = verbose > 0 ? stderr : stdout;
 
 	if (store->type == SWPLS_ID_SXP_HEADER_DATA) {
 		swpls_pr_sxpheader(verbose, stream, &(store->sxp_header), error);
@@ -1164,31 +1164,24 @@ int main(int argc, char **argv) {
 	bool read_data;
 
 	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
 
 	/* open file list */
 	if (read_datalist) {
-		if ((status = mb_datalist_open(opts.verbose, &datalist, opts.read_file, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(opts.verbose, &datalist, opts.read_file, look_processed, &error) != MB_SUCCESS) {
 			char message[MAX_ERROR_STRING];
 			sprintf(message, "Unable to open data list file: %s\n", opts.read_file);
 			error_exit(opts.verbose, MB_ERROR_OPEN_FAIL, "mb_datalist_open", message);
 		}
 
-		if ((status = mb_datalist_read(opts.verbose, datalist, ifile, dfile, &(opts.format), &file_weight, &error)) ==
-		    MB_SUCCESS) {
-			read_data = true;
-		}
-		else {
-			read_data = false;
-		}
-	}
-	/* else copy single filename to be read */
-	else {
+		read_data = mb_datalist_read(opts.verbose, datalist, ifile, dfile, &(opts.format), &file_weight, &error) ==
+                     MB_SUCCESS;
+	} else {
+		/* else copy single filename to be read */
 		strcpy(ifile, opts.read_file);
 		read_data = true;
 	}
 
-	/* reset total record counter */
 	zero_counts(opts.verbose, &totrecs, &error);
 
        	counts filerecs;

@@ -314,7 +314,7 @@ int main(int argc, char **argv) {
           /* n = */ sscanf(optarg, "%d", &format);
         }
         else if (strcmp("platform-file", options[option_index].name) == 0) {
-          const int n = sscanf(optarg, "%s", platform_file);
+          const int n = sscanf(optarg, "%1023s", platform_file);
           if (n == 1)
             use_platform_file = true;
         }
@@ -749,7 +749,6 @@ int main(int argc, char **argv) {
 
   /* MBIO read control parameters */
   void *datalist = NULL;
-  int look_processed = MB_DATALIST_LOOK_UNSET;
   double file_weight;
   int iformat;
   int oformat;
@@ -1300,18 +1299,15 @@ int main(int argc, char **argv) {
 
   /* open file list */
   if (read_datalist) {
-    if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+    const int look_processed = MB_DATALIST_LOOK_UNSET;
+    if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
       fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_ERROR_OPEN_FAIL);
     }
-    if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &iformat, &file_weight, &error)) == MB_SUCCESS)
-      read_data = true;
-    else
-      read_data = false;
-  }
-  /* else copy single filename to be read */
-  else {
+    read_data = mb_datalist_read(verbose, datalist, ifile, dfile, &iformat, &file_weight, &error) == MB_SUCCESS;
+  }  else {
+    // else copy single filename to be read
     strcpy(ifile, read_file);
     iformat = format;
     read_data = true;
@@ -1514,10 +1510,10 @@ int main(int argc, char **argv) {
         /* allocate memory if needed */
         if (status == MB_SUCCESS && nanav > 0 && n_nav + nanav >= n_nav_alloc) {
           n_nav_alloc += MAX(MBPREPROCESS_ALLOC_CHUNK, nanav);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_time_d, &error);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlon, &error);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlat, &error);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_speed, &error);
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_time_d, &error);
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlon, &error);
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlat, &error);
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_speed, &error);
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
             mb_error(verbose, error, &message);
@@ -1550,9 +1546,9 @@ int main(int argc, char **argv) {
         /* allocate memory if needed */
         if (status == MB_SUCCESS && nanav > 0 && n_sensordepth + nanav >= n_sensordepth_alloc) {
           n_sensordepth_alloc += MAX(MBPREPROCESS_ALLOC_CHUNK, nanav);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
                                (void **)&sensordepth_time_d, &error);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
                                (void **)&sensordepth_sensordepth, &error);
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
@@ -1582,9 +1578,9 @@ int main(int argc, char **argv) {
         /* allocate memory if needed */
         if (status == MB_SUCCESS && nanav > 0 && n_heading + nanav >= n_heading_alloc) {
           n_heading_alloc += MAX(MBPREPROCESS_ALLOC_CHUNK, nanav);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_time_d,
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_time_d,
                                &error);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_heading,
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_heading,
                                &error);
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
@@ -1613,9 +1609,9 @@ int main(int argc, char **argv) {
         /* allocate memory if needed */
         if (status == MB_SUCCESS && n_altitude + 1 >= n_altitude_alloc) {
           n_altitude_alloc += MBPREPROCESS_ALLOC_CHUNK;
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
                                (void **)&altitude_time_d, &error);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
                                (void **)&altitude_altitude, &error);
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
@@ -1643,13 +1639,13 @@ int main(int argc, char **argv) {
         /* allocate memory if needed */
         if (status == MB_SUCCESS && nanav > 0 && n_attitude + nanav >= n_attitude_alloc) {
           n_attitude_alloc += MAX(MBPREPROCESS_ALLOC_CHUNK, nanav);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double),
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double),
                                (void **)&attitude_time_d, &error);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_roll,
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_roll,
                                &error);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_pitch,
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_pitch,
                                &error);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_heave,
+          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_heave,
                                &error);
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
@@ -1674,12 +1670,12 @@ int main(int argc, char **argv) {
     }
 
     /* copy data record index if used for this format */
-    status =  mb_indextable(verbose, imbio_ptr, &i_num_indextable, (void **)&i_indextable, &error);
+    status &= mb_indextable(verbose, imbio_ptr, &i_num_indextable, (void **)&i_indextable, &error);
     if (i_num_indextable > 0) {
       if (num_indextable_alloc <= num_indextable + i_num_indextable) {
         /* allocate space */
         num_indextable_alloc += i_num_indextable;
-        status = mb_reallocd(verbose, __FILE__, __LINE__,
+        status &= mb_reallocd(verbose, __FILE__, __LINE__,
                             num_indextable_alloc * sizeof(struct mb_io_indextable_struct),
                             (void **)(&indextable), &error);
         if (error != MB_ERROR_NO_ERROR) {
@@ -1716,12 +1712,12 @@ int main(int argc, char **argv) {
     }
 
     /* close the swath file */
-    status = mb_close(verbose, &imbio_ptr, &error);
+    status &= mb_close(verbose, &imbio_ptr, &error);
         n_rt_files++;
 
     /* figure out whether and what to read next */
     if (read_datalist) {
-      if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &iformat, &file_weight, &error)) == MB_SUCCESS)
+      if (mb_datalist_read(verbose, datalist, ifile, dfile, &iformat, &file_weight, &error) == MB_SUCCESS)
         read_data = true;
       else
         read_data = false;
@@ -2294,18 +2290,15 @@ int main(int argc, char **argv) {
 
   /* open file list */
   if (read_datalist) {
-    if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+    const int look_processed = MB_DATALIST_LOOK_UNSET;
+    if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
       fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_ERROR_OPEN_FAIL);
     }
-    if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &iformat, &file_weight, &error)) == MB_SUCCESS)
-      read_data = true;
-    else
-      read_data = false;
-  }
-  /* else copy single filename to be read */
-  else {
+    read_data = mb_datalist_read(verbose, datalist, ifile, dfile, &iformat, &file_weight, &error) == MB_SUCCESS;
+  } else {
+    // else copy single filename to be read
     strcpy(ifile, read_file);
     iformat = format;
     read_data = true;
@@ -2372,8 +2365,8 @@ int main(int argc, char **argv) {
         fprintf(stderr, "\nPass 2: Opening input file:  %s %d\n", ifile, iformat);
 
       /* initialize reading the input file */
-      if ((status = mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-                     &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+      if (mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+                     &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
         char *message;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
@@ -2386,7 +2379,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Pass 2: Opening output file: %s %d\n", ofile, oformat);
 
       /* initialize writing the output swath file */
-      if ((status = mb_write_init(verbose, ofile, oformat, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error)) !=
+      if (mb_write_init(verbose, ofile, oformat, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error) !=
         MB_SUCCESS) {
         char *message;
         mb_error(verbose, error, &message);
@@ -2601,7 +2594,7 @@ int main(int argc, char **argv) {
                       &speed_org, &heading_org, &draft_org, &roll_org, &pitch_org, &heave_org, &error);
 
           /* call mb_extract_altitude to get altitude */
-          status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth_org, &altitude_org, &error);
+          status &= mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth_org, &altitude_org, &error);
 
           /* apply time jump fix */
           if (kluge_timejumps) {
@@ -2629,7 +2622,7 @@ int main(int argc, char **argv) {
           if (kind == MB_DATA_DATA && iformat == MBF_3DWISSLR
             && kluge_fix_wissl_timestamps) {
             if (!kluge_fix_wissl_timestamps_setup1) {
-                status = mb_indextablefix(verbose, imbio_ptr,
+                status &= mb_indextablefix(verbose, imbio_ptr,
                                           num_indextable, indextable,
                                           &error);
                 kluge_fix_wissl_timestamps_setup1 = true;
@@ -2660,37 +2653,37 @@ int main(int argc, char **argv) {
 
           /* use available asynchronous ancillary data to replace
             nav sensordepth heading attitude values for record timestamp  */
-          int interp_status = MB_SUCCESS;
+          // int interp_status = MB_SUCCESS;
           if (n_nav > 0) {
-            interp_status = mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_navlon - 1, n_nav, time_d,
+            /* interp_status = */ mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_navlon - 1, n_nav, time_d,
                                   &navlon_org, &jnav, &interp_error);
-            interp_status = mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_navlat - 1, n_nav, time_d, &navlat_org,
+            /* interp_status = */ mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_navlat - 1, n_nav, time_d, &navlat_org,
                                   &jnav, &interp_error);
-            interp_status =
+            /* interp_status = */
               mb_linear_interp(verbose, nav_time_d - 1, nav_speed - 1, n_nav, time_d, &speed_org, &jnav, &interp_error);
             nav_changed = true;
           }
           if (n_sensordepth > 0) {
-            interp_status = mb_linear_interp(verbose, sensordepth_time_d - 1, sensordepth_sensordepth - 1, n_sensordepth,
+            /* interp_status = */ mb_linear_interp(verbose, sensordepth_time_d - 1, sensordepth_sensordepth - 1, n_sensordepth,
                              time_d, &sensordepth_org, &jsensordepth, &interp_error);
             sensordepth_changed = true;
           }
           if (n_heading > 0) {
-            interp_status = mb_linear_interp_heading(verbose, heading_time_d - 1, heading_heading - 1, n_heading, time_d,
+            /* interp_status = */ mb_linear_interp_heading(verbose, heading_time_d - 1, heading_heading - 1, n_heading, time_d,
                                  &heading_org, &jheading, &interp_error);
             heading_changed = true;
           }
           if (n_altitude > 0) {
-            interp_status = mb_linear_interp(verbose, altitude_time_d - 1, altitude_altitude - 1, n_altitude, time_d,
+            /* interp_status = */ mb_linear_interp(verbose, altitude_time_d - 1, altitude_altitude - 1, n_altitude, time_d,
                              &altitude_org, &jaltitude, &interp_error);
             altitude_changed = true;
           }
           if (n_attitude > 0) {
-            interp_status = mb_linear_interp(verbose, attitude_time_d - 1, attitude_roll - 1, n_attitude, time_d,
+            /* interp_status = */ mb_linear_interp(verbose, attitude_time_d - 1, attitude_roll - 1, n_attitude, time_d,
                              &roll_org, &jattitude, &interp_error);
-            interp_status = mb_linear_interp(verbose, attitude_time_d - 1, attitude_pitch - 1, n_attitude, time_d,
+            /* interp_status = */ mb_linear_interp(verbose, attitude_time_d - 1, attitude_pitch - 1, n_attitude, time_d,
                              &pitch_org, &jattitude, &interp_error);
-            interp_status = mb_linear_interp(verbose, attitude_time_d - 1, attitude_heave - 1, n_attitude, time_d,
+            /* interp_status = */ mb_linear_interp(verbose, attitude_time_d - 1, attitude_heave - 1, n_attitude, time_d,
                              &heave_org, &jattitude, &interp_error);
             attitude_changed = true;
           }
@@ -2911,7 +2904,7 @@ int main(int argc, char **argv) {
                                   sensordepth_org, heading_org, roll_org, pitch_org, &navlon, &navlat,
                                   &sensordepth, &error);
                   draft = sensordepth - heave;
-                  status = mb_platform_orientation_target(verbose, (void *)platform, isensor, ioffset, heading_org,
+                  status &= mb_platform_orientation_target(verbose, (void *)platform, isensor, ioffset, heading_org,
                                       roll_org, pitch_org, &heading, &roll, &pitch, &error);
 
                   /* output integrated navigation */
@@ -2957,11 +2950,11 @@ int main(int argc, char **argv) {
       }
 
       /* close the input swath file */
-      status = mb_close(verbose, &imbio_ptr, &error);
-            n_rt_files++;
+      status &= mb_close(verbose, &imbio_ptr, &error);
+	n_rt_files++;
 
       /* close the output swath file */
-      status = mb_close(verbose, &ombio_ptr, &error);
+      status &= mb_close(verbose, &ombio_ptr, &error);
             n_wt_files++;
 
       /* close the synchronous attitude file */
@@ -2971,7 +2964,7 @@ int main(int argc, char **argv) {
       if (status == MB_SUCCESS) {
 
         /* generate inf fnv and fbt files */
-        status = mb_make_info(verbose, true, ofile, oformat, &error);
+        status &= mb_make_info(verbose, true, ofile, oformat, &error);
 
         /* generate gef files
          * - deprecated in favor of *resf files generated by mbprocess
@@ -3097,7 +3090,7 @@ int main(int argc, char **argv) {
 
     /* figure out whether and what to read next */
     if (read_datalist) {
-      if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
+      if (mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error) == MB_SUCCESS)
         read_data = true;
       else
         read_data = false;
@@ -3157,38 +3150,38 @@ int main(int argc, char **argv) {
 
   /* deallocate nav, sensordepth, heading, attitude, and time_latency arrays */
   if (n_nav_alloc > 0) {
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_time_d, &error);
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_navlon, &error);
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_navlat, &error);
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_speed, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_time_d, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_navlon, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_navlat, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_speed, &error);
   }
   if (n_sensordepth_alloc > 0) {
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&sensordepth_time_d, &error);
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&sensordepth_sensordepth, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&sensordepth_time_d, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&sensordepth_sensordepth, &error);
   }
   if (n_heading_alloc > 0) {
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&heading_time_d, &error);
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&heading_heading, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&heading_time_d, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&heading_heading, &error);
   }
   if (n_attitude_alloc > 0) {
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&attitude_time_d, &error);
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&attitude_roll, &error);
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&attitude_pitch, &error);
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&attitude_heave, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&attitude_time_d, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&attitude_roll, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&attitude_pitch, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&attitude_heave, &error);
   }
   if (time_latency_alloc > 0) {
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&time_latency_time_d, &error);
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&time_latency_time_latency, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&time_latency_time_d, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&time_latency_time_latency, &error);
   }
 
   /* deallocate platform structure */
   if (platform != NULL) {
-    status = mb_platform_deall(verbose, (void **)&platform, &error);
+    status &= mb_platform_deall(verbose, (void **)&platform, &error);
   }
 
   /* check memory */
   if (verbose >= 4)
-    status = mb_memory_list(verbose, &error);
+    status &= mb_memory_list(verbose, &error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);

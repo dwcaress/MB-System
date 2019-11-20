@@ -571,19 +571,21 @@ void fill_struct_inf(inf *inf_hold, char *holder) {
 	sscanf(buffer, "%*s %Lf %*s %Lf %*s %*f %*s", &inf_hold->e_lon, &inf_hold->e_lat);
 	if (zero_test > 0) {
 		if ((inf_hold->s_lat == 0.0) && (inf_hold->s_lon == 0.0)) {
-			if ((inf_hold->e_lon == 0.0) && (inf_hold->e_lon == 0.0))
+			// TODO(schwehr): Was there supposed to be a _lat?
+			if (inf_hold->e_lon == 0.0 /* && inf_hold->e_lon == 0.0 */ )
 				inf_hold->flag = 3;
 			else
 				inf_hold->flag = 1;
 		}
 		else {
-			if ((inf_hold->e_lon == 0.0) && (inf_hold->e_lon == 0.0))
+			// TODO(schwehr): Was there supposed to be a _lat?
+			if (inf_hold->e_lon == 0.0 /* && (inf_hold->e_lon == 0.0 */ )
 				inf_hold->flag = 2;
 			else
 				inf_hold->flag = 0;
 		}
 	}
-	/* calculate the mid_point */
+
 	mid_point(inf_hold->s_lat, inf_hold->s_lon, inf_hold->e_lat, inf_hold->e_lon, &inf_hold->ave_lat, &inf_hold->ave_lon);
 
 	fclose(fileName);
@@ -844,7 +846,8 @@ void print_svp(svp *cd) {
  */
 void pause_screen() {
 	printf("\nEnd the program press ENTER");
-	fflush(stdin);
+	// TODO(schwehr): Undefine behavior.  Was fflush on stdout intended?
+	// fflush(stdin);
 	getchar();
 }
 /* ------------------------------------------------------------------- */
@@ -868,10 +871,10 @@ void read_list(char *list, char *list_2) {
 		printf("result.txt could not be found");
 		exit(1);
 	}
-	int count_size2;
+	// int count_size2;
 	/* ------------------------------ */
 	while ((fgets(dBuffer, sizeof dBuffer, fDatalist)) != NULL) {
-		count_size2 = read_recursive2(dBuffer);
+		/* count_size2 = */ read_recursive2(dBuffer);
 	}
 
 	/* ------------------------------ */
@@ -965,11 +968,10 @@ void read_list(char *list, char *list_2) {
 		if (p_flag == 0) {
 			switch (inf_hold[i].flag) {
 			case 0:
-
-				if (verbose == 1)
+				if (verbose == 1) {
 					puts("\n\n========N check passed no 0.0 position was found===========\n\n");
-				if (verbose == 1)
 					printf("\nCalculating the distances to all svp profiles for %s\n", inf_hold[i].file_name);
+				}
 				double temp_dist = 0;
 				for (int j = 0; j < size_2; j++) {
 					geod_inverse(&g, inf_hold[i].ave_lat, inf_hold[i].ave_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
@@ -984,12 +986,11 @@ void read_list(char *list, char *list_2) {
 					if (verbose == 1)
 						printf("Distance number %d is : %lf\n", j, dist[0][j]);
 				}
-				if (verbose == 1)
+				if (verbose == 1) {
 					printf("\nSearching for the SVP with nearest position\n");
-				if (verbose == 1)
 					printf("the shortest distance is number %d from the list\n", n);
-				if (verbose == 1)
 					puts("==================================================");
+				}
 
 				fprintf(fresult, "%s\n", "============================================================");
 				fprintf(fresult, "%s\t", inf_hold[i].file_name);
@@ -1010,13 +1011,12 @@ void read_list(char *list, char *list_2) {
 				/* int shellstatus = */ system(all_in_sys);
 				break;
 			case 1:
-				if (verbose == 1)
+				if (verbose == 1) {
 					puts("\n\n=====================N check:   0.0 position was found=====================\n\n");
-
-				if (verbose == 1)
 					printf("\nThe file %s has no navigation information at the start position and the svp profile will be "
 					       "assigned to the end point of the file\n",
 					       inf_hold[i].file_name);
+				}
 				for (int j = 0; j < size_2; j++) {
 					geod_inverse(&g, inf_hold[i].s_lat, inf_hold[i].s_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
 					             &azi1, &azi2);
@@ -1030,12 +1030,11 @@ void read_list(char *list, char *list_2) {
 					if (verbose == 1)
 						printf("Distance number %d is : %lf\n", j, dist[0][j]);
 				}
-				if (verbose == 1)
+				if (verbose == 1) {
 					printf("\nSearching for the SVP with nearest position\n");
-				if (verbose == 1)
 					printf("the shortest distance is number %d from the list\n", n);
-				if (verbose == 1)
 					puts("==================================================");
+				}
 
 				fprintf(fresult, "%s\n", "============================================================");
 				fprintf(fresult, "%s\t", inf_hold[i].file_name);
@@ -1056,13 +1055,12 @@ void read_list(char *list, char *list_2) {
 				/* int shellstatus = */ system(all_in_sys);
 				break;
 			case 2:
-				if (verbose == 1)
+				if (verbose == 1) {
 					puts("\n\n==============N check:   0.0 position was found===================\n\n");
-
-				if (verbose == 1)
 					printf("\nThe file %s has no navigation information at the end position and the svp profile will be assigned "
 					       "to the start point of the file\n",
 					       inf_hold[i].file_name);
+				}
 				for (int j = 0; j < size_2; j++) {
 					geod_inverse(&g, inf_hold[i].e_lat, inf_hold[i].e_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
 					             &azi1, &azi2);
@@ -1076,12 +1074,11 @@ void read_list(char *list, char *list_2) {
 					if (verbose == 1)
 						printf("Distance number %d is : %lf\n", j, dist[0][j]);
 				}
-				if (verbose == 1)
+				if (verbose == 1) {
 					printf("\nSearching for the SVP with nearest position\n");
-				if (verbose == 1)
 					printf("the shortest distance is number %d from the list\n", n);
-				if (verbose == 1)
 					puts("==================================================");
+				}
 				fprintf(fresult, "%s\n", "============================================================");
 				fprintf(fresult, "%s\t", inf_hold[i].file_name);
 				fprintf(fresult, "%s\n", svp_hold[n].file_name);
@@ -1118,10 +1115,10 @@ void read_list(char *list, char *list_2) {
 		else {
 			if (p_flag == 1) /* calculate the nearest in time */
 			{
-				if (verbose == 1)
+				if (verbose == 1) {
 					puts("==================================================");
-				if (verbose == 1)
 					printf("\nCalculating the nearest svp in time for for %s\n", inf_hold[i].file_name);
+				}
 				double temp_time = 0;
 				for (int j = 0; j < size_2; j++) {
 					time_hold[0][j] = fabs(difftime(inf_hold[i].s_Time, svp_hold[j].svp_Time));
@@ -1135,12 +1132,11 @@ void read_list(char *list, char *list_2) {
 					if (verbose == 1)
 						printf("Time difference number %d is : %lf\n", j, time_hold[0][j]);
 				}
-				if (verbose == 1)
+				if (verbose == 1) {
 					printf("\nSearch for the SVP that is the nearest in Time\n");
-				if (verbose == 1)
 					printf("the shortest time interval is time difference number %d\n", n);
-				if (verbose == 1)
 					puts("==================================================");
+				}
 
 				fprintf(fresult, "%s\n", "============================================================");
 				fprintf(fresult, "%s\t", inf_hold[i].file_name);
@@ -1162,11 +1158,11 @@ void read_list(char *list, char *list_2) {
 			}
 			/************calculate the nearest in position within time***************************/
 			if (p_flag == 2) {
-				if (verbose == 1)
+				if (verbose == 1) {
 					puts("==================================================");
-				if (verbose == 1)
 					printf("\nCalculating the nearest svp in position within %d time period for for %s\n", p_3_time,
 					       inf_hold[i].file_name);
+				}
 				double temp_dist = 0;
 				double temp_dist2 = 0;
 				int count = 0;
@@ -1210,11 +1206,11 @@ void read_list(char *list, char *list_2) {
 					}
 				}
 				if (count == 0) {
-					if (verbose == 1)
+					if (verbose == 1) {
 						printf("\nnon of the SVP profiles are within the time period, The tool is selecting nearest in position "
 						       "without time considaration\n");
-					if (verbose == 1)
 						printf("the shortest distance is number %d from the list\n", n_pos);
+					}
 					n = n_pos;
 				}
 				else {
@@ -1242,11 +1238,11 @@ void read_list(char *list, char *list_2) {
 			}
 			if (p_flag == 3) {
 				// SVP nearest in time within range
-				if (verbose == 1)
+				if (verbose == 1) {
 					puts("==================================================");
-				if (verbose == 1)
 					printf("\nCalculating the nearest svp in time within %d range for for %s\n", p_4_range,
 					       inf_hold[i].file_name);
+				}
 				if (p_4_flage == 0)
 					printf("\n Calculating the nearest SVP in time\n");
 				if (p_4_flage == 1)
@@ -1384,19 +1380,19 @@ void read_list(char *list, char *list_2) {
 
 				if (count == 0) {
 					if (p_4_flage == 0) {
-						if (verbose == 1)
+						if (verbose == 1) {
 							printf("\nnon of the SVP profiles are within the specified range, The tool is selecting nearest in "
 							       "time without range considaration\n");
-						if (verbose == 1)
 							printf("the nearest in time is number %d from the list\n", n_pos_noSeason);
+						}
 						n = n_pos_noSeason;
 					}
 					else {
-						if (verbose == 1)
+						if (verbose == 1) {
 							printf("\nnon of the SVP profiles are within the specified range, The tool is selecting nearest in "
 							       "time without range considaration\n");
-						if (verbose == 1)
 							printf("the nearest in season is number %d from the list\n", n_pos_seasn);
+						}
 						n = n_pos_seasn;
 					}
 				}
@@ -1459,7 +1455,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", datalist);
+				sscanf(optarg, "%1023s", datalist);
 				break;
 			case 'N':
 			case 'n':
@@ -1527,7 +1523,7 @@ int main(int argc, char **argv) {
 			}
 			case 'S':
 			case 's':
-				sscanf(optarg, "%s", svplist);
+				sscanf(optarg, "%1023s", svplist);
 				break;
 			case 'V':
 			case 'v':

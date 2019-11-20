@@ -396,7 +396,6 @@ int main(int argc, char **argv) {
 	mb_path swath_file;
 	mb_path dfile;
 	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
 	double btime_d;
 	double etime_d;
@@ -585,18 +584,15 @@ int main(int argc, char **argv) {
 
 				/* open datalist or single swath file */
 				if (input_swath_format < 0) {
-					if ((status = mb_datalist_open(verbose, &datalist, input_swath_file, look_processed, &error)) != MB_SUCCESS) {
+					const int look_processed = MB_DATALIST_LOOK_UNSET;
+					if (mb_datalist_open(verbose, &datalist, input_swath_file, look_processed, &error) != MB_SUCCESS) {
 						fprintf(stderr, "\nUnable to open data list file: %s\n", input_swath_file);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 						exit(MB_ERROR_OPEN_FAIL);
 					}
-					if ((status = mb_datalist_read(verbose, datalist, swath_file, dfile, &input_swath_format, &file_weight,
-					                               &error)) == MB_SUCCESS)
-						read_data = true;
-					else
-						read_data = false;
-				}
-				else {
+					read_data = mb_datalist_read(verbose, datalist, swath_file, dfile, &input_swath_format, &file_weight,
+					                               &error) == MB_SUCCESS;
+				} else {
 					strcpy(swath_file, input_swath_file);
 					read_data = true;
 				}

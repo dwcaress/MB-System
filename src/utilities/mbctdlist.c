@@ -49,8 +49,9 @@ double NaN;
 
 static const char program_name[] = "mbctdlist";
 static const char help_message[] =
-    "mbctdlist lists all CTD records within swath data files\nThe -O option specifies how the values are "
-    "output\nin an mblist-likefashion.\n";
+    "mbctdlist lists all CTD records within swath data files\n"
+    "The -O option specifies how the values are output\n"
+    "in an mblist-likefashion.\n";
 static const char usage_message[] =
     "mbctdlist [-A -Ddecimate -Fformat -Gdelimeter -H -Ifile -Llonflip -Ooutput_format -V -Zsegment]";
 
@@ -219,11 +220,11 @@ int main(int argc, char **argv) {
 				break;
 			case 'G':
 			case 'g':
-				sscanf(optarg, "%s", delimiter);
+				sscanf(optarg, "%1023s", delimiter);
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'L':
 			case 'l':
@@ -238,7 +239,7 @@ int main(int argc, char **argv) {
 			case 'Z':
 			case 'z':
 				segment = true;
-				sscanf(optarg, "%s", segment_tag);
+				sscanf(optarg, "%1023s", segment_tag);
 				break;
 			case '?':
 				errflg = true;
@@ -307,29 +308,49 @@ int main(int argc, char **argv) {
 	if (format == 0)
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
-	int interp_status = MB_SUCCESS;
+	/**************************************************************************************/
+	/* section 1 - read all data and save nav etc for interpolation onto ctd data */
 
-	/* MBIO read control parameters */
-	int look_processed = MB_DATALIST_LOOK_UNSET;
+	/* determine whether to read one file or a list of files */
+	const bool read_datalist = format < 0;
+	void *datalist = NULL;
+	char file[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
 	double file_weight;
+	bool read_data;
+
+	/* open file list */
+	if (read_datalist) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
+			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_OPEN_FAIL);
+		}
+		read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+	} else {
+		// else copy single filename to be read
+		strcpy(file, read_file);
+		read_data = true;
+	}
+
+	void *mbio_ptr = NULL;
 	double btime_d;
 	double etime_d;
-	char dfile[MB_PATH_MAXLINE];
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
 
-	/* output format list controls */
-	double distance_total = 0.0;
-	int time_j[5];
-	bool mblist_next_value = false;
-	bool invert_next_value = false;
-	bool signflip_next_value = false;
-	bool first = true;
-
-	/* MBIO read values */
-	void *mbio_ptr = NULL;
 	void *store_ptr;
+
 	int kind;
 	int time_i[7];
 	double time_d;
@@ -340,19 +361,8 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
 	char comment[MB_COMMENT_MAXLINE];
 
-	/* navigation, heading, attitude data */
-	int survey_count = 0;
-	int survey_count_tot = 0;
 	int nnav = 0;
 	int nnav_alloc = 0;
 	double *nav_time_d = NULL;
@@ -362,84 +372,7 @@ int main(int argc, char **argv) {
 	double *nav_heading = NULL;
 	double *nav_speed = NULL;
 	double *nav_altitude = NULL;
-
-	/* CTD values */
-	int nctd;
-	double ctd_time_d[MB_CTD_MAX];
-	double ctd_conductivity[MB_CTD_MAX];
-	double ctd_temperature[MB_CTD_MAX];
-	double ctd_depth[MB_CTD_MAX];
-	double ctd_salinity[MB_CTD_MAX];
-	double ctd_soundspeed[MB_CTD_MAX];
-	int nsensor;
-	double sensor_time_d[MB_CTD_MAX];
-	double sensor1[MB_CTD_MAX];
-	double sensor2[MB_CTD_MAX];
-	double sensor3[MB_CTD_MAX];
-	double sensor4[MB_CTD_MAX];
-	double sensor5[MB_CTD_MAX];
-	double sensor6[MB_CTD_MAX];
-	double sensor7[MB_CTD_MAX];
-	double sensor8[MB_CTD_MAX];
-	double conductivity;
-	double temperature;
-	double potentialtemperature;
-	double depth;
-	double salinity;
-	double soundspeed;
-
-	/* additional time variables */
-	bool first_m = true;
-	double time_d_ref;
-	bool first_u = true;
-	time_t time_u;
-	time_t time_u_ref;
-	double seconds;
-
-	/* course calculation variables */
-	double dlon, dlat, minutes;
-	int degrees;
-	char hemi;
-	double headingx, headingy, mtodeglon, mtodeglat;
-	double course, course_old;
-	double time_d_old;
-	double time_interval;
-	double speed_made_good, speed_made_good_old;
-	double navlon_old, navlat_old;
-	double dx, dy;
-	double b;
-
-	int ictd;
-
-	int ctd_count = 0;
-	int ctd_count_tot = 0;
-
-	/* determine whether to read one file or a list of files */
-	const bool read_datalist = format < 0;
-	bool read_data;
-	void *datalist;
-	char file[MB_PATH_MAXLINE];
-
-	/**************************************************************************************/
-	/* section 1 - read all data and save nav etc for interpolation onto ctd data */
-
-	/* open file list */
-	if (read_datalist) {
-		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(MB_ERROR_OPEN_FAIL);
-		}
-		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
-		strcpy(file, read_file);
-		read_data = true;
-	}
+	int survey_count_tot = 0;
 
 	/* loop over all files to be read */
 	while (read_data) {
@@ -494,8 +427,8 @@ int main(int argc, char **argv) {
 		}
 
 		/* read and print data */
-		survey_count = 0;
-		first = true;
+		int survey_count = 0;
+		// first = true;  // TODO(schwehr): Should first be used in this while loop?
 		while (error <= MB_ERROR_NO_ERROR) {
 			/* read a data record */
 			status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
@@ -514,14 +447,14 @@ int main(int argc, char **argv) {
 				/* allocate memory for navigation/attitude arrays if needed */
 				if (nnav + 1 >= nnav_alloc) {
 					nnav_alloc += MBCTDLIST_ALLOC_CHUNK;
-					status = mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_time_d, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_lon, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_lat, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_speed, &error);
-					status =
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_time_d, &error);
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_lon, &error);
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_lat, &error);
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_speed, &error);
+					/* status &= */
 					    mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_sonardepth, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_heading, &error);
-					status =
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_heading, &error);
+					/* status &= */
 					    mb_reallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_altitude, &error);
 					if (error != MB_ERROR_NO_ERROR) {
 						char *message;
@@ -548,8 +481,7 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		/* close the swath file */
-		status = mb_close(verbose, &mbio_ptr, &error);
+		status &= mb_close(verbose, &mbio_ptr, &error);
 
 		/* output info */
 		if (verbose >= 1) {
@@ -583,21 +515,75 @@ int main(int argc, char **argv) {
 
 	/* open file list */
 	if (read_datalist) {
-		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
+		read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+	} else {
+		// else copy single filename to be read
 		strcpy(file, read_file);
 		read_data = true;
 	}
+
+	/* output format list controls */
+	double distance_total = 0.0;
+	int time_j[5];
+	bool mblist_next_value = false;
+	bool invert_next_value = false;
+	bool signflip_next_value = false;
+
+	/* CTD values */
+	int nctd;
+	double ctd_time_d[MB_CTD_MAX];
+	double ctd_conductivity[MB_CTD_MAX];
+	double ctd_temperature[MB_CTD_MAX];
+	double ctd_depth[MB_CTD_MAX];
+	double ctd_salinity[MB_CTD_MAX];
+	double ctd_soundspeed[MB_CTD_MAX];
+	int nsensor;
+	double sensor_time_d[MB_CTD_MAX];
+	double sensor1[MB_CTD_MAX];
+	double sensor2[MB_CTD_MAX];
+	double sensor3[MB_CTD_MAX];
+	double sensor4[MB_CTD_MAX];
+	double sensor5[MB_CTD_MAX];
+	double sensor6[MB_CTD_MAX];
+	double sensor7[MB_CTD_MAX];
+	double sensor8[MB_CTD_MAX];
+	double conductivity;
+	double temperature;
+	double potentialtemperature;
+	double salinity;
+	double soundspeed;
+
+	/* additional time variables */
+	bool first_m = true;
+	double time_d_ref;
+	bool first_u = true;
+	time_t time_u;
+	time_t time_u_ref;
+	double seconds;
+
+	/* course calculation variables */
+	double dlon, dlat, minutes;
+	int degrees;
+	char hemi;
+	double mtodeglon, mtodeglat;
+	double course;
+	double course_old;  // TODO(schwehr): cpplint says reassigned a value before the old one has been used.
+	double time_d_old;
+	double time_interval;
+	double speed_made_good;
+	double speed_made_good_old;  // TODO(schwehr): cpplint says reassigned a value before the old one has been used.
+	double navlon_old, navlat_old;
+	double b;
+
+	int ictd;
+
+	int ctd_count_tot = 0;
 
 	/* loop over all files to be read */
 	while (read_data) {
@@ -647,8 +633,8 @@ int main(int argc, char **argv) {
 		}
 
 		/* read and print data */
-		ctd_count = 0;
-		first = true;
+		int ctd_count = 0;
+		bool first = true;
 		while (error <= MB_ERROR_NO_ERROR) {
 			/* read a data record */
 			status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
@@ -665,11 +651,11 @@ int main(int argc, char **argv) {
 			/* if ctd then extract data */
 			if (error <= MB_ERROR_NO_ERROR && (kind == MB_DATA_CTD || kind == MB_DATA_SSV)) {
 				/* extract ctd */
-				status = mb_ctd(verbose, mbio_ptr, store_ptr, &kind, &nctd, ctd_time_d, ctd_conductivity, ctd_temperature,
+				status &= mb_ctd(verbose, mbio_ptr, store_ptr, &kind, &nctd, ctd_time_d, ctd_conductivity, ctd_temperature,
 				                ctd_depth, ctd_salinity, ctd_soundspeed, &error);
 
 				/* extract ancillary sensor data */
-				status = mb_ancilliarysensor(verbose, mbio_ptr, store_ptr, &kind, &nsensor, sensor_time_d, sensor1, sensor2,
+				status &= mb_ancilliarysensor(verbose, mbio_ptr, store_ptr, &kind, &nsensor, sensor_time_d, sensor1, sensor2,
 				                             sensor3, sensor4, sensor5, sensor6, sensor7, sensor8, &error);
 
 				/* loop over the nctd ctd points, outputting each one */
@@ -680,29 +666,29 @@ int main(int argc, char **argv) {
 						mb_get_date(verbose, time_d, time_i);
 						conductivity = ctd_conductivity[ictd];
 						temperature = ctd_temperature[ictd];
-						depth = ctd_depth[ictd];
+						// const double depth = ctd_depth[ictd];
 						salinity = ctd_salinity[ictd];
 						soundspeed = ctd_soundspeed[ictd];
 
 						/* get navigation */
 						int j = 0;
 						speed = 0.0;
-						interp_status =
+						int interp_status =
 						    mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_lon - 1, nnav, time_d, &navlon, &j, &error);
 						if (interp_status == MB_SUCCESS)
-							interp_status = mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_lat - 1, nnav, time_d, &navlat,
+							interp_status &= mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_lat - 1, nnav, time_d, &navlat,
 							                                          &j, &error);
 						if (interp_status == MB_SUCCESS)
-							interp_status = mb_linear_interp_heading(verbose, nav_time_d - 1, nav_heading - 1, nnav, time_d,
+							interp_status &= mb_linear_interp_heading(verbose, nav_time_d - 1, nav_heading - 1, nnav, time_d,
 							                                         &heading, &j, &error);
 						if (interp_status == MB_SUCCESS)
-							interp_status = mb_linear_interp(verbose, nav_time_d - 1, nav_sonardepth - 1, nnav, time_d,
+							interp_status &= mb_linear_interp(verbose, nav_time_d - 1, nav_sonardepth - 1, nnav, time_d,
 							                                 &sonardepth, &j, &error);
 						if (interp_status == MB_SUCCESS)
-							interp_status =
+							interp_status &=
 							    mb_linear_interp(verbose, nav_time_d - 1, nav_altitude - 1, nnav, time_d, &altitude, &j, &error);
 						if (interp_status == MB_SUCCESS)
-							interp_status =
+							interp_status &=
 							    mb_linear_interp(verbose, nav_time_d - 1, nav_speed - 1, nnav, time_d, &speed, &j, &error);
 
 						/* only output if interpolation of nav etc has worked */
@@ -711,8 +697,8 @@ int main(int argc, char **argv) {
 
 							/* calculate course made good and distance */
 							mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-							headingx = sin(DTR * heading);
-							headingy = cos(DTR * heading);
+							// const double headingx = sin(DTR * heading);
+							// const double headingy = cos(DTR * heading);
 							if (first) {
 								time_interval = 0.0;
 								course = heading;
@@ -723,8 +709,8 @@ int main(int argc, char **argv) {
 							}
 							else {
 								time_interval = time_d - time_d_old;
-								dx = (navlon - navlon_old) / mtodeglon;
-								dy = (navlat - navlat_old) / mtodeglat;
+								const double dx = (navlon - navlon_old) / mtodeglon;
+								const double dy = (navlat - navlat_old) / mtodeglat;
 								distance = sqrt(dx * dx + dy * dy);
 								if (distance > 0.0)
 									course = RTD * atan2(dx / distance, dy / distance);
@@ -1068,7 +1054,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* close the swath file */
-		status = mb_close(verbose, &mbio_ptr, &error);
+		status &= mb_close(verbose, &mbio_ptr, &error);
 
 		/* output info */
 		if (verbose >= 1) {
@@ -1077,7 +1063,7 @@ int main(int argc, char **argv) {
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
-			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
+			if (mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS)
 				read_data = true;
 			else
 				read_data = false;
@@ -1085,9 +1071,8 @@ int main(int argc, char **argv) {
 		else {
 			read_data = false;
 		}
+	}  // end loop over files in list
 
-		/* end loop over files in list */
-	}
 	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
@@ -1096,20 +1081,19 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nTotal %d CTD records\n", ctd_count_tot);
 	}
 
-	/* deallocate navigation arrays */
 	if (nnav > 0) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_time_d, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lon, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lat, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_speed, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_sonardepth, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_heading, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_altitude, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_time_d, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lon, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lat, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_speed, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_sonardepth, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_heading, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_altitude, &error);
 	}
 
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);

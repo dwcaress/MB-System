@@ -253,12 +253,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'G':
 			case 'g':
-				sscanf(optarg, "%s", platform_file);
+				sscanf(optarg, "%1023s", platform_file);
 				use_platform_file = true;
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'K':
 			case 'k':
@@ -309,23 +309,23 @@ int main(int argc, char **argv) {
 				break;
 			case 'M':
 			case 'm':
-				sscanf(optarg, "%s", rockfile);
+				sscanf(optarg, "%1023s", rockfile);
 				rockdata = true;
 				break;
 			case 'N':
 			case 'n':
-				sscanf(optarg, "%s", insfile);
+				sscanf(optarg, "%1023s", insfile);
 				insdata = true;
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", ofile);
+				sscanf(optarg, "%1023s", ofile);
 				ofile_set = true;
 				break;
 			case 'P':
 			case 'p':
 			{
-				sscanf(optarg, "%s", buffer);
+				sscanf(optarg, "%1023s", buffer);
 				struct stat file_status;
 				const int fstat = stat(buffer, &file_status);
 				if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
@@ -376,7 +376,7 @@ int main(int argc, char **argv) {
 			case 'T':
 			case 't':
 			{
-				sscanf(optarg, "%s", buffer);
+				sscanf(optarg, "%1023s", buffer);
 				struct stat file_status;
 				int fstat = stat(buffer, &file_status);
 				if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
@@ -397,7 +397,7 @@ int main(int argc, char **argv) {
 			}
 			case 'W':
 			case 'w':
-				sscanf(optarg, "%s", dslfile);
+				sscanf(optarg, "%1023s", dslfile);
 				dsldata = true;
 				break;
 			case 'Z':
@@ -682,7 +682,7 @@ int main(int argc, char **argv) {
 		int ins_velocityx_index = -1;
 		int ins_velocityy_index = -1;
 		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer && strncmp(buffer, "# begin", 7) != 0) {
-			nscan = sscanf(buffer, "# %s %s", valuetype, value);
+			nscan = sscanf(buffer, "# %1023s %1023s", valuetype, value);
 			if (nscan == 2) {
 				if (strcmp(value, "time") == 0)
 					ins_time_d_index = ins_len;
@@ -1009,7 +1009,7 @@ int main(int argc, char **argv) {
 				double second;
 				double id;
 				char sensor[24];
-				nscan = sscanf(buffer, "PPL %d/%d/%d %d:%d:%lf %s %lf %lf %lf %lf %lf %lf %lf", &year, &month, &day, &hour,
+				nscan = sscanf(buffer, "PPL %d/%d/%d %d:%d:%lf %23s %lf %lf %lf %lf %lf %lf %lf", &year, &month, &day, &hour,
 				               &minute, &second, sensor, &dsl_lat[ndsl], &dsl_lon[ndsl], &dsl_sonardepth[ndsl],
 				               &dsl_heading[ndsl], &dsl_pitch[ndsl], &dsl_roll[ndsl], &id);
 				if (nscan == 14) {
@@ -1063,7 +1063,7 @@ int main(int argc, char **argv) {
 		int sonardepth_sonardepth_index = 0;
 		int sonardepth_len = 0;
 		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer && strncmp(buffer, "# begin", 7) != 0) {
-			nscan = sscanf(buffer, "# %s %s", valuetype, value);
+			nscan = sscanf(buffer, "# %1023s %1023s", valuetype, value);
 			if (nscan == 2) {
 				if (strcmp(value, "time") == 0)
 					sonardepth_time_d_index = sonardepth_len;
@@ -1331,18 +1331,14 @@ int main(int argc, char **argv) {
 	/* open file list */
 	if (read_datalist) {
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
-		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+		if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
+		read_data = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+	} else {
+		// else copy single filename to be read
 		strcpy(ifile, read_file);
 		read_data = true;
 	}
@@ -4128,18 +4124,14 @@ int main(int argc, char **argv) {
 		/* open file list */
 		if (read_datalist) {
 			const int look_processed = MB_DATALIST_LOOK_UNSET;
-			if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+			if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 				fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 				exit(MB_ERROR_OPEN_FAIL);
 			}
-			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = true;
-			else
-				read_data = false;
-		}
-		/* else copy single filename to be read */
-		else {
+			read_data = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+		} else {
+			// else copy single filename to be read
 			strcpy(ifile, read_file);
 			read_data = true;
 		}

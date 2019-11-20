@@ -1077,9 +1077,9 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error);
 int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error);
 
-int mb_pr_lockswathfile(int verbose, char *file, int purpose, const char *program_name, int *error);
-int mb_pr_unlockswathfile(int verbose, char *file, int purpose, const char *program_name, int *error);
-int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *program, char *user, char *cpu, char *date,
-                   int *error);
+int mb_pr_lockswathfile(int verbose, const char *file, int purpose, const char *program_name, int *error);
+int mb_pr_unlockswathfile(int verbose, const char *file, int purpose, const char *program_name, int *error);
+int mb_pr_lockinfo(int verbose, const char *file, int *locked, int *purpose,
+                   char *program, char *user, char *cpu, char *date, int *error);
 
 #endif  /* MB_PROCESS_H_ */

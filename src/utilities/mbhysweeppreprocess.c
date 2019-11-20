@@ -92,7 +92,6 @@ int main(int argc, char **argv) {
 	/* MBIO read control parameters */
 	char read_file[MB_PATH_MAXLINE] = "";
 	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
 	double btime_d;
 	double etime_d;
@@ -347,7 +346,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'D':
 			case 'd':
-				sscanf(optarg, "%s", buffer);
+				sscanf(optarg, "%1023s", buffer);
 				if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					sonardepthdata = true;
 					strcpy(sonardepthfile, buffer);
@@ -359,16 +358,16 @@ int main(int argc, char **argv) {
 				break;
 			case 'G':
 			case 'g':
-				sscanf(optarg, "%s", platform_file);
+				sscanf(optarg, "%1023s", platform_file);
 				use_platform_file = true;
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'J':
 			case 'j':
-				sscanf(optarg, "%s", proj4command);
+				sscanf(optarg, "%1023s", proj4command);
 				projection_set = true;
 				break;
 			case 'K':
@@ -389,7 +388,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'N':
 			case 'n':
-				sscanf(optarg, "%s", buffer);
+				sscanf(optarg, "%1023s", buffer);
 				if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					navdata = true;
 					strcpy(navfile, buffer);
@@ -397,12 +396,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", ofile);
+				sscanf(optarg, "%1023s", ofile);
 				ofile_set = true;
 				break;
 			case 'T':
 			case 't':
-				sscanf(optarg, "%s", timelagfile);
+				sscanf(optarg, "%1023s", timelagfile);
 				if ((fstat = stat(timelagfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_MODEL;
 				}
@@ -831,18 +830,15 @@ int main(int argc, char **argv) {
 
 	/* open file list */
 	if (read_datalist) {
-		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
+		read_data = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+	} else {
+		/* else copy single filename to be read */
 		strcpy(ifile, read_file);
 		read_data = true;
 	}
@@ -1460,18 +1456,15 @@ int main(int argc, char **argv) {
 
 		/* open file list */
 		if (read_datalist) {
-			if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+			const int look_processed = MB_DATALIST_LOOK_UNSET;
+			if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 				fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 				exit(MB_ERROR_OPEN_FAIL);
 			}
-			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = true;
-			else
-				read_data = false;
-		}
-		/* else copy single filename to be read */
-		else {
+			read_data = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+		} else {
+			/* else copy single filename to be read */
 			strcpy(ifile, read_file);
 			read_data = true;
 		}

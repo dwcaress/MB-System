@@ -1141,7 +1141,7 @@ int main(int argc, char **argv) {
 					spacing_priority = true;
 					optarg[strlen(optarg) - 1] = '\0';
 				}
-				const int n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
+				const int n = sscanf(optarg, "%lf/%lf/%1023s", &dx_set, &dy_set, units);
 				if (n > 1)
 					set_spacing = true;
 				if (n < 3)
@@ -1180,11 +1180,11 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", filelist);
+				sscanf(optarg, "%1023s", filelist);
 				break;
 			case 'J':
 			case 'j':
-				sscanf(optarg, "%s", projection_pars);
+				sscanf(optarg, "%1023s", projection_pars);
 				projection_pars_f = true;
 				break;
 			case 'L':
@@ -1201,7 +1201,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", fileroot);
+				sscanf(optarg, "%1023s", fileroot);
 				break;
 			case 'P':
 			case 'p':
@@ -1225,7 +1225,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'T':
 			case 't':
-				sscanf(optarg, "%s", topogridfile);
+				sscanf(optarg, "%1023s", topogridfile);
 				usetopogrid = true;
 				break;
 			case 'U':
@@ -1308,7 +1308,7 @@ int main(int argc, char **argv) {
 					priority_angle_priority = priority_angle_85degreesdn_priority;
 				}
 				else {
-					sscanf(optarg, "%s", pfile);
+					sscanf(optarg, "%1023s", pfile);
 				}
 				if ((priority_mode & MBMOSAIC_PRIORITY_ANGLE) == 0)
 					priority_mode += MBMOSAIC_PRIORITY_ANGLE;
@@ -2155,7 +2155,7 @@ int main(int argc, char **argv) {
 		void *datalist = NULL;
 		int ndata = 0;
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
-		if ((status = mb_datalist_open(verbose, &datalist, filelist, look_processed, &error)) != MB_SUCCESS) {
+		if (mb_datalist_open(verbose, &datalist, filelist, look_processed, &error) != MB_SUCCESS) {
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
@@ -2166,7 +2166,7 @@ int main(int argc, char **argv) {
 		mb_path ppath = "";
 		mb_path dpath = "";
 		double file_weight = 1.0;
-		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
+		while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
 		       MB_SUCCESS) {
 			int ndatafile = 0;
 
@@ -2705,7 +2705,7 @@ int main(int argc, char **argv) {
 		int ndata = 0;
 		void *datalist = NULL;
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
-		if ((status = mb_datalist_open(verbose, &datalist, filelist, look_processed, &error)) != MB_SUCCESS) {
+		if (mb_datalist_open(verbose, &datalist, filelist, look_processed, &error) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2717,7 +2717,7 @@ int main(int argc, char **argv) {
 		mb_path ppath = "";
 		mb_path dpath = "";
 		double file_weight = 1.0;
-		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
+		while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
 		       MB_SUCCESS) {
 			int ndatafile = 0;
 

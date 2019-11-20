@@ -557,7 +557,7 @@ int main(int argc, char **argv) {
 					spacing_priority = true;
 					optarg[strlen(optarg) - 1] = '\0';
 				}
-				const int n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
+				const int n = sscanf(optarg, "%lf/%lf/%1023s", &dx_set, &dy_set, units);
 				if (n > 1)
 					set_spacing = true;
 				if (n < 3)
@@ -611,16 +611,16 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", filelist);
+				sscanf(optarg, "%1023s", filelist);
 				break;
 			case 'J':
 			case 'j':
-				sscanf(optarg, "%s", projection_pars);
+				sscanf(optarg, "%1023s", projection_pars);
 				projection_pars_f = true;
 				break;
 			case 'K':
 			case 'k':
-				sscanf(optarg, "%s", backgroundfile);
+				sscanf(optarg, "%1023s", backgroundfile);
 				if ((grdrasterid = atoi(backgroundfile)) <= 0)
 					grdrasterid = -1;
 				break;
@@ -638,7 +638,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", fileroot);
+				sscanf(optarg, "%1023s", fileroot);
 				break;
 			case 'P':
 			case 'p':
@@ -791,7 +791,6 @@ int main(int argc, char **argv) {
 
 	/* mbgrid control variables */
 	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
 	double dx = 0.0;
 	double dy = 0.0;
@@ -1793,14 +1792,15 @@ int main(int argc, char **argv) {
 		/* read in data */
 		fprintf(outfp, "\nDoing first pass to generate low resolution slope grid...\n");
 		ndata = 0;
-		if ((status = mb_datalist_open(verbose, &datalist, filelist, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(verbose, &datalist, filelist, look_processed, &error) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
+		while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
 		       MB_SUCCESS) {
 			ndatafile = 0;
 
@@ -2545,14 +2545,15 @@ int main(int argc, char **argv) {
 		/* read in data */
 		fprintf(outfp, "\nDoing single pass to generate grid...\n");
 		ndata = 0;
-		if ((status = mb_datalist_open(verbose, &datalist, filelist, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(verbose, &datalist, filelist, look_processed, &error) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
 			exit(error);
 		}
-		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
+		while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
 		       MB_SUCCESS) {
 			ndatafile = 0;
 
@@ -2961,14 +2962,15 @@ int main(int argc, char **argv) {
 
 		/* read in data */
 		ndata = 0;
-		if ((status = mb_datalist_open(verbose, &datalist, filelist, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(verbose, &datalist, filelist, look_processed, &error) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
 			exit(error);
 		}
-		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
+		while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
 		       MB_SUCCESS) {
 			ndatafile = 0;
 
@@ -3468,14 +3470,15 @@ int main(int argc, char **argv) {
 
 		/* read in data */
 		ndata = 0;
-		if ((status = mb_datalist_open(verbose, &datalist, filelist, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(verbose, &datalist, filelist, look_processed, &error) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
 			exit(error);
 		}
-		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
+		while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
 		       MB_SUCCESS) {
 			ndatafile = 0;
 
@@ -4041,14 +4044,15 @@ int main(int argc, char **argv) {
 
 		/* read in data */
 		ndata = 0;
-		if ((status = mb_datalist_open(verbose, &datalist, filelist, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(verbose, &datalist, filelist, look_processed, &error) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
 			exit(error);
 		}
-		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
+		while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
 		       MB_SUCCESS) {
 			ndatafile = 0;
 

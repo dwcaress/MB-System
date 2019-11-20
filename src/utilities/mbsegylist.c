@@ -265,11 +265,11 @@ int main(int argc, char **argv) {
 				break;
 			case 'G':
 			case 'g':
-				sscanf(optarg, "%s", delimiter);
+				sscanf(optarg, "%1023s", delimiter);
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", file);
+				sscanf(optarg, "%1023s", file);
 				break;
 			case 'L':
 			case 'l':
@@ -284,7 +284,7 @@ int main(int argc, char **argv) {
 			case 'Z':
 			case 'z':
 				segment = true;
-				sscanf(optarg, "%s", segment_tag);
+				sscanf(optarg, "%1023s", segment_tag);
 				break;
 			case '?':
 				errflg = true;

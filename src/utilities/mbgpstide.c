@@ -143,13 +143,13 @@ int main(int argc, char **argv) {
 					sscanf(optarg, "%d", &format);
 				}
 				else if (strcmp("input", options[option_index].name) == 0) {
-					sscanf(optarg, "%s", read_file);
+					sscanf(optarg, "%1023s", read_file);
 				}
 				else if (strcmp("setparameters", options[option_index].name) == 0) {
 					mbprocess_update = true;
 				}
 				else if (strcmp("output", options[option_index].name) == 0) {
-					sscanf(optarg, "%s", tide_file);
+					sscanf(optarg, "%1023s", tide_file);
 					file_output = true;
 				}
 				else if (strcmp("offset", options[option_index].name) == 0) {
@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
 					skip_existing = true;
 				}
 				else if (strcmp("geoid", options[option_index].name) == 0) {
-					sscanf(optarg, "%s", geoidgrid);
+					sscanf(optarg, "%1023s", geoidgrid);
 					geoid_set = true;
 				}
 				else if (strcmp("use", options[option_index].name) == 0) {
@@ -189,7 +189,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'M':
 			case 'm':
@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", tide_file);
+				sscanf(optarg, "%1023s", tide_file);
 				file_output = true;
 				break;
 			case 'R':
@@ -210,7 +210,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'T':
 			case 't':
-				sscanf(optarg, "%s", geoidgrid);
+				sscanf(optarg, "%1023s", geoidgrid);
 				geoid_set = true;
 				break;
 			case 'U':
@@ -262,7 +262,6 @@ int main(int argc, char **argv) {
 
 	/* MBIO read control parameters */
 	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
 	mb_path swath_file;
 	mb_path file;
@@ -379,18 +378,15 @@ int main(int argc, char **argv) {
 
 	/* open file list */
 	if (read_datalist) {
-		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+		int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
+		read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+	} else {
+		// else copy single filename to be read
 		strcpy(file, read_file);
 		read_data = true;
 	}
