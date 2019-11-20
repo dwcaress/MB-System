@@ -831,7 +831,7 @@ libnetif_la_LIBADD = libtrnw.la \
 				-lm -lpthread
 
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
-trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la libqnx.la libnewmat.la  libtnav.la  libgeolib.la
+trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la libqnx.la libnewmat.la  libtnav.la  libgeolib.la  
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 netif_test_SOURCES = utils/netif-test.c

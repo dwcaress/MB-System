@@ -191,7 +191,7 @@ bin_PROGRAMS =   trn-server trn-cli netif-test trnif-test trnifsvr-test trnclien
 
 
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
-trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la libqnx.la libnewmat.la  libtnav.la  libgeolib.la
+trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la libqnx.la libnewmat.la  libtnav.la  libgeolib.la  
 
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
@@ -208,7 +208,7 @@ trnifsvr_test_LDADD = libnetif.la  ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.
 trnclient_test_SOURCES =  utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnclient_test_LDADD = libtnav.la
 
-dist_bin_SCRIPTS =
+dist_bin_SCRIPTS = 
 
 CLEANFILES =
 DISTCLEANFILES =

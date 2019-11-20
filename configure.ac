@@ -407,9 +407,6 @@ else
 fi
 CPPFLAGS=$save_CPPFLAGS
 CFLAGS=$save_CFLAGS
-if test "$FOUND_PROJ6" = "yes"; then
-  CFLAGS="$CFLAGS $libproj_CPPFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
-fi
 dnl Done checking for PROJ library libproj and PROJ headers
 
 dnl Substitute PROJ library and header arguments
@@ -1063,6 +1060,12 @@ if test $BYTESWAP = "yes" ; then
 else
     AS_ECHO(["Byteswapping: Disabled"])
 fi
+if test "$FOUND_PROJ6" = "yes"; then
+    AS_ECHO(["PROJ: Using PROJ 6 API"])
+else
+    AS_ECHO(["PROJ: Using PROJ 4/5 API"])
+fi
+
 AS_ECHO(["libgmt_CPPFLAGS:     $libgmt_CPPFLAGS"])
 AS_ECHO(["libgmt_LIBS:         $libgmt_LIBS"])
 AS_ECHO(["libgmt_LDFLAGS:      $libgmt_LDFLAGS"])

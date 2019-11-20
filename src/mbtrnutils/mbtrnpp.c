@@ -163,7 +163,9 @@ int64_t mbtrnpp_loop_delay_msec = 0;
 #define TRNU_HOST_DFL    "localhost"
 #define TRNU_PORT_DFL    8000
 #define TRNSVR_HOST_DFL  "localhost"
-#define TRNSVR_PORT_DFL  27027
+#define TRNSVR_PORT_DFL  28000
+#define TRN_XMIT_GAIN_RESON7K_DFL 200.0
+#define TRN_XMIT_GAIN_KMALL_DFL -20.0
 #endif //WITH_MBTNAV
 #define SZ_1M (1024 * 1024)
 #define SZ_1G (1024 * 1024 * 1024)
@@ -235,117 +237,75 @@ char *trnusvr_host=TRNU_HOST_DFL;
 char g_cmd_line[MBTRNPP_CMD_LINE_BYTES] = {0};
 char *g_log_dir = NULL;
 
-// TODO : fix metrics
-//MST_COUNTER_SET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN],mlist_size(trn_plist));
-//MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRNTX_XT], mtime_dtime());
-//MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_TXN]);
-//MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_TRN_TX_BYTES],iobytes);
-//MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRN_PUBN]);
-//MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_TRN_PUB_BYTES],iobytes);
-//MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRN_TX]);
-//MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRNTX_XT], mtime_dtime());
-//MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_DISN]);
-//MST_COUNTER_SET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN],mlist_size(trn_plist));
-
-//MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRNRX_XT], mtime_dtime());
-//MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRNRX_XT], mtime_dtime());
-//MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_RXZ]);
-//MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_RXE]);
-//MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_CLI_RX_BYTES],iobytes);
-//MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_RXN]);
-//MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_ACKN]);
-//MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_CLI_ACK_BYTES],iobytes);
-//MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_ACK]);
-//MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ENTOP]);
-//MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLIADDR_RX]);
-
+// metrics info
 typedef enum {
-  MBTPP_EV_CYCLES = 0,
-  MBTPP_EV_EMBGETALL,
-  MBTPP_EV_EMBFAILURE,
-  MBTPP_EV_ESRC_SOCKET,
-  MBTPP_EV_ESRC_CON,
-  MBTPP_EV_ECLI_RXZ,
-  MBTPP_EV_ECLI_RXE,
-  MBTPP_EV_ECLI_TXZ,
-  MBTPP_EV_ECLI_TXE,
-  MBTPP_EV_ECLI_ACK,
-  MBTPP_EV_ETRN_TX,
-  MBTPP_EV_ECLIADDR_RX,
-  MBTPP_EV_ENTOP,
-  MBTPP_EV_SRC_CONN,
-  MBTPP_EV_SRC_DISN,
-  MBTPP_EV_CLI_CONN,
-  MBTPP_EV_CLI_DISN,
-  MBTPP_EV_CLI_RXN,
-  MBTPP_EV_CLI_TXN,
-  MBTPP_EV_CLI_ACKN,
-  MBTPP_EV_TRN_PUBN,
-  MBTPP_EV_LOG_STATN,
+  MBTPP_EV_MB_CYCLES = 0,
+  MBTPP_EV_MB_CONN,
+  MBTPP_EV_MB_DISN,
+  MBTPP_EV_MB_PUBN,
+    MBTPP_EV_MB_TRN_REINIT,
+    MBTPP_EV_MB_GAIN_LO,
+    MBTPP_EV_EMBGETALL,
+    MBTPP_EV_EMBFAILURE,
+    MBTPP_EV_EMBSOCKET,
+    MBTPP_EV_EMBCON,
 #ifdef WITH_MBTNAV
-    MBTPP_EV_TNAV_PUBN,
+    MBTPP_EV_TRN_PROCN,
+    MBTPP_EV_TRNU_PUBN,
 #endif
     MBTPP_EV_COUNT
 } mbtrnpp_stevent_id;
 
 typedef enum {
-  MBTPP_STA_CLI_LIST_LEN,
-  MBTPP_STA_CLI_ACK_BYTES,
-  MBTPP_STA_CLI_RX_BYTES,
-  MBTPP_STA_TRN_TX_BYTES,
-  MBTPP_STA_TRN_PUB_BYTES,
-#ifdef WITH_MBTNAV
-    MBTPP_STA_TNAV_PUB_BYTES,
-#endif
+  MBTPP_STA_MB_FWRITE_BYTES=0,
     MBTPP_STA_COUNT
 } mbtrnpp_ststatus_id;
 
 typedef enum {
-  MBTPP_CH_MBGETALL_XT = 0,
-  MBTPP_CH_MBPING_XT,
-  MBTPP_CH_TRNRX_XT,
-  MBTPP_CH_TRNTX_XT,
-  MBTPP_CH_LOG_XT,
-  MBTPP_CH_DTIME_XT,
-  MBTPP_CH_MBGETFAIL_XT,
-  MBTPP_CH_MBPOST_XT,
-  MBTPP_CH_STATS_XT,
-  MBTPP_CH_CYCLE_XT,
-  MBTPP_CH_THRUPUT,
+  MBTPP_CH_MB_GETALL_XT = 0,
+  MBTPP_CH_MB_PING_XT,
+  MBTPP_CH_MB_LOG_XT,
+  MBTPP_CH_MB_DTIME_XT,
+  MBTPP_CH_MB_GETFAIL_XT,
+  MBTPP_CH_MB_POST_XT,
+  MBTPP_CH_MB_STATS_XT,
+  MBTPP_CH_MB_CYCLE_XT,
+  MBTPP_CH_MB_FWRITE_XT,
+  MBTPP_CH_MB_PROC_MB1_XT,
 #ifdef WITH_MBTNAV
-    MBTPP_CH_TNAV_UPDATE_XT,
-    MBTPP_CH_TNAV_BIASEST_XT,
-    MBTPP_CH_TNAV_REINIT_XT,
-    MBTPP_CH_TNAV_PUB_XT,
-    MBTPP_CH_TNAV_LOG_XT,
-    MBTPP_CH_TNAV_CYCLE_XT,
+    MBTPP_CH_TRN_UPDATE_XT,
+    MBTPP_CH_TRN_BIASEST_XT,
+    MBTPP_CH_TRN_NREINITS_XT,
+    MBTPP_CH_TRN_TRNU_PUB_XT,
+    MBTPP_CH_TRN_TRNU_LOG_XT,
+    MBTPP_CH_TRN_PROC_XT,
+    MBTPP_CH_TRN_TRNSVR_XT,
+    MBTPP_CH_TRN_TRNUSVR_XT,
+    MBTPP_CH_TRN_PROC_TRN_XT,
 #endif
     MBTPP_CH_COUNT
 } mbtrnpp_stchan_id;
 
 const char *mbtrnpp_stevent_labels[] = {
-    "cycles",     "e_mbgetall", "e_mbfailure", "e_src_socket", "e_src_con", "e_cli_rx_z",
-    "e_cli_rx_e", "e_cli_tx_z", "e_cli_tx_e",  "e_cli_ack",    "e_trn_tx",  "e_cliaddr_rx",
-    "e_ntop",     "src_con",    "src_dis",     "cli_con",      "cli_dis",   "cli_rx",
-    "cli_tx",     "cli_ack",    "trn_pub_n",   "log_stat"
+    "mb_cycles", "mb_con", "mb_dis", "mb_pub_n", "mb_trn_reinit", "mb_gain_lo",
+    "e_mbgetall", "e_mbfailure", "e_mbsocket",
+    "e_mbcon"
 #ifdef WITH_MBTNAV
-    ,"tnav_pub_n",
+    ,"trn_proc_n","trnu_pub_n"
 #endif
 };
 const char *mbtrnpp_ststatus_labels[] = {
-    "cli_list_len", "cli_ack_bytes", "cli_rx_bytes", "trn_tx_bytes", "trn_pub_bytes"
-#ifdef WITH_MBTNAV
-    ,"tnav_pub_bytes"
-#endif
-
+    "mb_fwrite_bytes"
 };
 
 const char *mbtrnpp_stchan_labels[] = {
-    "mbgetall_xt",  "mbping_xt", "trnrx_xt", "trntx_xt", "log_xt", "dtime_xt",
-    "mbgetfail_xt", "mbpost_xt", "stats_xt", "cycle_xt", "thruput"
+    "mb_getall_xt",  "mb_ping_xt", "mb_log_xt", "mb_dtime_xt",
+    "mb_getfail_xt", "mb_post_xt", "mb_stats_xt", "mb_cycle_xt", "mb_fwrite_xt",
+    "mb_proc_mb1_xt"
 #ifdef WITH_MBTNAV
-    ,"tnav_up_xt", "tnav_best_xt", "tnav_ri_xt",
-    "tnav_pub_xt", "tnav_log_xt", "tnav_cycle_xt"
+    , "trn_update_xt", "trn_biasest_xt", "trn_nreinits_xt",
+    "trn_trnu_pub_xt", "trn_trnu_log_xt", "trn_proc_xt",
+    "trn_trnsvr_xt", "trn_trnusvr_xt", "trn_proc_trn_xt"
 #endif
 
 };
@@ -396,6 +356,12 @@ int mbtrnpp_trn_pub_osocket(trn_update_t *update, msock_socket_t *pub_sock);
 char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int indent);
 #endif // WITH_MBTNAV
 
+// arm the TRN reinit flag
+// reinit TRN when sonar transmit gain above threshold
+// or if trn_nombgain is true
+bool trn_reinit_flag=true;
+bool trn_nombgain=false;
+
 
 char mRecordBuf[MBSYS_KMBES_MAX_NUM_MRZ_DGMS][64*1024];
 /*--------------------------------------------------------------------*/
@@ -404,38 +370,40 @@ int main(int argc, char **argv) {
   char help_message[] = "mbtrnpp reads raw multibeam data, applies automated cleaning\n\t"
                         "and downsampling, and then passes the bathymetry on to a terrain relative navigation (TRN) process.\n";
   char usage_message[] = "mbtrnpp [\n"
-                        "\t--verbose\n"
-                        "\t--help\n"
-                        "\t--log-directory=path\n"
-                        "\t--input=datalist|file|socket_definition\n"
-                        "\t--output=file|'socket'\n"
-                        "\t--swathwidth=value\n"
-                        "\t--soundings=value\n"
-                        "\t--median-filter=threshold/nx/ny\n"
-                        "\t--format=format\n"
-                        "\t--platform-file\n"
-                        "\t--platform-target-sensor\n"
-                        "\t--projection=projection_id\n"
-                        "\t--stats=n\n"
-                        "\t--hbeat=n\n"
-                        "\t--mbhbn=n\n"
-                        "\t--mbhbt=d.d\n"
-                        "\t--trnhbt=n\n"
-                        "\t--trnuhbt=n\n"
-                        "\t--delay=n\n"
-                        "\t--stats=n\n"
-                        "\t--trn-en\n"
-                        "\t--trn-utm\n"
-                        "\t--trn-map\n"
-                        "\t--trn-par\n"
-                        "\t--trn-log\n"
-                        "\t--trn-cfg\n"
-                        "\t--trn-mtype\n"
-                        "\t--trn-ftype\n"
-                        "\t--mb-out=mb1svr[:host:port]/mb1/reson\n"
-                        "\t--trn-out=trnsvr[:host:port]/trnusvr[:host:port]/trnu/sout/serr/debug\n"
-                        "\t--trn-decn\n"
-                        "\t--trn-decs\n";
+                         "\t--verbose\n"
+                         "\t--help\n"
+                         "\t--log-directory=path\n"
+                         "\t--input=datalist|file|socket_definition\n"
+                         "\t--output=file|'socket'\n"
+                         "\t--swathwidth=value\n"
+                         "\t--soundings=value\n"
+                         "\t--median-filter=threshold/nx/ny\n"
+                         "\t--format=format\n"
+                         "\t--platform-file\n"
+                         "\t--platform-target-sensor\n"
+                         "\t--projection=projection_id\n"
+                         "\t--stats=n\n"
+                         "\t--hbeat=n\n"
+                         "\t--mbhbn=n\n"
+                         "\t--mbhbt=d.d\n"
+                         "\t--trnhbt=n\n"
+                         "\t--trnuhbt=n\n"
+                         "\t--delay=n\n"
+                         "\t--stats=n\n"
+                         "\t--trn-en\n"
+                         "\t--trn-dis\n"
+                         "\t--trn-utm\n"
+                         "\t--trn-map\n"
+                         "\t--trn-par\n"
+                         "\t--trn-log\n"
+                         "\t--trn-cfg\n"
+                         "\t--trn-mtype\n"
+                         "\t--trn-ftype\n"
+                         "\t--mb-out=mb1svr[:host:port]/mb1/reson\n"
+                         "\t--trn-out=trnsvr[:host:port]/trnusvr[:host:port]/trnu/sout/serr/debug\n"
+                         "\t--trn-decn\n"
+                         "\t--trn-decs\n"
+                         "\t--trn-nombgain\n";
   extern char WIN_DECLSPEC *optarg;
   int option_index;
   int errflg = 0;
@@ -484,6 +452,7 @@ int main(int argc, char **argv) {
                                     {"soundings", required_argument, NULL, 0},
                                     {"median-filter", required_argument, NULL, 0},
                                     {"trn-en", no_argument, NULL, 0},
+                                    {"trn-dis", no_argument, NULL, 0},
                                     {"trn-utm", required_argument, NULL, 0},
                                     {"trn-map", required_argument, NULL, 0},
                                     {"trn-cfg", required_argument, NULL, 0},
@@ -492,10 +461,11 @@ int main(int argc, char **argv) {
                                     {"trn-mtype", required_argument, NULL, 0},
                                     {"trn-ftype", required_argument, NULL, 0},
                                     {"trn-mod", required_argument, NULL, 0},
-                                    {"mb-out", required_argument, NULL, 0},
+ 								    {"mb-out", required_argument, NULL, 0},
                                     {"trn-out", required_argument, NULL, 0},
                                     {"trn-decn", required_argument, NULL, 0},
                                     {"trn-decs", required_argument, NULL, 0},
+                                    {"trn-nombgain", no_argument, NULL, 0},
                                     {NULL, 0, NULL, 0}};
 
   /* MBIO read control parameters */
@@ -551,6 +521,7 @@ int main(int argc, char **argv) {
   /* buffer handling parameters */
   int n_buffer_max = 1;
   struct mbtrnpp_ping_struct ping[MBTRNPREPROCESS_BUFFER_DEFAULT];
+  int done;
 
   /* counting parameters */
   int n_pings_read = 0;
@@ -963,10 +934,14 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
         sscanf(optarg, "%lf", &trn_status_interval_sec);
       }
 #ifdef WITH_MBTNAV
-      /* TRN enable */
-      else if (strcmp("trn-en", options[option_index].name) == 0) {
-        trn_enable = true;
-      }
+        /* TRN enable */
+        else if (strcmp("trn-en", options[option_index].name) == 0) {
+            trn_enable = true;
+        }
+        /* TRN disable */
+        else if (strcmp("trn-dis", options[option_index].name) == 0) {
+            trn_enable = false;
+        }
       /* TRN UTM zone */
       else if (strcmp("trn-utm", options[option_index].name) == 0) {
         sscanf(optarg, "%ld", &trn_utm_zone);
@@ -1015,6 +990,10 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
               trn_dec_time=mtime_dtime();
 
       }
+      /* Ignore TRN transmit gain threshold checks */
+      else if (strcmp("trn-nombgain", options[option_index].name) == 0) {
+          trn_nombgain=true;
+      }
 
 #endif // WITH_MBTNAV
 
@@ -1035,7 +1014,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
 
       /* platform-target-sensor */
       else if (strcmp("platform-target-sensor", options[option_index].name) == 0) {
-          n = sscanf(optarg, "%d", &target_sensor);
+        	n = sscanf(optarg, "%d", &target_sensor);
       }
 
       /*-------------------------------------------------------
@@ -1212,6 +1191,8 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
        // restore module debug
         mmd_channel_set(MOD_MBTRNPP,olvl);
        }
+    }else{
+        fprintf(stderr,"WARN: skipping TRN init trn_en[%c] trn_cfg[%p]\n",(trn_enable?'Y':'N'),trn_cfg);
     }
 
     // release the config strings
@@ -1343,10 +1324,21 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
     strcpy(ifile, input);
     read_data = true;
   }
+
+    /* set transmit_gain threshold according to format */
+    double transmit_gain_threshold = 0.0;
+    if (format == MBF_RESON7KR) {
+        transmit_gain_threshold = TRN_XMIT_GAIN_RESON7K_DFL;
+    }
+    else if (format == MBF_KEMKMALL) {
+        transmit_gain_threshold = TRN_XMIT_GAIN_KMALL_DFL;
+    }
+    mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: transmit gain threshold[%.2lf] nombgain[%c]\n",transmit_gain_threshold,(trn_nombgain?'Y':'N'));
+
   // kick off the first cycle here
   // future cycles start and end in the stats update
-  MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_CYCLE_XT], mtime_dtime());
-  MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_STATS_XT], mtime_dtime());
+  MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT], mtime_dtime());
+  MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_STATS_XT], mtime_dtime());
   /* loop over all files to be read */
   while (read_data == true) {
 
@@ -1544,17 +1536,8 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
     n_buffer_max = median_filter_n_along;
     n_ping_process = n_buffer_max / 2;
 
-    /* set transmit_gain threshold according to format */
-    double transmit_gain_threshold = 0.0;
-    if (format == MBF_RESON7KR) {
-      transmit_gain_threshold = 200.0;
-    }
-    else if (format == MBF_KEMKMALL) {
-      transmit_gain_threshold = -20.0;
-    }
-
     /* loop over reading data */
-    bool done = false;
+    done = false;
     idataread = 0;
 
     while (!done) {
@@ -1611,7 +1594,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
       /* read the next data */
       error = MB_ERROR_NO_ERROR;
 
-      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MBGETALL_XT], mtime_dtime());
+      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETALL_XT], mtime_dtime());
       status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, ping[idataread].time_i, &ping[idataread].time_d,
                           &ping[idataread].navlon, &ping[idataread].navlat, &ping[idataread].speed,
                           &ping[idataread].heading, &ping[idataread].distance, &ping[idataread].altitude,
@@ -1622,8 +1605,8 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
 
       //            PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb_get_all - status[%d] kind[%d] err[%d]\n",status, kind,
       //            error));
-      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MBGETALL_XT], mtime_dtime());
-      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MBPING_XT], mtime_dtime());
+      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETALL_XT], mtime_dtime());
+      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PING_XT], mtime_dtime());
 
       if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
         ping[idataread].count = ndata;
@@ -1631,20 +1614,21 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
         n_pings_read++;
         n_soundings_read += ping[idataread].beams_bath;
 
-        // apply transmit gain thresholding
-        double transmit_gain;
-        double pulse_length;
-        double receive_gain;
-        status = mb_gains(verbose, imbio_ptr, store_ptr, &kind, &transmit_gain, &pulse_length, &receive_gain, &error);
-        if (transmit_gain < transmit_gain_threshold) {
-          for (i = 0; i < ping[idataread].beams_bath; i++) {
-            if (mb_beam_ok(ping[idataread].beamflag[i])) {
-              ping[idataread].beamflag[i] = (char)(MB_FLAG_SONAR | MB_FLAG_FLAG);
-            }
-          }
-        }
+          // apply transmit gain thresholding
+          double transmit_gain;
+          double pulse_length;
+          double receive_gain;
 
-        // count soundings
+          status = mb_gains(verbose, imbio_ptr, store_ptr, &kind, &transmit_gain, &pulse_length, &receive_gain, &error);
+          if (transmit_gain < transmit_gain_threshold) {
+              for (i = 0; i < ping[idataread].beams_bath; i++) {
+                  if (mb_beam_ok(ping[idataread].beamflag[i])) {
+                      ping[idataread].beamflag[i] = (char)(MB_FLAG_SONAR | MB_FLAG_FLAG);
+                  }
+              }
+          }
+
+          // count soundings
         for (i = 0; i < ping[idataread].beams_bath; i++) {
           ping[idataread].beamflag_filter[i] = ping[idataread].beamflag[i];
           if (mb_beam_ok(ping[idataread].beamflag[i])) {
@@ -1860,17 +1844,46 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
             index += 4;
             PMPRINT(MOD_MBTRNPP, MBTRNPP_V3, (stderr, "mb1 record chk[%08X] idx[%zu] mb1sz[%zu]\n", checksum, index, mb1_size));
 
-            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MBPING_XT], mtime_dtime());
+            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PING_XT], mtime_dtime());
 
             /* output MB1, TRN data */
             if ( !OUTPUT_FLAGS_ZERO() ) {
 
+                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
+
                 // do MB1 processing/output
                 mbtrnpp_process_mb1(output_buffer, mb1_size, trn_cfg);
 
+                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
+
 #ifdef WITH_MBTNAV
-                // do TRN processing/output
-                mbtrnpp_trn_process_mb1(trn_instance, (mb1_t *)output_buffer, trn_cfg);
+                if (trn_nombgain || (transmit_gain >= transmit_gain_threshold) ){
+                    // reinit TRN filter when transmit gains indicate valid input
+                    // and clear the flag
+                    if ( trn_reinit_flag ){
+                        wtnav_reinit_filter(trn_instance,true);
+                        trn_reinit_flag=false;
+                        mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: trn filter reinit gain[%.2lf]\n",transmit_gain);
+                        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_TRN_REINIT]);
+                    }
+
+                    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_TRN_XT], mtime_dtime());
+
+                    // do TRN processing/output
+                    mbtrnpp_trn_process_mb1(trn_instance, (mb1_t *)output_buffer, trn_cfg);
+
+                    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_TRN_XT], mtime_dtime());
+
+                }else{
+                    // if transmit gain drops below threshold...
+                    if(!trn_reinit_flag){
+                        // log and count gain lo event (one time)
+                        mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: transmit gain lo[%.2lf]\n",transmit_gain);
+                        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_GAIN_LO]);
+                    }
+                    // reset reinit flag so reinit will occur when gain restored
+                    trn_reinit_flag=true;
+                }
 #endif // WITH_MBTNAV
 
                 MBTRNPP_UPDATE_STATS(app_stats, mbtrnpp_mlog_id, MBTRNPP_STAT_FLAGS);
@@ -1879,8 +1892,19 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
 
             /* write the packet to a file */
             if ( OUTPUT_FLAG_SET(OUTPUT_MB1_FILE_EN) ) {
+
+
                 if(NULL!=output_fp && NULL!=output_buffer){
-                  fwrite(output_buffer, mb1_size, 1, output_fp);
+                    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_FWRITE_XT], mtime_dtime());
+
+                    size_t obytes=0;
+                    if( (obytes=fwrite(output_buffer, mb1_size, 1, output_fp))>0){
+                    	MST_COUNTER_ADD(app_stats->stats->events[MBTPP_EV_EMBGETALL],obytes);
+                    }
+
+
+                    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_FWRITE_XT], mtime_dtime());
+
                 }else{
                     fprintf(stderr,"%s:%d - ERR fwrite failed obuf[%p] fp[%p]\n",__FUNCTION__,__LINE__,output_buffer,output_fp);
                 }
@@ -1907,7 +1931,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
       }
       else {
 
-        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MBGETFAIL_XT], mtime_dtime());
+        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
         PMPRINT(MOD_MBTRNPP, MBTRNPP_V4,
                 (stderr, "mb_get_all failed: status[%d] kind[%d] err[%d]\n", status, kind, error));
 
@@ -1920,17 +1944,17 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
           error = MB_ERROR_NO_ERROR;
 
         }
-        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MBGETFAIL_XT], mtime_dtime());
+        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
       }
 
-      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MBPOST_XT], mtime_dtime());
+      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_POST_XT], mtime_dtime());
 
       if (status == MB_FAILURE && error > 0) {
         fprintf(stderr, "mbtrnpp: MB_FAILURE - error>0 : setting done flag\n");
         done = true;
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFAILURE]);
       }
-      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MBPOST_XT], mtime_dtime());
+      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_POST_XT], mtime_dtime());
 
     } // while(!done) [main loop]
 
@@ -2365,37 +2389,33 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
     }
 
     // we can only measure the previous stats cycle...
-    if (stats->stats->per_stats[MBTPP_CH_CYCLE_XT].n > 0) {
+    if (stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].n > 0) {
       // get the timing of the last cycle
-      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_STATS_XT], stats_prev_start);
-      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_STATS_XT], stats_prev_end);
+      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_STATS_XT], stats_prev_start);
+      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_STATS_XT], stats_prev_end);
     }
     else {
       // seed the first cycle
-      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_STATS_XT], (stats_now - 0.0001));
-      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_STATS_XT], stats_now);
+      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_STATS_XT], (stats_now - 0.0001));
+      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_STATS_XT], stats_now);
     }
 
     // end the cycle timer here
     // [start at the end if this function]
-    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_CYCLE_XT], stats_now);
+    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT], stats_now);
 
     // measure dtime execution time (twice), while we're at it
-    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_DTIME_XT], mtime_dtime());
-    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_DTIME_XT], mtime_dtime());
-    MST_METRIC_DIV(app_stats->stats->metrics[MBTPP_CH_DTIME_XT], 2.0);
+    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_DTIME_XT], mtime_dtime());
+    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_DTIME_XT], mtime_dtime());
+    MST_METRIC_DIV(app_stats->stats->metrics[MBTPP_CH_MB_DTIME_XT], 2.0);
 
     // update uptime
     stats->uptime = stats_now - stats->session_start;
 
-    // update throughput measurement
-    stats->stats->metrics[MBTPP_CH_THRUPUT].value =
-        (stats->uptime > 0.0 ? (double)stats->stats->status[MBTPP_STA_TRN_TX_BYTES] / stats->uptime : 0.0);
-
     PMPRINT(MOD_MBTRNPP, MBTRNPP_V4,
             (stderr, "cycle_xt: stat_now[%.4lf] start[%.4lf] stop[%.4lf] value[%.4lf]\n", stats_now,
-             app_stats->stats->metrics[MBTPP_CH_CYCLE_XT].start, app_stats->stats->metrics[MBTPP_CH_CYCLE_XT].stop,
-             app_stats->stats->metrics[MBTPP_CH_CYCLE_XT].value));
+             app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT].start, app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT].stop,
+             app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT].value));
 
     // update stats
     mstats_update_stats(stats->stats, MBTPP_CH_COUNT, flags);
@@ -2408,15 +2428,15 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
 
     PMPRINT(MOD_MBTRNPP,  MBTRNPP_V4,
             (stderr, "cycle_xt.p: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
-             app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].n, app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].sum,
-             app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].min, app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].max,
-             app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].avg));
+             app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].n, app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].sum,
+             app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].min, app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].max,
+             app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].avg));
 
     PMPRINT(MOD_MBTRNPP, MBTRNPP_V4,
             (stderr, "cycle_xt.a: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
-             app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].n, app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].sum,
-             app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].min, app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].max,
-             app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].avg));
+             app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].n, app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].sum,
+             app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].min, app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].max,
+             app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].avg));
 
     if (flags & MSF_READER) {
       mstats_update_stats(reader_stats, R7KR_MET_COUNT, flags);
@@ -2433,7 +2453,7 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
         ((stats_now - stats->stats->stat_period_start) > stats->stats->stat_period_sec)) {
 
       // start log execution timer
-      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_LOG_XT], mtime_dtime());
+      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_LOG_XT], mtime_dtime());
 
       mlog_tprintf(mbtrnpp_mlog_id, "%.3lf,i,uptime,%0.3lf\n", stats_now, stats->uptime);
       mstats_log_stats(stats->stats, stats_now, log_id, flags);
@@ -2456,11 +2476,11 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
       stats->stats->stat_period_start = stats_now;
 
       // stop log execution timer
-      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_LOG_XT], mtime_dtime());
+      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_LOG_XT], mtime_dtime());
     }
 
     // start cycle timer
-    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_CYCLE_XT], mtime_dtime());
+    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT], mtime_dtime());
 
     // update stats execution time variables
     stats_prev_start = stats_now;
@@ -2691,7 +2711,7 @@ int mbtrnpp_trn_pub_olog(trn_update_t *update,
                          sqrt(update->mse_dat->covariance[0]),
                          sqrt(update->mse_dat->covariance[2]),
                          sqrt(update->mse_dat->covariance[5]));
-        mlog_tprintf(log_id,"trn_reinit,%d\n",update->reinit_count);
+        mlog_tprintf(log_id,"trn_reinit_flag,%d\n",update->reinit_count);
 
     }
 
@@ -2890,6 +2910,7 @@ int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, pt_cdata_t **pt_
     }
     else {
       PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "Last Meas Invalid\n"));
+        mlog_tprintf(trn_ulog_id,"ERR: last meas invalid\n");
     }
     wposet_destroy(mle);
     wposet_destroy(mse);
@@ -2907,19 +2928,19 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
         // publish to selected outputs
         if( OUTPUT_FLAG_SET(OUTPUT_TRNU_SVR_EN) ){
 
-            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_PUB_XT], mtime_dtime());
+            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_PUB_XT], mtime_dtime());
 
             mbtrnpp_trn_pub_osocket(pstate, trnusvr->socket);
 
-            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_PUB_XT], mtime_dtime());
-            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TNAV_PUBN]);
+            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_PUB_XT], mtime_dtime());
+            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
         }
         if( OUTPUT_FLAG_SET(OUTPUT_TRNU_ASC) ){
-            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_LOG_XT], mtime_dtime());
+            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_LOG_XT], mtime_dtime());
 
             mbtrnpp_trn_pub_olog(pstate, trn_ulog_id);
 
-            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_LOG_XT], mtime_dtime());
+            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_LOG_XT], mtime_dtime());
         }
         if( OUTPUT_FLAG_SET(OUTPUT_TRNU_DEBUG) ){
             mbtrnpp_trn_pub_odebug(pstate);
@@ -2958,10 +2979,12 @@ int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **
       }
       else {
         PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "wposet_mb1_to_pose failed [%d]\n", test));
+          mlog_tprintf(trn_ulog_id,"ERR: mb1_to_pose failed [%d]\n", test);
       }
     }
     else {
       PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "wmeast_mb1_to_meas failed [%d]\n", test));
+        mlog_tprintf(trn_ulog_id,"ERR: mb1_to_meas failed [%d]\n", test);
     }
   }
 
@@ -2970,13 +2993,16 @@ int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **
 
 /*--------------------------------------------------------------------*/
 
+//int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 {
     int retval=-1;
 
-    // check decimation
-    bool do_process=false;
+    // ignore if trn disabled
     if(trn_enable){
+        // check decimation
+        bool do_process=false;
+
         // TODO: arbitrate between time/count decimation
         if(trn_decn>0){
             if( ((++trn_dec_cycles)%trn_decn)==0 ){
@@ -2994,87 +3020,97 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
             // (trn_decs<=0 && trn_decn<=0 )
             do_process=true;
         }
-    }
 
-    // server: update (trn_server) client connections
-    netif_update_connections(trnsvr);
-    // server: service (trn_server) client requests
-    netif_reqres(trnsvr);
-    // server: update (trnu server) client connections
-    netif_update_connections(trnusvr);
-    // server: service (trnu server) client requests
-    netif_reqres(trnusvr);
+        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNSVR_XT], mtime_dtime());
 
-    if (do_process) {
+        // server: update (trn_server) client connections
+        netif_update_connections(trnsvr);
 
-        if(NULL!=tnav && NULL!=mb1 && NULL!=cfg){
-            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_CYCLE_XT], mtime_dtime());
-            int test=-1;
+        // server: service (trn_server) client requests
+        netif_reqres(trnsvr);
 
-            wmeast_t *mt = NULL;
-            wposet_t *pt = NULL;
-            trn_update_t trn_state={NULL,NULL,NULL,0},*pstate=&trn_state;
+        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNSVR_XT], mtime_dtime());
+
+        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUSVR_XT], mtime_dtime());
+       // server: update (trnu server) client connections
+        netif_update_connections(trnusvr);
+        // server: service (trnu server) client requests
+        netif_reqres(trnusvr);
+
+        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUSVR_XT], mtime_dtime());
+
+        if (do_process) {
+            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRN_PROCN]);
 
             if(NULL!=tnav && NULL!=mb1 && NULL!=cfg){
+                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_XT], mtime_dtime());
+                int test=-1;
 
-                // get TRN update
-                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_UPDATE_XT], mtime_dtime());
+                wmeast_t *mt = NULL;
+                wposet_t *pt = NULL;
+                trn_update_t trn_state={NULL,NULL,NULL,0},*pstate=&trn_state;
 
-                test=mbtrnpp_trn_update(tnav, mb1, &pt, &mt,cfg);
+                if(NULL!=tnav && NULL!=mb1 && NULL!=cfg){
 
-                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_UPDATE_XT], mtime_dtime());
+                    // get TRN update
+                    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_UPDATE_XT], mtime_dtime());
 
-                if( test==0){
-                    // get TRN bias estimates
-                    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_BIASEST_XT], mtime_dtime());
+                    test=mbtrnpp_trn_update(tnav, mb1, &pt, &mt,cfg);
 
-                    test=mbtrnpp_trn_get_bias_estimates(tnav, pt, &pstate->pt_dat, &pstate->mle_dat, &pstate->mse_dat);
-
-                    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_BIASEST_XT], mtime_dtime());
+                    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_UPDATE_XT], mtime_dtime());
 
                     if( test==0){
-                        if(NULL!=pstate->pt_dat &&  NULL!= pstate->mle_dat && NULL!=pstate->mse_dat ){
+                        // get TRN bias estimates
+                        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_BIASEST_XT], mtime_dtime());
 
-                            // get number of reinits
-                            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_REINIT_XT], mtime_dtime());
+                        test=mbtrnpp_trn_get_bias_estimates(tnav, pt, &pstate->pt_dat, &pstate->mle_dat, &pstate->mse_dat);
 
-                            pstate->reinit_count = wtnav_get_num_reinits(tnav);
+                        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_BIASEST_XT], mtime_dtime());
 
-                            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_REINIT_XT], mtime_dtime());
+                        if( test==0){
+                            if(NULL!=pstate->pt_dat &&  NULL!= pstate->mle_dat && NULL!=pstate->mse_dat ){
 
-                            // publish to selected outputs
-                            mbtrnpp_trn_publish(pstate, cfg);
+                                // get number of reinits
+                                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
 
-                            retval=0;
+                                pstate->reinit_count = wtnav_get_num_reinits(tnav);
 
+                                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
+
+                                // publish to selected outputs
+                                mbtrnpp_trn_publish(pstate, cfg);
+
+                                retval=0;
+
+                            }else{
+                                PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat));
+                                mlog_tprintf(trn_ulog_id,"ERR: NULL data pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p] ts[%.3lf] beams[%u] ping[%d] lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n",
+                                             pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat,
+                                             mb1->sounding.ts, mb1->sounding.nbeams, mb1->sounding.ping_number,
+                                             mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.hdg, mb1->sounding.depth);
+                            }
                         }else{
-                            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat));
-                            mlog_tprintf(trn_ulog_id,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat);
-                            mlog_tprintf(trn_ulog_id,"ERR: ts[%.3lf] beams[%u] ping[%d] \n",mb1->sounding.ts, mb1->sounding.nbeams, mb1->sounding.ping_number);
-                            mlog_tprintf(trn_ulog_id,"ERR: lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n\n",mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.hdg, mb1->sounding.depth);
+                            mlog_tprintf(trn_ulog_id,"ERR: trncli_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno));
 
+                            PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
                         }
                     }else{
-                        PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_get_bias_estimates failed [%d]\n",test));
-                        //                mlog_tprintf(mbtrnpp_mlog_id,"ERR: trncli_get_bias_estimates failed [%d]\n",test);
+                        mlog_tprintf(trn_ulog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
+                        PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_update failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
                     }
-                }else{
-                    PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_send_update failed [%d]\n",test));
-                    //            mlog_tprintf(mbtrnpp_mlog_id,"ERR: trncli_send_update failed [%d]\n",test);
-                }
-                wmeast_destroy(mt);
-                wposet_destroy(pt);
-                if(NULL!=pstate->pt_dat)
+                    wmeast_destroy(mt);
+                    wposet_destroy(pt);
+                    if(NULL!=pstate->pt_dat)
                     free(pstate->pt_dat);
-                if(NULL!=pstate->mse_dat)
+                    if(NULL!=pstate->mse_dat)
                     free(pstate->mse_dat);
-                if(NULL!=pstate->mle_dat)
+                    if(NULL!=pstate->mle_dat)
                     free(pstate->mle_dat);
+                }
+                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_XT], mtime_dtime());
             }
-            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_CYCLE_XT], mtime_dtime());
         }
     }
-
 
     return retval;
 }
@@ -3098,8 +3134,10 @@ int mbtrnpp_process_mb1(char *src, size_t len, trn_config_t *cfg)
             netif_reqres(mb1svr);
            // publish mb1 sounding to all clients
             netif_pub(mb1svr,(char *)src, len);
+            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_PUBN]);
+
         }
-        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CYCLES]);
+        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_CYCLES]);
 
         //                struct timeval stv={0};
         //                gettimeofday(&stv,NULL);
@@ -3190,7 +3228,7 @@ int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, i
 
     if (reader->state == R7KR_CONNECTED || reader->state == R7KR_SUBSCRIBED) {
       // update application performance profile
-      MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_SRC_CONN]);
+      MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_CONN]);
     }
 
     // get global 7K reader performance profile
@@ -3279,7 +3317,7 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
     *error   = MB_ERROR_EOF;
     *size    = (size_t)rbytes;
 
-      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MBGETFAIL_XT], mtime_dtime());
+      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
       PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb_get_all failed: status[%d] err[%d]\n",status, *error));
 
       MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBGETALL]);
@@ -3291,21 +3329,21 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
       // check connection status
       // only reconnect if disconnected
       if ((NULL!=reader && reader->state==R7KR_INITIALIZED) || (me_errno==ME_ESOCK) || (me_errno==ME_EOF)  ) {
-          MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ESRC_SOCKET]);
+          MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBSOCKET]);
 
           // empty the reader's record frame container
           r7kr_reader_purge(reader);
           fprintf(stderr,"mbtrnpp: input socket disconnected status[%s]\n",r7kr_strstate(reader->state));
           mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket disconnected status[%s]\n",r7kr_strstate(reader->state));
-          MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_SRC_DISN]);
+          MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_DISN]);
           if (r7kr_reader_connect(reader,true)==0) {
               fprintf(stderr,"mbtrnpp: input socket connected status[%s]\n",r7kr_strstate(reader->state));
               mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket connected status[%s]\n",r7kr_strstate(reader->state));
-              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_SRC_CONN]);
+              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_CONN]);
           }else{
               fprintf(stderr,"mbtrnpp: input socket reconnect failed status[%s]\n",r7kr_strstate(reader->state));
               mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket reconnect failed status[%s]\n",r7kr_strstate(reader->state));
-              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ESRC_CON]);
+              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBCON]);
 
               struct timespec twait={0},trem={0};
               twait.tv_sec=5;
@@ -3314,7 +3352,7 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
       }
 
 
-      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MBGETFAIL_XT], mtime_dtime());
+      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
 
 //    if (me_errno==ME_ESOCK) {
 //        fprintf(stderr,"r7kr_reader server connection closed.\n");
@@ -3740,7 +3778,7 @@ fprintf(stderr, "%s:%4.4d Handling %d datagrams\n", __FILE__, __LINE__, totalDgm
           mb_put_binary_short(true, 1, &buffer[sizeof(struct mbsys_kmbes_header)]);
           mb_put_binary_short(true, 1, &buffer[sizeof(struct mbsys_kmbes_header)+2]);
           mb_put_binary_int(true, totalSize, &buffer[index]);
-      dgmsReceived = 0; /*reset received counter back to 0*/
+	    dgmsReceived = 0; /*reset received counter back to 0*/
         }
       }
     }

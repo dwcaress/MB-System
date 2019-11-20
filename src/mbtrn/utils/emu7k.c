@@ -482,7 +482,7 @@ static void *s_server_publish(void *arg)
         
         while (NULL!=source_file && !svr->stop) {
             double min_delay = ((double)svr->cfg->min_delay)/1000.0;
-            double max_delay = MAX_DELAY_DFL_SEC;
+            double max_delay = ((double)svr->cfg->max_delay)/1000.0;//MAX_DELAY_DFL_SEC;
 
             PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"running file[%s]\n",source_file->path));
             PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"min_delay[%.3lf] max_delay[%.3lf]\n",min_delay,max_delay));
@@ -660,7 +660,7 @@ static void *s_server_publish(void *arg)
                                     int64_t status=-1;
                                     if( (status=msock_send(client->sock_if, cur_frame, pnf[CUR_FRAME]->packet_size))<=0){
                                         PEPRINT((stderr,"send failed [%"PRId64"] [%d/%s]\n",status,errno,strerror(errno)));
-                                        if ( errno==EPIPE || errno==ECONNRESET ) {
+                                        if ( errno==EPIPE || errno==ECONNRESET || errno==EBADF) {
                                             delete_client=true;
                                         }
                                     }
@@ -962,7 +962,7 @@ void *s_server_main(void *arg)
                                 do_close=false;
                                 PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"server waiting for client data fd[%d]\n",i));
                                 if (( nbytes = recv(i, iobuf, sizeof iobuf, 0)) <= 0) {
-                                    PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"handle client data fd[%d] nbytes[%d]\n",i,nbytes));
+                                    PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"ERR - recv failed fd[%d] nbytes[%d] [%d/%s]\n",i,nbytes,errno, strerror(errno)));
                                     // got error or connection closed by client
                                     if (nbytes == 0) {
                                         // connection closed
@@ -970,11 +970,13 @@ void *s_server_main(void *arg)
                                     } else if(nbytes<0) {
                                         fprintf(stderr,"ERR - recv failed socket[%d] [%d/%s]\n",i,errno,strerror(errno));
                                     }
+                                    do_close=true;
                                 }else{
                                     PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"server received request on socket [%d] len[%d]\n",i,nbytes));
                                     s_server_handle_request(svr,iobuf,nbytes,i);
                                 }
                                 if (do_close) {
+                                    fprintf(stderr,"ERR - closing fd[%d]\n", i);
                                     close(i); // bye!
                                 }
                                 FD_CLR(i, &master); // remove from master set
@@ -1070,6 +1072,7 @@ static void s_show_help()
     "  --host=s       : host IP address or name\n"
     "  --port=n       : TCP/IP port\n"
     "  --min-delay=n  : minimum packet processing delay (msec)\n"
+    "  --max-delay=n  : maximum packet processing delay (msec)\n"
     "  --restart      : restart data when end of file is reached\n"
     "  --no-restart   : stop when end of file is reached\n"
     "  --statn=n      : output stats every n records\n"
@@ -1105,6 +1108,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"port", required_argument, NULL, 0},
         {"file", required_argument, NULL, 0},
         {"min-delay", required_argument, NULL, 0},
+        {"max-delay", required_argument, NULL, 0},
         {"statn", required_argument, NULL, 0},
         {"restart", no_argument, NULL, 0},
         {"no-restart", no_argument, NULL, 0},
@@ -1151,6 +1155,10 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                 // min-delay
                 else if (strcmp("min-delay", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->min_delay);
+                }
+                // max-delay
+                else if (strcmp("max-delay", options[option_index].name) == 0) {
+                    sscanf(optarg,"%d",&cfg->max_delay);
                 }
                 // statn
                 else if (strcmp("statn", options[option_index].name) == 0) {
@@ -1206,6 +1214,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
         fprintf(stderr,"restart   [%c]\n",(cfg->restart?'Y':'N'));
         fprintf(stderr,"statn     [%u]\n",cfg->statn);
         fprintf(stderr,"min-delay [%d]\n",cfg->min_delay);
+        fprintf(stderr,"max-delay [%d]\n",cfg->max_delay);
         fprintf(stderr,"nf        [%c]\n",(cfg->netframe_input?'Y':'N'));
         fprintf(stderr,"offset    [%"PRIu32"]\n",cfg->start_offset);
         fprintf(stderr,"xds       [%d]\n",cfg->xds);
@@ -1311,6 +1320,7 @@ int main(int argc, char **argv)
         strdup(EMU_HOST_DFL),
         EMU_PORT_DFL,
         MIN_DELAY_DFL_MSEC,
+        MAX_DELAY_DFL_MSEC,
         RESTART_DFL,
         STATN_DFL_REC,
         0,0,0,

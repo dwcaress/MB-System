@@ -334,6 +334,18 @@ MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 
 -------------------------------------------------------------------------------
 
+Everything: Now fully compatible with PROJ 6.X. The configure script will detect
+the presence or absence of PROJ 6 or later - if the PROJ installation predates
+PROJ 6 then the old header files and API are used. PROJ 6 and later include a
+comprehensive database of coordinate reference systems (e.g. projected coordinate
+systems and/or datums), making the projected coordinate system list kept in the
+file src/share/Projections.dat unnecessary. For now this file will continue to
+be part of the MB-System distribution to support installation with obsolete
+versions of PROJ.
+
+TRN: Removed some unnecessary test data and code from the src/mbtrnav/gctp/
+directory.
+
 -----> 5.7.6beta17 (October 29, 2019)
 
 MBeditviz: Added option to display 3D soundings colored according to the map's
