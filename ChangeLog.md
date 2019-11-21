@@ -343,8 +343,11 @@ file src/share/Projections.dat unnecessary. For now this file will continue to
 be part of the MB-System distribution to support installation with obsolete
 versions of PROJ.
 
-TRN: Removed some unnecessary test data and code from the src/mbtrnav/gctp/
+mbtrnpp: Removed some unnecessary test data and code from the src/mbtrnav/gctp/
 directory.
+
+mbtrnpp: Fixed a number for formatting and type issues hampering building the
+TRN code on MacOs.
 
 -----> 5.7.6beta17 (October 29, 2019)
 
