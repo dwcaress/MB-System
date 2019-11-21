@@ -332,7 +332,7 @@ if test "$GOT_PROJ" = "yes" ; then
     AS_ECHO(["PROJ library location specified: $proj_libdir - check if libproj is there..."])
     save_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -L$proj_libdir"
-    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+    AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
     if test "$FOUND_PROJ_LIB" = "yes"; then
         FOUND_PROJ6=yes
         AS_ECHO(["Found PROJ 6 library libproj"])
@@ -353,7 +353,7 @@ else
     dnl Look for pkg-config PROJ package...
     AS_ECHO(["Look for pkg-config PROJ package..."])
     PKG_CHECK_MODULES([libproj], [proj], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no])
-    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+    AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
     if test "$FOUND_PROJ_LIB" = "yes"; then
         FOUND_PROJ6=yes
         AS_ECHO(["Found PROJ 6 library libproj"])
@@ -373,7 +373,7 @@ fi
 if test "$FOUND_PROJ_LIB" = "no" ; then
     dnl Did not find PROJ library pkg-config package, looking in the other usual places...
     AS_ECHO(["Did not find PROJ library pkg-config package, looking in the other usual places..."])
-    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no],)
+    AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no],)
     if test "$FOUND_PROJ_LIB" = "yes"; then
       FOUND_PROJ6=yes
       AS_ECHO(["Found PROJ 6 library libproj"])

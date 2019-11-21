@@ -818,6 +818,7 @@ infodir
 docdir
 oldincludedir
 includedir
+runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -935,6 +936,7 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
+runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1187,6 +1189,15 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
+  -runstatedir | --runstatedir | --runstatedi | --runstated \
+  | --runstate | --runstat | --runsta | --runst | --runs \
+  | --run | --ru | --r)
+    ac_prev=runstatedir ;;
+  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
+  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
+  | --run=* | --ru=* | --r=*)
+    runstatedir=$ac_optarg ;;
+
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1324,7 +1335,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir
+		libdir localedir mandir runstatedir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1477,6 +1488,7 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -18696,9 +18708,9 @@ if test "$GOT_PROJ" = "yes" ; then
         $as_echo "PROJ library location specified: $proj_libdir - check if libproj is there..."
     save_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -L$proj_libdir"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_create in -lproj" >&5
-$as_echo_n "checking for proj_create in -lproj... " >&6; }
-if ${ac_cv_lib_proj_proj_create+:} false; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_normalize_for_visualization in -lproj" >&5
+$as_echo_n "checking for proj_normalize_for_visualization in -lproj... " >&6; }
+if ${ac_cv_lib_proj_proj_normalize_for_visualization+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -18712,27 +18724,27 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char proj_create ();
+char proj_normalize_for_visualization ();
 int
 main ()
 {
-return proj_create ();
+return proj_normalize_for_visualization ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_proj_proj_create=yes
+  ac_cv_lib_proj_proj_normalize_for_visualization=yes
 else
-  ac_cv_lib_proj_proj_create=no
+  ac_cv_lib_proj_proj_normalize_for_visualization=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_create" >&5
-$as_echo "$ac_cv_lib_proj_proj_create" >&6; }
-if test "x$ac_cv_lib_proj_proj_create" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_normalize_for_visualization" >&5
+$as_echo "$ac_cv_lib_proj_proj_normalize_for_visualization" >&6; }
+if test "x$ac_cv_lib_proj_proj_normalize_for_visualization" = xyes; then :
   FOUND_PROJ_LIB=yes
 else
   FOUND_PROJ_LIB=no
@@ -18919,8 +18931,8 @@ $as_echo "no" >&6; }
 fi
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj" >&5
-$as_echo_n "checking for proj... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libproj" >&5
+$as_echo_n "checking for libproj... " >&6; }
 
 if test -n "$libproj_CFLAGS"; then
     pkg_cv_libproj_CFLAGS="$libproj_CFLAGS"
@@ -18960,7 +18972,7 @@ fi
 
 
 if test $pkg_failed = yes; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
 if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
@@ -18978,7 +18990,7 @@ fi
 
 	FOUND_PROJ_LIB=no
 elif test $pkg_failed = untried; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 	FOUND_PROJ_LIB=no
 else
@@ -18988,9 +19000,9 @@ else
 $as_echo "yes" >&6; }
 	FOUND_PROJ_LIB=yes
 fi
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_create in -lproj" >&5
-$as_echo_n "checking for proj_create in -lproj... " >&6; }
-if ${ac_cv_lib_proj_proj_create+:} false; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_normalize_for_visualization in -lproj" >&5
+$as_echo_n "checking for proj_normalize_for_visualization in -lproj... " >&6; }
+if ${ac_cv_lib_proj_proj_normalize_for_visualization+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -19004,27 +19016,27 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char proj_create ();
+char proj_normalize_for_visualization ();
 int
 main ()
 {
-return proj_create ();
+return proj_normalize_for_visualization ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_proj_proj_create=yes
+  ac_cv_lib_proj_proj_normalize_for_visualization=yes
 else
-  ac_cv_lib_proj_proj_create=no
+  ac_cv_lib_proj_proj_normalize_for_visualization=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_create" >&5
-$as_echo "$ac_cv_lib_proj_proj_create" >&6; }
-if test "x$ac_cv_lib_proj_proj_create" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_normalize_for_visualization" >&5
+$as_echo "$ac_cv_lib_proj_proj_normalize_for_visualization" >&6; }
+if test "x$ac_cv_lib_proj_proj_normalize_for_visualization" = xyes; then :
   FOUND_PROJ_LIB=yes
 else
   FOUND_PROJ_LIB=no
@@ -19089,9 +19101,9 @@ fi
 fi
 if test "$FOUND_PROJ_LIB" = "no" ; then
         $as_echo "Did not find PROJ library pkg-config package, looking in the other usual places..."
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_create in -lproj" >&5
-$as_echo_n "checking for proj_create in -lproj... " >&6; }
-if ${ac_cv_lib_proj_proj_create+:} false; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_normalize_for_visualization in -lproj" >&5
+$as_echo_n "checking for proj_normalize_for_visualization in -lproj... " >&6; }
+if ${ac_cv_lib_proj_proj_normalize_for_visualization+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -19105,27 +19117,27 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char proj_create ();
+char proj_normalize_for_visualization ();
 int
 main ()
 {
-return proj_create ();
+return proj_normalize_for_visualization ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_proj_proj_create=yes
+  ac_cv_lib_proj_proj_normalize_for_visualization=yes
 else
-  ac_cv_lib_proj_proj_create=no
+  ac_cv_lib_proj_proj_normalize_for_visualization=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_create" >&5
-$as_echo "$ac_cv_lib_proj_proj_create" >&6; }
-if test "x$ac_cv_lib_proj_proj_create" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_normalize_for_visualization" >&5
+$as_echo "$ac_cv_lib_proj_proj_normalize_for_visualization" >&6; }
+if test "x$ac_cv_lib_proj_proj_normalize_for_visualization" = xyes; then :
   FOUND_PROJ_LIB=yes
 else
   FOUND_PROJ_LIB=no
@@ -19639,8 +19651,8 @@ else
         $as_echo "Look for pkg-config FFTW package..."
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for fftw3" >&5
-$as_echo_n "checking for fftw3... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libfftw3" >&5
+$as_echo_n "checking for libfftw3... " >&6; }
 
 if test -n "$libfftw3_CFLAGS"; then
     pkg_cv_libfftw3_CFLAGS="$libfftw3_CFLAGS"
@@ -19680,7 +19692,7 @@ fi
 
 
 if test $pkg_failed = yes; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
 if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
@@ -19698,7 +19710,7 @@ fi
 
 	GOT_FFTW=no
 elif test $pkg_failed = untried; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 	GOT_FFTW=no
 else
@@ -20007,8 +20019,8 @@ fi
                 $as_echo "Look for pkg-config X11 package..."
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for openmotif" >&5
-$as_echo_n "checking for openmotif... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libXm" >&5
+$as_echo_n "checking for libXm... " >&6; }
 
 if test -n "$libXm_CFLAGS"; then
     pkg_cv_libXm_CFLAGS="$libXm_CFLAGS"
@@ -20048,7 +20060,7 @@ fi
 
 
 if test $pkg_failed = yes; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
 if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
@@ -20066,7 +20078,7 @@ fi
 
 	GOT_MOTIF=no
 elif test $pkg_failed = untried; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 	GOT_MOTIF=no
 else
@@ -20305,8 +20317,8 @@ fi
                 $as_echo "Look for pkg-config OpenGL package..."
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for opengl" >&5
-$as_echo_n "checking for opengl... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libGLU" >&5
+$as_echo_n "checking for libGLU... " >&6; }
 
 if test -n "$libGLU_CFLAGS"; then
     pkg_cv_libGLU_CFLAGS="$libGLU_CFLAGS"
@@ -20346,7 +20358,7 @@ fi
 
 
 if test $pkg_failed = yes; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
 if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
@@ -20364,7 +20376,7 @@ fi
 
 	GOT_OPENGL=no
 elif test $pkg_failed = untried; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 	GOT_OPENGL=no
 else
