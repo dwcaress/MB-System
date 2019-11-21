@@ -23,6 +23,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
 
+- Version 5.7.6beta18    November 21, 2019
 - Version 5.7.6beta17    November 15, 2019
 - Version 5.7.6beta16    October 29, 2019
 - Version 5.7.6beta15    October 21, 2019
@@ -334,6 +335,8 @@ MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 
 -------------------------------------------------------------------------------
 
+-----> 5.7.6beta18 (November 21, 2019)
+
 Everything: Now fully compatible with PROJ 6.X. The configure script will detect
 the presence or absence of PROJ 6 or later - if the PROJ installation predates
 PROJ 6 then the old header files and API are used. PROJ 6 and later include a
@@ -349,7 +352,7 @@ directory.
 mbtrnpp: Fixed a number for formatting and type issues hampering building the
 TRN code on MacOs.
 
------> 5.7.6beta17 (October 29, 2019)
+-----> 5.7.6beta17 (November 15, 2019)
 
 MBeditviz: Added option to display 3D soundings colored according to the map's
 coloring (including selected colortabel and any histogram equalization).
