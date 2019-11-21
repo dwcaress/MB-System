@@ -18988,6 +18988,102 @@ else
 $as_echo "yes" >&6; }
 	FOUND_PROJ_LIB=yes
 fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_create in -lproj" >&5
+$as_echo_n "checking for proj_create in -lproj... " >&6; }
+if ${ac_cv_lib_proj_proj_create+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lproj  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char proj_create ();
+int
+main ()
+{
+return proj_create ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_proj_proj_create=yes
+else
+  ac_cv_lib_proj_proj_create=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_create" >&5
+$as_echo "$ac_cv_lib_proj_proj_create" >&6; }
+if test "x$ac_cv_lib_proj_proj_create" = xyes; then :
+  FOUND_PROJ_LIB=yes
+else
+  FOUND_PROJ_LIB=no
+fi
+
+    if test "$FOUND_PROJ_LIB" = "yes"; then
+        FOUND_PROJ6=yes
+        $as_echo "Found PROJ 6 library libproj"
+    else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pj_init_plus in -lproj" >&5
+$as_echo_n "checking for pj_init_plus in -lproj... " >&6; }
+if ${ac_cv_lib_proj_pj_init_plus+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lproj  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pj_init_plus ();
+int
+main ()
+{
+return pj_init_plus ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_proj_pj_init_plus=yes
+else
+  ac_cv_lib_proj_pj_init_plus=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_pj_init_plus" >&5
+$as_echo "$ac_cv_lib_proj_pj_init_plus" >&6; }
+if test "x$ac_cv_lib_proj_pj_init_plus" = xyes; then :
+  FOUND_PROJ_LIB=yes
+else
+  FOUND_PROJ_LIB=no
+fi
+
+        if test "$FOUND_PROJ_LIB" = "yes"; then
+            FOUND_PROJ4=yes
+            $as_echo "Found PROJ 4/5 library libproj"
+        fi
+    fi
+    if test "$FOUND_PROJ_LIB" = "no"; then
+        as_fn_error $? "Did not find PROJ library pkg-config package..." "$LINENO" 5
+    fi
     libproj_LIBS="-lproj"
     libproj_LDFLAGS=""
 fi
@@ -19143,12 +19239,6 @@ fi
 if test "$FOUND_PROJ_HEADER_proj_apih" = "yes"; then
   FOUND_PROJ_HEADERS="yes"
   $as_echo "Found PROJ header proj_api.h"
-fi
-if test "$FOUND_PROJ_HEADERS" = "yes" ; then
-  $as_echo "3  Set FOUND_PROJ_HEADERS to yes"
-fi
-if test "$FOUND_PROJ_HEADERS" = "no" ; then
-  $as_echo "3  Set FOUND_PROJ_HEADERS to no"
 fi
 if test "$FOUND_PROJ_HEADERS" = "no" ; then
   if test "$GOT_PROJ" = "yes" ; then
