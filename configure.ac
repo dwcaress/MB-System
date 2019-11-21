@@ -353,6 +353,20 @@ else
     dnl Look for pkg-config PROJ package...
     AS_ECHO(["Look for pkg-config PROJ package..."])
     PKG_CHECK_MODULES([libproj], [proj], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no])
+    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+    if test "$FOUND_PROJ_LIB" = "yes"; then
+        FOUND_PROJ6=yes
+        AS_ECHO(["Found PROJ 6 library libproj"])
+    else
+        AC_CHECK_LIB([proj], [pj_init_plus], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+        if test "$FOUND_PROJ_LIB" = "yes"; then
+            FOUND_PROJ4=yes
+            AS_ECHO(["Found PROJ 4/5 library libproj"])
+        fi
+    fi
+    if test "$FOUND_PROJ_LIB" = "no"; then
+        AC_MSG_ERROR([Did not find PROJ library pkg-config package...])
+    fi
     libproj_LIBS="-lproj"
     libproj_LDFLAGS=""
 fi
@@ -412,12 +426,6 @@ AC_CHECK_HEADER(proj_api.h, [FOUND_PROJ_HEADER_proj_apih=yes], [FOUND_PROJ_HEADE
 if test "$FOUND_PROJ_HEADER_proj_apih" = "yes"; then
   FOUND_PROJ_HEADERS="yes"
   AS_ECHO(["Found PROJ header proj_api.h"])
-fi
-if test "$FOUND_PROJ_HEADERS" = "yes" ; then
-  AS_ECHO(["3  Set FOUND_PROJ_HEADERS to yes"])
-fi
-if test "$FOUND_PROJ_HEADERS" = "no" ; then
-  AS_ECHO(["3  Set FOUND_PROJ_HEADERS to no"])
 fi
 if test "$FOUND_PROJ_HEADERS" = "no" ; then
   if test "$GOT_PROJ" = "yes" ; then
