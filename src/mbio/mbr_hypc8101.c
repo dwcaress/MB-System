@@ -313,7 +313,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int time_i[7];
 	double angle0, angle_inc;
 	int device_type, device_nav, device_hcp;
-	int device_gyro, device_sb2;
+	int device_sb2;
 	char device_name[32];
 	double sb2_clock, sb2_ssv;
 	int sb2_nvalues;
@@ -759,14 +759,15 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else if (strncmp(line, "DEV", 3) == 0) {
 				nscan = sscanf(line + 4, "%d %d %s", &ndevice, &device_type, device_name);
 				if (nscan == 3) {
-					if (device_type == 4)
+					if (device_type == 4) {
 						device_nav = ndevice;
-					else if (device_type == 32)
-						device_gyro = ndevice;
-					else if (device_type == 512)
+					} else if (device_type == 32) {
+						// int device_gyro = ndevice;
+					} else if (device_type == 512) {
 						device_hcp = ndevice;
-					else if (device_type == 32784)
+					} else if (device_type == 32784) {
 						device_sb2 = ndevice;
+					}
 				}
 			}
 
