@@ -46,9 +46,11 @@
 #include "mb_process.h"
 
 #define MBSVPLIST_SVP_NUM_ALLOC 24
-#define MBSVPLIST_PRINTMODE_CHANGE 0
-#define MBSVPLIST_PRINTMODE_UNIQUE 1
-#define MBSVPLIST_PRINTMODE_ALL 2
+typedef enum {
+    MBSVPLIST_PRINTMODE_CHANGE = 0,
+    MBSVPLIST_PRINTMODE_UNIQUE = 1,
+    MBSVPLIST_PRINTMODE_ALL = 2,
+} printmode_t;
 
 struct mbsvplist_svp_struct {
 	bool time_set;        /* time stamp known */
@@ -103,7 +105,7 @@ int main(int argc, char **argv) {
 	bounds[2] = -90.0;
 	bounds[3] = 90.0;
 
-	int svp_printmode = MBSVPLIST_PRINTMODE_CHANGE;
+	printmode_t svp_printmode = MBSVPLIST_PRINTMODE_CHANGE;
 	bool output_counts = false;
 	bool ssv_output = false;
 	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
@@ -148,8 +150,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'M':
 			case 'm':
-				sscanf(optarg, "%d", &svp_printmode);
+			{
+				int tmp;
+				sscanf(optarg, "%d", &tmp);
+				svp_printmode = (printmode_t)tmp;
 				break;
+			}
 			case 'N':
 			case 'n':
 				sscanf(optarg, "%d", &min_num_pairs);
@@ -502,11 +508,11 @@ int main(int argc, char **argv) {
 						}
 					}
 					svp.match_last = svp_match_last;
-				}
+				// }
 
 				/* check if the svp is a duplicate to the previous svp
 				    whether from the same file or a previous file */
-				if (svp_loaded) {
+				// if (svp_loaded) {
 					/* check if svp is the same as the previous */
 					if (svp.n == svp_last.n && memcmp(svp.depth, svp_last.depth, svp.n) == 0 &&
 					    memcmp(svp.velocity, svp_last.velocity, svp.n) == 0) {
