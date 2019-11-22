@@ -43,9 +43,10 @@ const int MBRTL_ALLOC_CHUNK = 1000;
 
 static const char program_name[] = "MBrolltimelag";
 static const char help_message[] =
-    "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath "
-    "data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a "
-    "specified set of time lags.";
+    "MBrolltimelag extracts the roll time series and the apparent\n"
+    "bottom slope time series from swath data, and then calculates\n"
+    "the cross correlation between the roll and the slope minus roll\n"
+    "for a specified set of time lags.";
 static const char usage_message[] =
     "mbrolltimelag -Iswathdata [-Fformat -Krollsource -Nnping -Ooutputname -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
 

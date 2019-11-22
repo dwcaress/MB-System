@@ -84,11 +84,13 @@ struct printfield {
 
 static const char program_name[] = "MBinsreprocess";
 static const char help_message[] =
-    "MBinsreprocess reads an INS navigation file (e.g. from a Kearfott SeaDevil), \nincluding information "
-    "about the state of navigation aiding by GPS, DVL, \nand other navigation sources. It then identifies "
-    "time periods without \naiding in which the navigation drifted in free inertial. These free \ninertial "
-    "periods are typically ended with a navigation tear as the INS \ncalculates a new state. This program "
-    "removes the navigation tears by \nlinear interpolation in time. The adjusted navigation is output.\n";
+    "MBinsreprocess reads an INS navigation file (e.g. from a Kearfott SeaDevil),\n"
+    "including information about the state of navigation aiding by GPS, DVL,\n"
+    "and other navigation sources. It then identifies time periods without\n"
+    "aiding in which the navigation drifted in free inertial. These free\n"
+    "inertial periods are typically ended with a navigation tear as the INS\n"
+    "calculates a new state. This program removes the navigation tears by\n"
+    "linear interpolation in time. The adjusted navigation is output.\n";
 static const char usage_message[] =
     "mbinsreprocess --input=filename --output=filename [--help --verbose]";
 

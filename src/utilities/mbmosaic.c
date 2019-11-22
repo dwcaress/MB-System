@@ -132,17 +132,20 @@ struct footprint {
 
 static const char program_name[] = "mbmosaic";
 static const char help_message[] =
-    "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data "
-    "files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum "
-    "filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between "
-    "\nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
+    "mbmosaic is an utility used to mosaic amplitude or\n"
+    "sidescan data contained in a set of swath sonar data files.\n"
+    "This program uses one of four algorithms (gaussian weighted mean,\n"
+    "median filter, minimum filter, maximum filter) to grid regions\n"
+    "covered by multibeam swaths and then fills in gaps between\n"
+    "the swaths (to the degree specified by the user) using a minimum\n"
+    "curvature algorithm.";
 static const char usage_message[] =
     "mbmosaic -Ifilelist -Oroot\n"
-    "\t[-Rwest/east/south/north -Rfactor -Adatatype\n"
-    "\t-Bborder -Cclip/mode/tension -Dxdim/ydim -Edx/dy/units\n"
-    "\t-Fpriority_range -Ggridkind -H -Jprojection -Llonflip -M -N -Ppings\n"
-    "\t-Sspeed -Ttopogrid -Ubearing/factor[/mode] -V -Wscale -Xextend\n"
-    "\t-Ypriority_source -Zbathdef]";
+    "    [-Rwest/east/south/north -Rfactor -Adatatype\n"
+    "    -Bborder -Cclip/mode/tension -Dxdim/ydim -Edx/dy/units\n"
+    "    -Fpriority_range -Ggridkind -H -Jprojection -Llonflip -M -N -Ppings\n"
+    "    -Sspeed -Ttopogrid -Ubearing/factor[/mode] -V -Wscale -Xextend\n"
+    "    -Ypriority_source -Zbathdef]";
 
 /*--------------------------------------------------------------------*/
 /*

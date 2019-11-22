@@ -56,12 +56,14 @@ const int MBV_SHADE_VIEW_OVERLAY = 3;
 
 static const char program_name[] = "MBDEFAULTS";
 static const char help_message[] =
-    "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file "
-    "~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no "
-    "~/.mbio_defaults \nfile exists one will be created.";
+    "MBDEFAULTS sets and retrieves the /default MBIO control\n"
+    "parameters stored in the file ~/.mbio_defaults.\n"
+    "Only the parameters specified by command line\n"
+    "arguments will be changed; if no ~/.mbio_defaults\n"
+    "file exists one will be created.";
 static const char usage_message[] =
-    "mbdefaults [-Bfileiobuffer -Dpsdisplay -Ffbtversion -Iimagedisplay "
-    "-Llonflip\n\t-Mmbviewsettings\n\t-Ttimegap -Wproject -V -H]";
+    "mbdefaults [-Bfileiobuffer -Dpsdisplay -Ffbtversion -Iimagedisplay -Llonflip\n"
+    "    -Mmbviewsettings\n\t-Ttimegap -Wproject -V -H]";
 
 /*--------------------------------------------------------------------*/
 

@@ -48,11 +48,14 @@ const double MBES_MAX_SWEEP = 1.0;
 
 static const char program_name[] = "MBextractsegy";
 static const char help_message[] =
-    "MBextractsegy extracts subbottom profiler, center beam reflection,\nor seismic reflection data from "
-    "data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
+    "MBextractsegy extracts subbottom profiler, center beam reflection,\n"
+    "or seismic reflection data from data supported by MB-System and\n"
+    "rewrites it as a SEGY file in the form used by SIOSEIS.";
 static const char usage_message[] =
-    "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat \n\t-Ifile -Jxscale/yscale "
-    "-Lstartline/lineroot \n\t-Osegyfile -Qtimelistfile -Rroutefile \n\t-Ssampleformat -Zplotmax -H -V]";
+    "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat\n"
+    "    -Ifile -Jxscale/yscale -Lstartline/lineroot\n"
+    "    -Osegyfile -Qtimelistfile -Rroutefile\n"
+    "    -Ssampleformat -Zplotmax -H -V]";
 
 /*--------------------------------------------------------------------*/
 
