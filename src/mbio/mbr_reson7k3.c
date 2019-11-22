@@ -118,27 +118,6 @@ int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
-  int *current_ping;
-  int *last_ping;
-  int *save_flag;
-  int *recordid;
-  int *recordidlast;
-  char **bufferptr;
-  char *buffer;
-  int *bufferalloc;
-  char **buffersaveptr;
-  char *buffersave;
-  int *size;
-  int *nbadrec;
-  int *deviceid;
-  unsigned short *enumerator;
-  int *fileheaders;
-  double *pixel_size;
-  double *swath_width;
-  int *preprocess_pars_set;
-  int *platform_set;
-	struct mb_platform_struct **platform_ptr = NULL;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -146,22 +125,36 @@ int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
   }
 
+  int *current_ping;
+  int *last_ping;
+  int *recordid;
+  int *recordidlast;
+  char **bufferptr;
+  int *bufferalloc;
+  char **buffersaveptr;
+  int *size;
+  int *nbadrec;
+  int *deviceid;
+  unsigned short *enumerator;
+  int *fileheaders;
+  double *pixel_size;
+  double *swath_width;
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* allocate memory for data structure */
   mb_io_ptr->structure_size = 0;
   mb_io_ptr->data_structure_size = 0;
   int status = mbsys_reson7k3_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
-  save_flag = (int *)&mb_io_ptr->save_flag;
+  int *save_flag = (int *)&mb_io_ptr->save_flag;
   current_ping = (int *)&mb_io_ptr->save14;
   last_ping = (int *)&mb_io_ptr->save1;
   recordid = (int *)&mb_io_ptr->save3;
   recordidlast = (int *)&mb_io_ptr->save4;
   bufferptr = (char **)&mb_io_ptr->saveptr1;
-  buffer = (char *)*bufferptr;
+  // char *buffer = (char *)*bufferptr;
   bufferalloc = (int *)&mb_io_ptr->save6;
   buffersaveptr = (char **)&mb_io_ptr->saveptr2;
-  buffersave = (char *)*buffersaveptr;
+  // char *buffersave = (char *)*buffersaveptr;
   size = (int *)&mb_io_ptr->save8;
   nbadrec = (int *)&mb_io_ptr->save9;
   deviceid = (int *)&mb_io_ptr->save10;
@@ -169,9 +162,9 @@ int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
   fileheaders = (int *)&mb_io_ptr->save12;
   pixel_size = (double *)&mb_io_ptr->saved1;
   swath_width = (double *)&mb_io_ptr->saved2;
-  preprocess_pars_set = (int *)&mb_io_ptr->save13;
-  platform_set = (int *)&mb_io_ptr->save7;
-  platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
+  // int *preprocess_pars_set = (int *)&mb_io_ptr->save13;
+  // int *platform_set = (int *)&mb_io_ptr->save7;
+  // struct mb_platform_struct **platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
 
   *current_ping = -1;
   *last_ping = -1;
@@ -421,7 +414,6 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   char *buffer = NULL;
   int *bufferalloc = NULL;
   char **buffersaveptr = NULL;
-  char *buffersave = NULL;
   int *filecatalogoffsetoffset = NULL;
   int *platform_set = NULL;
 	struct mb_platform_struct **platform_ptr = NULL;
@@ -444,7 +436,7 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   buffer = (char *)*bufferptr;
   bufferalloc = (int *)&mb_io_ptr->save6;
   buffersaveptr = (char **)&mb_io_ptr->saveptr2;
-  buffersave = (char *)*buffersaveptr;
+  // char *buffersave = (char *)*buffersaveptr;
   filecatalogoffsetoffset = (int *)&mb_io_ptr->save5;
   platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
 
@@ -5838,15 +5830,10 @@ int mbr_reson7k3_rd_CompressedBeamformedMagnitude(int verbose, char *buffer, voi
 int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store_ptr, int *error){
   s7k3_compressedwatercolumndata *compressedwatercolumndata;
   size_t nread;
-  int truncatebeams;
   int magnitudeonly;
   int eightbitmagphase;
-  int downsampling;
-  int downsamplingtype;
   int thirtytwobitdata;
-  int compressionfactorvalid;
   int segmentnumbersvalid;
-  int firstsamplerxdelay;
   int time_j[5];
 
   if (verbose >= 2) {
@@ -5896,10 +5883,7 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
             limit data. Data is included up to the bottom detection
             point + 10%. This flag has no effect on systems which
             do not perform bottom detection. */
-  if (CompressedWaterColumn->flags & 0x0001)
-    truncatebeams = true;
-  else
-    truncatebeams = false;
+  // bool truncatebeams = CompressedWaterColumn->flags & 0x0001;
 
   /* Flags bit 1 : Include magnitude data only (strip phase) */
   if (CompressedWaterColumn->flags & 0x0002)
@@ -5920,14 +5904,14 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
   /* Flags bit 4-7 : Downsampling divisor. Value = ((flags | 0xF0) >> 4). Only
           values 2-16 are valid. This field is ignored if downsampling
           is not enabled (type = “none”). */
-  downsampling = ((CompressedWaterColumn->flags & 0x00F0) >> 4);
+  // int downsampling = (CompressedWaterColumn->flags & 0x00F0) >> 4;
 
   /* Bit 8-11 : Downsampling type:
           0 (0x000) = None
           1 (0x100) = Middle value
           2 (0x200) = Peak value
           3 (0x300) = Average value */
-  downsamplingtype = ((CompressedWaterColumn->flags & 0x0F00) >> 8);
+  // int downsamplingtype = (CompressedWaterColumn->flags & 0x0F00) >> 8;
 
   /* Bit 12 : 32 Bits data */
   if (CompressedWaterColumn->flags & 0x1000)
@@ -5936,10 +5920,7 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
     thirtytwobitdata = false;
 
   /* Bit 13 : Compression factor available */
-  if (CompressedWaterColumn->flags & 0x2000)
-    compressionfactorvalid = true;
-  else
-    compressionfactorvalid = false;
+  // bool compressionfactorvalid = CompressedWaterColumn->flags & 0x2000;
 
   /* Bit 14 : Segment numbers available */
   if (CompressedWaterColumn->flags & 0x4000)
@@ -5948,10 +5929,7 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
     segmentnumbersvalid = false;
 
   /* Bit 15 : First sample contains RxDelay value. */
-  if (CompressedWaterColumn->flags & 0x8000)
-    firstsamplerxdelay = true;
-  else
-    firstsamplerxdelay = false;
+  // bool firstsamplerxdelay = CompressedWaterColumn->flags & 0x8000;
 
   /* now calculate samplesize */
   if (thirtytwobitdata == true) {
@@ -8894,7 +8872,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
           int fpos_current = ftell(mb_io_ptr->mbfp);
 
           // move to start of FileCatalog record
-          int fstatus = fseek(mb_io_ptr->mbfp, store->FileHeader.file_catalog_offset, SEEK_SET);
+          /* int fstatus = */ fseek(mb_io_ptr->mbfp, store->FileHeader.file_catalog_offset, SEEK_SET);
 
           // Most of the time the FileHeader.file_catalog_size value is the size
           // of the entire FileCatalog record as per the format spec, but sometimes
@@ -8945,7 +8923,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
           store->type = R7KRECID_FileHeader;
 
           // reset file position
-          fstatus = fseek(mb_io_ptr->mbfp, fpos_current, SEEK_SET);
+          /* fstatus = */ fseek(mb_io_ptr->mbfp, fpos_current, SEEK_SET);
           *icatalog = 1;
 
         }

@@ -117,8 +117,6 @@ int mbr_info_hysweep1(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error) {
-	int *file_header_read;
-	int *file_header_written;
 	int *line_saved;
 	int *RMB_read;
 	double *pixel_size;
@@ -140,8 +138,8 @@ int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	const int status = mbsys_hysweep_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* set saved values */
-	file_header_read = (int *)&mb_io_ptr->save1;
-	file_header_written = (int *)&mb_io_ptr->save2;
+	int *file_header_read = (int *)&mb_io_ptr->save1;
+	int *file_header_written = (int *)&mb_io_ptr->save2;
 	line_saved = (int *)&mb_io_ptr->save3;
 	RMB_read = (int *)&mb_io_ptr->save4;
 	*file_header_read = false;
@@ -233,8 +231,6 @@ int mbr_hysweep1_rd_line(int verbose, FILE *mbfp, char *line, int *error) {
 int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_hysweep_device_struct *device;
 	struct mbsys_hysweep_device_offset_struct *offset;
-	int *file_header_read;
-	int *file_header_written;
 	int *line_saved;
 	int *RMB_read;
 	int nscan, nread;
@@ -295,8 +291,8 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char *line = store->readline;
 
 	/* get saved values */
-	file_header_read = (int *)&mb_io_ptr->save1;
-	file_header_written = (int *)&mb_io_ptr->save2;
+	int *file_header_read = (int *)&mb_io_ptr->save1;
+	// int *file_header_written = (int *)&mb_io_ptr->save2;
 	line_saved = (int *)&mb_io_ptr->save3;
 	RMB_read = (int *)&mb_io_ptr->save4;
 
@@ -2301,8 +2297,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mbsys_hysweep_device_struct *device;
 	struct mbsys_hysweep_device_offset_struct *offset;
 	struct mbsys_hysweep_struct hysweeptmp;
-	int *file_header_read;
-	int *file_header_written;
 	int kindex;
 	int *add_MB_POS;
 	int *add_MB_HCP;
@@ -2330,8 +2324,8 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char *line = store->writeline;
 
 	/* get saved values */
-	file_header_read = (int *)&mb_io_ptr->save1;
-	file_header_written = (int *)&mb_io_ptr->save2;
+	// int *file_header_read = (int *)&mb_io_ptr->save1;
+	int *file_header_written = (int *)&mb_io_ptr->save2;
 	add_MB_POS = (int *)&mb_io_ptr->save3;
 	add_MB_HCP = (int *)&mb_io_ptr->save4;
 	add_MB_GYR = (int *)&mb_io_ptr->save5;

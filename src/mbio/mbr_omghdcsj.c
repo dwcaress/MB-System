@@ -402,7 +402,6 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int *beam_size;
 	int *data_size;
 	int *image_size;
-	char *comment;
 	char *buffer;
 	int read_size;
 	short *short_ptr;
@@ -430,7 +429,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_omghdcsj_summary_struct *summary = &(dataplus->summary);
 	struct mbf_omghdcsj_profile_struct *profile = &(dataplus->profile);
 	struct mbf_omghdcsj_data_struct *data = &(dataplus->data);
-	comment = dataplus->comment;
+	// char *comment = dataplus->comment;
 	buffer = dataplus->buffer;
 	read_summary = (int *)&mb_io_ptr->save1;
 	fileVersion = (int *)&mb_io_ptr->save2;
@@ -4072,8 +4071,6 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int *beam_size;
 	int *data_size;
 	int *image_size;
-	double *pixel_size;
-	char *comment;
 	char *buffer;
 	int write_size;
 	short *short_ptr;
@@ -4094,7 +4091,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_omghdcsj_summary_struct *summary = &(dataplus->summary);
 	struct mbf_omghdcsj_profile_struct *profile = &(dataplus->profile);
 	struct mbf_omghdcsj_data_struct *data = &(dataplus->data);
-	comment = dataplus->comment;
+	// char *comment = dataplus->comment;
 	buffer = dataplus->buffer;
 	write_summary = (int *)&mb_io_ptr->save1;
 	fileVersion = (int *)&mb_io_ptr->save2;
@@ -4104,7 +4101,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	beam_size = (int *)&mb_io_ptr->save6;
 	data_size = (int *)&mb_io_ptr->save7;
 	image_size = (int *)&mb_io_ptr->save8;
-	pixel_size = (double *)&mb_io_ptr->saved1;
+	// double *pixel_size = (double *)&mb_io_ptr->saved1;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;

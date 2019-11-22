@@ -4038,6 +4038,8 @@ int mb_pr_get_kluges(int verbose, char *file, int *mbp_kluge001, int *mbp_kluge0
 int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag, double *bath, double *bathacrosstrack,
                             int *ndepths, double *depths, double *depthacrosstrack, int *nslopes, double *slopes,
                             double *slopeacrosstrack, double *depthsmooth, int *error) {
+	(void)depthsmooth;  // unused
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
