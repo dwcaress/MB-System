@@ -124,10 +124,13 @@ FILE *outfp = NULL;
 /* program identifiers */
 static const char program_name[] = "mbgrid";
 static const char help_message[] =
-    "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath "
-    "sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, "
-    "minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe "
-    "swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
+    "mbgrid is an utility used to grid bathymetry, amplitude, or\n"
+    "sidescan data contained in a set of swath sonar data files.\n"
+    "This program uses one of four algorithms (gaussian weighted mean,\n"
+    "median filter, minimum filter, maximum filter) to grid regions\n"
+    "covered swaths and then fills in gaps between\n"
+    "the swaths (to the degree specified by the user) using a minimum\n"
+    "curvature algorithm.";
 static const char usage_message[] =
     "mbgrid   -Ifilelist -Oroot [-Adatatype -Bborder -Cclip[/mode] -Dxdim/ydim\n"
     "          -Edx/dy/units[!]  -Fmode[/threshold] -Ggridkind -Jprojection\n"
