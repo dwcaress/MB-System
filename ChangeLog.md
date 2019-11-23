@@ -23,6 +23,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
 
+- Version 5.7.6beta19    November 22, 2019
 - Version 5.7.6beta18    November 21, 2019
 - Version 5.7.6beta17    November 15, 2019
 - Version 5.7.6beta16    October 29, 2019
@@ -334,6 +335,11 @@ announced releases.
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 
 -------------------------------------------------------------------------------
+
+-----> 5.7.6beta19 (November 22, 2019)
+
+Mbprocess: Attempting to fix processing of format 71 files within an mbnavadjust
+project.
 
 -----> 5.7.6beta18 (November 21, 2019)
 

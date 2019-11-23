@@ -710,6 +710,7 @@ int main(int argc, char **argv) {
   char str_locked_fail[] = "unlocked but set lock failed";
   char str_locked_no[] = "unlocked";
   int variable_beams;
+  int traveltime;
   int beam_flagging;
   char mbp_pfile[MBP_FILENAMESIZE];
   FILE *tfp;
@@ -1178,16 +1179,12 @@ int main(int argc, char **argv) {
         }
       }
 
-      int traveltime;  // TODO(schwehr): Make mb_format_flags take bools.
-
-      /* check for format with travel time data */
-      if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE) {
-        status = mb_format_flags(verbose, &process.mbp_format, &variable_beams, &traveltime, &beam_flagging, &error);
-        if (!traveltime) {
-          fprintf(stderr, "\nWarning:\n\tFormat %d does not include travel time data.\n", process.mbp_format);
-          fprintf(stderr, "\tTravel times and angles estimated assuming\n");
-          fprintf(stderr, "\t1500 m/s water sound speed.\n");
-        }
+      /* check for format with travel time data */  // TODO(schwehr): Make mb_format_flags take bools.
+      status = mb_format_flags(verbose, &process.mbp_format, &variable_beams, &traveltime, &beam_flagging, &error);
+      if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE && !traveltime) {
+        fprintf(stderr, "\nWarning:\n\tFormat %d does not include travel time data.\n", process.mbp_format);
+        fprintf(stderr, "\tTravel times and angles estimated assuming\n");
+        fprintf(stderr, "\t1500 m/s water sound speed.\n");
       }
 
       /* check for right format if recalculating sidescan is on */

@@ -849,7 +849,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double navlon, navlat;
 	short short_transducer_depth;
 	short short_altitude;
-	int *version;
+	int fbtversion;
 	int time_j[5], time_i[7];
 
 	if (verbose >= 2) {
@@ -867,13 +867,13 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* set data flag pointer */
 	flag = (short *)buffer;
 
-	/* set version pointer */
-	version = &(mb_io_ptr->save1);
+	/* get fbt file version to be written */
+	fbtversion = mb_io_ptr->save1;
 
 	/* if set, write old format - this should only happen for writing fbt files
 	    when the user has set fbtversion = old in the .mbio_defaults file
 	    using mbdefaults */
-	if (store->kind == MB_DATA_DATA && *version == 2) {
+	if (store->kind == MB_DATA_DATA && fbtversion == 2) {
 		*flag = MBF_MBLDEOIH_ID_DATA2;
 		header_length = MBF_MBLDEOIH_V2HEADERSIZE;
 
@@ -979,7 +979,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       sonartype:        %d\n", store->topo_type);
 		fprintf(stderr, "dbg5       error:            %d\n", *error);
 	}
-	if (verbose >= 5 && store->kind == MB_DATA_DATA && *version == 2) {
+	if (verbose >= 5 && store->kind == MB_DATA_DATA && fbtversion == 2) {
 		fprintf(stderr, "\ndbg5  Old version header values in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", oldstore.year);
 		fprintf(stderr, "dbg5       day:              %d\n", oldstore.day);
@@ -1011,7 +1011,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* if set, write old format - this should only happen for writing fbt files
 		    when the user has set fbtversion = old in the .mbio_defaults file
 		    using mbdefaults */
-		if (mb_io_ptr->save1 == 2) {
+		if (fbtversion == 2) {
 			/* recalculate depth scaling so that it encompasses full bathymetry values, not
 			    just bathymetry relative to the sonar
 			    - to convert to old format add transducer depth to the bathymetry
