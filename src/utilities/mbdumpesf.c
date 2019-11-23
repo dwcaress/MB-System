@@ -44,11 +44,12 @@ typedef enum {
 
 static const char program_name[] = "mbdumpesf";
 static const char help_message[] =
-    "mbdumpesf reads an MB-System edit save file and dumps the \ncontents as an ascii table to stdout.";
+    "mbdumpesf reads an MB-System edit save file and dumps the\n"
+    "contents as an ascii table to stdout.";
 static const char usage_message[] =
     "mbdumpesf --input=esffile\n"
-    "\t[--output=esffile --ignore-unflag --ignore-flag \n"
-    "\t--ignore-filter --ignore-zero \n"
+    "\t[--output=esffile --ignore-unflag --ignore-flag\n"
+    "\t--ignore-filter --ignore-zero\n"
     "\t--verbose --help]";
 
 /*--------------------------------------------------------------------*/

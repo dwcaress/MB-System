@@ -382,7 +382,7 @@ int mbr_rt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     double depthmax = 0.0;
     double distmax = 0.0;
     double bath, bathacrosstrack, bathalongtrack;
-    int index = 0;
+    // int index = 0;
     for (int i = 0; i < beams_bath; i++) {
       int beam_id;
       int index = i * MBF_MBARIMB1_BEAMSIZE;
@@ -402,7 +402,7 @@ int mbr_rt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       store->depth_scale = 0.001 * (float)(MAX((depthmax / 30.0), 1.0));
     if (distmax > 0.0)
       store->distance_scale = 0.001 * (float)(MAX((distmax / 30.0), 1.0));
-    double ss_scale = 0.0;
+    // double ss_scale = 0.0;
 
     for (int i = 0; i < beams_bath; i++) {
       int beam_id;

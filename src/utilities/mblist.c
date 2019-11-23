@@ -76,13 +76,14 @@ double NaN;
 
 static const char program_name[] = "MBLIST";
 static const char help_message[] =
-    "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is "
-    "quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns "
-    "separated by tabs.";
+    "MBLIST prints the specified contents of a swath data\n"
+    "file to stdout. The form of the output is quite flexible;\n"
+    "MBLIST is tailored to produce ascii files in spreadsheet\n"
+    "style with data columns separated by tabs.";
 static const char usage_message[] =
-    "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile "
-    "-Kdecimate -Llonflip -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end \n-Ooptions -Ppings "
-    "-Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
+    "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc\n"
+    "    -Fformat -Gdelimiter -H -Ifile -Kdecimate -Llonflip -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end\n"
+    "    -Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
 
 /*--------------------------------------------------------------------*/
 int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, bool use_bath, bool use_amp, bool use_ss, dump_mode_t dump_mode,

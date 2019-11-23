@@ -46,12 +46,15 @@ double NaN;
 
 static const char program_name[] = "mbnavlist";
 static const char help_message[] =
-    "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. "
-    "The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in "
-    "spreadsheet style with data columns separated by tabs.";
+    "mbnavlist prints the specified contents of navigation records\n"
+    "in a swath sonar data file to stdout. The form of the\n"
+    "output is quite flexible; mbnavlist is tailored to produce\n"
+    "ascii files in spreadsheet style with data columns separated by tabs.";
 static const char usage_message[] =
-    "mbnavlist [-Byr/mo/da/hr/mn/sc -Ddecimate -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile "
-    "-Kkind -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
+    "mbnavlist [-Byr/mo/da/hr/mn/sc -Ddecimate -Eyr/mo/da/hr/mn/sc\n"
+    "    -Fformat -Gdelimiter -H -Ifile -Kkind -Llonflip\n"
+    "    -Ooptions -Rw/e/s/n -Sspeed\n"
+    "    -Ttimegap -V -Zsegment]";
 
 /*--------------------------------------------------------------------*/
 int printsimplevalue(int verbose, double value, int width, int precision, bool ascii, bool *invert, bool *flipsign, int *error) {

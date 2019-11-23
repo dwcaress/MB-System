@@ -63,8 +63,8 @@ const int MBES_ONLINE_THRESHOLD = 15.0;
 const int MBES_ONLINE_COUNT = 30;
 
 static const char help_message[] =
-    "mb7k2jstar extracts Edgetech subbottom profiler and sidescan data \nfrom "
-    "Reson 7k format data and outputs in the Edgetech Jstar format.";
+    "mb7k2jstar extracts Edgetech subbottom profiler and sidescan data\n"
+    "from Reson 7k format data and outputs in the Edgetech Jstar format.";
 static const char program_name[] = "mb7k2jstar";
 static const char usage_message[] =
     "mb7k2jstar [-Ifile -Atype -Bmode[/threshold] -C -Fformat "

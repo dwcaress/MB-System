@@ -49,10 +49,12 @@ typedef enum {
 
 static const char program_name[] = "mbgetesf";
 static const char help_message[] =
-    "mbgetesf reads a multibeam data file and writes out\nan edit save file which can be applied to other "
-    "data files\ncontaining the same data (but presumably in a different\nstate of processing).  This "
-    "allows editing of one data file to\nbe transferred to another with ease.  The programs mbedit "
-    "and\nmbprocess can be used to apply the edit events to another file.";
+    "mbgetesf reads a multibeam data file and writes out\n"
+    "an edit save file which can be applied to other data files\n"
+    "containing the same data (but presumably in a different\n"
+    "state of processing).  This allows editing of one data file to\n"
+    "be transferred to another with ease.  The programs mbedit and\n"
+    "mbprocess can be used to apply the edit events to another file.";
 static const char usage_message[] =
     "mbgetesf [-Fformat -Iinfile -Mmode -Oesffile -V -H]";
 

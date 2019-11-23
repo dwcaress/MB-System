@@ -66,8 +66,8 @@ const float depth[48 /* NDEPTH_MAX + 2 */] =
 
 static const char program_name[] = "MBLEVITUS";
 static const char help_message[] =
-    "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus "
-    "temperature and salinity database.";
+    "MBLEVITUS generates an average water velocity profile for a\n"
+    "specified location from the Levitus temperature and salinity database.";
 static const char usage_message[] =
     "mblevitus [-Rlon/lat -Ooutfile -V -H]";
 

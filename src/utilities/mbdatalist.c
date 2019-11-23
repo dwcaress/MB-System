@@ -35,8 +35,8 @@
 
 static const char program_name[] = "mbdatalist";
 static const char help_message[] =
-    "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. "
-    "\nThe results are dumped to stdout.";
+    "mbdatalist parses recursive datalist files and outputs the\n"
+    "complete list of data files and formats. The results are dumped to stdout.";
 static const char usage_message[] =
     "mbdatalist [-C -D -Fformat -Ifile -N -O -P -Q -Rw/e/s/n -S -U -Y -Z -V -H]";
 
