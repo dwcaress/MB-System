@@ -332,7 +332,8 @@ static bool log_clock_res = true;
 // MSF_ASTAT  : aggregate stats
 // MSF_PSTAT  : periodic stats
 // MSF_READER : r7kr reader stats
-#define MBTRNPP_STAT_FLAGS (MSF_STATUS | MSF_EVENT | MSF_ASTAT)
+#define MBTRNPP_STAT_FLAGS (MSF_STATUS | MSF_EVENT | MSF_ASTAT | MSF_PSTAT)
+//unsigned int mbtrnpp_stat_flags = MBTRNPP_STAT_FLAGS_DFL;
 
 int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags flags);
 
@@ -2680,21 +2681,21 @@ int mbtrnpp_trn_pub_olog(trn_update_t *update,
     if(NULL!=update){
         if(NULL!=update->pt_dat)
             retval=0;
-        mlog_tprintf(log_id,"trn_pt_dat,%.2lf,%.4lf,%.4lf,%.4lf\n",
+        mlog_tprintf(log_id,"trn_pt_dat,%lf,%.4lf,%.4lf,%.4lf\n",
                      update->pt_dat->time,
                      update->pt_dat->x,
                      update->pt_dat->y,
                      update->pt_dat->z);
 
         if(NULL!=update->mle_dat)
-            mlog_tprintf(log_id,"trn_mle_dat,%.2lf,%.4lf,%.4lf,%.4lf\n",
+            mlog_tprintf(log_id,"trn_mle_dat,%lf,%.4lf,%.4lf,%.4lf\n",
                          update->mle_dat->time,
                          update->mle_dat->x,
                          update->mle_dat->y,
                          update->mle_dat->z);
 
         if(NULL!=update->mse_dat)
-            mlog_tprintf(log_id,"trn_mse_dat,%.2lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf\n",
+            mlog_tprintf(log_id,"trn_mse_dat,%lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf\n",
                          update->mse_dat->time,
                          update->mse_dat->x,
                          update->mse_dat->y,
@@ -2705,7 +2706,7 @@ int mbtrnpp_trn_pub_olog(trn_update_t *update,
                          update->mse_dat->covariance[1]);
 
         if(NULL!=update->mse_dat && NULL!=update->pt_dat && NULL!=update->mle_dat)
-            mlog_tprintf(log_id,"trn_est,%.2lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.2lf,%.2lf,%.2lf\n",
+            mlog_tprintf(log_id,"trn_est,%lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.4lf,%.2lf,%.2lf,%.2lf\n",
                          update->mse_dat->time,
                          (update->mle_dat->x-update->pt_dat->x),
                          (update->mle_dat->y-update->pt_dat->y),
@@ -2996,10 +2997,14 @@ int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **
 
 /*--------------------------------------------------------------------*/
 
-//int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 {
     int retval=-1;
+
+    static int mb1_count=0;
+    static int process_count=0;
+
+    mlog_tprintf(trn_ulog_id,"trn_mb1_count,%lf,%d\n",mtime_etime(),++mb1_count);
 
     // ignore if trn disabled
     if(trn_enable){
@@ -3043,6 +3048,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUSVR_XT], mtime_dtime());
 
         if (do_process) {
+            mlog_tprintf(trn_ulog_id,"trn_update_start,%lf,%d\n",mtime_etime(),++process_count);
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRN_PROCN]);
 
             if(NULL!=tnav && NULL!=mb1 && NULL!=cfg){
@@ -3111,9 +3117,10 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                     free(pstate->mle_dat);
                 }
                 MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_XT], mtime_dtime());
-            }
-        }
-    }
+            }// if tnav, mb1,cfg != NULL
+            mlog_tprintf(trn_ulog_id,"trn_update_end,%lf,%d\n",mtime_etime(),retval);
+        }// if do_process
+    }// if trn_en
 
     return retval;
 }
