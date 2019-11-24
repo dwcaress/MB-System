@@ -3364,65 +3364,6 @@ int main(int argc, char **argv) {
 	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
-	/* MBIO read control parameters */
-	int obeams_bath;
-	int obeams_amp;
-	int opixels_ss;
-
-	/* MBIO read values */
-	void *ombio_ptr = NULL;
-	double beamheading;
-	double roll, beamroll;
-	double pitch, beampitch;
-	double heave, beamheave;
-
-	int ins_output_index = -1;
-
-	double timelag = 0.0;
-	double timelagm = 0.0;
-
-	/* kluge modes */
-	double time_d_org;
-	double dtime_d;
-	s7k_time s7kTime;
-	struct mb_esf_struct esf;
-
-	/* variables for beam angle calculation */
-	mb_3D_orientation tx_align;
-	mb_3D_orientation tx_orientation;
-	double tx_steer;
-	mb_3D_orientation rx_align;
-	mb_3D_orientation rx_orientation;
-	double rx_steer;
-	double reference_heading;
-	double beamAzimuth;
-	double beamDepression;
-
-	int jtimedelay = 0;
-	int jtimelag = 0;
-	int jins = 0;
-	int jrock = 0;
-	int jdsl = 0;
-	int jsonardepth = 0;
-	int jdnav = 0;
-	int jdaltitude = 0;
-	int jdheading = 0;
-	int jdattitude = 0;
-	int jdsonardepth = 0;
-
-	int interp_status;
-	double soundspeed;
-	double mtodeglon, mtodeglat;
-	double dist;
-	double pixel_size;
-	double swath_width;
-	int time7k_i[7];
-	int time7k_j[5];
-	double time7k_d;
-
-	int testformat;
-	int start, end;
-
 	/* close time delay file */
 	if (tfp != NULL) {
 		fclose(tfp);
@@ -3485,6 +3426,15 @@ int main(int argc, char **argv) {
 	 * == MB7KPREPROCESS_TIMELAG_CONSTANT) plus any timedelay values
 	 * embedded in the data (MBARI AUV bluefin nav records only)
 	 */
+
+	int interp_status;
+
+	int jtimedelay = 0;
+	int jtimelag = 0;
+
+	double timelag = 0.0;
+	double timelagm = 0.0;
+
 	if (timelagmode != MB7KPREPROCESS_TIMELAG_OFF) {
 		/*
 		 * correct time of navigation, heading, attitude, sonardepth,
@@ -3710,6 +3660,8 @@ int main(int argc, char **argv) {
 			}
 		}
 	}
+
+
 	/* if desired apply filtering to sonardepth data */
 	if (sonardepthfilter) {
 		/*
@@ -3857,6 +3809,10 @@ int main(int argc, char **argv) {
 			}
 		}
 	}
+
+	int start;
+	int end;
+
 	/* Fix timestamp jumps if requested with kluge 6 */
 	if (kluge_fixtimejump) {
 		fprintf(stderr, "Fixing timestamp jumps in %d Reson data\n", nbatht);
@@ -3934,6 +3890,7 @@ int main(int argc, char **argv) {
 			batht_time_d_new[i] = batht_time_d[i] + batht_time_offset[i];
 		}
 	}
+
 	/* fix problems with edget timestamp arrays */
 	if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
 		for (int i = 0; i < nedget; i++) {
@@ -3966,6 +3923,55 @@ int main(int argc, char **argv) {
 			edget_time_d_new[i] = edget_time_d[i] + edget_time_offset[i];
 		}
 	}
+
+	/* MBIO read control parameters */
+	int obeams_bath;
+	int obeams_amp;
+	int opixels_ss;
+
+	/* MBIO read values */
+	void *ombio_ptr = NULL;
+	double beamheading;
+	double roll, beamroll;
+	double pitch, beampitch;
+	double heave, beamheave;
+
+	int ins_output_index = -1;
+
+	/* kluge modes */
+	double time_d_org;
+	double dtime_d;
+	s7k_time s7kTime;
+	struct mb_esf_struct esf;
+
+	/* variables for beam angle calculation */
+	mb_3D_orientation tx_align;
+	mb_3D_orientation tx_orientation;
+	double tx_steer;
+	mb_3D_orientation rx_align;
+	mb_3D_orientation rx_orientation;
+	double rx_steer;
+	double reference_heading;
+	double beamAzimuth;
+	double beamDepression;
+
+	int jins = 0;
+	int jrock = 0;
+	int jdsl = 0;
+	int jsonardepth = 0;
+	int jdnav = 0;
+	int jdaltitude = 0;
+	int jdheading = 0;
+	int jdattitude = 0;
+	int jdsonardepth = 0;
+
+	double soundspeed;
+	double mtodeglon, mtodeglat;
+	double dist;
+	double pixel_size;
+	double swath_width;
+	int time7k_i[7];
+
 	/*
 	 * remove noise from position data associated with Kearfott INS on an
 	 * ROV that consists of jumps every two seconds
@@ -4053,6 +4059,7 @@ int main(int argc, char **argv) {
 
 	int found;  // TODO(schwehr): Make mb_esf_check take a bool.
 	int iping = 0;
+	int testformat;
 
 	/*
 	 * now read the data files again, this time interpolating nav and
@@ -6767,12 +6774,14 @@ int main(int argc, char **argv) {
 
 					fsdwsb = &(istore->fsdwsb);
 					header = &(fsdwsb->header);
+					int time7k_j[5];
 					time7k_j[0] = header->s7kTime.Year;
 					time7k_j[1] = header->s7kTime.Day;
 					time7k_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
 					time7k_j[3] = (int)header->s7kTime.Seconds;
 					time7k_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time7k_j[3]));
 					mb_get_itime(verbose, time7k_j, time7k_i);
+					double time7k_d;
 					mb_get_time(verbose, time7k_i, &time7k_d);
 					const double last_fsdwsbp_time_d = MAX(last_fsdwsbp_time_d, time7k_d);
 					if (last_fsdwsbp_time_d > time7k_d) {
@@ -6827,12 +6836,14 @@ int main(int argc, char **argv) {
 					nrec_fsdwsslo++;
 					fsdwsslo = &(istore->fsdwsslo);
 					header = &(fsdwsslo->header);
+					int time7k_j[5];
 					time7k_j[0] = header->s7kTime.Year;
 					time7k_j[1] = header->s7kTime.Day;
 					time7k_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
 					time7k_j[3] = (int)header->s7kTime.Seconds;
 					time7k_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time7k_j[3]));
 					mb_get_itime(verbose, time7k_j, time7k_i);
+					double time7k_d;
 					mb_get_time(verbose, time7k_i, &time7k_d);
 					const double last_fsdwsslo_time_d = MAX(last_fsdwsslo_time_d, time7k_d);
 					if (last_fsdwsslo_time_d > time7k_d) {
@@ -6896,12 +6907,14 @@ int main(int argc, char **argv) {
 
 					fsdwsshi = &(istore->fsdwsshi);
 					header = &(fsdwsshi->header);
+					int time7k_j[5];
 					time7k_j[0] = header->s7kTime.Year;
 					time7k_j[1] = header->s7kTime.Day;
 					time7k_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
 					time7k_j[3] = (int)header->s7kTime.Seconds;
 					time7k_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time7k_j[3]));
 					mb_get_itime(verbose, time7k_j, time7k_i);
+					double time7k_d;
 					mb_get_time(verbose, time7k_i, &time7k_d);
 					const double last_fsdwsshi_time_d = MAX(last_fsdwsshi_time_d, time7k_d);
 					if (last_fsdwsshi_time_d > time7k_d) {
