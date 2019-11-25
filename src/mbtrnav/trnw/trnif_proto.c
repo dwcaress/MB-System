@@ -635,7 +635,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                     param=0;
                 }
                 send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, param);
-            mlog_tprintf(self->mlog_id,"trn_lms,%lf,[%s:%s]\n",msg_time, param, peer->chost, peer->service);
+                mlog_tprintf(self->mlog_id,"trn_lms,%lf,%d,[%s:%s]\n",msg_time, param, peer->chost, peer->service);
                 break;
 
             case TRN_MSG_N_REINITS:
@@ -672,7 +672,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                     param=0;
                 }
                 send_len=trnw_ptype_msg(&msg_out, TRN_MSG_ACK, param);
-                mlog_tprintf(self->mlog_id,"trn_out_meas,%lf,[%s:%s]\n",msg_time, param, peer->chost, peer->service);
+                mlog_tprintf(self->mlog_id,"trn_out_meas,%lf,%d,[%s:%s]\n",msg_time, param, peer->chost, peer->service);
                break;
 
             case TRN_MSG_IS_CONV:
