@@ -314,11 +314,7 @@ int main(int argc, char **argv) {
 
 	void *datalist;
 	double file_weight = 1.0;
-	char dfile[MB_PATH_MAXLINE];
-	char dfilelast[MB_PATH_MAXLINE];
-	char pwd[MB_PATH_MAXLINE];
 	char command[MB_PATH_MAXLINE];
-	char *filename;
 	int nfile = 0;
 	int nparproblem;
 	int ndataproblem;
@@ -427,8 +423,11 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		char file[MB_PATH_MAXLINE];
+		char dfile[MB_PATH_MAXLINE];
+		char dfilelast[MB_PATH_MAXLINE];
 		while (mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS) {
 			nfile++;
+			char pwd[MB_PATH_MAXLINE];  // TODO(schwehr): is the cwd going to change?
 			/* char *bufptr = */ getcwd(pwd, MB_PATH_MAXLINE);
 			mb_get_relative_path(verbose, file, pwd, &error);
 			mb_get_relative_path(verbose, dfile, pwd, &error);
@@ -464,7 +463,8 @@ int main(int argc, char **argv) {
 					fprintf(output, "Copying %s %d %f\n", file, format, file_weight);
 					sprintf(command, "cp %s* .", file);
 					/* shellstatus = */ system(command);
-					if ((filename = strrchr(file, '/')) != NULL)
+					char *filename = strrchr(file, '/');
+					if (filename != NULL)
 						filename++;
 					else
 						filename = file;
@@ -555,7 +555,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* set program status */
-	status = MB_SUCCESS;
+	// status = MB_SUCCESS;
 
 	/* output counts */
 	if (verbose > 0) {
@@ -569,7 +569,7 @@ int main(int argc, char **argv) {
 
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	if (verbose >= 2) {
 		fprintf(output, "\ndbg2  Program <%s> completed\n", program_name);
