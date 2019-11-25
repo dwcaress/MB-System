@@ -20,6 +20,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1153,11 +1154,10 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 	int nchar, nget;
 	size_t size;
 	FILE *tfp;
-	int nav_ok;
 	int time_i[7], time_j[6], ihr, ioff;
 	char NorS[2], EorW[2];
 	double mlon, llon, mlat, llat;
-	int degree, time_set;
+	int degree;
 	double sec, hr, dminute;
 	double time_d, heading, sensordepth, roll, pitch, heave;
 	int len;
@@ -1233,6 +1233,8 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 
 	/* read the records */
 	if (status == MB_SUCCESS) {
+		bool time_set;
+		bool nav_ok;
 		nrecord = 0;
 		if ((tfp = fopen(merge_nav_file, "r")) == NULL) {
 			*error = MB_ERROR_OPEN_FAIL;
@@ -1492,7 +1494,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 				}
 
 				/* make sure longitude is defined according to lonflip */
-				if (nav_ok == true) {
+				if (nav_ok) {
 					if (merge_nav_lonflip == -1 && n_lon[nrecord] > 0.0)
 						n_lon[nrecord] = n_lon[nrecord] - 360.0;
 					else if (merge_nav_lonflip == 0 && n_lon[nrecord] < -180.0)
@@ -1504,7 +1506,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && nav_ok == true) {
+				if (verbose >= 5 && nav_ok) {
 					fprintf(stderr, "\ndbg5  New navigation point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       nav[%d]: %f %f %f\n", nrecord, n_time_d[nrecord], n_lon[nrecord], n_lat[nrecord]);
 				}
@@ -1514,7 +1516,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 				}
 
 				/* check for reverses or repeats in time */
-				if (nav_ok == true) {
+				if (nav_ok) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])
@@ -1566,7 +1568,6 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 	int nchar, nget;
 	size_t size;
 	FILE *tfp;
-	int sensordepth_ok;
 	int time_i[7], time_j[6], ihr;
 	double sec;
 	double time_d, lon, lat, heading, speed, roll, pitch, heave;
@@ -1625,6 +1626,7 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 
 	/* read the records */
 	if (status == MB_SUCCESS) {
+		bool sensordepth_ok;
 		nrecord = 0;
 		if ((tfp = fopen(merge_sensordepth_file, "r")) == NULL) {
 			*error = MB_ERROR_OPEN_FAIL;
@@ -1692,7 +1694,7 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && sensordepth_ok == true) {
+				if (verbose >= 5 && sensordepth_ok) {
 					fprintf(stderr, "\ndbg5  New sensordepth point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       sensordepth[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_sensordepth[nrecord]);
 				}
@@ -1702,7 +1704,7 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 				}
 
 				/* check for reverses or repeats in time */
-				if (sensordepth_ok == true) {
+				if (sensordepth_ok) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])
@@ -1751,7 +1753,6 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 	int nchar, nget;
 	size_t size;
 	FILE *tfp;
-	int altitude_ok;
 	int time_i[7], time_j[6], ihr;
 	double sec;
 	double time_d;
@@ -1810,6 +1811,7 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 
 	/* read the records */
 	if (status == MB_SUCCESS) {
+		bool altitude_ok;
 		nrecord = 0;
 		if ((tfp = fopen(merge_altitude_file, "r")) == NULL) {
 			*error = MB_ERROR_OPEN_FAIL;
@@ -1866,7 +1868,7 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && altitude_ok == true) {
+				if (verbose >= 5 && altitude_ok) {
 					fprintf(stderr, "\ndbg5  New altitude point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       altitude[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_altitude[nrecord]);
 				}
@@ -1876,7 +1878,7 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 				}
 
 				/* check for reverses or repeats in time */
-				if (altitude_ok == true) {
+				if (altitude_ok) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])
@@ -1924,7 +1926,6 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 	int nchar, nget;
 	size_t size;
 	FILE *tfp;
-	int heading_ok;
 	int time_i[7], time_j[6], ihr;
 	double sec;
 	double time_d, lon, lat, sensordepth, speed, roll, pitch, heave;
@@ -1983,6 +1984,7 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 
 	/* read the records */
 	if (status == MB_SUCCESS) {
+		bool heading_ok;
 		nrecord = 0;
 		if ((tfp = fopen(merge_heading_file, "r")) == NULL) {
 			*error = MB_ERROR_OPEN_FAIL;
@@ -2050,7 +2052,7 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && heading_ok == true) {
+				if (verbose >= 5 && heading_ok) {
 					fprintf(stderr, "\ndbg5  New heading point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       heading[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_heading[nrecord]);
 				}

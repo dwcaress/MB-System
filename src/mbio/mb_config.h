@@ -23,7 +23,7 @@
 #define HAVE_LIBM 1
 
 /* Have malloc.h */
-#define HAVE_MALLOC_H 1
+/* #undef HAVE_MALLOC_H */
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -68,10 +68,10 @@
 #define MBSYSTEM_CONFIG_DEFINED 1
 
 /* Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h */
-#define MBSYSTEM_INSTALL_PREFIX "NONE"
+#define MBSYSTEM_INSTALL_PREFIX "/usr/local"
 
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
-#define MBSYSTEM_OTPS_LOCATION "/usr/local/OTPS2"
+#define MBSYSTEM_OTPS_LOCATION "/usr/local/src/OTPS2"
 
 /* Build libmbtnav */
 #define MBTNAV_ENABLED 1
@@ -80,10 +80,7 @@
 #define MBTRN_ENABLED 1
 
 /* Build graphical tools */
-/* #undef MBUTILS_ENABLED */
-
-/* Define to 1 if your C compiler doesn't accept -c and -o together. */
-/* #undef NO_MINUS_C_MINUS_O */
+#define MBUTILS_ENABLED 1
 
 /* Name of package */
 #define PACKAGE "mbsystem"
@@ -95,7 +92,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.7.6beta15"
+#define PACKAGE_STRING "mbsystem 5.7.6beta19"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -104,7 +101,7 @@
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.7.6beta15"
+#define PACKAGE_VERSION "5.7.6beta19"
 
 /* Build tools using PCL */
 /* #undef PCLTOOLS_ENABLED */
@@ -116,10 +113,10 @@
 /* #undef TEST_ENABLED */
 
 /* Version number of package */
-#define VERSION "5.7.6beta15"
+#define VERSION "5.7.6beta19"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "21 October 2019"
+#define VERSION_DATE "22 November 2019"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

@@ -41,8 +41,9 @@ enum MbformatList {
 
 static const char program_name[] = "MBFORMAT";
 static const char help_message[] =
-    "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  "
-    "If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
+    "MBFORMAT is an utility which identifies the swath data formats\n"
+    "associated with MBIO format id's.  If no format id is specified,\n"
+    "MBFORMAT lists all of the currently supported formats.";
 static const char usage_message[] = "mbformat [-Fformat -Ifile -L -K -V -W -H]";
 
 /*--------------------------------------------------------------------*/
@@ -81,7 +82,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", file);
+				sscanf(optarg, "%1023s", file);
 				file_specified = true;
 				break;
 			case 'V':

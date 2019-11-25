@@ -699,7 +699,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 	double amplog;
 	int *npings;
 	int nping_read = 0;
-	int start, done, first, nplot;
+	int start, first, nplot;
 	int plot;
 	int flush;
 	int save_new;
@@ -989,8 +989,8 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 			/* loop over reading */
 			*npings = 0;
 			start = true;
-			done = false;
-			while (done == false) {
+			bool done = false;
+			while (!done) {
 				pingcur = &Ctrl->swath_plot->data[*npings];
 				status =
 				    mb_read(verbose, Ctrl->mbio_ptr, &(pingcur->kind), &(pingcur->pings), pingcur->time_i, &(pingcur->time_d),
@@ -1125,7 +1125,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 					}
 					else
 						first = 1;
-					if (done == true)
+					if (done)
 						nplot = *npings - first;
 					else
 						nplot = *npings - first - 1;

@@ -37,7 +37,8 @@
 #include "mb_status.h"
 #include "mb_io.h"
 
-#define MBINFO_MAXPINGS 50
+const int MBINFO_MAXPINGS = 50;
+
 struct ping {
 	char *beamflag;
 	double *bath;
@@ -49,12 +50,12 @@ struct ping {
 	double *sslat;
 };
 
-enum OutputFormat {
+typedef enum {
   FREE_TEXT = 0,
   JSON = 1,
   XML = 2,
   MAX_OUTPUT_FORMAT = 2
-};
+} output_format_t ;
 
 static const char program_name[] = "MBINFO";
 static const char usage_message[] =
@@ -66,28 +67,282 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char format_description[MB_DESCRIPTION_LENGTH];
-
-	/* MBIO read control parameters */
-	char read_file[MB_PATH_MAXLINE];
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
 	int format;
-	int pings;
+	int pings_get = 1;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &format, &pings_get, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	char read_file[MB_PATH_MAXLINE] = "stdin";
+	bool comments = false;
+	bool good_nav_only = false;
+	bool lonflip_set = false;
+	int lonflip_use = 0;
+	int mask_nx = 0;
+	int mask_ny = 0;
+	bool coverage_mask = false;
+	bool print_notices = false;
+	bool output_usefile = false;
+	int pings_read = 1;
+	bool bathy_in_feet = false;  // TODO(schwehr): Switch to bathy_in_meters.
+	output_format_t output_format = FREE_TEXT;
+
+	/* process argument list */
+	bool errflg = false;
+	bool help = false;
+        {
+		int c;
+		while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:NnOoP:p:R:r:S:s:T:t:WwX:x:")) != -1)
+	        {
+			switch (c) {
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
+				btime_i[6] = 0;
+				break;
+			case 'C':
+			case 'c':
+				comments = true;
+				break;
+			case 'E':
+			case 'e':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
+				etime_i[6] = 0;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+				good_nav_only = true;
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%1023s", read_file);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				lonflip_set = true;
+				lonflip_use = lonflip;
+				break;
+			case 'M':
+			case 'm':
+				sscanf(optarg, "%d/%d", &mask_nx, &mask_ny);
+				coverage_mask = true;
+				break;
+			case 'N':
+			case 'n':
+				print_notices = true;
+				break;
+			case 'O':
+			case 'o':
+				output_usefile = true;
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%d", &pings_read);
+				if (pings_read < 1)
+					pings_read = 1;
+				if (pings_read > MBINFO_MAXPINGS)
+					pings_read = MBINFO_MAXPINGS;
+				break;
+			case 'R':
+			case 'r':
+				mb_get_bounds(optarg, bounds);
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%lf", &speedmin);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf", &timegap);
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'W':
+			case 'w':
+				bathy_in_feet = true;
+				break;
+			case 'X':
+			case 'x':
+			{
+				int tmp;
+				sscanf(optarg, "%d", &tmp);
+				output_format = (output_format_t)tmp;
+				if (output_format < 0 || output_format > MAX_OUTPUT_FORMAT) {
+					errflg = true;
+					fprintf(stderr, "Invalid output format for inf file");
+				}
+				break;
+			}
+			default:
+				errflg = true;
+			}
+		}
+	}
+
+	FILE * const stream = verbose <= 1 ? stdout : stderr;
+
+	if (errflg) {
+		fprintf(stream, "usage: %s\n", usage_message);
+		fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
+		exit(MB_ERROR_BAD_USAGE);
+	}
+
+	if (verbose == 1 || help) {
+		fprintf(stream, "\nProgram %s\n", program_name);
+		fprintf(stream, "MB-system Version %s\n", MB_VERSION);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stream, "\ndbg2  Program <%s>\n", program_name);
+		fprintf(stream, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stream, "dbg2  Control Parameters:\n");
+		fprintf(stream, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stream, "dbg2       help:       %d\n", help);
+		fprintf(stream, "dbg2       format:     %d\n", format);
+		fprintf(stream, "dbg2       pings:      %d\n", pings_read);
+		fprintf(stream, "dbg2       lonflip:    %d\n", lonflip);
+		fprintf(stream, "dbg2       bounds[0]:  %f\n", bounds[0]);
+		fprintf(stream, "dbg2       bounds[1]:  %f\n", bounds[1]);
+		fprintf(stream, "dbg2       bounds[2]:  %f\n", bounds[2]);
+		fprintf(stream, "dbg2       bounds[3]:  %f\n", bounds[3]);
+		fprintf(stream, "dbg2       btime_i[0]: %d\n", btime_i[0]);
+		fprintf(stream, "dbg2       btime_i[1]: %d\n", btime_i[1]);
+		fprintf(stream, "dbg2       btime_i[2]: %d\n", btime_i[2]);
+		fprintf(stream, "dbg2       btime_i[3]: %d\n", btime_i[3]);
+		fprintf(stream, "dbg2       btime_i[4]: %d\n", btime_i[4]);
+		fprintf(stream, "dbg2       btime_i[5]: %d\n", btime_i[5]);
+		fprintf(stream, "dbg2       btime_i[6]: %d\n", btime_i[6]);
+		fprintf(stream, "dbg2       etime_i[0]: %d\n", etime_i[0]);
+		fprintf(stream, "dbg2       etime_i[1]: %d\n", etime_i[1]);
+		fprintf(stream, "dbg2       etime_i[2]: %d\n", etime_i[2]);
+		fprintf(stream, "dbg2       etime_i[3]: %d\n", etime_i[3]);
+		fprintf(stream, "dbg2       etime_i[4]: %d\n", etime_i[4]);
+		fprintf(stream, "dbg2       etime_i[5]: %d\n", etime_i[5]);
+		fprintf(stream, "dbg2       etime_i[6]: %d\n", etime_i[6]);
+		fprintf(stream, "dbg2       speedmin:   %f\n", speedmin);
+		fprintf(stream, "dbg2       timegap:    %f\n", timegap);
+		fprintf(stream, "dbg2       good_nav:   %d\n", good_nav_only);
+		fprintf(stream, "dbg2       comments:   %d\n", comments);
+		fprintf(stream, "dbg2       file:       %s\n", read_file);
+		fprintf(stream, "dbg2       bathy feet: %d\n", bathy_in_feet);
+		fprintf(stream, "dbg2       lonflip_set:%d\n", lonflip_set);
+		fprintf(stream, "dbg2       coverage:   %d\n", coverage_mask);
+		if (coverage_mask) {
+			fprintf(stream, "dbg2       mask_nx:    %d\n", mask_nx);
+			fprintf(stream, "dbg2       mask_ny:    %d\n", mask_ny);
+		}
+	}
+
+	if (help) {
+		static const char help_message[] =
+		    "MBINFO reads a swath sonar data file and outputs\n"
+	            "some basic statistics.  If pings are averaged (pings > 2)\n"
+	            "MBINFO estimates the variance for each of the swath\n"
+	            "beams by reading a set number of pings (>2) and then finding\n"
+	            "the variance of the detrended values for each beam.\n"
+	            "The results are dumped to stdout.";
+		fprintf(stream, "\n%s\n", help_message);
+		fprintf(stream, "\nusage: %s\n", usage_message);
+		exit(MB_ERROR_NO_ERROR);
+	}
+
+	int timbeg_i[7];
+	int timend_i[7];
+	for (int i = 0; i < 7; i++) {
+		timbeg_i[i] = 0;
+		timend_i[i] = 0;
+	}
+	int notice_list[MB_NOTICE_MAX];
+	int notice_list_tot[MB_NOTICE_MAX];
+	for (int i = 0; i < MB_NOTICE_MAX; i++) {
+		notice_list[i] = 0;
+		notice_list_tot[i] = 0;
+	}
+
+	int error = MB_ERROR_NO_ERROR;
+	if (format == 0)
+		mb_get_format(verbose, read_file, NULL, &format, &error);
+
+	double bathy_scale;
+	if (bathy_in_feet)
+		bathy_scale = 1.0 / 0.3048;
+	else
+		bathy_scale = 1.0;
+
+
+	/* determine whether to read one file or a list of files */
+	const bool read_datalist = format < 0;
+	bool read_data;
+
+	/* if reading from datalist then variance calculations
+	    are disabled */
+	if (read_datalist)
+		pings_read = 1;
+
+	/* output stream for basic stuff (stdout if verbose <= 1,
+	    output if verbose > 1) */
+	FILE *output = NULL;
+
+	/* Open output file if requested */
+	if (output_usefile) {
+		char output_file[MB_PATH_MAXLINE];
+		strcpy(output_file, read_file);
+		switch (output_format) {
+		case FREE_TEXT:
+			strcat(output_file, ".inf");
+			break;
+		case JSON:
+			strcat(output_file, "_inf.json");
+			break;
+		case XML:
+			strcat(output_file, "_inf.xml");
+			break;
+		default:
+			break;
+		}
+		if ((output = fopen(output_file, "w")) == NULL)
+			output = stream;
+	}
+	else {
+		output = stream;
+	}
+	switch (output_format) {
+	case FREE_TEXT:
+		break;
+	case JSON:
+		fprintf(output, "{\n");
+		break;
+	case XML:
+		fprintf(output, "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
+		fprintf(output, "<mbinfo>\n");
+		break;
+	default:
+		break;
+	}
+
+	char format_description[MB_DESCRIPTION_LENGTH];
+
+	int pings;
+	double file_weight;
+	double btime_d;
+	double etime_d;
 	char file[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
-	int pings_get = 1;
-	int pings_read = 1;
 	int beams_bath_alloc = 0;
 	int beams_amp_alloc = 0;
 	int pixels_ss_alloc = 0;
@@ -122,13 +377,7 @@ int main(int argc, char **argv) {
 	int icomment = 0;
 
 	/* mbinfo control parameters */
-	bool comments = false;
-	bool good_nav_only = false;
 	double speed_threshold = 50.0;
-	bool bathy_in_feet = false;  // TODO(schwehr): Switch to bathy_in_meters.
-	double bathy_scale;
-	int lonflip_use = 0;
-	bool lonflip_set = false;
 
 	/* limit variables */
 	double lonmin = 0.0;
@@ -161,8 +410,6 @@ int main(int argc, char **argv) {
 	double altend = 0.0;
 	double timbeg = 0.0;
 	double timend = 0.0;
-	int timbeg_i[7];
-	int timend_i[7];
 	int timbeg_j[5];
 	int timend_j[5];
 	double distot = 0.0;
@@ -234,269 +481,20 @@ int main(int argc, char **argv) {
 	int *nssvartot = NULL;
 
 	/* coverage mask variables */
-	bool coverage_mask = false;
-	int mask_nx = 0;
-	int mask_ny = 0;
 	double mask_dx = 0.0;
 	double mask_dy = 0.0;
 	int *mask = NULL;
 
 	/* notice variables */
-	bool print_notices = false;
-	int notice_list[MB_NOTICE_MAX];
-	int notice_list_tot[MB_NOTICE_MAX];
 	char *notice_msg;
 
-	/* output stream for basic stuff (stdout if verbose <= 1,
-	    output if verbose > 1) */
-	FILE *output = NULL;
-	bool output_usefile = false;
 	char *fileprint;
-	enum OutputFormat output_format = FREE_TEXT;
-	int len1;
-	int len2;
 	char string[500];
 
 	double speed_apparent;
 	double time_d_last = 0.0;
 	double val_double;
 
-	for (int i = 0; i < 7; i++) {
-		timbeg_i[i] = 0;
-		timend_i[i] = 0;
-	}
-	for (int i = 0; i < MB_NOTICE_MAX; i++) {
-		notice_list[i] = 0;
-		notice_list_tot[i] = 0;
-	}
-
-	int status = mb_defaults(verbose, &format, &pings_get, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
-	/* set default input to stdin */
-	strcpy(read_file, "stdin");
-
-	/* process argument list */
-	bool errflg = false;
-	bool help = false;
-        {
-		int c;
-		while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:NnOoP:p:R:r:S:s:T:t:WwX:x:")) != -1)
-	        {
-			switch (c) {
-			case 'B':
-			case 'b':
-				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
-				btime_i[6] = 0;
-				break;
-			case 'C':
-			case 'c':
-				comments = true;
-				break;
-			case 'E':
-			case 'e':
-				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
-				etime_i[6] = 0;
-				break;
-			case 'F':
-			case 'f':
-				sscanf(optarg, "%d", &format);
-				break;
-			case 'G':
-			case 'g':
-				good_nav_only = true;
-				break;
-			case 'H':
-			case 'h':
-				help = true;
-				break;
-			case 'I':
-			case 'i':
-				sscanf(optarg, "%s", read_file);
-				break;
-			case 'L':
-			case 'l':
-				sscanf(optarg, "%d", &lonflip);
-				lonflip_set = true;
-				lonflip_use = lonflip;
-				break;
-			case 'M':
-			case 'm':
-				sscanf(optarg, "%d/%d", &mask_nx, &mask_ny);
-				coverage_mask = true;
-				break;
-			case 'N':
-			case 'n':
-				print_notices = true;
-				break;
-			case 'O':
-			case 'o':
-				output_usefile = true;
-				break;
-			case 'P':
-			case 'p':
-				sscanf(optarg, "%d", &pings_read);
-				if (pings_read < 1)
-					pings_read = 1;
-				if (pings_read > MBINFO_MAXPINGS)
-					pings_read = MBINFO_MAXPINGS;
-				break;
-			case 'R':
-			case 'r':
-				mb_get_bounds(optarg, bounds);
-				break;
-			case 'S':
-			case 's':
-				sscanf(optarg, "%lf", &speedmin);
-				break;
-			case 'T':
-			case 't':
-				sscanf(optarg, "%lf", &timegap);
-				break;
-			case 'V':
-			case 'v':
-				verbose++;
-				break;
-			case 'W':
-			case 'w':
-				bathy_in_feet = true;
-				break;
-			case 'X':
-			case 'x':
-				sscanf(optarg, "%d", &output_format);
-				if (output_format < 0 || output_format > MAX_OUTPUT_FORMAT) {
-					errflg = true;
-					fprintf(stderr, "Invalid output format for inf file");
-				}
-				break;
-			default:
-				errflg = true;
-			}
-		}
-	}
-       
-	FILE * const stream = verbose <= 1 ? stdout : stderr;
-
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stream, "usage: %s\n", usage_message);
-		fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
-		exit(MB_ERROR_BAD_USAGE);
-	}
-
-	if (verbose == 1 || help) {
-		fprintf(stream, "\nProgram %s\n", program_name);
-		fprintf(stream, "MB-system Version %s\n", MB_VERSION);
-	}
-
-	if (verbose >= 2) {
-		fprintf(stream, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stream, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stream, "dbg2  Control Parameters:\n");
-		fprintf(stream, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stream, "dbg2       help:       %d\n", help);
-		fprintf(stream, "dbg2       format:     %d\n", format);
-		fprintf(stream, "dbg2       pings:      %d\n", pings_read);
-		fprintf(stream, "dbg2       lonflip:    %d\n", lonflip);
-		fprintf(stream, "dbg2       bounds[0]:  %f\n", bounds[0]);
-		fprintf(stream, "dbg2       bounds[1]:  %f\n", bounds[1]);
-		fprintf(stream, "dbg2       bounds[2]:  %f\n", bounds[2]);
-		fprintf(stream, "dbg2       bounds[3]:  %f\n", bounds[3]);
-		fprintf(stream, "dbg2       btime_i[0]: %d\n", btime_i[0]);
-		fprintf(stream, "dbg2       btime_i[1]: %d\n", btime_i[1]);
-		fprintf(stream, "dbg2       btime_i[2]: %d\n", btime_i[2]);
-		fprintf(stream, "dbg2       btime_i[3]: %d\n", btime_i[3]);
-		fprintf(stream, "dbg2       btime_i[4]: %d\n", btime_i[4]);
-		fprintf(stream, "dbg2       btime_i[5]: %d\n", btime_i[5]);
-		fprintf(stream, "dbg2       btime_i[6]: %d\n", btime_i[6]);
-		fprintf(stream, "dbg2       etime_i[0]: %d\n", etime_i[0]);
-		fprintf(stream, "dbg2       etime_i[1]: %d\n", etime_i[1]);
-		fprintf(stream, "dbg2       etime_i[2]: %d\n", etime_i[2]);
-		fprintf(stream, "dbg2       etime_i[3]: %d\n", etime_i[3]);
-		fprintf(stream, "dbg2       etime_i[4]: %d\n", etime_i[4]);
-		fprintf(stream, "dbg2       etime_i[5]: %d\n", etime_i[5]);
-		fprintf(stream, "dbg2       etime_i[6]: %d\n", etime_i[6]);
-		fprintf(stream, "dbg2       speedmin:   %f\n", speedmin);
-		fprintf(stream, "dbg2       timegap:    %f\n", timegap);
-		fprintf(stream, "dbg2       good_nav:   %d\n", good_nav_only);
-		fprintf(stream, "dbg2       comments:   %d\n", comments);
-		fprintf(stream, "dbg2       file:       %s\n", read_file);
-		fprintf(stream, "dbg2       bathy feet: %d\n", bathy_in_feet);
-		fprintf(stream, "dbg2       lonflip_set:%d\n", lonflip_set);
-		fprintf(stream, "dbg2       coverage:   %d\n", coverage_mask);
-		if (coverage_mask) {
-			fprintf(stream, "dbg2       mask_nx:    %d\n", mask_nx);
-			fprintf(stream, "dbg2       mask_ny:    %d\n", mask_ny);
-		}
-	}
-
-	if (help) {
-		static const char help_message[] =
-		    "MBINFO reads a swath sonar data file and outputs\n"
-	            "some basic statistics.  If pings are averaged (pings > 2)\n"
-	            "MBINFO estimates the variance for each of the swath\n"
-	            "beams by reading a set number of pings (>2) and then finding\n"
-	            "the variance of the detrended values for each beam.\n"
-	            "The results are dumped to stdout.";
-		fprintf(stream, "\n%s\n", help_message);
-		fprintf(stream, "\nusage: %s\n", usage_message);
-		exit(error);
-	}
-
-	/* get format if required */
-	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
-
-	if (bathy_in_feet)
-		bathy_scale = 1.0 / 0.3048;
-	else
-		bathy_scale = 1.0;
-
-
-	/* determine whether to read one file or a list of files */
-	const bool read_datalist = format < 0;
-	bool read_data;
-
-	/* if reading from datalist then variance calculations
-	    are disabled */
-	if (read_datalist)
-		pings_read = 1;
-
-	/* Open output file if requested */
-	if (output_usefile) {
-		char output_file[MB_PATH_MAXLINE];
-		strcpy(output_file, read_file);
-		switch (output_format) {
-		case FREE_TEXT:
-			strcat(output_file, ".inf");
-			break;
-		case JSON:
-			strcat(output_file, "_inf.json");
-			break;
-		case XML:
-			strcat(output_file, "_inf.xml");
-			break;
-		default:
-			break;
-		}
-		if ((output = fopen(output_file, "w")) == NULL)
-			output = stream;
-	}
-	else {
-		output = stream;
-	}
-	switch (output_format) {
-	case FREE_TEXT:
-		break;
-	case JSON:
-		fprintf(output, "{\n");
-		break;
-	case XML:
-		fprintf(output, "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
-		fprintf(output, "<mbinfo>\n");
-		break;
-	default:
-		break;
-	}
 	/* read only once unless coverage mask requested */
 	int pass = 0;
 
@@ -524,21 +522,20 @@ int main(int argc, char **argv) {
 	int val_int;  // TODO(schwehr): bool?
 	bool good_nav;
 	bool done = false;
+
+	void *datalist;
 	while (!done) {
 		/* open file list */
 		if (read_datalist) {
-			if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+			const int look_processed = MB_DATALIST_LOOK_UNSET;
+			if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 				fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 				exit(MB_ERROR_OPEN_FAIL);
 			}
-			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = true;
-			else
-				read_data = false;
-		}
-		/* else copy single filename to be read */
-		else {
+			read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+		} else {
+			// else copy single filename to be read
 			strcpy(file, read_file);
 			read_data = true;
 		}
@@ -708,11 +705,12 @@ int main(int argc, char **argv) {
 					fprintf(output, "%s", format_description);
 					break;
 				case JSON:
+				{
 					fprintf(output, "\"file_info\": {\n");
 					fprintf(output, "\"swath_data_file\": \"%s\",\n", fileprint);
 					fprintf(output, "\"mbio_data_format_id\": \"%d\",\n", format);
-					len1 = strspn(format_description, "Formatname: ");
-					len2 = strcspn(&format_description[len1], "\n");
+					size_t len1 = strspn(format_description, "Formatname: ");
+					size_t len2 = strcspn(&format_description[len1], "\n");
 					strncpy(string, &format_description[len1], len2);
 					string[len2] = '\0';
 					fprintf(output, "\"format_name\": \"%s\",\n", string);
@@ -732,12 +730,14 @@ int main(int argc, char **argv) {
 					fprintf(output, "\"attributes\": \"%s\"\n", &format_description[len1]);
 					fprintf(output, "},\n");
 					break;
+				}
 				case XML:
+				{
 					fprintf(output, "\t<file_info>\n");
 					fprintf(output, "\t\t<swath_data_file>%s</swath_data_file>\n", fileprint);
 					fprintf(output, "\t\t<mbio_data_format_id>%d</mbio_data_format_id>\n", format);
-					len1 = strspn(format_description, "Formatname: ");
-					len2 = strcspn(&format_description[len1], "\n");
+					size_t len1 = strspn(format_description, "Formatname: ");
+					size_t len2 = strcspn(&format_description[len1], "\n");
 					strncpy(string, &format_description[len1], len2);
 					string[len2] = '\0';
 					fprintf(output, "\t\t<format_name>%s</format_name>\n", string);
@@ -757,6 +757,7 @@ int main(int argc, char **argv) {
 					fprintf(output, "\t\t<attributes>%s</attributes>\n", &format_description[len1]);
 					fprintf(output, "\t</file_info>\n");
 					break;
+				}
 				default:
 					errflg = true;
 				}

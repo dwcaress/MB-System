@@ -113,9 +113,6 @@ static const char help_message[] =
 /*--------------------------------------------------------------------*/
 int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int nss, double *ss,
                       double *ssacrosstrack, int *error) {
-  int ifirst, ilast;
-  int iss, ibath;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -129,8 +126,8 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
   }
 
   /* find limits of good bathy */
-  ifirst = -1;
-  ilast = -1;
+  int ifirst = -1;
+  int ilast = -1;
   for (int i = 0; i < nbath; i++) {
     if (mb_beam_ok(beamflag[i])) {
       if (ifirst < 0)
@@ -142,8 +139,8 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
   /* loop over sidescan looking for bathy on either side
      - zero sidescan if bathy lacking */
   if (ifirst < ilast) {
-    ibath = ifirst;
-    for (iss = 0; iss < nss; iss++) {
+    int ibath = ifirst;
+    for (int iss = 0; iss < nss; iss++) {
       /* make sure ibath sets right interval for ss */
       while (ibath < ilast - 1 && (!mb_beam_ok(beamflag[ibath]) || !mb_beam_ok(beamflag[ibath + 1]) ||
                                    (mb_beam_ok(beamflag[ibath + 1]) && ssacrosstrack[iss] > bathacrosstrack[ibath + 1])))
@@ -161,7 +158,7 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 
   /* else if no good bathy zero all sidescan */
   else {
-    for (iss = 0; iss < nss; iss++) {
+    for (int iss = 0; iss < nss; iss++) {
       ss[iss] = 0.0;
     }
   }
@@ -181,10 +178,6 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 /*--------------------------------------------------------------------*/
 int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, struct mbprocess_sscorr_struct *corrtable,
                   struct mbprocess_sscorr_struct *corrtableuse, int *error) {
-  double factor;
-  int ifirst, ilast, irecent, inext;
-  int ii, itable;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -215,14 +208,16 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
     }
   }
   else {
-    itable = 0;
+    int itable = 0;
     for (int i = 0; i < ncorrtable - 1; i++) {
       if (corrtable[i].time_d <= time_d && corrtable[i + 1].time_d > time_d)
         itable = i;
     }
-    factor = (time_d - corrtable[itable].time_d) / (corrtable[itable + 1].time_d - corrtable[itable].time_d);
+    const double factor = (time_d - corrtable[itable].time_d) / (corrtable[itable + 1].time_d - corrtable[itable].time_d);
     corrtableuse->time_d = time_d;
-    corrtableuse->nangle = MIN(corrtable[itable].nangle, corrtable[itable].nangle);
+    // TODO(schwehr): What was this about?
+    // corrtableuse->nangle = MIN(corrtable[itable].nangle, corrtable[itable].nangle);
+    corrtableuse->nangle = corrtable[itable].nangle;
     for (int i = 0; i < corrtableuse->nangle; i++) {
       corrtableuse->angle[i] =
           corrtable[itable].angle[i] + factor * (corrtable[itable + 1].angle[i] - corrtable[itable].angle[i]);
@@ -244,14 +239,17 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
   }
 
   /* now interpolate or extrapolate any zero values */
-  ifirst = ncorrangle;
-  ilast = -1;
+  int ifirst = ncorrangle;
+  int ilast = -1;
   for (int i = 0; i < ncorrangle; i++) {
     if (corrtableuse->amplitude[i] != 0.0) {
       ifirst = MIN(i, ifirst);
       ilast = MAX(i, ilast);
     }
   }
+
+  int irecent = 0;
+  int inext;
   for (int i = 0; i < ncorrangle; i++) {
     if (corrtableuse->amplitude[i] != 0.0)
       irecent = i;
@@ -265,12 +263,12 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
     }
     else if (corrtableuse->amplitude[i] == 0.0) {
       inext = -1;
-      for (ii = i + 1; ii < ilast; ii++) {
+      for (int ii = i + 1; ii < ilast; ii++) {
         if (corrtableuse->amplitude[ii] != 0.0 && inext < 0)
           inext = ii;
       }
       if (irecent < i && inext > i) {
-        factor = ((double)(i - irecent)) / ((double)(inext - irecent));
+        const double factor = ((double)(i - irecent)) / ((double)(inext - irecent));
         corrtableuse->amplitude[i] = corrtableuse->amplitude[irecent] +
                                      factor * (corrtableuse->amplitude[inext] - corrtableuse->amplitude[irecent]);
         corrtableuse->sigma[i] =
@@ -299,9 +297,6 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 }
 /*--------------------------------------------------------------------*/
 int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double angle, double *corr, int *error) {
-  int iangle;
-  int ifirst, ilast;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -314,34 +309,34 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
     fprintf(stderr, "dbg2       angle:       %f\n", angle);
   }
 
+  int iangle;
   /* search for the specified angle */
   bool found = false;
-  for (int i = 0; i < nangle - 1; i++)
+  for (int i = 0; i < nangle - 1; i++) {
     if (angle >= angles[i] && angle <= angles[i + 1]) {
       found = true;
       iangle = i;
     }
+  }
 
   /* interpolate the correction */
   if (found) {
     *corr = corrs[iangle] +
             (corrs[iangle + 1] - corrs[iangle]) * (angle - angles[iangle]) / (angles[iangle + 1] - angles[iangle]);
-  }
-  else if (angle < angles[0]) {
-    iangle = 0;
+  }   else if (angle < angles[0]) {
+    // iangle = 0;
     *corr = corrs[0];
-  }
-  else if (angle > angles[nangle - 1]) {
-    iangle = nangle - 1;
+  }   else if (angle > angles[nangle - 1]) {
+    // iangle = nangle - 1;
     *corr = corrs[nangle - 1];
-  }
-  else
+  } else {
     *corr = 0.0;
+  }
 
   /* use outermost value if angle outside nonzero range */
   if (*corr == 0.0) {
-    ifirst = nangle - 1;
-    ilast = 0;
+    int ifirst = nangle - 1;
+    int ilast = 0;
     for (int i = 0; i < nangle; i++) {
       if (corr[i] != 0.0) {
         if (ifirst > i)
@@ -421,21 +416,226 @@ static const char usage_message[] =
     "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -S -T -V -H]";
 
 int main(int argc, char **argv) {
-  /* MBIO status variables */
   int verbose = 0;
-  int error = MB_ERROR_NO_ERROR;
-  char *message = NULL;
-
-  /* MBIO read and write control parameters */
+  int mbp_format;
   int pings;
   int lonflip;
   double bounds[4];
   int btime_i[7];
   int etime_i[7];
-  double btime_d;
-  double etime_d;
   double speedmin;
   double timegap;
+  int status = mb_defaults(verbose, &mbp_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+  int uselockfiles; // TODO(schwehr): Make mb_uselockfiles take a bool.
+  status &= mb_uselockfiles(verbose, &uselockfiles);
+
+  /* reset all defaults */
+  pings = 1;
+  // lonflip = 0;
+  bounds[0] = -360.;
+  bounds[1] = 360.;
+  bounds[2] = -90.;
+  bounds[3] = 90.;
+  btime_i[0] = 1962;
+  btime_i[1] = 2;
+  btime_i[2] = 21;
+  btime_i[3] = 10;
+  btime_i[4] = 30;
+  btime_i[5] = 0;
+  btime_i[6] = 0;
+  etime_i[0] = 2062;
+  etime_i[1] = 2;
+  etime_i[2] = 21;
+  etime_i[3] = 10;
+  etime_i[4] = 30;
+  etime_i[5] = 0;
+  etime_i[6] = 0;
+  speedmin = 0.0;
+  timegap = 1000000000.0;
+
+  int error = MB_ERROR_NO_ERROR;
+
+  /* set default input and output */
+  bool mbp_ifile_specified = false;
+  char mbp_ifile[MBP_FILENAMESIZE] = "";
+
+  bool mbp_ofile_specified = false;
+  char mbp_ofile[MBP_FILENAMESIZE] = "";
+  bool mbp_format_specified = false;
+  bool strip_comments = false;
+  int format = 0;
+  char read_file[MB_PATH_MAXLINE];
+  bool checkuptodate = true;
+  bool printfilestatus = false;
+  bool testonly = false;
+
+  /* process argument list */
+  {
+    bool errflg = false;
+    int c;
+    bool help = false;
+    while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpSsTt")) != -1)
+      switch (c) {
+      case 'H':
+      case 'h':
+        help = true;
+        break;
+      case 'V':
+      case 'v':
+        verbose++;
+        break;
+      case 'F':
+      case 'f':
+        sscanf(optarg, "%d", &format);
+        mbp_format_specified = true;
+        break;
+      case 'I':
+      case 'i':
+        mbp_ifile_specified = true;
+        sscanf(optarg, "%1023s", read_file);
+        break;
+      case 'N':
+      case 'n':
+        strip_comments = true;
+        break;
+      case 'O':
+      case 'o':
+        mbp_ofile_specified = true;
+        sscanf(optarg, "%1023s", mbp_ofile);
+        break;
+      case 'P':
+      case 'p':
+        checkuptodate = false;
+        break;
+      case 'S':
+      case 's':
+        printfilestatus = true;
+        break;
+      case 'T':
+      case 't':
+        testonly = true;
+        break;
+      case '?':
+        errflg = true;
+      }
+
+    if (errflg) {
+      fprintf(stderr, "usage: %s\n", usage_message);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_BAD_USAGE);
+    }
+
+    if (help) {
+      fprintf(stderr, "\nProgram %s\n", program_name);
+      fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
+      fprintf(stderr, "\n%s\n", help_message);
+      fprintf(stderr, "\nusage: %s\n", usage_message);
+      exit(error);
+    }
+  }
+
+  /* try datalist.mb-1 as input */
+  struct stat file_status;
+  if (!mbp_ifile_specified) {
+    const int fstat = stat("datalist.mb-1", &file_status);
+    if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      strcpy(read_file, "datalist.mb-1");
+      mbp_ifile_specified = true;
+    }
+  }
+
+  /* quit if no input file specified */
+  if (!mbp_ifile_specified) {
+    fprintf(stderr, "\nProgram <%s> requires an input data file.\n", program_name);
+    fprintf(stderr, "The input file may be specified with the -I option.\n");
+    fprintf(stderr, "The default input file is \"datalist.mb-1\".\n");
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(MB_ERROR_OPEN_FAIL);
+  }
+
+  /* get format if required */
+  if (format == 0)
+    mb_get_format(verbose, read_file, NULL, &format, &error);
+
+  /* determine whether to read one file or a list of files */
+  const bool read_datalist = format < 0;
+  bool read_data = false;
+
+  /* open file list */
+  void *datalist;
+  char mbp_dfile[MBP_FILENAMESIZE];
+  double file_weight;
+  if (read_datalist) {
+    const int look_processed = MB_DATALIST_LOOK_NO;
+    if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
+      fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_OPEN_FAIL);
+    }
+    read_data = mb_datalist_read(verbose, datalist, mbp_ifile, mbp_dfile, &mbp_format, &file_weight, &error) == MB_SUCCESS;
+  } else {
+    // else copy single filename to be read
+    strcpy(mbp_ifile, read_file);
+    mbp_format = format;
+    read_data = true;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+    fprintf(stderr, "\ndbg2  MB-System Control Parameters:\n");
+    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+    fprintf(stderr, "dbg2       read_file:       %s\n", read_file);
+    fprintf(stderr, "dbg2       format:          %d\n", format);
+    fprintf(stderr, "dbg2       pings:           %d\n", pings);
+    fprintf(stderr, "dbg2       lonflip:         %d\n", lonflip);
+    fprintf(stderr, "dbg2       bounds[0]:       %f\n", bounds[0]);
+    fprintf(stderr, "dbg2       bounds[1]:       %f\n", bounds[1]);
+    fprintf(stderr, "dbg2       bounds[2]:       %f\n", bounds[2]);
+    fprintf(stderr, "dbg2       bounds[3]:       %f\n", bounds[3]);
+    fprintf(stderr, "dbg2       btime_i[0]:      %d\n", btime_i[0]);
+    fprintf(stderr, "dbg2       btime_i[1]:      %d\n", btime_i[1]);
+    fprintf(stderr, "dbg2       btime_i[2]:      %d\n", btime_i[2]);
+    fprintf(stderr, "dbg2       btime_i[3]:      %d\n", btime_i[3]);
+    fprintf(stderr, "dbg2       btime_i[4]:      %d\n", btime_i[4]);
+    fprintf(stderr, "dbg2       btime_i[5]:      %d\n", btime_i[5]);
+    fprintf(stderr, "dbg2       btime_i[6]:      %d\n", btime_i[6]);
+    fprintf(stderr, "dbg2       etime_i[0]:      %d\n", etime_i[0]);
+    fprintf(stderr, "dbg2       etime_i[1]:      %d\n", etime_i[1]);
+    fprintf(stderr, "dbg2       etime_i[2]:      %d\n", etime_i[2]);
+    fprintf(stderr, "dbg2       etime_i[3]:      %d\n", etime_i[3]);
+    fprintf(stderr, "dbg2       etime_i[4]:      %d\n", etime_i[4]);
+    fprintf(stderr, "dbg2       etime_i[5]:      %d\n", etime_i[5]);
+    fprintf(stderr, "dbg2       etime_i[6]:      %d\n", etime_i[6]);
+    fprintf(stderr, "dbg2       speedmin:        %f\n", speedmin);
+    fprintf(stderr, "dbg2       timegap:         %f\n", timegap);
+    fprintf(stderr, "dbg2       strip_comments:  %d\n", strip_comments);
+    fprintf(stderr, "dbg2       checkuptodate:   %d\n", checkuptodate);
+    fprintf(stderr, "dbg2       printfilestatus: %d\n", printfilestatus);
+    fprintf(stderr, "dbg2       testonly:        %d\n", testonly);
+    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+  }
+
+  else if (verbose > 0) {
+    fprintf(stderr, "\nProgram <%s>\n", program_name);
+    fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+    fprintf(stderr, "\nProgram Operation:\n");
+    fprintf(stderr, "  Input file:      %s\n", read_file);
+    fprintf(stderr, "  Format:          %d\n", format);
+    if (checkuptodate)
+      fprintf(stderr, "  Files processed only if out of date.\n");
+    else
+      fprintf(stderr, "  All files processed.\n");
+    if (!strip_comments)
+      fprintf(stderr, "  Comments embedded in output.\n\n");
+    else
+      fprintf(stderr, "  Comments stripped from output.\n\n");
+  }
+
+  /* MBIO read and write control parameters */
+  double btime_d;
+  double etime_d;
   int beams_bath;
   int beams_amp;
   int pixels_ss;
@@ -490,36 +690,14 @@ int main(int argc, char **argv) {
   int pixel_size_set;
   int swath_width_set;
   int pixel_int;
-  double pixel_size;
+  double pixel_size = 0;
   double swath_width;
-
-  /* time, user, host variables */
-  time_t right_now;
-  char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 
   /* parameter controls */
   struct mb_process_struct process;
 
   /* processing variables */
-  bool checkuptodate = true;
-  bool testonly = false;
-  bool printfilestatus = false;
-  char read_file[MB_PATH_MAXLINE];
-  void *datalist;
-  int look_processed = MB_DATALIST_LOOK_NO;
-  double file_weight;
   bool proceedprocess = false;
-  bool outofdate = false;
-  double time_d_lastping = 0.0;
-  int ifilemodtime = 0;
-  int ofilemodtime = 0;
-  int pfilemodtime = 0;
-  int navfilemodtime = 0;
-  int navadjfilemodtime = 0;
-  int attitudefilemodtime = 0;
-  int sonardepthfilemodtime = 0;
-  int esfmodtime = 0;
-  int svpmodtime = 0;
   char str_process_yes[] = "**: Data processed";
   char str_process_no[] = "--: Data not processed";
   char str_process_yes_test[] = "Data processed (test-only mode)";
@@ -531,30 +709,18 @@ int main(int argc, char **argv) {
   char str_locked_ignored[] = "locked but lock ignored";
   char str_locked_fail[] = "unlocked but set lock failed";
   char str_locked_no[] = "unlocked";
-  int format = 0;
   int variable_beams;
   int traveltime;
   int beam_flagging;
-  bool calculatespeedheading = false;
-  int mbp_ifile_specified;
-  char mbp_ifile[MBP_FILENAMESIZE];
   char mbp_pfile[MBP_FILENAMESIZE];
-  char mbp_dfile[MBP_FILENAMESIZE];
-  int mbp_ofile_specified;
-  char mbp_ofile[MBP_FILENAMESIZE];
-  int mbp_format_specified;
-  int mbp_format;
-  int strip_comments;
   FILE *tfp;
-  struct stat file_status;
-  int fstat;
   int nnav = 0;
   int nanav = 0;
   int nattitude = 0;
   int nsonardepth = 0;
   int ntide = 0;
   int nstatic = 0;
-  int size, nchar, len, nget, nav_ok, attitude_ok, sonardepth_ok, tide_ok, static_ok;
+  int size, nchar;
   int time_j[5], stime_i[7], ftime_i[7];
   int ihr;
   double sec, hr;
@@ -562,7 +728,7 @@ int main(int argc, char **argv) {
   char *bufftmp;
   char NorS[2], EorW[2];
   double mlon, llon, mlat, llat;
-  int degree, time_set;
+  int degree;
   double dminute;
   double splineflag;
   double *ntime = NULL;
@@ -609,21 +775,17 @@ int main(int argc, char **argv) {
   double navlat_old = 0.0;
   double speed_old = 0.0;
   double heading_old = 0.0;
-  int nsvp = 0;
   double *depth = NULL;
   double *velocity = NULL;
   double *velocity_sum = NULL;
   void *rt_svp = NULL;
   double ssv;
   int sensorhead = 0;
-  int sensorhead_status = MB_SUCCESS;
   int sensorhead_error = MB_ERROR_NO_ERROR;
 
   /* swath file locking variables */
-  int uselockfiles;
   int lock_status;
   int lock_error;
-  int locked;
   int lock_purpose;
   mb_path lock_program;
   mb_path lock_cpu;
@@ -632,6 +794,7 @@ int main(int argc, char **argv) {
 
   /* edit save file control variables */
   struct mb_esf_struct esf;
+  memset(&esf, 0, sizeof(struct mb_esf_struct));
   int neditnull;
   int neditduplicate;
   int neditnotused;
@@ -641,7 +804,6 @@ int main(int argc, char **argv) {
   mb_path resf_file;
   FILE *resf_fp = NULL;
   mb_path resf_header;
-  int resf_mode = MB_ESF_MODE_EXPLICIT;
   int action;
 
   double draft_org, depth_offset_use, depth_offset_change, depth_offset_org, static_shift;
@@ -695,241 +857,41 @@ int main(int argc, char **argv) {
 
   /* topography parameters */
   struct mbprocess_grid_struct grid;
+  memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
 
-  /* output fbt and fnv files */
-  FILE *fnv_fp, *fbt_fp;
-  mb_path fnv_file, fbt_file;
-
-  char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
+  char buffer[MBP_FILENAMESIZE];
+  char dummy[MBP_FILENAMESIZE];
   char *string1, *string2, *string3;
   double factor;
   int pingmultiplicity;
   int nbeams;
   int istart, iend, icut;
-  int intstat;
   int ioff;
   int mm;
-  int ix, jy, kgrid;
-  int kgrid00, kgrid10, kgrid01, kgrid11;
 
-  /* get current default values */
-  int status = mb_defaults(verbose, &mbp_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-  status &= mb_uselockfiles(verbose, &uselockfiles);
-
-  /* reset all defaults */
-  pings = 1;
-  // lonflip = 0;
-  bounds[0] = -360.;
-  bounds[1] = 360.;
-  bounds[2] = -90.;
-  bounds[3] = 90.;
-  btime_i[0] = 1962;
-  btime_i[1] = 2;
-  btime_i[2] = 21;
-  btime_i[3] = 10;
-  btime_i[4] = 30;
-  btime_i[5] = 0;
-  btime_i[6] = 0;
-  etime_i[0] = 2062;
-  etime_i[1] = 2;
-  etime_i[2] = 21;
-  etime_i[3] = 10;
-  etime_i[4] = 30;
-  etime_i[5] = 0;
-  etime_i[6] = 0;
-  speedmin = 0.0;
-  timegap = 1000000000.0;
-
-  /* set default input and output */
-  mbp_ifile_specified = false;
-  strcpy(mbp_ifile, "\0");
-  mbp_ofile_specified = false;
-  strcpy(mbp_ofile, "\0");
-  mbp_format_specified = false;
-  strip_comments = false;
-
-  /* initialize grid and esf */
-  memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
-  memset(&esf, 0, sizeof(struct mb_esf_struct));
-
-  /* process argument list */
-  {
-    bool errflg = false;
-    int c;
-    bool help = false;
-    while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpSsTt")) != -1)
-      switch (c) {
-      case 'H':
-      case 'h':
-        help = true;
-        break;
-      case 'V':
-      case 'v':
-        verbose++;
-        break;
-      case 'F':
-      case 'f':
-        sscanf(optarg, "%d", &format);
-        mbp_format_specified = true;
-        break;
-      case 'I':
-      case 'i':
-        mbp_ifile_specified = true;
-        sscanf(optarg, "%s", read_file);
-        break;
-      case 'N':
-      case 'n':
-        strip_comments = true;
-        break;
-      case 'O':
-      case 'o':
-        mbp_ofile_specified = true;
-        sscanf(optarg, "%s", mbp_ofile);
-        break;
-      case 'P':
-      case 'p':
-        checkuptodate = false;
-        break;
-      case 'S':
-      case 's':
-        printfilestatus = true;
-        break;
-      case 'T':
-      case 't':
-        testonly = true;
-        break;
-      case '?':
-        errflg = true;
-      }
-
-    if (errflg) {
-      fprintf(stderr, "usage: %s\n", usage_message);
-      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(MB_ERROR_BAD_USAGE);
-    }
-
-    if (help) {
-      fprintf(stderr, "\nProgram %s\n", program_name);
-      fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
-      fprintf(stderr, "\n%s\n", help_message);
-      fprintf(stderr, "\nusage: %s\n", usage_message);
-      exit(error);
-    }
-  }
-
-  /* try datalist.mb-1 as input */
-  if (mbp_ifile_specified == false) {
-    if ((fstat = stat("datalist.mb-1", &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-      strcpy(read_file, "datalist.mb-1");
-      mbp_ifile_specified = true;
-    }
-  }
-
-  /* quit if no input file specified */
-  if (mbp_ifile_specified == false) {
-    fprintf(stderr, "\nProgram <%s> requires an input data file.\n", program_name);
-    fprintf(stderr, "The input file may be specified with the -I option.\n");
-    fprintf(stderr, "The default input file is \"datalist.mb-1\".\n");
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(MB_ERROR_OPEN_FAIL);
-  }
-
-  /* get format if required */
-  if (format == 0)
-    mb_get_format(verbose, read_file, NULL, &format, &error);
-
-  /* determine whether to read one file or a list of files */
-  const bool read_datalist = format < 0;
-  bool read_data = false;
-
-  /* open file list */
-  if (read_datalist) {
-    if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-      fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
-      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(MB_ERROR_OPEN_FAIL);
-    }
-    if ((status = mb_datalist_read(verbose, datalist, mbp_ifile, mbp_dfile, &mbp_format, &file_weight, &error)) == MB_SUCCESS)
-      read_data = true;
-    else
-      read_data = false;
-  }
-  /* else copy single filename to be read */
-  else {
-    strcpy(mbp_ifile, read_file);
-    mbp_format = format;
-    read_data = true;
-  }
-
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-    fprintf(stderr, "\ndbg2  MB-System Control Parameters:\n");
-    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-    fprintf(stderr, "dbg2       read_file:       %s\n", read_file);
-    fprintf(stderr, "dbg2       format:          %d\n", format);
-    fprintf(stderr, "dbg2       pings:           %d\n", pings);
-    fprintf(stderr, "dbg2       lonflip:         %d\n", lonflip);
-    fprintf(stderr, "dbg2       bounds[0]:       %f\n", bounds[0]);
-    fprintf(stderr, "dbg2       bounds[1]:       %f\n", bounds[1]);
-    fprintf(stderr, "dbg2       bounds[2]:       %f\n", bounds[2]);
-    fprintf(stderr, "dbg2       bounds[3]:       %f\n", bounds[3]);
-    fprintf(stderr, "dbg2       btime_i[0]:      %d\n", btime_i[0]);
-    fprintf(stderr, "dbg2       btime_i[1]:      %d\n", btime_i[1]);
-    fprintf(stderr, "dbg2       btime_i[2]:      %d\n", btime_i[2]);
-    fprintf(stderr, "dbg2       btime_i[3]:      %d\n", btime_i[3]);
-    fprintf(stderr, "dbg2       btime_i[4]:      %d\n", btime_i[4]);
-    fprintf(stderr, "dbg2       btime_i[5]:      %d\n", btime_i[5]);
-    fprintf(stderr, "dbg2       btime_i[6]:      %d\n", btime_i[6]);
-    fprintf(stderr, "dbg2       etime_i[0]:      %d\n", etime_i[0]);
-    fprintf(stderr, "dbg2       etime_i[1]:      %d\n", etime_i[1]);
-    fprintf(stderr, "dbg2       etime_i[2]:      %d\n", etime_i[2]);
-    fprintf(stderr, "dbg2       etime_i[3]:      %d\n", etime_i[3]);
-    fprintf(stderr, "dbg2       etime_i[4]:      %d\n", etime_i[4]);
-    fprintf(stderr, "dbg2       etime_i[5]:      %d\n", etime_i[5]);
-    fprintf(stderr, "dbg2       etime_i[6]:      %d\n", etime_i[6]);
-    fprintf(stderr, "dbg2       speedmin:        %f\n", speedmin);
-    fprintf(stderr, "dbg2       timegap:         %f\n", timegap);
-    fprintf(stderr, "dbg2       strip_comments:  %d\n", strip_comments);
-    fprintf(stderr, "dbg2       checkuptodate:   %d\n", checkuptodate);
-    fprintf(stderr, "dbg2       printfilestatus: %d\n", printfilestatus);
-    fprintf(stderr, "dbg2       testonly:        %d\n", testonly);
-    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-  }
-
-  else if (verbose > 0) {
-    fprintf(stderr, "\nProgram <%s>\n", program_name);
-    fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-    fprintf(stderr, "\nProgram Operation:\n");
-    fprintf(stderr, "  Input file:      %s\n", read_file);
-    fprintf(stderr, "  Format:          %d\n", format);
-    if (checkuptodate)
-      fprintf(stderr, "  Files processed only if out of date.\n");
-    else
-      fprintf(stderr, "  All files processed.\n");
-    if (strip_comments == false)
-      fprintf(stderr, "  Comments embedded in output.\n\n");
-    else
-      fprintf(stderr, "  Comments stripped from output.\n\n");
-  }
+  int locked;  // TODO(schwehr): Make mb_pr_lockswathfile take a bool.
+  bool attitude_ok;
+  bool nav_ok;
+  bool time_set;
 
   /* loop over all files to be read */
-  while (read_data == true) {
+  while (read_data) {
     /* load parameters */
     status = mb_pr_readpar(verbose, mbp_ifile, false, &process, &error);
 
     /* reset output file and format if not reading from datalist */
     if (!read_datalist) {
-      if (mbp_ofile_specified == true) {
+      if (mbp_ofile_specified) {
         strcpy(process.mbp_ofile, mbp_ofile);
       }
-      if (mbp_format_specified == true) {
+      if (mbp_format_specified) {
         process.mbp_format = mbp_format;
       }
     }
 
     /* make output file path global if needed */
-    if (status == MB_SUCCESS && mbp_ofile_specified == false && process.mbp_ofile[0] != '/' && process.mbp_ofile[1] != ':' &&
+    int len;
+    if (status == MB_SUCCESS && !mbp_ofile_specified && process.mbp_ofile[0] != '/' && process.mbp_ofile[1] != ':' &&
         strrchr(process.mbp_ifile, '/') != NULL && (len = strrchr(process.mbp_ifile, '/') - process.mbp_ifile + 1) > 1) {
       strcpy(mbp_ofile, process.mbp_ofile);
       strncpy(process.mbp_ofile, process.mbp_ifile, len);
@@ -938,13 +900,14 @@ int main(int argc, char **argv) {
     }
 
     /* get mod time for the input file */
-    ifilemodtime = 0;
-    if ((fstat = stat(mbp_ifile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+    int ifilemodtime = 0;
+    int fstat = stat(mbp_ifile, &file_status);
+    if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
       ifilemodtime = file_status.st_mtime;
     }
 
     /* check for existing parameter file */
-    pfilemodtime = 0;
+    int pfilemodtime = 0;
     sprintf(mbp_pfile, "%s.par", mbp_ifile);
     if ((fstat = stat(mbp_pfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
       pfilemodtime = file_status.st_mtime;
@@ -972,63 +935,65 @@ int main(int argc, char **argv) {
     }
     /* check for up to date */
     else {
-      /* initialize file modification times as 0, update if they exist */
-      ofilemodtime = 0;
-      navfilemodtime = 0;
-      navadjfilemodtime = 0;
-      attitudefilemodtime = 0;
-      sonardepthfilemodtime = 0;
-      esfmodtime = 0;
-      svpmodtime = 0;
-
       /* get mod time for the output file */
-      if ((fstat = stat(process.mbp_ofile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
-        ofilemodtime = file_status.st_mtime;
+      const int ofilemodtime =
+          stat(process.mbp_ofile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
+          ? file_status.st_mtime : 0;
 
       /* get mod time for the navigation file if needed */
-      if (process.mbp_nav_mode != MBP_NAV_OFF && (fstat = stat(process.mbp_navfile, &file_status)) == 0 &&
-          (file_status.st_mode & S_IFMT) != S_IFDIR)
-        navfilemodtime = file_status.st_mtime;
+      const int navfilemodtime =
+          process.mbp_nav_mode != MBP_NAV_OFF &&
+          stat(process.mbp_navfile, &file_status) == 0 &&
+          (file_status.st_mode & S_IFMT) != S_IFDIR
+          ? file_status.st_mtime : 0;
 
       /* get mod time for the navigation adjustment file if needed */
-      if (process.mbp_navadj_mode != MBP_NAVADJ_OFF && (fstat = stat(process.mbp_navadjfile, &file_status)) == 0 &&
-          (file_status.st_mode & S_IFMT) != S_IFDIR)
-        navadjfilemodtime = file_status.st_mtime;
+      const int navadjfilemodtime =
+          process.mbp_navadj_mode != MBP_NAVADJ_OFF &&
+          stat(process.mbp_navadjfile, &file_status) == 0 &&
+          (file_status.st_mode & S_IFMT) != S_IFDIR
+          ? file_status.st_mtime : 0;
 
       /* get mod time for the attitude file if needed */
-      if (process.mbp_attitude_mode != MBP_ATTITUDE_OFF && (fstat = stat(process.mbp_attitudefile, &file_status)) == 0 &&
-          (file_status.st_mode & S_IFMT) != S_IFDIR)
-        attitudefilemodtime = file_status.st_mtime;
+      const int attitudefilemodtime =
+          process.mbp_attitude_mode != MBP_ATTITUDE_OFF &&
+          stat(process.mbp_attitudefile, &file_status) == 0 &&
+          (file_status.st_mode & S_IFMT) != S_IFDIR
+          ? file_status.st_mtime : 0;
 
       /* get mod time for the sonardepth file if needed */
-      if (process.mbp_sonardepth_mode != MBP_SONARDEPTH_OFF &&
-          (fstat = stat(process.mbp_sonardepthfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
-        sonardepthfilemodtime = file_status.st_mtime;
+      const int sonardepthfilemodtime =
+          process.mbp_sonardepth_mode != MBP_SONARDEPTH_OFF &&
+          stat(process.mbp_sonardepthfile, &file_status) == 0 &&
+          (file_status.st_mode & S_IFMT) != S_IFDIR
+          ? file_status.st_mtime : 0;
 
       /* get mod time for the edit save file if needed */
-      if (process.mbp_edit_mode != MBP_EDIT_OFF && (fstat = stat(process.mbp_editfile, &file_status)) == 0 &&
-          (file_status.st_mode & S_IFMT) != S_IFDIR)
-        esfmodtime = file_status.st_mtime;
+      const int esfmodtime =
+          process.mbp_edit_mode != MBP_EDIT_OFF &&
+          stat(process.mbp_editfile, &file_status) == 0 &&
+          (file_status.st_mode & S_IFMT) != S_IFDIR
+          ? file_status.st_mtime : 0;
 
       /* get mod time for the svp file if needed */
-      if (process.mbp_svp_mode != MBP_SVP_OFF && (fstat = stat(process.mbp_svpfile, &file_status)) == 0 &&
-          (file_status.st_mode & S_IFMT) != S_IFDIR)
-        svpmodtime = file_status.st_mtime;
+      const int svpmodtime =
+          process.mbp_svp_mode != MBP_SVP_OFF &&
+          stat(process.mbp_svpfile, &file_status) == 0 &&
+          (file_status.st_mode & S_IFMT) != S_IFDIR
+          ? file_status.st_mtime : 0;
 
       /* now check if processed file is out of date */
-      if (ofilemodtime > 0 && ofilemodtime >= ifilemodtime && ofilemodtime >= pfilemodtime &&
-          ofilemodtime >= navfilemodtime && ofilemodtime >= navadjfilemodtime && ofilemodtime >= attitudefilemodtime &&
-          ofilemodtime >= sonardepthfilemodtime && ofilemodtime >= esfmodtime && ofilemodtime >= svpmodtime)
-        outofdate = false;
-      else
-        outofdate = true;
+      const bool outofdate =
+          !(ofilemodtime > 0 && ofilemodtime >= ifilemodtime && ofilemodtime >= pfilemodtime &&
+            ofilemodtime >= navfilemodtime && ofilemodtime >= navadjfilemodtime && ofilemodtime >= attitudefilemodtime &&
+            ofilemodtime >= sonardepthfilemodtime && ofilemodtime >= esfmodtime && ofilemodtime >= svpmodtime);
 
       /* deal with information */
       if (outofdate || !checkuptodate) {
         /* not testing - do it for real */
         if (!testonly) {
           /* want to process, now try to set a lock of the file to be processed */
-          if (uselockfiles == true) {
+          if (uselockfiles) {
             lock_status =
                 mb_pr_lockswathfile(verbose, process.mbp_ifile, MBP_LOCK_PROCESS, program_name, &lock_error);
             if (lock_status == MB_SUCCESS) {
@@ -1037,7 +1002,7 @@ int main(int argc, char **argv) {
             }
             else if (lock_error == MB_ERROR_FILE_LOCKED) {
               proceedprocess = false;
-              lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program,
+              /* lock_status = */ mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program,
                                            lock_user, lock_cpu, lock_date, &lock_error);
             }
             else if (lock_error == MB_ERROR_OPEN_FAIL) {
@@ -1048,7 +1013,7 @@ int main(int argc, char **argv) {
 
           /* want to process, but lock files are disabled */
           else {
-            lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program, lock_user,
+            /* lock_status = */ mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program, lock_user,
                                          lock_cpu, lock_date, &lock_error);
             proceedprocess = true;
           }
@@ -1057,9 +1022,9 @@ int main(int argc, char **argv) {
         /* else only testing */
         else {
           /* want to process, check lock status of the file to be processed */
-          lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program, lock_user,
+          /* lock_status = */ mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program, lock_user,
                                        lock_cpu, lock_date, &lock_error);
-          if (locked == false || uselockfiles == false) {
+          if (!locked || !uselockfiles) {
             proceedprocess = true;
           }
           else {
@@ -1069,8 +1034,10 @@ int main(int argc, char **argv) {
       }
       else {
         proceedprocess = false;
-        lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program, lock_user,
-                                     lock_cpu, lock_date, &lock_error);
+        /* lock_status = */
+        mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose,
+                       lock_program, lock_user, lock_cpu, lock_date,
+                       &lock_error);
       }
 
       /* write out information */
@@ -1088,21 +1055,21 @@ int main(int argc, char **argv) {
       }
       if (outofdate)
         string2 = str_outofdate_yes;
-      else if (!outofdate && checkuptodate == false)
+      else if (!outofdate && !checkuptodate)
         string2 = str_outofdate_overridden;
       else
         string2 = str_outofdate_no;
-      if (locked == true && uselockfiles == false)
+      if (locked && !uselockfiles)
         string3 = str_locked_ignored;
-      else if (locked == true)
+      else if (locked)
         string3 = str_locked_yes;
-      else if (locked == false && lock_error == MB_ERROR_OPEN_FAIL)
+      else if (!locked && lock_error == MB_ERROR_OPEN_FAIL)
         string3 = str_locked_fail;
       else
         string3 = str_locked_no;
       fprintf(stderr, "%s - %s - %s: \n\tInput:  %s\n\tOutput: %s\n", string1, string2, string3, process.mbp_ifile,
               process.mbp_ofile);
-      if (locked == true)
+      if (locked)
         fprintf(stderr, "\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", lock_program, lock_user, lock_cpu,
                 lock_date);
       if (testonly || verbose > 0 || printfilestatus) {
@@ -1212,14 +1179,12 @@ int main(int argc, char **argv) {
         }
       }
 
-      /* check for format with travel time data */
-      if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE) {
-        status = mb_format_flags(verbose, &process.mbp_format, &variable_beams, &traveltime, &beam_flagging, &error);
-        if (traveltime != true) {
-          fprintf(stderr, "\nWarning:\n\tFormat %d does not include travel time data.\n", process.mbp_format);
-          fprintf(stderr, "\tTravel times and angles estimated assuming\n");
-          fprintf(stderr, "\t1500 m/s water sound speed.\n");
-        }
+      /* check for format with travel time data */  // TODO(schwehr): Make mb_format_flags take bools.
+      status = mb_format_flags(verbose, &process.mbp_format, &variable_beams, &traveltime, &beam_flagging, &error);
+      if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE && !traveltime) {
+        fprintf(stderr, "\nWarning:\n\tFormat %d does not include travel time data.\n", process.mbp_format);
+        fprintf(stderr, "\tTravel times and angles estimated assuming\n");
+        fprintf(stderr, "\t1500 m/s water sound speed.\n");
       }
 
       /* check for right format if recalculating sidescan is on */
@@ -1236,11 +1201,11 @@ int main(int argc, char **argv) {
 
       if (verbose == 1) {
         fprintf(stderr, "\nInput and Output Files:\n");
-        if (process.mbp_format_specified == true)
+        if (process.mbp_format_specified)
           fprintf(stderr, "  Format:                        %d\n", process.mbp_format);
         fprintf(stderr, "  Input file:                    %s\n", process.mbp_ifile);
         fprintf(stderr, "  Output file:                   %s\n", process.mbp_ofile);
-        if (strip_comments == true)
+        if (strip_comments)
           fprintf(stderr, "  Comments in output:            OFF\n");
         else
           fprintf(stderr, "  Comments in output:            ON\n");
@@ -1616,7 +1581,7 @@ int main(int argc, char **argv) {
         --------------------------------------------*/
 
       /* if raytracing or correction/uncorrection to be done get svp */
-      nsvp = 0;
+      int nsvp = 0;
       if (process.mbp_svp_mode != MBP_SVP_OFF) {
         /* count the data points in the svp file */
         nsvp = 0;
@@ -1625,6 +1590,7 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
         }
+        char *result;
         while ((result = fgets(buffer, MBP_FILENAMESIZE, tfp)) == buffer)
           if (buffer[0] != '#')
             nsvp++;
@@ -1633,14 +1599,15 @@ int main(int argc, char **argv) {
         /* allocate arrays for svp */
         if (nsvp > 1) {
           size = (nsvp + 2) * sizeof(double);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&depth, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&depth, &error);
           if (error == MB_ERROR_NO_ERROR)
-            status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&velocity, &error);
+            /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&velocity, &error);
           if (error == MB_ERROR_NO_ERROR)
-            status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&velocity_sum, &error);
+            /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&velocity_sum, &error);
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1762,27 +1729,29 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
         }
+        char *result;
         while ((result = fgets(buffer, nchar, tfp)) == buffer)
           nnav++;
         fclose(tfp);
 
         /* allocate arrays for nav */
         if (nnav > 1) {
-          size = (nnav + 1) * sizeof(double);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&ntime, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nlon, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nlat, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nheading, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nspeed, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&ndraft, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nroll, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&npitch, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nheave, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nlonspl, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nlatspl, &error);
+          // size = (nnav + 1) * sizeof(double);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&ntime, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nlon, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nlat, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nheading, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nspeed, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&ndraft, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nroll, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&npitch, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nheave, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nlonspl, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nlatspl, &error);
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1804,19 +1773,20 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
         }
+
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
           nav_ok = false;
 
           /* deal with nav in form: time_d lon lat */
           if (process.mbp_nav_format == 1) {
-            nget = sscanf(buffer, "%lf %lf %lf", &ntime[nnav], &nlon[nnav], &nlat[nnav]);
+            const int nget = sscanf(buffer, "%lf %lf %lf", &ntime[nnav], &nlon[nnav], &nlat[nnav]);
             if (nget == 3)
               nav_ok = true;
           }
 
           /* deal with nav in form: yr mon day hour min sec lon lat */
           else if (process.mbp_nav_format == 2) {
-            nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf", &time_i[0], &time_i[1], &time_i[2], &time_i[3],
+            const int nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf", &time_i[0], &time_i[1], &time_i[2], &time_i[3],
                           &time_i[4], &sec, &nlon[nnav], &nlat[nnav]);
             time_i[5] = (int)sec;
             time_i[6] = 1000000 * (sec - time_i[5]);
@@ -1828,7 +1798,7 @@ int main(int argc, char **argv) {
 
           /* deal with nav in form: yr jday hour min sec lon lat */
           else if (process.mbp_nav_format == 3) {
-            nget = sscanf(buffer, "%d %d %d %d %lf %lf %lf", &time_j[0], &time_j[1], &ihr, &time_j[2], &sec,
+            const int nget = sscanf(buffer, "%d %d %d %d %lf %lf %lf", &time_j[0], &time_j[1], &ihr, &time_j[2], &sec,
                           &nlon[nnav], &nlat[nnav]);
             time_j[2] = time_j[2] + 60 * ihr;
             time_j[3] = (int)sec;
@@ -1842,7 +1812,7 @@ int main(int argc, char **argv) {
 
           /* deal with nav in form: yr jday daymin sec lon lat */
           else if (process.mbp_nav_format == 4) {
-            nget = sscanf(buffer, "%d %d %d %lf %lf %lf", &time_j[0], &time_j[1], &time_j[2], &sec, &nlon[nnav],
+            const int nget = sscanf(buffer, "%d %d %d %lf %lf %lf", &time_j[0], &time_j[1], &time_j[2], &sec, &nlon[nnav],
                           &nlat[nnav]);
             time_j[3] = (int)sec;
             time_j[4] = 1000000 * (sec - time_j[3]);
@@ -1950,7 +1920,7 @@ int main(int argc, char **argv) {
               }
               else if (((process.mbp_nav_format == 6 && strncmp(&buffer[3], "GLL", 3) == 0) ||
                         (process.mbp_nav_format == 7 && strncmp(&buffer[3], "GGA", 3) == 0)) &&
-                       time_set == true && len > 26) {
+                       time_set && len > 26) {
                 time_set = false;
                 /* find start of ",ddmm.mm,N,ddmm.mm,E" */
                 if ((bufftmp = strchr(buffer, ',')) != NULL) {
@@ -2016,14 +1986,14 @@ int main(int argc, char **argv) {
 
           /* deal with nav in form: yr mon day hour min sec time_d lon lat heading speed draft*/
           else if (process.mbp_nav_format == 9) {
-            nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0], &time_i[1],
+            const int nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0], &time_i[1],
                           &time_i[2], &time_i[3], &time_i[4], &sec, &ntime[nnav], &nlon[nnav], &nlat[nnav],
                           &nheading[nnav], &nspeed[nnav], &ndraft[nnav], &nroll[nnav], &npitch[nnav], &nheave[nnav]);
             if (nget >= 9)
               nav_ok = true;
             if (nnav > 0 && ntime[nnav] <= ntime[nnav - 1])
               nav_ok = false;
-            if (nav_ok == true) {
+            if (nav_ok) {
               if (process.mbp_nav_heading == MBP_NAV_ON && nget < 10) {
                 fprintf(stderr, "\nHeading data missing from nav file.\nMerging of heading data disabled.\n");
                 process.mbp_nav_heading = MBP_NAV_OFF;
@@ -2061,7 +2031,7 @@ int main(int argc, char **argv) {
           /* deal with nav in r2rnav form:
               yyyy-mm-ddThh:mm:ss.sssZ decimalLongitude decimalLatitude quality nsat dilution height */
           else if (process.mbp_nav_format == 10) {
-            nget = sscanf(buffer, "%d-%d-%dT%d:%d:%lfZ %lf %lf %d %d %d %d", &time_i[0], &time_i[1], &time_i[2],
+            const int nget = sscanf(buffer, "%d-%d-%dT%d:%d:%lfZ %lf %lf %d %d %d %d", &time_i[0], &time_i[1], &time_i[2],
                           &time_i[3], &time_i[4], &sec, &nlon[nnav], &nlat[nnav], &quality, &nsatellite, &dilution,
                           &gpsheight);
             if (nget != 12) {
@@ -2085,7 +2055,7 @@ int main(int argc, char **argv) {
           }
 
           /* make sure longitude is defined according to lonflip */
-          if (nav_ok == true) {
+          if (nav_ok) {
             if (lonflip == -1 && nlon[nnav] > 0.0)
               nlon[nnav] = nlon[nnav] - 360.0;
             else if (lonflip == 0 && nlon[nnav] < -180.0)
@@ -2097,7 +2067,7 @@ int main(int argc, char **argv) {
           }
 
           /* output some debug values */
-          if (verbose >= 5 && nav_ok == true) {
+          if (verbose >= 5 && nav_ok) {
             fprintf(stderr, "\ndbg5  New navigation point read in program <%s>\n", program_name);
             fprintf(stderr, "dbg5       nav[%d]: %f %f %f\n", nnav, ntime[nnav], nlon[nnav], nlat[nnav]);
           }
@@ -2107,7 +2077,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for reverses or repeats in time */
-          if (nav_ok == true) {
+          if (nav_ok) {
             if (nnav == 0)
               nnav++;
             else if (ntime[nnav] > ntime[nnav - 1])
@@ -2170,6 +2140,7 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
         }
+        char *result;
         while ((result = fgets(buffer, nchar, tfp)) == buffer)
           if (buffer[0] != '#')
             nanav++;
@@ -2177,17 +2148,18 @@ int main(int argc, char **argv) {
 
         /* allocate arrays for adjusted nav */
         if (nanav > 1) {
-          size = (nanav + 1) * sizeof(double);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&natime, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&nalon, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&nalat, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&naz, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&nalonspl, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&nalatspl, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&nazspl, &error);
+          // size = (nanav + 1) * sizeof(double);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&natime, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&nalon, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&nalat, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&naz, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&nalonspl, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&nalatspl, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&nazspl, &error);
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2214,7 +2186,7 @@ int main(int argc, char **argv) {
 
           /* deal with nav in form: yr mon day hour min sec time_d lon lat */
           if (buffer[0] != '#') {
-            nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0],
+            const int nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0],
                           &time_i[1], &time_i[2], &time_i[3], &time_i[4], &sec, &natime[nanav], &nalon[nanav],
                           &nalat[nanav], &heading, &speed, &draft, &roll, &pitch, &heave, &naz[nanav]);
             if (process.mbp_navadj_mode == MBP_NAVADJ_LL && nget >= 9)
@@ -2224,7 +2196,7 @@ int main(int argc, char **argv) {
           }
 
           /* make sure longitude is defined according to lonflip */
-          if (nav_ok == true) {
+          if (nav_ok) {
             if (lonflip == -1 && nalon[nanav] > 0.0)
               nalon[nanav] = nalon[nanav] - 360.0;
             else if (lonflip == 0 && nalon[nanav] < -180.0)
@@ -2236,7 +2208,7 @@ int main(int argc, char **argv) {
           }
 
           /* output some debug values */
-          if (verbose >= 5 && nav_ok == true) {
+          if (verbose >= 5 && nav_ok) {
             fprintf(stderr, "\ndbg5  New adjusted navigation point read in program <%s>\n", program_name);
             fprintf(stderr, "dbg5       nav[%d]: %f %f %f\n", nanav, natime[nanav], nalon[nanav], nalat[nanav]);
           }
@@ -2246,7 +2218,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for reverses or repeats in time */
-          if (nav_ok == true) {
+          if (nav_ok) {
             if (nanav == 0)
               nanav++;
             else if (natime[nanav] > natime[nanav - 1])
@@ -2306,20 +2278,22 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
         }
+        char *result;
         while ((result = fgets(buffer, nchar, tfp)) == buffer)
           nattitude++;
         fclose(tfp);
 
         /* allocate arrays for attitude */
         if (nattitude > 1) {
-          size = (nattitude + 1) * sizeof(double);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nattitude * sizeof(double), (void **)&attitudetime, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nattitude * sizeof(double), (void **)&attituderoll, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nattitude * sizeof(double), (void **)&attitudepitch, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nattitude * sizeof(double), (void **)&attitudeheave, &error);
+          // size = (nattitude + 1) * sizeof(double);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nattitude * sizeof(double), (void **)&attitudetime, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nattitude * sizeof(double), (void **)&attituderoll, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nattitude * sizeof(double), (void **)&attitudepitch, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nattitude * sizeof(double), (void **)&attitudeheave, &error);
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2349,7 +2323,7 @@ int main(int argc, char **argv) {
 
             /* deal with attitude in form: time_d roll pitch heave */
             if (process.mbp_attitude_format == 1) {
-              nget = sscanf(buffer, "%lf %lf %lf %lf", &attitudetime[nattitude], &attituderoll[nattitude],
+              const int nget = sscanf(buffer, "%lf %lf %lf %lf", &attitudetime[nattitude], &attituderoll[nattitude],
                             &attitudepitch[nattitude], &attitudeheave[nattitude]);
               if (nget == 4)
                 attitude_ok = true;
@@ -2357,7 +2331,7 @@ int main(int argc, char **argv) {
 
             /* deal with attitude in form: yr mon day hour min sec roll pitch heave */
             else if (process.mbp_attitude_format == 2) {
-              nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf", &time_i[0], &time_i[1], &time_i[2],
+              const int nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf", &time_i[0], &time_i[1], &time_i[2],
                             &time_i[3], &time_i[4], &sec, &attituderoll[nattitude], &attitudepitch[nattitude],
                             &attitudeheave[nattitude]);
               time_i[5] = (int)sec;
@@ -2370,7 +2344,7 @@ int main(int argc, char **argv) {
 
             /* deal with attitude in form: yr jday hour min sec roll pitch heave */
             else if (process.mbp_attitude_format == 3) {
-              nget = sscanf(buffer, "%d %d %d %d %lf %lf %lf %lf", &time_j[0], &time_j[1], &ihr, &time_j[2], &sec,
+              const int nget = sscanf(buffer, "%d %d %d %d %lf %lf %lf %lf", &time_j[0], &time_j[1], &ihr, &time_j[2], &sec,
                             &attituderoll[nattitude], &attitudepitch[nattitude], &attitudeheave[nattitude]);
               time_j[2] = time_j[2] + 60 * ihr;
               time_j[3] = (int)sec;
@@ -2384,7 +2358,7 @@ int main(int argc, char **argv) {
 
             /* deal with attitude in form: yr jday daymin sec roll pitch heave */
             else if (process.mbp_attitude_format == 4) {
-              nget = sscanf(buffer, "%d %d %d %lf %lf %lf %lf", &time_j[0], &time_j[1], &time_j[2], &sec,
+              const int nget = sscanf(buffer, "%d %d %d %lf %lf %lf %lf", &time_j[0], &time_j[1], &time_j[2], &sec,
                             &attituderoll[nattitude], &attitudepitch[nattitude], &attitudeheave[nattitude]);
               time_j[3] = (int)sec;
               time_j[4] = 1000000 * (sec - time_j[3]);
@@ -2397,7 +2371,7 @@ int main(int argc, char **argv) {
           }
 
           /* output some debug values */
-          if (verbose >= 5 && attitude_ok == true) {
+          if (verbose >= 5 && attitude_ok) {
             fprintf(stderr, "\ndbg5  New attitude point read in program <%s>\n", program_name);
             fprintf(stderr, "dbg5       attitude[%d]: %f %f %f %f\n", nattitude, attitudetime[nattitude],
                     attituderoll[nattitude], attitudepitch[nattitude], attitudeheave[nattitude]);
@@ -2408,7 +2382,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for reverses or repeats in time */
-          if (attitude_ok == true) {
+          if (attitude_ok) {
             if (nattitude == 0)
               nattitude++;
             else if (attitudetime[nattitude] > attitudetime[nattitude - 1])
@@ -2462,19 +2436,21 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
         }
+        char *result;
         while ((result = fgets(buffer, nchar, tfp)) == buffer)
           nsonardepth++;
         fclose(tfp);
 
         /* allocate arrays for sonardepth */
         if (nsonardepth > 1) {
-          size = (nsonardepth + 1) * sizeof(double);
-          status =
-              mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&fsonardepthtime, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&fsonardepth, &error);
+          // size = (nsonardepth + 1) * sizeof(double);
+          /* status &= */
+          mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&fsonardepthtime, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&fsonardepth, &error);
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2497,21 +2473,21 @@ int main(int argc, char **argv) {
           exit(MB_ERROR_OPEN_FAIL);
         }
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-          sonardepth_ok = false;
+	  bool sonardepth_ok = false;
 
           /* ignore comments */
           if (buffer[0] != '#') {
 
             /* deal with sonardepth in form: time_d sonardepth */
             if (process.mbp_sonardepth_format == 1) {
-              nget = sscanf(buffer, "%lf %lf", &fsonardepthtime[nsonardepth], &fsonardepth[nsonardepth]);
+              const int nget = sscanf(buffer, "%lf %lf", &fsonardepthtime[nsonardepth], &fsonardepth[nsonardepth]);
               if (nget == 2)
                 sonardepth_ok = true;
             }
 
             /* deal with sonardepth in form: yr mon day hour min sec sonardepth */
             else if (process.mbp_sonardepth_format == 2) {
-              nget = sscanf(buffer, "%d %d %d %d %d %lf %lf", &time_i[0], &time_i[1], &time_i[2], &time_i[3],
+              const int nget = sscanf(buffer, "%d %d %d %d %d %lf %lf", &time_i[0], &time_i[1], &time_i[2], &time_i[3],
                             &time_i[4], &sec, &fsonardepth[nsonardepth]);
               time_i[5] = (int)sec;
               time_i[6] = 1000000 * (sec - time_i[5]);
@@ -2523,7 +2499,7 @@ int main(int argc, char **argv) {
 
             /* deal with sonardepth in form: yr jday hour min sec sonardepth */
             else if (process.mbp_sonardepth_format == 3) {
-              nget = sscanf(buffer, "%d %d %d %d %lf %lf", &time_j[0], &time_j[1], &ihr, &time_j[2], &sec,
+              const int nget = sscanf(buffer, "%d %d %d %d %lf %lf", &time_j[0], &time_j[1], &ihr, &time_j[2], &sec,
                             &fsonardepth[nsonardepth]);
               time_j[2] = time_j[2] + 60 * ihr;
               time_j[3] = (int)sec;
@@ -2537,7 +2513,7 @@ int main(int argc, char **argv) {
 
             /* deal with sonardepth in form: yr jday daymin sec sonardepth */
             else if (process.mbp_sonardepth_format == 4) {
-              nget = sscanf(buffer, "%d %d %d %lf %lf", &time_j[0], &time_j[1], &time_j[2], &sec,
+              const int nget = sscanf(buffer, "%d %d %d %lf %lf", &time_j[0], &time_j[1], &time_j[2], &sec,
                             &fsonardepth[nsonardepth]);
               time_j[3] = (int)sec;
               time_j[4] = 1000000 * (sec - time_j[3]);
@@ -2550,7 +2526,7 @@ int main(int argc, char **argv) {
           }
 
           /* output some debug values */
-          if (verbose >= 5 && sonardepth_ok == true) {
+          if (verbose >= 5 && sonardepth_ok) {
             fprintf(stderr, "\ndbg5  New sonardepth point read in program <%s>\n", program_name);
             fprintf(stderr, "dbg5       sonardepth[%d]: %f %f\n", nsonardepth, fsonardepthtime[nsonardepth],
                     fsonardepth[nsonardepth]);
@@ -2561,7 +2537,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for reverses or repeats in time */
-          if (sonardepth_ok == true) {
+          if (sonardepth_ok) {
             if (nsonardepth == 0)
               nsonardepth++;
             else if (fsonardepthtime[nsonardepth] > fsonardepthtime[nsonardepth - 1])
@@ -2616,18 +2592,20 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
         }
+        char *result;
         while ((result = fgets(buffer, nchar, tfp)) == buffer)
           ntide++;
         fclose(tfp);
 
         /* allocate arrays for tide */
         if (ntide > 1) {
-          size = (ntide + 1) * sizeof(double);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, ntide * sizeof(double), (void **)&tidetime, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, ntide * sizeof(double), (void **)&tide, &error);
+          // size = (ntide + 1) * sizeof(double);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, ntide * sizeof(double), (void **)&tidetime, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, ntide * sizeof(double), (void **)&tide, &error);
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2650,21 +2628,21 @@ int main(int argc, char **argv) {
           exit(MB_ERROR_OPEN_FAIL);
         }
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-          tide_ok = false;
+          bool tide_ok = false;
 
           /* ignore comments */
           if (buffer[0] != '#') {
 
             /* deal with tide in form: time_d tide */
             if (process.mbp_tide_format == 1) {
-              nget = sscanf(buffer, "%lf %lf", &tidetime[ntide], &tide[ntide]);
+              const int nget = sscanf(buffer, "%lf %lf", &tidetime[ntide], &tide[ntide]);
               if (nget == 2)
                 tide_ok = true;
             }
 
             /* deal with tide in form: yr mon day hour min sec tide */
             else if (process.mbp_tide_format == 2) {
-              nget = sscanf(buffer, "%d %d %d %d %d %lf %lf", &time_i[0], &time_i[1], &time_i[2], &time_i[3],
+              const int nget = sscanf(buffer, "%d %d %d %d %d %lf %lf", &time_i[0], &time_i[1], &time_i[2], &time_i[3],
                             &time_i[4], &sec, &tide[ntide]);
               time_i[5] = (int)sec;
               time_i[6] = 1000000 * (sec - time_i[5]);
@@ -2676,7 +2654,7 @@ int main(int argc, char **argv) {
 
             /* deal with tide in form: yr jday hour min sec tide */
             else if (process.mbp_tide_format == 3) {
-              nget = sscanf(buffer, "%d %d %d %d %lf %lf", &time_j[0], &time_j[1], &ihr, &time_j[2], &sec,
+              const int nget = sscanf(buffer, "%d %d %d %d %lf %lf", &time_j[0], &time_j[1], &ihr, &time_j[2], &sec,
                             &tide[ntide]);
               time_j[2] = time_j[2] + 60 * ihr;
               time_j[3] = (int)sec;
@@ -2690,7 +2668,7 @@ int main(int argc, char **argv) {
 
             /* deal with tide in form: yr jday daymin sec tide */
             else if (process.mbp_tide_format == 4) {
-              nget = sscanf(buffer, "%d %d %d %lf %lf", &time_j[0], &time_j[1], &time_j[2], &sec, &tide[ntide]);
+              const int nget = sscanf(buffer, "%d %d %d %lf %lf", &time_j[0], &time_j[1], &time_j[2], &sec, &tide[ntide]);
               time_j[3] = (int)sec;
               time_j[4] = 1000000 * (sec - time_j[3]);
               mb_get_itime(verbose, time_j, time_i);
@@ -2702,7 +2680,7 @@ int main(int argc, char **argv) {
           }
 
           /* output some debug values */
-          if (verbose >= 5 && tide_ok == true) {
+          if (verbose >= 5 && tide_ok) {
             fprintf(stderr, "\ndbg5  New tide point read in program <%s>\n", program_name);
             fprintf(stderr, "dbg5       tide[%d]: %f %f\n", ntide, tidetime[ntide], tide[ntide]);
           }
@@ -2712,7 +2690,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for reverses or repeats in time */
-          if (tide_ok == true) {
+          if (tide_ok) {
             if (ntide == 0)
               ntide++;
             else if (tidetime[ntide] > tidetime[ntide - 1])
@@ -2784,18 +2762,20 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
         }
+        char *result;
         while ((result = fgets(buffer, nchar, tfp)) == buffer)
           nstatic++;
         fclose(tfp);
 
         /* allocate arrays for static */
         if (nstatic > 0) {
-          size = (nstatic + 1) * sizeof(double);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nstatic * sizeof(int), (void **)&staticbeam, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nstatic * sizeof(double), (void **)&staticoffset, &error);
+          // size = (nstatic + 1) * sizeof(double);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nstatic * sizeof(int), (void **)&staticbeam, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nstatic * sizeof(double), (void **)&staticoffset, &error);
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2818,18 +2798,17 @@ int main(int argc, char **argv) {
           exit(MB_ERROR_OPEN_FAIL);
         }
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-          static_ok = false;
-
           /* deal with static in form: beam_# offset */
           if (buffer[0] != '#') {
-            nget = sscanf(buffer, "%d %lf", &staticbeam[nstatic], &staticoffset[nstatic]);
+            bool static_ok = false;
+            const int nget = sscanf(buffer, "%d %lf", &staticbeam[nstatic], &staticoffset[nstatic]);
             if (nget == 2) {
               static_ok = true;
               nstatic++;
             }
 
             /* output some debug values */
-            if (verbose >= 5 && static_ok == true) {
+            if (verbose >= 5 && static_ok) {
               fprintf(stderr, "\ndbg5  New static beam correction read in program <%s>\n", program_name);
               fprintf(stderr, "dbg5       beam:%d offset:%f\n", staticbeam[nstatic], staticoffset[nstatic]);
             }
@@ -2868,18 +2847,20 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
         }
+        char *result;
         while ((result = fgets(buffer, nchar, tfp)) == buffer)
           nstatic++;
         fclose(tfp);
 
         /* allocate arrays for static */
         if (nstatic > 0) {
-          size = (nstatic + 1) * sizeof(double);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nstatic * sizeof(double), (void **)&staticoffset, &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nstatic * sizeof(double), (void **)&staticangle, &error);
+          // size = (nstatic + 1) * sizeof(double);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nstatic * sizeof(double), (void **)&staticoffset, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nstatic * sizeof(double), (void **)&staticangle, &error);
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2902,18 +2883,17 @@ int main(int argc, char **argv) {
           exit(MB_ERROR_OPEN_FAIL);
         }
         while ((result = fgets(buffer, nchar, tfp)) == buffer) {
-          static_ok = false;
-
           /* deal with static in form: angle offset */
           if (buffer[0] != '#') {
-            nget = sscanf(buffer, "%lf %lf", &staticangle[nstatic], &staticoffset[nstatic]);
+            const int nget = sscanf(buffer, "%lf %lf", &staticangle[nstatic], &staticoffset[nstatic]);
+            bool static_ok = false;
             if (nget == 2) {
               static_ok = true;
               nstatic++;
             }
 
             /* output some debug values */
-            if (verbose >= 5 && static_ok == true) {
+            if (verbose >= 5 && static_ok) {
               fprintf(stderr, "\ndbg5  New static angle correction read in program <%s>\n", program_name);
               fprintf(stderr, "dbg5       angle:%f offset:%f\n", staticangle[nstatic], staticoffset[nstatic]);
             }
@@ -2951,6 +2931,7 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
         }
+        char *result;
         while ((result = fgets(buffer, MBP_FILENAMESIZE, tfp)) == buffer) {
           if (strncmp(buffer, "# table:", 8) == 0)
             nampcorrtable++;
@@ -2963,30 +2944,31 @@ int main(int argc, char **argv) {
         if (nampcorrtable > 0) {
           size = nampcorrtable * sizeof(struct mbprocess_sscorr_struct);
           ampcorrtable = NULL;
-          status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&ampcorrtable, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&ampcorrtable, &error);
           for (int i = 0; i < nampcorrtable; i++) {
             ampcorrtable[i].angle = NULL;
             ampcorrtable[i].amplitude = NULL;
             ampcorrtable[i].sigma = NULL;
-            status = mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
+            /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
                                 (void **)&(ampcorrtable[i].angle), &error);
-            status = mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
+            /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
                                 (void **)&(ampcorrtable[i].amplitude), &error);
-            status = mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
+            /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
                                 (void **)&(ampcorrtable[i].sigma), &error);
           }
           ampcorrtableuse.angle = NULL;
           ampcorrtableuse.amplitude = NULL;
           ampcorrtableuse.sigma = NULL;
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
                               (void **)&(ampcorrtableuse.angle), &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
                               (void **)&(ampcorrtableuse.amplitude), &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
                               (void **)&(ampcorrtableuse.sigma), &error);
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3011,15 +2993,15 @@ int main(int argc, char **argv) {
         while ((result = fgets(buffer, MBP_FILENAMESIZE, tfp)) == buffer) {
           /* deal with amplitude correction tables */
           if (strncmp(buffer, "# table:", 8) == 0) {
-            nget = sscanf(buffer, "# table:%d", &itable);
+            /* nget = */ sscanf(buffer, "# table:%d", &itable);
             nampcorrtable++;
             ampcorrtable[itable].nangle = 0;
           }
           else if (strncmp(buffer, "# time:", 7) == 0)
-            nget = sscanf(buffer, "# time: %d/%d/%d %d:%d:%d.%d %lf", &time_i[0], &time_i[1], &time_i[2], &time_i[3],
+            /* nget = */ sscanf(buffer, "# time: %d/%d/%d %d:%d:%d.%d %lf", &time_i[0], &time_i[1], &time_i[2], &time_i[3],
                           &time_i[4], &time_i[5], &time_i[6], &(ampcorrtable[itable].time_d));
           else if (buffer[0] != '#') {
-            nget = sscanf(buffer, "%lf %lf %lf", &(ampcorrtable[itable].angle[ampcorrtable[itable].nangle]),
+            const int nget = sscanf(buffer, "%lf %lf %lf", &(ampcorrtable[itable].angle[ampcorrtable[itable].nangle]),
                           &(ampcorrtable[itable].amplitude[ampcorrtable[itable].nangle]),
                           &(ampcorrtable[itable].sigma[ampcorrtable[itable].nangle]));
             (ampcorrtable[itable].nangle)++;
@@ -3075,6 +3057,7 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
         }
+        char *result;
         while ((result = fgets(buffer, MBP_FILENAMESIZE, tfp)) == buffer) {
           if (strncmp(buffer, "# table:", 8) == 0)
             nsscorrtable++;
@@ -3087,30 +3070,31 @@ int main(int argc, char **argv) {
         if (nsscorrtable > 0) {
           size = nsscorrtable * sizeof(struct mbprocess_sscorr_struct);
           sscorrtable = NULL;
-          status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&sscorrtable, &error);
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&sscorrtable, &error);
           for (int i = 0; i < nsscorrtable; i++) {
             sscorrtable[i].angle = NULL;
             sscorrtable[i].amplitude = NULL;
             sscorrtable[i].sigma = NULL;
-            status = mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
+            /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
                                 (void **)&(sscorrtable[i].angle), &error);
-            status = mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
+            /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
                                 (void **)&(sscorrtable[i].amplitude), &error);
-            status = mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
+            /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
                                 (void **)&(sscorrtable[i].sigma), &error);
           }
           sscorrtableuse.angle = NULL;
           sscorrtableuse.amplitude = NULL;
           sscorrtableuse.sigma = NULL;
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
                               (void **)&(sscorrtableuse.angle), &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
                               (void **)&(sscorrtableuse.amplitude), &error);
-          status = mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
+          /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
                               (void **)&(sscorrtableuse.sigma), &error);
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3135,15 +3119,15 @@ int main(int argc, char **argv) {
         while ((result = fgets(buffer, MBP_FILENAMESIZE, tfp)) == buffer) {
           /* deal with sidescan correction tables */
           if (strncmp(buffer, "# table:", 8) == 0) {
-            nget = sscanf(buffer, "# table:%d", &itable);
+            /* nget = */ sscanf(buffer, "# table:%d", &itable);
             nsscorrtable++;
             sscorrtable[itable].nangle = 0;
           }
           else if (strncmp(buffer, "# time:", 7) == 0)
-            nget = sscanf(buffer, "# time: %d/%d/%d %d:%d:%d.%d %lf", &time_i[0], &time_i[1], &time_i[2], &time_i[3],
+            /* nget = */ sscanf(buffer, "# time: %d/%d/%d %d:%d:%d.%d %lf", &time_i[0], &time_i[1], &time_i[2], &time_i[3],
                           &time_i[4], &time_i[5], &time_i[6], &(sscorrtable[itable].time_d));
           else if (buffer[0] != '#') {
-            nget = sscanf(buffer, "%lf %lf %lf", &(sscorrtable[itable].angle[sscorrtable[itable].nangle]),
+            const int nget = sscanf(buffer, "%lf %lf %lf", &(sscorrtable[itable].angle[sscorrtable[itable].nangle]),
                           &(sscorrtable[itable].amplitude[sscorrtable[itable].nangle]),
                           &(sscorrtable[itable].sigma[sscorrtable[itable].nangle]));
             (sscorrtable[itable].nangle)++;
@@ -3192,9 +3176,10 @@ int main(int argc, char **argv) {
         --------------------------------------------*/
 
       /* initialize reading the input swath sonar file */
-      if ((status = mb_read_init(verbose, process.mbp_ifile, process.mbp_format, pings, lonflip, bounds, btime_i, etime_i,
-                                 speedmin, timegap, &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
-                                 &error)) != MB_SUCCESS) {
+      if (mb_read_init(verbose, process.mbp_ifile, process.mbp_format, pings, lonflip, bounds, btime_i, etime_i,
+                       speedmin, timegap, &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
+                       &error) != MB_SUCCESS) {
+        char *message = NULL;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", process.mbp_ifile);
@@ -3203,8 +3188,10 @@ int main(int argc, char **argv) {
       }
 
       /* initialize writing the output swath sonar file */
-      if ((status = mb_write_init(verbose, process.mbp_ofile, process.mbp_format, &ombio_ptr, &beams_bath, &beams_amp,
-                                  &pixels_ss, &error)) != MB_SUCCESS) {
+      if (mb_write_init(verbose, process.mbp_ofile, process.mbp_format,
+                        &ombio_ptr, &beams_bath, &beams_amp, &pixels_ss,
+                        &error) != MB_SUCCESS) {
+        char *message = NULL;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", process.mbp_ofile);
@@ -3214,45 +3201,46 @@ int main(int argc, char **argv) {
 
       /* allocate memory for data arrays */
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+        /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflagorg, &error);
+        /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflagorg, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+        /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+        /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
+        /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
                                    &error);
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
+        /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
                                    &error);
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+        /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status =
+        /* status &= */
             mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status =
+        /* status &= */
             mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&ttimes, &error);
+        /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&ttimes, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&angles, &error);
+        /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&angles, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&angles_forward,
+        /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&angles_forward,
                                    &error);
       if (error == MB_ERROR_NO_ERROR)
-        status =
+        /* status &= */
             mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&angles_null, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bheave, &error);
+        /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bheave, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+        /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
                                    (void **)&alongtrack_offset, &error);
 
       /* if error initializing memory then quit */
       if (error != MB_ERROR_NO_ERROR) {
+        char *message = NULL;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3270,7 +3258,7 @@ int main(int argc, char **argv) {
           is obtained, then close and reopen the file
           this provides the starting surface sound velocity
           for recalculating the bathymetry */
-      if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE && traveltime == true &&
+      if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE && traveltime &&
           process.mbp_ssv_mode != MBP_SSV_SET) {
         ssv_start = 0.0;
         ssv_prelimpass = true;
@@ -3278,7 +3266,6 @@ int main(int argc, char **argv) {
         while (error <= MB_ERROR_NO_ERROR && ssv_start <= 0.0) {
           /* read some data */
           error = MB_ERROR_NO_ERROR;
-          status = MB_SUCCESS;
           status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
                               &heading, &distance, &altitude, &sonardepth, &nbath, &namp, &nss, beamflag, bath, amp,
                               bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
@@ -3313,10 +3300,11 @@ int main(int argc, char **argv) {
         }
 
         /* close and reopen the input file */
-        status = mb_close(verbose, &imbio_ptr, &error);
-        if ((status = mb_read_init(verbose, process.mbp_ifile, process.mbp_format, pings, lonflip, bounds, btime_i,
-                                   etime_i, speedmin, timegap, &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp,
-                                   &pixels_ss, &error)) != MB_SUCCESS) {
+        status &= mb_close(verbose, &imbio_ptr, &error);
+        if (mb_read_init(verbose, process.mbp_ifile, process.mbp_format, pings, lonflip, bounds, btime_i,
+                         etime_i, speedmin, timegap, &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp,
+                         &pixels_ss, &error) != MB_SUCCESS) {
+          char *message = NULL;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
           fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", process.mbp_ifile);
@@ -3326,51 +3314,52 @@ int main(int argc, char **argv) {
 
         /* reallocate memory for data arrays */
         if (error == MB_ERROR_NO_ERROR)
-          status =
+          /* status &= */
               mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
         if (error == MB_ERROR_NO_ERROR)
-          status =
+          /* status &= */
               mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflagorg, &error);
         if (error == MB_ERROR_NO_ERROR)
-          status =
+          /* status &= */
               mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
         if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+          /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
         if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+          /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
                                      (void **)&bathacrosstrack, &error);
         if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+          /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
                                      (void **)&bathalongtrack, &error);
         if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+          /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
         if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack,
+          /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack,
                                      &error);
         if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack,
+          /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack,
                                      &error);
         if (error == MB_ERROR_NO_ERROR)
-          status =
+          /* status &= */
               mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&ttimes, &error);
         if (error == MB_ERROR_NO_ERROR)
-          status =
+          /* status &= */
               mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&angles, &error);
         if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+          /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
                                      (void **)&angles_forward, &error);
         if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&angles_null,
+          /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&angles_null,
                                      &error);
         if (error == MB_ERROR_NO_ERROR)
-          status =
+          /* status &= */
               mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bheave, &error);
         if (error == MB_ERROR_NO_ERROR)
-          status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+          /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
                                      (void **)&alongtrack_offset, &error);
 
         /* if error initializing memory then quit */
         if (error != MB_ERROR_NO_ERROR) {
+          char *message = NULL;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3388,6 +3377,7 @@ int main(int argc, char **argv) {
       sprintf(resf_file, "%s.resf", process.mbp_ifile);
       if ((resf_fp = fopen(resf_file, "w")) == NULL) {
         error = MB_ERROR_OPEN_FAIL;
+        char *message = NULL;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nReverse edit save file <%s> not initialized for writing\n", resf_file);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3395,17 +3385,21 @@ int main(int argc, char **argv) {
       } else {
         /* put version header at beginning */
         memset(resf_header, 0, MB_PATH_MAXLINE);
-        right_now = time((time_t *)0);
+        const time_t right_now = time((time_t *)0);
+        char date[32];
         strcpy(date, ctime(&right_now));
         date[strlen(date) - 1] = '\0';
-        if ((user_ptr = getenv("USER")) == NULL)
+        char *user_ptr = getenv("USER");
+        if (user_ptr == NULL)
           user_ptr = getenv("LOGNAME");
+        char user[MBP_FILENAMESIZE];
         if (user_ptr != NULL)
           strcpy(user, user_ptr);
         else
           strcpy(user, "unknown");
+        char host[MBP_FILENAMESIZE];
         gethostname(host, MBP_FILENAMESIZE);
-        resf_mode = MB_ESF_MODE_EXPLICIT;
+        const int resf_mode = MB_ESF_MODE_EXPLICIT;
         sprintf(resf_header,
             "ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n",
             resf_mode, MB_VERSION, program_name, user, host, date);
@@ -3436,12 +3430,14 @@ int main(int argc, char **argv) {
                                      (void **)&slopeacrosstrack, &error);
       }
 
+      // TODO(schwehr): What if there was an error in the register process?
+
       /*--------------------------------------------
         output comments
         --------------------------------------------*/
 
       /* write comments to beginning of output file */
-      if (strip_comments == false) {
+      if (!strip_comments) {
         /* insert metadata */
         if (strlen(process.mbp_meta_vessel) > 0) {
           sprintf(comment, "METAVESSEL:%s", process.mbp_meta_vessel);
@@ -3566,15 +3562,19 @@ int main(int argc, char **argv) {
         status = mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (error == MB_ERROR_NO_ERROR)
           ocomment++;
-        right_now = time((time_t *)0);
+        const time_t right_now = time((time_t *)0);
+        char date[32];
         strcpy(date, ctime(&right_now));
         date[strlen(date) - 1] = '\0';
-        if ((user_ptr = getenv("USER")) == NULL)
+        char *user_ptr = getenv("USER");
+        if (user_ptr == NULL)
           user_ptr = getenv("LOGNAME");
+        char user[MBP_FILENAMESIZE];
         if (user_ptr != NULL)
           strcpy(user, user_ptr);
         else
           strcpy(user, "unknown");
+        char host[MBP_FILENAMESIZE];
         gethostname(host, MBP_FILENAMESIZE);
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
@@ -4316,7 +4316,7 @@ int main(int argc, char **argv) {
           sprintf(comment, "  Data cutting enabled (%d commands).", process.mbp_cut_num);
         else
           sprintf(comment, "  Data cutting disabled.");
-        status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+        status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (error == MB_ERROR_NO_ERROR)
           ocomment++;
         for (int i = 0; i < process.mbp_cut_num; i++) {
@@ -4421,14 +4421,14 @@ int main(int argc, char **argv) {
 
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, " ");
-        status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+        status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (error == MB_ERROR_NO_ERROR)
           ocomment++;
       }
 
       /* set up the raytracing */
       if (process.mbp_svp_mode != MBP_SVP_OFF)
-        status = mb_rt_init(verbose, nsvp, depth, velocity, &rt_svp, &error);
+        status &= mb_rt_init(verbose, nsvp, depth, velocity, &rt_svp, &error);
 
       /* set up the sidescan recalculation */
       if (process.mbp_ssrecalc_mode == MBP_SSRECALC_ON) {
@@ -4451,8 +4451,7 @@ int main(int argc, char **argv) {
         pixel_int = process.mbp_ssrecalc_interpolate;
       }
 
-      /* initialize time_d_lastping */
-      time_d_lastping = 0.0;
+      double time_d_lastping = 0.0;
 
       /*--------------------------------------------
         loop over reading input
@@ -4463,7 +4462,7 @@ int main(int argc, char **argv) {
         /* read some data */
         error = MB_ERROR_NO_ERROR;
         status = MB_SUCCESS;
-        status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
+        status &= mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
                             &distance, &altitude, &sonardepth, &nbath, &namp, &nss, beamflag, bath, amp, bathacrosstrack,
                             bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
@@ -4493,7 +4492,7 @@ int main(int argc, char **argv) {
           }
         }
 
-        /* save the orignal beamflag states */
+        /* save the original beamflag states */
         if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
           for (int i = 0; i < nbath; i++) {
             beamflagorg[i] = beamflag[i];
@@ -4502,7 +4501,7 @@ int main(int argc, char **argv) {
 
         /* detect multiple pings with the same time stamps */
         if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
-          sensorhead_status = mb_sensorhead(verbose, imbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
+          const int sensorhead_status = mb_sensorhead(verbose, imbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
           if (sensorhead_status == MB_SUCCESS) {
             pingmultiplicity = sensorhead;
           }
@@ -4532,6 +4531,7 @@ int main(int argc, char **argv) {
           fprintf(stderr, "%s\n", comment);
         }
         else if (verbose >= 1 && error < MB_ERROR_NO_ERROR && error > MB_ERROR_OTHER) {
+          char *message = NULL;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
           fprintf(stderr, "Input Record: %d\n", idata);
@@ -4539,11 +4539,13 @@ int main(int argc, char **argv) {
                   time_i[5]);
         }
         else if (verbose >= 1 && error < MB_ERROR_NO_ERROR) {
+          char *message = NULL;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
           fprintf(stderr, "Input Record: %d\n", idata);
         }
         else if (verbose >= 1 && error != MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
+          char *message = NULL;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nFatal MBIO Error:\n%s\n", message);
           fprintf(stderr, "Last Good Time: %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4],
@@ -4610,23 +4612,24 @@ int main(int argc, char **argv) {
         }
 
         /* interpolate the navigation if desired */
+        // int intstat;
         if (error == MB_ERROR_NO_ERROR && process.mbp_nav_mode == MBP_NAV_ON &&
             (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
           /* interpolate navigation */
           if (process.mbp_nav_algorithm == MBP_NAV_SPLINE && time_d >= ntime[0] && time_d <= ntime[nnav - 1]) {
-            intstat =
+            /* intstat = */
                 mb_spline_interp(verbose, ntime - 1, nlon - 1, nlonspl - 1, nnav, time_d, &navlon, &itime, &error);
-            intstat =
+            /* intstat = */
                 mb_spline_interp(verbose, ntime - 1, nlat - 1, nlatspl - 1, nnav, time_d, &navlat, &itime, &error);
           }
           else {
-            intstat = mb_linear_interp_longitude(verbose, ntime - 1, nlon - 1, nnav, time_d, &navlon, &itime, &error);
-            intstat = mb_linear_interp_latitude(verbose, ntime - 1, nlat - 1, nnav, time_d, &navlat, &itime, &error);
+            /* intstat = */ mb_linear_interp_longitude(verbose, ntime - 1, nlon - 1, nnav, time_d, &navlon, &itime, &error);
+            /* intstat = */ mb_linear_interp_latitude(verbose, ntime - 1, nlat - 1, nnav, time_d, &navlat, &itime, &error);
           }
 
           /* interpolate heading */
           if (process.mbp_nav_heading == MBP_NAV_ON) {
-            intstat =
+            /* intstat = */
                 mb_linear_interp_heading(verbose, ntime - 1, nheading - 1, nnav, time_d, &heading, &itime, &error);
             if (heading < 0.0)
               heading += 360.0;
@@ -4636,19 +4639,19 @@ int main(int argc, char **argv) {
 
           /* interpolate speed */
           if (process.mbp_nav_speed == MBP_NAV_ON) {
-            intstat = mb_linear_interp(verbose, ntime - 1, nspeed - 1, nnav, time_d, &speed, &itime, &error);
+            /* intstat = */ mb_linear_interp(verbose, ntime - 1, nspeed - 1, nnav, time_d, &speed, &itime, &error);
           }
 
           /* interpolate draft */
           if (process.mbp_nav_draft == MBP_NAV_ON) {
-            intstat = mb_linear_interp(verbose, ntime - 1, ndraft - 1, nnav, time_d, &draft, &itime, &error);
+            /* intstat = */ mb_linear_interp(verbose, ntime - 1, ndraft - 1, nnav, time_d, &draft, &itime, &error);
           }
 
           /* interpolate attitude */
           if (process.mbp_nav_attitude == MBP_NAV_ON) {
-            intstat = mb_linear_interp(verbose, ntime - 1, nroll - 1, nnav, time_d, &roll, &itime, &error);
-            intstat = mb_linear_interp(verbose, ntime - 1, npitch - 1, nnav, time_d, &pitch, &itime, &error);
-            intstat = mb_linear_interp(verbose, ntime - 1, nheave - 1, nnav, time_d, &heave, &itime, &error);
+            /* intstat = */ mb_linear_interp(verbose, ntime - 1, nroll - 1, nnav, time_d, &roll, &itime, &error);
+            /* intstat = */ mb_linear_interp(verbose, ntime - 1, npitch - 1, nnav, time_d, &pitch, &itime, &error);
+            /* intstat = */ mb_linear_interp(verbose, ntime - 1, nheave - 1, nnav, time_d, &heave, &itime, &error);
           }
         }
 
@@ -4660,11 +4663,11 @@ int main(int argc, char **argv) {
         if (error == MB_ERROR_NO_ERROR && process.mbp_attitude_mode == MBP_ATTITUDE_ON &&
             (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
           /* interpolate adjusted navigation */
-          intstat =
+          /* intstat = */
               mb_linear_interp(verbose, attitudetime - 1, attituderoll - 1, nattitude, time_d, &roll, &iatime, &error);
-          intstat = mb_linear_interp(verbose, attitudetime - 1, attitudepitch - 1, nattitude, time_d, &pitch, &iatime,
+          /* intstat = */ mb_linear_interp(verbose, attitudetime - 1, attitudepitch - 1, nattitude, time_d, &pitch, &iatime,
                                      &error);
-          intstat = mb_linear_interp(verbose, attitudetime - 1, attitudeheave - 1, nattitude, time_d, &heave, &iatime,
+          /* intstat = */ mb_linear_interp(verbose, attitudetime - 1, attitudeheave - 1, nattitude, time_d, &heave, &iatime,
                                      &error);
         }
 
@@ -4676,7 +4679,7 @@ int main(int argc, char **argv) {
         if (error == MB_ERROR_NO_ERROR && process.mbp_sonardepth_mode == MBP_SONARDEPTH_ON &&
             (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
           /* interpolate adjusted navigation */
-          intstat = mb_linear_interp(verbose, fsonardepthtime - 1, fsonardepth - 1, nsonardepth, time_d, &draft,
+          /* intstat = */ mb_linear_interp(verbose, fsonardepthtime - 1, fsonardepth - 1, nsonardepth, time_d, &draft,
                                      &iatime, &error);
         }
 
@@ -4719,15 +4722,15 @@ int main(int argc, char **argv) {
             (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
           /* interpolate adjusted navigation */
           if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE && time_d >= natime[0] && time_d <= natime[nanav - 1]) {
-            intstat = mb_spline_interp(verbose, natime - 1, nalon - 1, nalonspl - 1, nanav, time_d, &navlon, &iatime,
+            /* intstat = */ mb_spline_interp(verbose, natime - 1, nalon - 1, nalonspl - 1, nanav, time_d, &navlon, &iatime,
                                        &error);
-            intstat = mb_spline_interp(verbose, ntime - 1, nalat - 1, nalatspl - 1, nanav, time_d, &navlat, &iatime,
+            /* intstat = */ mb_spline_interp(verbose, ntime - 1, nalat - 1, nalatspl - 1, nanav, time_d, &navlat, &iatime,
                                        &error);
           }
           else {
-            intstat =
+            /* intstat = */
                 mb_linear_interp_longitude(verbose, natime - 1, nalon - 1, nanav, time_d, &navlon, &iatime, &error);
-            intstat =
+            /* intstat = */
                 mb_linear_interp_latitude(verbose, natime - 1, nalat - 1, nanav, time_d, &navlat, &iatime, &error);
           }
         }
@@ -4741,11 +4744,11 @@ int main(int argc, char **argv) {
             nanav > 1) {
           /* interpolate z offset */
           if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE && time_d >= natime[0] && time_d <= natime[nanav - 1]) {
-            intstat =
+            /* intstat = */
                 mb_spline_interp(verbose, natime - 1, naz - 1, nazspl - 1, nanav, time_d, &zoffset, &iatime, &error);
           }
           else {
-            intstat = mb_linear_interp(verbose, natime - 1, naz - 1, nanav, time_d, &zoffset, &iatime, &error);
+            /* intstat = */ mb_linear_interp(verbose, natime - 1, naz - 1, nanav, time_d, &zoffset, &iatime, &error);
           }
 
           /* apply z offset to draft / sonar depth */
@@ -4760,7 +4763,7 @@ int main(int argc, char **argv) {
         if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA
           && process.mbp_tide_mode == MBP_TIDE_ON && ntide > 0) {
           /* interpolate tide */
-          intstat = mb_linear_interp(verbose, tidetime - 1, tide - 1, ntide, time_d, &tideval, &itime, &error);
+          /* intstat = */ mb_linear_interp(verbose, tidetime - 1, tide - 1, ntide, time_d, &tideval, &itime, &error);
 
           /* apply tide to to draft / sonar depth */
           draft -= tideval;
@@ -4792,7 +4795,7 @@ int main(int argc, char **argv) {
           --------------------------------------------*/
 
         /* make up heading and speed if required */
-        calculatespeedheading = false;
+        bool calculatespeedheading = false;
         if (process.mbp_heading_mode == MBP_HEADING_CALC || process.mbp_heading_mode == MBP_HEADING_CALCOFFSET)
           calculatespeedheading = true;
         for (icut = 0; icut < process.mbp_cut_num; icut++) {
@@ -4868,14 +4871,14 @@ int main(int argc, char **argv) {
 
         /* if survey data encountered,
             get the bathymetry */
-        if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA)) {
+        if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
 
           /*--------------------------------------------
             get travel time values
             --------------------------------------------*/
 
           /* extract travel times if they exist */
-          if (traveltime == true) {
+          if (traveltime) {
             status = mb_ttimes(verbose, imbio_ptr, store_ptr, &kind, &nbeams, ttimes, angles, angles_forward,
                                angles_null, bheave, alongtrack_offset, &draft_org, &ssv, &error);
           }
@@ -5029,20 +5032,15 @@ int main(int argc, char **argv) {
                 /* apply static shift if any */
                 zz += static_shift;
 
-                /* get alongtrack and acrosstrack distances
-                    and depth */
+                /* get alongtrack and acrosstrack distances and depth */
                 bathacrosstrack[i] = xx * cos(DTR * angles_forward[i]);
                 bathalongtrack[i] = xx * sin(DTR * angles_forward[i]) + alongtrack_offset[i];
                 bath[i] = zz;
 
-                /* output some debug values */
-                if (verbose >= 5)
+                if (verbose >= 5) {
                   fprintf(stderr, "dbg5       %3d %3d %6.3f %6.3f %6.3f %8.2f %8.2f %8.2f\n", idata, i,
                           0.5 * ttimes[i], angles[i], angles_forward[i], bathacrosstrack[i], bathalongtrack[i],
                           bath[i]);
-
-                /* output some debug messages */
-                if (verbose >= 5) {
                   fprintf(stderr, "\ndbg5  Depth value calculated in program <%s>:\n", program_name);
                   fprintf(stderr, "dbg5       kind:  %d\n", kind);
                   fprintf(stderr, "dbg5       beam:  %d\n", i);
@@ -5117,19 +5115,6 @@ int main(int argc, char **argv) {
                 bathalongtrack[i] = range * sin(alphar);
                 bathacrosstrack[i] = range * cos(alphar) * cos(betar);
 
-                /* rotate bathymetry by applying attitude biases */
-                //        status = mb_platform_math_attitude_rotate_beam (verbose,
-                //                    bathacrosstrack[i],
-                //                    bathalongtrack[i],
-                //                    bath[i],
-                //                    (roll - roll_org + process.mbp_rollbias),
-                //                    (pitch - pitch_org + process.mbp_pitchbias),
-                //                    (heading - heading_org + process.mbp_headingbias),
-                //                    &bathacrosstrack[i],
-                //                    &bathalongtrack[i],
-                //                    &bath[i],
-                //                    &error);
-
                 /* add heave and draft back in */
                 bath[i] += depth_offset_use;
 
@@ -5153,13 +5138,9 @@ int main(int argc, char **argv) {
                 /* apply transducer depth change to depths */
                 bath[i] += depth_offset_change;
 
-                /* output some debug values */
-                if (verbose >= 5)
+                if (verbose >= 5) {
                   fprintf(stderr, "dbg5       %3d %3d %8.2f %8.2f %8.2f\n", idata, i, bathacrosstrack[i],
                           bathalongtrack[i], bath[i]);
-
-                /* output some debug messages */
-                if (verbose >= 5) {
                   fprintf(stderr, "\ndbg5  Depth value calculated in program <%s>:\n", program_name);
                   fprintf(stderr, "dbg5       kind:  %d\n", kind);
                   fprintf(stderr, "dbg5       beam:  %d\n", i);
@@ -5356,7 +5337,7 @@ int main(int argc, char **argv) {
           else if (process.mbp_format == MBF_RESON7KR)
             status = mbsys_reson7k_makess(verbose, imbio_ptr, store_ptr, R7KRECID_7kV2SnippetData, pixel_size_set,
                                           &pixel_size, swath_width_set, &swath_width, pixel_int, &error);
-          status = mb_extract(verbose, imbio_ptr, store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
+          status &= mb_extract(verbose, imbio_ptr, store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
                               &nbath, &namp, &nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
                               ssacrosstrack, ssalongtrack, comment, &error);
         }
@@ -5454,13 +5435,13 @@ int main(int argc, char **argv) {
           if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA &&
               nampcorrtable > 0 && nampcorrangle > 0) {
             /* calculate the correction table */
-            status =
+            status &=
                 get_corrtable(verbose, time_d, nampcorrtable, nampcorrangle, ampcorrtable, &ampcorrtableuse, &error);
 
             /* set the reference amplitudes */
-            status = get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle, ampcorrtableuse.amplitude,
+            status &= get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle, ampcorrtableuse.amplitude,
                                    (-process.mbp_ampcorr_angle), &reference_amp_port, &error);
-            status = get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle, ampcorrtableuse.amplitude,
+            status &= get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle, ampcorrtableuse.amplitude,
                                    process.mbp_ampcorr_angle, &reference_amp_stbd, &error);
             reference_amp = 0.5 * (reference_amp_port + reference_amp_stbd);
 
@@ -5469,7 +5450,7 @@ int main(int argc, char **argv) {
               if (mb_beam_ok(beamflag[i])) {
                 bathy = 0.0;
                 if (ndepths > 1) {
-                  status = mb_pr_get_bathyslope(verbose, ndepths, depths, depthacrosstrack, nslopes, slopes,
+                  status &= mb_pr_get_bathyslope(verbose, ndepths, depths, depthacrosstrack, nslopes, slopes,
                                                 slopeacrosstrack, bathacrosstrack[i], &bathy, &slope, &error);
                   if (status != MB_SUCCESS) {
                     bathy = 0.0;
@@ -5491,7 +5472,7 @@ int main(int argc, char **argv) {
                   angle = RTD * atan(bathacrosstrack[i] / altitude_use);
                   if (process.mbp_ampcorr_slope != MBP_AMPCORR_IGNORESLOPE)
                     angle += RTD * atan(slope);
-                  status = get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle,
+                  status &= get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle,
                                          ampcorrtableuse.amplitude, angle, &correction, &error);
                   if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
                     amp[i] = amp[i] - correction + reference_amp;
@@ -5506,12 +5487,12 @@ int main(int argc, char **argv) {
           if (process.mbp_sscorr_mode == MBP_SSCORR_ON && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA &&
               nsscorrtable > 0 && nsscorrangle > 0) {
             /* calculate the correction table */
-            status = get_corrtable(verbose, time_d, nsscorrtable, nsscorrangle, sscorrtable, &sscorrtableuse, &error);
+            status &= get_corrtable(verbose, time_d, nsscorrtable, nsscorrangle, sscorrtable, &sscorrtableuse, &error);
 
             /* set the reference amplitudes */
-            status = get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle, sscorrtableuse.amplitude,
+            status &= get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle, sscorrtableuse.amplitude,
                                    (-process.mbp_sscorr_angle), &reference_amp_port, &error);
-            status = get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle, sscorrtableuse.amplitude,
+            status &= get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle, sscorrtableuse.amplitude,
                                    process.mbp_sscorr_angle, &reference_amp_stbd, &error);
             reference_amp = 0.5 * (reference_amp_port + reference_amp_stbd);
 
@@ -5520,7 +5501,7 @@ int main(int argc, char **argv) {
               if (ss[i] > MB_SIDESCAN_NULL) {
                 bathy = 0.0;
                 if (ndepths > 1) {
-                  status = mb_pr_get_bathyslope(verbose, ndepths, depths, depthacrosstrack, nslopes, slopes,
+                  status &= mb_pr_get_bathyslope(verbose, ndepths, depths, depthacrosstrack, nslopes, slopes,
                                                 slopeacrosstrack, ssacrosstrack[i], &bathy, &slope, &error);
                   if (status != MB_SUCCESS) {
                     bathy = 0.0;
@@ -5543,7 +5524,7 @@ int main(int argc, char **argv) {
                   if (process.mbp_sscorr_slope != MBP_SSCORR_IGNORESLOPE) {
                     angle += RTD * atan(slope);
                   }
-                  status = get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle,
+                  status &= get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle,
                                          sscorrtableuse.amplitude, angle, &correction, &error);
                   if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
                     ss[i] = ss[i] - correction + reference_amp;
@@ -5570,13 +5551,13 @@ int main(int argc, char **argv) {
           if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA &&
               nampcorrtable > 0 && nampcorrangle > 0) {
             /* calculate the correction table */
-            status =
+            status &=
                 get_corrtable(verbose, time_d, nampcorrtable, nampcorrangle, ampcorrtable, &ampcorrtableuse, &error);
 
             /* set the reference amplitudes */
-            status = get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle, ampcorrtableuse.amplitude,
+            status &= get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle, ampcorrtableuse.amplitude,
                                    (-process.mbp_ampcorr_angle), &reference_amp_port, &error);
-            status = get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle, ampcorrtableuse.amplitude,
+            status &= get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle, ampcorrtableuse.amplitude,
                                    process.mbp_ampcorr_angle, &reference_amp_stbd, &error);
             reference_amp = 0.5 * (reference_amp_port + reference_amp_stbd);
 
@@ -5586,13 +5567,13 @@ int main(int argc, char **argv) {
                 /* get position in grid */
                 r[0] = headingy * bathacrosstrack[i] + headingx * bathalongtrack[i];
                 r[1] = -headingx * bathacrosstrack[i] + headingy * bathalongtrack[i];
-                ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
-                jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
-                kgrid = ix * grid.n_rows + jy;
-                kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
-                kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
-                kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
-                kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
+                const int ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
+                const int jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
+                const int kgrid = ix * grid.n_rows + jy;
+                const int kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
+                const int kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
+                const int kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
+                const int kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
                 if (ix > 0 && ix < grid.n_columns - 1 && jy > 0 && jy < grid.n_rows - 1 &&
                     grid.data[kgrid] > grid.nodatavalue && grid.data[kgrid00] > grid.nodatavalue &&
                     grid.data[kgrid01] > grid.nodatavalue && grid.data[kgrid10] > grid.nodatavalue &&
@@ -5644,7 +5625,7 @@ int main(int argc, char **argv) {
                 }
 
                 /* apply correction */
-                status = get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle,
+                status &= get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle,
                                        ampcorrtableuse.amplitude, angle, &correction, &error);
                 if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
                   amp[i] = amp[i] - correction + reference_amp;
@@ -5658,12 +5639,12 @@ int main(int argc, char **argv) {
           if (process.mbp_sscorr_mode == MBP_SSCORR_ON && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA &&
               nsscorrtable > 0 && nsscorrangle > 0) {
             /* calculate the correction table */
-            status = get_corrtable(verbose, time_d, nsscorrtable, nsscorrangle, sscorrtable, &sscorrtableuse, &error);
+            status &= get_corrtable(verbose, time_d, nsscorrtable, nsscorrangle, sscorrtable, &sscorrtableuse, &error);
 
             /* set the reference amplitudes */
-            status = get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle, sscorrtableuse.amplitude,
+            status &= get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle, sscorrtableuse.amplitude,
                                    (-process.mbp_sscorr_angle), &reference_amp_port, &error);
-            status = get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle, sscorrtableuse.amplitude,
+            status &= get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle, sscorrtableuse.amplitude,
                                    process.mbp_sscorr_angle, &reference_amp_stbd, &error);
             reference_amp = 0.5 * (reference_amp_port + reference_amp_stbd);
 
@@ -5673,13 +5654,13 @@ int main(int argc, char **argv) {
                 /* get position in grid */
                 r[0] = headingy * ssacrosstrack[i] + headingx * ssalongtrack[i];
                 r[1] = -headingx * ssacrosstrack[i] + headingy * ssalongtrack[i];
-                ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
-                jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
-                kgrid = ix * grid.n_rows + jy;
-                kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
-                kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
-                kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
-                kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
+                const int ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
+                const int jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
+                const int kgrid = ix * grid.n_rows + jy;
+                const int kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
+                const int kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
+                const int kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
+                const int kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
                 if (ix > 0 && ix < grid.n_columns - 1 && jy > 0 && jy < grid.n_rows - 1 &&
                     grid.data[kgrid] > grid.nodatavalue && grid.data[kgrid00] > grid.nodatavalue &&
                     grid.data[kgrid01] > grid.nodatavalue && grid.data[kgrid10] > grid.nodatavalue &&
@@ -5792,7 +5773,7 @@ int main(int argc, char **argv) {
           --------------------------------------------*/
 
         /* write some data */
-        if (error == MB_ERROR_NO_ERROR || (kind == MB_DATA_COMMENT && strip_comments == false)) {
+        if (error == MB_ERROR_NO_ERROR || (kind == MB_DATA_COMMENT && !strip_comments)) {
           status = mb_put_all(verbose, ombio_ptr, store_ptr, false, kind, time_i, time_d, navlon, navlat, speed,
                               heading, nbath, namp, nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
                               ssacrosstrack, ssalongtrack, comment, &error);
@@ -5807,6 +5788,7 @@ int main(int argc, char **argv) {
               oother++;
           }
           else {
+            char *message = NULL;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
             fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", process.mbp_ofile);
@@ -5860,16 +5842,18 @@ int main(int argc, char **argv) {
       }
 
       /*--------------------------------------------
-        close files and deallocate memory
+        reset status/error, close files and deallocate memory
         --------------------------------------------*/
+      status = MB_SUCCESS;
+      error = MB_ERROR_NO_ERROR;
 
-      /* close the files */
-      status = mb_close(verbose, &imbio_ptr, &error);
-      status = mb_close(verbose, &ombio_ptr, &error);
+      status &= mb_close(verbose, &imbio_ptr, &error);
+      status &= mb_close(verbose, &ombio_ptr, &error);
 
       /* unlock the raw swath file */
-      if (uselockfiles == true)
-        lock_status = mb_pr_unlockswathfile(verbose, process.mbp_ifile, MBP_LOCK_PROCESS, program_name, &lock_error);
+      if (uselockfiles) {
+        /* lock_status = */ mb_pr_unlockswathfile(verbose, process.mbp_ifile, MBP_LOCK_PROCESS, program_name, &lock_error);
+      }
 
       /* close the *.resf file */
       if (resf_fp != NULL) {
@@ -5878,15 +5862,15 @@ int main(int argc, char **argv) {
 
       /* deallocate arrays for amplitude correction tables */
       if (nampcorrtable > 0) {
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.angle), &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.amplitude), &error);
-        mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.sigma), &error);
+        status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.angle), &error);
+        status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.amplitude), &error);
+        status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.sigma), &error);
         for (int i = 0; i < nampcorrtable; i++) {
-          mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].angle), &error);
-          mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].amplitude), &error);
-          mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].sigma), &error);
+          status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].angle), &error);
+          status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].amplitude), &error);
+          status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].sigma), &error);
         }
-        status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ampcorrtable, &error);
+        status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ampcorrtable, &error);
       }
 
       /* deallocate arrays for sidescan correction tables */
@@ -6008,7 +5992,11 @@ int main(int argc, char **argv) {
     mb_datalist_close(verbose, &datalist, &error);
 
   /* check memory */
-  status = mb_memory_list(verbose, &error);
+  status &= mb_memory_list(verbose, &error);
+
+  if (status == MB_FAILURE) {
+    fprintf(stderr, "ERROR: status is MB_FAILURE.\n");
+  }
 
   exit(error);
 }

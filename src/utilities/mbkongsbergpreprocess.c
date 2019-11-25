@@ -1,3 +1,4 @@
+
 /*--------------------------------------------------------------------
  *    The MB-system:	mbkongsbergpreprocess.c	1/1/2012
  *
@@ -39,78 +40,326 @@
 #include "mb_status.h"
 #include "mbsys_simrad3.h"
 
-#define MBKONSBERGPREPROCESS_ALLOC_CHUNK 1000
-#define MBKONSBERGPREPROCESS_PROCESS 1
-#define MBKONSBERGPREPROCESS_TIMESTAMPLIST 2
-#define MBKONSBERGPREPROCESS_TIMELAG_OFF 0
-#define MBKONSBERGPREPROCESS_TIMELAG_CONSTANT 1
-#define MBKONSBERGPREPROCESS_TIMELAG_MODEL 2
+const int MBKONSBERGPREPROCESS_ALLOC_CHUNK = 1000;
 
-#define MBKONSBERGPREPROCESS_SONAR_OFFSET_NONE 0
-#define MBKONSBERGPREPROCESS_SONAR_OFFSET_SONAR 1
-#define MBKONSBERGPREPROCESS_SONAR_OFFSET_MRU 2
-#define MBKONSBERGPREPROCESS_SONAR_OFFSET_NAVIGATION 3
+typedef enum {
+    MBKONSBERGPREPROCESS_PROCESS = 1,
+    MBKONSBERGPREPROCESS_TIMESTAMPLIST = 2,
+} konsberg_mode_t;
 
-#define MBKONSBERGPREPROCESS_OFFSET_MAX 12
+typedef enum {
+    MBKONSBERGPREPROCESS_TIMELAG_OFF = 0,
+    MBKONSBERGPREPROCESS_TIMELAG_CONSTANT = 1,
+    MBKONSBERGPREPROCESS_TIMELAG_MODEL = 2,
+} timelag_t;
 
-#define MBKONSBERGPREPROCESS_NAVFORMAT_NONE 0
-#define MBKONSBERGPREPROCESS_NAVFORMAT_OFG 1
+// typedef enum {
+//     MBKONSBERGPREPROCESS_SONAR_OFFSET_NONE = 0,
+//     MBKONSBERGPREPROCESS_SONAR_OFFSET_SONAR = 1,
+//     MBKONSBERGPREPROCESS_SONAR_OFFSET_MRU = 2,
+//     MBKONSBERGPREPROCESS_SONAR_OFFSET_NAVIGATION = 3,
+// } sonar_offset_t;
+
+const int MBKONSBERGPREPROCESS_OFFSET_MAX = 12;
+
+// typedef enum {
+//     MBKONSBERGPREPROCESS_NAVFORMAT_NONE = 0,
+//     MBKONSBERGPREPROCESS_NAVFORMAT_OFG = 1,
+// } navformat_t;
 
 /* set precision of iterative raytracing depth & distance matching */
-#define MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION 0.0001
-#define MBKONSBERGPREPROCESS_BATH_RECALC_NCALCMAX 50
-#define MBKONSBERGPREPROCESS_BATH_RECALC_ANGLEMODE 0
+const double MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION = 0.0001;
+const int MBKONSBERGPREPROCESS_BATH_RECALC_NCALCMAX = 50;
+const int MBKONSBERGPREPROCESS_BATH_RECALC_ANGLEMODE = 0;
 
-#define MBKONSBERGPREPROCESS_ZMODE_UNKNOWN 0
-#define MBKONSBERGPREPROCESS_ZMODE_USE_HEAVE_ONLY 1
-#define MBKONSBERGPREPROCESS_ZMODE_USE_SENSORDEPTH_ONLY 2
-#define MBKONSBERGPREPROCESS_ZMODE_USE_SENSORDEPTH_AND_HEAVE 3
+typedef enum {
+    MBKONSBERGPREPROCESS_ZMODE_UNKNOWN = 0,
+    MBKONSBERGPREPROCESS_ZMODE_USE_HEAVE_ONLY = 1,
+    MBKONSBERGPREPROCESS_ZMODE_USE_SENSORDEPTH_ONLY = 2,
+    MBKONSBERGPREPROCESS_ZMODE_USE_SENSORDEPTH_AND_HEAVE = 3,
+} zmode_t;
 
-#define MBKONSBERGPREPROCESS_WATERCOLUMN_IGNORE 0
-#define MBKONSBERGPREPROCESS_WATERCOLUMN_OUTPUT 1
+typedef enum {
+    MBKONSBERGPREPROCESS_WATERCOLUMN_IGNORE = 0,
+    MBKONSBERGPREPROCESS_WATERCOLUMN_OUTPUT = 1,
+} watercolumn_t;
 
-#define MBKONSBERGPREPROCESS_FILTER_NONE 0
-#define MBKONSBERGPREPROCESS_FILTER_MEAN 1
-#define MBKONSBERGPREPROCESS_FILTER_MEDIAN 2
+typedef enum {
+    MBKONSBERGPREPROCESS_FILTER_NONE = 0,
+    MBKONSBERGPREPROCESS_FILTER_MEAN = 1,
+    MBKONSBERGPREPROCESS_FILTER_MEDIAN = 2,
+} filter_t;
 
 static const char program_name[] = "mbkongsbergpreprocess";
 static const char help_message[] =
-    "mbkongsbergpreprocess reads a Kongsberg multibeam vendor format file (or datalist of "
-    "files),\ninterpolates the asynchronous navigation and attitude onto the multibeam data, \nand writes "
-    "the data as one or more format 59 files.";
+    "mbkongsbergpreprocess reads a Kongsberg multibeam vendor format file (or datalist of files),\n"
+    "interpolates the asynchronous navigation and attitude onto the multibeam data,\n"
+    "and writes the data as one or more format 59 files.";
 static const char usage_message[] =
-    "mbkongsbergpreprocess [-C -Doutputdirectory -Eoffx/offy[/offdepth] -Fformat -Ifile -Ooutfile "
-    "\n\t\t\t-Pfilterlength/filterdepth -Sdatatype/source -Ttimelag -W -H -V]";
+    "mbkongsbergpreprocess [-C -Doutputdirectory -Eoffx/offy[/offdepth] -Fformat -Ifile -Ooutfile\n"
+    "    -Pfilterlength/filterdepth -Sdatatype/source -Ttimelag -W -H -V]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message;
-
-	/* MBIO read control parameters */
-	char read_file[MB_PATH_MAXLINE] = "";
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
 	int format = 0;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
-	char ifile[MB_PATH_MAXLINE] = "";
-	char dfile[MB_PATH_MAXLINE] = "";
-	char ofile[MB_PATH_MAXLINE] = "";
-	bool ofile_set = false;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
+	bool output_counts = false;
 	char odir[MB_PATH_MAXLINE] = "";
 	bool odir_set = false;
+	double depthsensoroffx = 0.0;
+	double depthsensoroffy = 0.0;
+	double depthsensoroffz = 0.0;
+	bool sonardepthlever = false;
+	double sonardepthoffset = 0.0; /* depth sensor offset (+ makes vehicle deeper) */
+	int klugemode;
+	char ofile[MB_PATH_MAXLINE] = "";
+	bool ofile_set = false;
+	struct stat file_status;
+	char sonardepthfile[MB_PATH_MAXLINE] = "";
+	bool sonardepthdata = false;
+	double sonardepthfilterlength = 20.0;
+	double sonardepthfilterdepth = 20.0;
+	filter_t sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_NONE;
+	int depthsensor_mode = MBKONSBERGPREPROCESS_ZMODE_UNKNOWN;
+	int type;
+	int source;
+	int nav_source = MB_DATA_NAV;
+	int attitude_source = MB_DATA_NONE; // usually MB_DATA_ATTITUDE but let this be set by active sensor
+	int heading_source = MB_DATA_NAV;
+	int sonardepth_source = MB_DATA_DATA;
+	char timelagfile[MB_PATH_MAXLINE] = "";
+	timelag_t timelagmode = MBKONSBERGPREPROCESS_TIMELAG_OFF;
+	double timelagconstant = 0.0;
+	watercolumn_t watercolumnmode = MBKONSBERGPREPROCESS_WATERCOLUMN_IGNORE;
+
+	{
+		bool errflg = false;
+		bool help = false;
+		int c;
+		while ((c = getopt(argc, argv, "CcD:d:E:e:F:f:I:i:K:k:O:o:P:p:S:s:T:t:VvHh")) != -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'C':
+			case 'c':
+				output_counts = true;
+				break;
+			case 'D':
+			case 'd':
+				sscanf(optarg, "%1023s", odir);
+				odir_set = true;
+				break;
+			case 'E':
+			case 'e':
+			{
+				const int nscan = sscanf(optarg, "%lf/%lf/%lf/%lf", &depthsensoroffx, &depthsensoroffy, &depthsensoroffz, &sonardepthoffset);
+				if (nscan < 4) {
+					if (nscan == 3) {
+						sonardepthoffset = depthsensoroffz;
+						depthsensoroffz = depthsensoroffy;
+						depthsensoroffy = depthsensoroffx;
+						depthsensoroffx = 0.0;
+					}
+					else if (nscan == 2) {
+						sonardepthoffset = 0.0;
+						depthsensoroffz = depthsensoroffy;
+						depthsensoroffy = depthsensoroffx;
+						depthsensoroffx = 0.0;
+					}
+					else if (nscan == 1) {
+						sonardepthoffset = 0.0;
+						depthsensoroffz = 0.0;
+						depthsensoroffy = depthsensoroffx;
+						depthsensoroffx = 0.0;
+					}
+				}
+				if (nscan > 0)
+					sonardepthlever = true;
+				break;
+			}
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%1023s", read_file);
+				break;
+			case 'K':
+			case 'k':
+				sscanf(optarg, "%d", &klugemode);
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%1023s", ofile);
+				ofile_set = true;
+				break;
+			case 'P':
+			case 'p':
+			{
+				char buffer[MB_PATH_MAXLINE] = "";
+				sscanf(optarg, "%1023s", buffer);
+				const int fstat = stat(buffer, &file_status);
+				if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+					sonardepthdata = true;
+					strcpy(sonardepthfile, buffer);
+				}
+				else if (optarg[0] == 'F' || optarg[0] == 'f') {
+					const int nscan = sscanf(&(optarg[1]), "%lf/%lf", &sonardepthfilterlength, &sonardepthfilterdepth);
+					if (nscan == 1)
+						sonardepthfilterdepth = 20.0;
+					if (nscan >= 1)
+						sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_MEAN;
+					else
+						sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_NONE;
+				}
+				else if (optarg[0] == 'M' || optarg[0] == 'm') {
+					const int nscan = sscanf(&(optarg[1]), "%lf/%lf", &sonardepthfilterlength, &sonardepthfilterdepth);
+					if (nscan == 1)
+						sonardepthfilterdepth = 20.0;
+					if (nscan >= 1)
+						sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_MEDIAN;
+					else
+						sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_NONE;
+				}
+				else if (optarg[0] == 'U' || optarg[0] == 'u') {
+					/* nscan = */ sscanf(&(optarg[1]), "%d", &depthsensor_mode);
+				}
+				break;
+			}
+			case 'S':
+			case 's':
+				sscanf(optarg, "%d/%d", &type, &source);
+				if (type == 1)
+					nav_source = source;
+				else if (type == 2)
+					heading_source = source;
+				else if (type == 3)
+					attitude_source = source;
+				else if (type == 4)
+					sonardepth_source = source;
+				break;
+			case 'T':
+			case 't':
+			{
+				sscanf(optarg, "%1023s", timelagfile);
+				const int fstat = stat(timelagfile, &file_status);
+				if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+					timelagmode = MBKONSBERGPREPROCESS_TIMELAG_MODEL;
+				}
+				else {
+					sscanf(optarg, "%lf", &timelagconstant);
+					timelagmode = MBKONSBERGPREPROCESS_TIMELAG_CONSTANT;
+				}
+				break;
+			}
+			case 'W':
+			case 'w':
+			{
+				int tmp;
+				sscanf(optarg, "%d", &tmp);
+				watercolumnmode = (watercolumn_t)tmp;  // TODO(schwehr): Range check.
+				break;
+			}
+			case '?':
+				errflg = true;
+			}
+		}
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
+
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
+
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
+			fprintf(stderr, "dbg2       help:                %d\n", help);
+			fprintf(stderr, "dbg2       format:              %d\n", format);
+			fprintf(stderr, "dbg2       pings:               %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:             %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:           %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:           %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:           %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:           %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:            %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:             %f\n", timegap);
+			fprintf(stderr, "dbg2       read_file:           %s\n", read_file);
+			fprintf(stderr, "dbg2       ofile:               %s\n", ofile);
+			fprintf(stderr, "dbg2       ofile_set:           %d\n", ofile_set);
+			fprintf(stderr, "dbg2       odir:               %s\n", odir);
+			fprintf(stderr, "dbg2       odir_set:           %d\n", odir_set);
+			if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL) {
+				fprintf(stderr, "dbg2       timelagfile:         %s\n", timelagfile);
+			}
+			fprintf(stderr, "dbg2       watercolumnmode:        %d\n", watercolumnmode);
+			fprintf(stderr, "dbg2       sonardepthfilter:       %d\n", sonardepthfilter);
+			fprintf(stderr, "dbg2       sonardepthfilterlength: %f\n", sonardepthfilterlength);
+			fprintf(stderr, "dbg2       sonardepthfilterdepth:  %f\n", sonardepthfilterdepth);
+			fprintf(stderr, "dbg2       sonardepthfile:         %s\n", sonardepthfile);
+			fprintf(stderr, "dbg2       sonardepthdata:         %d\n", sonardepthdata);
+			fprintf(stderr, "dbg2       sonardepthlever:        %d\n", sonardepthlever);
+			fprintf(stderr, "dbg2       sonardepthoffset:       %f\n", sonardepthoffset);
+			fprintf(stderr, "dbg2       depthsensoroffx:        %f\n", depthsensoroffx);
+			fprintf(stderr, "dbg2       depthsensoroffy:        %f\n", depthsensoroffy);
+			fprintf(stderr, "dbg2       depthsensoroffz:        %f\n", depthsensoroffz);
+		}
+
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(MB_ERROR_NO_ERROR);
+		}
+	}
+
+	int error = MB_ERROR_NO_ERROR;
+
+	void *datalist;
+	double file_weight;
+	double btime_d;
+	double etime_d;
+	char ifile[MB_PATH_MAXLINE] = "";
+	char dfile[MB_PATH_MAXLINE] = "";
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -152,16 +401,9 @@ int main(int argc, char **argv) {
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* program mode */
-	int mode = MBKONSBERGPREPROCESS_PROCESS;
-	int nav_source = MB_DATA_NAV;
-	int attitude_source = MB_DATA_NONE; // usually MB_DATA_ATTITUDE but let this be set by active sensor
-	int heading_source = MB_DATA_NAV;
-	int sonardepth_source = MB_DATA_DATA;
+	konsberg_mode_t mode = MBKONSBERGPREPROCESS_PROCESS;
 
 	/* counting variables file */
-	bool output_counts = false;
-	int nfile_read = 0;
-	int nfile_write = 0;
 	int nrec_0x30_pu_id = 0;
 	int nrec_0x31_pu_status = 0;
 	int nrec_0x32_pu_bist = 0;
@@ -240,8 +482,6 @@ int main(int argc, char **argv) {
 	int nrec_0xE5_bathymetry_mbari59_tot = 0;
 
 	/* merge sonardepth from separate parosci pressure sensor data file */
-	char sonardepthfile[MB_PATH_MAXLINE] = "";
-	bool sonardepthdata = false;
 	int nsonardepth = 0;
 	double *sonardepth_time_d = NULL;
 	double *sonardepth_sonardepth = NULL;
@@ -273,76 +513,23 @@ int main(int argc, char **argv) {
 	double *dat_rph_heave = NULL;
 
 	/* timelag parameters */
-	int timelagmode = MBKONSBERGPREPROCESS_TIMELAG_OFF;
 	double timelag = 0.0;
-	double timelagconstant = 0.0;
-	char timelagfile[MB_PATH_MAXLINE] = "";
 	int ntimelag = 0;
 	double *timelag_time_d = NULL;
 	double *timelag_model = NULL;
 
-	/* depth sensor filtering */
-	int sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_NONE;
-	double sonardepthfilterlength = 20.0;
-	double sonardepthfilterdepth = 20.0;
-
-	/* depth sensor offset and lever arm parameters */
-	bool sonardepthlever = false;
-	double sonardepthoffset = 0.0; /* depth sensor offset (+ makes vehicle deeper) */
-	double depthsensoroffx = 0.0;
-	double depthsensoroffy = 0.0;
-	double depthsensoroffz = 0.0;
-
 	/* output asynchronous and synchronous time series ancillary files */
-	char athfile[MB_PATH_MAXLINE] = "";
-	char atsfile[MB_PATH_MAXLINE] = "";
-	char atafile[MB_PATH_MAXLINE] = "";
-	char stafile[MB_PATH_MAXLINE] = "";
-	FILE *athfp;
-	FILE *atsfp;
-	FILE *atafp;
-	FILE *stafp;
-
-	/* handling water column records */
-	int watercolumnmode = MBKONSBERGPREPROCESS_WATERCOLUMN_IGNORE;
-
-	/* processing kluge modes */
-	int klugemode;
 
 	int interp_status;
 	FILE *tfp = NULL;
-	struct stat file_status;
-	int fstat;
-	char buffer[MB_PATH_MAXLINE] = "";
 	char *result;
-	char fileroot[MB_PATH_MAXLINE] = "";
-	char *filenameptr;
 	int testformat;
-	int type, source;
-	double start_time_d, end_time_d;
 
-	double transmit_time_d, transmit_heading, transmit_heave, transmit_roll, transmit_pitch;
-	double receive_time_d, receive_heading, receive_heave, receive_roll, receive_pitch;
+	double transmit_heading, transmit_heave, transmit_roll, transmit_pitch;
+	double receive_heading, receive_heave, receive_roll, receive_pitch;
 
 	/* transmit and receive array offsets */
 	double tx_x, tx_y, tx_z, tx_h, tx_r, tx_p;
-	double rx_x, rx_y, rx_z, rx_h, rx_r, rx_p;
-
-	/* depth sensor offsets - used in place of heave for underwater platforms */
-	int depthsensor_mode = MBKONSBERGPREPROCESS_ZMODE_UNKNOWN;
-	double depth_off_x, depth_off_y, depth_off_z;
-
-	/* roll and pitch sensor offsets */
-	double rollpitch_off_x, rollpitch_off_y, rollpitch_off_z, rollpitch_off_h, rollpitch_off_r, rollpitch_off_p;
-
-	/* heave sensor offsets */
-	double heave_off_x, heave_off_y, heave_off_z, heave_off_h, heave_off_r, heave_off_p;
-
-	/* heading sensor offset */
-	double heading_off_x, heading_off_y, heading_off_z, heading_off_h, heading_off_r, heading_off_p;
-
-	/* position sensor offsets */
-	double position_off_x, position_off_y, position_off_z;
 
 	/* variables for beam angle calculation */
 	mb_3D_orientation tx_align;
@@ -370,222 +557,7 @@ int main(int argc, char **argv) {
 	int nmedian = 0;
 	int nmedian_alloc = 0;
 
-	int nscan;
-	int j1, j2;
-
-	/* get current default values */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
-	/* set default input to datalist.mb-1 */
-	strcpy(read_file, "datalist.mb-1");
-
-	/* set default nav and attitude sources */
-	nav_source = MB_DATA_NAV;
-	attitude_source = MB_DATA_NONE; // usually MB_DATA_ATTITUDE but let this be set by active sensor
-	heading_source = MB_DATA_NAV;
-	sonardepth_source = MB_DATA_DATA;
-
-	/* process argument list */
-	{
-		bool errflg = false;
-		bool help = false;
-		int c;
-		while ((c = getopt(argc, argv, "CcD:d:E:e:F:f:I:i:K:k:O:o:P:p:S:s:T:t:VvHh")) != -1)
-		{
-			switch (c) {
-			case 'H':
-			case 'h':
-				help = true;
-				break;
-			case 'V':
-			case 'v':
-				verbose++;
-				break;
-			case 'C':
-			case 'c':
-				output_counts = true;
-				break;
-			case 'D':
-			case 'd':
-				sscanf(optarg, "%s", odir);
-				odir_set = true;
-				break;
-			case 'E':
-			case 'e':
-				nscan = sscanf(optarg, "%lf/%lf/%lf/%lf", &depthsensoroffx, &depthsensoroffy, &depthsensoroffz, &sonardepthoffset);
-				if (nscan < 4) {
-					if (nscan == 3) {
-						sonardepthoffset = depthsensoroffz;
-						depthsensoroffz = depthsensoroffy;
-						depthsensoroffy = depthsensoroffx;
-						depthsensoroffx = 0.0;
-					}
-					else if (nscan == 2) {
-						sonardepthoffset = 0.0;
-						depthsensoroffz = depthsensoroffy;
-						depthsensoroffy = depthsensoroffx;
-						depthsensoroffx = 0.0;
-					}
-					else if (nscan == 1) {
-						sonardepthoffset = 0.0;
-						depthsensoroffz = 0.0;
-						depthsensoroffy = depthsensoroffx;
-						depthsensoroffx = 0.0;
-					}
-				}
-				if (nscan > 0)
-					sonardepthlever = true;
-				break;
-			case 'F':
-			case 'f':
-				sscanf(optarg, "%d", &format);
-				break;
-			case 'I':
-			case 'i':
-				sscanf(optarg, "%s", read_file);
-				break;
-			case 'K':
-			case 'k':
-				sscanf(optarg, "%d", &klugemode);
-				break;
-			case 'O':
-			case 'o':
-				sscanf(optarg, "%s", ofile);
-				ofile_set = true;
-				break;
-			case 'P':
-			case 'p':
-				sscanf(optarg, "%s", buffer);
-				if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-					sonardepthdata = true;
-					strcpy(sonardepthfile, buffer);
-				}
-				else if (optarg[0] == 'F' || optarg[0] == 'f') {
-					nscan = sscanf(&(optarg[1]), "%lf/%lf", &sonardepthfilterlength, &sonardepthfilterdepth);
-					if (nscan == 1)
-						sonardepthfilterdepth = 20.0;
-					if (nscan >= 1)
-						sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_MEAN;
-					else
-						sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_NONE;
-				}
-				else if (optarg[0] == 'M' || optarg[0] == 'm') {
-					nscan = sscanf(&(optarg[1]), "%lf/%lf", &sonardepthfilterlength, &sonardepthfilterdepth);
-					if (nscan == 1)
-						sonardepthfilterdepth = 20.0;
-					if (nscan >= 1)
-						sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_MEDIAN;
-					else
-						sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_NONE;
-				}
-				else if (optarg[0] == 'U' || optarg[0] == 'u') {
-					nscan = sscanf(&(optarg[1]), "%d", &depthsensor_mode);
-				}
-				break;
-			case 'S':
-			case 's':
-				sscanf(optarg, "%d/%d", &type, &source);
-				if (type == 1)
-					nav_source = source;
-				else if (type == 2)
-					heading_source = source;
-				else if (type == 3)
-					attitude_source = source;
-				else if (type == 4)
-					sonardepth_source = source;
-				break;
-			case 'T':
-			case 't':
-				sscanf(optarg, "%s", timelagfile);
-				if ((fstat = stat(timelagfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-					timelagmode = MBKONSBERGPREPROCESS_TIMELAG_MODEL;
-				}
-				else {
-					sscanf(optarg, "%lf", &timelagconstant);
-					timelagmode = MBKONSBERGPREPROCESS_TIMELAG_CONSTANT;
-				}
-				break;
-			case 'W':
-			case 'w':
-				sscanf(optarg, "%d", &watercolumnmode);
-				break;
-			case '?':
-				errflg = true;
-			}
-		}
-
-		if (errflg) {
-			fprintf(stderr, "usage: %s\n", usage_message);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(MB_ERROR_BAD_USAGE);
-		}
-
-		if (verbose == 1 || help) {
-			fprintf(stderr, "\nProgram %s\n", program_name);
-			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-		}
-
-		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-			fprintf(stderr, "dbg2  Control Parameters:\n");
-			fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
-			fprintf(stderr, "dbg2       help:                %d\n", help);
-			fprintf(stderr, "dbg2       format:              %d\n", format);
-			fprintf(stderr, "dbg2       pings:               %d\n", pings);
-			fprintf(stderr, "dbg2       lonflip:             %d\n", lonflip);
-			fprintf(stderr, "dbg2       bounds[0]:           %f\n", bounds[0]);
-			fprintf(stderr, "dbg2       bounds[1]:           %f\n", bounds[1]);
-			fprintf(stderr, "dbg2       bounds[2]:           %f\n", bounds[2]);
-			fprintf(stderr, "dbg2       bounds[3]:           %f\n", bounds[3]);
-			fprintf(stderr, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
-			fprintf(stderr, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
-			fprintf(stderr, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
-			fprintf(stderr, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
-			fprintf(stderr, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
-			fprintf(stderr, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
-			fprintf(stderr, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
-			fprintf(stderr, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
-			fprintf(stderr, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
-			fprintf(stderr, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
-			fprintf(stderr, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
-			fprintf(stderr, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
-			fprintf(stderr, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
-			fprintf(stderr, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
-			fprintf(stderr, "dbg2       speedmin:            %f\n", speedmin);
-			fprintf(stderr, "dbg2       timegap:             %f\n", timegap);
-			fprintf(stderr, "dbg2       read_file:           %s\n", read_file);
-			fprintf(stderr, "dbg2       ofile:               %s\n", ofile);
-			fprintf(stderr, "dbg2       ofile_set:           %d\n", ofile_set);
-			fprintf(stderr, "dbg2       odir:               %s\n", odir);
-			fprintf(stderr, "dbg2       odir_set:           %d\n", odir_set);
-			if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL) {
-				fprintf(stderr, "dbg2       timelagfile:         %s\n", timelagfile);
-				fprintf(stderr, "dbg2       ntimelag:            %d\n", ntimelag);
-			}
-			else {
-				fprintf(stderr, "dbg2       timelag:             %f\n", timelag);
-			}
-			fprintf(stderr, "dbg2       timelag:                %f\n", timelag);
-			fprintf(stderr, "dbg2       watercolumnmode:        %d\n", watercolumnmode);
-			fprintf(stderr, "dbg2       sonardepthfilter:       %d\n", sonardepthfilter);
-			fprintf(stderr, "dbg2       sonardepthfilterlength: %f\n", sonardepthfilterlength);
-			fprintf(stderr, "dbg2       sonardepthfilterdepth:  %f\n", sonardepthfilterdepth);
-			fprintf(stderr, "dbg2       sonardepthfile:         %s\n", sonardepthfile);
-			fprintf(stderr, "dbg2       sonardepthdata:         %d\n", sonardepthdata);
-			fprintf(stderr, "dbg2       sonardepthlever:        %d\n", sonardepthlever);
-			fprintf(stderr, "dbg2       sonardepthoffset:       %f\n", sonardepthoffset);
-			fprintf(stderr, "dbg2       depthsensoroffx:        %f\n", depthsensoroffx);
-			fprintf(stderr, "dbg2       depthsensoroffy:        %f\n", depthsensoroffy);
-			fprintf(stderr, "dbg2       depthsensoroffz:        %f\n", depthsensoroffz);
-		}
-
-		if (help) {
-			fprintf(stderr, "\n%s\n", help_message);
-			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
-		}
-	}
+	// int j1, j2;
 
 	/* read sonardepth data from file if specified */
 	if (sonardepthdata) {
@@ -598,6 +570,7 @@ int main(int argc, char **argv) {
 
 		/* count the data records */
 		nsonardepth = 0;
+		char buffer[MB_PATH_MAXLINE] = "";
 		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer)
 			if (buffer[0] != '#')
 				nsonardepth++;
@@ -613,6 +586,7 @@ int main(int argc, char **argv) {
 				status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double),
 				                    (void **)&sonardepth_sonardepthfilter, &error);
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating sonardepth data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -662,6 +636,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
+		char buffer[MB_PATH_MAXLINE] = "";
 		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer)
 			if (buffer[0] != '#')
 				ntimelag++;
@@ -669,10 +644,11 @@ int main(int argc, char **argv) {
 
 		/* allocate arrays for time lag */
 		if (ntimelag > 0) {
-			status = mb_mallocd(verbose, __FILE__, __LINE__, ntimelag * sizeof(double), (void **)&timelag_time_d, &error);
+			/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, ntimelag * sizeof(double), (void **)&timelag_time_d, &error);
 			if (error == MB_ERROR_NO_ERROR)
-				status = mb_mallocd(verbose, __FILE__, __LINE__, ntimelag * sizeof(double), (void **)&timelag_model, &error);
+				/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, ntimelag * sizeof(double), (void **)&timelag_model, &error);
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -722,18 +698,15 @@ int main(int argc, char **argv) {
 
 	/* open file list */
 	if (read_datalist) {
-		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
+		read_data = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+	} else {
+		/* else copy single filename to be read */
 		strcpy(ifile, read_file);
 		read_data = true;
 	}
@@ -742,8 +715,9 @@ int main(int argc, char **argv) {
 	while (read_data &&
 	       (format == MBF_EM300RAW || format == MBF_EM300MBA || format == MBF_EM710RAW || format == MBF_EM710MBA)) {
 		/* initialize reading the swath file */
-		if ((status = mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-		                           &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+		if (mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+		                           &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
@@ -767,26 +741,27 @@ int main(int argc, char **argv) {
 			ssalongtrack = NULL;
 		}
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+			/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+			/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+			/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status =
+			/* status &= */
 			    mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status =
+			/* status &= */
 			    mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+			/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
+			/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
+			/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1001,13 +976,14 @@ int main(int argc, char **argv) {
 					/* allocate memory for position arrays if needed */
 					if (ndat_nav + 1 >= ndat_nav_alloc) {
 						ndat_nav_alloc += MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_nav_alloc * sizeof(double),
+						/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_nav_alloc * sizeof(double),
 						                     (void **)&dat_nav_time_d, &error);
-						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_nav_alloc * sizeof(double), (void **)&dat_nav_lon,
+						/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_nav_alloc * sizeof(double), (void **)&dat_nav_lon,
 						                     &error);
-						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_nav_alloc * sizeof(double), (void **)&dat_nav_lat,
+						/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_nav_alloc * sizeof(double), (void **)&dat_nav_lat,
 						                     &error);
 						if (error != MB_ERROR_NO_ERROR) {
+							char *message;
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1042,11 +1018,12 @@ int main(int argc, char **argv) {
 					/* allocate memory for heading arrays if needed */
 					if (ndat_heading + 1 >= ndat_heading_alloc) {
 						ndat_heading_alloc += MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
+						/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
 						                     (void **)&dat_heading_time_d, &error);
-						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
+						/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
 						                     (void **)&dat_heading_heading, &error);
 						if (error != MB_ERROR_NO_ERROR) {
+							char *message;
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1094,13 +1071,14 @@ int main(int argc, char **argv) {
 				/* allocate memory for sonar depth arrays if needed */
 				if (ndat_sonardepth + 1 >= ndat_sonardepth_alloc) {
 					ndat_sonardepth_alloc += MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
 					                     (void **)&dat_sonardepth_time_d, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
 					                     (void **)&dat_sonardepth_sonardepth, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
 					                     (void **)&dat_sonardepth_sonardepthfilter, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1151,15 +1129,16 @@ int main(int argc, char **argv) {
 				/* allocate memory for attitude arrays if needed */
 				if (ndat_rph + attitude->att_ndata >= ndat_rph_alloc) {
 					ndat_rph_alloc += MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_time_d,
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_time_d,
 					                     &error);
-					status =
+					/* status &= */
 					    mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_roll, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_pitch,
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_pitch,
 					                     &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_heave,
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_heave,
 					                     &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1214,15 +1193,16 @@ int main(int argc, char **argv) {
 				/* allocate memory for attitude arrays if needed */
 				if (ndat_rph + netattitude->nat_ndata >= ndat_rph_alloc) {
 					ndat_rph_alloc += MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_time_d,
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_time_d,
 					                     &error);
-					status =
+					/* status &= */
 					    mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_roll, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_pitch,
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_pitch,
 					                     &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_heave,
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_heave,
 					                     &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1276,11 +1256,12 @@ int main(int argc, char **argv) {
 				/* allocate memory for heading arrays if needed */
 				if (ndat_heading + headingr->hed_ndata >= ndat_heading_alloc) {
 					ndat_heading_alloc += MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
 					                     (void **)&dat_heading_time_d, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
 					                     (void **)&dat_heading_heading, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1332,11 +1313,12 @@ int main(int argc, char **argv) {
 				/* allocate memory for heading arrays if needed */
 				if (ndat_heading + 1 >= ndat_heading_alloc) {
 					ndat_heading_alloc += MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
 					                     (void **)&dat_heading_time_d, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
 					                     (void **)&dat_heading_heading, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1386,13 +1368,14 @@ int main(int argc, char **argv) {
 				/* allocate memory for sonar depth arrays if needed */
 				if (ndat_sonardepth + 1 >= ndat_sonardepth_alloc) {
 					ndat_sonardepth_alloc += MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
 					                     (void **)&dat_sonardepth_time_d, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
 					                     (void **)&dat_sonardepth_sonardepth, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
+					/* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
 					                     (void **)&dat_sonardepth_sonardepthfilter, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1540,11 +1523,11 @@ int main(int argc, char **argv) {
 				nhalffilter = (int)(0.5 * sonardepthfilterlength / dtime);
 				nmedian_alloc = 2 * nhalffilter + 1;
 				median = NULL;
-				status = mb_reallocd(verbose, __FILE__, __LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
+				/* status = */ mb_reallocd(verbose, __FILE__, __LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
 				for (int i = 0; i < ndat_sonardepth; i++) {
 					dat_sonardepth_sonardepthfilter[i] = dat_sonardepth_sonardepth[i];
-					j1 = MAX(i - nhalffilter, 0);
-					j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
+					const int j1 = MAX(i - nhalffilter, 0);
+					const int j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
 					nmedian = 0;
 					for (int j = j1; j <= j2; j++) {
 						median[nmedian] = dat_sonardepth_sonardepth[j];
@@ -1556,7 +1539,7 @@ int main(int argc, char **argv) {
 					}
 				}
 				if (median != NULL) {
-					status = mb_freed(verbose, __FILE__, __LINE__, (void **)&median, &error);
+					/* status = */ mb_freed(verbose, __FILE__, __LINE__, (void **)&median, &error);
 					nmedian_alloc = 0;
 				}
 			}
@@ -1567,8 +1550,8 @@ int main(int argc, char **argv) {
 				for (int i = 0; i < ndat_sonardepth; i++) {
 					dat_sonardepth_sonardepthfilter[i] = 0.0;
 					sonardepth_filterweight = 0.0;
-					j1 = MAX(i - nhalffilter, 0);
-					j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
+					const int j1 = MAX(i - nhalffilter, 0);
+					const int j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
 					for (int j = j1; j <= j2; j++) {
 						dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
 						weight = exp(-dtol * dtol);
@@ -1600,11 +1583,11 @@ int main(int argc, char **argv) {
 				nhalffilter = (int)(0.5 * sonardepthfilterlength / dtime);
 				nmedian_alloc = 2 * nhalffilter + 1;
 				median = NULL;
-				status = mb_reallocd(verbose, __FILE__, __LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
+				status &= mb_reallocd(verbose, __FILE__, __LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
 				for (int i = 0; i < nsonardepth; i++) {
 					sonardepth_sonardepthfilter[i] = sonardepth_sonardepth[i];
-					j1 = MAX(i - nhalffilter, 0);
-					j2 = MIN(i + nhalffilter, nsonardepth - 1);
+					const int j1 = MAX(i - nhalffilter, 0);
+					const int j2 = MIN(i + nhalffilter, nsonardepth - 1);
 					nmedian = 0;
 					for (int j = j1; j <= j2; j++) {
 						median[nmedian] = dat_sonardepth_sonardepth[j];
@@ -1616,7 +1599,7 @@ int main(int argc, char **argv) {
 					}
 				}
 				if (median != NULL) {
-					status = mb_freed(verbose, __FILE__, __LINE__, (void **)&median, &error);
+					status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&median, &error);
 					nmedian_alloc = 0;
 				}
 			}
@@ -1627,8 +1610,8 @@ int main(int argc, char **argv) {
 				for (int i = 0; i < nsonardepth; i++) {
 					sonardepth_sonardepthfilter[i] = 0.0;
 					sonardepth_filterweight = 0.0;
-					j1 = MAX(i - nhalffilter, 0);
-					j2 = MIN(i + nhalffilter, nsonardepth - 1);
+					const int j1 = MAX(i - nhalffilter, 0);
+					const int j2 = MIN(i + nhalffilter, nsonardepth - 1);
 					for (int j = j1; j <= j2; j++) {
 						dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
 						weight = exp(-dtol * dtol);
@@ -1770,27 +1753,28 @@ int main(int argc, char **argv) {
 
 		/* open file list */
 		if (read_datalist) {
-			if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+			const int look_processed = MB_DATALIST_LOOK_UNSET;
+			if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 				fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 				exit(MB_ERROR_OPEN_FAIL);
 			}
-			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = true;
-			else
-				read_data = false;
-		}
-		/* else copy single filename to be read */
-		else {
+			read_data = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+		} else {
+			// else copy single filename to be read
 			strcpy(ifile, read_file);
 			read_data = true;
 		}
+
+		int nfile_read = 0;
+		int nfile_write = 0;
 
 		/* loop over all files to be read */
 		while (read_data && (format == MBF_EM710RAW || format == MBF_EM710MBA)) {
 			/* figure out the output file name if not specified */
 			if (!ofile_set) {
-				status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
+				char fileroot[MB_PATH_MAXLINE] = "";
+				status &= mb_get_format(verbose, ifile, fileroot, &testformat, &error);
 				if (format == MBF_EM710MBA && strncmp(".mb59", &ifile[strlen(ifile) - 5], 5) == 0)
 					sprintf(ofile, "%sf.mb%d", fileroot, MBF_EM710MBA);
 				else
@@ -1799,9 +1783,11 @@ int main(int argc, char **argv) {
 
 			/* if output directory was set by user, reset file path */
 			if (odir_set) {
+				char buffer[MB_PATH_MAXLINE] = "";
 				strcpy(buffer, odir);
 				if (buffer[strlen(odir) - 1] != '/')
 					strcat(buffer, "/");
+				char *filenameptr;
 				if (strrchr(ofile, '/') != NULL)
 					filenameptr = strrchr(ofile, '/') + 1;
 				else
@@ -1811,9 +1797,10 @@ int main(int argc, char **argv) {
 			}
 
 			/* initialize reading the input swath file */
-			if ((status = mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-			                           &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
+			if (mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+			                           &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) !=
 			    MB_SUCCESS) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 				fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
@@ -1824,10 +1811,12 @@ int main(int argc, char **argv) {
 
 			/* if ofile has been set then there is only one output file, otherwise there
 			    is an output file for each input file */
+			FILE *stafp;
 			if (!ofile_set || nfile_write == 0) {
 				/* initialize writing the output swath sonar file */
-				if ((status = mb_write_init(verbose, ofile, MBF_EM710MBA, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
-				                            &error)) != MB_SUCCESS) {
+				if (mb_write_init(verbose, ofile, MBF_EM710MBA, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
+				                            &error) != MB_SUCCESS) {
+					char *message;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
 					fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
@@ -1837,6 +1826,7 @@ int main(int argc, char **argv) {
 				nfile_write++;
 
 				/* initialize synchronous attitude output file */
+				char stafile[MB_PATH_MAXLINE] = "";
 				sprintf(stafile, "%s.sta", ofile);
 				if ((stafp = fopen(stafile, "w")) == NULL) {
 					fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", stafile);
@@ -1861,28 +1851,29 @@ int main(int argc, char **argv) {
 				ssalongtrack = NULL;
 			}
 			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+				/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+				/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
 			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+				/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
 			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
+				/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
 				                           &error);
 			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
+				/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
 				                           &error);
 			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+				/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
 			if (error == MB_ERROR_NO_ERROR)
-				status =
+				/* status &= */
 				    mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
 			if (error == MB_ERROR_NO_ERROR)
-				status =
+				/* status &= */
 				    mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1928,6 +1919,9 @@ int main(int argc, char **argv) {
 			nrec_0xE4_sidescan_mbari59 = 0;
 			nrec_0xE5_bathymetry_mbari59 = 0;
 
+			double start_time_d;
+			double end_time_d;
+
 			/* read and write data */
 			while (error <= MB_ERROR_NO_ERROR) {
 				/* reset error */
@@ -1935,7 +1929,7 @@ int main(int argc, char **argv) {
 				error = MB_ERROR_NO_ERROR;
 
 				/* read next data record */
-				status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
+				/* status = */ mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
 				                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 				                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
@@ -1965,11 +1959,11 @@ int main(int argc, char **argv) {
 					ping = (struct mbsys_simrad3_ping_struct *)&(istore->pings[istore->ping_index]);
 
 					nrec_0xE5_bathymetry_mbari59++;
-					if (ping->png_raw_read == true)
+					if (ping->png_raw_read)
 						nrec_0x4E_rawbeamN++;
-					if (ping->png_ss_read == true)
+					if (ping->png_ss_read)
 						nrec_0x59_sidescan2++;
-					if (ping->png_quality_read == true)
+					if (ping->png_quality_read)
 						nrec_0x4F_quality++;
 				}
 				else if (status == MB_SUCCESS) {
@@ -2043,6 +2037,11 @@ int main(int argc, char **argv) {
 					ping = (struct mbsys_simrad3_ping_struct *)&(istore->pings[istore->ping_index]);
 
 					/* get transducer offsets */
+
+					// double rx_x, rx_y, rx_z;
+					double rx_h;
+					double rx_r;
+					double rx_p;
 					if (istore->par_stc == 0) {
 						tx_x = istore->par_s1x;
 						tx_y = istore->par_s1y;
@@ -2050,9 +2049,9 @@ int main(int argc, char **argv) {
 						tx_h = istore->par_s1h;
 						tx_r = istore->par_s1r;
 						tx_p = istore->par_s1p;
-						rx_x = istore->par_s2x;
-						rx_y = istore->par_s2y;
-						rx_z = istore->par_s2z;
+						// rx_x = istore->par_s2x;
+						// rx_y = istore->par_s2y;
+						// rx_z = istore->par_s2z;
 						rx_h = istore->par_s2h;
 						rx_r = istore->par_s2r;
 						rx_p = istore->par_s2p;
@@ -2064,9 +2063,9 @@ int main(int argc, char **argv) {
 						tx_h = istore->par_s1h;
 						tx_r = istore->par_s1r;
 						tx_p = istore->par_s1p;
-						rx_x = istore->par_s1x;
-						rx_y = istore->par_s1y;
-						rx_z = istore->par_s1z;
+						// rx_x = istore->par_s1x;
+						// rx_y = istore->par_s1y;
+						// rx_z = istore->par_s1z;
 						rx_h = istore->par_s1h;
 						rx_r = istore->par_s1r;
 						rx_p = istore->par_s1p;
@@ -2078,9 +2077,9 @@ int main(int argc, char **argv) {
 						tx_h = istore->par_s1h;
 						tx_r = istore->par_s1r;
 						tx_p = istore->par_s1p;
-						rx_x = istore->par_s1x;
-						rx_y = istore->par_s1y;
-						rx_z = istore->par_s1z;
+						// rx_x = istore->par_s1x;
+						// rx_y = istore->par_s1y;
+						// rx_z = istore->par_s1z;
 						rx_h = istore->par_s1h;
 						rx_r = istore->par_s1r;
 						rx_p = istore->par_s1p;
@@ -2092,9 +2091,9 @@ int main(int argc, char **argv) {
 						tx_h = istore->par_s2h;
 						tx_r = istore->par_s2r;
 						tx_p = istore->par_s2p;
-						rx_x = istore->par_s2x;
-						rx_y = istore->par_s2y;
-						rx_z = istore->par_s2z;
+						// rx_x = istore->par_s2x;
+						// rx_y = istore->par_s2y;
+						// rx_z = istore->par_s2z;
 						rx_h = istore->par_s2h;
 						rx_r = istore->par_s2r;
 						rx_p = istore->par_s2p;
@@ -2106,9 +2105,9 @@ int main(int argc, char **argv) {
 						tx_h = istore->par_s1h;
 						tx_r = istore->par_s1r;
 						tx_p = istore->par_s1p;
-						rx_x = istore->par_s2x;
-						rx_y = istore->par_s2y;
-						rx_z = istore->par_s2z;
+						// rx_x = istore->par_s2x;
+						// rx_y = istore->par_s2y;
+						// rx_z = istore->par_s2z;
 						rx_h = istore->par_s2h;
 						rx_r = istore->par_s2r;
 						rx_p = istore->par_s2p;
@@ -2120,9 +2119,9 @@ int main(int argc, char **argv) {
 						tx_h = istore->par_s1h;
 						tx_r = istore->par_s1r;
 						tx_p = istore->par_s1p;
-						rx_x = istore->par_s3x;
-						rx_y = istore->par_s3y;
-						rx_z = istore->par_s3z;
+						// rx_x = istore->par_s3x;
+						// rx_y = istore->par_s3y;
+						// rx_z = istore->par_s3z;
 						rx_h = istore->par_s3h;
 						rx_r = istore->par_s3r;
 						rx_p = istore->par_s3p;
@@ -2134,9 +2133,9 @@ int main(int argc, char **argv) {
 						tx_h = istore->par_s0h;
 						tx_r = istore->par_s0r;
 						tx_p = istore->par_s0p;
-						rx_x = istore->par_s2x;
-						rx_y = istore->par_s2y;
-						rx_z = istore->par_s2z;
+						// rx_x = istore->par_s2x;
+						// rx_y = istore->par_s2y;
+						// rx_z = istore->par_s2z;
 						rx_h = istore->par_s2h;
 						rx_r = istore->par_s2r;
 						rx_p = istore->par_s2p;
@@ -2148,9 +2147,9 @@ int main(int argc, char **argv) {
 						tx_h = istore->par_s1h;
 						tx_r = istore->par_s1r;
 						tx_p = istore->par_s1p;
-						rx_x = istore->par_s3x;
-						rx_y = istore->par_s3y;
-						rx_z = istore->par_s3z;
+						// rx_x = istore->par_s3x;
+						// rx_y = istore->par_s3y;
+						// rx_z = istore->par_s3z;
 						rx_h = istore->par_s3h;
 						rx_r = istore->par_s3r;
 						rx_p = istore->par_s3p;
@@ -2165,103 +2164,110 @@ int main(int argc, char **argv) {
 						else
 							depthsensor_mode = MBKONSBERGPREPROCESS_ZMODE_USE_HEAVE_ONLY;
 					}
+					/* depth sensor offsets - used in place of heave for underwater platforms */
+					// double depth_off_x, depth_off_y, depth_off_z;
 					if (!sonardepthlever) {
-						depth_off_x = istore->par_dsx;
-						depth_off_y = istore->par_dsy;
-						depth_off_z = istore->par_dsz;
+						// depth_off_x = istore->par_dsx;
+						// depth_off_y = istore->par_dsy;
+						// depth_off_z = istore->par_dsz;
 
 						sonardepthoffset = istore->par_dso;
 						depthsensoroffx = tx_x - istore->par_dsx;
 						depthsensoroffy = tx_y - istore->par_dsy;
 						depthsensoroffz = tx_z - istore->par_dsz;
 					}
-					if (istore->par_aps == 0) {
-						position_off_x = istore->par_p1x;
-						position_off_y = istore->par_p1y;
-						position_off_z = istore->par_p1z;
-					}
-					else if (istore->par_aps == 1) {
-						position_off_x = istore->par_p2x;
-						position_off_y = istore->par_p2y;
-						position_off_z = istore->par_p2z;
-					}
-					else if (istore->par_aps == 2) {
-						position_off_x = istore->par_p3x;
-						position_off_y = istore->par_p3y;
-						position_off_z = istore->par_p3z;
-					}
-					if (istore->par_aro == 2) {
-						rollpitch_off_x = istore->par_msx;
-						rollpitch_off_y = istore->par_msy;
-						rollpitch_off_z = istore->par_msz;
-						rollpitch_off_h = istore->par_msg;
-						rollpitch_off_r = istore->par_msr;
-						rollpitch_off_p = istore->par_msp;
-					}
-					else if (istore->par_aro == 3) {
-						rollpitch_off_x = istore->par_nsx;
-						rollpitch_off_y = istore->par_nsy;
-						rollpitch_off_z = istore->par_nsz;
-						rollpitch_off_h = istore->par_nsg;
-						rollpitch_off_r = istore->par_nsr;
-						rollpitch_off_p = istore->par_nsp;
-					}
-					if (istore->par_ahe == 2) {
-						heave_off_x = istore->par_msx;
-						heave_off_y = istore->par_msy;
-						heave_off_z = istore->par_msz;
-						heave_off_h = istore->par_msg;
-						heave_off_r = istore->par_msr;
-						heave_off_p = istore->par_msp;
-					}
-					else if (istore->par_ahe == 3) {
-						heave_off_x = istore->par_nsx;
-						heave_off_y = istore->par_nsy;
-						heave_off_z = istore->par_nsz;
-						heave_off_h = istore->par_nsg;
-						heave_off_r = istore->par_nsr;
-						heave_off_p = istore->par_nsp;
-					}
-					if (istore->par_ahs == 0 || istore->par_ahs == 4) {
-						heading_off_x = istore->par_p3x;
-						heading_off_y = istore->par_p3y;
-						heading_off_z = istore->par_p3z;
-						heading_off_h = istore->par_gcg;
-						heading_off_r = 0.0;
-						heading_off_p = 0.0;
-					}
-					else if (istore->par_ahs == 1) {
-						heading_off_x = istore->par_p1x;
-						heading_off_y = istore->par_p1y;
-						heading_off_z = istore->par_p1z;
-						heading_off_h = istore->par_gcg;
-						heading_off_r = 0.0;
-						heading_off_p = 0.0;
-					}
-					else if (istore->par_ahs == 2) {
-						heading_off_x = istore->par_msx;
-						heading_off_y = istore->par_msy;
-						heading_off_z = istore->par_msz;
-						heading_off_h = istore->par_msg + istore->par_gcg;
-						heading_off_r = istore->par_msr;
-						heading_off_p = istore->par_msp;
-					}
-					else if (istore->par_ahs == 3 && istore->par_nsz != 0.0) {
-						heading_off_x = istore->par_nsx;
-						heading_off_y = istore->par_nsy;
-						heading_off_z = istore->par_nsz;
-						heading_off_h = istore->par_nsg + istore->par_gcg;
-						heading_off_r = istore->par_nsr;
-						heading_off_p = istore->par_nsp;
-					}
-					else if (istore->par_ahs == 3) {
-						heading_off_x = istore->par_p2x;
-						heading_off_y = istore->par_p2y;
-						heading_off_z = istore->par_p2z;
-						heading_off_h = istore->par_gcg;
-						heading_off_r = 0.0;
-						heading_off_p = 0.0;
-					}
+					// double position_off_x;
+					// double position_off_y;
+					// double position_off_z;
+					// if (istore->par_aps == 0) {
+					//	position_off_x = istore->par_p1x;
+					//	position_off_y = istore->par_p1y;
+					//	position_off_z = istore->par_p1z;
+					// } else if (istore->par_aps == 1) {
+					//	position_off_x = istore->par_p2x;
+					//	position_off_y = istore->par_p2y;
+					//	position_off_z = istore->par_p2z;
+					// } else if (istore->par_aps == 2) {
+					//	position_off_x = istore->par_p3x;
+					//	position_off_y = istore->par_p3y;
+					//	position_off_z = istore->par_p3z;
+					/* roll and pitch sensor offsets */
+					// double rollpitch_off_x, rollpitch_off_y, rollpitch_off_z;
+					// double rollpitch_off_h, rollpitch_off_r, rollpitch_off_p;
+					// }
+					// if (istore->par_aro == 2) {
+					//	rollpitch_off_x = istore->par_msx;
+					//	rollpitch_off_y = istore->par_msy;
+					//	rollpitch_off_z = istore->par_msz;
+					//	rollpitch_off_h = istore->par_msg;
+					//	rollpitch_off_r = istore->par_msr;
+					//	rollpitch_off_p = istore->par_msp;
+					// } else if (istore->par_aro == 3) {
+					//	rollpitch_off_x = istore->par_nsx;
+					//	rollpitch_off_y = istore->par_nsy;
+					//	rollpitch_off_z = istore->par_nsz;
+					//	rollpitch_off_h = istore->par_nsg;
+					//	rollpitch_off_r = istore->par_nsr;
+					//	rollpitch_off_p = istore->par_nsp;
+					// }
+					/* heave sensor offsets */
+					// double heave_off_x, heave_off_y, heave_off_z;
+					// double heave_off_h, heave_off_r, heave_off_p;
+					// if (istore->par_ahe == 2) {
+					//	heave_off_x = istore->par_msx;
+					//	heave_off_y = istore->par_msy;
+					//	heave_off_z = istore->par_msz;
+					//	heave_off_h = istore->par_msg;
+					//	heave_off_r = istore->par_msr;
+					//	heave_off_p = istore->par_msp;
+					// }
+					// else if (istore->par_ahe == 3) {
+					//	heave_off_x = istore->par_nsx;
+					//	heave_off_y = istore->par_nsy;
+					//	heave_off_z = istore->par_nsz;
+					//	heave_off_h = istore->par_nsg;
+					//	heave_off_r = istore->par_nsr;
+					//	heave_off_p = istore->par_nsp;
+					// }
+
+					// double heading_off_x, heading_off_y, heading_off_z;
+					// double heading_off_h, heading_off_r, heading_off_p;
+					// if (istore->par_ahs == 0 || istore->par_ahs == 4) {
+					//	heading_off_x = istore->par_p3x;
+					//	heading_off_y = istore->par_p3y;
+					//	heading_off_z = istore->par_p3z;
+					//	heading_off_h = istore->par_gcg;
+					//	heading_off_r = 0.0;
+					//	heading_off_p = 0.0;
+					// } else if (istore->par_ahs == 1) {
+					//	heading_off_x = istore->par_p1x;
+					//	heading_off_y = istore->par_p1y;
+					//	heading_off_z = istore->par_p1z;
+					//	heading_off_h = istore->par_gcg;
+					//	heading_off_r = 0.0;
+					//	heading_off_p = 0.0;
+					// } else if (istore->par_ahs == 2) {
+					//	heading_off_x = istore->par_msx;
+					//	heading_off_y = istore->par_msy;
+					//	heading_off_z = istore->par_msz;
+					//	heading_off_h = istore->par_msg + istore->par_gcg;
+					//	heading_off_r = istore->par_msr;
+					//	heading_off_p = istore->par_msp;
+					// } else if (istore->par_ahs == 3 && istore->par_nsz != 0.0) {
+					//	heading_off_x = istore->par_nsx;
+					//	heading_off_y = istore->par_nsy;
+					//	heading_off_z = istore->par_nsz;
+					//	heading_off_h = istore->par_nsg + istore->par_gcg;
+					//	heading_off_r = istore->par_nsr;
+					//	heading_off_p = istore->par_nsp;
+					// } else if (istore->par_ahs == 3) {
+					//	heading_off_x = istore->par_p2x;
+					//	heading_off_y = istore->par_p2y;
+					//	heading_off_z = istore->par_p2z;
+					//	heading_off_h = istore->par_gcg;
+					//	heading_off_r = 0.0;
+					//	heading_off_p = 0.0;
+					// }
 
 					/* merge heading from best available source */
 					if (ndat_heading > 0) {
@@ -2355,15 +2361,15 @@ int main(int argc, char **argv) {
 					/* calculate corrected ranges, angles, and bathymetry for each beam */
 					for (int i = 0; i < ping->png_nbeams; i++) {
 						/* calculate time of transmit and receive */
-						transmit_time_d = time_d + (double)ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
-						receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
+						const double transmit_time_d = time_d + (double)ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
+						const double receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
 
 						/* merge heading from best available source */
 						if (ndat_heading > 0) {
-							interp_status =
+							interp_status &=
 							    mb_linear_interp_heading(verbose, dat_heading_time_d - 1, dat_heading_heading - 1, ndat_heading,
 							                             transmit_time_d, &transmit_heading, &jheading, &error);
-							interp_status =
+							interp_status &=
 							    mb_linear_interp_heading(verbose, dat_heading_time_d - 1, dat_heading_heading - 1, ndat_heading,
 							                             receive_time_d, &receive_heading, &jheading, &error);
 						}
@@ -2390,8 +2396,10 @@ int main(int argc, char **argv) {
 							if (interp_status == MB_SUCCESS)
 								interp_status = mb_linear_interp(verbose, dat_rph_time_d - 1, dat_rph_heave - 1, ndat_rph,
 								                                 transmit_time_d, &transmit_heave, &jattitude, &error);
-							interp_status = mb_linear_interp(verbose, dat_rph_time_d - 1, dat_rph_roll - 1, ndat_rph,
-							                                 receive_time_d, &receive_roll, &jattitude, &error);
+							if (interp_status == MB_SUCCESS)
+								// TODO(schwehr): Why was this interp_status not in an if block?
+								interp_status = mb_linear_interp(verbose, dat_rph_time_d - 1, dat_rph_roll - 1, ndat_rph,
+								                                 receive_time_d, &receive_roll, &jattitude, &error);
 							if (interp_status == MB_SUCCESS)
 								interp_status = mb_linear_interp(verbose, dat_rph_time_d - 1, dat_rph_pitch - 1, ndat_rph,
 								                                 receive_time_d, &receive_pitch, &jattitude, &error);
@@ -2413,26 +2421,28 @@ int main(int argc, char **argv) {
 								interp_status =
 								    mb_linear_interp(verbose, sonardepth_time_d - 1, sonardepth_sonardepth - 1, nsonardepth,
 								                     transmit_time_d, &transmit_heave, &jsonardepth, &error);
-								interp_status =
+								interp_status &=
 								    mb_linear_interp(verbose, sonardepth_time_d - 1, sonardepth_sonardepth - 1, nsonardepth,
 								                     receive_time_d, &receive_heave, &jsonardepth, &error);
 							}
-							else if (ndat_sonardepth > 0) {
-								interp_status =
-								    mb_linear_interp(verbose, sonardepth_time_d - 1, sonardepth_sonardepth - 1, nsonardepth,
-								                     transmit_time_d, &transmit_heave, &jsonardepth, &error);
-								interp_status =
-								    mb_linear_interp(verbose, sonardepth_time_d - 1, sonardepth_sonardepth - 1, nsonardepth,
-								                     receive_time_d, &receive_heave, &jsonardepth, &error);
-							}
-							else {
-								interp_status =
-								    mb_linear_interp(verbose, sonardepth_time_d - 1, sonardepth_sonardepth - 1, nsonardepth,
-								                     transmit_time_d, &transmit_heave, &jsonardepth, &error);
-								interp_status =
-								    mb_linear_interp(verbose, sonardepth_time_d - 1, sonardepth_sonardepth - 1, nsonardepth,
-								                     receive_time_d, &receive_heave, &jsonardepth, &error);
-							}
+							// TODO(schwehr): Why two ndat_sonardepth > 0 sections.
+							// else if (ndat_sonardepth > 0) {
+							//	interp_status =
+							//	    mb_linear_interp(verbose, sonardepth_time_d - 1, sonardepth_sonardepth - 1, nsonardepth,
+							//	                     transmit_time_d, &transmit_heave, &jsonardepth, &error);
+							//	interp_status &=
+							//	    mb_linear_interp(verbose, sonardepth_time_d - 1, sonardepth_sonardepth - 1, nsonardepth,
+							//	                     receive_time_d, &receive_heave, &jsonardepth, &error);
+							// }
+							// TODO(schwehr): How is this different?
+							// else {
+							//	interp_status =
+							//	    mb_linear_interp(verbose, sonardepth_time_d - 1, sonardepth_sonardepth - 1, nsonardepth,
+							//	                     transmit_time_d, &transmit_heave, &jsonardepth, &error);
+							//	interp_status &=
+							//	    mb_linear_interp(verbose, sonardepth_time_d - 1, sonardepth_sonardepth - 1, nsonardepth,
+							//	                     receive_time_d, &receive_heave, &jsonardepth, &error);
+							// }
 							heave = transmit_heave;
 						}
 
@@ -2530,7 +2540,7 @@ int main(int argc, char **argv) {
 					swath_width = (double *)&imb_io_ptr->saved2;
 					ping->png_pixel_size = 0;
 					ping->png_pixels_ss = 0;
-					status =
+					status &=
 					    mbsys_simrad3_makess(verbose, imbio_ptr, istore_ptr, false, pixel_size, false, swath_width, 1, &error);
 				}
 
@@ -2559,6 +2569,7 @@ int main(int argc, char **argv) {
 					                    heading, obeams_bath, obeams_amp, opixels_ss, beamflag, bath, amp, bathacrosstrack,
 					                    bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 					if (status != MB_SUCCESS) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
 						fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", ofile);
@@ -2660,7 +2671,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* close the input swath file */
-			status = mb_close(verbose, &imbio_ptr, &error);
+			status &= mb_close(verbose, &imbio_ptr, &error);
 
 			/* close the output swath file if necessary */
 			if (!ofile_set || !read_data) {
@@ -2671,7 +2682,9 @@ int main(int argc, char **argv) {
 				end_time_d += 120.0;
 
 				/* output asynchronous heading output file */
+				char athfile[MB_PATH_MAXLINE] = "";
 				sprintf(athfile, "%s.ath", ofile);
+				FILE *athfp;
 				if ((athfp = fopen(athfile, "w")) != NULL) {
 					for (int i = 0; i < ndat_heading; i++) {
 						if (dat_heading_time_d[i] > start_time_d && dat_heading_time_d[i] < end_time_d)
@@ -2686,7 +2699,9 @@ int main(int argc, char **argv) {
 				}
 
 				/* output asynchronous sonardepth output file */
+				char atsfile[MB_PATH_MAXLINE] = "";
 				sprintf(atsfile, "%s.ats", ofile);
+				FILE *atsfp;
 				if ((atsfp = fopen(atsfile, "w")) != NULL) {
 					for (int i = 0; i < ndat_sonardepth; i++) {
 						if (dat_sonardepth_time_d[i] > start_time_d && dat_sonardepth_time_d[i] < end_time_d)
@@ -2701,6 +2716,8 @@ int main(int argc, char **argv) {
 				}
 
 				/* output asynchronous attitude output file */
+				FILE *atafp;
+				char atafile[MB_PATH_MAXLINE] = "";
 				sprintf(atafile, "%s.ata", ofile);
 				if ((atafp = fopen(atafile, "w")) != NULL) {
 					for (int i = 0; i < ndat_rph; i++) {
@@ -2776,38 +2793,38 @@ int main(int argc, char **argv) {
 
 	/* deallocate navigation arrays */
 	if (ndat_nav > 0) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_nav_time_d, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_nav_lon, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_nav_lat, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_nav_time_d, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_nav_lon, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_nav_lat, &error);
 	}
 	if (ndat_heading > 0) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_heading_time_d, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_heading_heading, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_heading_time_d, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_heading_heading, &error);
 	}
 	if (ndat_rph > 0) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_rph_time_d, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_rph_roll, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_rph_pitch, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_rph_heave, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_rph_time_d, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_rph_roll, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_rph_pitch, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_rph_heave, &error);
 	}
 	if (ndat_sonardepth > 0) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_sonardepth_time_d, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_sonardepth_sonardepth, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_sonardepth_sonardepthfilter, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_sonardepth_time_d, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_sonardepth_sonardepth, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_sonardepth_sonardepthfilter, &error);
 	}
 	if (ntimelag > 0) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&timelag_time_d, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&timelag_model, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&timelag_time_d, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&timelag_model, &error);
 	}
 	if (nsonardepth > 0) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&sonardepth_time_d, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&sonardepth_sonardepth, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&sonardepth_sonardepthfilter, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&sonardepth_time_d, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&sonardepth_sonardepth, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&sonardepth_sonardepthfilter, &error);
 	}
 
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);

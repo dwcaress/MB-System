@@ -45,40 +45,49 @@
 #include "mbsys_simrad3.h"
 
 #define MAX_OPTIONS 25
-#define DUMP_MODE_LIST 1
-#define DUMP_MODE_BATH 2
-#define DUMP_MODE_TOPO 3
-#define DUMP_MODE_AMP 4
-#define DUMP_MODE_SS 5
-#define MBLIST_CHECK_ON 0
-#define MBLIST_CHECK_ON_NULL 1
-#define MBLIST_CHECK_OFF_RAW 2
-#define MBLIST_CHECK_OFF_NAN 3
-#define MBLIST_CHECK_OFF_FLAGNAN 4
-#define MBLIST_SET_OFF 0
-#define MBLIST_SET_ON 1
-#define MBLIST_SET_ALL 2
-#define MBLIST_SET_EXCLUDE_OUTER 3
-#define MBLIST_SEGMENT_MODE_NONE 0
-#define MBLIST_SEGMENT_MODE_TAG 1
-#define MBLIST_SEGMENT_MODE_SWATHFILE 2
-#define MBLIST_SEGMENT_MODE_DATALIST 3
+typedef enum {
+    DUMP_MODE_LIST = 1,
+    DUMP_MODE_BATH = 2,
+    DUMP_MODE_TOPO = 3,
+    DUMP_MODE_AMP = 4,
+    DUMP_MODE_SS = 5,
+} dump_mode_t;
+typedef enum {
+    MBLIST_CHECK_ON = 0,
+    MBLIST_CHECK_ON_NULL = 1,
+    MBLIST_CHECK_OFF_RAW = 2,
+    MBLIST_CHECK_OFF_NAN = 3,
+    MBLIST_CHECK_OFF_FLAGNAN = 4,
+} check_t;
+typedef enum {
+    MBLIST_SET_OFF = 0,
+    MBLIST_SET_ON = 1,
+    MBLIST_SET_ALL = 2,
+    MBLIST_SET_EXCLUDE_OUTER = 3,
+} beam_set_t;
+typedef enum {
+    MBLIST_SEGMENT_MODE_NONE = 0,
+    MBLIST_SEGMENT_MODE_TAG = 1,
+    MBLIST_SEGMENT_MODE_SWATHFILE = 2,
+    MBLIST_SEGMENT_MODE_DATALIST = 3,
+} segment_mode_t;
 
 double NaN;
 
 static const char program_name[] = "MBLIST";
 static const char help_message[] =
-    "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is "
-    "quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns "
-    "separated by tabs.";
+    "MBLIST prints the specified contents of a swath data\n"
+    "file to stdout. The form of the output is quite flexible;\n"
+    "MBLIST is tailored to produce ascii files in spreadsheet\n"
+    "style with data columns separated by tabs.";
 static const char usage_message[] =
-    "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile "
-    "-Kdecimate -Llonflip -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end \n-Ooptions -Ppings "
-    "-Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
+    "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc\n"
+    "    -Fformat -Gdelimiter -H -Ifile -Kdecimate -Llonflip -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end\n"
+    "    -Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
 
 /*--------------------------------------------------------------------*/
-int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, bool use_bath, bool use_amp, bool use_ss, int dump_mode,
-               int beam_set, int pixel_set, int beam_vertical, int pixel_vertical, int *beam_start, int *beam_end,
+int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, bool use_bath, bool use_amp, bool use_ss, dump_mode_t dump_mode,
+               beam_set_t beam_set, int pixel_set, int beam_vertical, int pixel_vertical, int *beam_start, int *beam_end,
                int *beam_exclude_percent, int *pixel_start, int *pixel_end, int *n_list, char *list, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBLIST function <%s> called\n", __func__);
@@ -751,238 +760,48 @@ int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *
 
 int main(int argc, char **argv) {
   int verbose = 0;
-  int error = MB_ERROR_NO_ERROR;
-  char *message;
-
-  /* MBIO read control parameters */
-  char read_file[MB_PATH_MAXLINE];
-  void *datalist;
-  int look_processed = MB_DATALIST_LOOK_UNSET;
-  double file_weight;
   int format;
   int pings;
   int pings_read;
-  int decimate;
   int lonflip;
   double bounds[4];
   int btime_i[7];
   int etime_i[7];
-  double btime_d;
-  double etime_d;
   double speedmin;
   double timegap;
-  char file[MB_PATH_MAXLINE];
-  char dfile[MB_PATH_MAXLINE];
-  int beams_bath;
-  int beams_amp;
-  int pixels_ss;
+  int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-  /* output format list controls */
-  char list[MAX_OPTIONS];
-  int n_list;
-  int beam_set = MBLIST_SET_OFF;
-  int beam_start;
-  int beam_end;
-  int beam_exclude_percent;
-  int beam_vertical = 0;
-  int pixel_set = MBLIST_SET_OFF;
-  int pixel_start;
-  int pixel_end;
-  int pixel_vertical = 0;
-  int dump_mode = 1;
-  double distance_total;
-  int nread;
-  int beam_status = MB_SUCCESS;
-  int pixel_status = MB_SUCCESS;
-  int time_j[5];
-  bool use_bath = false;
-  bool use_amp = false;
-  bool use_ss = false;
-  bool use_slope = false;
-  bool use_attitude = false;
-  bool use_nav = false;  // TODO(schwehr): Unused?
-  bool use_gains = false;
-  bool use_detects = true;
-  bool use_pingnumber = false;
-  int check_values = MBLIST_CHECK_ON;
-  bool check_nav = false;
-  bool check_bath = false;
-  bool check_amp = false;
-  bool check_ss = false;
-  bool signflip_next_value = false;
-  bool raw_next_value = false;
-  bool port_next_value = false;
-  bool stbd_next_value = false;
-  bool sensornav_next_value = false;
-  bool sensorrelative_next_value = false;
-  bool projectednav_next_value = false;
-  bool use_raw = false;
-  bool special_character = false;
+  char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
+  bool bathy_in_feet = false;
+
   bool ascii = true;
   bool netcdf = false;
   bool netcdf_cdl = true;
-  bool segment = false;
-  int segment_mode = MBLIST_SEGMENT_MODE_NONE;
-  char segment_tag[MB_PATH_MAXLINE];
-  char delimiter[MB_PATH_MAXLINE];
-
-  /* MBIO read values */
-  void *mbio_ptr = NULL;
-  void *store_ptr = NULL;
-  int kind;
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double speed;
-  double heading;
-  double distance;
-  double altitude;
-  double sonardepth;
-  double draft;
-  double roll;
-  double pitch;
-  double heave;
-  char *beamflag = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  int *detect = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
-  char comment[MB_COMMENT_MAXLINE];
-  int icomment = 0;
-  unsigned int pingnumber;
-
-  /* additional time variables */
-  bool first_m = true;
-  double time_d_ref;
-  bool first_u = true;
-  time_t time_u;
-  time_t time_u_ref;
-  double seconds;
-
-  /* crosstrack slope values */
-  double avgslope;
-  double sx, sy, sxx, sxy;
-  int ns;
-  double angle, depth, slope;
-  int ndepths;
-  double *depths = NULL;
-  double *depthacrosstrack = NULL;
-  int nslopes;
-  double *slopes = NULL;
-  double *slopeacrosstrack = NULL;
-
-  /* course calculation variables */
-  double course, course_old;
-  double time_d_old, dt;
-  double time_interval;
-  double speed_made_good, speed_made_good_old;
-  double navlon_old, navlat_old;
-  double dx, dy, dist;
-  double delta, b;
-  double dlon, dlat, minutes;
-  int degrees;
-  char hemi;
-  double headingx, headingy, mtodeglon, mtodeglat;
-
-  /* swathbounds variables */
-  int beam_port, beam_stbd;
-  int pixel_port, pixel_stbd;
-
-  /* projected coordinate system */
+  dump_mode_t dump_mode = DUMP_MODE_LIST;
+  beam_set_t beam_set = MBLIST_SET_OFF;
+  int pixel_set = MBLIST_SET_OFF;  // TODO(schwehr): Is this really beam_set_t?
+  char delimiter[MB_PATH_MAXLINE] = "\t";
+  char projection_pars[MB_PATH_MAXLINE] = "";
   bool use_projection = false;
-  char projection_pars[MB_PATH_MAXLINE];
-  char projection_id[MB_PATH_MAXLINE];
-  int proj_status;
-  void *pjptr = NULL;
-  double reference_lon, reference_lat;
-  int utm_zone;
-  double naveasting, navnorthing, deasting, dnorthing;
+  int decimate = 1;
+  int beam_exclude_percent;
+  int beam_start;
+  int beam_end;
+  int pixel_start;
+  int pixel_end;
+  check_t check_values = MBLIST_CHECK_ON;
+  bool check_nav = false;
+  char output_file[MB_PATH_MAXLINE] = "-";
+  bool segment = false;
+  segment_mode_t segment_mode = MBLIST_SEGMENT_MODE_NONE;
+  char segment_tag[MB_PATH_MAXLINE];
 
-  /* bathymetry feet flag */
-  bool bathy_in_feet = false;
-  double bathy_scale;
+  // set up the default list controls
+  //   (Time, lon, lat, heading, speed, along-track distance, center beam depth)
+  char list[MAX_OPTIONS] = "TXYHSLZ";
+  int n_list = 7;
 
-  /* raw data values */
-  int count = 0;
-  int invert;
-  int flip;
-  int mode;
-  int ipulse_length;
-  int png_count;
-  int sample_rate;
-  double absorption;
-  int max_range;
-  int r_zero;
-  int r_zero_corr;
-  int tvg_start;
-  int tvg_stop;
-  double bsn;
-  double bso;
-  double mback;
-  int nback;
-  int tx;
-  int tvg_crossover;
-  int nbeams_ss;
-  int npixels;
-  int *beam_samples = NULL;
-  int *range = NULL;
-  int *start_sample = NULL;
-  double *depression = NULL;
-  double *bs = NULL;
-  double *ss_pixels = NULL;
-  double transmit_gain;
-  double pulse_length;
-  double receive_gain;
-
-  int shellstatus;
-  int nbeams;
-
-  /* output files */
-  FILE **output;
-  FILE *outfile;
-  char output_file[MB_PATH_MAXLINE];
-  char output_file_temp[MB_PATH_MAXLINE];
-  char buffer[MB_BUFFER_MAX];
-
-  /* netcdf variables */
-  char variable[MB_PATH_MAXLINE];
-  int lcount = 0;
-  time_t right_now;
-  char date[32], user[128], *user_ptr, host[128];
-
-  /* get current default values */
-  int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
-  /* set default input to datalist.mb-1 */
-  strcpy(read_file, "datalist.mb-1");
-
-  /* set up the default list controls
-      (Time, lon, lat, heading, speed, along-track distance, center beam depth) */
-  list[0] = 'T';
-  list[1] = 'X';
-  list[2] = 'Y';
-  list[3] = 'H';
-  list[4] = 'S';
-  list[5] = 'L';
-  list[6] = 'Z';
-  n_list = 7;
-  delimiter[0] = '\t';
-  delimiter[1] = '\0';
-  projection_pars[0] = '\0';
-
-  /* set dump mode flag to DUMP_MODE_LIST */
-  dump_mode = DUMP_MODE_LIST;
-  decimate = 1;
-
-  /* get NaN value */
   MB_MAKE_DNAN(NaN);
-
-  strcpy(output_file, "-");
 
   /* process argument list */
   {
@@ -1017,16 +836,21 @@ int main(int argc, char **argv) {
         break;
       case 'D':
       case 'd':
-        sscanf(optarg, "%d", &dump_mode);
-        if (dump_mode == DUMP_MODE_BATH)
-          beam_set = MBLIST_SET_ALL;
-        else if (dump_mode == DUMP_MODE_TOPO)
-          beam_set = MBLIST_SET_ALL;
-        else if (dump_mode == DUMP_MODE_AMP)
-          beam_set = MBLIST_SET_ALL;
-        else if (dump_mode == DUMP_MODE_SS)
-          pixel_set = MBLIST_SET_ALL;
-        break;
+        {
+          int tmp;
+          sscanf(optarg, "%d", &tmp);
+          // TODO(schwehr): Range check tmp.
+          dump_mode = (dump_mode_t)tmp;
+          if (dump_mode == DUMP_MODE_BATH)
+            beam_set = MBLIST_SET_ALL;
+          else if (dump_mode == DUMP_MODE_TOPO)
+            beam_set = MBLIST_SET_ALL;
+          else if (dump_mode == DUMP_MODE_AMP)
+            beam_set = MBLIST_SET_ALL;
+          else if (dump_mode == DUMP_MODE_SS)
+            pixel_set = MBLIST_SET_ALL;
+          break;
+        }
       case 'E':
       case 'e':
         sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
@@ -1034,7 +858,7 @@ int main(int argc, char **argv) {
         break;
       case 'G':
       case 'g':
-        sscanf(optarg, "%s", delimiter);
+        sscanf(optarg, "%1023s", delimiter);
         break;
       case 'F':
       case 'f':
@@ -1042,11 +866,11 @@ int main(int argc, char **argv) {
         break;
       case 'I':
       case 'i':
-        sscanf(optarg, "%s", read_file);
+        sscanf(optarg, "%1023s", read_file);
         break;
       case 'J':
       case 'j':
-        sscanf(optarg, "%s", projection_pars);
+        sscanf(optarg, "%1023s", projection_pars);
         use_projection = true;
         break;
       case 'K':
@@ -1119,9 +943,13 @@ int main(int argc, char **argv) {
         if (optarg[0] == 'N')
           check_nav = true;
         else {
-          sscanf(optarg, "%d", &check_values);
-          if (check_values < MBLIST_CHECK_ON || check_values > MBLIST_CHECK_OFF_FLAGNAN)
+          int tmp;
+          sscanf(optarg, "%d", &tmp);
+          check_values = (check_t)tmp;
+          if (check_values < MBLIST_CHECK_ON || check_values > MBLIST_CHECK_OFF_FLAGNAN) {
+            fprintf(stderr, "WARNING: -u/-U: check_values out of range.\n");
             check_values = MBLIST_CHECK_ON;
+          }
         }
         break;
       case 'W':
@@ -1130,12 +958,12 @@ int main(int argc, char **argv) {
         break;
       case 'X':
       case 'x':
-        sscanf(optarg, "%s", output_file);
+        sscanf(optarg, "%1023s", output_file);
         break;
       case 'Z':
       case 'z':
         segment = true;
-        sscanf(optarg, "%s", segment_tag);
+        sscanf(optarg, "%1023s", segment_tag);
         if (strcmp(segment_tag, "swathfile") == 0)
           segment_mode = MBLIST_SEGMENT_MODE_SWATHFILE;
         else if (strcmp(segment_tag, "datalist") == 0)
@@ -1189,7 +1017,6 @@ int main(int argc, char **argv) {
       fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
       fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
       fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
-      fprintf(stderr, "dbg2       file:           %s\n", file);
       fprintf(stderr, "dbg2       output_file:    %s\n", output_file);
       fprintf(stderr, "dbg2       ascii:          %d\n", ascii);
       fprintf(stderr, "dbg2       netcdf:         %d\n", netcdf);
@@ -1218,14 +1045,16 @@ int main(int argc, char **argv) {
     if (help) {
       fprintf(stderr, "\n%s\n", help_message);
       fprintf(stderr, "\nusage: %s\n", usage_message);
-      exit(error);
+      exit(MB_ERROR_NO_ERROR);
     }
   }
 
-  /* get format if required */
+  int error = MB_ERROR_NO_ERROR;
+
   if (format == 0)
     mb_get_format(verbose, read_file, NULL, &format, &error);
 
+  double bathy_scale;
   /* set bathymetry scaling */
   if (bathy_in_feet)
     bathy_scale = 1.0 / 0.3048;
@@ -1235,36 +1064,188 @@ int main(int argc, char **argv) {
   /* determine whether to read one file or a list of files */
   const bool read_datalist = format < 0;
   bool read_data;
+  void *datalist;
+  char file[MB_PATH_MAXLINE];
+  char dfile[MB_PATH_MAXLINE];
+  double file_weight;
 
   /* open file list */
   if (read_datalist) {
-    if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+    const int look_processed = MB_DATALIST_LOOK_UNSET;
+    if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
       fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_ERROR_OPEN_FAIL);
     }
-    if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-      read_data = true;
-    else
-      read_data = false;
-  }
-  /* else copy single filename to be read */
-  else {
+    read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+  } else {
+    // else copy single filename to be read
     strcpy(file, read_file);
     read_data = true;
   }
 
+  double btime_d;
+  double etime_d;
+  int beams_bath;
+  int beams_amp;
+  int pixels_ss;
+
+  /* output format list controls */
+  int beam_vertical = 0;
+  int pixel_vertical = 0;
+  int nread;
+  int beam_status = MB_SUCCESS;
+  int pixel_status = MB_SUCCESS;
+  int time_j[5];
+  bool use_bath = false;
+  bool use_amp = false;
+  bool use_ss = false;
+  bool use_slope = false;
+  bool use_attitude = false;
+  bool use_gains = false;
+  bool use_detects = true;
+  bool use_pingnumber = false;
+  bool check_bath = false;
+  bool check_amp = false;
+  bool check_ss = false;
+  bool signflip_next_value = false;
+  bool raw_next_value = false;
+  bool port_next_value = false;
+  bool stbd_next_value = false;
+  bool sensornav_next_value = false;
+  bool sensorrelative_next_value = false;
+  bool projectednav_next_value = false;
+  bool use_raw = false;
+  bool special_character = false;
+
+  /* MBIO read values */
+  void *mbio_ptr = NULL;
+  void *store_ptr = NULL;
+  int kind;
+  int time_i[7];
+  double time_d;
+  double navlon;
+  double navlat;
+  double speed;
+  double heading;
+  double distance;
+  double altitude;
+  double sonardepth;
+  double draft;
+  double roll;
+  double pitch;
+  double heave;
+  char *beamflag = NULL;
+  double *bath = NULL;
+  double *bathacrosstrack = NULL;
+  double *bathalongtrack = NULL;
+  int *detect = NULL;
+  double *amp = NULL;
+  double *ss = NULL;
+  double *ssacrosstrack = NULL;
+  double *ssalongtrack = NULL;
+  char comment[MB_COMMENT_MAXLINE];
+  int icomment = 0;
+  unsigned int pingnumber;
+
+  /* additional time variables */
+  bool first_m = true;
+  bool first_u = true;
+  time_t time_u;
+  time_t time_u_ref;
+  double seconds;
+
+  /* crosstrack slope values */
+  double avgslope;
+  double sx, sy, sxx, sxy;
+  int ns;
+  double angle, depth, slope;
+  int ndepths;
+  double *depths = NULL;
+  double *depthacrosstrack = NULL;
+  int nslopes;
+  double *slopes = NULL;
+  double *slopeacrosstrack = NULL;
+
+  /* course calculation variables */
+  double course, course_old;
+  double time_d_old, dt;
+  double time_interval;
+  double speed_made_good, speed_made_good_old;
+  double navlon_old, navlat_old;
+  double dx, dy, dist;
+  double delta, b;
+  double dlon, dlat, minutes;
+  int degrees;
+  char hemi;
+  double headingx, headingy, mtodeglon, mtodeglat;
+
+  /* swathbounds variables */
+  int beam_port, beam_stbd;
+  int pixel_port, pixel_stbd;
+
+  /* projected coordinate system */
+  char projection_id[MB_PATH_MAXLINE];
+  int proj_status;
+  void *pjptr = NULL;
+  double reference_lon, reference_lat;
+  int utm_zone;
+  double naveasting, navnorthing, deasting, dnorthing;
+
+  /* raw data values */
+  int count = 0;
+  int invert;
+  int flip;
+  int mode;
+  int ipulse_length;
+  int png_count;
+  int sample_rate;
+  double absorption;
+  int max_range;
+  int r_zero;
+  int r_zero_corr;
+  int tvg_start;
+  int tvg_stop;
+  double bsn;
+  double bso;
+  double mback;
+  int nback;
+  int tx;
+  int tvg_crossover;
+  int nbeams_ss;
+  int npixels;
+  int *beam_samples = NULL;
+  int *range = NULL;
+  int *start_sample = NULL;
+  double *depression = NULL;
+  double *bs = NULL;
+  double *ss_pixels = NULL;
+  double transmit_gain;
+  double pulse_length;
+  double receive_gain;
+
+  int shellstatus;
+  int nbeams;
+
+  char output_file_temp[MB_PATH_MAXLINE];
+  char buffer[MB_BUFFER_MAX];
+
+  /* netcdf variables */
+  char variable[MB_PATH_MAXLINE];
+  int lcount = 0;
+
   /* set the initial along track distance here so */
-  /* it's cummulative over multiple files*/
-  distance_total = 0.0;
+  /* it is cumulative over multiple files */
+  double distance_total = 0.0;
 
   /* initialize output files */
+  FILE **output;
   status = mb_mallocd(verbose, __FILE__, __LINE__, n_list * sizeof(FILE *), (void **)&output, &error);
 
   bool invert_next_value = false;
 
+  FILE *outfile;
   if (!netcdf) {
-    /* open output file */
     if (0 == strncmp("-", output_file, 2))
       outfile = stdout;
     else
@@ -1336,15 +1317,19 @@ int main(int argc, char **argv) {
     fprintf(outfile, "\n");
     fprintf(outfile, "\t:mbsystem_version = \"%s\";\n", MB_VERSION);
 
-    right_now = time((time_t *)0);
+    const time_t right_now = time((time_t *)0);
+    char date[32];
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
-    if ((user_ptr = (char *)getenv("USER")) == NULL)
+    char *user_ptr = (char *)getenv("USER");
+    if (user_ptr == NULL)
       user_ptr = (char *)getenv("LOGNAME");
+    char user[128];
     if (user_ptr != NULL)
       strcpy(user, user_ptr);
     else
       strcpy(user, "unknown");
+    char host[128];
     gethostname(host, 128);
 
     fprintf(outfile, "\t:run = \"by <%s> on cpu <%s> at <%s>\";\n\n", user, host, date);
@@ -2675,7 +2660,9 @@ int main(int argc, char **argv) {
 
   bool use_course = false;
   bool use_time_interval = false;
-  bool use_swathbounds = false;  // TODO(schwehr): Set but not used.
+  // bool use_swathbounds = false;  // TODO(schwehr): Set but not used.
+  // bool use_nav = false;  // TODO(schwehr): Unused?
+  double time_d_ref = 0;
 
   /* loop over all files to be read */
   while (read_data) {
@@ -2683,6 +2670,7 @@ int main(int argc, char **argv) {
     /* initialize reading the swath file */
     if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
                                &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+      char *message;
       mb_error(verbose, error, &message);
       fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
       fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -2700,6 +2688,7 @@ int main(int argc, char **argv) {
     else
       for (int i = 0; i < n_list; i++) {
         if (!raw_next_value) {
+          // TODO(schwehr): Why not a switch?
           if (list[i] == 'Z' || list[i] == 'z' || list[i] == 'A' || list[i] == 'a' || list[i] == 'Q' || list[i] == 'q')
             use_bath = true;
           if (list[i] == 'B')
@@ -2720,14 +2709,14 @@ int main(int argc, char **argv) {
             use_detects = true;
           if (list[i] == 'N' || list[i] == 'n')
             use_pingnumber = true;
-          if (list[i] == 'X' || list[i] == 'x' || list[i] == 'Y' || list[i] == 'y')
-            use_nav = true;
+          // if (list[i] == 'X' || list[i] == 'x' || list[i] == 'Y' || list[i] == 'y')
+          //   use_nav = true;
           if (list[i] == '.')
             raw_next_value = true;
-          if (list[i] == '=')
-            use_swathbounds = true;
-          if (list[i] == '+')
-            use_swathbounds = true;
+          // if (list[i] == '=')
+          //   use_swathbounds = true;
+          // if (list[i] == '+')
+          //   use_swathbounds = true;
         }
         else {
           if (list[i] == 'T' || list[i] == 't' || list[i] == 'U' || list[i] == 'l')
@@ -2805,6 +2794,7 @@ int main(int argc, char **argv) {
 
     /* if error initializing memory then quit */
     if (error != MB_ERROR_NO_ERROR) {
+      char *message;
       mb_error(verbose, error, &message);
       fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -4155,7 +4145,7 @@ int main(int argc, char **argv) {
                   mb_get_jtime(verbose, time_i, time_j);
                   seconds = time_i[5] + 1e-6 * time_i[6];
                   if (ascii) {
-                    if (netcdf == true)
+                    if (netcdf)
                       fprintf(output[i], "%d, %d, %d, %d, %d", time_j[0], time_j[1], time_j[2], time_j[3],
                               time_j[4]);
                     else
@@ -4791,7 +4781,7 @@ int main(int argc, char **argv) {
 
         /* copy data to CDL file */
         /* TODO(schwehr): Convert this abuse of for to a while. */
-        for (int j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i]); j > 0;
+        for (size_t j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i]); j > 0;
              j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i])) {
           if (j != fwrite(buffer, sizeof(char), j, outfile)) {
             fprintf(stderr, "Error writing to CDL file");

@@ -90,7 +90,7 @@ struct mbareaclean_sndg_struct {
 	bool sndg_edit;
 };
 
-/* sounding atorage values and arrays */
+/* sounding storage values and arrays */
 int nfile = 0;
 int nfile_alloc = 0;
 struct mbareaclean_file_struct *files = NULL;
@@ -188,126 +188,18 @@ int flag_sounding(int verbose, bool flag, bool output_bad, bool output_good, str
 
 /*--------------------------------------------------------------------*/
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
-
-	/* MBIO read control parameters */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
-	int kind;
-	char read_file[MB_PATH_MAXLINE];
-	char swathfile[MB_PATH_MAXLINE];
-	char swathfileread[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	void *datalist;
-	double file_weight;
 	int format;
-	int formatread;
-	int variable_beams;
-	int traveltime;
-	int beam_flagging;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
-	struct mb_info_struct mb_info;
-
-	int time_i[7];
-	double time_d;
-	int pingsread;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	char *beamflag;
-	char *beamflagorg;
-	int *detect;
-	double *bath;
-	double *amp;
-	double *bathlon;
-	double *bathlat;
-	double *ss;
-	double *sslon;
-	double *sslat;
-	char comment[MB_COMMENT_MAXLINE];
-
-	/* mbareaclean control parameters */
-	bool median_filter = false;
-	double median_filter_threshold = 0.25;
-	int median_filter_nmin = 10;
-	bool mediandensity_filter = false;
-	int mediandensity_filter_nmax = 0;
-	bool plane_fit = false;
-	double plane_fit_threshold = 0.05;
-	int plane_fit_nmin = 10;
-	bool std_dev_filter = false;
-	double std_dev_threshold = 2.0;
-	int std_dev_nmin = 10;
-	bool output_good = false;
-	bool output_bad = false;
-	int flag_detect = MB_DETECT_AMPLITUDE;
-	bool use_detect = false;
-	bool limit_beams = false;
-	bool beam_in = true;
-	int min_beam = 0;
-	int max_beam = 0;
-	int max_beam_no = 0;
-	double areabounds[4];
-	bool areaboundsset = false;
-	double binsize = 0.0;
-	bool binsizeset = false;
-	double dx, dy;
-	int nx, ny;
-	double mtodeglon;
-	double mtodeglat;
-	int pingmultiplicity;
-	int detect_status;
-	int detect_error;
-	int sensorhead;
-	int sensorhead_status = MB_SUCCESS;
-	int sensorhead_error = MB_ERROR_NO_ERROR;
-
-	/* median filter parameters */
-	int binnum;
-	int binnummax;
-	double *bindepths;
-	double threshold;
-
-	/* counting parameters */
-	int files_tot = 0;
-	int pings_tot = 0;
-	int beams_tot = 0;
-	int beams_good_org_tot = 0;
-	int beams_flag_org_tot = 0;
-	int beams_null_org_tot = 0;
-
-	/* save file control variables */
-	char esffile[MB_PATH_MAXLINE];
-	struct mb_esf_struct esf;
-	int action;
-
-	double xx, yy;
-	int ix, iy, ib, kgrid;
-	double d1, d2;
-	int i1, i2;
-
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* reset all defaults but the format and lonflip */
-	strcpy(read_file, "datalist.mb-1");
 	format = 0;
 	pings = 1;
 	bounds[0] = -360.;
@@ -331,7 +223,32 @@ int main(int argc, char **argv) {
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 
-	/* process argument list */
+	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
+	bool output_bad = false;
+	bool std_dev_filter = false;
+	double std_dev_threshold = 2.0;
+	int std_dev_nmin = 10;
+	bool median_filter = false;
+	double median_filter_threshold = 0.25;
+	int median_filter_nmin = 10;
+	bool mediandensity_filter = false;
+	int mediandensity_filter_nmax = 0;
+	bool limit_beams = false;
+	bool output_good = false;
+	bool beam_in = true;
+	int min_beam = 0;
+	int max_beam = 0;
+	int max_beam_no = 0;
+	bool plane_fit = false;
+	// double plane_fit_threshold = 0.05;
+	// int plane_fit_nmin = 10;
+	double areabounds[4];
+	bool areaboundsset = false;
+	double binsize = 0.0;
+	bool binsizeset = false;
+	int flag_detect = MB_DETECT_AMPLITUDE;
+	bool use_detect = false;
+
 	{
 		bool errflg = false;
 		int c;
@@ -366,12 +283,15 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'M':
 			case 'm':
 			{
 				median_filter = true;
+				double d1;
+				int i1;
+				int i2;
 				const int n = sscanf(optarg, "%lf/%d/%d", &d1, &i1, &i2);
 				if (n > 0)
 					median_filter_threshold = d1;
@@ -400,13 +320,17 @@ int main(int argc, char **argv) {
 			case 'P':
 			case 'p':
 			{
+				// TODO(schwehr): -p not in the man page.
 				plane_fit = true;
-				sscanf(optarg, "%lf", &plane_fit_threshold);
-				const int n = sscanf(optarg, "%lf/%d/%lf", &d1, &i1, &d2);
-				if (n > 0)
-					plane_fit_threshold = d1;
-				if (n > 1)
-					plane_fit_nmin = i1;
+				// sscanf(optarg, "%lf", &plane_fit_threshold);
+				// double d1;
+				// double d2;
+				// int i1;
+				// const int n = sscanf(optarg, "%lf/%d/%lf", &d1, &i1, &d2);
+				// if (n > 0)
+				// 	plane_fit_threshold = d1;
+				// if (n > 1)
+				//	plane_fit_nmin = i1;
 				break;
 			}
 			case 'R':
@@ -484,8 +408,8 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2       mediandensity_filter:      %d\n", mediandensity_filter);
 			fprintf(stderr, "dbg2       mediandensity_filter_nmax: %d\n", mediandensity_filter_nmax);
 			fprintf(stderr, "dbg2       plane_fit:                 %d\n", plane_fit);
-			fprintf(stderr, "dbg2       plane_fit_threshold:       %f\n", plane_fit_threshold);
-			fprintf(stderr, "dbg2       plane_fit_nmin:            %d\n", plane_fit_nmin);
+			// fprintf(stderr, "dbg2       plane_fit_threshold:       %f\n", plane_fit_threshold);
+			// fprintf(stderr, "dbg2       plane_fit_nmin:            %d\n", plane_fit_nmin);
 			fprintf(stderr, "dbg2       std_dev_filter:            %d\n", std_dev_filter);
 			fprintf(stderr, "dbg2       std_dev_threshold:         %f\n", std_dev_threshold);
 			fprintf(stderr, "dbg2       std_dev_nmin:              %d\n", std_dev_nmin);
@@ -509,15 +433,20 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
+
+	int error = MB_ERROR_NO_ERROR;
+	int formatread;
+	void *datalist;
 
 	/* if bounds not set get bounds of input data */
 	if (!areaboundsset) {
 		formatread = format;
+		struct mb_info_struct mb_info;
 		memset(&mb_info, 0, sizeof(struct mb_info_struct));
-		status = mb_get_info_datalist(verbose, read_file, &formatread, &mb_info, lonflip, &error);
+		status &= mb_get_info_datalist(verbose, read_file, &formatread, &mb_info, lonflip, &error);
 
 		areabounds[0] = mb_info.lon_min;
 		areabounds[1] = mb_info.lon_max;
@@ -529,13 +458,15 @@ int main(int argc, char **argv) {
 	}
 
 	/* calculate grid properties */
+	double mtodeglon;
+	double mtodeglat;
 	mb_coor_scale(verbose, 0.5 * (areabounds[2] + areabounds[3]), &mtodeglon, &mtodeglat);
 	if (binsize <= 0.0)
 		binsize = (areabounds[1] - areabounds[0]) / 101 / mtodeglon;
-	dx = binsize * mtodeglon;
-	dy = binsize * mtodeglat;
-	nx = 1 + (int)((areabounds[1] - areabounds[0]) / dx);
-	ny = 1 + (int)((areabounds[3] - areabounds[2]) / dy);
+	double dx = binsize * mtodeglon;
+	double dy = binsize * mtodeglat;
+	const int nx = 1 + (int)((areabounds[1] - areabounds[0]) / dx);
+	const int ny = 1 + (int)((areabounds[3] - areabounds[2]) / dy);
 	if (nx > 1 && ny > 1) {
 		dx = (areabounds[1] - areabounds[0]) / (nx - 1);
 		dy = (areabounds[3] - areabounds[2]) / (ny - 1);
@@ -544,14 +475,15 @@ int main(int argc, char **argv) {
 	/* allocate grid arrays */
 	nsndg = 0;
 	nsndg_alloc = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, nx * ny * sizeof(int *), (void **)&gsndg, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, nx * ny * sizeof(int *), (void **)&gsndg, &error);
 	if (status == MB_SUCCESS)
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nx * ny * sizeof(int), (void **)&gsndgnum, &error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, nx * ny * sizeof(int), (void **)&gsndgnum, &error);
 	if (status == MB_SUCCESS)
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nx * ny * sizeof(int), (void **)&gsndgnum_alloc, &error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, nx * ny * sizeof(int), (void **)&gsndgnum_alloc, &error);
 
 	/* if error initializing memory then quit */
-	if (error != MB_ERROR_NO_ERROR) {
+	if (error != MB_ERROR_NO_ERROR || status != MB_SUCCESS) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -640,32 +572,80 @@ int main(int argc, char **argv) {
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
 	bool read_data;
+	char swathfile[MB_PATH_MAXLINE];
+	char swathfileread[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
+	double file_weight;
 
 	/* open file list */
 	if (read_datalist) {
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
-		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+		if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(error);
 		}
-		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
+		read_data = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+	} else {
+		// else copy single filename to be read
 		strcpy(swathfile, read_file);
 		read_data = true;
 	}
+
+	void *mbio_ptr = NULL;
+	double btime_d;
+	double etime_d;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+	char *beamflag;
+	char *beamflagorg;
+	int *detect;
+	double *bath;
+	double *amp;
+	double *bathlon;
+	double *bathlat;
+	double *ss;
+	double *sslon;
+	double *sslat;
+
+	/* save file control variables */
+	char esffile[MB_PATH_MAXLINE];
+	struct mb_esf_struct esf;
+	int files_tot = 0;
+
+	int kind;
+	int pingsread;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char comment[MB_COMMENT_MAXLINE];
+
+       	void *store_ptr = NULL;
+
+	int pingmultiplicity;
+	int pings_tot = 0;
+	int beams_tot = 0;
+	int beams_good_org_tot = 0;
+	int beams_flag_org_tot = 0;
+	int beams_null_org_tot = 0;
 
 	/* loop over all files to be read */
 	while (read_data) {
 
 		/* check format and get format flags */
+		int variable_beams;
+		int traveltime;
+		int beam_flagging;
 		if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n", format,
 			        message);
@@ -683,6 +663,7 @@ int main(int argc, char **argv) {
 		if ((status = mb_read_init(verbose, swathfileread, formatread, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 		                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
 		    MB_SUCCESS) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swathfileread);
@@ -711,28 +692,29 @@ int main(int argc, char **argv) {
 		sslon = NULL;
 		sslat = NULL;
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&detect, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&detect, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathlon, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathlon, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathlat, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathlat, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&sslon, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&sslon, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&sslat, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&sslat, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflagorg, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflagorg, &error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -742,11 +724,12 @@ int main(int argc, char **argv) {
 		/* update memory for files */
 		if (nfile >= nfile_alloc) {
 			nfile_alloc += FILEALLOCNUM;
-			status = mb_reallocd(verbose, __FILE__, __LINE__, nfile_alloc * sizeof(struct mbareaclean_file_struct),
+			status &= mb_reallocd(verbose, __FILE__, __LINE__, nfile_alloc * sizeof(struct mbareaclean_file_struct),
 			                     (void **)&files, &error);
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -772,18 +755,19 @@ int main(int argc, char **argv) {
 		files[nfile].sndg_countstart = nsndg;
 		files[nfile].beams_bath = beams_bath;
 		files[nfile].sndg = NULL;
-		status = mb_mallocd(verbose, __FILE__, __LINE__, files[nfile].nping_alloc * sizeof(double),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, files[nfile].nping_alloc * sizeof(double),
 		                    (void **)&(files[nfile].ping_time_d), &error);
 		if (status == MB_SUCCESS)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, files[nfile].nping_alloc * sizeof(int),
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, files[nfile].nping_alloc * sizeof(int),
 			                    (void **)&(files[nfile].pingmultiplicity), &error);
 		if (status == MB_SUCCESS)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, files[nfile].nping_alloc * sizeof(double),
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, files[nfile].nping_alloc * sizeof(double),
 			                    (void **)&(files[nfile].ping_altitude), &error);
 		if (status == MB_SUCCESS)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, files[nfile].nsndg_alloc * sizeof(struct mbareaclean_sndg_struct),
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, files[nfile].nsndg_alloc * sizeof(struct mbareaclean_sndg_struct),
 			                    (void **)&(files[nfile].sndg), &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -811,7 +795,7 @@ int main(int argc, char **argv) {
 
 			/* read next record */
 			error = MB_ERROR_NO_ERROR;
-			status = mb_read(verbose, mbio_ptr, &kind, &pingsread, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
+			status &= mb_read(verbose, mbio_ptr, &kind, &pingsread, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
 			                 &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathlon, bathlat,
 			                 ss, sslon, sslat, comment, &error);
 			if (verbose >= 2) {
@@ -825,15 +809,18 @@ int main(int argc, char **argv) {
 					beamflagorg[i] = beamflag[i];
 
 				/* get detections and ping multiplicity */
-				status = mb_get_store(verbose, mbio_ptr, &store_ptr, &error);
-				detect_status = mb_detects(verbose, mbio_ptr, store_ptr, &kind, &beams_bath, detect, &detect_error);
+				/* status = */ mb_get_store(verbose, mbio_ptr, &store_ptr, &error);
+				int detect_error;
+				const int detect_status = mb_detects(verbose, mbio_ptr, store_ptr, &kind, &beams_bath, detect, &detect_error);
 				if (detect_status != MB_SUCCESS) {
-					status = MB_SUCCESS;
+					// status = MB_SUCCESS;
 					for (int i = 0; i < beams_bath; i++) {
 						detect[i] = MB_DETECT_UNKNOWN;
 					}
 				}
-				sensorhead_status = mb_sensorhead(verbose, mbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
+				int sensorhead;
+				int sensorhead_error = MB_ERROR_NO_ERROR;
+				const int sensorhead_status = mb_sensorhead(verbose, mbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
 
 				/* allocate memory if necessary */
 				if (files[nfile - 1].nping >= files[nfile - 1].nping_alloc) {
@@ -844,9 +831,10 @@ int main(int argc, char **argv) {
 						status = mb_reallocd(verbose, __FILE__, __LINE__, files[nfile - 1].nping_alloc * sizeof(int),
 						                     (void **)&(files[nfile - 1].pingmultiplicity), &error);
 					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, files[nfile - 1].nping_alloc * sizeof(double),
+						/* status = */ mb_reallocd(verbose, __FILE__, __LINE__, files[nfile - 1].nping_alloc * sizeof(double),
 						                     (void **)&(files[nfile - 1].ping_altitude), &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -903,12 +891,12 @@ int main(int argc, char **argv) {
 					max_beam = beams_bath - min_beam;
 
 				/* now loop over the beams and store the soundings in the grid bins */
-				for (ib = 0; ib < beams_bath; ib++) {
+				for (int ib = 0; ib < beams_bath; ib++) {
 					if (beamflagorg[ib] != MB_FLAG_NULL) {
 						/* get bin for current beam */
-						ix = (bathlon[ib] - areabounds[0] - 0.5 * dx) / dx;
-						iy = (bathlat[ib] - areabounds[2] - 0.5 * dy) / dy;
-						kgrid = ix * ny + iy;
+						const int ix = (bathlon[ib] - areabounds[0] - 0.5 * dx) / dx;
+						const int iy = (bathlat[ib] - areabounds[2] - 0.5 * dy) / dy;
+						const int kgrid = ix * ny + iy;
 
 						/* add sounding */
 						if (ix >= 0 && ix < nx && iy >= 0 && iy < ny) {
@@ -918,6 +906,7 @@ int main(int argc, char **argv) {
 								                     files[nfile - 1].nsndg_alloc * sizeof(struct mbareaclean_sndg_struct),
 								                     (void **)&files[nfile - 1].sndg, &error);
 								if (error != MB_ERROR_NO_ERROR) {
+									char *message = NULL;
 									mb_error(verbose, error, &message);
 									fprintf(stderr, "\nMBIO Error allocating sounding arrays:\n%s\n", message);
 									fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -931,6 +920,7 @@ int main(int argc, char **argv) {
 								status = mb_reallocd(verbose, __FILE__, __LINE__, gsndgnum_alloc[kgrid] * sizeof(int),
 								                     (void **)&gsndg[kgrid], &error);
 								if (error != MB_ERROR_NO_ERROR) {
+									char *message = NULL;
 									mb_error(verbose, error, &message);
 									fprintf(stderr, "\nMBIO Error allocating sounding arrays:\n%s\n", message);
 									fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -985,7 +975,7 @@ int main(int argc, char **argv) {
 
 		/* check memory */
 		if (verbose >= 4)
-			status = mb_memory_list(verbose, &error);
+			status &= mb_memory_list(verbose, &error);
 
 		/* give the statistics */
 		if (verbose >= 0) {
@@ -995,7 +985,7 @@ int main(int argc, char **argv) {
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
-			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
+			if (/* status = */ mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error) == MB_SUCCESS)
 				read_data = true;
 			else
 				read_data = false;
@@ -1009,18 +999,29 @@ int main(int argc, char **argv) {
 	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
+
+	/* median filter parameters */
+	double *bindepths;
+	double threshold;
+
+	/* counting parameters */
+
 	/* loop over grid cells to find maximum number of soundings */
-	binnummax = 0;
-	for (ix = 0; ix < nx; ix++)
-		for (iy = 0; iy < ny; iy++) {
+	int binnummax = 0;
+	// double xx;
+	// double yy;
+	for (int ix = 0; ix < nx; ix++) {
+		for (int iy = 0; iy < ny; iy++) {
 			/* get cell id */
-			kgrid = ix * ny + iy;
-			xx = areabounds[0] + 0.5 * dx + ix * dx;
-			yy = areabounds[3] + 0.5 * dy + iy * dy;
+			const int kgrid = ix * ny + iy;
+			// xx = areabounds[0] + 0.5 * dx + ix * dx;
+			// yy = areabounds[3] + 0.5 * dy + iy * dy;
 			binnummax = MAX(binnummax, gsndgnum[kgrid]);
 		}
-	status = mb_mallocd(verbose, __FILE__, __LINE__, binnummax * sizeof(double), (void **)&(bindepths), &error);
+        }
+	/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, binnummax * sizeof(double), (void **)&(bindepths), &error);
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating sounding sorting array:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1030,15 +1031,15 @@ int main(int argc, char **argv) {
 	/* deal with median filter */
 	if (median_filter) {
 		/* loop over grid cells applying median filter test */
-		for (ix = 0; ix < nx; ix++)
-			for (iy = 0; iy < ny; iy++) {
+		for (int ix = 0; ix < nx; ix++)
+			for (int iy = 0; iy < ny; iy++) {
 				/* get cell id */
-				kgrid = ix * ny + iy;
-				xx = areabounds[0] + 0.5 * dx + ix * dx;
-				yy = areabounds[3] + 0.5 * dy + iy * dy;
+				const int kgrid = ix * ny + iy;
+				// xx = areabounds[0] + 0.5 * dx + ix * dx;
+				// yy = areabounds[3] + 0.5 * dy + iy * dy;
 
 				/* load up array */
-				binnum = 0;
+				int binnum = 0;
 				for (int i = 0; i < gsndgnum[kgrid]; i++) {
 					getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
 					if (mb_beam_ok(sndg->sndg_beamflag)) {
@@ -1082,16 +1083,16 @@ int main(int argc, char **argv) {
 	/* deal with standard deviation filter */
 	if (std_dev_filter) {
 		/* loop over grid cells applying std dev filter test */
-		for (ix = 0; ix < nx; ix++)
-			for (iy = 0; iy < ny; iy++) {
+		for (int ix = 0; ix < nx; ix++)
+			for (int iy = 0; iy < ny; iy++) {
 				/* get cell id */
-				kgrid = ix * ny + iy;
-				xx = areabounds[0] + 0.5 * dx + ix * dx;
-				yy = areabounds[3] + 0.5 * dy + iy * dy;
+				const int kgrid = ix * ny + iy;
+				const double xx = areabounds[0] + 0.5 * dx + ix * dx;
+				const double yy = areabounds[3] + 0.5 * dy + iy * dy;
 
 				/* get mean */
 				double mean = 0.0;
-				binnum = 0;
+				int binnum = 0;
 				for (int i = 0; i < gsndgnum[kgrid]; i++) {
 					getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
 					if (mb_beam_ok(sndg->sndg_beamflag)) {
@@ -1146,6 +1147,7 @@ int main(int argc, char **argv) {
 		for (int j = 0; j < files[i].nsndg; j++) {
 			sndg = &(files[i].sndg[j]);
 			if (sndg->sndg_beamflag != sndg->sndg_beamflag_org) {
+				int action = 0;
 				if (mb_beam_ok(sndg->sndg_beamflag)) {
 					action = MBP_EDIT_UNFLAG;
 				}
@@ -1167,8 +1169,8 @@ int main(int argc, char **argv) {
 		/* update mbprocess parameter file */
 		if (esffile_open) {
 			/* update mbprocess parameter file */
-			status = mb_pr_update_format(verbose, files[i].filelist, true, files[i].file_format, &error);
-			status = mb_pr_update_edit(verbose, files[i].filelist, MBP_EDIT_ON, esffile, &error);
+			status &= mb_pr_update_format(verbose, files[i].filelist, true, files[i].file_format, &error);
+			status &= mb_pr_update_edit(verbose, files[i].filelist, MBP_EDIT_ON, esffile, &error);
 		}
 	}
 
@@ -1186,7 +1188,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* free arrays */
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bindepths, &error);
 	for (int i = 0; i < nx * ny; i++)
 		if (gsndg[i] != NULL)
@@ -1203,12 +1204,11 @@ int main(int argc, char **argv) {
 	}
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&files, &error);
 
-	/* set program status */
-	status = MB_SUCCESS;
+	// status = MB_SUCCESS;
 
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);

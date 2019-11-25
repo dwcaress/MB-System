@@ -37,23 +37,24 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-#define NCHARMAX 256
+const int NCHARMAX = 256;
 
 /*--------------------------------------------------------------------*/
 
 static const char program_name[] = "MBauvnavusbl";
 static const char help_message[] =
-    "MBauvnavusbl reads a primary navigation file (usually from a submerged platform\n swath survey) and "
-    "also reads secondary navigation (e.g. USBL fixes).\n The program calculates position offsets between "
-    "the raw survey navigation\n and the secondary navigation every 3600 seconds (10 minutes), and then\n "
-    "linearly interpolates and applies this adjustment vector for each\n primary navigation position. The "
-    "adjusted navigation is output.";
+    "MBauvnavusbl reads a primary navigation file (usually from a submerged platform\n"
+    "swath survey) and also reads secondary navigation (e.g. USBL fixes).\n"
+    "The program calculates position offsets between the raw survey navigation\n"
+    "and the secondary navigation every 3600 seconds (10 minutes), and then\n"
+    "linearly interpolates and applies this adjustment vector for each\n"
+    "primary navigation position. The adjusted navigation is output.";
 static const char usage_message[] =
     "mbauvnavusbl -Inavfile -Ooutfile -Uusblfile [-Fnavformat -Llonflip -Musblformat -V -H ]";
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int status;
+	// int status;
 
 	/* get current default values - only interested in lonflip */
 	int lonflip;
@@ -65,18 +66,14 @@ int main(int argc, char **argv) {
 		int etime_i[7];
 		double speedmin;
 		double timegap;
-		status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i,
+		/* status = */ mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i,
                                      etime_i, &speedmin, &timegap);
 	}
 
 	/* Files and formats */
-	char ifile[MB_PATH_MAXLINE];
-	char ofile[MB_PATH_MAXLINE];
-	char ufile[MB_PATH_MAXLINE];
-	/* set default input and output */
-	strcpy(ifile, "stdin");
-	strcpy(ofile, "stdout");
-	strcpy(ufile, "\0");
+	char ifile[MB_PATH_MAXLINE] = "stdin";
+	char ofile[MB_PATH_MAXLINE] = "stdout";
+	char ufile[MB_PATH_MAXLINE] = "";
 	int navformat = 9;
 	int usblformat = 165;
 
@@ -113,11 +110,11 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", ifile);
+				sscanf(optarg, "%1023s", ifile);
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", ofile);
+				sscanf(optarg, "%1023s", ofile);
 				break;
 			case 'M':
 			case 'm':
@@ -125,7 +122,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'U':
 			case 'u':
-				sscanf(optarg, "%s", ufile);
+				sscanf(optarg, "%1023s", ufile);
 				break;
 			case '?':
 				errflg = true;
@@ -216,40 +213,34 @@ int main(int argc, char **argv) {
 	double loncoravg;
 	double latcoravg;
 
-	int nstime_i[7], nftime_i[7];
-	int ustime_i[7], uftime_i[7];
-
-	int year;
-	int jday;
-	double timetag;
-	double easting, northing;
-	double rov_altitude, rov_roll, rov_pitch;
-	int position_flag, heading_flag, altitude_flag, attitude_flag, pressure_flag;
-	double sec;
+	int nstime_i[7];
+	int nftime_i[7];
+	int ustime_i[7];
+	int uftime_i[7];
 
 	/* allocate space for the nav points */
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&ntime, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nlon, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nlat, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nheading, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nspeed, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nsonardepth, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nroll, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&npitch, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nheave, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&alon, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&alat, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&aheading, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&asonardepth, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&ttime, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&tlon, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&tlat, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&theading, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&tsonardepth, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&ntime, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nlon, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nlat, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nheading, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nspeed, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nsonardepth, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nroll, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&npitch, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nheave, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&alon, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&alat, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&aheading, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&asonardepth, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&ttime, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&tlon, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&tlat, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&theading, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&tsonardepth, &error);
 
 	/* if error initializing memory then quit */
-	char *message;
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -264,11 +255,13 @@ int main(int argc, char **argv) {
 		exit(MB_ERROR_OPEN_FAIL);
 	}
 	strncpy(buffer, "\0", sizeof(buffer));
-	int nget = 0;
+
+
 	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer) {
 		bool nav_ok = false;
+		double sec;
 
-		nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0], &time_i[1], &time_i[2],
+		int nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0], &time_i[1], &time_i[2],
 		              &time_i[3], &time_i[4], &sec, &ntime[nnav], &nlon[nnav], &nlat[nnav], &nheading[nnav], &nspeed[nnav],
 		              &nsonardepth[nnav], &nroll[nnav], &npitch[nnav], &nheave[nnav]);
 		if (nget >= 12)
@@ -331,14 +324,15 @@ int main(int argc, char **argv) {
 	fclose(fp);
 
 	/* allocate space for the nav points */
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nusbl * sizeof(double), (void **)&utime, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nusbl * sizeof(double), (void **)&ulon, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nusbl * sizeof(double), (void **)&ulat, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nusbl * sizeof(double), (void **)&uheading, &error);
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, nusbl * sizeof(double), (void **)&usonardepth, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nusbl * sizeof(double), (void **)&utime, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nusbl * sizeof(double), (void **)&ulon, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nusbl * sizeof(double), (void **)&ulat, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nusbl * sizeof(double), (void **)&uheading, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nusbl * sizeof(double), (void **)&usonardepth, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -355,24 +349,51 @@ int main(int argc, char **argv) {
 	strncpy(buffer, "\0", sizeof(buffer));
 	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer) {
 		bool nav_ok = false;
+		int nget = 0;
 
-		/* ignore comments */
 		if (buffer[0] == '#') {
-		}
-		else if (strchr(buffer, ',') != NULL) {
+			// Ignore comments
+		} else if (strchr(buffer, ',') != NULL) {
+			int year;
+			int jday;
+			double timetag;
+			double easting;
+			double northing;
+			double rov_altitude;
+			double rov_roll;
+			double rov_pitch;
+			int position_flag;
+			int heading_flag;
+			int altitude_flag;
+			int attitude_flag;
+			int pressure_flag;
 			nget = sscanf(buffer, "%d,%d,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%d,%d,%d,%d,%d", &year, &jday, &timetag,
 			              &utime[nusbl], &ulat[nusbl], &ulon[nusbl], &easting, &northing, &usonardepth[nusbl], &uheading[nusbl],
 			              &rov_altitude, &rov_pitch, &rov_roll, &position_flag, &pressure_flag, &heading_flag, &altitude_flag,
 			              &attitude_flag);
-		}
-		else {
+		} else {
+			int year;
+			int jday;
+			double timetag;
+			double easting;
+			double northing;
+			double rov_altitude;
+			double rov_roll;
+			double rov_pitch;
+			int position_flag;
+			int heading_flag;
+			int altitude_flag;
+			int attitude_flag;
+			int pressure_flag;
 			nget = sscanf(buffer, "%d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf,%d,%d,%d,%d,%d", &year, &jday, &timetag,
 			              &utime[nusbl], &ulat[nusbl], &ulon[nusbl], &easting, &northing, &usonardepth[nusbl], &uheading[nusbl],
 			              &rov_altitude, &rov_pitch, &rov_roll, &position_flag, &pressure_flag, &heading_flag, &altitude_flag,
 			              &attitude_flag);
 		}
-		if (nget == 18)
+
+		if (nget == 18) {
 			nav_ok = true;
+		}
 
 		/* make sure longitude is defined according to lonflip */
 		if (nav_ok) {
@@ -410,6 +431,7 @@ int main(int argc, char **argv) {
 		}
 		strncpy(buffer, "\0", sizeof(buffer));
 	}
+
 	fclose(fp);
 
 	/* check for nav */
@@ -520,11 +542,11 @@ int main(int argc, char **argv) {
 		        nspeed[i], nsonardepth[i], nroll[i], npitch[i], nheave[i]);
 		if (fputs(buffer, fp) == EOF) {
 			error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
+			// status = MB_FAILURE;
 		}
 		else {
 			error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
+			// status = MB_SUCCESS;
 		}
 	}
 	fclose(fp);
@@ -556,7 +578,7 @@ int main(int argc, char **argv) {
 
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		/* status = */ mb_memory_list(verbose, &error);
 
 	/* give the statistics */
 	if (verbose >= 1) {

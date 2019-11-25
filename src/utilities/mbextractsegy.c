@@ -33,211 +33,66 @@
 #include "mb_segy.h"
 #include "mb_status.h"
 
-#define MBES_ALLOC_NUM 128
-#define MBES_ROUTE_WAYPOINT_NONE 0
-#define MBES_ROUTE_WAYPOINT_SIMPLE 1
-#define MBES_ROUTE_WAYPOINT_TRANSIT 2
-#define MBES_ROUTE_WAYPOINT_STARTLINE 3
-#define MBES_ROUTE_WAYPOINT_ENDLINE 4
-#define MBES_ONLINE_THRESHOLD 15.0
-#define MBES_ONLINE_COUNT 30
-#define MBES_NUM_PLOT_MAX 50
-#define MBES_MAX_SWEEP 1.0
+const int MBES_ALLOC_NUM = 128;
+typedef enum {
+    MBES_ROUTE_WAYPOINT_NONE = 0,
+    MBES_ROUTE_WAYPOINT_SIMPLE = 1,
+    MBES_ROUTE_WAYPOINT_TRANSIT = 2,
+    MBES_ROUTE_WAYPOINT_STARTLINE = 3,
+    MBES_ROUTE_WAYPOINT_ENDLINE = 4,
+} waypoint_t;
+const double MBES_ONLINE_THRESHOLD = 15.0;
+const int MBES_ONLINE_COUNT = 30;
+const int MBES_NUM_PLOT_MAX = 50;
+const double MBES_MAX_SWEEP = 1.0;
 
 static const char program_name[] = "MBextractsegy";
 static const char help_message[] =
-    "MBextractsegy extracts subbottom profiler, center beam reflection,\nor seismic reflection data from "
-    "data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
+    "MBextractsegy extracts subbottom profiler, center beam reflection,\n"
+    "or seismic reflection data from data supported by MB-System and\n"
+    "rewrites it as a SEGY file in the form used by SIOSEIS.";
 static const char usage_message[] =
-    "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat \n\t-Ifile -Jxscale/yscale "
-    "-Lstartline/lineroot \n\t-Osegyfile -Qtimelistfile -Rroutefile \n\t-Ssampleformat -Zplotmax -H -V]";
+    "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat\n"
+    "    -Ifile -Jxscale/yscale -Lstartline/lineroot\n"
+    "    -Osegyfile -Qtimelistfile -Rroutefile\n"
+    "    -Ssampleformat -Zplotmax -H -V]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
-	mb_path read_file = "";
-	mb_path output_file = "";
-	bool output_file_set = false;
-	void *datalist = NULL;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight = 1.0;
 	int format;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
-	mb_path file = "";
-	mb_path dfile = "";
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	double timeshift = 0.0;
-
-	/* MBIO read values */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
-	int kind;
-	int time_i[7];
-	int time_j[5];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-	int icomment = 0;
-
-	/* segy data */
-	int sampleformat = MB_SEGY_SAMPLEFORMAT_ENVELOPE;
-	int samplesize = 0;
-	struct mb_segyasciiheader_struct segyasciiheader;
-	struct mb_segyfileheader_struct segyfileheader;
-	struct mb_segytraceheader_struct segytraceheader;
-	int segydata_alloc = 0;
-	float *segydata = NULL;
-	int buffer_alloc = 0;
-	char *buffer = NULL;
-
-	/* route and auto-line data */
-	mb_path timelist_file = "";
-	bool timelist_file_set = false;
-	int ntimepoint = 0;
-	int ntimepointalloc = 0;
-	double *routetime_d = NULL;
-	mb_path route_file = "";
-	bool route_file_set = false;
-	bool checkroutebearing = false;
-	mb_path lineroot = "";
-	int nroutepoint = 0;
-	int nroutepointalloc = 0;
-	double lon;
-	double lat;
-	double topo;
-	int waypoint;
-	double *routelon = NULL;
-	double *routelat = NULL;
-	double *routeheading = NULL;
-	int *routewaypoint = NULL;
-	double range = 0.0;
-	double rangethreshold = 25.0;
-	double rangelast = 0.0;
-	int activewaypoint = 0;
-	int startline = 1;
-	int linenumber = 0;
-
-	/* auto plotting */
-	FILE *sfp = NULL;
-	mb_path scriptfile = "";
-	double seafloordepthmin = -1.0;
-	double seafloordepthmax = -1.0;
-	double seafloordepthminplot[MBES_NUM_PLOT_MAX];
-	double seafloordepthmaxplot[MBES_NUM_PLOT_MAX];
-	double sweep;
-	double delay;
-	double startlon;
-	double startlat;
-	int startshot;
-	double endlon;
-	double endlat;
-	int endshot;
-	double linedistance;
-	double linebearing;
-	int nshot;
-	int nshotmax;
-	int nplot = 0;
-	double xscale = 0.01;
-	double yscale = 50.0;
-	double maxwidth = 30.0;
-	mb_path zbounds = "";
-	double zmax = 50;
-
-	mb_path command = "";
-	mb_path scale = "";
-	double mtodeglon, mtodeglat;
-	double lastlon;
-	double lastlat;
-	double lastheading;
-	double headingdiff;
-	double lastdistance;
-	int oktowrite;
-	double dx, dy;
-	FILE *fp = NULL;
-	char *result;
-	int nget;
-	int nread;
-	int nwrite;
-	int first;
-	int index;
-	double tracemin, tracemax, tracerms, tracelength;
-	double linetracemin, linetracemax, linetracelength, endofdata;
-	double draft, roll, pitch, heave;
-	int shellstatus;
-
-	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	/* set default input to datalist.mb-1 */
-	strcpy(read_file, "datalist.mb-1");
+	mb_path read_file = "datalist.mb-1";
 
-	/* set default lineroot to sbp */
-	strcpy(lineroot, "sbp");
+	mb_path lineroot = "sbp";
+	int startline = 1;
 
-	/* initialize output segy structures */
-	for (int j = 0; j < 40; j++)
-		for (int i = 0; i < 80; i++)
-			segyasciiheader.line[j][i] = 0;
-	segyfileheader.jobid = 0;
-	segyfileheader.line = 0;
-	segyfileheader.reel = 0;
-	segyfileheader.channels = 0;
-	segyfileheader.aux_channels = 0;
-	segyfileheader.sample_interval = 0;
-	segyfileheader.sample_interval_org = 0;
-	segyfileheader.number_samples = 0;
-	segyfileheader.number_samples_org = 0;
-	segyfileheader.format = 5;
-	segyfileheader.cdp_fold = 0;
-	segyfileheader.trace_sort = 0;
-	segyfileheader.vertical_sum = 0;
-	segyfileheader.sweep_start = 0;
-	segyfileheader.sweep_end = 0;
-	segyfileheader.sweep_length = 0;
-	segyfileheader.sweep_type = 0;
-	segyfileheader.sweep_trace = 0;
-	segyfileheader.sweep_taper_start = 0;
-	segyfileheader.sweep_taper_end = 0;
-	segyfileheader.sweep_taper = 0;
-	segyfileheader.correlated = 0;
-	segyfileheader.binary_gain = 0;
-	segyfileheader.amplitude = 0;
-	segyfileheader.units = 0;
-	segyfileheader.impulse_polarity = 0;
-	segyfileheader.domain = 0;
-	for (int i = 0; i < 338; i++)
-		segyfileheader.extra[i] = 0;
+	int sampleformat = MB_SEGY_SAMPLEFORMAT_ENVELOPE;
 
-	/* process argument list */
+	mb_path route_file = "";
+	bool route_file_set = false;
+	double timeshift = 0.0;
+	double maxwidth = 30.0;
+	double xscale = 0.01;
+	double yscale = 50.0;
+	double zmax = 50;
+	bool checkroutebearing = false;
+	double rangethreshold = 25.0;
+	mb_path timelist_file = "";
+	bool timelist_file_set = false;
+	mb_path output_file = "";
+	bool output_file_set = false;
+	waypoint_t waypoint;
+
 	{
 		bool errflg = false;
 		int c;
@@ -269,7 +124,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'J':
 			case 'j':
@@ -277,7 +132,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'L':
 			case 'l':
-				sscanf(optarg, "%d/%s", &startline, lineroot);
+				sscanf(optarg, "%d/%1023s", &startline, lineroot);
 				break;
 			case 'M':
 			case 'm':
@@ -285,17 +140,17 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", output_file);
+				sscanf(optarg, "%1023s", output_file);
 				output_file_set = true;
 				break;
 			case 'Q':
 			case 'q':
-				sscanf(optarg, "%s", timelist_file);
+				sscanf(optarg, "%1023s", timelist_file);
 				timelist_file_set = true;
 				break;
 			case 'R':
 			case 'r':
-				sscanf(optarg, "%s", route_file);
+				sscanf(optarg, "%1023s", route_file);
 				route_file_set = true;
 				break;
 			case 'S':
@@ -361,7 +216,6 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2       timegap:           %f\n", timegap);
 			fprintf(stderr, "dbg2       sampleformat:      %d\n", sampleformat);
 			fprintf(stderr, "dbg2       timeshift:         %f\n", timeshift);
-			fprintf(stderr, "dbg2       file:              %s\n", file);
 			fprintf(stderr, "dbg2       timelist_file_set: %d\n", timelist_file_set);
 			fprintf(stderr, "dbg2       timelist_file:     %s\n", timelist_file);
 			fprintf(stderr, "dbg2       route_file_set:    %d\n", route_file_set);
@@ -379,48 +233,150 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
 
+	void *datalist = NULL;
+	double file_weight = 1.0;
+	double btime_d;
+	double etime_d;
+	mb_path file = "";
+	mb_path dfile = "";
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+
+	/* MBIO read values */
+	void *mbio_ptr = NULL;
+	void *store_ptr = NULL;
+	int kind;
+	int time_i[7];
+	int time_j[5];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	char comment[MB_COMMENT_MAXLINE];
+	int icomment = 0;
+
+	/* segy data */
+	int samplesize = 0;
+	struct mb_segytraceheader_struct segytraceheader;
+	int segydata_alloc = 0;
+	float *segydata = NULL;
+	int buffer_alloc = 0;
+	char *buffer = NULL;
+
+	/* route and auto-line data */
+	int ntimepoint = 0;
+	double *routetime_d = NULL;
+	int nroutepoint = 0;
+	int nroutepointalloc = 0;
+	double lon;
+	double lat;
+	double topo;
+	double *routelon = NULL;
+	double *routelat = NULL;
+	double *routeheading = NULL;
+	int *routewaypoint = NULL;
+	double range = 0.0;
+	double rangelast = 0.0;
+	int activewaypoint = 0;
+
+	/* auto plotting */
+	FILE *sfp = NULL;
+	mb_path scriptfile = "";
+	double seafloordepthmin = -1.0;
+	double seafloordepthmax = -1.0;
+	double seafloordepthminplot[MBES_NUM_PLOT_MAX];
+	double seafloordepthmaxplot[MBES_NUM_PLOT_MAX];
+	double sweep;
+	double delay;
+	double startlon;
+	double startlat;
+	int startshot;
+	double endlon;
+	double endlat;
+	int endshot;
+	double linedistance;
+	double linebearing;
+	int nplot = 0;
+	mb_path zbounds = "";
+
+	mb_path command = "";
+	mb_path scale = "";
+	double mtodeglon, mtodeglat;
+	double lastlon;
+	double lastlat;
+	double lastheading;
+	double headingdiff;
+	double lastdistance;
+	int oktowrite;
+	FILE *fp = NULL;
+	char *result;
+	int nread;
+	int nwrite;
+	double tracemin, tracemax, tracerms, tracelength;
+	double linetracemin, linetracemax, linetracelength, endofdata;
+	double draft, roll, pitch, heave;
+
 	/* set starting line number */
-	linenumber = startline;
+	int linenumber = startline;
 
 	/* set maximum number of shots per plot */
-	nshotmax = (int)(maxwidth / xscale);
+	int nshotmax = (int)(maxwidth / xscale);
 
-	bool rawroutefile = false;
-	int rangeok;
+	// bool rawroutefile = false;
+	bool rangeok;
+	int error = MB_ERROR_NO_ERROR;
 
 	/* if specified read route time list file */
 	if (timelist_file_set) {
 		/* open the input file */
 		if ((fp = fopen(timelist_file, "r")) == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
-			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open time list file <%s> for reading\n", timelist_file);
 			exit(status);
 		}
-		rawroutefile = false;
+		// rawroutefile = false;
+		int ntimepointalloc = 0;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] != '#') {
-				int i;
-				nget = sscanf(comment, "%d %d %lf %lf %lf %lf", &i, &waypoint, &lon, &lat, &heading, &time_d);
+				{
+					int i;  // TODO(schwehr): Use a more informative variable name.
+					int tmp;
+					/* const int nget = */
+					sscanf(comment, "%d %d %lf %lf %lf %lf", &i, &tmp, &lon, &lat, &heading, &time_d);
+					waypoint = (waypoint_t)tmp;  // TODO(schwehr): Range check
+				}
 
 				/* if good data check for need to allocate more space */
 				if (ntimepoint + 1 > ntimepointalloc) {
 					ntimepointalloc += MBES_ALLOC_NUM;
-					status =
+					int reallocd_status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routelon, &error);
-					status =
+					reallocd_status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routelat, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routeheading,
+					reallocd_status &= mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routeheading,
 					                     &error);
-					status =
+					reallocd_status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(int), (void **)&routewaypoint, &error);
-					status =
+					reallocd_status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routetime_d, &error);
-					if (status != MB_SUCCESS) {
+					if (reallocd_status != MB_SUCCESS) {
 						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
@@ -475,7 +431,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
 			exit(status);
 		}
-		rawroutefile = false;
+		bool rawroutefile = false;  // TODO(schwehr): Explain how this flag works.  Suspicious
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] == '#') {
 				if (strncmp(comment, "## Route File Version", 21) == 0) {
@@ -483,7 +439,9 @@ int main(int argc, char **argv) {
 				}
 			}
 			else {
-				nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint, &heading);
+				int waypoint_tmp;
+				const int nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint_tmp, &heading);
+				waypoint = (waypoint_t)waypoint_tmp;  // TODO(schwehr): Range check
 				if (comment[0] == '#') {
 					fprintf(stderr, "buffer:%s", comment);
 					if (strncmp(comment, "## Route File Version", 21) == 0) {
@@ -500,15 +458,15 @@ int main(int argc, char **argv) {
 				/* if good data check for need to allocate more space */
 				if (point_ok && nroutepoint + 1 > nroutepointalloc) {
 					nroutepointalloc += MBES_ALLOC_NUM;
-					status =
+					int reallocd_status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
-					status =
+					reallocd_status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelat, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routeheading,
+					reallocd_status &= mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routeheading,
 					                     &error);
-					status =
+					reallocd_status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int), (void **)&routewaypoint, &error);
-					if (status != MB_SUCCESS) {
+					if (reallocd_status != MB_SUCCESS) {
 						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
@@ -575,18 +533,15 @@ int main(int argc, char **argv) {
 
 	/* open file list */
 	if (read_datalist) {
-		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
+		read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+	} else {
+		/* else copy single filename to be read */
 		strcpy(file, read_file);
 		read_data = true;
 	}
@@ -608,15 +563,52 @@ int main(int argc, char **argv) {
 		exit(status);
 	}
 
+	struct mb_segyasciiheader_struct segyasciiheader;
+	for (int j = 0; j < 40; j++)
+		for (int i = 0; i < 80; i++)
+			segyasciiheader.line[j][i] = 0;
+
+	struct mb_segyfileheader_struct segyfileheader;
+	segyfileheader.jobid = 0;
+	segyfileheader.line = 0;
+	segyfileheader.reel = 0;
+	segyfileheader.channels = 0;
+	segyfileheader.aux_channels = 0;
+	segyfileheader.sample_interval = 0;
+	segyfileheader.sample_interval_org = 0;
+	segyfileheader.number_samples = 0;
+	segyfileheader.number_samples_org = 0;
+	segyfileheader.format = 5;
+	segyfileheader.cdp_fold = 0;
+	segyfileheader.trace_sort = 0;
+	segyfileheader.vertical_sum = 0;
+	segyfileheader.sweep_start = 0;
+	segyfileheader.sweep_end = 0;
+	segyfileheader.sweep_length = 0;
+	segyfileheader.sweep_type = 0;
+	segyfileheader.sweep_trace = 0;
+	segyfileheader.sweep_taper_start = 0;
+	segyfileheader.sweep_taper_end = 0;
+	segyfileheader.sweep_taper = 0;
+	segyfileheader.correlated = 0;
+	segyfileheader.binary_gain = 0;
+	segyfileheader.amplitude = 0;
+	segyfileheader.units = 0;
+	segyfileheader.impulse_polarity = 0;
+	segyfileheader.domain = 0;
+	for (int i = 0; i < 338; i++)
+		segyfileheader.extra[i] = 0;
+
 	bool recalculatesweep = false;
 	bool linechange;
+	int index;  // TODO(schwehr: Localize
 
 	/* loop over all files to be read */
 	while (read_data) {
 
 		/* initialize reading the swath file */
-		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
-		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+		if (mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
+		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
 			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
@@ -627,23 +619,23 @@ int main(int argc, char **argv) {
 
 		/* allocate memory for data arrays */
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+			/* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+			/* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+			/* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status =
+			/* status &= */
 			    mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status =
+			/* status &= */
 			    mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+			/* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
+			/* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
+			/* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
@@ -656,7 +648,7 @@ int main(int argc, char **argv) {
 
 		/* read and print data */
 		nread = 0;
-		first = true;
+		// bool first = true;
 		lastlon = 0.0;
 		lastlat = 0.0;
 		lastheading = 0.0;
@@ -697,18 +689,18 @@ int main(int argc, char **argv) {
 
 				/* to set lines check survey data time against time list */
 				if (ntimepoint > 1) {
-					dx = (navlon - routelon[activewaypoint]) / mtodeglon;
-					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
+					const double dx = (navlon - routelon[activewaypoint]) / mtodeglon;
+					const double dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 					range = sqrt(dx * dx + dy * dy);
-					if (time_d >= routetime_d[activewaypoint] && activewaypoint < ntimepoint) {
+					if (activewaypoint < ntimepoint && time_d >= routetime_d[activewaypoint]) {
 						linechange = true;
 					}
 				}
 
 				/* else to set lines check survey data position against waypoints */
 				else if (nroutepoint > 1 && navlon != 0.0 && navlat != 0.0) {
-					dx = (navlon - routelon[activewaypoint]) / mtodeglon;
-					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
+					const double dx = (navlon - routelon[activewaypoint]) / mtodeglon;
+					const double dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 					range = sqrt(dx * dx + dy * dy);
 					if (range < rangethreshold)
 						rangeok = true;
@@ -732,11 +724,12 @@ int main(int argc, char **argv) {
 						/* use mbsegyinfo to generate a sinf file */
 						sprintf(command, "mbsegyinfo -I %s -O", output_file);
 						fprintf(stderr, "Executing: %s\n", command);
-						shellstatus = system(command);
+						/* const int shellstatus = */ system(command);
+						// TODO(schwehr): Check the shellstatus
 
 						/* get bearing and plot scale */
-						dx = (endlon - startlon) / mtodeglon;
-						dy = (endlat - startlat) / mtodeglat;
+						const double dx = (endlon - startlon) / mtodeglon;
+						const double dy = (endlat - startlat) / mtodeglat;
 						linedistance = sqrt(dx * dx + dy * dy);
 						linebearing = RTD * atan2(dx, dy);
 						if (linebearing < 0.0)
@@ -749,7 +742,7 @@ int main(int argc, char **argv) {
 						/* output commands to first cut plotting script file */
 						/* The maximum useful plot length is about nshotmax shots, so
 						    we break longer files up into multiple plots */
-						nshot = endshot - startshot + 1;
+						// int nshot = endshot - startshot + 1;
 						nplot = nwrite / nshotmax;
 						if (nwrite % nshotmax > 0)
 							nplot++;
@@ -829,9 +822,9 @@ int main(int argc, char **argv) {
 
 					/* increment active waypoint */
 					activewaypoint++;
-				}
-
-				if (linechange) {
+				// TODO(schwehr): Is there some reason there was a second if needed here?
+				// }
+				// if (linechange) {
 					mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
 					rangelast = 1000 * rangethreshold;
 					seafloordepthmin = -1.0;
@@ -1245,7 +1238,7 @@ int main(int argc, char **argv) {
 						mb_put_binary_float(false, segytraceheader.pitch, (void *)&buffer[index]);
 						index += 4;
 						mb_put_binary_float(false, segytraceheader.heading, (void *)&buffer[index]);
-						index += 4;
+						// index += 4;
 
 						/* write out segy header */
 						if (fwrite(buffer, 1, MB_SEGY_TRACEHEADER_LENGTH, fp) != MB_SEGY_TRACEHEADER_LENGTH) {
@@ -1326,11 +1319,12 @@ int main(int argc, char **argv) {
 				/* use mbsegyinfo to generate a sinf file */
 				sprintf(command, "mbsegyinfo -I %s -O", output_file);
 				fprintf(stderr, "Executing: %s\n", command);
-				shellstatus = system(command);
+				/* const int shellstatus = */ system(command);
+				// TODO(schwehr): Check the shellstatus
 
 				/* get bearing and plot scale */
-				dx = (endlon - startlon) / mtodeglon;
-				dy = (endlat - startlat) / mtodeglat;
+				const double dx = (endlon - startlon) / mtodeglon;
+				const double dy = (endlat - startlat) / mtodeglat;
 				linedistance = sqrt(dx * dx + dy * dy);
 				if (linebearing < 0.0)
 					linebearing += 360.0;
@@ -1342,7 +1336,7 @@ int main(int argc, char **argv) {
 				/* output commands to first cut plotting script file */
 				/* The maximum useful plot length is about nshotmax shots, so
 				    we break longer files up into multiple plots */
-				nshot = endshot - startshot + 1;
+				// const int nshot = endshot - startshot + 1;
 				nplot = nwrite / nshotmax;
 				if (nwrite % nshotmax > 0)
 					nplot++;
@@ -1436,19 +1430,20 @@ int main(int argc, char **argv) {
 	/* close plotting script file */
 	fclose(sfp);
 	sprintf(command, "chmod +x %s", scriptfile);
-	shellstatus = system(command);
+	/* const int shellstatus = */ system(command);
+	// TODO(schwehr): Check the shellstatus
 
 	/* deallocate route arrays */
 	if (route_file_set) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
 	}
 
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);

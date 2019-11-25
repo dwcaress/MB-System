@@ -23,6 +23,10 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
 
+- Version 5.7.6beta19    November 22, 2019
+- Version 5.7.6beta18    November 21, 2019
+- Version 5.7.6beta17    November 15, 2019
+- Version 5.7.6beta16    October 29, 2019
 - Version 5.7.6beta15    October 21, 2019
 - Version 5.7.6beta14    October 8, 2019
 - Version 5.7.6beta12    September 20, 2019
@@ -331,6 +335,60 @@ announced releases.
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 
 -------------------------------------------------------------------------------
+
+-----> 5.7.6beta19 (November 22, 2019)
+
+Mbprocess: Attempting to fix processing of format 71 files within an mbnavadjust
+project.
+
+-----> 5.7.6beta18 (November 21, 2019)
+
+Everything: Now fully compatible with PROJ 6.X. The configure script will detect
+the presence or absence of PROJ 6 or later - if the PROJ installation predates
+PROJ 6 then the old header files and API are used. PROJ 6 and later include a
+comprehensive database of coordinate reference systems (e.g. projected coordinate
+systems and/or datums), making the projected coordinate system list kept in the
+file src/share/Projections.dat unnecessary. For now this file will continue to
+be part of the MB-System distribution to support installation with obsolete
+versions of PROJ.
+
+mbtrnpp: Removed some unnecessary test data and code from the src/mbtrnav/gctp/
+directory.
+
+mbtrnpp: Fixed a number for formatting and type issues hampering building the
+TRN code on MacOs.
+
+-----> 5.7.6beta17 (November 15, 2019)
+
+MBeditviz: Added option to display 3D soundings colored according to the map's
+coloring (including selected colortabel and any histogram equalization).
+
+MBeditviz: Added GUI elements to support multiple modes of gridding.
+
+Mbm_route2mission: Modified to output waypoint_bottom behaviors with the
+current suite of options specified.
+
+Format 72 (MBF_MBARIMB1): Fixed handling of heading (degrees not radians).
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices. Current changes include replacing MB_YES/MB_NO with boolean
+true and false, and changing the type of the associated variables from int to
+bool.
+
+mbtrnpp: Many changes by Kent Headley to this in src/mbtrnutils and supporting
+source directories src/mbtrn and src/mbtrnav.
+
+-----> 5.7.6beta16 (October 29, 2019)
+
+MBnavadjust: Fixed bug in calculating the range of contour values and the size
+of the memory allocation for contours.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices. Current changes include replacing MB_YES/MB_NO with boolean
+true and false, and changing the type of the associated variables from int to
+bool.
 
 -----> 5.7.6beta15 (October 21, 2019)
 

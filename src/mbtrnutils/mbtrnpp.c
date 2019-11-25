@@ -870,7 +870,6 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
                       char *shost = strtok(NULL,":");
                       char *sport = strtok(NULL,":");
 
-
                       if(NULL!=shost){
                           trnusvr_host = strdup(shost);
                       }
@@ -1631,7 +1630,6 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
         n_pings_read++;
         n_soundings_read += ping[idataread].beams_bath;
 
-
           // apply transmit gain thresholding
           double transmit_gain;
           double pulse_length;
@@ -1869,10 +1867,8 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
 
                 MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
 
-
                 // do MB1 processing/output
                 mbtrnpp_process_mb1(output_buffer, mb1_size, trn_cfg);
-
 
                 MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
 
@@ -1973,6 +1969,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFAILURE]);
       }
       MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_POST_XT], mtime_dtime());
+
     } // while(!done) [main loop]
 
     /* close the files */
@@ -2600,7 +2597,6 @@ int mbtrnpp_init_debug(int verbose) {
     mlog_tprintf(mbtrnpp_mlog_id, "cmdline [%s]\n", g_cmd_line);
     mlog_tprintf(mbtrnpp_mlog_id, "r7kr v[%s] build[%s]\n", R7KR_VERSION_STR, LIBMFRAME_BUILD);
 
-
       trn_ulog_path = (char *)malloc(512);
       sprintf(trn_ulog_path, "%s//%s-%s%s", g_log_dir, TRN_ULOG_NAME, session_date, MBTRNPP_LOG_EXT);
       trn_ulog_id = mlog_get_instance(trn_ulog_path, &trn_ulog_conf, TRN_ULOG_NAME);
@@ -2659,13 +2655,11 @@ int mbtrnpp_trn_pub_ostream(trn_update_t *update,
 {
     int retval=-1;
 
-
     if(NULL!=update->mse_dat && NULL!=update->pt_dat && NULL!=update->mle_dat){
         char str[256]={0};
         fprintf(stream,"\nTRN Update:\n%s", mbtrnpp_trn_updatestr(str,256,update,0));
         retval=0;
     }
-
 
     return retval;
 }
@@ -2674,15 +2668,12 @@ int mbtrnpp_trn_pub_odebug(trn_update_t *update)
 {
     int retval=-1;
 
-
     if(NULL!=update->mse_dat && NULL!=update->pt_dat && NULL!=update->mle_dat){
         char str[256]={0};
-
 
         PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V1,(stderr,"\nTRN Update:\n%s", mbtrnpp_trn_updatestr(str,256,update,0)));
         retval=0;
     }
-
 
     return retval;
 }
@@ -2731,6 +2722,7 @@ int mbtrnpp_trn_pub_olog(trn_update_t *update,
                          sqrt(update->mse_dat->covariance[2]),
                          sqrt(update->mse_dat->covariance[5]));
         mlog_tprintf(log_id,"trn_reinit_flag,%d\n",update->reinit_count);
+
     }
 
     return retval;
@@ -2881,7 +2873,6 @@ int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, bool verbose)
                                  trnif_msg_handle_trnu,
                                  trnif_msg_pub_trnu);
 
-
         if(NULL!=svr){
             *psvr = svr;
             //            netif_set_reqres_res(svr,trn);
@@ -2939,7 +2930,6 @@ int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, pt_cdata_t **pt_
 int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
 {
     int retval = -1;
-
 
     if(NULL!=pstate && NULL!=cfg){
         // publish to selected outputs
@@ -3010,6 +3000,7 @@ int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **
 
 /*--------------------------------------------------------------------*/
 
+//int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 {
     int retval=-1;
@@ -3366,7 +3357,6 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
               fprintf(stderr,"mbtrnpp: input socket reconnect failed status[%s]\n",r7kr_strstate(reader->state));
               mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket reconnect failed status[%s]\n",r7kr_strstate(reader->state));
               MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBCON]);
-
 
               struct timespec twait={0},trem={0};
               twait.tv_sec=5;

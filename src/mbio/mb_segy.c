@@ -17,11 +17,10 @@
  *
  * Author:	D. W. Caress
  * Date:	May 25, 2004
- *
- *
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

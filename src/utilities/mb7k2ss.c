@@ -19,8 +19,6 @@
  * Author:	D. W. Caress
  * Date:	August 15, 2007
  *              R/V Atlantis, Axial Seamount
- *
- *
  */
 
 #include <getopt.h>
@@ -39,39 +37,51 @@
 #include "mbsys_ldeoih.h"
 #include "mbsys_reson7k.h"
 
-#define MB7K2SS_SS_FLAT_BOTTOM 0
-#define MB7K2SS_SS_3D_BOTTOM 1
-#define MB7K2SS_SSDIMENSION 4001
-#define MB7K2SS_SSLOW 1
-#define MB7K2SS_SSHIGH 2
+typedef enum {
+    MB7K2SS_SS_FLAT_BOTTOM = 0,
+    MB7K2SS_SS_3D_BOTTOM = 1,
+} layout_t;
+const int MB7K2SS_SSDIMENSION = 4001;
+typedef enum {
+    MB7K2SS_SSLOW = 1,
+    MB7K2SS_SSHIGH = 2,
+} extract_t;
 
-#define MB7K2SS_BOTTOMPICK_NONE 0
-#define MB7K2SS_BOTTOMPICK_BATHYMETRY 1
-#define MB7K2SS_BOTTOMPICK_ALTITUDE 2
-#define MB7K2SS_BOTTOMPICK_ARRIVAL 3
-#define MB7K2SS_BOTTOMPICK_3DBATHY 4
+typedef enum {
+    MB7K2SS_BOTTOMPICK_NONE = 0,
+    MB7K2SS_BOTTOMPICK_BATHYMETRY = 1,
+    MB7K2SS_BOTTOMPICK_ALTITUDE = 2,
+    MB7K2SS_BOTTOMPICK_ARRIVAL = 3,
+    MB7K2SS_BOTTOMPICK_3DBATHY = 4,
+} bottompick_t;
 
-#define MB7K2SS_SSGAIN_OFF 0
-#define MB7K2SS_SSGAIN_TVG_1OVERR 1
+typedef enum {
+    MB7K2SS_SSGAIN_OFF = 0,
+    MB7K2SS_SSGAIN_TVG_1OVERR = 1,
+} ssgain_t;
 
-#define MB7K2SS_ALLOC_NUM 128
-#define MB7K2SS_ALLOC_CHUNK 1024
+const int MB7K2SS_ALLOC_NUM = 128;
+const int MB7K2SS_ALLOC_CHUNK = 1024;
 
-#define MB7K2SS_ROUTE_WAYPOINT_NONE 0
-#define MB7K2SS_ROUTE_WAYPOINT_SIMPLE 1
-#define MB7K2SS_ROUTE_WAYPOINT_TRANSIT 2
-#define MB7K2SS_ROUTE_WAYPOINT_STARTLINE 3
-#define MB7K2SS_ROUTE_WAYPOINT_ENDLINE 4
-#define MB7K2SS_ONLINE_THRESHOLD 15.0
-#define MB7K2SS_ONLINE_COUNT 30
+typedef enum {
+    MB7K2SS_ROUTE_WAYPOINT_NONE = 0,
+    MB7K2SS_ROUTE_WAYPOINT_SIMPLE = 1,
+    MB7K2SS_ROUTE_WAYPOINT_TRANSIT = 2,
+    MB7K2SS_ROUTE_WAYPOINT_STARTLINE = 3,
+    MB7K2SS_ROUTE_WAYPOINT_ENDLINE = 4,
+} waypoint_t;
 
-#define MB7K2SS_NUM_ANGLES 171
-#define MB7K2SS_ANGLE_MAX 85.0
+const double MB7K2SS_ONLINE_THRESHOLD = 15.0;
+const int MB7K2SS_ONLINE_COUNT = 30;
+
+const int MB7K2SS_NUM_ANGLES = 171;
+const double MB7K2SS_ANGLE_MAX = 85.0;
 
 static const char program_name[] = "mb7k2ss";
 static const char help_message[] =
-    "mb7k2ss extracts sidescan sonar data from Reson 7k format data, \nbins and lays the sidescan onto the "
-    "seafloor, and outputs files \nin the MBF_MBLDEOIH formst (MBIO format id 71).\n";
+    "mb7k2ss extracts sidescan sonar data from Reson 7k format data,\n"
+    "bins and lays the sidescan onto the seafloor, and outputs files \n"
+    "in the MBF_MBLDEOIH formst (MBIO format id 71).\n";
 static const char usage_message[] =
     "mb7k2ss [-Ifile -Atype -Bmode[/threshold] -C -D -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile "
     "-Ttopogridfile -X -H -V]";
@@ -133,8 +143,17 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int verbose = 0;
+	int format = 0;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
 	int error = MB_ERROR_NO_ERROR;
 
 	bool read_datalist = false;  // TODO(schwehr): Probable bug with this var.
@@ -142,18 +161,9 @@ int main(int argc, char **argv) {
 	mb_path current_output_file;
 	bool new_output_file = true;
 	bool output_file_set = false;
-	int look_processed = MB_DATALIST_LOOK_YES;
 	double file_weight;
-	int format = 0;
-	int pings;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
 	double btime_d;
 	double etime_d;
-	double speedmin;
-	double timegap;
 	mb_path file;
 	mb_path dfile;
 	int beams_bath;
@@ -163,7 +173,6 @@ int main(int argc, char **argv) {
 	int startline = 1;
 	mb_path lineroot = "sidescan";
 
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	mb_path read_file = "datalist.mb-1";
@@ -171,19 +180,19 @@ int main(int argc, char **argv) {
 	int mode;
 
 	/* extract modes */
-	int extract_type = MB7K2SS_SSLOW;
+	extract_t  extract_type = MB7K2SS_SSLOW;
 	int target_kind = MB_DATA_SIDESCAN2;
 	bool print_comments = false;
 
 	/* bottompick mode */
-	int bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
+	bottompick_t bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
 	double bottompickthreshold = 0.4;
 
 	/* sidescan interpolation scale */
 	int interpbins = 0;
 
 	/* sidescan gain mode */
-	int gainmode = MB7K2SS_SSGAIN_OFF;
+	ssgain_t gainmode = MB7K2SS_SSGAIN_OFF;  // TODO(schwehr): Not used.
 	double gainfactor = 1.0;
 
 	bool checkroutebearing = false;
@@ -193,7 +202,7 @@ int main(int argc, char **argv) {
 	bool route_file_set = false;
 	int smooth = 0;
 	mb_path topogridfile;
-	int sslayoutmode = MB7K2SS_SS_FLAT_BOTTOM;
+	layout_t sslayoutmode = MB7K2SS_SS_FLAT_BOTTOM;
 	double rangethreshold = 50.0;
 	bool swath_width_set = false;
 	double swath_width = -1.0;
@@ -240,7 +249,9 @@ int main(int argc, char **argv) {
 			case 'B':
 			case 'b':
 			{
-				const int n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
+				int tmp;
+				const int n = sscanf(optarg, "%d/%lf", &tmp, &bottompickthreshold);
+				bottompickmode = (bottompick_t)tmp;
 				if (n == 0)
 					bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
 				else if (n == 1 && bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL)
@@ -261,15 +272,19 @@ int main(int argc, char **argv) {
 				break;
 			case 'G':
 			case 'g':
-				sscanf(optarg, "%d/%lf", &gainmode, &gainfactor);
+			{
+				int tmp;
+				sscanf(optarg, "%d/%lf", &tmp, &gainfactor);
+				gainmode = (ssgain_t)tmp;
 				break;
+			}
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'L':
 			case 'l':
-				sscanf(optarg, "%d/%s", &startline, lineroot);
+				sscanf(optarg, "%d/%1023s", &startline, lineroot);
 				break;
 			case 'M':
 			case 'm':
@@ -277,17 +292,17 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", output_file);
+				sscanf(optarg, "%1023s", output_file);
 				output_file_set = true;
 				break;
 			case 'Q':
 			case 'q':
-				sscanf(optarg, "%s", timelist_file);
+				sscanf(optarg, "%1023s", timelist_file);
 				timelist_file_set = true;
 				break;
 			case 'R':
 			case 'r':
-				sscanf(optarg, "%s", route_file);
+				sscanf(optarg, "%1023s", route_file);
 				route_file_set = true;
 				break;
 			case 'S':
@@ -296,7 +311,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'T':
 			case 't':
-				sscanf(optarg, "%s", topogridfile);
+				sscanf(optarg, "%1023s", topogridfile);
 				sslayoutmode = MB7K2SS_SS_3D_BOTTOM;
 				break;
 			case 'U':
@@ -387,161 +402,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* topography parameters */
-	void *topogrid_ptr = NULL;
-
-	/* MBIO read values */
-	void *imbio_ptr = NULL;
-	struct mb_io_struct *imb_io_ptr = NULL;
-	void *istore_ptr = NULL;
-	struct mbsys_reson7k_struct *istore = NULL;
-	void *ombio_ptr = NULL;
-	struct mb_io_struct *omb_io_ptr = NULL;
-	void *ostore_ptr = NULL;
-	struct mbsys_ldeoih_struct *ostore = NULL;
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	double roll;
-	double pitch;
-	double heave;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	double *ttimes = NULL;
-	double *angles = NULL;
-	double *angles_forward = NULL;
-	double *angles_null = NULL;
-	double *bheave = NULL;
-	double *alongtrack_offset = NULL;
-	double draft;
-	double ssv;
-	double ssv_use = 1500.0;
-
-	char comment[MB_COMMENT_MAXLINE];
-	int icomment = 0;
-
-	/* synchronous navigation, heading, attitude data (from multibeam bathymetry records) */
-	int ndat = 0;
-	int ndat_alloc = 0;
-	double *dat_time_d = NULL;
-	double *dat_lon = NULL;
-	double *dat_lat = NULL;
-	double *dat_speed = NULL;
-	double *dat_sonardepth = NULL;
-	double *dat_heading = NULL;
-	double *dat_draft = NULL;
-	double *dat_roll = NULL;
-	double *dat_pitch = NULL;
-	double *dat_heave = NULL;
-	double *dat_altitude = NULL;
-
-	/* sidescan data data */
-	s7k_fsdwchannel *sschannelport; /* Port hannel header and data */
-	s7k_fsdwssheader *ssheaderport; /* Port Edgetech sidescan header */
-	s7k_fsdwchannel *sschannelstbd; /* Starboard channel header and data */
-	s7k_fsdwssheader *ssheaderstbd; /* Starboard Edgetech sidescan header */
-
-	/* output sidescan data */
-	int obeams_bath;
-	int obeams_amp;
-	int opixels_ss;
-	double oss[MB7K2SS_SSDIMENSION];
-	double ossacrosstrack[MB7K2SS_SSDIMENSION];
-	double ossalongtrack[MB7K2SS_SSDIMENSION];
-	int ossbincount[MB7K2SS_SSDIMENSION];
-	double pixel_width;
-
-	/* sidescan layout mode */
-	double ss_altitude;
-
-	/* route and auto-line data */
-	int ntimepoint = 0;
-	double *routetime_d = NULL;
-	bool rawroutefile = false;
-	int nroutepoint = 0;
-	int nroutepointalloc = 0;
-	double lon;
-	double lat;
-	double topo;
-	int waypoint;
-	double *routelon = NULL;
-	double *routelat = NULL;
-	double *routeheading = NULL;
-	int *routewaypoint = NULL;
-	double range;
-	double rangelast;
-	int activewaypoint = 0;
-	int linenumber;
-
-	/* bottom layout parameters */
-	int nangle = MB7K2SS_NUM_ANGLES;
-	double angle_min = -MB7K2SS_ANGLE_MAX;
-	double angle_max = MB7K2SS_ANGLE_MAX;
-	double table_angle[MB7K2SS_NUM_ANGLES];
-	double table_xtrack[MB7K2SS_NUM_ANGLES];
-	double table_ltrack[MB7K2SS_NUM_ANGLES];
-	double table_altitude[MB7K2SS_NUM_ANGLES];
-	double table_range[MB7K2SS_NUM_ANGLES];
-
-	/* counting variables */
-	int nreaddata = 0;
-	int nwritesslo = 0;
-	int nwritesshi = 0;
-	int nreaddatatot = 0;
-	int nreadheadertot = 0;
-	int nreadssvtot = 0;
-	int nreadnav1tot = 0;
-	int nreadsbptot = 0;
-	int nreadsslotot = 0;
-	int nreadsshitot = 0;
-	int nwritesslotot = 0;
-	int nwritesshitot = 0;
-
-	/* auto plotting */
-	FILE *sfp = NULL;
-	char scriptfile[MB_PATH_MAXLINE];
-	char command[MB_PATH_MAXLINE];
-
-	int format_status, format_guess;
-	int format_output = MBF_MBLDEOIH;
-	unsigned short *datashort;
-	double value, threshold;
-	double channelmax;
-	int portchannelpick;
-	int stbdchannelpick;
-	double ttime;
-	double ttime_min;
-	double ttime_min_use;
-	int istart;
-	double weight;
-	double factor;
-	double mtodeglon, mtodeglat;
-	double headingdiff;
-	int oktowrite;
-	double dx, dy;
-	int kangle, kstart;
-	double xtrack, ltrack, rr, rangemin;
-	FILE *fp = NULL;
-	char *result;
-	int nget;
-	int previous, jj, interpable;
-	double dss, dssl, fraction;
-	int itime;
-	int jport;
-
 	if (verbose == 1) {
 		fprintf(stderr, "\nProgram <%s>\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
@@ -598,6 +458,7 @@ int main(int argc, char **argv) {
 	if (ssflip)
 		fprintf(stdout, "     Sidescan port and starboard exchanged\n");
 
+	int linenumber = 0;
 	/* set starting line number and output file if route read */
 	if (route_file_set || timelist_file_set) {
 		linenumber = startline;
@@ -610,23 +471,45 @@ int main(int argc, char **argv) {
 	/* new output file obviously needed */
 	new_output_file = true;
 
+	double *routelon = NULL;
+	double *routelat = NULL;
+	double *routeheading = NULL;
+	int *routewaypoint = NULL;
+	double *routetime_d = NULL;
+	int ntimepoint = 0;
 	bool linechange;
+	double mtodeglon;
+	double mtodeglat;
+	int activewaypoint = 0;
+	double rangelast = 0.0;  // TODO(schwehr): Might not be always set correctly.
+	int oktowrite;
+	double topo;
+	int nroutepoint = 0;
+	int nroutepointalloc = 0;
+	double time_d;
+	char comment[MB_COMMENT_MAXLINE];
+	double heading;
 
 	/* if specified read route time list file */
 	if (timelist_file_set) {
 		/* open the input file */
-		if ((fp = fopen(timelist_file, "r")) == NULL) {
+		FILE *fp = fopen(timelist_file, "r");
+		if (fp == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
 			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open time list file <%s> for reading\n", timelist_file);
 			exit(status);
 		}
-		rawroutefile = false;
 		int ntimepointalloc = 0;
+		char *result;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] != '#') {
 				int i;
-				nget = sscanf(comment, "%d %d %lf %lf %lf %lf", &i, &waypoint, &lon, &lat, &heading, &time_d);
+				int waypoint;
+				double lon;
+				double lat;
+				/* const int nget = */
+				sscanf(comment, "%d %d %lf %lf %lf %lf", &i, &waypoint, &lon, &lat, &heading, &time_d);
 
 				/* if good data check for need to allocate more space */
 				if (ntimepoint + 1 > ntimepointalloc) {
@@ -682,13 +565,15 @@ int main(int argc, char **argv) {
 	/* if specified read route file */
 	else if (route_file_set) {
 		/* open the input file */
+		FILE *fp = NULL;
 		if ((fp = fopen(route_file, "r")) == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
 			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
 			exit(status);
 		}
-		rawroutefile = false;
+		bool rawroutefile = false;
+		char *result;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] == '#') {
 				if (strncmp(comment, "## Route File Version", 21) == 0) {
@@ -696,7 +581,11 @@ int main(int argc, char **argv) {
 				}
 			}
 			else {
-				nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint, &heading);
+				int waypoint_tmp;
+				double lon;
+				double lat;
+				const int nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint_tmp, &heading);
+				const waypoint_t waypoint = (waypoint_t)waypoint_tmp;
 				if (comment[0] == '#') {
 					fprintf(stderr, "buffer:%s", comment);
 					if (strncmp(comment, "## Route File Version", 21) == 0) {
@@ -757,6 +646,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* read topography grid if 3D bottom correction specified */
+	void *topogrid_ptr = NULL;
 	if (sslayoutmode == MB7K2SS_SS_3D_BOTTOM) {
 		status = mb_topogrid_init(verbose, topogridfile, &lonflip, &topogrid_ptr, &error);
 	}
@@ -770,6 +660,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* set up plotting script file */
+	char scriptfile[MB_PATH_MAXLINE];
 	if ((route_file_set && nroutepoint > 1) || (timelist_file_set && ntimepoint > 1)) {
 		sprintf(scriptfile, "%s_ssswathplot.cmd", lineroot);
 	}
@@ -779,7 +670,8 @@ int main(int argc, char **argv) {
 	else {
 		sprintf(scriptfile, "%s_ssswathplot.cmd", file);
 	}
-	if ((sfp = fopen(scriptfile, "w")) == NULL) {
+	FILE *sfp = fopen(scriptfile, "w");
+	if (sfp == NULL) {
 		error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 		fprintf(stderr, "\nUnable to open plotting script file <%s> \n", scriptfile);
@@ -796,27 +688,74 @@ int main(int argc, char **argv) {
 
 	bool read_data;
 	void *datalist;
+
 	/* open file list */
 	if (read_datalist) {
-		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_YES;
+		if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
+		read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+	} else {
+		// else copy single filename to be read
 		strcpy(file, read_file);
 		read_data = true;
 	}
 
+	void *imbio_ptr = NULL;
+	struct mb_io_struct *imb_io_ptr = NULL;
+	int nreaddata = 0;
+	int nreaddatatot = 0;
+
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	double *ttimes = NULL;
+	double *angles = NULL;
+	double *angles_forward = NULL;
+	double *angles_null = NULL;
+	double *bheave = NULL;
+	double *alongtrack_offset = NULL;
+
+	int kind;
+	int time_i[7];
+	double navlon;
+	double navlat;
+	double speed;
+	double distance;
+	double altitude;
+	double sonardepth;
+	double roll;
+	double pitch;
+	double heave;
+	double draft;
+
+	/* synchronous navigation, heading, attitude data (from multibeam bathymetry records) */
+	int ndat = 0;
+	int ndat_alloc = 0;
+	double *dat_time_d = NULL;
+	double *dat_lon = NULL;
+	double *dat_lat = NULL;
+	double *dat_speed = NULL;
+	double *dat_sonardepth = NULL;
+	double *dat_heading = NULL;
+	double *dat_draft = NULL;
+	double *dat_roll = NULL;
+	double *dat_pitch = NULL;
+	double *dat_heave = NULL;
+	double *dat_altitude = NULL;
+
 	/* first read and store all navigation, attitude, heading, sonar depth, and altitude
 	   data from the survey (multibeam) records - loop over all files to be read
 	   - use fbt files if available */
+
 	while (read_data && format == MBF_RESON7KR) {
 		/* use fbt file if available as source for processed navigation and attitude */
 		mb_get_fbt(verbose, file, &format, &error);
@@ -832,10 +771,8 @@ int main(int argc, char **argv) {
 			exit(error);
 		}
 
-		/* get pointers to data storage */
 		imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
-		istore_ptr = imb_io_ptr->store_data;
-		istore = (struct mbsys_reson7k_struct *)istore_ptr;
+		void *istore_ptr = imb_io_ptr->store_data;
 		nreaddata = 0;
 
 		if (error == MB_ERROR_NO_ERROR) {
@@ -985,21 +922,76 @@ int main(int argc, char **argv) {
 
 	/* open file list */
 	if (read_datalist) {
-		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_YES;
+		if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
+		read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+	} else {
+		// else copy single filename to be read
 		strcpy(file, read_file);
 		read_data = true;
 	}
+
+	void *ombio_ptr = NULL;
+	struct mb_io_struct *omb_io_ptr = NULL;
+	void *ostore_ptr = NULL;
+	struct mbsys_ldeoih_struct *ostore = NULL;
+	double ssv;
+	double ssv_use = 1500.0;
+
+	int icomment = 0;
+
+	/* sidescan data data */
+	s7k_fsdwchannel *sschannelport; /* Port hannel header and data */
+	s7k_fsdwssheader *ssheaderport; /* Port Edgetech sidescan header */
+	s7k_fsdwchannel *sschannelstbd; /* Starboard channel header and data */
+	s7k_fsdwssheader *ssheaderstbd; /* Starboard Edgetech sidescan header */
+
+	/* output sidescan data */
+	int obeams_bath;
+	int obeams_amp;
+	int opixels_ss;
+	double oss[MB7K2SS_SSDIMENSION];
+	double ossacrosstrack[MB7K2SS_SSDIMENSION];
+	double ossalongtrack[MB7K2SS_SSDIMENSION];
+	int ossbincount[MB7K2SS_SSDIMENSION];
+
+	/* sidescan layout mode */
+	double ss_altitude = 0.0;  // TODO(schwehr): Might not always be set correctly.
+
+	/* route and auto-line data */
+	double range = 0.0;  // TODO(schwehr): Might not always be set correctly.
+
+	/* bottom layout parameters */
+	int nangle = MB7K2SS_NUM_ANGLES;
+	double angle_min = -MB7K2SS_ANGLE_MAX;
+	double angle_max = MB7K2SS_ANGLE_MAX;
+	double table_angle[MB7K2SS_NUM_ANGLES];
+	double table_xtrack[MB7K2SS_NUM_ANGLES];
+	double table_ltrack[MB7K2SS_NUM_ANGLES];
+	double table_altitude[MB7K2SS_NUM_ANGLES];
+	double table_range[MB7K2SS_NUM_ANGLES];
+
+	/* counting variables */
+	int nwritesslo = 0;
+	int nwritesshi = 0;
+	int nreadheadertot = 0;
+	int nreadssvtot = 0;
+	int nreadnav1tot = 0;
+	int nreadsbptot = 0;
+	int nreadsslotot = 0;
+	int nreadsshitot = 0;
+	int nwritesslotot = 0;
+	int nwritesshitot = 0;
+
+	int format_guess;
+	const int format_output = MBF_MBLDEOIH;
+	double ttime;
+	double ttime_min;
+	double ttime_min_use = 0.0;  // TODO(schwehr): Might not be properly set in all cases.
 
 	/* loop over all files to be read */
 	while (read_data && format == MBF_RESON7KR) {
@@ -1017,9 +1009,9 @@ int main(int argc, char **argv) {
 
 		/* get pointers to data storage */
 		imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
-		istore_ptr = imb_io_ptr->store_data;
-		istore = (struct mbsys_reson7k_struct *)istore_ptr;
-		itime = 0;
+		void *istore_ptr = imb_io_ptr->store_data;
+		struct mbsys_reson7k_struct *istore = (struct mbsys_reson7k_struct *)istore_ptr;
+		int itime = 0;
 
 		if (error == MB_ERROR_NO_ERROR) {
 			beamflag = NULL;
@@ -1082,7 +1074,7 @@ int main(int argc, char **argv) {
 
 			else if (!output_file_set && !route_file_set && !timelist_file_set) {
 				new_output_file = true;
-				format_status = mb_get_format(verbose, file, output_file, &format_guess, &error);
+				const int format_status = mb_get_format(verbose, file, output_file, &format_guess, &error);
 				if (format_status != MB_SUCCESS || format_guess != format) {
 					strcpy(output_file, file);
 				}
@@ -1091,11 +1083,11 @@ int main(int argc, char **argv) {
 				}
 				if (extract_type == MB7K2SS_SSLOW) {
 					strcat(output_file, "_sslo.mb71");
-					format_output = MBF_MBLDEOIH;
+					// format_output = MBF_MBLDEOIH;
 				}
 				else if (extract_type == MB7K2SS_SSHIGH) {
 					strcat(output_file, "_sshi.mb71");
-					format_output = MBF_MBLDEOIH;
+					// format_output = MBF_MBLDEOIH;
 				}
 			}
 		}
@@ -1156,18 +1148,18 @@ int main(int argc, char **argv) {
 			if (status == MB_SUCCESS && kind == target_kind && navlon != 0.0 && navlat != 0.0) {
 				/* to set lines check survey data time against time list */
 				if (ntimepoint > 1) {
-					dx = (navlon - routelon[activewaypoint]) / mtodeglon;
-					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
+					const double dx = (navlon - routelon[activewaypoint]) / mtodeglon;
+					const double dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 					range = sqrt(dx * dx + dy * dy);
-					if (time_d >= routetime_d[activewaypoint] && activewaypoint < ntimepoint) {
+					if (activewaypoint < ntimepoint && time_d >= routetime_d[activewaypoint]) {
 						linechange = true;
 					}
 				}
 
 				/* else to set lines check survey data position against waypoints */
 				else if (nroutepoint > 1 && navlon != 0.0 && navlat != 0.0) {
-					dx = (navlon - routelon[activewaypoint]) / mtodeglon;
-					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
+					const double dx = (navlon - routelon[activewaypoint]) / mtodeglon;
+					const double dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 					range = sqrt(dx * dx + dy * dy);
 					if (range < rangethreshold && (activewaypoint == 0 || range > rangelast) &&
 					    activewaypoint < nroutepoint - 1) {
@@ -1185,7 +1177,7 @@ int main(int argc, char **argv) {
 						sprintf(output_file, "%s_%4.4d_sslo.mb71", lineroot, linenumber);
 					else if (extract_type == MB7K2SS_SSHIGH)
 						sprintf(output_file, "%s_%4.4d_sshi.mb71", lineroot, linenumber);
-					format_output = MBF_MBLDEOIH;
+					// format_output = MBF_MBLDEOIH;
 
 					/* set to open new output file */
 					new_output_file = true;
@@ -1292,7 +1284,7 @@ int main(int argc, char **argv) {
 			        (within MB7K2SS_ONLINE_THRESHOLD degrees)
 			        before writing any data */
 			if (checkroutebearing && nroutepoint > 1 && activewaypoint > 0) {
-				headingdiff = fabs(routeheading[activewaypoint - 1] - heading);
+				double headingdiff = fabs(routeheading[activewaypoint - 1] - heading);
 				if (headingdiff > 180.0)
 					headingdiff = 360.0 - headingdiff;
 				if (headingdiff < MB7K2SS_ONLINE_THRESHOLD)
@@ -1360,24 +1352,24 @@ int main(int argc, char **argv) {
 					/* reset the sonar altitude using the specified mode */
 					if (bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL) {
 						/* get bottom arrival in port trace */
-						datashort = (unsigned short *)sschannelport->data;
-						channelmax = 0.0;
+						unsigned short *datashort = (unsigned short *)sschannelport->data;
+						double channelmax = 0.0;
 						for (unsigned int i = 0; i < ssheaderport->samples; i++) {
-							if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-								value = sqrt(
-								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
-							else
-								value = (double)(datashort[i]);
+							const double value =
+								ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC
+								? sqrt(
+								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
+								: (double)(datashort[i]);
 							channelmax = MAX(value, channelmax);
 						}
-						portchannelpick = 0;
-						threshold = bottompickthreshold * channelmax;
+						int portchannelpick = 0;
+						double threshold = bottompickthreshold * channelmax;
 						for (unsigned int i = 0; i < ssheaderport->samples && portchannelpick == 0; i++) {
-							if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-								value = sqrt(
-								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
-							else
-								value = (double)(datashort[i]);
+							const double value =
+								ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC
+								? sqrt(
+								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
+								: (double)(datashort[i]);
 							if (value >= threshold)
 								portchannelpick = i;
 						}
@@ -1386,21 +1378,21 @@ int main(int argc, char **argv) {
 						datashort = (unsigned short *)sschannelstbd->data;
 						channelmax = 0.0;
 						for (unsigned int i = 0; i < ssheaderstbd->samples; i++) {
-							if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-								value = sqrt(
-								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
-							else
-								value = (double)(datashort[i]);
+							const double value =
+								ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC
+								? sqrt(
+								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
+								: (double)(datashort[i]);
 							channelmax = MAX(value, channelmax);
 						}
-						stbdchannelpick = 0;
+						int stbdchannelpick = 0;
 						threshold = bottompickthreshold * channelmax;
 						for (unsigned int i = 0; i < ssheaderstbd->samples && stbdchannelpick == 0; i++) {
-							if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-								value = sqrt(
-								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
-							else
-								value = (double)(datashort[i]);
+							const double value =
+								ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC
+								? sqrt(
+								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
+								: (double)(datashort[i]);
 							if (value >= threshold)
 								stbdchannelpick = i;
 						}
@@ -1438,10 +1430,10 @@ int main(int argc, char **argv) {
 						                          table_altitude, table_range, &error);
 
 					/* get swath width and pixel size */
-					rr = 0.0000000005 * ssv_use * (ssheaderport->samples * ssheaderport->sampleInterval);
+					double rr = 0.0000000005 * ssv_use * (ssheaderport->samples * ssheaderport->sampleInterval);
 					if (!swath_width_set)
 						swath_width = 2.2 * sqrt(rr * rr - ss_altitude * ss_altitude);
-					pixel_width = swath_width / (opixels_ss - 1);
+					const double pixel_width = swath_width / (opixels_ss - 1);
 
 					/* initialize the output sidescan */
 
@@ -1453,9 +1445,9 @@ int main(int argc, char **argv) {
 					}
 
 					/* find minimum range */
-					rangemin = table_range[0];
-					kstart = 0;
-					for (kangle = 1; kangle < nangle; kangle++) {
+					double rangemin = table_range[0];
+					int kstart = 0;
+					for (int kangle = 1; kangle < nangle; kangle++) {
 						if (table_range[kangle] < rangemin) {
 							rangemin = table_range[kangle];
 							kstart = kangle;
@@ -1463,25 +1455,25 @@ int main(int argc, char **argv) {
 					}
 
 					/* bin port trace */
-					datashort = (unsigned short *)sschannelport->data;
+					unsigned short *datashort = (unsigned short *)sschannelport->data;
 					// istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
-					istart = rangemin / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
-					weight = exp(MB_LN_2 * ((double)ssheaderport->weightingFactor));
+					int istart = rangemin / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
+					double weight = exp(MB_LN_2 * ((double)ssheaderport->weightingFactor));
 					for (unsigned int i = istart; i < ssheaderport->samples; i++) {
-						/* get sample value */
-						if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-							value =
-							    sqrt((double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
-						else
-							value = (double)(datashort[i]);
+						const double value =
+							ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC
+							? sqrt((double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
+							: (double)(datashort[i]);
 
 						/* get sample range */
 						rr = 0.0000000005 * ssv_use * (i * ssheaderport->sampleInterval);
 
 						/* look up position(s) for this range */
 						bool done = false;
-						for (kangle = kstart; kangle > 0 && !done; kangle--) {
+						for (int kangle = kstart; kangle > 0 && !done; kangle--) {
 							bool found = false;
+							double xtrack;
+							double ltrack;
 							if (rr <= table_range[kstart]) {
 								xtrack = table_xtrack[kstart];
 								ltrack = table_ltrack[kstart];
@@ -1489,14 +1481,14 @@ int main(int argc, char **argv) {
 								found = true;
 							}
 							else if (rr > table_range[kangle] && rr <= table_range[kangle - 1]) {
-								factor = (rr - table_range[kangle]) / (table_range[kangle - 1] - table_range[kangle]);
+								const double factor = (rr - table_range[kangle]) / (table_range[kangle - 1] - table_range[kangle]);
 								xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle - 1] - table_xtrack[kangle]);
 								ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle - 1] - table_ltrack[kangle]);
 								found = true;
 								done = true;
 							}
 							else if (rr < table_range[kangle] && rr >= table_range[kangle - 1]) {
-								factor = (rr - table_range[kangle]) / (table_range[kangle - 1] - table_range[kangle]);
+								const double factor = (rr - table_range[kangle]) / (table_range[kangle - 1] - table_range[kangle]);
 								xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle - 1] - table_xtrack[kangle]);
 								ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle - 1] - table_ltrack[kangle]);
 								found = true;
@@ -1518,7 +1510,7 @@ int main(int argc, char **argv) {
 					/* find minimum range */
 					rangemin = table_range[0];
 					kstart = 0;
-					for (kangle = 1; kangle < nangle; kangle++) {
+					for (int kangle = 1; kangle < nangle; kangle++) {
 						if (table_range[kangle] < rangemin) {
 							rangemin = table_range[kangle];
 							kstart = kangle;
@@ -1531,20 +1523,20 @@ int main(int argc, char **argv) {
 					istart = rangemin / (0.0000000005 * ssv_use * ssheaderstbd->sampleInterval);
 					weight = exp(MB_LN_2 * ((double)ssheaderstbd->weightingFactor));
 					for (unsigned int i = istart; i < ssheaderstbd->samples; i++) {
-						/* get sample value */
-						if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-							value =
-							    sqrt((double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
-						else
-							value = (double)(datashort[i]);
+						const double value =
+							ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC
+							? sqrt((double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
+							: (double)(datashort[i]);
 
 						/* get sample range */
 						rr = 0.0000000005 * ssv_use * (i * ssheaderstbd->sampleInterval);
 
 						/* look up position for this range */
 						bool done = false;
-						for (kangle = kstart; kangle < nangle - 1 && !done; kangle++) {
+						for (int kangle = kstart; kangle < nangle - 1 && !done; kangle++) {
 							bool found = false;
+							double xtrack;
+							double ltrack;
 							if (rr <= table_range[kstart]) {
 								xtrack = table_xtrack[kstart];
 								ltrack = table_ltrack[kstart];
@@ -1553,14 +1545,14 @@ int main(int argc, char **argv) {
 								done = true;
 							}
 							else if (rr > table_range[kangle] && rr <= table_range[kangle + 1]) {
-								factor = (rr - table_range[kangle]) / (table_range[kangle + 1] - table_range[kangle]);
+								const double factor = (rr - table_range[kangle]) / (table_range[kangle + 1] - table_range[kangle]);
 								xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle + 1] - table_xtrack[kangle]);
 								ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle + 1] - table_ltrack[kangle]);
 								found = true;
 								done = true;
 							}
 							else if (rr < table_range[kangle] && rr >= table_range[kangle + 1]) {
-								factor = (rr - table_range[kangle]) / (table_range[kangle + 1] - table_range[kangle]);
+								const double factor = (rr - table_range[kangle]) / (table_range[kangle + 1] - table_range[kangle]);
 								xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle + 1] - table_xtrack[kangle]);
 								ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle + 1] - table_ltrack[kangle]);
 								found = true;
@@ -1580,7 +1572,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* calculate the output sidescan */
-					jport = -1;
+					int jport = -1;
 					for (int j = 0; j < opixels_ss; j++) {
 						if (ossbincount[j] > 0) {
 							oss[j] /= (double)ossbincount[j];
@@ -1593,15 +1585,15 @@ int main(int argc, char **argv) {
 					}
 
 					/* interpolate gaps in the output sidescan */
-					previous = opixels_ss;
+					int previous = opixels_ss;
 					for (int j = 0; j < opixels_ss; j++) {
 						if (ossbincount[j] > 0) {
-							interpable = j - previous - 1;
+							const int interpable = j - previous - 1;
 							if (interpable > 0 && interpable <= interpbins) {
-								dss = oss[j] - oss[previous];
-								dssl = ossalongtrack[j] - ossalongtrack[previous];
-								for (jj = previous + 1; jj < j; jj++) {
-									fraction = ((double)(jj - previous)) / ((double)(j - previous));
+								const double dss = oss[j] - oss[previous];
+								const double dssl = ossalongtrack[j] - ossalongtrack[previous];
+								for (int jj = previous + 1; jj < j; jj++) {
+									const double fraction = ((double)(jj - previous)) / ((double)(j - previous));
 									oss[jj] = oss[previous] + fraction * dss;
 									ossalongtrack[jj] = ossalongtrack[previous] + fraction * dssl;
 								}
@@ -1656,24 +1648,24 @@ int main(int argc, char **argv) {
 					/* reset the sonar altitude using the specified mode */
 					if (bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL) {
 						/* get bottom arrival in port trace */
-						datashort = (unsigned short *)sschannelport->data;
-						channelmax = 0.0;
+						unsigned short *datashort = (unsigned short *)sschannelport->data;
+						double channelmax = 0.0;
 						for (unsigned int i = 0; i < ssheaderport->samples; i++) {
-							if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-								value = sqrt(
-								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
-							else
-								value = (double)(datashort[i]);
+							const double value =
+								ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC
+								? sqrt(
+								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
+								: (double)(datashort[i]);
 							channelmax = MAX(value, channelmax);
 						}
-						portchannelpick = 0;
-						threshold = bottompickthreshold * channelmax;
+						int portchannelpick = 0;
+						double threshold = bottompickthreshold * channelmax;
 						for (unsigned int i = 0; i < ssheaderport->samples && portchannelpick == 0; i++) {
-							if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-								value = sqrt(
-								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
-							else
-								value = (double)(datashort[i]);
+							const double value =
+								ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC
+								? sqrt(
+								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
+								: (double)(datashort[i]);
 							if (value >= threshold)
 								portchannelpick = i;
 						}
@@ -1682,21 +1674,21 @@ int main(int argc, char **argv) {
 						datashort = (unsigned short *)sschannelstbd->data;
 						channelmax = 0.0;
 						for (unsigned int i = 0; i < ssheaderstbd->samples; i++) {
-							if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-								value = sqrt(
-								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
-							else
-								value = (double)(datashort[i]);
+							const double value =
+								ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC
+								? sqrt(
+								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
+								: (double)(datashort[i]);
 							channelmax = MAX(value, channelmax);
 						}
-						stbdchannelpick = 0;
+						int stbdchannelpick = 0;
 						threshold = bottompickthreshold * channelmax;
 						for (unsigned int i = 0; i < ssheaderstbd->samples && stbdchannelpick == 0; i++) {
-							if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-								value = sqrt(
-								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
-							else
-								value = (double)(datashort[i]);
+							const double value =
+								ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC
+								? sqrt(
+								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
+								: (double)(datashort[i]);
 							if (value >= threshold)
 								stbdchannelpick = i;
 						}
@@ -1727,10 +1719,10 @@ int main(int argc, char **argv) {
 						                          table_altitude, table_range, &error);
 
 					/* get swath width and pixel size */
-					rr = 0.0000000005 * ssv_use * (ssheaderport->samples * ssheaderport->sampleInterval);
+					double rr = 0.0000000005 * ssv_use * (ssheaderport->samples * ssheaderport->sampleInterval);
 					if (!swath_width_set)
 						swath_width = 2.2 * sqrt(rr * rr - ss_altitude * ss_altitude);
-					pixel_width = swath_width / (opixels_ss - 1);
+					const double pixel_width = swath_width / (opixels_ss - 1);
 
 					/* initialize the output sidescan */
 					for (int j = 0; j < opixels_ss; j++) {
@@ -1741,9 +1733,9 @@ int main(int argc, char **argv) {
 					}
 
 					/* find minimum range */
-					rangemin = table_range[0];
-					kstart = 0;
-					for (kangle = 1; kangle < nangle; kangle++) {
+					double rangemin = table_range[0];
+					int kstart = 0;
+					for (int kangle = 1; kangle < nangle; kangle++) {
 						if (table_range[kangle] < rangemin) {
 							rangemin = table_range[kangle];
 							kstart = kangle;
@@ -1751,25 +1743,26 @@ int main(int argc, char **argv) {
 					}
 
 					/* bin port trace */
-					datashort = (unsigned short *)sschannelport->data;
+					unsigned short *datashort = (unsigned short *)sschannelport->data;
 					// istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
-					istart = rangemin / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
-					weight = exp(MB_LN_2 * ((double)ssheaderport->weightingFactor));
+					int istart = rangemin / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
+					double weight = exp(MB_LN_2 * ((double)ssheaderport->weightingFactor));
 					for (unsigned int i = istart; i < ssheaderport->samples; i++) {
 						/* get sample value */
-						if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-							value =
-							    sqrt((double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
-						else
-							value = (double)(datashort[i]);
+						const double value =
+							ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC
+							? sqrt((double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
+							: (double)(datashort[i]);
 
 						/* get sample range */
 						rr = 0.0000000005 * ssv_use * (i * ssheaderport->sampleInterval);
 
 						/* look up position(s) for this range */
 						bool done = false;
-						for (kangle = kstart; kangle > 0 && !done; kangle--) {
+						for (int kangle = kstart; kangle > 0 && !done; kangle--) {
 							bool found = false;
+							double xtrack;
+							double ltrack;
 							if (rr <= table_range[kstart]) {
 								xtrack = table_xtrack[kstart];
 								ltrack = table_ltrack[kstart];
@@ -1777,14 +1770,14 @@ int main(int argc, char **argv) {
 								done = true;
 							}
 							else if (rr > table_range[kangle] && rr <= table_range[kangle - 1]) {
-								factor = (rr - table_range[kangle]) / (table_range[kangle - 1] - table_range[kangle]);
+								const double factor = (rr - table_range[kangle]) / (table_range[kangle - 1] - table_range[kangle]);
 								xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle - 1] - table_xtrack[kangle]);
 								ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle - 1] - table_ltrack[kangle]);
 								found = true;
 								done = true;
 							}
 							else if (rr < table_range[kangle] && rr >= table_range[kangle - 1]) {
-								factor = (rr - table_range[kangle]) / (table_range[kangle - 1] - table_range[kangle]);
+								const double factor = (rr - table_range[kangle]) / (table_range[kangle - 1] - table_range[kangle]);
 								xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle - 1] - table_xtrack[kangle]);
 								ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle - 1] - table_ltrack[kangle]);
 								found = true;
@@ -1806,7 +1799,7 @@ int main(int argc, char **argv) {
 					/* find minimum range */
 					rangemin = table_range[0];
 					kstart = 0;
-					for (kangle = 1; kangle < nangle; kangle++) {
+					for (int kangle = 1; kangle < nangle; kangle++) {
 						if (table_range[kangle] < rangemin) {
 							rangemin = table_range[kangle];
 							kstart = kangle;
@@ -1818,20 +1811,20 @@ int main(int argc, char **argv) {
 					istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderstbd->sampleInterval);
 					weight = exp(MB_LN_2 * ((double)ssheaderstbd->weightingFactor));
 					for (unsigned int i = istart; i < ssheaderstbd->samples; i++) {
-						/* get sample value */
-						if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-							value =
-							    sqrt((double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
-						else
-							value = (double)(datashort[i]);
+						const double value =
+							ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC
+							? sqrt((double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
+							: (double)(datashort[i]);
 
 						/* get sample range */
 						rr = 0.0000000005 * ssv_use * (i * ssheaderstbd->sampleInterval);
 
 						/* look up position for this range */
 						bool done = false;
-						for (kangle = kstart; kangle < nangle - 1 && !done; kangle++) {
+						for (int kangle = kstart; kangle < nangle - 1 && !done; kangle++) {
 							bool found = false;
+							double xtrack;
+							double ltrack;
 							if (rr <= table_range[kstart]) {
 								xtrack = table_xtrack[kstart];
 								ltrack = table_ltrack[kstart];
@@ -1839,14 +1832,14 @@ int main(int argc, char **argv) {
 								done = true;
 							}
 							else if (rr > table_range[kangle] && rr <= table_range[kangle + 1]) {
-								factor = (rr - table_range[kangle]) / (table_range[kangle + 1] - table_range[kangle]);
+								const double factor = (rr - table_range[kangle]) / (table_range[kangle + 1] - table_range[kangle]);
 								xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle + 1] - table_xtrack[kangle]);
 								ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle + 1] - table_ltrack[kangle]);
 								found = true;
 								done = true;
 							}
 							else if (rr < table_range[kangle] && rr >= table_range[kangle + 1]) {
-								factor = (rr - table_range[kangle]) / (table_range[kangle + 1] - table_range[kangle]);
+								const double factor = (rr - table_range[kangle]) / (table_range[kangle + 1] - table_range[kangle]);
 								xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle + 1] - table_xtrack[kangle]);
 								ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle + 1] - table_ltrack[kangle]);
 								found = true;
@@ -1876,15 +1869,15 @@ int main(int argc, char **argv) {
 					}
 
 					/* interpolate gaps in the output sidescan */
-					previous = opixels_ss;
+					int previous = opixels_ss;
 					for (int j = 0; j < opixels_ss; j++) {
 						if (ossbincount[j] > 0) {
-							interpable = j - previous - 1;
+							const int interpable = j - previous - 1;
 							if (interpable > 0 && interpable <= interpbins) {
-								dss = oss[j] - oss[previous];
-								dssl = ossalongtrack[j] - ossalongtrack[previous];
-								for (jj = previous + 1; jj < j; jj++) {
-									fraction = ((double)(jj - previous)) / ((double)(j - previous));
+								const double dss = oss[j] - oss[previous];
+								const double dssl = ossalongtrack[j] - ossalongtrack[previous];
+								for (int jj = previous + 1; jj < j; jj++) {
+									const double fraction = ((double)(jj - previous)) / ((double)(j - previous));
 									oss[jj] = oss[previous] + fraction * dss;
 									ossalongtrack[jj] = ossalongtrack[previous] + fraction * dssl;
 								}
@@ -1994,6 +1987,8 @@ int main(int argc, char **argv) {
 
 	/* close plotting script file */
 	fclose(sfp);
+
+	char command[MB_PATH_MAXLINE];
 	sprintf(command, "chmod +x %s", scriptfile);
 	/* int shellstatus = */ system(command);
 

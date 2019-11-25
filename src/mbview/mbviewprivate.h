@@ -579,9 +579,9 @@ int mbview_colorclear(size_t instance);
 int mbview_zscaleclear(size_t instance);
 int mbview_setcolorparms(size_t instance);
 int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct *data, int which_data);
-int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *data, int i, int j, int k);
-int mbview_colorpoint_histogram(struct mbview_world_struct *view, struct mbview_struct *data, float *histogram, int i, int j,
-                                int k);
+int mbview_colorvalue(struct mbview_world_struct *view, struct mbview_struct *data,
+                      float *histogram, double value, float *r, float *g, float *b);
+int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *data, float *histogram, int i, int j, int k);
 int mbview_getcolor(double value, double min, double max, int colortablemode, float below_red, float below_green,
                     float below_blue, float above_red, float above_green, float above_blue, float *colortable_red,
                     float *colortable_green, float *colortable_blue, float *red, float *green, float *blue);

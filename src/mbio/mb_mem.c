@@ -21,6 +21,7 @@
  * Date:	March 1, 1993
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -561,7 +562,7 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
 
 	/* else deallocate the memory if pointer is non-null and
 	    heap overflow has occurred */
-	else if (mb_alloc_overflow == true && *ptr != NULL) {
+	else if (mb_alloc_overflow && *ptr != NULL) {
 #ifdef MB_MEM_DEBUG
 		fprintf(stderr, "NOTICE: mbm_mem overflow pointer freed %d in function %s\n", *ptr, __func__);
 #endif

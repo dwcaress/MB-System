@@ -119,6 +119,8 @@
 #if !defined(GEODESIC_H)
 #define GEODESIC_H 1
 
+#include <stdbool.h>
+
 /**
  * The major version of the geodesic library.  (This tracks the version of
  * GeographicLib.)
@@ -408,7 +410,7 @@ void geod_position(const struct geod_geodesicline *l, double s12, double *plat2,
  * arguments \e plat2, etc., may be replaced by 0, if you do not need some
  * quantities computed.
  **********************************************************************/
-double geod_gendirect(const struct geod_geodesic *g, double lat1, double lon1, double azi1, int arcmode, double s12_a12,
+double geod_gendirect(const struct geod_geodesic *g, double lat1, double lon1, double azi1, bool arcmode, double s12_a12,
                       double *plat2, double *plon2, double *pazi2, double *ps12, double *pm12, double *pM12, double *pM21,
                       double *pS12);
 
@@ -502,7 +504,7 @@ double geod_geninverse(const struct geod_geodesic *g, double lat1, double lon1, 
  }
  @endcode
  **********************************************************************/
-double geod_genposition(const struct geod_geodesicline *l, int arcmode, double s12_a12, double *plat2, double *plon2,
+double geod_genposition(const struct geod_geodesicline *l, bool arcmode, double s12_a12, double *plat2, double *plon2,
                         double *pazi2, double *ps12, double *pm12, double *pM12, double *pM21, double *pS12);
 
 /**
@@ -520,7 +522,7 @@ double geod_genposition(const struct geod_geodesicline *l, int arcmode, double s
  * An example of the use of this function is given in the documentation for
  * geod_polygon_compute().
  **********************************************************************/
-void geod_polygon_init(struct geod_polygon *p, int polylinep);
+void geod_polygon_init(struct geod_polygon *p, bool polylinep);
 
 /**
  * Add a point to the polygon or polyline.
@@ -601,7 +603,7 @@ void geod_polygon_addedge(const struct geod_geodesic *g, struct geod_polygon *p,
  printf("%d %.8f %.3f\n", n, P, A);
  @endcode
  **********************************************************************/
-unsigned geod_polygon_compute(const struct geod_geodesic *g, const struct geod_polygon *p, int reverse, int sign, double *pA,
+unsigned geod_polygon_compute(const struct geod_geodesic *g, const struct geod_polygon *p, bool reverse, bool sign, double *pA,
                               double *pP);
 
 /**
@@ -631,8 +633,8 @@ unsigned geod_polygon_compute(const struct geod_geodesic *g, const struct geod_p
  * \e lat should be in the range [&minus;90&deg;, 90&deg;] and \e
  * lon should be in the range [&minus;540&deg;, 540&deg;).
  **********************************************************************/
-unsigned geod_polygon_testpoint(const struct geod_geodesic *g, const struct geod_polygon *p, double lat, double lon, int reverse,
-                                int sign, double *pA, double *pP);
+unsigned geod_polygon_testpoint(const struct geod_geodesic *g, const struct geod_polygon *p, double lat, double lon, bool reverse,
+                                bool sign, double *pA, double *pP);
 
 /**
  * Return the results assuming a tentative final test point is added via an
@@ -661,8 +663,8 @@ unsigned geod_polygon_testpoint(const struct geod_geodesic *g, const struct geod
  *
  * \e azi should be in the range [&minus;540&deg;, 540&deg;).
  **********************************************************************/
-unsigned geod_polygon_testedge(const struct geod_geodesic *g, const struct geod_polygon *p, double azi, double s, int reverse,
-                               int sign, double *pA, double *pP);
+unsigned geod_polygon_testedge(const struct geod_geodesic *g, const struct geod_polygon *p, double azi, double s, bool reverse,
+                               bool sign, double *pA, double *pP);
 
 /**
  * A simple interface for computing the area of a geodesic polygon.

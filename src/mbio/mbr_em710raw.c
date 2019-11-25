@@ -22,8 +22,6 @@
  *
  * Author:	D. W. Caress
  * Date:	February 26, 2008
- *
- *
  */
 
 #include <math.h>
@@ -210,7 +208,6 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	short *sonar_save;
 	short sonarunswap;
 	short sonarswap;
-	int swap;
 	int *databyteswapped;
 	int typegood;
 	int sonargood;
@@ -295,7 +292,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	}
 
 	/* set flag to swap bytes if necessary */
-	swap = *databyteswapped;
+	// int swap = *databyteswapped;
 
 	*type = *((short *)&label[0]);
 	*sonar = *((short *)&label[2]);
@@ -357,9 +354,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short type, short sonar,
                            int *goodend, int *error) {
-	char line[EM3_PU_STATUS_SIZE];
-	short short_val;
-	size_t read_len;
+	(void)type; // unused
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -380,7 +375,8 @@ int mbr_em710raw_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 	store->sonar = sonar;
 
 	/* read binary values into char array */
-	read_len = (size_t)(EM3_PU_STATUS_SIZE - 4);
+	size_t read_len = (size_t)(EM3_PU_STATUS_SIZE - 4);
+	char line[EM3_PU_STATUS_SIZE];
 	const int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary data */
@@ -391,6 +387,7 @@ int mbr_em710raw_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 		mb_get_binary_int(swap, &line[4], &store->sts_msec);
 		if (store->sts_date != 0)
 			store->msec = store->sts_msec;
+		short short_val;
 		mb_get_binary_short(swap, &line[8], &short_val);
 		store->sts_status_count = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
@@ -4223,10 +4220,6 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double bath_time_d, ss_time_d;
 	double rawspeed, pheading;
 	double plon, plat, pspeed, roll, pitch, heave;
-	double soundspeed;
-	double transmit_alongtrack;
-	double theta_nadir;
-	int inadir;
 	double att_time_d[MBSYS_SIMRAD3_MAXATTITUDE];
 	double att_roll[MBSYS_SIMRAD3_MAXATTITUDE];
 	double att_pitch[MBSYS_SIMRAD3_MAXATTITUDE];
@@ -4234,22 +4227,6 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	double transmit_time_d, transmit_heading, transmit_heave, transmit_roll, transmit_pitch;
 	double receive_time_d, receive_heading, receive_heave, receive_roll, receive_pitch;
-
-	/* transmit and receive array offsets */
-	double tx_x, tx_y, tx_z, tx_h, tx_r, tx_p;
-	double rx_x, rx_y, rx_z, rx_h, rx_r, rx_p;
-
-	/* roll and pitch sensor offsets */
-	double rollpitch_off_x, rollpitch_off_y, rollpitch_off_z, rollpitch_off_h, rollpitch_off_r, rollpitch_off_p;
-
-	/* heave sensor offsets */
-	double heave_off_x, heave_off_y, heave_off_z, heave_off_h, heave_off_r, heave_off_p;
-
-	/* heading sensor offset */
-	double heading_off_x, heading_off_y, heading_off_z, heading_off_h, heading_off_r, heading_off_p;
-
-	/* position sensor offsets */
-	double position_off_x, position_off_y, position_off_z;
 
 	/* variables for beam angle calculation */
 	mb_3D_orientation tx_align;
@@ -4486,209 +4463,225 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
+	// transmit and receive array offsets
+	// double tx_x, tx_y, tx_z;
+	double tx_h, tx_r, tx_p;
+
+	// double rx_x, rx_y, rx_z;
+	double rx_h, rx_r, rx_p;
 	/* add some calculated data to survey records */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
 		/* get transducer offsets */
 		if (store->par_stc == 0) {
-			tx_x = store->par_s1x;
-			tx_y = store->par_s1y;
-			tx_z = store->par_s1z;
+			// tx_x = store->par_s1x;
+			// tx_y = store->par_s1y;
+			// tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			rx_x = store->par_s2x;
-			rx_y = store->par_s2y;
-			rx_z = store->par_s2z;
+			// rx_x = store->par_s2x;
+			// rx_y = store->par_s2y;
+			// rx_z = store->par_s2z;
 			rx_h = store->par_s2h;
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
 		else if (store->par_stc == 1) {
-			tx_x = store->par_s1x;
-			tx_y = store->par_s1y;
-			tx_z = store->par_s1z;
+			// tx_x = store->par_s1x;
+			// tx_y = store->par_s1y;
+			// tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			rx_x = store->par_s1x;
-			rx_y = store->par_s1y;
-			rx_z = store->par_s1z;
+			// rx_x = store->par_s1x;
+			// rx_y = store->par_s1y;
+			// rx_z = store->par_s1z;
 			rx_h = store->par_s1h;
 			rx_r = store->par_s1r;
 			rx_p = store->par_s1p;
 		}
 		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_1) {
-			tx_x = store->par_s1x;
-			tx_y = store->par_s1y;
-			tx_z = store->par_s1z;
+			// tx_x = store->par_s1x;
+			// tx_y = store->par_s1y;
+			// tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			rx_x = store->par_s1x;
-			rx_y = store->par_s1y;
-			rx_z = store->par_s1z;
+			// rx_x = store->par_s1x;
+			// rx_y = store->par_s1y;
+			// rx_z = store->par_s1z;
 			rx_h = store->par_s1h;
 			rx_r = store->par_s1r;
 			rx_p = store->par_s1p;
 		}
 		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_2) {
-			tx_x = store->par_s2x;
-			tx_y = store->par_s2y;
-			tx_z = store->par_s2z;
+			// tx_x = store->par_s2x;
+			// tx_y = store->par_s2y;
+			// tx_z = store->par_s2z;
 			tx_h = store->par_s2h;
 			tx_r = store->par_s2r;
 			tx_p = store->par_s2p;
-			rx_x = store->par_s2x;
-			rx_y = store->par_s2y;
-			rx_z = store->par_s2z;
+			// rx_x = store->par_s2x;
+			// rx_y = store->par_s2y;
+			// rx_z = store->par_s2z;
 			rx_h = store->par_s2h;
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
 		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_1) {
-			tx_x = store->par_s1x;
-			tx_y = store->par_s1y;
-			tx_z = store->par_s1z;
+			// tx_x = store->par_s1x;
+			// tx_y = store->par_s1y;
+			// tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			rx_x = store->par_s2x;
-			rx_y = store->par_s2y;
-			rx_z = store->par_s2z;
+			// rx_x = store->par_s2x;
+			// rx_y = store->par_s2y;
+			// rx_z = store->par_s2z;
 			rx_h = store->par_s2h;
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
 		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_2) {
-			tx_x = store->par_s1x;
-			tx_y = store->par_s1y;
-			tx_z = store->par_s1z;
+			// tx_x = store->par_s1x;
+			// tx_y = store->par_s1y;
+			// tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			rx_x = store->par_s3x;
-			rx_y = store->par_s3y;
-			rx_z = store->par_s3z;
+			// rx_x = store->par_s3x;
+			// rx_y = store->par_s3y;
+			// rx_z = store->par_s3z;
 			rx_h = store->par_s3h;
 			rx_r = store->par_s3r;
 			rx_p = store->par_s3p;
 		}
 		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_1) {
-			tx_x = store->par_s0x;
-			tx_y = store->par_s0y;
-			tx_z = store->par_s0z;
+			// tx_x = store->par_s0x;
+			// tx_y = store->par_s0y;
+			// tx_z = store->par_s0z;
 			tx_h = store->par_s0h;
 			tx_r = store->par_s0r;
 			tx_p = store->par_s0p;
-			rx_x = store->par_s2x;
-			rx_y = store->par_s2y;
-			rx_z = store->par_s2z;
+			// rx_x = store->par_s2x;
+			// rx_y = store->par_s2y;
+			// rx_z = store->par_s2z;
 			rx_h = store->par_s2h;
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
 		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_2) {
-			tx_x = store->par_s1x;
-			tx_y = store->par_s1y;
-			tx_z = store->par_s1z;
+			// tx_x = store->par_s1x;
+			// tx_y = store->par_s1y;
+			// tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			rx_x = store->par_s3x;
-			rx_y = store->par_s3y;
-			rx_z = store->par_s3z;
+			// rx_x = store->par_s3x;
+			// rx_y = store->par_s3y;
+			// rx_z = store->par_s3z;
 			rx_h = store->par_s3h;
 			rx_r = store->par_s3r;
 			rx_p = store->par_s3p;
 		}
 
+		// position sensor offsets
+		// double position_off_x, position_off_y, position_off_z;
+
 		/* get active sensor offsets */
+
 		if (store->par_aps == 0) {
-			position_off_x = store->par_p1x;
-			position_off_y = store->par_p1y;
-			position_off_z = store->par_p1z;
+			// position_off_x = store->par_p1x;
+			// position_off_y = store->par_p1y;
+			// position_off_z = store->par_p1z;
 		}
 		else if (store->par_aps == 1) {
-			position_off_x = store->par_p2x;
-			position_off_y = store->par_p2y;
-			position_off_z = store->par_p2z;
+			// position_off_x = store->par_p2x;
+			// position_off_y = store->par_p2y;
+			// position_off_z = store->par_p2z;
 		}
 		else if (store->par_aps == 2) {
-			position_off_x = store->par_p3x;
-			position_off_y = store->par_p3y;
-			position_off_z = store->par_p3z;
+			// position_off_x = store->par_p3x;
+			// position_off_y = store->par_p3y;
+			// position_off_z = store->par_p3z;
 		}
+		/* roll and pitch sensor offsets */
+		// double rollpitch_off_x, rollpitch_off_y, rollpitch_off_z, rollpitch_off_h, rollpitch_off_r, rollpitch_off_p;
 		if (store->par_aro == 2) {
-			rollpitch_off_x = store->par_msx;
-			rollpitch_off_y = store->par_msy;
-			rollpitch_off_z = store->par_msz;
-			rollpitch_off_h = store->par_msg;
-			rollpitch_off_r = store->par_msr;
-			rollpitch_off_p = store->par_msp;
+			// rollpitch_off_x = store->par_msx;
+			// rollpitch_off_y = store->par_msy;
+			// rollpitch_off_z = store->par_msz;
+			// rollpitch_off_h = store->par_msg;
+			// rollpitch_off_r = store->par_msr;
+			// rollpitch_off_p = store->par_msp;
 		}
 		else if (store->par_aro == 3) {
-			rollpitch_off_x = store->par_nsx;
-			rollpitch_off_y = store->par_nsy;
-			rollpitch_off_z = store->par_nsz;
-			rollpitch_off_h = store->par_nsg;
-			rollpitch_off_r = store->par_nsr;
-			rollpitch_off_p = store->par_nsp;
+			// rollpitch_off_x = store->par_nsx;
+			// rollpitch_off_y = store->par_nsy;
+			// rollpitch_off_z = store->par_nsz;
+			// rollpitch_off_h = store->par_nsg;
+			// rollpitch_off_r = store->par_nsr;
+			// rollpitch_off_p = store->par_nsp;
 		}
+		/* heave sensor offsets */
+		// double heave_off_x, heave_off_y, heave_off_z, heave_off_h, heave_off_r, heave_off_p;
 		if (store->par_ahe == 2) {
-			heave_off_x = store->par_msx;
-			heave_off_y = store->par_msy;
-			heave_off_z = store->par_msz;
-			heave_off_h = store->par_msg;
-			heave_off_r = store->par_msr;
-			heave_off_p = store->par_msp;
+			// heave_off_x = store->par_msx;
+			// heave_off_y = store->par_msy;
+			// heave_off_z = store->par_msz;
+			// heave_off_h = store->par_msg;
+			// heave_off_r = store->par_msr;
+			// heave_off_p = store->par_msp;
 		}
 		else if (store->par_ahe == 3) {
-			heave_off_x = store->par_nsx;
-			heave_off_y = store->par_nsy;
-			heave_off_z = store->par_nsz;
-			heave_off_h = store->par_nsg;
-			heave_off_r = store->par_nsr;
-			heave_off_p = store->par_nsp;
+			// heave_off_x = store->par_nsx;
+			// heave_off_y = store->par_nsy;
+			// heave_off_z = store->par_nsz;
+			// heave_off_h = store->par_nsg;
+			// heave_off_r = store->par_nsr;
+			// heave_off_p = store->par_nsp;
 		}
+		/* heading sensor offset */
+		// double heading_off_x, heading_off_y, heading_off_z, heading_off_h, heading_off_r, heading_off_p;
 		if (store->par_ahs == 0 || store->par_ahs == 4) {
-			heading_off_x = store->par_p3x;
-			heading_off_y = store->par_p3y;
-			heading_off_z = store->par_p3z;
-			heading_off_h = store->par_gcg;
-			heading_off_r = 0.0;
-			heading_off_p = 0.0;
+			// heading_off_x = store->par_p3x;
+			// heading_off_y = store->par_p3y;
+			// heading_off_z = store->par_p3z;
+			// heading_off_h = store->par_gcg;
+			// heading_off_r = 0.0;
+			// heading_off_p = 0.0;
 		}
 		else if (store->par_ahs == 1) {
-			heading_off_x = store->par_p1x;
-			heading_off_y = store->par_p1y;
-			heading_off_z = store->par_p1z;
-			heading_off_h = store->par_gcg;
-			heading_off_r = 0.0;
-			heading_off_p = 0.0;
+			// heading_off_x = store->par_p1x;
+			// heading_off_y = store->par_p1y;
+			// heading_off_z = store->par_p1z;
+			// heading_off_h = store->par_gcg;
+			// heading_off_r = 0.0;
+			// heading_off_p = 0.0;
 		}
 		else if (store->par_ahs == 2) {
-			heading_off_x = store->par_msx;
-			heading_off_y = store->par_msy;
-			heading_off_z = store->par_msz;
-			heading_off_h = store->par_msg + store->par_gcg;
-			heading_off_r = store->par_msr;
-			heading_off_p = store->par_msp;
+			// heading_off_x = store->par_msx;
+			// heading_off_y = store->par_msy;
+			// heading_off_z = store->par_msz;
+			// heading_off_h = store->par_msg + store->par_gcg;
+			// heading_off_r = store->par_msr;
+			// heading_off_p = store->par_msp;
 		}
 		else if (store->par_ahs == 3 && store->par_nsz != 0.0) {
-			heading_off_x = store->par_nsx;
-			heading_off_y = store->par_nsy;
-			heading_off_z = store->par_nsz;
-			heading_off_h = store->par_nsg + store->par_gcg;
-			heading_off_r = store->par_nsr;
-			heading_off_p = store->par_nsp;
+			// heading_off_x = store->par_nsx;
+			// heading_off_y = store->par_nsy;
+			// heading_off_z = store->par_nsz;
+			// heading_off_h = store->par_nsg + store->par_gcg;
+			// heading_off_r = store->par_nsr;
+			// heading_off_p = store->par_nsp;
 		}
 		else if (store->par_ahs == 3) {
-			heading_off_x = store->par_p2x;
-			heading_off_y = store->par_p2y;
-			heading_off_z = store->par_p2z;
-			heading_off_h = store->par_gcg;
-			heading_off_r = 0.0;
-			heading_off_p = 0.0;
+			// heading_off_x = store->par_p2x;
+			// heading_off_y = store->par_p2y;
+			// heading_off_z = store->par_p2z;
+			// heading_off_h = store->par_gcg;
+			// heading_off_r = 0.0;
+			// heading_off_p = 0.0;
 		}
 
 		/* get ping time */
@@ -4726,8 +4719,8 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* make first cut at angles */
 		/* calculate corrected ranges, angles, and bathymetry */
-		theta_nadir = 90.0;
-		inadir = 0;
+		// const double theta_nadir = 90.0;
+		// int inadir = 0;
 		for (int i = 0; i < ping->png_nbeams; i++) {
 			/* calculate time of transmit and receive */
 			transmit_time_d = ptime_d + (double)ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
@@ -4740,13 +4733,13 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			mb_attint_interp(verbose, mbio_ptr, receive_time_d, &receive_heave, &receive_roll, &receive_pitch, error);
 
 			/* alongtrack offset distance */
-			transmit_alongtrack =
-			    (0.01 * ((double)ping->png_speed)) * ((double)ping->png_raw_txoffset[ping->png_raw_rxsector[i]]);
+			// const double transmit_alongtrack =
+			//     (0.01 * ((double)ping->png_speed)) * ((double)ping->png_raw_txoffset[ping->png_raw_rxsector[i]]);
 
 			/* get corrected range */
 			if (ping->png_ssv <= 0)
 				ping->png_ssv = 150;
-			soundspeed = 0.1 * ((double)ping->png_ssv);
+			// const double soundspeed = 0.1 * ((double)ping->png_ssv);
 			ping->png_range[i] = ping->png_raw_rxrange[i];
 			/* ping->png_bheave[i] is the difference between the heave at the ping timestamp time that is factored
 			 * into the ping->png_xducer_depth value and the average heave at the sector transmit time and the beam receive time

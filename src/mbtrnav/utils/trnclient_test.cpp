@@ -359,6 +359,7 @@ int main(int argc, char** argv)
     free(worker->host);
 
     fprintf(stderr,"done\n");
+  
     return 0;
 }
 

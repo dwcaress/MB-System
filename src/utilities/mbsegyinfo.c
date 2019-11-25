@@ -51,7 +51,6 @@ int main(int argc, char **argv) {
 	double speedmin;
 	double timegap;
 
-	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	char read_file[MB_PATH_MAXLINE] = "";
@@ -75,7 +74,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'L':
 			case 'l':

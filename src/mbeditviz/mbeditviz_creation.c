@@ -114,7 +114,8 @@ extern void do_mbeditviz_deleteselected(Widget, XtPointer, XtPointer);
 extern void do_mbeditviz_viewselected(Widget, XtPointer, XtPointer);
 extern void do_mbeditviz_viewall(Widget, XtPointer, XtPointer);
 extern void do_mbeditviz_mode_change(Widget, XtPointer, XtPointer);
-
+extern void do_mbeditviz_gridalgorithm_change(Widget, XtPointer, XtPointer);
+extern void do_mbeditviz_gridinterpolation_change(Widget, XtPointer, XtPointer);
 /**
  * Create the mainWindow_mbeditviz hierarchy of widgets.
  */
@@ -1357,7 +1358,7 @@ Widget CreatemainWindow_mbeditviz(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNwidth, 453);
 	ac++;
-	XtSetArg(args[ac], XmNheight, 337);
+	XtSetArg(args[ac], XmNheight, 550);
 	ac++;
 	XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING);
 	ac++;
@@ -1372,7 +1373,7 @@ Widget CreatemainWindow_mbeditviz(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNwidth, 453);
 	ac++;
-	XtSetArg(args[ac], XmNheight, 337);
+	XtSetArg(args[ac], XmNheight, 550);
 	ac++;
 	form_gridparameters = XtCreateWidget((char *)"form_gridparameters", xmFormWidgetClass, dialogShell_gridparameters, args, ac);
 
@@ -1386,9 +1387,9 @@ Widget CreatemainWindow_mbeditviz(Widget parent) {
 			ac++;
 		XtSetArg(args[ac], XmNminimum, 1);
 		ac++;
-		XtSetArg(args[ac], XmNdecimalPoints, 2);
+		XtSetArg(args[ac], XmNdecimalPoints, 3);
 		ac++;
-		XtSetArg(args[ac], XmNvalue, 100);
+		XtSetArg(args[ac], XmNvalue, 1000);
 		ac++;
 		XtSetArg(args[ac], XmNmaximum, 25000);
 		ac++;
@@ -1402,7 +1403,7 @@ Widget CreatemainWindow_mbeditviz(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNx, 10);
 		ac++;
-		XtSetArg(args[ac], XmNy, 128);
+		XtSetArg(args[ac], XmNy, 110);
 		ac++;
 		XtSetArg(args[ac], XmNwidth, 430);
 		ac++;
@@ -1430,7 +1431,7 @@ Widget CreatemainWindow_mbeditviz(Widget parent) {
 
 		tmp0 = (XmString)BX_CONVERT(
 		    form_gridparameters,
-		    (char *)":::t\"Current Grid Parameters:\":t\"    Longitude: -151.56667 -150.00000\":t\"    Latitude:     23.4567 "
+		    (char *)":::t\"Grid Bounds:\":t\"    Longitude: -151.56667 -150.00000\":t\"    Latitude:     23.4567 "
 		            "24.0000\":t\"    Cell Size: 10.00 m\"\"    Dimensions:  1234 X 2345\"",
 		    XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
@@ -1446,7 +1447,7 @@ Widget CreatemainWindow_mbeditviz(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNwidth, 432);
 		ac++;
-		XtSetArg(args[ac], XmNheight, 110);
+		XtSetArg(args[ac], XmNheight, 100);
 		ac++;
 		XtSetArg(
 		    args[ac], XmNfontList,
@@ -1461,6 +1462,186 @@ Widget CreatemainWindow_mbeditviz(Widget parent) {
 		 */
 		XmStringFree((XmString)tmp0);
 	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_gridparameters, (char *)"Gridding Algorithm:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 260);
+		ac++;
+		XtSetArg(args[ac], XmNy, 150);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_gridparameters, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_gridalgorithm = XmCreateLabel(form_gridparameters, (char *)"label_gridalgorithm", args, ac);
+		XtManageChild(label_gridalgorithm);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 260);
+	ac++;
+	XtSetArg(args[ac], XmNy, 170);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 144);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 65);
+	ac++;
+	XtSetArg(args[ac], XmNisHomogeneous, False);
+	ac++;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	radioBox_gridalgorithm = XmCreateRadioBox(form_gridparameters, (char *)"radioBox_gridalgorithm", args, ac);
+	XtManageChild(radioBox_gridalgorithm);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(radioBox_gridalgorithm, (char *)"Simple Mean", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 138);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(radioBox_gridalgorithm, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_gridalgorithm_simplemean = XmCreateToggleButton(radioBox_gridalgorithm, (char *)"toggleButton_gridalgorithm_simplemean", args, ac);
+		XtManageChild(toggleButton_gridalgorithm_simplemean);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_gridalgorithm_simplemean, XmNvalueChangedCallback, do_mbeditviz_gridalgorithm_change, (XtPointer)0);
+
+ac = 0;
+{
+  XmString tmp0;
+
+  tmp0 = (XmString)BX_CONVERT(radioBox_gridalgorithm, (char *)"Footprint", XmRXmString, 0, &argok);
+  XtSetArg(args[ac], XmNlabelString, tmp0);
+  if (argok)
+    ac++;
+  XtSetArg(args[ac], XmNwidth, 138);
+  ac++;
+  XtSetArg(args[ac], XmNheight, 28);
+  ac++;
+  XtSetArg(
+      args[ac], XmNfontList,
+      BX_CONVERT(radioBox_gridalgorithm, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+  if (argok)
+    ac++;
+  toggleButton_gridalgorithm_footprint = XmCreateToggleButton(radioBox_gridalgorithm, (char *)"toggleButton_gridalgorithm_footprint", args, ac);
+  XtManageChild(toggleButton_gridalgorithm_footprint);
+
+  /**
+   * Free any memory allocated for resources.
+   */
+  XmStringFree((XmString)tmp0);
+}
+
+XtAddCallback(toggleButton_gridalgorithm_footprint, XmNvalueChangedCallback, do_mbeditviz_gridalgorithm_change, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(radioBox_gridalgorithm, (char *)"Shoal Bias", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 138);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(radioBox_gridalgorithm, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_gridalgorithm_shoalbias = XmCreateToggleButton(radioBox_gridalgorithm, (char *)"toggleButton_gridalgorithm_shoalbias", args, ac);
+		XtManageChild(toggleButton_gridalgorithm_shoalbias);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_gridalgorithm_shoalbias, XmNvalueChangedCallback, do_mbeditviz_gridalgorithm_change, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_gridparameters, (char *)"Interpolation scale in grid cells:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 260);
+		ac++;
+		XtSetArg(args[ac], XmNy, 150);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_gridparameters, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_interpolation = XmCreateLabel(form_gridparameters, (char *)"label_interpolation", args, ac);
+		XtManageChild(label_interpolation);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 120);
+	ac++;
+	XtSetArg(args[ac], XmNy, 490);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 70);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 40);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(form_open, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	text_interpolation = XmCreateText(form_gridparameters, (char *)"0", args, ac);
+	XtManageChild(text_interpolation);
+
+	XtAddCallback(text_interpolation, XmNvalueChangedCallback, do_mbeditviz_gridinterpolation_change, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -1482,11 +1663,11 @@ Widget CreatemainWindow_mbeditviz(Widget parent) {
 			ac++;
 		XtSetArg(args[ac], XmNx, 10);
 		ac++;
-		XtSetArg(args[ac], XmNy, 200);
+		XtSetArg(args[ac], XmNy, 400);
 		ac++;
 		XtSetArg(args[ac], XmNwidth, 430);
 		ac++;
-		XtSetArg(args[ac], XmNheight, 70);
+		XtSetArg(args[ac], XmNheight, 200);
 		ac++;
 		XtSetArg(
 		    args[ac], XmNfontList,
@@ -1512,7 +1693,7 @@ Widget CreatemainWindow_mbeditviz(Widget parent) {
 			ac++;
 		XtSetArg(args[ac], XmNx, 290);
 		ac++;
-		XtSetArg(args[ac], XmNy, 290);
+		XtSetArg(args[ac], XmNy, 390);
 		ac++;
 		XtSetArg(args[ac], XmNwidth, 100);
 		ac++;
@@ -1545,7 +1726,7 @@ Widget CreatemainWindow_mbeditviz(Widget parent) {
 			ac++;
 		XtSetArg(args[ac], XmNx, 70);
 		ac++;
-		XtSetArg(args[ac], XmNy, 290);
+		XtSetArg(args[ac], XmNy, 390);
 		ac++;
 		XtSetArg(args[ac], XmNwidth, 100);
 		ac++;
@@ -1734,26 +1915,6 @@ Widget CreatemainWindow_mbeditviz(Widget parent) {
 	}
 
 	XtAddCallback(pushButton_error, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_error");
-	ac = 0;
-	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
-	ac++;
-	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
-	ac++;
-	XtSetArg(args[ac], XmNbottomOffset, 0);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 10);
-	ac++;
-	XtSetArg(args[ac], XmNrightOffset, 13);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 8);
-	ac++;
-	XtSetArg(args[ac], XmNtopWidget, label_current);
-	ac++;
-	XtSetValues(scale_cellsize, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM);
@@ -1783,11 +1944,116 @@ Widget CreatemainWindow_mbeditviz(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNleftOffset, 10);
 	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 13);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 8);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, label_current);
+	ac++;
+	XtSetValues(scale_cellsize, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
 	XtSetArg(args[ac], XmNrightOffset, 11);
 	ac++;
 	XtSetArg(args[ac], XmNtopOffset, 11);
 	ac++;
 	XtSetArg(args[ac], XmNtopWidget, scale_cellsize);
+	ac++;
+	XtSetValues(label_gridalgorithm, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 11);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, label_gridalgorithm);
+	ac++;
+	XtSetValues(radioBox_gridalgorithm, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 11);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 11);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, radioBox_gridalgorithm);
+	ac++;
+	XtSetValues(label_interpolation, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 11);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, label_interpolation);
+	ac++;
+	XtSetValues(text_interpolation, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 11);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 11);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, text_interpolation);
 	ac++;
 	XtSetValues(label_implied, args, ac);
 

@@ -19,7 +19,7 @@ GetRangeError(double& mapVariance, const double* const startPoint, const double*
 		beamU[0] = directionVector[0]/measuredDistance;
 		beamU[1] = directionVector[1]/measuredDistance;
 		beamU[2] = directionVector[2]/measuredDistance;
-		
+
 		if(!computeMapRayIntersection(startPoint, beamU, predictedRange, mapVariance)){
 			rangeError = measuredDistance - fabs(predictedRange);
 		} else {
@@ -59,7 +59,7 @@ GetRangeError(double& mapVariance, const double* const startPoint, const double*
 			}
 			//ADD IN CODE TO HANDLE NAN VALUES
 		}
-		
+
 		return rangeError;
 	}
 }
@@ -80,34 +80,34 @@ TerrainMapDEM(const char* mapName) {
 	setRefMap(mapName);
 }
 
-int 
+int
 TerrainMapDEM::
 loadSubMap(const double xcen, const double ycen, double* mapWidth, double vehN, double vehE)
 {
 	int mapStatus = this->extractSubMap(xcen, ycen, mapWidth);
-	
+
 	switch(mapStatus) {
-	
+
 		case MAPBOUNDS_OUT_OF_BOUNDS:
 			logs(TL_OMASK(TL_TERRAIN_MAP_DEM, TL_LOG),"TerrainNav:: Vehicle is operating outside of the given reference"
 				   " map.\n");
 			break;
-			
+
 		case MAPBOUNDS_OK:
 			break;
-			
+
 		case MAPBOUNDS_NEAR_EDGE:
 			logs(TL_OMASK(TL_TERRAIN_MAP_DEM, TL_LOG),"TerrainNav:: Vehicle is operating near the reference map boundary"
 				   "; correlation area may be truncated\n");
 			break;
-			
+
 		default:
 			logs(TL_OMASK(TL_TERRAIN_MAP_DEM, TL_LOG),"TerrainNav:: No valid map status code returned from extract map"
 				   " function\n");
 			mapStatus = MAPBOUNDS_OUT_OF_BOUNDS;
 			break;
 	}
-	
+
 	return mapStatus;
 }
 
@@ -117,21 +117,21 @@ TerrainMapDEM::
 }
 
 // throws exception when loading results in error
-void 
+void
 TerrainMapDEM::
 setLowResMap(const char* mapName){
 	if(this->refMap->lowResSrc == NULL) {
 		this->refMap->lowResSrc = mapsrc_init();
 		mapsrc_fill(mapName, this->refMap->lowResSrc);
 	}
-	
+
 	if(this->refMap->lowResSrc->status != MAPSRC_IS_FILLED) {
       logs(TL_OMASK(TL_TERRAIN_MAP_DEM, TL_LOG),"Error loading in low resolution map file...\n");
       throw Exception("TerrainMapDEM::setLowResMap() - Error loading map file");
 	}
 }
 
-bool 
+bool
 TerrainMapDEM::
 GetMapBounds(double* currMapBounds){
 	if(map.xpts != NULL) {
@@ -144,7 +144,7 @@ GetMapBounds(double* currMapBounds){
 	return false;
 }
 
-bool 
+bool
 TerrainMapDEM::
 GetMapT(mapT& currMap){
 	if(map.xpts != NULL){
@@ -162,7 +162,7 @@ withinRefMap(const double northPos, const double eastPos) {
 	if(withinBounds == MAPBOUNDS_OK) {
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -179,14 +179,14 @@ withinValidMapRegion(const double northPos, const double eastPos) {
 	return false;
 }
 
-bool 
+bool
 TerrainMapDEM::
 withinSubMap(const double northPos, const double eastPos){
 	//Check to make sure a sub-map has been loaded
 	if(this->map.xpts == NULL) {
 		return false;
 	}
-	
+
 	//Check if the point is within the loaded sub-map
 	if((northPos > this->map.xpts[0]) &&
 			(northPos < this->map.xpts[this->map.numX - 1]) &&
@@ -197,56 +197,56 @@ withinSubMap(const double northPos, const double eastPos){
 		return false;
 	}
 }
-	
+
 // throws exception when loading results in error
-void 
+void
 TerrainMapDEM::
 setRefMap(const char* mapName){
 	//int check_error_code;
 	mapbounds* tempBounds;
 	char mapPrefix[1024];
 	char mapVarName[1040];
-	
+
 	//clear memory for any currently stored ref maps
 	this->refMap->clean();
-	
+
 	//set map source to new reference map
 	this->refMap->src = mapsrc_init();
 	mapsrc_fill(mapName, this->refMap->src);
-	
+
 	//check that map source fill was successful
 	if(this->refMap->src->status != MAPSRC_IS_FILLED) {
       logs(TL_OMASK(TL_TERRAIN_MAP_DEM, TL_LOG),"Error loading in map file...\n");
       throw Exception("TerrainMapDEM::setRefMap() - Error loading map file");
 	}
-	
+
 	//define variance map file name
 	strcpy(mapPrefix, mapName);
 	strtok(mapPrefix, ".");
 	sprintf(mapVarName, "%s%s", mapPrefix, "_sd.grd");
-	
-	
-	
+
+
+
 	//set variance map source if provided
 	this->refMap->varSrc = mapsrc_init();
-	
+
 	//TODO MAPIO::check_error No such file or directory
 	//std::cout << "\n\nBetween here";
 	mapsrc_fill(mapVarName, this->refMap->varSrc);
 	//std::cout << "\nand here\n\n";
-	
+
 	if(this->refMap->varSrc->status != MAPSRC_IS_FILLED) {
 		mapsrc_free(this->refMap->varSrc);
 		this->refMap->varSrc = NULL;
 	}
-	
+
 	//set map bounds structure for new reference map
 	this->refMap->bounds = mapbounds_init();
 	tempBounds = mapbounds_init();
-	
+
 	//check_error_code = mapbounds_fill1(this->refMap->src, tempBounds);
 	mapbounds_fill1(this->refMap->src, tempBounds);
-	
+
 	//change labels to keep with a right-handed coordinate system
 	this->refMap->bounds->xmin = tempBounds->ymin;
 	this->refMap->bounds->xmax = tempBounds->ymax;
@@ -254,15 +254,15 @@ setRefMap(const char* mapName){
 	this->refMap->bounds->ymax = tempBounds->xmax;
 	this->refMap->bounds->dx = tempBounds->dy;
 	this->refMap->bounds->dy = tempBounds->dx;
-	
+
 	free(tempBounds);
 	tempBounds = NULL;
-	
+
 	//display reference map boundary information to screen
 	char* outputString = mapbounds_tostring(this->refMap->bounds);
 	logs(TL_OMASK(TL_TERRAIN_MAP_DEM, TL_LOG),outputString);
 	free(outputString);
-	
+
 	return;
 }
 
@@ -279,7 +279,7 @@ computeMapRayIntersection(const double* position, double* u, double& r, double& 
 	xI[1] = position[1];
 	xI[2] = position[2];
 	r = 0;
-	
+
 	//verify that u has unit length
 	length = sqrt(u[0] * u[0] + u[1] * u[1] + u[2] * u[2]);
 	if(length != 1.0) {
@@ -287,43 +287,43 @@ computeMapRayIntersection(const double* position, double* u, double& r, double& 
 		u[1] = u[1] / length;
 		u[2] = u[2] / length;
 	}
-	
+
 	//compute initial intersection with the terrain and delta_z difference
 	interpolateDepth(xI[0], xI[1], z, var);
 	diff = xI[2] - fabs(z);
 	numIter = 1;
-	
+
 	//iterate until converged or until max iterations
 	while(fabs(diff) > tol && numIter < maxIter) {
 		//step along direction vector
 		xI[0] -= diff * u[0];
 		xI[1] -= diff * u[1];
 		xI[2] -= diff * u[2];
-		
+
 		//recalculate terrain intersection
 		interpolateDepth(xI[0], xI[1], z, var);
-		
+
 		//if interpolated depth is NaN, return false
 		// if(isnan(z)) {
 		if(ISNIN(z)) {
 			r = fabs(z);
 			return false;
 		}
-		
+
 		diff = xI[2] - fabs(z);
 		numIter++;
 	}
-	
+
 	/*if(numIter == maxIter)
 	{
 	   logs(TL_OMASK(TL_TERRAIN_MAP_DEM, TL_LOG),"reached max iter; diff = %f \n", diff);
 	   exit(0);
 	   }*/
-	
+
 	r = sqrt((xI[0] - position[0]) * (xI[0] - position[0]) +
 			 (xI[1] - position[1]) * (xI[1] - position[1]) +
 			 (xI[2] - position[2]) * (xI[2] - position[2]));
-			 
+
 	return true;
 }
 
@@ -333,60 +333,60 @@ void
 TerrainMapDEM::
 interpolateDepth(double xi, double yi, double& zi, double& var) {
 	//Check that a map has been extracted
-	if((this->map.xpts == NULL)) {
+	if(this->map.xpts == NULL) {
 		logs(TL_OMASK(TL_TERRAIN_MAP_DEM, TL_LOG),"ERROR: tried to access map values without first extracting map"
 			   " information");
 		return;
 	}
-	
+
 	ColumnVector W;
 	int* xIndices = NULL;
 	int* yIndices = NULL;
 	int numPts;
 	double h_sq;
-	
+
 	//define pointer to an interpolation function
 	void (*pt2interpFunction)(double*, double*, const Matrix&, double, double,
 							  double&, int*, int*, ColumnVector&) = NULL;
-							  
+
 	//determine number of interpolation points and proper interpolation function
 	switch(this->interpMapMethod) {
 		case 0:
 			numPts = 1;
 			pt2interpFunction = &nearestInterp;
 			break;
-			
+
 		case 1:
 			numPts = 4;
 			pt2interpFunction = &bilinearInterp;
 			break;
-			
+
 		case 2:
 			numPts = 16;
 			pt2interpFunction = &bicubicInterp;
 			break;
-			
+
 		case 3:
 			numPts = 16;
 			pt2interpFunction = &splineInterp;
 			break;
-			
+
 		default:
 			numPts = 1;
 			pt2interpFunction = &nearestInterp;
 			break;
 	}
-	
+
 	//initialize indices arrays and Weights matrix
 	xIndices = new int[numPts];
 	yIndices = new int[numPts];
 	W.ReSize(numPts);
-	
+
 	//Perform interpolation
 	(*pt2interpFunction)(this->map.xpts, this->map.ypts,
 						 this->map.depths, xi, yi, zi,
 						 xIndices, yIndices, W);
-						 
+
 	//If returned depth is NaN, extract data from low resolution map
 	// if(isnan(zi) && this->refMap->lowResSrc != NULL) {
 	if(ISNIN(zi) && this->refMap->lowResSrc != NULL) {
@@ -408,7 +408,7 @@ interpolateDepth(double xi, double yi, double& zi, double& var) {
 			var = computeInterpDepthVariance(xIndices, yIndices, W);
 		}
 	}
-	
+
 	delete [] xIndices;
 	delete [] yIndices;
 	return;
@@ -418,11 +418,11 @@ double
 TerrainMapDEM::
 getNearestLowResMapPoint(const double north, const double east, double& nearestNorth, double& nearestEast) {
 	double zi;
-	
+
 	if(this->refMap->lowResSrc == NULL) {
 		return 0.0;
 	}
-	
+
 	zi = mapsrc_find(this->refMap->lowResSrc, east, north);
 	nearestNorth = refMap->lowResSrc->y
 				   [closestPtUniformArray(north, refMap->lowResSrc->y[0],
@@ -434,7 +434,7 @@ getNearestLowResMapPoint(const double north, const double east, double& nearestN
 										 refMap->lowResSrc->x
 										 [refMap->lowResSrc->xdimlen - 1],
 										 refMap->lowResSrc->xdimlen)];
-										 
+
 	return zi;
 }
 
@@ -448,13 +448,13 @@ computeInterpDepthVariance(int* xIndices, int* yIndices, ColumnVector Weights) {
 	ColumnVector VarVec(N);
 	double dx, dy, hsq, z1, z2;
 	int i, j;
-	
+
 	VarMat = 0.0;
-	
+
 	for(i = 0; i < N; i++) {
 		VarVec(i + 1) = this->map.depthVariance(xIndices[i] + 1, yIndices[i] + 1);
 		z1 = this->map.depths(xIndices[i] + 1, yIndices[i] + 1);
-		
+
 		//Compute cross-variance terms using variogram
 		for(j = i; j < N; j++) {
 			dx = this->map.xpts[xIndices[i]] -
@@ -471,18 +471,18 @@ computeInterpDepthVariance(int* xIndices, int* yIndices, ColumnVector Weights) {
 			}
 		}
 	}
-	
+
 	//compute total variance value for current map point
 	varValue = Weights.t() * VarVec + Weights.t() * VarMat * Weights;
 	var = varValue.AsScalar();
-	
+
 	//check that the variance is positive and finite
 	// if(isnan(var) || var < 0) {
 	if(ISNIN(var) || var < 0) {
 		varValue = Weights.t() * VarVec;
 		var = varValue.AsScalar();
 	}
-	
+
 	return var;
 }
 
@@ -490,31 +490,31 @@ int
 TerrainMapDEM::
 extractSubMap(const double north, const double east, double* mapParams) {
 	int statusCode;
-	
+
 	//check that there is a reference map loaded to extract data from
 	if(this->refMap->src == NULL) {
 		logs(TL_OMASK(TL_TERRAIN_MAP_DEM, TL_LOG),"Attempted to extract map data with no reference map defined!!");
 		return MAPBOUNDS_OUT_OF_BOUNDS;
 	}
-	
+
 	//if map is already defined, clear memory
 	if(this->map.xpts != NULL || this->map.ypts != NULL) {
 		this->map.clean();
 	}
-	
+
 	//load data from reference map
 	mapdata* data = (mapdata*) malloc(sizeof(struct mapdata));
 	statusCode = mapdata_fill(this->refMap->src, data, east, north, mapParams[1]
 							  , mapParams[0]);
-							  
+
 	//check status of loaded map data to ensure it worked properly
 	if(statusCode != MAPBOUNDS_OUT_OF_BOUNDS) {
 		convertMapdataToMapT(data);
-		
+
 		//load variance map data
 		extractVarMap(north, east, mapParams);
 	}
-	
+
 	mapdata_free(data, 1);
 	return statusCode;
 }
@@ -525,34 +525,34 @@ void
 TerrainMapDEM::
 convertMapdataToMapT(mapdata* currMapStruct) {
 	int i;
-	
+
 	//define parameters in mapT structure based on parameters in currMapStruct
 	this->map.numX = int(currMapStruct->ydimlen);
 	this->map.numY = int(currMapStruct->xdimlen);
 	this->map.xcen = currMapStruct->ycenter;
 	this->map.ycen = currMapStruct->xcenter;
-	
+
 	//define map xpts and ypts vectors
 	this->map.xpts = new double[this->map.numX];
 	this->map.ypts = new double[this->map.numY];
-	
+
 	//Map is stored in E,N,U frame. Convert to N,E,D frame
 	for(i = 0; i < this->map.numX; i++) {
 		this->map.xpts[i] = currMapStruct->ypts[i];
 	}
-	
+
 	for(i = 0; i < this->map.numY; i++) {
 		this->map.ypts[i] = currMapStruct->xpts[i];
 	}
-	
+
 	//define map parameters
 	this->map.dx = this->refMap->bounds->dx;
 	this->map.dy = this->refMap->bounds->dy;
-	
-	
+
+
 	//convert zpts to Matrix of depths, positive downward
 	Matrix temp(this->map.numX, this->map.numY);
-	
+
 	for(int row = 1; row <= this->map.numX; row++) {
 		for(int col = 1; col <= this->map.numY; col++) {
 			float* z = currMapStruct->z;
@@ -560,49 +560,49 @@ convertMapdataToMapT(mapdata* currMapStruct) {
 			temp(row, col) = fabs(value);
 		}
 	}
-	
+
 	this->map.depths = temp;
-	
+
 }
 
 int
 TerrainMapDEM::
 extractVarMap(const double north, const double east, double* mapParams) {
 	int statusCode;
-	
+
 	//check that there is a variance map loaded to extract data from
 	if(this->refMap->varSrc == NULL) {
 		this->map.depthVariance.ReSize(this->map.numX, this->map.numY);
 		this->map.depthVariance = fabs(this->map.dx);
-		
+
 		//check for valid variance value
 		// if(isnan(this->map.depthVariance(1, 1)) ||
 		if(ISNIN(this->map.depthVariance(1, 1)) ||
 				this->map.depthVariance(1, 1) == 0) {
 			this->map.depthVariance = fabs(this->map.dx);
 		}
-		
+
 		statusCode = MAPBOUNDS_OK;
 	} else {
 		mapdata* data = (mapdata*) malloc(sizeof(struct mapdata));
 		statusCode = mapdata_fill(this->refMap->varSrc, data, east, north,
 								  mapParams[1], mapParams[0]);
-								  
+
 		//check status of loaded map data to ensure it worked properly
 		if(statusCode != MAPBOUNDS_OUT_OF_BOUNDS) {
 			//convert zpts to Matrix of depths
 			Matrix temp(this->map.numX, this->map.numY);
-			
+
 			for(int row = 1; row <= this->map.numX; row++) {
 				for(int col = 1; col <= this->map.numY; col++) {
 					float* z = data->z;
 					float value = z[(row - 1) * this->map.numY + (col - 1)];
-					
+
 					//estimate variance by stored std. dev. values plus variogram
 					//variation at the given map resolution
 					temp(row, col) = value * value + 1.0 +
 									 evalVariogram(this->map.dx);
-									 
+
 					//check for valid variance values
 					// if(isnan(temp(row, col)) || value == 0) {
 					if(ISNIN(temp(row, col)) || value == 0) {
@@ -610,14 +610,14 @@ extractVarMap(const double north, const double east, double* mapParams) {
 					}
 				}
 			}
-			
+
 			this->map.depthVariance = temp;
-			
+
 		}
-		
+
 		mapdata_free(data, 1);
 	}
-	
+
 	return statusCode;
 }
 /******************************************************************************************/
@@ -632,12 +632,12 @@ void
 TerrainMapDEM::
 interpolateDepthMat(double* xi, double* yi, Matrix& zi, Matrix& var) {
 	//Check that a map has been extracted
-	if((this->map.xpts == NULL)) {
+	if(this->map.xpts == NULL) {
 		logs(TL_OMASK(TL_TERRAIN_MAP_DEM, TL_LOG),"ERROR: tried to access map values without first extracting map"
 			   " information");
 		return;
 	}
-	
+
 	int N = zi.Nrows();
 	int M = zi.Ncols();
 	int numPts, i, j;
@@ -645,44 +645,44 @@ interpolateDepthMat(double* xi, double* yi, Matrix& zi, Matrix& var) {
 	int* xIndices = NULL;
 	int* yIndices = NULL;
 	double h_sq;
-	
+
 	//define pointer to an interpolation function
 	void (*pt2interpFunction)(double*, double*, const Matrix&, double, double,
 							  double&, int*, int*, ColumnVector&) = NULL;
-							  
+
 	//determine number of interpolation points and proper interpolation function
 	switch(this->interpMapMethod) {
 		case 0:
 			numPts = 1;
 			pt2interpFunction = &nearestInterp;
 			break;
-			
+
 		case 1:
 			numPts = 4;
 			pt2interpFunction = &bilinearInterp;
 			break;
-			
+
 		case 2:
 			numPts = 16;
 			pt2interpFunction = &bicubicInterp;
 			break;
-			
+
 		case 3:
 			numPts = 16;
 			pt2interpFunction = &splineInterp;
 			break;
-			
+
 		default:
 			numPts = 1;
 			pt2interpFunction = &nearestInterp;
 			break;
 	}
-	
+
 	//initialize indices arrays and Weights matrix
 	xIndices = new int[numPts];
 	yIndices = new int[numPts];
 	W.ReSize(numPts);
-	
+
 	for(i = 0; i < N; i++) {
 		for(j = 0; j < M; j++) {
 			(*pt2interpFunction)(this->map.xpts, this->map.ypts,
@@ -716,7 +716,7 @@ interpolateDepthMat(double* xi, double* yi, Matrix& zi, Matrix& var) {
 	}
 	delete [] xIndices;
 	delete [] yIndices;
-	
+
 	return;
 }
 
@@ -729,53 +729,53 @@ interpolateGradient(double xi, double yi, Matrix& gradient) {
 	int* yIndices = NULL;
 	int numPts = 0;
 	double zi;
-	
+
 	//define pointer to an interpolation function
 	void (*pt2interpFunction)(double*, double*, const Matrix&, double, double,
 							  double&, int*, int*, ColumnVector&) = NULL;
-							  
+
 	//determine number of interpolation points and proper interpolation function
 	switch(this->interpMapMethod) {
 		case 0:
 			numPts = 1;
 			pt2interpFunction = &nearestInterp;
 			break;
-			
+
 		case 1:
 			numPts = 4;
 			pt2interpFunction = &bilinearInterp;
 			break;
-			
+
 		case 2:
 			numPts = 16;
 			pt2interpFunction = &bicubicInterp;
 			break;
-			
+
 		case 3:
 			numPts = 16;
 			pt2interpFunction = &splineInterp;
 			break;
-			
+
 		default:
 			numPts = 1;
 			pt2interpFunction = &nearestInterp;
 			break;
 	}
-	
+
 	//initialize indices arrays and Weights matrix
 	xIndices = new int[numPts];
 	yIndices = new int[numPts];
 	W.ReSize(numPts);
-	
+
 	//Perform interpolation to find xIndices and yIndices
 	(*pt2interpFunction)(this->map.xpts, this->map.ypts,
 						 this->map.depths, xi, yi, zi,
 						 xIndices, yIndices, W);
-						 
+
 	//Compute terrain gradient based on interpolation scheme and returned
 	//weights/indices
 	computeInterpTerrainGradient(xIndices, yIndices, xi, yi, gradient);
-	
+
 	delete [] xIndices;
 	delete [] yIndices;
 }
@@ -789,49 +789,49 @@ interpolateDepthAndGradient(double xi, double yi, double& zi, double& var, Matri
 	int* yIndices = NULL;
 	int numPts = 0;
 	double h_sq;
-	
+
 	//define pointer to an interpolation function
 	void (*pt2interpFunction)(double*, double*, const Matrix&, double, double,
 							  double&, int*, int*, ColumnVector&) = NULL;
-							  
+
 	//determine number of interpolation points and proper interpolation function
 	switch(this->interpMapMethod) {
 		case 0:
 			numPts = 1;
 			pt2interpFunction = &nearestInterp;
 			break;
-			
+
 		case 1:
 			numPts = 4;
 			pt2interpFunction = &bilinearInterp;
 			break;
-			
+
 		case 2:
 			numPts = 16;
 			pt2interpFunction = &bicubicInterp;
 			break;
-			
+
 		case 3:
 			numPts = 16;
 			pt2interpFunction = &splineInterp;
 			break;
-			
+
 		default:
 			numPts = 1;
 			pt2interpFunction = &nearestInterp;
 			break;
 	}
-	
+
 	//initialize indices arrays and Weights matrix
 	xIndices = new int[numPts];
 	yIndices = new int[numPts];
 	W.ReSize(numPts);
-	
+
 	//Perform interpolation to find zi
 	(*pt2interpFunction)(terrainMap->map.xpts, terrainMap->map.ypts,
 						 terrainMap->map.depths, xi, yi, zi,
 						 xIndices, yIndices, W);
-						 
+
 	//If returned depth is NaN, extract data from low resolution map
 	if(isnan(zi) && terrainMap->refMap->lowResSrc != NULL) {
 		double xPt, yPt;
@@ -852,11 +852,11 @@ interpolateDepthAndGradient(double xi, double yi, double& zi, double& var, Matri
 			var = computeInterpDepthVariance(xIndices, yIndices, W);
 		}
 	}
-	
+
 	//Compute terrain gradient based on interpolation scheme and returned
 	//weights/indices
 	computeInterpTerrainGradient(xIndices, yIndices, xi, yi, gradient);
-	
+
 	delete [] xIndices;
 	delete [] yIndices;
 }
@@ -870,10 +870,10 @@ computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi,
 	double dx, dy;
 	double b2, b3, b4;
 	double z11, z12, z21, z22;
-	
+
 	dx = this->map.dx;
 	dy = this->map.dy;
-	
+
 	//If using bilinear interpolation, compute terrain gradient based on the
 	//bilinear interpolation function
 	if(this->interpMapMethod == 1) {
@@ -885,7 +885,7 @@ computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi,
 		z21 = this->map.depths(xIndices[1] + 1, yIndices[1] + 1);
 		z12 = this->map.depths(xIndices[2] + 1, yIndices[2] + 1);
 		z22 = this->map.depths(xIndices[3] + 1, yIndices[3] + 1);
-		
+
 		// The resulting bilinear interpolation function is given
 		// by:
 		//        z(x,y)_interp = b1 + b2x + b3y + b4xy
@@ -896,7 +896,7 @@ computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi,
 		b3 = (1 / (dx * dy)) * (xIndices[0] * (z21 - z22) +
 								xIndices[2] * (z12 - z11));
 		b4 = (1 / (dx * dy)) * (z11 - z12 - z21 + z22);
-		
+
 		// The associated derivatives are:
 		//        dz/dx = b2 + b4y
 		//        dz/dy = b3 + b4x
@@ -904,7 +904,7 @@ computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi,
 		gradient(1, 1) = b2 + b4 * yi;
 		gradient(1, 2) = b3 + b4 * xi;
 	}
-	
+
 	//Use simple forward/backward differencing for gradient calculation
 	else {
 		//Compute X gradient
@@ -923,8 +923,8 @@ computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi,
 													   yIndices[0] + 1) - this->map.depths(xIndices[0], yIndices[0] + 1));
 			}
 		}
-		
-		
+
+
 		//Compute Y gradient
 		//If we are at the lower bound, use a forward difference
 		if(yIndices[0] == 0) {
@@ -942,9 +942,6 @@ computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi,
 			}
 		}
 	}
-	
-	
+
+
 }
-
-
-

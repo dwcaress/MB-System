@@ -22,9 +22,6 @@
  *
  * Author:	D. W. Caress
  * Date:	August 5, 1996
- *
- *
- *
  */
 
 #include <math.h>
@@ -36,7 +33,6 @@
 #include "mb_io.h"
 #include "mb_status.h"
 #include "mbsys_dsl.h"
-
 
 /*--------------------------------------------------------------------*/
 int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
@@ -378,7 +374,7 @@ int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			        ssalongtrack[i]);
 	}
 
-	int status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);

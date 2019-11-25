@@ -39,30 +39,37 @@
 #include "mb_status.h"
 #include "mbsys_hysweep.h"
 
-#define MBHYSWEEPPREPROCESS_ALLOC_CHUNK 1000
-// TODO(schwehr): enums
-static const int MBHYSWEEPPREPROCESS_PROCESS = 1;
-static const int MBHYSWEEPPREPROCESS_TIMESTAMPLIST = 2;
-static const int MBHYSWEEPPREPROCESS_TIMELAG_OFF = 0;
-static const int MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT = 1;
-static const int MBHYSWEEPPREPROCESS_TIMELAG_MODEL = 2;
+const int MBHYSWEEPPREPROCESS_ALLOC_CHUNK = 1000;
 
-static const int MBHYSWEEPPREPROCESS_SONAR_OFFSET_NONE = 0;
-static const int MBHYSWEEPPREPROCESS_SONAR_OFFSET_SONAR = 1;
-static const int MBHYSWEEPPREPROCESS_SONAR_OFFSET_MRU = 2;
-static const int MBHYSWEEPPREPROCESS_SONAR_OFFSET_NAVIGATION = 3;
+typedef enum {
+    MBHYSWEEPPREPROCESS_PROCESS = 1,
+    MBHYSWEEPPREPROCESS_TIMESTAMPLIST = 2,
+} hysweep_mode_t;
 
-#define MBHYSWEEPPREPROCESS_OFFSET_MAX 12
+typedef enum {
+    MBHYSWEEPPREPROCESS_TIMELAG_OFF = 0,
+    MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT = 1,
+    MBHYSWEEPPREPROCESS_TIMELAG_MODEL = 2,
+} timelag_t;
 
-static const int MBHYSWEEPPREPROCESS_NAVFORMAT_NONE = 0;
+typedef enum {
+    // MBHYSWEEPPREPROCESS_SONAR_OFFSET_NONE = 0,
+    MBHYSWEEPPREPROCESS_SONAR_OFFSET_SONAR = 1,
+    MBHYSWEEPPREPROCESS_SONAR_OFFSET_MRU = 2,
+    MBHYSWEEPPREPROCESS_SONAR_OFFSET_NAVIGATION = 3,
+} sonar_offset_t;
+
+const int MBHYSWEEPPREPROCESS_OFFSET_MAX = 12;
+
+// static const int MBHYSWEEPPREPROCESS_NAVFORMAT_NONE = 0;
 static const int MBHYSWEEPPREPROCESS_NAVFORMAT_OFG = 1;
-
 
 static const char program_name[] = "mbhysweeppreprocess";
 static const char help_message[] =
-    "mbhysweeppreprocess reads a Hysweep HSX format file, interpolates the\nasynchronous navigation and "
-    "attitude onto the multibeam data, \nand writes a new HSX file with that information correctly "
-    "embedded\nin the multibeam data.";
+    "mbhysweeppreprocess reads a Hysweep HSX format file, interpolates the\n"
+    "asynchronous navigation and attitude onto the multibeam data,\n"
+    "and writes a new HSX file with that information correctly embedded\n"
+    "in the multibeam data.";
 static const char usage_message[] =
     "mbhysweeppreprocess [-Aoffsettype/x/y/z/t -Brollbias/pitchbias/headingbias -Dsonardepthfile "
     "-Idatalist -Jprojection -L -Mnavformat -Nnavfile -Ttimelag -H -V]";
@@ -71,24 +78,24 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message;
-
-	/* MBIO read control parameters */
-	char read_file[MB_PATH_MAXLINE] = "";
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
 	int format = 0;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	int error = MB_ERROR_NO_ERROR;
+
+	/* MBIO read control parameters */
+	char read_file[MB_PATH_MAXLINE] = "";
+	void *datalist;
+	double file_weight;
+	double btime_d;
+	double etime_d;
 	char ifile[MB_PATH_MAXLINE] = "";
 	char dfile[MB_PATH_MAXLINE] = "";
 	char ofile[MB_PATH_MAXLINE] = "";
@@ -144,7 +151,7 @@ int main(int argc, char **argv) {
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* program mode */
-	int mode = MBHYSWEEPPREPROCESS_PROCESS;
+	hysweep_mode_t mode = MBHYSWEEPPREPROCESS_PROCESS;
 
 	/* counting variables */
 	int nrec_POS = 0;
@@ -218,7 +225,7 @@ int main(int argc, char **argv) {
 	double *dat_altitude_altitude = NULL;
 
 	/* timelag parameters */
-	int timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_OFF;
+	timelag_t timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_OFF;
 	double timelag = 0.0;
 	double timelagm = 0.0;
 	double timelagconstant = 0.0;
@@ -277,11 +284,9 @@ int main(int argc, char **argv) {
 	double second, yearsecond;
 	double easting, northing;
 	int testformat;
-	int type;
+	sonar_offset_t type;
 	double offset_roll, offset_pitch, offset_heading;
 	double offset_x, offset_y, offset_z, offset_t;
-
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");
@@ -304,7 +309,10 @@ int main(int argc, char **argv) {
 				break;
 			case 'A':
 			case 'a':
-				nscan = sscanf(optarg, "%d/%lf/%lf/%lf/%lf", &type, &offset_x, &offset_y, &offset_z, &offset_t);
+                        {
+				int tmp;
+				nscan = sscanf(optarg, "%d/%lf/%lf/%lf/%lf", &tmp, &offset_x, &offset_y, &offset_z, &offset_t);
+				type = (sonar_offset_t)tmp;
 				if (nscan >= 4) {
 					if (type == MBHYSWEEPPREPROCESS_SONAR_OFFSET_SONAR) {
 						offset_sonar_mode = true;
@@ -326,6 +334,7 @@ int main(int argc, char **argv) {
 					}
 				}
 				break;
+                        }
 			case 'B':
 			case 'b':
 				nscan = sscanf(optarg, "%lf/%lf/%lf", &offset_roll, &offset_pitch, &offset_heading);
@@ -338,7 +347,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'D':
 			case 'd':
-				sscanf(optarg, "%s", buffer);
+				sscanf(optarg, "%1023s", buffer);
 				if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					sonardepthdata = true;
 					strcpy(sonardepthfile, buffer);
@@ -350,16 +359,16 @@ int main(int argc, char **argv) {
 				break;
 			case 'G':
 			case 'g':
-				sscanf(optarg, "%s", platform_file);
+				sscanf(optarg, "%1023s", platform_file);
 				use_platform_file = true;
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'J':
 			case 'j':
-				sscanf(optarg, "%s", proj4command);
+				sscanf(optarg, "%1023s", proj4command);
 				projection_set = true;
 				break;
 			case 'K':
@@ -380,7 +389,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'N':
 			case 'n':
-				sscanf(optarg, "%s", buffer);
+				sscanf(optarg, "%1023s", buffer);
 				if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					navdata = true;
 					strcpy(navfile, buffer);
@@ -388,12 +397,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%s", ofile);
+				sscanf(optarg, "%1023s", ofile);
 				ofile_set = true;
 				break;
 			case 'T':
 			case 't':
-				sscanf(optarg, "%s", timelagfile);
+				sscanf(optarg, "%1023s", timelagfile);
 				if ((fstat = stat(timelagfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_MODEL;
 				}
@@ -528,6 +537,7 @@ int main(int argc, char **argv) {
 			if (error == MB_ERROR_NO_ERROR)
 				status = mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&nav_altitude, &error);
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating nav data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -607,6 +617,7 @@ int main(int argc, char **argv) {
 				status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_sonardepth,
 				                    &error);
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating sonardepth data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -666,6 +677,7 @@ int main(int argc, char **argv) {
 			if (error == MB_ERROR_NO_ERROR)
 				status = mb_mallocd(verbose, __FILE__, __LINE__, ntimelag * sizeof(double), (void **)&timelag_model, &error);
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -819,18 +831,15 @@ int main(int argc, char **argv) {
 
 	/* open file list */
 	if (read_datalist) {
-		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
+		read_data = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+	} else {
+		/* else copy single filename to be read */
 		strcpy(ifile, read_file);
 		read_data = true;
 	}
@@ -841,6 +850,7 @@ int main(int argc, char **argv) {
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 		                           &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s_> not initialized for reading\n", ifile);
@@ -856,6 +866,7 @@ int main(int argc, char **argv) {
 		/* check format and get data sources */
 		if ((status = mb_format_source(verbose, &format, &platform_source, &nav_source, &sensordepth_source, &heading_source,
 		                               &attitude_source, &svp_source, &error)) == MB_FAILURE) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_format_source>:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -898,6 +909,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -982,6 +994,7 @@ int main(int argc, char **argv) {
 						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_nav_alloc * sizeof(double), (void **)&dat_nav_lat,
 						                     &error);
 						if (error != MB_ERROR_NO_ERROR) {
+							char *message;
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1032,6 +1045,7 @@ int main(int argc, char **argv) {
 						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double),
 						                     (void **)&dat_rph_heave, &error);
 						if (error != MB_ERROR_NO_ERROR) {
+							char *message;
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1070,6 +1084,7 @@ int main(int argc, char **argv) {
 						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
 						                     (void **)&dat_heading_heading, &error);
 						if (error != MB_ERROR_NO_ERROR) {
+							char *message;
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1106,6 +1121,7 @@ int main(int argc, char **argv) {
 						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
 						                     (void **)&dat_sonardepth_sonardepth, &error);
 						if (error != MB_ERROR_NO_ERROR) {
+							char *message;
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1142,6 +1158,7 @@ int main(int argc, char **argv) {
 						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_altitude_alloc * sizeof(double),
 						                     (void **)&dat_altitude_altitude, &error);
 						if (error != MB_ERROR_NO_ERROR) {
+							char *message;
 							mb_error(verbose, error, &message);
 							fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1440,18 +1457,15 @@ int main(int argc, char **argv) {
 
 		/* open file list */
 		if (read_datalist) {
-			if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+			const int look_processed = MB_DATALIST_LOOK_UNSET;
+			if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 				fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 				exit(MB_ERROR_OPEN_FAIL);
 			}
-			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = true;
-			else
-				read_data = false;
-		}
-		/* else copy single filename to be read */
-		else {
+			read_data = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+		} else {
+			/* else copy single filename to be read */
 			strcpy(ifile, read_file);
 			read_data = true;
 		}
@@ -1471,6 +1485,7 @@ int main(int argc, char **argv) {
 			if ((status = mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 			                           &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
 			    MB_SUCCESS) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 				fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
@@ -1481,6 +1496,7 @@ int main(int argc, char **argv) {
 			/* initialize writing the output swath sonar file */
 			if ((status = mb_write_init(verbose, ofile, format, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error)) !=
 			    MB_SUCCESS) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
 				fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
@@ -1531,6 +1547,7 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2144,6 +2161,7 @@ int main(int argc, char **argv) {
 					                    heading, obeams_bath, obeams_amp, opixels_ss, beamflag, bath, amp, bathacrosstrack,
 					                    bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 					if (status != MB_SUCCESS) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
 						fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", ofile);

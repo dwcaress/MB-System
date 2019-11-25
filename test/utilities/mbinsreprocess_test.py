@@ -18,8 +18,14 @@ class MbinsreprocessTest(unittest.TestCase):
 
   def testNoArgs(self):
     cmd = [self.cmd]
-    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
-    self.assertIn('Unable to open log file <stdin> for reading', output)
+    raised = False
+    try:
+      subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+      raised = True
+      self.assertEqual(1, e.returncode)
+      self.assertIn(b'Unable to open log file <stdin> for reading', e.output)
+    self.assertTrue(raised)
 
   def testHelp(self):
     cmd = [self.cmd, '--help']

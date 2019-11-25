@@ -334,7 +334,6 @@ int netif_tcp_update_connections(netif_t *self)
     errsave=errno;
     msock_set_blocking(sock_inst,true);
 
-
     switch(new_fd){
         case -1:
             if(errsave!=EAGAIN){
@@ -810,7 +809,7 @@ void netif_show(netif_t *self, bool verbose, int indent)
         fprintf(stderr,"%*s[port         %10d]\n",indent,(indent>0?" ":""), self->port);
         fprintf(stderr,"%*s[socket       %10p]\n",indent,(indent>0?" ":""), self->socket);
         fprintf(stderr,"%*s[peer         %10p]\n",indent,(indent>0?" ":""), self->peer);
-        fprintf(stderr,"%*s[list         %10p/%02"PRIu64"]\n",indent,(indent>0?" ":""), self->list, mlist_size(self->list));
+        fprintf(stderr,"%*s[list         %10p/%02lu]\n",indent,(indent>0?" ":""), self->list, mlist_size(self->list));
         fprintf(stderr,"%*s[profile      %10p]\n",indent,(indent>0?" ":""), self->profile);
         fprintf(stderr,"%*s[mlog_id      %10d]\n",indent,(indent>0?" ":""), self->mlog_id);
         fprintf(stderr,"%*s[mlog_path    %10s]\n",indent,(indent>0?" ":""), self->mlog_path);
@@ -1006,14 +1005,14 @@ static int s_netif_pub_msg(netif_t *self, msock_connection_t *peer, char *data, 
             if ( (iobytes = msock_sendto(self->socket, peer->addr, data, len, flags )) > 0) {
                 fprintf(stderr,"client PUB UDP OK len[%lld]:\n",iobytes);
             }else{
-                fprintf(stderr,"client PUB UDP ERR len[%lld][%d/%s]\n",iobytes,errno,strerror(errno));
+                fprintf(stderr,"client PUB UDP ERR len[%d][%d/%s]\n",iobytes,errno,strerror(errno));
             }
         }
         if(self->ctype==ST_TCP){
-            if ( (iobytes = msock_send(peer->sock,  data, len )) > 0) {
-                fprintf(stderr,"client PUB TCP OK len[%lld]:\n",iobytes);
+            if ( (iobytes = msock_send(peer->sock, (byte *)data, len )) > 0) {
+                fprintf(stderr,"client PUB TCP OK len[%d]:\n",iobytes);
             }else{
-                fprintf(stderr,"client PUB TCP ERR len[%lld][%d/%s]\n",iobytes,errno,strerror(errno));
+                fprintf(stderr,"client PUB TCP ERR len[%d][%d/%s]\n",iobytes,errno,strerror(errno));
             }
         }
         retval=0;

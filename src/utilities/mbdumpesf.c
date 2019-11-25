@@ -37,16 +37,19 @@
 #include "mb_status.h"
 #include "mb_swap.h"
 
-#define OUTPUT_TEXT 0
-#define OUTPUT_ESF 1
+typedef enum {
+    OUTPUT_TEXT = 0,
+    OUTPUT_ESF = 1,
+} omode_t;
 
 static const char program_name[] = "mbdumpesf";
 static const char help_message[] =
-    "mbdumpesf reads an MB-System edit save file and dumps the \ncontents as an ascii table to stdout.";
+    "mbdumpesf reads an MB-System edit save file and dumps the\n"
+    "contents as an ascii table to stdout.";
 static const char usage_message[] =
     "mbdumpesf --input=esffile\n"
-    "\t[--output=esffile --ignore-unflag --ignore-flag \n"
-    "\t--ignore-filter --ignore-zero \n"
+    "\t[--output=esffile --ignore-unflag --ignore-flag\n"
+    "\t--ignore-filter --ignore-zero\n"
     "\t--verbose --help]";
 
 /*--------------------------------------------------------------------*/
@@ -57,7 +60,7 @@ int main(int argc, char **argv) {
 	/* MBIO read and write control parameters */
 	char iesffile[MB_PATH_MAXLINE];
 	char oesffile[MB_PATH_MAXLINE];
-	int omode = OUTPUT_TEXT;
+	omode_t omode = OUTPUT_TEXT;
 	FILE *iesffp = NULL;
 	FILE *oesffp = NULL;
 
@@ -124,7 +127,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", iesffile);
+				sscanf(optarg, "%1023s", iesffile);
 				break;
 			case '?':
 				errflg = true;
@@ -321,7 +324,6 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		/* close the edit save file */
 		fclose(iesffp);
 		if (omode == OUTPUT_ESF)
 			fclose(oesffp);

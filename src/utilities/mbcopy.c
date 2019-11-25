@@ -25,6 +25,7 @@
 
 #include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,30 +48,35 @@
 #include "mbsys_xse.h"
 
 /* defines for special copying routines */
-#define MBCOPY_PARTIAL 0
-#define MBCOPY_FULL 1
-#define MBCOPY_ELACMK2_TO_XSE 2
-#define MBCOPY_XSE_TO_ELACMK2 3
-#define MBCOPY_SIMRAD_TO_SIMRAD2 4
-#define MBCOPY_ANY_TO_MBLDEOIH 5
-
+typedef enum {
+    MBCOPY_PARTIAL = 0,
+    MBCOPY_FULL = 1,
+    MBCOPY_ELACMK2_TO_XSE = 2,
+    MBCOPY_XSE_TO_ELACMK2 = 3,
+    MBCOPY_SIMRAD_TO_SIMRAD2 = 4,
+    MBCOPY_ANY_TO_MBLDEOIH = 5,
 #ifdef ENABLE_GSF
-#define MBCOPY_RESON8K_TO_GSF 6
+    MBCOPY_RESON8K_TO_GSF = 6,
 #endif
+} copy_mode_t;
 
-#define MBCOPY_STRIPMODE_NONE       0
-#define MBCOPY_STRIPMODE_COMMENTS   1
-#define MBCOPY_STRIPMODE_BATHYONLY  2
+typedef enum {
+    MBCOPY_STRIPMODE_NONE      = 0,
+    MBCOPY_STRIPMODE_COMMENTS  = 1,
+    MBCOPY_STRIPMODE_BATHYONLY = 2,
+} strip_mode_t;
 
 static const char program_name[] = "MBcopy";
 static const char help_message[] =
-    "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified "
-    "conversions.  Options include \nwindowing in time and space and ping averaging.  The input and "
-    "\noutput data formats may differ, though not all possible combinations \nmake sense.  The default "
-    "input and output streams are stdin and stdout.";
+    "MBcopy copies an input swath sonar data file to an output\n"
+    "swath sonar data file with the specified conversions.  Options include\n"
+    "windowing in time and space and ping averaging.  The input and\n"
+    "output data formats may differ, though not all possible combinations\n"
+    "make sense.  The default input and output streams are stdin and stdout.";
 static const char usage_message[] =
-    "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  "
-    "-Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
+    "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc\n"
+    "\t-Fiformat/oformat/mformat -H -Iinfile -Llonflip -Mmergefile -N -Ooutfile\n"
+    "\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
 
 /*--------------------------------------------------------------------*/
 int setup_transfer_rules(int verbose, int ibeams, int obeams, int *istart, int *iend, int *offset, int *error) {
@@ -186,7 +192,7 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
       ostore->svp_velocity[i] = 0.1 * istore->svp_vel[i]; /* m/s */
       ostore->svp_conductivity[i] = 0.0;                  /* mmho/cm */
       ostore->svp_salinity[i] = 0.0;                      /* o/oo */
-      ostore->svp_temperature[i] = 0.0;                   /* degree celcius */
+      ostore->svp_temperature[i] = 0.0;                   /* degrees Celsius */
       ostore->svp_pressure[i] = 0.0;                      /* bar */
     }
 
@@ -1432,30 +1438,12 @@ int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype
 /*--------------------------------------------------------------------*/
 #ifdef ENABLE_GSF
 int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *error) {
-  int status = MB_SUCCESS;
-  struct mb_io_struct *imb_io_ptr;
-  struct mb_io_struct *omb_io_ptr;
-  struct mbsys_reson8k_struct *istore;
-  struct mbsys_gsf_struct *ostore;
-  gsfDataID *dataID; /* pointers withinin gsf data */
-  gsfRecords *records;
-  gsfSwathBathyPing *mb_ping;
-  gsfMBParams params;
-  double gain_correction;
-  double angscale;
-  double alpha;
-  double beta;
-  double theta;
-  double phi;
+  struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+  struct mb_io_struct *omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
 
-  imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
-  omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
-
-  /* get reson data structure pointer */
-  istore = imb_io_ptr->store_data;
-
+  struct mbsys_reson8k_struct *istore = imb_io_ptr->store_data;
   /* get gsf data structure pointer */
-  ostore = omb_io_ptr->store_data;
+  struct mbsys_gsf_struct *ostore = omb_io_ptr->store_data;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
@@ -1467,6 +1455,17 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
     fprintf(stderr, "dbg2       ostore:     %p\n", (void *)ostore);
     fprintf(stderr, "dbg2       kind:       %d\n", istore->kind);
   }
+
+  gsfDataID *dataID; /* pointers withinin gsf data */
+  gsfRecords *records;
+  gsfSwathBathyPing *mb_ping;
+  gsfMBParams params;
+  double gain_correction;
+  double angscale;
+  double alpha;
+  double beta;
+
+  int status = MB_SUCCESS;
 
   /* copy the data  */
   if (istore != NULL && ostore != NULL) {
@@ -1599,6 +1598,8 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
           mb_ping->travel_time[i] = 0.25 * (double)istore->range[i] / (double)istore->sample_rate;
           alpha = istore->png_pitch;
           beta = 90.0 + (icenter - i) * angscale + istore->png_roll;
+          double theta;
+          double phi;
           mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
           mb_ping->beam_angle[i] = theta;
           if (phi < 0.0)
@@ -1722,152 +1723,33 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
 
 int main(int argc, char **argv) {
   int verbose = 0;
-  int error = MB_ERROR_NO_ERROR;
-  char *message;
-
-  /* MBIO read control parameters */
-  int iformat = 0;
+  int format;
   int pings;
   int lonflip;
   double bounds[4];
   int btime_i[7];
   int etime_i[7];
-  double btime_d;
-  double etime_d;
   double speedmin;
   double timegap;
-  int fbtversion;
-  char ifile[MB_PATH_MAXLINE];
-  int ibeams_bath;
-  int ibeams_amp;
-  int ipixels_ss;
-  void *imbio_ptr = NULL;
-
-  /* MBIO write control parameters */
-  int oformat = 0;
-  char ofile[MB_PATH_MAXLINE];
-  int obeams_bath;
-  int obeams_amp;
-  int opixels_ss;
-  void *ombio_ptr = NULL;
-
-  /* MBIO merge control parameters */
-  bool merge = false;
-  int mformat = 0;
-  char mfile[MB_PATH_MAXLINE];
-  int mbeams_bath;
-  int mbeams_amp;
-  int mpixels_ss;
-  void *mmbio_ptr = NULL;
-
-  /* MBIO read and write values */
-  struct mb_io_struct *omb_io_ptr;
-  struct mb_io_struct *imb_io_ptr;
-  void *istore_ptr;
-  void *ostore_ptr;
-  int kind;
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double speed;
-  double heading;
-  double distance;
-  double altitude;
-  double sonardepth;
-  char *ibeamflag = NULL;
-  double *ibath = NULL;
-  double *ibathacrosstrack = NULL;
-  double *ibathalongtrack = NULL;
-  double *iamp = NULL;
-  double *iss = NULL;
-  double *issacrosstrack = NULL;
-  double *issalongtrack = NULL;
-  char *obeamflag = NULL;
-  double *obath = NULL;
-  double *obathacrosstrack = NULL;
-  double *obathalongtrack = NULL;
-  double *oamp = NULL;
-  double *oss = NULL;
-  double *ossacrosstrack = NULL;
-  double *ossalongtrack = NULL;
-  double draft;
-  double roll;
-  double pitch;
-  double heave;
-
-  int mstatus;
-  int merror = MB_ERROR_NO_ERROR;
-  int mkind = MB_DATA_NONE;
-  int mpings = 0;
-  int mtime_i[7];
-  double mtime_d = 0.0;
-  double mnavlon;
-  double mnavlat;
-  double mspeed;
-  double mheading;
-  double mdistance;
-  double maltitude;
-  double msonardepth;
-
-    int sensorhead_status = MB_SUCCESS;
-    int sensorhead_error = MB_ERROR_NO_ERROR;
-    int sensorhead = 0;
-    int sensortype = 0;
-
-  char mcomment[MB_COMMENT_MAXLINE];
-  int mnbath, mnamp, mnss;
-  char *mbeamflag = NULL;
-  double *mbath = NULL;
-  double *mbathacrosstrack = NULL;
-  double *mbathalongtrack = NULL;
-  double *mamp = NULL;
-  double *mss = NULL;
-  double *mssacrosstrack = NULL;
-  double *mssalongtrack = NULL;
-  int idata = 0;
-  int icomment = 0;
-  int odata = 0;
-  int ocomment = 0;
-  int nbath, namp, nss;
-  int istart_bath, iend_bath, offset_bath;
-  int istart_amp, iend_amp, offset_amp;
-  int istart_ss, iend_ss, offset_ss;
-  char comment[MB_COMMENT_MAXLINE];
-  bool insertcomments = false;
-  bool bathonly = false;
-  char commentfile[MB_PATH_MAXLINE];
-  int stripmode = MBCOPY_STRIPMODE_NONE;
-  int copymode = MBCOPY_PARTIAL;
-  bool use_sleep = false;
-
-  /* sleep variable */
-  double sleep_factor = 1.0;
-  double time_d_last;
-  unsigned int sleep_time;
-
-  /* time, user, host variables */
-  time_t right_now;
-  char date[32], user[128], *user_ptr, host[128];
-
-  FILE *fp;
-  char *result;
-  int format;
-  double seconds;
-
-  /* get current default values */
   int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+  int fbtversion;
   status &= mb_fbtversion(verbose, &fbtversion);
 
-  /* set default input and output */
-  iformat = 0;
-  oformat = 0;
-  mformat = 0;
-  strcpy(commentfile, "\0");
-  strcpy(ifile, "stdin");
-  strcpy(ofile, "stdout");
+  char commentfile[MB_PATH_MAXLINE] = "";
+  bool insertcomments = false;
+  bool bathonly = false;
+  int iformat = 0;
+  int oformat = 0;
+  int mformat = 0;
+  char ifile[MB_PATH_MAXLINE] = "stdin";
+  char mfile[MB_PATH_MAXLINE] = "";
+  bool merge = false;
+  strip_mode_t stripmode = MBCOPY_STRIPMODE_NONE;
+  char ofile[MB_PATH_MAXLINE] = "stdout";
+  double sleep_factor = 1.0;
+  bool use_sleep = false;
 
-  /* process argument list */
   {
     bool errflg = false;
     int c;
@@ -1876,13 +1758,16 @@ int main(int argc, char **argv) {
       switch (c) {
       case 'B':
       case 'b':
+      {
+        double seconds;
         sscanf(optarg, "%d/%d/%d/%d/%d/%lf", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &seconds);
         btime_i[5] = (int)floor(seconds);
         btime_i[6] = 1000000 * (seconds - btime_i[5]);
         break;
+      }
       case 'C':
       case 'c':
-        sscanf(optarg, "%s", commentfile);
+        sscanf(optarg, "%1023s", commentfile);
         insertcomments = true;
         break;
       case 'D':
@@ -1891,10 +1776,13 @@ int main(int argc, char **argv) {
         break;
       case 'E':
       case 'e':
+      {
+        double seconds;
         sscanf(optarg, "%d/%d/%d/%d/%d/%lf", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &seconds);
         etime_i[5] = (int)floor(seconds);
         etime_i[6] = 1000000 * (seconds - btime_i[5]);
         break;
+      }
       case 'F':
       case 'f':
       {
@@ -1909,7 +1797,7 @@ int main(int argc, char **argv) {
         break;
       case 'I':
       case 'i':
-        sscanf(optarg, "%s", ifile);
+        sscanf(optarg, "%1023s", ifile);
         break;
       case 'L':
       case 'l':
@@ -1918,18 +1806,25 @@ int main(int argc, char **argv) {
       case 'M':
       case 'm':
       {
-        const int i = sscanf(optarg, "%s", mfile);
+        const int i = sscanf(optarg, "%1023s", mfile);
         if (i == 1)
           merge = true;
         break;
       }
       case 'N':
       case 'n':
-        stripmode++;
+        if (stripmode == MBCOPY_STRIPMODE_NONE) {
+          stripmode = MBCOPY_STRIPMODE_COMMENTS;
+        } else if (stripmode == MBCOPY_STRIPMODE_COMMENTS) {
+          stripmode = MBCOPY_STRIPMODE_BATHYONLY;
+        } else {
+          fprintf(stderr, "Failure: Gave -n more than twice.\n");
+          exit(MB_ERROR_BAD_USAGE);
+        }
         break;
       case 'O':
       case 'o':
-        sscanf(optarg, "%s", ofile);
+        sscanf(optarg, "%1023s", ofile);
         break;
       case 'P':
       case 'p':
@@ -2017,13 +1912,115 @@ int main(int argc, char **argv) {
     if (help) {
       fprintf(stderr, "\n%s\n", help_message);
       fprintf(stderr, "\nusage: %s\n", usage_message);
-      exit(error);
+      exit(MB_ERROR_NO_ERROR);
     }
   }
 
-  /* get format if required */
+  int error = MB_ERROR_NO_ERROR;
+
   if (format == 0)
     mb_get_format(verbose, ifile, NULL, &format, &error);
+
+  /* MBIO read control parameters */
+  double btime_d;
+  double etime_d;
+  int ibeams_bath;
+  int ibeams_amp;
+  int ipixels_ss;
+  void *imbio_ptr = NULL;
+
+  /* MBIO write control parameters */
+  int obeams_bath;
+  int obeams_amp;
+  int opixels_ss;
+  void *ombio_ptr = NULL;
+
+  /* MBIO merge control parameters */
+  int mbeams_bath;
+  int mbeams_amp;
+  int mpixels_ss;
+  void *mmbio_ptr = NULL;
+
+  /* MBIO read and write values */
+  struct mb_io_struct *omb_io_ptr;
+  struct mb_io_struct *imb_io_ptr;
+  void *istore_ptr;
+  void *ostore_ptr;
+  int kind;
+  int time_i[7];
+  double time_d;
+  double navlon;
+  double navlat;
+  double speed;
+  double heading;
+  double distance;
+  double altitude;
+  double sonardepth;
+  char *ibeamflag = NULL;
+  double *ibath = NULL;
+  double *ibathacrosstrack = NULL;
+  double *ibathalongtrack = NULL;
+  double *iamp = NULL;
+  double *iss = NULL;
+  double *issacrosstrack = NULL;
+  double *issalongtrack = NULL;
+  char *obeamflag = NULL;
+  double *obath = NULL;
+  double *obathacrosstrack = NULL;
+  double *obathalongtrack = NULL;
+  double *oamp = NULL;
+  double *oss = NULL;
+  double *ossacrosstrack = NULL;
+  double *ossalongtrack = NULL;
+  double draft;
+  double roll;
+  double pitch;
+  double heave;
+
+  int merror = MB_ERROR_NO_ERROR;
+  int mkind = MB_DATA_NONE;
+  int mpings = 0;
+  int mtime_i[7];
+  double mtime_d = 0.0;
+  double mnavlon;
+  double mnavlat;
+  double mspeed;
+  double mheading;
+  double mdistance;
+  double maltitude;
+  double msonardepth;
+
+  int sensorhead_error = MB_ERROR_NO_ERROR;
+  int sensorhead = 0;
+  int sensortype = 0;
+
+  char mcomment[MB_COMMENT_MAXLINE];
+  int mnbath, mnamp, mnss;
+  char *mbeamflag = NULL;
+  double *mbath = NULL;
+  double *mbathacrosstrack = NULL;
+  double *mbathalongtrack = NULL;
+  double *mamp = NULL;
+  double *mss = NULL;
+  double *mssacrosstrack = NULL;
+  double *mssalongtrack = NULL;
+  int idata = 0;
+  int icomment = 0;
+  int odata = 0;
+  int ocomment = 0;
+  int nbath, namp, nss;
+  int istart_bath, iend_bath, offset_bath;
+  int istart_amp, iend_amp, offset_amp;
+  int istart_ss, iend_ss, offset_ss;
+  char comment[MB_COMMENT_MAXLINE];
+  copy_mode_t copymode = MBCOPY_PARTIAL;
+
+  /* sleep variable */
+  double time_d_last;
+  unsigned int sleep_time;
+
+  FILE *fp;
+  char *result;
 
   /* settle the input/output formats */
   if (iformat <= 0 && oformat <= 0) {
@@ -2039,18 +2036,21 @@ int main(int argc, char **argv) {
   /* obtain format array locations - format ids will
       be aliased to current ids if old format ids given */
   if ((status = mb_format(verbose, &iformat, &error)) != MB_SUCCESS) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding input format %d:\n%s\n", iformat, message);
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
     exit(error);
   }
   if ((status = mb_format(verbose, &oformat, &error)) != MB_SUCCESS) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding output format %d:\n%s\n", oformat, message);
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
     exit(error);
   }
   if (merge && (status = mb_format(verbose, &mformat, &error)) != MB_SUCCESS) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding merge format %d:\n%s\n", mformat, message);
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2060,6 +2060,7 @@ int main(int argc, char **argv) {
   /* initialize reading the input swath sonar file */
   if ((status = mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
                              &btime_d, &etime_d, &ibeams_bath, &ibeams_amp, &ipixels_ss, &error)) != MB_SUCCESS) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
     fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
@@ -2072,6 +2073,7 @@ int main(int argc, char **argv) {
   if (merge &&
       (status = mb_read_init(verbose, mfile, mformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mmbio_ptr,
                              &btime_d, &etime_d, &mbeams_bath, &mbeams_amp, &mpixels_ss, &error)) != MB_SUCCESS) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
     fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", mfile);
@@ -2082,6 +2084,7 @@ int main(int argc, char **argv) {
   /* initialize writing the output swath sonar file */
   if ((status = mb_write_init(verbose, ofile, oformat, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error)) !=
       MB_SUCCESS) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
     fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
@@ -2211,6 +2214,7 @@ int main(int argc, char **argv) {
 
   /* if error initializing memory then quit */
   if (error != MB_ERROR_NO_ERROR) {
+    char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2264,15 +2268,19 @@ int main(int argc, char **argv) {
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    right_now = time((time_t *)0);
+    const time_t right_now = time((time_t *)0);
+    char date[32];
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
+    char *user_ptr = getenv("USER");
+    if (user_ptr == NULL)
       user_ptr = getenv("LOGNAME");
+    char user[128];
     if (user_ptr != NULL)
       strcpy(user, user_ptr);
     else
       strcpy(user, "unknown");
+    char host[128];
     gethostname(host, 128);
     strncpy(comment, "\0", 256);
     sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
@@ -2410,9 +2418,10 @@ int main(int argc, char **argv) {
       while (merror <= MB_ERROR_NO_ERROR && (mkind != MB_DATA_DATA || time_d - .001 > mtime_d)) {
         /* find merge record */
 
-        mstatus = mb_get(verbose, mmbio_ptr, &mkind, &mpings, mtime_i, &mtime_d, &mnavlon, &mnavlat, &mspeed, &mheading,
-                         &mdistance, &maltitude, &msonardepth, &mnbath, &mnamp, &mnss, mbeamflag, mbath, mamp,
-                         mbathacrosstrack, mbathalongtrack, mss, mssacrosstrack, mssalongtrack, mcomment, &merror);
+        /* int mstatus = */
+        mb_get(verbose, mmbio_ptr, &mkind, &mpings, mtime_i, &mtime_d, &mnavlon, &mnavlat, &mspeed, &mheading,
+               &mdistance, &maltitude, &msonardepth, &mnbath, &mnamp, &mnss, mbeamflag, mbath, mamp,
+               mbathacrosstrack, mbathalongtrack, mss, mssacrosstrack, mssalongtrack, mcomment, &merror);
       }
 
       if (time_d + .001 < mtime_d || merror > 0) {
@@ -2448,6 +2457,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%s\n", comment);
       }
       else if (kind == MB_DATA_DATA && error < MB_ERROR_NO_ERROR && error >= MB_ERROR_OTHER) {
+        char *message;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
         fprintf(stderr, "Input Record: %d\n", idata);
@@ -2455,11 +2465,13 @@ int main(int argc, char **argv) {
                 time_i[6]);
       }
       else if (kind == MB_DATA_DATA && error < MB_ERROR_NO_ERROR) {
+        char *message;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
         fprintf(stderr, "Number of good records so far: %d\n", idata);
       }
       else if (error > MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
+        char *message;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nFatal MBIO Error:\n%s\n", message);
         fprintf(stderr, "Last Good Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4],
@@ -2572,8 +2584,8 @@ int main(int argc, char **argv) {
       if (kind == MB_DATA_DATA) {
         mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading, &draft,
                        &roll, &pitch, &heave, &error);
-        sensorhead_status = mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &sensorhead_error);
-        sensorhead_status = mb_sonartype(verbose, imbio_ptr, istore_ptr, &sensortype, &sensorhead_error);
+        /* int sensorhead_status = */ mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &sensorhead_error);
+        /* sensorhead_status = */ mb_sonartype(verbose, imbio_ptr, istore_ptr, &sensortype, &sensorhead_error);
       }
       ostore_ptr = omb_io_ptr->store_data;
       if (kind == MB_DATA_DATA || kind == MB_DATA_COMMENT) {
@@ -2656,6 +2668,7 @@ int main(int argc, char **argv) {
           ocomment++;
       }
       else {
+        char *message;
         mb_error(verbose, error, &message);
         if (copymode != MBCOPY_PARTIAL)
           fprintf(stderr, "\nMBIO Error returned from function <mb_put_all>:\n%s\n", message);
@@ -2671,13 +2684,11 @@ int main(int argc, char **argv) {
     }
   }
 
-  /* close the files */
-  status = mb_close(verbose, &imbio_ptr, &error);
-  status = mb_close(verbose, &ombio_ptr, &error);
+  status &= mb_close(verbose, &imbio_ptr, &error);
+  status &= mb_close(verbose, &ombio_ptr, &error);
 
-  /* check memory */
   if (verbose >= 4)
-    status = mb_memory_list(verbose, &error);
+    status &= mb_memory_list(verbose, &error);
 
   /* give the statistics */
   if (verbose >= 1) {

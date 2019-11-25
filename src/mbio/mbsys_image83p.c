@@ -20,13 +20,9 @@
  *      MBF_IMAGE83P : MBIO ID 191
  *      MBF_IMAGEMBA : MBIO ID 192
  *
- *
  * Author:	Vivek Reddy, Santa Clara University
  *       	D.W. Caress
  * Date:	May 5, 2008
- *
- *
- *
  */
 
 #include <math.h>

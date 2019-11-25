@@ -1067,9 +1067,9 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
                          double *slopeacrosstrack, double acrosstrack, double *depth, double *slope, int *error);
 int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y, int *error);
 int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *error);
-int mb_esf_load(int verbose, const char *program_name, char *swathfile, int load, int output, char *esffile, struct mb_esf_struct *esf,
+int mb_esf_load(int verbose, const char *program_name, char *swathfile, bool load, int output, char *esffile, struct mb_esf_struct *esf,
                 int *error);
-int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, int output, struct mb_esf_struct *esf, int *error);
+int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load, int output, struct mb_esf_struct *esf, int *error);
 int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, double tolerance, int *error);
 int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int pingmultiplicity, int nbath, char *beamflag,
                  int *error);
@@ -1077,9 +1077,9 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error);
 int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error);
 
-int mb_pr_lockswathfile(int verbose, char *file, int purpose, const char *program_name, int *error);
-int mb_pr_unlockswathfile(int verbose, char *file, int purpose, const char *program_name, int *error);
-int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *program, char *user, char *cpu, char *date,
-                   int *error);
+int mb_pr_lockswathfile(int verbose, const char *file, int purpose, const char *program_name, int *error);
+int mb_pr_unlockswathfile(int verbose, const char *file, int purpose, const char *program_name, int *error);
+int mb_pr_lockinfo(int verbose, const char *file, int *locked, int *purpose,
+                   char *program, char *user, char *cpu, char *date, int *error);
 
 #endif  /* MB_PROCESS_H_ */

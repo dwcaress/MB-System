@@ -25,6 +25,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,16 +41,14 @@
 
 /* Based on https://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows */
 #include <Windows.h>
-#define BILLION (1E9)
-#define CLOCK_REALTIME 0    // Not used in this clock_gettime() port (first arg)
+#define CLOCK_REALTIME 0
 #if defined(_MSC_VER) && (_MSC_VER <= 1800)
 struct timespec { long tv_sec; long tv_nsec; };
 #endif
-static BOOL g_first_time = 1;
+static bool g_first_time = 1;
 static LARGE_INTEGER g_counts_per_sec;
 
 int clock_gettime(int dummy, struct timespec *ct) {
-    LARGE_INTEGER count;
 
     if (g_first_time) {
         g_first_time = 0;
@@ -59,12 +58,13 @@ int clock_gettime(int dummy, struct timespec *ct) {
         }
     }
 
+    LARGE_INTEGER count;
     if ((NULL == ct) || (g_counts_per_sec.QuadPart <= 0) || (0 == QueryPerformanceCounter(&count))) {
         return -1;
     }
 
     ct->tv_sec = count.QuadPart / g_counts_per_sec.QuadPart;
-    ct->tv_nsec = ((count.QuadPart % g_counts_per_sec.QuadPart) * BILLION) / g_counts_per_sec.QuadPart;
+    ct->tv_nsec = ((count.QuadPart % g_counts_per_sec.QuadPart) * 1e9) / g_counts_per_sec.QuadPart;
 
     return 0;
 }
@@ -692,7 +692,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 
         ttime = mrz->sounding[i].twoWayTravelTime_sec
                                   + mrz->sounding[i].twoWayTravelTimeCorrection_sec;
-                                  
+
         /* calculate Bathymetry */
         rr = 0.5 * soundspeed * ttime;
         xx = rr * sin(DTR * theta);

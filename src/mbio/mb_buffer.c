@@ -36,11 +36,10 @@
  *
  * Author:	D. W. Caress
  * Date:	February 25, 1993
- *
- *
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -585,7 +584,7 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr, int star
 	}
 
 	/* extract the data */
-	/* if (found == true) */ {
+	/* if (found) */ {
 		int kind;
 		status = mb_buffer_extract_nav(verbose, buff_ptr, mbio_ptr, *id, &kind, time_i, time_d, navlon, navlat, speed, heading,
 		                               draft, roll, pitch, heave, error);

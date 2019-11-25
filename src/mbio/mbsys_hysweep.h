@@ -280,6 +280,7 @@ struct mbsys_hysweep_device_struct {
 	                   0040 - tide
 	                   0200 - MRU (heave, pitch, and roll compensation) */
 	int DV2_towfish;           /* 1 if device is mountedc on a tow fish */
+	// TODO(schwehr): Make DV2_enabled be a bool.
 	int DV2_enabled;           /* 1 if device is enabled */
 
 	/* OF2: Hysweep device offsets  */

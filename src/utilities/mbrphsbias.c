@@ -40,9 +40,9 @@
 #include "mb_swap.h"
 
 /* allocation */
-#define FILEALLOCNUM 16
-#define PINGALLOCNUM 128
-#define SNDGALLOCNUM 128
+const int FILEALLOCNUM = 16;
+const int PINGALLOCNUM = 128;
+const int SNDGALLOCNUM = 128;
 
 /* mbrphsbias structures */
 struct mbrphsbias_ping_struct {
@@ -98,10 +98,41 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int status;
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
+	int format;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	/* reset all defaults but the format and lonflip */
+	format = 0;
+	pings = 1;
+	bounds[0] = -360.;
+	bounds[1] = 360.;
+	bounds[2] = -90.;
+	bounds[3] = 90.;
+	btime_i[0] = 1962;
+	btime_i[1] = 2;
+	btime_i[2] = 21;
+	btime_i[3] = 10;
+	btime_i[4] = 30;
+	btime_i[5] = 0;
+	btime_i[6] = 0;
+	etime_i[0] = 2062;
+	etime_i[1] = 2;
+	etime_i[2] = 21;
+	etime_i[3] = 10;
+	etime_i[4] = 30;
+	etime_i[5] = 0;
+	etime_i[6] = 0;
+	speedmin = 0.0;
+	timegap = 1000000000.0;
+	int error = MB_ERROR_NO_ERROR;
 
 	/* MBIO read control parameters */
 	void *mbio_ptr = NULL;
@@ -112,22 +143,13 @@ int main(int argc, char **argv) {
 	char swathfileread[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
 	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
-	int format;
 	int formatread;
 	int variable_beams;
 	int traveltime;
 	int beam_flagging;
-	int pings;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
 	double btime_d;
 	double etime_d;
-	double speedmin;
-	double timegap;
 	struct mb_info_struct mb_info;
 
 	int time_i[7];
@@ -170,8 +192,6 @@ int main(int argc, char **argv) {
 	bool binsizeset = false;
 	double mtodeglon;
 	double mtodeglat;
-	double dx, dy;
-	int nx, ny;
 
 	/* sounding atorage values and arrays */
 	int nfile = 0;
@@ -193,33 +213,7 @@ int main(int argc, char **argv) {
 
 	int nbeams;
 
-	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
-	/* reset all defaults but the format and lonflip */
 	strcpy(read_file, "datalist.mb-1");
-	format = 0;
-	pings = 1;
-	bounds[0] = -360.;
-	bounds[1] = 360.;
-	bounds[2] = -90.;
-	bounds[3] = 90.;
-	btime_i[0] = 1962;
-	btime_i[1] = 2;
-	btime_i[2] = 21;
-	btime_i[3] = 10;
-	btime_i[4] = 30;
-	btime_i[5] = 0;
-	btime_i[6] = 0;
-	etime_i[0] = 2062;
-	etime_i[1] = 2;
-	etime_i[2] = 21;
-	etime_i[3] = 10;
-	etime_i[4] = 30;
-	etime_i[5] = 0;
-	etime_i[6] = 0;
-	speedmin = 0.0;
-	timegap = 1000000000.0;
 
 	/* process argument list */
 	{
@@ -242,7 +236,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'I':
 			case 'i':
-				sscanf(optarg, "%s", read_file);
+				sscanf(optarg, "%1023s", read_file);
 				break;
 			case 'R':
 			case 'r':
@@ -332,10 +326,10 @@ int main(int argc, char **argv) {
 	mb_coor_scale(verbose, 0.5 * (areabounds[2] + areabounds[3]), &mtodeglon, &mtodeglat);
 	if (binsize <= 0.0)
 		binsize = (areabounds[1] - areabounds[0]) / 101 / mtodeglon;
-	dx = binsize * mtodeglon;
-	dy = binsize * mtodeglat;
-	nx = 1 + (int)((areabounds[1] - areabounds[0]) / dx);
-	ny = 1 + (int)((areabounds[3] - areabounds[2]) / dy);
+	double dx = binsize * mtodeglon;
+	double dy = binsize * mtodeglat;
+	const int nx = 1 + (int)((areabounds[1] - areabounds[0]) / dx);
+	const int ny = 1 + (int)((areabounds[3] - areabounds[2]) / dy);
 	if (nx > 1 && ny > 1) {
 		dx = (areabounds[1] - areabounds[0]) / (nx - 1);
 		dy = (areabounds[3] - areabounds[2]) / (ny - 1);
@@ -348,6 +342,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -386,18 +381,15 @@ int main(int argc, char **argv) {
 
 	/* open file list */
 	if (read_datalist) {
-		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = true;
-		else
-			read_data = false;
-	}
-	/* else copy single filename to be read */
-	else {
+		read_data = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+	} else {
+		// else copy single filename to be read
 		strcpy(swathfile, read_file);
 		read_data = true;
 	}
@@ -406,6 +398,7 @@ int main(int argc, char **argv) {
 	while (read_data) {
 		/* check format and get format flags */
 		if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n", format,
 			        message);
@@ -422,6 +415,7 @@ int main(int argc, char **argv) {
 		if ((status = mb_read_init(verbose, swathfileread, formatread, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 		                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
 		    MB_SUCCESS) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swathfileread);
@@ -484,6 +478,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -498,6 +493,7 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -520,6 +516,7 @@ int main(int argc, char **argv) {
 		status = mb_mallocd(verbose, __FILE__, __LINE__, file->num_pings_alloc * sizeof(struct mbrphsbias_ping_struct),
 		                    (void **)&(file->pings), &error);
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message = NULL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -557,6 +554,7 @@ int main(int argc, char **argv) {
 					    mb_reallocd(verbose, __FILE__, __LINE__, file->num_pings_alloc * sizeof(struct mbrphsbias_ping_struct),
 					                (void **)&(file->pings), &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message = NULL;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -592,6 +590,7 @@ int main(int argc, char **argv) {
 					status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
 					                    (void **)&(ping->alongtrack_offset), &error);
 				if (error != MB_ERROR_NO_ERROR) {
+					char *message = NULL;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);

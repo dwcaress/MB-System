@@ -46,6 +46,16 @@ class MbcopyTest(unittest.TestCase):
     self.assertIn('lonflip', output)
     self.assertIn('fbtversion:', output)
 
+  def testTooManyStripModes(self):
+    cmd = [self.cmd, '-n', '-n', '-n']
+    try:
+      output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
+      self.assertFalse(output)  # Should always fail if it gets here.
+    except subprocess.CalledProcessError as e:
+      self.assertEqual(9, e.returncode)
+      output = e.output.decode()
+      self.assertIn('Gave -n more than twice.', output)
+
   # TODO(schwehr): Add tests of actual usage.
 
 

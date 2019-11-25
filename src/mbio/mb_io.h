@@ -129,6 +129,10 @@ const char *mb_platform_type(mb_platform_enum platform);
 #define MB_SENSOR_TYPE_CTD 110
 #define MB_SENSOR_TYPE_PRESSURE 111
 #define MB_SENSOR_TYPE_SOUNDSPEED 120
+
+#ifdef MB_NEED_SENSOR_TYPE
+// TODO(schwehr): Convert these from static header variables to
+// an accessor function.
 static int mb_sensor_type_id[] = {
     MB_SENSOR_TYPE_NONE,                    // 0
     MB_SENSOR_TYPE_SONAR_ECHOSOUNDER,       // 10
@@ -175,6 +179,7 @@ static char *mb_sensor_type_string[] = {"Unknown sensor type",
                                         "CTD",
                                         "Pressure",
                                         "Soundspeed"};
+#endif  // MB_NEED_SENSOR_TYPE
 
 /* survey platform sensor capability bitmask defines */
 #define MB_SENSOR_CAPABILITY1_NONE 0x00000000          // All bits = 0
@@ -455,6 +460,7 @@ struct mb_io_struct {
   int numfile;             /* the number of parallel files required for i/o */
   int filetype;            /* type of files used (normal, single normal, xdr, or gsf) */
   int filemode;            /* file mode (read or write) */
+  // TODO(schwehr): Bool
   int variable_beams;      /* if true then number of beams variable */
   int traveltime;          /* if true then traveltime and angle data supported */
   int beam_flagging;       /* if true then beam flagging supported */
@@ -597,7 +603,7 @@ struct mb_io_struct {
   double *new_ss_alongtrack;
 
   /* variables for projections to and from projected coordinates */
-  int projection_initialized;
+  int projection_initialized;  // TODO(schwehr): bool
   char projection_id[MB_NAME_LENGTH];
   void *pjptr;
 

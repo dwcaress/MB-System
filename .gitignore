@@ -111,3 +111,15 @@ lib
 *~
 src/mbtrn/mb1conv
 src/mbtrnutils/mbtrnpp
+src/mbtrn/r7kr_test
+src/mbtrnav/trn-cli
+src/mbtrnav/trn-server
+src/mbtrnsave/
+src/mbtrnavsave/
+src/mbtrnutilssave/
+
+src/mbtrn/mbtnav-cli
+src/mbtrnav/netif-test
+src/mbtrnav/trnclient-test
+src/mbtrnav/trnif-test
+src/mbtrnav/trnifsvr-test

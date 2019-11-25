@@ -18,11 +18,10 @@
  *
  * Author:	D. W. Caress
  * Date:	January 26, 1993
- *
- *
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -74,7 +73,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 	}
 
 	int status = MB_SUCCESS;
-	int reset_last;
+	bool reset_last;
 	double headingx = 0.0;
 	double headingy = 0.0;
 
@@ -435,7 +434,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 		}
 
 		/* if needed reset "last" pings */
-		if (reset_last == true) {
+		if (reset_last) {
 			mb_io_ptr->last_time_d = mb_io_ptr->new_time_d;
 			mb_io_ptr->last_lon = mb_io_ptr->new_lon;
 			mb_io_ptr->last_lat = mb_io_ptr->new_lat;
