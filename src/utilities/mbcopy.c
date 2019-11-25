@@ -1438,27 +1438,12 @@ int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype
 /*--------------------------------------------------------------------*/
 #ifdef ENABLE_GSF
 int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *error) {
-  struct mbsys_reson8k_struct *istore;
-  struct mbsys_gsf_struct *ostore;
-  gsfDataID *dataID; /* pointers withinin gsf data */
-  gsfRecords *records;
-  gsfSwathBathyPing *mb_ping;
-  gsfMBParams params;
-  double gain_correction;
-  double angscale;
-  double alpha;
-  double beta;
-  double theta;
-  double phi;
-
   struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
   struct mb_io_struct *omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
 
-  /* get reson data structure pointer */
-  istore = imb_io_ptr->store_data;
-
+  struct mbsys_reson8k_struct *istore = imb_io_ptr->store_data;
   /* get gsf data structure pointer */
-  ostore = omb_io_ptr->store_data;
+  struct mbsys_gsf_struct *ostore = omb_io_ptr->store_data;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
@@ -1470,6 +1455,15 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
     fprintf(stderr, "dbg2       ostore:     %p\n", (void *)ostore);
     fprintf(stderr, "dbg2       kind:       %d\n", istore->kind);
   }
+
+  gsfDataID *dataID; /* pointers withinin gsf data */
+  gsfRecords *records;
+  gsfSwathBathyPing *mb_ping;
+  gsfMBParams params;
+  double gain_correction;
+  double angscale;
+  double alpha;
+  double beta;
 
   int status = MB_SUCCESS;
 
@@ -1604,6 +1598,8 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
           mb_ping->travel_time[i] = 0.25 * (double)istore->range[i] / (double)istore->sample_rate;
           alpha = istore->png_pitch;
           beta = 90.0 + (icenter - i) * angscale + istore->png_roll;
+          double theta;
+          double phi;
           mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
           mb_ping->beam_angle[i] = theta;
           if (phi < 0.0)
@@ -1740,132 +1736,20 @@ int main(int argc, char **argv) {
   int fbtversion;
   status &= mb_fbtversion(verbose, &fbtversion);
 
-  int error = MB_ERROR_NO_ERROR;
-
-  /* MBIO read control parameters */
-  int iformat = 0;
-  double btime_d;
-  double etime_d;
-  char ifile[MB_PATH_MAXLINE];
-  int ibeams_bath;
-  int ibeams_amp;
-  int ipixels_ss;
-  void *imbio_ptr = NULL;
-
-  /* MBIO write control parameters */
-  int oformat = 0;
-  char ofile[MB_PATH_MAXLINE];
-  int obeams_bath;
-  int obeams_amp;
-  int opixels_ss;
-  void *ombio_ptr = NULL;
-
-  /* MBIO merge control parameters */
-  bool merge = false;
-  int mformat = 0;
-  char mfile[MB_PATH_MAXLINE] = "";
-  int mbeams_bath;
-  int mbeams_amp;
-  int mpixels_ss;
-  void *mmbio_ptr = NULL;
-
-  /* MBIO read and write values */
-  struct mb_io_struct *omb_io_ptr;
-  struct mb_io_struct *imb_io_ptr;
-  void *istore_ptr;
-  void *ostore_ptr;
-  int kind;
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double speed;
-  double heading;
-  double distance;
-  double altitude;
-  double sonardepth;
-  char *ibeamflag = NULL;
-  double *ibath = NULL;
-  double *ibathacrosstrack = NULL;
-  double *ibathalongtrack = NULL;
-  double *iamp = NULL;
-  double *iss = NULL;
-  double *issacrosstrack = NULL;
-  double *issalongtrack = NULL;
-  char *obeamflag = NULL;
-  double *obath = NULL;
-  double *obathacrosstrack = NULL;
-  double *obathalongtrack = NULL;
-  double *oamp = NULL;
-  double *oss = NULL;
-  double *ossacrosstrack = NULL;
-  double *ossalongtrack = NULL;
-  double draft;
-  double roll;
-  double pitch;
-  double heave;
-
-  int merror = MB_ERROR_NO_ERROR;
-  int mkind = MB_DATA_NONE;
-  int mpings = 0;
-  int mtime_i[7];
-  double mtime_d = 0.0;
-  double mnavlon;
-  double mnavlat;
-  double mspeed;
-  double mheading;
-  double mdistance;
-  double maltitude;
-  double msonardepth;
-
-  int sensorhead_error = MB_ERROR_NO_ERROR;
-  int sensorhead = 0;
-  int sensortype = 0;
-
-  char mcomment[MB_COMMENT_MAXLINE];
-  int mnbath, mnamp, mnss;
-  char *mbeamflag = NULL;
-  double *mbath = NULL;
-  double *mbathacrosstrack = NULL;
-  double *mbathalongtrack = NULL;
-  double *mamp = NULL;
-  double *mss = NULL;
-  double *mssacrosstrack = NULL;
-  double *mssalongtrack = NULL;
-  int idata = 0;
-  int icomment = 0;
-  int odata = 0;
-  int ocomment = 0;
-  int nbath, namp, nss;
-  int istart_bath, iend_bath, offset_bath;
-  int istart_amp, iend_amp, offset_amp;
-  int istart_ss, iend_ss, offset_ss;
-  char comment[MB_COMMENT_MAXLINE];
+  char commentfile[MB_PATH_MAXLINE] = "";
   bool insertcomments = false;
   bool bathonly = false;
-  char commentfile[MB_PATH_MAXLINE];
+  int iformat = 0;
+  int oformat = 0;
+  int mformat = 0;
+  char ifile[MB_PATH_MAXLINE] = "stdin";
+  char mfile[MB_PATH_MAXLINE] = "";
+  bool merge = false;
   strip_mode_t stripmode = MBCOPY_STRIPMODE_NONE;
-  copy_mode_t copymode = MBCOPY_PARTIAL;
+  char ofile[MB_PATH_MAXLINE] = "stdout";
+  double sleep_factor = 1.0;
   bool use_sleep = false;
 
-  /* sleep variable */
-  double sleep_factor = 1.0;
-  double time_d_last;
-  unsigned int sleep_time;
-
-  FILE *fp;
-  char *result;
-  double seconds;
-
-  /* set default input and output */
-  iformat = 0;
-  oformat = 0;
-  mformat = 0;
-  strcpy(commentfile, "\0");
-  strcpy(ifile, "stdin");
-  strcpy(ofile, "stdout");
-
-  /* process argument list */
   {
     bool errflg = false;
     int c;
@@ -1874,10 +1758,13 @@ int main(int argc, char **argv) {
       switch (c) {
       case 'B':
       case 'b':
+      {
+        double seconds;
         sscanf(optarg, "%d/%d/%d/%d/%d/%lf", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &seconds);
         btime_i[5] = (int)floor(seconds);
         btime_i[6] = 1000000 * (seconds - btime_i[5]);
         break;
+      }
       case 'C':
       case 'c':
         sscanf(optarg, "%1023s", commentfile);
@@ -1889,10 +1776,13 @@ int main(int argc, char **argv) {
         break;
       case 'E':
       case 'e':
+      {
+        double seconds;
         sscanf(optarg, "%d/%d/%d/%d/%d/%lf", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &seconds);
         etime_i[5] = (int)floor(seconds);
         etime_i[6] = 1000000 * (seconds - btime_i[5]);
         break;
+      }
       case 'F':
       case 'f':
       {
@@ -2022,13 +1912,115 @@ int main(int argc, char **argv) {
     if (help) {
       fprintf(stderr, "\n%s\n", help_message);
       fprintf(stderr, "\nusage: %s\n", usage_message);
-      exit(error);
+      exit(MB_ERROR_NO_ERROR);
     }
   }
 
-  /* get format if required */
+  int error = MB_ERROR_NO_ERROR;
+
   if (format == 0)
     mb_get_format(verbose, ifile, NULL, &format, &error);
+
+  /* MBIO read control parameters */
+  double btime_d;
+  double etime_d;
+  int ibeams_bath;
+  int ibeams_amp;
+  int ipixels_ss;
+  void *imbio_ptr = NULL;
+
+  /* MBIO write control parameters */
+  int obeams_bath;
+  int obeams_amp;
+  int opixels_ss;
+  void *ombio_ptr = NULL;
+
+  /* MBIO merge control parameters */
+  int mbeams_bath;
+  int mbeams_amp;
+  int mpixels_ss;
+  void *mmbio_ptr = NULL;
+
+  /* MBIO read and write values */
+  struct mb_io_struct *omb_io_ptr;
+  struct mb_io_struct *imb_io_ptr;
+  void *istore_ptr;
+  void *ostore_ptr;
+  int kind;
+  int time_i[7];
+  double time_d;
+  double navlon;
+  double navlat;
+  double speed;
+  double heading;
+  double distance;
+  double altitude;
+  double sonardepth;
+  char *ibeamflag = NULL;
+  double *ibath = NULL;
+  double *ibathacrosstrack = NULL;
+  double *ibathalongtrack = NULL;
+  double *iamp = NULL;
+  double *iss = NULL;
+  double *issacrosstrack = NULL;
+  double *issalongtrack = NULL;
+  char *obeamflag = NULL;
+  double *obath = NULL;
+  double *obathacrosstrack = NULL;
+  double *obathalongtrack = NULL;
+  double *oamp = NULL;
+  double *oss = NULL;
+  double *ossacrosstrack = NULL;
+  double *ossalongtrack = NULL;
+  double draft;
+  double roll;
+  double pitch;
+  double heave;
+
+  int merror = MB_ERROR_NO_ERROR;
+  int mkind = MB_DATA_NONE;
+  int mpings = 0;
+  int mtime_i[7];
+  double mtime_d = 0.0;
+  double mnavlon;
+  double mnavlat;
+  double mspeed;
+  double mheading;
+  double mdistance;
+  double maltitude;
+  double msonardepth;
+
+  int sensorhead_error = MB_ERROR_NO_ERROR;
+  int sensorhead = 0;
+  int sensortype = 0;
+
+  char mcomment[MB_COMMENT_MAXLINE];
+  int mnbath, mnamp, mnss;
+  char *mbeamflag = NULL;
+  double *mbath = NULL;
+  double *mbathacrosstrack = NULL;
+  double *mbathalongtrack = NULL;
+  double *mamp = NULL;
+  double *mss = NULL;
+  double *mssacrosstrack = NULL;
+  double *mssalongtrack = NULL;
+  int idata = 0;
+  int icomment = 0;
+  int odata = 0;
+  int ocomment = 0;
+  int nbath, namp, nss;
+  int istart_bath, iend_bath, offset_bath;
+  int istart_amp, iend_amp, offset_amp;
+  int istart_ss, iend_ss, offset_ss;
+  char comment[MB_COMMENT_MAXLINE];
+  copy_mode_t copymode = MBCOPY_PARTIAL;
+
+  /* sleep variable */
+  double time_d_last;
+  unsigned int sleep_time;
+
+  FILE *fp;
+  char *result;
 
   /* settle the input/output formats */
   if (iformat <= 0 && oformat <= 0) {
