@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libmframe.la libr7kr.la
+lib_LTLIBRARIES = libr7kr.la libmframe.la 
 
 include_HEADERS = \
 				mframe/src/mframe.h \
@@ -93,6 +93,7 @@ mbtnav_cli_SOURCES = utils/mbtnav_cli.c
 mbtnav_cli_LDADD = libr7kr.la
 
 dist_bin_SCRIPTS = mbtrnpp.sh emu7k.sh
+bin_SCRIPTS = mbtrnpp.sh
 
 CLEANFILES =
 DISTCLEANFILES =
