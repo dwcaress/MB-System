@@ -332,8 +332,8 @@ static bool log_clock_res = true;
 // MSF_ASTAT  : aggregate stats
 // MSF_PSTAT  : periodic stats
 // MSF_READER : r7kr reader stats
-#define MBTRNPP_STAT_FLAGS (MSF_STATUS | MSF_EVENT | MSF_ASTAT | MSF_PSTAT)
-//unsigned int mbtrnpp_stat_flags = MBTRNPP_STAT_FLAGS_DFL;
+#define MBTRNPP_STAT_FLAGS_DFL (MSF_STATUS | MSF_EVENT | MSF_ASTAT | MSF_PSTAT)
+mstats_flags mbtrnpp_stat_flags = MBTRNPP_STAT_FLAGS_DFL;
 
 int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags flags);
 
@@ -382,14 +382,14 @@ int main(int argc, char **argv) {
                          "\t--platform-file\n"
                          "\t--platform-target-sensor\n"
                          "\t--projection=projection_id\n"
-                         "\t--stats=n\n"
+                         "\t--statsec=d.d\n"
+                         "\t--statflags=<MSF_STATUS:MSF_EVENT:MSF_ASTAT:MSF_PSTAT:MSF_READER>\n"
                          "\t--hbeat=n\n"
                          "\t--mbhbn=n\n"
                          "\t--mbhbt=d.d\n"
                          "\t--trnhbt=n\n"
                          "\t--trnuhbt=n\n"
                          "\t--delay=n\n"
-                         "\t--stats=n\n"
                          "\t--trn-en\n"
                          "\t--trn-dis\n"
                          "\t--trn-utm\n"
@@ -430,8 +430,6 @@ int main(int argc, char **argv) {
    *     --swath-width=value
    *     --soundings=value
    *     --median-filter=threshold/nacrosstrack/nalongtrack
-   *
-   *
    */
   static struct option options[] = {{"help", no_argument, NULL, 0},
                                     {"verbose", required_argument, NULL, 0},
@@ -441,7 +439,8 @@ int main(int argc, char **argv) {
                                     {"trnhbt", required_argument, NULL, 0},
                                     {"trnuhbt", required_argument, NULL, 0},
                                     {"delay", required_argument, NULL, 0},
-                                    {"stats", required_argument, NULL, 0},
+                                    {"statsec", required_argument, NULL, 0},
+                                    {"statflags", required_argument, NULL, 0},
                                     {"format", required_argument, NULL, 0},
                                     {"platform-file", required_argument, NULL, 0},
                                     {"platform-target-sensor", required_argument, NULL, 0},
@@ -930,9 +929,28 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
       else if (strcmp("delay", options[option_index].name) == 0) {
         sscanf(optarg, "%lld", &mbtrnpp_loop_delay_msec);
       }
-      /* status log interval (s) */
-      else if (strcmp("stats", options[option_index].name) == 0) {
+      /* status log interval (decimal s) */
+      else if (strcmp("statsec", options[option_index].name) == 0) {
         sscanf(optarg, "%lf", &trn_status_interval_sec);
+      }
+            /* status flags */
+      else if (strcmp("statflags", options[option_index].name) == 0) {
+          mbtrnpp_stat_flags=0;
+          if(NULL!=strstr(optarg,"MSF_STATUS") || NULL!=strstr(optarg,"msf_status")){
+              mbtrnpp_stat_flags |= MSF_STATUS;
+          }
+          if(NULL!=strstr(optarg,"MSF_EVENT") || NULL!=strstr(optarg,"msf_event")){
+              mbtrnpp_stat_flags |= MSF_EVENT;
+          }
+          if(NULL!=strstr(optarg,"MSF_ASTAT") || NULL!=strstr(optarg,"msf_astat")){
+              mbtrnpp_stat_flags |= MSF_ASTAT;
+          }
+          if(NULL!=strstr(optarg,"MSF_PSTAT") || NULL!=strstr(optarg,"msf_pstat")){
+              mbtrnpp_stat_flags |= MSF_PSTAT;
+          }
+          if(NULL!=strstr(optarg,"MSF_READER") || NULL!=strstr(optarg,"msf_reader")){
+              mbtrnpp_stat_flags |= MSF_READER;
+          }
       }
 #ifdef WITH_MBTNAV
         /* TRN enable */
@@ -1888,7 +1906,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
                 }
 #endif // WITH_MBTNAV
 
-                MBTRNPP_UPDATE_STATS(app_stats, mbtrnpp_mlog_id, MBTRNPP_STAT_FLAGS);
+                MBTRNPP_UPDATE_STATS(app_stats, mbtrnpp_mlog_id, mbtrnpp_stat_flags);
 
             } // end MBTRNPREPROCESS_OUTPUT_TRN
 
@@ -2598,11 +2616,6 @@ int mbtrnpp_init_debug(int verbose) {
     fprintf(stderr, "cmdline [%s]\n", g_cmd_line);
   }
 
-  //    app_stats = mbtrnpp_stats_new(MBTPP_EV_COUNT,
-  //                                          MBTPP_STA_COUNT,
-  //                                          MBTPP_CH_COUNT,
-  //                                          mtime_dtime(),
-  //                                          trn_status_interval_sec);
   app_stats = mstats_profile_new(MBTPP_EV_COUNT, MBTPP_STA_COUNT, MBTPP_CH_COUNT, mbtrnpp_stats_labels, mtime_dtime(),
                                  trn_status_interval_sec);
 
