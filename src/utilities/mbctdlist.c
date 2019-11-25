@@ -112,45 +112,6 @@ int printsimplevalue(int verbose, double value, int width, int precision, bool a
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int printNaN(int verbose, bool ascii, bool *invert, bool *flipsign, int *error) {
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       ascii:           %d\n", ascii);
-		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
-		fprintf(stderr, "dbg2       flipsign:        %d\n", *flipsign);
-	}
-
-	/* reset invert flag */
-	if (*invert)
-		*invert = false;
-
-	/* reset flipsign flag */
-	if (*flipsign)
-		*flipsign = false;
-
-	/* print value */
-	if (ascii)
-		printf("NaN");
-	else
-		fwrite(&NaN, sizeof(double), 1, stdout);
-
-	const int status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-
-/*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
 	int verbose = 0;
@@ -528,14 +489,6 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
-	/* output format list controls */
-	double distance_total = 0.0;
-	int time_j[5];
-	bool mblist_next_value = false;
-	bool invert_next_value = false;
-	bool signflip_next_value = false;
-
-	/* CTD values */
 	int nctd;
 	double ctd_time_d[MB_CTD_MAX];
 	double ctd_conductivity[MB_CTD_MAX];
@@ -553,37 +506,38 @@ int main(int argc, char **argv) {
 	double sensor6[MB_CTD_MAX];
 	double sensor7[MB_CTD_MAX];
 	double sensor8[MB_CTD_MAX];
+	// int ictd;
 	double conductivity;
 	double temperature;
 	double potentialtemperature;
 	double salinity;
 	double soundspeed;
-
-	/* additional time variables */
-	bool first_m = true;
-	double time_d_ref;
-	bool first_u = true;
-	time_t time_u;
-	time_t time_u_ref;
-	double seconds;
-
-	/* course calculation variables */
-	double dlon, dlat, minutes;
-	int degrees;
-	char hemi;
-	double mtodeglon, mtodeglat;
+	double mtodeglon;
+	double mtodeglat;
 	double course;
-	double course_old;  // TODO(schwehr): cpplint says reassigned a value before the old one has been used.
-	double time_d_old;
 	double time_interval;
 	double speed_made_good;
+	double course_old;  // TODO(schwehr): cpplint says reassigned a value before the old one has been used.
 	double speed_made_good_old;  // TODO(schwehr): cpplint says reassigned a value before the old one has been used.
-	double navlon_old, navlat_old;
-	double b;
-
-	int ictd;
-
+	double time_d_old;
+	double navlon_old;
+	double navlat_old;
+	double distance_total = 0.0;
 	int ctd_count_tot = 0;
+	bool invert_next_value = false;
+	bool signflip_next_value = false;
+	bool mblist_next_value = false;
+	int time_j[5];
+	bool first_m = true;
+	double time_d_ref;
+	time_t time_u;  // TODO(schwehr): Localize
+	bool first_u = true;
+	time_t time_u_ref;
+	double dlon;
+	double dlat;
+	double minutes;
+	int degrees;
+	char hemi;
 
 	/* loop over all files to be read */
 	while (read_data) {
@@ -660,7 +614,7 @@ int main(int argc, char **argv) {
 
 				/* loop over the nctd ctd points, outputting each one */
 				if (error == MB_ERROR_NO_ERROR && nctd > 0) {
-					for (ictd = 0; ictd < nctd; ictd++) {
+					for (int ictd = 0; ictd < nctd; ictd++) {
 						/* get data */
 						time_d = ctd_time_d[ictd];
 						mb_get_date(verbose, time_d, time_i);
@@ -703,8 +657,8 @@ int main(int argc, char **argv) {
 								time_interval = 0.0;
 								course = heading;
 								speed_made_good = 0.0;
-								course_old = heading;
-								speed_made_good_old = speed;
+								// course_old = heading;
+								// speed_made_good_old = speed;
 								distance = 0.0;
 							}
 							else {
@@ -808,14 +762,15 @@ int main(int argc, char **argv) {
 										                 &error);
 										break;
 									case 'J': /* time string */
+									{
 										mb_get_jtime(verbose, time_i, time_j);
-										seconds = time_i[5] + 0.000001 * time_i[6];
+										const double seconds = time_i[5] + 0.000001 * time_i[6];
 										if (ascii) {
 											printf("%.4d %.3d %.2d %.2d %9.6f", time_j[0], time_j[1], time_i[3], time_i[4],
 											       seconds);
 										}
 										else {
-											b = time_j[0];
+											double b = time_j[0];
 											fwrite(&b, sizeof(double), 1, stdout);
 											b = time_j[1];
 											fwrite(&b, sizeof(double), 1, stdout);
@@ -829,14 +784,16 @@ int main(int argc, char **argv) {
 											fwrite(&b, sizeof(double), 1, stdout);
 										}
 										break;
+									}
 									case 'j': /* time string */
+									{
 										mb_get_jtime(verbose, time_i, time_j);
-										seconds = time_i[5] + 0.000001 * time_i[6];
+										const double seconds = time_i[5] + 0.000001 * time_i[6];
 										if (ascii) {
 											printf("%.4d %.3d %.4d %9.6f", time_j[0], time_j[1], time_j[2], seconds);
 										}
 										else {
-											b = time_j[0];
+											double b = time_j[0];
 											fwrite(&b, sizeof(double), 1, stdout);
 											b = time_j[1];
 											fwrite(&b, sizeof(double), 1, stdout);
@@ -848,6 +805,7 @@ int main(int argc, char **argv) {
 											fwrite(&b, sizeof(double), 1, stdout);
 										}
 										break;
+									}
 									case 'L': /* along-track distance (km) */
 										printsimplevalue(verbose, distance_total, 7, 3, ascii, &invert_next_value,
 										                 &signflip_next_value, &error);
@@ -863,14 +821,16 @@ int main(int argc, char **argv) {
 										break;
 									case 'm': /* time in decimal seconds since
 									        first record */
+									{
 										if (first_m) {
 											time_d_ref = time_d;
 											first_m = false;
 										}
-										b = time_d - time_d_ref;
+										const double b = time_d - time_d_ref;
 										printsimplevalue(verbose, b, 0, 6, ascii, &invert_next_value, &signflip_next_value,
 										                 &error);
 										break;
+									}
 									case 'P': /* potential temperature (degrees) */
 										/* approximation taken from http://mason.gmu.edu/~bklinger/seawater.pdf
 										  on 4/25/2012 - to be replaced by a better calculation at some point */
@@ -903,12 +863,13 @@ int main(int argc, char **argv) {
 										}
 										break;
 									case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
-										seconds = time_i[5] + 1e-6 * time_i[6];
+									{
+										const double seconds = time_i[5] + 1e-6 * time_i[6];
 										if (ascii)
 											printf("%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f", time_i[0], time_i[1], time_i[2], time_i[3],
 											       time_i[4], seconds);
 										else {
-											b = time_i[0];
+											double b = time_i[0];
 											fwrite(&b, sizeof(double), 1, stdout);
 											b = time_i[1];
 											fwrite(&b, sizeof(double), 1, stdout);
@@ -922,13 +883,15 @@ int main(int argc, char **argv) {
 											fwrite(&b, sizeof(double), 1, stdout);
 										}
 										break;
+									}
 									case 't': /* yyyy mm dd hh mm ss time string */
-										seconds = time_i[5] + 1e-6 * time_i[6];
+									{
+										const double seconds = time_i[5] + 1e-6 * time_i[6];
 										if (ascii)
 											printf("%.4d %.2d %.2d %.2d %.2d %9.6f", time_i[0], time_i[1], time_i[2], time_i[3],
 											       time_i[4], seconds);
 										else {
-											b = time_i[0];
+											double b = time_i[0];
 											fwrite(&b, sizeof(double), 1, stdout);
 											b = time_i[1];
 											fwrite(&b, sizeof(double), 1, stdout);
@@ -942,12 +905,13 @@ int main(int argc, char **argv) {
 											fwrite(&b, sizeof(double), 1, stdout);
 										}
 										break;
+									}
 									case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 										time_u = (int)time_d;
 										if (ascii)
 											printf("%ld", time_u);
 										else {
-											b = time_u;
+											const double b = time_u;
 											fwrite(&b, sizeof(double), 1, stdout);
 										}
 										break;
@@ -960,7 +924,7 @@ int main(int argc, char **argv) {
 										if (ascii)
 											printf("%ld", time_u - time_u_ref);
 										else {
-											b = time_u - time_u_ref;
+											const double b = time_u - time_u_ref;
 											fwrite(&b, sizeof(double), 1, stdout);
 										}
 										break;
@@ -995,7 +959,7 @@ int main(int argc, char **argv) {
 											printf("%3d %8.5f%c", degrees, minutes, hemi);
 										}
 										else {
-											b = degrees;
+											double b = degrees;
 											if (hemi == 'W')
 												b = -b;
 											fwrite(&b, sizeof(double), 1, stdout);
@@ -1022,7 +986,7 @@ int main(int argc, char **argv) {
 											printf("%3d %8.5f%c", degrees, minutes, hemi);
 										}
 										else {
-											b = degrees;
+											double b = degrees;
 											if (hemi == 'S')
 												b = -b;
 											fwrite(&b, sizeof(double), 1, stdout);
