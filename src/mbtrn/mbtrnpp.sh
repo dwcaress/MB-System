@@ -186,13 +186,22 @@ init_vars(){
 
     # delay between TRN messages (msec)
     #OPT_DELAY="--delay=0"
-    # statistics logging interval (s)
-    OPT_STATS="--stats=30"
+    # statistics logging interval (decimal sec)
+    OPT_STATSEC="--statsec=30"
+	# statistics flags
+    # enable stats processing options
+    # may include
+    # MSF_STATUS : status counters
+    # MSF_EVENT  : event/error counters
+    # MSF_ASTAT  : aggregate stats
+    # MSF_PSTAT  : periodic stats
+    # MSF_READER : r7kr reader stats
+    #OPT_STATFLAGS="--statflags=MSF_STATUS:MSF_EVENT:MSF_ASTAT:MSF_PSTAT"
 
     # TRN processing decimation (cycles)
      OPT_TRN_DECN="--trn-decn=9"
     # TRN processing decimation (sec)
-    #OPT_TRN_DECS="--trn-decs=0"
+ 	#OPT_TRN_DECS="--trn-decs=0"
 
     # print help and exit
     OPT_HELP="" #"--help"
@@ -464,16 +473,22 @@ do
     vout "ovr OPT_MBOUT: $OPT_MBOUT"
     fi
 
-    if [ ${a:2:6} == "trn-out" ]
+    if [ ${a:2:7} == "trn-out" ]
     then
     OPT_TRNOUT=$a
     vout "ovr OPT_TRNOUT: $OPT_TRNOUT"
     fi
 
-    if [ ${a:2:7} == "stat" ]
+    if [ ${a:2:7} == "statsec" ]
     then
-    OPT_STATS=$a
-    vout "ovr OPT_STATS: $OPT_STATS"
+    OPT_STATSEC=$a
+    vout "ovr OPT_STATSEC: $OPT_STATSEC"
+    fi
+
+    if [ ${a:2:9} == "statflags" ]
+    then
+    OPT_STATFLAGS=$a
+    vout "ovr OPT_STATFLAGS: $OPT_STATFLAGS"
     fi
 
     if [ ${a:2:6} == "trn-en" ]
@@ -482,7 +497,8 @@ do
     vout "ovr OPT_TRN_SEL: $OPT_TRN_SEL"
     fi
 
-    if [ ${a:2:6} == "trn-dis" ]
+
+    if [ ${a:2:7} == "trn-dis" ]
     then
     OPT_TRN_SEL=${OPT_TRN_DIS}
     vout "ovr OPT_TRN_SEL: $OPT_TRN_SEL"
@@ -518,13 +534,13 @@ do
     vout "ovr OPT_TRN_LOG: $OPT_TRN_LOG"
     fi
 
-    if [ ${a:2:8} == "trn-mtype" ]
+    if [ ${a:2:9} == "trn-mtype" ]
     then
     OPT_TRN_MTYPE=$a
     vout "ovr OPT_TRN_MTYPE: $OPT_TRN_MTYPE"
     fi
 
-    if [ ${a:2:8} == "trn-ftype" ]
+    if [ ${a:2:9} == "trn-ftype" ]
     then
     OPT_TRN_FTYPE=$a
     vout "ovr OPT_TRN_FTYPE: $OPT_TRN_FTYPE"
@@ -542,12 +558,6 @@ do
     vout "ovr OPT_TRN_DECS: $OPT_TRN_DECS"
     fi
 
-    if [ ${a:2:8} == "trn-ftype" ]
-    then
-    OPT_TRN_FTYPE=$a
-    vout "ovr OPT_TRN_FTYPE: $OPT_TRN_FTYPE"
-    fi
-
     if [ ${a:2:12} == "trn-nombgain" ]
     then
     OPT_TRN_NOMBGAIN=$a
@@ -563,7 +573,8 @@ done
 
 
 # set cmdline options
-APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATS $OPT_MBHBN $OPT_MBHBT $OPT_TRNHBT $OPT_TRNUHBT $OPT_DELAY $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_LOG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_TRN_NOMBGAIN $OPT_TRN_SEL  $OPT_HELP"
+
+APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATSEC $OPT_STATFLAGS $OPT_MBHBN $OPT_MBHBT $OPT_TRNHBT $OPT_TRNUHBT $OPT_DELAY $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_LOG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_TRN_NOMBGAIN $OPT_TRN_SEL  $OPT_HELP"
 
 # check required TRN options
 if [ ! -z "${OPT_TRN_EN}" ]

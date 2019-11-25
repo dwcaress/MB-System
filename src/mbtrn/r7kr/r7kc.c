@@ -753,13 +753,14 @@ double r7k_7ktime2d(r7k_time_t *r7kt)
         double ptf=modf(r7kt->seconds, &pti);
         struct tm tms = {0};
         char tstr[64]={0};
-        sprintf(tstr,"%u %u %02d:%02d:%02.0f",r7kt->year,r7kt->day,r7kt->hours,r7kt->minutes,pti);
-        
+        sprintf(tstr,"%u %u %02d:%02d:%02.0f",r7kt->year,r7kt->day,(int)r7kt->hours,(int)r7kt->minutes,r7kt->seconds);
+
         strptime(tstr,"%Y %j %H:%M:%S",&tms);
         tms.tm_isdst=-1;
         time_t tt = mktime(&tms);
         retval=(double)tt+ptf;
-        
+//        fprintf(stderr,"tms[%s] ret[%.3lf]\n",tms,retval);
+
     }// else invalid argument
     
     return retval;

@@ -2,20 +2,20 @@
 /// @file emu7k.c
 /// @authors k. Headley
 /// @date 01 jan 2018
- 
+
 /// 7k Center emulation
 /// Reads MB data from a file and writes
 /// it to a socket (e.g. emulates reson 7k center source)
 
 /////////////////////////
-// Terms of use 
+// Terms of use
 /////////////////////////
 //
 // Copyright Information
 //
 // Copyright 2000-2018 MBARI
 // Monterey Bay Aquarium Research Institute, all rights reserved.
-// 
+//
 // Terms of Use
 //
 // This program is free software; you can redistribute it and/or modify
@@ -29,36 +29,36 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details
 // (http://www.gnu.org/licenses/gpl-3.0.html)
-// 
+//
 // MBARI provides the documentation and software code "as is", with no warranty,
-// express or implied, as to the software, title, non-infringement of third party 
+// express or implied, as to the software, title, non-infringement of third party
 // rights, merchantability, or fitness for any particular purpose, the accuracy of
-// the code, or the performance or results which you may obtain from its use. You 
-// assume the entire risk associated with use of the code, and you agree to be 
-// responsible for the entire cost of repair or servicing of the program with 
+// the code, or the performance or results which you may obtain from its use. You
+// assume the entire risk associated with use of the code, and you agree to be
+// responsible for the entire cost of repair or servicing of the program with
 // which you are using the code.
-// 
+//
 // In no event shall MBARI be liable for any damages, whether general, special,
-// incidental or consequential damages, arising out of your use of the software, 
-// including, but not limited to, the loss or corruption of your data or damages 
-// of any kind resulting from use of the software, any prohibited use, or your 
+// incidental or consequential damages, arising out of your use of the software,
+// including, but not limited to, the loss or corruption of your data or damages
+// of any kind resulting from use of the software, any prohibited use, or your
 // inability to use the software. You agree to defend, indemnify and hold harmless
-// MBARI and its officers, directors, and employees against any claim, loss, 
-// liability or expense, including attorneys' fees, resulting from loss of or 
-// damage to property or the injury to or death of any person arising out of the 
+// MBARI and its officers, directors, and employees against any claim, loss,
+// liability or expense, including attorneys' fees, resulting from loss of or
+// damage to property or the injury to or death of any person arising out of the
 // use of the software.
-// 
-// The MBARI software is provided without obligation on the part of the 
-// Monterey Bay Aquarium Research Institute to assist in its use, correction, 
+//
+// The MBARI software is provided without obligation on the part of the
+// Monterey Bay Aquarium Research Institute to assist in its use, correction,
 // modification, or enhancement.
-// 
-// MBARI assumes no responsibility or liability for any third party and/or 
-// commercial software required for the database or applications. Licensee agrees 
-// to obtain and maintain valid licenses for any additional third party software 
+//
+// MBARI assumes no responsibility or liability for any third party and/or
+// commercial software required for the database or applications. Licensee agrees
+// to obtain and maintain valid licenses for any additional third party software
 // required.
 
 /////////////////////////
-// Headers 
+// Headers
 /////////////////////////
 // TODO: clean up server porting
 //#if defined(__unix__) || defined(__APPLE__)
@@ -91,7 +91,7 @@
 // Macros
 /////////////////////////
 /*
-// These macros should only be defined for 
+// These macros should only be defined for
 // application main files rather than general C files
 //
 /// @def PRODUCT
@@ -138,7 +138,7 @@
 #define TDIFF(a,b) (b-a)
 
 /////////////////////////
-// Declarations 
+// Declarations
 /////////////////////////
 
 ///// @enum emu7k_channel_id
@@ -289,7 +289,7 @@ emu7k_t *emu7k_lnew(msock_socket_t *s, mlist_t *path_list, app_cfg_t *cfg)
         self->cfg       = cfg;
         self->reader    = r7kr_freader_new(NULL, 2*MAX_FRAME_BYTES_7K, NULL, 0);
         self->file_list = NULL;
-        
+
         if (mlist_size(path_list)>0) {
             self->file_list = mlist_new();
             char *file_path = (char *)mlist_first(path_list);
@@ -320,7 +320,7 @@ void emu7k_destroy(emu7k_t **pself)
                 msock_socket_destroy(&self->sock_if);
                 mthread_thread_destroy(&self->t);
                 mthread_thread_destroy(&self->w);
-                
+
                 emu7k_client_t *client = (emu7k_client_t *)mlist_first(self->client_list);
                 while (NULL!=client) {
                     emu7k_client_destroy(&client);
@@ -329,7 +329,7 @@ void emu7k_destroy(emu7k_t **pself)
                 }
 
                 mlist_destroy(&self->client_list);
-                
+
                 mfile_file_t *file = (mfile_file_t *)mlist_first(self->file_list);
                 while (NULL!=file) {
                     mfile_file_destroy(&file);
@@ -388,6 +388,8 @@ void emu7k_stat_show(emu7k_stat_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[pub_total  %10"PRId64"]\n",indent,(indent>0?" ":""), self->pub_total);
         fprintf(stderr,"%*s[rec_cycle  %10"PRId64"]\n",indent,(indent>0?" ":""), self->rec_cycle);
         fprintf(stderr,"%*s[pub_cycle  %10"PRId64"]\n",indent,(indent>0?" ":""), self->pub_cycle);
+        fprintf(stderr,"%*s[frame_err  %10"PRId64"]\n",indent,(indent>0?" ":""), self->frame_err);
+        fprintf(stderr,"%*s[sync_bytes %10"PRId64"]\n",indent,(indent>0?" ":""), self->sync_bytes);
     }
 }
 // End function emu7k_stat_show
@@ -424,16 +426,16 @@ void emu7k_show(emu7k_t *self, bool verbose, uint16_t indent)
 }
 // End function emu7k_show
 
-static int64_t read_s7k_frame(emu7k_t *self, byte *dest, uint32_t len, uint32_t *sync_bytes)
+static int64_t read_s7k_frame(emu7k_t *self, byte *dest, uint32_t len, uint32_t *sync_bytes, emu7k_stat_t *stats)
 {
     int64_t retval=-1;
- 
+
     if (NULL!=self && NULL!=self->reader && NULL!=self->cfg &&
         NULL!=dest) {
 
         int64_t rbytes=0;
        r7kr_flags_t rflags = ( (self->cfg->netframe_input) ? R7KR_NET_STREAM : R7KR_DRF_STREAM );
-      
+
         if( (rbytes = r7kr_read_frame(self->reader, dest, len, rflags , 0.0, 20, sync_bytes )) >0 ){
             retval=rbytes;
             PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"r7kr_read_frame_new returned %s sz[%"PRId64"] sync[%"PRIu32"/x%X]\n",( (self->cfg->netframe_input) ? "NF" : "DRF" ), rbytes, *sync_bytes,*sync_bytes));
@@ -444,11 +446,16 @@ static int64_t read_s7k_frame(emu7k_t *self, byte *dest, uint32_t len, uint32_t 
 //            }else{
 //                r7k_drf_show((r7k_drf_t *)(dest),false,5);
 //            }
+        }else{
+            if(NULL!=stats){
+            stats->frame_err++;
+            stats->sync_bytes=*sync_bytes;
+            }
         }
     }else{
         PEPRINT((stderr,"invalid argument\n"));
     }
-    
+
     return retval;
 }
 // End function read_s7k_frame
@@ -460,11 +467,11 @@ static int64_t read_s7k_frame(emu7k_t *self, byte *dest, uint32_t len, uint32_t 
 static void *s_server_publish(void *arg)
 {
     emu7k_t *svr = (emu7k_t *)arg;
-    
+
     if (NULL!=svr) {
         msock_socket_t  *s = svr->sock_if;
         bool stop_req    = true;
-        
+
 #if defined (__APPLE__)
         // OSX segfaults when putting large arrays on stack
         byte *cur_frame=NULL;
@@ -479,7 +486,7 @@ static void *s_server_publish(void *arg)
         // iterate over the file list
         mfile_file_t *source_file = (mfile_file_t *)mlist_first(svr->file_list);
         uint32_t start_offset = svr->cfg->start_offset;
-        
+
         while (NULL!=source_file && !svr->stop) {
             double min_delay = ((double)svr->cfg->min_delay)/1000.0;
             double max_delay = ((double)svr->cfg->max_delay)/1000.0;//MAX_DELAY_DFL_SEC;
@@ -490,7 +497,7 @@ static void *s_server_publish(void *arg)
                 PEPRINT((stderr,"r7kr_reader_set_file failed\n"));
                 source_file=NULL;
             }
-            
+
             if (NULL != source_file) {
                 double sys_start = 0.0;
                 double str_start = 0.0;
@@ -502,13 +509,13 @@ static void *s_server_publish(void *arg)
                 int64_t rbytes=0;
                 uint32_t sync_bytes=0;
                 byte *pframe = NULL;
-                
+
                 struct timespec delay;
                 struct timespec rem;
                 int seq_number=0;
                 bool delete_client=false;
                 emu7k_stat_t *stats = &svr->stats;
-                
+
                 off_t file_end = mfile_seek(source_file,0,MFILE_END);
                 if ((off_t)start_offset>=file_end) {
                     mfile_seek(source_file,file_end,MFILE_SET);
@@ -519,25 +526,25 @@ static void *s_server_publish(void *arg)
                 }
 //                mfile_seek(source_file,0,MFILE_SET);
                 off_t file_cur = mfile_seek(source_file,0,MFILE_CUR);
-                
+
                 memset((void *)cur_frame,0,R7K_MAX_FRAME_BYTES*sizeof(byte));
                 memset((void *)nxt_frame,0,R7K_MAX_FRAME_BYTES*sizeof(byte));
-                
+
                 pnf[CUR_FRAME] = (r7k_nf_t *)(cur_frame);
                 pdrf[CUR_FRAME] = (r7k_drf_t *)(cur_frame+R7K_NF_BYTES);
                 pnf[NXT_FRAME] = (r7k_nf_t *)(nxt_frame);
                 pdrf[NXT_FRAME] = (r7k_drf_t *)(nxt_frame+R7K_NF_BYTES);
-                
+
                 // seed the frame buffer
                 // [need to look ahead for timing]
                 pframe = ( svr->cfg->netframe_input ? cur_frame : (cur_frame+R7K_NF_BYTES));
-                if ( (rbytes=read_s7k_frame(svr, pframe, R7K_MAX_FRAME_BYTES, &sync_bytes)) > 0) {
-                    
+                if ( (rbytes=read_s7k_frame(svr, pframe, R7K_MAX_FRAME_BYTES, &sync_bytes,stats)) > 0) {
+
                     sync_bytes=0;
                     pframe = ( svr->cfg->netframe_input ? nxt_frame : (nxt_frame+R7K_NF_BYTES));
-                    if ( (rbytes=read_s7k_frame(svr, pframe, R7K_MAX_FRAME_BYTES, &sync_bytes)) > 0) {
+                    if ( (rbytes=read_s7k_frame(svr, pframe, R7K_MAX_FRAME_BYTES, &sync_bytes,stats)) > 0) {
                         stop_req=false;
-                        
+
                     }else{
                         PEPRINT((stderr,"ERR - init next frame failed ret[%"PRId64"] [%d/%s]\n",rbytes,me_errno,me_strerror(me_errno)));
                         pdrf[NXT_FRAME] = NULL;
@@ -548,20 +555,20 @@ static void *s_server_publish(void *arg)
                     pdrf[CUR_FRAME] = NULL;
                     pnf[CUR_FRAME] = NULL;
                 }
-                
+
                 // mark the start of the system and stream times
                 str_start = r7k_7ktime2d(&pdrf[CUR_FRAME]->_7ktime);
                 sys_start = mtime_dtime();
-                
+
                 while (!stop_req && !svr->stop) {
-                    
+
                     if (mlist_size(svr->client_list)>0) {
-                        
+
                         emu7k_client_t *client = (emu7k_client_t *)mlist_first(svr->client_list);
-                        
+
                         if (svr->cfg->netframe_input == false) {
                             memset((void *)cur_frame,0,R7K_NF_BYTES);
-                            
+
                             pnf[CUR_FRAME]->protocol_version = R7K_NF_PROTO_VER;
                             pnf[CUR_FRAME]->tx_id       = r7k_txid();
                             pnf[CUR_FRAME]->seq_number  = seq_number++;
@@ -570,7 +577,7 @@ static void *s_server_publish(void *arg)
                             pnf[CUR_FRAME]->total_size  = pdrf[CUR_FRAME]->size;
                             pnf[CUR_FRAME]->total_records  = 1;
                         }
-                        
+
                         if (svr->cfg->verbose>=3) {
                             fprintf(stderr,"CUR_FRAME cf[%p] pnf[%p] pdrf[%p]\n",cur_frame, (byte *)pnf[CUR_FRAME],(byte *)pdrf[CUR_FRAME]);
                             if (svr->cfg->netframe_input) {
@@ -579,17 +586,17 @@ static void *s_server_publish(void *arg)
                             r7k_drf_show(pdrf[CUR_FRAME],false,5);
                             r7k_hex_show(cur_frame,(R7K_NF_BYTES+R7K_DRF_BYTES),16,true,5);
                         }
-                        
+
                         // iterate over client list
                         while (NULL != client && NULL!=pdrf[CUR_FRAME] ) {
-                            
+
                             delete_client=false;
-                            
+
                             // check client's subscription list
                             for (uint32_t i=0; i<client->sub_count; i++) {
                                 // send frame if client is subscribed
                                 if ( pdrf[CUR_FRAME]->record_type_id == (uint32_t)client->sub_list[i] ) {
-                                    
+
                                     if (min_delay>=0.0) {
                                         // get current time
                                         sys_now  = mtime_dtime();
@@ -627,11 +634,22 @@ static void *s_server_publish(void *arg)
                                             // min_delay overrides max_delay
                                             // if it is larger
                                             twait = max_delay;
+
+                                            if( svr->cfg->verbose>=2) {
+                                                char isostr[64]={0};
+                                                time_t tt_pkt=(time_t)0+pkt_time;
+                                                struct tm tm_pkt;
+                                                // should already be UTC; use localtime not gmtime
+                                                localtime_r(&tt_pkt,&tm_pkt);
+
+                                                strftime(isostr,64,"%FT%H:%M:%S",&tm_pkt);
+                                                PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"WARN: possible data gap twait[%lf] ending @ %0.3lf [%s]\n",twait,pkt_time,isostr));
+                                            }
                                         }
                                         if(twait<min_delay){
                                             twait = min_delay;
                                         }
-                                        
+
                                         if (twait>0.0) {
                                             double dsec = 0;
                                             double dnsec = modf(twait,&dsec);
@@ -648,15 +666,15 @@ static void *s_server_publish(void *arg)
                                             }
                                         }
                                     }// else no delay
-                                                                        
+
                                     PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,">>>> sending frame ofs[%"PRId32"] len[%6"PRIu32"] txid[%5"PRIu16"] seq[%"PRIu32"] type[%"PRIu32"] ts[%.3lf]\n",(int32_t)file_cur,pnf[CUR_FRAME]->packet_size,pnf[CUR_FRAME]->tx_id, pnf[CUR_FRAME]->seq_number, pdrf[CUR_FRAME]->record_type_id,pkt_time));
-                                    
+
                                     if( svr->cfg->verbose>=3) {
                                         r7k_nf_show(pnf[CUR_FRAME],false,5);
                                         r7k_drf_show(pdrf[CUR_FRAME],false,5);
                                         r7k_hex_show(cur_frame,pnf[CUR_FRAME]->packet_size,16,true,5);
                                     }
-                                    
+
                                     int64_t status=-1;
                                     if( (status=msock_send(client->sock_if, cur_frame, pnf[CUR_FRAME]->packet_size))<=0){
                                         PEPRINT((stderr,"send failed [%"PRId64"] [%d/%s]\n",status,errno,strerror(errno)));
@@ -664,10 +682,10 @@ static void *s_server_publish(void *arg)
                                             delete_client=true;
                                         }
                                     }
-                                    
+
                                     stats->pub_total++;
                                     stats->pub_cycle++;
-                                    
+
                                     if (delete_client) {
                                         PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"connection broken, deleting client %p fd[%d]\n",client,client->fd));
                                         mlist_remove(svr->client_list,client);
@@ -676,7 +694,7 @@ static void *s_server_publish(void *arg)
                                         client=NULL;
                                         stats->con_active--;
                                     }
-                                    
+
                                     // test feature: delay xds sec every xdt sec
                                     // (stop xmission w/o disconnecting socket, to test mbtrnpp response)
                                     if(svr->cfg->xds>1){
@@ -687,7 +705,7 @@ static void *s_server_publish(void *arg)
                                             svr->cfg->xdstart=xdnow;
                                         }
                                     }
-                                    
+
                                     break;
                                 }else{
                                     if (NULL!=pdrf[CUR_FRAME]) {
@@ -699,42 +717,42 @@ static void *s_server_publish(void *arg)
                             // get next client
                             client=(emu7k_client_t *)mlist_next(svr->client_list);
                         }// while clients
-                        
+
                         // check for end of input file
                         file_cur = mfile_seek(source_file,0,MFILE_CUR);
                         if (file_cur >= file_end) {
                             stats->cyc_total++;
                             stats->rec_cycle=0;
                             stats->pub_cycle=0;
-                            
+
                             PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"reached end of file eof[%"PRId32"] cur[%"PRIu32"]\n",(int32_t)file_end, (uint32_t)file_cur));
 
                             PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"setting stop_req\n"));
                             stop_req=true;
                         }
-                        
+
                         if (!stop_req) {
                             // clear current frame
                             memset((void *)cur_frame, 0, R7K_MAX_FRAME_BYTES);
                             // move next to current
                             memcpy((void *)cur_frame, nxt_frame, R7K_MAX_FRAME_BYTES);
-                            
+
                             // clear next frame data
                             memset((void *)nxt_frame, 0, R7K_MAX_FRAME_BYTES);
-                            
+
                             // read next record
                             sync_bytes=0;
                             pframe = ( svr->cfg->netframe_input ? nxt_frame : (nxt_frame+R7K_NF_BYTES));
-                            if ( (rbytes=read_s7k_frame(svr, pframe, R7K_MAX_FRAME_BYTES, &sync_bytes)) > 0) {
+                            if ( (rbytes=read_s7k_frame(svr, pframe, R7K_MAX_FRAME_BYTES, &sync_bytes,stats)) > 0) {
                                 stop_req=false;
                             }else{
-                                PEPRINT((stderr,"ERR - read next returned[%"PRId64"] [%d/%s]\n",rbytes,me_errno,me_strerror(me_errno)));
+                                PEPRINT((stderr,"ERR - read next returned[%"PRId64"] syncbytes[%"PRIu32"] [%d/%s]\n",rbytes,sync_bytes,me_errno,me_strerror(me_errno)));
                                 PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"setting stop_req\n"));
                                 stop_req=true;
-                            }
-                            
+                             }
+
                             PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"read frame at ofs[%"PRId32"/x%08X] rbytes[%"PRId64"] sbytes[%"PRIu32"]\n",(int32_t)file_cur,(unsigned int)file_cur,rbytes,sync_bytes));
-                            
+
                             if( svr->cfg->verbose>=3) {
                                 if (svr->cfg->netframe_input) {
                                     r7k_nf_show(pnf[NXT_FRAME],false,5);
@@ -746,61 +764,61 @@ static void *s_server_publish(void *arg)
                             stats->rec_cycle++;
                             stats->rec_total++;
                         }
-                        
+
                         if ( (svr->cfg->verbose>=2) &&
                             (svr->cfg->statn>0) &&
                             (stats->rec_total%svr->cfg->statn == 0) ) {
                             PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"stats\n"));
                             emu7k_stat_show(stats,false,7);
                         }
-                        
+
                     }else{
 //                        PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"no clients\n"));
                         sleep(1);
                     }
                 }// while !stop
-                
+
                 if(svr->cfg->verbose>=1){
                     PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"stopped - stats\n"));
                     emu7k_stat_show(stats,false,7);
                 }
-                
+
             }else{
                 PEPRINT((stderr,"NULL source file\n"));
                 s->status=-1;
             }
-            
+
             // get next file from list
             source_file = (mfile_file_t *)mlist_next(svr->file_list);
-            
+
             // if file is NULL (end of list) and restart set
             // start at beginning of list
             if (NULL==source_file && svr->cfg->restart) {
                 PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"restarting at beginning of file list\n"));
                 source_file = (mfile_file_t *)mlist_first(svr->file_list);
             }
-            
+
         }// while source_file
-        
+
 
         PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"publisher exiting sreq[%c] stop[%c]\n",(stop_req?'Y':'N'),(svr->stop?'Y':'N')));
-        
+
 #if defined (__APPLE__)
         free(cur_frame);
         free(nxt_frame);
 #endif
         g_interrupt = true;
         pthread_exit((void *)&s->status);
-        
+
         return (void *)(&s->status);
     }else{
         PEPRINT((stderr,"NULL server\n"));
     }
     pthread_exit((void *)NULL);
-    
+
     return (void *)NULL;
- 
-	
+
+
 }
 // End function s_server_publish
 
@@ -815,7 +833,7 @@ static int s_server_handle_request(emu7k_t *svr, byte *req, int rlen, int client
     int retval=0;
 	
     if (NULL!=req) {
-        
+
         r7k_nf_headers_t *fh=(r7k_nf_headers_t *)req;
         r7k_nf_t *nf = &(fh->nf);
         r7k_drf_t *drf = &(fh->drf);
@@ -836,7 +854,7 @@ static int s_server_handle_request(emu7k_t *svr, byte *req, int rlen, int client
             if(nf->protocol_version == R7K_NF_PROTO_VER &&
                drf->record_type_id == R7K_RT_REMCON &&
                rth->remcon_id == R7K_RTID_SUB){
-                
+
                 // got 7k center subscription record
 	            PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"7K SUB request received\n"));
                 // create, send SUB ACK message
@@ -852,7 +870,7 @@ static int s_server_handle_request(emu7k_t *svr, byte *req, int rlen, int client
                 msg->nf->packet_size = R7K_MSG_NF_PACKET_SIZE(msg);
                 msg->nf->total_size  = R7K_MSG_NF_TOTAL_SIZE(msg);
                 r7k_msg_set_checksum(msg);
-                
+
                 PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"sending SUB ACK:\n"));
                 if(svr->cfg->verbose>=1){
                     r7k_msg_show(msg,true,3);
@@ -860,7 +878,7 @@ static int s_server_handle_request(emu7k_t *svr, byte *req, int rlen, int client
                 msock_socket_t *s = msock_wrap_fd(client_fd);
                 r7k_msg_send(s,msg);
                 r7k_msg_destroy(&msg);
-                
+
                 // get sub request data
                 byte *pdata = (req + hdr_len);
                 uint32_t nsubs = *((uint32_t *)pdata);
@@ -891,7 +909,7 @@ static int s_server_handle_request(emu7k_t *svr, byte *req, int rlen, int client
 void *s_server_main(void *arg)
 {
     emu7k_t *svr = (emu7k_t *)arg;
-   
+
     int *retval=NULL;
 
     if ( (NULL!=svr) ) {
@@ -920,15 +938,15 @@ void *s_server_main(void *arg)
             msock_bind(s);
             PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"server [%s] - starting\n",msock_addr2str(s,buf,ADDRSTR_BYTES)));
             msock_listen(s,1);
-            
+
             tv.tv_sec = 3;
             tv.tv_usec = 0;
-            
+
             FD_ZERO(&read_fds);
             FD_ZERO(&master);
             FD_SET(s->fd,&master);
             fdmax = s->fd;
-            
+
             while (!svr->stop && !stop_req) {
                read_fds = master;
                 int stat=0;
@@ -1009,11 +1027,11 @@ void *s_server_main(void *arg)
                 s->status=0;
             }
         }
-        
+
         retval=(NULL!=s?&s->status:NULL);
     }
-    
-    
+
+
     pthread_exit((void *)retval);
 
     return (void *)retval;
@@ -1049,7 +1067,7 @@ int emu7k_stop(emu7k_t *self)
     if (NULL!=self) {
         PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"stopping server thread\n"));
         self->stop=true;
-        
+
         while( mthread_thread_join(self->t)!=0){
         	
         }
@@ -1099,7 +1117,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
     int c;
     bool help=false;
     bool version=false;
-    
+
     static struct option options[] = {
         {"verbose", required_argument, NULL, 0},
         {"help", no_argument, NULL, 0},
@@ -1116,7 +1134,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"nf", no_argument, NULL, 0},
         {"offset", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
-    
+
     // process argument list
     while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
         switch (c) {
@@ -1130,7 +1148,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                 if (strcmp("version", options[option_index].name) == 0) {
                     version=true;
                 }
-                // help 
+                // help
                 else if (strcmp("help", options[option_index].name) == 0) {
                     help = true;
                 }
@@ -1201,11 +1219,11 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
             exit(0);
         }
     }// while
-    
+
     for (int i=optind; i<argc; i++) {
         mlist_add(cfg->file_paths,strdup(argv[i]));
     }
-    
+
     if (cfg->verbose>0) {
         fprintf(stderr,"verbose   [%d]\n",cfg->verbose);
         fprintf(stderr,"host      [%s]\n",cfg->host);
@@ -1226,9 +1244,9 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
             path = (char *)mlist_next(cfg->file_paths);
         }
     }
-    
+
     g_verbose = cfg->verbose;
-    
+
     mconf_init(NULL,NULL);
     mmd_channel_dis(MOD_EMU7K,MM_ALL);
     mmd_channel_set(MOD_R7K,MM_ERR);
@@ -1309,11 +1327,11 @@ int main(int argc, char **argv)
     saStruct.sa_flags = 0;
     saStruct.sa_handler = s_termination_handler;
     sigaction(SIGINT, &saStruct, NULL);
-    
+
     // configure application
     mlist_t *file_paths=mlist_new();
     mlist_autofree(file_paths,free);
-    
+
     app_cfg_t cfg = {
         VERBOSE_OUTPUT_DFL,
         NULL,
@@ -1334,14 +1352,14 @@ int main(int argc, char **argv)
 
     // create/configure server socket
     msock_socket_t *svr_socket = msock_socket_new(cfg.host, cfg.port, ST_TCP);
-    
+
     // create/configure server
    // emu7k_t *server = emu7k_new(svr_socket, svr_data, &cfg);
     emu7k_t *server = emu7k_lnew(svr_socket, file_paths, &cfg);
-    
+
     // start server thread
     emu7k_start(server);
-    
+
     // wait for input signal (SIGINT)
     while (!server->stop && !g_interrupt) {
         sleep(2);
