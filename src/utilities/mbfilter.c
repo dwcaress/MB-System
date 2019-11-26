@@ -179,7 +179,7 @@ int hipass_mean(int verbose, int n, const double *val, double *wgt, double *hipa
 
 	/* get mean */
 	*hipass = 0.0;
-	int nn = 0;
+	int nn = 0;  // TODO(schwehr): Why not just use the value of n?
 	for (int i = 0; i < n; i++) {
 		*hipass += val[i];
 		nn++;
@@ -370,7 +370,6 @@ int smooth_median(int verbose, double original, bool apply_threshold, double thr
 			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
 	}
 
-	/* start */
 	*smooth = 0.0;
 
 	/* sort values and get median value */
@@ -415,7 +414,7 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth
 	/* get weights */
 	*smooth = 0.0;
 	double wgtsum = 0.0;
-	int nn = 0;
+	int nn = 0;  // TODO(schwehr): Why not just use n?
 	wgt[0] = 0.5;
 	for (int i = 1; i < n; i++) {
 		double diff = fabs(val[i] - val[0]);
@@ -891,66 +890,6 @@ int main(int argc, char **argv) {
 	if (format == 0)
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
-
-	/* MBIO read control parameters */
-	void *datalist;
-	double file_weight;
-	int system;
-	double btime_d;
-	double etime_d;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	int obeams_bath;
-	int obeams_amp;
-	int opixels_ss;
-	char file[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	void *imbio_ptr = NULL;
-
-	/* MBIO write control parameters */
-	char ofile[MB_PATH_MAXLINE];
-	void *ombio_ptr = NULL;
-
-	/* mbio read and write values */
-	struct mb_io_struct *imb_io_ptr;
-	struct mb_io_struct *omb_io_ptr;
-	void *store_ptr;
-	int kind;
-	int ndata = 0;
-	char comment[MB_COMMENT_MAXLINE];
-
-	/* buffer handling parameters */
-	int nhold = 0;
-	int nhold_ping = 0;
-	int nload;
-	int nunload;
-	int nread;
-	int nreadtot = 0;
-	int nwrite;
-	int nwritetot = 0;
-	struct mbfilter_ping_struct ping[MBFILTER_BUFFER_DEFAULT];
-
-	int nweight;
-	int nweightmax;
-	double *weights;
-	double *values;
-	double *distances;
-	int iteration;
-
-	double *dataptr0, *dataptr1;
-	char *flagptr0, *flagptr1;
-	double ddis;
-	int ndatapts;
-	int ifilter, ndx, ndl;
-	int ia, ib;
-	int ja, jb, jbeg, jend;
-	int ii, jj;
-
-	/* determine whether to read one file or a list of files */
-	const bool read_datalist = format < 0;
-	bool read_data;
-
 	/* output some information */
 	if (verbose > 0) {
 		if (datakind == MBFILTER_BATH)
@@ -999,6 +938,14 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	/* determine whether to read one file or a list of files */
+	const bool read_datalist = format < 0;
+	bool read_data;
+	void *datalist;
+	char file[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
+	double file_weight;
+
 	/* open file list */
 	if (read_datalist) {
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -1014,46 +961,46 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
+	/* MBIO read control parameters */
+	int system;
+	double btime_d;
+	double etime_d;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+	int obeams_bath;
+	int obeams_amp;
+	int opixels_ss;
+	void *imbio_ptr = NULL;
+
+	/* MBIO write control parameters */
+	char ofile[MB_PATH_MAXLINE];
+	void *ombio_ptr = NULL;
+
+	/* mbio read and write values */
+	void *store_ptr;
+	int kind;
+	char comment[MB_COMMENT_MAXLINE];
+
+	/* buffer handling parameters */
+	int nreadtot = 0;
+	int nwritetot = 0;
+	struct mbfilter_ping_struct ping[MBFILTER_BUFFER_DEFAULT];
+
+	double *weights;
+	double *values;
+	double *distances;
+
 	/* loop over all files to be read */
 	while (read_data) {
 
 		/* check for format with amplitude or sidescan data */
-		status = mb_format_system(verbose, &format, &system, &error);
-		status = mb_format_dimensions(verbose, &format, &beams_bath, &beams_amp, &pixels_ss, &error);
-		/* if (datakind == MBFILTER_BATH
-		    && beams_bath <= 0)
-		    {
-		    fprintf(stderr,"\nProgram <%s> is in bathymetry mode.\n",program_name);
-		    fprintf(stderr,"Format %d is unacceptable because it does not include sidescan data.\n",format);
-		    fprintf(stderr,"\nProgram <%s> Terminated\n",
-		        program_name);
-		    error = MB_ERROR_BAD_FORMAT;
-		    exit(error);
-		    }
-		if (datakind == MBFILTER_SS
-		    && pixels_ss <= 0)
-		    {
-		    fprintf(stderr,"\nProgram <%s> is in sidescan mode.\n",program_name);
-		    fprintf(stderr,"Format %d is unacceptable because it does not include sidescan data.\n",format);
-		    fprintf(stderr,"\nProgram <%s> Terminated\n",
-		        program_name);
-		    error = MB_ERROR_BAD_FORMAT;
-		    exit(error);
-		    }
-		if (datakind == MBFILTER_AMP
-		    && beams_amp <= 0)
-		    {
-		    fprintf(stderr,"\nProgram <%s> is in amplitude mode.\n",program_name);
-		    fprintf(stderr,"Format %d is unacceptable because it does not include amplitude data.\n",format);
-		    fprintf(stderr,"\nProgram <%s> Terminated\n",
-		        program_name);
-		    error = MB_ERROR_BAD_FORMAT;
-		    exit(error);
-		    }*/
+		status &= mb_format_system(verbose, &format, &system, &error);
+		status &= mb_format_dimensions(verbose, &format, &beams_bath, &beams_amp, &pixels_ss, &error);
 
 		/* initialize reading the input swath sonar file */
-		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
-		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+		if (mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
+		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
 			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
@@ -1061,7 +1008,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(error);
 		}
-		imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+		struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
 
 		/* initialize writing the output swath sonar file */
 		if (datakind == MBFILTER_BATH)
@@ -1070,7 +1017,7 @@ int main(int argc, char **argv) {
 			sprintf(ofile, "%s.ffa", file);
 		else if (datakind == MBFILTER_SS)
 			sprintf(ofile, "%s.ffs", file);
-		if ((status = mb_write_init(verbose, ofile, 71, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error)) !=
+		if (mb_write_init(verbose, ofile, 71, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error) !=
 		    MB_SUCCESS) {
 			char *message;
 			mb_error(verbose, error, &message);
@@ -1079,7 +1026,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(error);
 		}
-		omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
+		struct mb_io_struct *omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
 
 		/* allocate memory for data arrays */
 		for (int i = 0; i < n_buffer_max; i++) {
@@ -1125,7 +1072,7 @@ int main(int argc, char **argv) {
 				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
 				                           (void **)&ping[i].ssalongtrack, &error);
 			if (datakind == MBFILTER_BATH) {
-				ndatapts = beams_bath;
+				// ndatapts = beams_bath;
 				if (error == MB_ERROR_NO_ERROR)
 					status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
 					                           (void **)&ping[i].dataprocess, &error);
@@ -1134,7 +1081,7 @@ int main(int argc, char **argv) {
 					                           (void **)&ping[i].datasave, &error);
 			}
 			else if (datakind == MBFILTER_AMP) {
-				ndatapts = beams_amp;
+				// ndatapts = beams_amp;
 				if (error == MB_ERROR_NO_ERROR)
 					status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double),
 					                           (void **)&ping[i].dataprocess, &error);
@@ -1143,7 +1090,7 @@ int main(int argc, char **argv) {
 					                           (void **)&ping[i].datasave, &error);
 			}
 			else if (datakind == MBFILTER_SS) {
-				ndatapts = pixels_ss;
+				// ndatapts = pixels_ss;
 				if (error == MB_ERROR_NO_ERROR)
 					status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
 					                           (void **)&ping[i].dataprocess, &error);
@@ -1154,8 +1101,8 @@ int main(int argc, char **argv) {
 		}
 
 		/* get ideal number of ping records to hold */
-		nhold_ping = 1;
-		nweightmax = 1;
+		int nhold_ping = 1;
+		int nweightmax = 1;
 		for (int i = 0; i < num_filters; i++) {
 			nhold_ping = MAX(nhold_ping, filters[i].ldim);
 			nweightmax = MAX(nweightmax, filters[i].xdim * filters[i].ldim);
@@ -1163,11 +1110,11 @@ int main(int argc, char **argv) {
 
 		/* allocate memory for weights */
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nweightmax * sizeof(double), (void **)&weights, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nweightmax * sizeof(double), (void **)&weights, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nweightmax * sizeof(double), (void **)&values, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nweightmax * sizeof(double), (void **)&values, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nweightmax * sizeof(double), (void **)&distances, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nweightmax * sizeof(double), (void **)&distances, &error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
@@ -1181,9 +1128,9 @@ int main(int argc, char **argv) {
 		/* write comments to beginning of output file */
 		kind = MB_DATA_COMMENT;
 		sprintf(comment, "Data filtered by program %s", program_name);
-		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		sprintf(comment, "MB-system Version %s", MB_VERSION);
-		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		const time_t right_now = time((time_t *)0);
 		char date[32];
 		strcpy(date, ctime(&right_now));
@@ -1199,121 +1146,121 @@ int main(int argc, char **argv) {
 		char host[MB_PATH_MAXLINE];
 		gethostname(host, MB_PATH_MAXLINE);
 		sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
-		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		if (datakind == MBFILTER_BATH) {
 			sprintf(comment, "Processing bathymetry data...");
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (datakind == MBFILTER_AMP) {
 			sprintf(comment, "Processing beam amplitude data...");
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (datakind == MBFILTER_SS) {
 			sprintf(comment, "Processing sidescan data...");
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (hipass_mode == MBFILTER_HIPASS_MEAN) {
 			sprintf(comment, "applying mean subtraction filter for hipass");
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (hipass_mode == MBFILTER_HIPASS_GAUSSIAN) {
 			sprintf(comment, "applying gaussian mean subtraction filter for hipass");
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (hipass_mode == MBFILTER_HIPASS_MEDIAN) {
 			sprintf(comment, "applying median subtraction filter for hipass");
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (hipass_mode != MBFILTER_HIPASS_NONE) {
 			sprintf(comment, "  filter acrosstrack dimension: %d", hipass_xdim);
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 			sprintf(comment, "  filter alongtrack dimension:  %d", hipass_ldim);
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 			sprintf(comment, "  filter iterations:            %d", hipass_iter);
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 			sprintf(comment, "  filter offset:                %f", hipass_offset);
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (smooth_mode == MBFILTER_SMOOTH_MEAN) {
 			sprintf(comment, "applying mean filter for smoothing");
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (smooth_mode == MBFILTER_SMOOTH_GAUSSIAN) {
 			sprintf(comment, "applying gaussian mean filter for smoothing");
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (smooth_mode == MBFILTER_SMOOTH_MEDIAN) {
 			sprintf(comment, "applying median filter for smoothing");
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (smooth_mode == MBFILTER_SMOOTH_GRADIENT) {
 			sprintf(comment, "applying inverse gradient filter for smoothing");
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (smooth_mode == MBFILTER_SMOOTH_MEDIAN && apply_threshold) {
 			sprintf(comment, "  filter low ratio threshold:   %f", threshold_lo);
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 			sprintf(comment, "  filter high ratio threshold:  %f", threshold_hi);
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (smooth_mode != MBFILTER_SMOOTH_NONE) {
 			sprintf(comment, "  filter acrosstrack dimension: %d", smooth_xdim);
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 			sprintf(comment, "  filter alongtrack dimension:  %d", smooth_ldim);
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 			sprintf(comment, "  filter iterations:            %d", smooth_iter);
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (contrast_mode == MBFILTER_CONTRAST_EDGE) {
 			sprintf(comment, "applying edge detection filter for contrast enhancement");
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		else if (contrast_mode == MBFILTER_CONTRAST_GRADIENT) {
 			sprintf(comment, "applying gradient subtraction filter for contrast enhancement");
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		if (contrast_mode != MBFILTER_CONTRAST_NONE) {
 			sprintf(comment, "  filter acrosstrack dimension: %d", contrast_xdim);
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 			sprintf(comment, "  filter alongtrack dimension:  %d", contrast_ldim);
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 			sprintf(comment, "  filter iterations:            %d", contrast_iter);
-			status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
 		strncpy(comment, "\0", 256);
 		sprintf(comment, "Control Parameters:");
-		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		strncpy(comment, "\0", 256);
 		sprintf(comment, "  MBIO data format:   %d", format);
-		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		strncpy(comment, "\0", 256);
 		sprintf(comment, "  Input file:         %s", file);
-		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		strncpy(comment, "\0", 256);
 		sprintf(comment, "  Output file:        %s", ofile);
-		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		strncpy(comment, "\0", 256);
 		sprintf(comment, "  Longitude flip:     %d", lonflip);
-		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		strncpy(comment, "\0", 256);
 		sprintf(comment, "  Data kind:         %d", datakind);
-		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		strncpy(comment, "\0", 256);
 		sprintf(comment, " ");
-		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 
 		/* read and write */
 		bool first = true;
-		ndata = 0;
-		nhold = 0;
-		nread = 0;
-		nwrite = 0;
+		int ndata = 0;
+		int nhold = 0;
+		int nread = 0;
+		int nwrite = 0;
 		bool done = false;
 		while (!done) {
 			/* load some data into the buffer */
 			error = MB_ERROR_NO_ERROR;
-			nload = 0;
-			nunload = 0;
+			int nload = 0;
+			int nunload = 0;
 			// const int nexpect = n_buffer_max - ndata;
 			while (status == MB_SUCCESS && ndata < n_buffer_max) {
 				status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, ping[ndata].time_i, &ping[ndata].time_d,
@@ -1335,7 +1282,7 @@ int main(int argc, char **argv) {
 					                        &ping[ndata].navlon, &ping[ndata].navlat, &ping[ndata].speed, &ping[ndata].heading,
 					                        &ping[ndata].sonardepth, &ping[ndata].roll, &ping[ndata].pitch, &ping[ndata].heave,
 					                        &error);
-					status = mb_extract_altitude(verbose, imbio_ptr, store_ptr, &kind, &ping[ndata].sonardepth,
+					status &= mb_extract_altitude(verbose, imbio_ptr, store_ptr, &kind, &ping[ndata].sonardepth,
 					                             &ping[ndata].altitude, &error);
 				}
 				if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
@@ -1362,12 +1309,8 @@ int main(int argc, char **argv) {
 			}
 
 			/* get start of ping output range */
-			if (first) {
-				jbeg = 0;
-				first = false;
-			}
-			else
-				jbeg = MIN(nhold / 2 + 1, ndata);
+			const int jbeg = first ? 0 : MIN(nhold / 2 + 1, ndata);
+			if (first) { first = false; }
 
 			/* find number of pings to hold */
 			if (done)
@@ -1378,11 +1321,8 @@ int main(int argc, char **argv) {
 				nhold = 0;
 
 			/* get end of ping output range */
-			if (done)
-				jend = ndata - 1;
-			else {
-				jend = ndata - 1 - nhold / 2;
-			}
+			int jend = done ? ndata - 1 : ndata - 1 - nhold / 2;
+
 			if (jend < jbeg)
 				jend = jbeg;
 			if (verbose >= 1) {
@@ -1390,10 +1330,10 @@ int main(int argc, char **argv) {
 			}
 
 			/* loop over all filters */
-			for (ifilter = 0; ifilter < num_filters; ifilter++) {
-				iteration = 0;
-				ndx = filters[ifilter].xdim / 2;
-				ndl = filters[ifilter].ldim / 2;
+			for (int ifilter = 0; ifilter < num_filters; ifilter++) {
+				int iteration = 0;
+				const int ndx = filters[ifilter].xdim / 2;
+				const int ndl = filters[ifilter].ldim / 2;
 
 				while (iteration < filters[ifilter].iteration) {
 					if (verbose > 0)
@@ -1424,28 +1364,28 @@ int main(int argc, char **argv) {
 					for (int j = 0; j < ndata; j++) {
 
 						/* get beginning and end pings */
-						ja = j - ndl;
-						jb = j + ndl;
+						int ja = j - ndl;
+						int jb = j + ndl;
 						if (ja < 0)
 							ja = 0;
 						if (jb >= ndata)
 							jb = ndata - 1;
 
 						/* get data arrays and sizes to be used */
-						dataptr0 = ping[j].data_i_ptr;
-						flagptr0 = ping[j].flag_ptr;
-						ndatapts = ping[j].ndatapts;
+						double *dataptr0 = ping[j].data_i_ptr;
+						char *flagptr0 = ping[j].flag_ptr;
+						const int ndatapts = ping[j].ndatapts;
 
 						/* loop over each value */
 						for (int i = 0; i < ndatapts; i++) {
 							/* get beginning and end values */
-							ia = i - ndx;
-							ib = i + ndx;
+							int ia = i - ndx;
+							int ib = i + ndx;
 							if (ia < 0)
 								ia = 0;
 							if (ib >= ndatapts)
 								ib = ndatapts - 1;
-							nweight = 0;
+							int nweight = 0;
 
 							/* construct arrays of values and weights */
 							if (mb_beam_ok(flagptr0[i])) {
@@ -1455,13 +1395,13 @@ int main(int argc, char **argv) {
 								distances[0] = 0.0;
 
 								/* loop over surrounding pings and values */
-								for (jj = ja; jj <= jb; jj++)
-									for (ii = ia; ii <= ib; ii++) {
-										dataptr1 = ping[jj].data_i_ptr;
-										flagptr1 = ping[jj].flag_ptr;
+								for (int jj = ja; jj <= jb; jj++) {
+									for (int ii = ia; ii <= ib; ii++) {
+										double *dataptr1 = ping[jj].data_i_ptr;
+										char *flagptr1 = ping[jj].flag_ptr;
 										if ((jj != j || ii != i) && mb_beam_ok(flagptr1[ii])) {
 											values[nweight] = dataptr1[ii];
-											ddis = 0.0;
+											double ddis = 0.0;
 											if (ndx > 0)
 												ddis += (ii - i) * (ii - i) / (ndx * ndx);
 											if (ndl > 0)
@@ -1470,6 +1410,7 @@ int main(int argc, char **argv) {
 											nweight++;
 										}
 									}
+								}
 							}
 
 							/* get filtered value */
@@ -1498,11 +1439,6 @@ int main(int argc, char **argv) {
 								ping[j].data_f_ptr[i] = MB_SIDESCAN_NULL;
 							}
 						}
-
-						/* print out progress */
-						/*		  if (verbose > 0)
-						            fprintf(stderr, "done with ping %d of %d\n",
-						            (j-jbeg+1), (jend-jbeg+1));*/
 					}
 
 					/* reset initial array and add offset
@@ -1531,7 +1467,7 @@ int main(int argc, char **argv) {
 			if (ndata > 0)
 				for (int j = jbeg; j <= jend; j++) {
 					if (datakind == MBFILTER_BATH) {
-						status = mbcopy_any_to_mbldeoih(
+						status &= mbcopy_any_to_mbldeoih(
 						    verbose, system, MB_DATA_DATA, ping[j].time_i, ping[j].time_d, ping[j].navlon, ping[j].navlat,
 						    ping[j].speed, ping[j].heading, ping[j].sonardepth, ping[j].altitude, ping[j].roll, ping[j].pitch,
 						    ping[j].heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack, ping[j].beams_bath, 0, 0,
@@ -1540,7 +1476,7 @@ int main(int argc, char **argv) {
 						    &error);
 					}
 					else if (datakind == MBFILTER_AMP) {
-						status = mbcopy_any_to_mbldeoih(
+						status &= mbcopy_any_to_mbldeoih(
 						    verbose, system, MB_DATA_DATA, ping[j].time_i, ping[j].time_d, ping[j].navlon, ping[j].navlat,
 						    ping[j].speed, ping[j].heading, ping[j].sonardepth, ping[j].altitude, ping[j].roll, ping[j].pitch,
 						    ping[j].heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack, ping[j].beams_bath,
@@ -1550,7 +1486,7 @@ int main(int argc, char **argv) {
 					}
 
 					else if (datakind == MBFILTER_SS) {
-						status = mbcopy_any_to_mbldeoih(
+						status &= mbcopy_any_to_mbldeoih(
 						    verbose, system, MB_DATA_DATA, ping[j].time_i, ping[j].time_d, ping[j].navlon, ping[j].navlat,
 						    ping[j].speed, ping[j].heading, ping[j].sonardepth, ping[j].altitude, ping[j].roll, ping[j].pitch,
 						    ping[j].heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack, ping[j].beams_bath, 0,
@@ -1560,7 +1496,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* write the data */
-					status = mb_write_ping(verbose, ombio_ptr, omb_io_ptr->store_data, &error);
+					status &= mb_write_ping(verbose, ombio_ptr, omb_io_ptr->store_data, &error);
 					if (status == MB_SUCCESS) {
 						nunload++;
 						nwrite++;
@@ -1571,7 +1507,7 @@ int main(int argc, char **argv) {
 			/* save processed data in buffer */
 			if (ndata > nhold) {
 				for (int j = 0; j < nhold; j++) {
-					jj = ndata - nhold + j;
+					const int jj = ndata - nhold + j;
 					for (int i = 0; i < 7; i++)
 						ping[j].time_i[i] = ping[jj].time_i[i];
 					ping[j].time_d = ping[jj].time_d;
@@ -1616,9 +1552,8 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		/* close the files */
-		status = mb_close(verbose, &imbio_ptr, &error);
-		status = mb_close(verbose, &ombio_ptr, &error);
+		status &= mb_close(verbose, &imbio_ptr, &error);
+		status &= mb_close(verbose, &ombio_ptr, &error);
 
 		/* give the statistics */
 		if (verbose >= 1) {
@@ -1628,28 +1563,26 @@ int main(int argc, char **argv) {
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
-			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = true;
-			else
-				read_data = false;
+			read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
 		}
 		else {
 			read_data = false;
 		}
+	} /* end loop over files in list */
 
-		/* end loop over files in list */
-	}
 	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
-	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
-	/* give the statistics */
 	if (verbose >= 1) {
 		fprintf(stderr, "%d total data records read\n", nreadtot);
 		fprintf(stderr, "%d total data records written\n", nwritetot);
+	}
+
+	if (status == MB_FAILURE) {
+		fprintf(stderr, "WARNING: status is MB_FAILURE\n");
 	}
 
 	exit(error);
