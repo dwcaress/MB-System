@@ -729,8 +729,8 @@ int main(int argc, char **argv) {
 			}
 
 			/* initialize reading the input swath sonar file */
-			if ((status = mb_read_init(verbose, swathfile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-			                           &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
+			if (mb_read_init(verbose, swathfile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+			                           &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) !=
 			    MB_SUCCESS) {
 				char *message = NULL;
 				mb_error(verbose, error, &message);

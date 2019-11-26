@@ -395,8 +395,8 @@ int main(int argc, char **argv) {
 		status = mb_format(verbose, &format, &error);
 
 		/* initialize reading the swath sonar data file */
-		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
-		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+		if (mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
+		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
 			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(output, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
