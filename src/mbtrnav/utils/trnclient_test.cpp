@@ -27,6 +27,12 @@
 #include <semaphore.h>
 #include <signal.h>
 
+// OS X before Sierra does not have clock_gettime, use clock_get_time
+#if defined(__APPLE__) && !defined(__CLOCK_AVAILABILITY) && defined(__MACH__)
+#include <mach/mach.h>      /* host_get_clock_service */
+#include <mach/clock.h>     /* clock_get_time */
+#endif
+
 #include "TrnClient.h"
 #include "matrixArrayCalcs.h"
 #include "TNavConfig.h"
@@ -92,7 +98,8 @@ static double s_etime()
     struct timespec ts;
     memset(&ts,0,sizeof(struct timespec));
 
-#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+// OS X before Sierra does not have clock_gettime, use clock_get_time
+#if defined(__APPLE__) && !defined(__CLOCK_AVAILABILITY) && defined(__MACH__)
     clock_serv_t cclock;
     mach_timespec_t mts;
     host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
@@ -108,7 +115,7 @@ static double s_etime()
 
     return retval;
 }
-// End function mtime_etime
+// End function s_etime
 
 void out_csv(double time, measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas,double *cov, int covn,int fs,int nr)
 {
@@ -359,7 +366,7 @@ int main(int argc, char** argv)
     free(worker->host);
 
     fprintf(stderr,"done\n");
-  
+
     return 0;
 }
 

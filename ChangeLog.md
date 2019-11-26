@@ -23,6 +23,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
 
+- Version 5.7.6beta20    November 26, 2019
 - Version 5.7.6beta19    November 22, 2019
 - Version 5.7.6beta18    November 21, 2019
 - Version 5.7.6beta17    November 15, 2019
@@ -335,6 +336,21 @@ announced releases.
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 
 -------------------------------------------------------------------------------
+
+-----> 5.7.6beta20 (November 26, 2019)
+
+Mbprocess: Fix to handle temporary failures to read GMT grd files. The GMT grid
+reading code will now return with an error rather than causing the program to
+exit. This allows the code to keep trying to read the grid file until it succeeds.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices. Current changes include replacing MB_YES/MB_NO with boolean
+true and false, and changing the type of the associated variables from int to
+bool.
+
+mbtrnpp: Changes by Kent Headley to mbtrnpp in src/mbtrnutils and supporting
+source directories src/mbtrn and src/mbtrnav.
 
 -----> 5.7.6beta19 (November 22, 2019)
 
