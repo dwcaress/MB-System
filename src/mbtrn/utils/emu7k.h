@@ -109,6 +109,12 @@ typedef struct emu7k_stats_s{
     /// @var emu7k_stats_s::pub_cycle
     /// @brief number records published in current cycle
     uint64_t pub_cycle;
+    /// @var emu7k_stats_s::frame_err
+    /// @brief number frame errors
+    uint64_t frame_err;
+    /// @var emu7k_stats_s::sync_bytes
+    /// @brief number sync bytes
+    uint64_t sync_bytes;
 }emu7k_stat_t;
 
 /// @typedef struct app_cfg_s app_cfg_t

@@ -123,10 +123,34 @@ double mtime_dtime()
     fprintf(stderr,"mtime_dtime - not implemented\n");
 #endif
 
-    
     return retval;
 }
 // End function mtime_dtime
+
+double mtime_etime()
+{
+    double retval=0.0;
+
+    struct timespec ts;
+    memset(&ts,0,sizeof(struct timespec));
+
+#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+    clock_serv_t cclock;
+    mach_timespec_t mts;
+    host_get_clock_service(mach_host_self(), MTIME_ETIME_CLOCK, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    ts.tv_sec = mts.tv_sec;
+    ts.tv_nsec = mts.tv_nsec;
+#else
+    clock_gettime(MTIME_ETIME_CLOCK, &ts);
+#endif
+
+    retval=ts.tv_sec+(ts.tv_nsec/1.e9);
+
+    return retval;
+}
+// End function mtime_etime
 
 double mtime_mdtime(double mod)
 {
@@ -417,6 +441,9 @@ int mtime_test(int argc, char **argv)
     // release stopwatch resources
     MTIME_SW_DESTROY(&swatch);
 
+    double et_now = mtime_etime();
+    time_t tt_now = time(NULL);
+    fprintf(stderr,"etime[%0.3lf] ttnow[%ld]\n",et_now,tt_now);
     return retval;
 }
 #endif // WITH_MTIME_TEST

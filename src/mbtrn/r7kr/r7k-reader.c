@@ -1090,7 +1090,7 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                             state=R7KR_STATE_HEADER_VALID;
 //                            
                         }else{
-                            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - drf size<max frame invalid [%"PRIu32"]\n",pdrf->size));
+                            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"INFO - drf size > max frame invalid [%"PRIu32"]\n",pdrf->size));
                             MST_COUNTER_INC(self->stats->events[R7KR_EV_EDRFSIZE]);
                         }
                     }else{

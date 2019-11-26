@@ -166,6 +166,7 @@ const char *prof_event_labels[]={ \
     "cli_rr",
     "cli_pub"
 };
+
 const char *prof_status_labels[]={ \
     "cli_list_len",
     "cli_rx_bytes",
@@ -321,23 +322,22 @@ int netif_tcp_update_connections(netif_t *self)
 
     PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ACC\n",self->port_name));
 
-    msock_socket_t *socket =self->socket;
+    msock_socket_t *sock_inst =self->socket;
     msock_connection_t *peer =self->peer;
     mlist_t *list = self->list;
     int new_fd=-1;
     int errsave=0;
     double connect_time=0.0;
 
-    msock_set_blocking(socket,false);
-    new_fd = msock_accept(socket,peer->addr);
+    msock_set_blocking(sock_inst,false);
+    new_fd = msock_accept(sock_inst,peer->addr);
     errsave=errno;
-    msock_set_blocking(socket,true);
-
+    msock_set_blocking(sock_inst,true);
 
     switch(new_fd){
         case -1:
             if(errsave!=EAGAIN){
-                PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ERR - accept ret[-1] sfd[%d] nfd[%d] err[%d/%s]\n",self->port_name,socket->fd,new_fd,errsave,strerror(errsave)));
+                PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ERR - accept ret[-1] sfd[%d] nfd[%d] err[%d/%s]\n",self->port_name,sock_inst->fd,new_fd,errsave,strerror(errsave)));
             }else{
                 MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EAGAIN]);
             }
@@ -350,7 +350,7 @@ int netif_tcp_update_connections(netif_t *self)
 
         default:
             connect_time = mtime_dtime();
-            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:CONNECTED -  sfd[%d] nfd[%d]\n",self->port_name,socket->fd,new_fd));
+            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:CONNECTED -  sfd[%d] nfd[%d]\n",self->port_name,sock_inst->fd,new_fd));
             // generate a socket (wrapper) for the client connection
             peer->sock = msock_wrap_fd(new_fd);
             // record connect time
@@ -398,7 +398,7 @@ int netif_tcp_update_connections(netif_t *self)
 
             }
 
-            //            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ADD_CLI - id[%p/%s:%s] fd[%d] sfd[%d] nfd[%d] \n",self->port_name,peer,peer->chost, peer->service,peer->s->fd,socket->fd,new_fd));
+            //            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]:ADD_CLI - id[%p/%s:%s] fd[%d] sfd[%d] nfd[%d] \n",self->port_name,peer,peer->chost, peer->service,peer->s->fd,sock_inst->fd,new_fd));
 
             mlist_add(list,(void *)peer);
             self->peer = msock_connection_new();
@@ -996,14 +996,14 @@ static int s_netif_pub_msg(netif_t *self, msock_connection_t *peer, char *data, 
     int retval=-1;
 
     if(NULL!=self && NULL!=peer && NULL!=data && len>0){
-        int iobytes=0;
-        int flags = 0;
-#ifdef MSG_NOSIGNAL
-        flags = MSG_NOSIGNAL;
+        int64_t iobytes=0;
+        int flags=0;
+#if !defined(__APPLE__)
+        flags=MSG_NOSIGNAL;
 #endif
         if(self->ctype==ST_UDP){
-            if ((iobytes = msock_sendto(self->socket, peer->addr, (byte *)data, len, flags)) > 0) {
-                fprintf(stderr,"client PUB UDP OK len[%d]:\n",iobytes);
+            if ( (iobytes = msock_sendto(self->socket, peer->addr, data, len, flags )) > 0) {
+                fprintf(stderr,"client PUB UDP OK len[%lld]:\n",iobytes);
             }else{
                 fprintf(stderr,"client PUB UDP ERR len[%d][%d/%s]\n",iobytes,errno,strerror(errno));
             }
@@ -1089,23 +1089,25 @@ int s_netif_test_handle(void *msg, netif_t *self, msock_connection_t *peer, int 
 }
 static int s_netif_test_send(msock_socket_t *cli)
 {
+    int retval=-1;
 
     if(NULL!=cli){
-
         char *msg_out=strdup("PING");
         size_t len=strlen(msg_out)+1;
         if( len>0 && NULL!=msg_out && msock_send(cli,(byte *)msg_out,len)==len){
             fprintf(stderr,"client REQ send OK [%s/%zu]\n",msg_out,len);
+            retval=0;
         }else{
             fprintf(stderr,"client REQ send failed\n");
         }
         free(msg_out);
     }
-    return 0;
+    return retval;
 }
 
 static int s_netif_test_recv(msock_socket_t *cli)
 {
+    int retval=-1;
 
     if(NULL!=cli){
         int64_t test=0;
@@ -1115,6 +1117,7 @@ static int s_netif_test_recv(msock_socket_t *cli)
         if( (test=msock_recv(cli,(byte *)reply,16,0))>0){
             if(test==4 && strcmp(reply,"ACK")==0){
                 fprintf(stderr,"client ACK recv OK len[%s/%lld]\n",reply,test);
+                retval=0;
             }else if(test==5 && strcmp(reply,"NACK")==0){
                 fprintf(stderr,"client NACK recv OK len[%s/%lld]\n",reply,test);
             }else{
@@ -1124,7 +1127,7 @@ static int s_netif_test_recv(msock_socket_t *cli)
             fprintf(stderr,"client ACK recv ERR len[%lld][%d/%s]\n",test,errno,strerror(errno));
         }
     }
-    return 0;
+    return retval;
 }
 
 int netif_test()

@@ -709,9 +709,9 @@ int main(int argc, char **argv) {
   char str_locked_ignored[] = "locked but lock ignored";
   char str_locked_fail[] = "unlocked but set lock failed";
   char str_locked_no[] = "unlocked";
-  int variable_beams;
-  int traveltime;
-  int beam_flagging;
+  int variable_beams = false;
+  int traveltime = false;
+  int beam_flagging = false;
   char mbp_pfile[MBP_FILENAMESIZE];
   FILE *tfp;
   int nnav = 0;

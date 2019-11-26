@@ -13,24 +13,24 @@
 /////////////////////////
 /*
  Copyright Information
- 
+
  Copyright 2002-2019 MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
- 
+
  Terms of Use
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version. You can access the GPLv3 license at
  http://www.gnu.org/licenses/gpl-3.0.html
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details
  (http://www.gnu.org/licenses/gpl-3.0.html)
- 
+
  MBARI provides the documentation and software code "as is", with no warranty,
  express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
@@ -38,7 +38,7 @@
  assume the entire risk associated with use of the code, and you agree to be
  responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
- 
+
  In no event shall MBARI be liable for any damages, whether general, special,
  incidental or consequential damages, arising out of your use of the software,
  including, but not limited to, the loss or corruption of your data or damages
@@ -48,11 +48,11 @@
  liability or expense, including attorneys' fees, resulting from loss of or
  damage to property or the injury to or death of any person arising out of the
  use of the software.
- 
+
  The MBARI software is provided without obligation on the part of the
  Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
- 
+
  MBARI assumes no responsibility or liability for any third party and/or
  commercial software required for the database or applications. Licensee agrees
  to obtain and maintain valid licenses for any additional third party software
@@ -64,7 +64,7 @@
 #define NETIF_H
 
 /////////////////////////
-// Includes 
+// Includes
 /////////////////////////
 #include "mframe.h"
 #include "msocket.h"
@@ -200,7 +200,7 @@ struct netif_s{
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
     /// @fn netif_t *netif_new()
     /// @brief create a new netif instance.
     /// user owns, must release resources using netif_destroy
@@ -220,7 +220,7 @@ extern "C" {
                        netif_msg_read_fn read_fn,
                        netif_msg_handle_fn handle_fn,
                        netif_msg_pub_fn pub_fn);
-    
+
     netif_t *netif_tcp_new(char *name, char *host, int port,
                            double hbto,
                            netif_mode_t mode,
@@ -238,7 +238,7 @@ extern "C" {
     /// @param[in] pself pointer to instance
     /// @return none
     void netif_destroy(netif_t **pself);
-    
+
     /// @fn void netif_show(netif_t *pself, bool verbose, int indent)
     /// @brief print instance summary to console
     /// @param[in] pself pointer to instance
@@ -246,34 +246,34 @@ extern "C" {
     /// @param[in] indent number of spaces to indent output
     /// @return none
     void netif_show(netif_t *self, bool verbose, int indent);
-    
+
     /// @fn int netif_start(netif_t *self)
     /// @brief start netif (req/res mode)
     /// @param[in] self netif_t instance
     /// @param[in] delay_msec delay between cycles
     /// @return 0 on success, -1 otherwise
     int netif_start(netif_t *self, uint32_t delay_msec);
-    
+
     /// @fn int netif_restart(netif_t *self)
     /// @brief restart netif (req/res mode)
     /// @param[in] self netif_t instance
     /// @return 0 on success, -1 otherwise
     int netif_restart(netif_t *self);
-    
+
     /// @fn netif_stop(netif_t *self, int sig)
     /// @brief stop netif (req/res mode)
     /// @param[in] self netif_t instance
     /// @param[in] sig signal number (if stopped by signal)
     /// @return 0 on success, -1 otherwise
     int netif_stop(netif_t *self, int sig);
-    
+
     /// @fn int netif_init_log(netif_t *self, char *log_dir)
     /// @brief initialize message log
     /// @param[in] self netif_t instance
     /// @param[in] log_dir log output directory path
     /// @return 0 on success, -1 otherwise
     int netif_init_log(netif_t *self, char *log_name, char *log_dir);
-    
+
     /// @fn int netif_configure_debug(netif_t *self, int level)
     /// @brief set debug configuration
     /// @param[in] self netif_t instance
@@ -286,7 +286,7 @@ extern "C" {
     /// @param[in]
     /// @return 0 on success, -1 otherwise
     int netif_test();
- 
+
     void netif_set_reqres_res(netif_t *self, void *res);
     void netif_set_pub_res(netif_t *self, void *res);
 
@@ -307,7 +307,7 @@ extern "C" {
     const char *netif_get_build();
 
     void netif_init_mmd();
-    
+
     mstats_t *netif_stats(netif_t *self);
     mlog_id_t netif_log(netif_t *self);
 
