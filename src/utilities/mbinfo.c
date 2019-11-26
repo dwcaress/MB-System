@@ -545,9 +545,9 @@ int main(int argc, char **argv) {
 
 			void *mbio_ptr = NULL;
 			/* initialize reading the swath file */
-			if ((status = mb_read_init(verbose, file, format, pings_get, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+			if (mb_read_init(verbose, file, format, pings_get, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 			                           &mbio_ptr, &btime_d, &etime_d, &beams_bath_alloc, &beams_amp_alloc, &pixels_ss_alloc,
-			                           &error)) != MB_SUCCESS) {
+			                           &error) != MB_SUCCESS) {
 				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stream, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
