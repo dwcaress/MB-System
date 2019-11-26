@@ -123,12 +123,12 @@ static uint32_t s_trnif_dfl_send_tcp(msock_connection_t *peer, char *msg, int32_
 #endif
         if( (send_bytes=msock_sendto(peer->sock,  peer->addr, (byte *)msg, send_len,flags))==send_len){
             retval=send_bytes;
-            PDPRINT((stderr,"Reply OK len[%lld] peer[%s:%s]\n",send_len, peer->chost,peer->service));
+            PDPRINT((stderr,"Reply OK len[%d] peer[%s:%s]\n",send_len, peer->chost,peer->service));
         }else{
             if(NULL!=errout){
                 *errout=errno;
             }
-            PDPRINT((stderr,"Reply ERR peer[%s:%s] sock[%p/%p] len[%lld] err[%d/%s]\n",peer->chost,peer->service,peer->sock,  peer->addr, send_len,errno,strerror(errno)));
+            PDPRINT((stderr,"Reply ERR peer[%s:%s] sock[%p/%p] len[%d] err[%d/%s]\n",peer->chost,peer->service,peer->sock,  peer->addr, send_len,errno,strerror(errno)));
         }
     }
     return retval;
@@ -169,12 +169,12 @@ static uint32_t s_trnif_dfl_send_udp(netif_t *self,msock_connection_t *peer, cha
 #endif
         if( (send_bytes=msock_sendto(self->socket,  peer->addr, (byte *)msg, send_len,flags))==send_len){
             retval=send_bytes;
-            PDPRINT((stderr,"Reply OK len[%lld] peer[%s:%s]\n",send_len, peer->chost,peer->service));
+            PDPRINT((stderr,"Reply OK len[%d] peer[%s:%s]\n",send_len, peer->chost,peer->service));
         }else{
             if(NULL!=errout){
                 *errout=errno;
             }
-            PDPRINT((stderr,"Reply ERR peer[%s:%s] sock[%p/%p] len[%lld] err[%d/%s]\n",peer->chost,peer->service,peer->sock,  peer->addr, send_len,errno,strerror(errno)));
+            PDPRINT((stderr,"Reply ERR peer[%s:%s] sock[%p/%p] len[%d] err[%d/%s]\n",peer->chost,peer->service,peer->sock,  peer->addr, send_len,errno,strerror(errno)));
         }
     }
     return retval;

@@ -1002,17 +1002,17 @@ static int s_netif_pub_msg(netif_t *self, msock_connection_t *peer, char *data, 
         flags=MSG_NOSIGNAL;
 #endif
         if(self->ctype==ST_UDP){
-            if ( (iobytes = msock_sendto(self->socket, peer->addr, data, len, flags )) > 0) {
+            if ( (iobytes = msock_sendto(self->socket, peer->addr, (byte *) data, len, flags )) > 0) {
                 fprintf(stderr,"client PUB UDP OK len[%lld]:\n",iobytes);
             }else{
-                fprintf(stderr,"client PUB UDP ERR len[%d][%d/%s]\n",iobytes,errno,strerror(errno));
+                fprintf(stderr,"client PUB UDP ERR len[%lld][%d/%s]\n",iobytes,errno,strerror(errno));
             }
         }
         if(self->ctype==ST_TCP){
             if ( (iobytes = msock_send(peer->sock, (byte *)data, len )) > 0) {
-                fprintf(stderr,"client PUB TCP OK len[%d]:\n",iobytes);
+                fprintf(stderr,"client PUB TCP OK len[%lld]:\n",iobytes);
             }else{
-                fprintf(stderr,"client PUB TCP ERR len[%d][%d/%s]\n",iobytes,errno,strerror(errno));
+                fprintf(stderr,"client PUB TCP ERR len[%lld][%d/%s]\n",iobytes,errno,strerror(errno));
             }
         }
         retval=0;

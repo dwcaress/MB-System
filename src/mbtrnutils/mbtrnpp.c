@@ -401,8 +401,8 @@ int main(int argc, char **argv) {
                          "\t--trn-ftype\n"
                          "\t--mb-out=mb1svr[:host:port]/mb1/reson\n"
                          "\t--trn-out=trnsvr[:host:port]/trnusvr[:host:port]/trnu/sout/serr/debug\n"
-                         "\t--trn-decn\n";
-                         "\t--trn-decs\n";
+                         "\t--trn-decn\n"
+                         "\t--trn-decs\n"
                          "\t--trn-nombgain\n";
   extern char WIN_DECLSPEC *optarg;
   int option_index;
@@ -2759,7 +2759,7 @@ int mbtrnpp_trn_pub_osocket(trn_update_t *update,
                 update->reinit_count
             };
 
-            if( (iobytes=netif_pub(trnusvr,(byte *)&pub_data, sizeof(pub_data)))>0){
+            if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
                 retval=iobytes;
             }
         }
@@ -3147,7 +3147,7 @@ int mbtrnpp_process_mb1(char *src, size_t len, trn_config_t *cfg)
             // server: service (mb1 server) client requests
             netif_reqres(mb1svr);
            // publish mb1 sounding to all clients
-            netif_pub(mb1svr,(byte *)src, len);
+            netif_pub(mb1svr,(char *)src, len);
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_PUBN]);
 
         }
@@ -3331,7 +3331,7 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
     *size    = (size_t)rbytes;
 
       MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
-      PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb_get_all failed: status[%d] err[%d]\n",status, error));
+      PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb_get_all failed: status[%d] err[%d]\n",status, *error));
 
       MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBGETALL]);
 
