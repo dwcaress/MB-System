@@ -476,8 +476,8 @@ int main(int argc, char **argv) {
 			strcpy(swath_file, file);
 
 			/* initialize reading the swath file */
-			if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-										&mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
+			if (mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+										&mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) !=
 				MB_SUCCESS) {
 				char *message;
 				mb_error(verbose, error, &message);

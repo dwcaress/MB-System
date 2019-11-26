@@ -820,9 +820,9 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	struct mbsys_swathplus_struct *istore = NULL;
 
 	/* open the input file */
-	if ((status = mb_read_init(opts->verbose, ifile, opts->format, mbdflts->pings_get, mbdflts->lonflip, mbdflts->bounds,
+	if (mb_read_init(opts->verbose, ifile, opts->format, mbdflts->pings_get, mbdflts->lonflip, mbdflts->bounds,
 	                           mbdflts->btime_i, mbdflts->etime_i, mbdflts->speedmin, mbdflts->timegap, &imbio_ptr, &btime_d,
-	                           &etime_d, &beams_bath_alloc, &beams_amp_alloc, &pixels_ss_alloc, error)) != MB_SUCCESS) {
+	                           &etime_d, &beams_bath_alloc, &beams_amp_alloc, &pixels_ss_alloc, error) != MB_SUCCESS) {
 		char message[MAX_ERROR_STRING] = {0};
 		sprintf(message, "Swath File <%s> not initialized for reading\n", ifile);
 		error_exit(opts->verbose, *error, "mb_read_init", message);

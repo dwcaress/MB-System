@@ -2058,8 +2058,8 @@ int main(int argc, char **argv) {
   }
 
   /* initialize reading the input swath sonar file */
-  if ((status = mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
-                             &btime_d, &etime_d, &ibeams_bath, &ibeams_amp, &ipixels_ss, &error)) != MB_SUCCESS) {
+  if (mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
+                             &btime_d, &etime_d, &ibeams_bath, &ibeams_amp, &ipixels_ss, &error) != MB_SUCCESS) {
     char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
@@ -2071,8 +2071,8 @@ int main(int argc, char **argv) {
 
   /* initialize reading the merge swath sonar file */
   if (merge &&
-      (status = mb_read_init(verbose, mfile, mformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mmbio_ptr,
-                             &btime_d, &etime_d, &mbeams_bath, &mbeams_amp, &mpixels_ss, &error)) != MB_SUCCESS) {
+      (mb_read_init(verbose, mfile, mformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mmbio_ptr,
+                    &btime_d, &etime_d, &mbeams_bath, &mbeams_amp, &mpixels_ss, &error) != MB_SUCCESS)) {
     char *message;
     mb_error(verbose, error, &message);
     fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
