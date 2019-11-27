@@ -34,7 +34,7 @@
 #   mbm_grdtiff -Ifile [-Amagnitude[/azimuth/elevation]
 #            -Gcolor_mode -H -Kintensity_file -Nnudge_x/nudge_y -Oroot
 #            -S[color/shade] -V
-#            -Wcolor_style[/pallette[/ncolors]] ]
+#            -Wcolor_style[/palette[/ncolors]] ]
 #
 # Additional Options:
 #            [-Dflipcolor/flipshade -MGSscalefactor
@@ -59,9 +59,9 @@ $DTR = 3.1415926 / 180.0;
 # set default number of colors
 $ncpt = 11;
 
-# define color pallettes
+# define color palettes
 
-@color_pallette_names = (   "Haxby Colors",
+@color_palette_names = (   "Haxby Colors",
 			    "High Intensity Colors",
 			    "Low Intensity Colors",
 			    "Grayscale",
@@ -69,44 +69,44 @@ $ncpt = 11;
 			    "Uniform Black",
 			    "Uniform White");
 
-# original Haxby color pallette
+# original Haxby color palette
 #	$ncolors = 15;
 #	@cptbr = (255, 255, 255, 255, 255, 240, 205, 138, 106,  87,  50,   0,  40,  21,  37);
 #	@cptbg = (255, 221, 186, 161, 189, 236, 255, 236, 235, 215, 190, 160, 127,  92,  57);
 #	@cptbb = (255, 171, 133,  68,  87, 121, 162, 174, 255, 255, 255, 255, 251, 236, 175);
 #                 use       use  use  use  use  use  use  use       use       use       use
 
-# color pallette 1 - Haxby Color Table
+# color palette 1 - Haxby Color Table
 	@cptbr1 = (255, 255, 255, 255, 240, 205, 138, 106,  50,  40,  37);
 	@cptbg1 = (255, 186, 161, 189, 236, 255, 236, 235, 190, 127,  57);
 	@cptbb1 = (255, 133,  68,  87, 121, 162, 174, 255, 255, 251, 175);
 
-# color pallette 2 - High Intensity Colors
+# color palette 2 - High Intensity Colors
 	@cptbr2 = (255, 255, 255, 255, 128,   0,   0,   0,   0, 128, 255);
 	@cptbg2 = (  0,  64, 128, 255, 255, 255, 255, 128,   0,   0,   0);
 	@cptbb2 = (  0,   0,   0,   0,   0,   0, 255, 255, 255, 255, 255);
 
-# color pallette 3 - Low Intensity Colors
+# color palette 3 - Low Intensity Colors
 	@cptbr3 = (200, 194, 179, 141,  90,   0,   0,   0,   0,  90, 141);
 	@cptbg3 = (  0,  49,  90, 141, 179, 200, 141,  90,   0,   0,   0);
 	@cptbb3 = (  0,   0,   0,   0,   0,   0, 141, 179, 200, 179, 141);
 
-# color pallette 4 - Grayscale
+# color palette 4 - Grayscale
 	@cptbr4 = (255, 230, 204, 179, 153, 128, 102,  77,  51,  26,   0);
 	@cptbg4 = (255, 230, 204, 179, 153, 128, 102,  77,  51,  26,   0);
 	@cptbb4 = (255, 230, 204, 179, 153, 128, 102,  77,  51,  26,   0);
 
-# color pallette 5 - Uniform Grayscale
+# color palette 5 - Uniform Grayscale
 	@cptbr5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
 	@cptbg5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
 	@cptbb5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
 
-# color pallette 6 - Uniform Black
+# color palette 6 - Uniform Black
 	@cptbr6 = (  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0);
 	@cptbg6 = (  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0);
 	@cptbb6 = (  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0);
 
-# color pallette 7 - Uniform White
+# color palette 7 - Uniform White
 	@cptbr7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
 	@cptbg7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
 	@cptbb7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
@@ -167,7 +167,7 @@ if ($help)
 	print "\nBasic Usage: \n";
 	print "\t$program_name -Ifile [-Amagnitude[/azimuth/elevation] \n";
 	print "\t\t-Gcolor_mode -H -Kintensity_file -Oroot -S[color/shade]\n";
-	print "\t\t-V -Wcolor_style[/pallette[/ncolors]] ]\n";
+	print "\t\t-V -Wcolor_style[/palette[/ncolors]] ]\n";
 	print "Additional Options:\n";
 	print "\t\t[-Dflipcolor/flipshade\n";
 	print "\t\t-MGSscalefactor -MGW -Q -Rw/e/s/n -X -Y -Zmin/max[/mode]]\n";
@@ -302,17 +302,17 @@ if ($color_control)
 		{
 		$file_cpt = $color_control;
 		$color_style = 1;
-		$color_pallette = 1;
+		$color_palette = 1;
 		$ncolors = $ncpt;
 		}
 	elsif ($color_control =~ /\S+\/\S+\/\S+/)
 		{
-		($color_style, $color_pallette, $ncolors)
+		($color_style, $color_palette, $ncolors)
 			= $color_control =~  /(\S+)\/(\S+)\/(\S+)/;
-		if ($color_pallette < 1
-			|| $color_pallette > 7)
+		if ($color_palette < 1
+			|| $color_palette > 7)
 			{
-			$color_pallette = 1;
+			$color_palette = 1;
 			}
 		if ($ncolors < 2)
 			{
@@ -321,26 +321,26 @@ if ($color_control)
 		}
 	elsif ($color_control =~ /\S+\/\S+/)
 		{
-		($color_style, $color_pallette) = $color_control
+		($color_style, $color_palette) = $color_control
 			=~  /(\S+)\/(\S+)/;
-		if ($color_pallette < 1
-			|| $color_pallette > 7)
+		if ($color_palette < 1
+			|| $color_palette > 7)
 			{
-			$color_pallette = 1;
+			$color_palette = 1;
 			}
 		$ncolors = $ncpt;
 		}
 	else
 		{
 		$color_style = $color_control;
-		$color_pallette = 1;
+		$color_palette = 1;
 		$ncolors = $ncpt;
 		}
 	}
 else
 	{
 	$color_style = 1;
-	$color_pallette = 1;
+	$color_palette = 1;
 	$ncolors = $ncpt;
 	}
 if ($color_flip_control)
@@ -789,13 +789,13 @@ elsif ($color_mode)
 	$color_end = $color_start + $color_int * ($ncolors_use - 1);
 	}
 
-# get colors to use by interpolating defined color pallette
+# get colors to use by interpolating defined color palette
 if ($color_mode)
 	{
-	# set selected color pallette
-	eval "\@cptbr = \@cptbr$color_pallette;";
-	eval "\@cptbg = \@cptbg$color_pallette;";
-	eval "\@cptbb = \@cptbb$color_pallette;";
+	# set selected color palette
+	eval "\@cptbr = \@cptbr$color_palette;";
+	eval "\@cptbg = \@cptbg$color_palette;";
+	eval "\@cptbb = \@cptbb$color_palette;";
 
 	# interpolate colors
 	for ($i = 0; $i < $ncolors; $i++)
@@ -890,7 +890,7 @@ foreach $gmt_def (@gmt_defs) {
 	print FCMD "gmt gmtset $gmt_par $gmt_var\n";
 	}
 
-# generate color pallette table file if needed
+# generate color palette table file if needed
 if ($color_mode && !$file_cpt)
 	{
 	# set slope cpt
@@ -941,8 +941,8 @@ if ($color_mode && !$file_cpt)
 		}
 
 	# generate cpt file
-	print FCMD "#\n# Make color pallette table file\n";
-	print FCMD "echo Making color pallette table file...\n";
+	print FCMD "#\n# Make color palette table file\n";
+	print FCMD "echo Making color palette table file...\n";
 	if ($color_mode == 4 || $stretch_color)
 		{
 		$d1 = shift @hist;
@@ -1449,16 +1449,16 @@ if ($verbose)
 		}
 	print "\n  Output Files:\n";
 	print "    Output plot name root:    $root\n";
-	print "    Color pallette table:     $cptfile\n";
+	print "    Color palette table:      $cptfile\n";
 	print "    Plotting shellscript:     $cmdfile\n";
 	print "    Image file:               $tiffile\n";
 	print "\n  Image Attributes:\n";
 	if ($color_mode)
 		{
 		print "    Number of colors:         $ncolors\n";
-		print "    Color Pallette:           ",
-			"@color_pallette_names[$color_pallette - 1]\n";
-		if ($color_flip && color_pallette < 4)
+		print "    Color Palette:           ",
+			"@color_palette_names[$color_palette - 1]\n";
+		if ($color_flip && color_palette < 4)
 			{
 			print "    Colors reversed\n";
 			}
@@ -1488,7 +1488,7 @@ if ($verbose)
 		{
 		printf "    Color start datum:        %f\n", $color_start;
 		printf "    Color end datum:          %f\n", $color_end;
-		printf "    Histogram stretch applied to color pallette\n";
+		printf "    Histogram stretch applied to color palette\n";
 		}
 	elsif ($color_mode)
 		{
