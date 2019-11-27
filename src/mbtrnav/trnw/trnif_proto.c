@@ -583,6 +583,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                     mlog_tprintf(self->mlog_id,"trn_init_nack,[%s:%s]\n", peer->chost, peer->service);
                 }
 
+                mlog_tprintf(self->mlog_id,"trn_init,%lf,[%s:%s]\n",msg_time,peer->chost, peer->service);
                 break;
 
             case TRN_MSG_MEAS:
@@ -590,11 +591,13 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 commst_meas_update(trn, ct);
                 // serialize updated message
                 send_len=wcommst_serialize(&msg_out,ct,TRN_MSG_SIZE);
+                mlog_tprintf(self->mlog_id,"trn_meas,%lf,[%s:%s]\n",msg_time,peer->chost, peer->service);
                 break;
 
             case TRN_MSG_MOTN:
                 // do measurement update (using ct->mt)
                 commst_motion_update(trn, ct);
+                mlog_tprintf(self->mlog_id,"trn_motn,%lf,[%s:%s]\n",msg_time,peer->chost, peer->service);
 
                 // return ACK
                 send_len=trnw_ack_msg(&msg_out);
