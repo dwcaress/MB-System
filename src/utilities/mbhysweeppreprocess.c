@@ -230,8 +230,8 @@ int main(int argc, char **argv) {
 	double timelagconstant = 0.0;
 	char timelagfile[MB_PATH_MAXLINE] = "";
 	int ntimelag = 0;
-	double *timelag_time_d = NULL;
-	double *timelag_model = NULL;
+	// double *timelag_time_d = NULL;
+	// double *timelag_model = NULL;
 
 	/* sensor offset parameters */
 	bool offset_sonar_mode = false;
@@ -469,15 +469,15 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2       sonardepthfile:        %s\n", sonardepthfile);
 			fprintf(stderr, "dbg2       sonardepthdata:        %d\n", sonardepthdata);
 			fprintf(stderr, "dbg2       timelagmode:           %d\n", timelagmode);
-			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL) {
-				fprintf(stderr, "dbg2       timelagfile:           %s\n", timelagfile);
-				fprintf(stderr, "dbg2       ntimelag:              %d\n", ntimelag);
-				for (int i = 0; i < ntimelag; i++)
-					fprintf(stderr, "dbg2       timelag[%d]:           %f   %f\n", i, timelag_time_d[i], timelag_model[i]);
-			}
-			else {
+			// if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL) {
+			//	fprintf(stderr, "dbg2       timelagfile:           %s\n", timelagfile);
+			//	fprintf(stderr, "dbg2       ntimelag:              %d\n", ntimelag);
+			//	for (int i = 0; i < ntimelag; i++)
+			//		fprintf(stderr, "dbg2       timelag[%d]:           %f   %f\n", i, timelag_time_d[i], timelag_model[i]);
+			// }
+			// else {
 				fprintf(stderr, "dbg2       timelag:               %f\n", timelag);
-			}
+			// }
 			fprintf(stderr, "dbg2       offset_sonar_mode:     %d\n", offset_sonar_mode);
 			fprintf(stderr, "dbg2       offset_sonar_roll:     %f\n", offset_sonar_roll);
 			fprintf(stderr, "dbg2       offset_sonar_pitch:    %f\n", offset_sonar_pitch);
@@ -657,6 +657,9 @@ int main(int argc, char **argv) {
 		}
 		fclose(tfp);
 	}
+
+	double *timelag_time_d = NULL;
+	double *timelag_model = NULL;
 
 	/* get time lag model if specified */
 	if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL) {
