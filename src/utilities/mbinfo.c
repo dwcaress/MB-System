@@ -453,11 +453,10 @@ int main(int argc, char **argv) {
 	int nread = 0;
 
 	/* variance finding variables */
-	int nbath;
 	int namp;
 	int nss;
-	double sumx, sumxx, sumy, sumxy, delta;
-	double a, b, dev, mean, variance;
+	double delta;
+	double a, b, dev, mean;
 	double *bathmean = NULL;
 	double *bathvar = NULL;
 	int *nbathvar = NULL;
@@ -516,11 +515,9 @@ int main(int argc, char **argv) {
 	int meta_headingbias = 0;
 	int meta_draft = 0;
 
-	int val_int;  // TODO(schwehr): bool?
-	bool good_nav;
-	bool done = false;
-
 	void *datalist;
+
+	bool done = false;
 	while (!done) {
 		/* open file list */
 		if (read_datalist) {
@@ -884,8 +881,10 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
 								if (meta_svcorrected == 0) {
+									int val_int;
+									// TODO(schwehr): Is something missing for METASVCORRECTED?
 									sscanf(comment, "METASVCORRECTED:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "Corrected Depths:       YES\n");
 									else
 										fprintf(output, "Corrected Depths:       NO\n");
@@ -894,8 +893,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
 								if (meta_tidecorrected == 0) {
+									int val_int;
 									sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "Tide Corrected:         YES\n");
 									else
 										fprintf(output, "Tide Corrected:         NO\n");
@@ -904,8 +904,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
 								if (meta_batheditmanual == 0) {
+									int val_int;
 									sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "Depths Manually Edited: YES\n");
 									else
 										fprintf(output, "Depths Manually Edited: NO\n");
@@ -914,8 +915,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
 								if (meta_batheditauto == 0) {
+									int val_int;
 									sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "Depths Auto-Edited:     YES\n");
 									else
 										fprintf(output, "Depths Auto-Edited:     NO\n");
@@ -1004,8 +1006,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
 								if (meta_svcorrected == 0) {
+									int val_int;
 									sscanf(comment, "METASVCORRECTED:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\"corrected_depths\": \"YES\",\n");
 									else
 										fprintf(output, "\"corrected_depths\": \"NO\",\n");
@@ -1014,8 +1017,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
 								if (meta_tidecorrected == 0) {
+									int val_int;
 									sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\"tide_corrected\": \"YES\",\n");
 									else
 										fprintf(output, "\"tide_corrected\": \"NO\",\n");
@@ -1024,8 +1028,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
 								if (meta_batheditmanual == 0) {
+									int val_int;
 									sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\"depths_manually_edited\": \"YES\",\n");
 									else
 										fprintf(output, "\"depths_manually_edited\": \"NO\",\n");
@@ -1034,8 +1039,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
 								if (meta_batheditauto == 0) {
+									int val_int;
 									sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\"depths_auto-edited\": \"YES\",\n");
 									else
 										fprintf(output, "\"depths_auto-edited\": \"NO\",\n");
@@ -1128,8 +1134,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
 								if (meta_svcorrected == 0) {
+									int val_int;
 									sscanf(comment, "METASVCORRECTED:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\t\t<corrected_depths>YES</corrected_depths>\n");
 									else
 										fprintf(output, "\t\t<corrected_depths>NO</corrected_depths>\n");
@@ -1138,8 +1145,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
 								if (meta_tidecorrected == 0) {
+									int val_int;
 									sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\t\t<tide_corrected>YES</tide_corrected>\n");
 									else
 										fprintf(output, "\t\t<tide_corrected>NO</tide_corrected>\n");
@@ -1148,8 +1156,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
 								if (meta_batheditmanual == 0) {
+									int val_int;
 									sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\t\t<depths_manually_edited>YES</depths_manually_edited>\n");
 									else
 										fprintf(output, "\t\t<depths_manually_edited>NO</depths_manually_edited>\n");
@@ -1158,8 +1167,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
 								if (meta_batheditauto == 0) {
+									int val_int;
 									sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\t\t<depths_auto_edited>YES</depths_auto_edited>\n");
 									else
 										fprintf(output, "\t\t<depths_auto_edited>NO</depths_auto_edited>\n");
@@ -1365,20 +1375,15 @@ int main(int argc, char **argv) {
 
 						/* check for good nav */
 						speed_apparent = 3600.0 * distance / (time_d - time_d_last);
+						bool good_nav = true;
 						if (good_nav_only) {
-							//if (navlon == 0.0 || navlat == 0.0) {		// This still misses lots of trash JL
 							if ((navlon > -0.005 && navlon < 0.005) && (navlat > -0.005 && navlat < 0.005)) {
 								good_nav = false;
 							}
 							else if (beginnav && speed_apparent >= speed_threshold) {
 								good_nav = false;
-							}
-							else {
-								good_nav = true;
-							}
-						}
-						else
-							good_nav = true;
+							} // else { good_nav = true; }
+						} // else { good_nav = true; }
 
 						/* get total distance */
 						if (!good_nav_only || (good_nav && speed_apparent < speed_threshold)) {
@@ -1547,14 +1552,13 @@ int main(int argc, char **argv) {
 
 					/* do the bathymetry */
 					for (int i = 0; i < beams_bath; i++) {
-
 						/* fit line to depths */
-						nbath = 0;
-						sumx = 0.0;
-						sumxx = 0.0;
-						sumy = 0.0;
-						sumxy = 0.0;
-						variance = 0.0;
+						int nbath = 0;
+						double sumx = 0.0;
+						double sumxx = 0.0;
+						double sumy = 0.0;
+						double sumxy = 0.0;
+						double variance = 0.0;
 						for (int j = 0; j < nread; j++) {
 							datacur = &data[j];
 							bath = datacur->bath;
@@ -1592,7 +1596,7 @@ int main(int argc, char **argv) {
 						/* get mean amplitude */
 						namp = 0;
 						mean = 0.0;
-						variance = 0.0;
+						double variance = 0.0;
 						for (int j = 0; j < nread; j++) {
 							datacur = &data[j];
 							amp = datacur->amp;
@@ -1624,7 +1628,7 @@ int main(int argc, char **argv) {
 						/* get mean sidescan */
 						nss = 0;
 						mean = 0.0;
-						variance = 0.0;
+						double variance = 0.0;
 						for (int j = 0; j < nread; j++) {
 							datacur = &data[j];
 							ss = datacur->ss;
@@ -1782,13 +1786,11 @@ int main(int argc, char **argv) {
 		if (read_datalist)
 			mb_datalist_close(verbose, &datalist, &error);
 
-		/* figure out if done */
 		if (pass > 0 || !coverage_mask)
 			done = true;
-		pass++;
 
-		/* end loop over reading passes */
-	}
+		pass++;
+	}  /* end loop over reading passes */
 
 	/* calculate final variances */
 	if (pings_read > 2) {
