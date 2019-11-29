@@ -311,19 +311,14 @@ int main(int argc, char **argv) {
 
 	/* histogram variables */
 	double dvalue_bin;
-	double target_min;
-	double target_max;
 	double *histogram = NULL;
 	double *intervals = NULL;
 	double total;
-	double sum;
-	double p;
 	double target;
 	double dinterval;
 	double bin_fraction;
 	int ibin;
 
-	int nrec, nvalue;
 	int nrectot = 0;
 	int nvaluetot = 0;
 
@@ -440,8 +435,8 @@ int main(int argc, char **argv) {
 		}
 
 		/* initialize counting variables */
-		nrec = 0;
-		nvalue = 0;
+		int nrec = 0;
+		int nvalue = 0;
 
 		/* read and process data */
 		while (error <= MB_ERROR_NO_ERROR) {
@@ -519,7 +514,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* close the swath sonar data file */
-		status = mb_close(verbose, &mbio_ptr, &error);
+		status &= mb_close(verbose, &mbio_ptr, &error);
 		nrectot += nrec;
 		nvaluetot += nvalue;
 
@@ -558,9 +553,9 @@ int main(int argc, char **argv) {
 			total = total + histogram[i];
 
 		/* recast histogram */
-		sum = 0.0;
+		double sum = 0.0;
 		for (int i = 0; i < nbins; i++) {
-			p = (histogram[i] / 2 + sum) / (total + 1);
+			const double p = (histogram[i] / 2 + sum) / (total + 1);
 			sum = sum + histogram[i];
 			histogram[i] = qsnorm(p);
 		}
@@ -569,8 +564,8 @@ int main(int argc, char **argv) {
 	/* calculate gaussian intervals if required */
 	if (nintervals > 0 && gaussian) {
 		/* get interval spacing */
-		target_min = -2.0;
-		target_max = 2.0;
+		double target_min = -2.0;
+		double target_max = 2.0;
 		dinterval = (target_max - target_min) / (nintervals - 1);
 
 		/* get intervals */
@@ -579,7 +574,7 @@ int main(int argc, char **argv) {
 		ibin = 0;
 		for (int j = 1; j < nintervals - 1; j++) {
 			target = target_min + j * dinterval;
-			while (histogram[ibin] < target && ibin < nbins - 1)
+			while (ibin < nbins - 1 && histogram[ibin] < target)
 				ibin++;
 			if (ibin > 0)
 				bin_fraction = 1.0 - (histogram[ibin] - target) / (histogram[ibin] - histogram[ibin - 1]);
@@ -636,12 +631,9 @@ int main(int argc, char **argv) {
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&histogram, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&intervals, &error);
 
-	/* set program status */
-	status = MB_SUCCESS;
-
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	if (verbose >= 2) {
 		fprintf(output, "\ndbg2  Program <%s> completed\n", program_name);
