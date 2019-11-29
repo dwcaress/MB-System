@@ -27,21 +27,21 @@ than the maximum possible (number of data records times the
 maximum number of data supported for the particular data format)
 for formats supporting variable numbers of beams or pixels.
 Also reported are the numbers and percentages of good, zero,
-and flagged data values (good values are those which are neither
-zero nor flagged as bad).
+and flagged data values. Good values are those which are neither
+zero nor flagged as bad.
 
 An important function of \fBmbinfo\fP is to generate ".inf"
 files that may be parsed by other \fBMB-System\fP programs
 and macros. Programs such as \fBmbgrid\fP and \fBmbmosaic\fP,
 read ".inf" files, when available, to
-determine whether input swath data files actually contain
+determine whether input swath data files contain
 any data in the area of interest. The efficiency of these
 programs is enhanced by their ability to avoid reading files
 with no data in the area to be gridded or mosaiced. Programs
 such as \fBmbm_plot\fP and \fBmbm_grid\fP run \fBmbinfo\fP on
 input files to determine the data bounds. The availability
 of ".inf" files allows this information to be determined without
-having to read through each swath file.To create an ".inf" file, simply direct the
+having to read through each swath file. To create an ".inf" file, simply direct the
 output of \fBmbinfo\fP to a file named by adding the
 suffix ".inf" to the input swath
 data filename. This can also be accomplished using the \fB\-O\fP
@@ -66,7 +66,7 @@ and/or windowed in time and space.  Comments in the data
 stream may also be printed out.
 The results are dumped to stdout.
 
-If pings are averaged (\fIpings\fP > 2)
+If pings are averaged (\fIpings\fP > 2),
 \fBmbinfo\fP estimates the variance for each of the bathymetry beams
 and sidescan pixels
 by reading a set number of pings and then finding the
@@ -193,7 +193,7 @@ then the longitude values will be in
 the range from \-180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
-Default: \fBmbinfo\fP selects the bext longitude range based
+Default: \fBmbinfo\fP selects the best longitude range based
 on the first data.
 .TP
 .B \-M
@@ -254,7 +254,7 @@ Default: \fIwest\fP=\-360, east\fI=360\fP, \fIsouth\fP=\-90, \fInorth\fP=90.
 .br
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be
-copied. Default: \fIspeed\fP = 0.
+used to calculate statistics. Default: \fIspeed\fP = 0.
 .TP
 .B \-T
 \fItimegap\fP
@@ -471,4 +471,4 @@ obtaining:
 \fBmbsystem\fP(1)
 
 .SH BUGS
-No bugs, only features. Maybe too many features...
+No currently known bugs.
