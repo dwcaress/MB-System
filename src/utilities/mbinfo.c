@@ -485,9 +485,6 @@ int main(int argc, char **argv) {
 	double mask_dy = 0.0;
 	int *mask = NULL;
 
-	/* notice variables */
-	char *notice_msg;
-
 	char *fileprint;
 	char string[500];
 
@@ -722,7 +719,7 @@ int main(int argc, char **argv) {
 					fprintf(output, "\"informal_description\": \"%s\",\n", string);
 					len1 += len2 + 1;
 					len1 += strspn(&format_description[len1], "Attributes: ");
-					len2 = strlen(format_description);
+					// len2 = strlen(format_description);
 					format_description[strlen(format_description) - 1] = '\0';
 					for (len2 = len1; len2 <= strlen(format_description); len2++)
 						if (format_description[len2] == 10)
@@ -749,7 +746,7 @@ int main(int argc, char **argv) {
 					fprintf(output, "\t\t<informal_description>%s</informal_description>\n", string);
 					len1 += len2 + 1;
 					len1 += strspn(&format_description[len1], "Attributes: ");
-					len2 = strlen(format_description);
+					// len2 = strlen(format_description);
 					format_description[strlen(format_description) - 1] = '\0';
 					for (len2 = len1; len2 <= strlen(format_description); len2++)
 						if (format_description[len2] == 10)
@@ -1767,7 +1764,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* close the swath file */
-			status = mb_close(verbose, &mbio_ptr, &error);
+			status &= mb_close(verbose, &mbio_ptr, &error);
 
 			/* figure out whether and what to read next */
 			if (read_datalist) {
@@ -2275,22 +2272,25 @@ int main(int argc, char **argv) {
 			fprintf(output, "\nData Record Type Notices:\n");
 			for (int i = 0; i <= MB_DATA_KINDS; i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
-					fprintf(output, "DN: %d %s\n", notice_list_tot[i], notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
+					fprintf(output, "DN: %d %s\n", notice_list_tot[i], notice_message);
 				}
 			}
 			fprintf(output, "\nNonfatal Error Notices:\n");
 			for (int i = MB_DATA_KINDS + 1; i <= MB_DATA_KINDS - (MB_ERROR_MIN); i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
-					fprintf(output, "EN: %d %s\n", notice_list_tot[i], notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
+					fprintf(output, "EN: %d %s\n", notice_list_tot[i], notice_message);
 				}
 			}
 			fprintf(output, "\nProblem Notices:\n");
 			for (int i = MB_DATA_KINDS - (MB_ERROR_MIN) + 1; i < MB_NOTICE_MAX; i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
-					fprintf(output, "PN: %d %s\n", notice_list_tot[i], notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
+					fprintf(output, "PN: %d %s\n", notice_list_tot[i], notice_message);
 				}
 			}
 			break;
@@ -2300,11 +2300,12 @@ int main(int argc, char **argv) {
 			fprintf(output, "\"data_record_type_notices\": [\n");
 			for (int i = 0; i <= MB_DATA_KINDS; i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
 					if (notice_total > 0)
 						fprintf(output, ",\n");
 					fprintf(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\": \"%s\"\n}}",
-					        notice_list_tot[i], notice_msg);
+					        notice_list_tot[i], notice_message);
 					notice_total++;
 				}
 			}
@@ -2315,11 +2316,12 @@ int main(int argc, char **argv) {
 			fprintf(output, ",\n\"nonfatal_error_notices\": [\n");
 			for (int i = MB_DATA_KINDS + 1; i <= MB_DATA_KINDS - (MB_ERROR_MIN); i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
 					if (notice_total > 0)
 						fprintf(output, ",\n");
 					fprintf(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\": \"%s\"\n}}",
-					        notice_list_tot[i], notice_msg);
+					        notice_list_tot[i], notice_message);
 					notice_total++;
 				}
 			}
@@ -2330,11 +2332,12 @@ int main(int argc, char **argv) {
 			fprintf(output, ",\n\"problem_notices\": [\n");
 			for (int i = MB_DATA_KINDS - (MB_ERROR_MIN) + 1; i < MB_NOTICE_MAX; i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
 					if (notice_total > 0)
 						fprintf(output, ",\n");
 					fprintf(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\": \"%s\"\n}}",
-					        notice_list_tot[i], notice_msg);
+					        notice_list_tot[i], notice_message);
 					notice_total++;
 				}
 			}
@@ -2348,27 +2351,30 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t<data_record_type_notices>\n");
 			for (int i = 0; i <= MB_DATA_KINDS; i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
 					fprintf(output, "\t\t<notice_number>%d</notice_number>\n", notice_list_tot[i]);
-					fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_msg);
+					fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_message);
 				}
 			}
 			fprintf(output, "\t</data_record_type_notices>\n");
 			fprintf(output, "\t<nonfatal_error_notices>\n");
 			for (int i = MB_DATA_KINDS + 1; i <= MB_DATA_KINDS - (MB_ERROR_MIN); i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
 					fprintf(output, "\t\t<notice_number>%d</notice_number>\n", notice_list_tot[i]);
-					fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_msg);
+					fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_message);
 				}
 			}
 			fprintf(output, "\t</nonfatal_error_notices>\n");
 			fprintf(output, "\t<problem_notices>\n");
 			for (int i = MB_DATA_KINDS - (MB_ERROR_MIN) + 1; i < MB_NOTICE_MAX; i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
 					fprintf(output, "\t\t<notice_number>%d</notice_number>\n", notice_list_tot[i]);
-					fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_msg);
+					fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_message);
 				}
 			}
 			fprintf(output, "\t</problem_notices>\n");
