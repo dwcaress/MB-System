@@ -341,7 +341,6 @@ int main(int argc, char **argv) {
 	double file_weight;
 	double btime_d;
 	double etime_d;
-	char file[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
 	int beams_bath_alloc = 0;
 	int beams_amp_alloc = 0;
@@ -413,7 +412,6 @@ int main(int argc, char **argv) {
 	int timbeg_j[5];
 	int timend_j[5];
 	double distot = 0.0;
-	double timtot = 0.0;
 	double spdavg = 0.0;
 	int irec = 0;
 	int isbtmrec = 0;
@@ -435,15 +433,6 @@ int main(int argc, char **argv) {
 	int ngsbeams = 0;
 	int nzsbeams = 0;
 	int nfsbeams = 0;
-	double ngd_percent;
-	double nzd_percent;
-	double nfd_percent;
-	double nga_percent;
-	double nza_percent;
-	double nfa_percent;
-	double ngs_percent;
-	double nzs_percent;
-	double nfs_percent;
 	bool beginnav = false;
 	bool beginsdp = false;
 	bool beginalt = false;
@@ -520,6 +509,7 @@ int main(int argc, char **argv) {
 	bool done = false;
 	while (!done) {
 		/* open file list */
+		char file[MB_PATH_MAXLINE];
 		if (read_datalist) {
 			const int look_processed = MB_DATALIST_LOOK_UNSET;
 			if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
@@ -1558,7 +1548,6 @@ int main(int argc, char **argv) {
 						double sumxx = 0.0;
 						double sumy = 0.0;
 						double sumxy = 0.0;
-						double variance = 0.0;
 						for (int j = 0; j < nread; j++) {
 							datacur = &data[j];
 							bath = datacur->bath;
@@ -1572,6 +1561,7 @@ int main(int argc, char **argv) {
 							}
 						}
 						if (nbath == pings_read) {
+							double variance = 0.0;
 							delta = nbath * sumxx - sumx * sumx;
 							a = (sumxx * sumy - sumx * sumxy) / delta;
 							b = (nbath * sumxy - sumx * sumy) / delta;
@@ -1596,7 +1586,6 @@ int main(int argc, char **argv) {
 						/* get mean amplitude */
 						namp = 0;
 						mean = 0.0;
-						double variance = 0.0;
 						for (int j = 0; j < nread; j++) {
 							datacur = &data[j];
 							amp = datacur->amp;
@@ -1607,6 +1596,7 @@ int main(int argc, char **argv) {
 							}
 						}
 						if (namp == pings_read) {
+							double variance = 0.0;
 							mean = mean / namp;
 							for (int j = 0; j < nread; j++) {
 								datacur = &data[j];
@@ -1628,7 +1618,6 @@ int main(int argc, char **argv) {
 						/* get mean sidescan */
 						nss = 0;
 						mean = 0.0;
-						double variance = 0.0;
 						for (int j = 0; j < nread; j++) {
 							datacur = &data[j];
 							ss = datacur->ss;
@@ -1638,6 +1627,7 @@ int main(int argc, char **argv) {
 							}
 						}
 						if (nss == pings_read) {
+							double variance = 0.0;
 							mean = mean / nss;
 							for (int j = 0; j < nread; j++) {
 								datacur = &data[j];
@@ -1812,39 +1802,35 @@ int main(int argc, char **argv) {
 	}
 
 	/* calculate percentages of data */
+	double ngd_percent = 0.0;
+	double nzd_percent = 0.0;
+	double nfd_percent = 0.0;
 	if (ntdbeams > 0) {
 		ngd_percent = 100.0 * ngdbeams / ntdbeams;
 		nzd_percent = 100.0 * nzdbeams / ntdbeams;
 		nfd_percent = 100.0 * nfdbeams / ntdbeams;
 	}
-	else {
-		ngd_percent = 0.0;
-		nzd_percent = 0.0;
-		nfd_percent = 0.0;
-	}
+
+	double nga_percent = 0.0;
+	double nza_percent = 0.0;
+	double nfa_percent = 0.0;
 	if (ntabeams > 0) {
 		nga_percent = 100.0 * ngabeams / ntabeams;
 		nza_percent = 100.0 * nzabeams / ntabeams;
 		nfa_percent = 100.0 * nfabeams / ntabeams;
 	}
-	else {
-		nga_percent = 0.0;
-		nza_percent = 0.0;
-		nfa_percent = 0.0;
-	}
+
+	double ngs_percent = 0.0;
+	double nzs_percent = 0.0;
+	double nfs_percent = 0.0;
 	if (ntsbeams > 0) {
 		ngs_percent = 100.0 * ngsbeams / ntsbeams;
 		nzs_percent = 100.0 * nzsbeams / ntsbeams;
 		nfs_percent = 100.0 * nfsbeams / ntsbeams;
 	}
-	else {
-		ngs_percent = 0.0;
-		nzs_percent = 0.0;
-		nfs_percent = 0.0;
-	}
 
 	/* now print out the results */
-	timtot = (timend - timbeg) / 3600.0;
+	const double timtot = (timend - timbeg) / 3600.0;
 	if (timtot > 0.0)
 		spdavg = distot / timtot;
 	mb_get_jtime(verbose, timbeg_i, timbeg_j);
@@ -2451,9 +2437,8 @@ int main(int argc, char **argv) {
 
 	status = MB_SUCCESS;
 
-	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	if (verbose >= 2) {
 		fprintf(stream, "\ndbg2  Program <%s> completed\n", program_name);
