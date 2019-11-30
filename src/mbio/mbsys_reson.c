@@ -69,7 +69,7 @@ int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	store->pitch_offset = 0;      /* pitch offset (degrees) */
 	store->heading_offset = 0;    /* heading offset (degrees) */
 	store->time_delay = 0;        /* positioning system delay (sec) */
-	store->transducer_depth = 0;  /* tranducer depth (meters) */
+	store->transducer_depth = 0;  /* transducer depth (meters) */
 	store->transducer_height = 0; /* reference height (meters) */
 	store->transducer_x = 0;      /* reference fore-aft offset (meters) */
 	store->transducer_y = 0;      /* reference athwartships

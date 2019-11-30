@@ -474,7 +474,7 @@ struct mbsys_reson_struct {
 	short pitch_offset;      /* pitch offset (degrees) */
 	short heading_offset;    /* heading offset (degrees) */
 	short time_delay;        /* positioning system delay (sec) */
-	short transducer_depth;  /* tranducer depth (meters) */
+	short transducer_depth;  /* transducer depth (meters) */
 	short transducer_height; /* reference height (meters) */
 	short transducer_x;      /* reference athwartships offset (meters) */
 	short transducer_y;      /* reference fore-aft offset (meters) */
