@@ -78,7 +78,7 @@ struct field {
 struct printfield {
 	char name[MB_PATH_MAXLINE];
 	int index;
-	int formatset;
+	// int formatset;
 	char format[MB_PATH_MAXLINE];
 };
 
@@ -110,7 +110,6 @@ int main(int argc, char **argv) {
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	char ifile[MB_PATH_MAXLINE] = "stdin";
-	char ofile[MB_PATH_MAXLINE] = "stdout";
 
 	{
 		const struct option options[] =
@@ -125,6 +124,8 @@ int main(int argc, char **argv) {
 		int c;
 		bool help = false;
 		int option_index;
+		char ofile[MB_PATH_MAXLINE] = "stdout";
+
 		while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
 		{
 			switch (c) {
@@ -180,8 +181,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* count the number of records in the  */
-
 	/* open the input file */
 	FILE *fp = fopen(ifile, "r");
 	if (fp == NULL) {
@@ -211,9 +210,10 @@ int main(int argc, char **argv) {
 			if (strcmp(type, "double") == 0) {
 				fields[nfields].type = TYPE_DOUBLE;
 				fields[nfields].size = 8;
+				// TODO(schwehr): Was the second mLatK supposed to be something else?
 				if (angles_in_degrees &&
 				    (strcmp(fields[nfields].name, "mLatK") == 0 || strcmp(fields[nfields].name, "mLonK") == 0 ||
-				     strcmp(fields[nfields].name, "mLatK") == 0 || strcmp(fields[nfields].name, "mRollK") == 0 ||
+				     /* strcmp(fields[nfields].name, "mLatK") == 0 || */ strcmp(fields[nfields].name, "mRollK") == 0 ||
 				     strcmp(fields[nfields].name, "mPitchK") == 0 || strcmp(fields[nfields].name, "mHeadK") == 0 ||
 				     strcmp(fields[nfields].name, "mYawK") == 0 || strcmp(fields[nfields].name, "mLonCB") == 0 ||
 				     strcmp(fields[nfields].name, "mLatCB") == 0 || strcmp(fields[nfields].name, "mRollCB") == 0 ||
@@ -286,28 +286,28 @@ int main(int argc, char **argv) {
 	double *utcTime = NULL;
 
 	if (nrecord > 0) {
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&time, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(int), (void **)&mCyclesK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(int), (void **)&mModeK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(int), (void **)&mMonK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mLatK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mLonK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mNorthK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mEastK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mDepthK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mRollK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mPitchK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mHeadK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mVbodyxK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mVbodyyK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mVbodyzK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mAccelxK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mAccelyK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mAccelzK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mPrateK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mQrateK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mRrateK, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&utcTime, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&time, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(int), (void **)&mCyclesK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(int), (void **)&mModeK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(int), (void **)&mMonK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mLatK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mLonK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mNorthK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mEastK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mDepthK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mRollK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mPitchK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mHeadK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mVbodyxK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mVbodyyK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mVbodyzK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mAccelxK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mAccelyK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mAccelzK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mPrateK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mQrateK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&mRrateK, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&utcTime, &error);
 		memset(time, 0, nrecord * sizeof(double));
 		memset(mCyclesK, 0, nrecord * sizeof(int));
 		memset(mModeK, 0, nrecord * sizeof(int));
@@ -347,7 +347,7 @@ int main(int argc, char **argv) {
 		/* loop over the fields in the record */
 		for (int ifield = 0; ifield < nfields; ifield++) {
 			if (fields[ifield].type == TYPE_DOUBLE) {
-				double dvalue;
+				double dvalue = 0.0;
 				mb_get_binary_double(true, &buffer[fields[ifield].index], &dvalue);
 				dvalue *= fields[ifield].scale;
 				if ((strcmp(fields[ifield].name, "mHeadK") == 0 || strcmp(fields[ifield].name, "mYawK") == 0) &&
@@ -391,7 +391,7 @@ int main(int argc, char **argv) {
 					utcTime[irecord] = dvalue;
 			}
 			else if (fields[ifield].type == TYPE_INTEGER) {
-				int ivalue;
+				int ivalue = 0;
 				mb_get_binary_int(true, &buffer[fields[ifield].index], &ivalue);
 				if (strcmp(fields[ifield].name, "mCyclesK") == 0)
 					mCyclesK[irecord] = ivalue;
@@ -401,13 +401,13 @@ int main(int argc, char **argv) {
 					mMonK[irecord] = ivalue;
 			}
 			else if (fields[ifield].type == TYPE_TIMETAG) {
-				double dvalue;
+				double dvalue = 0.0;
 				mb_get_binary_double(true, &buffer[fields[ifield].index], &dvalue);
 				if (strcmp(fields[ifield].name, "time") == 0)
 					time[irecord] = dvalue;
 			}
 			else if (fields[ifield].type == TYPE_ANGLE) {
-				double dvalue;
+				double dvalue = 0.0;
 				mb_get_binary_double(true, &buffer[fields[ifield].index], &dvalue);
 				dvalue *= fields[ifield].scale;
 				if (strcmp(fields[ifield].name, "mYawCB") == 0 && angles_in_degrees && dvalue < 0.0)
@@ -420,26 +420,18 @@ int main(int argc, char **argv) {
 	fclose(fp);
 
 	/* output the data */
-	double dx = 0.0;
-	double dy = 0.0;
 	double rr = 0.0;
 	int time_i[7];
 	for (irecord = 0; irecord < nrecord; irecord++) {
 		if (irecord > 0) {
-			dx = mEastK[irecord] - mEastK[irecord - 1];
-			dy = mNorthK[irecord] - mNorthK[irecord - 1];
+			const double dx = mEastK[irecord] - mEastK[irecord - 1];
+			const double dy = mNorthK[irecord] - mNorthK[irecord - 1];
 			rr = sqrt(dx * dx + dy * dy);
 		}
-		char dvl_char;
-		if (mMonK[irecord] & KEARFOTT_MONITOR_DVL_PPROCESSED)
-			dvl_char = 'X';
-		else
-			dvl_char = ' ';
-		char jump_char;
-		if (rr > 1.0)
-			jump_char = '*';
-		else
-			jump_char = ' ';
+		const char dvl_char =
+			(mMonK[irecord] & KEARFOTT_MONITOR_DVL_PPROCESSED)
+			? 'X' : ' ';
+		const char jump_char = rr > 1.0 ? '*' : ' ';
 		mb_get_date(verbose, time[irecord], time_i);
 		fprintf(stderr,
 		        "%7d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %16.6f %14.9f %14.9f %10.3f %10.3f %7d %7d |   %c %10.3f "
@@ -473,13 +465,15 @@ int main(int argc, char **argv) {
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&mRrateK, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&utcTime, &error);
 
-	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
-	/* give the statistics */
 	if (verbose >= 1) {
 		fprintf(stderr, "\n%d input ins records\n", nrecord);
+	}
+
+	if (status == MB_FAILURE) {
+		fprintf(stderr, "WARNING: status is MB_FAILURE\n");
 	}
 
 	exit(error);

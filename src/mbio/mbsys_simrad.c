@@ -81,20 +81,20 @@ int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	store->roll_offset = 0.0;    /* roll offset (degrees) */
 	store->pitch_offset = 0.0;   /* pitch offset (degrees) */
 	store->heading_offset = 0.0; /* heading offset (degrees) */
-	store->em100_td = 0.0;       /* EM-100 tranducer depth (meters) */
-	store->em100_tx = 0.0;       /* EM-100 tranducer fore-aft
+	store->em100_td = 0.0;       /* EM-100 transducer depth (meters) */
+	store->em100_tx = 0.0;       /* EM-100 transducer fore-aft
 	                     offset (meters) */
-	store->em100_ty = 0.0;       /* EM-100 tranducer athwartships
+	store->em100_ty = 0.0;       /* EM-100 transducer athwartships
 	                     offset (meters) */
-	store->em12_td = 0.0;        /* EM-12 tranducer depth (meters) */
-	store->em12_tx = 0.0;        /* EM-12 tranducer fore-aft
+	store->em12_td = 0.0;        /* EM-12 transducer depth (meters) */
+	store->em12_tx = 0.0;        /* EM-12 transducer fore-aft
 	                     offset (meters) */
-	store->em12_ty = 0.0;        /* EM-12 tranducer athwartships
+	store->em12_ty = 0.0;        /* EM-12 transducer athwartships
 	                     offset (meters) */
-	store->em1000_td = 0.0;      /* EM-1000 tranducer depth (meters) */
-	store->em1000_tx = 0.0;      /* EM-1000 tranducer fore-aft
+	store->em1000_td = 0.0;      /* EM-1000 transducer depth (meters) */
+	store->em1000_tx = 0.0;      /* EM-1000 transducer fore-aft
 	                     offset (meters) */
-	store->em1000_ty = 0.0;      /* EM-1000 tranducer athwartships
+	store->em1000_ty = 0.0;      /* EM-1000 transducer athwartships
 	                     offset (meters) */
 	for (int i = 0; i < 128; i++)
 		store->spare_parameter[i] = '\0';

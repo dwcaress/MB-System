@@ -249,7 +249,6 @@ int main(int argc, char **argv) {
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ssacrosstrack, &error);
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ssalongtrack, &error);
 
-	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
 		char *message = NULL;
 		mb_error(verbose, error, &message);
@@ -265,10 +264,8 @@ int main(int argc, char **argv) {
 	fprintf(output, "MBIO Data Format ID:  %d\n", format);
 	fprintf(output, "%s", format_description);
 
-
 	/* mbio read and write values */
 	void *store_ptr;
-	struct mbsys_hsds_struct *store;
 	int time_i[7];
 	double time_d;
 	double navlon;
@@ -296,13 +293,12 @@ int main(int argc, char **argv) {
 	while (error <= MB_ERROR_NO_ERROR) {
 		/* read some data */
 		error = MB_ERROR_NO_ERROR;
-		status = MB_SUCCESS;
 		status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
 		                    &altitude, &sonardepth, &nbath, &namp, &nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
 		                    ssacrosstrack, ssalongtrack, comment, &error);
 
 		/* get data structure pointer */
-		store = (struct mbsys_hsds_struct *)store_ptr;
+		struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
 
 		/* non-survey data do not matter to mbhsdump */
 		if (error >= MB_ERROR_OTHER && error < MB_ERROR_NO_ERROR) {
@@ -518,7 +514,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	status = mb_close(verbose, &mbio_ptr, &error);
+	status &= mb_close(verbose, &mbio_ptr, &error);
 
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
@@ -529,9 +525,8 @@ int main(int argc, char **argv) {
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&ssacrosstrack, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&ssalongtrack, &error);
 
-	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	/* give the statistics */
 	fprintf(output, "\n");
@@ -549,6 +544,10 @@ int main(int argc, char **argv) {
 		fprintf(output, "%d standby data records listed\n", mb_data_standby_count);
 	if (mb_data_nav_source_list)
 		fprintf(output, "%d navigation source data records listed\n", mb_data_nav_source_count);
+
+	if (status == MB_FAILURE) {
+		fprintf(stderr, "WARNING: status is MB_FAILURE\n");
+	}
 
 	exit(error);
 }

@@ -341,7 +341,6 @@ int main(int argc, char **argv) {
 	double file_weight;
 	double btime_d;
 	double etime_d;
-	char file[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
 	int beams_bath_alloc = 0;
 	int beams_amp_alloc = 0;
@@ -413,7 +412,6 @@ int main(int argc, char **argv) {
 	int timbeg_j[5];
 	int timend_j[5];
 	double distot = 0.0;
-	double timtot = 0.0;
 	double spdavg = 0.0;
 	int irec = 0;
 	int isbtmrec = 0;
@@ -435,15 +433,6 @@ int main(int argc, char **argv) {
 	int ngsbeams = 0;
 	int nzsbeams = 0;
 	int nfsbeams = 0;
-	double ngd_percent;
-	double nzd_percent;
-	double nfd_percent;
-	double nga_percent;
-	double nza_percent;
-	double nfa_percent;
-	double ngs_percent;
-	double nzs_percent;
-	double nfs_percent;
 	bool beginnav = false;
 	bool beginsdp = false;
 	bool beginalt = false;
@@ -453,11 +442,10 @@ int main(int argc, char **argv) {
 	int nread = 0;
 
 	/* variance finding variables */
-	int nbath;
 	int namp;
 	int nss;
-	double sumx, sumxx, sumy, sumxy, delta;
-	double a, b, dev, mean, variance;
+	double delta;
+	double a, b, dev, mean;
 	double *bathmean = NULL;
 	double *bathvar = NULL;
 	int *nbathvar = NULL;
@@ -484,9 +472,6 @@ int main(int argc, char **argv) {
 	double mask_dx = 0.0;
 	double mask_dy = 0.0;
 	int *mask = NULL;
-
-	/* notice variables */
-	char *notice_msg;
 
 	char *fileprint;
 	char string[500];
@@ -519,13 +504,12 @@ int main(int argc, char **argv) {
 	int meta_headingbias = 0;
 	int meta_draft = 0;
 
-	int val_int;  // TODO(schwehr): bool?
-	bool good_nav;
-	bool done = false;
-
 	void *datalist;
+
+	bool done = false;
 	while (!done) {
 		/* open file list */
+		char file[MB_PATH_MAXLINE];
 		if (read_datalist) {
 			const int look_processed = MB_DATALIST_LOOK_UNSET;
 			if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
@@ -722,7 +706,7 @@ int main(int argc, char **argv) {
 					fprintf(output, "\"informal_description\": \"%s\",\n", string);
 					len1 += len2 + 1;
 					len1 += strspn(&format_description[len1], "Attributes: ");
-					len2 = strlen(format_description);
+					// len2 = strlen(format_description);
 					format_description[strlen(format_description) - 1] = '\0';
 					for (len2 = len1; len2 <= strlen(format_description); len2++)
 						if (format_description[len2] == 10)
@@ -749,7 +733,7 @@ int main(int argc, char **argv) {
 					fprintf(output, "\t\t<informal_description>%s</informal_description>\n", string);
 					len1 += len2 + 1;
 					len1 += strspn(&format_description[len1], "Attributes: ");
-					len2 = strlen(format_description);
+					// len2 = strlen(format_description);
 					format_description[strlen(format_description) - 1] = '\0';
 					for (len2 = len1; len2 <= strlen(format_description); len2++)
 						if (format_description[len2] == 10)
@@ -887,8 +871,10 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
 								if (meta_svcorrected == 0) {
+									int val_int;
+									// TODO(schwehr): Is something missing for METASVCORRECTED?
 									sscanf(comment, "METASVCORRECTED:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "Corrected Depths:       YES\n");
 									else
 										fprintf(output, "Corrected Depths:       NO\n");
@@ -897,8 +883,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
 								if (meta_tidecorrected == 0) {
+									int val_int;
 									sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "Tide Corrected:         YES\n");
 									else
 										fprintf(output, "Tide Corrected:         NO\n");
@@ -907,8 +894,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
 								if (meta_batheditmanual == 0) {
+									int val_int;
 									sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "Depths Manually Edited: YES\n");
 									else
 										fprintf(output, "Depths Manually Edited: NO\n");
@@ -917,8 +905,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
 								if (meta_batheditauto == 0) {
+									int val_int;
 									sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "Depths Auto-Edited:     YES\n");
 									else
 										fprintf(output, "Depths Auto-Edited:     NO\n");
@@ -1007,8 +996,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
 								if (meta_svcorrected == 0) {
+									int val_int;
 									sscanf(comment, "METASVCORRECTED:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\"corrected_depths\": \"YES\",\n");
 									else
 										fprintf(output, "\"corrected_depths\": \"NO\",\n");
@@ -1017,8 +1007,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
 								if (meta_tidecorrected == 0) {
+									int val_int;
 									sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\"tide_corrected\": \"YES\",\n");
 									else
 										fprintf(output, "\"tide_corrected\": \"NO\",\n");
@@ -1027,8 +1018,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
 								if (meta_batheditmanual == 0) {
+									int val_int;
 									sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\"depths_manually_edited\": \"YES\",\n");
 									else
 										fprintf(output, "\"depths_manually_edited\": \"NO\",\n");
@@ -1037,8 +1029,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
 								if (meta_batheditauto == 0) {
+									int val_int;
 									sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\"depths_auto-edited\": \"YES\",\n");
 									else
 										fprintf(output, "\"depths_auto-edited\": \"NO\",\n");
@@ -1131,8 +1124,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METASVCORRECTED:", 16) == 0) {
 								if (meta_svcorrected == 0) {
+									int val_int;
 									sscanf(comment, "METASVCORRECTED:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\t\t<corrected_depths>YES</corrected_depths>\n");
 									else
 										fprintf(output, "\t\t<corrected_depths>NO</corrected_depths>\n");
@@ -1141,8 +1135,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0) {
 								if (meta_tidecorrected == 0) {
+									int val_int;
 									sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\t\t<tide_corrected>YES</tide_corrected>\n");
 									else
 										fprintf(output, "\t\t<tide_corrected>NO</tide_corrected>\n");
@@ -1151,8 +1146,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0) {
 								if (meta_batheditmanual == 0) {
+									int val_int;
 									sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\t\t<depths_manually_edited>YES</depths_manually_edited>\n");
 									else
 										fprintf(output, "\t\t<depths_manually_edited>NO</depths_manually_edited>\n");
@@ -1161,8 +1157,9 @@ int main(int argc, char **argv) {
 							}
 							else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0) {
 								if (meta_batheditauto == 0) {
+									int val_int;
 									sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-									if (val_int == true)
+									if (val_int)
 										fprintf(output, "\t\t<depths_auto_edited>YES</depths_auto_edited>\n");
 									else
 										fprintf(output, "\t\t<depths_auto_edited>NO</depths_auto_edited>\n");
@@ -1368,20 +1365,15 @@ int main(int argc, char **argv) {
 
 						/* check for good nav */
 						speed_apparent = 3600.0 * distance / (time_d - time_d_last);
+						bool good_nav = true;
 						if (good_nav_only) {
-							//if (navlon == 0.0 || navlat == 0.0) {		// This still misses lots of trash JL
 							if ((navlon > -0.005 && navlon < 0.005) && (navlat > -0.005 && navlat < 0.005)) {
 								good_nav = false;
 							}
 							else if (beginnav && speed_apparent >= speed_threshold) {
 								good_nav = false;
-							}
-							else {
-								good_nav = true;
-							}
-						}
-						else
-							good_nav = true;
+							} // else { good_nav = true; }
+						} // else { good_nav = true; }
 
 						/* get total distance */
 						if (!good_nav_only || (good_nav && speed_apparent < speed_threshold)) {
@@ -1550,14 +1542,12 @@ int main(int argc, char **argv) {
 
 					/* do the bathymetry */
 					for (int i = 0; i < beams_bath; i++) {
-
 						/* fit line to depths */
-						nbath = 0;
-						sumx = 0.0;
-						sumxx = 0.0;
-						sumy = 0.0;
-						sumxy = 0.0;
-						variance = 0.0;
+						int nbath = 0;
+						double sumx = 0.0;
+						double sumxx = 0.0;
+						double sumy = 0.0;
+						double sumxy = 0.0;
 						for (int j = 0; j < nread; j++) {
 							datacur = &data[j];
 							bath = datacur->bath;
@@ -1571,6 +1561,7 @@ int main(int argc, char **argv) {
 							}
 						}
 						if (nbath == pings_read) {
+							double variance = 0.0;
 							delta = nbath * sumxx - sumx * sumx;
 							a = (sumxx * sumy - sumx * sumxy) / delta;
 							b = (nbath * sumxy - sumx * sumy) / delta;
@@ -1595,7 +1586,6 @@ int main(int argc, char **argv) {
 						/* get mean amplitude */
 						namp = 0;
 						mean = 0.0;
-						variance = 0.0;
 						for (int j = 0; j < nread; j++) {
 							datacur = &data[j];
 							amp = datacur->amp;
@@ -1606,6 +1596,7 @@ int main(int argc, char **argv) {
 							}
 						}
 						if (namp == pings_read) {
+							double variance = 0.0;
 							mean = mean / namp;
 							for (int j = 0; j < nread; j++) {
 								datacur = &data[j];
@@ -1627,7 +1618,6 @@ int main(int argc, char **argv) {
 						/* get mean sidescan */
 						nss = 0;
 						mean = 0.0;
-						variance = 0.0;
 						for (int j = 0; j < nread; j++) {
 							datacur = &data[j];
 							ss = datacur->ss;
@@ -1637,6 +1627,7 @@ int main(int argc, char **argv) {
 							}
 						}
 						if (nss == pings_read) {
+							double variance = 0.0;
 							mean = mean / nss;
 							for (int j = 0; j < nread; j++) {
 								datacur = &data[j];
@@ -1767,7 +1758,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* close the swath file */
-			status = mb_close(verbose, &mbio_ptr, &error);
+			status &= mb_close(verbose, &mbio_ptr, &error);
 
 			/* figure out whether and what to read next */
 			if (read_datalist) {
@@ -1785,13 +1776,11 @@ int main(int argc, char **argv) {
 		if (read_datalist)
 			mb_datalist_close(verbose, &datalist, &error);
 
-		/* figure out if done */
 		if (pass > 0 || !coverage_mask)
 			done = true;
-		pass++;
 
-		/* end loop over reading passes */
-	}
+		pass++;
+	}  /* end loop over reading passes */
 
 	/* calculate final variances */
 	if (pings_read > 2) {
@@ -1813,39 +1802,35 @@ int main(int argc, char **argv) {
 	}
 
 	/* calculate percentages of data */
+	double ngd_percent = 0.0;
+	double nzd_percent = 0.0;
+	double nfd_percent = 0.0;
 	if (ntdbeams > 0) {
 		ngd_percent = 100.0 * ngdbeams / ntdbeams;
 		nzd_percent = 100.0 * nzdbeams / ntdbeams;
 		nfd_percent = 100.0 * nfdbeams / ntdbeams;
 	}
-	else {
-		ngd_percent = 0.0;
-		nzd_percent = 0.0;
-		nfd_percent = 0.0;
-	}
+
+	double nga_percent = 0.0;
+	double nza_percent = 0.0;
+	double nfa_percent = 0.0;
 	if (ntabeams > 0) {
 		nga_percent = 100.0 * ngabeams / ntabeams;
 		nza_percent = 100.0 * nzabeams / ntabeams;
 		nfa_percent = 100.0 * nfabeams / ntabeams;
 	}
-	else {
-		nga_percent = 0.0;
-		nza_percent = 0.0;
-		nfa_percent = 0.0;
-	}
+
+	double ngs_percent = 0.0;
+	double nzs_percent = 0.0;
+	double nfs_percent = 0.0;
 	if (ntsbeams > 0) {
 		ngs_percent = 100.0 * ngsbeams / ntsbeams;
 		nzs_percent = 100.0 * nzsbeams / ntsbeams;
 		nfs_percent = 100.0 * nfsbeams / ntsbeams;
 	}
-	else {
-		ngs_percent = 0.0;
-		nzs_percent = 0.0;
-		nfs_percent = 0.0;
-	}
 
 	/* now print out the results */
-	timtot = (timend - timbeg) / 3600.0;
+	const double timtot = (timend - timbeg) / 3600.0;
 	if (timtot > 0.0)
 		spdavg = distot / timtot;
 	mb_get_jtime(verbose, timbeg_i, timbeg_j);
@@ -2275,22 +2260,25 @@ int main(int argc, char **argv) {
 			fprintf(output, "\nData Record Type Notices:\n");
 			for (int i = 0; i <= MB_DATA_KINDS; i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
-					fprintf(output, "DN: %d %s\n", notice_list_tot[i], notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
+					fprintf(output, "DN: %d %s\n", notice_list_tot[i], notice_message);
 				}
 			}
 			fprintf(output, "\nNonfatal Error Notices:\n");
 			for (int i = MB_DATA_KINDS + 1; i <= MB_DATA_KINDS - (MB_ERROR_MIN); i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
-					fprintf(output, "EN: %d %s\n", notice_list_tot[i], notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
+					fprintf(output, "EN: %d %s\n", notice_list_tot[i], notice_message);
 				}
 			}
 			fprintf(output, "\nProblem Notices:\n");
 			for (int i = MB_DATA_KINDS - (MB_ERROR_MIN) + 1; i < MB_NOTICE_MAX; i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
-					fprintf(output, "PN: %d %s\n", notice_list_tot[i], notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
+					fprintf(output, "PN: %d %s\n", notice_list_tot[i], notice_message);
 				}
 			}
 			break;
@@ -2300,11 +2288,12 @@ int main(int argc, char **argv) {
 			fprintf(output, "\"data_record_type_notices\": [\n");
 			for (int i = 0; i <= MB_DATA_KINDS; i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
 					if (notice_total > 0)
 						fprintf(output, ",\n");
 					fprintf(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\": \"%s\"\n}}",
-					        notice_list_tot[i], notice_msg);
+					        notice_list_tot[i], notice_message);
 					notice_total++;
 				}
 			}
@@ -2315,11 +2304,12 @@ int main(int argc, char **argv) {
 			fprintf(output, ",\n\"nonfatal_error_notices\": [\n");
 			for (int i = MB_DATA_KINDS + 1; i <= MB_DATA_KINDS - (MB_ERROR_MIN); i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
 					if (notice_total > 0)
 						fprintf(output, ",\n");
 					fprintf(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\": \"%s\"\n}}",
-					        notice_list_tot[i], notice_msg);
+					        notice_list_tot[i], notice_message);
 					notice_total++;
 				}
 			}
@@ -2330,11 +2320,12 @@ int main(int argc, char **argv) {
 			fprintf(output, ",\n\"problem_notices\": [\n");
 			for (int i = MB_DATA_KINDS - (MB_ERROR_MIN) + 1; i < MB_NOTICE_MAX; i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
 					if (notice_total > 0)
 						fprintf(output, ",\n");
 					fprintf(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\": \"%s\"\n}}",
-					        notice_list_tot[i], notice_msg);
+					        notice_list_tot[i], notice_message);
 					notice_total++;
 				}
 			}
@@ -2348,27 +2339,30 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t<data_record_type_notices>\n");
 			for (int i = 0; i <= MB_DATA_KINDS; i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
 					fprintf(output, "\t\t<notice_number>%d</notice_number>\n", notice_list_tot[i]);
-					fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_msg);
+					fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_message);
 				}
 			}
 			fprintf(output, "\t</data_record_type_notices>\n");
 			fprintf(output, "\t<nonfatal_error_notices>\n");
 			for (int i = MB_DATA_KINDS + 1; i <= MB_DATA_KINDS - (MB_ERROR_MIN); i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
 					fprintf(output, "\t\t<notice_number>%d</notice_number>\n", notice_list_tot[i]);
-					fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_msg);
+					fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_message);
 				}
 			}
 			fprintf(output, "\t</nonfatal_error_notices>\n");
 			fprintf(output, "\t<problem_notices>\n");
 			for (int i = MB_DATA_KINDS - (MB_ERROR_MIN) + 1; i < MB_NOTICE_MAX; i++) {
 				if (notice_list_tot[i] > 0) {
-					mb_notice_message(verbose, i, &notice_msg);
+					char *notice_message;
+					mb_notice_message(verbose, i, &notice_message);
 					fprintf(output, "\t\t<notice_number>%d</notice_number>\n", notice_list_tot[i]);
-					fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_msg);
+					fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_message);
 				}
 			}
 			fprintf(output, "\t</problem_notices>\n");
@@ -2443,9 +2437,8 @@ int main(int argc, char **argv) {
 
 	status = MB_SUCCESS;
 
-	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	if (verbose >= 2) {
 		fprintf(stream, "\ndbg2  Program <%s> completed\n", program_name);

@@ -673,7 +673,7 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 				}
 			}
 
-			/* handle tranducer extended group */
+			/* handle transducer extended group */
 			else if (group_id == MBSYS_XSE_SHP_GROUP_TRANSDUCEREXTENDED) {
 				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_xdx_num_transducer);
 				index += 4;

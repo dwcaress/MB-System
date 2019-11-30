@@ -138,21 +138,6 @@ static const char usage_message[] =
     "          -Rfactor  -Sspeed  -Ttension  -Utime  -V -Wscale -Xextend]";
 
 /*--------------------------------------------------------------------*/
-/* approximate complementary error function from numerical recipes */
-double erfcc(double x) {
-	const double z = fabs(x);
-	const double t = 1.0 / (1.0 + 0.5 * z);
-	const double ans =
-	    t *
-	    exp(-z * z - 1.26551223 +
-	        t * (1.00002368 +
-	             t * (0.37409196 +
-	                  t * (0.09678418 +
-	                       t * (-0.18628806 +
-	                            t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
-	return x >= 0.0 ? ans : 2.0 - ans;
-}
-/*--------------------------------------------------------------------*/
 /* approximate error function altered from numerical recipes */
 double mbgrid_erf(double x) {
 	const double z = fabs(x);
@@ -199,9 +184,8 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 	if (fp == NULL) {
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
-	}
-	/* output grid */
-	else {
+	} else {
+		/* output grid */
 		fprintf(fp, "grid created by program MBGRID\n");
 		const time_t right_now = time((time_t *)0);
 		char date[32];
@@ -269,10 +253,8 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
 	if (fp == NULL) {
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
-	}
-
-	/* output grid */
-	else {
+	} else {
+		/* output grid */
 		fprintf(fp, "ncols %d\n", nx);
 		fprintf(fp, "nrows %d\n", ny);
 		fprintf(fp, "xllcorner %.10g\n", xmin - 0.5 * dx);
@@ -332,10 +314,8 @@ int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double
 	if (fp == NULL) {
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
-	}
-
-	/* output grid */
-	else {
+	} else {
+		/* output grid */
 		fwrite((char *)&nx, 1, 4, fp);
 		fwrite((char *)&ny, 1, 4, fp);
 		fwrite((char *)&xmin, 1, 8, fp);
@@ -410,17 +390,14 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 	/* get integrated weight */
 	const double fa = foot_a;
 	const double fb = foot_b;
-	/*	*weight = 0.25 * ( erfcc((pcx - dx) / fa) - erfcc((pcx + dx) / fa))
-	 * ( erfcc((pcy - dy) / fb) - erfcc((pcy + dy) / fb));*/
 	*weight = 0.25 * (mbgrid_erf((pcx + dx) / fa) - mbgrid_erf((pcx - dx) / fa)) *
 	          (mbgrid_erf((pcy + dy) / fb) - mbgrid_erf((pcy - dy) / fb));
 
 	/* use if weight large or any ratio <= 1 */
 	if (*weight > 0.05) {
 		*use = MBGRID_USE_YES;
-	}
-	/* check ratio of each corner footprint 1/e distance */
-	else {
+	} else {
+		/* check ratio of each corner footprint 1/e distance */
 		*use = MBGRID_USE_NO;
 		for (int i = 0; i < 4; i++) {
 			const double ang = RTD * atan2(py[i], px[i]);
@@ -782,6 +759,28 @@ int main(int argc, char **argv) {
 
 	int error = MB_ERROR_NO_ERROR;
 
+	/* if bounds not set get bounds of input data */
+	if (!gbndset || (!set_spacing && !set_dimensions)) {
+		struct mb_info_struct mb_info;
+		int formatread = -1;
+		status = mb_get_info_datalist(verbose, filelist, &formatread, &mb_info, lonflip, &error);
+
+		if (!gbndset) {
+			gbnd[0] = mb_info.lon_min;
+			gbnd[1] = mb_info.lon_max;
+			gbnd[2] = mb_info.lat_min;
+			gbnd[3] = mb_info.lat_max;
+			// gbndset = true;
+		}
+
+		if (!set_spacing && !set_dimensions) {
+			dx_set = 0.02 * mb_info.altitude_max;
+			dy_set = 0.02 * mb_info.altitude_max;
+			set_spacing = true;
+			strcpy(units, "meters");
+		}
+	}
+
 	double btime_d;
 	double etime_d;
 	int beams_bath;
@@ -808,10 +807,7 @@ int main(int argc, char **argv) {
 	char ofile[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
 	char plot_cmd[MB_COMMENT_MAXLINE];
-	char plot_stdout[MB_COMMENT_MAXLINE];
 	int plot_status;
-
-	char backgroundfileuse[MB_PATH_MAXLINE];
 
 	/* mbio read values */
 	int rpings;
@@ -834,8 +830,6 @@ int main(int argc, char **argv) {
 	double *sslon = NULL;
 	double *sslat = NULL;
 	char comment[MB_COMMENT_MAXLINE];
-	struct mb_info_struct mb_info;
-	int formatread;
 
 	/* lon,lat,value triples variables */
 	double tlon;
@@ -847,9 +841,6 @@ int main(int argc, char **argv) {
 	double xlon, ylat, xx, yy;
 	double factor, weight, topofactor;
 	int offx, offy, xtradim;
-	double sdx, sdy;
-	int sclip;
-	int sxdim, sydim;
 	double *grid = NULL;
 	double *norm = NULL;
 	double *sigma = NULL;
@@ -874,18 +865,15 @@ int main(int argc, char **argv) {
 	float *output = NULL;
 	float *sgrid = NULL;
 	int *cnt = NULL;
-	float xmin, ymin, ddx, ddy, zflag, cay;
 	double **data;
 	double *value = NULL;
-	int ndata, ndatafile, nbackground, nbackground_alloc;
+	int ndata, ndatafile, nbackground;
 	double zmin, zmax, zclip;
 	int nmax;
 	double smin, smax;
 	int nbinset, nbinzero, nbinspline, nbinbackground;
 
 	/* projected grid parameters */
-	double reference_lon, reference_lat;
-	int proj_status;
 	void *pjptr;
 	double deglontokm, deglattokm;
 	double mtodeglon, mtodeglat;
@@ -898,18 +886,11 @@ int main(int argc, char **argv) {
 	char nlabel[MB_PATH_MAXLINE];
 	char sdlabel[MB_PATH_MAXLINE];
 
-	/* variables needed to handle Not-a-Number values */
-	float NaN;
-
 	/* other variables */
 	FILE *dfp = NULL;
 	FILE *rfp = NULL;
-	int ii, jj, iii, jjj, kkk, ir;
-	int i1, i2, j1, j2, k1, k2;
-	double r;
-	int dmask[9];
 	int kgrid, kout, kint, ib, ix, iy;
-	int ix1, ix2, iy1, iy2, isx, isy;
+	int ix1, ix2, iy1, iy2;
 
 	double foot_dx, foot_dy, foot_dxn, foot_dyn;
 	double foot_lateral, foot_range, foot_theta;
@@ -923,27 +904,6 @@ int main(int argc, char **argv) {
 
 	int gxdim = 0;
 	int gydim = 0;
-
-	/* if bounds not set get bounds of input data */
-	if (!gbndset || (!set_spacing && !set_dimensions)) {
-		formatread = -1;
-		status = mb_get_info_datalist(verbose, filelist, &formatread, &mb_info, lonflip, &error);
-
-		if (!gbndset) {
-			gbnd[0] = mb_info.lon_min;
-			gbnd[1] = mb_info.lon_max;
-			gbnd[2] = mb_info.lat_min;
-			gbnd[3] = mb_info.lat_max;
-			gbndset = true;
-		}
-
-		if (!set_spacing && !set_dimensions) {
-			dx_set = 0.02 * mb_info.altitude_max;
-			dy_set = 0.02 * mb_info.altitude_max;
-			set_spacing = true;
-			strcpy(units, "meters");
-		}
-	}
 
 	/* if requested expand the grid bounds */
 	if (boundsfactor > 1.0) {
@@ -979,6 +939,7 @@ int main(int argc, char **argv) {
 
 	/* define NaN in case it's needed */
 	if (use_NaN) {
+		float NaN;
 		MB_MAKE_FNAN(NaN);
 		outclipvalue = NaN;
 	}
@@ -990,13 +951,13 @@ int main(int argc, char **argv) {
 		/* check for UTM with undefined zone */
 		if (strcmp(projection_pars, "UTM") == 0 || strcmp(projection_pars, "U") == 0 || strcmp(projection_pars, "utm") == 0 ||
 		    strcmp(projection_pars, "u") == 0) {
-			reference_lon = 0.5 * (gbnd[0] + gbnd[1]);
+			double reference_lon = 0.5 * (gbnd[0] + gbnd[1]);
 			if (reference_lon < 180.0)
 				reference_lon += 360.0;
 			if (reference_lon >= 180.0)
 				reference_lon -= 360.0;
 			const int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
-			reference_lat = 0.5 * (gbnd[2] + gbnd[3]);
+			double reference_lat = 0.5 * (gbnd[2] + gbnd[3]);
 			if (reference_lat >= 0.0)
 				sprintf(projection_id, "UTM%2.2dN", utm_zone);
 			else
@@ -1007,7 +968,7 @@ int main(int argc, char **argv) {
 
 		/* set projection flag */
 		use_projection = true;
-		proj_status = mb_proj_init(verbose, projection_id, &(pjptr), &error);
+		const int proj_status = mb_proj_init(verbose, projection_id, &(pjptr), &error);
 
 		/* if projection not successfully initialized then quit */
 		if (proj_status != MB_SUCCESS) {
@@ -1516,10 +1477,12 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nExtracting background from grid file %s...\n", backgroundfile);
 
 		/* guess about twice the data actually expected */
-		if (use_projection)
-			nbackground_alloc = 2 * gxdim * gydim;
-		else
-			nbackground_alloc = 2 * gxdim * gydim;
+		int nbackground_alloc = 2 * gxdim * gydim;
+		// TODO(schwehr): Bug?
+		// if (use_projection)
+		//	nbackground_alloc = 2 * gxdim * gydim;
+		// else
+		// 	nbackground_alloc = 2 * gxdim * gydim;
 
 /* allocate and initialize background data arrays */
 #ifdef USESURFACE
@@ -1571,9 +1534,11 @@ int main(int argc, char **argv) {
 
 		/* if needed translate grid to normal registration */
 		sprintf(plot_cmd, "gmt grdinfo %s", backgroundfile);
+		char backgroundfileuse[MB_PATH_MAXLINE];
 		strcpy(backgroundfileuse, backgroundfile);
 		if ((rfp = popen(plot_cmd, "r")) != NULL) {
 			/* parse the grdinfo results */
+			char plot_stdout[MB_COMMENT_MAXLINE];
 			/* char *bufptr = */ fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
 			/* bufptr = */ fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
 			/* bufptr = */ fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
@@ -1761,15 +1726,15 @@ int main(int argc, char **argv) {
 	if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT_SLOPE) {
 		/* set up parameters for first cut low resolution slope grid */
 		// sbnd[4]; for (int i = 0; i < 4; i++) sbnd[i] = wbnd[i];
-		sdx = 2.0 * dx;
-		sdy = 2.0 * dy;
-		sxdim = gxdim / 2;
-		sydim = gydim / 2;
-		sclip = MAX(gxdim, gydim);
+		const double sdx = 2.0 * dx;
+		const double sdy = 2.0 * dy;
+		int sxdim = gxdim / 2;
+		int sydim = gydim / 2;
+		int sclip = MAX(gxdim, gydim);
 
 		/* allocate memory for additional arrays */
-		status = mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(double), (void **)&norm, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, sxdim * sydim * sizeof(double), (void **)&gridsmall, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(double), (void **)&norm, &error);
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, sxdim * sydim * sizeof(double), (void **)&gridsmall, &error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
@@ -1938,7 +1903,7 @@ int main(int argc, char **argv) {
 								}
 						}
 					}
-					status = mb_close(verbose, &mbio_ptr, &error);
+					/* status = */ mb_close(verbose, &mbio_ptr, &error);
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
@@ -2063,16 +2028,16 @@ int main(int argc, char **argv) {
 		ndata = ndata / 3;
 
 		/* do the interpolation */
-		cay = (float)tension;
-		xmin = (float)(wbnd[0] - 0.5 * sdx - bdata_origin_x);
-		ymin = (float)(wbnd[2] - 0.5 * sdy - bdata_origin_y);
-		ddx = (float)sdx;
-		ddy = (float)sdy;
+		float cay = (float)tension;
+		float xmin = (float)(wbnd[0] - 0.5 * sdx - bdata_origin_x);
+		float ymin = (float)(wbnd[2] - 0.5 * sdy - bdata_origin_y);
+		float ddx = (float)sdx;
+		float ddy = (float)sdy;
 		fprintf(outfp, "\nDoing Zgrid spline interpolation with %d data points...\n", ndata);
 		mb_zgrid2(sgrid, &sxdim, &sydim, &xmin, &ymin, &ddx, &ddy, sdata, &ndata, work1, work2, work3, &cay, &sclip);
 #endif
 
-		zflag = 5.0e34;
+		// float zflag = 5.0e34f;
 		for (int i = 0; i < sxdim; i++)
 			for (int j = 0; j < sydim; j++) {
 				kgrid = i * sydim + j;
@@ -2116,14 +2081,14 @@ int main(int argc, char **argv) {
 		/* read in data */
 		fprintf(outfp, "\nDoing second pass to generate final grid...\n");
 		ndata = 0;
-		if ((status = mb_datalist_open(verbose, &datalist, dfile, look_processed, &error)) != MB_SUCCESS) {
+		if (mb_datalist_open(verbose, &datalist, dfile, look_processed, &error) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
 			exit(error);
 		}
-		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
+		while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
 		       MB_SUCCESS) {
 			ndatafile = 0;
 
@@ -2274,40 +2239,36 @@ int main(int argc, char **argv) {
 									/* else deal with multibeam data that have beam footprints */
 									else {
 										/* get slope from low resolution grid */
-										isx = (bathlon[ib] - wbnd[0] + 0.5 * sdx) / sdx;
-										isy = (bathlat[ib] - wbnd[2] + 0.5 * sdy) / sdy;
+										int isx = (bathlon[ib] - wbnd[0] + 0.5 * sdx) / sdx;
+										int isy = (bathlat[ib] - wbnd[2] + 0.5 * sdy) / sdy;
 										isx = MIN(MAX(isx, 0), sxdim - 1);
 										isy = MIN(MAX(isy, 0), sydim - 1);
 										double dzdx;
 										double dzdy;
 										if (isx == 0) {
-											k1 = isx * sydim + isy;
-											k2 = (isx + 1) * sydim + isy;
+											const int k1 = isx * sydim + isy;
+											const int k2 = (isx + 1) * sydim + isy;
 											dzdx = (gridsmall[k2] - gridsmall[k1]) / sdx;
-										}
-										else if (isx == sxdim - 1) {
-											k1 = (isx - 1) * sydim + isy;
-											k2 = isx * sydim + isy;
+										} else if (isx == sxdim - 1) {
+											const int k1 = (isx - 1) * sydim + isy;
+											const int k2 = isx * sydim + isy;
 											dzdx = (gridsmall[k2] - gridsmall[k1]) / sdx;
-										}
-										else {
-											k1 = (isx - 1) * sydim + isy;
-											k2 = (isx + 1) * sydim + isy;
+										} else {
+											const int k1 = (isx - 1) * sydim + isy;
+											const int k2 = (isx + 1) * sydim + isy;
 											dzdx = (gridsmall[k2] - gridsmall[k1]) / (2.0 * sdx);
 										}
 										if (isy == 0) {
-											k1 = isx * sydim + isy;
-											k2 = isx * sydim + (isy + 1);
+											const int k1 = isx * sydim + isy;
+											const int k2 = isx * sydim + (isy + 1);
 											dzdy = (gridsmall[k2] - gridsmall[k1]) / sdy;
-										}
-										else if (isy == sydim - 1) {
-											k1 = isx * sydim + (isy - 1);
-											k2 = isx * sydim + isy;
+										} else if (isy == sydim - 1) {
+											const int k1 = isx * sydim + (isy - 1);
+											const int k2 = isx * sydim + isy;
 											dzdy = (gridsmall[k2] - gridsmall[k1]) / sdy;
-										}
-										else {
-											k1 = isx * sydim + (isy - 1);
-											k2 = isx * sydim + (isy + 1);
+										} else {
+											const int k1 = isx * sydim + (isy - 1);
+											const int k2 = isx * sydim + (isy + 1);
 											dzdy = (gridsmall[k2] - gridsmall[k1]) / (2.0 * sdy);
 										}
 
@@ -2409,8 +2370,8 @@ int main(int argc, char **argv) {
 												iy2 = MIN(iy + foot_diy, gydim - 1);
 
 												/* loop over neighborhood of bins */
-												for (ii = ix1; ii <= ix2; ii++)
-													for (jj = iy1; jj <= iy2; jj++) {
+												for (int ii = ix1; ii <= ix2; ii++)
+													for (int jj = iy1; jj <= iy2; jj++) {
 														/* find center of bin in lon lat degrees from sounding center */
 														kgrid = ii * gydim + jj;
 														xx = (wbnd[0] + ii * dx + 0.5 * dx - bathlon[ib]);
@@ -2802,8 +2763,8 @@ int main(int argc, char **argv) {
 												iy2 = MIN(iy + foot_diy, gydim - 1);
 
 												/* loop over neighborhood of bins */
-												for (ii = ix1; ii <= ix2; ii++)
-													for (jj = iy1; jj <= iy2; jj++) {
+												for (int ii = ix1; ii <= ix2; ii++)
+													for (int jj = iy1; jj <= iy2; jj++) {
 														/* find center of bin in lon lat degrees from sounding center */
 														kgrid = ii * gydim + jj;
 														xx = (wbnd[0] + ii * dx + 0.5 * dx - bathlon[ib]);
@@ -3406,6 +3367,7 @@ int main(int argc, char **argv) {
 				if (cnt[kgrid] > 0) {
 					value = data[kgrid];
 					qsort((char *)value, cnt[kgrid], sizeof(double), (void *)mb_double_compare);
+					// TODO(schwehr): grid_mode always has to be MBGRID_MEDIAN_FILTER here.
 					if (grid_mode == MBGRID_MEDIAN_FILTER) {
 						grid[kgrid] = value[cnt[kgrid] / 2];
 					}
@@ -3642,8 +3604,8 @@ int main(int argc, char **argv) {
 										ix2 = MIN(ix + xtradim, gxdim - 1);
 										iy1 = MAX(iy - xtradim, 0);
 										iy2 = MIN(iy + xtradim, gydim - 1);
-										for (ii = ix1; ii <= ix2; ii++)
-											for (jj = iy1; jj <= iy2; jj++) {
+										for (int ii = ix1; ii <= ix2; ii++)
+											for (int jj = iy1; jj <= iy2; jj++) {
 												kgrid = ii * gydim + jj;
 												xx = wbnd[0] + ii * dx - bathlon[ib];
 												yy = wbnd[2] + jj * dy - bathlat[ib];
@@ -3735,8 +3697,8 @@ int main(int argc, char **argv) {
 										ix2 = MIN(ix + xtradim, gxdim - 1);
 										iy1 = MAX(iy - xtradim, 0);
 										iy2 = MIN(iy + xtradim, gydim - 1);
-										for (ii = ix1; ii <= ix2; ii++)
-											for (jj = iy1; jj <= iy2; jj++) {
+										for (int ii = ix1; ii <= ix2; ii++)
+											for (int jj = iy1; jj <= iy2; jj++) {
 												kgrid = ii * gydim + jj;
 												xx = wbnd[0] + ii * dx - bathlon[ib];
 												yy = wbnd[2] + jj * dy - bathlat[ib];
@@ -3824,8 +3786,8 @@ int main(int argc, char **argv) {
 										ix2 = MIN(ix + xtradim, gxdim - 1);
 										iy1 = MAX(iy - xtradim, 0);
 										iy2 = MIN(iy + xtradim, gydim - 1);
-										for (ii = ix1; ii <= ix2; ii++)
-											for (jj = iy1; jj <= iy2; jj++) {
+										for (int ii = ix1; ii <= ix2; ii++)
+											for (int jj = iy1; jj <= iy2; jj++) {
 												kgrid = ii * gydim + jj;
 												xx = wbnd[0] + ii * dx - sslon[ib];
 												yy = wbnd[2] + jj * dy - sslat[ib];
@@ -3922,8 +3884,8 @@ int main(int argc, char **argv) {
 						ix2 = MIN(ix + xtradim, gxdim - 1);
 						iy1 = MAX(iy - xtradim, 0);
 						iy2 = MIN(iy + xtradim, gydim - 1);
-						for (ii = ix1; ii <= ix2; ii++)
-							for (jj = iy1; jj <= iy2; jj++) {
+						for (int ii = ix1; ii <= ix2; ii++)
+							for (int jj = iy1; jj <= iy2; jj++) {
 								kgrid = ii * gydim + jj;
 								xx = wbnd[0] + ii * dx - tlon;
 								yy = wbnd[2] + jj * dy - tlat;
@@ -4575,8 +4537,8 @@ int main(int argc, char **argv) {
   										ix2 = MIN(ix + xtradim, gxdim - 1);
   										iy1 = MAX(iy - xtradim, 0);
   										iy2 = MIN(iy + xtradim, gydim - 1);
-  										for (ii = ix1; ii <= ix2; ii++) {
-  											for (jj = iy1; jj <= iy2; jj++) {
+  										for (int ii = ix1; ii <= ix2; ii++) {
+  											for (int jj = iy1; jj <= iy2; jj++) {
   												kgrid = ii * gydim + jj;
   												xx = wbnd[0] + ii * dx - bathlon[ib];
   												yy = wbnd[2] + jj * dy - bathlat[ib];
@@ -4656,8 +4618,8 @@ int main(int argc, char **argv) {
   										ix2 = MIN(ix + xtradim, gxdim - 1);
   										iy1 = MAX(iy - xtradim, 0);
   										iy2 = MIN(iy + xtradim, gydim - 1);
-  										for (ii = ix1; ii <= ix2; ii++)
-  											for (jj = iy1; jj <= iy2; jj++) {
+  										for (int ii = ix1; ii <= ix2; ii++)
+  											for (int jj = iy1; jj <= iy2; jj++) {
   												kgrid = ii * gydim + jj;
   												xx = wbnd[0] + ii * dx - bathlon[ib];
   												yy = wbnd[2] + jj * dy - bathlat[ib];
@@ -4735,8 +4697,8 @@ int main(int argc, char **argv) {
   										ix2 = MIN(ix + xtradim, gxdim - 1);
   										iy1 = MAX(iy - xtradim, 0);
   										iy2 = MIN(iy + xtradim, gydim - 1);
-  										for (ii = ix1; ii <= ix2; ii++)
-  											for (jj = iy1; jj <= iy2; jj++) {
+  										for (int ii = ix1; ii <= ix2; ii++)
+  											for (int jj = iy1; jj <= iy2; jj++) {
   												kgrid = ii * gydim + jj;
   												xx = wbnd[0] + ii * dx - bathlon[ib];
   												yy = wbnd[2] + jj * dy - bathlat[ib];
@@ -4755,7 +4717,7 @@ int main(int argc, char **argv) {
 								}
 						}
 					}
-					status = mb_close(verbose, &mbio_ptr, &error);
+					/* status = */ mb_close(verbose, &mbio_ptr, &error);
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
@@ -4984,11 +4946,11 @@ int main(int argc, char **argv) {
 		ndata = ndata / 3;
 
 		/* do the interpolation */
-		cay = (float)tension;
-		xmin = (float)(wbnd[0] - 0.5 * dx - bdata_origin_x);
-		ymin = (float)(wbnd[2] - 0.5 * dy - bdata_origin_y);
-		ddx = (float)dx;
-		ddy = (float)dy;
+		float cay = (float)tension;
+		float xmin = (float)(wbnd[0] - 0.5 * dx - bdata_origin_x);
+		float ymin = (float)(wbnd[2] - 0.5 * dy - bdata_origin_y);
+		float ddx = (float)dx;
+		float ddy = (float)dy;
 		fprintf(outfp, "\nDoing Zgrid spline interpolation with %d data points...\n", ndata);
 		/*for (i=0;i<ndata/3;i++)
 		{
@@ -5009,7 +4971,7 @@ int main(int argc, char **argv) {
 
 		/* translate the interpolation into the grid array
 		    filling only data gaps */
-		zflag = 5.0e34;
+		const float zflag = 5.0e34f;
 		if (clipmode == MBGRID_INTERP_GAP) {
 			for (int i = 0; i < gxdim; i++)
 				for (int j = 0; j < gydim; j++) {
@@ -5022,25 +4984,26 @@ int main(int argc, char **argv) {
 					num[kgrid] = false;
 					if (grid[kgrid] >= clipvalue && sgrid[kint] < zflag) {
 						/* initialize direction mask of search */
-						for (ii = 0; ii < 9; ii++)
+						int dmask[9];
+						for (int ii = 0; ii < 9; ii++)
 							dmask[ii] = false;
 
 						/* loop over rings around point, starting close */
 						// TODO(schwehr): Is num an int or a bool?
-						for (ir = 0; ir <= clip && num[kgrid] == false; ir++) {
+						for (int ir = 0; ir <= clip && num[kgrid] == false; ir++) {
 							/* set bounds of search */
-							i1 = MAX(0, i - ir);
-							i2 = MIN(gxdim - 1, i + ir);
-							j1 = MAX(0, j - ir);
-							j2 = MIN(gydim - 1, j + ir);
+							const int i1 = MAX(0, i - ir);
+							const int i2 = MIN(gxdim - 1, i + ir);
+							const int j1 = MAX(0, j - ir);
+							const int j2 = MIN(gydim - 1, j + ir);
 
-							jj = j1;
-							for (ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
+							int jj = j1;
+							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
-									r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
-									iii = rint((ii - i) / r + 1);
-									jjj = rint((jj - j) / r + 1);
-									kkk = iii * 3 + jjj;
+									const double r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
+									const int iii = rint((ii - i) / r + 1);
+									const int jjj = rint((jj - j) / r + 1);
+									const int kkk = iii * 3 + jjj;
 									dmask[kkk] = true;
 									if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
 									    (dmask[1] && dmask[7]))
@@ -5049,12 +5012,12 @@ int main(int argc, char **argv) {
 							}
 
 							jj = j2;
-							for (ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
+							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
-									r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
-									iii = rint((ii - i) / r + 1);
-									jjj = rint((jj - j) / r + 1);
-									kkk = iii * 3 + jjj;
+									const double r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
+									const int iii = rint((ii - i) / r + 1);
+									const int jjj = rint((jj - j) / r + 1);
+									const int kkk = iii * 3 + jjj;
 									dmask[kkk] = true;
 									if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
 									    (dmask[1] && dmask[7]))
@@ -5062,13 +5025,13 @@ int main(int argc, char **argv) {
 								}
 							}
 
-							ii = i1;
+							int ii = i1;
 							for (jj = j1; jj <= j2 && num[kgrid] == false; jj++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
-									r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
-									iii = rint((ii - i) / r + 1);
-									jjj = rint((jj - j) / r + 1);
-									kkk = iii * 3 + jjj;
+									const double r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
+									const int iii = rint((ii - i) / r + 1);
+									const int jjj = rint((jj - j) / r + 1);
+									const int kkk = iii * 3 + jjj;
 									dmask[kkk] = true;
 									if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
 									    (dmask[1] && dmask[7]))
@@ -5079,10 +5042,10 @@ int main(int argc, char **argv) {
 							ii = i2;
 							for (jj = j1; jj <= j2 && num[kgrid] == false; jj++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
-									r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
-									iii = rint((ii - i) / r + 1);
-									jjj = rint((jj - j) / r + 1);
-									kkk = iii * 3 + jjj;
+									const double r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
+									const int iii = rint((ii - i) / r + 1);
+									const int jjj = rint((jj - j) / r + 1);
+									const int kkk = iii * 3 + jjj;
 									dmask[kkk] = true;
 									if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
 									    (dmask[1] && dmask[7]))
@@ -5122,28 +5085,28 @@ int main(int argc, char **argv) {
 					num[kgrid] = false;
 					if (grid[kgrid] >= clipvalue && sgrid[kint] < zflag) {
 						/* loop over rings around point, starting close */
-						for (ir = 0; ir <= clip && num[kgrid] == false; ir++) {
+						for (int ir = 0; ir <= clip && num[kgrid] == false; ir++) {
 							/* set bounds of search */
-							i1 = MAX(0, i - ir);
-							i2 = MIN(gxdim - 1, i + ir);
-							j1 = MAX(0, j - ir);
-							j2 = MIN(gydim - 1, j + ir);
+							const int i1 = MAX(0, i - ir);
+							const int i2 = MIN(gxdim - 1, i + ir);
+							const int j1 = MAX(0, j - ir);
+							const int j2 = MIN(gydim - 1, j + ir);
 
-							jj = j1;
-							for (ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
+							int jj = j1;
+							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
 									num[kgrid] = true;
 								}
 							}
 
 							jj = j2;
-							for (ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
+							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
 									num[kgrid] = true;
 								}
 							}
 
-							ii = i1;
+							int ii = i1;
 							for (jj = j1; jj <= j2 && num[kgrid] == false; jj++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
 									num[kgrid] = true;
@@ -5252,11 +5215,11 @@ int main(int argc, char **argv) {
 		           (float)(wbnd[1] - bdata_origin_x), (float)(wbnd[2] - bdata_origin_y), (float)(wbnd[3] - bdata_origin_y), dx,
 		           dy, tension, sgrid);
 #else
-		cay = (float)tension;
-		xmin = (float)(wbnd[0] - 0.5 * dx - bdata_origin_x);
-		ymin = (float)(wbnd[2] - 0.5 * dy - bdata_origin_y);
-		ddx = (float)dx;
-		ddy = (float)dy;
+		float cay = (float)tension;
+		float xmin = (float)(wbnd[0] - 0.5 * dx - bdata_origin_x);
+		float ymin = (float)(wbnd[2] - 0.5 * dy - bdata_origin_y);
+		float ddx = (float)dx;
+		float ddy = (float)dy;
 		clip = MAX(gxdim, gydim);
 		fprintf(outfp, "\nDoing Zgrid spline interpolation with %d background points...\n", nbackground);
 		mb_zgrid(sgrid, &gxdim, &gydim, &xmin, &ymin, &ddx, &ddy, bdata, &nbackground, work1, work2, work3, &cay, &clip);
@@ -5264,7 +5227,7 @@ int main(int argc, char **argv) {
 
 		/* translate the interpolation into the grid array
 		    - interpolate only to fill a data gap */
-		zflag = 5.0e34;
+		const float zflag = 5.0e34f;
 		for (int i = 0; i < gxdim; i++)
 			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
@@ -5505,7 +5468,7 @@ int main(int argc, char **argv) {
 
 	/* deallocate projection */
 	if (use_projection)
-		proj_status = mb_proj_free(verbose, &(pjptr), &error);
+		/* proj_status = */ mb_proj_free(verbose, &(pjptr), &error);
 
 	/* run mbm_grdplot */
 	if (gridkind == MBGRID_GMTGRD) {
@@ -5513,19 +5476,14 @@ int main(int argc, char **argv) {
 		strcpy(ofile, fileroot);
 		strcat(ofile, ".grd");
 		if (datatype == MBGRID_DATA_BATHYMETRY) {
-			sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -C -D -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title,
-			        zlabel);
-		}
-		else if (datatype == MBGRID_DATA_TOPOGRAPHY) {
+			sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -C -D -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title, zlabel);
+		} else if (datatype == MBGRID_DATA_TOPOGRAPHY) {
 			sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -C -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title, zlabel);
-		}
-		else if (datatype == MBGRID_DATA_AMPLITUDE) {
-			sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title,
-			        zlabel);
-		}
-		else {
-			sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title,
-			        zlabel);
+		// TODO(schwehr): Bug?
+		// } else if (datatype == MBGRID_DATA_AMPLITUDE) {
+		//	sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title, zlabel);
+		} else {
+			sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title, zlabel);
 		}
 		if (verbose) {
 			fprintf(outfp, "\nexecuting mbm_grdplot...\n%s\n", plot_cmd);

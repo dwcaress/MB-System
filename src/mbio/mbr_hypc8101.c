@@ -134,7 +134,7 @@ int mbr_zero_hypc8101(int verbose, char *data_ptr, int *error) {
 		data->heading_offset = 0;    /* heading offset (degrees) */
 		data->time_delay = 0;        /* positioning system
 		                     delay (sec) */
-		data->transducer_depth = 0;  /* tranducer depth (meters) */
+		data->transducer_depth = 0;  /* transducer depth (meters) */
 		data->transducer_height = 0; /* reference height (meters) */
 		data->transducer_x = 0;      /* reference athwartships
 		                         offset (meters) */

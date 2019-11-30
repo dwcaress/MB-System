@@ -258,74 +258,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	int error = MB_ERROR_NO_ERROR;
-
-	/* MBIO read control parameters */
-	void *datalist;
-	double file_weight;
-	mb_path swath_file;
-	mb_path file;
-	mb_path dfile;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-
-	/* MBIO read values */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-
-	double tidelon;
-	double tidelat;
-	double btime_d;
-	double etime_d;
-	mb_path nav_file;
-	int ngood = 0;
-
-	FILE *tfp;
-	FILE *ofp;
-	struct stat file_status;
-	int fstat;
-	bool proceed = true;
-	int input_size, input_modtime, output_size, output_modtime;
-	mb_path line = "";
-	int nread;
-
-	double geoid_offset = 0.0;
-	double height = 0.0;
-	double ttime_d;
-	double geoid_time = 0.0;
-
-	double this_interval = 0.0;
-	double next_interval = 0.0;
-	int count_tide = 0;
-	double sum_tide = 0.0;
-	double atide = 0.0;
-
-	struct mb_io_struct *mb_io_ptr = NULL;
-	struct mbsys_simrad2_struct *simrad2_ptr;
-	struct mbsys_simrad3_struct *simrad3_ptr;
-#ifdef ENABLE_GSF
-	struct mbsys_gsf_struct *gsf_ptr;
-#endif
+	FILE *ofp = NULL;
 
 	/* If a single output file is specified, open and initialise it */
 	if (file_output) {
@@ -333,7 +266,6 @@ int main(int argc, char **argv) {
 			ofp = stdout;
 		} else {
 			if ((ofp = fopen(tide_file, "w")) == NULL) {
-				error = MB_ERROR_OPEN_FAIL;
 				fprintf(stderr, "\nUnable to open tide output file <%s>\n", tide_file);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 				exit(MB_FAILURE);
@@ -368,6 +300,8 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	int error = MB_ERROR_NO_ERROR;
+
 	/* get format if required */
 	if (format == 0)
 		mb_get_format(verbose, read_file, NULL, &format, &error);
@@ -375,6 +309,10 @@ int main(int argc, char **argv) {
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
 	bool read_data;
+	void *datalist;
+	mb_path file;
+	mb_path dfile;
+	double file_weight;
 
 	/* open file list */
 	if (read_datalist) {
@@ -393,6 +331,10 @@ int main(int argc, char **argv) {
 
 	bool read_geoid = false;
 	bool have_height = false;
+	int count_tide = 0;
+	int ngood = 0;
+	double sum_tide = 0.0;
+	double this_interval = 0.0;
 
 	/* loop over all files to be read */
 	while (read_data) {
@@ -400,25 +342,24 @@ int main(int argc, char **argv) {
 		/* Figure out if the file needs a tide model - don't generate a new tide
 			model if one was made previously and is up to date AND the
 			appropriate request has been made */
-		proceed = true;
+		bool proceed = true;
 		if (!file_output) {
 			sprintf(tide_file, "%s.gps.tde", file);
 			if (skip_existing) {
-				if ((fstat = stat(file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				struct stat file_status;
+				int fstat = stat(file, &file_status);
+				int input_modtime = 0;
+				int input_size = 0;
+				if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					input_modtime = file_status.st_mtime;
 					input_size = file_status.st_size;
 				}
-				else {
-					input_modtime = 0;
-					input_size = 0;
-				}
-				if ((fstat = stat(tide_file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				fstat = stat(tide_file, &file_status);
+				int output_size = 0;
+				int output_modtime = 0;
+				if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					output_modtime = file_status.st_mtime;
 					output_size = file_status.st_size;
-				}
-				else {
-					output_modtime = 0;
-					output_size = 0;
 				}
 				if (output_modtime > input_modtime && input_size > 0 && output_size > 0) {
 					proceed = false;
@@ -473,9 +414,16 @@ int main(int argc, char **argv) {
 			/* some helpful output */
 			fprintf(stderr, "\n---------------------------------------\n\nProcessing tides for %s\n\n", file);
 
+			mb_path swath_file;
 			strcpy(swath_file, file);
 
-			/* initialize reading the swath file */
+			void *mbio_ptr = NULL;
+			double btime_d;
+			double etime_d;
+			int beams_bath;
+			int beams_amp;
+			int pixels_ss;
+
 			if (mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 										&mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) !=
 				MB_SUCCESS) {
@@ -488,25 +436,33 @@ int main(int argc, char **argv) {
 			}
 
 			/* allocate memory for data arrays */
+			char *beamflag = NULL;
 			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+				/* status = */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+			double *bath = NULL;
 			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+				/* status = */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+			double *amp = NULL;
 			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+				/* status = */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+			double *bathacrosstrack = NULL;
 			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
+				/* status = */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
 											&error);
+			double *bathalongtrack = NULL;
 			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
+				/* status = */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
 											&error);
+			double *ss = NULL;
 			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+				/* status = */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+			double *ssacrosstrack = NULL;
 			if (error == MB_ERROR_NO_ERROR)
-				status =
+				/* status = */
 					mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
+			double *ssalongtrack = NULL;
 			if (error == MB_ERROR_NO_ERROR)
-				status =
+				/* status = */
 					mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
 
 			/* if error initializing memory then quit */
@@ -518,10 +474,20 @@ int main(int argc, char **argv) {
 				exit(error);
 			}
 
+			FILE *tfp;
+			double tidelon;
+			double tidelat;
+			double geoid_time = 0.0;
+			double geoid_offset = 0.0;
+
 			/* get geoid corrections */
 			if (geoid_set) {
+				mb_path nav_file;
 				sprintf(nav_file, "%s.fnv", swath_file);
-				if ((fstat = stat(nav_file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				struct stat file_status;
+				const int fstat = stat(nav_file, &file_status);
+				mb_path line = "";
+				if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					sprintf(line, "awk '{ print $8 \" \" $9 \" \" $7 }' %s | grdtrack -G%s", nav_file, geoidgrid);
 				} else {
 					sprintf(line, "mblist -F%d -I%s -OXYU | grdtrack -G%s", format, file, geoidgrid);
@@ -540,12 +506,26 @@ int main(int argc, char **argv) {
 			}
 
 			/* read and use data */
-			nread = 0;
+			int nread = 0;
+			void *store_ptr = NULL;
+			int kind;
+			double time_d;
+			double navlon;
+			double navlat;
+			double speed;
+			double heading;
+			double next_interval = 0.0;
+			int time_i[7];
+
 			while (error <= MB_ERROR_NO_ERROR) {
 				/* reset error */
 				error = MB_ERROR_NO_ERROR;
 
 				/* read next data record */
+				double distance;
+				double altitude;
+				double sonardepth;
+				char comment[MB_COMMENT_MAXLINE];
 				status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
 									&distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 									bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
@@ -562,13 +542,15 @@ int main(int argc, char **argv) {
 						fprintf(stderr, "dbg2       Have Installation telegram\n");
 				}
 
-				mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+				struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+				double ttime_d;
+				double height = 0.0;
 #ifdef ENABLE_GSF
 				if (mb_io_ptr->format == MBF_GSFGENMB) {
 					if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
 						ttime_d = time_d;
-						gsf_ptr = (struct mbsys_gsf_struct *)mb_io_ptr->store_data;
+						struct mbsys_gsf_struct *gsf_ptr = (struct mbsys_gsf_struct *)mb_io_ptr->store_data;
 						height = gsf_ptr->records.mb_ping.height;
 						if (gps_source == 1) {
 							height += gsf_ptr->records.mb_ping.sep;
@@ -582,7 +564,7 @@ int main(int argc, char **argv) {
 				if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_HEIGHT && gps_source == 0) {
 
 					if (mb_io_ptr->format == MBF_EM300MBA || mb_io_ptr->format == MBF_EM300RAW) {
-						simrad2_ptr = (struct mbsys_simrad2_struct *)mb_io_ptr->store_data;
+						struct mbsys_simrad2_struct *simrad2_ptr = (struct mbsys_simrad2_struct *)mb_io_ptr->store_data;
 						height = simrad2_ptr->hgt_height * 0.01;
 						time_i[0] = simrad2_ptr->hgt_date / 10000;
 						time_i[1] = (simrad2_ptr->hgt_date % 10000) / 100;
@@ -595,7 +577,7 @@ int main(int argc, char **argv) {
 						have_height = true;
 
 					} else if (mb_io_ptr->format == MBF_EM710MBA || mb_io_ptr->format == MBF_EM710RAW) {
-						simrad3_ptr = (struct mbsys_simrad3_struct *)mb_io_ptr->store_data;
+						struct mbsys_simrad3_struct *simrad3_ptr = (struct mbsys_simrad3_struct *)mb_io_ptr->store_data;
 						height = simrad3_ptr->hgt_height * 0.01;
 						time_i[0] = simrad3_ptr->hgt_date / 10000;
 						time_i[1] = (simrad3_ptr->hgt_date % 10000) / 100;
@@ -618,7 +600,7 @@ int main(int argc, char **argv) {
 					if (ttime_d > next_interval || (!file_output && error == MB_ERROR_EOF)) {
 						if (count_tide > 0) {
 							ngood++;
-							atide = sum_tide / count_tide;
+							const double atide = sum_tide / count_tide;
 							if (tideformat == 1) {
 								fprintf(ofp, "%.3f %9.4f\n", this_interval, atide);
 
@@ -665,7 +647,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* close the swath file */
-			status = mb_close(verbose, &mbio_ptr, &error);
+			status &= mb_close(verbose, &mbio_ptr, &error);
 
 			if (read_geoid) {
 				pclose(tfp);
@@ -682,7 +664,7 @@ int main(int argc, char **argv) {
 
 			/* set mbprocess usage of tide file */
 			if (mbprocess_update && ngood > 0) {
-				status = mb_pr_update_tide(verbose, swath_file, MBP_TIDE_ON, tide_file, tideformat, &error);
+				status &= mb_pr_update_tide(verbose, swath_file, MBP_TIDE_ON, tide_file, tideformat, &error);
 				fprintf(stderr, "MBprocess set to apply tide correction to %s\n", swath_file);
 			}
 
@@ -690,17 +672,12 @@ int main(int argc, char **argv) {
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
-			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = true;
-			else
-				read_data = false;
-		}
-		else {
+			read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+		} else {
 			read_data = false;
 		}
+	}  // end loop over files in list
 
-		/* end loop over files in list */
-	}
 	if (read_datalist) {
 		mb_datalist_close(verbose, &datalist, &error);
 	}
@@ -708,7 +685,8 @@ int main(int argc, char **argv) {
 	/* if single output file specified, then finalise and close it */
 	if (file_output) {
 		if (count_tide > 0) {
-			atide = sum_tide / count_tide;
+			const double atide = sum_tide / count_tide;
+			int time_i[7];
 			if (tideformat == 1) {
 				fprintf(ofp, "%.3f %9.4f\n", this_interval, atide);
 
@@ -728,9 +706,8 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
