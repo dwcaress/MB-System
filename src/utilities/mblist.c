@@ -301,8 +301,6 @@ int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double 
 /*--------------------------------------------------------------------*/
 int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacrosstrack, int nslopes, double *slopes,
                    double *slopeacrosstrack, double acrosstrack, double *depth, double *slope, int *error) {
-  int idepth, islope;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -325,7 +323,7 @@ int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacross
     if (acrosstrack >= depthacrosstrack[0] && acrosstrack <= depthacrosstrack[ndepths - 1]) {
 
       /* look for depth */
-      idepth = -1;
+      int idepth = -1;
       while (found_depth && idepth < ndepths - 2) {
         idepth++;
         if (acrosstrack >= depthacrosstrack[idepth] && acrosstrack <= depthacrosstrack[idepth + 1]) {
@@ -338,7 +336,7 @@ int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacross
       }
 
       /* look for slope */
-      islope = -1;
+      int islope = -1;
       while (!found_slope && islope < nslopes - 2) {
         islope++;
         if (acrosstrack >= slopeacrosstrack[islope] && acrosstrack <= slopeacrosstrack[islope + 1]) {
@@ -380,8 +378,6 @@ int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacross
 /*--------------------------------------------------------------------*/
 int printsimplevalue(int verbose, FILE *output, double value, int width, int precision, bool ascii, bool *invert, bool *flipsign,
                      int *error) {
-  char format[24];
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -395,6 +391,7 @@ int printsimplevalue(int verbose, FILE *output, double value, int width, int pre
   }
 
   /* make print format */
+  char format[24];
   format[0] = '%';
   if (*invert)
     strcpy(format, "%g");
@@ -1093,7 +1090,6 @@ int main(int argc, char **argv) {
   /* output format list controls */
   int beam_vertical = 0;
   int pixel_vertical = 0;
-  int nread;
   int beam_status = MB_SUCCESS;
   int pixel_status = MB_SUCCESS;
   int time_j[5];
@@ -1224,11 +1220,9 @@ int main(int argc, char **argv) {
   double pulse_length;
   double receive_gain;
 
-  int shellstatus;
   int nbeams;
 
   char output_file_temp[MB_PATH_MAXLINE];
-  char buffer[MB_BUFFER_MAX];
 
   /* netcdf variables */
   char variable[MB_PATH_MAXLINE];
@@ -2745,50 +2739,50 @@ int main(int argc, char **argv) {
 
     /* allocate memory for data arrays */
     if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+      /* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+      /* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+      /* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status =
+      /* status &= */
           mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status =
+      /* status &= */
           mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+      /* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
+      /* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
+      /* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&depths, &error);
+      /* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&depths, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status =
+      /* status &= */
           mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&depthacrosstrack, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 2 * sizeof(double), (void **)&slopes, &error);
+      /* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 2 * sizeof(double), (void **)&slopes, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 2 * sizeof(double), (void **)&slopeacrosstrack,
+      /* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 2 * sizeof(double), (void **)&slopeacrosstrack,
                                  &error);
     if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 2 * sizeof(int), (void **)&detect, &error);
+      /* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 2 * sizeof(int), (void **)&detect, &error);
     if (use_raw) {
       if (error == MB_ERROR_NO_ERROR)
-        status =
+        /* status &= */
             mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), (void **)&beam_samples, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status =
+        /* status &= */
             mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), (void **)&start_sample, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), (void **)&range, &error);
+        /* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), (void **)&range, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status =
+        /* status &= */
             mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&depression, &error);
       if (error == MB_ERROR_NO_ERROR)
-        status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bs, &error);
-      status = mb_mallocd(verbose, __FILE__, __LINE__, (MBSYS_SIMRAD2_MAXRAWPIXELS) * sizeof(double), (void **)&ss_pixels,
+        /* status &= */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bs, &error);
+      /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, (MBSYS_SIMRAD2_MAXRAWPIXELS) * sizeof(double), (void **)&ss_pixels,
                           &error);
     }
 
@@ -2812,7 +2806,7 @@ int main(int argc, char **argv) {
     }
 
     /* read and print data */
-    nread = 0;
+    int nread = 0;
     bool first = true;
     while (error <= MB_ERROR_NO_ERROR) {
       /* reset error */
@@ -2937,7 +2931,7 @@ int main(int argc, char **argv) {
                                 &beam_vertical, &beam_stbd, &pixel_port, &pixel_vertical, &pixel_stbd, &error);
 
         /* set and/or check beams and pixels to be output */
-        status = set_output(verbose, beams_bath, beams_amp, pixels_ss, use_bath, use_amp, use_ss, dump_mode, beam_set,
+        status &= set_output(verbose, beams_bath, beams_amp, pixels_ss, use_bath, use_amp, use_ss, dump_mode, beam_set,
                             pixel_set, beam_vertical, pixel_vertical, &beam_start, &beam_end, &beam_exclude_percent,
                             &pixel_start, &pixel_end, &n_list, list, &error);
 
@@ -3080,7 +3074,8 @@ int main(int argc, char **argv) {
               beam_status = MB_FAILURE;
           if (use_time_interval && first)
             beam_status = MB_FAILURE;
-          if (check_nav && (navlon == 0.0 || navlon == 0.0))
+          // TODO(schwehr): should the last check be navlat?
+          if (check_nav && (navlon == 0.0 /* || navlon == 0.0 */ ))
             beam_status = MB_FAILURE;
 
           /* print out good beams */
@@ -3220,10 +3215,11 @@ int main(int argc, char **argv) {
                   break;
                 case 'F': /* Beamflag numeric value */
                   if (ascii) {
-                    if (netcdf)
+                    // TODO(schwehr): Bug?
+                    // if (netcdf)
                       fprintf(output[i], "%u", beamflag[k]);
-                    else
-                      fprintf(output[i], "%u", beamflag[k]);
+                    // else
+                    //  fprintf(output[i], "%u", beamflag[k]);
                   }
                   else {
                     b = beamflag[k];
@@ -3817,7 +3813,6 @@ int main(int argc, char **argv) {
                   raw_next_value = false;
                   break;
 
-                  break;
                 case 'G': /* TVG start */
                   if (ascii)
                     fprintf(output[i], "%6d", tvg_start);
@@ -3992,7 +3987,8 @@ int main(int argc, char **argv) {
             pixel_status = MB_FAILURE;
           if (use_time_interval && first)
             pixel_status = MB_FAILURE;
-          if (check_nav && (navlon == 0.0 || navlon == 0.0))
+          // TODO(schwehr): Should the last check be mavlat?
+          if (check_nav && (navlon == 0.0 /* || navlon == 0.0 */ ))
             pixel_status = MB_FAILURE;
 
           /* print out good pixels */
@@ -4749,7 +4745,7 @@ int main(int argc, char **argv) {
     }
 
     /* close the swath file */
-    status = mb_close(verbose, &mbio_ptr, &error);
+    status &= mb_close(verbose, &mbio_ptr, &error);
 
     /* deallocate memory used for data arrays */
     if (use_raw) {
@@ -4758,12 +4754,8 @@ int main(int argc, char **argv) {
 
     /* figure out whether and what to read next */
     if (read_datalist) {
-      if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-        read_data = true;
-      else
-        read_data = false;
-    }
-    else {
+      read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+    } else {
       read_data = false;
     }
 
@@ -4781,6 +4773,7 @@ int main(int argc, char **argv) {
 
         /* copy data to CDL file */
         /* TODO(schwehr): Convert this abuse of for to a while. */
+	  char buffer[MB_BUFFER_MAX];
         for (size_t j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i]); j > 0;
              j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i])) {
           if (j != fwrite(buffer, sizeof(char), j, outfile)) {
@@ -4797,20 +4790,19 @@ int main(int argc, char **argv) {
     /* convert cdl to netcdf */
     if (!netcdf_cdl) {
       sprintf(output_file_temp, "ncgen -o %s %s.cdl", output_file, output_file);
-      shellstatus = system(output_file_temp);
+      const int shellstatus = system(output_file_temp);
       if (shellstatus == 0) {
         sprintf(output_file_temp, "rm %s.cdl", output_file);
-        shellstatus = system(output_file_temp);
+        // TODO(schwehr): Check return of system.
+        /* shellstatus = */ system(output_file_temp);
       }
     }
-  }
-  else {
+  } else {
     fclose(outfile);
   }
 
-  /* check memory */
   if (verbose >= 4)
-    status = mb_memory_list(verbose, &error);
+    status &= mb_memory_list(verbose, &error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
