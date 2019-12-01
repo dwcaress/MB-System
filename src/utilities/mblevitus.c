@@ -105,6 +105,8 @@ int main(int argc, char **argv) {
 	double longitude = 0.0;
 	double latitude = 0.0;
 
+	// TODO(schwehr): Why restrict the ofile size to be so small?
+	//   Why not mb_path?
 	char ofile[128];
 	strcpy(ofile, "velocity");
 
@@ -136,7 +138,7 @@ int main(int argc, char **argv) {
 			}
 			case 'O':
 			case 'o':
-				sscanf(optarg, "%1023s", ofile);
+				sscanf(optarg, "%127s", ofile);
 				break;
 			case '?':
 				errflg = true;
@@ -215,44 +217,39 @@ int main(int argc, char **argv) {
 	fprintf(outfp, "  Requested:  %6.4f longitude   %6.4f latitude\n", longitude, latitude);
 	fprintf(outfp, "  Used:       %6.4f longitude   %6.4f latitude\n", lon_actual, lat_actual);
 
+	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 
 	/* read the temperature */
 	const int record_size = sizeof(float) * NLEVITUS_MAX * 180;
 	long location = ilon * record_size;
-	int status = fseek(ifp, location, 0);
+	/* int status = */ fseek(ifp, location, 0);
 	float temperature[NLEVITUS_MAX][180];
-	if ((status = fread(&temperature[0][0], 1, record_size, ifp)) == record_size) {
-		status = MB_SUCCESS;
-		error = MB_ERROR_NO_ERROR;
-	}
-	else {
+	if (fread(&temperature[0][0], 1, record_size, ifp) == record_size) {
 		status = MB_FAILURE;
 		error = MB_ERROR_EOF;
+		fprintf(stderr, "ERROR: EOF reading temperature\n");
 	}
 
 	/* read the salinity */
 	location = location + 360 * record_size;
-	status = fseek(ifp, location, 0);
+	/* status = */ fseek(ifp, location, 0);
 	float salinity[NLEVITUS_MAX][180];
-	if ((status = fread(&salinity[0][0], 1, record_size, ifp)) == record_size) {
-		status = MB_SUCCESS;
-		error = MB_ERROR_NO_ERROR;
-	}
-	else {
+	if (fread(&salinity[0][0], 1, record_size, ifp) == record_size) {
 		status = MB_FAILURE;
 		error = MB_ERROR_EOF;
+		fprintf(stderr, "ERROR: EOF reading salinity\n");
 	}
 
 	fclose(ifp);
 
-/* byte swap the data if necessary */
 #ifdef BYTESWAPPED
 	for (int i = 0; i < NLEVITUS_MAX; i++) {
 		mb_swap_float(&temperature[i][ilat]);
 		mb_swap_float(&salinity[i][ilat]);
 	}
 #endif
+
 	/* calculate velocity from temperature and salinity */
 	int nvelocity = 0;
 	int nvelocity_tot = 0;
@@ -335,6 +332,7 @@ int main(int argc, char **argv) {
 		gethostname(host, 128);
 		fprintf(ofp, "# Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 	}
+
 	fprintf(ofp, "# Water velocity profile derived from Levitus\n");
 	fprintf(ofp, "# temperature and salinity database.  This profile\n");
 	fprintf(ofp, "# represents the annual average water velocity\n");
