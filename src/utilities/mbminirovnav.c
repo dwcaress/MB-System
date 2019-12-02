@@ -63,6 +63,23 @@ static const char usage_message[] =
     "\t--utm-zone=zone_id/NorS\n"
     "\t--verbose\n\n";
 
+// Return the number of lines that don't start with # and are at least 5 char long.
+
+// Rewinds the file before returning.
+int GetNumRecords(FILE *fp) {
+  int nrecord = 0;
+
+  char buffer[MB_PATH_MAXLINE];
+  char *result = NULL;
+  while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer)
+    if (buffer[0] != '#' && strlen(buffer) > 5)
+      nrecord++;
+
+  rewind(fp);
+
+  return nrecord;
+}
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
@@ -89,7 +106,6 @@ int main(int argc, char **argv) {
   mb_path input_rov_file = "";
   mb_path output_file = "";
 
-  /* process argument list */
   {
     static struct option options[] = {
       {"help", no_argument, NULL, 0},
@@ -303,32 +319,18 @@ int main(int argc, char **argv) {
   /* count the records */
   FILE *fp = fopen(input_nav_file, "r");
   if (fp != NULL) {
-    /* loop over reading the records */
-    int nrecord = 0;
-    char buffer[MB_PATH_MAXLINE];
-    char *result = NULL;
-    while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer)
-      if (buffer[0] != '#' && strlen(buffer) > 5)
-        nrecord++;
-
-    rewind(fp);
-
-    /* allocate memory */
-    int num_nav_alloc = 0;
-    if (num_nav_alloc < nrecord) {
-      const size_t size = nrecord * sizeof(double);
+    const int num_nav_alloc = GetNumRecords(fp);
+    if (num_nav_alloc) {
+      const size_t size = num_nav_alloc * sizeof(double);
       status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&nav_time_d, &error);
       if (status == MB_SUCCESS)
         status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&nav_lon, &error);
       if (status == MB_SUCCESS)
         status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&nav_lat, &error);
-      if (status == MB_SUCCESS)
-        num_nav_alloc = nrecord;
     }
 
     /* read the records */
     if (status == MB_SUCCESS) {
-      nrecord = 0;
       /* loop over reading the records */
       char buffer[MB_PATH_MAXLINE];
       char *result = NULL;
@@ -392,42 +394,34 @@ int main(int argc, char **argv) {
   /*-------------------------------------------------------------------*/
   /* load input ctd data */
 
-  int num_ctd_alloc = 0;
   int num_ctd = 0;
   double *ctd_time_d = NULL;
   double *ctd_depth = NULL;
-  double ctd_C, ctd_T, ctd_D, ctd_S;
-  double ctd_O2uM, ctd_O2raw, ctd_DGH_T, ctd_C2_T, ctd_C2_C;
 
-  /* count the records */
   error = MB_ERROR_NO_ERROR;
   if ((fp = fopen(input_ctd_file, "r")) != NULL) {
-    /* loop over reading the records */
-    int nrecord = 0;
-    char buffer[MB_PATH_MAXLINE];
-    char *result = NULL;
-    while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer)
-      if (buffer[0] != '#' && strlen(buffer) > 5)
-        nrecord++;
-
-    rewind(fp);
-
-    /* allocate memory if necessary */
-    if (num_ctd_alloc < nrecord) {
-      const size_t size = nrecord * sizeof(double);
+    const int num_ctd_alloc = GetNumRecords(fp);
+    if (num_ctd_alloc) {
+      const size_t size = num_ctd_alloc * sizeof(double);
       status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&ctd_time_d, &error);
       if (status == MB_SUCCESS)
         status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&ctd_depth, &error);
-      if (status == MB_SUCCESS)
-        num_ctd_alloc = nrecord;
     }
 
     /* loop over reading the records */
     if (status == MB_SUCCESS) {
-      nrecord = 0;
       char buffer[MB_PATH_MAXLINE];
       char *result = NULL;
       while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer) {
+        double ctd_C;
+        double ctd_D;
+        double ctd_S;
+        double ctd_T;
+        double ctd_O2uM;
+        double ctd_O2raw;
+        double ctd_DGH_T;
+        double ctd_C2_T;
+        double ctd_C2_C;
         const int nget = sscanf(buffer, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
                 &time_d, &ctd_C, &ctd_T, &ctd_D, &ctd_S,
                 &ctd_O2uM, &ctd_O2raw, &ctd_DGH_T, &ctd_C2_T, &ctd_C2_C);
@@ -447,7 +441,6 @@ int main(int argc, char **argv) {
       }
     }
 
-    /* close the file */
     fclose(fp);
   }
 
@@ -460,32 +453,18 @@ int main(int argc, char **argv) {
   /*-------------------------------------------------------------------*/
   /* load input rov data */
 
-  int num_rov_alloc = 0;
   int num_rov = 0;
   double *rov_time_d = NULL;
   double *rov_heading = NULL;
   double *rov_roll = NULL;
   double *rov_pitch = NULL;
-  double rov_x, rov_y, rov_z, rov_yaw, rov_magna_amps;
-  double rov_F1, rov_F2, rov_F3, rov_F4, rov_F5;
-  double rov_Heading, rov_Pitch, rov_Roll;
 
   /* count the records */
   error = MB_ERROR_NO_ERROR;
-  int nrecord = 0;
   if ((fp = fopen(input_rov_file, "r")) != NULL) {
-    /* loop over reading the records */
-    char buffer[MB_PATH_MAXLINE];
-    char *result = NULL;
-    while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer)
-      if (buffer[0] != '#' && strlen(buffer) > 5)
-        nrecord++;
-
-    rewind(fp);
-
-    /* allocate memory */
-    if (num_rov_alloc < nrecord) {
-      const size_t size = nrecord * sizeof(double);
+    const int num_rov_alloc = GetNumRecords(fp);
+    if (num_rov_alloc) {
+      const size_t size = num_rov_alloc * sizeof(double);
       status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&rov_time_d, &error);
       if (status == MB_SUCCESS)
         status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&rov_heading, &error);
@@ -493,17 +472,27 @@ int main(int argc, char **argv) {
         status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&rov_roll, &error);
       if (status == MB_SUCCESS)
         status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&rov_pitch, &error);
-      if (status == MB_SUCCESS)
-        num_rov_alloc = nrecord;
     }
 
     /* read the records */
     if (status == MB_SUCCESS) {
-      nrecord = 0;
       /* loop over reading the records */
       char buffer[MB_PATH_MAXLINE];
       char *result = NULL;
       while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer) {
+        double rov_x;
+        double rov_y;
+        double rov_z;
+        double rov_yaw;
+        double rov_magna_amps;
+        double rov_F1;
+        double rov_F2;
+        double rov_F3;
+        double rov_F4;
+        double rov_F5;
+        double rov_Heading;
+        double rov_Pitch;
+        double rov_Roll;
         const int nget = sscanf(buffer, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
                 &time_d, &rov_x, &rov_y, &rov_z, &rov_yaw, &rov_magna_amps,
                 &rov_F1, &rov_F2, &rov_F3, &rov_F4, &rov_F5,
@@ -526,7 +515,6 @@ int main(int argc, char **argv) {
       }
     }
 
-    /* close the file */
     fclose(fp);
   }
 
@@ -536,7 +524,6 @@ int main(int argc, char **argv) {
     }
   }
 
-  int num_dvl_alloc = 0;
   int num_dvl = 0;
   double *dvl_time_d = NULL;
   double *dvl_altitude = NULL;
@@ -546,27 +533,15 @@ int main(int argc, char **argv) {
   double *dvl_vz = NULL;
   double *dvl_status = NULL;
 
-  double dvl_Altitude, dvl_Stime, dvl_Vx, dvl_Vy, dvl_Vz, dvl_Status;
-
   /*-------------------------------------------------------------------*/
   /* load input dvl data */
 
   /* count the records */
   error = MB_ERROR_NO_ERROR;
   if ((fp = fopen(input_dvl_file, "r")) != NULL) {
-    /* loop over reading the records */
-    int nrecord = 0;
-    char buffer[MB_PATH_MAXLINE];
-    char *result = NULL;
-    while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer)
-      if (buffer[0] != '#' && strlen(buffer) > 5)
-        nrecord++;
-
-    rewind(fp);
-
-    /* allocate memory if necessary */
-    if (status == MB_SUCCESS && num_dvl_alloc < nrecord) {
-      const size_t size = nrecord * sizeof(double);
+    const int num_dvl_alloc = GetNumRecords(fp);
+    if (status == MB_SUCCESS && num_dvl_alloc) {
+      const size_t size = num_dvl_alloc * sizeof(double);
       status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&dvl_time_d, &error);
       if (status == MB_SUCCESS)
         status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&dvl_altitude, &error);
@@ -580,17 +555,20 @@ int main(int argc, char **argv) {
         status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&dvl_vz, &error);
       if (status == MB_SUCCESS)
         status &= mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&dvl_status, &error);
-      if (status == MB_SUCCESS)
-        num_dvl_alloc = nrecord;
     }
 
     /* read the records */
     if (status == MB_SUCCESS) {
-      nrecord = 0;
       /* loop over reading the records - handle the different formats */
       char buffer[MB_PATH_MAXLINE];
       char *result = NULL;
       while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer) {
+        double dvl_Altitude;
+        double dvl_Stime;
+        double dvl_Vx;
+        double dvl_Vy;
+        double dvl_Vz;
+        double dvl_Status;
         const int nget = sscanf(buffer, "%lf,%lf,%lf,%lf,%lf,%lf,%lf",
                 &time_d, &dvl_Altitude, &dvl_Stime, &dvl_Vx, &dvl_Vy, &dvl_Vz, &dvl_Status);
         if (nget == 7) {
@@ -613,7 +591,6 @@ int main(int argc, char **argv) {
         }
       }
 
-      /* close the file */
       fclose(fp);
     }
   }
@@ -652,8 +629,6 @@ int main(int argc, char **argv) {
     else
       sprintf(projection_id, "UTM%2.2dS", utm_zone);
   }
-  void *pjptr = NULL;
-  /* int proj_status = */ mb_proj_init(verbose, projection_id, &(pjptr), &error);
 
   int jnav = 0;
   int jctd = 0;
@@ -666,12 +641,12 @@ int main(int argc, char **argv) {
   int num_heading_valid = 0;
   int num_attitude_valid = 0;
   int num_altitude_valid = 0;
+
   if (status == MB_SUCCESS && num_nav > 0 && num_rov > 0) {
     if ((fp = fopen(output_file, "w")) == NULL) {
       error = MB_ERROR_OPEN_FAIL;
       status = MB_FAILURE;
     } else {
-      int interp_status = MB_SUCCESS;
       int interp_error = MB_ERROR_NO_ERROR;
 
       bool onav_position_flag = false;
@@ -693,6 +668,9 @@ int main(int argc, char **argv) {
       int onav_time_i[7];
       int onav_time_j[5];
 
+      void *pjptr = NULL;
+      /* int proj_status = */ mb_proj_init(verbose, projection_id, &(pjptr), &error);
+
       /* loop over defined intervals (1 second by default) from start time to end time */
       for (int ioutput = 0; ioutput < num_output; ioutput++) {
         /* set the output time */
@@ -703,9 +681,10 @@ int main(int argc, char **argv) {
         mb_get_jtime(verbose, onav_time_i, onav_time_j);
         const int onav_jday = onav_time_j[1];
 
+        // int interp_status = MB_SUCCESS;
         if (num_nav > 0) {
-          interp_status &= mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_lon - 1, num_nav, onav_time_d, &onav_lon, &jnav, &interp_error);
-          interp_status &= mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_lat - 1, num_nav, onav_time_d, &onav_lat, &jnav, &interp_error);
+          /* interp_status &= */ mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_lon - 1, num_nav, onav_time_d, &onav_lon, &jnav, &interp_error);
+          /* interp_status &= */ mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_lat - 1, num_nav, onav_time_d, &onav_lat, &jnav, &interp_error);
 
           // if not interpolating navigation, then actually use the most recent
           // navigation values even if those are repeated, as identified by the
@@ -721,25 +700,25 @@ int main(int argc, char **argv) {
           }
         }
         if (num_ctd > 0) {
-          interp_status = mb_linear_interp(verbose, ctd_time_d - 1, ctd_depth - 1, num_ctd, onav_time_d, &onav_depth, &jctd, &interp_error);
+          /* interp_status &= */ mb_linear_interp(verbose, ctd_time_d - 1, ctd_depth - 1, num_ctd, onav_time_d, &onav_depth, &jctd, &interp_error);
           if (onav_depth != 0.0) {
             onav_pressure_flag = true;
             onav_pressure = onav_depth * (1.0052405 * (1 + 5.28E-3 * sin(DTR * onav_lat) * sin(DTR * onav_lat)));
           }
         }
         if (num_dvl > 0) {
-          interp_status = mb_linear_interp(verbose, dvl_time_d - 1, dvl_altitude - 1, num_dvl, onav_time_d, &onav_altitude, &jdvl, &interp_error);
+          /* interp_status &= */ mb_linear_interp(verbose, dvl_time_d - 1, dvl_altitude - 1, num_dvl, onav_time_d, &onav_altitude, &jdvl, &interp_error);
           if (onav_altitude != 0.0) {
             onav_altitude_flag = true;
           }
         }
         if (num_rov > 0) {
-          interp_status = mb_linear_interp_heading(verbose, rov_time_d - 1, rov_heading - 1, num_rov, onav_time_d, &onav_heading, &jrov, &interp_error);
+          /* interp_status &= */ mb_linear_interp_heading(verbose, rov_time_d - 1, rov_heading - 1, num_rov, onav_time_d, &onav_heading, &jrov, &interp_error);
           if (onav_heading != 0.0) {
             onav_heading_flag = true;
           }
-          interp_status = mb_linear_interp(verbose, rov_time_d - 1, rov_roll - 1, num_rov, onav_time_d, &onav_roll, &jrov, &interp_error);
-          interp_status = mb_linear_interp(verbose, rov_time_d - 1, rov_pitch - 1, num_rov, onav_time_d, &onav_pitch, &jrov, &interp_error);
+          /* interp_status &= */ mb_linear_interp(verbose, rov_time_d - 1, rov_roll - 1, num_rov, onav_time_d, &onav_roll, &jrov, &interp_error);
+          /* interp_status &= */ mb_linear_interp(verbose, rov_time_d - 1, rov_pitch - 1, num_rov, onav_time_d, &onav_pitch, &jrov, &interp_error);
           if (onav_roll != 0.0 && onav_pitch != 0.0) {
             onav_attitude_flag = true;
           }
@@ -784,6 +763,7 @@ int main(int argc, char **argv) {
       }
 
       fclose(fp);
+      /* int proj_status = */ mb_proj_free(verbose, &(pjptr), &error);
     }
   }
 
@@ -804,7 +784,6 @@ int main(int argc, char **argv) {
   }
 
 
-  /* int proj_status = */ mb_proj_free(verbose, &(pjptr), &error);
   status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_time_d, &error);
   status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lon, &error);
   status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lat, &error);
