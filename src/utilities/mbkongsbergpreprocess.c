@@ -1,4 +1,3 @@
-
 /*--------------------------------------------------------------------
  *    The MB-system:	mbkongsbergpreprocess.c	1/1/2012
  *
@@ -42,10 +41,10 @@
 
 const int MBKONSBERGPREPROCESS_ALLOC_CHUNK = 1000;
 
-typedef enum {
-    MBKONSBERGPREPROCESS_PROCESS = 1,
-    MBKONSBERGPREPROCESS_TIMESTAMPLIST = 2,
-} konsberg_mode_t;
+// typedef enum {
+//     MBKONSBERGPREPROCESS_PROCESS = 1,
+//     MBKONSBERGPREPROCESS_TIMESTAMPLIST = 2,
+// } konsberg_mode_t;
 
 typedef enum {
     MBKONSBERGPREPROCESS_TIMELAG_OFF = 0,
@@ -142,6 +141,9 @@ int main(int argc, char **argv) {
 	timelag_t timelagmode = MBKONSBERGPREPROCESS_TIMELAG_OFF;
 	double timelagconstant = 0.0;
 	watercolumn_t watercolumnmode = MBKONSBERGPREPROCESS_WATERCOLUMN_IGNORE;
+
+	// TODO(schwehr): Should this be a command line flag?
+	// const konsberg_mode_t mode = MBKONSBERGPREPROCESS_PROCESS;
 
 	{
 		bool errflg = false;
@@ -400,53 +402,11 @@ int main(int argc, char **argv) {
 	double *ssalongtrack = NULL;
 	char comment[MB_COMMENT_MAXLINE];
 
-	/* program mode */
-	konsberg_mode_t mode = MBKONSBERGPREPROCESS_PROCESS;
-
-	/* counting variables file */
-	int nrec_0x30_pu_id = 0;
-	int nrec_0x31_pu_status = 0;
-	int nrec_0x32_pu_bist = 0;
-	int nrec_0x33_parameter_extra = 0;
-	int nrec_0x41_attitude = 0;
-	int nrec_0x43_clock = 0;
-	int nrec_0x44_bathymetry = 0;
-	int nrec_0x45_singlebeam = 0;
-	int nrec_0x46_rawbeamF = 0;
-	int nrec_0x47_surfacesoundspeed2 = 0;
-	int nrec_0x48_heading = 0;
-	int nrec_0x49_parameter_start = 0;
-	int nrec_0x4A_tilt = 0;
-	int nrec_0x4B_echogram = 0;
-	int nrec_0x4E_rawbeamN = 0;
-	int nrec_0x4F_quality = 0;
-	int nrec_0x50_pos = 0;
-	int nrec_0x52_runtime = 0;
-	int nrec_0x53_sidescan = 0;
-	int nrec_0x54_tide = 0;
-	int nrec_0x55_svp2 = 0;
-	int nrec_0x56_svp = 0;
-	int nrec_0x57_surfacesoundspeed = 0;
-	int nrec_0x58_bathymetry2 = 0;
-	int nrec_0x59_sidescan2 = 0;
-	int nrec_0x66_rawbeamf = 0;
-	int nrec_0x68_height = 0;
-	int nrec_0x69_parameter_stop = 0;
-	int nrec_0x6B_water_column = 0;
-	int nrec_0x6E_network_attitude = 0;
-	int nrec_0x70_parameter = 0;
-	int nrec_0x73_surface_sound_speed = 0;
-	int nrec_0xE1_bathymetry_mbari57 = 0;
-	int nrec_0xE2_sidescan_mbari57 = 0;
-	int nrec_0xE3_bathymetry_mbari59 = 0;
-	int nrec_0xE4_sidescan_mbari59 = 0;
-	int nrec_0xE5_bathymetry_mbari59 = 0;
-
 	/* counting variables total */
 	int nrec_0x30_pu_id_tot = 0;
 	int nrec_0x31_pu_status_tot = 0;
 	int nrec_0x32_pu_bist_tot = 0;
-	int nrec_0x33_parameter_extra_tot = 0;
+	// int nrec_0x33_parameter_extra_tot = 0;
 	int nrec_0x41_attitude_tot = 0;
 	int nrec_0x43_clock_tot = 0;
 	int nrec_0x44_bathymetry_tot = 0;
@@ -529,35 +489,22 @@ int main(int argc, char **argv) {
 	double receive_heading, receive_heave, receive_roll, receive_pitch;
 
 	/* transmit and receive array offsets */
-	double tx_x, tx_y, tx_z, tx_h, tx_r, tx_p;
+	// double tx_x, tx_y, tx_z, tx_h, tx_r, tx_p;
 
 	/* variables for beam angle calculation */
 	mb_3D_orientation tx_align;
 	mb_3D_orientation tx_orientation;
-	double tx_steer;
 	mb_3D_orientation rx_align;
 	mb_3D_orientation rx_orientation;
-	double rx_steer;
-	double reference_heading;
 	double beamAzimuth;
 	double beamDepression;
-	double *pixel_size, *swath_width;
-	mb_u_char detection_mask;
 
 	int jtimelag = 0;
 	int jnav = 0;
 	int jheading = 0;
 	int jattitude = 0;
 	int jsonardepth = 0;
-	int nhalffilter;
-	double sonardepth_filterweight;
-	double dtime, dtol, weight;
-	double factor;
 	double *median = NULL;
-	int nmedian = 0;
-	int nmedian_alloc = 0;
-
-	// int j1, j2;
 
 	/* read sonardepth data from file if specified */
 	if (sonardepthdata) {
@@ -769,43 +716,43 @@ int main(int argc, char **argv) {
 		}
 
 		/* reset file record counters */
-		nrec_0x30_pu_id = 0;
-		nrec_0x31_pu_status = 0;
-		nrec_0x32_pu_bist = 0;
-		nrec_0x33_parameter_extra = 0;
-		nrec_0x41_attitude = 0;
-		nrec_0x43_clock = 0;
-		nrec_0x44_bathymetry = 0;
-		nrec_0x45_singlebeam = 0;
-		nrec_0x46_rawbeamF = 0;
-		nrec_0x47_surfacesoundspeed2 = 0;
-		nrec_0x48_heading = 0;
-		nrec_0x49_parameter_start = 0;
-		nrec_0x4A_tilt = 0;
-		nrec_0x4B_echogram = 0;
-		nrec_0x4E_rawbeamN = 0;
-		nrec_0x4F_quality = 0;
-		nrec_0x50_pos = 0;
-		nrec_0x52_runtime = 0;
-		nrec_0x53_sidescan = 0;
-		nrec_0x54_tide = 0;
-		nrec_0x55_svp2 = 0;
-		nrec_0x56_svp = 0;
-		nrec_0x57_surfacesoundspeed = 0;
-		nrec_0x58_bathymetry2 = 0;
-		nrec_0x59_sidescan2 = 0;
-		nrec_0x66_rawbeamf = 0;
-		nrec_0x68_height = 0;
-		nrec_0x69_parameter_stop = 0;
-		nrec_0x6B_water_column = 0;
-		nrec_0x6E_network_attitude = 0;
-		nrec_0x70_parameter = 0;
-		nrec_0x73_surface_sound_speed = 0;
-		nrec_0xE1_bathymetry_mbari57 = 0;
-		nrec_0xE2_sidescan_mbari57 = 0;
-		nrec_0xE3_bathymetry_mbari59 = 0;
-		nrec_0xE4_sidescan_mbari59 = 0;
-		nrec_0xE5_bathymetry_mbari59 = 0;
+		int nrec_0x30_pu_id = 0;
+		int nrec_0x31_pu_status = 0;
+		int nrec_0x32_pu_bist = 0;
+		// int nrec_0x33_parameter_extra = 0;
+		int nrec_0x41_attitude = 0;
+		int nrec_0x43_clock = 0;
+		int nrec_0x44_bathymetry = 0;
+		int nrec_0x45_singlebeam = 0;
+		int nrec_0x46_rawbeamF = 0;
+		int nrec_0x47_surfacesoundspeed2 = 0;
+		int nrec_0x48_heading = 0;
+		int nrec_0x49_parameter_start = 0;
+		int nrec_0x4A_tilt = 0;
+		int nrec_0x4B_echogram = 0;
+		int nrec_0x4E_rawbeamN = 0;
+		int nrec_0x4F_quality = 0;
+		int nrec_0x50_pos = 0;
+		int nrec_0x52_runtime = 0;
+		int nrec_0x53_sidescan = 0;
+		int nrec_0x54_tide = 0;
+		int nrec_0x55_svp2 = 0;
+		int nrec_0x56_svp = 0;
+		int nrec_0x57_surfacesoundspeed = 0;
+		int nrec_0x58_bathymetry2 = 0;
+		int nrec_0x59_sidescan2 = 0;
+		int nrec_0x66_rawbeamf = 0;
+		int nrec_0x68_height = 0;
+		int nrec_0x69_parameter_stop = 0;
+		int nrec_0x6B_water_column = 0;
+		int nrec_0x6E_network_attitude = 0;
+		int nrec_0x70_parameter = 0;
+		int nrec_0x73_surface_sound_speed = 0;
+		int nrec_0xE1_bathymetry_mbari57 = 0;
+		int nrec_0xE2_sidescan_mbari57 = 0;
+		int nrec_0xE3_bathymetry_mbari59 = 0;
+		int nrec_0xE4_sidescan_mbari59 = 0;
+		int nrec_0xE5_bathymetry_mbari59 = 0;
 
 		/* read and print data */
 		while (error <= MB_ERROR_NO_ERROR) {
@@ -966,9 +913,9 @@ int main(int argc, char **argv) {
 				time_i[6] = (istore->pos_msec % 1000) * 1000;
 				mb_get_time(verbose, time_i, &time_d);
 
-				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-					fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x50_pos:%d\n", time_i[0],
-					        time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], nrec_0x50_pos);
+				// if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+				// 	fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x50_pos:%d\n", time_i[0],
+				// 	        time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], nrec_0x50_pos);
 
 				/* deal with desired navigation source and valid positions */
 				if (istore->kind == nav_source && istore->pos_longitude != EM3_INVALID_INT &&
@@ -1064,9 +1011,9 @@ int main(int argc, char **argv) {
 				time_i[6] = (istore->hgt_msec % 1000) * 1000;
 				mb_get_time(verbose, time_i, &time_d);
 
-				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-					fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x68_height:%d\n", time_i[0],
-					        time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], nrec_0x68_height);
+				// if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+				// 	fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x68_height:%d\n", time_i[0],
+				// 	        time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], nrec_0x68_height);
 
 				/* allocate memory for sonar depth arrays if needed */
 				if (ndat_sonardepth + 1 >= ndat_sonardepth_alloc) {
@@ -1122,9 +1069,9 @@ int main(int argc, char **argv) {
 				time_i[6] = (attitude->att_msec % 1000) * 1000;
 				mb_get_time(verbose, time_i, &time_d);
 
-				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-					fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x41_attitude:%d\n", time_i[0],
-					        time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], nrec_0x41_attitude);
+				// if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+				// 	fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x41_attitude:%d\n", time_i[0],
+				// 	        time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], nrec_0x41_attitude);
 
 				/* allocate memory for attitude arrays if needed */
 				if (ndat_rph + attitude->att_ndata >= ndat_rph_alloc) {
@@ -1185,10 +1132,10 @@ int main(int argc, char **argv) {
 				time_i[6] = (netattitude->nat_msec % 1000) * 1000;
 				mb_get_time(verbose, time_i, &time_d);
 
-				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-					fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x6E_network_attitude:%d\n",
-					        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
-					        nrec_0x6E_network_attitude);
+				// if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+				// 	fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x6E_network_attitude:%d\n",
+				// 	        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+				// 	        nrec_0x6E_network_attitude);
 
 				/* allocate memory for attitude arrays if needed */
 				if (ndat_rph + netattitude->nat_ndata >= ndat_rph_alloc) {
@@ -1249,9 +1196,9 @@ int main(int argc, char **argv) {
 				time_i[6] = (headingr->hed_msec % 1000) * 1000;
 				mb_get_time(verbose, time_i, &time_d);
 
-				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-					fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x48_heading:%d\n", time_i[0],
-					        time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], nrec_0x48_heading);
+				// if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+				// 	fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x48_heading:%d\n", time_i[0],
+				// 	        time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], nrec_0x48_heading);
 
 				/* allocate memory for heading arrays if needed */
 				if (ndat_heading + headingr->hed_ndata >= ndat_heading_alloc) {
@@ -1306,9 +1253,9 @@ int main(int argc, char **argv) {
 				time_i[6] = (ping->png_msec % 1000) * 1000;
 				mb_get_time(verbose, time_i, &time_d);
 
-				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-					fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", time_i[0], time_i[1], time_i[2],
-					        time_i[3], time_i[4], time_i[5], time_i[6]);
+				// if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+				// 	fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", time_i[0], time_i[1], time_i[2],
+				// 	        time_i[3], time_i[4], time_i[5], time_i[6]);
 
 				/* allocate memory for heading arrays if needed */
 				if (ndat_heading + 1 >= ndat_heading_alloc) {
@@ -1361,9 +1308,9 @@ int main(int argc, char **argv) {
 				time_i[6] = (ping->png_msec % 1000) * 1000;
 				mb_get_time(verbose, time_i, &time_d);
 
-				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-					fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", time_i[0], time_i[1], time_i[2],
-					        time_i[3], time_i[4], time_i[5], time_i[6]);
+				// if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+				// 	fprintf(stderr, "Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", time_i[0], time_i[1], time_i[2],
+				// 	        time_i[3], time_i[4], time_i[5], time_i[6]);
 
 				/* allocate memory for sonar depth arrays if needed */
 				if (ndat_sonardepth + 1 >= ndat_sonardepth_alloc) {
@@ -1421,7 +1368,7 @@ int main(int argc, char **argv) {
 			fprintf(stdout, "     nrec_0x30_pu_id:         %d\n", nrec_0x30_pu_id);
 			fprintf(stdout, "     nrec_0x31_pu_status:          %d\n", nrec_0x31_pu_status);
 			fprintf(stdout, "     nrec_0x32_pu_bist:           %d\n", nrec_0x32_pu_bist);
-			fprintf(stdout, "     nrec_0x33_parameter_extra:        %d\n", nrec_0x33_parameter_extra);
+			// fprintf(stdout, "     nrec_0x33_parameter_extra:        %d\n", nrec_0x33_parameter_extra);
 			fprintf(stdout, "     nrec_0x41_attitude:               %d\n", nrec_0x41_attitude);
 			fprintf(stdout, "     nrec_0x43_clock:                  %d\n", nrec_0x43_clock);
 			fprintf(stdout, "     nrec_0x44_bathymetry:             %d\n", nrec_0x44_bathymetry);
@@ -1459,7 +1406,7 @@ int main(int argc, char **argv) {
 			nrec_0x30_pu_id_tot += nrec_0x30_pu_id;
 			nrec_0x31_pu_status_tot += nrec_0x31_pu_status;
 			nrec_0x32_pu_bist_tot += nrec_0x32_pu_bist;
-			nrec_0x33_parameter_extra_tot += nrec_0x33_parameter_extra;
+			// nrec_0x33_parameter_extra_tot += nrec_0x33_parameter_extra;
 			nrec_0x41_attitude_tot += nrec_0x41_attitude;
 			nrec_0x43_clock_tot += nrec_0x43_clock;
 			nrec_0x44_bathymetry_tot += nrec_0x44_bathymetry;
@@ -1516,19 +1463,19 @@ int main(int argc, char **argv) {
 		/* apply filtering to sonardepth data
 		    read from asynchronous records in 7k files */
 		if (ndat_sonardepth > 1) {
-			dtime = (dat_sonardepth_time_d[ndat_sonardepth - 1] - dat_sonardepth_time_d[0]) / ndat_sonardepth;
+			const double dtime = (dat_sonardepth_time_d[ndat_sonardepth - 1] - dat_sonardepth_time_d[0]) / ndat_sonardepth;
 			if (sonardepthfilter == MBKONSBERGPREPROCESS_FILTER_MEDIAN) {
 				fprintf(stderr, "Applying running median filtering to %d sonardepth data filter length %f seconds\n",
 				        ndat_sonardepth, sonardepthfilterlength);
-				nhalffilter = (int)(0.5 * sonardepthfilterlength / dtime);
-				nmedian_alloc = 2 * nhalffilter + 1;
+				const int nhalffilter = (int)(0.5 * sonardepthfilterlength / dtime);
+				const int nmedian_alloc = 2 * nhalffilter + 1;
 				median = NULL;
 				/* status = */ mb_reallocd(verbose, __FILE__, __LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
 				for (int i = 0; i < ndat_sonardepth; i++) {
 					dat_sonardepth_sonardepthfilter[i] = dat_sonardepth_sonardepth[i];
 					const int j1 = MAX(i - nhalffilter, 0);
 					const int j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
-					nmedian = 0;
+					int nmedian = 0;
 					for (int j = j1; j <= j2; j++) {
 						median[nmedian] = dat_sonardepth_sonardepth[j];
 						nmedian++;
@@ -1540,21 +1487,21 @@ int main(int argc, char **argv) {
 				}
 				if (median != NULL) {
 					/* status = */ mb_freed(verbose, __FILE__, __LINE__, (void **)&median, &error);
-					nmedian_alloc = 0;
+					// nmedian_alloc = 0;
 				}
 			}
 			else {
 				fprintf(stderr, "Applying running Gaussian mean filtering to %d sonardepth data filter length %f seconds\n",
 				        ndat_sonardepth, sonardepthfilterlength);
-				nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+				const int nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
 				for (int i = 0; i < ndat_sonardepth; i++) {
 					dat_sonardepth_sonardepthfilter[i] = 0.0;
-					sonardepth_filterweight = 0.0;
+					double sonardepth_filterweight = 0.0;
 					const int j1 = MAX(i - nhalffilter, 0);
 					const int j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
 					for (int j = j1; j <= j2; j++) {
-						dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
-						weight = exp(-dtol * dtol);
+						const double dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
+						const double weight = exp(-dtol * dtol);
 						dat_sonardepth_sonardepthfilter[i] += weight * dat_sonardepth_sonardepth[j];
 						sonardepth_filterweight += weight;
 					}
@@ -1565,10 +1512,9 @@ int main(int argc, char **argv) {
 				}
 			}
 			for (int i = 0; i < ndat_sonardepth; i++) {
-				if (dat_sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
-					factor = 1.0;
-				else
-					factor = exp(-(dat_sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth) / (sonardepthfilterdepth));
+				const double factor = dat_sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth
+					? 1.0
+					: exp(-(dat_sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth) / (sonardepthfilterdepth));
 				dat_sonardepth_sonardepth[i] =
 				    (1.0 - factor) * dat_sonardepth_sonardepth[i] + factor * dat_sonardepth_sonardepthfilter[i];
 			}
@@ -1576,19 +1522,19 @@ int main(int argc, char **argv) {
 
 		/* filter sonardepth data from separate file */
 		if (nsonardepth > 1) {
-			dtime = (sonardepth_time_d[nsonardepth - 1] - sonardepth_time_d[0]) / nsonardepth;
+			const double dtime = (sonardepth_time_d[nsonardepth - 1] - sonardepth_time_d[0]) / nsonardepth;
 			if (sonardepthfilter == MBKONSBERGPREPROCESS_FILTER_MEDIAN) {
 				fprintf(stderr, "Applying running median filtering to %d sonardepth nav data filter length %f seconds\n",
 				        nsonardepth, sonardepthfilterlength);
-				nhalffilter = (int)(0.5 * sonardepthfilterlength / dtime);
-				nmedian_alloc = 2 * nhalffilter + 1;
+				const int nhalffilter = (int)(0.5 * sonardepthfilterlength / dtime);
+				const int nmedian_alloc = 2 * nhalffilter + 1;
 				median = NULL;
 				status &= mb_reallocd(verbose, __FILE__, __LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
 				for (int i = 0; i < nsonardepth; i++) {
 					sonardepth_sonardepthfilter[i] = sonardepth_sonardepth[i];
 					const int j1 = MAX(i - nhalffilter, 0);
 					const int j2 = MIN(i + nhalffilter, nsonardepth - 1);
-					nmedian = 0;
+					int nmedian = 0;
 					for (int j = j1; j <= j2; j++) {
 						median[nmedian] = dat_sonardepth_sonardepth[j];
 						nmedian++;
@@ -1600,21 +1546,21 @@ int main(int argc, char **argv) {
 				}
 				if (median != NULL) {
 					status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&median, &error);
-					nmedian_alloc = 0;
+					// nmedian_alloc = 0;
 				}
 			}
 			else {
 				fprintf(stderr, "Applying running Gaussian mean filtering to %d sonardepth nav data filter length %f seconds\n",
 				        nsonardepth, sonardepthfilterlength);
-				nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+				const int nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
 				for (int i = 0; i < nsonardepth; i++) {
 					sonardepth_sonardepthfilter[i] = 0.0;
-					sonardepth_filterweight = 0.0;
+					double sonardepth_filterweight = 0.0;
 					const int j1 = MAX(i - nhalffilter, 0);
 					const int j2 = MIN(i + nhalffilter, nsonardepth - 1);
 					for (int j = j1; j <= j2; j++) {
-						dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
-						weight = exp(-dtol * dtol);
+						const double dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
+						const double weight = exp(-dtol * dtol);
 						sonardepth_sonardepthfilter[i] += weight * sonardepth_sonardepth[j];
 						sonardepth_filterweight += weight;
 					}
@@ -1623,17 +1569,16 @@ int main(int argc, char **argv) {
 				}
 			}
 			for (int i = 0; i < nsonardepth; i++) {
-				if (sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
-					factor = 1.0;
-				else
-					factor = exp(-(sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth) / (sonardepthfilterdepth));
+				const double factor = sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth
+					? 1.0
+					: exp(-(sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth) / (sonardepthfilterdepth));
 				sonardepth_sonardepth[i] = (1.0 - factor) * sonardepth_sonardepth[i] + factor * sonardepth_sonardepthfilter[i];
 			}
 		}
 	}
 
 	/* output auv sonardepth data */
-	if (nsonardepth > 0 && (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)) {
+	if (nsonardepth > 0 && (verbose > 0 /* || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST */)) {
 		fprintf(stdout, "\nTotal auv sonardepth data read: %d\n", nsonardepth);
 		for (int i = 0; i < nsonardepth; i++) {
 			fprintf(stdout, "  SONARDEPTH: %12d %8.3f %8.3f\n", i, sonardepth_time_d[i], sonardepth_sonardepth[i]);
@@ -1641,39 +1586,39 @@ int main(int argc, char **argv) {
 	}
 
 	/* output asynchronous navigation and attitude data */
-	if (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+	if (verbose > 0 /* || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST */) {
 		fprintf(stdout, "\nTotal navigation data read: %d\n", ndat_nav);
-	if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-		for (int i = 0; i < ndat_nav; i++) {
-			fprintf(stdout, "  NAV: %5d %17.6f %11.6f %10.6f\n", i, dat_nav_time_d[i], dat_nav_lon[i], dat_nav_lat[i]);
-		}
-	if (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+	// if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+	// 	for (int i = 0; i < ndat_nav; i++) {
+	// 		fprintf(stdout, "  NAV: %5d %17.6f %11.6f %10.6f\n", i, dat_nav_time_d[i], dat_nav_lon[i], dat_nav_lat[i]);
+	// 	}
+	// if (verbose > 0 /* || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST */)
 		fprintf(stdout, "\nTotal sonardepth data read: %d\n", ndat_sonardepth);
-	if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-		for (int i = 0; i < ndat_sonardepth; i++) {
-			fprintf(stdout, "  DEP: %5d %17.6f %8.3f\n", i, dat_sonardepth_time_d[i], dat_sonardepth_sonardepth[i]);
-		}
-	if (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+	// if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+	// 	for (int i = 0; i < ndat_sonardepth; i++) {
+	// 		fprintf(stdout, "  DEP: %5d %17.6f %8.3f\n", i, dat_sonardepth_time_d[i], dat_sonardepth_sonardepth[i]);
+	// 	}
+	// if (verbose > 0 /* || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST */)
 		fprintf(stdout, "\nTotal heading data read: %d\n", ndat_heading);
-	if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-		for (int i = 0; i < ndat_heading; i++) {
-			fprintf(stdout, "  HDG: %5d %17.6f %8.3f\n", i, dat_heading_time_d[i], dat_heading_heading[i]);
-		}
-	if (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+	// if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+	// 	for (int i = 0; i < ndat_heading; i++) {
+	// 		fprintf(stdout, "  HDG: %5d %17.6f %8.3f\n", i, dat_heading_time_d[i], dat_heading_heading[i]);
+	// 	}
+	// if (verbose > 0 /* || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST */)
 		fprintf(stdout, "\nTotal attitude data read: %d\n", ndat_rph);
-	if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-		for (int i = 0; i < ndat_rph; i++) {
-			fprintf(stdout, "  HCP: %5d %17.6f %8.3f %8.3f %8.3f\n", i, dat_rph_time_d[i], dat_rph_roll[i], dat_rph_pitch[i],
-			        dat_rph_heave[i]);
-		}
+	// if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+	// 	for (int i = 0; i < ndat_rph; i++) {
+	// 		fprintf(stdout, "  HCP: %5d %17.6f %8.3f %8.3f %8.3f\n", i, dat_rph_time_d[i], dat_rph_roll[i], dat_rph_pitch[i],
+	// 		        dat_rph_heave[i]);
+	// 	}
+	}
 
-	/* output counts */
 	if (output_counts) {
 		fprintf(stdout, "\nTotal data records read from: %s\n", read_file);
 		fprintf(stdout, "     nrec_0x30_pu_id_tot:     %d\n", nrec_0x30_pu_id_tot);
 		fprintf(stdout, "     nrec_0x31_pu_status_tot:      %d\n", nrec_0x31_pu_status_tot);
 		fprintf(stdout, "     nrec_0x32_pu_bist_tot:       %d\n", nrec_0x32_pu_bist_tot);
-		fprintf(stdout, "     nrec_0x33_parameter_extra_tot:    %d\n", nrec_0x33_parameter_extra_tot);
+		// fprintf(stdout, "     nrec_0x33_parameter_extra_tot:    %d\n", nrec_0x33_parameter_extra_tot);
 		fprintf(stdout, "     nrec_0x41_attitude_tot:           %d\n", nrec_0x41_attitude_tot);
 		fprintf(stdout, "     nrec_0x43_clock_tot:              %d\n", nrec_0x43_clock_tot);
 		fprintf(stdout, "     nrec_0x44_bathymetry_tot:         %d\n", nrec_0x44_bathymetry_tot);
@@ -1711,7 +1656,7 @@ int main(int argc, char **argv) {
 	nrec_0x30_pu_id_tot = 0;
 	nrec_0x31_pu_status_tot = 0;
 	nrec_0x32_pu_bist_tot = 0;
-	nrec_0x33_parameter_extra_tot = 0;
+	// nrec_0x33_parameter_extra_tot = 0;
 	nrec_0x41_attitude_tot = 0;
 	nrec_0x43_clock_tot = 0;
 	nrec_0x44_bathymetry_tot = 0;
@@ -1749,9 +1694,8 @@ int main(int argc, char **argv) {
 	/* now read the data files again, this time interpolating nav and attitude
 	    into the multibeam records and fixing other problems found in the
 	    data */
-	if (mode >= MBKONSBERGPREPROCESS_PROCESS) {
-
-		/* open file list */
+	/* if (mode >= MBKONSBERGPREPROCESS_PROCESS) */
+	{
 		if (read_datalist) {
 			const int look_processed = MB_DATALIST_LOOK_UNSET;
 			if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
@@ -1881,43 +1825,43 @@ int main(int argc, char **argv) {
 			}
 
 			/* reset file record counters */
-			nrec_0x30_pu_id = 0;
-			nrec_0x31_pu_status = 0;
-			nrec_0x32_pu_bist = 0;
-			nrec_0x33_parameter_extra = 0;
-			nrec_0x41_attitude = 0;
-			nrec_0x43_clock = 0;
-			nrec_0x44_bathymetry = 0;
-			nrec_0x45_singlebeam = 0;
-			nrec_0x46_rawbeamF = 0;
-			nrec_0x47_surfacesoundspeed2 = 0;
-			nrec_0x48_heading = 0;
-			nrec_0x49_parameter_start = 0;
-			nrec_0x4A_tilt = 0;
-			nrec_0x4B_echogram = 0;
-			nrec_0x4E_rawbeamN = 0;
-			nrec_0x4F_quality = 0;
-			nrec_0x50_pos = 0;
-			nrec_0x52_runtime = 0;
-			nrec_0x53_sidescan = 0;
-			nrec_0x54_tide = 0;
-			nrec_0x55_svp2 = 0;
-			nrec_0x56_svp = 0;
-			nrec_0x57_surfacesoundspeed = 0;
-			nrec_0x58_bathymetry2 = 0;
-			nrec_0x59_sidescan2 = 0;
-			nrec_0x66_rawbeamf = 0;
-			nrec_0x68_height = 0;
-			nrec_0x69_parameter_stop = 0;
-			nrec_0x6B_water_column = 0;
-			nrec_0x6E_network_attitude = 0;
-			nrec_0x70_parameter = 0;
-			nrec_0x73_surface_sound_speed = 0;
-			nrec_0xE1_bathymetry_mbari57 = 0;
-			nrec_0xE2_sidescan_mbari57 = 0;
-			nrec_0xE3_bathymetry_mbari59 = 0;
-			nrec_0xE4_sidescan_mbari59 = 0;
-			nrec_0xE5_bathymetry_mbari59 = 0;
+			int nrec_0x30_pu_id = 0;
+			int nrec_0x31_pu_status = 0;
+			int nrec_0x32_pu_bist = 0;
+			// int nrec_0x33_parameter_extra = 0;
+			int nrec_0x41_attitude = 0;
+			int nrec_0x43_clock = 0;
+			int nrec_0x44_bathymetry = 0;
+			int nrec_0x45_singlebeam = 0;
+			int nrec_0x46_rawbeamF = 0;
+			int nrec_0x47_surfacesoundspeed2 = 0;
+			int nrec_0x48_heading = 0;
+			int nrec_0x49_parameter_start = 0;
+			int nrec_0x4A_tilt = 0;
+			int nrec_0x4B_echogram = 0;
+			int nrec_0x4E_rawbeamN = 0;
+			int nrec_0x4F_quality = 0;
+			int nrec_0x50_pos = 0;
+			int nrec_0x52_runtime = 0;
+			int nrec_0x53_sidescan = 0;
+			int nrec_0x54_tide = 0;
+			int nrec_0x55_svp2 = 0;
+			int nrec_0x56_svp = 0;
+			int nrec_0x57_surfacesoundspeed = 0;
+			int nrec_0x58_bathymetry2 = 0;
+			int nrec_0x59_sidescan2 = 0;
+			int nrec_0x66_rawbeamf = 0;
+			int nrec_0x68_height = 0;
+			int nrec_0x69_parameter_stop = 0;
+			int nrec_0x6B_water_column = 0;
+			int nrec_0x6E_network_attitude = 0;
+			int nrec_0x70_parameter = 0;
+			int nrec_0x73_surface_sound_speed = 0;
+			int nrec_0xE1_bathymetry_mbari57 = 0;
+			int nrec_0xE2_sidescan_mbari57 = 0;
+			int nrec_0xE3_bathymetry_mbari59 = 0;
+			int nrec_0xE4_sidescan_mbari59 = 0;
+			int nrec_0xE5_bathymetry_mbari59 = 0;
 
 			double start_time_d;
 			double end_time_d;
@@ -2042,6 +1986,12 @@ int main(int argc, char **argv) {
 					double rx_h;
 					double rx_r;
 					double rx_p;
+					double tx_x;
+					double tx_y;
+					double tx_z;
+					double tx_h;
+					double tx_r;
+					double tx_p;
 					if (istore->par_stc == 0) {
 						tx_x = istore->par_s1x;
 						tx_y = istore->par_s1y;
@@ -2470,6 +2420,7 @@ int main(int argc, char **argv) {
 						    3) flip the sign of the beam steering angle from that array
 						        (reverse TX means flip sign of TX steer, reverse RX
 						        means flip sign of RX steer) */
+						double tx_steer;
 						if (tx_h <= 90.0 || tx_h >= 270.0) {
 							tx_align.roll = tx_r;
 							tx_align.pitch = tx_p;
@@ -2485,6 +2436,7 @@ int main(int argc, char **argv) {
 						tx_orientation.roll = transmit_roll;
 						tx_orientation.pitch = transmit_pitch;
 						tx_orientation.heading = transmit_heading;
+						double rx_steer;
 						if (rx_h <= 90.0 || rx_h >= 270.0) {
 							rx_align.roll = rx_r;
 							rx_align.pitch = rx_p;
@@ -2500,7 +2452,7 @@ int main(int argc, char **argv) {
 						rx_orientation.roll = receive_roll;
 						rx_orientation.pitch = receive_pitch;
 						rx_orientation.heading = receive_heading;
-						reference_heading = heading;
+						const double reference_heading = heading;
 
 						status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
 						                     reference_heading, &beamAzimuth, &beamDepression, &error);
@@ -2510,7 +2462,7 @@ int main(int argc, char **argv) {
 							ping->png_azimuth[i] += 360.0;
 
 						/* calculate beamflag */
-						detection_mask = (mb_u_char)ping->png_raw_rxdetection[i];
+						const mb_u_char detection_mask = (mb_u_char)ping->png_raw_rxdetection[i];
 						if (istore->sonar == MBSYS_SIMRAD3_M3 && (ping->png_detection[i] & 128) == 128) {
 							ping->png_beamflag[i] = MB_FLAG_NULL;
 							ping->png_raw_rxdetection[i] = ping->png_raw_rxdetection[i] | 128;
@@ -2536,8 +2488,8 @@ int main(int argc, char **argv) {
 					}
 
 					/* generate processed sidescan */
-					pixel_size = (double *)&imb_io_ptr->saved1;
-					swath_width = (double *)&imb_io_ptr->saved2;
+					double *pixel_size = (double *)&imb_io_ptr->saved1;
+					double *swath_width = (double *)&imb_io_ptr->saved2;
 					ping->png_pixel_size = 0;
 					ping->png_pixels_ss = 0;
 					status &=
@@ -2585,7 +2537,7 @@ int main(int argc, char **argv) {
 				fprintf(stdout, "     nrec_0x30_pu_id:         %d\n", nrec_0x30_pu_id);
 				fprintf(stdout, "     nrec_0x31_pu_status:          %d\n", nrec_0x31_pu_status);
 				fprintf(stdout, "     nrec_0x32_pu_bist:           %d\n", nrec_0x32_pu_bist);
-				fprintf(stdout, "     nrec_0x33_parameter_extra:        %d\n", nrec_0x33_parameter_extra);
+				// fprintf(stdout, "     nrec_0x33_parameter_extra:        %d\n", nrec_0x33_parameter_extra);
 				fprintf(stdout, "     nrec_0x41_attitude:               %d\n", nrec_0x41_attitude);
 				fprintf(stdout, "     nrec_0x43_clock:                  %d\n", nrec_0x43_clock);
 				fprintf(stdout, "     nrec_0x44_bathymetry:             %d\n", nrec_0x44_bathymetry);
@@ -2624,7 +2576,7 @@ int main(int argc, char **argv) {
 			nrec_0x30_pu_id_tot += nrec_0x30_pu_id;
 			nrec_0x31_pu_status_tot += nrec_0x31_pu_status;
 			nrec_0x32_pu_bist_tot += nrec_0x32_pu_bist;
-			nrec_0x33_parameter_extra_tot += nrec_0x33_parameter_extra;
+			// nrec_0x33_parameter_extra_tot += nrec_0x33_parameter_extra;
 			nrec_0x41_attitude_tot += nrec_0x41_attitude;
 			nrec_0x43_clock_tot += nrec_0x43_clock;
 			nrec_0x44_bathymetry_tot += nrec_0x44_bathymetry;
@@ -2661,12 +2613,8 @@ int main(int argc, char **argv) {
 
 			/* figure out whether and what to read next */
 			if (read_datalist) {
-				if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-					read_data = true;
-				else
-					read_data = false;
-			}
-			else {
+				read_data = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+			} else {
 				read_data = false;
 			}
 
@@ -2684,55 +2632,48 @@ int main(int argc, char **argv) {
 				/* output asynchronous heading output file */
 				char athfile[MB_PATH_MAXLINE] = "";
 				sprintf(athfile, "%s.ath", ofile);
-				FILE *athfp;
-				if ((athfp = fopen(athfile, "w")) != NULL) {
-					for (int i = 0; i < ndat_heading; i++) {
-						if (dat_heading_time_d[i] > start_time_d && dat_heading_time_d[i] < end_time_d)
-							fprintf(athfp, "%0.6f\t%7.3f\n", dat_heading_time_d[i], dat_heading_heading[i]);
-					}
-					fclose(athfp);
-				}
-				else {
+				FILE *athfp = fopen(athfile, "w");
+				if (athfp == NULL) {
 					fprintf(stderr, "\nUnable to open asynchronous heading data file <%s> for writing\n", athfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_ERROR_OPEN_FAIL);
 				}
+				for (int i = 0; i < ndat_heading; i++) {
+					if (dat_heading_time_d[i] > start_time_d && dat_heading_time_d[i] < end_time_d)
+						fprintf(athfp, "%0.6f\t%7.3f\n", dat_heading_time_d[i], dat_heading_heading[i]);
+				}
+				fclose(athfp);
 
 				/* output asynchronous sonardepth output file */
 				char atsfile[MB_PATH_MAXLINE] = "";
 				sprintf(atsfile, "%s.ats", ofile);
-				FILE *atsfp;
-				if ((atsfp = fopen(atsfile, "w")) != NULL) {
-					for (int i = 0; i < ndat_sonardepth; i++) {
-						if (dat_sonardepth_time_d[i] > start_time_d && dat_sonardepth_time_d[i] < end_time_d)
-							fprintf(atsfp, "%0.6f\t%7.3f\n", dat_sonardepth_time_d[i], dat_sonardepth_sonardepth[i]);
-					}
-					fclose(atsfp);
-				}
-				else {
+				FILE *atsfp = fopen(atsfile, "w");
+				if (atsfp == NULL) {
 					fprintf(stderr, "\nUnable to open asynchronous sonardepth data file <%s> for writing\n", atsfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_ERROR_OPEN_FAIL);
 				}
+				for (int i = 0; i < ndat_sonardepth; i++) {
+					if (dat_sonardepth_time_d[i] > start_time_d && dat_sonardepth_time_d[i] < end_time_d)
+						fprintf(atsfp, "%0.6f\t%7.3f\n", dat_sonardepth_time_d[i], dat_sonardepth_sonardepth[i]);
+				}
+				fclose(atsfp);
 
 				/* output asynchronous attitude output file */
-				FILE *atafp;
 				char atafile[MB_PATH_MAXLINE] = "";
 				sprintf(atafile, "%s.ata", ofile);
-				if ((atafp = fopen(atafile, "w")) != NULL) {
-					for (int i = 0; i < ndat_rph; i++) {
-						if (dat_rph_time_d[i] > start_time_d && dat_rph_time_d[i] < end_time_d)
-							fprintf(atafp, "%0.6f\t%0.3f\t%0.3f\n", dat_rph_time_d[i], dat_rph_roll[i], dat_rph_pitch[i]);
-					}
-					fclose(atafp);
-				}
-				else {
+				FILE *atafp = fopen(atafile, "w");
+				if (atafp == NULL) {
 					fprintf(stderr, "\nUnable to open asynchronous attitude data file <%s> for writing\n", atafile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_ERROR_OPEN_FAIL);
 				}
+				for (int i = 0; i < ndat_rph; i++) {
+					if (dat_rph_time_d[i] > start_time_d && dat_rph_time_d[i] < end_time_d)
+						fprintf(atafp, "%0.6f\t%0.3f\t%0.3f\n", dat_rph_time_d[i], dat_rph_roll[i], dat_rph_pitch[i]);
+				}
+				fclose(atafp);
 
-				/* close ats and sta files */
 				fclose(stafp);
 
 				/* generate inf fnv and fbt files */
@@ -2741,12 +2682,11 @@ int main(int argc, char **argv) {
 				}
 			}
 
-			/* end loop over files in list */
-		}
+
+		}  // end loop over files in list
 		if (read_datalist)
 			mb_datalist_close(verbose, &datalist, &error);
 
-		/* output counts */
 		if (output_counts) {
 			fprintf(stdout, "\nTotal files read:  %d\n", nfile_read);
 			fprintf(stdout, "Total files written: %d\n", nfile_write);
@@ -2754,7 +2694,7 @@ int main(int argc, char **argv) {
 			fprintf(stdout, "     nrec_0x30_pu_id_tot:     %d\n", nrec_0x30_pu_id_tot);
 			fprintf(stdout, "     nrec_0x31_pu_status_tot:      %d\n", nrec_0x31_pu_status_tot);
 			fprintf(stdout, "     nrec_0x32_pu_bist_tot:       %d\n", nrec_0x32_pu_bist_tot);
-			fprintf(stdout, "     nrec_0x33_parameter_extra_tot:    %d\n", nrec_0x33_parameter_extra_tot);
+			// fprintf(stdout, "     nrec_0x33_parameter_extra_tot:    %d\n", nrec_0x33_parameter_extra_tot);
 			fprintf(stdout, "     nrec_0x41_attitude_tot:           %d\n", nrec_0x41_attitude_tot);
 			fprintf(stdout, "     nrec_0x43_clock_tot:              %d\n", nrec_0x43_clock_tot);
 			fprintf(stdout, "     nrec_0x44_bathymetry_tot:         %d\n", nrec_0x44_bathymetry_tot);
@@ -2791,7 +2731,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* deallocate navigation arrays */
 	if (ndat_nav > 0) {
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_nav_time_d, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&dat_nav_lon, &error);
@@ -2822,7 +2761,6 @@ int main(int argc, char **argv) {
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&sonardepth_sonardepthfilter, &error);
 	}
 
-	/* check memory */
 	if (verbose >= 4)
 		status &= mb_memory_list(verbose, &error);
 
