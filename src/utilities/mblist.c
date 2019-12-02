@@ -1225,7 +1225,6 @@ int main(int argc, char **argv) {
   char output_file_temp[MB_PATH_MAXLINE];
 
   /* netcdf variables */
-  char variable[MB_PATH_MAXLINE];
   int lcount = 0;
 
   /* set the initial along track distance here so */
@@ -1336,6 +1335,7 @@ int main(int argc, char **argv) {
         exit(1);
       }
 
+      char variable[MB_PATH_MAXLINE];  // TODO(schwehr): Localize to all the use sites.
       if (!raw_next_value) {
         switch (list[i]) {
         case '/': /* Inverts next simple value */
@@ -3217,7 +3217,7 @@ int main(int argc, char **argv) {
                   if (ascii) {
                     // TODO(schwehr): Bug?
                     // if (netcdf)
-                      fprintf(output[i], "%u", beamflag[k]);
+                      fprintf(output[i], "%d", beamflag[k]);
                     // else
                     //  fprintf(output[i], "%u", beamflag[k]);
                   }
@@ -3229,7 +3229,7 @@ int main(int argc, char **argv) {
                 case 'f': /* Beamflag character value (ascii only) */
                   if (ascii) {
                     if (netcdf)
-                      fprintf(output[i], "%u", beamflag[k]);
+                      fprintf(output[i], "%d", beamflag[k]);
                     else {
                       if (mb_beam_check_flag_unusable(beamflag[k]))
                         fprintf(output[i], "-");
@@ -3366,7 +3366,7 @@ int main(int argc, char **argv) {
                   break;
                 case 'N': /* ping counter */
                   if (ascii)
-                    fprintf(output[i], "%6d", pingnumber);
+                    fprintf(output[i], "%6u", pingnumber);
                   else {
                     b = pingnumber;
                     fwrite(&b, sizeof(double), 1, outfile);
@@ -3583,7 +3583,6 @@ int main(int argc, char **argv) {
                               headingy * mtodeglat * bathalongtrack[k];
                     printsimplevalue(verbose, output[i], dlat, 15, 10, ascii, &invert_next_value,
                                      &signflip_next_value, &error);
-                    sensornav_next_value = false;
                   }
                   else {
                     if (sensorrelative_next_value)
@@ -4185,7 +4184,7 @@ int main(int argc, char **argv) {
                   break;
                 case 'N': /* ping counter */
                   if (ascii)
-                    fprintf(output[i], "%6d", pingnumber);
+                    fprintf(output[i], "%6u", pingnumber);
                   else {
                     b = pingnumber;
                     fwrite(&b, sizeof(double), 1, outfile);
