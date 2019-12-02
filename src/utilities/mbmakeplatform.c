@@ -229,7 +229,7 @@ int main(int argc, char **argv) {
 
 	int error = MB_ERROR_NO_ERROR;
 	struct mb_platform_struct *platform = NULL;
-	status = mb_platform_init(verbose, (void **)&platform, &error);
+	status &= mb_platform_init(verbose, (void **)&platform, &error);
 
 
 	/* process argument list - for this program all the action
@@ -433,7 +433,6 @@ int main(int argc, char **argv) {
 	mb_path time_latency_model_file;
 	FILE *tfp = NULL;
 	char buffer[MB_PATH_MAXLINE];
-	char *result;
 	sensor_mode_t sensor_mode = SENSOR_OFF;
 	int sensor_id;
 	int ioffset;
@@ -644,7 +643,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* close the swath file */
-					status = mb_close(verbose, &mbio_ptr, &error);
+					status &= mb_close(verbose, &mbio_ptr, &error);
 
 					read_data = false;
 				}
@@ -1193,6 +1192,7 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_ERROR_OPEN_FAIL);
 				}
+				char *result;
 				while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer)
 					if (buffer[0] != '#')
 						tmp_sensor.num_time_latency++;
@@ -1337,7 +1337,7 @@ int main(int argc, char **argv) {
 						    tmp_offsets[ioffset].attitude_offset_heading, tmp_offsets[ioffset].attitude_offset_roll,
 						    tmp_offsets[ioffset].attitude_offset_pitch, &error);
 					}
-					status = mb_platform_set_sensor_timelatency(
+					status &= mb_platform_set_sensor_timelatency(
 					    verbose, (void *)platform, sensor_id, tmp_sensor.time_latency_mode, tmp_sensor.time_latency_static,
 					    tmp_sensor.num_time_latency, tmp_sensor.time_latency_time_d, tmp_sensor.time_latency_value, &error);
 					sensor_mode = SENSOR_OFF;
@@ -1567,6 +1567,7 @@ int main(int argc, char **argv) {
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 						exit(MB_ERROR_OPEN_FAIL);
 					}
+					char *result;
 					while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer)
 						if (buffer[0] != '#')
 							active_sensor->num_time_latency++;
@@ -1635,7 +1636,7 @@ int main(int argc, char **argv) {
 		                           (MB_SENSOR_CAPABILITY1_POSITION + MB_SENSOR_CAPABILITY1_DEPTH + MB_SENSOR_CAPABILITY1_HEAVE +
 		                            MB_SENSOR_CAPABILITY1_ROLLPITCH + MB_SENSOR_CAPABILITY1_HEADING),
 		                           MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM, 1, 0, &error);
-		status = mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 0, MB_SENSOR_POSITION_OFFSET_STATIC, 0.0, 0.0, 0.0,
+		status &= mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 0, MB_SENSOR_POSITION_OFFSET_STATIC, 0.0, 0.0, 0.0,
 		                                       MB_SENSOR_ATTITUDE_OFFSET_STATIC, 0.0, 0.0, 0.0, &error);
 	}
 
