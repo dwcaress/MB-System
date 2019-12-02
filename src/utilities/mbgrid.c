@@ -4367,14 +4367,14 @@ int main(int argc, char **argv) {
 		/* read in data */
 		fprintf(outfp, "\nDoing second pass to generate final grid...\n");
 		ndata = 0;
-		if ((status = mb_datalist_open(verbose, &datalist, dfile, look_processed, &error)) != MB_SUCCESS) {
+		if (mb_datalist_open(verbose, &datalist, dfile, look_processed, &error) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
 			exit(error);
 		}
-		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
+		while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
 		       MB_SUCCESS) {
 			ndatafile = 0;
 
