@@ -304,10 +304,8 @@ int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double
 	if (fp == NULL) {
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
-	}
-
-	/* output grid */
-	else {
+	} else {
+		/* output grid */
 		fwrite((char *)&nx, 1, 4, fp);
 		fwrite((char *)&ny, 1, 4, fp);
 		fwrite((char *)&xmin, 1, 8, fp);
@@ -502,26 +500,29 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 		}
 	}
 
-	double azi_starboard, azi_port, weight_starboard, weight_port;
-	double heading_difference, weight_heading;
+	double heading_difference;
+	double weight_heading;
 	/* get look azimuth priorities */
 
 	if (priority_mode & MBMOSAIC_PRIORITY_AZIMUTH) {
 		/* get priorities for starboard and port sides of ping */
-		azi_starboard = heading - 90.0 - priority_azimuth;
+		double azi_starboard = heading - 90.0 - priority_azimuth;
 		if (azi_starboard > 180.0)
 			azi_starboard -= 360.0 * ((int)((azi_starboard + 180.0) / 360.0));
 		else if (azi_starboard < -180.0)
 			azi_starboard += 360.0 * ((int)((-azi_starboard + 180.0) / 360.0));
+		double weight_starboard;
 		if (priority_azimuth_factor * azi_starboard <= -90.0 || priority_azimuth_factor * azi_starboard >= 90.0)
 			weight_starboard = 0.0;
 		else
 			weight_starboard = MAX(cos(DTR * priority_azimuth_factor * azi_starboard), 0.0);
-		azi_port = heading + 90.0 - priority_azimuth;
+
+		double azi_port = heading + 90.0 - priority_azimuth;
 		if (azi_port > 180.0)
 			azi_port -= 360.0 * ((int)((azi_port + 180.0) / 360.0));
 		else if (azi_port < -180.0)
 			azi_port += 360.0 * ((int)((-azi_port + 180.0) / 360.0));
+		double weight_port;
 		if (priority_azimuth_factor * azi_port <= -90.0 || priority_azimuth_factor * azi_port >= 90.0)
 			weight_port = 0.0;
 		else
@@ -927,7 +928,6 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 		}
 	}
 
-	double azi_starboard, azi_port, weight_starboard, weight_port;
 	double heading_difference, weight_heading;
 
 	/* get grazing angle priorities */
@@ -958,20 +958,23 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 	/* get look azimuth priorities */
 	if (priority_mode & MBMOSAIC_PRIORITY_AZIMUTH) {
 		/* get priorities for starboard and port sides of ping */
-		azi_starboard = heading - 90.0 - priority_azimuth;
+		double azi_starboard = heading - 90.0 - priority_azimuth;
 		if (azi_starboard > 180.0)
 			azi_starboard -= 360.0 * ((int)((azi_starboard + 180.0) / 360.0));
 		else if (azi_starboard < -180.0)
 			azi_starboard += 360.0 * ((int)((-azi_starboard + 180.0) / 360.0));
+		double weight_starboard;
 		if (priority_azimuth_factor * azi_starboard <= -90.0 || priority_azimuth_factor * azi_starboard >= 90.0)
 			weight_starboard = 0.0;
 		else
 			weight_starboard = MAX(cos(DTR * priority_azimuth_factor * azi_starboard), 0.0);
-		azi_port = heading + 90.0 - priority_azimuth;
+
+		double azi_port = heading + 90.0 - priority_azimuth;
 		if (azi_port > 180.0)
 			azi_port -= 360.0 * ((int)((azi_port + 180.0) / 360.0));
 		else if (azi_port < -180.0)
 			azi_port += 360.0 * ((int)((-azi_port + 180.0) / 360.0));
+		double weight_port;
 		if (priority_azimuth_factor * azi_port <= -90.0 || priority_azimuth_factor * azi_port >= 90.0)
 			weight_port = 0.0;
 		else
@@ -2134,11 +2137,6 @@ int main(int argc, char **argv) {
 	double beamwidth_xtrack;
 	double beamwidth_ltrack;
 
-	int ii;
-	int jj;
-	int iii;
-	int jjj;
-
 	/* bottom layout parameters */
 	int nangle = MB7K2SS_NUM_ANGLES;
 	double angle_min = -MB7K2SS_ANGLE_MAX;
@@ -2428,8 +2426,8 @@ int main(int argc, char **argv) {
 										iy2 = MIN(iy2, gydim - 1);
 
 										/* process if in region of interest */
-										for (ii = ix1; ii <= ix2; ii++)
-											for (jj = iy1; jj <= iy2; jj++) {
+										for (int ii = ix1; ii <= ix2; ii++)
+											for (int jj = iy1; jj <= iy2; jj++) {
 												/* set grid if highest weight */
 												const int kgrid = ii * gydim + jj;
 												xx = dx * ii + wbnd[0];
@@ -2610,8 +2608,8 @@ int main(int argc, char **argv) {
 										iy2 = MIN(iy2, gydim - 1);
 
 										/* process if in region of interest */
-										for (ii = ix1; ii <= ix2; ii++)
-											for (jj = iy1; jj <= iy2; jj++) {
+										for (int ii = ix1; ii <= ix2; ii++)
+											for (int jj = iy1; jj <= iy2; jj++) {
 												/* set grid if highest weight */
 												const int kgrid = ii * gydim + jj;
 												xx = dx * ii + wbnd[0];
@@ -2630,7 +2628,10 @@ int main(int argc, char **argv) {
 							}
 						}
 					}
-					status = mb_close(verbose, &mbio_ptr, &error);
+					status &= mb_close(verbose, &mbio_ptr, &error);
+					if (status == MB_FAILURE) {
+						fprintf(stderr,"WARNING: status is MB_FAILURE\n");
+					}
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
@@ -2686,11 +2687,10 @@ int main(int argc, char **argv) {
 
 	/* other variables */
 	double norm_weight;
-	int i1, i2, j1, j2;
-	int ir;
+	// int ir;
 	double r;
 	int dmask[9];
-	int kint;
+	// int kint;
 	// int ix1, ix2, iy1, iy2;
 
 	/***** do second pass gridding *****/
@@ -2976,8 +2976,8 @@ int main(int argc, char **argv) {
 										iy2 = MIN(iy2, gydim - 1);
 
 										/* process if in region of interest */
-										for (ii = ix1; ii <= ix2; ii++)
-											for (jj = iy1; jj <= iy2; jj++) {
+										for (int ii = ix1; ii <= ix2; ii++)
+											for (int jj = iy1; jj <= iy2; jj++) {
 												/* add to cell if weight high enough */
 												const int kgrid = ii * gydim + jj;
 												xx = dx * ii + wbnd[0];
@@ -3166,8 +3166,8 @@ int main(int argc, char **argv) {
 										iy2 = MIN(iy2, gydim - 1);
 
 										/* process if in region of interest */
-										for (ii = ix1; ii <= ix2; ii++)
-											for (jj = iy1; jj <= iy2; jj++) {
+										for (int ii = ix1; ii <= ix2; ii++)
+											for (int jj = iy1; jj <= iy2; jj++) {
 												/* set grid if highest weight */
 												const int kgrid = ii * gydim + jj;
 												xx = dx * ii + wbnd[0];
@@ -3195,7 +3195,10 @@ int main(int argc, char **argv) {
 							}
 						}
 					}
-					status = mb_close(verbose, &mbio_ptr, &error);
+					status &= mb_close(verbose, &mbio_ptr, &error);
+					if (status == MB_FAILURE) {
+						fprintf(stderr,"WARNING: status is MB_FAILURE (2)\n");
+					}
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
@@ -3375,30 +3378,30 @@ int main(int argc, char **argv) {
 				for (int j = 0; j < gydim; j++) {
 					const int kgrid = i * gydim + j;
 #ifdef USESURFACE
-					kint = i + (gydim - j - 1) * gxdim;
+					const int kint = i + (gydim - j - 1) * gxdim;
 #else
-					kint = i + j * gxdim;
+					const int kint = i + j * gxdim;
 #endif
 					num[kgrid] = false;
 					if (grid[kgrid] >= clipvalue && sgrid[kint] < zflag) {
 						/* initialize direction mask of search */
-						for (ii = 0; ii < 9; ii++)
+						for (int ii = 0; ii < 9; ii++)
 							dmask[ii] = false;
 
 						/* loop over rings around point, starting close */
-						for (ir = 0; ir <= clip && num[kgrid] == false; ir++) {
+						for (int ir = 0; ir <= clip && num[kgrid] == false; ir++) {
 							/* set bounds of search */
-							i1 = MAX(0, i - ir);
-							i2 = MIN(gxdim - 1, i + ir);
-							j1 = MAX(0, j - ir);
-							j2 = MIN(gydim - 1, j + ir);
+							int i1 = MAX(0, i - ir);
+							int i2 = MIN(gxdim - 1, i + ir);
+							int j1 = MAX(0, j - ir);
+							int j2 = MIN(gydim - 1, j + ir);
 
-							jj = j1;
-							for (ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
+							int jj = j1;
+							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
 									r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
-									iii = rint((ii - i) / r) + 1;
-									jjj = rint((jj - j) / r) + 1;
+									const int iii = rint((ii - i) / r) + 1;
+									const int jjj = rint((jj - j) / r) + 1;
 									k_mode = iii * 3 + jjj;
 									dmask[k_mode] = true;
 									if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
@@ -3408,11 +3411,11 @@ int main(int argc, char **argv) {
 							}
 
 							jj = j2;
-							for (ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
+							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
 									r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
-									iii = rint((ii - i) / r) + 1;
-									jjj = rint((jj - j) / r) + 1;
+									const int iii = rint((ii - i) / r) + 1;
+									const int jjj = rint((jj - j) / r) + 1;
 									k_mode = iii * 3 + jjj;
 									dmask[k_mode] = true;
 									if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
@@ -3421,12 +3424,12 @@ int main(int argc, char **argv) {
 								}
 							}
 
-							ii = i1;
+							int ii = i1;
 							for (jj = j1; jj <= j2 && num[kgrid] == false; jj++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
 									r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
-									iii = rint((ii - i) / r) + 1;
-									jjj = rint((jj - j) / r) + 1;
+									const int iii = rint((ii - i) / r) + 1;
+									const int jjj = rint((jj - j) / r) + 1;
 									k_mode = iii * 3 + jjj;
 									dmask[k_mode] = true;
 									if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
@@ -3439,8 +3442,8 @@ int main(int argc, char **argv) {
 							for (jj = j1; jj <= j2 && num[kgrid] == false; jj++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
 									r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
-									iii = rint((ii - i) / r) + 1;
-									jjj = rint((jj - j) / r) + 1;
+									const int iii = rint((ii - i) / r) + 1;
+									const int jjj = rint((jj - j) / r) + 1;
 									k_mode = iii * 3 + jjj;
 									dmask[k_mode] = true;
 									if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
@@ -3455,9 +3458,9 @@ int main(int argc, char **argv) {
 				for (int j = 0; j < gydim; j++) {
 					const int kgrid = i * gydim + j;
 #ifdef USESURFACE
-					kint = i + (gydim - j - 1) * gxdim;
+					const int kint = i + (gydim - j - 1) * gxdim;
 #else
-					kint = i + j * gxdim;
+					const int kint = i + j * gxdim;
 #endif
 					if (num[kgrid] == true) {
 						grid[kgrid] = sgrid[kint];
@@ -3473,36 +3476,36 @@ int main(int argc, char **argv) {
 				for (int j = 0; j < gydim; j++) {
 					const int kgrid = i * gydim + j;
 #ifdef USESURFACE
-					kint = i + (gydim - j - 1) * gxdim;
+					const int kint = i + (gydim - j - 1) * gxdim;
 #else
-					kint = i + j * gxdim;
+					const int kint = i + j * gxdim;
 #endif
 
 					num[kgrid] = false;
 					if (grid[kgrid] >= clipvalue && sgrid[kint] < zflag) {
 						/* loop over rings around point, starting close */
-						for (ir = 0; ir <= clip && num[kgrid] == false; ir++) {
+						for (int ir = 0; ir <= clip && num[kgrid] == false; ir++) {
 							/* set bounds of search */
-							i1 = MAX(0, i - ir);
-							i2 = MIN(gxdim - 1, i + ir);
-							j1 = MAX(0, j - ir);
-							j2 = MIN(gydim - 1, j + ir);
+							int i1 = MAX(0, i - ir);
+							int i2 = MIN(gxdim - 1, i + ir);
+							int j1 = MAX(0, j - ir);
+							int j2 = MIN(gydim - 1, j + ir);
 
-							jj = j1;
-							for (ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
+							int jj = j1;
+							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
 									num[kgrid] = true;
 								}
 							}
 
 							jj = j2;
-							for (ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
+							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
 									num[kgrid] = true;
 								}
 							}
 
-							ii = i1;
+							int ii = i1;
 							for (jj = j1; jj <= j2 && num[kgrid] == false; jj++) {
 								if (grid[ii * gydim + jj] < clipvalue) {
 									num[kgrid] = true;
@@ -3522,9 +3525,9 @@ int main(int argc, char **argv) {
 				for (int j = 0; j < gydim; j++) {
 					const int kgrid = i * gydim + j;
 #ifdef USESURFACE
-					kint = i + (gydim - j - 1) * gxdim;
+					const int kint = i + (gydim - j - 1) * gxdim;
 #else
-					kint = i + j * gxdim;
+					const int kint = i + j * gxdim;
 #endif
 					if (num[kgrid] == true) {
 						grid[kgrid] = sgrid[kint];
@@ -3540,9 +3543,9 @@ int main(int argc, char **argv) {
 				for (int j = 0; j < gydim; j++) {
 					const int kgrid = i * gydim + j;
 #ifdef USESURFACE
-					kint = i + (gydim - j - 1) * gxdim;
+					const int kint = i + (gydim - j - 1) * gxdim;
 #else
-					kint = i + j * gxdim;
+					const int kint = i + j * gxdim;
 #endif
 					if (grid[kgrid] >= clipvalue && sgrid[kint] < zflag) {
 						grid[kgrid] = sgrid[kint];
@@ -3555,7 +3558,7 @@ int main(int argc, char **argv) {
 		for (int i = 0; i < gxdim; i++)
 			for (int j = 0; j < gydim; j++) {
 				const int kgrid = i * gydim + j;
-				kint = i + j * gxdim;
+				const int kint = i + j * gxdim;
 				if (num[kgrid] == true) {
 					grid[kgrid] = sgrid[kint];
 					nbinspline++;
