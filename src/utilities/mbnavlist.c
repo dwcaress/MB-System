@@ -397,11 +397,9 @@ int main(int argc, char **argv) {
 	double mtodeglon;
 	double mtodeglat;
 	double course;
-	double course_old;
 	double time_d_old;
 	double time_interval;
 	double speed_made_good;
-	double speed_made_good_old;
 	double navlon_old;
 	double navlat_old;
 
@@ -493,6 +491,8 @@ int main(int argc, char **argv) {
 		int nread = 0;
 		int nnav = 0;
 		bool first = true;
+		double course_old;
+		double speed_made_good_old;
 		while (error <= MB_ERROR_NO_ERROR) {
 			/* read a ping of data */
 			int kind;
@@ -583,8 +583,8 @@ int main(int argc, char **argv) {
 						time_interval = 0.0;
 						course = heading;
 						speed_made_good = 0.0;
-						course_old = heading;
-						speed_made_good_old = speed;
+						// course_old = heading;
+						// speed_made_good_old = speed;
 						distance = 0.0;
 					}
 					else {
@@ -922,12 +922,8 @@ int main(int argc, char **argv) {
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
-			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = true;
-			else
-				read_data = false;
-		}
-		else {
+			read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+		} else {
 			read_data = false;
 		}
 
