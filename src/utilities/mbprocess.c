@@ -454,8 +454,6 @@ int main(int argc, char **argv) {
   speedmin = 0.0;
   timegap = 1000000000.0;
 
-  int error = MB_ERROR_NO_ERROR;
-
   /* set default input and output */
   bool mbp_ifile_specified = false;
   char mbp_ifile[MBP_FILENAMESIZE] = "";
@@ -531,9 +529,11 @@ int main(int argc, char **argv) {
       fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
       fprintf(stderr, "\n%s\n", help_message);
       fprintf(stderr, "\nusage: %s\n", usage_message);
-      exit(error);
+      exit(MB_ERROR_NO_ERROR);
     }
   }
+
+  int error = MB_ERROR_NO_ERROR;
 
   /* try datalist.mb-1 as input */
   struct stat file_status;
@@ -877,7 +877,7 @@ int main(int argc, char **argv) {
   /* loop over all files to be read */
   while (read_data) {
     /* load parameters */
-    status = mb_pr_readpar(verbose, mbp_ifile, false, &process, &error);
+    status &= mb_pr_readpar(verbose, mbp_ifile, false, &process, &error);
 
     /* reset output file and format if not reading from datalist */
     if (!read_datalist) {
@@ -1180,7 +1180,7 @@ int main(int argc, char **argv) {
       }
 
       /* check for format with travel time data */  // TODO(schwehr): Make mb_format_flags take bools.
-      status = mb_format_flags(verbose, &process.mbp_format, &variable_beams, &traveltime, &beam_flagging, &error);
+      status &= mb_format_flags(verbose, &process.mbp_format, &variable_beams, &traveltime, &beam_flagging, &error);
       if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE && !traveltime) {
         fprintf(stderr, "\nWarning:\n\tFormat %d does not include travel time data.\n", process.mbp_format);
         fprintf(stderr, "\tTravel times and angles estimated assuming\n");
@@ -1555,7 +1555,7 @@ int main(int argc, char **argv) {
            (process.mbp_sscorr_slope == MBP_SSCORR_USETOPO || process.mbp_sscorr_slope == MBP_SSCORR_USETOPOSLOPE))) {
         grid.data = NULL;
         strcpy(grid.file, process.mbp_ampsscorr_topofile);
-        status = mb_read_gmt_grd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue,
+        status &= mb_read_gmt_grd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue,
                                  &grid.nxy, &grid.n_columns, &grid.n_rows, &grid.min, &grid.max, &grid.xmin, &grid.xmax, &grid.ymin,
                                  &grid.ymax, &grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
         if (status == MB_FAILURE) {
@@ -2732,7 +2732,7 @@ int main(int argc, char **argv) {
 
       /* get edits */
       if (process.mbp_edit_mode == MBP_EDIT_ON) {
-        status = mb_esf_open(verbose, program_name, process.mbp_editfile, true, false, &esf, &error);
+        status &= mb_esf_open(verbose, program_name, process.mbp_editfile, true, false, &esf, &error);
         if (status == MB_FAILURE) {
           fprintf(stderr, "\nUnable to read from Edit Save File <%s>\n", process.mbp_editfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3266,7 +3266,7 @@ int main(int argc, char **argv) {
         while (error <= MB_ERROR_NO_ERROR && ssv_start <= 0.0) {
           /* read some data */
           error = MB_ERROR_NO_ERROR;
-          status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
+          status &= mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
                               &heading, &distance, &altitude, &sonardepth, &nbath, &namp, &nss, beamflag, bath, amp,
                               bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
@@ -3290,7 +3290,7 @@ int main(int argc, char **argv) {
 
           if (kind == MB_DATA_DATA && error <= MB_ERROR_NO_ERROR) {
             /* extract travel times */
-            status = mb_ttimes(verbose, imbio_ptr, store_ptr, &kind, &nbeams, ttimes, angles, angles_forward,
+            status &= mb_ttimes(verbose, imbio_ptr, store_ptr, &kind, &nbeams, ttimes, angles, angles_forward,
                                angles_null, bheave, alongtrack_offset, &draft, &ssv, &error);
 
             /* check surface sound velocity */
@@ -3366,9 +3366,13 @@ int main(int argc, char **argv) {
           exit(error);
         }
       }
-      if (ssv_start <= 0.0)
+      if (ssv_start <= 0.0) {
         ssv_start = ssv_default;
+      }
 
+      if (status == MB_FAILURE) {
+        fprintf(stderr, "WARNING: status is MB_FAILURE.\n");
+      }
       /* reset error */
       error = MB_ERROR_NO_ERROR;
       status = MB_SUCCESS;
@@ -3551,7 +3555,7 @@ int main(int argc, char **argv) {
         kind = MB_DATA_COMMENT;
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, "Swath data modified by program %s", program_name);
-        status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+        status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (error == MB_ERROR_NO_ERROR)
           ocomment++;
         strncpy(comment, "\0", MBP_FILENAMESIZE);
@@ -3559,7 +3563,7 @@ int main(int argc, char **argv) {
           ocomment++;
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, "MB-system Version %s", MB_VERSION);
-        status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+        status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (error == MB_ERROR_NO_ERROR)
           ocomment++;
         const time_t right_now = time((time_t *)0);
@@ -3578,24 +3582,24 @@ int main(int argc, char **argv) {
         gethostname(host, MBP_FILENAMESIZE);
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
-        status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+        status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (error == MB_ERROR_NO_ERROR)
           ocomment++;
 
         if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "Depths and crosstrack distances recalculated from travel times");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  by raytracing through a water velocity profile specified");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  by the user.  The depths have been saved in units of");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
@@ -4290,20 +4294,20 @@ int main(int argc, char **argv) {
 
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, "Sidescan Recalculation:");
-        status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+        status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (process.mbp_ssrecalc_mode == MBP_SSRECALC_ON) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Sidescan recalculated.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Sidescan pixel size:           %f", process.mbp_ssrecalc_pixelsize);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Sidescan swath width:          %f", process.mbp_ssrecalc_swathwidth);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Sidescan interpolation:        %d", process.mbp_ssrecalc_interpolate);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         }
         else {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
@@ -4323,9 +4327,9 @@ int main(int argc, char **argv) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Cut[%d]: %d %d %f %f", i, process.mbp_cut_kind[i], process.mbp_cut_mode[i],
                   process.mbp_cut_min[i], process.mbp_cut_max[i]);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           sprintf(comment, "  %f %f", process.mbp_cut_min[i], process.mbp_cut_max[i]);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
@@ -5813,20 +5817,17 @@ int main(int argc, char **argv) {
             if (verbose >= 2)
               fprintf(stderr, "BEAM FLAG TIED TO NULL BEAM: i:%d edit: %f %d %d   %d\n", i, esf.edit[i].time_d,
                   esf.edit[i].beam, esf.edit[i].action, esf.edit[i].use);
-          }
-          else if (esf.edit[i].use == 100) {
+          } else if (esf.edit[i].use == 100) {
             neditduplicate++;
             if (verbose >= 2)
               fprintf(stderr, "DUPLICATE BEAM FLAG:         i:%d edit: %f %d %d   %d\n", i, esf.edit[i].time_d,
                   esf.edit[i].beam, esf.edit[i].action, esf.edit[i].use);
-          }
-          else if (esf.edit[i].use != 1) {
+          } else if (esf.edit[i].use != 1) {
             neditnotused++;
             if (verbose >= 2)
               fprintf(stderr, "BEAM FLAG NOT USED:          i:%d edit: %f %d %d   %d\n", i, esf.edit[i].time_d,
                   esf.edit[i].beam, esf.edit[i].action, esf.edit[i].use);
-          }
-          else if (esf.edit[i].use == 1) {
+          } else /* if (esf.edit[i].use == 1) */ {
             neditused++;
             if (verbose >= 2)
               fprintf(stderr, "BEAM FLAG USED:              i:%d edit: %f %d %d   %d\n", i, esf.edit[i].time_d,
@@ -5844,6 +5845,9 @@ int main(int argc, char **argv) {
       /*--------------------------------------------
         reset status/error, close files and deallocate memory
         --------------------------------------------*/
+      if (status == MB_FAILURE) {
+        fprintf(stderr, "WARNING: status is MB_FAILURE.\n");
+      }
       status = MB_SUCCESS;
       error = MB_ERROR_NO_ERROR;
 
@@ -5916,10 +5920,10 @@ int main(int argc, char **argv) {
         mb_freed(verbose, __FILE__, __LINE__, (void **)&nalonspl, &error);
         mb_freed(verbose, __FILE__, __LINE__, (void **)&nalatspl, &error);
         mb_freed(verbose, __FILE__, __LINE__, (void **)&nazspl, &error);
-      }
+      // }
 
       /* deallocate arrays for attitude merging */
-      if (nanav > 0) {
+      // if (nanav > 0) {
         mb_freed(verbose, __FILE__, __LINE__, (void **)&attitudetime, &error);
         mb_freed(verbose, __FILE__, __LINE__, (void **)&attituderoll, &error);
         mb_freed(verbose, __FILE__, __LINE__, (void **)&attitudepitch, &error);
