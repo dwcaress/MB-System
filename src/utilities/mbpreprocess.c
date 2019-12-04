@@ -675,226 +675,6 @@ int main(int argc, char **argv) {
     }
   }
 
-  /* asynchronous navigation, heading, altitude, attitude, soundspeed data */
-  int n_nav = 0;
-  int n_nav_alloc = 0;
-  double *nav_time_d = NULL;
-  double *nav_navlon = NULL;
-  double *nav_navlat = NULL;
-  double *nav_speed = NULL;
-
-  int n_sensordepth = 0;
-  int n_sensordepth_alloc = 0;
-  double *sensordepth_time_d = NULL;
-  double *sensordepth_sensordepth = NULL;
-
-  int n_heading = 0;
-  int n_heading_alloc = 0;
-  double *heading_time_d = NULL;
-  double *heading_heading = NULL;
-
-  int n_altitude = 0;
-  int n_altitude_alloc = 0;
-  double *altitude_time_d = NULL;
-  double *altitude_altitude = NULL;
-
-  int n_attitude = 0;
-  int n_attitude_alloc = 0;
-  double *attitude_time_d = NULL;
-  double *attitude_roll = NULL;
-  double *attitude_pitch = NULL;
-  double *attitude_heave = NULL;
-
-  int n_soundspeed = 0;
-  int n_soundspeed_alloc = 0;
-  double *soundspeed_time_d = NULL;
-  double *soundspeed_soundspeed = NULL;
-
-  int time_latency_num = 0;
-  int time_latency_alloc = 0;
-  double *time_latency_time_d = NULL;
-  double *time_latency_time_latency = NULL;
-
-  /* time domain filtering */
-
-  /* platform definition file */
-  struct mb_platform_struct *platform = NULL;
-  // struct mb_sensor_struct *sensor_bathymetry = NULL;
-  // struct mb_sensor_struct *sensor_backscatter = NULL;
-  struct mb_sensor_struct *sensor_position = NULL;
-  struct mb_sensor_struct *sensor_depth = NULL;
-  struct mb_sensor_struct *sensor_heading = NULL;
-  struct mb_sensor_struct *sensor_rollpitch = NULL;
-  // struct mb_sensor_struct *sensor_heave = NULL;
-  struct mb_sensor_struct *sensor_target = NULL;
-
-
-  /* file indexing (used by some formats) */
-  int num_indextable = 0;
-  int num_indextable_alloc = 0;
-  struct mb_io_indextable_struct *indextable = NULL;
-  int i_num_indextable = 0;
-  struct mb_io_indextable_struct *i_indextable = NULL;
-
-  /* kluge various data fixes */
-  double kluge_first_time_d;
-  double kluge_last_time_d;
-  double dtime_d_expect;
-  double dtime_d;
-  double correction_start_time_d = 0.0;
-  int correction_start_index = 0;
-  int correction_end_index = -1;
-  bool kluge_fix_wissl_timestamps_setup1 = false;
-  bool kluge_fix_wissl_timestamps_setup2 = false;
-
-  /* MBIO read control parameters */
-  void *datalist = NULL;
-  double file_weight;
-  int iformat;
-  int oformat;
-  double btime_d;
-  double etime_d;
-  mb_path ifile = "";
-  memset(ifile, 0, sizeof(mb_path));
-  mb_path dfile = "";
-  memset(dfile, 0, sizeof(mb_path));
-  mb_path ofile = "";
-  memset(ofile, 0, sizeof(mb_path));
-  mb_path fileroot = "";
-  memset(fileroot, 0, sizeof(mb_path));
-  int beams_bath;
-  int beams_amp;
-  int pixels_ss;
-  int obeams_bath;
-  int obeams_amp;
-  int opixels_ss;
-
-  /* MBIO read values */
-  void *imbio_ptr = NULL;
-  void *ombio_ptr = NULL;
-  void *istore_ptr = NULL;
-  int kind;
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double speed;
-  double heading;
-  double distance;
-  double altitude;
-  double sensordepth;
-  double draft;
-  double roll;
-  double pitch;
-  double heave;
-  char *beamflag = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
-  char comment[MB_COMMENT_MAXLINE];
-  double navlon_org;
-  double navlat_org;
-  double speed_org;
-  double heading_org;
-  double altitude_org;
-  double sensordepth_org;
-  double draft_org;
-  double roll_org, roll_delta;
-  double pitch_org, pitch_delta;
-  double heave_org;
-  double depth_offset_change;
-
-  /* arrays for asynchronous data accessed using mb_extract_nnav() */
-  int nanavmax = MB_NAV_MAX;
-  int nanav;
-  int atime_i[7 * MB_NAV_MAX];
-  double atime_d[MB_NAV_MAX];
-  double alon[MB_NAV_MAX];
-  double alat[MB_NAV_MAX];
-  double aspeed[MB_NAV_MAX];
-  double aheading[MB_NAV_MAX];
-  double asensordepth[MB_NAV_MAX];
-  double aroll[MB_NAV_MAX];
-  double apitch[MB_NAV_MAX];
-  double aheave[MB_NAV_MAX];
-
-  /* counts of records read and written */
-  int n_rf_data = 0;
-  int n_rf_comment = 0;
-  int n_rf_nav = 0;
-  int n_rf_nav1 = 0;
-  int n_rf_nav2 = 0;
-  int n_rf_nav3 = 0;
-  int n_rf_att = 0;
-  int n_rf_att1 = 0;
-  int n_rf_att2 = 0;
-  int n_rf_att3 = 0;
-  int n_rt_data = 0;
-  int n_rt_comment = 0;
-  int n_rt_nav = 0;
-  int n_rt_nav1 = 0;
-  int n_rt_nav2 = 0;
-  int n_rt_nav3 = 0;
-  int n_rt_att = 0;
-  int n_rt_att1 = 0;
-  int n_rt_att2 = 0;
-  int n_rt_att3 = 0;
-    int n_rt_files = 0;
-
-  int n_wf_data = 0;
-  int n_wf_comment = 0;
-  int n_wf_nav = 0;
-  int n_wf_nav1 = 0;
-  int n_wf_nav2 = 0;
-  int n_wf_nav3 = 0;
-  int n_wf_att = 0;
-  int n_wf_att1 = 0;
-  int n_wf_att2 = 0;
-  int n_wf_att3 = 0;
-  int n_wt_data = 0;
-  int n_wt_comment = 0;
-  int n_wt_nav = 0;
-  int n_wt_nav1 = 0;
-  int n_wt_nav2 = 0;
-  int n_wt_nav3 = 0;
-  int n_wt_att = 0;
-  int n_wt_att1 = 0;
-  int n_wt_att2 = 0;
-  int n_wt_att3 = 0;
-  int n_wt_files = 0;
-
-  // int shellstatus;
-  // mb_path command = "";
-
-  mb_path afile = "";
-  memset(afile, 0, sizeof(mb_path));
-  FILE *afp = NULL;
-  struct stat file_status;
-  int fstat;
-  double start_time_d;
-  double end_time_d;
-  int istart, iend;
-  int input_size, input_modtime, output_size, output_modtime;
-
-  mb_path fnvfile = "";
-  memset(fnvfile, 0, sizeof(mb_path));
-  int isensor, ioffset;
-
-  int testformat;
-  int interp_error = MB_ERROR_NO_ERROR;
-  int jnav = 0;
-  int jsensordepth = 0;
-  int jheading = 0;
-  int jaltitude = 0;
-  int jattitude = 0;
-  int index = 0;
-  char buffer[16] = "";
-  int ii, nn;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
     fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1116,6 +896,17 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     skip_existing:                %d\n", skip_existing);
   }
 
+  /* platform definition file */
+  struct mb_platform_struct *platform = NULL;
+  // struct mb_sensor_struct *sensor_bathymetry = NULL;
+  // struct mb_sensor_struct *sensor_backscatter = NULL;
+  // struct mb_sensor_struct *sensor_heave = NULL;
+  struct mb_sensor_struct *sensor_position = NULL;
+  struct mb_sensor_struct *sensor_depth = NULL;
+  struct mb_sensor_struct *sensor_heading = NULL;
+  struct mb_sensor_struct *sensor_rollpitch = NULL;
+  struct mb_sensor_struct *sensor_target = NULL;
+
   /*-------------------------------------------------------------------*/
   /* load platform definition if specified */
   if (use_platform_file) {
@@ -1158,6 +949,210 @@ int main(int argc, char **argv) {
     if (target_sensor >= 0)
       sensor_target = &(platform->sensors[target_sensor]);
   }
+
+  /* asynchronous navigation, heading, altitude, attitude, soundspeed data */
+  int n_nav = 0;
+  int n_nav_alloc = 0;
+  double *nav_time_d = NULL;
+  double *nav_navlon = NULL;
+  double *nav_navlat = NULL;
+  double *nav_speed = NULL;
+
+  int n_sensordepth = 0;
+  int n_sensordepth_alloc = 0;
+  double *sensordepth_time_d = NULL;
+  double *sensordepth_sensordepth = NULL;
+
+  int n_heading = 0;
+  int n_heading_alloc = 0;
+  double *heading_time_d = NULL;
+  double *heading_heading = NULL;
+
+  int n_altitude = 0;
+  int n_altitude_alloc = 0;
+  double *altitude_time_d = NULL;
+  double *altitude_altitude = NULL;
+
+  int n_attitude = 0;
+  int n_attitude_alloc = 0;
+  double *attitude_time_d = NULL;
+  double *attitude_roll = NULL;
+  double *attitude_pitch = NULL;
+  double *attitude_heave = NULL;
+
+  int n_soundspeed = 0;
+  int n_soundspeed_alloc = 0;
+  double *soundspeed_time_d = NULL;
+  double *soundspeed_soundspeed = NULL;
+
+  int time_latency_num = 0;
+  int time_latency_alloc = 0;
+  double *time_latency_time_d = NULL;
+  double *time_latency_time_latency = NULL;
+
+  /* time domain filtering */
+
+  /* file indexing (used by some formats) */
+  int num_indextable = 0;
+  int num_indextable_alloc = 0;
+  struct mb_io_indextable_struct *indextable = NULL;
+  int i_num_indextable = 0;
+  struct mb_io_indextable_struct *i_indextable = NULL;
+
+  /* kluge various data fixes */
+  double kluge_first_time_d;
+  double kluge_last_time_d;
+  double dtime_d_expect;
+  double dtime_d;
+  double correction_start_time_d = 0.0;
+  int correction_start_index = 0;
+  int correction_end_index = -1;
+  bool kluge_fix_wissl_timestamps_setup1 = false;
+  bool kluge_fix_wissl_timestamps_setup2 = false;
+
+  /* MBIO read control parameters */
+  void *datalist = NULL;
+  double file_weight;
+  int iformat;
+  int oformat;
+  double btime_d;
+  double etime_d;
+  mb_path ifile = "";
+  memset(ifile, 0, sizeof(mb_path));
+  mb_path dfile = "";
+  memset(dfile, 0, sizeof(mb_path));
+  mb_path ofile = "";
+  memset(ofile, 0, sizeof(mb_path));
+  mb_path fileroot = "";
+  memset(fileroot, 0, sizeof(mb_path));
+  int beams_bath;
+  int beams_amp;
+  int pixels_ss;
+  int obeams_bath;
+  int obeams_amp;
+  int opixels_ss;
+
+  /* MBIO read values */
+  void *imbio_ptr = NULL;
+  void *ombio_ptr = NULL;
+  void *istore_ptr = NULL;
+  int kind;
+  int time_i[7];
+  double time_d;
+  double navlon;
+  double navlat;
+  double speed;
+  double heading;
+  double distance;
+  double altitude;
+  double sensordepth;
+  double draft;
+  double roll;
+  double pitch;
+  double heave;
+  char *beamflag = NULL;
+  double *bath = NULL;
+  double *bathacrosstrack = NULL;
+  double *bathalongtrack = NULL;
+  double *amp = NULL;
+  double *ss = NULL;
+  double *ssacrosstrack = NULL;
+  double *ssalongtrack = NULL;
+  char comment[MB_COMMENT_MAXLINE];
+  double navlon_org;
+  double navlat_org;
+  double speed_org;
+  double heading_org;
+  double altitude_org;
+  double sensordepth_org;
+  double draft_org;
+  double roll_org, roll_delta;
+  double pitch_org, pitch_delta;
+  double heave_org;
+  double depth_offset_change;
+
+  /* arrays for asynchronous data accessed using mb_extract_nnav() */
+  int nanavmax = MB_NAV_MAX;
+  int nanav;
+  int atime_i[7 * MB_NAV_MAX];
+  double atime_d[MB_NAV_MAX];
+  double alon[MB_NAV_MAX];
+  double alat[MB_NAV_MAX];
+  double aspeed[MB_NAV_MAX];
+  double aheading[MB_NAV_MAX];
+  double asensordepth[MB_NAV_MAX];
+  double aroll[MB_NAV_MAX];
+  double apitch[MB_NAV_MAX];
+  double aheave[MB_NAV_MAX];
+
+  /* counts of records read and written */
+  int n_rf_data = 0;
+  int n_rf_comment = 0;
+  int n_rf_nav = 0;
+  int n_rf_nav1 = 0;
+  int n_rf_nav2 = 0;
+  int n_rf_nav3 = 0;
+  int n_rf_att = 0;
+  int n_rf_att1 = 0;
+  int n_rf_att2 = 0;
+  int n_rf_att3 = 0;
+  int n_rt_data = 0;
+  int n_rt_comment = 0;
+  int n_rt_nav = 0;
+  int n_rt_nav1 = 0;
+  int n_rt_nav2 = 0;
+  int n_rt_nav3 = 0;
+  int n_rt_att = 0;
+  int n_rt_att1 = 0;
+  int n_rt_att2 = 0;
+  int n_rt_att3 = 0;
+    int n_rt_files = 0;
+
+  int n_wf_data = 0;
+  int n_wf_comment = 0;
+  int n_wf_nav = 0;
+  int n_wf_nav1 = 0;
+  int n_wf_nav2 = 0;
+  int n_wf_nav3 = 0;
+  int n_wf_att = 0;
+  int n_wf_att1 = 0;
+  int n_wf_att2 = 0;
+  int n_wf_att3 = 0;
+  int n_wt_data = 0;
+  int n_wt_comment = 0;
+  int n_wt_nav = 0;
+  int n_wt_nav1 = 0;
+  int n_wt_nav2 = 0;
+  int n_wt_nav3 = 0;
+  int n_wt_att = 0;
+  int n_wt_att1 = 0;
+  int n_wt_att2 = 0;
+  int n_wt_att3 = 0;
+  int n_wt_files = 0;
+
+  // int shellstatus;
+  // mb_path command = "";
+
+  mb_path afile = "";
+  FILE *afp = NULL;
+  struct stat file_status;
+  double start_time_d;
+  double end_time_d;
+  int istart, iend;
+  int input_size, input_modtime, output_size, output_modtime;
+
+  mb_path fnvfile = "";
+  int isensor, ioffset;
+
+  int testformat;
+  int interp_error = MB_ERROR_NO_ERROR;
+  int jnav = 0;
+  int jsensordepth = 0;
+  int jheading = 0;
+  int jaltitude = 0;
+  int jattitude = 0;
+  int index = 0;
+  char buffer[16] = "";
 
   /*-------------------------------------------------------------------*/
   /* load ancillary data from external files if requested */
@@ -1830,7 +1825,7 @@ int main(int argc, char **argv) {
         } else {
           /* if correction has been on and there was a negative jump that needs deleting */
           if (correction_on && correction_end_index > correction_start_index) {
-            for (ii=correction_start_index;ii<=correction_end_index;ii++) {
+            for (int ii = correction_start_index; ii <= correction_end_index; ii++) {
               fprintf(stderr,"DEP MBARI DELETE: i:%d t:%f\n", ii, sensordepth_time_d[ii]);
               sensordepth_time_d[ii] = 0.0;
             }
@@ -1842,10 +1837,10 @@ int main(int argc, char **argv) {
       }
 
       /* remove any samples that have had the timestamps zeroed */
-      nn = n_sensordepth;
+      int nn = n_sensordepth;
       for (int i = n_sensordepth-1;i>=0;i--) {
         if (sensordepth_time_d[i] == 0.0) {
-          for (ii=i;ii<nn-1;ii++) {
+          for (int ii = i; ii < nn - 1; ii++) {
             sensordepth_time_d[ii] = sensordepth_time_d[ii+1];
             sensordepth_sensordepth[ii] = sensordepth_sensordepth[ii+1];
           }
@@ -2332,7 +2327,7 @@ int main(int argc, char **argv) {
       appropriate request has been made */
     bool proceed = true;
     if (skip_existing) {
-      if ((fstat = stat(ifile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      if (stat(ifile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         input_modtime = file_status.st_mtime;
         input_size = file_status.st_size;
       }
@@ -2340,7 +2335,7 @@ int main(int argc, char **argv) {
         input_modtime = 0;
         input_size = 0;
       }
-      if ((fstat = stat(ofile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      if (stat(ofile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         output_modtime = file_status.st_mtime;
         output_size = file_status.st_size;
       }
@@ -2427,49 +2422,49 @@ int main(int argc, char **argv) {
 
       /* delete old synchronous and synchronous files */
       sprintf(afile, "%s.ata", ofile);
-      if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
       sprintf(afile, "%s.ath", ofile);
-      if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
       sprintf(afile, "%s.ats", ofile);
-      if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
       sprintf(afile, "%s.sta", ofile);
-      if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
       sprintf(afile, "%s.baa", ofile);
-      if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
       sprintf(afile, "%s.bah", ofile);
-      if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
       sprintf(afile, "%s.bas", ofile);
-      if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
       sprintf(afile, "%s.bsa", ofile);
-      if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
