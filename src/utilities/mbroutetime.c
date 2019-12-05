@@ -169,10 +169,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	double mtodeglon, mtodeglat;
-	double dx, dy;
-	int nread;
-
 	/* read route file */
 	FILE *fp = fopen(route_file, "r");
 	if (fp == NULL) {
@@ -182,7 +178,6 @@ int main(int argc, char **argv) {
 
 	bool rawroutefile = false;
 	char comment[MB_COMMENT_MAXLINE] = "";
-	char *result;
 	double heading;
 
 	int nroutepoint = 0;
@@ -194,6 +189,8 @@ int main(int argc, char **argv) {
 	double *routetime_d = NULL;
 
 	int error = MB_ERROR_NO_ERROR;
+
+	char *result;
 	while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 		if (comment[0] == '#') {
 			if (strncmp(comment, "## Route File Version", 21) == 0) {
@@ -221,12 +218,12 @@ int main(int argc, char **argv) {
 			if (point_ok && nroutepoint + 2 > nroutepointalloc) {
 				nroutepointalloc += MBES_ALLOC_NUM;
 				status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
-				status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelat, &error);
-				status =
+				status &= mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelat, &error);
+				status &=
 				    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routeheading, &error);
-				status =
+				status &=
 				    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int), (void **)&routewaypoint, &error);
-				status =
+				status &=
 				    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routetime_d, &error);
 				if (status != MB_SUCCESS) {
 					char *message;
@@ -266,6 +263,8 @@ int main(int argc, char **argv) {
 
 	/* set starting values */
 	int activewaypoint = 0;
+	double mtodeglon;
+	double mtodeglat;
 	mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
 	double rangelast = 1000 * rangethreshold;
 
@@ -383,7 +382,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* read and use data */
-		nread = 0;
+		int nread = 0;
 		while (error <= MB_ERROR_NO_ERROR && activewaypoint < nroutepoint) {
 			/* reset error */
 			error = MB_ERROR_NO_ERROR;
@@ -410,8 +409,8 @@ int main(int argc, char **argv) {
 
 				/* check survey data position against waypoints */
 				if (navlon != 0.0 && navlat != 0.0) {
-					dx = (navlon - routelon[activewaypoint]) / mtodeglon;
-					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
+					const double dx = (navlon - routelon[activewaypoint]) / mtodeglon;
+					const double dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 					range = sqrt(dx * dx + dy * dy);
 					if (verbose > 0)
 						fprintf(stderr, "> activewaypoint:%d time_d:%f range:%f   lon: %f %f   lat: %f %f\n", activewaypoint,
@@ -439,7 +438,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* close the swath file */
-		status = mb_close(verbose, &mbio_ptr, &error);
+		status &= mb_close(verbose, &mbio_ptr, &error);
 
 		/* output read statistics */
 		fprintf(stderr, "%d records read from %s\n", nread, file);
@@ -488,7 +487,7 @@ int main(int argc, char **argv) {
 	fclose(fp);
 
 	/* deallocate route arrays */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
