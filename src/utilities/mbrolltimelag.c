@@ -206,6 +206,7 @@ int main(int argc, char **argv) {
 	double time_d;
 	double roll;
 	int nscan = fscanf(fp, "%lf %lf", &time_d, &roll);
+	pclose(fp);
 	int nroll = 0;
 	int nroll_alloc = 0;
 	double *roll_time_d = NULL;
@@ -213,8 +214,8 @@ int main(int argc, char **argv) {
 	while (nscan == 2) {
 		if (nroll >= nroll_alloc) {
 			nroll_alloc += MBRTL_ALLOC_CHUNK;
-			status = mb_reallocd(verbose, __FILE__, __LINE__, nroll_alloc * sizeof(double), (void **)&roll_time_d, &error);
-			status = mb_reallocd(verbose, __FILE__, __LINE__, nroll_alloc * sizeof(double), (void **)&roll_roll, &error);
+			status &= mb_reallocd(verbose, __FILE__, __LINE__, nroll_alloc * sizeof(double), (void **)&roll_time_d, &error);
+			status &= mb_reallocd(verbose, __FILE__, __LINE__, nroll_alloc * sizeof(double), (void **)&roll_roll, &error);
 		}
 		if (nroll == 0 || time_d > roll_time_d[nroll - 1]) {
 			roll_time_d[nroll] = time_d;
@@ -222,7 +223,6 @@ int main(int argc, char **argv) {
 			nroll++;
 		}
 	}
-	pclose(fp);
 	fprintf(stderr, "%d roll data read from %s\n", nroll, swathdata);
 
 	/* open total cross correlation file */
@@ -287,7 +287,6 @@ int main(int argc, char **argv) {
 	}
 
 	/* slope data */
-	int nslope = 0;
 	int nslopetot = 0;
 	int nslope_alloc = 0;
 	double *slope_time_d = NULL;
@@ -302,19 +301,16 @@ int main(int argc, char **argv) {
 	double slopeminusmean;
 	double rollminusmean;
 	double r;
-	double sum_x = 0.0;
-	double sum_y = 0.0;
-	double sum_xy = 0.0;
-	double sum_x2 = 0.0;
-	double sum_y2 = 0.0;
+	// double sum_x = 0.0;
+	// double sum_y = 0.0;
+	// double sum_xy = 0.0;
+	// double sum_x2 = 0.0;
+	// double sum_y2 = 0.0;
 
 	int nrollmean;
 	double rollmean;
 	double slopemean;
 
-	int peakkmax;
-	int peakksum;
-	double time_d_avg;
 	int nestimate = 0;
 	int nmodel = 0;
 
@@ -330,17 +326,17 @@ int main(int argc, char **argv) {
 	/* loop over all files to be read */
 	while (read_data) {
 		nestimate = 0;
-		nslope = 0;
-		time_d_avg = 0.0;
+		int nslope = 0;
+		double time_d_avg = 0.0;
 		sprintf(cmdfile, "mblist -I%s -F%d -OMAR", swathfile, format);
 		fprintf(stderr, "\nRunning %s...\n", cmdfile);
 		fp = popen(cmdfile, "r");
 		while ((nscan = fscanf(fp, "%lf %lf %lf", &time_d, &slope, &roll)) == 3) {
 			if (nslope >= nslope_alloc) {
 				nslope_alloc += MBRTL_ALLOC_CHUNK;
-				status = mb_reallocd(verbose, __FILE__, __LINE__, nslope_alloc * sizeof(double), (void **)&slope_time_d, &error);
-				status = mb_reallocd(verbose, __FILE__, __LINE__, nslope_alloc * sizeof(double), (void **)&slope_slope, &error);
-				status = mb_reallocd(verbose, __FILE__, __LINE__, nslope_alloc * sizeof(double), (void **)&slope_roll, &error);
+				status &= mb_reallocd(verbose, __FILE__, __LINE__, nslope_alloc * sizeof(double), (void **)&slope_time_d, &error);
+				status &= mb_reallocd(verbose, __FILE__, __LINE__, nslope_alloc * sizeof(double), (void **)&slope_slope, &error);
+				status &= mb_reallocd(verbose, __FILE__, __LINE__, nslope_alloc * sizeof(double), (void **)&slope_roll, &error);
 			}
 			if (nslope == 0 || time_d > slope_time_d[nslope - 1]) {
 				slope_time_d[nslope] = time_d;
@@ -403,12 +399,11 @@ int main(int argc, char **argv) {
 					nrollmean++;
 				}
 			}
+
 			if (nrollmean > 0) {
 				rollmean /= nrollmean;
-			}
 
-			/* calculate cross correlation for the specified time lags */
-			if (nrollmean > 0) {
+				/* calculate cross correlation for the specified time lags */
 				fprintf(fpx, ">\n");
 				if (fpt != NULL)
 					fprintf(fpt, ">\n");
@@ -494,18 +489,16 @@ int main(int argc, char **argv) {
 			/* print out best correlated time lag estimates */
 			if (peakr > rthreshold) {
 				timelaghistogram[peakk]++;
-			}
 
-			/* augment histogram */
-			if (peakr > rthreshold) {
+				/* augment histogram */
 				fprintf(fpe, "%10.3f %6.3f\n", slope_time_d[(j0 + j1) / 2], peaktimelag);
 				fprintf(fpf, "%6.3f\n", peaktimelag);
 				fprintf(fph, "%6.3f\n", peaktimelag);
-				sum_x += slope_time_d[(j0 + j1) / 2];
-				sum_y += peaktimelag;
-				sum_xy += slope_time_d[(j0 + j1) / 2] * peaktimelag;
-				sum_x2 += slope_time_d[(j0 + j1) / 2] * slope_time_d[(j0 + j1) / 2];
-				sum_y2 += peaktimelag * peaktimelag;
+				// sum_x += slope_time_d[(j0 + j1) / 2];
+				// sum_y += peaktimelag;
+				// sum_xy += slope_time_d[(j0 + j1) / 2] * peaktimelag;
+				// sum_x2 += slope_time_d[(j0 + j1) / 2] * slope_time_d[(j0 + j1) / 2];
+				// sum_y2 += peaktimelag * peaktimelag;
 				nestimate++;
 			}
 
@@ -533,8 +526,8 @@ int main(int argc, char **argv) {
 
 		/* output peak time lag */
 		peakk = 0;
-		peakkmax = 0;
-		peakksum = 0;
+		int peakkmax = 0;
+		int peakksum = 0;
 		timelag = 0.0;
 		for (int k = 0; k < nlag; k++) {
 			if (timelaghistogram[k] > peakkmax) {
@@ -567,12 +560,11 @@ int main(int argc, char **argv) {
 
 		/* end loop over files in list */
 	}
-	if (read_datalist)
+	if (read_datalist) {
 		mb_datalist_close(verbose, &datalist, &error);
-
-	// TODO(schwehr): Why not: if (ftp) fclose(fpt);
-	if (read_datalist)
 		fclose(fpt);
+	}
+
 	fclose(fpe);
 	fclose(fph);
 	fclose(fpm);
@@ -613,12 +605,16 @@ int main(int argc, char **argv) {
 
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	/* give the statistics */
 	if (verbose >= 1) {
 		fprintf(stderr, "\n%d input roll records\n", nroll);
 		fprintf(stderr, "%d input slope\n", nslopetot);
+	}
+
+	if (status == MB_FAILURE) {
+		fprintf(stderr, "WARNING: status is MB_FAILURE\n");
 	}
 
 	exit(error);

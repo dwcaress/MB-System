@@ -98,9 +98,6 @@ void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, 
 	static int isub[10];
 
 	int line[10];
-	int i = 0;
-	int j2;
-	int l;
 
 	int iet = 0; // initial error flags, one for triagularization
 	int ieb = 0; // one for backsolving
@@ -116,6 +113,7 @@ void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, 
 			// line=0 flags unused lines
 		}
 
+		int i1 = 0;
 		for (int j = 0; j < n - 1; j++) {
 			//  triangularize matrix by partial pivoting
 			double big = 0.0; // find biggest element in j-th column
@@ -124,7 +122,7 @@ void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, 
 				if (line[l1] == 0) {
 					const double testa = (double)fabs((double)(*(a + l1 * nstore + j)));
 					if (testa > big) {
-						i = l1;
+						i1 = l1;
 						big = testa;
 					}
 				}
@@ -133,16 +131,16 @@ void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, 
 				iet = 1;
 			}
 
-			line[i] = 1; // selected unused line becomes used line
-			isub[j] = i; // isub points to j-th row of tri. matrix
+			line[i1] = 1; // selected unused line becomes used line
+			isub[j] = i1; // isub points to j-th row of tri. matrix
 
-			const double sum = 1.0 / (*(a + i * nstore + j));
+			const double sum = 1.0 / (*(a + i1 * nstore + j));
 			// reduce matrix towards triangle
 			for (int k = 0; k < n; k++) {
 				if (line[k] == 0) {
 					const double b = (*(a + k * nstore + j)) * sum;
-					for (l = j + 1; l < n; l++) {
-						*(a + k * nstore + l) = (*(a + k * nstore + l)) - b * (*(a + i * nstore + l));
+					for (int l = j + 1; l < n; l++) {
+						*(a + k * nstore + l) = (*(a + k * nstore + l)) - b * (*(a + i1 * nstore + l));
 					}
 					*(a + k * nstore + j) = b;
 				}
@@ -162,9 +160,10 @@ void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, 
 
 	// start backsolving
 
-	for (i = 0; i < n; i++) { // invert pointers. line(i) now gives
-		                  // row no in triang matrix of i-th row
-		                  // of actual matrix
+	// invert pointers. line(i) now gives
+	// row no in triang matrix of i-th row
+	// of actual matrix
+	for (int i = 0; i < n; i++) {
 		line[isub[i]] = i;
 	}
 
@@ -186,7 +185,7 @@ void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, 
 
 	for (int j = n - 2; j >= 0; j--) {  // backsolve rest of triangle
 		double sum = vec[isub[j]];
-		for (j2 = j + 1; j2 < n; j2++) {
+		for (int j2 = j + 1; j2 < n; j2++) {
 			sum = sum - vec[isub[j2]] * (*(a + isub[j] * nstore + j2));
 		}
 		b = *(a + isub[j] * nstore + j);
@@ -199,7 +198,7 @@ void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, 
 
 	// put the solution vector into the proper order
 	// reorder solution
-	for (i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++) {
 		int j = 0;
 		for (int k = i; k < n; k++) { // search for i-th solution element
 			if (line[k] == i) {
@@ -456,8 +455,8 @@ int main(int argc, char **argv) {
 	}
 
 	/* allocate memory for counting arrays */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, xdim * ydim * sizeof(int), (void **)&icount, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, xdim * ydim * sizeof(int), (void **)&jcount, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, xdim * ydim * sizeof(int), (void **)&icount, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, xdim * ydim * sizeof(int), (void **)&jcount, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
@@ -489,14 +488,14 @@ int main(int argc, char **argv) {
 	}
 
 	/* allocate memory for reading data arrays */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&beamflag, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlon, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlat, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_amp * sizeof(double), (void **)&amp, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ss, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslon, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslat, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&beamflag, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlon, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlat, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_amp * sizeof(double), (void **)&amp, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ss, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslon, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslat, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
@@ -509,7 +508,7 @@ int main(int argc, char **argv) {
 
 	/* loop over reading */
 	while (error <= MB_ERROR_NO_ERROR) {
-		status = mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
+		status &= mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
 		                 &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathlon, bathlat, ss,
 		                 sslon, sslat, comment, &error);
 
@@ -542,7 +541,7 @@ int main(int argc, char **argv) {
 				}
 		}
 	}
-	status = mb_close(verbose, &mbio_ptr, &error);
+	status &= mb_close(verbose, &mbio_ptr, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
@@ -551,10 +550,17 @@ int main(int argc, char **argv) {
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&sslon, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&sslat, &error);
+
+	if (status == MB_FAILURE) {
+		fprintf(stderr, "WARNING: status is MB_FAILURE\n");
+	}
+
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
-	if (verbose >= 2)
+
+	if (verbose >= 2) {
 		fprintf(outfp, "\n");
+	}
 	fprintf(outfp, "%d depth points counted in %s\n", ndatafile, ifile);
 
 	/* count data in second swath file */
@@ -572,14 +578,14 @@ int main(int argc, char **argv) {
 	}
 
 	/* allocate memory for reading data arrays */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&beamflag, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlon, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlat, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_amp * sizeof(double), (void **)&amp, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ss, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslon, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslat, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&beamflag, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlon, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlat, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_amp * sizeof(double), (void **)&amp, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ss, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslon, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslat, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
@@ -625,7 +631,7 @@ int main(int argc, char **argv) {
 				}
 		}
 	}
-	status = mb_close(verbose, &mbio_ptr, &error);
+	status &= mb_close(verbose, &mbio_ptr, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
@@ -634,15 +640,22 @@ int main(int argc, char **argv) {
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&sslon, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&sslat, &error);
+
+	if (status == MB_FAILURE) {
+		fprintf(stderr, "WARNING: status is MB_FAILURE\n");
+	}
+
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
-	if (verbose >= 2)
+
+	if (verbose >= 2) {
 		fprintf(outfp, "\n");
+	}
 	fprintf(outfp, "%d depth points counted in %s\n", ndatafile, jfile);
 
 	/* allocate space for data */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, xdim * ydim * sizeof(struct bathptr), (void **)&idata, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, xdim * ydim * sizeof(struct bathptr), (void **)&jdata, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, xdim * ydim * sizeof(struct bathptr), (void **)&idata, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, xdim * ydim * sizeof(struct bathptr), (void **)&jdata, &error);
 	for (int i = 0; i < xdim; i++)
 		for (int j = 0; j < ydim; j++) {
 			const int k = i * ydim + j;
@@ -685,14 +698,14 @@ int main(int argc, char **argv) {
 	}
 
 	/* allocate memory for reading data arrays */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&beamflag, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlon, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlat, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_amp * sizeof(double), (void **)&amp, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ss, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslon, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslat, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&beamflag, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlon, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlat, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_amp * sizeof(double), (void **)&amp, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ss, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslon, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslat, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
@@ -743,7 +756,9 @@ int main(int argc, char **argv) {
 				}
 		}
 	}
-	status = mb_close(verbose, &mbio_ptr, &error);
+
+	status &= mb_close(verbose, &mbio_ptr, &error);
+
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
@@ -752,10 +767,17 @@ int main(int argc, char **argv) {
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&sslon, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&sslat, &error);
+
+	if (status == MB_FAILURE) {
+		fprintf(stderr, "WARNING: status is MB_FAILURE\n");
+	}
+
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
-	if (verbose >= 2)
+
+	if (verbose >= 2) {
 		fprintf(outfp, "\n");
+	}
 	fprintf(outfp, "%d depth points read from %s\n", ndatafile, ifile);
 
 	/* read data in second swath file */
@@ -773,14 +795,14 @@ int main(int argc, char **argv) {
 	}
 
 	/* allocate memory for reading data arrays */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&beamflag, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlon, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlat, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_amp * sizeof(double), (void **)&amp, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ss, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslon, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslat, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&beamflag, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlon, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathlat, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_amp * sizeof(double), (void **)&amp, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ss, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslon, &error);
+	/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&sslat, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
@@ -793,7 +815,7 @@ int main(int argc, char **argv) {
 
 	/* loop over reading */
 	while (error <= MB_ERROR_NO_ERROR) {
-		status = mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
+		status &= mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
 		                 &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathlon, bathlat, ss,
 		                 sslon, sslat, comment, &error);
 
@@ -814,7 +836,7 @@ int main(int argc, char **argv) {
 		}
 
 		if (error == MB_ERROR_NO_ERROR) {
-			for (ib = 0; ib < beams_bath; ib++)
+			for (ib = 0; ib < beams_bath; ib++) {
 				if (mb_beam_ok(beamflag[ib])) {
 					ix = (bathlon[ib] - bounds[0]) / dx;
 					iy = (bathlat[ib] - bounds[2]) / dy;
@@ -829,9 +851,12 @@ int main(int argc, char **argv) {
 						ndatafile++;
 					}
 				}
+			}
 		}
 	}
-	status = mb_close(verbose, &mbio_ptr, &error);
+
+	status &= mb_close(verbose, &mbio_ptr, &error);
+
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bathlon, &error);
@@ -840,10 +865,17 @@ int main(int argc, char **argv) {
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&sslon, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&sslat, &error);
+
+	if (status == MB_FAILURE) {
+		fprintf(stderr, "WARNING: status is MB_FAILURE\n");
+	}
+
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
-	if (verbose >= 2)
+
+	if (verbose >= 2) {
 		fprintf(outfp, "\n");
+	}
 	fprintf(outfp, "%d depth points read from %s\n", ndatafile, jfile);
 
 	/* loop over regions */
@@ -993,7 +1025,7 @@ int main(int argc, char **argv) {
 		}
 
 	/* deallocate space for data */
-	for (int i = 0; i < xdim; i++)
+	for (int i = 0; i < xdim; i++) {
 		for (int j = 0; j < ydim; j++) {
 			const int k = i * ydim + j;
 			if (icount[k] > 0) {
@@ -1003,14 +1035,15 @@ int main(int argc, char **argv) {
 				status = mb_freed(verbose, __FILE__, __LINE__, (void **)&jdata[k].ptr, &error);
 			}
 		}
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&idata, &error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&jdata, &error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&icount, &error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&jcount, &error);
+	}
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&idata, &error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&jdata, &error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&icount, &error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&jcount, &error);
 
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
