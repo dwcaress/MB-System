@@ -76,6 +76,7 @@ struct mbrphsbias_ping_struct {
 	double *bheave;
 	double *alongtrack_offset;
 };
+
 struct mbrphsbias_file_struct {
 	char path[MB_PATH_MAXLINE];
 	int format;
@@ -132,90 +133,15 @@ int main(int argc, char **argv) {
 	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
-	int error = MB_ERROR_NO_ERROR;
 
-	/* MBIO read control parameters */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
-	int kind;
-	char read_file[MB_PATH_MAXLINE];
-	char swathfile[MB_PATH_MAXLINE];
-	char swathfileread[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	void *datalist;
-	double file_weight;
-	int formatread;
-	int variable_beams;
-	int traveltime;
-	int beam_flagging;
-	double btime_d;
-	double etime_d;
-	struct mb_info_struct mb_info;
+	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
 
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	double draft;
-	double ssv;
-	double roll;
-	double pitch;
-	double heave;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	char *beamflag;
-	double *bath;
-	double *amp;
-	double *bathacrosstrack;
-	double *bathalongtrack;
-	double *ss;
-	double *ssacrosstrack;
-	double *ssalongtrack;
-	double *ttimes;
-	double *angles;
-	double *angles_forward;
-	double *angles_null;
-	double *bheave;
-	double *alongtrack_offset;
-	char comment[MB_COMMENT_MAXLINE];
-
-	/* control parameters */
-	double areabounds[4];
 	bool areaboundsset = false;
+	double areabounds[4] = {0.0, 0.0, 0.0, 0.0};
+
 	double binsize = 0.0;
 	bool binsizeset = false;
-	double mtodeglon;
-	double mtodeglat;
 
-	/* sounding atorage values and arrays */
-	int nfile = 0;
-	int nfile_alloc = 0;
-	struct mbrphsbias_file_struct *files = NULL;
-	int *gsndgnum = NULL;
-	double *gsndgsqsum = NULL;
-
-	/* counting parameters */
-	int files_tot = 0;
-	int pings_tot = 0;
-	int beams_tot = 0;
-	int beams_good_tot = 0;
-	int beams_flagged_tot = 0;
-	int beams_null_tot = 0;
-
-	struct mbrphsbias_ping_struct *ping;
-	struct mbrphsbias_file_struct *file;
-
-	int nbeams;
-
-	strcpy(read_file, "datalist.mb-1");
-
-	/* process argument list */
 	{
 		bool errflg = false;
 		int c;
@@ -304,9 +230,14 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(error);
+			exit(MB_ERROR_NO_ERROR);
 		}
 	}
+
+	int error = MB_ERROR_NO_ERROR;
+
+	int formatread;
+	struct mb_info_struct mb_info;
 
 	/* if bounds not set get bounds of input data */
 	if (!areaboundsset) {
@@ -323,6 +254,8 @@ int main(int argc, char **argv) {
 	}
 
 	/* calculate area grid properties */
+	double mtodeglon;
+	double mtodeglat;
 	mb_coor_scale(verbose, 0.5 * (areabounds[2] + areabounds[3]), &mtodeglon, &mtodeglat);
 	if (binsize <= 0.0)
 		binsize = (areabounds[1] - areabounds[0]) / 101 / mtodeglon;
@@ -335,8 +268,11 @@ int main(int argc, char **argv) {
 		dy = (areabounds[3] - areabounds[2]) / (ny - 1);
 	}
 
+	int *gsndgnum = NULL;
+	double *gsndgsqsum = NULL;
+
 	/* allocate grid arrays */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, nx * ny * sizeof(int *), (void **)&gsndgnum, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, nx * ny * sizeof(int *), (void **)&gsndgnum, &error);
 	if (status == MB_SUCCESS)
 		status = mb_mallocd(verbose, __FILE__, __LINE__, nx * ny * sizeof(double), (void **)&gsndgsqsum, &error);
 
@@ -378,6 +314,10 @@ int main(int argc, char **argv) {
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
 	bool read_data;
+	void *datalist;
+	char swathfile[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
+	double file_weight;
 
 	/* open file list */
 	if (read_datalist) {
@@ -393,6 +333,67 @@ int main(int argc, char **argv) {
 		strcpy(swathfile, read_file);
 		read_data = true;
 	}
+
+	/* MBIO read control parameters */
+	void *mbio_ptr = NULL;
+	void *store_ptr = NULL;
+	int kind;
+	char swathfileread[MB_PATH_MAXLINE];
+	int variable_beams;
+	int traveltime;
+	int beam_flagging;
+	double btime_d;
+	double etime_d;
+
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	double draft;
+	double ssv;
+	double roll;
+	double pitch;
+	double heave;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+	char *beamflag;
+	double *bath;
+	double *amp;
+	double *bathacrosstrack;
+	double *bathalongtrack;
+	double *ss;
+	double *ssacrosstrack;
+	double *ssalongtrack;
+	double *ttimes;
+	double *angles;
+	double *angles_forward;
+	double *angles_null;
+	double *bheave;
+	double *alongtrack_offset;
+	char comment[MB_COMMENT_MAXLINE];
+
+	/* sounding atorage values and arrays */
+	int nfile = 0;
+	int nfile_alloc = 0;
+	struct mbrphsbias_file_struct *files = NULL;
+
+	/* counting parameters */
+	int pings_tot = 0;
+	int beams_tot = 0;
+	int beams_good_tot = 0;
+	int beams_flagged_tot = 0;
+	int beams_null_tot = 0;
+
+	struct mbrphsbias_ping_struct *ping;
+	struct mbrphsbias_file_struct *file;
+
+	int nbeams;
 
 	/* loop over all files to be read */
 	while (read_data) {
@@ -513,7 +514,7 @@ int main(int argc, char **argv) {
 		file->num_beams_null = 0;
 		file->num_pings_alloc = PINGALLOCNUM;
 		file->pings = NULL;
-		status = mb_mallocd(verbose, __FILE__, __LINE__, file->num_pings_alloc * sizeof(struct mbrphsbias_ping_struct),
+		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, file->num_pings_alloc * sizeof(struct mbrphsbias_ping_struct),
 		                    (void **)&(file->pings), &error);
 		if (error != MB_ERROR_NO_ERROR) {
 			char *message = NULL;
@@ -542,9 +543,9 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "dbg2    status:     %d\n", status);
 			}
 			if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
-				status = mb_extract_nav(verbose, mbio_ptr, store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
+				status &= mb_extract_nav(verbose, mbio_ptr, store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
 				                        &draft, &roll, &pitch, &heave, &error);
-				status = mb_ttimes(verbose, mbio_ptr, store_ptr, &kind, &nbeams, ttimes, angles, angles_forward, angles_null,
+				status &= mb_ttimes(verbose, mbio_ptr, store_ptr, &kind, &nbeams, ttimes, angles, angles_forward, angles_null,
 				                   bheave, alongtrack_offset, &draft, &ssv, &error);
 
 				/* allocate memory if necessary */
@@ -562,32 +563,32 @@ int main(int argc, char **argv) {
 					}
 				}
 				ping = &(file->pings[file->num_pings]);
-				status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&(ping->beamflag), &error);
+				/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&(ping->beamflag), &error);
 				if (error == MB_ERROR_NO_ERROR)
-					status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&(ping->bath), &error);
+					/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&(ping->bath), &error);
 				if (error == MB_ERROR_NO_ERROR)
-					status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
+					/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
 					                    (void **)&(ping->bathacrosstrack), &error);
 				if (error == MB_ERROR_NO_ERROR)
-					status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
+					/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
 					                    (void **)&(ping->bathalongtrack), &error);
 				if (error == MB_ERROR_NO_ERROR)
-					status =
+					/* status &= */
 					    mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&(ping->ttimes), &error);
 				if (error == MB_ERROR_NO_ERROR)
-					status =
+					/* status &= */
 					    mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&(ping->angles), &error);
 				if (error == MB_ERROR_NO_ERROR)
-					status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
+					/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
 					                    (void **)&(ping->angles_forward), &error);
 				if (error == MB_ERROR_NO_ERROR)
-					status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&(ping->angles_null),
+					/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&(ping->angles_null),
 					                    &error);
 				if (error == MB_ERROR_NO_ERROR)
-					status =
+					/* status &= */
 					    mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&(ping->bheave), &error);
 				if (error == MB_ERROR_NO_ERROR)
-					status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
+					/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
 					                    (void **)&(ping->alongtrack_offset), &error);
 				if (error != MB_ERROR_NO_ERROR) {
 					char *message = NULL;
@@ -656,21 +657,17 @@ int main(int argc, char **argv) {
 		}
 
 		/* close the files */
-		status = mb_close(verbose, &mbio_ptr, &error);
+		status &= mb_close(verbose, &mbio_ptr, &error);
 
-		/* figure out whether and what to read next */
-		if (read_datalist) {
-			read_data = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
-		} else {
-			read_data = false;
-		}
+		read_data = read_datalist && mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error) == MB_SUCCESS;
 	}
 
 	/* give the total statistics */
 	if (verbose >= 0) {
 		fprintf(stderr, "\nMBrphsbias Processing Totals:\n");
 		fprintf(stderr, "-------------------------\n");
-		fprintf(stderr, "%d total swath data files processed\n", files_tot);
+		// int files_tot = 0;
+		// fprintf(stderr, "%d total swath data files processed\n", files_tot);
 		fprintf(stderr, "%d total pings processed\n", pings_tot);
 		fprintf(stderr, "%d total soundings processed\n", beams_tot);
 		fprintf(stderr, "-------------------------\n");
@@ -678,7 +675,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* free arrays */
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&gsndgnum, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&gsndgsqsum, &error);
 
@@ -701,12 +697,9 @@ int main(int argc, char **argv) {
 	}
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&files, &error);
 
-	/* set program status */
-	status = MB_SUCCESS;
-
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
