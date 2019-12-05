@@ -308,19 +308,15 @@ int main(int argc, char **argv) {
 	int iystart, iyend;
 	double factor, gtime, btime, stime, dtime, tmax;
 	double cosfactor;
-	double filtersum;
 	double btimesave = 0.0;
 	double stimesave = 0.0;
 	double dtimesave = 0.0;
 	double mtodeglon, mtodeglat;
 	double navlon, navlat;
 	double line_distance, line_dx, line_dy, trace_x;
-	double cos_arg;
 	int plot_status;
-	int worktrace_alloc;
-	int filtertrace_alloc;
-	int nfilter;
-	int iagchalfwindow;
+	// int nfilter;
+	// int iagchalfwindow;
 
 	/* set file to null */
 	segyfile[0] = '\0';
@@ -672,9 +668,7 @@ int main(int argc, char **argv) {
 	if (verbose > 0)
 		fprintf(outfp, "\n");
 
-	/* proceed if all ok */
 	if (status == MB_SUCCESS) {
-
 		/* initialize grid and weight arrays */
 		for (int k = 0; k < ngridxy; k++) {
 			grid[k] = 0.0;
@@ -682,6 +676,8 @@ int main(int argc, char **argv) {
 		}
 
 		bool traceok;
+		int filtertrace_alloc = 0;
+		int worktrace_alloc = 0;
 
 		/* read and print data */
 		int nread = 0;
@@ -885,21 +881,21 @@ int main(int argc, char **argv) {
 							                     (void **)&worktrace, &error);
 							worktrace_alloc = traceheader.nsamps;
 						}
-						nfilter = 2 * ((int)(0.5 * filterwindow / sampleinterval)) + 1;
+						const int nfilter = 2 * ((int)(0.5 * filterwindow / sampleinterval)) + 1;
 						if (filtertrace == NULL || nfilter > filtertrace_alloc) {
 							status =
 							    mb_reallocd(verbose, __FILE__, __LINE__, nfilter * sizeof(float), (void **)&filtertrace, &error);
 							filtertrace_alloc = nfilter;
 						}
-						filtersum = 0.0;
+						// double filtersum = 0.0;
 						for (int j = 0; j < nfilter; j++) {
-							cos_arg = (0.5 * M_PI * (j - nfilter / 2)) / (0.5 * nfilter);
+							const double cos_arg = (0.5 * M_PI * (j - nfilter / 2)) / (0.5 * nfilter);
 							filtertrace[j] = cos(cos_arg);
-							filtersum += filtertrace[j];
+							// filtersum += filtertrace[j];
 						}
 						for (int i = 0; i <= traceheader.nsamps; i++) {
 							worktrace[i] = 0.0;
-							filtersum = 0.0;
+							double filtersum = 0.0;
 							const int jstart = MAX(nfilter / 2 - i, 0);
 							const int jend = MIN(nfilter - 1, nfilter - 1 + (traceheader.nsamps - 1 - nfilter / 2 - i));
 							for (int j = jstart; j <= jend; j++) {
@@ -921,7 +917,7 @@ int main(int argc, char **argv) {
 							                     (void **)&worktrace, &error);
 							worktrace_alloc = traceheader.nsamps;
 						}
-						iagchalfwindow = 0.5 * agcwindow / sampleinterval;
+						const int iagchalfwindow = 0.5 * agcwindow / sampleinterval;
 						for (int i = 0; i <= traceheader.nsamps; i++) {
 							igainstart = i - iagchalfwindow;
 							igainstart = MAX(0, igainstart);
