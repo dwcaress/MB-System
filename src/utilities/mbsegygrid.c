@@ -467,56 +467,20 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	void *mbsegyioptr;
-	struct mb_segyasciiheader_struct asciiheader;
-	struct mb_segyfileheader_struct fileheader;
-	struct mb_segytraceheader_struct traceheader;
-	float *trace = NULL;
-	float *worktrace = NULL;
-	float *filtertrace = NULL;
-
-	/* grid controls */
-	char gridfile[MB_PATH_MAXLINE] = "";
-	double sampleinterval = 0.0;
-	int ntraces;
-	int ngridx = 0;
-	int ngridy = 0;
-	int ngridxy = 0;
-	float *grid = NULL;
-	float *gridweight = NULL;
-	double xmin;
-	double xmax;
-	double ymin;
-	double ymax;
-	double dx;
-	double dy;
-	double gridmintot = 0.0;
-	double gridmaxtot = 0.0;
-	char projection[MB_PATH_MAXLINE] = "";
-	char xlabel[MB_PATH_MAXLINE] = "";
-	char ylabel[MB_PATH_MAXLINE] = "";
-	char zlabel[MB_PATH_MAXLINE] = "";
-	char title[MB_PATH_MAXLINE] = "";
-	char plot_cmd[MB_PATH_MAXLINE] = "";
+	int error = MB_ERROR_NO_ERROR;
 
 	int sinftracemode = MBSEGYGRID_USESHOT;
 	int sinftracestart = 0;
 	int sinftraceend = 0;
 	int sinfchanstart = 0;
 	int sinfchanend = -1;
+
 	double sinftimesweep = 0.0;
 	double sinftimedelay = 0.0;
 	double sinfstartlon = 0.0;
 	double sinfstartlat = 0.0;
 	double sinfendlon = 0.0;
 	double sinfendlat = 0.0;
-
-	double xwidth, ywidth;
-	double mtodeglon, mtodeglat;
-	double line_distance, line_dx, line_dy;
-	int plot_status;
-
-	int error = MB_ERROR_NO_ERROR;
 
 	/* get segy limits if required */
 	if (traceend < 1 || traceend < tracestart || timesweep <= 0.0 || (plotmode == MBSEGYGRID_PLOTBYDISTANCE && startlon == 0.0)) {
@@ -561,6 +525,9 @@ int main(int argc, char **argv) {
 	}
 
 	/* initialize reading the segy file */
+	void *mbsegyioptr;
+	struct mb_segyasciiheader_struct asciiheader;
+	struct mb_segyfileheader_struct fileheader;
 	if (mb_segy_read_init(verbose, segyfile, &mbsegyioptr, &asciiheader, &fileheader, &error) != MB_SUCCESS) {
 		char *message;
 		mb_error(verbose, error, &message);
@@ -571,12 +538,28 @@ int main(int argc, char **argv) {
 	}
 
 	/* calculate implied grid parameters */
+	char gridfile[MB_PATH_MAXLINE] = "";
 	strcpy(gridfile, fileroot);
 	strcat(gridfile, ".grd");
-	if (chanend >= chanstart)
-		ntraces = (traceend - tracestart + 1) * (chanend - chanstart + 1);
-	else
-		ntraces = traceend - tracestart + 1;
+	const int ntraces =
+		chanend >= chanstart
+		? (traceend - tracestart + 1) * (chanend - chanstart + 1)
+		: traceend - tracestart + 1;
+
+	int ngridx = 0;
+	int ngridy = 0;
+	int ngridxy = 0;
+	double sampleinterval = 0.0;
+	double xmin;
+	double xmax;
+	double ymin;
+	double ymax;
+	double dx;
+	double dy;
+	double mtodeglon;
+	double mtodeglat;
+	double line_dx = 0.0;
+	double line_dy = 0.0;
 
 	/* set up plotting trace by trace */
 	if (plotmode == MBSEGYGRID_PLOTBYTRACENUMBER) {
@@ -597,7 +580,7 @@ int main(int argc, char **argv) {
 		mb_coor_scale(verbose, 0.5 * (startlat + endlat), &mtodeglon, &mtodeglat);
 		dx = (endlon - startlon) / mtodeglon;
 		dy = (endlat - startlat) / mtodeglat;
-		line_distance = sqrt(dx * dx + dy * dy);
+		const double line_distance = sqrt(dx * dx + dy * dy);
 		line_dx = dx / line_distance;
 		line_dy = dy / line_distance;
 
@@ -626,10 +609,12 @@ int main(int argc, char **argv) {
 	// TODO(schwehr): What about MBSEGYGRID_WINDOW_SEAFLOOR?
 	// TODO(schwehr): What about MBSEGYGRID_WINDOW_DEPTH?
 
+	float *grid = NULL;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridxy * sizeof(float), (void **)&grid, &error);
+	float *gridweight = NULL;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridxy * sizeof(float), (void **)&gridweight, &error);
 
-	/* output info */
+	// TODO(schwehr): When is verbose ever negative?
 	if (verbose >= 0) {
 		fprintf(outfp, "\nMBsegygrid Parameters:\n");
 		fprintf(outfp, "Input segy file:         %s\n", segyfile);
@@ -680,6 +665,11 @@ int main(int argc, char **argv) {
 	if (verbose > 0)
 		fprintf(outfp, "\n");
 
+	float *worktrace = NULL;
+	float *filtertrace = NULL;
+	double gridmintot = 0.0;
+	double gridmaxtot = 0.0;
+
 	if (status == MB_SUCCESS) {
 		/* initialize grid and weight arrays */
 		for (int k = 0; k < ngridxy; k++) {
@@ -701,7 +691,9 @@ int main(int argc, char **argv) {
 		/* read and print data */
 		int nread = 0;
 		while (error <= MB_ERROR_NO_ERROR) {
-			/* reset error */
+			struct mb_segytraceheader_struct traceheader;
+			float *trace = NULL;
+
 			error = MB_ERROR_NO_ERROR;
 
 			/* read a trace */
@@ -1028,9 +1020,16 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	/* grid controls */
+	char xlabel[MB_PATH_MAXLINE] = "";
+	char ylabel[MB_PATH_MAXLINE] = "";
+
+	int plot_status;
+
 	/* write out the grid */
 	error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
+	char projection[MB_PATH_MAXLINE] = "";
 	strcpy(projection, "SeismicProfile");
 	if (scale2distance) {
 		strcpy(xlabel, "Distance (m)");
@@ -1041,19 +1040,20 @@ int main(int argc, char **argv) {
 		ymax = timescale * ymax;
 		dx = shotscale * decimatex;
 		dy = timescale * sampleinterval / decimatey;
-	}
-	else {
+	} else {
 		strcpy(xlabel, "Trace Number");
 		strcpy(ylabel, "Travel Time (seconds)");
 		dx = (double)decimatex;
 		dy = sampleinterval / decimatey;
 	}
+
+	char zlabel[MB_PATH_MAXLINE] = "";
 	strcpy(zlabel, "Trace Signal");
+	char title[MB_PATH_MAXLINE] = "";
 	sprintf(title, "Seismic Grid from %s", segyfile);
 	status &= mb_write_gmt_grd(verbose, gridfile, grid, NaN, ngridx, ngridy, xmin, xmax, ymin, ymax, gridmintot, gridmaxtot, dx,
 	                          dy, xlabel, ylabel, zlabel, title, projection, argc, argv, &error);
 
-	/* close the swath file */
 	status &= mb_segy_close(verbose, &mbsegyioptr, &error);
 
 	/* deallocate memory for grid array */
@@ -1065,19 +1065,20 @@ int main(int argc, char **argv) {
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&gridweight, &error);
 
 	/* run mbm_grdplot */
-	xwidth = MIN(0.01 * (double)ngridx, 55.0);
-	ywidth = MIN(0.01 * (double)ngridy, 28.0);
+	const double xwidth = MIN(0.01 * (double)ngridx, 55.0);
+	const double ywidth = MIN(0.01 * (double)ngridy, 28.0);
+	char plot_cmd[MB_PATH_MAXLINE] = "";
 	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -V -L\"File %s - %s:%s\"", gridfile, xwidth, ywidth, gridfile, title,
 	        zlabel);
 	if (verbose) {
 		fprintf(outfp, "\nexecuting mbm_grdplot...\n%s\n", plot_cmd);
 	}
 	plot_status = system(plot_cmd);
-	if (plot_status == -1) {
+	// TODO(schwehr): man of mbm_grdplot does not describe the return code.  Only 0 is success.
+	if (plot_status != 0) {
 		fprintf(outfp, "\nError executing mbm_grdplot on grid file %s\n", gridfile);
 	}
 
-	/* check memory */
 	if (verbose >= 4)
 		status &= mb_memory_list(verbose, &error);
 
