@@ -335,7 +335,6 @@ int main(int argc, char **argv) {
 	int svp_save_alloc = 0;
 	struct mbsvplist_svp_struct *svp_save = NULL;
 	char svp_file[MB_PATH_MAXLINE];
-	FILE *svp_fp;
 	int svp_read_tot = 0;
 	int svp_written_tot = 0;
 	int svp_repeat_in_file;
@@ -351,8 +350,6 @@ int main(int argc, char **argv) {
 	double *heave = NULL;
 	double *alongtrack_offset = NULL;
 	double ssv;
-
-	int isvp;
 
 	bool svp_match_last = false;
 	int svp_unique_tot = 0;
@@ -570,7 +567,7 @@ int main(int argc, char **argv) {
 
 				/* check if any saved svps need time tags and position */
 				if (time_d != 0.0 && (navlon != 0.0 || navlat != 0.0)) {
-					for (isvp = 0; isvp < svp_save_count; isvp++) {
+					for (int isvp = 0; isvp < svp_save_count; isvp++) {
 						if (!svp_save[isvp].time_set) {
 							svp_save[isvp].time_set = true;
 							svp_save[isvp].time_d = time_d;
@@ -603,22 +600,18 @@ int main(int argc, char **argv) {
 
 		/* output svps from this file if there are any and ssv_output and output_counts are false */
 		if (svp_save_count > 0 && !ssv_output && !output_counts) {
-			for (isvp = 0; isvp < svp_save_count; isvp++) {
+			for (int isvp = 0; isvp < svp_save_count; isvp++) {
 				if (svp_save[isvp].n >= min_num_pairs &&
 				    ((svp_printmode == MBSVPLIST_PRINTMODE_CHANGE &&
 				      (svp_written == 0 || !svp_save[isvp].repeat_in_file)) ||
 				     (svp_printmode == MBSVPLIST_PRINTMODE_UNIQUE && !svp_save[isvp].match_last) ||
 				     (svp_printmode == MBSVPLIST_PRINTMODE_ALL))) {
 					/* set the output */
+					FILE *svp_fp = stdout;
 					if (svp_file_output) {
-						/* set file name */
 						sprintf(svp_file, "%s_%3.3d.svp", file, isvp);
-
-						/* open the file */
 						svp_fp = fopen(svp_file, "w");
 					}
-					else
-						svp_fp = stdout;
 
 					/* get time as date */
 					mb_get_date(verbose, svp_save[isvp].time_d, svp_time_i);
