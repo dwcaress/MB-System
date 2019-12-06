@@ -162,47 +162,13 @@ int main(int argc, char **argv) {
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
 
-	int decimate;
-
-	/* segy data */
-	void *mbsegyioptr;
-	struct mb_segyasciiheader_struct asciiheader;
-	struct mb_segyfileheader_struct fileheader;
-	struct mb_segytraceheader_struct traceheader;
-	float *trace;
-
-	/* output format list controls */
-	int nread;
-	bool invert_next_value = false;
-	bool signflip_next_value = false;  // TODO(schwehr): signflip or flipsign.  Be consistent.
-	bool first = true;
+	int decimate = 1;
 	bool ascii = true;
+	char delimiter[MB_PATH_MAXLINE] = "\t";
 	bool segment = false;
 	char segment_tag[MB_PATH_MAXLINE] = "";
-	char delimiter[MB_PATH_MAXLINE] = "";
 
-	/* additional time variables */
-	bool first_m = true;
-	double time_d_ref;
-	bool first_u = true;
-	time_t time_u;
-	time_t time_u_ref;
-	double time_interval = 0.0;
-	double minutes;
-	int degrees;
-	char hemi;
-
-	int time_i[7], time_j[5];
-	double time_d, time_d_old;
-	double navlon, navlat;
-	double factor, sonardepth, waterdepth;
-	double delay, interval;
-	double seconds;
-
-
-	/* set file to null */
 	char file[MB_PATH_MAXLINE] = "";
 
 	/* set up the default list controls: TiXYSsCcDINL
@@ -234,8 +200,6 @@ int main(int argc, char **argv) {
 	n_list++;
 	list[n_list] = 'L';
 	n_list++;
-	sprintf(delimiter, "\t");
-	decimate = 1;
 
 	/* get NaN value */
 	MB_MAKE_DNAN(NaN);
@@ -346,8 +310,13 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	void *mbsegyioptr;
+	struct mb_segyasciiheader_struct asciiheader;
+	struct mb_segyfileheader_struct fileheader;
+
 	/* initialize reading the segy file */
 	if (mb_segy_read_init(verbose, file, &mbsegyioptr, &asciiheader, &fileheader, &error) != MB_SUCCESS) {
+		char *message = NULL;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error returned from function <mb_segy_read_init>:\n%s\n", message);
 		fprintf(stderr, "\nSEGY File <%s> not initialized for reading\n", file);
@@ -360,14 +329,39 @@ int main(int argc, char **argv) {
 		printf("%s\n", segment_tag);
 	}
 
+	/* segy data */
+	float *trace;
+
+	/* output format list controls */
+	bool invert_next_value = false;
+	bool signflip_next_value = false;  // TODO(schwehr): signflip or flipsign.  Be consistent.
+
+	bool first_m = true;
+	double time_d_ref;
+	bool first_u = true;
+	time_t time_u;
+	time_t time_u_ref;
+	double time_interval = 0.0;
+	double minutes;
+	int degrees;
+	char hemi;
+
+	int time_i[7], time_j[5];
+	double time_d, time_d_old;
+	double navlon, navlat;
+	double factor, sonardepth, waterdepth;
+	double delay, interval;
+	double seconds;
+
 	/* read and print data */
-	nread = 0;
-	first = true;
+	int nread = 0;
+	bool first = true;
 	while (error <= MB_ERROR_NO_ERROR) {
 		/* reset error */
 		error = MB_ERROR_NO_ERROR;
 
 		/* read a trace */
+		struct mb_segytraceheader_struct traceheader;
 		status = mb_segy_read_trace(verbose, mbsegyioptr, &traceheader, &trace, &error);
 
 		/* get needed values */
@@ -519,8 +513,8 @@ int main(int argc, char **argv) {
 				        1/1/70 00:00:00 */
 					printsimplevalue(verbose, time_d, 0, 6, ascii, &invert_next_value, &signflip_next_value, &error);
 					break;
-				case 'm': /* time in decimal seconds since
-				        first record */
+				case 'm': /* time in decimal seconds since first record */
+				{
 					if (first_m) {
 						time_d_ref = time_d;
 						first_m = false;
@@ -528,6 +522,7 @@ int main(int argc, char **argv) {
 					const double b = time_d - time_d_ref;
 					printsimplevalue(verbose, b, 0, 6, ascii, &invert_next_value, &signflip_next_value, &error);
 					break;
+				}
 				case 'N': /* number of samples in trace */
 					if (ascii)
 						printf("%6d", traceheader.nsamps);
