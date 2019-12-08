@@ -46,7 +46,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hysweep_struct), (void **)store_ptr, error);
@@ -705,7 +705,7 @@ int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
@@ -788,7 +788,7 @@ int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
@@ -902,7 +902,7 @@ int mbsys_hysweep_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
@@ -933,8 +933,8 @@ int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 	mb_longname sensor_name;
 	int sensor_capability1, sensor_capability2;
 	int sensor_type;
-	int num_offsets = 0;
-	int num_time_latency = 0;
+	// int num_offsets = 0;
+	// int num_time_latency = 0;
 	int sensor_multibeam = -1;
 	int isensor, ioffset;
 
@@ -949,7 +949,7 @@ int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
@@ -978,8 +978,8 @@ int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			strcpy(sensor_name, device->DEV_device_name);
 			sensor_capability1 = MB_SENSOR_CAPABILITY1_NONE;
 			sensor_capability2 = MB_SENSOR_CAPABILITY2_NONE;
-			num_offsets = device->num_offsets;
-			num_time_latency = 0;
+			const int num_offsets = device->num_offsets;
+			int num_time_latency = 0;
 			if (num_offsets > 0) {
 				struct mbsys_hysweep_device_offset_struct *offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[0]);
 				if (offset->OF2_offset_time != 0.0)
@@ -1220,7 +1220,7 @@ int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		/* reset data sources to reflect Hysweep designated primary nav device */
 		if (store->primary_nav_device >= 0 && store->primary_nav_device < store->num_devices) {
 			/* get device structure */
-			isensor = store->primary_nav_device;
+			// isensor = store->primary_nav_device;
 			struct mbsys_hysweep_device_struct *device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->primary_nav_device]);
 
 			if (device->DV2_device_capability & 0x0004)
@@ -1718,7 +1718,7 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
@@ -1826,7 +1826,7 @@ int mbsys_hysweep_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
@@ -1895,7 +1895,7 @@ int mbsys_hysweep_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
@@ -2324,7 +2324,7 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
@@ -2411,23 +2411,6 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
-	int status = MB_SUCCESS;
-	int nbathsort;
-	double pixel_size_calc;
-	double ss_spacing;
-	int iminxtrack;
-	double minxtrack;
-	double maxxtrack;
-	int nrangetable;
-	double acrosstracktablemin;
-	int irangenadir, irange;
-	int found;
-	int pixel_int_use;
-	int sample_start, sample_end;
-	double xtrackss, ltrackss, factor;
-	double range;
-	int first, last, k1, k2;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2441,8 +2424,25 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		fprintf(stderr, "dbg2       pixel_int:       %d\n", pixel_int);
 	}
 
+	int status = MB_SUCCESS;
+	int nbathsort;
+	double pixel_size_calc;
+	// double ss_spacing;
+	// int iminxtrack;
+	double minxtrack;
+	double maxxtrack;
+	int nrangetable;
+	double acrosstracktablemin;
+	int irangenadir, irange;
+	int found;
+	int pixel_int_use;
+	int sample_start, sample_end;
+	double xtrackss, ltrackss, factor;
+	double range;
+	int first, last;
+
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
@@ -2471,13 +2471,13 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		store->MSS_ping_number = store->RSS_ping_number;
 
 		/* get raw pixel size */
-		ss_spacing = 0.5 * store->RSS_sound_velocity / store->RSS_sample_rate;
+		// const double ss_spacing = 0.5 * store->RSS_sound_velocity / store->RSS_sample_rate;
 
 		/* get median depth relative to the sonar and check for min max xtrack */
 		nbathsort = 0;
 		minxtrack = 0.0;
 		maxxtrack = 0.0;
-		iminxtrack = store->RMB_num_beams / 2;
+		// int iminxtrack = store->RMB_num_beams / 2;
 		found = false;
 		for (int i = 0; i < store->RMB_num_beams; i++) {
 			if (mb_beam_ok(store->RMB_sounding_flags[i])) {
@@ -2487,7 +2487,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 
 				if (found == false || fabs(store->RMB_sounding_across[i]) < minxtrack) {
 					minxtrack = fabs(store->RMB_sounding_across[i]);
-					iminxtrack = i;
+					// iminxtrack = i;
 					found = true;
 				}
 
@@ -2630,8 +2630,8 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		}
 
 		/* interpolate the sidescan */
-		k1 = first;
-		k2 = first;
+		int k1 = first;
+		int k2 = first;
 		for (int k = first + 1; k < last; k++) {
 			if (store->MSS_ss_cnt[k] <= 0) {
 				if (k2 <= k) {
