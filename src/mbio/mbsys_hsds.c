@@ -46,7 +46,7 @@ int mbsys_hsds_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsds_struct), store_ptr, error);
@@ -140,6 +140,9 @@ int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                        double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                        double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                        double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
+	(void)ss;  // Unused arg
+	(void)ssacrosstrack;  // Unused arg
+	(void)ssalongtrack;  // Unused arg
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -306,7 +309,6 @@ int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
                       double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                       double *ssalongtrack, char *comment, int *error) {
 	int status = MB_SUCCESS;
-	double scalefactor;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -352,7 +354,7 @@ int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
@@ -384,6 +386,7 @@ int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 
 		/* put distance and depth values
 		    into data structure */
+		double scalefactor;
 		if (store->depth_scale > 0.0)
 			scalefactor = 1.0 / store->depth_scale;
 		else
@@ -689,7 +692,7 @@ int mbsys_hsds_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
@@ -829,7 +832,7 @@ int mbsys_hsds_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
@@ -889,7 +892,7 @@ int mbsys_hsds_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
@@ -955,7 +958,7 @@ int mbsys_hsds_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
@@ -996,7 +999,7 @@ int mbsys_hsds_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;

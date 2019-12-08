@@ -1954,19 +1954,23 @@ int main(int argc, char **argv) {
 			exit(error);
 		}
 
-	int interp_error = MB_ERROR_NO_ERROR;
-	double time_latency;
-	int jsurvey = 0;
-	int jnav = 0;
-	int jsensordepth = 0;
-	int jaltitude = 0;
-	int jheading = 0;
-	int jattitude = 0;
-	int jsoundspeed = 0;
-	double channelmax, threshold, ttime;
-	int portchannelpick, stbdchannelpick;
-	double xtrack, ltrack, rr, rangemin, factor, fraction;
-	int format_nottobeused = 0;
+		int interp_error = MB_ERROR_NO_ERROR;
+		double time_latency;
+		int jsurvey = 0;
+		int jnav = 0;
+		int jsensordepth = 0;
+		int jaltitude = 0;
+		int jheading = 0;
+		int jattitude = 0;
+		int jsoundspeed = 0;
+		double channelmax;
+		double threshold;
+		double ttime;
+		int portchannelpick;
+		int stbdchannelpick;
+		double factor;
+		double fraction;
+		int format_nottobeused = 0;
 
 	        // get the fileroot (but don't use the format id returned here, we already
 		// know the format, probably from a datalist)
@@ -2368,7 +2372,7 @@ int main(int argc, char **argv) {
 
 				/* get swath width and pixel size */
 				if (swath_mode == MBSSLAYOUT_SWATHWIDTH_VARIABLE) {
-					rr = 0.5 * soundspeed * sample_interval * MAX(num_samples_port, num_samples_stbd);
+					const double rr = 0.5 * soundspeed * sample_interval * MAX(num_samples_port, num_samples_stbd);
 					swath_width = 2.2 * sqrt(rr * rr - ss_altitude * ss_altitude);
 				}
 				pixel_width = swath_width / (opixels_ss - 1);
@@ -2382,7 +2386,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* find minimum range */
-				rangemin = table_range[0];
+				double rangemin = table_range[0];
 				int kstart = 0;
 				for (int kangle = 1; kangle < nangle; kangle++) {
 					if (table_range[kangle] < rangemin) {
@@ -2395,12 +2399,14 @@ int main(int argc, char **argv) {
 				int istart = rangemin / (soundspeed * sample_interval);
 				for (int i = istart; i < num_samples_port; i++) {
 					/* get sample range */
-					rr = 0.5 * soundspeed * sample_interval * i;
+					const double rr = 0.5 * soundspeed * sample_interval * i;
 
 					/* look up position(s) for this range */
 					bool done = false;
 					for (int kangle = kstart; kangle > 0 && !done; kangle--) {
 						bool found = false;
+						double xtrack;
+						double ltrack;
 						if (rr <= table_range[kstart]) {
 							xtrack = table_xtrack[kstart];
 							ltrack = table_ltrack[kstart];
@@ -2448,12 +2454,14 @@ int main(int argc, char **argv) {
 				istart = rangemin / (soundspeed * sample_interval);
 				for (int i = istart; i < num_samples_stbd; i++) {
 					/* get sample range */
-					rr = 0.5 * soundspeed * sample_interval * i;
+					const double rr = 0.5 * soundspeed * sample_interval * i;
 
 					/* look up position for this range */
 					bool done = false;
 					for (int kangle = kstart; kangle < nangle - 1 && !done; kangle++) {
 						bool found = false;
+						double xtrack;
+						double ltrack;
 						if (rr <= table_range[kstart]) {
 							xtrack = table_xtrack[kstart];
 							ltrack = table_ltrack[kstart];

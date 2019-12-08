@@ -78,12 +78,10 @@ int main(int argc, char **argv) {
 	bool lookforfiles = false;
 	bool removembnavadjust = false;
 	struct stat file_status;
-	int fstat;
 	int format = 0;
 	char mbp_ifile[MBP_FILENAMESIZE];
 	char mbp_dfile[MBP_FILENAMESIZE];
 	int mbp_format;
-	bool write_parameter_file = false;
 	int nscan;
 
 	/* set default input and output */
@@ -177,7 +175,6 @@ int main(int argc, char **argv) {
 	const bool read_datalist = format < 0;
 	bool read_data = false;
 
-	int status = MB_SUCCESS;
 	double file_weight;
 
 	/* open file list */
@@ -198,13 +195,14 @@ int main(int argc, char **argv) {
 
 	struct mb_process_struct process;
 
+	int status = MB_SUCCESS;
+
 	/* loop over all files to be read */
 	while (read_data) {
-
 		/* load parameters */
 		status = mb_pr_readpar(verbose, mbp_ifile, lookforfiles, &process, &error);
 		process.mbp_ifile_specified = true;
-		write_parameter_file = false;
+		bool write_parameter_file = false;
 
 		if (process.mbp_format_specified == false) {
 			process.mbp_format = mbp_format;
@@ -220,7 +218,7 @@ int main(int argc, char **argv) {
 		    file referenced by the process.mbp_navadjfile */
 		if (removembnavadjust) {
 			/* delete the navadjust file if it exists */
-			if (strlen(process.mbp_navadjfile) > 0 && (fstat = stat(process.mbp_navadjfile, &file_status)) == 0 &&
+			if (strlen(process.mbp_navadjfile) > 0 && stat(process.mbp_navadjfile, &file_status) == 0 &&
 			    (file_status.st_mode & S_IFMT) != S_IFDIR) {
 				remove(process.mbp_navadjfile);
 				fprintf(stderr, "Removed navigation adjustment file %s for %s\n", process.mbp_navadjfile, mbp_ifile);
@@ -756,10 +754,6 @@ int main(int argc, char **argv) {
 			else if (strncmp(pargv[i], "SSCORRSLOPE", 11) == 0) {
 				sscanf(pargv[i], "SSCORRSLOPE:%d", &process.mbp_sscorr_slope);
 			}
-			else if (strncmp(pargv[i], "AMPSSCORRTOPOFILE", 17) == 0) {
-				sscanf(pargv[i], "AMPSSCORRTOPOFILE:%1023s", process.mbp_ampsscorr_topofile);
-			}
-
 			/* sidescan recalculation */
 			else if (strncmp(pargv[i], "SSRECALCMODE", 12) == 0) {
 				sscanf(pargv[i], "SSRECALCMODE:%d", &process.mbp_ssrecalc_mode);
@@ -1224,15 +1218,12 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "  Kluge010:                      %d\n", process.mbp_kluge010);
 		}
 
-		/* write parameters */
 		if (write_parameter_file)
 			status = mb_pr_writepar(verbose, mbp_ifile, &process, &error);
 
-		/* output results */
 		if (status == MB_SUCCESS) {
 			fprintf(stderr, "Success updating parameter file for %s...\n", mbp_ifile);
-		}
-		else {
+		} else {
 			fprintf(stderr, "Failure to update parameter file for %s!!!\n", mbp_ifile);
 		}
 
@@ -1242,15 +1233,17 @@ int main(int argc, char **argv) {
 		} else {
 			read_data = false;
 		}
-
 	} /* end loop over datalist */
 
 	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
-	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
+
+	if (status == MB_FAILURE) {
+		fprintf(stderr, "WARNING: status is MB_FAILURE\n");
+	}
 
 	exit(error);
 }
