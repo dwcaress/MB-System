@@ -43,7 +43,7 @@ int mbsys_mr1_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_mr1_struct), store_ptr, error);
@@ -93,7 +93,7 @@ int mbsys_mr1_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1_struct *store = (struct mbsys_mr1_struct *)store_ptr;
@@ -416,7 +416,7 @@ int mbsys_mr1_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1_struct *store = (struct mbsys_mr1_struct *)store_ptr;
@@ -536,7 +536,7 @@ int mbsys_mr1_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1_struct *store = (struct mbsys_mr1_struct *)store_ptr;
@@ -666,7 +666,7 @@ int mbsys_mr1_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1_struct *store = (struct mbsys_mr1_struct *)store_ptr;
@@ -737,7 +737,7 @@ int mbsys_mr1_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1_struct *store = (struct mbsys_mr1_struct *)store_ptr;
@@ -799,7 +799,7 @@ int mbsys_mr1_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1_struct *store = (struct mbsys_mr1_struct *)store_ptr;
@@ -933,7 +933,7 @@ int mbsys_mr1_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1_struct *store = (struct mbsys_mr1_struct *)store_ptr;
@@ -989,7 +989,7 @@ int mbsys_mr1_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_mr1_struct *store = (struct mbsys_mr1_struct *)store_ptr;
