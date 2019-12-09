@@ -48,7 +48,7 @@ int mbsys_mr1v2001_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *err
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_mr1v2001_struct), store_ptr, error);
@@ -100,7 +100,7 @@ int mbsys_mr1v2001_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
@@ -175,7 +175,7 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	/* get data structure pointer */
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
-	BSFile *header = &(store->header);
+	// BSFile *header = &(store->header);
 	Ping *ping = &(store->ping);
 	PingSide *pingport = &(ping->png_sides[ACP_PORT]);
 	PingSide *pingstbd = &(ping->png_sides[ACP_STBD]);
@@ -476,12 +476,12 @@ int mbsys_mr1v2001_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
-	BSFile *header = &(store->header);
+	// BSFile *header = &(store->header);
 	Ping *ping = &(store->ping);
 	PingSide *pingport = &(ping->png_sides[ACP_PORT]);
 	PingSide *pingstbd = &(ping->png_sides[ACP_STBD]);
@@ -489,13 +489,13 @@ int mbsys_mr1v2001_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 	float *pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
 	unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
 	float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
-	unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
-	AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
+	// unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
+	// AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
 	float *sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
 	unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
 	float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
-	unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
-	AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
+	// unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
+	// AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
 
 	/* set data kind */
 	store->kind = kind;
@@ -650,27 +650,27 @@ int mbsys_mr1v2001_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
 	/* get pointers */
-	BSFile *header = &(store->header);
+	// BSFile *header = &(store->header);
 	Ping *ping = &(store->ping);
 	PingSide *pingport = &(ping->png_sides[ACP_PORT]);
 	PingSide *pingstbd = &(ping->png_sides[ACP_STBD]);
 	PingData *pingdata = &(store->pingdata);
 	float *pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
-	unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
-	float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
-	unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
-	AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
+	// unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
+	// float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
+	// unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
+	// AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
 	float *sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
-	unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
-	float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
-	unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
-	AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
+	// unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
+	// float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
+	// unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
+	// AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -798,27 +798,27 @@ int mbsys_mr1v2001_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
 	/* get pointers */
-	BSFile *header = &(store->header);
+	// BSFile *header = &(store->header);
 	Ping *ping = &(store->ping);
 	PingSide *pingport = &(ping->png_sides[ACP_PORT]);
 	PingSide *pingstbd = &(ping->png_sides[ACP_STBD]);
-	PingData *pingdata = &(store->pingdata);
-	float *pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
-	unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
-	float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
-	unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
-	AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
-	float *sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
-	unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
-	float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
-	unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
-	AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
+	// PingData *pingdata = &(store->pingdata);
+	// float *pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
+	// unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
+	// float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
+	// unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
+	// AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
+	// float *sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
+	// unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
+	// float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
+	// unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
+	// AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -886,27 +886,27 @@ int mbsys_mr1v2001_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
 	/* get pointers */
-	BSFile *header = &(store->header);
+	// BSFile *header = &(store->header);
 	Ping *ping = &(store->ping);
 	PingSide *pingport = &(ping->png_sides[ACP_PORT]);
 	PingSide *pingstbd = &(ping->png_sides[ACP_STBD]);
 	PingData *pingdata = &(store->pingdata);
 	float *pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
 	unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
-	float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
-	unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
-	AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
+	// float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
+	// unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
+	// AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
 	float *sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
 	unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
-	float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
-	unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
-	AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
+	// float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
+	// unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
+	// AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1031,27 +1031,27 @@ int mbsys_mr1v2001_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
 	/* get pointers */
-	BSFile *header = &(store->header);
+	// BSFile *header = &(store->header);
 	Ping *ping = &(store->ping);
-	PingSide *pingport = &(ping->png_sides[ACP_PORT]);
-	PingSide *pingstbd = &(ping->png_sides[ACP_STBD]);
-	PingData *pingdata = &(store->pingdata);
-	float *pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
-	unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
-	float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
-	unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
-	AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
-	float *sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
-	unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
-	float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
-	unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
-	AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
+	// PingSide *pingport = &(ping->png_sides[ACP_PORT]);
+	// PingSide *pingstbd = &(ping->png_sides[ACP_STBD]);
+	// PingData *pingdata = &(store->pingdata);
+	// float *pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
+	// unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
+	// float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
+	// unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
+	// AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
+	// float *sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
+	// unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
+	// float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
+	// unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
+	// AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1202,42 +1202,26 @@ int mbsys_mr1v2001_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
-	/* get pointers */
-	BSFile *header;
-	Ping *ping;
-	PingSide *pingport;
-	PingSide *pingstbd;
-	PingData *pingdata;
-	float *pbty;
-	unsigned int *pbtyflags;
-	float *pss;
-	unsigned char *pssflags;
-	AuxBeamInfo *pabi;
-	float *sbty;
-	unsigned int *sbtyflags;
-	float *sss;
-	unsigned char *sssflags;
-	AuxBeamInfo *sabi;
-	header = &(store->header);
-	ping = &(store->ping);
-	pingport = &(ping->png_sides[ACP_PORT]);
-	pingstbd = &(ping->png_sides[ACP_STBD]);
-	pingdata = &(store->pingdata);
-	pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
-	pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
-	pss = (float *)(pingdata->pd_ss[ACP_PORT]);
-	pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
-	pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
-	sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
-	sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
-	sss = (float *)(pingdata->pd_ss[ACP_STBD]);
-	sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
-	sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
+	// BSFile *header = &(store->header);
+	Ping *ping = &(store->ping);
+	// PingSide *pingport = &(ping->png_sides[ACP_PORT]);
+	// PingSide *pingstbd = &(ping->png_sides[ACP_STBD]);
+	// PingData *pingdata = &(store->pingdata);
+	// float *pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
+	// unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
+	// float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
+	// unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
+	// AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
+	// float *sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
+	// unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
+	// float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
+	// unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
+	// AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -1290,7 +1274,7 @@ int mbsys_mr1v2001_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
