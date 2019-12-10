@@ -105,21 +105,21 @@ int mbsys_mr1v2001_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int 
 	/* get data structure pointer */
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
-	BSFile *header = &(store->header);
+	// BSFile *header = &(store->header);
 	Ping *ping = &(store->ping);
 	PingSide *pingport = &(ping->png_sides[ACP_PORT]);
 	PingSide *pingstbd = &(ping->png_sides[ACP_STBD]);
-	PingData *pingdata = &(store->pingdata);
-	float *pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
-	unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
-	float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
-	unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
-	AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
-	float *sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
-	unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
-	float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
-	unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
-	AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
+	// PingData *pingdata = &(store->pingdata);
+	// float *pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
+	// unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
+	// float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
+	// unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
+	// AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
+	// float *sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
+	// unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
+	// float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
+	// unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
+	// AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -183,13 +183,13 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	float *pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
 	unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
 	float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
-	unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
-	AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
+	// unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
+	// AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
 	float *sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
 	unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
 	float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
-	unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
-	AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
+	// unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
+	// AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
 
 	/* get data kind */
 	*kind = store->kind;
