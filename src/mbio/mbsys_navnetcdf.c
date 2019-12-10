@@ -43,7 +43,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_navnetcdf_struct), store_ptr, error);
@@ -362,7 +362,7 @@ int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)*store_ptr;
@@ -371,20 +371,20 @@ int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *er
 
 	/* deallocate any allocated arrays */
 	if (store->mbHistDate != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistDate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistDate, error);
 	if (store->mbHistTime != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistTime, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistTime, error);
 	if (store->mbHistCode != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistCode, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistCode, error);
 	if (store->mbHistAutor != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistAutor, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistAutor, error);
 	if (store->mbHistModule != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistModule, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistModule, error);
 	if (store->mbHistComment != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistComment, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistComment, error);
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -408,7 +408,7 @@ int mbsys_navnetcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -589,6 +589,17 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
                            double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag,
                            double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                            double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
+	(void)nbath;  // Unused arg
+	(void)namp;  // Unused arg
+	(void)nss;  // Unused arg
+	(void)beamflag;  // Unused arg
+	(void)bath;  // Unused arg
+	(void)amp;  // Unused arg
+	(void)bathacrosstrack;  // Unused arg
+	(void)bathalongtrack;  // Unused arg
+	(void)ss;  // Unused arg
+	(void)ssacrosstrack;  // Unused arg
+	(void)ssalongtrack;  // Unused arg
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -616,7 +627,7 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -676,7 +687,7 @@ int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -743,7 +754,7 @@ int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -809,7 +820,7 @@ int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -871,7 +882,7 @@ int mbsys_navnetcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -926,7 +937,7 @@ int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -1063,7 +1074,7 @@ int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -1114,7 +1125,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -1151,12 +1162,12 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE) {
-		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistDate, error);
-		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistTime, error);
-		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistCode, error);
-		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistAutor, error);
-		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistModule, error);
-		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistComment, error);
+		/* status &= */ mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistDate, error);
+		/* status &= */ mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistTime, error);
+		/* status &= */ mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistCode, error);
+		/* status &= */ mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistAutor, error);
+		/* status &= */ mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistModule, error);
+		/* status &= */ mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistComment, error);
 		status = MB_FAILURE;
 		*error = MB_ERROR_MEMORY_FAIL;
 		if (verbose >= 2) {
