@@ -49,7 +49,6 @@ static bool g_first_time = 1;
 static LARGE_INTEGER g_counts_per_sec;
 
 int clock_gettime(int dummy, struct timespec *ct) {
-
     if (g_first_time) {
         g_first_time = 0;
 
@@ -80,15 +79,15 @@ int mbsys_kmbes_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* allocate memory for data structure */
   const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_kmbes_struct), (void **)store_ptr, error);
 
-    /* initialize allocated structure to zero */
-    if (status == MB_SUCCESS) {
-        memset(*store_ptr, 0, sizeof(struct mbsys_kmbes_struct));
-    }
+  /* initialize allocated structure to zero */
+  if (status == MB_SUCCESS) {
+    memset(*store_ptr, 0, sizeof(struct mbsys_kmbes_struct));
+  }
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)*store_ptr;
@@ -97,8 +96,8 @@ int mbsys_kmbes_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
   store->kind = MB_DATA_NONE;
 
   /* initialize data struct pointers to NULL */
-    for (int i = 0; i < MBSYS_KMBES_MAX_NUM_MWC_DGMS; i++)
-        store->mwc[i].beamData_p = NULL;
+  for (int i = 0; i < MBSYS_KMBES_MAX_NUM_MWC_DGMS; i++)
+    store->mwc[i].beamData_p = NULL;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -172,7 +171,7 @@ int mbsys_kmbes_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
-                                    int *error) {
+                           int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -182,7 +181,7 @@ int mbsys_kmbes_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -266,10 +265,10 @@ int mbsys_kmbes_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *son
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  // struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* get sonar type */
   *sonartype = MB_TOPOGRAPHY_TYPE_ECHOSOUNDER;  // TODO: review this setting
@@ -299,10 +298,10 @@ int mbsys_kmbes_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  // struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* get sidescan type */
   *ss_type = MB_SIDESCAN_LINEAR; // TODO: review this setting
@@ -325,20 +324,6 @@ int mbsys_kmbes_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *
 int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
                              void *platform_ptr, void *preprocess_pars_ptr,
                              int *error) {
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double sensordepth;
-  double heading;
-  double altitude;
-  double speed;
-  double roll;
-  double pitch;
-  double heave;
-  double soundspeed;
-  double soundspeednew;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -348,6 +333,20 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
     fprintf(stderr, "dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
     fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
   }
+
+  int time_i[7];
+  double time_d;
+  double navlon;
+  double navlat;
+  double sensordepth;
+  double heading;
+  // double altitude;
+  double speed;
+  double roll;
+  double pitch;
+  double heave;
+  double soundspeed;
+  double soundspeednew;
 
   *error = MB_ERROR_NO_ERROR;
 
@@ -360,33 +359,33 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* data structure pointers */
-  struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+  // struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
   struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
-  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
-  struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
+  // struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+  // struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
   struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
   struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
   struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
-  struct mbsys_kmbes_xmc *xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
+  // struct mbsys_kmbes_xmc *xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
   struct mbsys_kmbes_xms *xms = (struct mbsys_kmbes_xms *)&store->xms;
 
   /* kluge parameters */
-  int kluge_beampatternsnell = false;
-  double kluge_beampatternsnellfactor = 1.0;
+  // int kluge_beampatternsnell = false;
+  // double kluge_beampatternsnellfactor = 1.0;
   int kluge_soundspeedsnell = false;
   double kluge_soundspeedsnellfactor = 1.0;
   int kluge_auvsentrysensordepth = false;
 
   /* get saved values */
-  double *pixel_size = (double *)&mb_io_ptr->saved1;
-  double *swath_width = (double *)&mb_io_ptr->saved2;
+  // double *pixel_size = (double *)&mb_io_ptr->saved1;
+  // double *swath_width = (double *)&mb_io_ptr->saved2;
 
   /* get kluges */
   for (int i = 0; i < pars->n_kluge; i++) {
     if (pars->kluge_id[i] == MB_PR_KLUGE_BEAMTWEAK) {
-      kluge_beampatternsnell = true;
-      kluge_beampatternsnellfactor = *((double *)&pars->kluge_pars[i * MB_PR_KLUGE_PAR_SIZE]);
+      // kluge_beampatternsnell = true;
+      // kluge_beampatternsnellfactor = *((double *)&pars->kluge_pars[i * MB_PR_KLUGE_PAR_SIZE]);
     }
     else if (pars->kluge_id[i] == MB_PR_KLUGE_SOUNDSPEEDTWEAK) {
       kluge_soundspeedsnell = true;
@@ -462,8 +461,8 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
     /*--------------------------------------------------------------*/
 
     /* loop over all sub-pings */
-    int numSoundings = 0;
-    int interp_status = MB_SUCCESS;
+    // int numSoundings = 0;
+    // int interp_status = MB_SUCCESS;
     int interp_error = MB_ERROR_NO_ERROR;
     int jnav = 0;
     int jsensordepth = 0;
@@ -473,8 +472,8 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
     double soundspeedsnellfactor;
 
     for(int imrz = 0; imrz < store->n_mrz_read; imrz++) {
-      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
-      xmt = (struct mbsys_kmbes_xmt *)&store->xmt[imrz];
+      struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+      struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[imrz];
 
       // get time
       time_d = ((double)mrz->header.time_sec) + MBSYS_KMBES_NANO * mrz->header.time_nanosec;
@@ -514,10 +513,10 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 
       /* interpolate nav */
       if (pars->n_nav > 0) {
-        interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1,
+        int interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1,
                                                     pars->nav_lon - 1, pars->n_nav,
                                                     time_d, &navlon, &jnav, &interp_error);
-        interp_status = mb_linear_interp_latitude(verbose, pars->nav_time_d - 1,
+        interp_status &= mb_linear_interp_latitude(verbose, pars->nav_time_d - 1,
                                                     pars->nav_lat - 1, pars->n_nav,
                                                     time_d, &navlat, &jnav, &interp_error);
         mrz->pingInfo.longitude_deg = navlon;
@@ -528,10 +527,11 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         /* calculate speed from position */
         double mtodeglon, mtodeglat;
         double dx, dy, dt;
-        int j1, j2;
         mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
         speed = 0.0;
         if (interp_status == MB_SUCCESS && jnav > 0) {
+          int j1;
+          int j2;
           if (jnav > 1) {
             j1 = jnav - 2;
             j2 = jnav - 1;
@@ -539,6 +539,9 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
           else if (jnav == 1){
             j1 = jnav - 1;
             j2 = jnav;
+          } else {
+            fprintf(stderr, "TODO(schwehr): What was supposed to happen here?\n");
+            assert(false);
           }
           dx = (pars->nav_lon[j2] - pars->nav_lon[j1]) / mtodeglon;
           dy = (pars->nav_lat[j2] - pars->nav_lat[j1]) / mtodeglat;
@@ -550,7 +553,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
           xmt->xmtPingInfo.speed = speed;
       }
       if (pars->nav_speed != NULL) {
-        interp_status = mb_linear_interp(verbose, pars->nav_time_d - 1,
+        /* interp_status = */ mb_linear_interp(verbose, pars->nav_time_d - 1,
                                                   pars->nav_speed - 1, pars->n_nav,
                                                   time_d, &speed, &jnav, &interp_error);
         xmt->xmtPingInfo.speed = speed;
@@ -558,7 +561,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 
       /* interpolate sensordepth */
       if (pars->n_sensordepth > 0) {
-        interp_status = mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+        /* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
                                         pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
       }
       else if (kluge_auvsentrysensordepth) {
@@ -570,7 +573,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 
       /* interpolate heading */
       if (pars->n_heading > 0) {
-        interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+        /* interp_status = */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
                                                  pars->n_heading, time_d, &heading, &jheading, &interp_error);
         mrz->pingInfo.headingVessel_deg = heading;
         xmt->xmtPingInfo.heading = heading;
@@ -584,11 +587,11 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 
       /* interpolate Attitude */
       if (pars->n_attitude > 0) {
-        interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
+        /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
                                          time_d, &roll, &jattitude, &interp_error);
-        interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
+        /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
                                          time_d, &pitch, &jattitude, &interp_error);
-        interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
+        /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
                                          time_d, &heave, &jattitude, &interp_error);
         xmt->xmtPingInfo.roll = roll;
         xmt->xmtPingInfo.pitch = pitch;
@@ -598,7 +601,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
       /* interpolate soundspeed */
       soundspeed = mrz->pingInfo.soundSpeedAtTxDepth_mPerSec;
       if (pars->modify_soundspeed) {
-        interp_status = mb_linear_interp(verbose, pars->soundspeed_time_d - 1, pars->soundspeed_soundspeed - 1, pars->n_soundspeed,
+        /* interp_status = */ mb_linear_interp(verbose, pars->soundspeed_time_d - 1, pars->soundspeed_soundspeed - 1, pars->n_soundspeed,
                                        time_d, &soundspeednew, &jsoundspeed, &interp_error);
         soundspeedsnellfactor = soundspeednew / soundspeed;
         soundspeed = soundspeednew;
@@ -622,36 +625,35 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         mb_3D_orientation tx_align;
         mb_3D_orientation tx_orientation;
         double tx_steer;
-        mb_3D_orientation rx_align;
         mb_3D_orientation rx_orientation;
         double rx_steer;
         double reference_heading;
         double beamAzimuth;
         double beamDepression;
-        double ttime;
+        double ttime = 0.0;  // TODO(schwehr): Bug?
         double beamroll, beampitch, beamheading;
-        double theta, phi;
-        double rr, xx, zz;
-        double mtodeglon, mtodeglat, headingx, headingy;
-        double soundspeedsnellfactor;
+        // double theta, phi;
+        // double mtodeglon, mtodeglat;
+        // double headingx, headingy;
 
         /* get roll at bottom return time for this beam */
-        interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1,
+        /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1,
                               pars->attitude_roll - 1, pars->n_attitude,
                               time_d + ttime, &beamroll, &jattitude, error);
 
         /* get pitch at bottom return time for this beam */
-        interp_status =
+        /* interp_status = */
             mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
                              time_d + ttime, &beampitch, &jattitude, error);
 
         /* get heading at bottom return time for this beam */
-        interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+        /* interp_status = */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
                                                  pars->n_heading, time_d + ttime, &beamheading,
                                                  &jheading, error);
 
         /* change the sound speed recorded for the current ping and
          * then use it to alter the beam angles and recalculate the Bathymetry */
+        const double soundspeedsnellfactor = 0.0;  // TODO(schwehr): Likely a bug
         if (pars->modify_soundspeed || kluge_soundspeedsnell == true) {
           mrz->sounding[i].beamAngleReRx_deg =
                 RTD * asin(MAX(-1.0, MIN(1.0, soundspeedsnellfactor
@@ -683,10 +685,11 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         rx_orientation.heading = beamheading;
         reference_heading = heading;
 
+        mb_3D_orientation rx_align = {0.0, 0.0, 0.0};  // TODO(schwehr): Bug?
         status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
                              reference_heading, &beamAzimuth, &beamDepression, error);
-        theta = 90.0 - beamDepression;
-        phi = 90.0 - beamAzimuth;
+        const double theta = 90.0 - beamDepression;
+        double phi = 90.0 - beamAzimuth;
         if (phi < 0.0)
           phi += 360.0;
 
@@ -694,26 +697,26 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
                                   + mrz->sounding[i].twoWayTravelTimeCorrection_sec;
 
         /* calculate Bathymetry */
-        rr = 0.5 * soundspeed * ttime;
-        xx = rr * sin(DTR * theta);
-        zz = rr * cos(DTR * theta);
-        //mrz->sounding[i].y_reRefPoint_m = xx * cos(DTR * phi);
-        //mrz->sounding[i].x_reRefPoint_m = xx * sin(DTR * phi);
-        //mrz->sounding[i].z_reRefPoint_m = zz;
+        // const double rr = 0.5 * soundspeed * ttime;
+        // const double xx = rr * sin(DTR * theta);
+        // const double zz = rr * cos(DTR * theta);
+        // mrz->sounding[i].y_reRefPoint_m = xx * cos(DTR * phi);
+        // mrz->sounding[i].x_reRefPoint_m = xx * sin(DTR * phi);
+        // mrz->sounding[i].z_reRefPoint_m = zz;
         double receive_time_delay = ttime +
             mrz->sectorInfo[mrz->sounding[i].txSectorNumb].sectorTransmitDelay_sec;
         double receive_time_d = time_d + receive_time_delay;
         double receive_sensordepth = sensordepth;
         double receive_heave = heave;
         if (pars->n_sensordepth > 0) {
-          interp_status = mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+          /* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
                                           pars->n_sensordepth, receive_time_d, &receive_sensordepth, &jsensordepth, &interp_error);
         }
         else if (kluge_auvsentrysensordepth) {
           receive_sensordepth = -mrz->pingInfo.ellipsoidHeightReRefPoint_m;
         }
         if (pars->n_attitude > 0) {
-          interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
+          /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
                                            time_d, &receive_heave, &jattitude, &interp_error);
         }
 
@@ -728,7 +731,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
     }
 
     // generate pseudosidescan
-    mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+    struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
     if (xms->pingCnt != mrz->cmnPart.pingCnt) {
       double *pixel_size = (double *)&mb_io_ptr->saved1;
       double *swath_width = (double *)&mb_io_ptr->saved2;
@@ -766,7 +769,7 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
-  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+  // struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
   struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
   struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
@@ -785,7 +788,7 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     *time_d = store->time_d;
 
     /* derive overall navigation from first sub-ping for this ping */
-    mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+    struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
 
     /* get navigation */
     *navlon = mrz->pingInfo.longitude_deg;
@@ -1168,16 +1171,16 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
-  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+  // struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
   struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
   struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
-  struct mbsys_kmbes_xmc *xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
+  // struct mbsys_kmbes_xmc *xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
   struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
   struct mbsys_kmbes_xms *xms = (struct mbsys_kmbes_xms *)&store->xms;
 
@@ -1195,7 +1198,7 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
     /* read distance and depth values into storage arrays */
     int numSoundings = 0;
     for(int imrz = 0; imrz < store->n_mrz_read; imrz++) {
-      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+      struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
       mrz->pingInfo.longitude_deg = navlon;
       mrz->pingInfo.latitude_deg = navlat;
@@ -1343,12 +1346,12 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
-  struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
+  // struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
 
   /* get data kind */
   *kind = store->kind;
@@ -1368,13 +1371,13 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
     for (int imrz = 0; imrz < store->n_mrz_read; imrz++) {
 
       mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
-      xmt = (struct mbsys_kmbes_xmt *)&store->xmt[imrz];
+      struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[imrz];
 
       for (int i = 0;
-            i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
-            i++) {
-        struct mbsys_kmbes_mrz_sounding *sounding = &mrz->sounding[i];
-        struct mbsys_kmbes_mrz_tx_sector_info *sectorInfo = &mrz->sectorInfo[sounding->txSectorNumb];
+           i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
+           i++) {
+        // struct mbsys_kmbes_mrz_sounding *sounding = &mrz->sounding[i];
+        // struct mbsys_kmbes_mrz_tx_sector_info *sectorInfo = &mrz->sectorInfo[sounding->txSectorNumb];
 
         ttimes[numSoundings] = xmt->xmtSounding[i].twtt;
         angles[numSoundings] = xmt->xmtSounding[i].angle_vertical;
@@ -1386,7 +1389,6 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
       }
       *nbeams = numSoundings;
 
-      /* set status */
       *error = MB_ERROR_NO_ERROR;
       status = MB_SUCCESS;
 
@@ -1441,7 +1443,7 @@ int mbsys_kmbes_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -1529,7 +1531,7 @@ int mbsys_kmbes_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -1621,7 +1623,7 @@ int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -1696,7 +1698,7 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -1768,8 +1770,8 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
-                                     double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
-                                     double *pitch, double *heave, int *error) {
+                            double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
+                            double *pitch, double *heave, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1779,13 +1781,13 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
-  struct mbsys_kmbes_xmb *xmb = (struct mbsys_kmbes_xmb *)&store->xmb;
+  // struct mbsys_kmbes_xmb *xmb = (struct mbsys_kmbes_xmb *)&store->xmb;
   struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
   struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
   struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
@@ -1976,7 +1978,7 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -2191,15 +2193,15 @@ int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
-  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+  // struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
   struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
   struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
-  struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
+  // struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
 
   int status = MB_SUCCESS;
 
@@ -2212,8 +2214,8 @@ int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 
     /* loop over all sub-pings */
     for(int imrz = 0; imrz < store->n_mrz_read; imrz++) {
-      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
-      xmt = (struct mbsys_kmbes_xmt *)&store->xmt[imrz];
+      struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+      struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[imrz];
       mrz->pingInfo.longitude_deg = navlon;
       mrz->pingInfo.latitude_deg = navlat;
       mrz->pingInfo.headingVessel_deg = heading;
@@ -2302,7 +2304,7 @@ int mbsys_kmbes_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *k
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -2371,7 +2373,7 @@ int mbsys_kmbes_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -2415,7 +2417,7 @@ int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
   }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointers */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -2571,20 +2573,6 @@ int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
              int swath_width_set, double *swath_width, int pixel_int, int *error) {
-  double ss[MBSYS_KMBES_MAX_PIXELS];
-  int ss_cnt[MBSYS_KMBES_MAX_PIXELS];
-  double ssacrosstrack[MBSYS_KMBES_MAX_PIXELS];
-  double ssalongtrack[MBSYS_KMBES_MAX_PIXELS];
-  int nbathsort;
-  double bathsort[MBSYS_KMBES_MAX_PIXELS];
-  int nsoundings, nsamples;
-  double median_altitude;
-  double pixel_size_calc;
-  double sample_size_m;
-  int pixel_int_use;
-  int first, last, k1, kc, k2;
-  double dx1, dx2, dx, xx;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2598,8 +2586,20 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
     fprintf(stderr, "dbg2       pixel_int:       %d\n", pixel_int);
   }
 
+  double ss[MBSYS_KMBES_MAX_PIXELS];
+  int ss_cnt[MBSYS_KMBES_MAX_PIXELS];
+  double ssalongtrack[MBSYS_KMBES_MAX_PIXELS];
+  int nbathsort;
+  double bathsort[MBSYS_KMBES_MAX_PIXELS];
+  int nsoundings, nsamples;
+  double median_altitude;
+  double pixel_size_calc;
+  const int pixel_int_use = 0;  // TODO(schwehr): Likely a bug
+  int first, last, k1, kc, k2;
+  double dx1, dx2, xx;
+
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -2608,10 +2608,11 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
   if (store->kind == MB_DATA_DATA) {
 
     /* initialize the sidescan binning arrays */
+    // double ssacrosstrack[MBSYS_KMBES_MAX_PIXELS];
     for (int i = 0; i < MBSYS_KMBES_MAX_PIXELS; i++) {
       ss[i] = 0.0;
       ss_cnt[i] = 0;
-      ssacrosstrack[i] = 0.0;
+      // ssacrosstrack[i] = 0.0;
       ssalongtrack[i] = 0.0;
     }
 
@@ -2662,7 +2663,7 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
       struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
       /* get raw sample size */
-      sample_size_m = 750.0 / mrz->rxInfo.seabedImageSampleRate;
+      // const double sample_size_m = 750.0 / mrz->rxInfo.seabedImageSampleRate;
 
       /* use only valid, unflagged soundings */
       nsoundings = mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections;
@@ -2676,7 +2677,7 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
           k2 = k1 + mrz->sounding[i].SInumSamples - 1;
 
           /* calculate nominal pixel size */
-          dx = sample_size_m * sin(DTR * mrz->sounding[i].beamAngleReRx_deg);
+          // const double dx = sample_size_m * sin(DTR * mrz->sounding[i].beamAngleReRx_deg);
 
           /* deal with sounding to port of nadir - samples ordered right-to-left */
           if (mrz->sounding[i].y_reRefPoint_m < 0.0) {
@@ -2757,11 +2758,12 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
     /* average the sidescan */
     first = MBSYS_KMBES_MAX_PIXELS;
     last = -1;
+    // double ssacrosstrack[MBSYS_KMBES_MAX_PIXELS];
     for (int k = 0; k < MBSYS_KMBES_MAX_PIXELS; k++) {
       if (ss_cnt[k] > 0) {
         ss[k] /= ss_cnt[k];
         ssalongtrack[k] /= ss_cnt[k];
-        ssacrosstrack[k] = (k - MBSYS_KMBES_MAX_PIXELS / 2) * (*pixel_size);
+        // ssacrosstrack[k] = (k - MBSYS_KMBES_MAX_PIXELS / 2) * (*pixel_size);
         first = MIN(first, k);
         last = k;
       }
@@ -2781,7 +2783,7 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
         }
         if (k2 - k1 <= pixel_int_use) {
           ss[k] = ss[k1] + (ss[k2] - ss[k1]) * ((double)(k - k1)) / ((double)(k2 - k1));
-          ssacrosstrack[k] = (k - MBSYS_KMBES_MAX_PIXELS / 2) * (*pixel_size);
+          // ssacrosstrack[k] = (k - MBSYS_KMBES_MAX_PIXELS / 2) * (*pixel_size);
           ssalongtrack[k] =
               ssalongtrack[k1] + (ssalongtrack[k2] - ssalongtrack[k1]) * ((double)(k - k1)) / ((double)(k2 - k1));
         }
