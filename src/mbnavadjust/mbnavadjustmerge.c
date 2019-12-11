@@ -55,44 +55,46 @@
 #define MOD_MODE_UNSET_GLOBAL_TIE 5
 #define MOD_MODE_UNSET_ALL_GLOBAL_TIES 6
 #define MOD_MODE_ADD_CROSSING 7
-#define MOD_MODE_SET_TIE 8
-#define MOD_MODE_SET_TIE_XYZ 9
-#define MOD_MODE_SET_TIE_XY 10
-#define MOD_MODE_SET_TIE_Z 11
-#define MOD_MODE_SET_TIES_XYZ_ALL 12
-#define MOD_MODE_SET_TIES_XY_ALL 13
-#define MOD_MODE_SET_TIES_Z_ALL 14
-#define MOD_MODE_SET_TIES_XYZ_FILE 15
-#define MOD_MODE_SET_TIES_XY_FILE 16
-#define MOD_MODE_SET_TIES_Z_FILE 17
-#define MOD_MODE_SET_TIES_XYZ_SURVEY 18
-#define MOD_MODE_SET_TIES_XY_SURVEY 19
-#define MOD_MODE_SET_TIES_Z_SURVEY 20
-#define MOD_MODE_SET_TIES_XYZ_BYSURVEY 21
-#define MOD_MODE_SET_TIES_XY_BYSURVEY 22
-#define MOD_MODE_SET_TIES_Z_BYSURVEY 23
-#define MOD_MODE_SET_TIES_XYZ_BLOCK 24
-#define MOD_MODE_SET_TIES_XY_BLOCK 25
-#define MOD_MODE_SET_TIES_Z_BLOCK 26
-#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 27
-#define MOD_MODE_SET_TIES_XY_BY_TIME 28
-#define MOD_MODE_UNSET_TIE 29
-#define MOD_MODE_UNSET_TIES_FILE 30
-#define MOD_MODE_UNSET_TIES_SURVEY 31
-#define MOD_MODE_UNSET_TIES_BYSURVEY 32
-#define MOD_MODE_UNSET_TIES_BLOCK 33
-#define MOD_MODE_UNSET_TIES_ALL 34
-#define MOD_MODE_SKIP_UNSET_CROSSINGS 35
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS 36
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 37
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 38
-#define MOD_MODE_INSERT_DISCONTINUITY 39
-#define MOD_MODE_REIMPORT_FILE 40
-#define MOD_MODE_REIMPORT_ALL_FILES 41
-#define MOD_MODE_TRIANGULATE 42
-#define MOD_MODE_TRIANGULATE_SECTION 43
-#define MOD_MODE_UNSET_SHORT_SECTION_TIES 44
-#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 45
+#define MOD_MODE_SET_TIE_VALUES_ALL 8
+#define MOD_MODE_SET_TIE_VALUES_XYZ 9
+#define MOD_MODE_SET_TIE_VALUES_Z 10
+#define MOD_MODE_SET_TIE_XYZ 11
+#define MOD_MODE_SET_TIE_XY 12
+#define MOD_MODE_SET_TIE_Z 13
+#define MOD_MODE_SET_TIES_XYZ_ALL 14
+#define MOD_MODE_SET_TIES_XY_ALL 15
+#define MOD_MODE_SET_TIES_Z_ALL 16
+#define MOD_MODE_SET_TIES_XYZ_FILE 17
+#define MOD_MODE_SET_TIES_XY_FILE 18
+#define MOD_MODE_SET_TIES_Z_FILE 19
+#define MOD_MODE_SET_TIES_XYZ_SURVEY 20
+#define MOD_MODE_SET_TIES_XY_SURVEY 21
+#define MOD_MODE_SET_TIES_Z_SURVEY 22
+#define MOD_MODE_SET_TIES_XYZ_BYSURVEY 23
+#define MOD_MODE_SET_TIES_XY_BYSURVEY 24
+#define MOD_MODE_SET_TIES_Z_BYSURVEY 25
+#define MOD_MODE_SET_TIES_XYZ_BLOCK 26
+#define MOD_MODE_SET_TIES_XY_BLOCK 27
+#define MOD_MODE_SET_TIES_Z_BLOCK 28
+#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 29
+#define MOD_MODE_SET_TIES_XY_BY_TIME 30
+#define MOD_MODE_UNSET_TIE 31
+#define MOD_MODE_UNSET_TIES_FILE 32
+#define MOD_MODE_UNSET_TIES_SURVEY 33
+#define MOD_MODE_UNSET_TIES_BYSURVEY 34
+#define MOD_MODE_UNSET_TIES_BLOCK 35
+#define MOD_MODE_UNSET_TIES_ALL 36
+#define MOD_MODE_SKIP_UNSET_CROSSINGS 37
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS 38
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 39
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 40
+#define MOD_MODE_INSERT_DISCONTINUITY 41
+#define MOD_MODE_REIMPORT_FILE 42
+#define MOD_MODE_REIMPORT_ALL_FILES 43
+#define MOD_MODE_TRIANGULATE 44
+#define MOD_MODE_TRIANGULATE_SECTION 45
+#define MOD_MODE_UNSET_SHORT_SECTION_TIES 46
+#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 47
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
@@ -334,7 +336,9 @@ int main(int argc, char **argv) {
   mb_path command = "";
   mb_path filename = "";
   double mtodeglon, mtodeglat;
-  int found, current_crossing;
+  int current_crossing;
+  bool found = false;
+  bool found_crossing = false;
   int imod, ifile, icrossing, itie, itie_set, isection, isnav;
   double timediff, timediffmin;
   mb_path tmp_mb_path = "";
@@ -570,7 +574,16 @@ int main(int argc, char **argv) {
                               &mods[num_mods].section1, &mods[num_mods].file2, &mods[num_mods].section2,
                               &mods[num_mods].xoffset, &mods[num_mods].yoffset, &mods[num_mods].zoffset,
                               &mods[num_mods].xsigma, &mods[num_mods].ysigma, &mods[num_mods].zsigma)) == 10) {
-            mods[num_mods].mode = MOD_MODE_SET_TIE;
+            mods[num_mods].mode = MOD_MODE_SET_TIE_VALUES_ALL;
+            num_mods++;
+          }
+          else if ((nscan = sscanf(optarg, "%d/%d/%lf/%lf/%lf/%lf/%lf/%lf", &mods[num_mods].file1,
+                              &mods[num_mods].file2,
+                              &mods[num_mods].xoffset, &mods[num_mods].yoffset, &mods[num_mods].zoffset,
+                              &mods[num_mods].xsigma, &mods[num_mods].ysigma, &mods[num_mods].zsigma)) == 8) {
+            mods[num_mods].mode = MOD_MODE_SET_TIE_VALUES_ALL;
+            mods[num_mods].section1 = 0;
+            mods[num_mods].section2 = 0;
             num_mods++;
           }
           else if ((nscan = sscanf(optarg, "%d:%d/%d:%d/%lf/%lf/%lf", &mods[num_mods].file1, &mods[num_mods].section1,
@@ -579,7 +592,7 @@ int main(int argc, char **argv) {
             mods[num_mods].xsigma = 10.0;
             mods[num_mods].ysigma = 10.0;
             mods[num_mods].zsigma = 1.0;
-            mods[num_mods].mode = MOD_MODE_SET_TIE;
+            mods[num_mods].mode = MOD_MODE_SET_TIE_VALUES_XYZ;
             num_mods++;
           }
           else if ((nscan = sscanf(optarg, "%d/%d/%lf/%lf/%lf", &mods[num_mods].file1, &mods[num_mods].file2,
@@ -589,7 +602,27 @@ int main(int argc, char **argv) {
             mods[num_mods].xsigma = 10.0;
             mods[num_mods].ysigma = 10.0;
             mods[num_mods].zsigma = 1.0;
-            mods[num_mods].mode = MOD_MODE_SET_TIE;
+            mods[num_mods].mode = MOD_MODE_SET_TIE_VALUES_XYZ;
+            num_mods++;
+          }
+          else if ((nscan = sscanf(optarg, "%d:%d/%d:%d///%lf", &mods[num_mods].file1, &mods[num_mods].section1,
+                                   &mods[num_mods].file2, &mods[num_mods].section2, &mods[num_mods].zoffset)) == 5) {
+            mods[num_mods].xsigma = 10.0;
+            mods[num_mods].ysigma = 10.0;
+            mods[num_mods].zsigma = 1.0;
+            mods[num_mods].mode = MOD_MODE_SET_TIE_VALUES_Z;
+            num_mods++;
+          }
+          else if ((nscan = sscanf(optarg, "%d/%d///%lf", &mods[num_mods].file1, &mods[num_mods].file2,
+                                   &mods[num_mods].zoffset)) == 3) {
+            mods[num_mods].section1 = 0;
+            mods[num_mods].section2 = 0;
+            mods[num_mods].xoffset = 0.0;
+            mods[num_mods].yoffset = 0.0;
+            mods[num_mods].xsigma = 10.0;
+            mods[num_mods].ysigma = 10.0;
+            mods[num_mods].zsigma = 1.0;
+            mods[num_mods].mode = MOD_MODE_SET_TIE_VALUES_XYZ;
             num_mods++;
           }
           else {
@@ -1705,6 +1738,7 @@ int main(int argc, char **argv) {
   /* apply any specified changes to the output project */
   for (imod = 0; imod < num_mods; imod++) {
     switch (mods[imod].mode) {
+
     case MOD_MODE_SET_GLOBAL_TIE:
       fprintf(stderr, "\nCommand set-global-tie=%4.4d:%4.4d:%4.4d/%.3f/%.3f/%.3f/%.3f/%.3f/%.3f\n", mods[imod].file1,
               mods[imod].section1, mods[imod].snav2, mods[imod].xoffset, mods[imod].yoffset, mods[imod].zoffset,
@@ -1908,21 +1942,21 @@ int main(int argc, char **argv) {
               mods[imod].file2, mods[imod].section2);
 
       /* check to see if this crossing already exists */
-      found = false;
-      for (icrossing = 0; icrossing < project_output.num_crossings && found == false; icrossing++) {
+      found_crossing = false;
+      for (icrossing = 0; icrossing < project_output.num_crossings && found_crossing == false; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         if (crossing->file_id_2 == mods[imod].file1 && crossing->file_id_1 == mods[imod].file2 &&
             crossing->section_2 == mods[imod].section1 && crossing->section_1 == mods[imod].section2) {
-          found = true;
+          found_crossing = true;
         }
         else if (crossing->file_id_1 == mods[imod].file1 && crossing->file_id_2 == mods[imod].file2 &&
                  crossing->section_1 == mods[imod].section1 && crossing->section_2 == mods[imod].section2) {
-          found = true;
+          found_crossing = true;
         }
       }
 
       /* if the crossing does not exist, create it */
-      if (found == false) {
+      if (found_crossing == false) {
         /* allocate mbna_crossing array if needed */
         if (project_output.num_crossings_alloc <= project_output.num_crossings) {
           project_output.crossings = (struct mbna_crossing *)realloc(
@@ -1956,31 +1990,41 @@ int main(int argc, char **argv) {
       }
       break;
 
-    case MOD_MODE_SET_TIE:
-      fprintf(stderr, "\nCommand set-tie=%4.4d:%4.4d/%4.4d:%4.4d/%.3f/%.3f/%.3f/%.3f/%.3f/%.3f\n", mods[imod].file1,
+    case MOD_MODE_SET_TIE_VALUES_ALL:
+    case MOD_MODE_SET_TIE_VALUES_XYZ:
+    case MOD_MODE_SET_TIE_VALUES_Z:
+      if (mods[imod].mode == MOD_MODE_SET_TIE_VALUES_ALL)
+        fprintf(stderr, "\nCommand set-tie=%4.4d:%4.4d/%4.4d:%4.4d/%.3f/%.3f/%.3f/%.3f/%.3f/%.3f\n", mods[imod].file1,
               mods[imod].section1, mods[imod].file2, mods[imod].section2, mods[imod].xoffset, mods[imod].yoffset,
               mods[imod].zoffset, mods[imod].xsigma, mods[imod].ysigma, mods[imod].zsigma);
+      else if (mods[imod].mode == MOD_MODE_SET_TIE_VALUES_XYZ)
+        fprintf(stderr, "\nCommand set-tie=%4.4d:%4.4d/%4.4d:%4.4d/%.3f/%.3f/%.3f\n", mods[imod].file1,
+              mods[imod].section1, mods[imod].file2, mods[imod].section2, mods[imod].xoffset, mods[imod].yoffset,
+              mods[imod].zoffset);
+      else if (mods[imod].mode == MOD_MODE_SET_TIE_VALUES_Z)
+        fprintf(stderr, "\nCommand set-tie=%4.4d:%4.4d/%4.4d:%4.4d///%.3f\n", mods[imod].file1,
+              mods[imod].section1, mods[imod].file2, mods[imod].section2, mods[imod].zoffset);
 
       /* check to see if this crossing already exists */
-      found = false;
-      for (icrossing = 0; icrossing < project_output.num_crossings && found == false; icrossing++) {
+      found_crossing = false;
+      for (icrossing = 0; icrossing < project_output.num_crossings && found_crossing == false; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         if (crossing->file_id_2 == mods[imod].file1 && crossing->file_id_1 == mods[imod].file2 &&
             crossing->section_2 == mods[imod].section1 && crossing->section_1 == mods[imod].section2) {
-          found = true;
+          found_crossing = true;
           current_crossing = icrossing;
           crossing = (struct mbna_crossing *)&project_output.crossings[icrossing];
         }
         else if (crossing->file_id_1 == mods[imod].file1 && crossing->file_id_2 == mods[imod].file2 &&
                  crossing->section_1 == mods[imod].section1 && crossing->section_2 == mods[imod].section2) {
-          found = true;
+          found_crossing = true;
           current_crossing = icrossing;
           crossing = (struct mbna_crossing *)&project_output.crossings[icrossing];
         }
       }
 
       /* if the crossing does not exist, create it */
-      if (found == false) {
+      if (found_crossing == false) {
         /* allocate mbna_crossing array if needed */
         if (project_output.num_crossings_alloc <= project_output.num_crossings) {
           project_output.crossings = (struct mbna_crossing *)realloc(
@@ -2015,7 +2059,11 @@ int main(int argc, char **argv) {
       }
 
       /* if the tie does not exist, create it */
+      bool existing_tie = true;
       if (crossing->num_ties == 0) {
+
+        existing_tie = false;
+
         /* add tie and set number */
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
         file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
@@ -2053,23 +2101,28 @@ int main(int argc, char **argv) {
         tie->snav_2_time_d = section2->snav_time_d[tie->snav_2];
         mb_coor_scale(verbose, 0.25 * (section1->latmin + section1->latmax + section2->latmin + section2->latmax),
                       &mtodeglon, &mtodeglat);
-        tie->offset_x = mods[imod].xoffset * mtodeglon;
-        tie->offset_y = mods[imod].yoffset * mtodeglat;
-        tie->offset_x_m = mods[imod].xoffset;
-        tie->offset_y_m = mods[imod].yoffset;
+        if (!existing_tie || mods[imod].mode == MOD_MODE_SET_TIE_VALUES_ALL
+          || mods[imod].mode == MOD_MODE_SET_TIE_VALUES_XYZ) {
+          tie->offset_x = mods[imod].xoffset * mtodeglon;
+          tie->offset_y = mods[imod].yoffset * mtodeglat;
+          tie->offset_x_m = mods[imod].xoffset;
+          tie->offset_y_m = mods[imod].yoffset;
+        }
         tie->offset_z_m = mods[imod].zoffset;
-        tie->sigmar1 = mods[imod].xsigma;
-        tie->sigmax1[0] = 1.0;
-        tie->sigmax1[1] = 0.0;
-        tie->sigmax1[2] = 0.0;
-        tie->sigmar2 = mods[imod].ysigma;
-        tie->sigmax2[0] = 0.0;
-        tie->sigmax2[1] = 1.0;
-        tie->sigmax2[2] = 0.0;
-        tie->sigmar3 = mods[imod].zsigma;
-        tie->sigmax3[0] = 0.0;
-        tie->sigmax3[1] = 0.0;
-        tie->sigmax3[2] = 1.0;
+        if (!existing_tie || mods[imod].mode == MOD_MODE_SET_TIE_VALUES_ALL) {
+          tie->sigmar1 = mods[imod].xsigma;
+          tie->sigmax1[0] = 1.0;
+          tie->sigmax1[1] = 0.0;
+          tie->sigmax1[2] = 0.0;
+          tie->sigmar2 = mods[imod].ysigma;
+          tie->sigmax2[0] = 0.0;
+          tie->sigmax2[1] = 1.0;
+          tie->sigmax2[2] = 0.0;
+          tie->sigmar3 = mods[imod].zsigma;
+          tie->sigmax3[0] = 0.0;
+          tie->sigmax3[1] = 0.0;
+          tie->sigmax3[2] = 1.0;
+        }
         tie->inversion_offset_x = section2->snav_lon_offset[tie->snav_2] - section1->snav_lon_offset[tie->snav_1];
         tie->inversion_offset_y = section2->snav_lat_offset[tie->snav_2] - section1->snav_lat_offset[tie->snav_1];
         tie->inversion_offset_x_m = tie->inversion_offset_x / mtodeglon;
@@ -2097,27 +2150,27 @@ int main(int argc, char **argv) {
               mods[imod].file2, mods[imod].section2);
 
       /* check to see if this crossing already exists */
-      found = false;
-      for (icrossing = 0; icrossing < project_output.num_crossings && found == false; icrossing++) {
+      found_crossing = false;
+      for (icrossing = 0; icrossing < project_output.num_crossings && found_crossing == false; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
         file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
         if (crossing->file_id_2 == mods[imod].file1 && crossing->file_id_1 == mods[imod].file2 &&
             crossing->section_2 == mods[imod].section1 && crossing->section_1 == mods[imod].section2) {
-          found = true;
+          found_crossing = true;
           current_crossing = icrossing;
           crossing = (struct mbna_crossing *)&project_output.crossings[icrossing];
         }
         else if (crossing->file_id_1 == mods[imod].file1 && crossing->file_id_2 == mods[imod].file2 &&
                  crossing->section_1 == mods[imod].section1 && crossing->section_2 == mods[imod].section2) {
-          found = true;
+          found_crossing = true;
           current_crossing = icrossing;
           crossing = (struct mbna_crossing *)&project_output.crossings[icrossing];
         }
       }
 
       /* set the tie parameters */
-      if (found == true) {
+      if (found_crossing == true) {
         for (itie = 0; itie < crossing->num_ties; itie++) {
           tie = &crossing->ties[itie];
           tie->status = MBNA_TIE_XYZ;
@@ -2137,27 +2190,27 @@ int main(int argc, char **argv) {
               mods[imod].file2, mods[imod].section2);
 
       /* check to see if this crossing already exists */
-      found = false;
-      for (icrossing = 0; icrossing < project_output.num_crossings && found == false; icrossing++) {
+      found_crossing = false;
+      for (icrossing = 0; icrossing < project_output.num_crossings && found_crossing == false; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
         file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
         if (crossing->file_id_2 == mods[imod].file1 && crossing->file_id_1 == mods[imod].file2 &&
             crossing->section_2 == mods[imod].section1 && crossing->section_1 == mods[imod].section2) {
-          found = true;
+          found_crossing = true;
           current_crossing = icrossing;
           crossing = (struct mbna_crossing *)&project_output.crossings[icrossing];
         }
         else if (crossing->file_id_1 == mods[imod].file1 && crossing->file_id_2 == mods[imod].file2 &&
                  crossing->section_1 == mods[imod].section1 && crossing->section_2 == mods[imod].section2) {
-          found = true;
+          found_crossing = true;
           current_crossing = icrossing;
           crossing = (struct mbna_crossing *)&project_output.crossings[icrossing];
         }
       }
 
       /* set the tie parameters */
-      if (found == true) {
+      if (found_crossing == true) {
         for (itie = 0; itie < crossing->num_ties; itie++) {
           tie = &crossing->ties[itie];
           tie->status = MBNA_TIE_XY;
@@ -2177,27 +2230,27 @@ int main(int argc, char **argv) {
               mods[imod].file2, mods[imod].section2);
 
       /* check to see if this crossing already exists */
-      found = false;
-      for (icrossing = 0; icrossing < project_output.num_crossings && found == false; icrossing++) {
+      found_crossing = false;
+      for (icrossing = 0; icrossing < project_output.num_crossings && found_crossing == false; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
         file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
         if (crossing->file_id_2 == mods[imod].file1 && crossing->file_id_1 == mods[imod].file2 &&
             crossing->section_2 == mods[imod].section1 && crossing->section_1 == mods[imod].section2) {
-          found = true;
+          found_crossing = true;
           current_crossing = icrossing;
           crossing = (struct mbna_crossing *)&project_output.crossings[icrossing];
         }
         else if (crossing->file_id_1 == mods[imod].file1 && crossing->file_id_2 == mods[imod].file2 &&
                  crossing->section_1 == mods[imod].section1 && crossing->section_2 == mods[imod].section2) {
-          found = true;
+          found_crossing = true;
           current_crossing = icrossing;
           crossing = (struct mbna_crossing *)&project_output.crossings[icrossing];
         }
       }
 
       /* set the tie parameters */
-      if (found == true) {
+      if (found_crossing == true) {
         for (itie = 0; itie < crossing->num_ties; itie++) {
           tie = &crossing->ties[itie];
           tie->status = MBNA_TIE_Z;
@@ -2645,25 +2698,25 @@ int main(int argc, char **argv) {
               mods[imod].file2, mods[imod].section2);
 
       /* check to see if this crossing already exists */
-      found = false;
-      for (icrossing = 0; icrossing < project_output.num_crossings && found == false; icrossing++) {
+      found_crossing = false;
+      for (icrossing = 0; icrossing < project_output.num_crossings && found_crossing == false; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
         file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
         if (crossing->file_id_2 == mods[imod].file1 && crossing->file_id_1 == mods[imod].file2 &&
             crossing->section_2 == mods[imod].section1 && crossing->section_1 == mods[imod].section2) {
-          found = true;
+          found_crossing = true;
           current_crossing = icrossing;
         }
         else if (crossing->file_id_1 == mods[imod].file1 && crossing->file_id_2 == mods[imod].file2 &&
                  crossing->section_1 == mods[imod].section1 && crossing->section_2 == mods[imod].section2) {
-          found = true;
+          found_crossing = true;
           current_crossing = icrossing;
         }
       }
 
       /* unset the ties associated with this crossing */
-      if (found == true && crossing->num_ties > 0) {
+      if (found_crossing == true && crossing->num_ties > 0) {
         crossing->num_ties = 0;
 
         fprintf(stderr, "Unset tie:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,

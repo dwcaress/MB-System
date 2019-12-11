@@ -23,6 +23,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
 
+- Version 5.7.6beta21    December 11, 2019
 - Version 5.7.6beta20    November 26, 2019
 - Version 5.7.6beta19    November 22, 2019
 - Version 5.7.6beta18    November 21, 2019
@@ -336,6 +337,16 @@ announced releases.
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 
 -------------------------------------------------------------------------------
+
+-----> 5.7.6beta21 (December 11, 2019)
+
+GMT modules (mbcontour, mbswath, mbgrdtiff): modified the #ifdefs to allow building with GMT 6.1 and later.
+
+MBnavadjustmerge: augmented --set-tie option to allow changing the z-offset value of an existing tie.
+
+MBprocess: Change behavior when reading grid files for backscatter correction fails - the functions in mb_readwritegrd.c used to wait 1 millisecond before trying to read again; now the code waits for 25 milliseconds.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best practices
 
 -----> 5.7.6beta20 (November 26, 2019)
 

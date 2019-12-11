@@ -515,7 +515,7 @@ int GMT_mbgrdtiff_parse(struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl, struc
 			Ctrl->I.active = true;
 			if (n_files >= 3)
 				break;
-#if GMT_MINOR_VERSION == 1 && GMT_RELEASE_VERSION < 2
+#if GMT_MAJOR_VERSION < 5 || (GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION == 1 && GMT_RELEASE_VERSION < 2)
 			if (gmt_check_filearg(GMT, '<', opt->arg, GMT_IN))
 #else
 			if (gmt_check_filearg(GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET))
