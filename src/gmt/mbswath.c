@@ -450,7 +450,7 @@ int GMT_mbswath_parse(struct GMT_CTRL *GMT, struct MBSWATH_CTRL *Ctrl, struct GM
 		switch (opt->option) {
 		case '<': /* Input file (only one or three is accepted) */
 			Ctrl->I.active = true;
-#if GMT_MINOR_VERSION == 1 && GMT_RELEASE_VERSION < 2
+#if GMT_MAJOR_VERSION < 5 || (GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION == 1 && GMT_RELEASE_VERSION < 2)
 			if (gmt_check_filearg(GMT, '<', opt->arg, GMT_IN)) {
 #else
 			if (gmt_check_filearg(GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET)) {

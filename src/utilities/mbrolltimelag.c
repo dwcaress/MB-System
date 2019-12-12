@@ -202,16 +202,15 @@ int main(int argc, char **argv) {
 		sprintf(cmdfile, "mbnavlist -I%s -F%d -N%d -OMR", swathdata, format, navchannel);
 	fprintf(stderr, "\nRunning %s...\n", cmdfile);
 
-	FILE *fp = popen(cmdfile, "r");
-	double time_d;
-	double roll;
-	int nscan = fscanf(fp, "%lf %lf", &time_d, &roll);
-	pclose(fp);
 	int nroll = 0;
 	int nroll_alloc = 0;
 	double *roll_time_d = NULL;
 	double *roll_roll = NULL;
-	while (nscan == 2) {
+	FILE *fp = popen(cmdfile, "r");
+	double time_d;
+	double roll;
+  int nscan;
+  while ((nscan = fscanf(fp, "%lf %lf", &time_d, &roll)) == 2) {
 		if (nroll >= nroll_alloc) {
 			nroll_alloc += MBRTL_ALLOC_CHUNK;
 			status &= mb_reallocd(verbose, __FILE__, __LINE__, nroll_alloc * sizeof(double), (void **)&roll_time_d, &error);
@@ -222,7 +221,8 @@ int main(int argc, char **argv) {
 			roll_roll[nroll] = roll;
 			nroll++;
 		}
-	}
+  }
+	pclose(fp);
 	fprintf(stderr, "%d roll data read from %s\n", nroll, swathdata);
 
 	/* open total cross correlation file */

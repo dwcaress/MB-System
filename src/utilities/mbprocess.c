@@ -5845,8 +5845,10 @@ int main(int argc, char **argv) {
       /*--------------------------------------------
         reset status/error, close files and deallocate memory
         --------------------------------------------*/
-      if (status == MB_FAILURE) {
-        fprintf(stderr, "WARNING: status is MB_FAILURE.\n");
+      if (status == MB_FAILURE && error != MB_ERROR_EOF) {
+        char *message = NULL;
+        mb_error(verbose, error, &message);
+        fprintf(stderr, "WARNING: exited read loop with error: %s\n", message);
       }
       status = MB_SUCCESS;
       error = MB_ERROR_NO_ERROR;
@@ -5920,10 +5922,10 @@ int main(int argc, char **argv) {
         mb_freed(verbose, __FILE__, __LINE__, (void **)&nalonspl, &error);
         mb_freed(verbose, __FILE__, __LINE__, (void **)&nalatspl, &error);
         mb_freed(verbose, __FILE__, __LINE__, (void **)&nazspl, &error);
-      // }
+      }
 
       /* deallocate arrays for attitude merging */
-      // if (nanav > 0) {
+      if (nattitude > 0) {
         mb_freed(verbose, __FILE__, __LINE__, (void **)&attitudetime, &error);
         mb_freed(verbose, __FILE__, __LINE__, (void **)&attituderoll, &error);
         mb_freed(verbose, __FILE__, __LINE__, (void **)&attitudepitch, &error);

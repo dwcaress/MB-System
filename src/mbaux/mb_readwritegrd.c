@@ -86,22 +86,23 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
     }
 
     /* read in the grid */
+    const int MAX_GRID_READ_ATTEMPTS = 1000;
     int num_tries = 0;
     struct GMT_GRID *G = NULL;      /* GMT grid structure pointer */
-    while (G == NULL && num_tries < 100) {
+    while (G == NULL && num_tries < MAX_GRID_READ_ATTEMPTS) {
       if ((G = GMT_Read_Data(API, GMT_IS_GRID, GMT_IS_FILE, GMT_IS_SURFACE, GMT_GRID_ALL, NULL, grdfile, NULL)) == NULL) {
         num_tries++;
 #ifdef _WIN32
-        Sleep(1);    /* 1 milisec */
+        Sleep(1);    /* 25 milisec */
 #else
-        usleep(1000);
+        usleep(25000);
 #endif
         if (num_tries > 0)
-          fprintf(stderr,"%s:%s:%4.4d: num_tries:%d status:%d error:%d G:%p\n", __FILE__, __FUNCTION__, __LINE__, num_tries, status, *error, G);
-      } else {
-        if (num_tries > 0) {
-          fprintf(stderr, "Read grid on try %d\n", num_tries);
-        }
+          fprintf(stderr,"!!-- Failed to read grid <%s> - Number of attempts: %d out of %d possible\n",
+                  grdfile, num_tries, MAX_GRID_READ_ATTEMPTS);
+      }
+      else if (num_tries > 0) {
+        fprintf(stderr, "!!-- Succeeded reading grid <%s> on attempt %d\n", grdfile, num_tries+1);
       }
     }
     if (G == NULL) {
