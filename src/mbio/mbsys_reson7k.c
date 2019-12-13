@@ -5011,11 +5011,8 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
       mb_3D_orientation tx_align;
       mb_3D_orientation tx_orientation;
-      double tx_steer;
       mb_3D_orientation rx_align;
       mb_3D_orientation rx_orientation;
-      double rx_steer;
-      double reference_heading;
       double beamAzimuth;
       double beamDepression;
 
@@ -5023,8 +5020,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       double beamroll = 0.0;
       double beampitch = 0.0;
       double beamheave;
-      double soundspeed;
-      double soundspeedsnellfactor = 1.0;
       s7kr_v2detection *v2detection = &(store->v2detection);
       s7kr_v2detectionsetup *v2detectionsetup = &(store->v2detectionsetup);
       s7kr_v2rawdetection *v2rawdetection = &(store->v2rawdetection);
@@ -5095,6 +5090,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
         }
 
         /* get ready to calculate bathymetry */
+        double soundspeed;
         if (volatilesettings->sound_velocity > 0.0)
           soundspeed = volatilesettings->sound_velocity;
         else if (remotecontrolsettings->sound_velocity > 0.0)
@@ -5156,6 +5152,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
         }
 
         /* Change the sound speed used to calculate bathymetry */
+        double soundspeedsnellfactor = 1.0;
         if (pars->modify_soundspeed && pars->n_soundspeed > 0) {
           soundspeedsnellfactor = soundspeednew / soundspeed;
           soundspeed = soundspeednew;
@@ -5219,7 +5216,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 0,
                                                   &(tx_align.heading), &(tx_align.roll), &(tx_align.pitch), error);
 
-          status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 1,
+          status &= mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 1,
                                                   &(rx_align.heading), &(rx_align.roll), &(rx_align.pitch), error);
         }
 
@@ -5240,6 +5237,10 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
         /* loop over detections as available - the 7k format has used several
            different records over the years, so there are several different
            cases that must be handled */
+
+        double reference_heading;
+        double tx_steer;
+        double rx_steer;
 
         /* case of v2rawdetection record */
         if (store->read_v2rawdetection == true) {
@@ -5672,11 +5673,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
-  struct mb_platform_struct *platform;
-  int sensor_multibeam, sensor_position, sensor_attitude;
-  int ntimelag = 0;
-  int isensor;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5700,11 +5696,11 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
   /* extract sensor offsets from installation record */
   if (*platform_ptr != NULL) {
     /* get pointer to platform structure */
-    platform = (struct mb_platform_struct *)(*platform_ptr);
+    struct mb_platform_struct *platform = (struct mb_platform_struct *)(*platform_ptr);
 
     /* look for multibeam sensor, add it if necessary */
-    sensor_multibeam = -1;
-    for (isensor = 0; isensor < platform->num_sensors && sensor_multibeam < 0; isensor++) {
+    int sensor_multibeam = -1;
+    for (int isensor = 0; isensor < platform->num_sensors && sensor_multibeam < 0; isensor++) {
       if (platform->sensors[isensor].type == MB_SENSOR_TYPE_SONAR_MULTIBEAM &&
           platform->sensors[isensor].num_offsets == 2) {
         sensor_multibeam = isensor;
@@ -5738,16 +5734,17 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
     }
 
     /* look for position sensor, add it if necessary */
-    sensor_position = -1;
+    int sensor_position = -1;
     if (platform->source_position1 >= 0)
       sensor_position = platform->source_position1;
-    for (isensor = 0; isensor < platform->num_sensors && sensor_position < 0; isensor++) {
+    for (int isensor = 0; isensor < platform->num_sensors && sensor_position < 0; isensor++) {
       if (platform->sensors[isensor].type == MB_SENSOR_TYPE_POSITION && platform->sensors[isensor].num_offsets == 1) {
         sensor_position = isensor;
       }
     }
     if (sensor_position < 0) {
       /* set sensor 1 (position) */
+      const int ntimelag = 0;
       status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_POSITION, NULL, NULL, NULL, 0, 0, 1,
                                       ntimelag, error);
       if (status == MB_SUCCESS) {
@@ -5775,10 +5772,10 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
     }
 
     /* look for attitude sensor, add it if necessary */
-    sensor_attitude = -1;
+    int sensor_attitude = -1;
     if (platform->source_rollpitch1 >= 0)
       sensor_attitude = platform->source_rollpitch1;
-    for (isensor = 0; isensor < platform->num_sensors && sensor_attitude < 0; isensor++) {
+    for (int isensor = 0; isensor < platform->num_sensors && sensor_attitude < 0; isensor++) {
       if ((platform->sensors[isensor].type == MB_SENSOR_TYPE_VRU || platform->sensors[isensor].type == MB_SENSOR_TYPE_IMU ||
            platform->sensors[isensor].type == MB_SENSOR_TYPE_INS) &&
           platform->sensors[isensor].num_offsets == 1) {
@@ -5787,6 +5784,7 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
     }
     if (sensor_attitude < 0) {
       /* set sensor 2 (attitude) */
+      const int ntimelag = 0;
       status =
           mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_VRU, NULL, NULL, NULL, 0, 0, 1, ntimelag, error);
       if (status == MB_SUCCESS) {
@@ -6689,7 +6687,7 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
   s7kr_reference *reference = (s7kr_reference *)&store->reference;
 
   double heave_use, roll, pitch;
-  double alpha, beta, theta, phi;
+  // double alpha, beta, theta, phi;
 
   /* get data kind */
   *kind = store->kind;
@@ -6736,8 +6734,10 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
         angles_forward[i] = RTD * bathymetry->azimuth_angle[i];
       }
       else {
-        alpha = RTD * beamgeometry->angle_alongtrack[i] + bathymetry->pitch;
-        beta = 90.0 - RTD * beamgeometry->angle_acrosstrack[i] + bathymetry->roll;
+        const double alpha = RTD * beamgeometry->angle_alongtrack[i] + bathymetry->pitch;
+        const double beta = 90.0 - RTD * beamgeometry->angle_acrosstrack[i] + bathymetry->roll;
+	double phi;
+	double theta;
         mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
         angles[i] = theta;
         angles_forward[i] = phi;
@@ -6961,9 +6961,6 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
   s7kr_reference *reference = (s7kr_reference *)&store->reference;
 
   double heave, roll, pitch;
-  double xtrackmin;
-  int altitude_found;
-  char flag;
 
   /* get data kind */
   *kind = store->kind;
@@ -6989,14 +6986,15 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
     }
 
     /* get altitude */
-    altitude_found = false;
+    bool altitude_found = false;
     if (mb_io_ptr->naltitude > 0) {
       mb_altint_interp(verbose, mbio_ptr, store->time_d, altitudev, error);
       altitude_found = true;
     }
     if (altitude_found == false && bathymetry->optionaldata == true) {
       /* get depth closest to nadir */
-      xtrackmin = 999999.9;
+      double xtrackmin = 999999.9;
+      char flag;
       for (int i = 0; i < bathymetry->number_beams; i++) {
         if (bathymetry->quality[i] == 0) {
           flag = MB_FLAG_NULL;
@@ -7905,8 +7903,8 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
   if (store->kind == MB_DATA_VELOCITY_PROFILE) {
     /* allocate memory if necessary */
     if (svp->nalloc < nsvp) {
-      status = mb_reallocd(verbose, __FILE__, __LINE__, nsvp * sizeof(float), (void **)&(svp->depth), error);
-      status = mb_reallocd(verbose, __FILE__, __LINE__, nsvp * sizeof(float), (void **)&(svp->sound_velocity), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, nsvp * sizeof(float), (void **)&(svp->depth), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, nsvp * sizeof(float), (void **)&(svp->sound_velocity), error);
       if (status == MB_SUCCESS) {
         svp->nalloc = nsvp;
       }
@@ -7958,18 +7956,12 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 
   struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
   s7kr_bathymetry *bathymetry;
-  s7kr_bluefin *bluefin;
   s7kr_fsdwsb *fsdwsb;
   s7k_fsdwchannel *fsdwchannel;
-  s7kr_ctd *ctd;
-  double dsonardepth, dsonaraltitude, dwaterdepth;
-  int sonardepth, waterdepth;
-  int watersoundspeed;
-  float fwatertime;
+  double dsonardepth, dsonaraltitude;
   double longitude, latitude;
   double speed, heading;
   double roll, pitch, heave;
-  double xtrackmin;
   int time_j[5];
 
   /* extract data from structure */
@@ -7977,8 +7969,8 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
     /* get relevant structures */
     mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segytraceheader_ptr;
     bathymetry = &(store->bathymetry);
-    bluefin = &(store->bluefin);
-    ctd = &(store->ctd);
+    s7kr_bluefin *bluefin = &(store->bluefin);
+    s7kr_ctd *ctd = &(store->ctd);
     fsdwsb = &(store->fsdwsb);
     // s7k_header *header = &(fsdwsb->header);
     fsdwchannel = &(fsdwsb->channel);
@@ -7987,12 +7979,12 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
     /* get needed values */
     mb_depint_interp(verbose, mbio_ptr, store->time_d, &dsonardepth, error);
     mb_altint_interp(verbose, mbio_ptr, store->time_d, &dsonaraltitude, error);
-    dwaterdepth = dsonardepth + dsonaraltitude;
+    double dwaterdepth = dsonardepth + dsonaraltitude;
 
     /* if possible get altitude from nadir of multibeam bathymetry */
     if (bathymetry->optionaldata == true) {
       /* get depth closest to nadir */
-      xtrackmin = 999999.9;
+      double xtrackmin = 999999.9;
       for (int i = 0; i < bathymetry->number_beams; i++) {
         if (((bathymetry->quality[i] & 15) == 15) && fabs((double)bathymetry->acrosstrack[i]) < xtrackmin) {
           dwaterdepth = bathymetry->depth[i];
@@ -8003,15 +7995,16 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
     }
 
     /* get needed values */
-    sonardepth = (int)(100 * dsonardepth);
-    waterdepth = (int)(100 * dwaterdepth);
+    const int sonardepth = (int)(100 * dsonardepth);
+    const int waterdepth = (int)(100 * dwaterdepth);
+    int watersoundspeed;
     if (ctd->n > 0)
       watersoundspeed = (int)(ctd->sound_velocity[ctd->n - 1]);
     else if (bluefin->environmental[0].sound_speed > 0.0)
       watersoundspeed = (int)(bluefin->environmental[0].sound_speed);
     else
       watersoundspeed = 1500;
-    fwatertime = 2.0 * dwaterdepth / ((double)watersoundspeed);
+    const float fwatertime = 2.0 * dwaterdepth / ((double)watersoundspeed);
 
     mb_hedint_interp(verbose, mbio_ptr, store->time_d, &heading, error);
     speed = 0.0;
@@ -8203,12 +8196,6 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int
   }
 
   struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
-  s7kr_fsdwsb *fsdwsb;
-  s7k_fsdwchannel *fsdwchannel;
-  s7k_fsdwsegyheader *fsdwsegyheader;
-  short *shortptr;
-  unsigned short *ushortptr;
-  double weight;
 
   /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -8225,15 +8212,15 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int
 
     /* get relevant structures */
     mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segyheader_ptr;
-    fsdwsb = &(store->fsdwsb);
+    s7kr_fsdwsb *fsdwsb = &(store->fsdwsb);
     // s7k_header *header = &(fsdwsb->header);
-    fsdwchannel = &(fsdwsb->channel);
-    fsdwsegyheader = &(fsdwsb->segyheader);
-    shortptr = (short *)fsdwchannel->data;
-    ushortptr = (unsigned short *)fsdwchannel->data;
+    s7k_fsdwchannel *fsdwchannel = &(fsdwsb->channel);
+    s7k_fsdwsegyheader *fsdwsegyheader = &(fsdwsb->segyheader);
+    short *shortptr = (short *)fsdwchannel->data;
+    unsigned short *ushortptr = (unsigned short *)fsdwchannel->data;
 
     /* get the trace weight */
-    weight = exp(MB_LN_2 * ((double)fsdwsegyheader->weightingFactor));
+    const double weight = exp(MB_LN_2 * ((double)fsdwsegyheader->weightingFactor));
 
     /* extract the data */
     if (fsdwsb->data_format == EDGETECH_TRACEFORMAT_ENVELOPE) {
