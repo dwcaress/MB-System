@@ -6517,7 +6517,8 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
     processedsidescan->number_pixels = nss;
     for (int i = 0; i < processedsidescan->number_pixels; i++) {
       processedsidescan->sidescan[i] = ss[i];
-      processedsidescan->alongtrack[i] = processedsidescan->alongtrack[i];
+      // TODO(schwehr): What was actually intended?
+      // processedsidescan->alongtrack[i] = processedsidescan->alongtrack[i];
     }
     for (int i = processedsidescan->number_pixels; i < MBSYS_RESON7K_MAX_PIXELS; i++) {
       processedsidescan->sidescan[i] = 0.0;
@@ -7087,7 +7088,6 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
   /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
-  s7kr_position *position = (s7kr_position *)&store->position;
   // s7kr_attitude *attitude = (s7kr_attitude *)&store->attitude;
   s7kr_reference *reference = (s7kr_reference *)&store->reference;
   s7kr_bluefin *bluefin = (s7kr_bluefin *)&store->bluefin;
@@ -7120,11 +7120,11 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
       mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, navlon, navlat, speed, error);
 
     /* get heading */
-    if (bathymetry->optionaldata == true)
+    if (bathymetry->optionaldata) {
       *heading = RTD * bathymetry->heading;
 
     /* get navigation */
-    if (bathymetry->optionaldata == true) {
+    // if (bathymetry->optionaldata == true) {
       *navlon = RTD * bathymetry->longitude;
       *navlat = RTD * bathymetry->latitude;
     }
@@ -7158,7 +7158,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
   /* extract data from nav structure */
   else if (*kind == MB_DATA_NAV1) {
     /* get position data structure */
-    position = (s7kr_position *)&store->position;
+    s7kr_position *position = (s7kr_position *)&store->position;
 
     /* get time */
     for (int i = 0; i < 7; i++)
@@ -7181,7 +7181,8 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 
     /* get draft  */
     if (mb_io_ptr->nsonardepth > 0) {
-      if (mb_io_ptr->nsonardepth > 0)
+      // TODO(schwehr): Was something else intended in the if?
+      // if (mb_io_ptr->nsonardepth > 0)
         mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
       *heave = 0.0;
     }
