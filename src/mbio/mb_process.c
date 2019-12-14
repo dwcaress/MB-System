@@ -1475,14 +1475,14 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 		fprintf(fp, "##\n## Forces explicit reading of parameter modes.\n");
 		fprintf(fp, "EXPLICIT\n");
 		fprintf(fp, "##\n## General Parameters:\n");
-		if (process->mbp_format_specified == true) {
+		if (process->mbp_format_specified) {
 			fprintf(fp, "FORMAT %d\n", process->mbp_format);
 		}
 		else {
 			fprintf(fp, "## FORMAT format\n");
 		}
 		char relative_path[MBP_FILENAMESIZE];
-		if (process->mbp_ifile_specified == true) {
+		if (process->mbp_ifile_specified) {
 			strcpy(relative_path, process->mbp_ifile);
 			status = mb_get_relative_path(verbose, relative_path, pwd, error);
 			fprintf(fp, "INFILE %s\n", relative_path);
@@ -1490,7 +1490,7 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 		else {
 			fprintf(fp, "## INFILE infile\n");
 		}
-		if (process->mbp_ofile_specified == true) {
+		if (process->mbp_ofile_specified) {
 			strcpy(relative_path, process->mbp_ofile);
 			status = mb_get_relative_path(verbose, relative_path, pwd, error);
 			fprintf(fp, "OUTFILE %s\n", relative_path);
@@ -1687,25 +1687,25 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 
 		/* processing kluges */
 		fprintf(fp, "##\n## Processing Kluges:\n");
-		if (process->mbp_kluge001 == true)
+		if (process->mbp_kluge001)
 			fprintf(fp, "KLUGE001\n");
-		if (process->mbp_kluge002 == true)
+		if (process->mbp_kluge002)
 			fprintf(fp, "KLUGE002\n");
-		if (process->mbp_kluge003 == true)
+		if (process->mbp_kluge003)
 			fprintf(fp, "KLUGE003\n");
-		if (process->mbp_kluge004 == true)
+		if (process->mbp_kluge004)
 			fprintf(fp, "KLUGE004\n");
-		if (process->mbp_kluge005 == true)
+		if (process->mbp_kluge005)
 			fprintf(fp, "KLUGE005\n");
-		if (process->mbp_kluge006 == true)
+		if (process->mbp_kluge006)
 			fprintf(fp, "KLUGE006\n");
-		if (process->mbp_kluge007 == true)
+		if (process->mbp_kluge007)
 			fprintf(fp, "KLUGE007\n");
-		if (process->mbp_kluge008 == true)
+		if (process->mbp_kluge008)
 			fprintf(fp, "KLUGE008\n");
-		if (process->mbp_kluge009 == true)
+		if (process->mbp_kluge009)
 			fprintf(fp, "KLUGE009\n");
-		if (process->mbp_kluge010 == true)
+		if (process->mbp_kluge010)
 			fprintf(fp, "KLUGE010\n");
 
 		/* close file */
@@ -1793,7 +1793,7 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 		}
 
 		/* set output file if needed */
-		if (process->mbp_ofile_specified == false && process->mbp_format_specified == true) {
+		if (process->mbp_ofile_specified == false && process->mbp_format_specified) {
 			/* use .txt suffix if MBARI ROV navigation */
 			if (process->mbp_format == MBF_MBARIROV)
 				sprintf(process->mbp_ofile, "%sedited.txt", fileroot);
@@ -1803,7 +1803,7 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 			process->mbp_ofile_specified = true;
 		}
 	}
-	else if (process->mbp_ofile_specified == false && process->mbp_format_specified == true) {
+	else if (process->mbp_ofile_specified == false && process->mbp_format_specified) {
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 		strcpy(fileroot, process->mbp_ifile);
@@ -1934,7 +1934,7 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 		status = mb_pr_get_output(verbose, &format, process.mbp_ifile, ofile, error);
 
 		/* check data format */
-		if (status == MB_SUCCESS && process.mbp_format_specified == true && format != 0 && process.mbp_format != format) {
+		if (status == MB_SUCCESS && process.mbp_format_specified && format != 0 && process.mbp_format != format) {
 			unexpected_format = true;
 			(*nparproblem)++;
 
@@ -1943,7 +1943,7 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 		}
 
 		/* check output file */
-		if (status == MB_SUCCESS && process.mbp_ofile_specified == true && format != 0) {
+		if (status == MB_SUCCESS && process.mbp_ofile_specified && format != 0) {
 			if (strcmp(process.mbp_ofile, ofile) != 0) {
 				unexpected_output = true;
 				(*nparproblem)++;
@@ -1951,7 +1951,7 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 		}
 
 		/* check if output file specified but does not exist */
-		if (process.mbp_ofile_specified == true && stat(process.mbp_ofile, &statbuf) != 0) {
+		if (process.mbp_ofile_specified && stat(process.mbp_ofile, &statbuf) != 0) {
 			missing_ofile = true;
 			(*nparproblem)++;
 		}
@@ -4609,7 +4609,7 @@ int mb_pr_unlockswathfile(int verbose, const char *file, int purpose, const char
 			strcpy(user, "unknown");
 
 		/* if locked and everything matches remove lock file */
-		if (locked == true && strncmp(program_name, lock_program, MAX(strlen(program_name), strlen(lock_program))) == 0
+		if (locked && strncmp(program_name, lock_program, MAX(strlen(program_name), strlen(lock_program))) == 0
 		    && strncmp(user, lock_user, MAX(strlen(user), strlen(lock_user))) == 0
 		    && purpose == lock_purpose) {
 			mb_path command;

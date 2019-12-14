@@ -209,10 +209,10 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	short sonarunswap;
 	short sonarswap;
 	int *databyteswapped;
-	int typegood;
-	int sonargood;
-	int sonarswapgood;
-	int sonarunswapgood;
+	bool typegood;
+	bool sonargood;
+	bool sonarswapgood;
+	bool sonarunswapgood;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -254,7 +254,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	/* check for data byte swapping if necessary */
 	sonarswapgood = false;
 	sonarunswapgood = false;
-	if (typegood == true && *databyteswapped == -1) {
+	if (typegood && *databyteswapped == -1) {
 		sonarunswap = *((short *)&label[2]);
 		sonarswap = mb_swap_short(sonarunswap);
 
@@ -277,14 +277,14 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		else {
 			sonarswapgood = false;
 		}
-		if (sonarunswapgood == true && sonarswapgood == false) {
-			if (mb_io_ptr->byteswapped == true)
+		if (sonarunswapgood && sonarswapgood == false) {
+			if (mb_io_ptr->byteswapped)
 				*databyteswapped = true;
 			else
 				*databyteswapped = false;
 		}
-		else if (sonarunswapgood == false && sonarswapgood == true) {
-			if (mb_io_ptr->byteswapped == true)
+		else if (sonarunswapgood == false && sonarswapgood) {
+			if (mb_io_ptr->byteswapped)
 				*databyteswapped = false;
 			else
 				*databyteswapped = true;
@@ -296,7 +296,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 
 	*type = *((short *)&label[0]);
 	*sonar = *((short *)&label[2]);
-	if (mb_io_ptr->byteswapped == true)
+	if (mb_io_ptr->byteswapped)
 		*type = mb_swap_short(*type);
 	if (*databyteswapped != mb_io_ptr->byteswapped) {
 		*sonar = mb_swap_short(*sonar);
@@ -318,7 +318,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		sonargood = true;
 	}
 
-	if (startbyte == EM3_START_BYTE && typegood == false && sonargood == true) {
+	if (startbyte == EM3_START_BYTE && typegood == false && sonargood) {
 		mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_BAD_DATAGRAM);
 		if (verbose >= 1)
 			fprintf(stderr, "Bad datagram type: %4.4hX %4.4hX | %d %d\n", *type, *sonar, *type, *sonar);
@@ -4064,15 +4064,15 @@ Have a nice day...\n");
 				done = false;
 			}
 			if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_M3) {
-				if (store->pings[store->ping_index].png_bath_read == true &&
-				    store->pings[store->ping_index].png_raw_read == true &&
+				if (store->pings[store->ping_index].png_bath_read &&
+				    store->pings[store->ping_index].png_raw_read &&
 				    store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_raw_count) {
 					done = true;
 				}
 			}
 			else if (status == MB_SUCCESS) {
-				if (store->pings[store->ping_index].png_bath_read == true &&
-				    store->pings[store->ping_index].png_ss_read == true &&
+				if (store->pings[store->ping_index].png_bath_read &&
+				    store->pings[store->ping_index].png_ss_read &&
 				    store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_ss_count) {
 					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = true;
@@ -4124,8 +4124,8 @@ Have a nice day...\n");
 				done = false;
 			}
 			if (status == MB_SUCCESS) {
-				if (store->pings[store->ping_index].png_bath_read == true &&
-				    store->pings[store->ping_index].png_ss_read == true &&
+				if (store->pings[store->ping_index].png_bath_read &&
+				    store->pings[store->ping_index].png_ss_read &&
 				    store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_ss_count) {
 					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = true;
@@ -4197,7 +4197,7 @@ Have a nice day...\n");
 #endif
 
 		/* get file position */
-		if (*label_save_flag == true)
+		if (*label_save_flag)
 			mb_io_ptr->file_bytes = ftell(mbfp) - 2;
 		else
 			mb_io_ptr->file_bytes = ftell(mbfp);
@@ -8433,7 +8433,7 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			status = mbr_em710raw_wr_svp2(verbose, mbio_ptr, swap, store, error);
 	}
 	else if (store->kind == MB_DATA_DATA) {
-		if (ping->png_raw_read == true) {
+		if (ping->png_raw_read) {
 #ifdef MBR_EM710RAW_DEBUG
 			fprintf(stderr, "call mbr_em710raw_wr_rawbeam4 kind:%d type %x\n", store->kind, store->type);
 #else
@@ -8454,7 +8454,7 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 #endif
 
-		if (ping->png_quality_read == true) {
+		if (ping->png_quality_read) {
 #ifdef MBR_EM710RAW_DEBUG
 			fprintf(stderr, "call mbr_em710raw_wr_quality kind:%d type %x\n", store->kind, store->type);
 #else
@@ -8484,7 +8484,7 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 #endif
 		status = mbr_em710raw_wr_bath2(verbose, mbio_ptr, swap, store, error);
-		if (ping->png_ss_read == true) {
+		if (ping->png_ss_read) {
 #ifdef MBR_EM710RAW_DEBUG
 			fprintf(stderr, "call mbr_em710raw_wr_ss2 kind:%d type %x\n", store->kind, store->type);
 #else

@@ -413,7 +413,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int offset_start;
 	int nrawpixels;
 	int ssrawoffset;
-	int firstgoodbeam;
+	bool firstgoodbeam;
 	double bathsort[MBF_OMGHDCSJ_MAX_BEAMS];
 	double *pixel_size;
 	int pixels_ss;
@@ -3465,7 +3465,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				beam = &data->beams[i];
 				if (beam->no_samples > 0) {
 					nrawpixels += beam->no_samples;
-					if (firstgoodbeam == true) {
+					if (firstgoodbeam) {
 						ssrawoffset = beam->offset;
 						firstgoodbeam = false;
 					}

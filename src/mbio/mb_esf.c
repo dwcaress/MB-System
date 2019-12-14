@@ -266,7 +266,7 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 						status = MB_FAILURE;
 						*error = MB_ERROR_EOF;
 					}
-					else if (esf->byteswapped == true) {
+					else if (esf->byteswapped) {
 						mb_swap_double(&(esf->edit[nedit].time_d));
 						esf->edit[nedit].beam = mb_swap_int(esf->edit[nedit].beam);
 						esf->edit[nedit].action = mb_swap_int(esf->edit[nedit].action);
@@ -671,7 +671,7 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 
 	/* write out the edit */
 	if (esf->esffp != NULL) {
-		if (esf->byteswapped == true) {
+		if (esf->byteswapped) {
 			mb_swap_double(&time_d);
 			beam = mb_swap_int(beam);
 			action = mb_swap_int(action);
@@ -724,7 +724,7 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 
 	/* write out the edit */
 	if (esf->essfp != NULL) {
-		if (esf->byteswapped == true) {
+		if (esf->byteswapped) {
 			mb_swap_double(&time_d);
 			beam = mb_swap_int(beam);
 			action = mb_swap_int(action);

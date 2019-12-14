@@ -682,7 +682,8 @@ int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	struct mbf_hsldeoih_survey_struct read_data;
 	int read_size;
-	int need_back, gain_ok;
+	bool need_back;
+	bool gain_ok;
 	int gain_inner, gain_outer;
 	double gain_beam, factor;
 
@@ -901,14 +902,14 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		    are available */
 		need_back = true;
 		i = 0;
-		while (i < MBF_HSLDEOIH_BEAMS && need_back == true) {
+		while (i < MBF_HSLDEOIH_BEAMS && need_back) {
 			if (data->back[i] != 0)
 				need_back = false;
 			i++;
 		}
 
 		/* get beam amplitude values if needed */
-		if (need_back == true) {
+		if (need_back) {
 			data->back_scale = 1.0;
 			for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 				gain_beam = 6 * data->gain[which_gain[i]];
@@ -1214,14 +1215,14 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		    are available */
 		need_back = true;
 		i = 0;
-		while (i < MBF_HSLDEOIH_BEAMS && need_back == true) {
+		while (i < MBF_HSLDEOIH_BEAMS && need_back) {
 			if (data->back[i] != 0)
 				need_back = false;
 			i++;
 		}
 
 		/* get beam amplitude values if needed */
-		if (need_back == true) {
+		if (need_back) {
 			data->back_scale = 1.0;
 			for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 				gain_beam = 6 * data->gain[which_gain[i]];

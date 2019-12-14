@@ -1395,7 +1395,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 						}
 						else if (((merge_nav_format == 6 && strncmp(&buffer[3], "GLL", 3) == 0) ||
 						          (merge_nav_format == 7 && strncmp(&buffer[3], "GGA", 3) == 0)) &&
-						         time_set == true && len > 26) {
+						         time_set && len > 26) {
 							time_set = false;
 							/* find start of ",ddmm.mm,N,ddmm.mm,E" */
 							if ((bufftmp = strchr(buffer, ',')) != NULL) {
@@ -2062,7 +2062,7 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 				}
 
 				/* check for reverses or repeats in time */
-				if (heading_ok == true) {
+				if (heading_ok) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])
@@ -2111,7 +2111,7 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 	int nchar, nget;
 	size_t size;
 	FILE *tfp;
-	int attitude_ok;
+	bool attitude_ok;
 	int time_i[7], time_j[6], ihr;
 	double sec;
 	double time_d, lon, lat, sensordepth, heading, speed;
@@ -2252,7 +2252,7 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && attitude_ok == true) {
+				if (verbose >= 5 && attitude_ok) {
 					fprintf(stderr, "\ndbg5  New attitude point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       attitude[%d]: %f %f %f %f\n", nrecord, n_time_d[nrecord], n_roll[nrecord],
 					        n_pitch[nrecord], n_heave[nrecord]);
@@ -2263,7 +2263,7 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 				}
 
 				/* check for reverses or repeats in time */
-				if (attitude_ok == true) {
+				if (attitude_ok) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])
@@ -2314,7 +2314,7 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 	int nchar, nget;
 	size_t size;
 	FILE *tfp;
-	int soundspeed_ok;
+	bool soundspeed_ok;
 	int time_i[7], time_j[6], ihr;
 	double sec;
 	double time_d;
@@ -2429,7 +2429,7 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && soundspeed_ok == true) {
+				if (verbose >= 5 && soundspeed_ok) {
 					fprintf(stderr, "\ndbg5  New soundspeed point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       soundspeed[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_soundspeed[nrecord]);
 				}
@@ -2439,7 +2439,7 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 				}
 
 				/* check for reverses or repeats in time */
-				if (soundspeed_ok == true) {
+				if (soundspeed_ok) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])
@@ -2488,7 +2488,7 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 	int nchar, nget;
 	size_t size;
 	FILE *tfp;
-	int timeshift_ok;
+	bool timeshift_ok;
 	int time_i[7], time_j[6], ihr;
 	double sec;
 	double time_d;
@@ -2603,7 +2603,7 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 				}
 
 				/* output some debug values */
-				if (verbose >= 5 && timeshift_ok == true) {
+				if (verbose >= 5 && timeshift_ok) {
 					fprintf(stderr, "\ndbg5  New timeshift point read in function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       timeshift[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_timeshift[nrecord]);
 				}
@@ -2613,7 +2613,7 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 				}
 
 				/* check for reverses or repeats in time */
-				if (timeshift_ok == true) {
+				if (timeshift_ok) {
 					if (nrecord == 0)
 						nrecord++;
 					else if (n_time_d[nrecord] > n_time_d[nrecord - 1])

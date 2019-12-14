@@ -108,7 +108,7 @@ int mb_close(int verbose, void **mbio_ptr, int *error) {
   }
 
   /* deallocate UTM projection if required */
-  if (mb_io_ptr->projection_initialized == true) {
+  if (mb_io_ptr->projection_initialized) {
     mb_io_ptr->projection_initialized = false;
     mb_proj_free(verbose, &(mb_io_ptr->pjptr), error);
   }

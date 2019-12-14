@@ -1439,11 +1439,11 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 
 		/* write out each field */
 		int shift = 0;
-		if (data->defined_survey_id == true) {
+		if (data->defined_survey_id) {
 			sprintf(&line[shift], "%s", data->survey_id);
 			shift = strlen(line);
 		}
-		if (data->defined_timezone == true) {
+		if (data->defined_timezone) {
 			sprintf(&line[shift], "\t%f", data->timezone);
 			shift = strlen(line);
 		}
@@ -1451,7 +1451,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_date == true) {
+		if (data->defined_date) {
 			sprintf(&line[shift], "\t%d", data->date);
 			shift = strlen(line);
 		}
@@ -1459,7 +1459,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_time == true) {
+		if (data->defined_time) {
 			sprintf(&line[shift], "\t%f", data->time);
 			shift = strlen(line);
 		}
@@ -1467,7 +1467,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_lat == true) {
+		if (data->defined_lat) {
 			sprintf(&line[shift], "\t%f", data->lat);
 			shift = strlen(line);
 		}
@@ -1475,7 +1475,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_lon == true) {
+		if (data->defined_lon) {
 			sprintf(&line[shift], "\t%f", data->lon);
 			shift = strlen(line);
 		}
@@ -1483,7 +1483,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_pos_type == true) {
+		if (data->defined_pos_type) {
 			sprintf(&line[shift], "\t%d", data->pos_type);
 			shift = strlen(line);
 		}
@@ -1491,7 +1491,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_nav_qualco == true) {
+		if (data->defined_nav_qualco) {
 			sprintf(&line[shift], "\t%d", data->nav_qualco);
 			shift = strlen(line);
 		}
@@ -1499,7 +1499,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_bat_ttime == true) {
+		if (data->defined_bat_ttime) {
 			sprintf(&line[shift], "\t%f", data->bat_ttime);
 			shift = strlen(line);
 		}
@@ -1507,7 +1507,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_corr_depth == true) {
+		if (data->defined_corr_depth) {
 			sprintf(&line[shift], "\t%f", data->corr_depth);
 			shift = strlen(line);
 		}
@@ -1515,7 +1515,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_bat_cpco == true) {
+		if (data->defined_bat_cpco) {
 			sprintf(&line[shift], "\t%d", data->bat_cpco);
 			shift = strlen(line);
 		}
@@ -1523,7 +1523,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_bat_typco == true) {
+		if (data->defined_bat_typco) {
 			sprintf(&line[shift], "\t%d", data->bat_typco);
 			shift = strlen(line);
 		}
@@ -1531,7 +1531,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_bat_qualco == true) {
+		if (data->defined_bat_qualco) {
 			sprintf(&line[shift], "\t%d", data->bat_qualco);
 			shift = strlen(line);
 		}
@@ -1539,7 +1539,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_tot == true) {
+		if (data->defined_mag_tot) {
 			sprintf(&line[shift], "\t%f", data->mag_tot);
 			shift = strlen(line);
 		}
@@ -1547,7 +1547,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_tot2 == true) {
+		if (data->defined_mag_tot2) {
 			sprintf(&line[shift], "\t%f", data->mag_tot2);
 			shift = strlen(line);
 		}
@@ -1555,7 +1555,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_res == true) {
+		if (data->defined_mag_res) {
 			sprintf(&line[shift], "\t%f", data->mag_res);
 			shift = strlen(line);
 		}
@@ -1563,7 +1563,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_ressen == true) {
+		if (data->defined_mag_ressen) {
 			sprintf(&line[shift], "\t%d", data->mag_ressen);
 			shift = strlen(line);
 		}
@@ -1571,7 +1571,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_dicorr == true) {
+		if (data->defined_mag_dicorr) {
 			sprintf(&line[shift], "\t%f", data->mag_dicorr);
 			shift = strlen(line);
 		}
@@ -1579,7 +1579,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_sdepth == true) {
+		if (data->defined_mag_sdepth) {
 			sprintf(&line[shift], "\t%d", data->mag_sdepth);
 			shift = strlen(line);
 		}
@@ -1587,7 +1587,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_mag_qualco == true) {
+		if (data->defined_mag_qualco) {
 			sprintf(&line[shift], "\t%d", data->mag_qualco);
 			shift = strlen(line);
 		}
@@ -1595,7 +1595,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_gra_obs == true) {
+		if (data->defined_gra_obs) {
 			sprintf(&line[shift], "\t%f", data->gra_obs);
 			shift = strlen(line);
 		}
@@ -1603,7 +1603,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_eotvos == true) {
+		if (data->defined_eotvos) {
 			sprintf(&line[shift], "\t%f", data->eotvos);
 			shift = strlen(line);
 		}
@@ -1611,7 +1611,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_freeair == true) {
+		if (data->defined_freeair) {
 			sprintf(&line[shift], "\t%f", data->freeair);
 			shift = strlen(line);
 		}
@@ -1619,7 +1619,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_gra_qualco == true) {
+		if (data->defined_gra_qualco) {
 			sprintf(&line[shift], "\t%d", data->gra_qualco);
 			shift = strlen(line);
 		}
@@ -1627,7 +1627,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_lineid == true) {
+		if (data->defined_lineid) {
 			sprintf(&line[shift], "\t%d", data->lineid);
 			shift = strlen(line);
 		}
@@ -1635,7 +1635,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			sprintf(&line[shift], "\t");
 			shift = strlen(line);
 		}
-		if (data->defined_pointid == true) {
+		if (data->defined_pointid) {
 			sprintf(&line[shift], "\t%d", data->pointid);
 			shift = strlen(line);
 		}

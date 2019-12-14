@@ -476,14 +476,14 @@ int mbsys_xse_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		*nbath = 0;
 		*namp = 0;
 		*nss = 0;
-		if (store->mul_frame == true) {
+		if (store->mul_frame) {
 			*nbath = store->mul_num_beams;
-			if (store->mul_group_amp == true)
+			if (store->mul_group_amp)
 				*namp = store->mul_num_beams;
 		}
 
-		if (store->sid_frame == true) {
-			if (store->sid_group_avl == true)
+		if (store->sid_frame) {
+			if (store->sid_group_avl)
 				*nss = store->sid_avl_num_samples;
 		}
 	}
@@ -568,10 +568,10 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		*nbath = 0;
 		*namp = 0;
 		*nss = 0;
-		if (store->mul_frame == true) {
+		if (store->mul_frame) {
 			/* set number of beams */
 			*nbath = store->mul_num_beams;
-			if (store->mul_group_amp == true)
+			if (store->mul_group_amp)
 				*namp = store->mul_num_beams;
 
 			/* determine whether beams are ordered
@@ -635,14 +635,14 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		}
 
 		/* get sidescan */
-		if (store->sid_frame == true) {
-			if (store->sid_group_avl == true) {
+		if (store->sid_frame) {
+			if (store->sid_group_avl) {
 				*nss = store->sid_avl_num_samples;
 				for (int i = 0; i < *nss; i++) {
 					const int j = *nss - i - 1;
 					ss[j] = store->sid_avl_amp[i];
 					ssacrosstrack[j] = dsign * 0.001 * store->sid_avl_binsize * (i - *nss / 2);
-					if (store->mul_frame == true)
+					if (store->mul_frame)
 						ssalongtrack[j] =
 						    0.5 * store->nav_speed_ground *
 						    (store->sid_sec + 0.000001 * store->sid_usec - (store->mul_sec + 0.000001 * store->mul_usec));
@@ -666,21 +666,21 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		*navlat = RTD * store->nav_y;
 
 		/* get heading */
-		if (store->nav_group_heading == true)
+		if (store->nav_group_heading)
 			*heading = RTD * store->nav_hdg_heading;
-		else if (store->nav_group_motiongt == true)
+		else if (store->nav_group_motiongt)
 			*heading = RTD * store->nav_course_ground;
-		else if (store->nav_group_motiontw == true)
+		else if (store->nav_group_motiontw)
 			*heading = RTD * store->nav_course_water;
 		else
 			mb_hedint_interp(verbose, mbio_ptr, *time_d, heading, error);
 
 		/* get speed  */
-		if (store->nav_group_log == true)
+		if (store->nav_group_log)
 			*speed = 3.6 * store->nav_log_speed;
-		else if (store->nav_group_motiongt == true)
+		else if (store->nav_group_motiongt)
 			*speed = 3.6 * store->nav_speed_ground;
-		else if (store->nav_group_motiontw == true)
+		else if (store->nav_group_motiontw)
 			*speed = 3.6 * store->nav_speed_water;
 
 		/* get distance and depth values */
@@ -831,7 +831,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 		xtrackmax = 0.0;
 		ixtrackmin = 0;
 		ixtrackmax = 0;
-		if (store->mul_frame == true) {
+		if (store->mul_frame) {
 			/* determine whether beams are ordered
 			port to starboard or starboard to port */
 			for (int i = 0; i < store->mul_num_beams; i++) {
@@ -885,7 +885,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 		}
 
 		/* now insert the sidescan */
-		if (store->sid_frame == true) {
+		if (store->sid_frame) {
 			store->sid_group_avl = true;
 			if (nss != store->sid_avl_num_samples) {
 				store->sid_avl_num_samples = nss;
@@ -981,7 +981,7 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get draft */
-		if (store->par_parameter == true)
+		if (store->par_parameter)
 			*draft = 0.5 * (store->par_trans_z_port + store->par_trans_z_stbd);
 		else
 			*draft = store->par_ship_draft;
@@ -994,7 +994,7 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 
 		/* get travel times, angles */
 		*nbeams = 0;
-		if (store->mul_frame == true) {
+		if (store->mul_frame) {
 			/* determine whether beams are ordered
 			port to starboard or starboard to port */
 			xtrackmin = 0.0;
@@ -1116,7 +1116,7 @@ int mbsys_xse_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 
 		/* get nbeams and detects */
 		*nbeams = 0;
-		if (store->mul_frame == true) {
+		if (store->mul_frame) {
 			/* loop over beams to get nbeams */
 			for (int i = 0; i < store->mul_num_beams; i++) {
 				const int j = store->mul_num_beams - store->beams[i].beam;
@@ -1196,7 +1196,7 @@ int mbsys_xse_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get draft */
-		if (store->par_parameter == true)
+		if (store->par_parameter)
 			*transducer_depth = 0.5 * (store->par_trans_z_port + store->par_trans_z_stbd);
 		else
 			*transducer_depth = store->par_ship_draft;
@@ -1301,7 +1301,7 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*speed = 3.6 * store->mul_speed;
 
 		/* get draft */
-		if (store->par_parameter == true)
+		if (store->par_parameter)
 			*draft = 0.5 * (store->par_trans_z_port + store->par_trans_z_stbd);
 		else
 			*draft = store->par_ship_draft;
@@ -1312,12 +1312,12 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			*pitch = RTD * store->beams[store->mul_num_beams / 2].pitch;
 			*heave = store->beams[store->mul_num_beams / 2].heave;
 		}
-		else if (store->nav_group_hrp == true) {
+		else if (store->nav_group_hrp) {
 			*roll = RTD * store->nav_hrp_roll;
 			*pitch = RTD * store->nav_hrp_pitch;
 			*heave = store->nav_hrp_heave;
 		}
-		else if (store->nav_group_heave == true && store->nav_group_roll == true && store->nav_group_pitch == true) {
+		else if (store->nav_group_heave && store->nav_group_roll && store->nav_group_pitch) {
 			*roll = RTD * store->nav_rol_roll;
 			*pitch = RTD * store->nav_pit_pitch;
 			*heave = store->nav_hea_heave;
@@ -1338,27 +1338,27 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		mb_get_date(verbose, *time_d, time_i);
 
 		/* get heading */
-		if (store->nav_group_heading == true)
+		if (store->nav_group_heading)
 			*heading = RTD * store->nav_hdg_heading;
-		else if (store->nav_group_motiongt == true)
+		else if (store->nav_group_motiongt)
 			*heading = RTD * store->nav_course_ground;
-		else if (store->nav_group_motiontw == true)
+		else if (store->nav_group_motiontw)
 			*heading = RTD * store->nav_course_water;
 		else
 			mb_hedint_interp(verbose, mbio_ptr, *time_d, heading, error);
 
 		/* get speed if possible */
-		if (store->nav_group_log == true)
+		if (store->nav_group_log)
 			*speed = 3.6 * store->nav_log_speed;
-		else if (store->nav_group_motiongt == true)
+		else if (store->nav_group_motiongt)
 			*speed = 3.6 * store->nav_speed_ground;
-		else if (store->nav_group_motiontw == true)
+		else if (store->nav_group_motiontw)
 			*speed = 3.6 * store->nav_speed_water;
 		else
 			*speed = 0.0;
 
 		/* get navigation */
-		if (store->nav_group_position == true) {
+		if (store->nav_group_position) {
 			*navlon = RTD * store->nav_x;
 			*navlat = RTD * store->nav_y;
 		}
@@ -1366,18 +1366,18 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			mb_navint_interp(verbose, mbio_ptr, *time_d, *heading, *speed, navlon, navlat, speed, error);
 
 		/* get draft */
-		if (store->par_parameter == true)
+		if (store->par_parameter)
 			*draft = 0.5 * (store->par_trans_z_port + store->par_trans_z_stbd);
 		else
 			*draft = store->par_ship_draft;
 
 		/* get roll pitch and heave */
-		if (store->nav_group_hrp == true) {
+		if (store->nav_group_hrp) {
 			*roll = RTD * store->nav_hrp_roll;
 			*pitch = RTD * store->nav_hrp_pitch;
 			*heave = store->nav_hrp_heave;
 		}
-		else if (store->nav_group_heave == true && store->nav_group_roll == true && store->nav_group_pitch == true) {
+		else if (store->nav_group_heave && store->nav_group_roll && store->nav_group_pitch) {
 			*roll = RTD * store->nav_rol_roll;
 			*pitch = RTD * store->nav_pit_pitch;
 			*heave = store->nav_hea_heave;
@@ -1491,7 +1491,7 @@ int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 		store->mul_speed = speed / 3.6;
 
 		/* get draft */
-		if (store->par_parameter == true) {
+		if (store->par_parameter) {
 			store->par_trans_z_port = draft;
 			store->par_trans_z_stbd = draft;
 		}
@@ -1522,7 +1522,7 @@ int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 		store->nav_log_speed = speed / 3.6;
 
 		/* get draft */
-		if (store->par_parameter == true) {
+		if (store->par_parameter) {
 			store->par_trans_z_port = draft;
 			store->par_trans_z_stbd = draft;
 		}

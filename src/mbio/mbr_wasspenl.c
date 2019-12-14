@@ -1157,7 +1157,7 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char recordid[12];
 	size_t read_len;
 	int skip;
-	int reset_beamflags;
+	bool reset_beamflags;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1265,7 +1265,7 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 							if (corbathy->z[i] == 0 && corbathy->empty[i] != MB_FLAG_NULL)
 								reset_beamflags = true;
 						}
-						if (reset_beamflags == true)
+						if (reset_beamflags)
 							for (int i = 0; i < corbathy->num_beams; i++) {
 								const int j = corbathy->beam_index[i];
 								if (corbathy->z[i] == 0)

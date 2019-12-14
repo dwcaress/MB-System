@@ -3938,7 +3938,7 @@ numOfDgms, dgmNum, header.numBytesDgm, dgm_index->index_org, dgm_index->ping_num
             store->num_soundings = 0;
             store->num_backscatter_samples = 0;
             store->num_pixels = 0;
-            if (done == true) {
+            if (done) {
               for (int imrz=0;imrz<store->n_mrz_needed;imrz++) {
                 numSoundings = store->mrz[imrz].rxInfo.numSoundingsMaxMain
                                 + store->mrz[imrz].rxInfo.numExtraDetections;
@@ -3953,12 +3953,12 @@ numOfDgms, dgmNum, header.numBytesDgm, dgm_index->index_org, dgm_index->ping_num
           }
 
           /* if mwc datagrams are expected then not done yet */
-          if (done == true && store->xmb.watercolumn == true) {
+          if (done && store->xmb.watercolumn) {
             done = false;
           }
 
           /* if xmt and xms datagrams are expected  then not done yet */
-          if (done == true && store->xmb.mbsystem_extensions == true) {
+          if (done && store->xmb.mbsystem_extensions) {
             done = false;
           }
           break;
@@ -3989,7 +3989,7 @@ numOfDgms, dgmNum, header.numBytesDgm, dgm_index->index_org, dgm_index->ping_num
 
           /* if xmt and xms datagrams are expected but the xms has not been read,
               then not done yet */
-          if (done == true && store->xmb.mbsystem_extensions == true) {
+          if (done && store->xmb.mbsystem_extensions) {
             done = false;
           }
           break;

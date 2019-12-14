@@ -261,7 +261,8 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int read_status;
 	int shortspersample;
 	int trace_size;
-	int testx1, testx2, testy1, testy2, obsolete_header;
+	int testx1, testx2, testy1, testy2;
+        bool obsolete_header;
 	double time_d;
 	double navlon, navlat, heading;
 	double speed, sonardepth, altitude;
@@ -546,7 +547,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 2;
 
                 /* fix problems created by writing obsolete header */
-                if (obsolete_header == true) {
+                if (obsolete_header) {
                     // set first time value
                     // zero extra position values
                     // move seafloor depth, sonar depth, and altitude values if nonzero

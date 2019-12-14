@@ -662,7 +662,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	}
 
 	/* if data and file header written */
-	if (mb_io_ptr->fileheader == true && store->kind == MB_DATA_DATA) {
+	if (mb_io_ptr->fileheader && store->kind == MB_DATA_DATA) {
 		/* write data */
 		if ((bs_status = mbbs_wrpnghdr(&(store->ping), (XDR *)xdrs)) != BS_SUCCESS) {
 			status = MB_FAILURE;

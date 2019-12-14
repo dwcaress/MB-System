@@ -1066,7 +1066,7 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 	ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
 	/* if first call for current ping, initialize */
-	if (first == true) {
+	if (first) {
 		ping->pixels_ssraw = 0;
 		for (int i = 0; i < ping->beams_bath; i++) {
 			ping->beam_samples[i] = 0;
@@ -1229,7 +1229,7 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
 	/* if first call for current ping, initialize */
-	if (first == true) {
+	if (first) {
 		ping->pixels_ssraw = 0;
 		for (int i = 0; i < ping->beams_bath; i++) {
 			ping->beam_samples[i] = 0;
@@ -1413,7 +1413,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	num_bathrec = (int *)&mb_io_ptr->save6;
 	num_ssrec = (int *)&mb_io_ptr->save7;
 	file_has_ss = (int *)&mb_io_ptr->save8;
-	if (*expect_save_flag == true) {
+	if (*expect_save_flag) {
 		expect = *expect_save;
 		first_type = *first_type_save;
 		first_ss = *first_ss_save;
@@ -1446,7 +1446,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (*label_save_flag == false) {
 			/* read four byte wrapper if data stream is known
 			    to have wrappers */
-			if (*wrapper == true) {
+			if (*wrapper) {
 				if ((read_len = fread(label, 1, 4, mb_io_ptr->mbfp)) != 4) {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
@@ -1665,7 +1665,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				fprintf(stderr, "check num_bathrec:%d\n", *num_bathrec);
 #endif
 				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == true) {
+				if (first_type == EM_NONE && *file_has_ss) {
 					done = false;
 					first_type = EM_12S_BATH;
 					expect = EM_12S_SS;
@@ -1697,7 +1697,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
 #endif
 				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == true) {
+				if (first_type == EM_NONE && *file_has_ss) {
 					done = false;
 					first_type = EM_12DP_BATH;
 					expect = EM_12DP_SS;
@@ -1729,7 +1729,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
 #endif
 				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == true) {
+				if (first_type == EM_NONE && *file_has_ss) {
 					done = false;
 					first_type = EM_12DS_BATH;
 					expect = EM_12DS_SS;
@@ -1761,7 +1761,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
 #endif
 				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == true) {
+				if (first_type == EM_NONE && *file_has_ss) {
 					done = false;
 					first_type = EM_121_BATH;
 					expect = EM_12S_SS;
@@ -1793,7 +1793,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 				store->sonar = MBSYS_SIMRAD_EM1000;
 				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == true) {
+				if (first_type == EM_NONE && *file_has_ss) {
 					done = false;
 					first_type = EM_12DS_BATH;
 					expect = EM_12S_SS;
@@ -1818,7 +1818,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call mbr_emoldraw_rd_ss type %x\n", *type);
 #endif
 			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_CENTER, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == true)
+			if (status == MB_SUCCESS && first_ss)
 				(*num_ssrec)++;
 			if (status == MB_SUCCESS && more_ss == false) {
 				*file_has_ss = true;
@@ -1833,7 +1833,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 				first_ss = true;
 			}
-			else if (status == MB_SUCCESS && more_ss == true) {
+			else if (status == MB_SUCCESS && more_ss) {
 				done = false;
 				expect = EM_12S_SS;
 				first_ss = false;
@@ -1865,7 +1865,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call mbr_emoldraw_rd_ss type %x\n", *type);
 #endif
 			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_PORT, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == true)
+			if (status == MB_SUCCESS && first_ss)
 				(*num_ssrec)++;
 			if (status == MB_SUCCESS && more_ss == false) {
 				*file_has_ss = true;
@@ -1880,7 +1880,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 				first_ss = true;
 			}
-			else if (status == MB_SUCCESS && more_ss == true) {
+			else if (status == MB_SUCCESS && more_ss) {
 				done = false;
 				expect = EM_12DP_SS;
 				first_ss = false;
@@ -1913,7 +1913,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call mbr_emoldraw_rd_ss type %x\n", *type);
 #endif
 			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_STARBOARD, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == true)
+			if (status == MB_SUCCESS && first_ss)
 				(*num_ssrec)++;
 			if (status == MB_SUCCESS && more_ss == false) {
 				*file_has_ss = true;
@@ -1928,7 +1928,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 				first_ss = true;
 			}
-			else if (status == MB_SUCCESS && more_ss == true) {
+			else if (status == MB_SUCCESS && more_ss) {
 				done = false;
 				expect = EM_12DS_SS;
 				first_ss = false;
@@ -1960,7 +1960,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call mbr_emoldraw_rd_ssp type %x\n", *type);
 #endif
 			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_CENTER, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == true)
+			if (status == MB_SUCCESS && first_ss)
 				(*num_ssrec)++;
 			if (status == MB_SUCCESS && more_ss == false) {
 				*file_has_ss = true;
@@ -1975,7 +1975,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 				first_ss = true;
 			}
-			else if (status == MB_SUCCESS && more_ss == true) {
+			else if (status == MB_SUCCESS && more_ss) {
 				done = false;
 				expect = EM_12S_SS;
 				first_ss = false;
@@ -2007,7 +2007,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call mbr_emoldraw_rd_ssp type %x\n", *type);
 #endif
 			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_PORT, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == true)
+			if (status == MB_SUCCESS && first_ss)
 				(*num_ssrec)++;
 			if (status == MB_SUCCESS && more_ss == false) {
 				*file_has_ss = true;
@@ -2022,7 +2022,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 				first_ss = true;
 			}
-			else if (status == MB_SUCCESS && more_ss == true) {
+			else if (status == MB_SUCCESS && more_ss) {
 				done = false;
 				expect = EM_12DP_SS;
 				first_ss = false;
@@ -2055,7 +2055,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call mbr_emoldraw_rd_ssp type %x\n", *type);
 #endif
 			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_STARBOARD, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == true)
+			if (status == MB_SUCCESS && first_ss)
 				(*num_ssrec)++;
 			if (status == MB_SUCCESS && more_ss == false) {
 				*file_has_ss = true;
@@ -2070,7 +2070,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 				first_ss = true;
 			}
-			else if (status == MB_SUCCESS && more_ss == true) {
+			else if (status == MB_SUCCESS && more_ss) {
 				done = false;
 				expect = EM_12DS_SS;
 				first_ss = false;
@@ -2103,14 +2103,14 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get file position */
-	if (*label_save_flag == true)
+	if (*label_save_flag)
 		mb_io_ptr->file_bytes = ftell(mbfp) - 2;
 	else if (*expect_save_flag != true)
 		mb_io_ptr->file_bytes = ftell(mbfp);
 
 /* swap label if saved and byteswapped */
 #ifdef BYTESWAPPED
-	if (*label_save_flag == true)
+	if (*label_save_flag)
 		*type = (short int)mb_swap_short(*type);
 #endif
 

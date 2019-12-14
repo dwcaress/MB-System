@@ -2379,7 +2379,7 @@ int mbsys_reson7k3_print_Snippet(int verbose, s7k3_Snippet *Snippet, int *error)
     }
   }
   fprintf(stderr, "%s     optionaldata:               %u\n", first, Snippet->optionaldata);
-  if (Snippet->optionaldata == true) {
+  if (Snippet->optionaldata) {
     fprintf(stderr, "%s     frequency:                  %f\n", first, Snippet->frequency);
     fprintf(stderr, "%s     latitude:                   %f\n", first, Snippet->latitude);
     fprintf(stderr, "%s     longitude:                  %f\n", first, Snippet->longitude);
@@ -3781,13 +3781,13 @@ int mbsys_reson7k3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int 
   /* extract data from structure */
   if (*kind == MB_DATA_DATA) {
     /* get beam and pixel numbers */
-    if (store->read_RawDetection == true) {
+    if (store->read_RawDetection) {
       s7k3_RawDetection *RawDetection = (s7k3_RawDetection *)&store->RawDetection;
       *nbath = RawDetection->number_beams;
       *namp = *nbath;
       *nss = 0;
     }
-    else if (store->read_SegmentedRawDetection == true) {
+    else if (store->read_SegmentedRawDetection) {
       s7k3_SegmentedRawDetection *SegmentedRawDetection = (s7k3_SegmentedRawDetection *)&store->SegmentedRawDetection;
       *nbath = SegmentedRawDetection->n_rx;
       *namp = *nbath;
@@ -3837,11 +3837,11 @@ int mbsys_reson7k3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnum
   struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)mb_io_ptr->store_data;
 
   /* extract data from structure */
-  if (store->read_RawDetection == true) {
+  if (store->read_RawDetection) {
     RawDetection = (s7k3_RawDetection *)&store->RawDetection;
     *pingnumber = RawDetection->ping_number;
   }
-  else if (store->read_SegmentedRawDetection == true) {
+  else if (store->read_SegmentedRawDetection) {
     SegmentedRawDetection = (s7k3_SegmentedRawDetection *)&store->SegmentedRawDetection;
     *pingnumber = SegmentedRawDetection->ping_number;
   }
@@ -4137,7 +4137,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     // s7k3_CommonSystemSettings *CommonSystemSettings = &(store->CommonSystemSettings);
 
     /* print out record headers */
-    if (store->read_SonarSettings == true) {
+    if (store->read_SonarSettings) {
       header = &(SonarSettings->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4151,7 +4151,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 "R7KRECID_SonarSettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping_number:%d\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], SonarSettings->ping_number);
     }
-    if (store->read_MatchFilter == true) {
+    if (store->read_MatchFilter) {
       header = &(MatchFilter->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4165,7 +4165,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 "R7KRECID_MatchFilter:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping_number:%d\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], MatchFilter->ping_number);
     }
-    if (store->read_BeamGeometry == true) {
+    if (store->read_BeamGeometry) {
       header = &(BeamGeometry->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4179,7 +4179,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 "R7KRECID_BeamGeometry:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) beams:%d\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], BeamGeometry->number_beams);
     }
-    if (store->read_SideScan == true) {
+    if (store->read_SideScan) {
       header = &(SideScan->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4195,7 +4195,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], SideScan->ping_number,
                 SideScan->number_beams);
     }
-    if (store->read_VerticalDepth == true) {
+    if (store->read_VerticalDepth) {
       header = &(VerticalDepth->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4209,7 +4209,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 "R7KRECID_VerticalDepth:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping_number:%d\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], VerticalDepth->ping_number);
     }
-    if (store->read_TVG == true) {
+    if (store->read_TVG) {
       header = &(TVG->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4223,7 +4223,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 "R7KRECID_TVG:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping_number:%d\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], TVG->ping_number);
     }
-    if (store->read_Image == true) {
+    if (store->read_Image) {
       header = &(Image->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4239,7 +4239,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], Image->ping_number,
                 Image->width, Image->height);
     }
-    if (store->read_PingMotion == true) {
+    if (store->read_PingMotion) {
       header = &(PingMotion->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4253,7 +4253,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 "R7KRECID_PingMotion:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping_number:%d\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], PingMotion->ping_number);
     }
-    if (store->read_Beamformed == true) {
+    if (store->read_Beamformed) {
       header = &(Beamformed->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4269,7 +4269,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], Beamformed->ping_number,
                 Beamformed->number_beams);
     }
-    if (store->read_VernierProcessingDataRaw == true) {
+    if (store->read_VernierProcessingDataRaw) {
       header = &(VernierProcessingDataRaw->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4283,7 +4283,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 "R7KRECID_VernierProcessingDataRaw:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping_number:%d\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], VernierProcessingDataRaw->ping_number);
     }
-    if (store->read_RawDetection == true) {
+    if (store->read_RawDetection) {
       header = &(RawDetection->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4300,7 +4300,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 RawDetection->number_beams);
     }
 
-    if (store->read_Snippet == true) {
+    if (store->read_Snippet) {
       header = &(Snippet->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4316,7 +4316,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], Snippet->ping_number,
                 Snippet->number_beams);
     }
-    if (store->read_VernierProcessingDataFiltered == true) {
+    if (store->read_VernierProcessingDataFiltered) {
       header = &(VernierProcessingDataFiltered->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4332,7 +4332,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], VernierProcessingDataFiltered->ping_number,
                 VernierProcessingDataFiltered->number_soundings);
     }
-    if (store->read_CompressedBeamformedMagnitude == true) {
+    if (store->read_CompressedBeamformedMagnitude) {
       header = &(CompressedBeamformedMagnitude->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4348,7 +4348,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], CompressedBeamformedMagnitude->ping_number,
                 CompressedBeamformedMagnitude->number_beams);
     }
-    if (store->read_CompressedWaterColumn == true) {
+    if (store->read_CompressedWaterColumn) {
       header = &(CompressedWaterColumn->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4364,7 +4364,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], CompressedWaterColumn->ping_number,
                 CompressedWaterColumn->number_beams);
     }
-    if (store->read_SegmentedRawDetection == true) {
+    if (store->read_SegmentedRawDetection) {
       header = &(SegmentedRawDetection->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4380,7 +4380,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], SegmentedRawDetection->ping_number,
                 SegmentedRawDetection->n_segments);
     }
-    if (store->read_CalibratedBeam == true) {
+    if (store->read_CalibratedBeam) {
       header = &(CalibratedBeam->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4396,7 +4396,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], CalibratedBeam->ping_number,
                 CalibratedBeam->total_beams);
     }
-    if (store->read_CalibratedSideScan == true) {
+    if (store->read_CalibratedSideScan) {
       header = &(CalibratedSideScan->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4410,7 +4410,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 "R7KRECID_CalibratedSideScan:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping_number:%d\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], CalibratedSideScan->ping_number);
     }
-    if (store->read_SnippetBackscatteringStrength == true) {
+    if (store->read_SnippetBackscatteringStrength) {
       header = &(SnippetBackscatteringStrength->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4426,7 +4426,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], SnippetBackscatteringStrength->ping_number,
                 SnippetBackscatteringStrength->number_beams);
     }
-    if (store->read_RemoteControlSonarSettings == true) {
+    if (store->read_RemoteControlSonarSettings) {
       header = &(RemoteControlSonarSettings->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4443,7 +4443,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
     /* if requested ignore water column data
      * (will not be included in any output file) */
-    if (pars->ignore_water_column == true) {
+    if (pars->ignore_water_column) {
       store->read_Beamformed = false;
       store->read_CompressedBeamformedMagnitude = false;
     }
@@ -4451,7 +4451,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     /*--------------------------------------------------------------*/
     /* change timestamp if indicated */
     /*--------------------------------------------------------------*/
-    if (pars->timestamp_changed == true) {
+    if (pars->timestamp_changed) {
       time_d = pars->time_d;
       mb_get_date(verbose, time_d, time_i);
       mb_get_jtime(verbose, time_i, time_j);
@@ -4467,45 +4467,45 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
               time_i[4], time_i[5], time_i[6], RawDetection->ping_number);
 
       /* apply the timestamp to all of the relevant data records */
-      if (store->read_SonarSettings == true)
+      if (store->read_SonarSettings)
         store->SonarSettings.header.s7kTime = s7kTime;
-      if (store->read_MatchFilter == true)
+      if (store->read_MatchFilter)
         store->MatchFilter.header.s7kTime = s7kTime;
-      if (store->read_BeamGeometry == true)
+      if (store->read_BeamGeometry)
         store->BeamGeometry.header.s7kTime = s7kTime;
-      if (store->read_SideScan == true)
+      if (store->read_SideScan)
         store->SideScan.header.s7kTime = s7kTime;
-      if (store->read_VerticalDepth == true)
+      if (store->read_VerticalDepth)
         store->VerticalDepth.header.s7kTime = s7kTime;
-      if (store->read_TVG == true)
+      if (store->read_TVG)
         store->TVG.header.s7kTime = s7kTime;
-      if (store->read_Image == true)
+      if (store->read_Image)
         store->Image.header.s7kTime = s7kTime;
-      if (store->read_PingMotion == true)
+      if (store->read_PingMotion)
         store->PingMotion.header.s7kTime = s7kTime;
-      if (store->read_Beamformed == true)
+      if (store->read_Beamformed)
         store->Beamformed.header.s7kTime = s7kTime;
-      if (store->read_VernierProcessingDataRaw == true)
+      if (store->read_VernierProcessingDataRaw)
         store->VernierProcessingDataRaw.header.s7kTime = s7kTime;
-      if (store->read_RawDetection == true)
+      if (store->read_RawDetection)
         store->RawDetection.header.s7kTime = s7kTime;
-      if (store->read_Snippet == true)
+      if (store->read_Snippet)
         store->Snippet.header.s7kTime = s7kTime;
-      if (store->read_VernierProcessingDataFiltered == true)
+      if (store->read_VernierProcessingDataFiltered)
         store->VernierProcessingDataFiltered.header.s7kTime = s7kTime;
-      if (store->read_CompressedBeamformedMagnitude == true)
+      if (store->read_CompressedBeamformedMagnitude)
         store->CompressedBeamformedMagnitude.header.s7kTime = s7kTime;
-      if (store->read_CompressedWaterColumn == true)
+      if (store->read_CompressedWaterColumn)
         store->CompressedWaterColumn.header.s7kTime = s7kTime;
-      if (store->read_SegmentedRawDetection == true)
+      if (store->read_SegmentedRawDetection)
         store->SegmentedRawDetection.header.s7kTime = s7kTime;
-      if (store->read_CalibratedBeam == true)
+      if (store->read_CalibratedBeam)
         store->CalibratedBeam.header.s7kTime = s7kTime;
-      if (store->read_CalibratedSideScan == true)
+      if (store->read_CalibratedSideScan)
         store->CalibratedSideScan.header.s7kTime = s7kTime;
-      if (store->read_SnippetBackscatteringStrength == true)
+      if (store->read_SnippetBackscatteringStrength)
         store->SnippetBackscatteringStrength.header.s7kTime = s7kTime;
-      if (store->read_RemoteControlSonarSettings == true)
+      if (store->read_RemoteControlSonarSettings)
         store->RemoteControlSonarSettings.header.s7kTime = s7kTime;
     }
 
@@ -4598,9 +4598,9 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     /*--------------------------------------------------------------*/
     /* recalculate Bathymetry  */
     /*--------------------------------------------------------------*/
-    if ((store->read_RawDetection == true && RawDetection->optionaldata == false)
-        || (store->read_SegmentedRawDetection == true && SegmentedRawDetection->optionaldata == false)
-        || pars->recalculate_bathymetry == true) {
+    if ((store->read_RawDetection && RawDetection->optionaldata == false)
+        || (store->read_SegmentedRawDetection && SegmentedRawDetection->optionaldata == false)
+        || pars->recalculate_bathymetry) {
 
       if (verbose >= 2) {
         fprintf(stderr, "\ndbg2 Recalculating Bathymetry in %s: 7k ping records read:\n", __func__);
@@ -4657,7 +4657,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
       /* Deal with RawDetection record case */
 
       /* initialize all of the beams */
-      if (store->read_RawDetection == true) {
+      if (store->read_RawDetection) {
         for (int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           bathydata = &(RawDetection->bathydata[i]);
@@ -4669,7 +4669,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
           bathydata->pointing_angle = 0.0;
           bathydata->azimuth_angle = 0.0;
         }
-      } else if (store->read_SegmentedRawDetection == true) {
+      } else if (store->read_SegmentedRawDetection) {
         for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
           segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
           bathydata = &(SegmentedRawDetection->bathydata[i]);
@@ -4684,7 +4684,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
       }
 
       /* set ping values */
-      if (store->read_RawDetection == true) {
+      if (store->read_RawDetection) {
         RawDetection->frequency = SonarSettings->frequency;
         RawDetection->longitude = DTR * navlon;
         RawDetection->latitude = DTR * navlat;
@@ -4700,7 +4700,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
         else {
           RawDetection->vehicle_depth = sensordepth;
         }
-      } else if (store->read_SegmentedRawDetection == true) {
+      } else if (store->read_SegmentedRawDetection) {
         SegmentedRawDetection->frequency = SonarSettings->frequency;
         SegmentedRawDetection->longitude = DTR * navlon;
         SegmentedRawDetection->latitude = DTR * navlat;
@@ -4744,7 +4744,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
         /*
          * RawDetection record
          */
-        if (store->read_RawDetection == true) {
+        if (store->read_RawDetection) {
           for (int i = 0; i < RawDetection->number_beams; i++) {
             rawdetectiondata = &RawDetection->rawdetectiondata[i];
             rawdetectiondata->rx_angle
@@ -4752,7 +4752,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                          * sin(rawdetectiondata->rx_angle))));
           }
         }
-        else if (store->read_SegmentedRawDetection == true) {
+        else if (store->read_SegmentedRawDetection) {
           for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
             segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
             segmentedrawdetectionrxdata->rx_angle_cross
@@ -4789,7 +4789,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
         /*
          * RawDetection record
          */
-        if (store->read_RawDetection == true) {
+        if (store->read_RawDetection) {
           for (int i = 0; i < RawDetection->number_beams; i++) {
             rawdetectiondata = &RawDetection->rawdetectiondata[i];
             rawdetectiondata->rx_angle =
@@ -4797,7 +4797,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                          * sin(rawdetectiondata->rx_angle))));
           }
         }
-        else if (store->read_SegmentedRawDetection == true) {
+        else if (store->read_SegmentedRawDetection) {
           for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
             segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
             segmentedrawdetectionrxdata->rx_angle_cross =
@@ -4817,7 +4817,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
       }
 
       /* calculate bathymetry from RawDetection record */
-      if (store->read_RawDetection == true) {
+      if (store->read_RawDetection) {
         for (int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           bathydata = &(RawDetection->bathydata[i]);
@@ -4911,7 +4911,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
             + RawDetection->number_beams * RawDetection->data_field_size;
       }
       /* calculate bathymetry from SegmentedRawDetection record */
-      else if (store->read_SegmentedRawDetection == true) {
+      else if (store->read_SegmentedRawDetection) {
         for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
           segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
           segmentedrawdetectiontxdata = &(SegmentedRawDetection->segmentedrawdetectiontxdata[segmentedrawdetectionrxdata->used_segment-1]);
@@ -5010,18 +5010,18 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
     /* regenerate SideScan */
     if (store->read_ProcessedSideScan == false
-      || pars->recalculate_bathymetry == true) {
+      || pars->recalculate_bathymetry) {
       status = mbsys_reson7k3_makess(verbose, mbio_ptr, store_ptr, ss_source,
                                       false, pixel_size, false, swath_width,
                                       true, error);
     }
-  //if (store->read_RawDetection == true) {
+  //if (store->read_RawDetection) {
   //  mbsys_reson7k3_print_RawDetection(verbose, &store->RawDetection, error);
   //}
-  //else if (store->read_SegmentedRawDetection == true) {
+  //else if (store->read_SegmentedRawDetection) {
   //  mbsys_reson7k3_print_SegmentedRawDetection(verbose, &store->SegmentedRawDetection, error);
   //}
-  //if (store->read_ProcessedSideScan == true)
+  //if (store->read_ProcessedSideScan)
   //mbsys_reson7k3_print_ProcessedSideScan(verbose, &store->ProcessedSideScan, error);
 
     /*--------------------------------------------------------------*/
@@ -5303,8 +5303,8 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
   if (*kind == MB_DATA_DATA) {
 
     // bathymetry in RawDetection 7027 records (e.g. Reson)
-    if (store->read_RawDetection == true
-        && RawDetection->optionaldata == true) {
+    if (store->read_RawDetection
+        && RawDetection->optionaldata) {
 
       /* get the time */
       s7k3_header *header = &RawDetection->header;
@@ -5371,8 +5371,8 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
     } // end bathymetry in RawDetection 7027 records (e.g. Reson)
 
     // bathymetry in SegmentedRawDetection records (e.g. Hydrosweep)
-    else if (store->read_SegmentedRawDetection == true
-        && SegmentedRawDetection->optionaldata == true) {
+    else if (store->read_SegmentedRawDetection
+        && SegmentedRawDetection->optionaldata) {
 //mbsys_reson7k3_print_SegmentedRawDetection(verbose, SegmentedRawDetection, error);
 
       /* get the time */
@@ -5435,7 +5435,7 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
     }
 
     // extract processed multibeam sidescan
-    if (status == MB_SUCCESS && store->read_ProcessedSideScan == true) {
+    if (status == MB_SUCCESS && store->read_ProcessedSideScan) {
 			*nss = ProcessedSideScan->number_pixels;
 			for (int i = 0; i < ProcessedSideScan->number_pixels; i++) {
 				ss[i] = ProcessedSideScan->sidescan[i];
@@ -5754,7 +5754,7 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
   if (store->kind == MB_DATA_DATA) {
 
     // bathymetry in RawDetection 7027 records (e.g. Reson)
-    if (store->read_RawDetection == true) {
+    if (store->read_RawDetection) {
 
       /* optional data must be set */
       RawDetection->optionaldata = true;
@@ -5800,7 +5800,7 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
     } // end bathymetry in RawDetection 7027 records (e.g. Reson)
 
     // bathymetry in SegmentedRawDetection 7047 records (e.g. Hydrosweep)
-    else if (store->read_SegmentedRawDetection == true) {
+    else if (store->read_SegmentedRawDetection) {
 
       /* optional data must be set */
       SegmentedRawDetection->optionaldata = true;
@@ -5838,7 +5838,7 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
     if (store->read_ProcessedSideScan == false) {
       // Initialize ProcessedSideScan structure if necessary
       store->read_ProcessedSideScan = true;
-      if (store->read_RawDetection == true) {
+      if (store->read_RawDetection) {
         ProcessedSideScan->header = RawDetection->header;
         ProcessedSideScan->serial_number = RawDetection->serial_number;
         ProcessedSideScan->ping_number = RawDetection->ping_number;
@@ -5846,7 +5846,7 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
         ProcessedSideScan->sonardepth = RawDetection->vehicle_depth;
         ProcessedSideScan->altitude = bath[nbath/2] - ProcessedSideScan->sonardepth;
       }
-      else if (store->read_SegmentedRawDetection == true) {
+      else if (store->read_SegmentedRawDetection) {
         ProcessedSideScan->header = SegmentedRawDetection->header;
         ProcessedSideScan->serial_number = SegmentedRawDetection->serial_number;
         ProcessedSideScan->ping_number = SegmentedRawDetection->ping_number;
@@ -6015,8 +6015,8 @@ int mbsys_reson7k3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 
   /* extract data from structure */
   if (*kind == MB_DATA_DATA) {
-    if (store->read_RawDetection == true
-        && RawDetection->optionaldata == true) {
+    if (store->read_RawDetection
+        && RawDetection->optionaldata) {
 
       /* get depth offset (heave + sonar depth) */
       *ssv = SonarSettings->sound_velocity;
@@ -6042,8 +6042,8 @@ int mbsys_reson7k3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
       status = MB_SUCCESS;
     }
 
-    else if (store->read_SegmentedRawDetection == true
-        && SegmentedRawDetection->optionaldata == true) {
+    else if (store->read_SegmentedRawDetection
+        && SegmentedRawDetection->optionaldata) {
 
       /* get depth offset (heave + sonar depth) */
       *ssv = SonarSettings->sound_velocity;
@@ -6141,8 +6141,8 @@ int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 
   /* extract data from structure */
   if (*kind == MB_DATA_DATA) {
-    if (store->read_BeamGeometry == true
-        && store->read_RawDetection == true) {
+    if (store->read_BeamGeometry
+        && store->read_RawDetection) {
       /* read beam detects into storage arrays */
       *nbeams = BeamGeometry->number_beams;
       for (int i = 0; i < RawDetection->number_beams; i++) {
@@ -6167,8 +6167,8 @@ int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
       status = MB_SUCCESS;
     }
 
-    else if (store->read_SegmentedRawDetection == true
-        && SegmentedRawDetection->optionaldata == true) {
+    else if (store->read_SegmentedRawDetection
+        && SegmentedRawDetection->optionaldata) {
       /* read beam detects into storage arrays */
       *nbeams = SegmentedRawDetection->n_rx;
       for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
@@ -6258,8 +6258,8 @@ int mbsys_reson7k3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 
   /* extract data from structure */
   if (*kind == MB_DATA_DATA) {
-    if (store->read_SonarSettings == true
-        && store->read_RawDetection == true) {
+    if (store->read_SonarSettings
+        && store->read_RawDetection) {
 
       /* get transmit_gain (dB) */
       *transmit_gain = (double)SonarSettings->power_selection;
@@ -6362,8 +6362,8 @@ int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
       altitude_found = true;
     }
 
-    if (store->read_RawDetection == true
-        && RawDetection->optionaldata == true) {
+    if (store->read_RawDetection
+        && RawDetection->optionaldata) {
 
       /* get transducer depth and altitude */
       *transducer_depth = RawDetection->vehicle_depth + RawDetection->heave;
@@ -6391,8 +6391,8 @@ int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 
     }
 
-    else if (store->read_SegmentedRawDetection == true
-        && SegmentedRawDetection->optionaldata == true) {
+    else if (store->read_SegmentedRawDetection
+        && SegmentedRawDetection->optionaldata) {
 
       /* get transducer depth and altitude */
       *transducer_depth = SegmentedRawDetection->vehicle_depth + SegmentedRawDetection->heave;
@@ -6500,8 +6500,8 @@ int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 
   /* extract data from ping structure */
   if (*kind == MB_DATA_DATA) {
-    if (store->read_RawDetection == true
-        && RawDetection->optionaldata == true) {
+    if (store->read_RawDetection
+        && RawDetection->optionaldata) {
 
       /* get the time */
       header = &RawDetection->header;
@@ -6539,8 +6539,8 @@ int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
       /* done translating values */
     }
 
-    else if (store->read_SegmentedRawDetection == true
-        && SegmentedRawDetection->optionaldata == true) {
+    else if (store->read_SegmentedRawDetection
+        && SegmentedRawDetection->optionaldata) {
 
       /* get the time */
       header = &SegmentedRawDetection->header;
@@ -8088,21 +8088,21 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
 
   /* if necessary pick a source for the backscatter */
   if (store->kind == MB_DATA_DATA && source == R7KRECID_None) {
-    if (store->read_SnippetBackscatteringStrength == true)
+    if (store->read_SnippetBackscatteringStrength)
       source = R7KRECID_SnippetBackscatteringStrength;
-    else if (store->read_Snippet == true)
+    else if (store->read_Snippet)
       source = R7KRECID_Snippet;
-    else if (store->read_CalibratedSideScan == true)
+    else if (store->read_CalibratedSideScan)
       source = R7KRECID_CalibratedSideScan;
-    else if (store->read_SideScan == true)
+    else if (store->read_SideScan)
       source = R7KRECID_SideScan;
   }
 
   /* calculate SideScan from the desired source data if it is available */
-  if (store->kind == MB_DATA_DATA && ((source == R7KRECID_CalibratedSideScan && store->read_CalibratedSideScan == true) ||
-                                      (source == R7KRECID_SnippetBackscatteringStrength && store->read_SnippetBackscatteringStrength == true) ||
-                                      (source == R7KRECID_Snippet && store->read_Snippet == true) ||
-                                      (source == R7KRECID_SideScan && store->read_SideScan == true))) {
+  if (store->kind == MB_DATA_DATA && ((source == R7KRECID_CalibratedSideScan && store->read_CalibratedSideScan) ||
+                                      (source == R7KRECID_SnippetBackscatteringStrength && store->read_SnippetBackscatteringStrength) ||
+                                      (source == R7KRECID_Snippet && store->read_Snippet) ||
+                                      (source == R7KRECID_SideScan && store->read_SideScan))) {
 
     // Handle case of bathymetry in RawDetection 7027 records
     // - These records are output by Teledyne Reson multibeam sonars and
@@ -8110,7 +8110,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
     // - The RawDetection records contain all valid soundings, not all beams
     // - The BeamGeometry defines the possible swath, the RawDetection contains
     //   the achieved swath.
-    if (store->read_RawDetection == true) {
+    if (store->read_RawDetection) {
       // get acrosstract beam angle width from the center beam in the BeamGeometry record
       beamwidth = 2.0 * RTD * BeamGeometry->beamwidth_acrosstrack[BeamGeometry->number_beams / 2];
 
@@ -8171,7 +8171,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
     //   are NOT accompanied by BeamGeometry 7004 records
     // - The RawDetection records contain all valid soundings from all transmit
     //   segments, not necessarily all formed beams
-    else if (store->read_SegmentedRawDetection == true) {
+    else if (store->read_SegmentedRawDetection) {
       // get acrosstract beam angle width from the center beam in the BeamGeometry record
       beamwidth = 2.0 * RTD * SegmentedRawDetection->segmentedrawdetectiontxdata[0].rx_beam_width;
 
@@ -8275,9 +8275,9 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
       // with each snippet - we only use snippets from non-null and unflagged
       // soundings - the snippet samples are located using the location of the
       // associated sounding
-//if (store->read_RawDetection == true)
+//if (store->read_RawDetection)
 //mbsys_reson7k3_print_RawDetection(verbose, RawDetection, error);
-//else if (store->read_SegmentedRawDetection == true)
+//else if (store->read_SegmentedRawDetection)
 //mbsys_reson7k3_print_SegmentedRawDetection(verbose, SegmentedRawDetection, error);
 //mbsys_reson7k3_print_SnippetBackscatteringStrength(verbose, SnippetBackscatteringStrength, error);
       int ibeamdetectindex = 0;
@@ -8287,7 +8287,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
         processbeam = false;
 
         // Deal with case of RawDetection record
-        if (store->read_RawDetection == true) {
+        if (store->read_RawDetection) {
 
           // search RawDetection record for the associated sounding
           bool found = false;
@@ -8312,7 +8312,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
         }
 
         // Deal with case of SegmentedRawDetection record
-        else if (store->read_SegmentedRawDetection == true) {
+        else if (store->read_SegmentedRawDetection) {
 
           // search SegmentedRawDetection record for the associated sounding
           bool found = false;
@@ -8375,9 +8375,9 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
       // with each snippet - we only use snippets from non-null and unflagged
       // soundings - the snippet samples are located using the location of the
       // associated sounding
-//if (store->read_RawDetection == true)
+//if (store->read_RawDetection)
 //mbsys_reson7k3_print_RawDetection(verbose, RawDetection, error);
-//else if (store->read_SegmentedRawDetection == true)
+//else if (store->read_SegmentedRawDetection)
 //mbsys_reson7k3_print_SegmentedRawDetection(verbose, SegmentedRawDetection, error);
 //mbsys_reson7k3_print_Snippet(verbose, Snippet, error);
       int ibeamdetectindex = 0;
@@ -8387,7 +8387,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
         processbeam = false;
 
         // Deal with case of RawDetection record
-        if (store->read_RawDetection == true) {
+        if (store->read_RawDetection) {
 
           // search RawDetection record for the associated sounding
           bool found = false;
@@ -8412,7 +8412,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
         }
 
         // Deal with case of SegmentedRawDetection record
-        else if (store->read_SegmentedRawDetection == true) {
+        else if (store->read_SegmentedRawDetection) {
 
           // search SegmentedRawDetection record for the associated sounding
           bool found = false;
@@ -8478,7 +8478,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
       /* get acrosstrack distance versus range table from RawDetection */
       nrangetable = 0;
       irangenadir = 0;
-      if (store->read_RawDetection == true) {
+      if (store->read_RawDetection) {
         for (int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           bathydata = &(RawDetection->bathydata[i]);
@@ -8494,7 +8494,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
             nrangetable++;
           }
         }
-      } else if (store->read_SegmentedRawDetection == true) {
+      } else if (store->read_SegmentedRawDetection) {
         for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
           segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
           segmentedrawdetectiontxdata = &(SegmentedRawDetection->segmentedrawdetectiontxdata[segmentedrawdetectionrxdata->used_segment-1]);
@@ -8583,7 +8583,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
       /* get acrosstrack distance versus range table from RawDetection */
       nrangetable = 0;
       irangenadir = 0;
-      if (store->read_RawDetection == true) {
+      if (store->read_RawDetection) {
         for (int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           bathydata = &(RawDetection->bathydata[i]);
@@ -8599,7 +8599,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
             nrangetable++;
           }
         }
-      } else if (store->read_SegmentedRawDetection == true) {
+      } else if (store->read_SegmentedRawDetection) {
         for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
           segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
           segmentedrawdetectiontxdata = &(SegmentedRawDetection->segmentedrawdetectiontxdata[segmentedrawdetectionrxdata->used_segment-1]);
@@ -8721,7 +8721,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
 
     /* embed the SideScan into the processed SideScan record */
     store->read_ProcessedSideScan = true;
-    if (store->read_RawDetection == true) {
+    if (store->read_RawDetection) {
       ProcessedSideScan->header = RawDetection->header;
       ProcessedSideScan->serial_number = RawDetection->serial_number;
       ProcessedSideScan->ping_number = RawDetection->ping_number;
@@ -8731,7 +8731,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
       ProcessedSideScan->altitude = RawDetection->bathydata[iminxtrack].depth
                                     - ProcessedSideScan->sonardepth;
     }
-    else if (store->read_SegmentedRawDetection == true) {
+    else if (store->read_SegmentedRawDetection) {
       ProcessedSideScan->header = SegmentedRawDetection->header;
       ProcessedSideScan->serial_number = SegmentedRawDetection->serial_number;
       ProcessedSideScan->ping_number = SegmentedRawDetection->ping_number;
