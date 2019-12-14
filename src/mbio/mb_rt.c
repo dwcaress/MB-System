@@ -591,9 +591,9 @@ int mb_rt_circular(int verbose, int *error) {
 		status = mb_rt_quad1(verbose, error);
 	else if (model->turned == false)
 		status = mb_rt_quad3(verbose, error);
-	else if (model->turned == true && model->layer_gradient[model->layer] > 0.0)
+	else if (model->turned && model->layer_gradient[model->layer] > 0.0)
 		status = mb_rt_quad2(verbose, error);
-	else if (model->turned == true)
+	else if (model->turned)
 		status = mb_rt_quad4(verbose, error);
 
 	/* put points in plotting arrays */
@@ -662,7 +662,7 @@ int mb_rt_line(int verbose, int *error) {
 		model->xf = model->xx + xvel * model->dt;
 		model->zf = model->zz + zvel * model->dt;
 		model->tt_left = model->tt_left - model->dt;
-		if (model->turned == true)
+		if (model->turned)
 			model->layer--;
 		else
 			model->layer++;
@@ -728,7 +728,7 @@ int mb_rt_vertical(int verbose, int *error) {
 		const double vfvi = exp(model->tt_left * model->layer_gradient[model->layer]);
 		if (model->turned == false)
 			vf = vi * vfvi;
-		else if (model->turned == true)
+		else if (model->turned)
 			vf = vi / vfvi;
 		model->zf = (vf - model->layer_vel_top[model->layer]) / model->layer_gradient[model->layer] +
 		            model->layer_depth_top[model->layer];
@@ -740,7 +740,7 @@ int mb_rt_vertical(int verbose, int *error) {
 	else {
 		model->xf = model->xx;
 		model->tt_left = model->tt_left - model->dt;
-		if (model->turned == true)
+		if (model->turned)
 			model->layer--;
 		else
 			model->layer++;

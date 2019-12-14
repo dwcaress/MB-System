@@ -308,7 +308,7 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 		sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
 
 		/* change timestamp if indicated */
-		if (pars->timestamp_changed == true) {
+		if (pars->timestamp_changed) {
 			time_d = pars->time_d;
 			mb_get_date(verbose, time_d, time_i);
 			mb_get_jtime(verbose, time_i, time_j);
@@ -342,7 +342,7 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 		ssstbd = (struct mbsys_jstar_channel_struct *)&(store->ssstbd);
 
 		/* change timestamp if indicated */
-		if (pars->timestamp_changed == true) {
+		if (pars->timestamp_changed) {
 			time_d = pars->time_d;
 			mb_get_date(verbose, time_d, time_i);
 			mb_get_jtime(verbose, time_i, time_j);

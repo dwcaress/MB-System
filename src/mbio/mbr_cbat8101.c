@@ -1455,7 +1455,7 @@ int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 
 	/* write the record label */
 	label = RESON_COMMENT;
-	if (swap == true)
+	if (swap)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -1551,7 +1551,7 @@ int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 
 	/* write the record label */
 	label = RESON_PARAMETER;
-	if (swap == true)
+	if (swap)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -1718,7 +1718,7 @@ int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 
 	/* write the record label */
 	label = RESON_NAV;
-	if (swap == true)
+	if (swap)
 		label = (short)mb_swap_short(label);
 
 	int status = fwrite(&label, 1, 2, mbfp);
@@ -1858,7 +1858,7 @@ int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	}
 
 	/* write the record label */
-	if (swap == true)
+	if (swap)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -1988,7 +1988,7 @@ int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 
 	/* write the record label */
 	label = RESON_BATH_8101;
-	if (swap == true)
+	if (swap)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -2147,7 +2147,7 @@ int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 
 	/* write the record label */
 	label = RESON_HEADING;
-	if (swap == true)
+	if (swap)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -2237,7 +2237,7 @@ int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, int swap, void *data_ptr, 
 
 	/* write the record label */
 	label = RESON_ATTITUDE;
-	if (swap == true)
+	if (swap)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {

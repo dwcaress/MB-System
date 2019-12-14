@@ -948,13 +948,13 @@ int mbr_mr1aldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1aldeo_struct
 	}
 
 	/* if data and file header written */
-	else if (mb_io_ptr->fileheader == true && data->kind == MB_DATA_DATA) {
+	else if (mb_io_ptr->fileheader && data->kind == MB_DATA_DATA) {
 		/* write data */
 		status = mbr_mr1aldeo_wr_ping(verbose, xdrs, data, error);
 	}
 
 	/* if not data and file header written */
-	else if (mb_io_ptr->fileheader == true && data->kind != MB_DATA_DATA) {
+	else if (mb_io_ptr->fileheader && data->kind != MB_DATA_DATA) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_KIND;
 	}

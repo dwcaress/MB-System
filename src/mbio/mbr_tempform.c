@@ -248,7 +248,7 @@ int mbr_tempform_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get file position */
-	if (*save_flag == true)
+	if (*save_flag)
 		mb_io_ptr->file_bytes = ftell(mbfp) - *size;
 	else
 		mb_io_ptr->file_bytes = ftell(mbfp);

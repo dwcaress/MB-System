@@ -521,6 +521,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+// TODO(schwehr): Make force a bool
 int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -559,7 +560,7 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 	}
 
 	/* make new inf file if not there or out of date */
-	if (force == true || (datmodtime > 0 && datmodtime > infmodtime)) {
+	if (force || (datmodtime > 0 && datmodtime > infmodtime)) {
 		if (verbose >= 1)
 			fprintf(stderr, "\nGenerating inf file for %s\n", file);
 		char command[MB_PATH_MAXLINE];

@@ -184,10 +184,10 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	short sonarunswap;
 	short sonarswap;
 	int *databyteswapped;
-	int typegood;
-	int sonargood;
-	int sonarswapgood;
-	int sonarunswapgood;
+	bool typegood;
+	bool sonargood;
+	bool sonarswapgood;
+	bool sonarunswapgood;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -225,7 +225,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	}
 
 	/* check for data byte swapping if necessary */
-	if (typegood == true && *databyteswapped == -1) {
+	if (typegood && *databyteswapped == -1) {
 		sonarunswap = *((short *)&label[2]);
 		sonarswap = mb_swap_short(sonarunswap);
 
@@ -256,14 +256,14 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			sonarswapgood = false;
 		}
 
-		if (sonarunswapgood == true && sonarswapgood == false) {
-			if (mb_io_ptr->byteswapped == true)
+		if (sonarunswapgood && sonarswapgood == false) {
+			if (mb_io_ptr->byteswapped)
 				*databyteswapped = true;
 			else
 				*databyteswapped = false;
 		}
-		else if (sonarunswapgood == false && sonarswapgood == true) {
-			if (mb_io_ptr->byteswapped == true)
+		else if (sonarunswapgood == false && sonarswapgood) {
+			if (mb_io_ptr->byteswapped)
 				*databyteswapped = false;
 			else
 				*databyteswapped = true;
@@ -275,7 +275,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 
 	*type = *((short *)&label[0]);
 	*sonar = *((short *)&label[2]);
-	if (mb_io_ptr->byteswapped == true)
+	if (mb_io_ptr->byteswapped)
 		*type = mb_swap_short(*type);
 	if (*databyteswapped != mb_io_ptr->byteswapped) {
 		*sonar = mb_swap_short(*sonar);
@@ -295,7 +295,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		sonargood = false;
 	}
 
-	if (startbyte == EM2_START_BYTE && typegood == false && sonargood == true) {
+	if (startbyte == EM2_START_BYTE && typegood == false && sonargood) {
 		mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_BAD_DATAGRAM);
 		if (verbose >= 1)
 			fprintf(stderr, "Bad datagram type: %4.4hX %4.4hX | %d %d\n", *type, *sonar, *type, *sonar);
@@ -3429,7 +3429,7 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	nbadrec = (int *)&mb_io_ptr->save7;
 	length = (int *)&mb_io_ptr->save8;
 	record_size_char = (char *)&record_size;
-	if (*expect_save_flag == true) {
+	if (*expect_save_flag) {
 		expect = *expect_save;
 		first_type = *first_type_save;
 		*expect_save_flag = false;
@@ -3984,7 +3984,7 @@ Have a nice day...\n");
 
 			/* salvage bath even if sidescan is corrupt */
 			else {
-				if (first_type == EM2_BATH_MBA && match == true) {
+				if (first_type == EM2_BATH_MBA && match) {
 					status = MB_SUCCESS;
 					done = true;
 					expect = EM2_NONE;
@@ -4033,7 +4033,7 @@ Have a nice day...\n");
 #endif
 
 		/* get file position */
-		if (*label_save_flag == true)
+		if (*label_save_flag)
 			mb_io_ptr->file_bytes = ftell(mbfp) - 2;
 		else if (*expect_save_flag != true)
 			mb_io_ptr->file_bytes = ftell(mbfp);
@@ -7783,19 +7783,19 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "call mbr_em300mba_wr_bath kind:%d type %x\n", store->kind, EM2_BATH_MBA);
 #endif
 		status = mbr_em300mba_wr_bath(verbose, mbfp, swap, store, 0, error);
-		if (ping->png_raw1_read == true) {
+		if (ping->png_raw1_read) {
 #ifdef MBR_EM300MBA_DEBUG
 			fprintf(stderr, "call mbr_em300mba_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
 #endif
 			status = mbr_em300mba_wr_rawbeam(verbose, mbfp, swap, store, error);
 		}
-		if (ping->png_raw2_read == true) {
+		if (ping->png_raw2_read) {
 #ifdef MBR_EM300MBA_DEBUG
 			fprintf(stderr, "call mbr_em300mba_wr_rawbeam2 kind:%d type %x\n", store->kind, store->type);
 #endif
 			status = mbr_em300mba_wr_rawbeam2(verbose, mbfp, swap, store, error);
 		}
-		if (ping->png_raw3_read == true) {
+		if (ping->png_raw3_read) {
 #ifdef MBR_EM300MBA_DEBUG
 			fprintf(stderr, "call mbr_em300mba_wr_rawbeam3 kind:%d type %x\n", store->kind, store->type);
 #endif
@@ -7805,7 +7805,7 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (ping->png_raw1_read == false && ping->png_raw2_read == false && ping->png_raw3_read == false)
 			fprintf(stderr, "NOT call mbr_em300mba_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
 #endif
-		if (ping->png_ss_read == true) {
+		if (ping->png_ss_read) {
 #ifdef MBR_EM300MBA_DEBUG
 			fprintf(stderr, "call mbr_em300mba_wr_ss kind:%d type %x\n", store->kind, EM2_SS_MBA);
 #endif
@@ -7823,7 +7823,7 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "call mbr_em300mba_wr_bath kind:%d type %x\n", store->kind, store->type);
 #endif
 			status = mbr_em300mba_wr_bath(verbose, mbfp, swap, store, 1, error);
-			if (ping->png_raw3_read == true) {
+			if (ping->png_raw3_read) {
 #ifdef MBR_EM300MBA_DEBUG
 				fprintf(stderr, "call mbr_em300mba_wr_rawbeam3 kind:%d type %x\n", store->kind, store->type);
 #endif
@@ -7833,7 +7833,7 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (ping->png_raw3_read == false)
 				fprintf(stderr, "NOT call mbr_em300mba_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
 #endif
-			if (ping->png_ss_read == true) {
+			if (ping->png_ss_read) {
 #ifdef MBR_EM300MBA_DEBUG
 				fprintf(stderr, "call mbr_em300mba_wr_ss kind:%d type %x\n", store->kind, store->type);
 #endif

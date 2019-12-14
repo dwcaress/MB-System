@@ -895,7 +895,6 @@ int mbr_3dwisslr_rd_data
   size_t index;
   int time_i[7];
   int time_j[5];
-  int found;
 
   if (verbose >= 2)
     {
@@ -924,7 +923,7 @@ int mbr_3dwisslr_rd_data
   *error = MB_ERROR_NO_ERROR;
 
   /* find next unread record in the file index table */
-  found = false;
+  bool found = false;
   int irecord = 0;
   for (int i = 0; i < mb_io_ptr->num_indextable && found == false; i++)
     if (mb_io_ptr->indextable[i].read == false)
@@ -936,7 +935,7 @@ int mbr_3dwisslr_rd_data
   int status = MB_SUCCESS;
 
   /* read the next record */
-  if (found == true)
+  if (found)
     {
     /* set the file offset */
     fseek(mb_io_ptr->mbfp, mb_io_ptr->indextable[irecord].offset, SEEK_SET);

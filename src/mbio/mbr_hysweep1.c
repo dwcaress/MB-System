@@ -272,7 +272,8 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int tmpRMB_num_beams;
 	double tmpRMB_sound_velocity;
 	int tmpRMB_ping_number;
-	int SNRok, RSSok;
+	bool SNRok;
+	bool RSSok;
 	int len;
 
 	if (verbose >= 2) {
@@ -314,7 +315,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (status == MB_SUCCESS) {
 			/* check if a new record has been encountered before the last one
 			    has been processed */
-			if (*RMB_read == true && strncmp(line, "RMB", 3) == 0) {
+			if (*RMB_read && strncmp(line, "RMB", 3) == 0) {
 				/* check for erroneous RMB records associated with non-multibeam devices */
 				/* parse the first line */
 				nscan = sscanf(line + 4, "%d %lf %x %x %x %d %lf %d", &(tmpRMB_device_number), &(tmpRMB_time),
@@ -790,7 +791,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					}
 					else
 						RSSok = true;
-					if (SNRok == true && RSSok == true) {
+					if (SNRok && RSSok) {
 						done = true;
 						store->kind = MB_DATA_DATA;
 						store->time_d = store->TND_survey_time_d + store->RMB_time;
@@ -933,7 +934,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					}
 					else
 						SNRok = true;
-					if (SNRok == true && RSSok == true) {
+					if (SNRok && RSSok) {
 						done = true;
 						store->kind = MB_DATA_DATA;
 						store->time_d = store->TND_survey_time_d + store->RMB_time;
@@ -1079,7 +1080,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					}
 					else
 						RSSok = true;
-					if (SNRok == true && RSSok == true) {
+					if (SNRok && RSSok) {
 						done = true;
 						store->kind = MB_DATA_DATA;
 						store->time_d = store->TND_survey_time_d + store->RMB_time;
@@ -1251,7 +1252,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				if (status == MB_SUCCESS) {
 					done = true;
 					device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->POS_device_number]);
-					if (device->DV2_enabled == true)
+					if (device->DV2_enabled)
 						store->kind = MB_DATA_NAV;
 					else
 						store->kind = MB_DATA_NAV1;
@@ -1338,7 +1339,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				   a *.prj file leave it in place, if not use the first
 				   PRJ record in the file, if no projection set just use
 				   UTM01N */
-				if (mb_io_ptr->projection_initialized == true) {
+				if (mb_io_ptr->projection_initialized) {
 					strcpy(store->PRJ_proj4_command, mb_io_ptr->projection_id);
 				}
 				else {
@@ -1962,9 +1963,9 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS && (store->kind == MB_DATA_NAV || store->kind == MB_DATA_NAV1 || store->kind == MB_DATA_NAV2)) {
 		/* check device for being enabled */
 		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->POS_device_number]);
-		if (device->DV2_enabled == true) {
+		if (device->DV2_enabled) {
 			/* add latest fix */
-			if (mb_io_ptr->projection_initialized == true) {
+			if (mb_io_ptr->projection_initialized) {
 				mb_proj_inverse(verbose, mb_io_ptr->pjptr, store->POS_x, store->POS_y, &navlon, &navlat, error);
 			}
 			else {
@@ -1979,7 +1980,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS && store->kind == MB_DATA_ATTITUDE) {
 		/* check device for being enabled */
 		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->HCP_device_number]);
-		if (device->DV2_enabled == true) {
+		if (device->DV2_enabled) {
 			/* add latest attitude */
 			mb_attint_add(verbose, mbio_ptr, store->time_d, store->HCP_heave, -store->HCP_roll, store->HCP_pitch, error);
 		}
@@ -1989,7 +1990,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS && store->kind == MB_DATA_HEADING) {
 		/* check device for being enabled */
 		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->GYR_device_number]);
-		if (device->DV2_enabled == true) {
+		if (device->DV2_enabled) {
 			/* add latest attitude */
 			mb_hedint_add(verbose, mbio_ptr, store->time_d, store->GYR_heading, error);
 		}
@@ -1999,7 +2000,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS && store->kind == MB_DATA_SONARDEPTH) {
 		/* check device for being enabled */
 		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->DFT_device_number]);
-		if (device->DV2_enabled == true) {
+		if (device->DV2_enabled) {
 			/* add latest attitude */
 			mb_depint_add(verbose, mbio_ptr, store->time_d, store->DFT_draft, error);
 		}
@@ -2009,7 +2010,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS && store->kind == MB_DATA_ALTITUDE) {
 		/* check device for being enabled */
 		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->EC1_device_number]);
-		if (device->DV2_enabled == true) {
+		if (device->DV2_enabled) {
 			/* add latest attitude */
 			mb_altint_add(verbose, mbio_ptr, store->time_d, store->EC1_rawdepth, error);
 		}
@@ -2034,7 +2035,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, store->RMBint_heading, speed, &(store->RMBint_lon),
 		                                 &(store->RMBint_lat), &speed, &interp_error);
 		if (interp_status == MB_SUCCESS) {
-			if (mb_io_ptr->projection_initialized == true) {
+			if (mb_io_ptr->projection_initialized) {
 				mb_proj_forward(verbose, mb_io_ptr->pjptr, store->RMBint_lon, store->RMBint_lat, &(store->RMBint_x),
 				                &(store->RMBint_y), error);
 			}
@@ -2349,7 +2350,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		*add_MB_DFT = true;
 		for (int i = 0; i < hysweeptmp.num_devices; i++) {
 			device = (struct mbsys_hysweep_device_struct *)&(hysweeptmp.devices[i]);
-			if (device->DV2_enabled == true) {
+			if (device->DV2_enabled) {
 				if ((strncmp(device->DEV_device_name, "MB-System", 9) == 0)) {
 					if (device->DV2_device_capability & 0x0004)
 						*add_MB_POS = false;
@@ -2376,7 +2377,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 			}
 		}
-		if (*add_MB_POS == true) {
+		if (*add_MB_POS) {
 			*device_number_MB_POS = hysweeptmp.num_devices;
 			device = (struct mbsys_hysweep_device_struct *)&(hysweeptmp.devices[hysweeptmp.num_devices]);
 			device->DEV_device_number = hysweeptmp.num_devices;
@@ -2401,7 +2402,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			}
 			hysweeptmp.num_devices++;
 		}
-		if (*add_MB_GYR == true) {
+		if (*add_MB_GYR) {
 			*device_number_MB_GYR = hysweeptmp.num_devices;
 			device = (struct mbsys_hysweep_device_struct *)&(hysweeptmp.devices[hysweeptmp.num_devices]);
 			device->DEV_device_number = hysweeptmp.num_devices;
@@ -2426,7 +2427,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			}
 			hysweeptmp.num_devices++;
 		}
-		if (*add_MB_HCP == true) {
+		if (*add_MB_HCP) {
 			*device_number_MB_HCP = hysweeptmp.num_devices;
 			device = (struct mbsys_hysweep_device_struct *)&(hysweeptmp.devices[hysweeptmp.num_devices]);
 			device->DEV_device_number = hysweeptmp.num_devices;
@@ -2451,7 +2452,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			}
 			hysweeptmp.num_devices++;
 		}
-		if (*add_MB_DFT == true) {
+		if (*add_MB_DFT) {
 			*device_number_MB_DFT = hysweeptmp.num_devices;
 			device = (struct mbsys_hysweep_device_struct *)&(hysweeptmp.devices[hysweeptmp.num_devices]);
 			device->DEV_device_number = hysweeptmp.num_devices;
@@ -2651,20 +2652,20 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 
 		/* add desired interpolated data */
-		if (*add_MB_POS == true) {
+		if (*add_MB_POS) {
 			sprintf(line, "POS %d %.3f %.2f %.2f\r\n", *device_number_MB_POS, store->RMB_time, store->RMBint_x, store->RMBint_y);
 			fputs(line, mbfp);
 		}
-		if (*add_MB_GYR == true) {
+		if (*add_MB_GYR) {
 			sprintf(line, "GYR %d %.3f %.2f\r\n", *device_number_MB_GYR, store->RMB_time, store->RMBint_heading);
 			fputs(line, mbfp);
 		}
-		if (*add_MB_HCP == true) {
+		if (*add_MB_HCP) {
 			sprintf(line, "HCP %d %.3f %.2f %.2f %.2f\r\n", *device_number_MB_HCP, store->RMB_time, (store->RMBint_heave),
 			        (-store->RMBint_roll), store->RMBint_pitch);
 			fputs(line, mbfp);
 		}
-		if (*add_MB_DFT == true) {
+		if (*add_MB_DFT) {
 			sprintf(line, "DFT %d %.3f %.2f\r\n", *device_number_MB_DFT, store->RMB_time, store->RMBint_draft);
 			fputs(line, mbfp);
 		}

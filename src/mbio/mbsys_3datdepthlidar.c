@@ -508,7 +508,7 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 	}
 
 	/* change timestamp if indicated */
-	if (pars->timestamp_changed == true) {
+	if (pars->timestamp_changed) {
 		store->time_d = pars->time_d;
 		mb_get_date(verbose, pars->time_d, time_i);
 		mb_get_jtime(verbose, time_i, time_j);

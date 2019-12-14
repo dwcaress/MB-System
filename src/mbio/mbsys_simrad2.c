@@ -1765,7 +1765,7 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 		/*--------------------------------------------------------------*/
 		/* change timestamp if indicated */
 		/*--------------------------------------------------------------*/
-		if (pars->timestamp_changed == true) {
+		if (pars->timestamp_changed) {
 			time_d = pars->time_d;
 			mb_get_date(verbose, time_d, time_i);
 
@@ -3595,7 +3595,7 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	double depthscale, dacrscale;
 	double altitude_best;
 	double xtrack_min;
-	int found;
+	bool found;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3645,7 +3645,7 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			}
 		}
-		if (found == true) {
+		if (found) {
 			*altitude = altitude_best;
 		}
 		else
@@ -4530,7 +4530,7 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	double range, beam_foot, beamwidth, sint;
 	int time_i[7];
 	double bath_time_d, ss_time_d;
-	int ss_ok;
+	bool ss_ok;
 	int first, last, k1, k2;
 
 	if (verbose >= 2) {
@@ -4680,7 +4680,7 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 
 		/* loop over raw sidescan, putting each raw pixel into
 		    the binning arrays */
-		if (ss_ok == true)
+		if (ss_ok)
 			for (int i = 0; i < ping->png_nbeams_ss; i++) {
 				beam_ss = &ping->png_ssraw[ping->png_start_sample[i]];
 				if (mb_beam_ok(ping->png_beamflag[i])) {
@@ -4933,7 +4933,7 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 
 		/* loop over raw sidescan, putting each raw pixel into
 		    the binning arrays */
-		if (ss_ok == true)
+		if (ss_ok)
 			for (int i = 0; i < ping->png_nbeams_ss; i++) {
 				beam_ss = &ping->png_ssraw[ping->png_start_sample[i]];
 				if (mb_beam_ok(ping->png_beamflag[i])) {

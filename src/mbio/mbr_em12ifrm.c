@@ -622,7 +622,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 			}
 
 			/* use sidescan if saved */
-			if (*save_ss == true && *ss_ping_number == data->ping_number && *ss_swath_id == data->swath_id) {
+			if (*save_ss && *ss_ping_number == data->ping_number && *ss_swath_id == data->swath_id) {
 				done = true;
 			}
 
@@ -659,7 +659,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 	if (status == MB_SUCCESS && mb_io_ptr->mbfp2 != NULL && !done && *save_data == MB_DATA_NONE) {
 		/* read sidescan until it matches ping number and side */
 		*ss_ping_number = 0;
-		while (!done && *ss_available == true && *ss_ping_number <= data->ping_number) {
+		while (!done && *ss_available && *ss_ping_number <= data->ping_number) {
 			/* read sidescan header from sidescan file */
 			if ((read_status = fread(line, 1, MBF_EM12IFRM_SSHEADER_SIZE, mb_io_ptr->mbfp2)) == MBF_EM12IFRM_SSHEADER_SIZE) {
 				mb_io_ptr->file2_bytes += read_status;
@@ -800,7 +800,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 		mb_get_time(verbose, ptime_i, &ptime_d);
 
 		/* see if nav is needed and potentially available */
-		if (*nav_available == true && (mb_io_ptr->nfix == 0 || mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] < ptime_d)) {
+		if (*nav_available && (mb_io_ptr->nfix == 0 || mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] < ptime_d)) {
 			bool navdone = false;
 			while (!navdone) {
 				if ((result = fgets(line, MBF_EM12IFRM_RECORD_SIZE, mb_io_ptr->mbfp3)) != line) {

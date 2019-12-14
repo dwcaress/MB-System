@@ -2066,7 +2066,7 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 				multiplier_min = floor(min_scale_factor / (min + mb_ping->scaleFactors.scaleTable[id - 1].offset));
 			multiplier = MAX(MIN(multiplier_min, multiplier_max), 1.0);
 
-			if (reset_all == true || multiplier < mb_ping->scaleFactors.scaleTable[id - 1].multiplier) {
+			if (reset_all || multiplier < mb_ping->scaleFactors.scaleTable[id - 1].multiplier) {
 				mb_ping->scaleFactors.scaleTable[id - 1].multiplier = multiplier;
 				mb_ping->scaleFactors.scaleTable[id - 1].offset = offset;
 			}
