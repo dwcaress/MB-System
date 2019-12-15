@@ -143,8 +143,8 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 					*file_in_bounds = false;
 					const double mask_dx = (lon_max - lon_min) / mask_nx;
 					const double mask_dy = (lat_max - lat_min) / mask_ny;
-					for (int i = 0; i < mask_nx && *file_in_bounds == false; i++)
-						for (int j = 0; j < mask_ny && *file_in_bounds == false; j++) {
+					for (int i = 0; i < mask_nx && !*file_in_bounds; i++)
+						for (int j = 0; j < mask_ny && !*file_in_bounds; j++) {
 							int k = i + j * mask_nx;
 							const double lonwest = lon_min + i * mask_dx;
 							const double loneast = lonwest + mask_dx;

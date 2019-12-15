@@ -697,13 +697,13 @@ int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* if tag not found read single bytes until found
 		    or end of file */
-		while (found == false && status == MB_SUCCESS) {
+		while (!found && status == MB_SUCCESS) {
 			/* look for "DSL " tag at start of record */
 			if (strncmp(tag, "DSL ", 4) == 0)
 				found = true;
 
 			/* read next byte */
-			if (found == false) {
+			if (!found) {
 				for (int i = 0; i < 3; i++)
 					tag[i] = tag[i + 1];
 				status = fread(&tag[3], 1, 1, mb_io_ptr->mbfp);

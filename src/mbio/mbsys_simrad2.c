@@ -3635,7 +3635,7 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 				found = true;
 			}
 		}
-		if (found == false) {
+		if (!found) {
 			xtrack_min = 99999999.9;
 			for (int i = 0; i < ping->png_nbeams; i++) {
 				if (ping->png_quality[i] > 0 && fabs(dacrscale * ping->png_acrosstrack[i]) < xtrack_min) {

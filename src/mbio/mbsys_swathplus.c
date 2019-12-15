@@ -1860,7 +1860,7 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) 
 	swpls_projection *projection = NULL;
 
 	/* only read the projection if not previously set */
-	if (store->projection_set == false) {
+	if (!store->projection_set) {
 		projection = &(store->projection);
 
 		/* extract the data */

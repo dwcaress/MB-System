@@ -343,15 +343,15 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				if (strncmp(buffer, "EXPLICIT", 8) == 0) {
 					explicit = true;
 				}
-				else if (strncmp(buffer, "INFILE", 6) == 0 && process->mbp_ifile_specified == false) {
+				else if (strncmp(buffer, "INFILE", 6) == 0 && !process->mbp_ifile_specified) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_ifile);
 					process->mbp_ifile_specified = true;
 				}
-				else if (strncmp(buffer, "OUTFILE", 7) == 0 && process->mbp_ofile_specified == false) {
+				else if (strncmp(buffer, "OUTFILE", 7) == 0 && !process->mbp_ofile_specified) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_ofile);
 					process->mbp_ofile_specified = true;
 				}
-				else if (strncmp(buffer, "FORMAT", 6) == 0 && process->mbp_format_specified == false) {
+				else if (strncmp(buffer, "FORMAT", 6) == 0 && !process->mbp_format_specified) {
 					sscanf(buffer, "%s %d", dummy, &process->mbp_format);
 					process->mbp_format_specified = true;
 				}
@@ -880,7 +880,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	mb_get_shortest_path(verbose, process->mbp_ifile, error);
 
 	/* figure out data format or output filename if required */
-	if (process->mbp_format_specified == false || process->mbp_ofile_specified == false) {
+	if (!process->mbp_format_specified || !process->mbp_ofile_specified) {
 		mb_pr_default_output(verbose, process, error);
 	}
 
@@ -1152,8 +1152,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	int status = MB_SUCCESS;
 
 	/* check for error */
-	if (process->mbp_ifile_specified == false || process->mbp_ofile_specified == false ||
-	    process->mbp_format_specified == false) {
+	if (!process->mbp_ifile_specified || !process->mbp_ofile_specified ||
+	    !process->mbp_format_specified) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_OPEN_FAIL;
 	}
@@ -1787,13 +1787,13 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 	/* deal with format */
 	if (status == MB_SUCCESS && format > 0) {
 		/* set format if found */
-		if (process->mbp_format_specified == false) {
+		if (!process->mbp_format_specified) {
 			process->mbp_format = format;
 			process->mbp_format_specified = true;
 		}
 
 		/* set output file if needed */
-		if (process->mbp_ofile_specified == false && process->mbp_format_specified) {
+		if (!process->mbp_ofile_specified && process->mbp_format_specified) {
 			/* use .txt suffix if MBARI ROV navigation */
 			if (process->mbp_format == MBF_MBARIROV)
 				sprintf(process->mbp_ofile, "%sedited.txt", fileroot);
@@ -1803,7 +1803,7 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 			process->mbp_ofile_specified = true;
 		}
 	}
-	else if (process->mbp_ofile_specified == false && process->mbp_format_specified) {
+	else if (!process->mbp_ofile_specified && process->mbp_format_specified) {
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 		strcpy(fileroot, process->mbp_ifile);
@@ -3135,7 +3135,7 @@ int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp
 		char buffer[MBP_FILENAMESIZE];
 		char dummy[MBP_FILENAMESIZE];
 		char *result;
-		while ((result = fgets(buffer, MBP_FILENAMESIZE, fp)) == buffer && *mbp_ofile_specified == false) {
+		while ((result = fgets(buffer, MBP_FILENAMESIZE, fp)) == buffer && !*mbp_ofile_specified) {
 			if (strncmp(buffer, "OUTFILE", 7) == 0) {
 				sscanf(buffer, "%s %s", dummy, mbp_ofile);
 				*mbp_ofile_specified = true;
@@ -4303,7 +4303,7 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
 
 			/* look for depth */
 			int idepth = -1;
-			while (found_depth == false && idepth < ndepths - 2) {
+			while (!found_depth && idepth < ndepths - 2) {
 				idepth++;
 				if (acrosstrack >= depthacrosstrack[idepth] && acrosstrack <= depthacrosstrack[idepth + 1]) {
 					*depth = depths[idepth] + (acrosstrack - depthacrosstrack[idepth]) /
@@ -4316,7 +4316,7 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
 
 			/* look for slope */
 			int islope = -1;
-			while (found_slope == false && islope < nslopes - 2) {
+			while (!found_slope && islope < nslopes - 2) {
 				islope++;
 				if (acrosstrack >= slopeacrosstrack[islope] && acrosstrack <= slopeacrosstrack[islope + 1]) {
 					*slope = slopes[islope] + (acrosstrack - slopeacrosstrack[islope]) /

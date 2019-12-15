@@ -2652,7 +2652,7 @@ int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 	found = false;
 	oldest_ping = 999999999;
 	oldest_ping_index = -1;
-	for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == false; i++) {
+	for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES && !found; i++) {
 		/* look for this ping by ping number and sonar serial number - if we already read
 		 * a record from this ping it has to be stored in one of the structures */
 		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial) {
@@ -2676,7 +2676,7 @@ int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 			oldest_ping_index = i;
 		}
 	}
-	if (found == false) {
+	if (!found) {
 		store->ping_index = oldest_ping_index;
 	}
 	ping = (struct mbsys_simrad3_ping_struct *)&store->pings[store->ping_index];
@@ -2842,7 +2842,7 @@ int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 	found = false;
 	oldest_ping = 999999999;
 	oldest_ping_index = -1;
-	for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == false; i++) {
+	for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES && !found; i++) {
 		/* look for this ping by ping number and sonar serial number - if we already read
 		 * a record from this ping it has to be stored in one of the structures */
 		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial) {
@@ -2866,7 +2866,7 @@ int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 			oldest_ping_index = i;
 		}
 	}
-	if (found == false) {
+	if (!found) {
 		store->ping_index = oldest_ping_index;
 	}
 	ping = (struct mbsys_simrad3_ping_struct *)&store->pings[store->ping_index];
@@ -3078,7 +3078,7 @@ int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 	found = false;
 	oldest_ping = 999999999;
 	oldest_ping_index = -1;
-	for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == false; i++) {
+	for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES && !found; i++) {
 		/* look for this ping by ping number and sonar serial number - if we already read
 		 * a record from this ping it has to be stored in one of the structures */
 		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial) {
@@ -3102,7 +3102,7 @@ int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 			oldest_ping_index = i;
 		}
 	}
-	if (found == false) {
+	if (!found) {
 		store->ping_index = oldest_ping_index;
 	}
 	ping = (struct mbsys_simrad3_ping_struct *)&store->pings[store->ping_index];
@@ -3237,7 +3237,7 @@ int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 	found = false;
 	oldest_ping = 999999999;
 	oldest_ping_index = -1;
-	for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES && found == false; i++) {
+	for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES && !found; i++) {
 		/* look for this ping by ping number and sonar serial number - if we already read
 		 * a record from this ping it has to be stored in one of the structures */
 		if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial) {
@@ -3261,7 +3261,7 @@ int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 			oldest_ping_index = i;
 		}
 	}
-	if (found == false) {
+	if (!found) {
 		store->ping_index = oldest_ping_index;
 	}
 	ping = (struct mbsys_simrad3_ping_struct *)&store->pings[store->ping_index];
