@@ -143,8 +143,8 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 					*file_in_bounds = false;
 					const double mask_dx = (lon_max - lon_min) / mask_nx;
 					const double mask_dy = (lat_max - lat_min) / mask_ny;
-					for (int i = 0; i < mask_nx && *file_in_bounds == false; i++)
-						for (int j = 0; j < mask_ny && *file_in_bounds == false; j++) {
+					for (int i = 0; i < mask_nx && !*file_in_bounds; i++)
+						for (int j = 0; j < mask_ny && !*file_in_bounds; j++) {
 							int k = i + j * mask_nx;
 							const double lonwest = lon_min + i * mask_dx;
 							const double loneast = lonwest + mask_dx;
@@ -521,6 +521,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+// TODO(schwehr): Make force a bool
 int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -559,7 +560,7 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 	}
 
 	/* make new inf file if not there or out of date */
-	if (force == true || (datmodtime > 0 && datmodtime > infmodtime)) {
+	if (force || (datmodtime > 0 && datmodtime > infmodtime)) {
 		if (verbose >= 1)
 			fprintf(stderr, "\nGenerating inf file for %s\n", file);
 		char command[MB_PATH_MAXLINE];

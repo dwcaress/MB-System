@@ -551,7 +551,7 @@ int mbr_mr1bldeo_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* if first time through read file header */
-	if (mb_io_ptr->fileheader == false) {
+	if (!mb_io_ptr->fileheader) {
 		status = mbr_mr1bldeo_rd_hdr(verbose, xdrs, data, &mb_io_ptr->hdr_comment, error);
 		if (status == MB_SUCCESS) {
 			mb_io_ptr->fileheader = true;
@@ -915,7 +915,7 @@ int mbr_mr1bldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1bldeo_struct
 	int status = MB_SUCCESS;
 
 	/* if comment and file header not written */
-	if (mb_io_ptr->fileheader == false && data->kind == MB_DATA_COMMENT) {
+	if (!mb_io_ptr->fileheader && data->kind == MB_DATA_COMMENT) {
 		/* add comment to string mb_io_ptr->hdr_comment
 		    to be be written in file header */
 		lenc = strlen(data->comment);
@@ -935,7 +935,7 @@ int mbr_mr1bldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1bldeo_struct
 	}
 
 	/* if data and file header not written */
-	else if (mb_io_ptr->fileheader == false && data->kind != MB_DATA_COMMENT) {
+	else if (!mb_io_ptr->fileheader && data->kind != MB_DATA_COMMENT) {
 		/* write file header */
 		status = mbr_mr1bldeo_wr_hdr(verbose, xdrs, data, &mb_io_ptr->hdr_comment, error);
 		mb_io_ptr->fileheader = true;
@@ -945,13 +945,13 @@ int mbr_mr1bldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1bldeo_struct
 	}
 
 	/* if data and file header written */
-	else if (mb_io_ptr->fileheader == true && data->kind == MB_DATA_DATA) {
+	else if (mb_io_ptr->fileheader && data->kind == MB_DATA_DATA) {
 		/* write data */
 		status = mbr_mr1bldeo_wr_ping(verbose, xdrs, data, error);
 	}
 
 	/* if not data and file header written */
-	else if (mb_io_ptr->fileheader == true && data->kind != MB_DATA_DATA) {
+	else if (mb_io_ptr->fileheader && data->kind != MB_DATA_DATA) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_KIND;
 	}

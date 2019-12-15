@@ -463,7 +463,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 		}
 		else if (((mb_u_char)line[0]) == 0xce && ((mb_u_char)line[1] == 0xfa))
 			found = true;
-		while (status == MB_SUCCESS && found == false) {
+		while (status == MB_SUCCESS && !found) {
 			line[0] = line[1];
 			read_len = fread(&(line[1]), 1, 1, mb_io_ptr->mbfp);
 			skip++;
@@ -1671,7 +1671,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		    XTF allows projected coordinates like UTM but the format spec
 		    lists the projection specification values as unused!
 		    Assume UTM zone 1N as we have to assume something */
-		if (mb_io_ptr->projection_initialized == true) {
+		if (mb_io_ptr->projection_initialized) {
 			mb_proj_inverse(verbose, mb_io_ptr->pjptr, data->bathheader.SensorXcoordinate, data->bathheader.SensorYcoordinate,
 			                &lon, &lat, error);
 		}
@@ -1778,7 +1778,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			    - since the projection is initialized, it will be applied when data
 			    are extracted using mb_extract(), mb_extract_nav(), etc., so we have
 			    to reproject the lon lat values to eastings northings for now */
-			if (mb_io_ptr->projection_initialized == true) {
+			if (mb_io_ptr->projection_initialized) {
 				mb_proj_forward(verbose, mb_io_ptr->pjptr, store->png_longitude, store->png_latitude, &(store->png_longitude),
 				                &(store->png_latitude), error);
 			}

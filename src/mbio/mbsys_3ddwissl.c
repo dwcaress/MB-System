@@ -715,7 +715,7 @@ int mbsys_3ddwissl_preprocess
   int time_i[7];
   int time_j[5];
   /* change timestamp if indicated */
-  if (pars->timestamp_changed == true)
+  if (pars->timestamp_changed)
     {
     store->time_d = pars->time_d;
     mb_get_date(verbose, pars->time_d, time_i);
@@ -995,15 +995,15 @@ int mbsys_3ddwissl_preprocess
   double target_altitude;
 
   /* calculate the bathymetry using the newly inserted values */
-  if (pars->sounding_amplitude_filter == true)
+  if (pars->sounding_amplitude_filter)
     amplitude_threshold = pars->sounding_amplitude_threshold;
   else
     amplitude_threshold = MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD;
-  if (pars->sounding_altitude_filter == true)
+  if (pars->sounding_altitude_filter)
     target_altitude = pars->sounding_target_altitude;
   else
     target_altitude = MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE;
-  if (pars->head1_offsets == true)
+  if (pars->head1_offsets)
     {
     store->heada_offset_x_m = pars->head1_offsets_x;
     store->heada_offset_y_m = pars->head1_offsets_y;
@@ -1012,7 +1012,7 @@ int mbsys_3ddwissl_preprocess
     store->heada_offset_roll_deg = pars->head1_offsets_roll;
     store->heada_offset_pitch_deg = pars->head1_offsets_pitch;
     }
-  if (pars->head2_offsets == true)
+  if (pars->head2_offsets)
     {
     store->headb_offset_x_m = pars->head2_offsets_x;
     store->headb_offset_y_m = pars->head2_offsets_y;

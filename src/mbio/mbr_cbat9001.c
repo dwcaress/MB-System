@@ -385,7 +385,7 @@ int mbr_cbat9001_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		data->par_second = (int)line[5];
 		data->par_hundredth_sec = (int)line[6];
 		data->par_thousandth_sec = (int)line[7];
-		if (swap == false) {
+		if (!swap) {
 			short_ptr = (short *)&line[8];
 			data->roll_offset = *short_ptr;
 			short_ptr = (short *)&line[10];
@@ -539,7 +539,7 @@ int mbr_cbat9001_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 		data->pos_second = (int)line[5];
 		data->pos_hundredth_sec = (int)line[6];
 		data->pos_thousandth_sec = (int)line[7];
-		if (swap == false) {
+		if (!swap) {
 			int_ptr = (int *)&line[8];
 			data->pos_latitude = *int_ptr;
 			int_ptr = (int *)&line[12];
@@ -651,7 +651,7 @@ int mbr_cbat9001_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 		data->svp_second = (int)line[5];
 		data->svp_hundredth_sec = (int)line[6];
 		data->svp_thousandth_sec = (int)line[7];
-		if (swap == false) {
+		if (!swap) {
 			int_ptr = (int *)&line[8];
 			data->svp_latitude = *int_ptr;
 			int_ptr = (int *)&line[12];
@@ -667,7 +667,7 @@ int mbr_cbat9001_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 		for (int i = 0; i < 500; i++) {
 			short_ptr = (short *)&line[16 + 4 * i];
 			short_ptr2 = (short *)&line[18 + 4 * i];
-			if (swap == false) {
+			if (!swap) {
 				data->svp_depth[i] = *short_ptr;
 				data->svp_vel[i] = *short_ptr2;
 			}
@@ -744,7 +744,7 @@ int mbr_cbat9001_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		data->svp_second = (int)line[5];
 		data->svp_hundredth_sec = (int)line[6];
 		data->svp_thousandth_sec = (int)line[7];
-		if (swap == false) {
+		if (!swap) {
 			int_ptr = (int *)&line[8];
 			data->svp_latitude = *int_ptr;
 			int_ptr = (int *)&line[12];
@@ -760,7 +760,7 @@ int mbr_cbat9001_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		for (int i = 0; i < 200; i++) {
 			short_ptr = (short *)&line[16 + 4 * i];
 			short_ptr2 = (short *)&line[18 + 4 * i];
-			if (swap == false) {
+			if (!swap) {
 				data->svp_depth[i] = *short_ptr;
 				data->svp_vel[i] = *short_ptr2;
 			}
@@ -838,7 +838,7 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 		data->second = (int)line[5];
 		data->hundredth_sec = (int)line[6];
 		data->thousandth_sec = (int)line[7];
-		if (swap == false) {
+		if (!swap) {
 			int_ptr = (int *)&line[8];
 			data->latitude = *int_ptr;
 			int_ptr = (int *)&line[12];
@@ -879,7 +879,7 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 		data->gain2 = (int)line[30];
 		data->gain3 = (int)line[31];
 		data->beams_bath = MBF_CBAT9001_MAXBEAMS;
-		if (swap == false) {
+		if (!swap) {
 			for (int i = 0; i < data->beams_bath; i++) {
 				beamarray = line + 32 + 12 * i;
 				short_ptr = (short *)beamarray;
@@ -962,7 +962,6 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int status = MB_SUCCESS;
-	int first;
 	short *type;
 	char label[2];
 	char label_save[2];
@@ -985,12 +984,12 @@ int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	type = (short *)label;
-	first = true;
+	bool first = true;
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	bool done = false;
 	while (!done) {
-		if (mb_io_ptr->byteswapped == false) {
+		if (!mb_io_ptr->byteswapped) {
 			/* get first part of next record label */
 			if ((status = fread(&label[0], 1, 1, mb_io_ptr->mbfp)) != 1) {
 				status = MB_FAILURE;
@@ -1016,7 +1015,7 @@ int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 			/* if not first and second part looks like first
 			    get other piece from last label */
-			if (status == MB_SUCCESS && first == false && label[1] == 0x02) {
+			if (status == MB_SUCCESS && !first && label[1] == 0x02) {
 				label[0] = label[1];
 				label[1] = label_save[0];
 			}
@@ -1314,7 +1313,7 @@ int mbr_cbat9001_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 
 	/* write the record label */
 	label = RESON_COMMENT;
-	if (swap == true)
+	if (swap)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -1410,7 +1409,7 @@ int mbr_cbat9001_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 
 	/* write the record label */
 	label = RESON_PARAMETER;
-	if (swap == true)
+	if (swap)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -1431,7 +1430,7 @@ int mbr_cbat9001_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 		line[5] = (char)data->par_second;
 		line[6] = (char)data->par_hundredth_sec;
 		line[7] = (char)data->par_thousandth_sec;
-		if (swap == false) {
+		if (!swap) {
 			short_ptr = (short *)&line[8];
 			*short_ptr = data->roll_offset;
 			short_ptr = (short *)&line[10];
@@ -1577,7 +1576,7 @@ int mbr_cbat9001_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 
 	/* write the record label */
 	label = RESON_NAV;
-	if (swap == true)
+	if (swap)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -1598,7 +1597,7 @@ int mbr_cbat9001_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 		line[5] = (char)data->pos_second;
 		line[6] = (char)data->pos_hundredth_sec;
 		line[7] = (char)data->pos_thousandth_sec;
-		if (swap == false) {
+		if (!swap) {
 			int_ptr = (int *)&line[8];
 			*int_ptr = data->pos_latitude;
 			int_ptr = (int *)&line[12];
@@ -1716,7 +1715,7 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	}
 
 	/* write the record label */
-	if (swap == true)
+	if (swap)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -1737,7 +1736,7 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 		line[5] = (char)data->svp_second;
 		line[6] = (char)data->svp_hundredth_sec;
 		line[7] = (char)data->svp_thousandth_sec;
-		if (swap == false) {
+		if (!swap) {
 			int_ptr = (int *)&line[8];
 			*int_ptr = data->svp_latitude;
 			int_ptr = (int *)&line[12];
@@ -1752,7 +1751,7 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 		for (int i = 0; i < data->svp_num; i++) {
 			short_ptr = (short *)&line[16 + 4 * i];
 			short_ptr2 = (short *)&line[18 + 4 * i];
-			if (swap == false) {
+			if (!swap) {
 
 				*short_ptr = (short)data->svp_depth[i];
 				*short_ptr2 = (short)data->svp_vel[i];
@@ -1847,7 +1846,7 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 
 	/* write the record label */
 	label = RESON_BATH_9001;
-	if (swap == true)
+	if (swap)
 		label = (short)mb_swap_short(label);
 	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
@@ -1868,7 +1867,7 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 		line[5] = (char)data->second;
 		line[6] = (char)data->hundredth_sec;
 		line[7] = (char)data->thousandth_sec;
-		if (swap == false) {
+		if (!swap) {
 			int_ptr = (int *)&line[8];
 			*int_ptr = data->latitude;
 			int_ptr = (int *)&line[12];
@@ -1909,7 +1908,7 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 		line[30] = (char)data->gain2;
 		line[31] = (char)data->gain3;
 
-		if (swap == false) {
+		if (!swap) {
 			for (int i = 0; i < MBF_CBAT9001_MAXBEAMS; i++) {
 				beamarray = line + 32 + 12 * i;
 				short_ptr = (short *)beamarray;

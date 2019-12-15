@@ -875,7 +875,7 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	double *angles_simrad;
 	double alpha, beta;
 	int istep = 0;
-	int interleave = 0;
+	bool interleave = false;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1045,7 +1045,7 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			ttscale = 0.0002;
 
 		/* if interleaved get center beam */
-		if (interleave == true) {
+		if (interleave) {
 			if (ping->bath_mode == 12 && abs(ping->bath_acrosstrack[28]) < abs(ping->bath_acrosstrack[29]))
 				istep = 1;
 			else if (ping->bath_mode == 13 && abs(ping->bath_acrosstrack[31]) < abs(ping->bath_acrosstrack[30]))
@@ -1063,7 +1063,7 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			if (store->sonar == MBSYS_SIMRAD_EM1000 && ping->bath_mode == 13) {
 				beta = 90.0 - angles_simrad[*nbeams - 1 - (2 * i + istep)];
 			}
-			else if (store->sonar == MBSYS_SIMRAD_EM1000 && interleave == true) {
+			else if (store->sonar == MBSYS_SIMRAD_EM1000 && interleave) {
 				beta = 90.0 + angles_simrad[2 * i + istep];
 			}
 			else if (store->sonar == MBSYS_SIMRAD_EM1000) {
@@ -2184,7 +2184,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		}
 
 		/* if interleaved get center beam */
-		if (interleave == true) {
+		if (interleave) {
 			if (ping->bath_mode == 12 && abs(ping->bath_acrosstrack[28]) < abs(ping->bath_acrosstrack[29]))
 				istep = 1;
 			else if (ping->bath_mode == 13 && abs(ping->bath_acrosstrack[31]) < abs(ping->bath_acrosstrack[30]))
@@ -2238,11 +2238,11 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		}
 
 		/* get sidescan pixel size */
-		if (swath_width_set == false && nbathsort > 0) {
+		if (!swath_width_set && nbathsort > 0) {
 			(*swath_width) = 2.5 + angles_simrad[0];
 			(*swath_width) = MAX((*swath_width), 60.0);
 		}
-		if (pixel_size_set == false && nbathsort > 0) {
+		if (!pixel_size_set && nbathsort > 0) {
 			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
 			pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_SIMRAD_MAXPIXELS;
 			pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort / 2] * sin(DTR * 0.1));
@@ -2290,7 +2290,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 					if (store->sonar == MBSYS_SIMRAD_EM1000 && ping->bath_mode == 13) {
 						angle = angles_simrad[ping->beams_bath - 1 - (2 * i + istep)];
 					}
-					else if (store->sonar == MBSYS_SIMRAD_EM1000 && interleave == true) {
+					else if (store->sonar == MBSYS_SIMRAD_EM1000 && interleave) {
 						angle = -angles_simrad[2 * i + istep];
 					}
 					else if (store->sonar == MBSYS_SIMRAD_EM1000) {

@@ -1513,7 +1513,7 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		    Assume UTM zone 1N as we have to assume something */
 		double lon;
 		double lat;
-		if (mb_io_ptr->projection_initialized == true) {
+		if (mb_io_ptr->projection_initialized) {
 			mb_proj_inverse(verbose, mb_io_ptr->pjptr, data->pingheader.SensorXcoordinate, data->pingheader.SensorYcoordinate,
 			                &lon, &lat, error);
 		}
@@ -1622,7 +1622,7 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			    - since the projection is initialized, it will be applied when data
 			    are extracted using mb_extract(), mb_extract_nav(), etc., so we have
 			    to reproject the lon lat values to eastings northings for now */
-			if (mb_io_ptr->projection_initialized == true) {
+			if (mb_io_ptr->projection_initialized) {
 				mb_proj_forward(verbose, mb_io_ptr->pjptr, store->png_longitude, store->png_latitude, &(store->png_longitude),
 				                &(store->png_latitude), error);
 			}

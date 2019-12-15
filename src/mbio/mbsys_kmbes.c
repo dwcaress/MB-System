@@ -373,7 +373,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
   /* kluge parameters */
   // int kluge_beampatternsnell = false;
   // double kluge_beampatternsnellfactor = 1.0;
-  int kluge_soundspeedsnell = false;
+  bool kluge_soundspeedsnell = false;
   double kluge_soundspeedsnellfactor = 1.0;
   int kluge_auvsentrysensordepth = false;
 
@@ -442,7 +442,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
     /*--------------------------------------------------------------*/
     /* change timestamp if indicated */
     /*--------------------------------------------------------------*/
-    if (pars->timestamp_changed == true) {
+    if (pars->timestamp_changed) {
       /* set time */
       mb_get_date(verbose, pars->time_d, time_i);
       for (int i = 0; i < 7; i++)
@@ -611,7 +611,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
       /* if requested apply kluge scaling of sound speed - which means
           changing beam angles by Snell's law and changing the sound
           speed used to calculate Bathymetry */
-      if (kluge_soundspeedsnell == true) {
+      if (kluge_soundspeedsnell) {
         /*
          * sound speed
          */
@@ -654,7 +654,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         /* change the sound speed recorded for the current ping and
          * then use it to alter the beam angles and recalculate the Bathymetry */
         const double soundspeedsnellfactor = 0.0;  // TODO(schwehr): Likely a bug
-        if (pars->modify_soundspeed || kluge_soundspeedsnell == true) {
+        if (pars->modify_soundspeed || kluge_soundspeedsnell) {
           mrz->sounding[i].beamAngleReRx_deg =
                 RTD * asin(MAX(-1.0, MIN(1.0, soundspeedsnellfactor
                          * sin(DTR * mrz->sounding[i].beamAngleReRx_deg))));

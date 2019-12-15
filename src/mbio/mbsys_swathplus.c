@@ -1860,7 +1860,7 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) 
 	swpls_projection *projection = NULL;
 
 	/* only read the projection if not previously set */
-	if (store->projection_set == false) {
+	if (!store->projection_set) {
 		projection = &(store->projection);
 
 		/* extract the data */
@@ -1909,7 +1909,7 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) 
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:                 %d\n", *error);
 		fprintf(stderr, "dbg2       store->projection_set: %d\n", store->projection_set);
-		if (store->projection_set == true) {
+		if (store->projection_set) {
 			projection = &(store->projection);
 			fprintf(stderr, "dbg2       projection->projection_id:  %s\n", projection->projection_id);
 		}

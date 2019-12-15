@@ -1103,7 +1103,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 
 	/* now if multibeam already read but bin size lacking then
 	   calculate bin size from bathymetry */
-	if (store->mul_frame == true && store->mul_num_beams > 1 && store->sid_avl_num_samples > 1 && store->sid_avl_binsize <= 0) {
+	if (store->mul_frame && store->mul_num_beams > 1 && store->sid_avl_num_samples > 1 && store->sid_avl_binsize <= 0) {
 		/* get width of bathymetry swath size */
 		xmin = 9999999.9;
 		xmax = -9999999.9;
@@ -1817,9 +1817,9 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 
 	/* now if tt and angles read but bathymetry not read
 	   calculate bathymetry assuming 1500 m/s velocity */
-	if (status == MB_SUCCESS && store->mul_group_tt == true && store->mul_group_angle == true &&
-	    store->mul_group_heave == true && store->mul_group_roll == true && store->mul_group_pitch == true &&
-	    store->mul_group_depth == false) {
+	if (status == MB_SUCCESS && store->mul_group_tt && store->mul_group_angle &&
+	    store->mul_group_heave && store->mul_group_roll && store->mul_group_pitch &&
+	    !store->mul_group_depth) {
 		store->mul_group_lateral = true;
 		store->mul_group_along = true;
 		store->mul_group_depth = true;
@@ -1838,7 +1838,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 	}
 
 	/* check for sensible bathymetry */
-	if (status == MB_SUCCESS && store->mul_group_depth == true) {
+	if (status == MB_SUCCESS && store->mul_group_depth) {
 		for (int i = 0; i < store->mul_num_beams; i++) {
 			if (fabs(store->beams[i].depth) > 11000.0) {
 				status = MB_FAILURE;
@@ -1852,7 +1852,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 
 	/* now if sidescan already read but bin size lacking then
 	   calculate bin size from bathymetry */
-	if (store->mul_num_beams > 1 && store->sid_frame == true && store->sid_avl_num_samples > 1 && store->sid_avl_binsize <= 0) {
+	if (store->mul_num_beams > 1 && store->sid_frame && store->sid_avl_num_samples > 1 && store->sid_avl_binsize <= 0) {
 		/* get width of bathymetry swath size */
 		xmin = 9999999.9;
 		xmax = -9999999.9;
@@ -2209,7 +2209,7 @@ int byte_count;
 		fprintf(stderr, "dbg5       sbm_sec:             %u\n", store->sbm_sec);
 		fprintf(stderr, "dbg5       sbm_usec:            %u\n", store->sbm_usec);
 	}
-	if (verbose >= 5 && store->sbm_properties == true) {
+	if (verbose >= 5 && store->sbm_properties) {
 		fprintf(stderr, "dbg5       sbm_ping:            %d\n", store->sbm_ping);
 		fprintf(stderr, "dbg5       sbm_ping_gain:       %f\n", store->sbm_ping_gain);
 		fprintf(stderr, "dbg5       sbm_pulse_width:     %f\n", store->sbm_pulse_width);
@@ -2223,23 +2223,23 @@ int byte_count;
 		fprintf(stderr, "dbg5       sbm_frequency:       %f\n", store->sbm_frequency);
 		fprintf(stderr, "dbg5       sbm_bandwidth:       %f\n", store->sbm_bandwidth);
 	}
-	if (verbose >= 5 && store->sbm_hrp == true) {
+	if (verbose >= 5 && store->sbm_hrp) {
 		fprintf(stderr, "dbg5       sbm_heave:           %f\n", store->sbm_heave);
 		fprintf(stderr, "dbg5       sbm_roll:            %f\n", store->sbm_roll);
 		fprintf(stderr, "dbg5       sbm_pitch:           %f\n", store->sbm_pitch);
 	}
-	if (verbose >= 5 && store->sbm_signal == true) {
+	if (verbose >= 5 && store->sbm_signal) {
 		fprintf(stderr, "dbg5       sbm_signal_beam:     %d\n", store->sbm_signal_beam);
 		fprintf(stderr, "dbg5       sbm_signal_count:    %d\n", store->sbm_signal_count);
 		for (int i = 0; i < store->sbm_signal_count; i++)
 			fprintf(stderr, "dbg5       sample[%d]: %f\n", i, store->sbm_signal_amp[i]);
 	}
-	if (verbose >= 5 && store->sbm_message == true) {
+	if (verbose >= 5 && store->sbm_message) {
 		fprintf(stderr, "dbg5       sbm_message_id:      %d\n", store->sbm_message_id);
 		fprintf(stderr, "dbg5       sbm_message_len:     %d\n", store->sbm_message_len);
 		fprintf(stderr, "dbg5       sbm_message_txt:     %s\n", store->sbm_message_txt);
 	}
-	if (verbose >= 5 && store->sbm_sweepsegments == true) {
+	if (verbose >= 5 && store->sbm_sweepsegments) {
 		fprintf(stderr, "dbg5       sbm_sweep_direction: %d\n", store->sbm_sweep_direction);
 		fprintf(stderr, "dbg5       sbm_sweep_azimuth:   %f\n", store->sbm_sweep_azimuth);
 		fprintf(stderr, "dbg5       sbm_sweep_segments:  %d\n", store->sbm_sweep_segments);
@@ -2253,7 +2253,7 @@ int byte_count;
 		fprintf(stderr, "dbg5       sbm_sweep_interpolatedroll:    %f\n", store->sbm_sweep_interpolatedroll);
 		fprintf(stderr, "dbg5       sbm_sweep_stabilizedangle:     %f\n", store->sbm_sweep_stabilizedangle);
 	}
-	if (verbose >= 5 && store->sbm_spacingmode == true) {
+	if (verbose >= 5 && store->sbm_spacingmode) {
 		fprintf(stderr, "dbg5       sbm_spacing_mode:      	      %d\n", store->sbm_spacing_mode);
 		fprintf(stderr, "dbg5       sbm_spacing_equidistance:      %f\n", store->sbm_spacing_equidistance);
 		fprintf(stderr, "dbg5       sbm_spacing_equidistance_min:  %f\n", store->sbm_spacing_equidistance_min);
@@ -2862,7 +2862,7 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	store->sbm_hrp = false;
 	store->sbm_signal = false;
 	store->sbm_message = false;
-	if (*frame_save == true) {
+	if (*frame_save) {
 		store->mul_frame = false;
 		store->sid_frame = false;
 	}
@@ -2872,7 +2872,7 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	bool done = false;
 	while (!done) {
 		/* use saved frame if available */
-		if (*frame_save == true) {
+		if (*frame_save) {
 			frame_id = *frame_id_save;
 			frame_source = *frame_source_save;
 			frame_sec = *frame_sec_save;
@@ -3054,11 +3054,11 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->kind = MB_DATA_DATA;
 				status = mbr_l3xseraw_rd_sidescan(verbose, buffer_size, buffer, store_ptr, error);
 				store->sid_frame = true;
-				if (frame_id == *frame_expect && store->sid_ping == store->mul_ping && store->sid_group_avl == true) {
+				if (frame_id == *frame_expect && store->sid_ping == store->mul_ping && store->sid_group_avl) {
 					*frame_expect = MBSYS_XSE_NONE_FRAME;
 					done = true;
 				}
-				else if (frame_id == *frame_expect && store->sid_ping == store->mul_ping && store->sid_group_avl == false) {
+				else if (frame_id == *frame_expect && store->sid_ping == store->mul_ping && !store->sid_group_avl) {
 					done = false;
 				}
 				else if (*frame_expect == MBSYS_XSE_NONE_FRAME) {
@@ -3167,7 +3167,7 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				fprintf(stderr, "%s:%d | READ SEABEAM\n", __FILE__, __LINE__);
 #endif
 				status = mbr_l3xseraw_rd_seabeam(verbose, buffer_size, buffer, store_ptr, error);
-				if (store->sbm_properties == true)
+				if (store->sbm_properties)
 					store->kind = MB_DATA_RUN_PARAMETER;
 				else
 					store->kind = MB_DATA_RAW_LINE;
@@ -3271,20 +3271,20 @@ int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		time_d = store->nav_sec - MBSYS_XSE_TIME_OFFSET + 0.000001 * store->nav_usec;
 
 		/* add nav to navlist */
-		if (store->nav_group_position == true)
+		if (store->nav_group_position)
 			mb_navint_add(verbose, mbio_ptr, time_d, RTD * store->nav_x, RTD * store->nav_y, error);
 
 		/* add heading to navlist */
-		if (store->nav_group_heading == true)
+		if (store->nav_group_heading)
 			mb_hedint_add(verbose, mbio_ptr, time_d, RTD * store->nav_hdg_heading, error);
-		else if (store->nav_group_motiongt == true)
+		else if (store->nav_group_motiongt)
 			mb_hedint_add(verbose, mbio_ptr, time_d, RTD * store->nav_course_ground, error);
-		else if (store->nav_group_motiontw == true)
+		else if (store->nav_group_motiontw)
 			mb_hedint_add(verbose, mbio_ptr, time_d, RTD * store->nav_course_water, error);
 	}
 
 	/* interpolate navigation for survey pings if needed */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->mul_group_mbsystemnav == false) {
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && !store->mul_group_mbsystemnav) {
 		/* get timestamp */
 		time_d = store->mul_sec - MBSYS_XSE_TIME_OFFSET + 0.000001 * store->mul_usec;
 
@@ -3292,11 +3292,11 @@ int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_hedint_interp(verbose, mbio_ptr, time_d, &heading, error);
 
 		/* get speed if possible */
-		if (store->nav_group_log == true)
+		if (store->nav_group_log)
 			speed = 3.6 * store->nav_log_speed;
-		else if (store->nav_group_motiongt == true)
+		else if (store->nav_group_motiongt)
 			speed = 3.6 * store->nav_speed_ground;
-		else if (store->nav_group_motiontw == true)
+		else if (store->nav_group_motiontw)
 			speed = 3.6 * store->nav_speed_water;
 		else
 			speed = 0.0;
@@ -3392,7 +3392,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/*****************************************/
 
 	/* write general group */
-	if (store->nav_group_general == true) {
+	if (store->nav_group_general) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -3435,7 +3435,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/*****************************************/
 
 	/* write position group */
-	if (store->nav_group_position == true) {
+	if (store->nav_group_position) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -3486,7 +3486,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/*****************************************/
 
 	/* write accuracy group */
-	if (store->nav_group_accuracy == true) {
+	if (store->nav_group_accuracy) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -3535,7 +3535,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/*****************************************/
 
 	/* write motion ground truth group */
-	if (store->nav_group_motiongt == true) {
+	if (store->nav_group_motiongt) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -3578,7 +3578,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/*****************************************/
 
 	/* write motion through water group */
-	if (store->nav_group_motiontw == true) {
+	if (store->nav_group_motiontw) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -3621,7 +3621,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/*****************************************/
 
 	/* write track steering group */
-	if (store->nav_group_track == true) {
+	if (store->nav_group_track) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -3674,7 +3674,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/*****************************************/
 
 	/* write heave roll pitch group */
-	if (store->nav_group_hrp == true) {
+	if (store->nav_group_hrp) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -3719,7 +3719,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/*****************************************/
 
 	/* write heave group */
-	if (store->nav_group_hrp == true) {
+	if (store->nav_group_hrp) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -3760,7 +3760,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/*****************************************/
 
 	/* write roll group */
-	if (store->nav_group_roll == true) {
+	if (store->nav_group_roll) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -3801,7 +3801,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/*****************************************/
 
 	/* write pitch group */
-	if (store->nav_group_pitch == true) {
+	if (store->nav_group_pitch) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -3842,7 +3842,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/*****************************************/
 
 	/* write heading group */
-	if (store->nav_group_heading == true) {
+	if (store->nav_group_heading) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -3883,7 +3883,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/*****************************************/
 
 	/* write speed log group */
-	if (store->nav_group_log == true) {
+	if (store->nav_group_log) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -3924,7 +3924,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/*****************************************/
 
 	/* write gps altitude group */
-	if (store->nav_group_gps == true) {
+	if (store->nav_group_gps) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -4628,7 +4628,7 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 
 	/*****************************************/
 
-	if (store->par_parameter == true) {
+	if (store->par_parameter) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -4702,7 +4702,7 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 
 	/*****************************************/
 
-	if (store->par_navigationandmotion == true) {
+	if (store->par_navigationandmotion) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5068,7 +5068,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	frame_count += group_count + 12;
 
 	/* get beam groups */
-	if (store->mul_group_beam == true) {
+	if (store->mul_group_beam) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5111,7 +5111,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get tt groups */
-	if (store->mul_group_tt == true) {
+	if (store->mul_group_tt) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5154,7 +5154,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get quality groups */
-	if (store->mul_group_quality == true) {
+	if (store->mul_group_quality) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5197,7 +5197,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get amplitude groups */
-	if (store->mul_group_amp == true) {
+	if (store->mul_group_amp) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5240,7 +5240,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get delay groups */
-	if (store->mul_group_delay == true) {
+	if (store->mul_group_delay) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5283,7 +5283,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get lateral groups */
-	if (store->mul_group_lateral == true) {
+	if (store->mul_group_lateral) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5326,7 +5326,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get along groups */
-	if (store->mul_group_along == true) {
+	if (store->mul_group_along) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5369,7 +5369,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get depth groups */
-	if (store->mul_group_depth == true) {
+	if (store->mul_group_depth) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5412,7 +5412,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get angle groups */
-	if (store->mul_group_angle == true) {
+	if (store->mul_group_angle) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5455,7 +5455,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get heave groups */
-	if (store->mul_group_heave == true) {
+	if (store->mul_group_heave) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5498,7 +5498,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get roll groups */
-	if (store->mul_group_roll == true) {
+	if (store->mul_group_roll) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5541,7 +5541,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get pitch groups */
-	if (store->mul_group_pitch == true) {
+	if (store->mul_group_pitch) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5584,7 +5584,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get gates groups */
-	if (store->mul_group_gates == true) {
+	if (store->mul_group_gates) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5631,7 +5631,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get noise groups */
-	if (store->mul_group_noise == true) {
+	if (store->mul_group_noise) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5674,7 +5674,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get length groups */
-	if (store->mul_group_length == true) {
+	if (store->mul_group_length) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5717,7 +5717,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get hits groups */
-	if (store->mul_group_hits == true) {
+	if (store->mul_group_hits) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5760,7 +5760,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get heavereceive groups */
-	if (store->mul_group_heavereceive == true) {
+	if (store->mul_group_heavereceive) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5803,7 +5803,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get azimuth groups */
-	if (store->mul_group_azimuth == true) {
+	if (store->mul_group_azimuth) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5846,7 +5846,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get properties groups */
-	if (store->mul_group_properties == true) {
+	if (store->mul_group_properties) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5895,7 +5895,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get normalized amplitude groups */
-	if (store->mul_group_normamp == true) {
+	if (store->mul_group_normamp) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -5956,7 +5956,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get mbsystemnav groups */
-	if (store->mul_group_mbsystemnav == true) {
+	if (store->mul_group_mbsystemnav) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6195,7 +6195,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	/*****************************************/
 
 	/* get amplitude vs traveltime group */
-	if (store->sid_group_avt == true) {
+	if (store->sid_group_avt) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6244,7 +6244,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	/*****************************************/
 
 	/* get phase vs traveltime group */
-	if (store->sid_group_avt == true) {
+	if (store->sid_group_avt) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6293,7 +6293,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	/*****************************************/
 
 	/* get amplitude vs lateral group */
-	if (store->sid_group_avl == true) {
+	if (store->sid_group_avl) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6342,7 +6342,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	/*****************************************/
 
 	/* get phase vs lateral group */
-	if (store->sid_group_pvl == true) {
+	if (store->sid_group_pvl) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6391,7 +6391,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	/*****************************************/
 
 	/* get signal group */
-	if (store->sid_group_signal == true) {
+	if (store->sid_group_signal) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6444,7 +6444,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	/*****************************************/
 
 	/* get ping group */
-	if (store->sid_group_ping == true) {
+	if (store->sid_group_ping) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6501,7 +6501,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	/*****************************************/
 
 	/* get complex signal group */
-	if (store->sid_group_ping == true) {
+	if (store->sid_group_ping) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6556,7 +6556,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	/*****************************************/
 
 	/* get weighting group */
-	if (store->sid_group_weighting == true) {
+	if (store->sid_group_weighting) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6656,7 +6656,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 		fprintf(stderr, "dbg5       sbm_sec:             %u\n", store->sbm_sec);
 		fprintf(stderr, "dbg5       sbm_usec:            %u\n", store->sbm_usec);
 	}
-	if (verbose >= 5 && store->sbm_properties == true) {
+	if (verbose >= 5 && store->sbm_properties) {
 		fprintf(stderr, "dbg5       sbm_ping:            %d\n", store->sbm_ping);
 		fprintf(stderr, "dbg5       sbm_ping_gain:       %f\n", store->sbm_ping_gain);
 		fprintf(stderr, "dbg5       sbm_pulse_width:     %f\n", store->sbm_pulse_width);
@@ -6670,23 +6670,23 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 		fprintf(stderr, "dbg5       sbm_frequency:       %f\n", store->sbm_frequency);
 		fprintf(stderr, "dbg5       sbm_bandwidth:       %f\n", store->sbm_bandwidth);
 	}
-	if (verbose >= 5 && store->sbm_hrp == true) {
+	if (verbose >= 5 && store->sbm_hrp) {
 		fprintf(stderr, "dbg5       sbm_heave:           %f\n", store->sbm_heave);
 		fprintf(stderr, "dbg5       sbm_roll:            %f\n", store->sbm_roll);
 		fprintf(stderr, "dbg5       sbm_pitch:           %f\n", store->sbm_pitch);
 	}
-	if (verbose >= 5 && store->sbm_signal == true) {
+	if (verbose >= 5 && store->sbm_signal) {
 		fprintf(stderr, "dbg5       sbm_signal_beam:     %d\n", store->sbm_signal_beam);
 		fprintf(stderr, "dbg5       sbm_signal_count:    %d\n", store->sbm_signal_count);
 		for (int i = 0; i < store->sbm_signal_count; i++)
 			fprintf(stderr, "dbg5       sample[%d]: %f\n", i, store->sbm_signal_amp[i]);
 	}
-	if (verbose >= 5 && store->sbm_message == true) {
+	if (verbose >= 5 && store->sbm_message) {
 		fprintf(stderr, "dbg5       sbm_message_id:      %d\n", store->sbm_message_id);
 		fprintf(stderr, "dbg5       sbm_message_len:     %d\n", store->sbm_message_len);
 		fprintf(stderr, "dbg5       sbm_message_txt:     %s\n", store->sbm_message_txt);
 	}
-	if (verbose >= 5 && store->sbm_sweepsegments == true) {
+	if (verbose >= 5 && store->sbm_sweepsegments) {
 		fprintf(stderr, "dbg5       sbm_sweep_direction: %d\n", store->sbm_sweep_direction);
 		fprintf(stderr, "dbg5       sbm_sweep_azimuth:   %f\n", store->sbm_sweep_azimuth);
 		fprintf(stderr, "dbg5       sbm_sweep_segments:  %d\n", store->sbm_sweep_segments);
@@ -6700,7 +6700,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 		fprintf(stderr, "dbg5       sbm_sweep_interpolatedroll:    %f\n", store->sbm_sweep_interpolatedroll);
 		fprintf(stderr, "dbg5       sbm_sweep_stabilizedangle:     %f\n", store->sbm_sweep_stabilizedangle);
 	}
-	if (verbose >= 5 && store->sbm_spacingmode == true) {
+	if (verbose >= 5 && store->sbm_spacingmode) {
 		fprintf(stderr, "dbg5       sbm_spacing_mode:      	      %d\n", store->sbm_spacing_mode);
 		fprintf(stderr, "dbg5       sbm_spacing_equidistance:      %f\n", store->sbm_spacing_equidistance);
 		fprintf(stderr, "dbg5       sbm_spacing_equidistance_min:  %f\n", store->sbm_spacing_equidistance_min);
@@ -6735,7 +6735,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 	frame_count += 16;
 
 	/* deal with properties group */
-	if (store->sbm_properties == true) {
+	if (store->sbm_properties) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6796,7 +6796,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 	}
 
 	/* deal with hrp group */
-	if (store->sbm_hrp == true) {
+	if (store->sbm_hrp) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6839,7 +6839,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 	}
 
 	/* deal with signal group */
-	if (store->sbm_signal == true) {
+	if (store->sbm_signal) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6884,7 +6884,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 	}
 
 	/* deal with message group */
-	if (store->sbm_message == true) {
+	if (store->sbm_message) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6929,7 +6929,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 	}
 
 	/* deal with sweep segments group */
-	if (store->sbm_sweepsegments == true) {
+	if (store->sbm_sweepsegments) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -6990,7 +6990,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 	}
 
 	/* deal with spacing mode group */
-	if (store->sbm_message == true) {
+	if (store->sbm_message) {
 /* get group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH$", 4);
@@ -7233,7 +7233,7 @@ int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MB_DEBUG
 		fprintf(stderr, "%s:%d | WRITE MULTIBEAM\n", __FILE__, __LINE__);
 #endif
-		if (store->mul_frame == true) {
+		if (store->mul_frame) {
 			status = mbr_l3xseraw_wr_multibeam(verbose, &buffer_size, buffer, store_ptr, error);
 			if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
 				*error = MB_ERROR_WRITE_FAIL;
@@ -7243,7 +7243,7 @@ int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MB_DEBUG
 		fprintf(stderr, "%s:%d | WRITE SIDESCAN\n", __FILE__, __LINE__);
 #endif
-		if (store->sid_frame == true) {
+		if (store->sid_frame) {
 			status = mbr_l3xseraw_wr_sidescan(verbose, &buffer_size, buffer, store_ptr, error);
 			if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
 				*error = MB_ERROR_WRITE_FAIL;

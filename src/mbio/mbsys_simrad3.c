@@ -952,7 +952,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		/*--------------------------------------------------------------*/
 		/* change timestamp if indicated */
 		/*--------------------------------------------------------------*/
-		if (pars->timestamp_changed == true) {
+		if (pars->timestamp_changed) {
 			time_d = pars->time_d;
 			mb_get_date(verbose, time_d, time_i);
 
@@ -2832,7 +2832,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
                                    double *altitude, int *error) {
 	double altitude_best;
 	double xtrack_min;
-	int found;
+	bool found;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2870,7 +2870,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 				found = true;
 			}
 		}
-		if (found == false) {
+		if (!found) {
 			xtrack_min = 99999999.9;
 			for (int i = 0; i < ping->png_nbeams; i++) {
 				if (ping->png_quality[i] > 0 && fabs(ping->png_acrosstrack[i]) < xtrack_min) {
@@ -2880,7 +2880,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			}
 		}
-		if (found == true)
+		if (found)
 			*altitude = altitude_best;
 		else
 			*altitude = 0.0;
@@ -3751,7 +3751,7 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	double range, beam_foot, beamwidth, sint;
 	int time_i[7];
 	double bath_time_d, ss_time_d;
-	int ss_ok;
+	bool ss_ok;
 	int first, last, k1, k2;
 
 	if (verbose >= 2) {
@@ -3814,13 +3814,13 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		}
 
 		/* get sidescan pixel size */
-		if (swath_width_set == false) {
+		if (!swath_width_set) {
 			if (store->run_swath_angle > 0)
 				*swath_width = (double)store->run_swath_angle;
 			else
 				*swath_width = 2.5 + MAX(90.0 - ping->png_depression[0], 90.0 - ping->png_depression[ping->png_nbeams - 1]);
 		}
-		if (pixel_size_set == false && nbathsort > 0) {
+		if (!pixel_size_set && nbathsort > 0) {
 			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
 			pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_SIMRAD3_MAXPIXELS;
 			if (store->run_max_swath > 0) {
@@ -3871,7 +3871,7 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 
 		/* loop over raw sidescan, putting each raw pixel into
 		    the binning arrays */
-		if (ss_ok == true)
+		if (ss_ok)
 			for (int i = 0; i < ping->png_nbeams_ss; i++) {
 				beam_ss = &ping->png_ssraw[ping->png_start_sample[i]];
 				if (mb_beam_ok(ping->png_beamflag[i])) {

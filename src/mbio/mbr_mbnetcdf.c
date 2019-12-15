@@ -276,7 +276,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
 	/* if first read then set everything up */
-	if (*dataread == false) {
+	if (!*dataread) {
 		*dataread = true;
 
 		/* get dimensions */

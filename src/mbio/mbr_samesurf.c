@@ -305,7 +305,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 				/* convert position from UTM easting and northing
 				    to lon lat if necessary */
-				if (mb_io_ptr->projection_initialized == true) {
+				if (mb_io_ptr->projection_initialized) {
 					easting = store->CenterPosition[i].centerPositionX + *refeasting;
 					northing = store->CenterPosition[i].centerPositionY + *refnorthing;
 					mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, &lon, &lat, error);

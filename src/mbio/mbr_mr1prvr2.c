@@ -194,7 +194,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* if first time through read file header */
-	if (mb_io_ptr->fileheader == false) {
+	if (!mb_io_ptr->fileheader) {
 		/* read the header into memory */
 		bs_status = mbbs_rdbsfhdr(&(store->header), (XDR *)xdrs);
 		if (bs_status == BS_SUCCESS) {
@@ -638,7 +638,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* if comment and file header not written */
-	if (mb_io_ptr->fileheader == false && store->kind == MB_DATA_COMMENT) {
+	if (!mb_io_ptr->fileheader && store->kind == MB_DATA_COMMENT) {
 		/* add comment to string mb_io_ptr->hdr_comment
 		    to be be written in file header */
 		mb_io_ptr->hdr_comment_size += strlen(store->comment) + 2;
@@ -648,7 +648,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	}
 
 	/* if data and file header not written */
-	else if (mb_io_ptr->fileheader == false && store->kind != MB_DATA_COMMENT) {
+	else if (!mb_io_ptr->fileheader && store->kind != MB_DATA_COMMENT) {
 		/* insert new comments into file header */
 		mbbs_replacestr(&(store->header.bsf_log), mb_io_ptr->hdr_comment);
 
@@ -662,7 +662,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	}
 
 	/* if data and file header written */
-	if (mb_io_ptr->fileheader == true && store->kind == MB_DATA_DATA) {
+	if (mb_io_ptr->fileheader && store->kind == MB_DATA_DATA) {
 		/* write data */
 		if ((bs_status = mbbs_wrpnghdr(&(store->ping), (XDR *)xdrs)) != BS_SUCCESS) {
 			status = MB_FAILURE;

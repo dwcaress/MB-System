@@ -329,7 +329,7 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
                         double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                         double *ssalongtrack, char *comment, int *error) {
 	int time_j[5];
-	int set_pixel_size;
+	bool set_pixel_size;
 	double gain_db;
 	double gain_factor;
 	int center_pixel;
@@ -447,7 +447,7 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 			else
 				store->pixels[i].amplitude = 0;
 			store->pixels[i].alongtrack = ssalongtrack[i];
-			if (set_pixel_size == true && ssacrosstrack[i] > 0) {
+			if (set_pixel_size && ssacrosstrack[i] > 0) {
 				store->pixel_size = ssacrosstrack[i] / (i - center_pixel);
 				set_pixel_size = false;
 			}

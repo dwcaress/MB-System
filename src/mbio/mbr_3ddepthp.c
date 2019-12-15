@@ -207,7 +207,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* if first read then read 2 byte magic number at start of file */
 	bool done = false;
-	if (*file_header_readwritten == false) {
+	if (!*file_header_readwritten) {
 		/* read and check the first two bytes */
 		size_t read_len = (size_t)2;
 		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
@@ -321,7 +321,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					skip++;
 				}
 			}
-		} while (status == MB_SUCCESS && valid_id == false);
+		} while (status == MB_SUCCESS && !valid_id);
 
 		/* read the full record */
 		if (status == MB_SUCCESS) {
@@ -740,7 +740,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	        - LIDAR scans only with no record id's */
 	else if (status == MB_SUCCESS && !done && store->file_version == 1 && store->sub_version == 0) {
 		/* read the next scan header */
-		if (mb_io_ptr->save2 == false) {
+		if (!mb_io_ptr->save2) {
 			size_t read_len = (size_t)MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE;
 			status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
 		}
@@ -948,7 +948,7 @@ int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	const int status = mbr_3ddepthp_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* if needed calculate bathymetry */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->bathymetry_calculated == false) {
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && !store->bathymetry_calculated) {
 		mbsys_3datdepthlidar_calculatebathymetry(verbose, mbio_ptr, store_ptr, error);
 	}
 
@@ -1005,7 +1005,7 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char buffer[MBF_3DDEPTHP_BUFFER_SIZE];
 
 	/* if first write then write the magic number file header */
-	if (*file_header_readwritten == false) {
+	if (!*file_header_readwritten) {
 		/* encode the header data */
 		index = 0;
 		const unsigned short magic_number = MBF_3DDEPTHP_MAGICNUMBER;

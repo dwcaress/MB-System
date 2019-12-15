@@ -610,7 +610,7 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time
 	/* apply projection and lonflip if necessary */
 	if (status == MB_SUCCESS) {
 		/* apply inverse projection if required */
-		if (mb_io_ptr->projection_initialized == true) {
+		if (mb_io_ptr->projection_initialized) {
 			const double easting = *navlon;
 			const double northing = *navlat;
 			mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, navlon, navlat, error);
@@ -742,7 +742,7 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i
 	mb_io_ptr->pixels_ss_max = MAX(mb_io_ptr->pixels_ss_max, nss);
 
 	/* apply inverse projection if required */
-	if (mb_io_ptr->projection_initialized == true) {
+	if (mb_io_ptr->projection_initialized) {
 		double easting;
 		double northing;
 		mb_proj_forward(verbose, mb_io_ptr->pjptr, navlon, navlat, &easting, &northing, error);
@@ -800,7 +800,7 @@ int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int 
 	/* apply projection and lonflip if necessary */
 	if (status == MB_SUCCESS) {
 		/* apply inverse projection if required */
-		if (mb_io_ptr->projection_initialized == true) {
+		if (mb_io_ptr->projection_initialized) {
 			const double easting = *navlon;
 			const double northing = *navlat;
 			mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, navlon, navlat, error);
@@ -921,7 +921,7 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int 
 	if (status == MB_SUCCESS) {
 		for (int inav = 0; inav < *n; inav++) {
 			/* apply inverse projection if required */
-			if (mb_io_ptr->projection_initialized == true) {
+			if (mb_io_ptr->projection_initialized) {
 				double easting;
 				double northing;
 				easting = navlon[inav];
@@ -1006,7 +1006,7 @@ int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], d
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* apply inverse projection if required */
-	if (mb_io_ptr->projection_initialized == true) {
+	if (mb_io_ptr->projection_initialized) {
 		double easting;
 		double northing;
 		mb_proj_forward(verbose, mb_io_ptr->pjptr, navlon, navlat, &easting, &northing, error);
