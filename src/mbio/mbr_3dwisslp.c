@@ -1326,7 +1326,7 @@ int mbr_rt_3dwisslp
 
   /* if needed calculate bathymetry */
   if (( status == MB_SUCCESS) && ( store->kind == MB_DATA_DATA) &&
-    ( store->bathymetry_calculated == false) )
+      (!store->bathymetry_calculated))
     mbsys_3ddwissl_calculatebathymetry(verbose,
       mbio_ptr,
       store_ptr,

@@ -925,8 +925,8 @@ int mbr_3dwisslr_rd_data
   /* find next unread record in the file index table */
   bool found = false;
   int irecord = 0;
-  for (int i = 0; i < mb_io_ptr->num_indextable && found == false; i++)
-    if (mb_io_ptr->indextable[i].read == false)
+  for (int i = 0; i < mb_io_ptr->num_indextable && !found; i++)
+    if (!mb_io_ptr->indextable[i].read)
       {
       found = true;
       irecord = i;
@@ -1693,7 +1693,7 @@ int mbr_rt_3dwisslr
   int status = MB_SUCCESS;
 
   /* if needed index the file */
-  if (*file_indexed == false)
+  if (!*file_indexed)
     status = mbr_3dwisslr_index_data(verbose, mbio_ptr, store_ptr, error);
 
   /* read next data from file */
@@ -1701,7 +1701,7 @@ int mbr_rt_3dwisslr
 
   /* if needed calculate bathymetry */
   if (( status == MB_SUCCESS) && ( store->kind == MB_DATA_DATA) &&
-    ( store->bathymetry_calculated == false) )
+      (!store->bathymetry_calculated) )
     mbsys_3ddwissl_calculatebathymetry(verbose,
       mbio_ptr,
       store_ptr,

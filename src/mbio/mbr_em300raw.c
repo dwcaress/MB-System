@@ -3488,7 +3488,7 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	*error = MB_ERROR_NO_ERROR;
 	while (!done) {
 		/* if no label saved get next record label */
-		if (*label_save_flag == false) {
+		if (!*label_save_flag) {
 			/* read four byte record size */
 			int read_len;
 			if ((read_len = fread(&record_size, 1, 4, mb_io_ptr->mbfp)) != 4) {

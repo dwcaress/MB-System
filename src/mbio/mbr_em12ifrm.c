@@ -627,7 +627,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 			}
 
 			/* initialize sidescan if none saved */
-			else if (*save_ss == false) {
+			else if (!*save_ss) {
 				data->pixels_ssraw = 0;
 				for (int i = 0; i < MBF_EM12IFRM_MAXBEAMS; i++) {
 					beamlist[i] = 0;
@@ -1137,7 +1137,7 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				ping->beam_center_sample[i] = 0;
 				ping->beam_start_sample[i] = 0;
 			}
-			if (*save_ss == false) {
+			if (!*save_ss) {
 				ping->pixels_ssraw = data->pixels_ssraw;
 				ping->ss_mode = data->ss_mode;
 				for (int i = 0; i < ping->beams_bath; i++) {

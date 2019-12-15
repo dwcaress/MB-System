@@ -2485,7 +2485,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 				    store->RMB_sounding_depths[i] - store->RMBint_draft + store->RMBint_heave;
 				nbathsort++;
 
-				if (found == false || fabs(store->RMB_sounding_across[i]) < minxtrack) {
+				if (!found || fabs(store->RMB_sounding_across[i]) < minxtrack) {
 					minxtrack = fabs(store->RMB_sounding_across[i]);
 					// iminxtrack = i;
 					found = true;
@@ -2568,7 +2568,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		for (int i = sample_start; i < sample_end; i++) {
 			range = ((double)i) / ((double)store->RSS_sample_rate);
 			found = false;
-			for (int j = irange; j > 0 && found == false; j--) {
+			for (int j = irange; j > 0 && !found; j--) {
 				if (range >= store->MSS_table_range[j] && range < store->MSS_table_range[j - 1]) {
 					irange = j;
 					found = true;
@@ -2595,7 +2595,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		for (int i = sample_start; i < sample_end; i++) {
 			range = ((double)i) / ((double)store->RSS_sample_rate);
 			found = false;
-			for (int j = irange; j < nrangetable - 1 && found == false; j++) {
+			for (int j = irange; j < nrangetable - 1 && !found; j++) {
 				if (range >= store->MSS_table_range[j] && range < store->MSS_table_range[j + 1]) {
 					irange = j;
 					found = true;

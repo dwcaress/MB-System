@@ -256,13 +256,13 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			sonarswapgood = false;
 		}
 
-		if (sonarunswapgood && sonarswapgood == false) {
+		if (sonarunswapgood && sonarswapgood) {
 			if (mb_io_ptr->byteswapped)
 				*databyteswapped = true;
 			else
 				*databyteswapped = false;
 		}
-		else if (sonarunswapgood == false && sonarswapgood) {
+		else if (!sonarunswapgood && sonarswapgood) {
 			if (mb_io_ptr->byteswapped)
 				*databyteswapped = false;
 			else
@@ -295,7 +295,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		sonargood = false;
 	}
 
-	if (startbyte == EM2_START_BYTE && typegood == false && sonargood) {
+	if (startbyte == EM2_START_BYTE && !typegood && sonargood) {
 		mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_BAD_DATAGRAM);
 		if (verbose >= 1)
 			fprintf(stderr, "Bad datagram type: %4.4hX %4.4hX | %d %d\n", *type, *sonar, *type, *sonar);
@@ -3394,7 +3394,7 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	short *sonarlast;
 	int *nbadrec;
 	int *length;
-	int match;
+	int match;  // TODO(schwehr): Make a bool
 	int read_len;
 	int skip = 0;
 	char junk;
@@ -3459,7 +3459,7 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	bool done = false;
 	while (!done) {
 		/* if no label saved get next record label */
-		if (*label_save_flag == false) {
+		if (!*label_save_flag) {
 			/* read four byte record size */
 			if ((read_len = fread(&record_size, 1, 4, mb_io_ptr->mbfp)) != 4) {
 				status = MB_FAILURE;
@@ -3856,7 +3856,7 @@ Have a nice day...\n");
 #endif
 				status = mbr_em300mba_rd_bath(verbose, mbfp, swap, store, &match, sonar, *version, error);
 				if (status == MB_SUCCESS) {
-					if (first_type == EM2_NONE || match == false || store->ping->png_count != store->ping2->png_count ||
+					if (first_type == EM2_NONE || !match || store->ping->png_count != store->ping2->png_count ||
 					    store->ping->png_serial != store->ping2->png_serial) {
 						done = false;
 						first_type = EM2_BATH_MBA;
@@ -3885,7 +3885,7 @@ Have a nice day...\n");
 #endif
 			status = mbr_em300mba_rd_bath(verbose, mbfp, swap, store, &match, sonar, *version, error);
 			if (status == MB_SUCCESS) {
-				if (first_type == EM2_NONE || match == false) {
+				if (first_type == EM2_NONE || !match) {
 					done = false;
 					first_type = EM2_BATH_MBA;
 					expect = EM2_SS_MBA;
@@ -3971,7 +3971,7 @@ Have a nice day...\n");
 			status = mbr_em300mba_rd_ss(verbose, mbfp, swap, store, sonar, *length, &match, error);
 			if (status == MB_SUCCESS) {
 				ping->png_ss_read = true;
-				if (first_type == EM2_NONE || match == false) {
+				if (first_type == EM2_NONE || !match) {
 					done = false;
 					first_type = EM2_SS_MBA;
 					expect = EM2_BATH_MBA;
@@ -4102,7 +4102,7 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* if no sidescan read then zero sidescan data */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && ping->png_ss_read == false) {
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && !ping->png_ss_read) {
 		status = mbsys_simrad2_zero_ss(verbose, store_ptr, error);
 	}
 
@@ -7802,7 +7802,7 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			status = mbr_em300mba_wr_rawbeam3(verbose, mbfp, swap, store, 0, error);
 		}
 #ifdef MBR_EM300MBA_DEBUG
-		if (ping->png_raw1_read == false && ping->png_raw2_read == false && ping->png_raw3_read == false)
+		if (!ping->png_raw1_read && !ping->png_raw2_read && ping->png_raw3_read == false)
 			fprintf(stderr, "NOT call mbr_em300mba_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
 #endif
 		if (ping->png_ss_read) {
@@ -7830,7 +7830,7 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				status = mbr_em300mba_wr_rawbeam3(verbose, mbfp, swap, store, 1, error);
 			}
 #ifdef MBR_EM300MBA_DEBUG
-			if (ping->png_raw3_read == false)
+			if (!ping->png_raw3_read)
 				fprintf(stderr, "NOT call mbr_em300mba_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
 #endif
 			if (ping->png_ss_read) {

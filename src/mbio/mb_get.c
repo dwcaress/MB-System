@@ -599,7 +599,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 				ssalongtrack[i] = 0.0;
 			}
 		}
-		if (mb_io_ptr->variable_beams == false) {
+		if (!mb_io_ptr->variable_beams) {
 			*nbath = mb_io_ptr->beams_bath_max;
 			*namp = mb_io_ptr->beams_amp_max;
 			*nss = mb_io_ptr->pixels_ss_max;
