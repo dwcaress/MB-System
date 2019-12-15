@@ -7802,7 +7802,7 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			status = mbr_em300mba_wr_rawbeam3(verbose, mbfp, swap, store, 0, error);
 		}
 #ifdef MBR_EM300MBA_DEBUG
-		if (!ping->png_raw1_read && !ping->png_raw2_read && ping->png_raw3_read == false)
+		if (!ping->png_raw1_read && !ping->png_raw2_read && !ping->png_raw3_read)
 			fprintf(stderr, "NOT call mbr_em300mba_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
 #endif
 		if (ping->png_ss_read) {

@@ -469,7 +469,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS) {
 		/* if first survey ping and no processing parameters output,
 		    output the processing parameters */
-		if (data->kind == MB_DATA_DATA && mb_io_ptr->save1 == false) {
+		if (data->kind == MB_DATA_DATA && !mb_io_ptr->save1) {
 			/* write a processing parameter record */
 			dataID->recordID = GSF_RECORD_PROCESSING_PARAMETERS;
 			if (gsfWrite((int)mb_io_ptr->gsfid, dataID, records) < 0) {

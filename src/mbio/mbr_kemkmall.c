@@ -3743,7 +3743,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   }
 
   /* if not done loop over reading data until a record is ready for return */
-  while (done == false) {
+  while (!done) {
 
     // if reading a file then use the index of datagrams
     if (mb_io_ptr->mbfp != NULL) {
@@ -4075,7 +4075,7 @@ numOfDgms, dgmNum, header.numBytesDgm, dgm_index->index_org, dgm_index->ping_num
       (*dgm_id)++;
 
     /* if not done but no more data in index then done with error */
-    if (done == false && mb_io_ptr->mbfp != NULL && *dgm_id >= dgm_index_table->dgm_count) {
+    if (!done && mb_io_ptr->mbfp != NULL && *dgm_id >= dgm_index_table->dgm_count) {
       done = true;
       *error = MB_ERROR_EOF;
       status = MB_FAILURE;
@@ -4117,7 +4117,7 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
 
   /* if reading from a file that has not been indexed, index the file */
-  if (*file_indexed == false && mb_io_ptr->mbfp != NULL) {
+  if (!*file_indexed && mb_io_ptr->mbfp != NULL) {
 #ifdef MBR_KEMKMALL_DEBUG
   fprintf(stderr, "About to call mbr_kemkmall_index_data...\n");
 #endif
@@ -4151,7 +4151,7 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   /* if this is a ping and the first time read by MB-System fill in xmt structure
      and generate pseudosidescan */
   if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
-    && store->xmb.mbsystem_extensions == false) {
+      && !store->xmb.mbsystem_extensions) {
 
     /* set preprocess parameters */
     struct mb_preprocess_struct *preprocess_pars_ptr = &mb_io_ptr->preprocess_pars;

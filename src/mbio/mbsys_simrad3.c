@@ -3814,13 +3814,13 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		}
 
 		/* get sidescan pixel size */
-		if (swath_width_set == false) {
+		if (!swath_width_set) {
 			if (store->run_swath_angle > 0)
 				*swath_width = (double)store->run_swath_angle;
 			else
 				*swath_width = 2.5 + MAX(90.0 - ping->png_depression[0], 90.0 - ping->png_depression[ping->png_nbeams - 1]);
 		}
-		if (pixel_size_set == false && nbathsort > 0) {
+		if (!pixel_size_set && nbathsort > 0) {
 			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
 			pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_SIMRAD3_MAXPIXELS;
 			if (store->run_max_swath > 0) {

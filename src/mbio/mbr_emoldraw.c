@@ -1443,7 +1443,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	bool done = false;
 	while (!done) {
 		/* if no label saved get next record label */
-		if (*label_save_flag == false) {
+		if (!*label_save_flag) {
 			/* read four byte wrapper if data stream is known
 			    to have wrappers */
 			if (*wrapper) {
@@ -1820,7 +1820,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_CENTER, first_ss, &more_ss, error);
 			if (status == MB_SUCCESS && first_ss)
 				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == false) {
+			if (status == MB_SUCCESS && !more_ss) {
 				*file_has_ss = true;
 				if (first_type == EM_NONE) {
 					done = false;
@@ -1867,7 +1867,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_PORT, first_ss, &more_ss, error);
 			if (status == MB_SUCCESS && first_ss)
 				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == false) {
+			if (status == MB_SUCCESS && !more_ss) {
 				*file_has_ss = true;
 				if (first_type == EM_NONE) {
 					done = false;
@@ -1915,7 +1915,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_STARBOARD, first_ss, &more_ss, error);
 			if (status == MB_SUCCESS && first_ss)
 				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == false) {
+			if (status == MB_SUCCESS && !more_ss) {
 				*file_has_ss = true;
 				if (first_type == EM_NONE) {
 					done = false;
@@ -1962,7 +1962,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_CENTER, first_ss, &more_ss, error);
 			if (status == MB_SUCCESS && first_ss)
 				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == false) {
+			if (status == MB_SUCCESS && !more_ss) {
 				*file_has_ss = true;
 				if (first_type == EM_NONE) {
 					done = false;
@@ -2009,7 +2009,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_PORT, first_ss, &more_ss, error);
 			if (status == MB_SUCCESS && first_ss)
 				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == false) {
+			if (status == MB_SUCCESS && !more_ss) {
 				*file_has_ss = true;
 				if (first_type == EM_NONE) {
 					done = false;
@@ -2057,7 +2057,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_STARBOARD, first_ss, &more_ss, error);
 			if (status == MB_SUCCESS && first_ss)
 				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == false) {
+			if (status == MB_SUCCESS && !more_ss) {
 				*file_has_ss = true;
 				if (first_type == EM_NONE) {
 					done = false;
