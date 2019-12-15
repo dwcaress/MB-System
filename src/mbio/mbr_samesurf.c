@@ -194,6 +194,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double *refnorthing = &(mb_io_ptr->saved2);
 
 	/* set sapi verbosity */
+        // TODO(schwehr): What?
 	int sapi_verbose;
 	if (verbose > 1)
 		sapi_verbose = verbose;
@@ -203,7 +204,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* read global info if the structure is blank (usually first time through) */
-	if (store->initialized == false) {
+	if (!store->initialized) {
 		strncpy(store->NameOfShip, SAPI_getNameOfShip(), LABEL_SIZE);
 		strncpy(store->NameOfSounder, SAPI_getNameOfSounder(), LABEL_SIZE);
 		strncpy(store->TypeOfSounder, SAPI_getTypeOfSounder(), LABEL_SIZE);
@@ -224,7 +225,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		/* initialize UTM projection if required */
-		if (store->GlobalData.presentationOfPosition == 'X' && mb_io_ptr->projection_initialized == false) {
+		if (store->GlobalData.presentationOfPosition == 'X' && !mb_io_ptr->projection_initialized) {
 			/* initialize UTM projection */
 			utm_zone = (int)(((RTD * store->GlobalData.referenceMeridian + 183.0) / 6.0) + 0.5);
 			sprintf(projection, "UTM%2.2dN", utm_zone);

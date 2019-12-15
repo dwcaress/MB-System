@@ -294,7 +294,7 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	formatversion = (int *)&mb_io_ptr->save2;
 
 	/* read file header if necessary */
-	if (*fileheader_initialized == false) {
+	if (!*fileheader_initialized) {
 		read_len = 16;
 		buffer[read_len] = '\0';
 		status = mb_fileio_get(verbose, mbio_ptr, (char *)buffer, &read_len, error);
@@ -632,7 +632,7 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* write file header if necessary */
-	if (*fileheader_initialized == false) {
+	if (!*fileheader_initialized) {
 		sprintf(buffer, "##PHOTGRAM##V001");
 		write_len = 16;
 		buffer[write_len] = '\0';

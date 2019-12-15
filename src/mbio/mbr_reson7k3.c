@@ -7956,7 +7956,6 @@ int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   s7k3_RawDetection *RawDetection;
   s7k3_SegmentedRawDetection *SegmentedRawDetection;
   int skip;
-  int ping_record;
   int time_j[5];
   size_t read_len;
 
@@ -8100,7 +8099,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
     }
 
     /* check for ping record and ping number */
-    ping_record = false;
+    bool ping_record = false;
     if (status == MB_SUCCESS) {
       if (*recordid == R7KRECID_ProcessedSideScan
           || *recordid == R7KRECID_SonarSettings
@@ -8216,7 +8215,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         or if no FileCatalog read at start and any non-ping record encountered */
     if (status == MB_SUCCESS && *last_ping >= 0
         && (*recordid == R7KRECID_FileCatalog
-            || (ping_record == false && store->FileCatalog_read.n > 0))) {
+            || (!ping_record && store->FileCatalog_read.n > 0))) {
       /* good ping if bathymetry record is read */
       if (store->read_RawDetection
           || store->read_SegmentedRawDetection) {
@@ -8268,7 +8267,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
     }
 
 #ifdef MBR_RESON7K3_DEBUG2
-    if (status == MB_SUCCESS && !done && *save_flag == false) {
+    if (status == MB_SUCCESS && !done && !*save_flag) {
       fprintf(stderr, "Reading record id: %4.4X  %4.4d | %4.4X  %4.4d | %4.4hX  %4.4d |", *recordid, *recordid, *deviceid,
               *deviceid, *enumerator, *enumerator);
       if (*recordid == R7KRECID_None)
@@ -9333,18 +9332,18 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
   /* if needed calculate bathymetry using preprocess function */
   if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
-      && (  (store->read_RawDetection
-              && RawDetection->optionaldata == false)
-            || (store->read_SegmentedRawDetection
-              && SegmentedRawDetection->optionaldata == false))) {
+      && ((store->read_RawDetection
+           && !RawDetection->optionaldata)
+          || (store->read_SegmentedRawDetection
+              && !SegmentedRawDetection->optionaldata))) {
     /* get platform model if needed */
-    if (*platform_set == false) {
+    if (!*platform_set) {
       status = mbsys_reson7k3_extract_platform(verbose, mbio_ptr, store_ptr, &store->kind, (void **)platform_ptr, error);
       *platform_set = true;
     }
 
     /* set preprocess parameters if needed - have to update counts of ancilliary data arrays each time */
-    if (*preprocess_pars_set == false) {
+    if (!*preprocess_pars_set) {
       preprocess_pars->target_sensor = 0;
 
       preprocess_pars->timestamp_changed = false;

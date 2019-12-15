@@ -393,7 +393,7 @@ int mbr_rt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	swpls_projection *projection = &store->projection;
 
 	/* check if projection has been set from *.prj file, if so, copy into projection structure */
-	if ((store->projection_set == false) && (mb_io_ptr->projection_initialized)) {
+	if (!store->projection_set && (mb_io_ptr->projection_initialized)) {
 		projection->time_d = time(NULL);
 		projection->microsec = 0;
 		projection->nchars = strnlen(mb_io_ptr->projection_id, MB_NAME_LENGTH);
@@ -414,7 +414,7 @@ int mbr_rt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 	/* check if projection has been read from *mb222 file, if so, tell mb system */
-	else if ((store->projection_set) && (mb_io_ptr->projection_initialized == false)) {
+	else if (store->projection_set && !mb_io_ptr->projection_initialized) {
 		mb_proj_init(verbose, projection->projection_id, &(mb_io_ptr->pjptr), error);
 		strncpy(mb_io_ptr->projection_id, projection->projection_id, MB_NAME_LENGTH);
 		mb_io_ptr->projection_initialized = true;
@@ -426,7 +426,7 @@ int mbr_rt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		*error = MB_ERROR_UNINTELLIGIBLE;
 	}
 	/* save geographic position fix data */
-	else if ((status == MB_SUCCESS) && (store->kind == MB_DATA_NAV) && (store->projection_set == false)) {
+	else if (status == MB_SUCCESS && store->kind == MB_DATA_NAV && !store->projection_set) {
 		mb_navint_add(verbose, mbio_ptr, store->time_d, store->posll.longitude, store->posll.latitude, error);
 	}
 	/* save projected position fix data */
@@ -482,7 +482,7 @@ int mbr_wt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* write header record if needed */
-	if ((store->sxi_header_set) && (*header_rec_written == false)) {
+	if (store->sxi_header_set && !*header_rec_written) {
 		int origkind = store->kind;
 		int origtype = store->type;
 		store->kind = MB_DATA_HEADER;
@@ -496,9 +496,9 @@ int mbr_wt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* write projection record if needed */
-	if ((store->projection_set) && (*projection_rec_written == false)) {
-		int origkind = store->kind;
-		int origtype = store->type;
+	if (store->projection_set && !*projection_rec_written) {
+		const int origkind = store->kind;
+		const int origtype = store->type;
 		store->kind = MB_DATA_PARAMETER;
 		store->type = SWPLS_ID_PROJECTION;
 		status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
@@ -510,17 +510,14 @@ int mbr_wt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* write projection file if needed */
-	//	if ((*projection_file_created == false) &&
-	//		(store->projection_set))
-	//		{
+	//	if (!*projection_file_created && store->projection_set) {
 	//		sprintf(projection_file, "%s.prj", mb_io_ptr->file);
-	//		if ((pfp = fopen(projection_file, "w")) != NULL)
-	//			{
+	//		if ((pfp = fopen(projection_file, "w")) != NULL) {
 	//			fprintf(pfp, "%s\n", store->projection_id);
 	//			*projection_file_created = true;
-	//			}
-	//		fclose(pfp);
 	//		}
+	//		fclose(pfp);
+	//	}
 
 	/* write next data to file */
 	status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
