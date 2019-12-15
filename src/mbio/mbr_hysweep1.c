@@ -306,7 +306,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	bool done = false;
 	while (*error == MB_ERROR_NO_ERROR && !done) {
 		/* read the next line */
-		if (*line_saved == false)
+		if (!*line_saved)
 			status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 		else
 			*line_saved = false;
@@ -2337,7 +2337,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	device_number_MB_DFT = (int *)&mb_io_ptr->save10;
 
 	/* write fileheader if needed */
-	if (*file_header_written == false && store->kind != MB_DATA_COMMENT) {
+	if (!*file_header_written && store->kind != MB_DATA_COMMENT) {
 		/* copy the mbsys_hysweep structure so that we can mess with the device list
 		    if needed before writing it out */
 		hysweeptmp = *store;

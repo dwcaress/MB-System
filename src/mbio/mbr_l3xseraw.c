@@ -1819,7 +1819,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 	   calculate bathymetry assuming 1500 m/s velocity */
 	if (status == MB_SUCCESS && store->mul_group_tt && store->mul_group_angle &&
 	    store->mul_group_heave && store->mul_group_roll && store->mul_group_pitch &&
-	    store->mul_group_depth == false) {
+	    !store->mul_group_depth) {
 		store->mul_group_lateral = true;
 		store->mul_group_along = true;
 		store->mul_group_depth = true;
@@ -3058,7 +3058,7 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*frame_expect = MBSYS_XSE_NONE_FRAME;
 					done = true;
 				}
-				else if (frame_id == *frame_expect && store->sid_ping == store->mul_ping && store->sid_group_avl == false) {
+				else if (frame_id == *frame_expect && store->sid_ping == store->mul_ping && !store->sid_group_avl) {
 					done = false;
 				}
 				else if (*frame_expect == MBSYS_XSE_NONE_FRAME) {
@@ -3284,7 +3284,7 @@ int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* interpolate navigation for survey pings if needed */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->mul_group_mbsystemnav == false) {
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && !store->mul_group_mbsystemnav) {
 		/* get timestamp */
 		time_d = store->mul_sec - MBSYS_XSE_TIME_OFFSET + 0.000001 * store->mul_usec;
 

@@ -878,7 +878,7 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		/* see if gain values are messed up */
 		gain_ok = false;
 		int i = 0;
-		while (i < 8 && gain_ok == false) {
+		while (i < 8 && !gain_ok) {
 			if (data->gain[i] != data->gain[0])
 				gain_ok = true;
 			if (data->gain[i + 8] != data->gain[8])
@@ -887,7 +887,7 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		}
 
 		/* fix gain values if needed */
-		if (gain_ok == false) {
+		if (!gain_ok) {
 			gain_outer = data->gain[0];
 			gain_inner = data->gain[8];
 			for (int i = 0; i < 16; i++) {
@@ -1191,7 +1191,7 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		/* see if gain values are messed up */
 		gain_ok = false;
 		int i = 0;
-		while (i < 8 && gain_ok == false) {
+		while (i < 8 && !gain_ok) {
 			if (data->gain[i] != data->gain[0])
 				gain_ok = true;
 			if (data->gain[i + 8] != data->gain[8])
@@ -1200,7 +1200,7 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		}
 
 		/* fix gain values if needed */
-		if (gain_ok == false) {
+		if (!gain_ok) {
 			gain_outer = data->gain[0];
 			gain_inner = data->gain[8];
 			for (int i = 0; i < 16; i++) {

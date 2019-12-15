@@ -2238,11 +2238,11 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		}
 
 		/* get sidescan pixel size */
-		if (swath_width_set == false && nbathsort > 0) {
+		if (!swath_width_set && nbathsort > 0) {
 			(*swath_width) = 2.5 + angles_simrad[0];
 			(*swath_width) = MAX((*swath_width), 60.0);
 		}
-		if (pixel_size_set == false && nbathsort > 0) {
+		if (!pixel_size_set && nbathsort > 0) {
 			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
 			pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_SIMRAD_MAXPIXELS;
 			pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort / 2] * sin(DTR * 0.1));

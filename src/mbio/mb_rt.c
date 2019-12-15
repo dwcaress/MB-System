@@ -587,9 +587,9 @@ int mb_rt_circular(int verbose, int *error) {
 	int status = MB_SUCCESS;
 
 	/* decide which case to use */
-	if (model->turned == false && model->layer_gradient[model->layer] > 0.0)
+	if (!model->turned && model->layer_gradient[model->layer] > 0.0)
 		status = mb_rt_quad1(verbose, error);
-	else if (model->turned == false)
+	else if (!model->turned)
 		status = mb_rt_quad3(verbose, error);
 	else if (model->turned && model->layer_gradient[model->layer] > 0.0)
 		status = mb_rt_quad2(verbose, error);
@@ -621,7 +621,7 @@ int mb_rt_line(int verbose, int *error) {
 	/* find linear path */
 	const double asin_arg = MIN(model->pp * model->layer_vel_top[model->layer], 1.000);
 	double theta = asin(asin_arg);
-	if (model->turned == false) {
+	if (!model->turned) {
 		model->zf = model->layer_depth_bottom[model->layer];
 	}
 	else {
@@ -712,7 +712,7 @@ int mb_rt_vertical(int verbose, int *error) {
 	     (model->zz - model->layer_depth_top[model->layer]) * model->layer_gradient[model->layer];
 
 	double vf;
-	if (model->turned == false) {
+	if (!model->turned) {
 		model->zf = model->layer_depth_bottom[model->layer];
 		vf = model->layer_vel_bottom[model->layer];
 	}
@@ -726,7 +726,7 @@ int mb_rt_vertical(int verbose, int *error) {
 	if (model->dt >= model->tt_left) {
 		model->xf = model->xx;
 		const double vfvi = exp(model->tt_left * model->layer_gradient[model->layer]);
-		if (model->turned == false)
+		if (!model->turned)
 			vf = vi * vfvi;
 		else if (model->turned)
 			vf = vi / vfvi;

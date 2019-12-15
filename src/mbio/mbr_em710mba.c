@@ -312,7 +312,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		sonargood = true;
 	}
 
-	if (startbyte == EM3_START_BYTE && typegood == false && sonargood) {
+	if (startbyte == EM3_START_BYTE && !typegood && sonargood) {
 		mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_BAD_DATAGRAM);
 		if (verbose >= 1)
 			fprintf(stderr, "Bad datagram type: %4.4hX %4.4hX | %d %d\n", *type, *sonar, *type, *sonar);
@@ -4193,7 +4193,7 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "label_save_flag:%d status:%d\n", *label_save_flag, status);
 #endif
 		/* if no label saved get next record label */
-		if (*label_save_flag == false) {
+		if (!*label_save_flag) {
 			/* read four byte record size */
 			read_len = 4;
 			status = mb_fileio_get(verbose, mbio_ptr, (char *)&record_size, &read_len, error);
@@ -4709,7 +4709,7 @@ Have a nice day...\n");
 
 		/* if necessary read over unread but expected bytes */
 		bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
-		if (*label_save_flag == false && good_end_bytes == false && bytes_read < record_size) {
+		if (!*label_save_flag && !good_end_bytes && bytes_read < record_size) {
 #ifdef MBR_EM710MBA_DEBUG
 			fprintf(stderr, "skip over %d unread bytes of supported datagram type %x\n", record_size - bytes_read, type);
 #endif
@@ -4813,7 +4813,7 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* if no sidescan read then zero sidescan data */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && ping->png_ss_read == false) {
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && !ping->png_ss_read) {
 		status = mbsys_simrad3_zero_ss(verbose, store_ptr, error);
 	}
 

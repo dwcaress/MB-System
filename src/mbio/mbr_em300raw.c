@@ -3415,8 +3415,8 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	short *sonarlast;
 	int *nbadrec;
 	int *length;
-	int good_end_bytes;
-	int match;
+	int good_end_bytes;  // TODO(schwehr): Can this be a bool?
+	bool match;
 	int skip = 0;
 	char junk;
 
@@ -3888,7 +3888,7 @@ Have a nice day...\n");
 #endif
 				status = mbr_em300raw_rd_bath(verbose, mbfp, swap, store, &match, sonar, *version, &good_end_bytes, error);
 				if (status == MB_SUCCESS) {
-					if (first_type == EM2_NONE || match == false || store->ping->png_count != store->ping2->png_count ||
+					if (first_type == EM2_NONE || !match || store->ping->png_count != store->ping2->png_count ||
 					    store->ping->png_serial != store->ping2->png_serial) {
 						done = false;
 						first_type = EM2_BATH;
@@ -3917,7 +3917,7 @@ Have a nice day...\n");
 #endif
 			status = mbr_em300raw_rd_bath(verbose, mbfp, swap, store, &match, sonar, *version, &good_end_bytes, error);
 			if (status == MB_SUCCESS) {
-				if (first_type == EM2_NONE || match == false) {
+				if (first_type == EM2_NONE || !match) {
 					done = false;
 					first_type = EM2_BATH;
 					expect = EM2_SS;
@@ -4003,7 +4003,7 @@ Have a nice day...\n");
 			status = mbr_em300raw_rd_ss(verbose, mbfp, swap, store, sonar, *length, &match, &good_end_bytes, error);
 			if (status == MB_SUCCESS) {
 				ping->png_ss_read = true;
-				if (first_type == EM2_NONE || match == false) {
+				if (first_type == EM2_NONE || !match) {
 					done = false;
 					first_type = EM2_SS;
 					expect = EM2_BATH;
@@ -4060,7 +4060,7 @@ Have a nice day...\n");
 
 		/* if necessary read over unread but expected bytes */
 		int bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
-		if (*label_save_flag == false && good_end_bytes == false && bytes_read < record_size) {
+		if (!*label_save_flag && !good_end_bytes && bytes_read < record_size) {
 #ifdef MBR_EM300RAW_DEBUG
 			fprintf(stderr, "skip over %d unread bytes of supported datagram type %x\n", record_size - bytes_read, type);
 #endif
@@ -4171,7 +4171,7 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* if no sidescan read then zero sidescan data */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && ping->png_ss_read == false) {
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && !ping->png_ss_read) {
 		status = mbsys_simrad2_zero_ss(verbose, store_ptr, error);
 	}
 
@@ -7984,7 +7984,7 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			status = mbr_em300raw_wr_rawbeam3(verbose, mbfp, swap, store, 0, error);
 		}
 #ifdef MBR_EM300RAW_DEBUG
-		if (ping->png_raw1_read == false && ping->png_raw2_read == false && ping->png_raw3_read == false)
+		if (!ping->png_raw1_read && !ping->png_raw2_read && !ping->png_raw3_read)
 			fprintf(stderr, "NOT call mbr_em300raw_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
 #endif
 		if (ping->png_ss_read) {
@@ -8012,7 +8012,7 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				status = mbr_em300raw_wr_rawbeam3(verbose, mbfp, swap, store, 1, error);
 			}
 #ifdef MBR_EM300RAW_DEBUG
-			if (ping->png_raw3_read == false)
+			if (!ping->png_raw3_read)
 				fprintf(stderr, "NOT call mbr_em300raw_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
 #endif
 			if (ping->png_ss_read) {

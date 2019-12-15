@@ -381,7 +381,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* set error if required */
-	if (xdr_status == false) {
+	if (!xdr_status) {
 		*error = MB_ERROR_EOF;
 		status = MB_FAILURE;
 	}
@@ -844,7 +844,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* set error if required */
-	if (xdr_status == false) {
+	if (!xdr_status) {
 		*error = MB_ERROR_WRITE_FAIL;
 		status = MB_FAILURE;
 	}
