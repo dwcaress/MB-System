@@ -4598,8 +4598,8 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     /*--------------------------------------------------------------*/
     /* recalculate Bathymetry  */
     /*--------------------------------------------------------------*/
-    if ((store->read_RawDetection && RawDetection->optionaldata == false)
-        || (store->read_SegmentedRawDetection && SegmentedRawDetection->optionaldata == false)
+    if ((store->read_RawDetection && !RawDetection->optionaldata)
+        || (store->read_SegmentedRawDetection && !SegmentedRawDetection->optionaldata)
         || pars->recalculate_bathymetry) {
 
       if (verbose >= 2) {
@@ -5009,7 +5009,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     }
 
     /* regenerate SideScan */
-    if (store->read_ProcessedSideScan == false
+    if (!store->read_ProcessedSideScan
       || pars->recalculate_bathymetry) {
       status = mbsys_reson7k3_makess(verbose, mbio_ptr, store_ptr, ss_source,
                                       false, pixel_size, false, swath_width,
@@ -5835,7 +5835,7 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
     } // end bathymetry in SegmentedRawDetection 7047 records (e.g. Hydrosweep)
 
     // insert sidescan into ProcessedSideScan record
-    if (store->read_ProcessedSideScan == false) {
+    if (!store->read_ProcessedSideScan) {
       // Initialize ProcessedSideScan structure if necessary
       store->read_ProcessedSideScan = true;
       if (store->read_RawDetection) {
@@ -6322,7 +6322,6 @@ int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
   s7k3_bathydata *bathydata;
   s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata;
   double xtrackmin;
-  int altitude_found;
   mb_u_char *qualitycharptr;
   mb_u_char beamflag;
 
@@ -6356,7 +6355,7 @@ int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
   if (*kind == MB_DATA_DATA) {
 
     /* get altitude */
-    altitude_found = false;
+    bool altitude_found = false;
     if (mb_io_ptr->naltitude > 0) {
       mb_altint_interp(verbose, mbio_ptr, store->time_d, altitudev, error);
       altitude_found = true;
@@ -6367,7 +6366,7 @@ int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 
       /* get transducer depth and altitude */
       *transducer_depth = RawDetection->vehicle_depth + RawDetection->heave;
-      if (altitude_found == false) {
+      if (!altitude_found) {
         /* get depth closest to nadir */
         xtrackmin = 999999.9;
         for (int i = 0; i < RawDetection->number_beams; i++) {
@@ -6396,7 +6395,7 @@ int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 
       /* get transducer depth and altitude */
       *transducer_depth = SegmentedRawDetection->vehicle_depth + SegmentedRawDetection->heave;
-      if (altitude_found == false) {
+      if (!altitude_found) {
         /* get depth closest to nadir */
         xtrackmin = 999999.9;
         for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
@@ -6424,10 +6423,9 @@ int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
       status = MB_FAILURE;
     }
 
-    if (altitude_found == false && Altitude->altitude > 0.0) {
+    if (!altitude_found && Altitude->altitude > 0.0) {
       *altitudev = Altitude->altitude;
-    }
-    else if (altitude_found == false) {
+    } else if (!altitude_found) {
       *altitudev = 0.0;
     }
 
@@ -8010,8 +8008,12 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,
-                         int swath_width_set, double *swath_width, int pixel_int, int *error) {
+int mbsys_reson7k3_makess(
+    int verbose, void *mbio_ptr, void *store_ptr, int source,
+    int pixel_size_set,  // TODO(schwehr): bool
+    double *pixel_size,
+    int swath_width_set,  // TODO(schwehr): bool
+    double *swath_width, int pixel_int, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8051,7 +8053,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
   double acrosstracktable[MBSYS_RESON7K_MAX_BEAMS], acrosstracktablemin;
   double alongtracktable[MBSYS_RESON7K_MAX_BEAMS];
   int irangenadir, irange;
-  int found;
+  bool found;
   int pixel_int_use;
   int nsample_use, sample_start, sample_end;
   double angle, xtrack, xtrackss, ltrackss, factor;
@@ -8129,17 +8131,17 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
       nss = MIN(2 * BeamGeometry->number_beams, MBSYS_RESON7K_MAX_PIXELS);
 
       // get SideScan pixel size
-      //if (swath_width_set == false) {
+      //if (!swath_width_set) {
       //  (*swath_width) = MAX(fabs(RTD * BeamGeometry->angle_acrosstrack[0]),
       //                       fabs(RTD * BeamGeometry->angle_acrosstrack[BeamGeometry->number_beams - 1]));
       //}
-      if (swath_width_set == false && RawDetection->number_beams > 0) {
+      if (!swath_width_set && RawDetection->number_beams > 0) {
         int ib1 = RawDetection->rawdetectiondata[0].beam_descriptor - 1;
         int ib2 = RawDetection->rawdetectiondata[RawDetection->number_beams - 1].beam_descriptor - 1;
         (*swath_width) = MAX(fabs(RTD * BeamGeometry->angle_acrosstrack[ib1]),
                              fabs(RTD * BeamGeometry->angle_acrosstrack[ib2]));
       }
-      if (pixel_size_set == false) {
+      if (!pixel_size_set) {
 
         // get median depth relative to the sonar and check for min max xtrack
         nbathsort = 0;
@@ -8155,7 +8157,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
           if (mb_beam_ok(beamflag[i])) {
             bathsort[nbathsort] = bathydata->depth - RawDetection->vehicle_depth;
             nbathsort++;
-            if (found == false || fabs(bathydata->acrosstrack) < minxtrack) {
+            if (!found || fabs(bathydata->acrosstrack) < minxtrack) {
               minxtrack = fabs(bathydata->acrosstrack);
               iminxtrack = i;
               found = true;
@@ -8192,12 +8194,12 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
       nss = MBSYS_RESON7K_MAX_PIXELS / 2;
 
       // get SideScan pixel size
-      if (swath_width_set == false && SegmentedRawDetection->n_rx > 0) {
+      if (!swath_width_set && SegmentedRawDetection->n_rx > 0) {
         double rx_angle1 = SegmentedRawDetection->segmentedrawdetectionrxdata[0].rx_angle_cross;
         double rx_angle2 = SegmentedRawDetection->segmentedrawdetectionrxdata[SegmentedRawDetection->n_rx - 1].rx_angle_cross;
         (*swath_width) = MAX(fabs(RTD * rx_angle1), fabs(RTD * rx_angle2));
       }
-      if (pixel_size_set == false) {
+      if (pixel_size_set) {
 
         // get median depth relative to the sonar and check for min max xtrack
         nbathsort = 0;
@@ -8213,7 +8215,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
           if (mb_beam_ok(beamflag[i])) {
             bathsort[nbathsort] = bathydata->depth - SegmentedRawDetection->vehicle_depth;
             nbathsort++;
-            if (found == false || fabs(bathydata->acrosstrack) < minxtrack) {
+            if (!found || fabs(bathydata->acrosstrack) < minxtrack) {
               minxtrack = fabs(bathydata->acrosstrack);
               iminxtrack = i;
               found = true;
