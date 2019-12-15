@@ -2111,7 +2111,7 @@ int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *match, short sonar,
+int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, bool *match, short sonar,
                          int version, int *goodend, int *error) {
 	char line[EM2_BATH_HEADER_SIZE];
 	short short_val;
@@ -2914,7 +2914,7 @@ int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int length, int *match,
+int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int length, bool *match,
                        int *goodend, int *error) {
 	char line[EM2_SS_HEADER_SIZE];
 	short short_val;
