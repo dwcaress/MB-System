@@ -376,7 +376,7 @@ int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 	/* check if projection has been read from *mb222 file, if so, tell mb system */
-	else if ((store->projection_set) && (mb_io_ptr->projection_initialized == false)) {
+	else if (store->projection_set && !mb_io_ptr->projection_initialized) {
 		mb_proj_init(verbose, projection->projection_id, &(mb_io_ptr->pjptr), error);
 		strncpy(mb_io_ptr->projection_id, projection->projection_id, MB_NAME_LENGTH);
 		mb_io_ptr->projection_initialized = true;
@@ -432,7 +432,7 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* write header record if needed (just once, here at top of file) */
-	if (store->sxp_header_set && (*header_rec_written == false)) {
+	if (store->sxp_header_set && !*header_rec_written) {
 		const int origkind = store->kind;
 		const int origtype = store->type;
 		store->kind = MB_DATA_HEADER;
@@ -446,7 +446,7 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* write projection record if needed (just once, here at top of file) */
-	if (store->projection_set && (*projection_rec_written == false)) {
+	if (store->projection_set && !*projection_rec_written) {
 		const int origkind = store->kind;
 		const int origtype = store->type;
 		store->kind = MB_DATA_PARAMETER;

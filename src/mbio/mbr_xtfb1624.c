@@ -568,7 +568,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char line[MBF_XTFB1624_MAXLINE];
 
 	/* read file header if required */
-	if (*fileheaderread == false) {
+	if (!*fileheaderread) {
 		const int read_len = fread(line, 1, MBF_XTFB1624_FILEHEADERLEN, mb_io_ptr->mbfp);
 		if (read_len == MBF_XTFB1624_FILEHEADERLEN) {
 			/* extract data from buffer */
@@ -692,7 +692,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* if NavUnits indicates use of projected coordinates (the format spec
 			    indicates the projection parameters are unused!) assume UTM zone 1N
 			    and set up the projection */
-			if (fileheader->NavUnits == 0 && mb_io_ptr->projection_initialized == false) {
+			if (fileheader->NavUnits == 0 && !mb_io_ptr->projection_initialized) {
 				/* initialize UTM projection */
 				const int utm_zone = (int)(((RTD * 0.0 + 183.0) / 6.0) + 0.5);
 				char projection[MB_NAME_LENGTH];
