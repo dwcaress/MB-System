@@ -5036,7 +5036,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       /*--------------------------------------------------------------*/
       /* recalculate bathymetry  */
       /*--------------------------------------------------------------*/
-      if (status == MB_SUCCESS && (bathymetry->optionaldata == false || pars->recalculate_bathymetry)) {
+      if (status == MB_SUCCESS && (!bathymetry->optionaldata || pars->recalculate_bathymetry)) {
 
         if (verbose >= 2) {
           fprintf(stderr, "\ndbg2 Recalculating bathymetry in %s: 7k ping records read:\n", __func__);
@@ -6992,7 +6992,7 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
       mb_altint_interp(verbose, mbio_ptr, store->time_d, altitudev, error);
       altitude_found = true;
     }
-    if (altitude_found == false && bathymetry->optionaldata) {
+    if (!altitude_found && bathymetry->optionaldata) {
       /* get depth closest to nadir */
       double xtrackmin = 999999.9;
       char flag;
@@ -7029,10 +7029,10 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
         }
       }
     }
-    if (altitude_found == false && altitude->altitude > 0.0) {
+    if (!altitude_found && altitude->altitude > 0.0) {
       *altitudev = altitude->altitude;
     }
-    else if (altitude_found == false) {
+    else if (!altitude_found) {
       *altitudev = 0.0;
     }
 
@@ -9366,7 +9366,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
         bathsort[nbathsort] = bathymetry->depth[i] + bathymetry->vehicle_height;
         nbathsort++;
 
-        if (found == false || fabs(bathymetry->acrosstrack[i]) < minxtrack) {
+        if (!found || fabs(bathymetry->acrosstrack[i]) < minxtrack) {
           minxtrack = fabs(bathymetry->acrosstrack[i]);
           iminxtrack = i;
           found = true;
@@ -9380,11 +9380,11 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
     const int nss = MIN(4 * bathymetry->number_beams, MBSYS_RESON7K_MAX_PIXELS);
 
     /* get sidescan pixel size */
-    if (swath_width_set == false && bathymetry->number_beams > 0) {
+    if (!swath_width_set && bathymetry->number_beams > 0) {
       (*swath_width) = MAX(fabs(RTD * beamgeometry->angle_acrosstrack[0]),
                            fabs(RTD * beamgeometry->angle_acrosstrack[bathymetry->number_beams - 1]));
     }
-    if (pixel_size_set == false && nbathsort > 0) {
+    if (!pixel_size_set && nbathsort > 0) {
       /* calculate pixel size implied using swath width and nadir altitude */
       qsort((void *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
       double pixel_size_calc = 2.1 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / nss;
@@ -9482,7 +9482,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
     }
 
     /* use v2 snippet data */
-    else if (source == R7KRECID_7kV2SnippetData && v2snippet->error_flag == false) {
+    else if (source == R7KRECID_7kV2SnippetData && !v2snippet->error_flag) {
       for (int i = 0; i < v2snippet->number_beams; i++) {
         s7kr_v2snippettimeseries *snippettimeseries = (s7kr_v2snippettimeseries *)&(v2snippet->snippettimeseries[i]);
         const int ibeam = snippettimeseries->beam_number;
@@ -9602,7 +9602,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
       for (int i = sample_start; i < sample_end; i++) {
         range = ((double)i) / ((double)volatilesettings->sample_rate);
         found = false;
-        for (int j = irange; j > 0 && found == false; j--) {
+        for (int j = irange; j > 0 && !found; j--) {
           if (range >= rangetable[j] && range < rangetable[j - 1]) {
             irange = j;
             found = true;
@@ -9634,7 +9634,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
       for (int i = sample_start; i < sample_end; i++) {
         range = ((double)i) / ((double)volatilesettings->sample_rate);
         found = false;
-        for (int j = irange; j < nrangetable - 1 && found == false; j++) {
+        for (int j = irange; j < nrangetable - 1 && !found; j++) {
           if (range >= rangetable[j] && range < rangetable[j + 1]) {
             irange = j;
             found = true;

@@ -869,8 +869,11 @@ int mbsys_benthos_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
-                         int swath_width_set, double *swath_width, int *error) {
+int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr,
+                         int pixel_size_set,  // TODO(schwehr): bool
+                         double *pixel_size,
+                         int swath_width_set,  // TODO(schwehr): bool
+                         double *swath_width, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -913,11 +916,11 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 
 		const double groundrange = sqrt(pow(store->ssrawslantrange, 2) - pow(store->bath[0], 2));
 
-		if (swath_width_set == false) {
+		if (!swath_width_set) {
 			*swath_width = 2.0 * groundrange;
 		}
 
-		if (pixel_size_set == false) {
+		if (!pixel_size_set) {
 			const double pixel_size_calc = groundrange / groundsamples;
 
 			if ((*pixel_size) <= 0.0)

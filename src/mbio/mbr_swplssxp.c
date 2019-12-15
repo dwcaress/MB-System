@@ -355,7 +355,7 @@ int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	swpls_projection *projection = &store->projection;
 
 	/* check if projection has been set from *.prj file, if so, copy into projection structure */
-	if ((store->projection_set == false) && mb_io_ptr->projection_initialized) {
+	if (!store->projection_set && mb_io_ptr->projection_initialized) {
 		projection->time_d = time(NULL);
 		projection->microsec = 0;
 		projection->nchars = strnlen(mb_io_ptr->projection_id, MB_NAME_LENGTH);

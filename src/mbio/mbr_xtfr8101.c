@@ -254,7 +254,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	double timetag, heave, roll, pitch, heading;
 
 	/* read file header if required */
-	if (*fileheaderread == false) {
+	if (!*fileheaderread) {
 		read_len = fread(line, 1, MBF_XTFR8101_FILEHEADERLEN, mb_io_ptr->mbfp);
 		if (read_len == MBF_XTFR8101_FILEHEADERLEN) {
 			/* extract data from buffer */
@@ -378,7 +378,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* if NavUnits indicates use of projected coordinates (the format spec
 			    indicates the projection parameters are unused!) assume UTM zone 1N
 			    and set up the projection */
-			if (fileheader->NavUnits == 0 && mb_io_ptr->projection_initialized == false) {
+			if (fileheader->NavUnits == 0 && !mb_io_ptr->projection_initialized) {
 				/* initialize UTM projection */
 				const int utm_zone = (int)(((RTD * 0.0 + 183.0) / 6.0) + 0.5);
                                 char projection[MB_NAME_LENGTH];
