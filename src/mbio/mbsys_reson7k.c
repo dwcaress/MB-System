@@ -1388,31 +1388,31 @@ int mbsys_reson7k_print_header(int verbose, s7k_header *header, int *error) {
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     Version:                 %d\n", first, header->Version);
   fprintf(stderr, "%s     Offset:                  %d\n", first, header->Offset);
-  fprintf(stderr, "%s     SyncPattern:             %d\n", first, header->SyncPattern);
-  fprintf(stderr, "%s     Size:                    %d\n", first, header->Size);
-  fprintf(stderr, "%s     OffsetToOptionalData:    %d\n", first, header->OffsetToOptionalData);
-  fprintf(stderr, "%s     OptionalDataIdentifier:  %d\n", first, header->OptionalDataIdentifier);
+  fprintf(stderr, "%s     SyncPattern:             %u\n", first, header->SyncPattern);
+  fprintf(stderr, "%s     Size:                    %u\n", first, header->Size);
+  fprintf(stderr, "%s     OffsetToOptionalData:    %u\n", first, header->OffsetToOptionalData);
+  fprintf(stderr, "%s     OptionalDataIdentifier:  %u\n", first, header->OptionalDataIdentifier);
   fprintf(stderr, "%s     s7kTime.Year:            %d\n", first, header->s7kTime.Year);
   fprintf(stderr, "%s     s7kTime.Day:             %d\n", first, header->s7kTime.Day);
   fprintf(stderr, "%s     s7kTime.Seconds:         %f\n", first, header->s7kTime.Seconds);
   fprintf(stderr, "%s     s7kTime.Hours:           %d\n", first, header->s7kTime.Hours);
   fprintf(stderr, "%s     7kTime->Minutes:         %d\n", first, header->s7kTime.Minutes);
   fprintf(stderr, "%s     Reserved:                %d\n", first, header->Reserved);
-  fprintf(stderr, "%s     RecordType:              %d\n", first, header->RecordType);
-  fprintf(stderr, "%s     DeviceId:                %d\n", first, header->DeviceId);
+  fprintf(stderr, "%s     RecordType:              %u\n", first, header->RecordType);
+  fprintf(stderr, "%s     DeviceId:                %u\n", first, header->DeviceId);
   fprintf(stderr, "%s     Reserved2:               %d\n", first, header->Reserved2);
   fprintf(stderr, "%s     SystemEnumerator:        %d\n", first, header->SystemEnumerator);
-  fprintf(stderr, "%s     DataSetNumber:           %d\n", first, header->DataSetNumber);
-  fprintf(stderr, "%s     RecordNumber:            %d\n", first, header->RecordNumber);
+  fprintf(stderr, "%s     DataSetNumber:           %u\n", first, header->DataSetNumber);
+  fprintf(stderr, "%s     RecordNumber:            %u\n", first, header->RecordNumber);
   for (int i = 0; i < 8; i++) {
     fprintf(stderr, "%s     PreviousRecord[%d]:       %d\n", first, i, header->PreviousRecord[i]);
     fprintf(stderr, "%s     NextRecord[%d]:           %d\n", first, i, header->NextRecord[i]);
   }
   fprintf(stderr, "%s     Flags:                   %d\n", first, header->Flags);
   fprintf(stderr, "%s     Reserved3:               %d\n", first, header->Reserved3);
-  fprintf(stderr, "%s     Reserved4:               %d\n", first, header->Reserved4);
-  fprintf(stderr, "%s     FragmentedTotal:         %d\n", first, header->FragmentedTotal);
-  fprintf(stderr, "%s     FragmentNumber:          %d\n", first, header->FragmentNumber);
+  fprintf(stderr, "%s     Reserved4:               %u\n", first, header->Reserved4);
+  fprintf(stderr, "%s     FragmentedTotal:         %u\n", first, header->FragmentedTotal);
+  fprintf(stderr, "%s     FragmentNumber:          %u\n", first, header->FragmentNumber);
 
   const int status = MB_SUCCESS;
 
@@ -1565,7 +1565,7 @@ int mbsys_reson7k_print_position(int verbose, s7kr_position *position, int *erro
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     datum:                   %d\n", first, position->datum);
+  fprintf(stderr, "%s     datum:                   %u\n", first, position->datum);
   fprintf(stderr, "%s     latency:                 %f\n", first, position->latency);
   fprintf(stderr, "%s     latitude:                %f\n", first, position->latitude);
   fprintf(stderr, "%s     longitude:               %f\n", first, position->longitude);
@@ -1660,7 +1660,7 @@ int mbsys_reson7k_print_tide(int verbose, s7kr_tide *tide, int *error) {
   fprintf(stderr, "%s     source:                     %d\n", first, tide->source);
   fprintf(stderr, "%s     flags:                      %d\n", first, tide->flags);
   fprintf(stderr, "%s     gauge:                      %d\n", first, tide->gauge);
-  fprintf(stderr, "%s     datum:                      %d\n", first, tide->datum);
+  fprintf(stderr, "%s     datum:                      %u\n", first, tide->datum);
   fprintf(stderr, "%s     latency:                    %f\n", first, tide->latency);
   fprintf(stderr, "%s     latitude:                   %f\n", first, tide->latitude);
   fprintf(stderr, "%s     longitude:                  %f\n", first, tide->longitude);
@@ -1824,7 +1824,7 @@ int mbsys_reson7k_print_svp(int verbose, s7kr_svp *svp, int *error) {
   fprintf(stderr, "%s     reserved2:                  %d\n", first, svp->reserved2);
   fprintf(stderr, "%s     latitude:                   %f\n", first, svp->latitude);
   fprintf(stderr, "%s     longitude:                  %f\n", first, svp->longitude);
-  fprintf(stderr, "%s     n:                          %d\n", first, svp->n);
+  fprintf(stderr, "%s     n:                          %u\n", first, svp->n);
   fprintf(stderr, "%s     nalloc:                     %d\n", first, svp->nalloc);
   for (int i = 0; i < svp->n; i++)
     fprintf(stderr, "%s     i:%d depth:%f sound_velocity:%f\n", first, i, svp->depth[i], svp->sound_velocity[i]);
@@ -1874,7 +1874,7 @@ int mbsys_reson7k_print_ctd(int verbose, s7kr_ctd *ctd, int *error) {
   fprintf(stderr, "%s     latitude:                   %f\n", first, ctd->latitude);
   fprintf(stderr, "%s     longitude:                  %f\n", first, ctd->longitude);
   fprintf(stderr, "%s     sample_rate:                %f\n", first, ctd->sample_rate);
-  fprintf(stderr, "%s     n:                          %d\n", first, ctd->n);
+  fprintf(stderr, "%s     n:                          %u\n", first, ctd->n);
   fprintf(stderr, "%s     nalloc:                     %d\n", first, ctd->nalloc);
   for (int i = 0; i < ctd->n; i++)
     fprintf(stderr, "%s     i:%d conductivity_salinity:%f temperature:%f pressure_depth:%f sound_velocity:%f absorption:%f\n",
@@ -1921,8 +1921,8 @@ int mbsys_reson7k_print_geodesy(int verbose, s7kr_geodesy *geodesy, int *error) 
   fprintf(stderr, "%s     flattening:                 %f\n", first, geodesy->flattening);
   fprintf(stderr, "%s     reserved1:                  %s\n", first, geodesy->reserved1);
   fprintf(stderr, "%s     datum:                      %s\n", first, geodesy->datum);
-  fprintf(stderr, "%s     calculation_method:         %d\n", first, geodesy->calculation_method);
-  fprintf(stderr, "%s     number_parameters:          %d\n", first, geodesy->number_parameters);
+  fprintf(stderr, "%s     calculation_method:         %u\n", first, geodesy->calculation_method);
+  fprintf(stderr, "%s     number_parameters:          %u\n", first, geodesy->number_parameters);
   fprintf(stderr, "%s     dx:                         %f\n", first, geodesy->dx);
   fprintf(stderr, "%s     dy:                         %f\n", first, geodesy->dy);
   fprintf(stderr, "%s     dz:                         %f\n", first, geodesy->dz);
@@ -2222,9 +2222,9 @@ int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format, s7k_fsdwchanne
   fprintf(stderr, "%s     reserved1[0]                %d\n", first, fsdwchannel->reserved1[0]);
   fprintf(stderr, "%s     reserved1[1]                %d\n", first, fsdwchannel->reserved1[1]);
   fprintf(stderr, "%s     reserved1[2]                %d\n", first, fsdwchannel->reserved1[2]);
-  fprintf(stderr, "%s     number_samples:             %d\n", first, fsdwchannel->number_samples);
-  fprintf(stderr, "%s     start_time:                 %d\n", first, fsdwchannel->start_time);
-  fprintf(stderr, "%s     sample_interval:            %d\n", first, fsdwchannel->sample_interval);
+  fprintf(stderr, "%s     number_samples:             %u\n", first, fsdwchannel->number_samples);
+  fprintf(stderr, "%s     start_time:                 %u\n", first, fsdwchannel->start_time);
+  fprintf(stderr, "%s     sample_interval:            %u\n", first, fsdwchannel->sample_interval);
   fprintf(stderr, "%s     range:                      %f\n", first, fsdwchannel->range);
   fprintf(stderr, "%s     voltage:                    %f\n", first, fsdwchannel->voltage);
   fprintf(stderr, "%s     name:                       %s\n", first, fsdwchannel->name);
@@ -2278,12 +2278,12 @@ int mbsys_reson7k_print_fsdwssheader(int verbose, s7k_fsdwssheader *fsdwssheader
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     subsystem:                    %d\n", first, fsdwssheader->subsystem);
   fprintf(stderr, "%s     channelNum:                   %d\n", first, fsdwssheader->channelNum);
-  fprintf(stderr, "%s     pingNum:                      %d\n", first, fsdwssheader->pingNum);
+  fprintf(stderr, "%s     pingNum:                      %u\n", first, fsdwssheader->pingNum);
   fprintf(stderr, "%s     packetNum:                    %d\n", first, fsdwssheader->packetNum);
   fprintf(stderr, "%s     trigSource:                   %d\n", first, fsdwssheader->trigSource);
-  fprintf(stderr, "%s     samples:                      %d\n", first, fsdwssheader->samples);
-  fprintf(stderr, "%s     sampleInterval:               %d\n", first, fsdwssheader->sampleInterval);
-  fprintf(stderr, "%s     startDepth:                   %d\n", first, fsdwssheader->startDepth);
+  fprintf(stderr, "%s     samples:                      %u\n", first, fsdwssheader->samples);
+  fprintf(stderr, "%s     sampleInterval:               %u\n", first, fsdwssheader->sampleInterval);
+  fprintf(stderr, "%s     startDepth:                   %u\n", first, fsdwssheader->startDepth);
   fprintf(stderr, "%s     weightingFactor:              %d\n", first, fsdwssheader->weightingFactor);
   fprintf(stderr, "%s     ADCGain:                      %d\n", first, fsdwssheader->ADCGain);
   fprintf(stderr, "%s     ADCMax:                       %d\n", first, fsdwssheader->ADCMax);
@@ -2292,7 +2292,7 @@ int mbsys_reson7k_print_fsdwssheader(int verbose, s7k_fsdwssheader *fsdwssheader
   fprintf(stderr, "%s     markNumber:                   %d\n", first, fsdwssheader->markNumber);
   fprintf(stderr, "%s     dataFormat:                   %d\n", first, fsdwssheader->dataFormat);
   fprintf(stderr, "%s     reserved:                     %d\n", first, fsdwssheader->reserved);
-  fprintf(stderr, "%s     millisecondsToday:            %d\n", first, fsdwssheader->millisecondsToday);
+  fprintf(stderr, "%s     millisecondsToday:            %u\n", first, fsdwssheader->millisecondsToday);
   fprintf(stderr, "%s     year:                         %d\n", first, fsdwssheader->year);
   fprintf(stderr, "%s     day:                          %d\n", first, fsdwssheader->day);
   fprintf(stderr, "%s     hour:                         %d\n", first, fsdwssheader->hour);
@@ -2303,7 +2303,7 @@ int mbsys_reson7k_print_fsdwssheader(int verbose, s7k_fsdwssheader *fsdwssheader
   fprintf(stderr, "%s     roll:                         %d\n", first, fsdwssheader->roll);
   fprintf(stderr, "%s     heave:                        %d\n", first, fsdwssheader->heave);
   fprintf(stderr, "%s     yaw:                          %d\n", first, fsdwssheader->yaw);
-  fprintf(stderr, "%s     depth:                        %d\n", first, fsdwssheader->depth);
+  fprintf(stderr, "%s     depth:                        %u\n", first, fsdwssheader->depth);
   fprintf(stderr, "%s     temperature:                  %d\n", first, fsdwssheader->temperature);
   for (int i = 0; i < 2; i++)
     fprintf(stderr, "%s     reserved2[%d]:                 %d\n", first, i, fsdwssheader->reserved2[i]);
@@ -2699,10 +2699,10 @@ int mbsys_reson7k_print_volatilesettings(int verbose, s7kr_volatilesettings *vol
   fprintf(stderr, "%s     sample_rate:                %f\n", first, volatilesettings->sample_rate);
   fprintf(stderr, "%s     receiver_bandwidth:         %f\n", first, volatilesettings->receiver_bandwidth);
   fprintf(stderr, "%s     pulse_width:                %f\n", first, volatilesettings->pulse_width);
-  fprintf(stderr, "%s     pulse_type:                 %d\n", first, volatilesettings->pulse_type);
-  fprintf(stderr, "%s     pulse_envelope:             %d\n", first, volatilesettings->pulse_envelope);
+  fprintf(stderr, "%s     pulse_type:                 %u\n", first, volatilesettings->pulse_type);
+  fprintf(stderr, "%s     pulse_envelope:             %u\n", first, volatilesettings->pulse_envelope);
   fprintf(stderr, "%s     pulse_envelope_par:         %f\n", first, volatilesettings->pulse_envelope_par);
-  fprintf(stderr, "%s     pulse_reserved:             %d\n", first, volatilesettings->pulse_reserved);
+  fprintf(stderr, "%s     pulse_reserved:             %u\n", first, volatilesettings->pulse_reserved);
   fprintf(stderr, "%s     max_ping_rate:              %f\n", first, volatilesettings->max_ping_rate);
   fprintf(stderr, "%s     ping_period:                %f\n", first, volatilesettings->ping_period);
   fprintf(stderr, "%s     range_selection:            %f\n", first, volatilesettings->range_selection);
@@ -4663,7 +4663,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       mb_get_time(verbose, time_i, &time_d);
       if (verbose > 1)
         fprintf(stderr,
-                "R7KRECID_7kremotecontrolsettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+                "R7KRECID_7kremotecontrolsettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%u\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber);
     }
     if (store->read_backscatter) {
@@ -4678,8 +4678,8 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       mb_get_time(verbose, time_i, &time_d);
       if (verbose > 1)
         fprintf(stderr,
-                "R7KRECID_7kBackscatterImageData:   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d "
-                "ping:%d samples:%d\n",
+                "R7KRECID_7kBackscatterImageData:   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%u "
+                "ping:%u samples:%u\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
                 backscatter->ping_number, backscatter->number_samples);
     }
@@ -4695,8 +4695,8 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       mb_get_time(verbose, time_i, &time_d);
       if (verbose > 1)
         fprintf(stderr,
-                "R7KRECID_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d "
-                "beams:%d samples:%d\n",
+                "R7KRECID_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%u ping:%u "
+                "beams:%d samples:%u\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
                 beam->ping_number, beam->number_beams, beam->number_samples);
     }
@@ -4712,7 +4712,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       mb_get_time(verbose, time_i, &time_d);
       if (verbose > 1)
         fprintf(stderr,
-                "R7KRECID_7kVerticalDepth: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+                "R7KRECID_7kVerticalDepth: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%u ping:%u\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
                 verticaldepth->ping_number);
     }
@@ -4728,8 +4728,8 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       mb_get_time(verbose, time_i, &time_d);
       if (verbose > 1)
         fprintf(stderr,
-                "R7KRECID_7kImageData:              7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d "
-                "ping:%d width:%d height:%d\n",
+                "R7KRECID_7kImageData:              7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%u "
+                "ping:%u width:%u height:%u\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
                 image->ping_number, image->width, image->height);
     }
@@ -4751,8 +4751,8 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
       if (verbose > 1)
         fprintf(stderr,
-                "R7KRECID_7kBathymetricData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d "
-                "ping:%d beams:%d\n",
+                "R7KRECID_7kBathymetricData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%u "
+                "ping:%u beams:%u\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
                 bathymetry->ping_number, bathymetry->number_beams);
 
@@ -4875,7 +4875,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
         s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
         if (verbose > 1)
           fprintf(stderr, "Timestamp changed in function %s: "
-                "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d | ping_number:%d\n",
+                "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d | ping_number:%u\n",
                 __func__, time_i[0], time_i[1], time_i[2], time_i[3],
                 time_i[4], time_i[5], time_i[6], bathymetry->ping_number);
 
@@ -7123,20 +7123,13 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
     if (bathymetry->optionaldata) {
       *heading = RTD * bathymetry->heading;
 
-    /* get navigation */
-    // if (bathymetry->optionaldata) {
       *navlon = RTD * bathymetry->longitude;
       *navlat = RTD * bathymetry->latitude;
-    }
 
-    /* get draft  */
-    if (bathymetry->optionaldata) {
       *draft = -bathymetry->vehicle_height + reference->water_z;
-    }
-    else if (mb_io_ptr->nsonardepth > 0) {
+    } else if (mb_io_ptr->nsonardepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
-    }
-    else {
+    } else {
       *draft = reference->water_z;
     }
 
@@ -7472,24 +7465,16 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
     mb_hedint_interp(verbose, mbio_ptr, store->time_d, &(heading[0]), error);
     mb_navint_interp(verbose, mbio_ptr, store->time_d, heading[0], speed[0], &(navlon[0]), &(navlat[0]), &(speed[0]), error);
 
-    /* get heading */
-    if (bathymetry->optionaldata)
+    if (bathymetry->optionaldata) {
       heading[0] = RTD * bathymetry->heading;
 
-    /* get navigation */
-    if (bathymetry->optionaldata) {
       navlon[0] = RTD * bathymetry->longitude;
       navlat[0] = RTD * bathymetry->latitude;
-    }
 
-    /* get draft  */
-    if (bathymetry->optionaldata) {
       draft[0] = -bathymetry->vehicle_height + reference->water_z;
-    }
-    else if (mb_io_ptr->nsonardepth > 0) {
+    } else if (mb_io_ptr->nsonardepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, &(draft[0]), error);
-    }
-    else {
+    } else {
       draft[0] = reference->water_z;
     }
 
