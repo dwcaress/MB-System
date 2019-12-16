@@ -919,7 +919,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 	int status = MB_SUCCESS;
 
 	/* if asciiheader has not yet been written, write it */
-	if (mb_segyio_ptr->asciiheader_set == false) {
+	if (!mb_segyio_ptr->asciiheader_set) {
 		if (fwrite(asciiheader, 1, MB_SEGY_ASCIIHEADER_LENGTH, mb_segyio_ptr->fp) != MB_SEGY_ASCIIHEADER_LENGTH) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_WRITE_FAIL;
@@ -932,7 +932,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 	int index;
 
 	/* if fileheader has not yet been written, write it */
-	if (mb_segyio_ptr->fileheader_set == false) {
+	if (!mb_segyio_ptr->fileheader_set) {
 		/* make sure there is adequate memory in the buffer */
 		if (mb_segyio_ptr->bufferalloc < MB_SEGY_FILEHEADER_LENGTH) {
 			/* allocate buffer memory */

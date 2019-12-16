@@ -2409,8 +2409,11 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
-                         int swath_width_set, double *swath_width, int pixel_int, int *error) {
+int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr,
+                         int pixel_size_set,  // TODO(schwehr): bool
+                         double *pixel_size,
+                         int swath_width_set,  // TODO(schwehr): bool
+                         double *swath_width, int pixel_int, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2501,11 +2504,11 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		store->MSS_num_pixels = MBSYS_HYSWEEP_MSS_NUM_PIXELS;
 
 		/* get sidescan swath width and pixel size */
-		if (swath_width_set == false && store->RMB_num_beams > 0) {
+		if (!swath_width_set && store->RMB_num_beams > 0) {
 			(*swath_width) =
 			    MAX(fabs(store->RMB_sounding_rollangles[0]), fabs(store->RMB_sounding_rollangles[store->RMB_num_beams - 1]));
 		}
-		if (pixel_size_set == false && nbathsort > 0) {
+		if (!pixel_size_set && nbathsort > 0) {
 			/* calculate pixel size implied using swath width and nadir altitude */
 			pixel_size_calc =
 			    2.1 * tan(DTR * (*swath_width)) * store->MSS_table_altitude_sort[nbathsort / 2] / store->MSS_num_pixels;

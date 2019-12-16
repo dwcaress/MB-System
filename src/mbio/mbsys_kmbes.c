@@ -2571,8 +2571,12 @@ int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
-             int swath_width_set, double *swath_width, int pixel_int, int *error) {
+int mbsys_kmbes_makess(
+    int verbose, void *mbio_ptr, void *store_ptr,
+    int pixel_size_set,  // TODO(schwehr): bool
+    double *pixel_size,
+    int swath_width_set, // TODO(schwehr): bool
+    double *swath_width, int pixel_int, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2617,13 +2621,13 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
     }
 
     /* if not set get swath width from sonar settings */
-    if (swath_width_set == false) {
+    if (!swath_width_set) {
       *swath_width = MAX(fabs(store->mrz[0].pingInfo.portSectorEdge_deg),
                             fabs(store->mrz[0].pingInfo.starbSectorEdge_deg));
     }
 
     /* get median altitude if needed to calculate pixel size in meters */
-    if (pixel_size_set == false) {
+    if (!pixel_size_set) {
 
       /* loop over sub-ping datagrams */
       nbathsort = 0;

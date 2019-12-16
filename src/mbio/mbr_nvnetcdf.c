@@ -202,7 +202,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* if first read then set everything up */
-	if (*dataread == false) {
+	if (!*dataread) {
 		*dataread = true;
 
 		/* get dimensions */

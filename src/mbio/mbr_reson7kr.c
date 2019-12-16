@@ -8033,7 +8033,7 @@ Have a nice day...\n");
     }
 
 #ifdef MBR_RESON7KR_DEBUG2
-    if (status == MB_SUCCESS && !done && *save_flag == false) {
+    if (status == MB_SUCCESS && !done && !*save_flag) {
       fprintf(stderr, "Reading record id: %4.4X  %4.4d | %4.4X  %4.4d | %4.4hX  %4.4d |", *recordid, *recordid, *deviceid,
               *deviceid, *enumerator, *enumerator);
       if (*recordid == R7KRECID_ReferencePoint)
@@ -9131,7 +9131,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
   /* calculate bathymetry if only raw detects are available */
-  if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->read_bathymetry == false &&
+  if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && !store->read_bathymetry &&
       store->read_v2rawdetection) {
     bathymetry->header = v2rawdetection->header;
     bathymetry->header.RecordType = R7KRECID_7kBathymetricData;
@@ -9160,7 +9160,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   }
 
   /* else calculate bathymetry if only detects are available */
-  else if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->read_bathymetry == false &&
+  else if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && !store->read_bathymetry &&
            store->read_v2detection) {
     bathymetry->header = v2detection->header;
     bathymetry->header.RecordType = R7KRECID_7kBathymetricData;
@@ -9184,7 +9184,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   }
 
   /* get optional values in bathymetry record if needed */
-  if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && bathymetry->optionaldata == false) {
+  if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && !bathymetry->optionaldata) {
     /* get navigation */
     speed = 0.0;
     longitude = 0.0;
@@ -9361,7 +9361,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
   /* generate processed sidescan if needed */
   if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->read_bathymetry &&
-      store->read_processedsidescan == false) {
+      !store->read_processedsidescan) {
     /* set source of processed sidescan to be best available data */
     if (store->read_calibratedsnippet)
       ss_source = R7KRECID_7kCalibratedSnippetData;
