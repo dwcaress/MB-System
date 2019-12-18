@@ -611,12 +611,9 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 	/* get pointer to data descriptor */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
-        // BROKEN!!!
-        // BROKEN!!!
-        // BROKEN!!!
-        // TODO(schwehr): This is totally broken with for i inside of for i.
-	for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES; i++) {
-		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[i]);
+	for (int ping_num = 0; ping_num < MBSYS_SIMRAD3_NUM_PING_STRUCTURES; ping_num++) {
+		struct mbsys_simrad3_ping_struct *ping =
+			(struct mbsys_simrad3_ping_struct *)&(store->pings[ping_num]);
 
 		ping->png_ss_read = 0;          /* flag indicating actual reading of sidescan record */
 		ping->png_ss_date = 0;          /* date = year*10000 + month*100 + day
@@ -635,19 +632,19 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 		/* TVG law crossover angle (0.1 deg) */
 		ping->png_nbeams_ss = 0; /* number of beams with sidescan */
 		ping->png_npixels = 0;   /* number of pixels of sidescan */
-		for (int i = 0; i < MBSYS_SIMRAD3_MAXBEAMS; i++) {
-			ping->png_sort_direction[i] = 0;
+		for (int beam_num = 0; beam_num < MBSYS_SIMRAD3_MAXBEAMS; beam_num++) {
+			ping->png_sort_direction[beam_num] = 0;
 			/* sorting direction - The first sample in a beam
 			    has lowest range if 1, highest if -- 1. Note
 			    that the ranges in the seabed image datagram
 			    are all two-- way from time of transmit to
 			    time of receive. */
-			ping->png_beam_samples[i] = 0;
+			ping->png_beam_samples[beam_num] = 0;
 			/* number of sidescan samples derived from
 			    each beam */
-			ping->png_start_sample[i] = 0;
+			ping->png_start_sample[beam_num] = 0;
 			/* start sample number */
-			ping->png_ssdetection[i] = 0; /* Detection info:
+			ping->png_ssdetection[beam_num] = 0; /* Detection info:
 			                       This datagram may contain data for beams with and without a
 			                       valid detection. Eight bits (0-7) gives details about the detection:
 			                        A) If the most significant bit (bit7) is zero, this beam has a valid
@@ -678,7 +675,7 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 			                            bits 4-6: 3 = rejected
 			                            bits 4-6: 4 = no detection available
 			                            other bits : future use */
-			ping->png_center_sample[i] = 0;
+			ping->png_center_sample[beam_num] = 0;
 			/* center sample number */
 		}
 		for (int i = 0; i < MBSYS_SIMRAD3_MAXRAWPIXELS; i++) {
