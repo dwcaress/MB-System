@@ -33,6 +33,7 @@
  *
  */
 
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1995,10 +1996,6 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
 
-	double ss[MBSYS_SIMRAD_MAXPIXELS];
-	int ss_cnt[MBSYS_SIMRAD_MAXPIXELS];
-	double ssacrosstrack[MBSYS_SIMRAD_MAXPIXELS];
-	double ssalongtrack[MBSYS_SIMRAD_MAXPIXELS];
 	mb_s_char *beam_ss;
 	int nbathsort;
 	double bathsort[MBSYS_SIMRAD_MAXBEAMS];
@@ -2009,15 +2006,17 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 	double ss_spacing, ss_spacing_use;
 	double *angles_simrad;
 	int pixel_int_use;
-	double depth, xtrack, ltrack, xtrackss;
-	double range, beam_foot, beamwidth, sint;
-	double angle;
-	int interleave, istep;
+	double depth, xtrack;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
 		/* get pointer to raw data structure */
 		struct mbsys_simrad_survey_struct *ping = (struct mbsys_simrad_survey_struct *)store->ping;
+
+		double ss[MBSYS_SIMRAD_MAXPIXELS];
+		int ss_cnt[MBSYS_SIMRAD_MAXPIXELS];
+		double ssacrosstrack[MBSYS_SIMRAD_MAXPIXELS];
+		double ssalongtrack[MBSYS_SIMRAD_MAXPIXELS];
 
 		/* zero the sidescan */
 		for (int i = 0; i < MBSYS_SIMRAD_MAXPIXELS; i++) {
@@ -2073,7 +2072,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		depthoffset = 0.0;
 
 		/* get angles */
-		interleave = false;
+		bool interleave = false;
 		if (store->sonar == MBSYS_SIMRAD_EM1000) {
 			if (ping->bath_mode == 1) {
 				angles_simrad = angles_EM1000_ISO_ANG_60_2_MS_48_FAIS;
@@ -2183,6 +2182,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		}
 
 		/* if interleaved get center beam */
+		int istep;
 		if (interleave) {
 			if (ping->bath_mode == 12 && abs(ping->bath_acrosstrack[28]) < abs(ping->bath_acrosstrack[29]))
 				istep = 1;
@@ -2217,6 +2217,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		}
 
 		/* get beam angle size */
+		double beamwidth;
 		if (store->sonar == MBSYS_SIMRAD_EM12D || store->sonar == MBSYS_SIMRAD_EM12S) {
 			beamwidth = 2.00;
 		}
@@ -2225,6 +2226,8 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		}
 		else if (store->sonar == MBSYS_SIMRAD_EM1000) {
 			beamwidth = 2.5;
+		} else {
+			assert(false);
 		}
 
 		/* get median depth */
@@ -2278,6 +2281,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 
 		/* loop over raw sidescan, putting each raw pixel into
 		    the binning arrays */
+		double ltrack;
 		for (int i = 0; i < ping->beams_bath; i++) {
 			beam_ss = &ping->ssraw[ping->beam_start_sample[i]];
 			if (ping->bath[i] > 0.0) {
@@ -2285,7 +2289,8 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 					depth = depthscale * ping->bath[i];
 					xtrack = dacrscale * ping->bath_acrosstrack[i];
 					ltrack = daloscale * ping->bath_alongtrack[i];
-					range = sqrt(depth * depth + xtrack * xtrack);
+					const double range = sqrt(depth * depth + xtrack * xtrack);
+					double angle;
 					if (store->sonar == MBSYS_SIMRAD_EM1000 && ping->bath_mode == 13) {
 						angle = angles_simrad[ping->beams_bath - 1 - (2 * i + istep)];
 					}
@@ -2298,15 +2303,15 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 					else {
 						angle = -angles_simrad[i];
 					}
-					beam_foot = range * sin(DTR * beamwidth) / cos(DTR * angle);
-					sint = fabs(sin(DTR * angle));
+					const double beam_foot = range * sin(DTR * beamwidth) / cos(DTR * angle);
+					const double sint = fabs(sin(DTR * angle));
 					if (sint < ping->beam_samples[i] * ss_spacing / beam_foot)
 						ss_spacing_use = beam_foot / ping->beam_samples[i];
 					else
 						ss_spacing_use = ss_spacing / sint;
 				}
 				for (int k = 0; k < ping->beam_samples[i]; k++) {
-					xtrackss = xtrack + ss_spacing_use * (k - ping->beam_center_sample[i]);
+					const double xtrackss = xtrack + ss_spacing_use * (k - ping->beam_center_sample[i]);
 					const int kk = MBSYS_SIMRAD_MAXPIXELS / 2 + (int)(xtrackss / (*pixel_size));
 					if (kk > 0 && kk < MBSYS_SIMRAD_MAXPIXELS) {
 						ss[kk] += reflscale * ((double)beam_ss[k]);
