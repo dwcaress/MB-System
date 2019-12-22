@@ -19,8 +19,6 @@
  *
  * Author:	D. W. Caress
  * Date:	January 27, 2014
- *
- *
  */
 
 #include <math.h>
@@ -44,7 +42,7 @@ int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_wassp_struct), (void **)store_ptr, error);
@@ -55,17 +53,17 @@ int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	}
 
 	/* get data structure pointer */
-	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)*store_ptr;
-	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
-	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
-	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+	// struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)*store_ptr;
+	// struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
+	// struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
+	// struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	// struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	// struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
+	// struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	// struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	// struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	// struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	// struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -90,41 +88,41 @@ int mbsys_wassp_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 
 	/* get data structure pointer */
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)*store_ptr;
-	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
-	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
+	// struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
+	// struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
 	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
-	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
+	// struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	// struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
 	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
 	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	// struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+	// struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	int status = MB_SUCCESS;
 
 	/* deallocate any arrays or structures contained within the store data structure */
 	if (rawsonar->rawdata_alloc > 0) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(rawsonar->rawdata), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(rawsonar->rawdata), error);
 		rawsonar->rawdata_alloc = 0;
 	}
 	if (wcd_navi->wcdata_alloc > 0) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(wcd_navi->wcdata_x), error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(wcd_navi->wcdata_y), error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(wcd_navi->wcdata_mag), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(wcd_navi->wcdata_x), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(wcd_navi->wcdata_y), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(wcd_navi->wcdata_mag), error);
 		wcd_navi->wcdata_alloc = 0;
 	}
 	if (sensprop->n_alloc > 0) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(sensprop->sensors), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(sensprop->sensors), error);
 		sensprop->n_alloc = 0;
 	}
 	if (sys_cfg1->sys_cfg1_data_alloc > 0) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(sys_cfg1->sys_cfg1_data), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(sys_cfg1->sys_cfg1_data), error);
 		sys_cfg1->sys_cfg1_data_alloc = 0;
 	}
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -148,20 +146,20 @@ int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
-	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
+	// struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
 	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
-	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+	// struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	// struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	// struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
+	// struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	// struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	// struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	// struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	// struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -210,16 +208,16 @@ int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
 
 	/* get data structure pointer */
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)mb_io_ptr->store_data;
-	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
+	// struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
 	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
-	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+	// struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	// struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	// struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
+	// struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	// struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	// struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	// struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	// struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	/* extract data from structure */
 	*pingnumber = corbathy->ping_number;
@@ -248,20 +246,20 @@ int mbsys_wassp_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *son
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
-	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
-	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
-	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+	// struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	// struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
+	// struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
+	// struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	// struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	// struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
+	// struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	// struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	// struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	// struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	// struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	/* get sonar type */
 	*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
@@ -299,13 +297,13 @@ int mbsys_wassp_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
 	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
 	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	// struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	// struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
 	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	// struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	// struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	// struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	// struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
 	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	/* get data kind */
@@ -590,19 +588,19 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
-	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
+	// struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
 	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	// struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	// struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
 	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	// struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	// struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	// struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	// struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
 	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	/* set data kind */
@@ -685,8 +683,6 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                        double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                        double *ssv, int *error) {
-	double alpha, beta, theta, phi;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -702,20 +698,20 @@ int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
 	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
-	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	// struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
+	// struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	// struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
 	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+	// struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	// struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	// struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	// struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	// struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -735,9 +731,11 @@ int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = genbathy->detection_point[i] / genbathy->sampling_frequency;
 
-			alpha = nvupdate->pitch;
-			beta = 90.0 + genbathy->rx_angle[i] - nvupdate->roll;
+			const double alpha = nvupdate->pitch;
+			const double beta = 90.0 + genbathy->rx_angle[i] - nvupdate->roll;
 
+			double phi;
+			double theta;
 			mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
 			angles[i] = theta;
 			angles_forward[i] = phi;
@@ -800,20 +798,20 @@ int mbsys_wassp_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
 	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
-	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
-	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+	// struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
+	// struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	// struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	// struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
+	// struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	// struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	// struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	// struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	// struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -888,20 +886,20 @@ int mbsys_wassp_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
 	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
-	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
-	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+	// struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
+	// struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	// struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	// struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
+	// struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	// struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	// struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	// struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	// struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -970,20 +968,20 @@ int mbsys_wassp_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
-	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
-	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	// struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
+	// struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
+	// struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	// struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
 	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+	// struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	// struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	// struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	// struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	// struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1045,20 +1043,20 @@ int mbsys_wassp_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
-	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
+	// struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
 	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	// struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	// struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
 	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+	// struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	// struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	// struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	// struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	// struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1201,20 +1199,20 @@ int mbsys_wassp_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
-	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
+	// struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
 	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	// struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	// struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
 	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+	// struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	// struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	// struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	// struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	// struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
 	/* insert data in ping structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -1287,7 +1285,7 @@ int mbsys_wassp_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;

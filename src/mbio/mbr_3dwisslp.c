@@ -257,7 +257,7 @@ int mbr_3dwisslp_rd_data
   /* set status */
   int status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
-  size_t index = 0;
+  size_t index;  // TODO(schwehr): Localize index to each block.
   size_t read_len;
 
   /* if first read then read the fileheader, which is returned as a parameter record */
@@ -315,7 +315,7 @@ int mbr_3dwisslp_rd_data
         mb_get_binary_short(true, (void *)&buffer[index], &(store->heada_scans_per_file));
         index += 2;
         mb_get_binary_short(true, (void *)&buffer[index], &(store->headb_scans_per_file));
-        index += 2;
+        // index += 2;
 
         /* calculate size of a processed scan record and allocate read buffer and pulses
            array */
@@ -625,7 +625,7 @@ int mbr_3dwisslp_rd_data
           &(calibration_v1s1->factory_scanner_sml_deg)); index += 4;
         mb_get_binary_float(true, (void *)&buffer[index],
           &(calibration_v1s1->el_angle_fixed_deg)); index += 4;
-        memcpy(calibration_v1s1->unused, &buffer[index], 116); index += 116;
+        memcpy(calibration_v1s1->unused, &buffer[index], 116); // index += 116;
 #ifdef MBF_3DWISSLP_DEBUG
         fprintf(stderr,
           "%s:%s():%d INDEX at end of calibration b: %zu\n",
@@ -924,7 +924,7 @@ int mbr_3dwisslp_rd_data
             &(calibration_v1s3->digitizer_voltage_range_v)); index += 4;
           mb_get_binary_int(true, (void *)&buffer[index],
             &(calibration_v1s3->prf_tune_wait_ms)); index += 4;
-          memcpy(calibration_v1s3->unused, &buffer[index], 33); index += 33;
+          memcpy(calibration_v1s3->unused, &buffer[index], 33); // index += 33;
           }
 #ifdef MBF_3DWISSLP_DEBUG
         fprintf(stderr,
@@ -1260,7 +1260,7 @@ int mbr_3dwisslp_rd_data
         {
         index = 0;
         mb_get_binary_short(true, (void *)&buffer[index], &(store->comment_len));
-        index += 2;
+        // index += 2;
         read_len = (size_t)(MIN(store->comment_len, MB_COMMENT_MAXLINE-1));
         memset(store->comment, 0, MB_COMMENT_MAXLINE);
         status = mb_fileio_get(verbose, mbio_ptr, store->comment, &read_len, error);
@@ -1726,7 +1726,7 @@ int mbr_3dwisslp_wr_data
       mb_put_binary_float(true,
         calibration_v1s1->el_angle_fixed_deg,
         (void **)&buffer[index]); index += 4;
-      memcpy((void **)&buffer[index], calibration_v1s1->unused, 116); index +=116;
+      memcpy((void **)&buffer[index], calibration_v1s1->unused, 116); // index +=116;
 #ifdef MBF_3DWISSLP_DEBUG
       fprintf(stderr,
         "%s:%s():%d INDEX at end of calibration b: %zu\n",
@@ -2079,7 +2079,7 @@ int mbr_3dwisslp_wr_data
         (void **)&buffer[index]); index += 4;
         mb_put_binary_int(true, calibration_v1s3->prf_tune_wait_ms,
         (void **)&buffer[index]); index += 4;
-        memcpy((void **)&buffer[index], calibration_v1s3->unused, 33); index +=33;
+        memcpy((void **)&buffer[index], calibration_v1s3->unused, 33); // index +=33;
 #ifdef MBF_3DWISSLP_DEBUG
       fprintf(stderr,
         "%s:%s():%d INDEX at end of calibration b: %zu\n",
