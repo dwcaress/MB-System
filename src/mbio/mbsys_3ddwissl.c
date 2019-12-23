@@ -366,7 +366,7 @@ int mbsys_3ddwissl_alloc
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* allocate memory for data structure */
   int status = mb_mallocd(verbose,
@@ -545,7 +545,7 @@ int mbsys_3ddwissl_dimensions
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -658,9 +658,8 @@ int mbsys_3ddwissl_preprocess
   double mtodeglon, mtodeglat;
   double dlonm, dlatm;
   double headingx, headingy;
-  int interp_status = MB_SUCCESS;
   int interp_error = MB_ERROR_NO_ERROR;
-  int ipulse;
+  // int ipulse;
   int jnav = 0;
   int jsensordepth = 0;
   int jheading = 0;
@@ -678,7 +677,7 @@ int mbsys_3ddwissl_preprocess
 
   /* get data structure pointers */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
-  struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+  // struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
   struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
   if (verbose >= 2)
@@ -736,9 +735,10 @@ int mbsys_3ddwissl_preprocess
 
   /* get nav sensordepth heading attitude values for record timestamp
      - this will generally conform to the first pulse of the scan */
+  // int interp_status = MB_SUCCESS;
   if (pars->n_nav > 0)
     {
-    interp_status = mb_linear_interp_longitude(verbose,
+    /* interp_status = */ mb_linear_interp_longitude(verbose,
       pars->nav_time_d - 1,
       pars->nav_lon - 1,
       pars->n_nav,
@@ -746,7 +746,7 @@ int mbsys_3ddwissl_preprocess
       &store->navlon,
       &jnav,
       &interp_error);
-    interp_status = mb_linear_interp_latitude(verbose,
+    /* interp_status = */ mb_linear_interp_latitude(verbose,
       pars->nav_time_d - 1,
       pars->nav_lat - 1,
       pars->n_nav,
@@ -754,7 +754,7 @@ int mbsys_3ddwissl_preprocess
       &store->navlat,
       &jnav,
       &interp_error);
-    interp_status = mb_linear_interp(verbose,
+    /* interp_status = */ mb_linear_interp(verbose,
       pars->nav_time_d - 1,
       pars->nav_speed - 1,
       pars->n_nav,
@@ -765,7 +765,7 @@ int mbsys_3ddwissl_preprocess
     store->speed = (float)speed;
     }
   if (pars->n_sensordepth > 0)
-    interp_status = mb_linear_interp(verbose,
+    /* interp_status = */ mb_linear_interp(verbose,
       pars->sensordepth_time_d - 1,
       pars->sensordepth_sensordepth - 1,
       pars->n_sensordepth,
@@ -775,7 +775,7 @@ int mbsys_3ddwissl_preprocess
       &interp_error);
   if (pars->n_heading > 0)
     {
-    interp_status = mb_linear_interp_heading(verbose,
+    /* interp_status = */ mb_linear_interp_heading(verbose,
       pars->heading_time_d - 1,
       pars->heading_heading - 1,
       pars->n_heading,
@@ -794,7 +794,7 @@ int mbsys_3ddwissl_preprocess
   /*  } */
   if (pars->n_attitude > 0)
     {
-    interp_status = mb_linear_interp(verbose,
+    /* interp_status = */ mb_linear_interp(verbose,
       pars->attitude_time_d - 1,
       pars->attitude_roll - 1,
       pars->n_attitude,
@@ -803,7 +803,7 @@ int mbsys_3ddwissl_preprocess
       &jattitude,
       &interp_error);
     store->roll = (float)roll;
-    interp_status = mb_linear_interp(verbose,
+    /* interp_status = */ mb_linear_interp(verbose,
       pars->attitude_time_d - 1,
       pars->attitude_pitch - 1,
       pars->n_attitude,
@@ -882,7 +882,7 @@ int mbsys_3ddwissl_preprocess
     /* get nav sensordepth heading attitude values for record timestamp */
     if (pars->n_nav > 0)
       {
-      interp_status = mb_linear_interp_longitude(verbose,
+      /* interp_status = */ mb_linear_interp_longitude(verbose,
         pars->nav_time_d - 1,
         pars->nav_lon - 1,
         pars->n_nav,
@@ -890,7 +890,7 @@ int mbsys_3ddwissl_preprocess
         &navlon,
         &jnav,
         &interp_error);
-      interp_status = mb_linear_interp_latitude(verbose,
+      /* interp_status = */ mb_linear_interp_latitude(verbose,
         pars->nav_time_d - 1,
         pars->nav_lat - 1,
         pars->n_nav,
@@ -905,7 +905,7 @@ int mbsys_3ddwissl_preprocess
       }
     if (pars->n_sensordepth > 0)
       {
-      interp_status =mb_linear_interp(verbose,
+      /* interp_status = */mb_linear_interp(verbose,
         pars->sensordepth_time_d - 1,
         pars->sensordepth_sensordepth - 1,
         pars->n_sensordepth,
@@ -917,7 +917,7 @@ int mbsys_3ddwissl_preprocess
       }
     if (pars->n_heading > 0)
       {
-      interp_status = mb_linear_interp_heading(verbose,
+      /* interp_status = */ mb_linear_interp_heading(verbose,
         pars->heading_time_d - 1,
         pars->heading_heading - 1,
         pars->n_heading,
@@ -929,7 +929,7 @@ int mbsys_3ddwissl_preprocess
       }
     if (pars->n_attitude > 0)
       {
-      interp_status = mb_linear_interp(verbose,
+      /* interp_status = */ mb_linear_interp(verbose,
         pars->attitude_time_d - 1,
         pars->attitude_roll - 1,
         pars->n_attitude,
@@ -939,7 +939,7 @@ int mbsys_3ddwissl_preprocess
         &interp_error);
       pulse->roll_offset = (float)(roll - store->roll);
 
-      interp_status = mb_linear_interp(verbose,
+      /* interp_status = */ mb_linear_interp(verbose,
         pars->attitude_time_d - 1,
         pars->attitude_pitch - 1,
         pars->n_attitude,
@@ -1063,7 +1063,7 @@ int mbsys_3ddwissl_sensorhead
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1131,6 +1131,10 @@ int mbsys_3ddwissl_extract
   int *error                /* out: see mb_status.h:/MB_ERROR/ */
 )
 {
+  (void)ss;  // Unused arg
+  (void)ssacrosstrack;  // Unused arg
+  (void)ssalongtrack;  // Unused arg
+
   assert(mbio_ptr != NULL);
   assert(store_ptr != NULL);
 
@@ -1257,9 +1261,9 @@ int mbsys_3ddwissl_insert
   int *error                /* out: see mb_status.h:/MB_ERROR/ */
 )
 {
-  int status = MB_SUCCESS;
-  struct mbsys_3ddwissl_pulse_struct *pulse;
-  struct mbsys_3ddwissl_sounding_struct *sounding;
+  (void)ss;  // Unused arg
+  (void)ssacrosstrack;  // Unused arg
+  (void)ssalongtrack;  // Unused arg
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
@@ -1280,8 +1284,12 @@ int mbsys_3ddwissl_insert
     fprintf(stderr, "dbg2       kind:       %d\n", kind);
     }
 
+  int status = MB_SUCCESS;
+  struct mbsys_3ddwissl_pulse_struct *pulse;
+  struct mbsys_3ddwissl_sounding_struct *sounding;
+
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1303,9 +1311,9 @@ int mbsys_3ddwissl_insert
     store->time_d = time_d;
 
     /* calculate change in navigation */
-    double dlon = navlon - store->navlon;
-    double dlat = navlat - store->navlat;
-    double dheading = heading - store->heading;
+    // const double dlon = navlon - store->navlon;
+    // const double dlat = navlat - store->navlat;
+    // const double dheading = heading - store->heading;
 
     /* set the navigation */
     store->navlon = navlon;
@@ -1426,7 +1434,7 @@ int mbsys_3ddwissl_ttimes
     }
 
   /* get mb_io_ptr */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
@@ -1519,7 +1527,7 @@ int mbsys_3ddwissl_detects
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1622,7 +1630,7 @@ int mbsys_3ddwissl_pulses
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1712,7 +1720,7 @@ int mbsys_3ddwissl_gains
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1803,7 +1811,7 @@ int mbsys_3ddwissl_extract_altitude
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1918,7 +1926,7 @@ int mbsys_3ddwissl_extract_nnav
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -2034,7 +2042,7 @@ int mbsys_3ddwissl_extract_nav
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -2130,8 +2138,6 @@ int mbsys_3ddwissl_insert_nav
   int *error                          /* out: see mb_status.h:MB_ERROR */
 )
 {
-  double dlon, dlat, dheading, dsensordepth, droll, dpitch;
-
   /* check for non-null data */
   assert(mbio_ptr != NULL);
   assert(store_ptr != NULL);
@@ -2163,22 +2169,21 @@ int mbsys_3ddwissl_insert_nav
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
-  int status = MB_SUCCESS;
+  const int status = MB_SUCCESS;
 
   /* insert data in swathplus data structure */
-  if (store->kind == MB_DATA_DATA)
-    {
-    dlon = navlon - store->navlon;
-    dlat = navlat - store->navlat;
-    dheading = heading - store->heading;
-    dsensordepth = draft - heave - store->sensordepth;
-    droll = roll - store->roll;
-    dpitch = pitch - store->pitch;
+  if (store->kind == MB_DATA_DATA) {
+    // const double dlon = navlon - store->navlon;
+    // const double dlat = navlat - store->navlat;
+    // const double dheading = heading - store->heading;
+    // const double dsensordepth = draft - heave - store->sensordepth;
+    // const double droll = roll - store->roll;
+    // const double dpitch = pitch - store->pitch;
 
     store->time_d = time_d;
     store->navlon = navlon;
@@ -2191,8 +2196,8 @@ int mbsys_3ddwissl_insert_nav
 
     /* done translating values */
     *error = MB_ERROR_NO_ERROR;
-    status = MB_SUCCESS;
-    }
+    // status = MB_SUCCESS;
+  }
 
   if (verbose >= 2)
     {
@@ -2232,7 +2237,7 @@ int mbsys_3ddwissl_extract_svp
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -2313,7 +2318,7 @@ int mbsys_3ddwissl_insert_svp
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -2375,7 +2380,7 @@ int mbsys_3ddwissl_copy
   *error = MB_ERROR_NO_ERROR;
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointers */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -3564,6 +3569,8 @@ int mbsys_3ddwissl_calculatebathymetry
   int *error              /* out: see mb_status.h:MB_ERROR */
 )
 {
+  (void)mbio_ptr;  // Unused arg
+
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_sounding_struct *sounding;
   double alpha, beta, theta, phi;

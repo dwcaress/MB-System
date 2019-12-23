@@ -113,11 +113,6 @@ int mbr_info_wasspenl(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_wasspenl(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	char **bufferptr;
-	char *buffer;
-	int *bufferalloc;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -128,18 +123,15 @@ int mbr_alm_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
-	status = mbsys_wassp_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	int status = mbsys_wassp_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* allocate starting memory for data record buffer */
-	bufferptr = (char **)&mb_io_ptr->saveptr1;
-	buffer = (char *)*bufferptr;
-	bufferalloc = (int *)&mb_io_ptr->save6;
+	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
+	// char *buffer = (char *)*bufferptr;
+	int *bufferalloc = (int *)&mb_io_ptr->save6;
 	*bufferptr = NULL;
 	*bufferalloc = 0;
 	if (status == MB_SUCCESS) {
@@ -160,10 +152,6 @@ int mbr_alm_wasspenl(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	char **bufferptr;
-	char *buffer;
-	int *bufferalloc;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -176,14 +164,14 @@ int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for reading/writing buffer */
-	bufferptr = (char **)&mb_io_ptr->saveptr1;
-	buffer = (char *)*bufferptr;
-	bufferalloc = (int *)&mb_io_ptr->save6;
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)bufferptr, error);
+	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
+	// char *buffer = (char *)*bufferptr;
+	int *bufferalloc = (int *)&mb_io_ptr->save6;
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)bufferptr, error);
 	*bufferalloc = 0;
 
 	/* deallocate memory for data descriptor */
-	status = mbsys_wassp_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	status &= mbsys_wassp_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
