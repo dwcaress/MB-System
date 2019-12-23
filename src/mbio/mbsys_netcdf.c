@@ -19,8 +19,6 @@
  *
  * Author:	D. W. Caress
  * Date:	April 11, 2002
- *
- *
  */
 
 #include <math.h>
@@ -43,7 +41,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_netcdf_struct), (void **)store_ptr, error);
@@ -1055,7 +1053,7 @@ int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)*store_ptr;
@@ -1203,7 +1201,7 @@ int mbsys_netcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
@@ -1460,7 +1458,7 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
@@ -1829,7 +1827,7 @@ int mbsys_netcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
@@ -1896,7 +1894,7 @@ int mbsys_netcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
@@ -1967,7 +1965,7 @@ int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
@@ -1998,7 +1996,7 @@ int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 		else {
 			/* loop over soundings */
 			const double depthscale = store->mbDepthScale[0] * store->mbDepthScale_scale_factor;
-			const double distancescale = store->mbDistanceScale[0] * store->mbDistanceScale_scale_factor;
+			// const double distancescale = store->mbDistanceScale[0] * store->mbDistanceScale_scale_factor;
 			double xtrackminbest = 10000000.0;
 			double vdepthbest = 0.0;
 			double xtrackmin = 10000000.0;
@@ -2071,7 +2069,7 @@ int mbsys_netcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, d
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
@@ -2131,7 +2129,7 @@ int mbsys_netcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
@@ -2268,7 +2266,7 @@ int mbsys_netcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
@@ -2358,7 +2356,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;

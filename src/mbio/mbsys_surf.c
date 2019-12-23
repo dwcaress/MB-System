@@ -37,8 +37,37 @@
 #include "mbsys_surf.h"
 #include "../surf/mb_sapi.h"
 
-double mbsys_get_depth(SurfMultiBeamDepth *MultiBeamDepth, SurfTransducerParameterTable TransducerTable, float heave, int n);
+/*--------------------------------------------------------------------*/
+double mbsys_get_depth(SurfMultiBeamDepth *MultiBeamDepth, SurfTransducerParameterTable TransducerTable, float heave, int n) {
+	double x, y, z, a, b, c, d, depth;
+	int N;
 
+	a = b = c = d = 0.0;
+	N = 0;
+	/* include all beams with a lateral distance within ~15 % of the depth
+	   and calculate the depth @ centre assuming a linear slope.
+	 */
+	for (int i = 0; i < n; i++)
+		if ((MultiBeamDepth[i].depthFlag & (SB_DELETED | SB_DEPTH_SUPPRESSED | SB_REDUCED_FAN)) == 0) {
+			x = MultiBeamDepth[i].beamPositionAhead - TransducerTable.transducerPositionAhead;
+			y = MultiBeamDepth[i].beamPositionStar - TransducerTable.transducerPositionStar;
+			z = MultiBeamDepth[i].depth + heave - TransducerTable.transducerDepth;
+			if ((x * x + y * y) <= (z * z / 50.)) {
+				a += y;
+				b += y * y;
+				c += z;
+				d += z * y;
+				N++;
+			}
+		}
+
+	if (N > 0)
+		depth = (b * c - a * d) / (N * b - a * a) - heave + TransducerTable.transducerDepth;
+	else
+		depth = 0.0;
+
+	return (depth);
+}
 
 /*--------------------------------------------------------------------*/
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
@@ -50,7 +79,7 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_surf_struct), store_ptr, error);
@@ -111,7 +140,7 @@ int mbsys_surf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
@@ -154,8 +183,6 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                        double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                        double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                        double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	double v0, tlx, tly, tlz, z0, t0, t2, tn, dt, y;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -194,9 +221,9 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		mb_io_ptr->beamwidth_xtrack = 2.3;
 
 		/* transducer location */
-		tlx = store->ActualTransducerTable.transducerPositionAhead;
-		tly = store->ActualTransducerTable.transducerPositionStar;
-		tlz = store->ActualTransducerTable.transducerDepth - store->SoundingData.heaveWhileTransmitting;
+		const double tlx = store->ActualTransducerTable.transducerPositionAhead;
+		const double tly = store->ActualTransducerTable.transducerPositionStar;
+		const double tlz = store->ActualTransducerTable.transducerDepth - store->SoundingData.heaveWhileTransmitting;
 
 		/* reset storage arrays */
 		for (int i = 0; i < MBSYS_SURF_MAXBEAMS; i++) {
@@ -273,14 +300,15 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		}
 
 		/* get sidescan */
-		v0 = (store->SoundingData.cMean > 0.0 ? store->SoundingData.cMean : 1500.0);
-		z0 = mbsys_get_depth(store->MultiBeamDepth, store->ActualTransducerTable, store->SoundingData.heaveWhileTransmitting,
+		const double v0 = (store->SoundingData.cMean > 0.0 ? store->SoundingData.cMean : 1500.0);
+		double z0 = mbsys_get_depth(store->MultiBeamDepth, store->ActualTransducerTable, store->SoundingData.heaveWhileTransmitting,
 		                     store->NrBeams);
 		if ((store->NrSidescan > 0) && (z0 > tlz)) {
 			*nss = store->NrSidescan;
+			double tn, dt, y;
 			z0 -= tlz;
-			t0 = z0 / v0;
-			t2 = t0 * t0;
+			const double t0 = z0 / v0;
+			const double t2 = t0 * t0;
 			/* read portside scan */
 			if (store->SidescanData.actualNrOfSsDataPort > 1) {
 				/* initialise */
@@ -451,7 +479,7 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
@@ -546,8 +574,6 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                       double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                       double *ssv, int *error) {
-	double pitch, angle;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -563,7 +589,7 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
@@ -586,7 +612,7 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		if (((store->GlobalData.typeOfSounder == 'B') || (store->GlobalData.typeOfSounder == 'F')) &&
 		    (store->NrBeams == store->ActualAngleTable.actualNumberOfBeams) && (store->NrBeams == store->NrTravelTimes)) {
 			*nbeams = store->NrBeams;
-			pitch = -RTD * store->SoundingData.pitchWhileTransmitting;
+			const double pitch = -RTD * store->SoundingData.pitchWhileTransmitting;
 			for (int i = 0; i < store->NrBeams; i++) {
 				ttimes[i] = 0.0;
 				angles[i] = 0.0;
@@ -597,7 +623,7 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			}
 			for (int i = 0; i < store->NrBeams; i++) {
 				ttimes[i] = 2 * store->MultiBeamTraveltime[i].travelTimeOfRay;
-				angle = 90. - RTD * store->ActualAngleTable.beamAngle[i];
+				const double angle = 90. - RTD * store->ActualAngleTable.beamAngle[i];
 				mb_rollpitch_to_takeoff(verbose, pitch, angle, &angles[i], &angles_forward[i], error);
 				heave[i] =
 				    -0.5 * (store->SoundingData.heaveWhileTransmitting + store->MultiBeamReceiveParams[i].heaveWhileReceiving);
@@ -674,7 +700,7 @@ int mbsys_surf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
@@ -745,37 +771,6 @@ int mbsys_surf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 
 	return (status);
 }
-/*--------------------------------------------------------------------*/
-double mbsys_get_depth(SurfMultiBeamDepth *MultiBeamDepth, SurfTransducerParameterTable TransducerTable, float heave, int n) {
-	double x, y, z, a, b, c, d, depth;
-	int N;
-
-	a = b = c = d = 0.0;
-	N = 0;
-	/* include all beams with a lateral distance within ~15 % of the depth
-	   and calculate the depth @ centre assuming a linear slope.
-	 */
-	for (int i = 0; i < n; i++)
-		if ((MultiBeamDepth[i].depthFlag & (SB_DELETED | SB_DEPTH_SUPPRESSED | SB_REDUCED_FAN)) == 0) {
-			x = MultiBeamDepth[i].beamPositionAhead - TransducerTable.transducerPositionAhead;
-			y = MultiBeamDepth[i].beamPositionStar - TransducerTable.transducerPositionStar;
-			z = MultiBeamDepth[i].depth + heave - TransducerTable.transducerDepth;
-			if ((x * x + y * y) <= (z * z / 50.)) {
-				a += y;
-				b += y * y;
-				c += z;
-				d += z * y;
-				N++;
-			}
-		}
-
-	if (N > 0)
-		depth = (b * c - a * d) / (N * b - a * a) - heave + TransducerTable.transducerDepth;
-	else
-		depth = 0.0;
-
-	return (depth);
-}
 /*----------------------------------------------------------------------
 roll in MB-System is positive rotating starboard to down, same as in SURF
 pitch in MB-System is positive rotating down to forward, opposite in SURF
@@ -794,7 +789,7 @@ int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
@@ -865,7 +860,7 @@ int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
@@ -999,7 +994,7 @@ int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
@@ -1052,7 +1047,7 @@ int mbsys_surf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
@@ -1118,7 +1113,7 @@ int mbsys_surf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
@@ -1164,7 +1159,7 @@ int mbsys_surf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;

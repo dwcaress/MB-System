@@ -134,10 +134,10 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error) {
   int *recordid = (int *)&mb_io_ptr->save3;
   int *recordidlast = (int *)&mb_io_ptr->save4;
   char **bufferptr = (char **)&mb_io_ptr->saveptr1;
-  char *buffer = (char *)*bufferptr;
+  // char *buffer = (char *)*bufferptr;
   int *bufferalloc = (int *)&mb_io_ptr->save6;
   char **buffersaveptr = (char **)&mb_io_ptr->saveptr2;
-  char *buffersave = (char *)*buffersaveptr;
+  // char *buffersave = (char *)*buffersaveptr;
   int *size = (int *)&mb_io_ptr->save8;
   int *nbadrec = (int *)&mb_io_ptr->save9;
   int *deviceid = (int *)&mb_io_ptr->save10;
@@ -182,10 +182,6 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_reson7kr(int verbose, void *mbio_ptr, int *error) {
-  char **bufferptr;
-  char *buffer;
-  int *bufferalloc;
-  char **buffersaveptr;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -201,10 +197,10 @@ int mbr_dem_reson7kr(int verbose, void *mbio_ptr, int *error) {
   int status = mbsys_reson7k_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
   /* deallocate memory for reading/writing buffer */
-  bufferptr = (char **)&mb_io_ptr->saveptr1;
-  buffer = (char *)*bufferptr;
-  bufferalloc = (int *)&mb_io_ptr->save6;
-  buffersaveptr = (char **)&mb_io_ptr->saveptr2;
+  char **bufferptr = (char **)&mb_io_ptr->saveptr1;
+  // char *buffer = (char *)*bufferptr;
+  int *bufferalloc = (int *)&mb_io_ptr->save6;
+  char **buffersaveptr = (char **)&mb_io_ptr->saveptr2;
   status = mb_freed(verbose, __FILE__, __LINE__, (void **)bufferptr, error);
   status = mb_freed(verbose, __FILE__, __LINE__, (void **)buffersaveptr, error);
   *bufferalloc = 0;
@@ -8931,15 +8927,10 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   s7kr_volatilesettings *volatilesettings;
   s7kr_beamgeometry *beamgeometry;
   s7kr_bathymetry *bathymetry;
-  s7kr_backscatter *backscatter;
-  s7kr_beam *beam;
-  s7kr_image *image;
   s7kr_v2detection *v2detection;
   s7kr_v2detectionsetup *v2detectionsetup;
   s7kr_v2rawdetection *v2rawdetection;
   s7kr_bluefin *bluefin;
-  s7kr_processedsidescan *processedsidescan;
-  int *current_ping;
   int ss_source;
   double speed, heading, longitude, latitude;
   double roll, pitch, heave;
@@ -8968,15 +8959,15 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   volatilesettings = &store->volatilesettings;
   beamgeometry = &store->beamgeometry;
   bathymetry = &store->bathymetry;
-  backscatter = &store->backscatter;
-  beam = &store->beam;
-  image = &store->image;
+  // s7kr_backscatter *backscatter = &store->backscatter;
+  // s7kr_beam *beam = &store->beam;
+  // s7kr_image *image = &store->image;
   v2detectionsetup = &store->v2detectionsetup;
   v2detection = &store->v2detection;
   v2rawdetection = &store->v2rawdetection;
   bluefin = &store->bluefin;
-  processedsidescan = &store->processedsidescan;
-  current_ping = (int *)&mb_io_ptr->save14;
+  // s7kr_processedsidescan *processedsidescan = &store->processedsidescan;
+  // int *current_ping = (int *)&mb_io_ptr->save14;
   pixel_size = (double *)&mb_io_ptr->saved1;
   swath_width = (double *)&mb_io_ptr->saved2;
 
@@ -16584,15 +16575,6 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
-  FILE *mbfp;
-  char **bufferptr;
-  char *buffer;
-  int *bufferalloc;
-  int *fileheaders;
-  int size;
-  size_t write_len;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -16606,13 +16588,17 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
   /* get pointer to raw data structure */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  mbfp = mb_io_ptr->mbfp;
+  // FILE *mbfp = mb_io_ptr->mbfp;
 
   /* get saved values */
-  bufferptr = (char **)&mb_io_ptr->saveptr1;
-  buffer = (char *)*bufferptr;
-  bufferalloc = (int *)&mb_io_ptr->save6;
-  fileheaders = (int *)&mb_io_ptr->save12;
+  char **bufferptr = (char **)&mb_io_ptr->saveptr1;
+  char *buffer = (char *)*bufferptr;
+  int *bufferalloc = (int *)&mb_io_ptr->save6;
+  int *fileheaders = (int *)&mb_io_ptr->save12;
+  int size;
+  size_t write_len;
+
+  int status = MB_SUCCESS;
 
   /* write fileheader if needed */
   if (status == MB_SUCCESS && (store->type == R7KRECID_7kFileHeader || *fileheaders == 0)) {

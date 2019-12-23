@@ -6126,6 +6126,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
           /* Rx beam phase in 180/128 degree resolution. */
           memcpy(&buffer[index], mwc->beamData_p[i].samplePhase8bit, mwc->beamData_p[i].numSampleData);
           index += mwc->beamData_p[i].numSampleData;
+          break;  // TODO(schwehr): Should this fall through?
 
         /* 16 bit phase data */
         case 2:
