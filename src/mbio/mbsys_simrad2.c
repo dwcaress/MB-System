@@ -1875,7 +1875,7 @@ int mbsys_simrad2_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	struct mbsys_simrad2_struct *store = (struct mbsys_simrad2_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
@@ -1906,25 +1906,25 @@ int mbsys_simrad2_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		if (sensor_multibeam < 0) {
 			/* set sensor 0 (multibeam) */
 			int multibeam_offsets;
-			int multibeam_type;
+			// int multibeam_type;
 			if (store->sonar == MBSYS_SIMRAD2_EM3000D_1 || store->sonar == MBSYS_SIMRAD2_EM3000D_2 ||
 			    store->sonar == MBSYS_SIMRAD2_EM3000D_3 || store->sonar == MBSYS_SIMRAD2_EM3000D_4 ||
 			    store->sonar == MBSYS_SIMRAD2_EM3000D_5 || store->sonar == MBSYS_SIMRAD2_EM3000D_6 ||
 			    store->sonar == MBSYS_SIMRAD2_EM3000D_7 || store->sonar == MBSYS_SIMRAD2_EM3000D_8 ||
 			    store->sonar == MBSYS_SIMRAD2_EM3002 || store->sonar == MBSYS_SIMRAD2_EM12D) {
-				multibeam_type = MB_SENSOR_TYPE_SONAR_MULTIBEAM_TWOHEAD;
+				// multibeam_type = MB_SENSOR_TYPE_SONAR_MULTIBEAM_TWOHEAD;
 				multibeam_offsets = 4;
 				par_stc = 2;
 			}
 			else if (store->sonar == MBSYS_SIMRAD2_EM1002 || store->sonar == MBSYS_SIMRAD2_EM2000 ||
 			         store->sonar == MBSYS_SIMRAD2_EM3000 || store->sonar == MBSYS_SIMRAD2_EM100 ||
 			         store->sonar == MBSYS_SIMRAD2_EM1000) {
-				multibeam_type = MB_SENSOR_TYPE_SONAR_MULTIBEAM;
+				// multibeam_type = MB_SENSOR_TYPE_SONAR_MULTIBEAM;
 				multibeam_offsets = 2;
 				par_stc = 1;
 			}
 			else {
-				multibeam_type = MB_SENSOR_TYPE_SONAR_MULTIBEAM;
+				// multibeam_type = MB_SENSOR_TYPE_SONAR_MULTIBEAM;
 				multibeam_offsets = 2;
 				par_stc = 0;
 			}

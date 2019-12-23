@@ -22,7 +22,6 @@
  *
  * Author:	D. W. Caress
  * Date:	February 27, 1998
- *
  */
 
 #include <math.h>
@@ -153,8 +152,8 @@ int mbr_dem_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	struct mbf_gsfgenmb_struct *data = (struct mbf_gsfgenmb_struct *)mb_io_ptr->raw_data;
-	gsfRecords *records = &(data->records);
+	// struct mbf_gsfgenmb_struct *data = (struct mbf_gsfgenmb_struct *)mb_io_ptr->raw_data;
+	// gsfRecords *records = &(data->records);
 
 	/* deallocate memory for data descriptor */
 	/*gsfFree(records);*/
