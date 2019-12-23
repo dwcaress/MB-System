@@ -153,8 +153,10 @@ typedef char mb_longname[MB_LONGNAME_LENGTH];
 #define MB_NAV_MAX 256
 
 /* file mode (read or write) */
-#define MB_FILEMODE_READ 0
-#define MB_FILEMODE_WRITE 1
+typedef enum {
+  MB_FILEMODE_READ = 0,
+  MB_FILEMODE_WRITE = 1,
+} mb_filemode_enum;
 
 /* types of  files used by swath sonar data formats */
 #define MB_FILETYPE_NORMAL 1
