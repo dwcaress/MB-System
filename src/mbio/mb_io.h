@@ -459,7 +459,7 @@ struct mb_io_struct {
   char format_description[MB_DESCRIPTION_LENGTH];
   int numfile;             /* the number of parallel files required for i/o */
   int filetype;            /* type of files used (normal, single normal, xdr, or gsf) */
-  int filemode;            /* file mode (read or write) */
+  mb_filemode_enum filemode;            /* file mode (read or write) */
   // TODO(schwehr): Bool
   int variable_beams;      /* if true then number of beams variable */
   int traveltime;          /* if true then traveltime and angle data supported */
