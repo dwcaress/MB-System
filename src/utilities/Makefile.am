@@ -6,8 +6,6 @@ if BUILD_MBTRN
   MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
 endif
 
-# TODO(schwehr): What happened to mbps?
-
 bin_PROGRAMS =
 bin_PROGRAMS += mbconfig
 bin_PROGRAMS += mb7k2jstar
