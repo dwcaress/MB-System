@@ -127,6 +127,7 @@ mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.c
 mblevitus_SOURCES = mblevitus.c
 mblist_SOURCES = mblist.c
 mbmakeplatform_SOURCES = mbmakeplatform.c
+mbminirovnav_SOURCES = mbminirovnav.c
 mbmosaic_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbmosaic_SOURCES = mbmosaic.c
 mbnavlist_SOURCES = mbnavlist.c
