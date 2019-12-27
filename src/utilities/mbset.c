@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
 	/* processing variables */
-	bool explicit = false;
+	bool is_explicit = false;
 	char read_file[MBP_FILENAMESIZE];
 	void *datalist;
 	bool lookforfiles = false;
@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'E':
 			case 'e':
-				explicit = true;
+				is_explicit = true;
 				break;
 			case 'F':
 			case 'f':
@@ -258,7 +258,7 @@ int main(int argc, char **argv) {
 			/* navigation merging */
 			else if (strncmp(pargv[i], "NAVMODE", 7) == 0) {
 				sscanf(pargv[i], "NAVMODE:%d", &process.mbp_nav_mode);
-				if (!explicit && process.mbp_nav_mode == MBP_NAV_OFF) {
+				if (!is_explicit && process.mbp_nav_mode == MBP_NAV_OFF) {
 					process.mbp_navfile[0] = '\0';
 					process.mbp_nav_heading = MBP_NAV_OFF;
 					process.mbp_nav_speed = MBP_NAV_OFF;
@@ -268,7 +268,7 @@ int main(int argc, char **argv) {
 			}
 			else if (strncmp(pargv[i], "NAVFILE", 7) == 0) {
 				sscanf(pargv[i], "NAVFILE:%1023s", process.mbp_navfile);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_nav_mode = MBP_NAV_ON;
 					process.mbp_nav_heading = MBP_NAV_ON;
 					process.mbp_nav_speed = MBP_NAV_ON;
@@ -334,13 +334,13 @@ int main(int argc, char **argv) {
 			/* adjusted navigation merging */
 			else if (strncmp(pargv[i], "NAVADJMODE", 10) == 0) {
 				sscanf(pargv[i], "NAVADJMODE:%d", &process.mbp_navadj_mode);
-				if (!explicit && process.mbp_navadj_mode == MBP_NAVADJ_OFF) {
+				if (!is_explicit && process.mbp_navadj_mode == MBP_NAVADJ_OFF) {
 					process.mbp_navadjfile[0] = '\0';
 				}
 			}
 			else if (strncmp(pargv[i], "NAVADJFILE", 10) == 0) {
 				sscanf(pargv[i], "NAVADJFILE:%1023s", process.mbp_navadjfile);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_navadj_mode = MBP_NAVADJ_LLZ;
 				}
 			}
@@ -351,13 +351,13 @@ int main(int argc, char **argv) {
 			/* attitude merging */
 			else if (strncmp(pargv[i], "ATTITUDEMODE", 12) == 0) {
 				sscanf(pargv[i], "ATTITUDEMODE:%d", &process.mbp_attitude_mode);
-				if (!explicit && process.mbp_attitude_mode == MBP_ATTITUDE_OFF) {
+				if (!is_explicit && process.mbp_attitude_mode == MBP_ATTITUDE_OFF) {
 					process.mbp_attitudefile[0] = '\0';
 				}
 			}
 			else if (strncmp(pargv[i], "ATTITUDEFILE", 12) == 0) {
 				sscanf(pargv[i], "ATTITUDEFILE:%1023s", process.mbp_attitudefile);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_attitude_mode = MBP_ATTITUDE_ON;
 				}
 			}
@@ -368,13 +368,13 @@ int main(int argc, char **argv) {
 			/* sonardepth merging */
 			else if (strncmp(pargv[i], "SONARDEPTHMODE", 14) == 0) {
 				sscanf(pargv[i], "SONARDEPTHMODE:%d", &process.mbp_sonardepth_mode);
-				if (!explicit && process.mbp_sonardepth_mode == MBP_SONARDEPTH_OFF) {
+				if (!is_explicit && process.mbp_sonardepth_mode == MBP_SONARDEPTH_OFF) {
 					process.mbp_sonardepthfile[0] = '\0';
 				}
 			}
 			else if (strncmp(pargv[i], "SONARDEPTHFILE", 14) == 0) {
 				sscanf(pargv[i], "SONARDEPTHFILE:%1023s", process.mbp_sonardepthfile);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_sonardepth_mode = MBP_SONARDEPTH_ON;
 				}
 			}
@@ -479,13 +479,13 @@ int main(int argc, char **argv) {
 			/* bathymetry editing */
 			else if (strncmp(pargv[i], "EDITSAVEMODE", 12) == 0) {
 				sscanf(pargv[i], "EDITSAVEMODE:%d", &process.mbp_edit_mode);
-				if (!explicit && process.mbp_edit_mode == MBP_EDIT_OFF) {
+				if (!is_explicit && process.mbp_edit_mode == MBP_EDIT_OFF) {
 					process.mbp_editfile[0] = '\0';
 				}
 			}
 			else if (strncmp(pargv[i], "EDITSAVEFILE", 12) == 0) {
 				sscanf(pargv[i], "EDITSAVEFILE:%1023s", process.mbp_editfile);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_edit_mode = MBP_EDIT_ON;
 				}
 			}
@@ -496,13 +496,13 @@ int main(int argc, char **argv) {
 			}
 			else if (strncmp(pargv[i], "SVPMODE", 7) == 0) {
 				sscanf(pargv[i], "SVPMODE:%d", &process.mbp_svp_mode);
-				if (!explicit && process.mbp_svp_mode == MBP_SVP_OFF) {
+				if (!is_explicit && process.mbp_svp_mode == MBP_SVP_OFF) {
 					process.mbp_svpfile[0] = '\0';
 				}
 			}
 			else if (strncmp(pargv[i], "SVPFILE", 7) == 0) {
 				sscanf(pargv[i], "SVPFILE:%1023s", process.mbp_svpfile);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_svp_mode = MBP_SVP_ON;
 				}
 			}
@@ -531,13 +531,13 @@ int main(int argc, char **argv) {
 			/* static beam bathymetry correction */
 			else if (strncmp(pargv[i], "STATICMODE", 10) == 0) {
 				sscanf(pargv[i], "STATICMODE:%d", &process.mbp_static_mode);
-				if (!explicit && process.mbp_static_mode == MBP_STATIC_OFF) {
+				if (!is_explicit && process.mbp_static_mode == MBP_STATIC_OFF) {
 					process.mbp_staticfile[0] = '\0';
 				}
 			}
 			else if (strncmp(pargv[i], "STATICFILE", 10) == 0) {
 				sscanf(pargv[i], "STATICFILE:%1023s", process.mbp_staticfile);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_static_mode = MBP_SVP_ON;
 				}
 			}
@@ -548,25 +548,25 @@ int main(int argc, char **argv) {
 			}
 			else if (strncmp(pargv[i], "DRAFTOFFSET", 11) == 0) {
 				sscanf(pargv[i], "DRAFTOFFSET:%lf", &process.mbp_draft_offset);
-				if (!explicit && process.mbp_draft_mode == MBP_DRAFT_MULTIPLY) {
+				if (!is_explicit && process.mbp_draft_mode == MBP_DRAFT_MULTIPLY) {
 					process.mbp_draft_mode = MBP_DRAFT_MULTIPLYOFFSET;
 				}
-				else if (!explicit && process.mbp_draft_mode == MBP_DRAFT_OFF) {
+				else if (!is_explicit && process.mbp_draft_mode == MBP_DRAFT_OFF) {
 					process.mbp_draft_mode = MBP_DRAFT_OFFSET;
 				}
 			}
 			else if (strncmp(pargv[i], "DRAFTMULTIPLY", 13) == 0) {
 				sscanf(pargv[i], "DRAFTMULTIPLY:%lf", &process.mbp_draft_mult);
-				if (!explicit && process.mbp_draft_mode == MBP_DRAFT_OFFSET) {
+				if (!is_explicit && process.mbp_draft_mode == MBP_DRAFT_OFFSET) {
 					process.mbp_draft_mode = MBP_DRAFT_MULTIPLYOFFSET;
 				}
-				else if (!explicit && process.mbp_draft_mode == MBP_DRAFT_OFF) {
+				else if (!is_explicit && process.mbp_draft_mode == MBP_DRAFT_OFF) {
 					process.mbp_draft_mode = MBP_DRAFT_MULTIPLY;
 				}
 			}
 			else if (strncmp(pargv[i], "DRAFT", 5) == 0) {
 				sscanf(pargv[i], "DRAFT:%lf", &process.mbp_draft);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_draft_mode = MBP_DRAFT_SET;
 				}
 			}
@@ -577,19 +577,19 @@ int main(int argc, char **argv) {
 			}
 			else if (strncmp(pargv[i], "HEAVEOFFSET", 11) == 0) {
 				sscanf(pargv[i], "HEAVEOFFSET:%lf", &process.mbp_heave);
-				if (!explicit && process.mbp_heave_mode == MBP_HEAVE_MULTIPLY) {
+				if (!is_explicit && process.mbp_heave_mode == MBP_HEAVE_MULTIPLY) {
 					process.mbp_heave_mode = MBP_HEAVE_MULTIPLYOFFSET;
 				}
-				else if (!explicit && process.mbp_heave_mode == MBP_HEAVE_OFF) {
+				else if (!is_explicit && process.mbp_heave_mode == MBP_HEAVE_OFF) {
 					process.mbp_heave_mode = MBP_HEAVE_OFFSET;
 				}
 			}
 			else if (strncmp(pargv[i], "HEAVEMULTIPLY", 13) == 0) {
 				sscanf(pargv[i], "HEAVEMULTIPLY:%lf", &process.mbp_heave_mult);
-				if (!explicit && process.mbp_heave_mode == MBP_HEAVE_OFFSET) {
+				if (!is_explicit && process.mbp_heave_mode == MBP_HEAVE_OFFSET) {
 					process.mbp_heave_mode = MBP_HEAVE_MULTIPLYOFFSET;
 				}
-				else if (!explicit && process.mbp_heave_mode == MBP_HEADING_OFF) {
+				else if (!is_explicit && process.mbp_heave_mode == MBP_HEADING_OFF) {
 					process.mbp_heave_mode = MBP_HEAVE_MULTIPLY;
 				}
 			}
@@ -600,37 +600,37 @@ int main(int argc, char **argv) {
 			}
 			else if (strncmp(pargv[i], "VRUOFFSETX", 10) == 0) {
 				sscanf(pargv[i], "VRUOFFSETX:%lf", &process.mbp_vru_offsetx);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_lever_mode = MBP_LEVER_ON;
 				}
 			}
 			else if (strncmp(pargv[i], "VRUOFFSETY", 10) == 0) {
 				sscanf(pargv[i], "VRUOFFSETY:%lf", &process.mbp_vru_offsety);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_lever_mode = MBP_LEVER_ON;
 				}
 			}
 			else if (strncmp(pargv[i], "VRUOFFSETZ", 10) == 0) {
 				sscanf(pargv[i], "VRUOFFSETZ:%lf", &process.mbp_vru_offsetz);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_lever_mode = MBP_LEVER_ON;
 				}
 			}
 			else if (strncmp(pargv[i], "SONAROFFSETX", 12) == 0) {
 				sscanf(pargv[i], "SONAROFFSETX:%lf", &process.mbp_sonar_offsetx);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_lever_mode = MBP_LEVER_ON;
 				}
 			}
 			else if (strncmp(pargv[i], "SONAROFFSETY", 12) == 0) {
 				sscanf(pargv[i], "SONAROFFSETY:%lf", &process.mbp_sonar_offsety);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_lever_mode = MBP_LEVER_ON;
 				}
 			}
 			else if (strncmp(pargv[i], "SONAROFFSETZ", 12) == 0) {
 				sscanf(pargv[i], "SONAROFFSETZ:%lf", &process.mbp_sonar_offsetz);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_lever_mode = MBP_LEVER_ON;
 				}
 			}
@@ -641,19 +641,19 @@ int main(int argc, char **argv) {
 			}
 			else if (strncmp(pargv[i], "ROLLBIASPORT", 12) == 0) {
 				sscanf(pargv[i], "ROLLBIASPORT:%lf", &process.mbp_rollbias_port);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_rollbias_mode = MBP_ROLLBIAS_DOUBLE;
 				}
 			}
 			else if (strncmp(pargv[i], "ROLLBIASSTBD", 12) == 0) {
 				sscanf(pargv[i], "ROLLBIASSTBD:%lf", &process.mbp_rollbias_stbd);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_rollbias_mode = MBP_ROLLBIAS_DOUBLE;
 				}
 			}
 			else if (strncmp(pargv[i], "ROLLBIAS", 8) == 0) {
 				sscanf(pargv[i], "ROLLBIAS:%lf", &process.mbp_rollbias);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
 				}
 			}
@@ -664,7 +664,7 @@ int main(int argc, char **argv) {
 			}
 			else if (strncmp(pargv[i], "PITCHBIAS", 9) == 0) {
 				sscanf(pargv[i], "PITCHBIAS:%lf", &process.mbp_pitchbias);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_pitchbias_mode = MBP_PITCHBIAS_ON;
 				}
 			}
@@ -675,10 +675,10 @@ int main(int argc, char **argv) {
 			}
 			else if (strncmp(pargv[i], "HEADINGOFFSET", 13) == 0) {
 				sscanf(pargv[i], "HEADINGOFFSET:%lf", &process.mbp_headingbias);
-				if (!explicit && process.mbp_heading_mode == MBP_HEADING_CALC) {
+				if (!is_explicit && process.mbp_heading_mode == MBP_HEADING_CALC) {
 					process.mbp_heading_mode = MBP_HEADING_CALCOFFSET;
 				}
-				else if (!explicit && process.mbp_heading_mode == MBP_HEADING_OFF) {
+				else if (!is_explicit && process.mbp_heading_mode == MBP_HEADING_OFF) {
 					process.mbp_heading_mode = MBP_HEADING_OFFSET;
 				}
 			}
@@ -686,13 +686,13 @@ int main(int argc, char **argv) {
 			/* tide correction */
 			else if (strncmp(pargv[i], "TIDEMODE", 8) == 0) {
 				sscanf(pargv[i], "TIDEMODE:%d", &process.mbp_tide_mode);
-				if (!explicit && process.mbp_tide_mode == MBP_TIDE_OFF) {
+				if (!is_explicit && process.mbp_tide_mode == MBP_TIDE_OFF) {
 					process.mbp_tidefile[0] = '\0';
 				}
 			}
 			else if (strncmp(pargv[i], "TIDEFILE", 8) == 0) {
 				sscanf(pargv[i], "TIDEFILE:%1023s", process.mbp_tidefile);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_tide_mode = MBP_TIDE_ON;
 				}
 			}
@@ -703,13 +703,13 @@ int main(int argc, char **argv) {
 			/* amplitude correction */
 			else if (strncmp(pargv[i], "AMPCORRMODE", 11) == 0) {
 				sscanf(pargv[i], "AMPCORRMODE:%d", &process.mbp_ampcorr_mode);
-				if (!explicit && process.mbp_ampcorr_mode == MBP_AMPCORR_OFF) {
+				if (!is_explicit && process.mbp_ampcorr_mode == MBP_AMPCORR_OFF) {
 					process.mbp_ampcorrfile[0] = '\0';
 				}
 			}
 			else if (strncmp(pargv[i], "AMPCORRFILE", 11) == 0) {
 				sscanf(pargv[i], "AMPCORRFILE:%1023s", process.mbp_ampcorrfile);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_ampcorr_mode = MBP_AMPCORR_ON;
 				}
 			}
@@ -732,13 +732,13 @@ int main(int argc, char **argv) {
 			/* sidescan correction */
 			else if (strncmp(pargv[i], "SSCORRMODE", 10) == 0) {
 				sscanf(pargv[i], "SSCORRMODE:%d", &process.mbp_sscorr_mode);
-				if (!explicit && process.mbp_sscorr_mode == MBP_SSCORR_OFF) {
+				if (!is_explicit && process.mbp_sscorr_mode == MBP_SSCORR_OFF) {
 					process.mbp_sscorrfile[0] = '\0';
 				}
 			}
 			else if (strncmp(pargv[i], "SSCORRFILE", 10) == 0) {
 				sscanf(pargv[i], "SSCORRFILE:%1023s", process.mbp_sscorrfile);
-				if (!explicit) {
+				if (!is_explicit) {
 					process.mbp_sscorr_mode = MBP_SSCORR_ON;
 				}
 			}
