@@ -485,6 +485,11 @@ struct mbsys_swathplus_struct {
  * are commented out below. When using this example as the basis for
  * for coding a new MB-System I/O module, uncomment any non-required
  * functions that will be useful. */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int mbsys_swathplus_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_swathplus_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_swathplus_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
@@ -650,5 +655,9 @@ int swpls_pr_pos_offset(int verbose, FILE *fout, swpls_pos_offset *pos_offset, i
 int swpls_pr_imu_offset(int verbose, FILE *fout, swpls_imu_offset *imu_offset, int *error);
 int swpls_pr_txer_offset(int verbose, FILE *fout, swpls_txer_offset *txer_offset, int *error);
 int swpls_pr_wl_offset(int verbose, FILE *fout, swpls_wl_offset *wl_offset, int *error);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MBSYS_SWATHPLUS_H_ */
