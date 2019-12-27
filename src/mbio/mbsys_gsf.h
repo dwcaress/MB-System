@@ -54,6 +54,10 @@ struct mbsys_gsf_struct {
 	gsfRecords records;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* system specific function prototypes */
 int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
@@ -85,5 +89,9 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error);
 int mbsys_gsf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_ping, int *error);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MBSYS_GSF_H_ */

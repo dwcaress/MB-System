@@ -1539,6 +1539,11 @@ struct mbsys_kmbes_struct {
  * are commented out below. When using this example as the basis for
  * for coding a new MB-System I/O module, uncomment any non-required
  * functions that will be useful. */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int mbsys_kmbes_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_kmbes_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_kmbes_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
@@ -1628,5 +1633,9 @@ int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MBSYS_KMBES_H_ */

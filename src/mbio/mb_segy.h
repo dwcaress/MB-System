@@ -181,6 +181,10 @@ struct mb_segyio_struct {
 	float *trace;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* function prototypes */
 int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct mb_segyasciiheader_struct *segyasciiheader,
                       struct mb_segyfileheader_struct *segyfileheader, int *error);
@@ -192,5 +196,9 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheader_struct *traceheader, float *trace, int *error);
 void hilbert(int n, double delta[], double kappa[]);
 void hilbert2(int n, double data[]);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MB_SEGY_H_ */

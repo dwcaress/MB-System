@@ -2351,6 +2351,10 @@ struct mbsys_reson7k_struct {
 	int nrec_other;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* 7K Macros */
 int mbsys_reson7k_checkheader(s7k_header header);
 
@@ -2477,5 +2481,9 @@ int mbsys_reson7k_print_pitch(int verbose, s7kr_pitch *pitch, int *error);
 int mbsys_reson7k_print_soundvelocity(int verbose, s7kr_soundvelocity *soundvelocity, int *error);
 int mbsys_reson7k_print_absorptionloss(int verbose, s7kr_absorptionloss *absorptionloss, int *error);
 int mbsys_reson7k_print_spreadingloss(int verbose, s7kr_spreadingloss *spreadingloss, int *error);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MBSYS_RESON7K_H_ */
