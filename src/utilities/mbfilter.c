@@ -260,7 +260,7 @@ int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass) 
 
 	/* sort values and get median value */
 	if (n > 0) {
-		qsort((char *)val, n, sizeof(double), (void *)mb_double_compare);
+		qsort((char *)val, n, sizeof(double), mb_double_compare);
 		*hipass = val[0] - val[n / 2];
 	}
 
@@ -374,7 +374,7 @@ int smooth_median(int verbose, double original, bool apply_threshold, double thr
 
 	/* sort values and get median value */
 	if (n > 0) {
-		qsort((char *)val, n, sizeof(double), (void *)mb_double_compare);
+		qsort((char *)val, n, sizeof(double), mb_double_compare);
 		*smooth = val[n / 2];
 	}
 

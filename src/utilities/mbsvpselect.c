@@ -733,7 +733,7 @@ int read_recursive2(char *fname) {
 		return counter;
 	}
 
-	char *ret = strchr(result, ' ');
+	const char *ret = strchr(result, ' ');
 	if (ret == NULL) {
 		char file2[1024] = {""};
 		my_strcpy(file2, original);
@@ -968,11 +968,12 @@ void read_list(char *list, char *list_2) {
 		if (p_flag == 0) {
 			switch (inf_hold[i].flag) {
 			case 0:
+			{
 				if (verbose == 1) {
 					puts("\n\n========N check passed no 0.0 position was found===========\n\n");
 					printf("\nCalculating the distances to all svp profiles for %s\n", inf_hold[i].file_name);
 				}
-				double temp_dist = 0;
+				double temp_dist = 0.0;
 				for (int j = 0; j < size_2; j++) {
 					geod_inverse(&g, inf_hold[i].ave_lat, inf_hold[i].ave_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
 					             &azi1, &azi2);
@@ -1010,13 +1011,16 @@ void read_list(char *list, char *list_2) {
 				printf("%s\n", all_in_sys);
 				/* int shellstatus = */ system(all_in_sys);
 				break;
+			}
 			case 1:
+			{
 				if (verbose == 1) {
 					puts("\n\n=====================N check:   0.0 position was found=====================\n\n");
 					printf("\nThe file %s has no navigation information at the start position and the svp profile will be "
 					       "assigned to the end point of the file\n",
 					       inf_hold[i].file_name);
 				}
+				double temp_dist = 0.0;
 				for (int j = 0; j < size_2; j++) {
 					geod_inverse(&g, inf_hold[i].s_lat, inf_hold[i].s_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
 					             &azi1, &azi2);
@@ -1054,13 +1058,16 @@ void read_list(char *list, char *list_2) {
 				printf("%s\n", all_in_sys);
 				/* int shellstatus = */ system(all_in_sys);
 				break;
+			}
 			case 2:
+			{
 				if (verbose == 1) {
 					puts("\n\n==============N check:   0.0 position was found===================\n\n");
 					printf("\nThe file %s has no navigation information at the end position and the svp profile will be assigned "
 					       "to the start point of the file\n",
 					       inf_hold[i].file_name);
 				}
+				double temp_dist = 0.0;
 				for (int j = 0; j < size_2; j++) {
 					geod_inverse(&g, inf_hold[i].e_lat, inf_hold[i].e_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
 					             &azi1, &azi2);
@@ -1097,7 +1104,9 @@ void read_list(char *list, char *list_2) {
 				/* int shellstatus = */ system(all_in_sys);
 				fprintf(fresult, "%s\n", "=============================================================");
 				break;
+			}
 			case 3:
+			{
 				if (verbose == 1) {
 					puts("\n\n==============N check:   0.0 position was found====================\n\n");
 					printf("\n!!!The file %s has no navigation information and no svp will be assigned to it!!!\n",
@@ -1107,12 +1116,12 @@ void read_list(char *list, char *list_2) {
 					fprintf(fresult, "%s\n", "NaN");
 				}
 				break;
+			}
 
 			default:
 				break;
 			} /* switch */
-		}
-		else {
+		} else {
 			if (p_flag == 1) /* calculate the nearest in time */
 			{
 				if (verbose == 1) {
@@ -1163,8 +1172,8 @@ void read_list(char *list, char *list_2) {
 					printf("\nCalculating the nearest svp in position within %d time period for for %s\n", p_3_time,
 					       inf_hold[i].file_name);
 				}
-				double temp_dist = 0;
-				double temp_dist2 = 0;
+				double temp_dist = 0.0;
+				double temp_dist2 = 0.0;
 				int count = 0;
 				int n_pos_time = 0;
 				int n_pos = 0;
@@ -1437,11 +1446,8 @@ void read_list(char *list, char *list_2) {
 int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
-	char datalist[BUFSIZ];
-	char svplist[BUFSIZ];
-
-	my_strcpy(datalist, "datalist.mb-1");
-	my_strcpy(svplist, "svplist.mb-1");
+	char datalist[BUFSIZ] = "datalist.mb-1";
+	char svplist[BUFSIZ] = "svplist.mb-1";
 
 	{
 		bool errflg = false;

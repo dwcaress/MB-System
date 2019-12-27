@@ -1477,7 +1477,7 @@ int main(int argc, char **argv) {
 						nmedian++;
 					}
 					if (nmedian > 0) {
-						qsort((char *)median, nmedian, sizeof(double), (void *)mb_double_compare);
+						qsort((char *)median, nmedian, sizeof(double), mb_double_compare);
 						dat_sonardepth_sonardepthfilter[i] = median[nmedian / 2];
 					}
 				}
@@ -1536,7 +1536,7 @@ int main(int argc, char **argv) {
 						nmedian++;
 					}
 					if (nmedian > 0) {
-						qsort((char *)median, nmedian, sizeof(double), (void *)mb_double_compare);
+						qsort((char *)median, nmedian, sizeof(double), mb_double_compare);
 						dat_sonardepth_sonardepthfilter[i] = median[nmedian / 2];
 					}
 				}
