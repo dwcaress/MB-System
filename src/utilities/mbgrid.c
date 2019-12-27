@@ -3366,7 +3366,7 @@ int main(int argc, char **argv) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0) {
 					value = data[kgrid];
-					qsort((char *)value, cnt[kgrid], sizeof(double), (void *)mb_double_compare);
+					qsort((char *)value, cnt[kgrid], sizeof(double), mb_double_compare);
 					// TODO(schwehr): grid_mode always has to be MBGRID_MEDIAN_FILTER here.
 					if (grid_mode == MBGRID_MEDIAN_FILTER) {
 						grid[kgrid] = value[cnt[kgrid] / 2];

@@ -1322,7 +1322,7 @@ int main(int argc, char **argv) {
                     }
                   }
                 }
-                qsort((char *)list, nlist, sizeof(double), (void *)mb_double_compare);
+                qsort((char *)list, nlist, sizeof(double), mb_double_compare);
                 median = list[nlist / 2];
                 if (verbose >= 2) {
                   fprintf(stderr, "\ndbg2  depth statistics:\n");

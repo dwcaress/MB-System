@@ -729,6 +729,7 @@ int main(int argc, char **argv) {
 								break;
 							case 'm': /* time in decimal seconds since
 							        first record */
+							{
 								if (first_m) {
 									time_d_ref = time_d;
 									first_m = false;
@@ -736,6 +737,7 @@ int main(int argc, char **argv) {
 								double b = time_d - time_d_ref;
 								printsimplevalue(verbose, b, 0, 6, ascii, &invert_next_value, &signflip_next_value, &error);
 								break;
+							}
 							case 'P': /* pitch */
 								printsimplevalue(verbose, pitch, 6, 3, ascii, &invert_next_value, &signflip_next_value, &error);
 								break;
@@ -757,11 +759,11 @@ int main(int argc, char **argv) {
 								break;
 							case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 								seconds = time_i[5] + 1e-6 * time_i[6];
-								if (ascii)
+								if (ascii) {
 									printf("%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f", time_i[0], time_i[1], time_i[2], time_i[3],
 									       time_i[4], seconds);
-								else {
-									b = time_i[0];
+								} else {
+									double b = time_i[0];
 									fwrite(&b, sizeof(double), 1, stdout);
 									b = time_i[1];
 									fwrite(&b, sizeof(double), 1, stdout);
@@ -777,11 +779,11 @@ int main(int argc, char **argv) {
 								break;
 							case 't': /* yyyy mm dd hh mm ss time string */
 								seconds = time_i[5] + 1e-6 * time_i[6];
-								if (ascii)
+								if (ascii) {
 									printf("%.4d %.2d %.2d %.2d %.2d %9.6f", time_i[0], time_i[1], time_i[2], time_i[3],
 									       time_i[4], seconds);
-								else {
-									b = time_i[0];
+								} else {
+									double b = time_i[0];
 									fwrite(&b, sizeof(double), 1, stdout);
 									b = time_i[1];
 									fwrite(&b, sizeof(double), 1, stdout);
@@ -797,10 +799,10 @@ int main(int argc, char **argv) {
 								break;
 							case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 								time_u = (int)time_d;
-								if (ascii)
+								if (ascii) {
 									printf("%ld", time_u);
-								else {
-									b = time_u;
+								} else {
+									double b = time_u;
 									fwrite(&b, sizeof(double), 1, stdout);
 								}
 								break;
@@ -810,10 +812,10 @@ int main(int argc, char **argv) {
 									time_u_ref = time_u;
 									first_u = false;
 								}
-								if (ascii)
+								if (ascii) {
 									printf("%ld", time_u - time_u_ref);
-								else {
-									b = time_u - time_u_ref;
+								} else {
+									double b = time_u - time_u_ref;
 									fwrite(&b, sizeof(double), 1, stdout);
 								}
 								break;
@@ -855,9 +857,8 @@ int main(int argc, char **argv) {
 								minutes = 60.0 * (dlon - degrees);
 								if (ascii) {
 									printf("%3d %11.8f%c", degrees, minutes, hemi);
-								}
-								else {
-									b = degrees;
+								} else {
+									double b = degrees;
 									if (hemi == 'W')
 										b = -b;
 									fwrite(&b, sizeof(double), 1, stdout);
@@ -870,8 +871,7 @@ int main(int argc, char **argv) {
 									dlat = navlat;
 									printsimplevalue(verbose, dlat, 15, 10, ascii, &invert_next_value, &signflip_next_value,
 									                 &error);
-								}
-								else {
+								} else {
 									const double dnorthing = navnorthing;
 									printsimplevalue(verbose, dnorthing, 15, 3, ascii, &invert_next_value, &signflip_next_value,
 									                 &error);
@@ -883,16 +883,15 @@ int main(int argc, char **argv) {
 								if (dlat < 0.0) {
 									hemi = 'S';
 									dlat = -dlat;
-								}
-								else
+								} else {
 									hemi = 'N';
+								}
 								degrees = (int)dlat;
 								minutes = 60.0 * (dlat - degrees);
 								if (ascii) {
 									printf("%3d %11.8f%c", degrees, minutes, hemi);
-								}
-								else {
-									b = degrees;
+								} else {
+									double b = degrees;
 									if (hemi == 'S')
 										b = -b;
 									fwrite(&b, sizeof(double), 1, stdout);
