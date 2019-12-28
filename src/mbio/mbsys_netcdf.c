@@ -1627,7 +1627,7 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 
 		/* deal with a memory allocation failure */
 		if (status == MB_FAILURE) {
-			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCycle, error);
+			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCycle, error);
 			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDate, error);
 			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTime, error);
 			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbOrdinate, error);
@@ -2489,7 +2489,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE) {
-		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistDate, error);
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistDate, error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistTime, error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistCode, error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistAutor, error);
