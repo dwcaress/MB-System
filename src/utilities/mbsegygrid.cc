@@ -488,7 +488,7 @@ int main(int argc, char **argv) {
 		                &sinftimesweep, &sinftimedelay, &sinfstartlon, &sinfstartlat, &sinfendlon, &sinfendlat, &error);
 		if (traceend < 1 || traceend < tracestart) {
 			if (!tracemode_set)
-                tracemode = sinftracemode;
+		                tracemode = static_cast<useshot_t>(sinftracemode);
 			tracestart = sinftracestart;
 			traceend = sinftraceend;
 		}

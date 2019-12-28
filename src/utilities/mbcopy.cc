@@ -1441,9 +1441,9 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
   struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
   struct mb_io_struct *omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
 
-  struct mbsys_reson8k_struct *istore = imb_io_ptr->store_data;
+  struct mbsys_reson8k_struct *istore = static_cast<struct mbsys_reson8k_struct *>(imb_io_ptr->store_data);
   /* get gsf data structure pointer */
-  struct mbsys_gsf_struct *ostore = omb_io_ptr->store_data;
+  struct mbsys_gsf_struct *ostore = static_cast<struct mbsys_gsf_struct *>(omb_io_ptr->store_data);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
@@ -2563,15 +2563,16 @@ int main(int argc, char **argv) {
     }
     else if (copymode == MBCOPY_ELACMK2_TO_XSE && error == MB_ERROR_NO_ERROR) {
       ostore_ptr = omb_io_ptr->store_data;
-      status = mbcopy_elacmk2_to_xse(verbose, istore_ptr, ostore_ptr, &error);
+      status = mbcopy_elacmk2_to_xse(verbose, static_cast<mbsys_elacmk2_struct *>(istore_ptr),
+                                     static_cast<mbsys_xse_struct *>(ostore_ptr), &error);
     }
     else if (copymode == MBCOPY_XSE_TO_ELACMK2 && error == MB_ERROR_NO_ERROR) {
       ostore_ptr = omb_io_ptr->store_data;
-      status = mbcopy_xse_to_elacmk2(verbose, istore_ptr, ostore_ptr, &error);
+      status = mbcopy_xse_to_elacmk2(verbose, static_cast<mbsys_xse_struct *>(istore_ptr), static_cast<mbsys_elacmk2_struct *>(ostore_ptr), &error);
     }
     else if (copymode == MBCOPY_SIMRAD_TO_SIMRAD2 && error == MB_ERROR_NO_ERROR) {
       ostore_ptr = omb_io_ptr->store_data;
-      status = mbcopy_simrad_to_simrad2(verbose, istore_ptr, ostore_ptr, &error);
+      status = mbcopy_simrad_to_simrad2(verbose, static_cast<mbsys_simrad_struct *>(istore_ptr), static_cast<mbsys_simrad2_struct *>(ostore_ptr), &error);
     }
 #ifdef ENABLE_GSF
     else if (copymode == MBCOPY_RESON8K_TO_GSF && error == MB_ERROR_NO_ERROR) {
