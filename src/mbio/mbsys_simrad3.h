@@ -1359,6 +1359,10 @@ struct mbsys_simrad3_struct {
 	struct mbsys_simrad3_watercolumn_struct *wc;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* system specific function prototypes */
 int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error);
@@ -1411,5 +1415,9 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MBSYS_SIMRAD3_H_ */

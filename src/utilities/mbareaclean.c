@@ -1051,7 +1051,7 @@ int main(int argc, char **argv) {
 				/* apply median filter only if there are enough soundings */
 				if (binnum >= median_filter_nmin) {
 					/* run qsort */
-					qsort((void *)bindepths, binnum, sizeof(double), (void *)mb_double_compare);
+					qsort((void *)bindepths, binnum, sizeof(double), mb_double_compare);
 					const double median_depth = bindepths[binnum / 2];
 					double median_depth_low;
 					double median_depth_high;

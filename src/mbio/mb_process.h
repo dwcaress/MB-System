@@ -952,6 +952,10 @@ struct mb_esf_struct {
   int startnextsearch;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error);
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_struct *process, int *error);
 int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, int *error);
@@ -1081,5 +1085,9 @@ int mb_pr_lockswathfile(int verbose, const char *file, int purpose, const char *
 int mb_pr_unlockswathfile(int verbose, const char *file, int purpose, const char *program_name, int *error);
 int mb_pr_lockinfo(int verbose, const char *file, int *locked, int *purpose,
                    char *program, char *user, char *cpu, char *date, int *error);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MB_PROCESS_H_ */

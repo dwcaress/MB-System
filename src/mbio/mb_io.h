@@ -157,7 +157,7 @@ static int mb_sensor_type_id[] = {
     MB_SENSOR_TYPE_PRESSURE,                // 111
     MB_SENSOR_TYPE_SOUNDSPEED,              // 120
 };
-static char *mb_sensor_type_string[] = {"Unknown sensor type",
+static const char *mb_sensor_type_string[] = {"Unknown sensor type",
                                         "Sonar echosounder",
                                         "Sonar multiechosounder",
                                         "Sonar sidescan",

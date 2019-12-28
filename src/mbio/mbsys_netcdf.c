@@ -1062,122 +1062,122 @@ int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 
 	/* deallocate any allocated arrays */
 	if (store->mbHistDate != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistDate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistDate, error);
 	if (store->mbHistTime != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistTime, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistTime, error);
 	if (store->mbHistCode != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistCode, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistCode, error);
 	if (store->mbHistAutor != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistAutor, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistAutor, error);
 	if (store->mbHistModule != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistModule, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistModule, error);
 	if (store->mbHistComment != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistComment, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistComment, error);
 	if (store->mbCycle != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCycle, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCycle, error);
 	if (store->mbDate != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDate, error);
 	if (store->mbTime != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTime, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTime, error);
 	if (store->mbOrdinate != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbOrdinate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbOrdinate, error);
 	if (store->mbAbscissa != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAbscissa, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAbscissa, error);
 	if (store->mbFrequency != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbFrequency, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbFrequency, error);
 	if (store->mbSonarFrequency != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSonarFrequency, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSonarFrequency, error);
 	if (store->mbSounderMode != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSounderMode, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSounderMode, error);
 	if (store->mbReferenceDepth != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReferenceDepth, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReferenceDepth, error);
 	if (store->mbDynamicDraught != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDynamicDraught, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDynamicDraught, error);
 	if (store->mbTide != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTide, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTide, error);
 	if (store->mbSoundVelocity != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSoundVelocity, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSoundVelocity, error);
 	if (store->mbHeading != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHeading, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHeading, error);
 	if (store->mbRoll != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRoll, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRoll, error);
 	if (store->mbPitch != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbPitch, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbPitch, error);
 	if (store->mbTransmissionHeave != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmissionHeave, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmissionHeave, error);
 	if (store->mbDistanceScale != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDistanceScale, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDistanceScale, error);
 	if (store->mbRangeScale != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRangeScale, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRangeScale, error);
 	if (store->mbDepthScale != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepthScale, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepthScale, error);
 	if (store->mbVerticalDepth != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVerticalDepth, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVerticalDepth, error);
 	if (store->mbCQuality != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCQuality, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCQuality, error);
 	if (store->mbCFlag != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCFlag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCFlag, error);
 	if (store->mbInterlacing != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbInterlacing, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbInterlacing, error);
 	if (store->mbSamplingRate != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSamplingRate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSamplingRate, error);
 	if (store->mbCompensationLayerMode != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCompensationLayerMode, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCompensationLayerMode, error);
 	if (store->mbTransmitBeamwidth != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmitBeamwidth, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmitBeamwidth, error);
 	if (store->mbReceiveBeamwidth != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReceiveBeamwidth, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReceiveBeamwidth, error);
 	if (store->mbTransmitPulseLength != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmitPulseLength, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmitPulseLength, error);
 	if (store->mbAlongDistance != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAlongDistance, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAlongDistance, error);
 	if (store->mbAcrossDistance != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossDistance, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossDistance, error);
 	if (store->mbDepth != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepth, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepth, error);
 	if (store->mbAcrossBeamAngle != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossBeamAngle, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossBeamAngle, error);
 	if (store->mbAzimutBeamAngle != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAzimutBeamAngle, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAzimutBeamAngle, error);
 	if (store->mbRange != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRange, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRange, error);
 	if (store->mbSoundingBias != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSoundingBias, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSoundingBias, error);
 	if (store->mbSQuality != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSQuality, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSQuality, error);
 	if (store->mbReflectivity != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReflectivity, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReflectivity, error);
 	if (store->mbReceptionHeave != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReceptionHeave, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReceptionHeave, error);
 	if (store->mbAlongSlope != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAlongSlope, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAlongSlope, error);
 	if (store->mbAcrossSlope != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossSlope, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossSlope, error);
 	if (store->mbSFlag != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSFlag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSFlag, error);
 	if (store->mbSLengthOfDetection != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSLengthOfDetection, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSLengthOfDetection, error);
 	if (store->mbAntenna != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAntenna, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAntenna, error);
 	if (store->mbBeamBias != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeamBias, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeamBias, error);
 	if (store->mbBFlag != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBFlag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBFlag, error);
 	if (store->mbBeam != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeam, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeam, error);
 	if (store->mbAFlag != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAFlag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAFlag, error);
 	if (store->mbVelProfilRef != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilRef, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilRef, error);
 	if (store->mbVelProfilIdx != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilIdx, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilIdx, error);
 	if (store->mbVelProfilDate != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilDate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilDate, error);
 	if (store->mbVelProfilTime != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilTime, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilTime, error);
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -1547,137 +1547,140 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 
 		/* allocate arrays */
 		int status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbCycle, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(int), (void **)&store->mbDate, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(int), (void **)&store->mbTime, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(int), (void **)&store->mbOrdinate, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(int), (void **)&store->mbAbscissa, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbFrequency, error);
-		status =
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(int), (void **)&store->mbDate, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(int), (void **)&store->mbTime, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(int), (void **)&store->mbOrdinate, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(int), (void **)&store->mbAbscissa, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbFrequency, error);
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(int), (void **)&store->mbSonarFrequency, error);
-		status =
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbSounderMode, error);
-		status =
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(int), (void **)&store->mbReferenceDepth, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbDynamicDraught,
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbDynamicDraught,
 		                    error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbTide, error);
-		status =
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbTide, error);
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbSoundVelocity, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbHeading, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbRoll, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbPitch, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbHeading, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbRoll, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbPitch, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short),
 		                    (void **)&store->mbTransmissionHeave, error);
-		status =
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbDistanceScale, error);
-		status =
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbRangeScale, error);
-		status =
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbDepthScale, error);
-		status =
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(int), (void **)&store->mbVerticalDepth, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbCQuality, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbCFlag, error);
-		status =
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbCQuality, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbCFlag, error);
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbInterlacing, error);
-		status =
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbSamplingRate, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char),
 		                    (void **)&store->mbCompensationLayerMode, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short),
 		                    (void **)&store->mbTransmitBeamwidth, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbReceiveBeamwidth,
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbReceiveBeamwidth,
 		                    error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short),
 		                    (void **)&store->mbTransmitPulseLength, error);
-		status =
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(short), (void **)&store->mbAlongDistance, error);
-		status =
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(short), (void **)&store->mbAcrossDistance, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(int), (void **)&store->mbDepth, error);
-		status =
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(int), (void **)&store->mbDepth, error);
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(short), (void **)&store->mbAcrossBeamAngle, error);
-		status =
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(short), (void **)&store->mbAzimutBeamAngle, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(short), (void **)&store->mbRange, error);
-		status =
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(short), (void **)&store->mbRange, error);
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(short), (void **)&store->mbSoundingBias, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(char), (void **)&store->mbSQuality, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(char), (void **)&store->mbReflectivity, error);
-		status =
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(char), (void **)&store->mbSQuality, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(char), (void **)&store->mbReflectivity, error);
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(char), (void **)&store->mbReceptionHeave, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(short), (void **)&store->mbAlongSlope, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(short), (void **)&store->mbAcrossSlope, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(char), (void **)&store->mbSFlag, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(char), (void **)&store->mbSLengthOfDetection,
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(short), (void **)&store->mbAlongSlope, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(short), (void **)&store->mbAcrossSlope, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(char), (void **)&store->mbSFlag, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(char), (void **)&store->mbSLengthOfDetection,
 		                    error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(char), (void **)&store->mbAntenna, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(short), (void **)&store->mbBeamBias, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(char), (void **)&store->mbBFlag, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbBeam, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbAFlag, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbVelocityProfilNbr * store->mbCommentLength * sizeof(char),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(char), (void **)&store->mbAntenna, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(short), (void **)&store->mbBeamBias, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbBeamNbr * sizeof(char), (void **)&store->mbBFlag, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(short), (void **)&store->mbBeam, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbAntennaNbr * sizeof(char), (void **)&store->mbAFlag, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbVelocityProfilNbr * store->mbCommentLength * sizeof(char),
 		                    (void **)&store->mbVelProfilRef, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbVelocityProfilNbr * sizeof(short),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbVelocityProfilNbr * sizeof(short),
 		                    (void **)&store->mbVelProfilIdx, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbVelocityProfilNbr * sizeof(int),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbVelocityProfilNbr * sizeof(int),
 		                    (void **)&store->mbVelProfilDate, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->mbVelocityProfilNbr * sizeof(int),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, store->mbVelocityProfilNbr * sizeof(int),
 		                    (void **)&store->mbVelProfilTime, error);
 
 		/* deal with a memory allocation failure */
 		if (status == MB_FAILURE) {
 			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCycle, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDate, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTime, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbOrdinate, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAbscissa, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbFrequency, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSonarFrequency, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSounderMode, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReferenceDepth, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDynamicDraught, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTide, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSoundVelocity, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHeading, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRoll, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbPitch, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmissionHeave, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDistanceScale, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRangeScale, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepthScale, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVerticalDepth, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCQuality, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCFlag, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbInterlacing, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSamplingRate, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCompensationLayerMode, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmitBeamwidth, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReceiveBeamwidth, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmitPulseLength, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAlongDistance, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossDistance, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepth, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossBeamAngle, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAzimutBeamAngle, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRange, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSoundingBias, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSQuality, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReflectivity, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReceptionHeave, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAlongSlope, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossSlope, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSFlag, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSLengthOfDetection, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAntenna, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeamBias, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBFlag, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeam, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAFlag, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilRef, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilIdx, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilDate, error);
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilTime, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDate, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTime, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbOrdinate, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAbscissa, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbFrequency, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSonarFrequency, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSounderMode, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReferenceDepth, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDynamicDraught, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTide, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSoundVelocity, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHeading, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRoll, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbPitch, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmissionHeave, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDistanceScale, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRangeScale, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepthScale, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVerticalDepth, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCQuality, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCFlag, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbInterlacing, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSamplingRate, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCompensationLayerMode, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmitBeamwidth, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReceiveBeamwidth, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmitPulseLength, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAlongDistance, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossDistance, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepth, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossBeamAngle, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAzimutBeamAngle, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRange, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSoundingBias, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSQuality, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReflectivity, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReceptionHeave, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAlongSlope, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossSlope, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSFlag, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSLengthOfDetection, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAntenna, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeamBias, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBFlag, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeam, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAFlag, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilRef, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilIdx, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilDate, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilTime, error);
+			if (status == MB_FAILURE) {
+				fprintf(stderr, "MBIO function <%s>: mb_freed failure\n", __func__);
+			}
 			status = MB_FAILURE;
 			*error = MB_ERROR_MEMORY_FAIL;
 			if (verbose >= 2) {
@@ -2366,54 +2369,54 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 
 	/* deallocate memory if required */
 	if (store->mbHistoryRecNbr > copy->mbHistoryRecNbr) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistDate, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistTime, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistCode, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistAutor, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistModule, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistComment, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistDate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistTime, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistCode, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistAutor, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistModule, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistComment, error);
 	}
 	if (store->mbAntennaNbr > copy->mbAntennaNbr) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCycle, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDate, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTime, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbOrdinate, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAbscissa, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbFrequency, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSounderMode, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReferenceDepth, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDynamicDraught, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTide, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSoundVelocity, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHeading, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRoll, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbPitch, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmissionHeave, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDistanceScale, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepthScale, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVerticalDepth, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCQuality, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCFlag, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbInterlacing, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSamplingRate, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeam, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAFlag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCycle, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTime, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbOrdinate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAbscissa, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbFrequency, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSounderMode, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReferenceDepth, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDynamicDraught, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTide, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSoundVelocity, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHeading, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRoll, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbPitch, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmissionHeave, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDistanceScale, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepthScale, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVerticalDepth, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCQuality, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCFlag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbInterlacing, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSamplingRate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeam, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAFlag, error);
 	}
 	if (store->mbBeamNbr > copy->mbBeamNbr) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAlongDistance, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossDistance, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepth, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSQuality, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSFlag, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAntenna, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeamBias, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBFlag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAlongDistance, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossDistance, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepth, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSQuality, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSFlag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAntenna, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeamBias, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBFlag, error);
 	}
 	if (store->mbVelocityProfilNbr > copy->mbVelocityProfilNbr) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilRef, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilIdx, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilDate, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilTime, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilRef, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilIdx, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilDate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilTime, error);
 	}
 
 	/* allocate the memory in copy */
@@ -2425,109 +2428,112 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 		copy->mbBeamNbr = store->mbBeamNbr;
 		copy->mbCycleNbr = store->mbCycleNbr;
 		copy->mbVelocityProfilNbr = store->mbVelocityProfilNbr;
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbHistoryRecNbr * sizeof(int), (void **)&copy->mbHistDate, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbHistoryRecNbr * sizeof(int), (void **)&copy->mbHistTime, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbHistoryRecNbr * sizeof(char), (void **)&copy->mbHistCode, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbHistoryRecNbr * copy->mbNameLength * sizeof(char),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbHistoryRecNbr * sizeof(int), (void **)&copy->mbHistDate, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbHistoryRecNbr * sizeof(int), (void **)&copy->mbHistTime, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbHistoryRecNbr * sizeof(char), (void **)&copy->mbHistCode, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbHistoryRecNbr * copy->mbNameLength * sizeof(char),
 		                    (void **)&copy->mbHistAutor, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbHistoryRecNbr * copy->mbNameLength * sizeof(char),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbHistoryRecNbr * copy->mbNameLength * sizeof(char),
 		                    (void **)&copy->mbHistModule, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbHistoryRecNbr * copy->mbCommentLength * sizeof(char),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbHistoryRecNbr * copy->mbCommentLength * sizeof(char),
 		                    (void **)&copy->mbHistComment, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbCycle, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(int), (void **)&copy->mbDate, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(int), (void **)&copy->mbTime, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(int), (void **)&copy->mbOrdinate, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(int), (void **)&copy->mbAbscissa, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbFrequency, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbSounderMode, error);
-		status =
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbCycle, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(int), (void **)&copy->mbDate, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(int), (void **)&copy->mbTime, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(int), (void **)&copy->mbOrdinate, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(int), (void **)&copy->mbAbscissa, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbFrequency, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbSounderMode, error);
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(int), (void **)&copy->mbReferenceDepth, error);
-		status =
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbDynamicDraught, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbTide, error);
-		status =
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbTide, error);
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbSoundVelocity, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbHeading, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbRoll, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbPitch, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbTransmissionHeave,
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbHeading, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbRoll, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbPitch, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbTransmissionHeave,
 		                    error);
-		status =
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbDistanceScale, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbDepthScale, error);
-		status =
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbDepthScale, error);
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(int), (void **)&copy->mbVerticalDepth, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbCQuality, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbCFlag, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbInterlacing, error);
-		status =
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbCQuality, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbCFlag, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbInterlacing, error);
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbSamplingRate, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(short), (void **)&copy->mbAlongDistance, error);
-		status =
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(short), (void **)&copy->mbAlongDistance, error);
+		status &=
 		    mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(short), (void **)&copy->mbAcrossDistance, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(int), (void **)&copy->mbDepth, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(char), (void **)&copy->mbSQuality, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(char), (void **)&copy->mbSFlag, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(char), (void **)&copy->mbAntenna, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(short), (void **)&copy->mbBeamBias, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(char), (void **)&copy->mbBFlag, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbBeam, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbAFlag, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbVelocityProfilNbr * copy->mbCommentLength * sizeof(char),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(int), (void **)&copy->mbDepth, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(char), (void **)&copy->mbSQuality, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(char), (void **)&copy->mbSFlag, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(char), (void **)&copy->mbAntenna, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(short), (void **)&copy->mbBeamBias, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbBeamNbr * sizeof(char), (void **)&copy->mbBFlag, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(short), (void **)&copy->mbBeam, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbAntennaNbr * sizeof(char), (void **)&copy->mbAFlag, error);
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbVelocityProfilNbr * copy->mbCommentLength * sizeof(char),
 		                    (void **)&copy->mbVelProfilRef, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbVelocityProfilNbr * sizeof(short),
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbVelocityProfilNbr * sizeof(short),
 		                    (void **)&copy->mbVelProfilIdx, error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbVelocityProfilNbr * sizeof(int), (void **)&copy->mbVelProfilDate,
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbVelocityProfilNbr * sizeof(int), (void **)&copy->mbVelProfilDate,
 		                    error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->mbVelocityProfilNbr * sizeof(int), (void **)&copy->mbVelProfilTime,
+		status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->mbVelocityProfilNbr * sizeof(int), (void **)&copy->mbVelProfilTime,
 		                    error);
 	}
 
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE) {
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistDate, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistTime, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistCode, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistAutor, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistModule, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistComment, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCycle, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDate, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTime, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbOrdinate, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAbscissa, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbFrequency, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSounderMode, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReferenceDepth, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDynamicDraught, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTide, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSoundVelocity, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHeading, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRoll, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbPitch, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmissionHeave, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDistanceScale, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepthScale, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVerticalDepth, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCQuality, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCFlag, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbInterlacing, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSamplingRate, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAlongDistance, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossDistance, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepth, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSQuality, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSFlag, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAntenna, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeamBias, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBFlag, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeam, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAFlag, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilRef, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilIdx, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilDate, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilTime, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistTime, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistCode, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistAutor, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistModule, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHistComment, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCycle, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTime, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbOrdinate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAbscissa, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbFrequency, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSounderMode, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReferenceDepth, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDynamicDraught, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTide, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSoundVelocity, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHeading, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRoll, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbPitch, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmissionHeave, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDistanceScale, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepthScale, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVerticalDepth, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCQuality, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbCFlag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbInterlacing, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSamplingRate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAlongDistance, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAcrossDistance, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDepth, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSQuality, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSFlag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAntenna, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeamBias, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBFlag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeam, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAFlag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilRef, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilIdx, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilDate, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbVelProfilTime, error);
+		if (status == MB_FAILURE) {
+			fprintf(stderr, "MBIO function <%s>: mb_freed failure\n", __func__);
+		}
 		status = MB_FAILURE;
 		*error = MB_ERROR_MEMORY_FAIL;
 		if (verbose >= 2) {

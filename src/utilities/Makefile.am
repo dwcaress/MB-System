@@ -6,8 +6,6 @@ if BUILD_MBTRN
   MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
 endif
 
-# TODO(schwehr): What happened to mbps?
-
 bin_PROGRAMS =
 bin_PROGRAMS += mbconfig
 bin_PROGRAMS += mb7k2jstar
@@ -129,6 +127,7 @@ mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.c
 mblevitus_SOURCES = mblevitus.c
 mblist_SOURCES = mblist.c
 mbmakeplatform_SOURCES = mbmakeplatform.c
+mbminirovnav_SOURCES = mbminirovnav.c
 mbmosaic_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbmosaic_SOURCES = mbmosaic.c
 mbnavlist_SOURCES = mbnavlist.c

@@ -1235,9 +1235,11 @@ int main(int argc, char **argv) {
 		 * set sensor 0 (multibeam) for a single first offsets are
 		 * for transmit array, second for receive array
 		 */
-		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_SONAR_MULTIBEAM, NULL, "Reson", NULL,
+		if (status == MB_SUCCESS) {
+			mb_longname manufacturer = "Reson";
+			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_SONAR_MULTIBEAM, NULL, manufacturer, NULL,
 			                                MB_SENSOR_CAPABILITY1_NONE, MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM, 2, 0, &error);
+		}
 		if (status == MB_SUCCESS)
 			status =
 			    mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 0, multibeam_offset_mode, mbtransmit_offset_x,
@@ -2801,7 +2803,7 @@ int main(int argc, char **argv) {
 					    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber);
 
 				if (platform == NULL) {
-					status = mb_extract_platform(verbose, imbio_ptr, istore_ptr, &kind, (void *)&platform, &error);
+					status = mb_extract_platform(verbose, imbio_ptr, istore_ptr, &kind, (void **)&platform, &error);
 
 					/* deal with error */
 					if (status == MB_FAILURE) {

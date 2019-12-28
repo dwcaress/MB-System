@@ -28,7 +28,6 @@
 extern "C" {
 #endif
 
-
 #ifdef _WIN32
 	/* https://www.zachburlingame.com/2011/05/resolving-redefinition-errors-betwen-ws2def-h-and-winsock-h/ */
 #	ifndef WIN32

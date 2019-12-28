@@ -178,6 +178,10 @@ struct mb_topogrid_struct {
   float *data;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* mb_contour and mb_track function prototypes */
 int mb_triangulate(int verbose, struct swath *data, int *error);
 int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_bath, int contour_algorithm, int plot_contours,
@@ -321,5 +325,9 @@ void mbcblas_dscal(const int N, const double alpha, double *X, const int incX);
 void mbcblas_dgemv(const enum MBCBLAS_ORDER order, const enum MBCBLAS_TRANSPOSE TransA, const int M, const int N,
                    const double alpha, const double *A, const int lda, const double *X, const int incX, const double beta,
                    double *Y, const int incY);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MB_AUX_H_ */
