@@ -19,8 +19,6 @@
  *
  * Author:	D. W. Caress
  * Date:	April 11, 2002
- *
- *
  */
 
 #include <math.h>
