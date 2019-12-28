@@ -23,7 +23,7 @@
  * Author:	D. W. Caress
  * Date:	May 4, 2002
  */
-#define MBNETCDF_DEBUG 1
+// #define MBNETCDF_DEBUG 1
 
 #include <math.h>
 #include <stdio.h>
