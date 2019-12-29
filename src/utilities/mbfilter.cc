@@ -708,7 +708,7 @@ int main(int argc, char **argv) {
 				const int n = sscanf(optarg, "%d/%d/%d/%d", &tmp, &contrast_xdim, &contrast_ldim, &contrast_iter);
 				contrast_mode = (contrast_mode_t)tmp;
 				if (n >= 3) {
-					filters[num_filters].mode = contrast_mode + 7;
+					filters[num_filters].mode = static_cast<filter_a_mode_t>(contrast_mode + 7);
 					filters[num_filters].xdim = contrast_xdim;
 					filters[num_filters].ldim = contrast_ldim;
 					filters[num_filters].threshold = false;
@@ -728,7 +728,7 @@ int main(int argc, char **argv) {
 				const int n = sscanf(optarg, "%d/%d/%d/%d/%lf", &tmp, &hipass_xdim, &hipass_ldim, &hipass_iter, &hipass_offset);
 				hipass_mode = (hipass_mode_t)tmp;  // TODO(schwehr): Range check.
 				if (n >= 3) {
-					filters[num_filters].mode = hipass_mode + 0;
+					filters[num_filters].mode = static_cast<filter_a_mode_t>(hipass_mode + 0);
 					filters[num_filters].xdim = hipass_xdim;
 					filters[num_filters].ldim = hipass_ldim;
 					filters[num_filters].threshold = false;
@@ -780,7 +780,7 @@ int main(int argc, char **argv) {
 				           &threshold_hi);
 				smooth_mode = (smooth_mode_t)tmp;  // TODO(schwehr): Range check.
 				if (n >= 3) {
-					filters[num_filters].mode = smooth_mode + 3;
+					filters[num_filters].mode = static_cast<filter_a_mode_t>(smooth_mode + 3);
 					filters[num_filters].xdim = smooth_xdim;
 					filters[num_filters].ldim = smooth_ldim;
 				}
@@ -1472,7 +1472,7 @@ int main(int argc, char **argv) {
 						    ping[j].speed, ping[j].heading, ping[j].sonardepth, ping[j].altitude, ping[j].roll, ping[j].pitch,
 						    ping[j].heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack, ping[j].beams_bath, 0, 0,
 						    ping[j].beamflag, ping[j].datasave, ping[j].amp, ping[j].bathacrosstrack, ping[j].bathalongtrack,
-						    ping[j].ss, ping[j].ssacrosstrack, ping[j].ssalongtrack, comment, ombio_ptr, omb_io_ptr->store_data,
+						    ping[j].ss, ping[j].ssacrosstrack, ping[j].ssalongtrack, comment, static_cast<char *>(ombio_ptr), static_cast<char *>(omb_io_ptr->store_data),
 						    &error);
 					}
 					else if (datakind == MBFILTER_AMP) {
@@ -1481,8 +1481,8 @@ int main(int argc, char **argv) {
 						    ping[j].speed, ping[j].heading, ping[j].sonardepth, ping[j].altitude, ping[j].roll, ping[j].pitch,
 						    ping[j].heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack, ping[j].beams_bath,
 						    ping[j].beams_amp, 0, ping[j].beamflag, ping[j].bath, ping[j].datasave, ping[j].bathacrosstrack,
-						    ping[j].bathalongtrack, ping[j].ss, ping[j].ssacrosstrack, ping[j].ssalongtrack, comment, ombio_ptr,
-						    omb_io_ptr->store_data, &error);
+						    ping[j].bathalongtrack, ping[j].ss, ping[j].ssacrosstrack, ping[j].ssalongtrack, comment, static_cast<char *>(ombio_ptr),
+						    static_cast<char *>(omb_io_ptr->store_data), &error);
 					}
 
 					else if (datakind == MBFILTER_SS) {
@@ -1492,7 +1492,7 @@ int main(int argc, char **argv) {
 						    ping[j].heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack, ping[j].beams_bath, 0,
 						    ping[j].pixels_ss, ping[j].beamflag, ping[j].bath, ping[j].amp, ping[j].bathacrosstrack,
 						    ping[j].bathalongtrack, ping[j].datasave, ping[j].ssacrosstrack, ping[j].ssalongtrack, comment,
-						    ombio_ptr, omb_io_ptr->store_data, &error);
+						    static_cast<char *>(ombio_ptr), static_cast<char *>(omb_io_ptr->store_data), &error);
 					}
 
 					/* write the data */

@@ -882,7 +882,7 @@ void read_list(char *list, char *list_2) {
 	/* fill size */
 
 	/* Allocate memory for inf_struct */
-	inf *inf_hold = malloc((surveyLines_total) * sizeof(inf));
+	inf *inf_hold = static_cast<inf *>(malloc((surveyLines_total) * sizeof(inf)));
 	if (inf_hold == NULL) {
 		printf("no memory for the process end of process");
 		exit(1);
@@ -907,7 +907,7 @@ void read_list(char *list, char *list_2) {
 	size_2 = svp_total;
 
 	/* Allocate memory for svp_struct */
-	svp *svp_hold = malloc((svp_total) * sizeof(svp));
+	svp *svp_hold = static_cast<svp *>(malloc((svp_total) * sizeof(svp)));
 	if (svp_hold == NULL) {
 		printf("no memory for the process end of process");
 		exit(1);

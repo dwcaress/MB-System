@@ -478,7 +478,7 @@ int main(int argc, char **argv) {
 				if (verbose > 0) {
 					fprintf(stderr, "\nRead existing platform file <%s>\n", input_platform_file);
 					fprintf(stderr, "    platform->type:                        %d <%s>\n", platform->type,
-					        mb_platform_type(platform->type));
+					        mb_platform_type(static_cast<mb_platform_enum>(platform->type)));
 					fprintf(stderr, "    platform->name:                        %s\n", platform->name);
 					fprintf(stderr, "    platform->organization:                %s\n", platform->organization);
 					fprintf(stderr, "    platform->documentation_url:           %s\n", platform->documentation_url);
@@ -651,7 +651,7 @@ int main(int argc, char **argv) {
 				if (verbose > 0 && input_swath_platform_defined) {
 					fprintf(stderr, "\nExtracted platform from swath data <%s>\n", input_swath_file);
 					fprintf(stderr, "    platform->type:                        %d <%s>\n", platform->type,
-					        mb_platform_type(platform->type));
+					        mb_platform_type(static_cast<mb_platform_enum>(platform->type)));
 					fprintf(stderr, "    platform->name:                        %s\n", platform->name);
 					fprintf(stderr, "    platform->organization:                %s\n", platform->organization);
 					fprintf(stderr, "    platform->documentation_url:           %s\n", platform->documentation_url);
@@ -1648,7 +1648,7 @@ int main(int argc, char **argv) {
 	if (verbose > 0) {
 		fprintf(stderr, "\nOutput platform file <%s>\n", output_platform_file);
 		fprintf(stderr, "    platform->type:                        %d <%s>\n", platform->type,
-		        mb_platform_type(platform->type));
+		        mb_platform_type(static_cast<mb_platform_enum>(platform->type)));
 		fprintf(stderr, "    platform->name:                        %s\n", platform->name);
 		fprintf(stderr, "    platform->organization:                %s\n", platform->organization);
 		fprintf(stderr, "    platform->documentation_url:           %s\n", platform->documentation_url);
