@@ -810,14 +810,14 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 
 	int status = MB_SUCCESS;
 
-	void *imbio_ptr = NULL;
+	void *imbio_ptr = nullptr;
 	double btime_d;
 	double etime_d;
 	int beams_bath_alloc;
 	int beams_amp_alloc;
 	int pixels_ss_alloc;
 	mb_path ofile[SWPLS_MAX_TXERS];
-	struct mbsys_swathplus_struct *istore = NULL;
+	struct mbsys_swathplus_struct *istore = nullptr;
 
 	/* open the input file */
 	if (mb_read_init(opts->verbose, ifile, opts->format, mbdflts->pings_get, mbdflts->lonflip, mbdflts->bounds,
@@ -845,7 +845,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	bool ofile_init[SWPLS_MAX_TXERS];
 	void *ombio_ptr[SWPLS_MAX_TXERS];
 	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
-		ombio_ptr[i] = NULL;
+		ombio_ptr[i] = nullptr;
 		ofile_init[i] = false;
 	}
 
@@ -876,9 +876,9 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 		if ((status == MB_SUCCESS) && (istore->kind == MB_DATA_DATA) &&
 		    ((istore->type == SWPLS_ID_PROCESSED_PING) || (istore->type == SWPLS_ID_PROCESSED_PING2))) {
 			int obeams_bath, obeams_amp, opixels_ss;
-			struct mb_io_struct *omb_io_ptr = NULL;
-			void *ostore_ptr = NULL;
-			struct mbsys_swathplus_struct *ostore = NULL;
+			struct mb_io_struct *omb_io_ptr = nullptr;
+			void *ostore_ptr = nullptr;
+			struct mbsys_swathplus_struct *ostore = nullptr;
 			int txno = 0;
 			int txidx = 0;
 
@@ -1156,7 +1156,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (opts.format == 0) {
-		mb_get_format(opts.verbose, opts.read_file, NULL, &(opts.format), &error);
+		mb_get_format(opts.verbose, opts.read_file, nullptr, &(opts.format), &error);
 	}
 
 	/* determine whether to read one file or a list of files */

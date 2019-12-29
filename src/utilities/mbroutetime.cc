@@ -171,7 +171,7 @@ int main(int argc, char **argv) {
 
 	/* read route file */
 	FILE *fp = fopen(route_file, "r");
-	if (fp == NULL) {
+	if (fp == nullptr) {
 		fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
 		exit(MB_FAILURE);
 	}
@@ -182,11 +182,11 @@ int main(int argc, char **argv) {
 
 	int nroutepoint = 0;
 	int nroutepointalloc = 0;
-	double *routelon = NULL;
-	double *routelat = NULL;
-	double *routeheading = NULL;
-	int *routewaypoint = NULL;
-	double *routetime_d = NULL;
+	double *routelon = nullptr;
+	double *routelat = nullptr;
+	double *routeheading = nullptr;
+	int *routewaypoint = nullptr;
+	double *routetime_d = nullptr;
 
 	int error = MB_ERROR_NO_ERROR;
 
@@ -247,7 +247,7 @@ int main(int argc, char **argv) {
 	}
 
 	fclose(fp);
-	fp = NULL;
+	fp = nullptr;
 
 	/* Check that there are valid waypoints in memory */
 	if (nroutepoint < 1) {
@@ -276,7 +276,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
@@ -308,8 +308,8 @@ int main(int argc, char **argv) {
 	int pixels_ss;
 
 	/* MBIO read values */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
+	void *mbio_ptr = nullptr;
+	void *store_ptr = nullptr;
 	int kind;
 	int time_i[7];
 	double time_d;
@@ -319,14 +319,14 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
 
 	int nroutepointfound = 0;
 
@@ -473,7 +473,7 @@ int main(int argc, char **argv) {
 		sprintf(output_file, "%s_wpttime_d.txt", read_file);
 	}
 	fp = fopen(output_file, "w");
-	if (fp == NULL) {
+	if (fp == nullptr) {
 		fprintf(stderr, "\nUnable to open output waypoint time list file <%s> for writing\n", output_file);
 		exit(MB_ERROR_OPEN_FAIL);
 	}

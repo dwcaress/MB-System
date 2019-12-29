@@ -381,7 +381,7 @@ int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int a
   int status = MB_SUCCESS;
 
   /* write out the edit */
-  if (esffp != NULL) {
+  if (esffp != nullptr) {
 #ifdef BYTESWAPPED
     mb_swap_double(&time_d);
     beam = mb_swap_int(beam);
@@ -556,7 +556,7 @@ int main(int argc, char **argv) {
 
   /* get format if required */
   if (format == 0)
-    mb_get_format(verbose, read_file, NULL, &format, &error);
+    mb_get_format(verbose, read_file, nullptr, &format, &error);
 
   /* determine whether to read one file or a list of files */
   const bool read_datalist = format < 0;
@@ -639,8 +639,8 @@ int main(int argc, char **argv) {
   int beams_bath;
   int beams_amp;
   int pixels_ss;
-  void *imbio_ptr = NULL;
-  void *ombio_ptr = NULL;
+  void *imbio_ptr = nullptr;
+  void *ombio_ptr = nullptr;
   int platform_source;
   int nav_source;
   int sensordepth_source;
@@ -649,7 +649,7 @@ int main(int argc, char **argv) {
   int svp_source;
 
   /* mbio read and write values */
-  void *store_ptr = NULL;
+  void *store_ptr = nullptr;
   int kind;
   int time_i[7];
   double time_d;
@@ -667,15 +667,15 @@ int main(int argc, char **argv) {
   int nbath;
   int namp;
   int nss;
-  char *beamflag = NULL;
-  char *beamflagorg = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
+  char *beamflag = nullptr;
+  char *beamflagorg = nullptr;
+  double *bath = nullptr;
+  double *bathacrosstrack = nullptr;
+  double *bathalongtrack = nullptr;
+  double *amp = nullptr;
+  double *ss = nullptr;
+  double *ssacrosstrack = nullptr;
+  double *ssalongtrack = nullptr;
   int idata = 0;
   int inav = 0;
   int icomment = 0;
@@ -731,37 +731,37 @@ int main(int argc, char **argv) {
   int degree;
   double dminute;
   double splineflag;
-  double *ntime = NULL;
-  double *nlon = NULL;
-  double *nlat = NULL;
-  double *nheading = NULL;
-  double *nspeed = NULL;
-  double *ndraft = NULL;
-  double *nroll = NULL;
-  double *npitch = NULL;
-  double *nheave = NULL;
-  double *natime = NULL;
-  double *nalon = NULL;
-  double *nalat = NULL;
-  double *naz = NULL;
+  double *ntime = nullptr;
+  double *nlon = nullptr;
+  double *nlat = nullptr;
+  double *nheading = nullptr;
+  double *nspeed = nullptr;
+  double *ndraft = nullptr;
+  double *nroll = nullptr;
+  double *npitch = nullptr;
+  double *nheave = nullptr;
+  double *natime = nullptr;
+  double *nalon = nullptr;
+  double *nalat = nullptr;
+  double *naz = nullptr;
   double zoffset;
-  double *nlonspl = NULL;
-  double *nlatspl = NULL;
-  double *nalonspl = NULL;
-  double *nalatspl = NULL;
-  double *nazspl = NULL;
-  double *attitudetime = NULL;
-  double *attituderoll = NULL;
-  double *attitudepitch = NULL;
-  double *attitudeheave = NULL;
-  double *fsonardepthtime = NULL;
-  double *fsonardepth = NULL;
-  double *tidetime = NULL;
-  double *tide = NULL;
+  double *nlonspl = nullptr;
+  double *nlatspl = nullptr;
+  double *nalonspl = nullptr;
+  double *nalatspl = nullptr;
+  double *nazspl = nullptr;
+  double *attitudetime = nullptr;
+  double *attituderoll = nullptr;
+  double *attitudepitch = nullptr;
+  double *attitudeheave = nullptr;
+  double *fsonardepthtime = nullptr;
+  double *fsonardepth = nullptr;
+  double *tidetime = nullptr;
+  double *tide = nullptr;
   double tideval;
-  int *staticbeam = NULL;
+  int *staticbeam = nullptr;
   double *staticangle;
-  double *staticoffset = NULL;
+  double *staticoffset = nullptr;
   int itime, iatime;
   double headingx, headingy;
   double mtodeglon, mtodeglat;
@@ -775,10 +775,10 @@ int main(int argc, char **argv) {
   double navlat_old = 0.0;
   double speed_old = 0.0;
   double heading_old = 0.0;
-  double *depth = NULL;
-  double *velocity = NULL;
-  double *velocity_sum = NULL;
-  void *rt_svp = NULL;
+  double *depth = nullptr;
+  double *velocity = nullptr;
+  double *velocity_sum = nullptr;
+  void *rt_svp = nullptr;
   double ssv;
   int sensorhead = 0;
   int sensorhead_error = MB_ERROR_NO_ERROR;
@@ -802,7 +802,7 @@ int main(int argc, char **argv) {
 
   /* output reverse edit save file control variables */
   mb_path resf_file;
-  FILE *resf_fp = NULL;
+  FILE *resf_fp = nullptr;
   mb_path resf_header;
   int action;
 
@@ -813,12 +813,12 @@ int main(int argc, char **argv) {
   double alpha, beta;
   double alphar, betar;
   int ray_stat;
-  double *ttimes = NULL;
-  double *angles = NULL;
-  double *angles_forward = NULL;
-  double *angles_null = NULL;
-  double *bheave = NULL;
-  double *alongtrack_offset = NULL;
+  double *ttimes = nullptr;
+  double *angles = nullptr;
+  double *angles_forward = nullptr;
+  double *angles_null = nullptr;
+  double *bheave = nullptr;
+  double *alongtrack_offset = nullptr;
 
   /* ssv handling variables */
   bool ssv_prelimpass = false;
@@ -834,19 +834,19 @@ int main(int argc, char **argv) {
   int itable;
   int nsscorrtable = 0;
   int nsscorrangle = 0;
-  struct mbprocess_sscorr_struct *sscorrtable = NULL;
+  struct mbprocess_sscorr_struct *sscorrtable = nullptr;
   struct mbprocess_sscorr_struct sscorrtableuse;
   int nampcorrtable = 0;
   int nampcorrangle = 0;
-  struct mbprocess_sscorr_struct *ampcorrtable = NULL;
+  struct mbprocess_sscorr_struct *ampcorrtable = nullptr;
   struct mbprocess_sscorr_struct ampcorrtableuse;
   int ndepths;
-  double *depths = NULL;
-  double *depthsmooth = NULL;
-  double *depthacrosstrack = NULL;
+  double *depths = nullptr;
+  double *depthsmooth = nullptr;
+  double *depthacrosstrack = nullptr;
   int nslopes;
-  double *slopes = NULL;
-  double *slopeacrosstrack = NULL;
+  double *slopes = nullptr;
+  double *slopeacrosstrack = nullptr;
   double r[3];
   double v1[3], v2[3], v[3], vv;
   double slope;
@@ -892,7 +892,7 @@ int main(int argc, char **argv) {
     /* make output file path global if needed */
     int len;
     if (status == MB_SUCCESS && !mbp_ofile_specified && process.mbp_ofile[0] != '/' && process.mbp_ofile[1] != ':' &&
-        strrchr(process.mbp_ifile, '/') != NULL && (len = strrchr(process.mbp_ifile, '/') - process.mbp_ifile + 1) > 1) {
+        strrchr(process.mbp_ifile, '/') != nullptr && (len = strrchr(process.mbp_ifile, '/') - process.mbp_ifile + 1) > 1) {
       strcpy(mbp_ofile, process.mbp_ofile);
       strncpy(process.mbp_ofile, process.mbp_ifile, len);
       process.mbp_ofile[len] = '\0';
@@ -1553,11 +1553,11 @@ int main(int argc, char **argv) {
            (process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPO || process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPOSLOPE)) ||
           (process.mbp_sscorr_mode == MBP_SSCORR_ON &&
            (process.mbp_sscorr_slope == MBP_SSCORR_USETOPO || process.mbp_sscorr_slope == MBP_SSCORR_USETOPOSLOPE))) {
-        grid.data = NULL;
+        grid.data = nullptr;
         strcpy(grid.file, process.mbp_ampsscorr_topofile);
         status &= mb_read_gmt_grd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue,
                                  &grid.nxy, &grid.n_columns, &grid.n_rows, &grid.min, &grid.max, &grid.xmin, &grid.xmax, &grid.ymin,
-                                 &grid.ymax, &grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
+                                 &grid.ymax, &grid.dx, &grid.dy, &grid.data, nullptr, nullptr, &error);
         if (status == MB_FAILURE) {
           fprintf(stderr, "\nUnable to read topography grid file: %s\n", grid.file);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1585,7 +1585,7 @@ int main(int argc, char **argv) {
       if (process.mbp_svp_mode != MBP_SVP_OFF) {
         /* count the data points in the svp file */
         nsvp = 0;
-        if ((tfp = fopen(process.mbp_svpfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_svpfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Velocity Profile File <%s> for reading\n", process.mbp_svpfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -1607,7 +1607,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
-            char *message = NULL;
+            char *message = nullptr;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1624,7 +1624,7 @@ int main(int argc, char **argv) {
 
         /* read the data points in the svp file */
         nsvp = 0;
-        if ((tfp = fopen(process.mbp_svpfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_svpfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Velocity Profile File <%s> for reading\n", process.mbp_svpfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -1724,7 +1724,7 @@ int main(int argc, char **argv) {
 
         /* count the data points in the nav file */
         nnav = 0;
-        if ((tfp = fopen(process.mbp_navfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_navfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", process.mbp_navfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -1751,7 +1751,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
-            char *message = NULL;
+            char *message = nullptr;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1768,7 +1768,7 @@ int main(int argc, char **argv) {
 
         /* read the data points in the nav file */
         nnav = 0;
-        if ((tfp = fopen(process.mbp_navfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_navfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open navigation File <%s> for reading\n", process.mbp_navfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -1893,7 +1893,7 @@ int main(int argc, char **argv) {
               else if ((strncmp(&buffer[3], "ZDA", 3) == 0 || strncmp(&buffer[3], "UNX", 3) == 0) && len > 14) {
                 time_set = false;
                 /* find start of ",hhmmss.ss" */
-                if ((bufftmp = strchr(buffer, ',')) != NULL) {
+                if ((bufftmp = strchr(buffer, ',')) != nullptr) {
                   strncpy(dummy, "\0", 128);
                   time_i[3] = atoi(strncpy(dummy, bufftmp + 1, 2));
                   strncpy(dummy, "\0", 128);
@@ -1907,7 +1907,7 @@ int main(int argc, char **argv) {
                   else
                     time_i[6] = 0;
                   /* find start of ",dd,mm,yyyy" */
-                  if ((bufftmp = strchr(&bufftmp[1], ',')) != NULL) {
+                  if ((bufftmp = strchr(&bufftmp[1], ',')) != nullptr) {
                     strncpy(dummy, "\0", 128);
                     time_i[2] = atoi(strncpy(dummy, bufftmp + 1, 2));
                     strncpy(dummy, "\0", 128);
@@ -1923,7 +1923,7 @@ int main(int argc, char **argv) {
                        time_set && len > 26) {
                 time_set = false;
                 /* find start of ",ddmm.mm,N,ddmm.mm,E" */
-                if ((bufftmp = strchr(buffer, ',')) != NULL) {
+                if ((bufftmp = strchr(buffer, ',')) != nullptr) {
                   if (process.mbp_nav_format == 7)
                     bufftmp = strchr(&bufftmp[1], ',');
                   strncpy(dummy, "\0", 128);
@@ -2135,7 +2135,7 @@ int main(int argc, char **argv) {
 
         /* count the data points in the adjusted nav file */
         nanav = 0;
-        if ((tfp = fopen(process.mbp_navadjfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_navadjfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Adjusted Navigation File <%s> for reading\n", process.mbp_navadjfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -2159,7 +2159,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
-            char *message = NULL;
+            char *message = nullptr;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2176,7 +2176,7 @@ int main(int argc, char **argv) {
 
         /* read the data points in the nav file */
         nanav = 0;
-        if ((tfp = fopen(process.mbp_navadjfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_navadjfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open navigation File <%s> for reading\n", process.mbp_navadjfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -2273,7 +2273,7 @@ int main(int argc, char **argv) {
 
         /* count the data points in the attitude file */
         nattitude = 0;
-        if ((tfp = fopen(process.mbp_attitudefile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_attitudefile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Attitude File <%s> for reading\n", process.mbp_attitudefile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -2293,7 +2293,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
-            char *message = NULL;
+            char *message = nullptr;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2310,7 +2310,7 @@ int main(int argc, char **argv) {
 
         /* read the data points in the attitude file */
         nattitude = 0;
-        if ((tfp = fopen(process.mbp_attitudefile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_attitudefile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Attitude File <%s> for reading\n", process.mbp_attitudefile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -2431,7 +2431,7 @@ int main(int argc, char **argv) {
 
         /* count the data points in the sonardepth file */
         nsonardepth = 0;
-        if ((tfp = fopen(process.mbp_sonardepthfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_sonardepthfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Sonardepth File <%s> for reading\n", process.mbp_sonardepthfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -2450,7 +2450,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
-            char *message = NULL;
+            char *message = nullptr;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2467,7 +2467,7 @@ int main(int argc, char **argv) {
 
         /* read the data points in the sonardepth file */
         nsonardepth = 0;
-        if ((tfp = fopen(process.mbp_sonardepthfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_sonardepthfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Sonardepth File <%s> for reading\n", process.mbp_sonardepthfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -2587,7 +2587,7 @@ int main(int argc, char **argv) {
 
         /* count the data points in the tide file */
         ntide = 0;
-        if ((tfp = fopen(process.mbp_tidefile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_tidefile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Tide File <%s> for reading\n", process.mbp_tidefile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -2605,7 +2605,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
-            char *message = NULL;
+            char *message = nullptr;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2622,7 +2622,7 @@ int main(int argc, char **argv) {
 
         /* read the data points in the tide file */
         ntide = 0;
-        if ((tfp = fopen(process.mbp_tidefile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_tidefile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Tide File <%s> for reading\n", process.mbp_tidefile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -2757,7 +2757,7 @@ int main(int argc, char **argv) {
 
         /* count the data points in the static file */
         nstatic = 0;
-        if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_staticfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Static File <%s> for reading\n", process.mbp_staticfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -2775,7 +2775,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
-            char *message = NULL;
+            char *message = nullptr;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2792,7 +2792,7 @@ int main(int argc, char **argv) {
 
         /* read the data points in the static file */
         nstatic = 0;
-        if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_staticfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Static File <%s> for reading\n", process.mbp_staticfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -2842,7 +2842,7 @@ int main(int argc, char **argv) {
 
         /* count the data points in the static file */
         nstatic = 0;
-        if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_staticfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Static File <%s> for reading\n", process.mbp_staticfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -2860,7 +2860,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
-            char *message = NULL;
+            char *message = nullptr;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2877,7 +2877,7 @@ int main(int argc, char **argv) {
 
         /* read the data points in the static file */
         nstatic = 0;
-        if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_staticfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Static File <%s> for reading\n", process.mbp_staticfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -2926,7 +2926,7 @@ int main(int argc, char **argv) {
         /* count the data points in the amplitude correction file */
         nampcorrtable = 0;
         nampcorrangle = 0;
-        if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Amplitude Correction File <%s> for reading\n", process.mbp_ampcorrfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -2943,12 +2943,12 @@ int main(int argc, char **argv) {
         /* allocate arrays for amplitude correction tables */
         if (nampcorrtable > 0) {
           size = nampcorrtable * sizeof(struct mbprocess_sscorr_struct);
-          ampcorrtable = NULL;
+          ampcorrtable = nullptr;
           /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&ampcorrtable, &error);
           for (int i = 0; i < nampcorrtable; i++) {
-            ampcorrtable[i].angle = NULL;
-            ampcorrtable[i].amplitude = NULL;
-            ampcorrtable[i].sigma = NULL;
+            ampcorrtable[i].angle = nullptr;
+            ampcorrtable[i].amplitude = nullptr;
+            ampcorrtable[i].sigma = nullptr;
             /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
                                 (void **)&(ampcorrtable[i].angle), &error);
             /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
@@ -2956,9 +2956,9 @@ int main(int argc, char **argv) {
             /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
                                 (void **)&(ampcorrtable[i].sigma), &error);
           }
-          ampcorrtableuse.angle = NULL;
-          ampcorrtableuse.amplitude = NULL;
-          ampcorrtableuse.sigma = NULL;
+          ampcorrtableuse.angle = nullptr;
+          ampcorrtableuse.amplitude = nullptr;
+          ampcorrtableuse.sigma = nullptr;
           /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
                               (void **)&(ampcorrtableuse.angle), &error);
           /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nampcorrangle * sizeof(double),
@@ -2968,7 +2968,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
-            char *message = NULL;
+            char *message = nullptr;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2985,7 +2985,7 @@ int main(int argc, char **argv) {
 
         /* read the data points in the amplitude correction file */
         nampcorrtable = 0;
-        if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Amplitude Correction File <%s> for reading\n", process.mbp_ampcorrfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -3052,7 +3052,7 @@ int main(int argc, char **argv) {
         /* count the data points in the sidescan correction file */
         nsscorrtable = 0;
         nsscorrangle = 0;
-        if ((tfp = fopen(process.mbp_sscorrfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_sscorrfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Sidescan Correction File <%s> for reading\n", process.mbp_sscorrfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -3069,12 +3069,12 @@ int main(int argc, char **argv) {
         /* allocate arrays for sidescan correction tables */
         if (nsscorrtable > 0) {
           size = nsscorrtable * sizeof(struct mbprocess_sscorr_struct);
-          sscorrtable = NULL;
+          sscorrtable = nullptr;
           /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&sscorrtable, &error);
           for (int i = 0; i < nsscorrtable; i++) {
-            sscorrtable[i].angle = NULL;
-            sscorrtable[i].amplitude = NULL;
-            sscorrtable[i].sigma = NULL;
+            sscorrtable[i].angle = nullptr;
+            sscorrtable[i].amplitude = nullptr;
+            sscorrtable[i].sigma = nullptr;
             /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
                                 (void **)&(sscorrtable[i].angle), &error);
             /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
@@ -3082,9 +3082,9 @@ int main(int argc, char **argv) {
             /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
                                 (void **)&(sscorrtable[i].sigma), &error);
           }
-          sscorrtableuse.angle = NULL;
-          sscorrtableuse.amplitude = NULL;
-          sscorrtableuse.sigma = NULL;
+          sscorrtableuse.angle = nullptr;
+          sscorrtableuse.amplitude = nullptr;
+          sscorrtableuse.sigma = nullptr;
           /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
                               (void **)&(sscorrtableuse.angle), &error);
           /* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nsscorrangle * sizeof(double),
@@ -3094,7 +3094,7 @@ int main(int argc, char **argv) {
 
           /* if error initializing memory then quit */
           if (error != MB_ERROR_NO_ERROR) {
-            char *message = NULL;
+            char *message = nullptr;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3111,7 +3111,7 @@ int main(int argc, char **argv) {
 
         /* read the data points in the sidescan correction file */
         nsscorrtable = 0;
-        if ((tfp = fopen(process.mbp_sscorrfile, "r")) == NULL) {
+        if ((tfp = fopen(process.mbp_sscorrfile, "r")) == nullptr) {
           fprintf(stderr, "\nUnable to Open Sidescan Correction File <%s> for reading\n", process.mbp_sscorrfile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(MB_ERROR_OPEN_FAIL);
@@ -3179,7 +3179,7 @@ int main(int argc, char **argv) {
       if (mb_read_init(verbose, process.mbp_ifile, process.mbp_format, pings, lonflip, bounds, btime_i, etime_i,
                        speedmin, timegap, &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
                        &error) != MB_SUCCESS) {
-        char *message = NULL;
+        char *message = nullptr;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", process.mbp_ifile);
@@ -3191,7 +3191,7 @@ int main(int argc, char **argv) {
       if (mb_write_init(verbose, process.mbp_ofile, process.mbp_format,
                         &ombio_ptr, &beams_bath, &beams_amp, &pixels_ss,
                         &error) != MB_SUCCESS) {
-        char *message = NULL;
+        char *message = nullptr;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", process.mbp_ofile);
@@ -3240,7 +3240,7 @@ int main(int argc, char **argv) {
 
       /* if error initializing memory then quit */
       if (error != MB_ERROR_NO_ERROR) {
-        char *message = NULL;
+        char *message = nullptr;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3304,7 +3304,7 @@ int main(int argc, char **argv) {
         if (mb_read_init(verbose, process.mbp_ifile, process.mbp_format, pings, lonflip, bounds, btime_i,
                          etime_i, speedmin, timegap, &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp,
                          &pixels_ss, &error) != MB_SUCCESS) {
-          char *message = NULL;
+          char *message = nullptr;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
           fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", process.mbp_ifile);
@@ -3359,7 +3359,7 @@ int main(int argc, char **argv) {
 
         /* if error initializing memory then quit */
         if (error != MB_ERROR_NO_ERROR) {
-          char *message = NULL;
+          char *message = nullptr;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3379,9 +3379,9 @@ int main(int argc, char **argv) {
 
       /* open reverse edit save file (*.resf) */
       sprintf(resf_file, "%s.resf", process.mbp_ifile);
-      if ((resf_fp = fopen(resf_file, "w")) == NULL) {
+      if ((resf_fp = fopen(resf_file, "w")) == nullptr) {
         error = MB_ERROR_OPEN_FAIL;
-        char *message = NULL;
+        char *message = nullptr;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nReverse edit save file <%s> not initialized for writing\n", resf_file);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3394,10 +3394,10 @@ int main(int argc, char **argv) {
         strcpy(date, ctime(&right_now));
         date[strlen(date) - 1] = '\0';
         char *user_ptr = getenv("USER");
-        if (user_ptr == NULL)
+        if (user_ptr == nullptr)
           user_ptr = getenv("LOGNAME");
         char user[MBP_FILENAMESIZE];
-        if (user_ptr != NULL)
+        if (user_ptr != nullptr)
           strcpy(user, user_ptr);
         else
           strcpy(user, "unknown");
@@ -3571,10 +3571,10 @@ int main(int argc, char **argv) {
         strcpy(date, ctime(&right_now));
         date[strlen(date) - 1] = '\0';
         char *user_ptr = getenv("USER");
-        if (user_ptr == NULL)
+        if (user_ptr == nullptr)
           user_ptr = getenv("LOGNAME");
         char user[MBP_FILENAMESIZE];
-        if (user_ptr != NULL)
+        if (user_ptr != nullptr)
           strcpy(user, user_ptr);
         else
           strcpy(user, "unknown");
@@ -4535,7 +4535,7 @@ int main(int argc, char **argv) {
           fprintf(stderr, "%s\n", comment);
         }
         else if (verbose >= 1 && error < MB_ERROR_NO_ERROR && error > MB_ERROR_OTHER) {
-          char *message = NULL;
+          char *message = nullptr;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
           fprintf(stderr, "Input Record: %d\n", idata);
@@ -4543,13 +4543,13 @@ int main(int argc, char **argv) {
                   time_i[5]);
         }
         else if (verbose >= 1 && error < MB_ERROR_NO_ERROR) {
-          char *message = NULL;
+          char *message = nullptr;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
           fprintf(stderr, "Input Record: %d\n", idata);
         }
         else if (verbose >= 1 && error != MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
-          char *message = NULL;
+          char *message = nullptr;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nFatal MBIO Error:\n%s\n", message);
           fprintf(stderr, "Last Good Time: %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4],
@@ -5030,7 +5030,7 @@ int main(int argc, char **argv) {
 
                 /* raytrace */
                 status = mb_rt(verbose, rt_svp, (depth_offset_use - static_shift), angles[i], 0.5 * ttimes[i],
-                               process.mbp_angle_mode, ssv, angles_null[i], 0, NULL, NULL, NULL, &xx, &zz, &ttime,
+                               process.mbp_angle_mode, ssv, angles_null[i], 0, nullptr, nullptr, nullptr, &xx, &zz, &ttime,
                                &ray_stat, &error);
 
                 /* apply static shift if any */
@@ -5792,7 +5792,7 @@ int main(int argc, char **argv) {
               oother++;
           }
           else {
-            char *message = NULL;
+            char *message = nullptr;
             mb_error(verbose, error, &message);
             fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
             fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", process.mbp_ofile);
@@ -5846,7 +5846,7 @@ int main(int argc, char **argv) {
         reset status/error, close files and deallocate memory
         --------------------------------------------*/
       if (status == MB_FAILURE && error != MB_ERROR_EOF) {
-        char *message = NULL;
+        char *message = nullptr;
         mb_error(verbose, error, &message);
         fprintf(stderr, "WARNING: exited read loop with error: %s\n", message);
       }
@@ -5862,7 +5862,7 @@ int main(int argc, char **argv) {
       }
 
       /* close the *.resf file */
-      if (resf_fp != NULL) {
+      if (resf_fp != nullptr) {
         fclose(resf_fp);
       }
 
@@ -5893,7 +5893,7 @@ int main(int argc, char **argv) {
       }
 
       /* deallocate topography grid */
-      if (grid.data != NULL) {
+      if (grid.data != nullptr) {
         mb_freed(verbose, __FILE__, __LINE__, (void **)&grid.data, &error);
         memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
       }
@@ -5954,7 +5954,7 @@ int main(int argc, char **argv) {
         mb_freed(verbose, __FILE__, __LINE__, (void **)&depth, &error);
         mb_freed(verbose, __FILE__, __LINE__, (void **)&velocity, &error);
         mb_freed(verbose, __FILE__, __LINE__, (void **)&velocity_sum, &error);
-        if (rt_svp != NULL)
+        if (rt_svp != nullptr)
           status = mb_rt_deall(verbose, &rt_svp, &error);
       }
 

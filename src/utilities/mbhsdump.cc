@@ -219,11 +219,11 @@ int main(int argc, char **argv) {
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
-	void *mbio_ptr = NULL;
+	void *mbio_ptr = nullptr;
 
 	if (mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 	                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
-		char *message = NULL;
+		char *message = nullptr;
 		mb_error(verbose, error, &message);
 		fprintf(output, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 		fprintf(output, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -231,14 +231,14 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
 
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&beamflag, &error);
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, &error);
@@ -250,7 +250,7 @@ int main(int argc, char **argv) {
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ssalongtrack, &error);
 
 	if (error != MB_ERROR_NO_ERROR) {
-		char *message = NULL;
+		char *message = nullptr;
 		mb_error(verbose, error, &message);
 		fprintf(output, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(output, "\nProgram <%s> Terminated\n", program_name);
@@ -308,12 +308,12 @@ int main(int argc, char **argv) {
 
 		/* output error messages */
 		if (verbose >= 1 && error <= MB_ERROR_OTHER) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(output, "\nNonfatal MBIO Error:\n%s\n", message);
 		}
 		else if (verbose >= 1 && error > MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(output, "\nFatal MBIO Error:\n%s\n", message);
 		}

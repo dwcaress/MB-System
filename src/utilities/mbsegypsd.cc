@@ -53,7 +53,7 @@ typedef enum {
 float NaN;
 /* output stream for basic stuff (stdout if verbose <= 1,
     stderr if verbose > 1) */
-FILE *outfp = NULL;
+FILE *outfp = nullptr;
 
 static const char program_name[] = "mbsegypsd";
 static const char help_message[] =
@@ -121,10 +121,10 @@ int get_segy_limits(int verbose, char *segyfile, tracemode_t *tracemode,
 	/* read sinf file if possible */
 	sprintf(sinffile, "%s.sinf", segyfile);
 	FILE *sfp = fopen(sinffile, "r");
-	if (sfp != NULL) {
+	if (sfp != nullptr) {
 		/* read the sinf file */
 		char line[MB_PATH_MAXLINE] = "";
-		while (fgets(line, MB_PATH_MAXLINE, sfp) != NULL) {
+		while (fgets(line, MB_PATH_MAXLINE, sfp) != nullptr) {
 			if (strncmp(line, "  Trace length (sec):", 21) == 0) {
 				/* nscan = */ sscanf(line, "  Trace length (sec):%lf", timesweep);
 			}
@@ -444,15 +444,15 @@ int main(int argc, char **argv) {
 
 
 	/* allocate memory for grid array */
-	float *grid = NULL;
+	float *grid = nullptr;
 	int status = mb_mallocd(verbose, __FILE__, __LINE__, 2 * ngridxy * sizeof(float), (void **)&grid, &error);
-	double *spsd = NULL;
+	double *spsd = nullptr;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&spsd, &error);
-	double *wpsd = NULL;
+	double *wpsd = nullptr;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&wpsd, &error);
-	double *spsdtot = NULL;
+	double *spsdtot = nullptr;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&spsdtot, &error);
-	double *wpsdtot = NULL;
+	double *wpsdtot = nullptr;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&wpsdtot, &error);
 
 	/* zero working psd array */
@@ -527,7 +527,7 @@ int main(int argc, char **argv) {
 
 			/* read a trace */
 			struct mb_segytraceheader_struct traceheader;
-			float *trace = NULL;
+			float *trace = nullptr;
 			status = mb_segy_read_trace(verbose, mbsegyioptr, &traceheader, &trace, &error);
 
 			/* now process the trace */
@@ -750,7 +750,7 @@ int main(int argc, char **argv) {
 
 	/* output average power spectra */
 	FILE *fp  = fopen(psdfile, "w");
-	if (fp != NULL) {
+	if (fp != nullptr) {
 		for (int iy = 0; iy < ngridy; iy++) {
 			if (wpsdtot[iy] > 0.0) {
 				spsdtot[iy] = spsdtot[iy] / wpsdtot[iy];
@@ -762,7 +762,7 @@ int main(int argc, char **argv) {
 
 	status &= mb_segy_close(verbose, &mbsegyioptr, &error);
 
-	// float *worktrace = NULL;
+	// float *worktrace = nullptr;
 	// status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&worktrace, &error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&grid, &error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&spsd, &error);

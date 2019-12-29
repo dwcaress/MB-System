@@ -230,7 +230,7 @@ int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* figure out histogram dimensions */
 	if (nintervals > 0 && nbins <= 0)
@@ -288,7 +288,7 @@ int main(int argc, char **argv) {
 	int pixels_ss;
 
 	/* MBIO read values */
-	void *mbio_ptr = NULL;
+	void *mbio_ptr = nullptr;
 	int kind;
 	int time_i[7];
 	double time_d;
@@ -299,20 +299,20 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* histogram variables */
 	double dvalue_bin;
-	double *histogram = NULL;
-	double *intervals = NULL;
+	double *histogram = nullptr;
+	double *intervals = nullptr;
 	double total;
 	double target;
 	double dinterval;

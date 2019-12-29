@@ -316,7 +316,7 @@ int main(int argc, char **argv) {
 
 	/* initialize reading the segy file */
 	if (mb_segy_read_init(verbose, file, &mbsegyioptr, &asciiheader, &fileheader, &error) != MB_SUCCESS) {
-		char *message = NULL;
+		char *message = nullptr;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error returned from function <mb_segy_read_init>:\n%s\n", message);
 		fprintf(stderr, "\nSEGY File <%s> not initialized for reading\n", file);

@@ -258,7 +258,7 @@ int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
@@ -291,7 +291,7 @@ int main(int argc, char **argv) {
 	int pixels_ss;
 
 	/* MBIO read values */
-	void *mbio_ptr = NULL;
+	void *mbio_ptr = nullptr;
 	void *store_ptr;
 	int kind;
 	int time_i[7];
@@ -303,14 +303,14 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* save time stamp and position of last survey data */
@@ -333,7 +333,7 @@ int main(int argc, char **argv) {
 	struct mbsvplist_svp_struct svp_last;
 	svp_last.n = 0;
 	int svp_save_alloc = 0;
-	struct mbsvplist_svp_struct *svp_save = NULL;
+	struct mbsvplist_svp_struct *svp_save = nullptr;
 	char svp_file[MB_PATH_MAXLINE];
 	int svp_read_tot = 0;
 	int svp_written_tot = 0;
@@ -343,12 +343,12 @@ int main(int argc, char **argv) {
 
 	/* ttimes values */
 	int nbeams;
-	double *ttimes = NULL;
-	double *angles = NULL;
-	double *angles_forward = NULL;
-	double *angles_null = NULL;
-	double *heave = NULL;
-	double *alongtrack_offset = NULL;
+	double *ttimes = nullptr;
+	double *angles = nullptr;
+	double *angles_forward = nullptr;
+	double *angles_null = nullptr;
+	double *heave = nullptr;
+	double *alongtrack_offset = nullptr;
 	double ssv;
 
 	bool svp_match_last = false;
@@ -629,7 +629,7 @@ int main(int argc, char **argv) {
 						       svp_time_i[1], svp_time_i[2], svp_time_i[3], svp_time_i[4], svp_time_i[5], svp_time_i[6],
 						       svp_save[isvp].longitude, svp_save[isvp].latitude, svp_save[isvp].n);
 					}
-					else if (svp_fp != NULL) {
+					else if (svp_fp != nullptr) {
 						/* output info */
 						if (verbose >= 1) {
 							fprintf(stderr, "Outputting SVP to file: %s (# svp pairs=%d)\n", svp_file, svp_save[isvp].n);
@@ -647,10 +647,10 @@ int main(int argc, char **argv) {
 						strcpy(date, ctime(&right_now));
 						date[strlen(date) - 1] = '\0';
 						char *user_ptr = getenv("USER");
-						if (user_ptr == NULL)
+						if (user_ptr == nullptr)
 							user_ptr = getenv("LOGNAME");
 						char user[MB_PATH_MAXLINE];
-						if (user_ptr != NULL)
+						if (user_ptr != nullptr)
 							strcpy(user, user_ptr);
 						else
 							strcpy(user, "unknown");
@@ -680,7 +680,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* close the svp file */
-					if (svp_file_output && svp_fp != NULL) {
+					if (svp_file_output && svp_fp != nullptr) {
 						fclose(svp_fp);
 
 						/* if desired, set first svp output to be used for recalculating

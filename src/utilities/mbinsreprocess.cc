@@ -113,12 +113,12 @@ int main(int argc, char **argv) {
 
 	{
 		const struct option options[] =
-		    {{"verbose", no_argument, NULL, 0},
-		     {"help", no_argument, NULL, 0},
-		     {"verbose", no_argument, NULL, 0},
-		     {"input", required_argument, NULL, 0},
-		     {"output", required_argument, NULL, 0},
-		     {NULL, 0, NULL, 0}};
+		    {{"verbose", no_argument, nullptr, 0},
+		     {"help", no_argument, nullptr, 0},
+		     {"verbose", no_argument, nullptr, 0},
+		     {"input", required_argument, nullptr, 0},
+		     {"output", required_argument, nullptr, 0},
+		     {nullptr, 0, nullptr, 0}};
 
 		bool errflg = false;
 		int c;
@@ -183,7 +183,7 @@ int main(int argc, char **argv) {
 
 	/* open the input file */
 	FILE *fp = fopen(ifile, "r");
-	if (fp == NULL) {
+	if (fp == nullptr) {
 		fprintf(stderr, "\nUnable to open log file <%s> for reading\n", ifile);
 		exit(status);
 	}
@@ -262,28 +262,28 @@ int main(int argc, char **argv) {
 
 	int error = MB_ERROR_NO_ERROR;
 
-	double *time = NULL;
-	int *mCyclesK = NULL;
-	int *mModeK = NULL;
-	int *mMonK = NULL;
-	double *mLatK = NULL;
-	double *mLonK = NULL;
-	double *mNorthK = NULL;
-	double *mEastK = NULL;
-	double *mDepthK = NULL;
-	double *mRollK = NULL;
-	double *mPitchK = NULL;
-	double *mHeadK = NULL;
-	double *mVbodyxK = NULL;
-	double *mVbodyyK = NULL;
-	double *mVbodyzK = NULL;
-	double *mAccelxK = NULL;
-	double *mAccelyK = NULL;
-	double *mAccelzK = NULL;
-	double *mPrateK = NULL;
-	double *mQrateK = NULL;
-	double *mRrateK = NULL;
-	double *utcTime = NULL;
+	double *time = nullptr;
+	int *mCyclesK = nullptr;
+	int *mModeK = nullptr;
+	int *mMonK = nullptr;
+	double *mLatK = nullptr;
+	double *mLonK = nullptr;
+	double *mNorthK = nullptr;
+	double *mEastK = nullptr;
+	double *mDepthK = nullptr;
+	double *mRollK = nullptr;
+	double *mPitchK = nullptr;
+	double *mHeadK = nullptr;
+	double *mVbodyxK = nullptr;
+	double *mVbodyyK = nullptr;
+	double *mVbodyzK = nullptr;
+	double *mAccelxK = nullptr;
+	double *mAccelyK = nullptr;
+	double *mAccelzK = nullptr;
+	double *mPrateK = nullptr;
+	double *mQrateK = nullptr;
+	double *mRrateK = nullptr;
+	double *utcTime = nullptr;
 
 	if (nrecord > 0) {
 		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&time, &error);

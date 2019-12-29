@@ -297,7 +297,7 @@ int main(int argc, char **argv) {
 		strcpy(file, getenv("HOME"));
 		strcat(file, "/.mbio_defaults");
 		FILE *fp = fopen(file, "w");
-		if (fp == NULL) {
+		if (fp == nullptr) {
 			fprintf(stderr, "Could not open file %s\n", file);
 			exit(MB_ERROR_OPEN_FAIL);
 		}

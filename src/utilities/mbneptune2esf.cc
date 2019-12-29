@@ -121,7 +121,7 @@ int find_line(int verbose, char *line_name, struct neptune_line_tree **node, boo
               int *nlines, int *error) {
 	int status = MB_SUCCESS;
 
-	if (NULL == *node) {
+	if (nullptr == *node) {
 		if (!create)
 			return MB_FAILURE;
 
@@ -133,9 +133,9 @@ int find_line(int verbose, char *line_name, struct neptune_line_tree **node, boo
 		if (MB_SUCCESS == status) {
 			strncpy((*result)->name, line_name, LINE_NAME_LENGTH);
 			(*result)->name[LINE_NAME_LENGTH] = 0;
-			(*result)->prev = NULL;
-			(*result)->next = NULL;
-			(*result)->pings = NULL;
+			(*result)->prev = nullptr;
+			(*result)->next = nullptr;
+			(*result)->pings = nullptr;
 			(*nlines)++;
 			*node = *result;
 		}
@@ -155,7 +155,7 @@ int find_line(int verbose, char *line_name, struct neptune_line_tree **node, boo
 int find_ping(int verbose, int ping, struct neptune_ping_tree **node, bool create, struct neptune_ping_tree **result, int *error) {
 	int status = MB_SUCCESS;
 
-	if (NULL == *node) {
+	if (nullptr == *node) {
 		if (!create)
 			return MB_FAILURE;
 
@@ -166,9 +166,9 @@ int find_ping(int verbose, int ping, struct neptune_ping_tree **node, bool creat
 #endif
 		if (MB_SUCCESS == status) {
 			(*result)->ping = ping;
-			(*result)->prev = NULL;
-			(*result)->next = NULL;
-			(*result)->beams = NULL;
+			(*result)->prev = nullptr;
+			(*result)->next = nullptr;
+			(*result)->beams = nullptr;
 			*node = *result;
 		}
 		return status;
@@ -185,7 +185,7 @@ int find_ping(int verbose, int ping, struct neptune_ping_tree **node, bool creat
 /*--------------------------------------------------------------------*/
 
 void line_array(struct neptune_line_tree *line, struct neptune_line_tree ***array, int *n) {
-	if (NULL == line)
+	if (nullptr == line)
 		return;  // MB_SUCCESS
 
 	line_array(line->prev, array, n);
@@ -197,14 +197,14 @@ void line_array(struct neptune_line_tree *line, struct neptune_line_tree ***arra
 /*--------------------------------------------------------------------*/
 
 void print_pings(FILE *output, struct neptune_ping_tree *node) {
-	if (NULL == node)
+	if (nullptr == node)
 		return;  // MB_SUCCESS
 
 	print_pings(output, node->prev);
 
 	fprintf(output, "\tPing %d beams: ", node->ping);
 	struct neptune_beam_list *beam = node->beams;
-	while (NULL != beam) {
+	while (nullptr != beam) {
 		fprintf(output, " %d", beam->beam);
 		beam = beam->next;
 	}
@@ -217,7 +217,7 @@ void print_pings(FILE *output, struct neptune_ping_tree *node) {
 /*--------------------------------------------------------------------*/
 
 void free_pings(int verbose, struct neptune_ping_tree **node, int *error) {
-	if (NULL == *node)
+	if (nullptr == *node)
 		return;  // MB_SUCCESS
 
 	free_pings(verbose, &(*node)->prev, error);
@@ -225,7 +225,7 @@ void free_pings(int verbose, struct neptune_ping_tree **node, int *error) {
 
 	struct neptune_beam_list *beam = (*node)->beams;
 	struct neptune_beam_list *nextbeam;
-	while (NULL != beam) {
+	while (nullptr != beam) {
 		nextbeam = beam->next;
 #ifdef USE_MB_MALLOC
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&beam, error);
@@ -380,7 +380,7 @@ int main(int argc, char **argv) {
 	FILE *rules_fp;
 	if (0 == strncmp("-", rulesfile, 2)) {
 		rules_fp = stdin;
-	} else if ((rules_fp = fopen(rulesfile, "r")) == NULL) {
+	} else if ((rules_fp = fopen(rulesfile, "r")) == nullptr) {
 		fprintf(stderr, "\nUnable to open rules file %s\n", rulesfile);
 		fprintf(stderr, "\nusage: %s\n", usage_message);
 		exit(MB_ERROR_OPEN_FAIL);
@@ -394,7 +394,7 @@ int main(int argc, char **argv) {
 	char buff[MB_PATH_MAXLINE];
 	int nlines;
 	char line_name[MB_PATH_MAXLINE];
-	struct neptune_line_tree *rule_lines = NULL;
+	struct neptune_line_tree *rule_lines = nullptr;
 	struct neptune_line_tree *line;
 	int no_lines = 0;
 
@@ -479,14 +479,14 @@ int main(int argc, char **argv) {
 								     0 != strncmp(beams_buff, "BEAMS", 5)))
 									status = MB_FAILURE;
 
-								struct neptune_ping_tree *ping = NULL;
+								struct neptune_ping_tree *ping = nullptr;
 								if (MB_SUCCESS == status)
 									status = find_ping(verbose, ping_no, &(line->pings), true, &ping, &error);
 
 								if (MB_SUCCESS == status) {
 									struct neptune_beam_list *beam = ping->beams;
-									if (NULL != beam) {
-										while (NULL != beam->next)
+									if (nullptr != beam) {
+										while (nullptr != beam->next)
 										beam = beam->next;
 									}
 									for (int k = 0; k < nbeams; k++) {
@@ -497,7 +497,7 @@ int main(int argc, char **argv) {
 											status = MB_FAILURE;
 										used += bytes;
 
-										if (NULL == beam) {
+										if (nullptr == beam) {
 #ifdef USE_MB_MALLOC
 											status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct neptune_beam_list),
 											                    (void **)&(ping->beams), &error);
@@ -515,7 +515,7 @@ int main(int argc, char **argv) {
 											beam = beam->next;
 										}
 										beam->beam = beam_no;
-										beam->next = NULL;
+										beam->next = nullptr;
 									}
 								}
 							}
@@ -548,7 +548,7 @@ int main(int argc, char **argv) {
 			output = stdout;
 		else
 			output = fopen(output_file, "w");
-		if (output != NULL) {
+		if (output != nullptr) {
 			for (int i = 0; i < no_lines; i++) {
 				fprintf(output, "%s\n", lines[i]->name);
 				print_pings(output, lines[i]->pings);
@@ -558,7 +558,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
@@ -600,8 +600,8 @@ int main(int argc, char **argv) {
 	double *ssalongtrack;
 
 	/* mbio read and write values */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
+	void *mbio_ptr = nullptr;
+	void *store_ptr = nullptr;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *sim_ping;
@@ -656,7 +656,7 @@ int main(int argc, char **argv) {
 			int beam_flagging;  // TODO(schwehr): mb_format_flags should take a bool.
 			if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) !=
 			    MB_SUCCESS) {
-				char *message = NULL;
+				char *message = nullptr;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n", format,
 				        message);
@@ -679,7 +679,7 @@ int main(int argc, char **argv) {
 			if (mb_read_init(verbose, swathfile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 			                           &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) !=
 			    MB_SUCCESS) {
-				char *message = NULL;
+				char *message = nullptr;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 				fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swathfile);
@@ -701,13 +701,13 @@ int main(int argc, char **argv) {
 			}
 
 			/* allocate memory for data arrays */
-			cur_ping.beamflag = NULL;
-			cur_ping.beamflagorg = NULL;
-			cur_ping.bath = NULL;
-			cur_ping.bathacrosstrack = NULL;
-			cur_ping.bathalongtrack = NULL;
-			cur_ping.bathx = NULL;
-			cur_ping.bathy = NULL;
+			cur_ping.beamflag = nullptr;
+			cur_ping.beamflagorg = nullptr;
+			cur_ping.bath = nullptr;
+			cur_ping.bathacrosstrack = nullptr;
+			cur_ping.bathalongtrack = nullptr;
+			cur_ping.bathx = nullptr;
+			cur_ping.bathy = nullptr;
 			if (error == MB_ERROR_NO_ERROR)
 				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&cur_ping.beamflag,
 				                           &error);
@@ -730,10 +730,10 @@ int main(int argc, char **argv) {
 				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&cur_ping.bathy,
 				                           &error);
 
-			amp = NULL;
-			ss = NULL;
-			ssacrosstrack = NULL;
-			ssalongtrack = NULL;
+			amp = nullptr;
+			ss = nullptr;
+			ssacrosstrack = nullptr;
+			ssalongtrack = nullptr;
 			if (error == MB_ERROR_NO_ERROR)
 				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
 			if (error == MB_ERROR_NO_ERROR)
@@ -747,7 +747,7 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
-				char *message = NULL;
+				char *message = nullptr;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -761,7 +761,7 @@ int main(int argc, char **argv) {
 
 				/* handle esf edits */
 				status = mb_esf_load(verbose, program_name, swathfile, true, true, esffile, &esf, &error);
-				if (status == MB_SUCCESS && esf.esffp != NULL)
+				if (status == MB_SUCCESS && esf.esffp != nullptr)
 					esffile_open = true;
 				if (status == MB_FAILURE && error == MB_ERROR_OPEN_FAIL) {
 					esffile_open = false;
@@ -851,7 +851,7 @@ int main(int argc, char **argv) {
 					if (MB_SUCCESS == find_ping(verbose, ping_no, &line->pings, false, &ping, &error)) {
 						// TODO(schwehr): Why was there an extra "= beam"?
 						struct neptune_beam_list *beam /* = beam */ = ping->beams;
-						while (NULL != beam) {
+						while (nullptr != beam) {
 							const int beam_no = beam->beam;
 							if (mb_beam_ok(cur_ping.beamflag[beam_no])) {
 								if (verbose >= 1)

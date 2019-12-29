@@ -384,15 +384,15 @@ int main(int argc, char **argv) {
 	int nav_alloc = 0;
 
 	/* navigation, heading, attitude data for merging in fnv format */
-	double *nav_time_d = NULL;
-	double *nav_navlon = NULL;
-	double *nav_navlat = NULL;
-	double *nav_heading = NULL;
-	double *nav_speed = NULL;
-	double *nav_sensordepth = NULL;
-	double *nav_roll = NULL;
-	double *nav_pitch = NULL;
-	double *nav_heave = NULL;
+	double *nav_time_d = nullptr;
+	double *nav_navlon = nullptr;
+	double *nav_navlat = nullptr;
+	double *nav_heading = nullptr;
+	double *nav_speed = nullptr;
+	double *nav_sensordepth = nullptr;
+	double *nav_roll = nullptr;
+	double *nav_pitch = nullptr;
+	double *nav_heave = nullptr;
 
 	int time_i[7];
 
@@ -402,7 +402,7 @@ int main(int argc, char **argv) {
 		nav_num = 0;
 		const int nchar = MB_PATH_MAXLINE - 1;
 		FILE *fp = fopen(nav_file, "r");
-		if (fp == NULL) {
+		if (fp == nullptr) {
 			fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", nav_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -427,7 +427,7 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
-				char *message = NULL;
+				char *message = nullptr;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -437,7 +437,7 @@ int main(int argc, char **argv) {
 
 		/* read the data points in the nav file */
 		nav_num = 0;
-		if ((fp = fopen(nav_file, "r")) == NULL) {
+		if ((fp = fopen(nav_file, "r")) == nullptr) {
 			fprintf(stderr, "\nUnable to Open navigation File <%s> for reading\n", nav_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -462,7 +462,7 @@ int main(int argc, char **argv) {
 
 	/* open the input file */
 	FILE *fp = fopen(file, "r");
-	if (fp == NULL) {
+	if (fp == nullptr) {
 		error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 		fprintf(stderr, "\nUnable to open log file <%s> for reading\n", file);

@@ -223,73 +223,73 @@ int main(int argc, char **argv) {
   bool kluge_timejumps_mbaripressure = false;
 
   {
-    static struct option options[] = {{"verbose", no_argument, NULL, 0},
-                                      {"help", no_argument, NULL, 0},
-                                      {"input", required_argument, NULL, 0},
-                                      {"format", required_argument, NULL, 0},
-                                      {"platform-file", required_argument, NULL, 0},
-                                      {"platform-target-sensor", required_argument, NULL, 0},
-                                      {"output-sensor-fnv", no_argument, NULL, 0},
-                                      {"skip-existing", no_argument, NULL, 0},
-                                      {"nav-file", required_argument, NULL, 0},
-                                      {"nav-file-format", required_argument, NULL, 0},
-                                      {"nav-async", required_argument, NULL, 0},
-                                      {"nav-sensor", required_argument, NULL, 0},
-                                      {"sensordepth-file", required_argument, NULL, 0},
-                                      {"sensordepth-file-format", required_argument, NULL, 0},
-                                      {"sensordepth-async", required_argument, NULL, 0},
-                                      {"sensordepth-sensor", required_argument, NULL, 0},
-                                      {"heading-file", required_argument, NULL, 0},
-                                      {"heading-file-format", required_argument, NULL, 0},
-                                      {"heading-async", required_argument, NULL, 0},
-                                      {"heading-sensor", required_argument, NULL, 0},
-                                      {"altitude-file", required_argument, NULL, 0},
-                                      {"altitude-file-format", required_argument, NULL, 0},
-                                      {"altitude-async", required_argument, NULL, 0},
-                                      {"altitude-sensor", required_argument, NULL, 0},
-                                      {"attitude-file", required_argument, NULL, 0},
-                                      {"attitude-file-format", required_argument, NULL, 0},
-                                      {"attitude-async", required_argument, NULL, 0},
-                                      {"attitude-sensor", required_argument, NULL, 0},
-                                      {"soundspeed-file", required_argument, NULL, 0},
-                                      {"soundspeed-file-format", required_argument, NULL, 0},
-                                      {"soundspeed-async", required_argument, NULL, 0},
-                                      {"soundspeed-sensor", required_argument, NULL, 0},
-                                      {"time-latency-file", required_argument, NULL, 0},
-                                      {"time-latency-file-format", required_argument, NULL, 0},
-                                      {"time-latency-constant", required_argument, NULL, 0},
-                                      {"time-latency-apply-nav", no_argument, NULL, 0},
-                                      {"time-latency-apply-sensordepth", no_argument, NULL, 0},
-                                      {"time-latency-apply-heading", no_argument, NULL, 0},
-                                      {"time-latency-apply-attitude", no_argument, NULL, 0},
-                                      {"time-latency-apply-all-ancilliary", no_argument, NULL, 0},
-                                      {"time-latency-apply-survey", no_argument, NULL, 0},
-                                      {"time-latency-apply-all", no_argument, NULL, 0},
-                                      {"time-latency-apply-nav", no_argument, NULL, 0},
-                                      {"filter", required_argument, NULL, 0},
-                                      {"filter-apply-nav", no_argument, NULL, 0},
-                                      {"filter-apply-sensordepth", no_argument, NULL, 0},
-                                      {"filter-apply-heading", no_argument, NULL, 0},
-                                      {"filter-apply-attitude", no_argument, NULL, 0},
-                                      {"filter-apply-all-ancilliary", no_argument, NULL, 0},
-                                      {"recalculate-bathymetry", no_argument, NULL, 0},
-                                      {"no-change-survey", no_argument, NULL, 0},
-                                      {"multibeam-sidescan-source", required_argument, NULL, 0},
-                                      {"sounding-amplitude-filter", required_argument, NULL, 0},
-                                      {"sounding-altitude-filter", required_argument, NULL, 0},
-                                      {"ignore-water-column", no_argument, NULL, 0},
-                                      {"head1-offsets", required_argument, NULL, 0},
-                                      {"head2-offsets", required_argument, NULL, 0},
-                                      {"kluge-time-jumps", required_argument, NULL, 0},
-                                      {"kluge-ancilliary-time-jumps", required_argument, NULL, 0},
-                                      {"kluge-mbaripressure-time-jumps", required_argument, NULL, 0},
-                                      {"kluge-beam-tweak", required_argument, NULL, 0},
-                                      {"kluge-soundspeed-tweak", required_argument, NULL, 0},
-                                      {"kluge-zero-attitude-correction", no_argument, NULL, 0},
-                                      {"kluge-zero-alongtrack-angles", no_argument, NULL, 0},
-                                      {"kluge-fix-wissl-timestamps", no_argument, NULL, 0},
-                                      {"kluge-auv-sentry-sensordepth", no_argument, NULL, 0},
-                                      {NULL, 0, NULL, 0}};
+    static struct option options[] = {{"verbose", no_argument, nullptr, 0},
+                                      {"help", no_argument, nullptr, 0},
+                                      {"input", required_argument, nullptr, 0},
+                                      {"format", required_argument, nullptr, 0},
+                                      {"platform-file", required_argument, nullptr, 0},
+                                      {"platform-target-sensor", required_argument, nullptr, 0},
+                                      {"output-sensor-fnv", no_argument, nullptr, 0},
+                                      {"skip-existing", no_argument, nullptr, 0},
+                                      {"nav-file", required_argument, nullptr, 0},
+                                      {"nav-file-format", required_argument, nullptr, 0},
+                                      {"nav-async", required_argument, nullptr, 0},
+                                      {"nav-sensor", required_argument, nullptr, 0},
+                                      {"sensordepth-file", required_argument, nullptr, 0},
+                                      {"sensordepth-file-format", required_argument, nullptr, 0},
+                                      {"sensordepth-async", required_argument, nullptr, 0},
+                                      {"sensordepth-sensor", required_argument, nullptr, 0},
+                                      {"heading-file", required_argument, nullptr, 0},
+                                      {"heading-file-format", required_argument, nullptr, 0},
+                                      {"heading-async", required_argument, nullptr, 0},
+                                      {"heading-sensor", required_argument, nullptr, 0},
+                                      {"altitude-file", required_argument, nullptr, 0},
+                                      {"altitude-file-format", required_argument, nullptr, 0},
+                                      {"altitude-async", required_argument, nullptr, 0},
+                                      {"altitude-sensor", required_argument, nullptr, 0},
+                                      {"attitude-file", required_argument, nullptr, 0},
+                                      {"attitude-file-format", required_argument, nullptr, 0},
+                                      {"attitude-async", required_argument, nullptr, 0},
+                                      {"attitude-sensor", required_argument, nullptr, 0},
+                                      {"soundspeed-file", required_argument, nullptr, 0},
+                                      {"soundspeed-file-format", required_argument, nullptr, 0},
+                                      {"soundspeed-async", required_argument, nullptr, 0},
+                                      {"soundspeed-sensor", required_argument, nullptr, 0},
+                                      {"time-latency-file", required_argument, nullptr, 0},
+                                      {"time-latency-file-format", required_argument, nullptr, 0},
+                                      {"time-latency-constant", required_argument, nullptr, 0},
+                                      {"time-latency-apply-nav", no_argument, nullptr, 0},
+                                      {"time-latency-apply-sensordepth", no_argument, nullptr, 0},
+                                      {"time-latency-apply-heading", no_argument, nullptr, 0},
+                                      {"time-latency-apply-attitude", no_argument, nullptr, 0},
+                                      {"time-latency-apply-all-ancilliary", no_argument, nullptr, 0},
+                                      {"time-latency-apply-survey", no_argument, nullptr, 0},
+                                      {"time-latency-apply-all", no_argument, nullptr, 0},
+                                      {"time-latency-apply-nav", no_argument, nullptr, 0},
+                                      {"filter", required_argument, nullptr, 0},
+                                      {"filter-apply-nav", no_argument, nullptr, 0},
+                                      {"filter-apply-sensordepth", no_argument, nullptr, 0},
+                                      {"filter-apply-heading", no_argument, nullptr, 0},
+                                      {"filter-apply-attitude", no_argument, nullptr, 0},
+                                      {"filter-apply-all-ancilliary", no_argument, nullptr, 0},
+                                      {"recalculate-bathymetry", no_argument, nullptr, 0},
+                                      {"no-change-survey", no_argument, nullptr, 0},
+                                      {"multibeam-sidescan-source", required_argument, nullptr, 0},
+                                      {"sounding-amplitude-filter", required_argument, nullptr, 0},
+                                      {"sounding-altitude-filter", required_argument, nullptr, 0},
+                                      {"ignore-water-column", no_argument, nullptr, 0},
+                                      {"head1-offsets", required_argument, nullptr, 0},
+                                      {"head2-offsets", required_argument, nullptr, 0},
+                                      {"kluge-time-jumps", required_argument, nullptr, 0},
+                                      {"kluge-ancilliary-time-jumps", required_argument, nullptr, 0},
+                                      {"kluge-mbaripressure-time-jumps", required_argument, nullptr, 0},
+                                      {"kluge-beam-tweak", required_argument, nullptr, 0},
+                                      {"kluge-soundspeed-tweak", required_argument, nullptr, 0},
+                                      {"kluge-zero-attitude-correction", no_argument, nullptr, 0},
+                                      {"kluge-zero-alongtrack-angles", no_argument, nullptr, 0},
+                                      {"kluge-fix-wissl-timestamps", no_argument, nullptr, 0},
+                                      {"kluge-auv-sentry-sensordepth", no_argument, nullptr, 0},
+                                      {nullptr, 0, nullptr, 0}};
 
     int option_index;
     bool errflg = false;
@@ -897,15 +897,15 @@ int main(int argc, char **argv) {
   }
 
   /* platform definition file */
-  struct mb_platform_struct *platform = NULL;
-  // struct mb_sensor_struct *sensor_bathymetry = NULL;
-  // struct mb_sensor_struct *sensor_backscatter = NULL;
-  // struct mb_sensor_struct *sensor_heave = NULL;
-  struct mb_sensor_struct *sensor_position = NULL;
-  struct mb_sensor_struct *sensor_depth = NULL;
-  struct mb_sensor_struct *sensor_heading = NULL;
-  struct mb_sensor_struct *sensor_rollpitch = NULL;
-  struct mb_sensor_struct *sensor_target = NULL;
+  struct mb_platform_struct *platform = nullptr;
+  // struct mb_sensor_struct *sensor_bathymetry = nullptr;
+  // struct mb_sensor_struct *sensor_backscatter = nullptr;
+  // struct mb_sensor_struct *sensor_heave = nullptr;
+  struct mb_sensor_struct *sensor_position = nullptr;
+  struct mb_sensor_struct *sensor_depth = nullptr;
+  struct mb_sensor_struct *sensor_heading = nullptr;
+  struct mb_sensor_struct *sensor_rollpitch = nullptr;
+  struct mb_sensor_struct *sensor_target = nullptr;
 
   /*-------------------------------------------------------------------*/
   /* load platform definition if specified */
@@ -953,51 +953,51 @@ int main(int argc, char **argv) {
   /* asynchronous navigation, heading, altitude, attitude, soundspeed data */
   int n_nav = 0;
   int n_nav_alloc = 0;
-  double *nav_time_d = NULL;
-  double *nav_navlon = NULL;
-  double *nav_navlat = NULL;
-  double *nav_speed = NULL;
+  double *nav_time_d = nullptr;
+  double *nav_navlon = nullptr;
+  double *nav_navlat = nullptr;
+  double *nav_speed = nullptr;
 
   int n_sensordepth = 0;
   int n_sensordepth_alloc = 0;
-  double *sensordepth_time_d = NULL;
-  double *sensordepth_sensordepth = NULL;
+  double *sensordepth_time_d = nullptr;
+  double *sensordepth_sensordepth = nullptr;
 
   int n_heading = 0;
   int n_heading_alloc = 0;
-  double *heading_time_d = NULL;
-  double *heading_heading = NULL;
+  double *heading_time_d = nullptr;
+  double *heading_heading = nullptr;
 
   int n_altitude = 0;
   int n_altitude_alloc = 0;
-  double *altitude_time_d = NULL;
-  double *altitude_altitude = NULL;
+  double *altitude_time_d = nullptr;
+  double *altitude_altitude = nullptr;
 
   int n_attitude = 0;
   int n_attitude_alloc = 0;
-  double *attitude_time_d = NULL;
-  double *attitude_roll = NULL;
-  double *attitude_pitch = NULL;
-  double *attitude_heave = NULL;
+  double *attitude_time_d = nullptr;
+  double *attitude_roll = nullptr;
+  double *attitude_pitch = nullptr;
+  double *attitude_heave = nullptr;
 
   int n_soundspeed = 0;
   int n_soundspeed_alloc = 0;
-  double *soundspeed_time_d = NULL;
-  double *soundspeed_soundspeed = NULL;
+  double *soundspeed_time_d = nullptr;
+  double *soundspeed_soundspeed = nullptr;
 
   int time_latency_num = 0;
   int time_latency_alloc = 0;
-  double *time_latency_time_d = NULL;
-  double *time_latency_time_latency = NULL;
+  double *time_latency_time_d = nullptr;
+  double *time_latency_time_latency = nullptr;
 
   /* time domain filtering */
 
   /* file indexing (used by some formats) */
   int num_indextable = 0;
   int num_indextable_alloc = 0;
-  struct mb_io_indextable_struct *indextable = NULL;
+  struct mb_io_indextable_struct *indextable = nullptr;
   int i_num_indextable = 0;
-  struct mb_io_indextable_struct *i_indextable = NULL;
+  struct mb_io_indextable_struct *i_indextable = nullptr;
 
   /* kluge various data fixes */
   double kluge_first_time_d;
@@ -1011,7 +1011,7 @@ int main(int argc, char **argv) {
   bool kluge_fix_wissl_timestamps_setup2 = false;
 
   /* MBIO read control parameters */
-  void *datalist = NULL;
+  void *datalist = nullptr;
   double file_weight;
   int iformat;
   int oformat;
@@ -1033,9 +1033,9 @@ int main(int argc, char **argv) {
   int opixels_ss;
 
   /* MBIO read values */
-  void *imbio_ptr = NULL;
-  void *ombio_ptr = NULL;
-  void *istore_ptr = NULL;
+  void *imbio_ptr = nullptr;
+  void *ombio_ptr = nullptr;
+  void *istore_ptr = nullptr;
   int kind;
   int time_i[7];
   double time_d;
@@ -1050,14 +1050,14 @@ int main(int argc, char **argv) {
   double roll;
   double pitch;
   double heave;
-  char *beamflag = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
+  char *beamflag = nullptr;
+  double *bath = nullptr;
+  double *bathacrosstrack = nullptr;
+  double *bathalongtrack = nullptr;
+  double *amp = nullptr;
+  double *ss = nullptr;
+  double *ssacrosstrack = nullptr;
+  double *ssalongtrack = nullptr;
   char comment[MB_COMMENT_MAXLINE];
   double navlon_org;
   double navlat_org;
@@ -1134,7 +1134,7 @@ int main(int argc, char **argv) {
   // mb_path command = "";
 
   mb_path afile = "";
-  FILE *afp = NULL;
+  FILE *afp = nullptr;
   struct stat file_status;
   double start_time_d;
   double end_time_d;
@@ -1286,7 +1286,7 @@ int main(int argc, char **argv) {
 
   /* get format if required */
   if (format == 0)
-    mb_get_format(verbose, read_file, NULL, &format, &error);
+    mb_get_format(verbose, read_file, nullptr, &format, &error);
 
   /* determine whether to read one file or a list of files */
   const bool read_datalist = format < 0;
@@ -1383,14 +1383,14 @@ int main(int argc, char **argv) {
       exit(error);
     }
 
-    beamflag = NULL;
-    bath = NULL;
-    amp = NULL;
-    bathacrosstrack = NULL;
-    bathalongtrack = NULL;
-    ss = NULL;
-    ssacrosstrack = NULL;
-    ssalongtrack = NULL;
+    beamflag = nullptr;
+    bath = nullptr;
+    amp = nullptr;
+    bathacrosstrack = nullptr;
+    bathalongtrack = nullptr;
+    ss = nullptr;
+    ssacrosstrack = nullptr;
+    ssalongtrack = nullptr;
     if (error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
     if (error == MB_ERROR_NO_ERROR)
@@ -1992,7 +1992,7 @@ int main(int argc, char **argv) {
   /* position */
   if (n_nav > 0 && n_nav_alloc >= n_nav) {
     /* apply time latency correction called for in the platform file */
-    if (sensor_position != NULL && sensor_position->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
+    if (sensor_position != nullptr && sensor_position->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
       if (verbose > 0) {
         if (sensor_position->time_latency_mode == MB_SENSOR_TIME_LATENCY_STATIC)
           fprintf(stderr,
@@ -2028,7 +2028,7 @@ int main(int argc, char **argv) {
   /* sensordepth */
   if (n_sensordepth > 0 && n_sensordepth_alloc >= n_sensordepth) {
     /* apply time latency correction called for in the platform file */
-    if (sensor_depth != NULL && sensor_depth->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
+    if (sensor_depth != nullptr && sensor_depth->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
       if (verbose > 0) {
         if (sensor_depth->time_latency_mode == MB_SENSOR_TIME_LATENCY_STATIC)
           fprintf(
@@ -2069,7 +2069,7 @@ int main(int argc, char **argv) {
   /* heading */
   if (n_heading > 0 && n_heading_alloc >= n_heading) {
     /* apply time latency correction called for in the platform file */
-    if (sensor_heading != NULL && sensor_heading->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
+    if (sensor_heading != nullptr && sensor_heading->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
       if (verbose > 0) {
         if (sensor_heading->time_latency_mode == MB_SENSOR_TIME_LATENCY_STATIC)
           fprintf(stderr,
@@ -2126,7 +2126,7 @@ int main(int argc, char **argv) {
   /* attitude */
   if (n_attitude > 0 && n_attitude_alloc >= n_attitude) {
     /* apply time latency correction called for in the platform file */
-    if (sensor_rollpitch != NULL && sensor_rollpitch->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
+    if (sensor_rollpitch != nullptr && sensor_rollpitch->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
       if (verbose > 0) {
         if (sensor_rollpitch->time_latency_mode == MB_SENSOR_TIME_LATENCY_STATIC)
           fprintf(stderr,
@@ -2262,7 +2262,7 @@ int main(int argc, char **argv) {
     n_wt_files = 0;
 
   /* if requested to output integrated nav for all survey sensors, open files */
-  if (output_sensor_fnv && platform != NULL) {
+  if (output_sensor_fnv && platform != nullptr) {
     if (verbose > 0)
       fprintf(stderr, "\nOutputting fnv files for survey sensors\n");
     for (isensor = 0; isensor < platform->num_sensors; isensor++) {
@@ -2273,7 +2273,7 @@ int main(int argc, char **argv) {
           sprintf(fnvfile, "sensor_%2.2d_%2.2d_%2.2d.fnv", isensor, ioffset, platform->sensors[isensor].type);
           if (verbose > 0)
             fprintf(stderr, "Outputting sensor %d offset %d in fnv file:%s\n", isensor, ioffset, fnvfile);
-          if ((platform->sensors[isensor].offsets[ioffset].ofp = fopen(fnvfile, "wb")) == NULL) {
+          if ((platform->sensors[isensor].offsets[ioffset].ofp = fopen(fnvfile, "wb")) == nullptr) {
             fprintf(stderr, "\nUnable to open sensor fnv data file <%s> for writing\n", fnvfile);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(MB_ERROR_OPEN_FAIL);
@@ -2384,14 +2384,14 @@ int main(int argc, char **argv) {
         exit(error);
       }
 
-      beamflag = NULL;
-      bath = NULL;
-      amp = NULL;
-      bathacrosstrack = NULL;
-      bathalongtrack = NULL;
-      ss = NULL;
-      ssacrosstrack = NULL;
-      ssalongtrack = NULL;
+      beamflag = nullptr;
+      bath = nullptr;
+      amp = nullptr;
+      bathacrosstrack = nullptr;
+      bathalongtrack = nullptr;
+      ss = nullptr;
+      ssacrosstrack = nullptr;
+      ssalongtrack = nullptr;
       if (error == MB_ERROR_NO_ERROR)
         status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
       if (error == MB_ERROR_NO_ERROR)
@@ -2472,7 +2472,7 @@ int main(int argc, char **argv) {
 
       /* open synchronous attitude file */
       sprintf(afile, "%s.bsa", ofile);
-      if ((afp = fopen(afile, "wb")) == NULL) {
+      if ((afp = fopen(afile, "wb")) == nullptr) {
         fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", afile);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(MB_ERROR_OPEN_FAIL);
@@ -2631,7 +2631,7 @@ int main(int argc, char **argv) {
           }
 
           /* apply time latency correction called for in the platform file */
-          if (sensor_target != NULL && sensor_target->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
+          if (sensor_target != nullptr && sensor_target->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
             mb_apply_time_latency(verbose, 1, &time_d, sensor_target->time_latency_mode,
                         sensor_target->time_latency_static, sensor_target->num_time_latency,
                         sensor_target->time_latency_time_d, sensor_target->time_latency_value, &error);
@@ -2739,7 +2739,7 @@ int main(int argc, char **argv) {
             error = MB_ERROR_NO_ERROR;
 
             /* if platform defined, do lever arm correction */
-            if (platform != NULL) {
+            if (platform != nullptr) {
               /* calculate target sensor position */
               status = mb_platform_position(verbose, (void *)platform, target_sensor, 0, navlon, navlat, sensordepth,
                               heading, roll, pitch, &navlon, &navlat, &sensordepth, &error);
@@ -2893,7 +2893,7 @@ int main(int argc, char **argv) {
           for (isensor = 0; isensor < platform->num_sensors; isensor++) {
             if (platform->sensors[isensor].capability2 != 0) {
               for (ioffset = 0; ioffset < platform->sensors[isensor].num_offsets; ioffset++) {
-                if (platform->sensors[isensor].offsets[ioffset].ofp != NULL) {
+                if (platform->sensors[isensor].offsets[ioffset].ofp != nullptr) {
                   /* calculate position and attitude of target sensor */
                   status = mb_platform_position(verbose, (void *)platform, isensor, ioffset, navlon_org, navlat_org,
                                   sensordepth_org, heading_org, roll_org, pitch_org, &navlon, &navlat,
@@ -2986,7 +2986,7 @@ int main(int argc, char **argv) {
             iend++;
           if (iend > istart) {
             sprintf(afile, "%s.bah", ofile);
-            if ((afp = fopen(afile, "wb")) == NULL) {
+            if ((afp = fopen(afile, "wb")) == nullptr) {
               fprintf(stderr, "\nUnable to open asynchronous heading data file <%s> for writing\n", afile);
               fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
               exit(MB_ERROR_OPEN_FAIL);
@@ -3022,7 +3022,7 @@ int main(int argc, char **argv) {
             iend++;
           if (iend > istart) {
             sprintf(afile, "%s.bas", ofile);
-            if ((afp = fopen(afile, "wb")) == NULL) {
+            if ((afp = fopen(afile, "wb")) == nullptr) {
               fprintf(stderr, "\nUnable to open asynchronous sensordepth data file <%s> for writing\n", afile);
               fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
               exit(MB_ERROR_OPEN_FAIL);
@@ -3059,7 +3059,7 @@ int main(int argc, char **argv) {
             iend++;
           if (iend > istart) {
             sprintf(afile, "%s.baa", ofile);
-            if ((afp = fopen(afile, "wb")) == NULL) {
+            if ((afp = fopen(afile, "wb")) == nullptr) {
               fprintf(stderr, "\nUnable to open asynchronous attitude data file <%s> for writing\n", afile);
               fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
               exit(MB_ERROR_OPEN_FAIL);
@@ -3134,9 +3134,9 @@ int main(int argc, char **argv) {
     for (isensor = 0; isensor < platform->num_sensors; isensor++) {
       if (platform->sensors[isensor].capability2 != 0) {
         for (ioffset = 0; ioffset < platform->sensors[isensor].num_offsets; ioffset++) {
-          if (platform->sensors[isensor].offsets[ioffset].ofp != NULL) {
+          if (platform->sensors[isensor].offsets[ioffset].ofp != nullptr) {
             fclose(platform->sensors[isensor].offsets[ioffset].ofp);
-            platform->sensors[isensor].offsets[ioffset].ofp = NULL;
+            platform->sensors[isensor].offsets[ioffset].ofp = nullptr;
           }
         }
       }
@@ -3170,7 +3170,7 @@ int main(int argc, char **argv) {
   }
 
   /* deallocate platform structure */
-  if (platform != NULL) {
+  if (platform != nullptr) {
     status &= mb_platform_deall(verbose, (void **)&platform, &error);
   }
 

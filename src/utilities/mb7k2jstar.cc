@@ -328,10 +328,10 @@ int main(int argc, char **argv) {
 	bool new_output_file = true;
 
 	int nroutepoint = 0;
-	double *routelon = NULL;
-	double *routelat = NULL;
-	double *routeheading = NULL;
-	int *routewaypoint = NULL;
+	double *routelon = nullptr;
+	double *routelat = nullptr;
+	double *routeheading = nullptr;
+	int *routewaypoint = nullptr;
 	int activewaypoint = 0;
 	double mtodeglon;
 	double mtodeglat;
@@ -343,7 +343,7 @@ int main(int argc, char **argv) {
 	if (route_file_set) {
 		/* open the input file */
 		FILE *fp = fopen(route_file, "r");
-		if (fp == NULL) {
+		if (fp == nullptr) {
 			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
 			exit(MB_FAILURE);
 		}
@@ -409,7 +409,7 @@ int main(int argc, char **argv) {
 
 		/* close the file */
 		fclose(fp);
-		fp = NULL;
+		fp = nullptr;
 
 		/* set starting values */
 		activewaypoint = 1;
@@ -426,14 +426,14 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
 
 	/* open file list */
 	char file[MB_PATH_MAXLINE] = "";
-	void *datalist = NULL;
+	void *datalist = nullptr;
 	double file_weight;
 	char dfile[MB_PATH_MAXLINE];
 	bool read_data;
@@ -453,27 +453,27 @@ int main(int argc, char **argv) {
 	}
 
 	/* MBIO read values */
-	void *ombio_ptr = NULL;
-	struct mb_io_struct *omb_io_ptr = NULL;
-	void *ostore_ptr = NULL;
-	struct mbsys_jstar_struct *ostore = NULL;
+	void *ombio_ptr = nullptr;
+	struct mb_io_struct *omb_io_ptr = nullptr;
+	void *ostore_ptr = nullptr;
+	struct mbsys_jstar_struct *ostore = nullptr;
 	double roll;
 	double pitch;
 	double heave;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	double *ttimes = NULL;
-	double *angles = NULL;
-	double *angles_forward = NULL;
-	double *angles_null = NULL;
-	double *bheave = NULL;
-	double *alongtrack_offset = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
+	double *ttimes = nullptr;
+	double *angles = nullptr;
+	double *angles_forward = nullptr;
+	double *angles_null = nullptr;
+	double *bheave = nullptr;
+	double *alongtrack_offset = nullptr;
 	double draft;
 	double ssv;
 
@@ -482,7 +482,7 @@ int main(int argc, char **argv) {
 	/* jstar data */
 	s7k_fsdwchannel *s7kchannel;       /* Channel header and data */
 	s7k_fsdwssheader *s7kssheader;     /* Edgetech sidescan header */
-	s7k_fsdwsegyheader *s7ksegyheader = NULL; /* Segy header for subbottom trace */
+	s7k_fsdwsegyheader *s7ksegyheader = nullptr; /* Segy header for subbottom trace */
 	struct mbsys_jstar_channel_struct *channel;
 	int obeams_bath;
 	int obeams_amp;
@@ -530,7 +530,7 @@ int main(int argc, char **argv) {
 		int beams_bath;
 		int beams_amp;
 		int pixels_ss;
-		void *imbio_ptr = NULL;
+		void *imbio_ptr = nullptr;
 		if (mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
 			char *message;
@@ -547,14 +547,14 @@ int main(int argc, char **argv) {
 		struct mbsys_reson7k_struct *istore = (struct mbsys_reson7k_struct *)istore_ptr;
 
 		if (error == MB_ERROR_NO_ERROR) {
-			beamflag = NULL;
-			bath = NULL;
-			amp = NULL;
-			bathacrosstrack = NULL;
-			bathalongtrack = NULL;
-			ss = NULL;
-			ssacrosstrack = NULL;
-			ssalongtrack = NULL;
+			beamflag = nullptr;
+			bath = nullptr;
+			amp = nullptr;
+			bathacrosstrack = nullptr;
+			bathalongtrack = nullptr;
+			ss = nullptr;
+			ssacrosstrack = nullptr;
+			ssalongtrack = nullptr;
 		}
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
@@ -600,7 +600,7 @@ int main(int argc, char **argv) {
 
 		/* set up output file name if needed */
 		if (error == MB_ERROR_NO_ERROR) {
-			if (output_file_set && ombio_ptr == NULL) {
+			if (output_file_set && ombio_ptr == nullptr) {
 				/* set flag to open new output file */
 				new_output_file = true;
 			}
@@ -749,7 +749,7 @@ int main(int argc, char **argv) {
 			     (extract_sshigh && kind == MB_DATA_SIDESCAN3))) {
 
 				/* close any old output file unless a single file has been specified */
-				if (ombio_ptr != NULL) {
+				if (ombio_ptr != nullptr) {
 					/* close the swath file */
 					status = mb_close(verbose, &ombio_ptr, &error);
 
@@ -2238,7 +2238,7 @@ int main(int argc, char **argv) {
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* close output file if still open */
-	if (ombio_ptr != NULL) {
+	if (ombio_ptr != nullptr) {
 		/* close the swath file */
 		status = mb_close(verbose, &ombio_ptr, &error);
 

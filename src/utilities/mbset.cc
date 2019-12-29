@@ -65,7 +65,7 @@ static const char usage_message[] = "mbset -Iinfile -PPARAMETER:value [-E -L -N 
 
 int main(int argc, char **argv) {
 	int pargc = 0;
-	char **pargv = NULL;
+	char **pargv = nullptr;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
