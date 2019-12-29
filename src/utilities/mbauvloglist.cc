@@ -503,7 +503,7 @@ int main(int argc, char **argv) {
 			result = (char *)strrchr(buffer, ',');
 			strcpy(fields[nfields].units, &(result[1]));
 
-			fields[nfields].index = recordsize;
+			fields[nfields].index = static_cast<index_t>(recordsize);
 			if (strcmp(type, "double") == 0) {
 				fields[nfields].type = TYPE_DOUBLE;
 				fields[nfields].size = 8;
@@ -846,7 +846,7 @@ int main(int argc, char **argv) {
 
 		/* loop over the printfields */
 		for (int i = 0; i < nprintfields; i++) {
-			const index_t index = printfields[i].index;
+			const index_t index = static_cast<index_t>(printfields[i].index);
 			// TODO(schwehr): Make this a switch.
 			if (index == INDEX_ZERO) {
 				double dvalue = 0.0;

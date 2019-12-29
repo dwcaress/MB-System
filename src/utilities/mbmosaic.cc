@@ -66,6 +66,7 @@ typedef enum {
 } datatype_t ;
 
 /* prioritization mode */
+// TODO(schwehr): DANGER!  This appears to be a bitmask, not an enum.
 typedef enum {
     MBMOSAIC_PRIORITY_NONE = 0,
     MBMOSAIC_PRIORITY_ANGLE = 1,
@@ -1243,14 +1244,21 @@ int main(int argc, char **argv) {
 				if (n == 3 && k_mode == 1) {
 					priority_heading = t1;
 					priority_heading_factor = t2;
-					if ((priority_mode & MBMOSAIC_PRIORITY_HEADING) == 0)
-						priority_mode += MBMOSAIC_PRIORITY_HEADING;
+					if ((priority_mode & MBMOSAIC_PRIORITY_HEADING) == 0) {
+						priority_mode = static_cast<priority_t>(
+							static_cast<int>(priority_mode) +
+							static_cast<int>(MBMOSAIC_PRIORITY_HEADING));
+
+					}
 				}
 				else if (n >= 2) {
 					priority_azimuth = t1;
 					priority_azimuth_factor = t2;
-					if ((priority_mode & MBMOSAIC_PRIORITY_AZIMUTH) == 0)
-						priority_mode += MBMOSAIC_PRIORITY_AZIMUTH;
+					if ((priority_mode & MBMOSAIC_PRIORITY_AZIMUTH) == 0) {
+						priority_mode = static_cast<priority_t>(
+							static_cast<int>(priority_mode) +
+							static_cast<int>(MBMOSAIC_PRIORITY_AZIMUTH));
+					}
 				}
 				break;
 			}
@@ -1316,8 +1324,11 @@ int main(int argc, char **argv) {
 				else {
 					sscanf(optarg, "%1023s", pfile);
 				}
-				if ((priority_mode & MBMOSAIC_PRIORITY_ANGLE) == 0)
-					priority_mode += MBMOSAIC_PRIORITY_ANGLE;
+				if ((priority_mode & MBMOSAIC_PRIORITY_ANGLE) == 0) {
+					priority_mode = static_cast<priority_t>(
+						static_cast<int>(priority_mode) +
+						static_cast<int>(MBMOSAIC_PRIORITY_ANGLE));
+				}
 				break;
 			}
 			case 'Z':
@@ -3361,7 +3372,7 @@ int main(int argc, char **argv) {
 		ddy = (float)dy;
 		if (clipmode == MBMOSAIC_INTERP_ALL)
 			clip = MAX(gxdim, gydim);
-		mb_zgrid2(sgrid, &gxdim, &gydim, &xmin, &ymin, &ddx, &ddy, sdata, &ndata, work1, work2, work3, &cay, &clip);
+		mb_zgrid2(sgrid, &gxdim, &gydim, &xmin, &ymin, &ddx, &ddy, sdata, &ndata, static_cast<float *>(work1), static_cast<int *>(work2), static_cast<int *>(work3), &cay, &clip);
 
 		if (clipmode == MBMOSAIC_INTERP_GAP)
 			fprintf(outfp, "Applying spline interpolation to fill gaps of %d cells or less...\n", clip);
