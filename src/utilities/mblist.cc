@@ -1049,7 +1049,7 @@ int main(int argc, char **argv) {
   int error = MB_ERROR_NO_ERROR;
 
   if (format == 0)
-    mb_get_format(verbose, read_file, NULL, &format, &error);
+    mb_get_format(verbose, read_file, nullptr, &format, &error);
 
   double bathy_scale;
   /* set bathymetry scaling */
@@ -1115,8 +1115,8 @@ int main(int argc, char **argv) {
   bool special_character = false;
 
   /* MBIO read values */
-  void *mbio_ptr = NULL;
-  void *store_ptr = NULL;
+  void *mbio_ptr = nullptr;
+  void *store_ptr = nullptr;
   int kind;
   int time_i[7];
   double time_d;
@@ -1131,15 +1131,15 @@ int main(int argc, char **argv) {
   double roll;
   double pitch;
   double heave;
-  char *beamflag = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  int *detect = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
+  char *beamflag = nullptr;
+  double *bath = nullptr;
+  double *bathacrosstrack = nullptr;
+  double *bathalongtrack = nullptr;
+  int *detect = nullptr;
+  double *amp = nullptr;
+  double *ss = nullptr;
+  double *ssacrosstrack = nullptr;
+  double *ssalongtrack = nullptr;
   char comment[MB_COMMENT_MAXLINE];
   int icomment = 0;
   unsigned int pingnumber;
@@ -1157,11 +1157,11 @@ int main(int argc, char **argv) {
   int ns;
   double angle, depth, slope;
   int ndepths;
-  double *depths = NULL;
-  double *depthacrosstrack = NULL;
+  double *depths = nullptr;
+  double *depthacrosstrack = nullptr;
   int nslopes;
-  double *slopes = NULL;
-  double *slopeacrosstrack = NULL;
+  double *slopes = nullptr;
+  double *slopeacrosstrack = nullptr;
 
   /* course calculation variables */
   double course, course_old;
@@ -1183,7 +1183,7 @@ int main(int argc, char **argv) {
   /* projected coordinate system */
   char projection_id[MB_PATH_MAXLINE];
   int proj_status;
-  void *pjptr = NULL;
+  void *pjptr = nullptr;
   double reference_lon, reference_lat;
   int utm_zone;
   double naveasting, navnorthing, deasting, dnorthing;
@@ -1210,12 +1210,12 @@ int main(int argc, char **argv) {
   int tvg_crossover;
   int nbeams_ss;
   int npixels;
-  int *beam_samples = NULL;
-  int *range = NULL;
-  int *start_sample = NULL;
-  double *depression = NULL;
-  double *bs = NULL;
-  double *ss_pixels = NULL;
+  int *beam_samples = nullptr;
+  int *range = nullptr;
+  int *start_sample = nullptr;
+  double *depression = nullptr;
+  double *bs = nullptr;
+  double *ss_pixels = nullptr;
   double transmit_gain;
   double pulse_length;
   double receive_gain;
@@ -1243,7 +1243,7 @@ int main(int argc, char **argv) {
       outfile = stdout;
     else
       outfile = fopen(output_file, "w");
-    if (NULL == outfile) {
+    if (nullptr == outfile) {
       fprintf(stderr, "Could not open file: %s\n", output_file);
       exit(1);
     }
@@ -1268,7 +1268,7 @@ int main(int argc, char **argv) {
       if (!netcdf_cdl)
         strcat(output_file_temp, ".cdl");
       outfile = fopen(output_file_temp, "w+");
-      if (outfile == NULL) {
+      if (outfile == nullptr) {
         fprintf(stderr, "Unable to open file: %s\n", output_file_temp);
         exit(1);
       }
@@ -1315,10 +1315,10 @@ int main(int argc, char **argv) {
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
     char *user_ptr = (char *)getenv("USER");
-    if (user_ptr == NULL)
+    if (user_ptr == nullptr)
       user_ptr = (char *)getenv("LOGNAME");
     char user[128];
-    if (user_ptr != NULL)
+    if (user_ptr != nullptr)
       strcpy(user, user_ptr);
     else
       strcpy(user, "unknown");
@@ -1330,7 +1330,7 @@ int main(int argc, char **argv) {
     /* get temporary output file for each variable */
     for (int i = 0; i < n_list; i++) {
       output[i] = tmpfile();
-      if (output[i] == NULL) {
+      if (output[i] == nullptr) {
         fprintf(stderr, "Unable to open temp files\n");
         exit(1);
       }
@@ -2867,7 +2867,7 @@ int main(int argc, char **argv) {
       /* get projected navigation if needed */
       if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && use_projection) {
         /* set up projection if this is the first data */
-        if (pjptr == NULL) {
+        if (pjptr == nullptr) {
           /* Default projection is UTM */
           if (strlen(projection_pars) == 0)
             strcpy(projection_pars, "U");

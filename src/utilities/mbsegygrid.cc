@@ -137,10 +137,10 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 	/* read sinf file if possible */
 	sprintf(sinffile, "%s.sinf", segyfile);
 	FILE *sfp = fopen(sinffile, "r");
-	if (sfp != NULL) {
+	if (sfp != nullptr) {
 		/* read the sinf file */
 		char line[MB_PATH_MAXLINE] = "";
-		while (fgets(line, MB_PATH_MAXLINE, sfp) != NULL) {
+		while (fgets(line, MB_PATH_MAXLINE, sfp) != nullptr) {
 			if (strncmp(line, "  Trace length (sec):", 21) == 0) {
 				sscanf(line, "  Trace length (sec):%lf", timesweep);
 			}
@@ -609,9 +609,9 @@ int main(int argc, char **argv) {
 	// TODO(schwehr): What about MBSEGYGRID_WINDOW_SEAFLOOR?
 	// TODO(schwehr): What about MBSEGYGRID_WINDOW_DEPTH?
 
-	float *grid = NULL;
+	float *grid = nullptr;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridxy * sizeof(float), (void **)&grid, &error);
-	float *gridweight = NULL;
+	float *gridweight = nullptr;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridxy * sizeof(float), (void **)&gridweight, &error);
 
 	// TODO(schwehr): When is verbose ever negative?
@@ -665,8 +665,8 @@ int main(int argc, char **argv) {
 	if (verbose > 0)
 		fprintf(outfp, "\n");
 
-	float *worktrace = NULL;
-	float *filtertrace = NULL;
+	float *worktrace = nullptr;
+	float *filtertrace = nullptr;
 	double gridmintot = 0.0;
 	double gridmaxtot = 0.0;
 
@@ -692,7 +692,7 @@ int main(int argc, char **argv) {
 		int nread = 0;
 		while (error <= MB_ERROR_NO_ERROR) {
 			struct mb_segytraceheader_struct traceheader;
-			float *trace = NULL;
+			float *trace = nullptr;
 
 			error = MB_ERROR_NO_ERROR;
 
@@ -893,13 +893,13 @@ int main(int argc, char **argv) {
 
 					/* apply filtering if desired */
 					if (filtermode != MBSEGYGRID_FILTER_OFF) {
-						if (worktrace == NULL || traceheader.nsamps > worktrace_alloc) {
+						if (worktrace == nullptr || traceheader.nsamps > worktrace_alloc) {
 							status = mb_reallocd(verbose, __FILE__, __LINE__, traceheader.nsamps * sizeof(float),
 							                     (void **)&worktrace, &error);
 							worktrace_alloc = traceheader.nsamps;
 						}
 						const int nfilter = 2 * ((int)(0.5 * filterwindow / sampleinterval)) + 1;
-						if (filtertrace == NULL || nfilter > filtertrace_alloc) {
+						if (filtertrace == nullptr || nfilter > filtertrace_alloc) {
 							status =
 							    mb_reallocd(verbose, __FILE__, __LINE__, nfilter * sizeof(float), (void **)&filtertrace, &error);
 							filtertrace_alloc = nfilter;
@@ -929,7 +929,7 @@ int main(int argc, char **argv) {
 
 					/* apply agc if desired */
 					if (agcmode && agcwindow > 0.0) {
-						if (worktrace == NULL || traceheader.nsamps > worktrace_alloc) {
+						if (worktrace == nullptr || traceheader.nsamps > worktrace_alloc) {
 							status = mb_reallocd(verbose, __FILE__, __LINE__, traceheader.nsamps * sizeof(float),
 							                     (void **)&worktrace, &error);
 							worktrace_alloc = traceheader.nsamps;
@@ -1057,9 +1057,9 @@ int main(int argc, char **argv) {
 	status &= mb_segy_close(verbose, &mbsegyioptr, &error);
 
 	/* deallocate memory for grid array */
-	if (worktrace != NULL)
+	if (worktrace != nullptr)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&worktrace, &error);
-	if (filtertrace != NULL)
+	if (filtertrace != nullptr)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&filtertrace, &error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&grid, &error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&gridweight, &error);

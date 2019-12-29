@@ -177,10 +177,10 @@ int main(int argc, char **argv) {
 	const double lagstep = (lagend - lagstart) / (nlag - 1);
 
 	// TODO(schwehr): Why realloc?
-	double *rr = NULL;  // cross correlation parameters
+	double *rr = nullptr;  // cross correlation parameters
 	int status = mb_reallocd(verbose, __FILE__, __LINE__, nlag * sizeof(double), (void **)&rr, &error);
 
-	int *timelaghistogram = NULL;
+	int *timelaghistogram = nullptr;
 	status &= mb_reallocd(verbose, __FILE__, __LINE__, nlag * sizeof(int), (void **)&timelaghistogram, &error);
 
 	if (verbose > 0) {
@@ -204,8 +204,8 @@ int main(int argc, char **argv) {
 
 	int nroll = 0;
 	int nroll_alloc = 0;
-	double *roll_time_d = NULL;
-	double *roll_roll = NULL;
+	double *roll_time_d = nullptr;
+	double *roll_roll = nullptr;
 	FILE *fp = popen(cmdfile, "r");
 	double time_d;
 	double roll;
@@ -227,10 +227,10 @@ int main(int argc, char **argv) {
 
 	/* open total cross correlation file */
 	char xcorfiletot[MB_PATH_MAXLINE];
-	FILE *fpt = NULL;
+	FILE *fpt = nullptr;
 	if (read_datalist) {
 		sprintf(xcorfiletot, "%s_xcorr.txt", outroot);
-		if ((fpt = fopen(xcorfiletot, "w")) == NULL) {
+		if ((fpt = fopen(xcorfiletot, "w")) == nullptr) {
 			fprintf(stderr, "\nUnable to open cross correlation output: %s\n", xcorfiletot);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -241,7 +241,7 @@ int main(int argc, char **argv) {
 	char estimatefile[MB_PATH_MAXLINE];
 	sprintf(estimatefile, "%s_timelagest.txt", outroot);
 	FILE *fpe = fopen(estimatefile, "w");
-	if (fpe == NULL) {
+	if (fpe == nullptr) {
 		fprintf(stderr, "\nUnable to open estimate output: %s\n", estimatefile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);
@@ -251,7 +251,7 @@ int main(int argc, char **argv) {
 	char histfile[MB_PATH_MAXLINE];
 	sprintf(histfile, "%s_timelaghist.txt", outroot);
 	FILE *fph = fopen(histfile, "w");
-	if (fph == NULL) {
+	if (fph == nullptr) {
 		fprintf(stderr, "\nUnable to open histogram output: %s\n", histfile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);
@@ -261,7 +261,7 @@ int main(int argc, char **argv) {
 	char modelfile[MB_PATH_MAXLINE];
 	sprintf(modelfile, "%s_timelagmodel.txt", outroot);
 	FILE *fpm = fopen(modelfile, "w");
-	if (fpm == NULL) {
+	if (fpm == nullptr) {
 		fprintf(stderr, "\nUnable to open time lag model output: %s\n", modelfile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);
@@ -289,9 +289,9 @@ int main(int argc, char **argv) {
 	/* slope data */
 	int nslopetot = 0;
 	int nslope_alloc = 0;
-	double *slope_time_d = NULL;
-	double *slope_slope = NULL;
-	double *slope_roll = NULL;
+	double *slope_time_d = nullptr;
+	double *slope_slope = nullptr;
+	double *slope_roll = nullptr;
 
 	double slope;
 	double timelag;
@@ -356,7 +356,7 @@ int main(int argc, char **argv) {
 		char fhistfile[MB_PATH_MAXLINE];
 		sprintf(fhistfile, "%s_timelaghist.txt", swathfile);
 		FILE *fpf = fopen(fhistfile, "w");
-		if (fpf == NULL) {
+		if (fpf == nullptr) {
 			fprintf(stderr, "\nUnable to open histogram output: %s\n", fhistfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -366,7 +366,7 @@ int main(int argc, char **argv) {
 		char xcorfile[MB_PATH_MAXLINE];
 		sprintf(xcorfile, "%s_xcorr.txt", swathfile);
 		FILE *fpx = fopen(xcorfile, "w");
-		if (fpx == NULL) {
+		if (fpx == nullptr) {
 			fprintf(stderr, "\nUnable to open cross correlation output: %s\n", xcorfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -405,7 +405,7 @@ int main(int argc, char **argv) {
 
 				/* calculate cross correlation for the specified time lags */
 				fprintf(fpx, ">\n");
-				if (fpt != NULL)
+				if (fpt != nullptr)
 					fprintf(fpt, ">\n");
 				for (int k = 0; k < nlag; k++) {
 					timelag = lagstart + k * lagstep;
@@ -451,7 +451,7 @@ int main(int argc, char **argv) {
 
 					/* output results */
 					fprintf(fpx, "%5.3f %5.3f \n", timelag, r);
-					if (fpt != NULL)
+					if (fpt != nullptr)
 						fprintf(fpt, "%5.3f %5.3f \n", timelag, r);
 				}
 

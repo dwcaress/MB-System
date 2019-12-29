@@ -268,8 +268,8 @@ int main(int argc, char **argv) {
 		dy = (areabounds[3] - areabounds[2]) / (ny - 1);
 	}
 
-	int *gsndgnum = NULL;
-	double *gsndgsqsum = NULL;
+	int *gsndgnum = nullptr;
+	double *gsndgsqsum = nullptr;
 
 	/* allocate grid arrays */
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, nx * ny * sizeof(int *), (void **)&gsndgnum, &error);
@@ -278,7 +278,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
-		char *message = NULL;
+		char *message = nullptr;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -309,7 +309,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
@@ -335,8 +335,8 @@ int main(int argc, char **argv) {
 	}
 
 	/* MBIO read control parameters */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
+	void *mbio_ptr = nullptr;
+	void *store_ptr = nullptr;
 	int kind;
 	char swathfileread[MB_PATH_MAXLINE];
 	int variable_beams;
@@ -381,7 +381,7 @@ int main(int argc, char **argv) {
 	/* sounding atorage values and arrays */
 	int nfile = 0;
 	int nfile_alloc = 0;
-	struct mbrphsbias_file_struct *files = NULL;
+	struct mbrphsbias_file_struct *files = nullptr;
 
 	/* counting parameters */
 	int pings_tot = 0;
@@ -399,7 +399,7 @@ int main(int argc, char **argv) {
 	while (read_data) {
 		/* check format and get format flags */
 		if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n", format,
 			        message);
@@ -416,7 +416,7 @@ int main(int argc, char **argv) {
 		if (mb_read_init(verbose, swathfileread, formatread, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 		                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) !=
 		    MB_SUCCESS) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swathfileread);
@@ -430,20 +430,20 @@ int main(int argc, char **argv) {
 		}
 
 		/* allocate memory for data arrays */
-		beamflag = NULL;
-		bath = NULL;
-		amp = NULL;
-		bathacrosstrack = NULL;
-		bathalongtrack = NULL;
-		ss = NULL;
-		ssacrosstrack = NULL;
-		ssalongtrack = NULL;
-		ttimes = NULL;
-		angles = NULL;
-		angles_forward = NULL;
-		angles_null = NULL;
-		bheave = NULL;
-		alongtrack_offset = NULL;
+		beamflag = nullptr;
+		bath = nullptr;
+		amp = nullptr;
+		bathacrosstrack = nullptr;
+		bathalongtrack = nullptr;
+		ss = nullptr;
+		ssacrosstrack = nullptr;
+		ssalongtrack = nullptr;
+		ttimes = nullptr;
+		angles = nullptr;
+		angles_forward = nullptr;
+		angles_null = nullptr;
+		bheave = nullptr;
+		alongtrack_offset = nullptr;
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
@@ -479,7 +479,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -494,7 +494,7 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
-				char *message = NULL;
+				char *message = nullptr;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -513,11 +513,11 @@ int main(int argc, char **argv) {
 		file->num_beams_flagged = 0;
 		file->num_beams_null = 0;
 		file->num_pings_alloc = PINGALLOCNUM;
-		file->pings = NULL;
+		file->pings = nullptr;
 		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, file->num_pings_alloc * sizeof(struct mbrphsbias_ping_struct),
 		                    (void **)&(file->pings), &error);
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -555,7 +555,7 @@ int main(int argc, char **argv) {
 					    mb_reallocd(verbose, __FILE__, __LINE__, file->num_pings_alloc * sizeof(struct mbrphsbias_ping_struct),
 					                (void **)&(file->pings), &error);
 					if (error != MB_ERROR_NO_ERROR) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -591,7 +591,7 @@ int main(int argc, char **argv) {
 					/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
 					                    (void **)&(ping->alongtrack_offset), &error);
 				if (error != MB_ERROR_NO_ERROR) {
-					char *message = NULL;
+					char *message = nullptr;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);

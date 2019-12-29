@@ -65,19 +65,19 @@ int main(int argc, char **argv) {
 	/* process argument list */
 	{
 		const struct option options[] =
-			{{"verbose", no_argument, NULL, 0},
-	                {"help", no_argument, NULL, 0},
-	                {"prefix", no_argument, NULL, 0},
-	                {"cflags", no_argument, NULL, 0},
-	                {"libs", no_argument, NULL, 0},
-	                {"version", no_argument, NULL, 0},
-	                {"version-id", no_argument, NULL, 0},
-	                {"version-major", no_argument, NULL, 0},
-	                {"version-minor", no_argument, NULL, 0},
-	                {"version-archive", no_argument, NULL, 0},
-	                {"levitus", no_argument, NULL, 0},
-	                {"otps", no_argument, NULL, 0},
-	                {NULL, 0, NULL, 0}};
+			{{"verbose", no_argument, nullptr, 0},
+	                {"help", no_argument, nullptr, 0},
+	                {"prefix", no_argument, nullptr, 0},
+	                {"cflags", no_argument, nullptr, 0},
+	                {"libs", no_argument, nullptr, 0},
+	                {"version", no_argument, nullptr, 0},
+	                {"version-id", no_argument, nullptr, 0},
+	                {"version-major", no_argument, nullptr, 0},
+	                {"version-minor", no_argument, nullptr, 0},
+	                {"version-archive", no_argument, nullptr, 0},
+	                {"levitus", no_argument, nullptr, 0},
+	                {"otps", no_argument, nullptr, 0},
+	                {nullptr, 0, nullptr, 0}};
 
 		bool errflg = false;
 		int c;

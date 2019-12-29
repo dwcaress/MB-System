@@ -79,8 +79,8 @@ char *GMT_runtime_bindir_win32(char *result) {
 	TCHAR path[PATH_MAX + 1];
 
 	/* Get absolute path of executable */
-	if (GetModuleFileName(NULL, path, PATH_MAX) == PATH_MAX)
-		return NULL;  /* Path too long */
+	if (GetModuleFileName(nullptr, path, PATH_MAX) == PATH_MAX)
+		return nullptr;  /* Path too long */
 
 /* Convert to cstring */
 #ifdef _UNICODE
@@ -129,8 +129,8 @@ int main(int argc, char **argv) {
 			case 'r':
 			{
 				const char *lonptr = strtok(optarg, "/");
-				const char *latptr = strtok(NULL, "/");
-				if (lonptr != NULL && latptr != NULL) {
+				const char *latptr = strtok(nullptr, "/");
+				if (lonptr != nullptr && latptr != nullptr) {
 					longitude = mb_ddmmss_to_degree(lonptr);
 					latitude = mb_ddmmss_to_degree(latptr);
 				}
@@ -190,7 +190,7 @@ int main(int argc, char **argv) {
 	}
 
 	FILE *ifp = fopen(levitusfile, "rb");
-	if (ifp == NULL) {
+	if (ifp == nullptr) {
 		fprintf(stderr, "\nUnable to Open Levitus database file <%s> for reading\n", levitusfile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);
@@ -307,7 +307,7 @@ int main(int argc, char **argv) {
 	}
 
 	FILE *ofp = fopen(ofile, "w");
-	if (ofp == NULL) {
+	if (ofp == nullptr) {
 		fprintf(stderr, "\nUnable to Open output file <%s> for writing\n", ofile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);
@@ -321,10 +321,10 @@ int main(int argc, char **argv) {
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
 		const char *user_ptr = getenv("USER");
-		if (user_ptr == NULL)
+		if (user_ptr == nullptr)
 			user_ptr = getenv("LOGNAME");
 		char user[128];
-		if (user_ptr != NULL)
+		if (user_ptr != nullptr)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");

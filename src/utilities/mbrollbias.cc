@@ -369,14 +369,14 @@ int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
 	if (format == 0)
-		mb_get_format(verbose, ifile, NULL, &format, &error);
+		mb_get_format(verbose, ifile, nullptr, &format, &error);
 
 	double btime_d;
 	double etime_d;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
-	void *mbio_ptr = NULL;
+	void *mbio_ptr = nullptr;
 
 	/* mbio read values */
 	int rpings;
@@ -390,22 +390,22 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathlon = NULL;
-	double *bathlat = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *sslon = NULL;
-	double *sslat = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathlon = nullptr;
+	double *bathlat = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *sslon = nullptr;
+	double *sslat = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* grid variables */
-	int *icount = NULL;
-	int *jcount = NULL;
-	struct bathptr *idata = NULL;
-	struct bathptr *jdata = NULL;
-	struct bath *zone = NULL;
+	int *icount = nullptr;
+	int *jcount = nullptr;
+	struct bathptr *idata = nullptr;
+	struct bathptr *jdata = nullptr;
+	struct bath *zone = nullptr;
 	int ndatafile;
 	double iaa, ibb, icc, ihh;
 	double jaa, jbb, jcc, jhh;
@@ -659,8 +659,8 @@ int main(int argc, char **argv) {
 	for (int i = 0; i < xdim; i++)
 		for (int j = 0; j < ydim; j++) {
 			const int k = i * ydim + j;
-			idata[k].ptr = NULL;
-			jdata[k].ptr = NULL;
+			idata[k].ptr = nullptr;
+			jdata[k].ptr = nullptr;
 			if (icount[k] > 0) {
 				status =
 				    mb_mallocd(verbose, __FILE__, __LINE__, icount[k] * sizeof(struct bath), (void **)&(idata[k].ptr), &error);

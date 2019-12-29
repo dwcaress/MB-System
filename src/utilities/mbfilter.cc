@@ -588,7 +588,7 @@ int mbcopy_any_to_mbldeoih(int verbose, int system, int kind, int *time_i, doubl
 	int status = MB_SUCCESS;
 
 	/* copy the data  */
-	if (ostore != NULL) {
+	if (ostore != nullptr) {
 		/* set beam widths */
 		ostore->beam_xwidth = beamwidth_xtrack;
 		ostore->beam_lwidth = beamwidth_ltrack;
@@ -888,7 +888,7 @@ int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* output some information */
 	if (verbose > 0) {
@@ -971,11 +971,11 @@ int main(int argc, char **argv) {
 	int obeams_bath;
 	int obeams_amp;
 	int opixels_ss;
-	void *imbio_ptr = NULL;
+	void *imbio_ptr = nullptr;
 
 	/* MBIO write control parameters */
 	char ofile[MB_PATH_MAXLINE];
-	void *ombio_ptr = NULL;
+	void *ombio_ptr = nullptr;
 
 	/* mbio read and write values */
 	void *store_ptr;
@@ -1030,20 +1030,20 @@ int main(int argc, char **argv) {
 
 		/* allocate memory for data arrays */
 		for (int i = 0; i < n_buffer_max; i++) {
-			ping[i].beamflag = NULL;
-			ping[i].bath = NULL;
-			ping[i].amp = NULL;
-			ping[i].bathacrosstrack = NULL;
-			ping[i].bathalongtrack = NULL;
-			ping[i].pixelflag = NULL;
-			ping[i].ss = NULL;
-			ping[i].ssacrosstrack = NULL;
-			ping[i].ssalongtrack = NULL;
-			ping[i].dataprocess = NULL;
-			ping[i].datasave = NULL;
-			ping[i].data_i_ptr = NULL;
-			ping[i].data_f_ptr = NULL;
-			ping[i].flag_ptr = NULL;
+			ping[i].beamflag = nullptr;
+			ping[i].bath = nullptr;
+			ping[i].amp = nullptr;
+			ping[i].bathacrosstrack = nullptr;
+			ping[i].bathalongtrack = nullptr;
+			ping[i].pixelflag = nullptr;
+			ping[i].ss = nullptr;
+			ping[i].ssacrosstrack = nullptr;
+			ping[i].ssalongtrack = nullptr;
+			ping[i].dataprocess = nullptr;
+			ping[i].datasave = nullptr;
+			ping[i].data_i_ptr = nullptr;
+			ping[i].data_f_ptr = nullptr;
+			ping[i].flag_ptr = nullptr;
 			if (error == MB_ERROR_NO_ERROR)
 				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&ping[i].beamflag,
 				                           &error);
@@ -1136,10 +1136,10 @@ int main(int argc, char **argv) {
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
 		char *user_ptr = getenv("USER");
-		if (user_ptr == NULL)
+		if (user_ptr == nullptr)
 			user_ptr = getenv("LOGNAME");
 		char user[128];
-		if (user_ptr != NULL)
+		if (user_ptr != nullptr)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");

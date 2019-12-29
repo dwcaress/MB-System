@@ -70,7 +70,7 @@ int GetNumRecords(FILE *fp) {
   int nrecord = 0;
 
   char buffer[MB_PATH_MAXLINE];
-  char *result = NULL;
+  char *result = nullptr;
   while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer)
     if (buffer[0] != '#' && strlen(buffer) > 5)
       nrecord++;
@@ -108,20 +108,20 @@ int main(int argc, char **argv) {
 
   {
     static struct option options[] = {
-      {"help", no_argument, NULL, 0},
-      {"input", required_argument, NULL, 0},
-      {"input-nav-file", required_argument, NULL, 0},
-      {"input-ctd-file", required_argument, NULL, 0},
-      {"input-dvl-file", required_argument, NULL, 0},
-      {"input-rov-file", required_argument, NULL, 0},
-      {"interpolate-position", no_argument, NULL, 0},
-      {"interval", required_argument, NULL, 0},
-      {"output", required_argument, NULL, 0},
-      {"rov-dive-start", required_argument, NULL, 0},
-      {"rov-dive-end", required_argument, NULL, 0},
-      {"utm-zone", required_argument, NULL, 0},
-      {"verbose", no_argument, NULL, 0},
-      {NULL, 0, NULL, 0}};
+      {"help", no_argument, nullptr, 0},
+      {"input", required_argument, nullptr, 0},
+      {"input-nav-file", required_argument, nullptr, 0},
+      {"input-ctd-file", required_argument, nullptr, 0},
+      {"input-dvl-file", required_argument, nullptr, 0},
+      {"input-rov-file", required_argument, nullptr, 0},
+      {"interpolate-position", no_argument, nullptr, 0},
+      {"interval", required_argument, nullptr, 0},
+      {"output", required_argument, nullptr, 0},
+      {"rov-dive-start", required_argument, nullptr, 0},
+      {"rov-dive-end", required_argument, nullptr, 0},
+      {"utm-zone", required_argument, nullptr, 0},
+      {"verbose", no_argument, nullptr, 0},
+      {nullptr, 0, nullptr, 0}};
 
     int option_index;
     bool errflg = false;
@@ -261,10 +261,10 @@ int main(int argc, char **argv) {
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
     char *user_ptr = getenv("USER");
-    if (user_ptr == NULL)
+    if (user_ptr == nullptr)
       user_ptr = getenv("LOGNAME");
     char user[128];
-    if (user_ptr != NULL)
+    if (user_ptr != nullptr)
       strcpy(user, user_ptr);
     else
       strcpy(user, "unknown");
@@ -302,9 +302,9 @@ int main(int argc, char **argv) {
   /*-------------------------------------------------------------------*/
   /* load input nav data */
 
-  double *nav_time_d = NULL;
-  double *nav_lon = NULL;
-  double *nav_lat = NULL;
+  double *nav_time_d = nullptr;
+  double *nav_lon = nullptr;
+  double *nav_lat = nullptr;
   int num_nav = 0;
 
   double time_d;
@@ -318,7 +318,7 @@ int main(int argc, char **argv) {
 
   /* count the records */
   FILE *fp = fopen(input_nav_file, "r");
-  if (fp != NULL) {
+  if (fp != nullptr) {
     const int num_nav_alloc = GetNumRecords(fp);
     if (num_nav_alloc) {
       const size_t size = num_nav_alloc * sizeof(double);
@@ -333,7 +333,7 @@ int main(int argc, char **argv) {
     if (status == MB_SUCCESS) {
       /* loop over reading the records */
       char buffer[MB_PATH_MAXLINE];
-      char *result = NULL;
+      char *result = nullptr;
       while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer) {
         double rawlat;
         double rawlon;
@@ -395,11 +395,11 @@ int main(int argc, char **argv) {
   /* load input ctd data */
 
   int num_ctd = 0;
-  double *ctd_time_d = NULL;
-  double *ctd_depth = NULL;
+  double *ctd_time_d = nullptr;
+  double *ctd_depth = nullptr;
 
   error = MB_ERROR_NO_ERROR;
-  if ((fp = fopen(input_ctd_file, "r")) != NULL) {
+  if ((fp = fopen(input_ctd_file, "r")) != nullptr) {
     const int num_ctd_alloc = GetNumRecords(fp);
     if (num_ctd_alloc) {
       const size_t size = num_ctd_alloc * sizeof(double);
@@ -411,7 +411,7 @@ int main(int argc, char **argv) {
     /* loop over reading the records */
     if (status == MB_SUCCESS) {
       char buffer[MB_PATH_MAXLINE];
-      char *result = NULL;
+      char *result = nullptr;
       while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer) {
         double ctd_C;
         double ctd_D;
@@ -454,14 +454,14 @@ int main(int argc, char **argv) {
   /* load input rov data */
 
   int num_rov = 0;
-  double *rov_time_d = NULL;
-  double *rov_heading = NULL;
-  double *rov_roll = NULL;
-  double *rov_pitch = NULL;
+  double *rov_time_d = nullptr;
+  double *rov_heading = nullptr;
+  double *rov_roll = nullptr;
+  double *rov_pitch = nullptr;
 
   /* count the records */
   error = MB_ERROR_NO_ERROR;
-  if ((fp = fopen(input_rov_file, "r")) != NULL) {
+  if ((fp = fopen(input_rov_file, "r")) != nullptr) {
     const int num_rov_alloc = GetNumRecords(fp);
     if (num_rov_alloc) {
       const size_t size = num_rov_alloc * sizeof(double);
@@ -478,7 +478,7 @@ int main(int argc, char **argv) {
     if (status == MB_SUCCESS) {
       /* loop over reading the records */
       char buffer[MB_PATH_MAXLINE];
-      char *result = NULL;
+      char *result = nullptr;
       while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer) {
         double rov_x;
         double rov_y;
@@ -525,20 +525,20 @@ int main(int argc, char **argv) {
   }
 
   int num_dvl = 0;
-  double *dvl_time_d = NULL;
-  double *dvl_altitude = NULL;
-  double *dvl_stime = NULL;
-  double *dvl_vx = NULL;
-  double *dvl_vy = NULL;
-  double *dvl_vz = NULL;
-  double *dvl_status = NULL;
+  double *dvl_time_d = nullptr;
+  double *dvl_altitude = nullptr;
+  double *dvl_stime = nullptr;
+  double *dvl_vx = nullptr;
+  double *dvl_vy = nullptr;
+  double *dvl_vz = nullptr;
+  double *dvl_status = nullptr;
 
   /*-------------------------------------------------------------------*/
   /* load input dvl data */
 
   /* count the records */
   error = MB_ERROR_NO_ERROR;
-  if ((fp = fopen(input_dvl_file, "r")) != NULL) {
+  if ((fp = fopen(input_dvl_file, "r")) != nullptr) {
     const int num_dvl_alloc = GetNumRecords(fp);
     if (status == MB_SUCCESS && num_dvl_alloc) {
       const size_t size = num_dvl_alloc * sizeof(double);
@@ -561,7 +561,7 @@ int main(int argc, char **argv) {
     if (status == MB_SUCCESS) {
       /* loop over reading the records - handle the different formats */
       char buffer[MB_PATH_MAXLINE];
-      char *result = NULL;
+      char *result = nullptr;
       while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer) {
         double dvl_Altitude;
         double dvl_Stime;
@@ -643,7 +643,7 @@ int main(int argc, char **argv) {
   int num_altitude_valid = 0;
 
   if (status == MB_SUCCESS && num_nav > 0 && num_rov > 0) {
-    if ((fp = fopen(output_file, "w")) == NULL) {
+    if ((fp = fopen(output_file, "w")) == nullptr) {
       error = MB_ERROR_OPEN_FAIL;
       status = MB_FAILURE;
     } else {
@@ -668,7 +668,7 @@ int main(int argc, char **argv) {
       int onav_time_i[7];
       int onav_time_j[5];
 
-      void *pjptr = NULL;
+      void *pjptr = nullptr;
       /* int proj_status = */ mb_proj_init(verbose, projection_id, &(pjptr), &error);
 
       /* loop over defined intervals (1 second by default) from start time to end time */

@@ -460,8 +460,8 @@ int main(int argc, char **argv) {
 	char dfile[MB_PATH_MAXLINE];
 	char amptablefile[MB_PATH_MAXLINE];
 	char sstablefile[MB_PATH_MAXLINE];
-	FILE *atfp = NULL;
-	FILE *stfp = NULL;
+	FILE *atfp = nullptr;
+	FILE *stfp = nullptr;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -470,7 +470,7 @@ int main(int argc, char **argv) {
 	struct mb_esf_struct esf;
 
 	/* MBIO read values */
-	void *mbio_ptr = NULL;
+	void *mbio_ptr = nullptr;
 	int kind;
 	int time_i[7];
 	double time_d;
@@ -481,42 +481,42 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* slope calculation variables */
 	int nsmooth = 5;
 	int ndepths;
-	double *depths = NULL;
-	double *depthsmooth = NULL;
-	double *depthacrosstrack = NULL;
+	double *depths = nullptr;
+	double *depthsmooth = nullptr;
+	double *depthacrosstrack = nullptr;
 	int nslopes;
-	double *slopes = NULL;
-	double *slopeacrosstrack = NULL;
+	double *slopes = nullptr;
+	double *slopeacrosstrack = nullptr;
 
 	/* angle function variables */
 	double dangle;
 	double angle_start;
 	int ntotavg = 0;
-	int *nmeanamp = NULL;
-	double *meanamp = NULL;
-	double *sigmaamp = NULL;
-	int *nmeanss = NULL;
-	double *meanss = NULL;
-	double *sigmass = NULL;
-	int *nmeantotamp = NULL;
-	double *meantotamp = NULL;
-	double *sigmatotamp = NULL;
-	int *nmeantotss = NULL;
-	double *meantotss = NULL;
-	double *sigmatotss = NULL;
+	int *nmeanamp = nullptr;
+	double *meanamp = nullptr;
+	double *sigmaamp = nullptr;
+	int *nmeanss = nullptr;
+	double *meanss = nullptr;
+	double *sigmass = nullptr;
+	int *nmeantotamp = nullptr;
+	double *meantotamp = nullptr;
+	double *sigmatotamp = nullptr;
+	int *nmeantotss = nullptr;
+	double *meantotss = nullptr;
+	double *sigmatotss = nullptr;
 	double time_d_totavg;
 	double altitude_totavg;
 	int amp_corr_type;
@@ -526,8 +526,8 @@ int main(int argc, char **argv) {
 	int ss_corr_type;
 
 	/* amp vs angle grid variables */
-	float *gridamphist = NULL;
-	float *gridsshist = NULL;
+	float *gridamphist = nullptr;
+	float *gridsshist = nullptr;
 	char gridfile[MB_PATH_MAXLINE];
 	char *xlabel = "Grazing Angle (degrees)";
 	char *ylabel = "Amplitude";
@@ -734,10 +734,10 @@ int main(int argc, char **argv) {
 
 	/* get topography grid if specified */
 	if (corr_topogrid) {
-		grid.data = NULL;
+		grid.data = nullptr;
 		status = mb_read_gmt_grd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue, &grid.nxy,
 		                         &grid.n_columns, &grid.n_rows, &grid.min, &grid.max, &grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
-		                         &grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
+		                         &grid.dx, &grid.dy, &grid.data, nullptr, nullptr, &error);
 		if (status == MB_FAILURE) {
 			fprintf(stderr, "\nUnable to read grd file: %s\n", grid.file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -815,7 +815,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
@@ -976,7 +976,7 @@ int main(int argc, char **argv) {
 			if (amplitude_on) {
 				strcpy(amptablefile, swathfile);
 				strcat(amptablefile, ".aga");
-				if ((atfp = fopen(amptablefile, "w")) == NULL) {
+				if ((atfp = fopen(amptablefile, "w")) == nullptr) {
 					char *message;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nUnable to open output table file %s\n", amptablefile);
@@ -987,7 +987,7 @@ int main(int argc, char **argv) {
 			if (sidescan_on) {
 				strcpy(sstablefile, swathfile);
 				strcat(sstablefile, ".sga");
-				if ((stfp = fopen(sstablefile, "w")) == NULL) {
+				if ((stfp = fopen(sstablefile, "w")) == nullptr) {
 					char *message;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nUnable to open output table file %s\n", sstablefile);
@@ -1009,10 +1009,10 @@ int main(int argc, char **argv) {
 				strcpy(date, ctime(&right_now));
 				date[strlen(date) - 1] = '\0';
 				const char *user_ptr = getenv("USER");
-				if (user_ptr  == NULL)
+				if (user_ptr  == nullptr)
 					user_ptr = getenv("LOGNAME");
 				char user[MB_PATH_MAXLINE];
-				if (user_ptr != NULL)
+				if (user_ptr != nullptr)
 					strcpy(user, user_ptr);
 				else
 					strcpy(user, "unknown");
@@ -1039,10 +1039,10 @@ int main(int argc, char **argv) {
 				strcpy(date, ctime(&right_now));
 				date[strlen(date) - 1] = '\0';
 				const char *user_ptr = getenv("USER");
-				if (user_ptr == NULL)
+				if (user_ptr == nullptr)
 					user_ptr = getenv("LOGNAME");
 				char user[MB_PATH_MAXLINE];
-				if (user_ptr != NULL)
+				if (user_ptr != nullptr)
 					strcpy(user, user_ptr);
 				else
 					strcpy(user, "unknown");
@@ -1128,7 +1128,7 @@ int main(int argc, char **argv) {
 			if (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP) {
 				/* if needed, attempt to get sidescan correction type */
 				if (ss_corr_type == MBP_SSCORR_UNKNOWN) {
-					status &= mb_sidescantype(verbose, mbio_ptr, NULL, &ss_type, &error);
+					status &= mb_sidescantype(verbose, mbio_ptr, nullptr, &ss_type, &error);
 					if (status == MB_SUCCESS) {
 						if (ss_type == MB_SIDESCAN_LINEAR)
 							ss_corr_type = MBP_SSCORR_DIVISION;
@@ -1415,7 +1415,7 @@ int main(int argc, char **argv) {
 		/* close the swath sonar file */
 		status &= mb_close(verbose, &mbio_ptr, &error);
 		/* Close ESF file if avialable and open */
-		if (esf.edit != NULL || esf.esffp != NULL)
+		if (esf.edit != nullptr || esf.esffp != nullptr)
 			mb_esf_close(verbose, &esf, &error);
 
 		if (!dump && amplitude_on)
@@ -1556,7 +1556,7 @@ int main(int argc, char **argv) {
 	if (!dump && amplitude_on) {
 		strcpy(amptablefile, read_file);
 		strcat(amptablefile, "_tot.aga");
-		if ((atfp = fopen(amptablefile, "w")) == NULL) {
+		if ((atfp = fopen(amptablefile, "w")) == nullptr) {
 			error = MB_ERROR_OPEN_FAIL;
 			char *message;
 			mb_error(verbose, error, &message);
@@ -1572,10 +1572,10 @@ int main(int argc, char **argv) {
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
 		const char *user_ptr = getenv("USER");
-		if (user_ptr == NULL)
+		if (user_ptr == nullptr)
 			user_ptr = getenv("LOGNAME");
 		char user[MB_PATH_MAXLINE];
-		if (user_ptr != NULL)
+		if (user_ptr != nullptr)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
@@ -1601,7 +1601,7 @@ int main(int argc, char **argv) {
 	if (!dump && sidescan_on) {
 		strcpy(sstablefile, read_file);
 		strcat(sstablefile, "_tot.sga");
-		if ((stfp = fopen(sstablefile, "w")) == NULL) {
+		if ((stfp = fopen(sstablefile, "w")) == nullptr) {
 			error = MB_ERROR_OPEN_FAIL;
 			char *message;
 			mb_error(verbose, error, &message);
@@ -1617,10 +1617,10 @@ int main(int argc, char **argv) {
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
 		const char *user_ptr = getenv("USER");
-		if (user_ptr == NULL)
+		if (user_ptr == nullptr)
 			user_ptr = getenv("LOGNAME");
 		char user[MB_PATH_MAXLINE];
-		if (user_ptr != NULL)
+		if (user_ptr != nullptr)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
@@ -1680,7 +1680,7 @@ int main(int argc, char **argv) {
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&gridsshist, &error);
 		}
 	}
-	if (grid.data != NULL) {
+	if (grid.data != nullptr) {
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&grid.data, &error);
 	}
 

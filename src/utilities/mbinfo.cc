@@ -276,7 +276,7 @@ int main(int argc, char **argv) {
 
 	int error = MB_ERROR_NO_ERROR;
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	double bathy_scale;
 	if (bathy_in_feet)
@@ -296,7 +296,7 @@ int main(int argc, char **argv) {
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 	    output if verbose > 1) */
-	FILE *output = NULL;
+	FILE *output = nullptr;
 
 	/* Open output file if requested */
 	if (output_usefile) {
@@ -315,7 +315,7 @@ int main(int argc, char **argv) {
 		default:
 			break;
 		}
-		if ((output = fopen(output_file, "w")) == NULL)
+		if ((output = fopen(output_file, "w")) == nullptr)
 			output = stream;
 	}
 	else {
@@ -364,14 +364,14 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathlon = NULL;
-	double *bathlat = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *sslon = NULL;
-	double *sslat = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathlon = nullptr;
+	double *bathlat = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *sslon = nullptr;
+	double *sslat = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 	int icomment = 0;
 
@@ -446,32 +446,32 @@ int main(int argc, char **argv) {
 	int nss;
 	double delta;
 	double a, b, dev, mean;
-	double *bathmean = NULL;
-	double *bathvar = NULL;
-	int *nbathvar = NULL;
-	double *ampmean = NULL;
-	double *ampvar = NULL;
-	int *nampvar = NULL;
-	double *ssmean = NULL;
-	double *ssvar = NULL;
-	int *nssvar = NULL;
+	double *bathmean = nullptr;
+	double *bathvar = nullptr;
+	int *nbathvar = nullptr;
+	double *ampmean = nullptr;
+	double *ampvar = nullptr;
+	int *nampvar = nullptr;
+	double *ssmean = nullptr;
+	double *ssvar = nullptr;
+	int *nssvar = nullptr;
 	int nbathtot_alloc = 0;
 	int namptot_alloc = 0;
 	int nsstot_alloc = 0;
-	double *bathmeantot = NULL;
-	double *bathvartot = NULL;
-	int *nbathvartot = NULL;
-	double *ampmeantot = NULL;
-	double *ampvartot = NULL;
-	int *nampvartot = NULL;
-	double *ssmeantot = NULL;
-	double *ssvartot = NULL;
-	int *nssvartot = NULL;
+	double *bathmeantot = nullptr;
+	double *bathvartot = nullptr;
+	int *nbathvartot = nullptr;
+	double *ampmeantot = nullptr;
+	double *ampvartot = nullptr;
+	int *nampvartot = nullptr;
+	double *ssmeantot = nullptr;
+	double *ssvartot = nullptr;
+	int *nssvartot = nullptr;
 
 	/* coverage mask variables */
 	double mask_dx = 0.0;
 	double mask_dy = 0.0;
-	int *mask = NULL;
+	int *mask = nullptr;
 
 	char *fileprint;
 	char string[500];
@@ -527,7 +527,7 @@ int main(int argc, char **argv) {
 		/* loop over all files to be read */
 		while (read_data) {
 
-			void *mbio_ptr = NULL;
+			void *mbio_ptr = nullptr;
 			/* initialize reading the swath file */
 			if (mb_read_init(verbose, file, format, pings_get, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 			                           &mbio_ptr, &btime_d, &etime_d, &beams_bath_alloc, &beams_amp_alloc, &pixels_ss_alloc,
@@ -677,7 +677,7 @@ int main(int argc, char **argv) {
 
 			/* printf out file and format */
 			if (pass == 0) {
-				if (strrchr(file, '/') == NULL)
+				if (strrchr(file, '/') == nullptr)
 					fileprint = file;
 				else
 					fileprint = strrchr(file, '/') + 1;
@@ -2415,7 +2415,7 @@ int main(int argc, char **argv) {
 		break;
 	}
 
-	if (output_usefile && output != NULL) {
+	if (output_usefile && output != nullptr) {
 		fclose(output);
 	}
 

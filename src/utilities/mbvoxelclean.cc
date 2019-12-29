@@ -165,20 +165,20 @@ int main(int argc, char **argv) {
 
 	{
 		static struct option options[] = {
-		    {"verbose", no_argument, NULL, 0},
-		    {"help", no_argument, NULL, 0},
-		    {"input", required_argument, NULL, 0},
-		    {"format", required_argument, NULL, 0},
-		    {"voxel-size", required_argument, NULL, 0},
-		    {"occupy-threshold", required_argument, NULL, 0},
-		    {"count-flagged", required_argument, NULL, 0},
-		    {"flag-empty", no_argument, NULL, 0},
-		    {"ignore-empty", no_argument, NULL, 0},
-		    {"unflag-occupied", no_argument, NULL, 0},
-		    {"ignore-occupied", no_argument, NULL, 0},
-		    {"range-minimum", required_argument, NULL, 0},
-		    {"range-maximum", required_argument, NULL, 0},
-		    {NULL, 0, NULL, 0}};
+		    {"verbose", no_argument, nullptr, 0},
+		    {"help", no_argument, nullptr, 0},
+		    {"input", required_argument, nullptr, 0},
+		    {"format", required_argument, nullptr, 0},
+		    {"voxel-size", required_argument, nullptr, 0},
+		    {"occupy-threshold", required_argument, nullptr, 0},
+		    {"count-flagged", required_argument, nullptr, 0},
+		    {"flag-empty", no_argument, nullptr, 0},
+		    {"ignore-empty", no_argument, nullptr, 0},
+		    {"unflag-occupied", no_argument, nullptr, 0},
+		    {"ignore-occupied", no_argument, nullptr, 0},
+		    {"range-minimum", required_argument, nullptr, 0},
+		    {"range-maximum", required_argument, nullptr, 0},
+		    {nullptr, 0, nullptr, 0}};
 		int option_index;
 		bool errflg = false;
 		int c;
@@ -313,7 +313,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
@@ -361,22 +361,22 @@ int main(int argc, char **argv) {
 	int beams_bath = 0;
 	int beams_amp = 0;
 	int pixels_ss = 0;
-	char *beamflag = NULL;
-	char *beamflagorg = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
+	char *beamflag = nullptr;
+	char *beamflagorg = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* swath data storage */
-	struct mbvoxelclean_ping_struct *pings = NULL;
+	struct mbvoxelclean_ping_struct *pings = nullptr;
 
 	/* voxel storage */
-	unsigned char *voxel_count = NULL;  // TODO(schwehr): Make this a bool
+	unsigned char *voxel_count = nullptr;  // TODO(schwehr): Make this a bool
 
 	/* save file control variables */
 	char esffile[MB_PATH_MAXLINE];
@@ -402,7 +402,7 @@ int main(int argc, char **argv) {
 
 		/* check format and get format flags */
 		if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n", format,
 				message);
@@ -485,7 +485,7 @@ int main(int argc, char **argv) {
 				status &= mb_reallocd(verbose, __FILE__, __LINE__, mb_info.nrecords * sizeof(struct mbvoxelclean_ping_struct),
 					(void **)&pings, &error);
 				if (error != MB_ERROR_NO_ERROR) {
-					char *message = NULL;
+					char *message = nullptr;
 					mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 					fprintf(outfp, "\nMBIO Error allocating pings array:\n%s\n", message);
 					fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -516,7 +516,7 @@ int main(int argc, char **argv) {
 						status &= mb_reallocd(verbose, __FILE__, __LINE__, mb_info.nbeams_bath * sizeof(double),
 							 (void **)&pings[i].bathr, &error);
 					if (error != MB_ERROR_NO_ERROR) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays within the ping structure:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -546,11 +546,11 @@ int main(int argc, char **argv) {
 			}
 
 			/* initialize reading the input swath sonar file */
-			void *mbio_ptr = NULL;
+			void *mbio_ptr = nullptr;
 			if (mb_read_init(verbose, swathfileread, formatread, defaultpings, lonflip, bounds, btime_i, etime_i, speedmin,
 						   timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) !=
 			    MB_SUCCESS) {
-				char *message = NULL;
+				char *message = nullptr;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 				fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swathfile);
@@ -600,14 +600,14 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
-				char *message = NULL;
+				char *message = nullptr;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 				exit(error);
 			}
 
-			void *store_ptr = NULL;
+			void *store_ptr = nullptr;
 			double x_min;
 			double x_max;
 			double y_min;
@@ -622,7 +622,7 @@ int main(int argc, char **argv) {
 
 				/* handle esf edits */
 				status = mb_esf_load(verbose, program_name, swathfile, true, true, esffile, &esf, &error);
-				if (status == MB_SUCCESS && esf.esffp != NULL)
+				if (status == MB_SUCCESS && esf.esffp != nullptr)
 					esffile_open = true;
 				if (status == MB_FAILURE && error == MB_ERROR_OPEN_FAIL) {
 					esffile_open = false;
@@ -679,7 +679,7 @@ int main(int argc, char **argv) {
 							status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
 							 (void **)&pings[n_pings].bathr, &error);
 						if (error != MB_ERROR_NO_ERROR) {
-							char *message = NULL;
+							char *message = nullptr;
 							mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 							fprintf(outfp, "\nMBIO Error allocating data arrays within the ping structure:\n%s\n", message);
 							fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -832,7 +832,7 @@ int main(int argc, char **argv) {
 				status &= mb_reallocd(verbose, __FILE__, __LINE__, (size_t)n_voxel,
 				     (void **)&voxel_count, &error);
 				if (error != MB_ERROR_NO_ERROR) {
-					char *message = NULL;
+					char *message = nullptr;
 					mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 					fprintf(outfp, "\nMBIO Error allocating voxel counting arrays:\n%s\n", message);
 					fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -1040,4 +1040,3 @@ int main(int argc, char **argv) {
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-

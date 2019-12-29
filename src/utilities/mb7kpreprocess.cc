@@ -640,18 +640,18 @@ int main(int argc, char **argv) {
 	char *result;  // TODO(schwehr): Localize
 	char valuetype[MB_PATH_MAXLINE];
 	char value[MB_PATH_MAXLINE];
-	double *ins_time_d = NULL;
-	double *ins_lon = NULL;
-	double *ins_lat = NULL;
-	double *ins_heading = NULL;
-	double *ins_roll = NULL;
-	double *ins_pitch = NULL;
-	double *ins_sonardepth = NULL;
-	double *ins_sonardepthfilter = NULL;
-	double *ins_altitude_time_d = NULL;
-	double *ins_altitude = NULL;
-	double *ins_speed_time_d = NULL;
-	double *ins_speed = NULL;
+	double *ins_time_d = nullptr;
+	double *ins_lon = nullptr;
+	double *ins_lat = nullptr;
+	double *ins_heading = nullptr;
+	double *ins_roll = nullptr;
+	double *ins_pitch = nullptr;
+	double *ins_sonardepth = nullptr;
+	double *ins_sonardepthfilter = nullptr;
+	double *ins_altitude_time_d = nullptr;
+	double *ins_altitude = nullptr;
+	double *ins_speed_time_d = nullptr;
+	double *ins_speed = nullptr;
 
 	/* merge navigation and attitude from separate ins data file */
 	int nins = 0;
@@ -664,7 +664,7 @@ int main(int argc, char **argv) {
 	if (insdata) {
 		/* count the data points in the auv log file */
 		FILE *tfp = fopen(insfile, "r");
-		if (tfp == NULL) {
+		if (tfp == nullptr) {
 			fprintf(stderr, "\nUnable to open ins data file <%s> for reading\n", insfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -856,20 +856,20 @@ int main(int argc, char **argv) {
 
 	/* merge navigation and attitude from separate Steve Rock data file */
 	int nrock = 0;
-	double *rock_time_d = NULL;
-	double *rock_lon = NULL;
-	double *rock_lat = NULL;
-	double *rock_heading = NULL;
-	double *rock_roll = NULL;
-	double *rock_pitch = NULL;
-	double *rock_sonardepth = NULL;
-	double *rock_sonardepthfilter = NULL;
+	double *rock_time_d = nullptr;
+	double *rock_lon = nullptr;
+	double *rock_lat = nullptr;
+	double *rock_heading = nullptr;
+	double *rock_roll = nullptr;
+	double *rock_pitch = nullptr;
+	double *rock_sonardepth = nullptr;
+	double *rock_sonardepthfilter = nullptr;
 
 	/* read navigation and attitude data from rock file if specified */
 	if (rockdata) {
 		/* count the data points in the rock file */
 		FILE *tfp = fopen(rockfile, "r");
-		if (tfp == NULL) {
+		if (tfp == nullptr) {
 			fprintf(stderr, "\nUnable to open rock data file <%s> for reading\n", rockfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -940,14 +940,14 @@ int main(int argc, char **argv) {
 
 	/* merge navigation and attitude from separate WHOI DSL data file */
 	int ndsl = 0;
-	double *dsl_time_d = NULL;
-	double *dsl_lon = NULL;
-	double *dsl_lat = NULL;
-	double *dsl_heading = NULL;
-	double *dsl_roll = NULL;
-	double *dsl_pitch = NULL;
-	double *dsl_sonardepth = NULL;
-	double *dsl_sonardepthfilter = NULL;
+	double *dsl_time_d = nullptr;
+	double *dsl_lon = nullptr;
+	double *dsl_lat = nullptr;
+	double *dsl_heading = nullptr;
+	double *dsl_roll = nullptr;
+	double *dsl_pitch = nullptr;
+	double *dsl_sonardepth = nullptr;
+	double *dsl_sonardepthfilter = nullptr;
 
 	int time_i[7];
 
@@ -955,7 +955,7 @@ int main(int argc, char **argv) {
 	if (dsldata) {
 		/* count the data points in the dsl file */
 		FILE *tfp = fopen(dslfile, "r");
-		if (tfp == NULL) {
+		if (tfp == nullptr) {
 			fprintf(stderr, "\nUnable to open dsl data file <%s> for reading\n", dslfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -1044,15 +1044,15 @@ int main(int argc, char **argv) {
 	}
 
 	int nsonardepth = 0;
-	double *sonardepth_time_d = NULL;
-	double *sonardepth_sonardepth = NULL;
-	double *sonardepth_sonardepthfilter = NULL;
+	double *sonardepth_time_d = nullptr;
+	double *sonardepth_sonardepth = nullptr;
+	double *sonardepth_sonardepthfilter = nullptr;
 
 	/* read sonardepth data from AUV log file if specified */
 	if (sonardepthdata) {
 		/* count the data points in the auv log file */
 		FILE *tfp = fopen(sonardepthfile, "r");
-		if (tfp == NULL) {
+		if (tfp == nullptr) {
 			fprintf(stderr, "\nUnable to open sonardepth data file <%s> for reading\n", sonardepthfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -1141,15 +1141,15 @@ int main(int argc, char **argv) {
 	}
 
 	int ntimelag = 0;
-	double *timelag_time_d = NULL;
-	double *timelag_model = NULL;
+	double *timelag_time_d = nullptr;
+	double *timelag_model = nullptr;
 
 	/* get time lag model if specified */
 	if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL) {
 		/* count the data points in the timelag file */
 		ntimelag = 0;
 		FILE *tfp = fopen(timelagfile, "r");
-		if (tfp == NULL) {
+		if (tfp == nullptr) {
 			fprintf(stderr, "\nUnable to open time lag model File <%s> for reading\n", timelagfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -1204,14 +1204,14 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "No timelag data read from %s....\n", timelagfile);
 	}
 
-	struct mb_platform_struct *platform = NULL;
+	struct mb_platform_struct *platform = nullptr;
 
 	/*
 	 * null tfp - allows detection of whether time delay file was opened,
 	 * which only happens for MBARI AUV data with navigation and attitude
 	 * in "bluefin" records
 	 */
-	FILE *tfp = NULL;
+	FILE *tfp = nullptr;
 
 	/*
 	 * load platform definition if specified or if offsets otherwise
@@ -1237,7 +1237,7 @@ int main(int argc, char **argv) {
 		 */
 		if (status == MB_SUCCESS) {
 			mb_longname manufacturer = "Reson";
-			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_SONAR_MULTIBEAM, NULL, manufacturer, NULL,
+			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_SONAR_MULTIBEAM, nullptr, manufacturer, nullptr,
 			                                MB_SENSOR_CAPABILITY1_NONE, MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM, 2, 0, &error);
 		}
 		if (status == MB_SUCCESS)
@@ -1253,7 +1253,7 @@ int main(int argc, char **argv) {
 
 		/* set sensor 1 (position sensor) */
 		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_POSITION, NULL, NULL, NULL, 0, 0, 1,
+			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_POSITION, nullptr, nullptr, nullptr, 0, 0, 1,
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0, position_offset_mode, position_offset_x,
@@ -1264,7 +1264,7 @@ int main(int argc, char **argv) {
 
 		/* set sensor 2 (depth sensor) */
 		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_PRESSURE, NULL, NULL, NULL, 0, 0, 1,
+			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_PRESSURE, nullptr, nullptr, nullptr, 0, 0, 1,
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0, depth_offset_mode, depth_offset_x,
@@ -1275,7 +1275,7 @@ int main(int argc, char **argv) {
 
 		/* set sensor 3 (heading sensor) */
 		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_COMPASS, NULL, NULL, NULL, 0, 0, 1,
+			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_COMPASS, nullptr, nullptr, nullptr, 0, 0, 1,
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 3, 0, false, 0.0, 0.0, 0.0, heading_offset_mode,
@@ -1286,7 +1286,7 @@ int main(int argc, char **argv) {
 
 		/* set sensor 4 (rollpitch sensor) */
 		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_VRU, NULL, NULL, NULL, 0, 0, 1, ntimelag,
+			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_VRU, nullptr, nullptr, nullptr, 0, 0, 1, ntimelag,
 			                                &error);
 		if (status == MB_SUCCESS)
 			status =
@@ -1322,7 +1322,7 @@ int main(int argc, char **argv) {
 	}
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
@@ -1353,18 +1353,18 @@ int main(int argc, char **argv) {
 	int beams_amp;
 	int pixels_ss;
 
-	void *imbio_ptr = NULL;
-	struct mb_io_struct *imb_io_ptr = NULL;
-	void *istore_ptr = NULL;
-	struct mbsys_reson7k_struct *istore = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char *beamflag = NULL;
+	void *imbio_ptr = nullptr;
+	struct mb_io_struct *imb_io_ptr = nullptr;
+	void *istore_ptr = nullptr;
+	struct mbsys_reson7k_struct *istore = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
+	char *beamflag = nullptr;
 
 	int nfile_read = 0;
 	int nfile_write = 0;
@@ -1485,14 +1485,14 @@ int main(int argc, char **argv) {
 
 	int nbatht = 0;
 	int nbatht_alloc = 0;
-	double *batht_time_d = NULL;
-	int *batht_ping = NULL;
+	double *batht_time_d = nullptr;
+	int *batht_ping = nullptr;
 	/* bathymetry timetag data */
-	double *batht_time_d_new = NULL;
-	double *batht_time_offset = NULL;
-	int *batht_ping_offset = NULL;
+	double *batht_time_d_new = nullptr;
+	double *batht_time_offset = nullptr;
+	int *batht_ping_offset = nullptr;
 
-	bool *batht_good_offset = NULL;
+	bool *batht_good_offset = nullptr;
 	int nedget = 0;
 	double sslo_last_time_d = 0.0;
 	int sslo_last_ping;
@@ -1516,32 +1516,32 @@ int main(int argc, char **argv) {
 	/* asynchronous navigation, heading, attitude data */
 	int ndat_nav = 0;
 	int ndat_nav_alloc = 0;
-	double *dat_nav_time_d = NULL;
-	double *dat_nav_lon = NULL;
-	double *dat_nav_lat = NULL;
-	double *dat_nav_speed = NULL;
+	double *dat_nav_time_d = nullptr;
+	double *dat_nav_lon = nullptr;
+	double *dat_nav_lat = nullptr;
+	double *dat_nav_speed = nullptr;
 
 	int ndat_sonardepth = 0;
 	int ndat_sonardepth_alloc = 0;
-	double *dat_sonardepth_time_d = NULL;
-	double *dat_sonardepth_sonardepth = NULL;
-	double *dat_sonardepth_sonardepthfilter = NULL;
+	double *dat_sonardepth_time_d = nullptr;
+	double *dat_sonardepth_sonardepth = nullptr;
+	double *dat_sonardepth_sonardepthfilter = nullptr;
 
 	s7kr_customattitude *customattitude;
 
 	int ndat_rph = 0;
 	int ndat_rph_alloc = 0;
-	double *dat_rph_time_d = NULL;
-	double *dat_rph_roll = NULL;
-	double *dat_rph_pitch = NULL;
-	double *dat_rph_heave = NULL;
+	double *dat_rph_time_d = nullptr;
+	double *dat_rph_roll = nullptr;
+	double *dat_rph_pitch = nullptr;
+	double *dat_rph_heave = nullptr;
 
 	s7kr_fileheader *fileheader;
 
 	int ndat_altitude = 0;
 	int ndat_altitude_alloc = 0;
-	double *dat_altitude_time_d = NULL;
-	double *dat_altitude_altitude = NULL;
+	double *dat_altitude_time_d = nullptr;
+	double *dat_altitude_altitude = nullptr;
 
 	s7kr_motion *motion;
 	s7kr_depth *depth;
@@ -1553,8 +1553,8 @@ int main(int argc, char **argv) {
 
 	int ndat_heading = 0;
 	int ndat_heading_alloc = 0;
-	double *dat_heading_time_d = NULL;
-	double *dat_heading_heading = NULL;
+	double *dat_heading_time_d = nullptr;
+	double *dat_heading_heading = nullptr;
 
 	s7kr_surveyline *surveyline;
 	s7kr_navigation *navigation;
@@ -1572,8 +1572,8 @@ int main(int argc, char **argv) {
 	int ntimedelay = 0;
 	int ntimedelaycount = 0;
 	int ntimedelay_alloc = 0;
-	double *timedelay_time_d = NULL;
-	double *timedelay_timedelay = NULL;
+	double *timedelay_time_d = nullptr;
+	double *timedelay_timedelay = nullptr;
 
 	s7kr_fsdwss *fsdwsshi;
 	s7kr_fsdwss *fsdwsslo;
@@ -1584,13 +1584,13 @@ int main(int argc, char **argv) {
 
 	/* edgetech timetag data */
 	int nedget_alloc = 0;
-	double *edget_time_d = NULL;
-	int *edget_ping = NULL;
-	double *edget_time_d_new = NULL;
-	double *edget_time_offset = NULL;
-	int *edget_ping_offset = NULL;
+	double *edget_time_d = nullptr;
+	int *edget_ping = nullptr;
+	double *edget_time_d_new = nullptr;
+	double *edget_time_offset = nullptr;
+	int *edget_ping_offset = nullptr;
 
-	bool *edget_good_offset = NULL;
+	bool *edget_good_offset = nullptr;
 
 	/* loop over all files to be read */
 	while (read_data && format == MBF_RESON7KR) {
@@ -1611,14 +1611,14 @@ int main(int argc, char **argv) {
 		istore = (struct mbsys_reson7k_struct *)istore_ptr;
 
 		if (error == MB_ERROR_NO_ERROR) {
-			beamflag = NULL;
-			bath = NULL;
-			amp = NULL;
-			bathacrosstrack = NULL;
-			bathalongtrack = NULL;
-			ss = NULL;
-			ssacrosstrack = NULL;
-			ssalongtrack = NULL;
+			beamflag = nullptr;
+			bath = nullptr;
+			amp = nullptr;
+			bathacrosstrack = nullptr;
+			bathalongtrack = nullptr;
+			ss = nullptr;
+			ssacrosstrack = nullptr;
+			ssalongtrack = nullptr;
 		}
 		if (error == MB_ERROR_NO_ERROR)
 			/* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
@@ -2802,7 +2802,7 @@ int main(int argc, char **argv) {
 					    "R7KRECID_7kInstallationParameters: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 					    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber);
 
-				if (platform == NULL) {
+				if (platform == nullptr) {
 					status = mb_extract_platform(verbose, imbio_ptr, istore_ptr, &kind, (void **)&platform, &error);
 
 					/* deal with error */
@@ -2876,10 +2876,10 @@ int main(int argc, char **argv) {
 					timedelaymode = MB7KPREPROCESS_TIMEDELAY_OFF;
 
 				/* output time delay from MBARI AUV */
-				if (tfp == NULL) {
+				if (tfp == nullptr) {
 					/* open file for timedelay values */
 					sprintf(timedelayfile, "%s_timedelay.txt", read_file);
-					if ((tfp = fopen(timedelayfile, "w")) == NULL) {
+					if ((tfp = fopen(timedelayfile, "w")) == nullptr) {
 						fprintf(stderr, "\nUnable to open time delay file <%s> for writing\n", timedelayfile);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 						exit(MB_ERROR_OPEN_FAIL);
@@ -2905,7 +2905,7 @@ int main(int argc, char **argv) {
 						        bluefin->nav[i].position_time);
 
 					/* output time delay from MBARI AUV */
-					if (tfp != NULL) {
+					if (tfp != nullptr) {
 						fprintf(tfp, "%f %f\n", bluefin->nav[i].position_time, (-0.001 * (double)bluefin->nav[i].timedelay));
 					}
 				}
@@ -3363,9 +3363,9 @@ int main(int argc, char **argv) {
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* close time delay file */
-	if (tfp != NULL) {
+	if (tfp != nullptr) {
 		fclose(tfp);
-		tfp = NULL;
+		tfp = nullptr;
 	}
 	/* output counts */
 	fprintf(stdout, "\nTotal data records read from: %s\n", read_file);
@@ -3928,7 +3928,7 @@ int main(int argc, char **argv) {
 	int opixels_ss;
 
 	/* MBIO read values */
-	void *ombio_ptr = NULL;
+	void *ombio_ptr = nullptr;
 	double beamheading;
 	double roll, beamroll;
 	double pitch, beampitch;
@@ -4129,10 +4129,10 @@ int main(int argc, char **argv) {
 		}
 
 		/* output asynchronous and synchronous time series ancillary files */
-		FILE *athfp = NULL;
-		FILE *atsfp = NULL;
-		FILE *atafp = NULL;
-		FILE *stafp = NULL;
+		FILE *athfp = nullptr;
+		FILE *atsfp = nullptr;
+		FILE *atafp = nullptr;
+		FILE *stafp = nullptr;
 
 		/* loop over all files to be read */
 		while (read_data && format == MBF_RESON7KR) {
@@ -4185,7 +4185,7 @@ int main(int argc, char **argv) {
 				char ctdfile[MB_PATH_MAXLINE];
 				char fileroot[MB_PATH_MAXLINE];
 				sprintf(ctdfile, "%s_ctd.txt", fileroot);
-				if ((tfp = fopen(ctdfile, "w")) == NULL) {
+				if ((tfp = fopen(ctdfile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open ctd data file <%s> for writing\n", ctdfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_ERROR_OPEN_FAIL);
@@ -4196,7 +4196,7 @@ int main(int argc, char **argv) {
 				 */
 				char athfile[MB_PATH_MAXLINE];
 				sprintf(athfile, "%s.ath", ofile);
-				if ((athfp = fopen(athfile, "w")) == NULL) {
+				if ((athfp = fopen(athfile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous heading data file <%s> for writing\n", athfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_ERROR_OPEN_FAIL);
@@ -4207,7 +4207,7 @@ int main(int argc, char **argv) {
 				 */
 				char atsfile[MB_PATH_MAXLINE];
 				sprintf(atsfile, "%s.ats", ofile);
-				if ((atsfp = fopen(atsfile, "w")) == NULL) {
+				if ((atsfp = fopen(atsfile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous sonardepth data file <%s> for writing\n", atsfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_ERROR_OPEN_FAIL);
@@ -4218,7 +4218,7 @@ int main(int argc, char **argv) {
 				 */
 				char atafile[MB_PATH_MAXLINE];
 				sprintf(atafile, "%s.ata", ofile);
-				if ((atafp = fopen(atafile, "w")) == NULL) {
+				if ((atafp = fopen(atafile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous attitude data file <%s> for writing\n", atafile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_ERROR_OPEN_FAIL);
@@ -4229,7 +4229,7 @@ int main(int argc, char **argv) {
 				 */
 				char stafile[MB_PATH_MAXLINE];
 				sprintf(stafile, "%s.sta", ofile);
-				if ((stafp = fopen(stafile, "w")) == NULL) {
+				if ((stafp = fopen(stafile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", stafile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_ERROR_OPEN_FAIL);
@@ -4245,14 +4245,14 @@ int main(int argc, char **argv) {
 			swath_width = 0.0;
 
 			if (error == MB_ERROR_NO_ERROR) {
-				beamflag = NULL;
-				bath = NULL;
-				amp = NULL;
-				bathacrosstrack = NULL;
-				bathalongtrack = NULL;
-				ss = NULL;
-				ssacrosstrack = NULL;
-				ssalongtrack = NULL;
+				beamflag = nullptr;
+				bath = nullptr;
+				amp = nullptr;
+				bathacrosstrack = nullptr;
+				bathalongtrack = nullptr;
+				ss = nullptr;
+				ssacrosstrack = nullptr;
+				ssalongtrack = nullptr;
 			}
 			if (error == MB_ERROR_NO_ERROR)
 				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
@@ -4349,7 +4349,7 @@ int main(int argc, char **argv) {
 				if (esf_status == MB_SUCCESS && found) {
 					esf_status = mb_esf_load(verbose, program_name, ofile, true, true, esffile, &esf, &error);
 					// TODO(schwehr): These esf_status checks were just status.  Is this correct?
-					if (esf_status == MB_SUCCESS && esf.esffp != NULL)
+					if (esf_status == MB_SUCCESS && esf.esffp != nullptr)
 						esffile_open = true;
 					if (esf_status == MB_FAILURE && error == MB_ERROR_OPEN_FAIL) {
 						esffile_open = false;
@@ -4969,7 +4969,7 @@ int main(int argc, char **argv) {
 							// double headingx = sin(DTR * heading);
 							// double headingy = cos(DTR * heading);
 
-							if (platform != NULL) {
+							if (platform != nullptr) {
 								status = mb_platform_position(verbose, (void *)platform, platform->source_bathymetry, 0, navlon,
 								                              navlat, sonardepth, heading, roll, pitch, &navlon, &navlat,
 								                              &sonardepth, &error);
@@ -5113,7 +5113,7 @@ int main(int argc, char **argv) {
 							/*
 							 * get transducer angular offsets
 							 */
-							if (platform != NULL) {
+							if (platform != nullptr) {
 								status = mb_platform_orientation_offset(verbose, (void *)platform, platform->source_bathymetry, 0,
 								                                        &(tx_align.heading), &(tx_align.roll), &(tx_align.pitch),
 								                                        &error);
@@ -7436,7 +7436,7 @@ int main(int argc, char **argv) {
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&sonardepth_sonardepthfilter, &error);
 	}
 
-	if (platform != NULL) {
+	if (platform != nullptr) {
 		status = mb_platform_deall(verbose, (void **)&platform, &error);
 	}
 

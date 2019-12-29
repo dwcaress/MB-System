@@ -156,12 +156,12 @@ int main(int argc, char **argv) {
 
 	FILE *stream = verbose <= 1 ? stdout : stderr;
 
-	FILE *output = NULL;
+	FILE *output = nullptr;
 	if (output_usefile) {
 		char output_file[MB_PATH_MAXLINE];
 		strcpy(output_file, read_file);
 		strcat(output_file, ".sinf");
-		if ((output = fopen(output_file, "w")) == NULL)
+		if ((output = fopen(output_file, "w")) == nullptr)
 			output = stream;
 	}
 	else {
