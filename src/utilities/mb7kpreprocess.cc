@@ -32,6 +32,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
@@ -2916,7 +2918,7 @@ int main(int argc, char **argv) {
 					 * needed
 					 */
 					if (bluefin->number_frames > 0 && ndat_nav + bluefin->number_frames >= ndat_nav_alloc) {
-						ndat_nav_alloc += MAX(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
+						ndat_nav_alloc += std::max(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
 						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_nav_alloc * sizeof(double),
 						                     (void **)&dat_nav_time_d, &error);
 						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_nav_alloc * sizeof(double), (void **)&dat_nav_lon,
@@ -2941,7 +2943,7 @@ int main(int argc, char **argv) {
 					 * if needed
 					 */
 					if (bluefin->number_frames > 0 && ndat_heading + bluefin->number_frames >= ndat_heading_alloc) {
-						ndat_heading_alloc += MAX(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
+						ndat_heading_alloc += std::max(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
 						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
 						                     (void **)&dat_heading_time_d, &error);
 						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_heading_alloc * sizeof(double),
@@ -2962,7 +2964,7 @@ int main(int argc, char **argv) {
 					 * needed
 					 */
 					if (bluefin->number_frames > 0 && ndat_rph + bluefin->number_frames >= ndat_rph_alloc) {
-						ndat_rph_alloc += MAX(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
+						ndat_rph_alloc += std::max(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
 						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double),
 						                     (void **)&dat_rph_time_d, &error);
 						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_rph_alloc * sizeof(double), (void **)&dat_rph_roll,
@@ -2986,7 +2988,7 @@ int main(int argc, char **argv) {
 				 * needed
 				 */
 				if (bluefin->number_frames > 0 && ndat_altitude + bluefin->number_frames >= ndat_altitude_alloc) {
-					ndat_altitude_alloc += MAX(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
+					ndat_altitude_alloc += std::max(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_altitude_alloc * sizeof(double),
 					                     (void **)&dat_altitude_time_d, &error);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_altitude_alloc * sizeof(double),
@@ -3006,7 +3008,7 @@ int main(int argc, char **argv) {
 					 * needed
 					 */
 					if (bluefin->number_frames > 0 && ndat_sonardepth + bluefin->number_frames >= ndat_sonardepth_alloc) {
-						ndat_sonardepth_alloc += MAX(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
+						ndat_sonardepth_alloc += std::max(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
 						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
 						                     (void **)&dat_sonardepth_time_d, &error);
 						status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_sonardepth_alloc * sizeof(double),
@@ -3673,8 +3675,8 @@ int main(int argc, char **argv) {
 			for (int i = 0; i < ndat_sonardepth; i++) {
 				dat_sonardepth_sonardepthfilter[i] = 0.0;
 				double sonardepth_filterweight = 0.0;
-				const int j1 = MAX(i - nhalffilter, 0);
-				const int j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
+				const int j1 = std::max(i - nhalffilter, 0);
+				const int j2 = std::min(i + nhalffilter, ndat_sonardepth - 1);
 				for (int j = j1; j <= j2; j++) {
 					const double dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
 					const double weight = exp(-dtol * dtol);
@@ -3702,8 +3704,8 @@ int main(int argc, char **argv) {
 			for (int i = 0; i < nsonardepth; i++) {
 				sonardepth_sonardepthfilter[i] = 0.0;
 				double sonardepth_filterweight = 0.0;
-				const int j1 = MAX(i - nhalffilter, 0);
-				const int j2 = MIN(i + nhalffilter, nsonardepth - 1);
+				const int j1 = std::max(i - nhalffilter, 0);
+				const int j2 = std::min(i + nhalffilter, nsonardepth - 1);
 				for (int j = j1; j <= j2; j++) {
 					const double dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
 					const double weight = exp(-dtol * dtol);
@@ -3730,8 +3732,8 @@ int main(int argc, char **argv) {
 				double sonardepth_filterweight = 0.0;
 				const double dtime = (ins_time_d[nins - 1] - ins_time_d[0]) / nins;
 				const int nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
-				const int j1 = MAX(i - nhalffilter, 0);
-				const int j2 = MIN(i + nhalffilter, nins - 1);
+				const int j1 = std::max(i - nhalffilter, 0);
+				const int j2 = std::min(i + nhalffilter, nins - 1);
 				for (int j = j1; j <= j2; j++) {
 					const double dtol = (ins_time_d[j] - ins_time_d[i]) / sonardepthfilterlength;
 					const double weight = exp(-dtol * dtol);
@@ -3758,8 +3760,8 @@ int main(int argc, char **argv) {
 				double sonardepth_filterweight = 0.0;
 				const double dtime = (dsl_time_d[ndsl - 1] - dsl_time_d[0]) / ndsl;
 				const int nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
-				const int j1 = MAX(i - nhalffilter, 0);
-				const int j2 = MIN(i + nhalffilter, ndsl - 1);
+				const int j1 = std::max(i - nhalffilter, 0);
+				const int j2 = std::min(i + nhalffilter, ndsl - 1);
 				for (int j = j1; j <= j2; j++) {
 					const double dtol = (dsl_time_d[j] - dsl_time_d[i]) / sonardepthfilterlength;
 					const double weight = exp(-dtol * dtol);
@@ -3786,8 +3788,8 @@ int main(int argc, char **argv) {
 				double sonardepth_filterweight = 0.0;
 				const double dtime = (rock_time_d[nrock - 1] - rock_time_d[0]) / nrock;
 				const int nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
-				const int j1 = MAX(i - nhalffilter, 0);
-				const int j2 = MIN(i + nhalffilter, ndsl - 1);
+				const int j1 = std::max(i - nhalffilter, 0);
+				const int j2 = std::min(i + nhalffilter, ndsl - 1);
 				for (int j = j1; j <= j2; j++) {
 					const double dtol = (rock_time_d[j] - rock_time_d[i]) / sonardepthfilterlength;
 					const double weight = exp(-dtol * dtol);
@@ -4623,7 +4625,7 @@ int main(int argc, char **argv) {
 						time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
 						mb_get_itime(verbose, time_j, time_i);
 						mb_get_time(verbose, time_i, &time_d);
-						const double last_7k_time_d = MAX(last_7k_time_d, time_d);
+						const double last_7k_time_d = std::max(last_7k_time_d, time_d);
 						if (verbose > 0)
 							fprintf(stderr,
 							        "R7KRECID_7kBathymetricData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) "
@@ -6536,7 +6538,7 @@ int main(int argc, char **argv) {
 					time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
 					mb_get_itime(verbose, time_j, time_i);
 					mb_get_time(verbose, time_i, &time_d);
-					const double last_bluefinenv_time_d = MAX(last_bluefinenv_time_d, time_d);
+					const double last_bluefinenv_time_d = std::max(last_bluefinenv_time_d, time_d);
 					if (last_bluefinenv_time_d > time_d) {
 						status = MB_FAILURE;
 						error = MB_ERROR_IGNORE;
@@ -6695,7 +6697,7 @@ int main(int argc, char **argv) {
 					time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
 					mb_get_itime(verbose, time_j, time_i);
 					mb_get_time(verbose, time_i, &time_d);
-					const double last_bluefinnav_time_d = MAX(last_bluefinnav_time_d, time_d);
+					const double last_bluefinnav_time_d = std::max(last_bluefinnav_time_d, time_d);
 					if (last_bluefinnav_time_d > time_d) {
 						status = MB_FAILURE;
 						error = MB_ERROR_IGNORE;
@@ -6781,7 +6783,7 @@ int main(int argc, char **argv) {
 					mb_get_itime(verbose, time7k_j, time7k_i);
 					double time7k_d;
 					mb_get_time(verbose, time7k_i, &time7k_d);
-					const double last_fsdwsbp_time_d = MAX(last_fsdwsbp_time_d, time7k_d);
+					const double last_fsdwsbp_time_d = std::max(last_fsdwsbp_time_d, time7k_d);
 					if (last_fsdwsbp_time_d > time7k_d) {
 						status = MB_FAILURE;
 						error = MB_ERROR_IGNORE;
@@ -6843,7 +6845,7 @@ int main(int argc, char **argv) {
 					mb_get_itime(verbose, time7k_j, time7k_i);
 					double time7k_d;
 					mb_get_time(verbose, time7k_i, &time7k_d);
-					const double last_fsdwsslo_time_d = MAX(last_fsdwsslo_time_d, time7k_d);
+					const double last_fsdwsslo_time_d = std::max(last_fsdwsslo_time_d, time7k_d);
 					if (last_fsdwsslo_time_d > time7k_d) {
 						status = MB_FAILURE;
 						error = MB_ERROR_IGNORE;
@@ -6914,7 +6916,7 @@ int main(int argc, char **argv) {
 					mb_get_itime(verbose, time7k_j, time7k_i);
 					double time7k_d;
 					mb_get_time(verbose, time7k_i, &time7k_d);
-					const double last_fsdwsshi_time_d = MAX(last_fsdwsshi_time_d, time7k_d);
+					const double last_fsdwsshi_time_d = std::max(last_fsdwsshi_time_d, time7k_d);
 					if (last_fsdwsshi_time_d > time7k_d) {
 						status = MB_FAILURE;
 						error = MB_ERROR_IGNORE;
@@ -7004,7 +7006,7 @@ int main(int argc, char **argv) {
 						int i = 0;
 						for (; i < nins && ins_time_d[i] < time_d - 1; i++) {
 						}
-						ins_output_index = MAX(0, i - 1);
+						ins_output_index = std::max(0, i - 1);
 					}
 					/*
 					 * output bluefin record with 25
@@ -7019,7 +7021,7 @@ int main(int argc, char **argv) {
 						const int kind_save = istore->kind;
 						istore->kind = MB_DATA_NAV2;
 						istore->type = R7KRECID_Bluefin;
-						bluefin->number_frames = MIN(25, nins - ins_output_index + 1);
+						bluefin->number_frames = std::min(25, nins - ins_output_index + 1);
 
 						header->Version = 4;
 						header->Offset = 60;
@@ -7051,11 +7053,7 @@ int main(int argc, char **argv) {
 						header->FragmentNumber = 0;
 
 						bluefin->msec_timestamp = 0;
-						/*
-						 * bluefin->number_frames =
-						 * MIN(25, nins -
-						 * ins_output_index + 1);
-						 */
+						// bluefin->number_frames = std::min(25, nins - ins_output_index + 1);
 						bluefin->frame_size = 128;
 						bluefin->data_format = R7KRECID_BluefinNav;
 						for (int i = 0; i < 16; i++)

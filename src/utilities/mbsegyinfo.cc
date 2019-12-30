@@ -27,6 +27,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_segy.h"
@@ -326,21 +328,21 @@ int main(int argc, char **argv) {
 
 			/* get min max values */
 			else {
-				shotmin = MIN(shotmin, traceheader.shot_num);
-				shotmax = MAX(shotmax, traceheader.shot_num);
-				shotmin = MIN(shotmin, traceheader.shot_num);
-				shotmax = MAX(shotmax, traceheader.shot_num);
-				rpmin = MIN(rpmin, traceheader.rp_num);
-				rpmax = MAX(rpmax, traceheader.rp_num);
-				rptracemin = MIN(rptracemin, traceheader.rp_tr);
-				rptracemax = MAX(rptracemax, traceheader.rp_tr);
-				delaymin = MIN(delaymin, delay);
-				delaymax = MAX(delaymax, delay);
+				shotmin = std::min(shotmin, traceheader.shot_num);
+				shotmax = std::max(shotmax, traceheader.shot_num);
+				shotmin = std::min(shotmin, traceheader.shot_num);
+				shotmax = std::max(shotmax, traceheader.shot_num);
+				rpmin = std::min(rpmin, traceheader.rp_num);
+				rpmax = std::max(rpmax, traceheader.rp_num);
+				rptracemin = std::min(rptracemin, traceheader.rp_tr);
+				rptracemax = std::max(rptracemax, traceheader.rp_tr);
+				delaymin = std::min(delaymin, delay);
+				delaymax = std::max(delaymax, delay);
 				if (navlon != 0.0 && navlat != 0.0) {
-					lonmin = MIN(lonmin, navlon);
-					lonmax = MAX(lonmax, navlon);
-					latmin = MIN(latmin, navlat);
-					latmax = MAX(latmax, navlat);
+					lonmin = std::min(lonmin, navlon);
+					lonmax = std::max(lonmax, navlon);
+					latmin = std::min(latmin, navlat);
+					latmax = std::max(latmax, navlat);
 				}
 				lonend = navlon;
 				latend = navlat;
@@ -350,18 +352,18 @@ int main(int argc, char **argv) {
 				for (int i = 0; i < 5; i++) {
 					timend_j[i] = time_j[i];
 				}
-				rangemin = MIN(rangemin, range);
-				rangemax = MAX(rangemax, range);
-				receiverelevationmin = MIN(receiverelevationmin, receiverelevation);
-				receiverelevationmax = MAX(receiverelevationmax, receiverelevation);
-				sourceelevationmin = MIN(sourceelevationmin, sourceelevation);
-				sourceelevationmax = MAX(sourceelevationmax, sourceelevation);
-				sourcedepthmin = MIN(sourcedepthmin, sourcedepth);
-				sourcedepthmax = MAX(sourcedepthmax, sourcedepth);
-				sourcewaterdepthmin = MIN(sourcewaterdepthmin, sourcewaterdepth);
-				sourcewaterdepthmax = MAX(sourcewaterdepthmax, sourcewaterdepth);
-				receiverwaterdepthmin = MIN(receiverwaterdepthmin, receiverwaterdepth);
-				receiverwaterdepthmax = MAX(receiverwaterdepthmax, receiverwaterdepth);
+				rangemin = std::min(rangemin, range);
+				rangemax = std::max(rangemax, range);
+				receiverelevationmin = std::min(receiverelevationmin, receiverelevation);
+				receiverelevationmax = std::max(receiverelevationmax, receiverelevation);
+				sourceelevationmin = std::min(sourceelevationmin, sourceelevation);
+				sourceelevationmax = std::max(sourceelevationmax, sourceelevation);
+				sourcedepthmin = std::min(sourcedepthmin, sourcedepth);
+				sourcedepthmax = std::max(sourcedepthmax, sourcedepth);
+				sourcewaterdepthmin = std::min(sourcewaterdepthmin, sourcewaterdepth);
+				sourcewaterdepthmax = std::max(sourcewaterdepthmax, sourcewaterdepth);
+				receiverwaterdepthmin = std::min(receiverwaterdepthmin, receiverwaterdepth);
+				receiverwaterdepthmax = std::max(receiverwaterdepthmax, receiverwaterdepth);
 			}
 		}
 

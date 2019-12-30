@@ -32,6 +32,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
@@ -1504,7 +1506,7 @@ int main(int argc, char **argv) {
 
         /* allocate memory if needed */
         if (status == MB_SUCCESS && nanav > 0 && n_nav + nanav >= n_nav_alloc) {
-          n_nav_alloc += MAX(MBPREPROCESS_ALLOC_CHUNK, nanav);
+          n_nav_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
           /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_time_d, &error);
           /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlon, &error);
           /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlat, &error);
@@ -1540,7 +1542,7 @@ int main(int argc, char **argv) {
 
         /* allocate memory if needed */
         if (status == MB_SUCCESS && nanav > 0 && n_sensordepth + nanav >= n_sensordepth_alloc) {
-          n_sensordepth_alloc += MAX(MBPREPROCESS_ALLOC_CHUNK, nanav);
+          n_sensordepth_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
           /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
                                (void **)&sensordepth_time_d, &error);
           /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
@@ -1572,7 +1574,7 @@ int main(int argc, char **argv) {
 
         /* allocate memory if needed */
         if (status == MB_SUCCESS && nanav > 0 && n_heading + nanav >= n_heading_alloc) {
-          n_heading_alloc += MAX(MBPREPROCESS_ALLOC_CHUNK, nanav);
+          n_heading_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
           /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_time_d,
                                &error);
           /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_heading,
@@ -1633,7 +1635,7 @@ int main(int argc, char **argv) {
 
         /* allocate memory if needed */
         if (status == MB_SUCCESS && nanav > 0 && n_attitude + nanav >= n_attitude_alloc) {
-          n_attitude_alloc += MAX(MBPREPROCESS_ALLOC_CHUNK, nanav);
+          n_attitude_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
           /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double),
                                (void **)&attitude_time_d, &error);
           /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_roll,

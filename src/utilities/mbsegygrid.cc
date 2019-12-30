@@ -31,6 +31,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
@@ -603,8 +605,8 @@ int main(int argc, char **argv) {
 		iyend = ngridy - 1;
 	}
 	else if (windowmode == MBSEGYGRID_WINDOW_ON) {
-		iystart = MAX((windowstart) / sampleinterval, 0);
-		iyend = MIN((windowend) / sampleinterval, ngridy - 1);
+		iystart = std::max((windowstart) / sampleinterval, 0.0);
+		iyend = std::min((windowend) / sampleinterval, ngridy - 1.0);
 	}
 	// TODO(schwehr): What about MBSEGYGRID_WINDOW_SEAFLOOR?
 	// TODO(schwehr): What about MBSEGYGRID_WINDOW_DEPTH?
@@ -813,8 +815,8 @@ int main(int argc, char **argv) {
 				double tracemin = trace[0];
 				double tracemax = trace[0];
 				for (int i = 0; i < traceheader.nsamps; i++) {
-					tracemin = MIN(tracemin, trace[i]);
-					tracemax = MAX(tracemin, trace[i]);
+					tracemin = std::min(tracemin, static_cast<double>(trace[i]));
+					tracemax = std::max(tracemin, static_cast<double>(trace[i]));
 				}
 
 				if ((verbose == 0 && nread % 250 == 0) || (nread % 25 == 0)) {
@@ -838,13 +840,13 @@ int main(int argc, char **argv) {
 					/* get bounds of trace in depth window mode */
 					if (windowmode == MBSEGYGRID_WINDOW_DEPTH) {
 						iystart = (int)((dtime + windowstart - timedelay) / sampleinterval);
-						iystart = MAX(iystart, 0);
+						iystart = std::max(iystart, 0);
 						iyend = (int)((dtime + windowend - timedelay) / sampleinterval);
-						iyend = MIN(iyend, ngridy - 1);
+						iyend = std::min(iyend, ngridy - 1);
 					}
 					else if (windowmode == MBSEGYGRID_WINDOW_SEAFLOOR) {
-						iystart = MAX((stime + windowstart - timedelay) / sampleinterval, 0);
-						iyend = MIN((stime + windowend - timedelay) / sampleinterval, ngridy - 1);
+						iystart = std::max((stime + windowstart - timedelay) / sampleinterval, 0.0);
+						iyend = std::min((stime + windowend - timedelay) / sampleinterval, ngridy - 1.0);
 					}
 
 					/* apply gain if desired */
@@ -853,13 +855,13 @@ int main(int argc, char **argv) {
 							gainmode == MBSEGYGRID_GAIN_TZERO
 							? (dtime - btime + gaindelay) / sampleinterval
 							: (stime - btime + gaindelay) / sampleinterval;
-						igainstart = MAX(0, igainstart);
+						igainstart = std::max(0, igainstart);
 						int igainend;
 						if (gainwindow <= 0.0) {
 							igainend = traceheader.nsamps - 1;
 						} else {
 							igainend = igainstart + gainwindow / sampleinterval;
-							igainend = MIN(traceheader.nsamps - 1, igainend);
+							igainend = std::min(traceheader.nsamps - 1, igainend);
 						}
 						for (int i = 0; i <= igainstart; i++) {
 							trace[i] = 0.0;
@@ -875,12 +877,12 @@ int main(int argc, char **argv) {
 					}
 					else if (gainmode == MBSEGYGRID_GAIN_AGCSEAFLOOR) {
 						int igainstart = (stime - btime - 0.5 * gainwindow) / sampleinterval;
-						igainstart = MAX(0, igainstart);
+						igainstart = std::max(0, igainstart);
 						int igainend = (stime - btime + 0.5 * gainwindow) / sampleinterval;
-						igainend = MIN(traceheader.nsamps - 1, igainend);
+						igainend = std::min(traceheader.nsamps - 1, igainend);
 						double tmax = fabs(trace[igainstart]);
 						for (int i = igainstart; i <= igainend; i++) {
-							tmax = MAX(tmax, fabs(trace[i]));
+							tmax = std::max(tmax, static_cast<double>(fabs(trace[i])));
 						}
 						if (tmax > 0.0)
 							factor = gain / tmax;
@@ -913,8 +915,8 @@ int main(int argc, char **argv) {
 						for (int i = 0; i <= traceheader.nsamps; i++) {
 							worktrace[i] = 0.0;
 							double filtersum = 0.0;
-							const int jstart = MAX(nfilter / 2 - i, 0);
-							const int jend = MIN(nfilter - 1, nfilter - 1 + (traceheader.nsamps - 1 - nfilter / 2 - i));
+							const int jstart = std::max(nfilter / 2 - i, 0);
+							const int jend = std::min(nfilter - 1, nfilter - 1 + (traceheader.nsamps - 1 - nfilter / 2 - i));
 							for (int j = jstart; j <= jend; j++) {
 								const int ii = i - nfilter / 2 + j;
 								worktrace[i] += filtertrace[j] * trace[ii];
@@ -937,12 +939,12 @@ int main(int argc, char **argv) {
 						const int iagchalfwindow = 0.5 * agcwindow / sampleinterval;
 						for (int i = 0; i <= traceheader.nsamps; i++) {
 							int igainstart = i - iagchalfwindow;
-							igainstart = MAX(0, igainstart);
+							igainstart = std::max(0, igainstart);
 							int igainend = i + iagchalfwindow;
-							igainend = MIN(traceheader.nsamps - 1, igainend);
+							igainend = std::min(traceheader.nsamps - 1, igainend);
 							double tmax = 0.0;
 							for (int j = igainstart; j <= igainend; j++) {
-								tmax = MAX(tmax, fabs(trace[j]));
+								tmax = std::max(tmax, static_cast<double>(fabs(trace[j])));
 							}
 							if (tmax > 0.0)
 								worktrace[i] = trace[i] * agcmaxvalue / tmax;
@@ -956,7 +958,7 @@ int main(int argc, char **argv) {
 					else if (agcmode) {
 						double tmax = 0.0;
 						for (int i = 0; i <= traceheader.nsamps; i++) {
-							tmax = MAX(tmax, fabs(trace[i]));
+							tmax = std::max(tmax, static_cast<double>(fabs(trace[i])));
 						}
 						if (tmax > 0.0)
 							factor = agcmaxvalue / tmax;
@@ -1011,8 +1013,8 @@ int main(int argc, char **argv) {
 		for (int k = 0; k < ngridxy; k++) {
 			if (gridweight[k] > 0.0) {
 				grid[k] = grid[k] / gridweight[k];
-				gridmintot = MIN(grid[k], gridmintot);
-				gridmaxtot = MAX(grid[k], gridmaxtot);
+				gridmintot = std::min(static_cast<double>(grid[k]), gridmintot);
+				gridmaxtot = std::max(static_cast<double>(grid[k]), gridmaxtot);
 			}
 			else {
 				grid[k] = NaN;
@@ -1065,8 +1067,8 @@ int main(int argc, char **argv) {
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&gridweight, &error);
 
 	/* run mbm_grdplot */
-	const double xwidth = MIN(0.01 * (double)ngridx, 55.0);
-	const double ywidth = MIN(0.01 * (double)ngridy, 28.0);
+	const double xwidth = std::min(0.01 * (double)ngridx, 55.0);
+	const double ywidth = std::min(0.01 * (double)ngridy, 28.0);
 	char plot_cmd[MB_PATH_MAXLINE] = "";
 	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -V -L\"File %s - %s:%s\"", gridfile, xwidth, ywidth, gridfile, title,
 	        zlabel);

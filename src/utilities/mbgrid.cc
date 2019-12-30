@@ -43,6 +43,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
@@ -996,30 +998,30 @@ int main(int argc, char **argv) {
 			yy = gbnd[2];
 			mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 			mb_apply_lonflip(verbose, lonflip, &xlon);
-			obnd[0] = MIN(obnd[0], xlon);
-			obnd[1] = MAX(obnd[1], xlon);
-			obnd[2] = MIN(obnd[2], ylat);
-			obnd[3] = MAX(obnd[3], ylat);
+			obnd[0] = std::min(obnd[0], xlon);
+			obnd[1] = std::max(obnd[1], xlon);
+			obnd[2] = std::min(obnd[2], ylat);
+			obnd[3] = std::max(obnd[3], ylat);
 
 			/* third point */
 			xx = gbnd[0];
 			yy = gbnd[3];
 			mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 			mb_apply_lonflip(verbose, lonflip, &xlon);
-			obnd[0] = MIN(obnd[0], xlon);
-			obnd[1] = MAX(obnd[1], xlon);
-			obnd[2] = MIN(obnd[2], ylat);
-			obnd[3] = MAX(obnd[3], ylat);
+			obnd[0] = std::min(obnd[0], xlon);
+			obnd[1] = std::max(obnd[1], xlon);
+			obnd[2] = std::min(obnd[2], ylat);
+			obnd[3] = std::max(obnd[3], ylat);
 
 			/* fourth point */
 			xx = gbnd[1];
 			yy = gbnd[3];
 			mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 			mb_apply_lonflip(verbose, lonflip, &xlon);
-			obnd[0] = MIN(obnd[0], xlon);
-			obnd[1] = MAX(obnd[1], xlon);
-			obnd[2] = MIN(obnd[2], ylat);
-			obnd[3] = MAX(obnd[3], ylat);
+			obnd[0] = std::min(obnd[0], xlon);
+			obnd[1] = std::max(obnd[1], xlon);
+			obnd[2] = std::min(obnd[2], ylat);
+			obnd[3] = std::max(obnd[3], ylat);
 		}
 
 		/* else translate bounds to UTM */
@@ -1043,28 +1045,28 @@ int main(int argc, char **argv) {
 			xlon = obnd[1];
 			ylat = obnd[2];
 			mb_proj_forward(verbose, pjptr, xlon, ylat, &xx, &yy, &error);
-			gbnd[0] = MIN(gbnd[0], xx);
-			gbnd[1] = MAX(gbnd[1], xx);
-			gbnd[2] = MIN(gbnd[2], yy);
-			gbnd[3] = MAX(gbnd[3], yy);
+			gbnd[0] = std::min(gbnd[0], xx);
+			gbnd[1] = std::max(gbnd[1], xx);
+			gbnd[2] = std::min(gbnd[2], yy);
+			gbnd[3] = std::max(gbnd[3], yy);
 
 			/* third point */
 			xlon = obnd[0];
 			ylat = obnd[3];
 			mb_proj_forward(verbose, pjptr, xlon, ylat, &xx, &yy, &error);
-			gbnd[0] = MIN(gbnd[0], xx);
-			gbnd[1] = MAX(gbnd[1], xx);
-			gbnd[2] = MIN(gbnd[2], yy);
-			gbnd[3] = MAX(gbnd[3], yy);
+			gbnd[0] = std::min(gbnd[0], xx);
+			gbnd[1] = std::max(gbnd[1], xx);
+			gbnd[2] = std::min(gbnd[2], yy);
+			gbnd[3] = std::max(gbnd[3], yy);
 
 			/* fourth point */
 			xlon = obnd[1];
 			ylat = obnd[3];
 			mb_proj_forward(verbose, pjptr, xlon, ylat, &xx, &yy, &error);
-			gbnd[0] = MIN(gbnd[0], xx);
-			gbnd[1] = MAX(gbnd[1], xx);
-			gbnd[2] = MIN(gbnd[2], yy);
-			gbnd[3] = MAX(gbnd[3], yy);
+			gbnd[0] = std::min(gbnd[0], xx);
+			gbnd[1] = std::max(gbnd[1], xx);
+			gbnd[2] = std::min(gbnd[2], yy);
+			gbnd[3] = std::max(gbnd[3], yy);
 		}
 
 		/* get local scaling of lon lat */
@@ -1223,35 +1225,35 @@ int main(int argc, char **argv) {
 		yy = wbnd[2] - 0.05 * (wbnd[3] - wbnd[2]);
 		mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 		mb_apply_lonflip(verbose, lonflip, &xlon);
-		bounds[0] = MIN(bounds[0], xlon);
-		bounds[1] = MAX(bounds[1], xlon);
-		bounds[2] = MIN(bounds[2], ylat);
-		bounds[3] = MAX(bounds[3], ylat);
+		bounds[0] = std::min(bounds[0], xlon);
+		bounds[1] = std::max(bounds[1], xlon);
+		bounds[2] = std::min(bounds[2], ylat);
+		bounds[3] = std::max(bounds[3], ylat);
 
 		/* do third point */
 		xx = wbnd[0] - 0.05 * (wbnd[1] - wbnd[0]);
 		yy = wbnd[3] + 0.05 * (wbnd[3] - wbnd[2]);
 		mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 		mb_apply_lonflip(verbose, lonflip, &xlon);
-		bounds[0] = MIN(bounds[0], xlon);
-		bounds[1] = MAX(bounds[1], xlon);
-		bounds[2] = MIN(bounds[2], ylat);
-		bounds[3] = MAX(bounds[3], ylat);
+		bounds[0] = std::min(bounds[0], xlon);
+		bounds[1] = std::max(bounds[1], xlon);
+		bounds[2] = std::min(bounds[2], ylat);
+		bounds[3] = std::max(bounds[3], ylat);
 
 		/* do fourth point */
 		xx = wbnd[1] + 0.05 * (wbnd[1] - wbnd[0]);
 		yy = wbnd[3] + 0.05 * (wbnd[3] - wbnd[2]);
 		mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 		mb_apply_lonflip(verbose, lonflip, &xlon);
-		bounds[0] = MIN(bounds[0], xlon);
-		bounds[1] = MAX(bounds[1], xlon);
-		bounds[2] = MIN(bounds[2], ylat);
-		bounds[3] = MAX(bounds[3], ylat);
+		bounds[0] = std::min(bounds[0], xlon);
+		bounds[1] = std::max(bounds[1], xlon);
+		bounds[2] = std::min(bounds[2], ylat);
+		bounds[3] = std::max(bounds[3], ylat);
 	}
 
 	/* extend the bounds slightly to be sure no data gets missed */
-	xx = MIN(0.05 * (bounds[1] - bounds[0]), 0.1);
-	yy = MIN(0.05 * (bounds[3] - bounds[2]), 0.1);
+	xx = std::min(0.05 * (bounds[1] - bounds[0]), 0.1);
+	yy = std::min(0.05 * (bounds[3] - bounds[2]), 0.1);
 	bounds[0] = bounds[0] - xx;
 	bounds[1] = bounds[1] + xx;
 	bounds[2] = bounds[2] - yy;
@@ -1271,7 +1273,7 @@ int main(int argc, char **argv) {
 	if ((clipmode == MBGRID_INTERP_GAP || clipmode == MBGRID_INTERP_NEAR) && clip > xdim && clip > ydim)
 		clipmode = MBGRID_INTERP_ALL;
 	if (clipmode == MBGRID_INTERP_ALL)
-		clip = MAX(xdim, ydim);
+		clip = std::max(xdim, ydim);
 
 	/* set origin used to reduce data value size before conversion from
 	 * double to float when calling the interpolation routines */
@@ -1730,7 +1732,7 @@ int main(int argc, char **argv) {
 		const double sdy = 2.0 * dy;
 		int sxdim = gxdim / 2;
 		int sydim = gydim / 2;
-		int sclip = MAX(gxdim, gydim);
+		int sclip = std::max(gxdim, gydim);
 
 		/* allocate memory for additional arrays */
 		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(double), (void **)&norm, &error);
@@ -2241,8 +2243,8 @@ int main(int argc, char **argv) {
 										/* get slope from low resolution grid */
 										int isx = (bathlon[ib] - wbnd[0] + 0.5 * sdx) / sdx;
 										int isy = (bathlat[ib] - wbnd[2] + 0.5 * sdy) / sdy;
-										isx = MIN(MAX(isx, 0), sxdim - 1);
-										isy = MIN(MAX(isy, 0), sydim - 1);
+										isx = std::min(std::max(isx, 0), sxdim - 1);
+										isy = std::min(std::max(isy, 0), sydim - 1);
 										double dzdx;
 										double dzdy;
 										if (isx == 0) {
@@ -2362,12 +2364,12 @@ int main(int argc, char **argv) {
 													foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
 													foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
 												}
-												foot_dix = 2 * MAX(foot_wix, foot_lix);
-												foot_diy = 2 * MAX(foot_wiy, foot_liy);
-												ix1 = MAX(ix - foot_dix, 0);
-												ix2 = MIN(ix + foot_dix, gxdim - 1);
-												iy1 = MAX(iy - foot_diy, 0);
-												iy2 = MIN(iy + foot_diy, gydim - 1);
+												foot_dix = 2 * std::max(foot_wix, foot_lix);
+												foot_diy = 2 * std::max(foot_wiy, foot_liy);
+												ix1 = std::max(ix - foot_dix, 0);
+												ix2 = std::min(ix + foot_dix, gxdim - 1);
+												iy1 = std::max(iy - foot_diy, 0);
+												iy2 = std::min(iy + foot_diy, gydim - 1);
 
 												/* loop over neighborhood of bins */
 												for (int ii = ix1; ii <= ix2; ii++)
@@ -2755,12 +2757,12 @@ int main(int argc, char **argv) {
 													foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
 													foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
 												}
-												foot_dix = 2 * MAX(foot_wix, foot_lix);
-												foot_diy = 2 * MAX(foot_wiy, foot_liy);
-												ix1 = MAX(ix - foot_dix, 0);
-												ix2 = MIN(ix + foot_dix, gxdim - 1);
-												iy1 = MAX(iy - foot_diy, 0);
-												iy2 = MIN(iy + foot_diy, gydim - 1);
+												foot_dix = 2 * std::max(foot_wix, foot_lix);
+												foot_diy = 2 * std::max(foot_wiy, foot_liy);
+												ix1 = std::max(ix - foot_dix, 0);
+												ix2 = std::min(ix + foot_dix, gxdim - 1);
+												iy1 = std::max(iy - foot_diy, 0);
+												iy2 = std::min(iy + foot_diy, gydim - 1);
 
 												/* loop over neighborhood of bins */
 												for (int ii = ix1; ii <= ix2; ii++)
@@ -3600,10 +3602,10 @@ int main(int argc, char **argv) {
 									/* process if in region of interest */
 									if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim &&
 									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
-										ix1 = MAX(ix - xtradim, 0);
-										ix2 = MIN(ix + xtradim, gxdim - 1);
-										iy1 = MAX(iy - xtradim, 0);
-										iy2 = MIN(iy + xtradim, gydim - 1);
+										ix1 = std::max(ix - xtradim, 0);
+										ix2 = std::min(ix + xtradim, gxdim - 1);
+										iy1 = std::max(iy - xtradim, 0);
+										iy2 = std::min(iy + xtradim, gydim - 1);
 										for (int ii = ix1; ii <= ix2; ii++)
 											for (int jj = iy1; jj <= iy2; jj++) {
 												kgrid = ii * gydim + jj;
@@ -3693,10 +3695,10 @@ int main(int argc, char **argv) {
 									/* process if in region of interest */
 									if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim &&
 									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
-										ix1 = MAX(ix - xtradim, 0);
-										ix2 = MIN(ix + xtradim, gxdim - 1);
-										iy1 = MAX(iy - xtradim, 0);
-										iy2 = MIN(iy + xtradim, gydim - 1);
+										ix1 = std::max(ix - xtradim, 0);
+										ix2 = std::min(ix + xtradim, gxdim - 1);
+										iy1 = std::max(iy - xtradim, 0);
+										iy2 = std::min(iy + xtradim, gydim - 1);
 										for (int ii = ix1; ii <= ix2; ii++)
 											for (int jj = iy1; jj <= iy2; jj++) {
 												kgrid = ii * gydim + jj;
@@ -3782,10 +3784,10 @@ int main(int argc, char **argv) {
 									/* process if in region of interest */
 									if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim &&
 									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
-										ix1 = MAX(ix - xtradim, 0);
-										ix2 = MIN(ix + xtradim, gxdim - 1);
-										iy1 = MAX(iy - xtradim, 0);
-										iy2 = MIN(iy + xtradim, gydim - 1);
+										ix1 = std::max(ix - xtradim, 0);
+										ix2 = std::min(ix + xtradim, gxdim - 1);
+										iy1 = std::max(iy - xtradim, 0);
+										iy2 = std::min(iy + xtradim, gydim - 1);
 										for (int ii = ix1; ii <= ix2; ii++)
 											for (int jj = iy1; jj <= iy2; jj++) {
 												kgrid = ii * gydim + jj;
@@ -3880,10 +3882,10 @@ int main(int argc, char **argv) {
 					/* process the data */
 					if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim && iy >= -xtradim &&
 					    iy < gydim + xtradim && time_ok) {
-						ix1 = MAX(ix - xtradim, 0);
-						ix2 = MIN(ix + xtradim, gxdim - 1);
-						iy1 = MAX(iy - xtradim, 0);
-						iy2 = MIN(iy + xtradim, gydim - 1);
+						ix1 = std::max(ix - xtradim, 0);
+						ix2 = std::min(ix + xtradim, gxdim - 1);
+						iy1 = std::max(iy - xtradim, 0);
+						iy2 = std::min(iy + xtradim, gydim - 1);
 						for (int ii = ix1; ii <= ix2; ii++)
 							for (int jj = iy1; jj <= iy2; jj++) {
 								kgrid = ii * gydim + jj;
@@ -4533,10 +4535,10 @@ int main(int argc, char **argv) {
 									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
 										kgrid = ix * gydim + iy;
                     if (fabs(minormax[kgrid] - topofactor * bath[ib]) < minormax_weighted_mean_threshold) {
-  										ix1 = MAX(ix - xtradim, 0);
-  										ix2 = MIN(ix + xtradim, gxdim - 1);
-  										iy1 = MAX(iy - xtradim, 0);
-  										iy2 = MIN(iy + xtradim, gydim - 1);
+  										ix1 = std::max(ix - xtradim, 0);
+  										ix2 = std::min(ix + xtradim, gxdim - 1);
+  										iy1 = std::max(iy - xtradim, 0);
+  										iy2 = std::min(iy + xtradim, gydim - 1);
   										for (int ii = ix1; ii <= ix2; ii++) {
   											for (int jj = iy1; jj <= iy2; jj++) {
   												kgrid = ii * gydim + jj;
@@ -4614,10 +4616,10 @@ int main(int argc, char **argv) {
 									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
 										kgrid = ix * gydim + iy;
                     if (fabs(minormax[kgrid] - amp[ib]) < minormax_weighted_mean_threshold) {
-  										ix1 = MAX(ix - xtradim, 0);
-  										ix2 = MIN(ix + xtradim, gxdim - 1);
-  										iy1 = MAX(iy - xtradim, 0);
-  										iy2 = MIN(iy + xtradim, gydim - 1);
+  										ix1 = std::max(ix - xtradim, 0);
+  										ix2 = std::min(ix + xtradim, gxdim - 1);
+  										iy1 = std::max(iy - xtradim, 0);
+  										iy2 = std::min(iy + xtradim, gydim - 1);
   										for (int ii = ix1; ii <= ix2; ii++)
   											for (int jj = iy1; jj <= iy2; jj++) {
   												kgrid = ii * gydim + jj;
@@ -4693,10 +4695,10 @@ int main(int argc, char **argv) {
 									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
 										kgrid = ix * gydim + iy;
                     if (fabs(minormax[kgrid] - ss[ib]) < minormax_weighted_mean_threshold) {
-  										ix1 = MAX(ix - xtradim, 0);
-  										ix2 = MIN(ix + xtradim, gxdim - 1);
-  										iy1 = MAX(iy - xtradim, 0);
-  										iy2 = MIN(iy + xtradim, gydim - 1);
+  										ix1 = std::max(ix - xtradim, 0);
+  										ix2 = std::min(ix + xtradim, gxdim - 1);
+  										iy1 = std::max(iy - xtradim, 0);
+  										iy2 = std::min(iy + xtradim, gydim - 1);
   										for (int ii = ix1; ii <= ix2; ii++)
   											for (int jj = iy1; jj <= iy2; jj++) {
   												kgrid = ii * gydim + jj;
@@ -4958,7 +4960,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		}*/
 		if (clipmode == MBGRID_INTERP_ALL)
-			clip = MAX(gxdim, gydim);
+			clip = std::max(gxdim, gydim);
 		mb_zgrid(sgrid, &gxdim, &gydim, &xmin, &ymin, &ddx, &ddy, sdata, &ndata, work1, work2, work3, &cay, &clip);
 #endif
 
@@ -4992,10 +4994,10 @@ int main(int argc, char **argv) {
 						// TODO(schwehr): Is num an int or a bool?
 						for (int ir = 0; ir <= clip && num[kgrid] == false; ir++) {
 							/* set bounds of search */
-							const int i1 = MAX(0, i - ir);
-							const int i2 = MIN(gxdim - 1, i + ir);
-							const int j1 = MAX(0, j - ir);
-							const int j2 = MIN(gydim - 1, j + ir);
+							const int i1 = std::max(0, i - ir);
+							const int i2 = std::min(gxdim - 1, i + ir);
+							const int j1 = std::max(0, j - ir);
+							const int j2 = std::min(gydim - 1, j + ir);
 
 							int jj = j1;
 							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
@@ -5087,10 +5089,10 @@ int main(int argc, char **argv) {
 						/* loop over rings around point, starting close */
 						for (int ir = 0; ir <= clip && num[kgrid] == false; ir++) {
 							/* set bounds of search */
-							const int i1 = MAX(0, i - ir);
-							const int i2 = MIN(gxdim - 1, i + ir);
-							const int j1 = MAX(0, j - ir);
-							const int j2 = MIN(gydim - 1, j + ir);
+							const int i1 = std::max(0, i - ir);
+							const int i2 = std::min(gxdim - 1, i + ir);
+							const int j1 = std::max(0, j - ir);
+							const int j2 = std::min(gydim - 1, j + ir);
 
 							int jj = j1;
 							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
@@ -5220,7 +5222,7 @@ int main(int argc, char **argv) {
 		float ymin = (float)(wbnd[2] - 0.5 * dy - bdata_origin_y);
 		float ddx = (float)dx;
 		float ddy = (float)dy;
-		clip = MAX(gxdim, gydim);
+		clip = std::max(gxdim, gydim);
 		fprintf(outfp, "\nDoing Zgrid spline interpolation with %d background points...\n", nbackground);
 		mb_zgrid(sgrid, &gxdim, &gydim, &xmin, &ymin, &ddx, &ddy, bdata, &nbackground, work1, work2, work3, &cay, &clip);
 #endif

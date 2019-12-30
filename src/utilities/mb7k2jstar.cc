@@ -28,6 +28,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -1055,7 +1057,7 @@ int main(int argc, char **argv) {
 							for (int i = 0; i < channel->samples; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
-								channelmax = MAX(value, channelmax);
+								channelmax = std::max(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
@@ -1070,7 +1072,7 @@ int main(int argc, char **argv) {
 							channelmax = 0.0;
 							for (int i = 0; i < channel->samples; i++) {
 								value = (double)(channel->trace[i]);
-								channelmax = MAX(value, channelmax);
+								channelmax = std::max(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
@@ -1291,7 +1293,7 @@ int main(int argc, char **argv) {
 							for (int i = 0; i < channel->samples; i++) {
 								int n = 0;
 								channel->trace[i] = 0.0;
-								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
+								for (int j = std::max(i - smooth, 0); j < std::min(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
 								}
@@ -1303,7 +1305,7 @@ int main(int argc, char **argv) {
 							for (int i = 0; i < channel->samples; i++) {
 								int n = 0;
 								value = 0.0;
-								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
+								for (int j = std::max(i + smooth, 0); j < std::min(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
 								}
@@ -1326,7 +1328,7 @@ int main(int argc, char **argv) {
 							for (int i = 0; i < channel->samples; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
-								channelmax = MAX(value, channelmax);
+								channelmax = std::max(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
@@ -1341,7 +1343,7 @@ int main(int argc, char **argv) {
 							channelmax = 0.0;
 							for (int i = 0; i < channel->samples; i++) {
 								value = (double)(channel->trace[i]);
-								channelmax = MAX(value, channelmax);
+								channelmax = std::max(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
@@ -1367,7 +1369,7 @@ int main(int argc, char **argv) {
 					/* apply gain if specified */
 					if (gainmode == MB7K2JSTAR_SSGAIN_TVG_1OVERR) {
 						channelpick = (int)(((double)channel->sonarAltitude) / 0.00075 / ((double)channel->sampleInterval));
-						channelpick = MAX(channelpick, 1);
+						channelpick = std::max(channelpick, 1);
 						for (int i = 0; i < channelpick; i++) {
 							channel->trace[i] = (unsigned short)(gainfactor * channel->trace[i]);
 						}
@@ -1559,7 +1561,7 @@ int main(int argc, char **argv) {
 							for (int i = 0; i < channel->samples; i++) {
 								int n = 0;
 								channel->trace[i] = 0.0;
-								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
+								for (int j = std::max(i - smooth, 0); j < std::min(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
 								}
@@ -1571,7 +1573,7 @@ int main(int argc, char **argv) {
 							for (int i = 0; i < channel->samples; i++) {
 								int n = 0;
 								value = 0.0;
-								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
+								for (int j = std::max(i + smooth, 0); j < std::min(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
 								}
@@ -1594,7 +1596,7 @@ int main(int argc, char **argv) {
 							for (int i = 0; i < channel->samples; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
-								channelmax = MAX(value, channelmax);
+								channelmax = std::max(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
@@ -1609,7 +1611,7 @@ int main(int argc, char **argv) {
 							channelmax = 0.0;
 							for (int i = 0; i < channel->samples; i++) {
 								value = (double)(channel->trace[i]);
-								channelmax = MAX(value, channelmax);
+								channelmax = std::max(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
@@ -1635,7 +1637,7 @@ int main(int argc, char **argv) {
 					/* apply gain if specified */
 					if (gainmode == MB7K2JSTAR_SSGAIN_TVG_1OVERR) {
 						channelpick = (int)(((double)channel->sonarAltitude) / 0.00075 / ((double)channel->sampleInterval));
-						channelpick = MAX(channelpick, 1);
+						channelpick = std::max(channelpick, 1);
 						for (int i = channelpick; i < channel->samples; i++) {
 							factor = gainfactor * (((double)(i * i)) / ((double)(channelpick * channelpick)));
 							channel->trace[i] = (unsigned short)(factor * channel->trace[i]);
@@ -1837,7 +1839,7 @@ int main(int argc, char **argv) {
 							for (int i = 0; i < channel->samples; i++) {
 								int n = 0;
 								channel->trace[i] = 0.0;
-								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
+								for (int j = std::max(i - smooth, 0); j < std::min(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
 								}
@@ -1849,7 +1851,7 @@ int main(int argc, char **argv) {
 							for (int i = 0; i < channel->samples; i++) {
 								int n = 0;
 								value = 0.0;
-								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
+								for (int j = std::max(i + smooth, 0); j < std::min(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
 								}
@@ -1872,7 +1874,7 @@ int main(int argc, char **argv) {
 							for (int i = 0; i < channel->samples; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
-								channelmax = MAX(value, channelmax);
+								channelmax = std::max(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
@@ -1887,7 +1889,7 @@ int main(int argc, char **argv) {
 							channelmax = 0.0;
 							for (int i = 0; i < channel->samples; i++) {
 								value = (double)(channel->trace[i]);
-								channelmax = MAX(value, channelmax);
+								channelmax = std::max(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
@@ -2089,7 +2091,7 @@ int main(int argc, char **argv) {
 							for (int i = 0; i < channel->samples; i++) {
 								int n = 0;
 								channel->trace[i] = 0.0;
-								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
+								for (int j = std::max(i - smooth, 0); j < std::min(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
 								}
@@ -2101,7 +2103,7 @@ int main(int argc, char **argv) {
 							for (int i = 0; i < channel->samples; i++) {
 								int n = 0;
 								value = 0.0;
-								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
+								for (int j = std::max(i + smooth, 0); j < std::min(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
 								}
@@ -2124,7 +2126,7 @@ int main(int argc, char **argv) {
 							for (int i = 0; i < channel->samples; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
-								channelmax = MAX(value, channelmax);
+								channelmax = std::max(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
@@ -2139,7 +2141,7 @@ int main(int argc, char **argv) {
 							channelmax = 0.0;
 							for (int i = 0; i < channel->samples; i++) {
 								value = (double)(channel->trace[i]);
-								channelmax = MAX(value, channelmax);
+								channelmax = std::max(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;

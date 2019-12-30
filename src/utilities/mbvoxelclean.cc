@@ -51,6 +51,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_info.h"
@@ -736,12 +738,12 @@ int main(int argc, char **argv) {
 						    z_max = pings[n_pings].bathz[j];
 						    first = false;
 						} else {
-						    x_min = MIN(x_min, pings[n_pings].bathx[j]);
-						    x_max = MAX(x_max, pings[n_pings].bathx[j]);
-						    y_min = MIN(y_min, pings[n_pings].bathy[j]);
-						    y_max = MAX(y_max, pings[n_pings].bathy[j]);
-						    z_min = MIN(z_min, pings[n_pings].bathz[j]);
-						    z_max = MAX(z_max, pings[n_pings].bathz[j]);
+						    x_min = std::min(x_min, pings[n_pings].bathx[j]);
+						    x_max = std::max(x_max, pings[n_pings].bathx[j]);
+						    y_min = std::min(y_min, pings[n_pings].bathy[j]);
+						    y_max = std::max(y_max, pings[n_pings].bathy[j]);
+						    z_min = std::min(z_min, pings[n_pings].bathz[j]);
+						    z_max = std::max(z_max, pings[n_pings].bathz[j]);
 						}
 					    } else {
 						pings[n_pings].bathx[j] = 0.0;
@@ -852,7 +854,7 @@ int main(int argc, char **argv) {
 						const int iz = (pings[i].bathz[j] - z_min) / voxel_size_z;
 						const int kk = (ix * n_voxel_y + iy) * n_voxel_z + iz;
 						if (mb_beam_ok(pings[i].beamflag[j]) || count_flagged) {
-							voxel_count[kk] = MIN(voxel_count[kk] + 1, (unsigned char) 255);
+							voxel_count[kk] = std::min(voxel_count[kk] + 1, 255);
 						}
 					}
 				}

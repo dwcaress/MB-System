@@ -45,6 +45,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_info.h"
@@ -1016,7 +1018,7 @@ int main(int argc, char **argv) {
 			const int kgrid = ix * ny + iy;
 			// xx = areabounds[0] + 0.5 * dx + ix * dx;
 			// yy = areabounds[3] + 0.5 * dy + iy * dy;
-			binnummax = MAX(binnummax, gsndgnum[kgrid]);
+			binnummax = std::max(binnummax, gsndgnum[kgrid]);
 		}
         }
 	/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, binnummax * sizeof(double), (void **)&(bindepths), &error);

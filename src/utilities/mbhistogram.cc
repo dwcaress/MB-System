@@ -30,6 +30,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_define.h"
 #include "mb_status.h"
 
@@ -465,8 +467,8 @@ int main(int argc, char **argv) {
 								data_first = false;
 							}
 							else {
-								data_min = MIN(bath[i], data_min);
-								data_max = MAX(bath[i], data_max);
+								data_min = std::min(bath[i], data_min);
+								data_max = std::max(bath[i], data_max);
 							}
 						}
 					}
@@ -485,8 +487,8 @@ int main(int argc, char **argv) {
 								data_first = false;
 							}
 							else {
-								data_min = MIN(amp[i], data_min);
-								data_max = MAX(amp[i], data_max);
+								data_min = std::min(amp[i], data_min);
+								data_max = std::max(amp[i], data_max);
 							}
 						}
 					}
@@ -505,8 +507,8 @@ int main(int argc, char **argv) {
 								data_first = false;
 							}
 							else {
-								data_min = MIN(ss[i], data_min);
-								data_max = MAX(ss[i], data_max);
+								data_min = std::min(ss[i], data_min);
+								data_max = std::max(ss[i], data_max);
 							}
 						}
 					}
@@ -565,8 +567,8 @@ int main(int argc, char **argv) {
 		dinterval = (target_max - target_min) / (nintervals - 1);
 
 		/* get intervals */
-		intervals[0] = MAX(data_min, value_min);
-		intervals[nintervals - 1] = MIN(data_max, value_max);
+		intervals[0] = std::max(data_min, value_min);
+		intervals[nintervals - 1] = std::min(data_max, value_max);
 		ibin = 0;
 		for (int j = 1; j < nintervals - 1; j++) {
 			target = target_min + j * dinterval;

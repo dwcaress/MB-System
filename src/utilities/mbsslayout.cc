@@ -31,6 +31,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
@@ -1469,7 +1471,7 @@ int main(int argc, char **argv) {
 
 				/* allocate memory if needed */
 				if (status == MB_SUCCESS && nanav > 0 && n_nav + nanav >= n_nav_alloc) {
-					n_nav_alloc += MAX(MBSSLAYOUT_ALLOC_CHUNK, nanav);
+					n_nav_alloc += std::max(MBSSLAYOUT_ALLOC_CHUNK, nanav);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_time_d, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlon, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlat, &error);
@@ -1503,7 +1505,7 @@ int main(int argc, char **argv) {
 
 				/* allocate memory if needed */
 				if (status == MB_SUCCESS && nanav > 0 && n_sensordepth + nanav >= n_sensordepth_alloc) {
-					n_sensordepth_alloc += MAX(MBSSLAYOUT_ALLOC_CHUNK, nanav);
+					n_sensordepth_alloc += std::max(MBSSLAYOUT_ALLOC_CHUNK, nanav);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
 					                     (void **)&sensordepth_time_d, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
@@ -1536,7 +1538,7 @@ int main(int argc, char **argv) {
 
 				/* allocate memory if needed */
 				if (status == MB_SUCCESS && n_altitude + 1 >= n_altitude_alloc) {
-					n_altitude_alloc += MAX(MBSSLAYOUT_ALLOC_CHUNK, nanav);
+					n_altitude_alloc += std::max(MBSSLAYOUT_ALLOC_CHUNK, nanav);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
 					                     (void **)&altitude_time_d, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
@@ -1566,7 +1568,7 @@ int main(int argc, char **argv) {
 
 				/* allocate memory if needed */
 				if (status == MB_SUCCESS && nanav > 0 && n_heading + nanav >= n_heading_alloc) {
-					n_heading_alloc += MAX(MBSSLAYOUT_ALLOC_CHUNK, nanav);
+					n_heading_alloc += std::max(MBSSLAYOUT_ALLOC_CHUNK, nanav);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_time_d,
 					                     &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_heading,
@@ -1598,7 +1600,7 @@ int main(int argc, char **argv) {
 
 				/* allocate memory if needed */
 				if (status == MB_SUCCESS && nanav > 0 && n_attitude + nanav >= n_attitude_alloc) {
-					n_attitude_alloc += MAX(MBSSLAYOUT_ALLOC_CHUNK, nanav);
+					n_attitude_alloc += std::max(MBSSLAYOUT_ALLOC_CHUNK, nanav);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double),
 					                     (void **)&attitude_time_d, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_roll,
@@ -1636,7 +1638,7 @@ int main(int argc, char **argv) {
 
 				/* allocate memory if needed */
 				if (status == MB_SUCCESS && nactd > 0 && n_soundspeed + nactd >= n_soundspeed_alloc) {
-					n_soundspeed_alloc += MAX(MBSSLAYOUT_ALLOC_CHUNK, nactd);
+					n_soundspeed_alloc += std::max(MBSSLAYOUT_ALLOC_CHUNK, nactd);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_soundspeed_alloc * sizeof(double),
 					                     (void **)&soundspeed_time_d, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_soundspeed_alloc * sizeof(double),
@@ -2310,7 +2312,7 @@ int main(int argc, char **argv) {
 					/* get bottom arrival in port trace */
 					channelmax = 0.0;
 					for (int i = 0; i < num_samples_port; i++) {
-						channelmax = MAX(raw_samples_port[i], channelmax);
+						channelmax = std::max(raw_samples_port[i], channelmax);
 					}
 					portchannelpick = 0;
 					threshold = bottompick_threshold * channelmax;
@@ -2322,7 +2324,7 @@ int main(int argc, char **argv) {
 					/* get bottom arrival in starboard trace */
 					channelmax = 0.0;
 					for (int i = 0; i < num_samples_stbd; i++) {
-						channelmax = MAX(raw_samples_stbd[i], channelmax);
+						channelmax = std::max(raw_samples_stbd[i], channelmax);
 					}
 					stbdchannelpick = 0;
 					threshold = bottompick_threshold * channelmax;
@@ -2372,7 +2374,7 @@ int main(int argc, char **argv) {
 
 				/* get swath width and pixel size */
 				if (swath_mode == MBSSLAYOUT_SWATHWIDTH_VARIABLE) {
-					const double rr = 0.5 * soundspeed * sample_interval * MAX(num_samples_port, num_samples_stbd);
+					const double rr = 0.5 * soundspeed * sample_interval * std::max(num_samples_port, num_samples_stbd);
 					swath_width = 2.2 * sqrt(rr * rr - ss_altitude * ss_altitude);
 				}
 				pixel_width = swath_width / (opixels_ss - 1);

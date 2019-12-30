@@ -62,6 +62,8 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#include <algorithm>
+
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -986,7 +988,7 @@ int main(int argc, char **argv) {
 
           /* zap outer beams by number if requested */
           if (zap_beams) {
-            for (int i = 0; i < MIN(zap_beams_left, center); i++) {
+            for (int i = 0; i < std::min(zap_beams_left, center); i++) {
               if (mb_beam_ok(ping[irec].beamflag[i])) {
                 if (verbose >= 1)
                   fprintf(stderr, "x: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f\n", ping[irec].time_i[0],
@@ -1000,7 +1002,7 @@ int main(int argc, char **argv) {
                             i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, MBP_EDIT_FILTER, &error);
               }
             }
-            for (int i = 0; i < MIN(zap_beams_right, center); i++) {
+            for (int i = 0; i < std::min(zap_beams_right, center); i++) {
               int j = ping[irec].beams_bath - i - 1;
               if (mb_beam_ok(ping[irec].beamflag[j])) {
                 if (verbose >= 1)

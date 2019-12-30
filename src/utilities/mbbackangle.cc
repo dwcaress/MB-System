@@ -34,6 +34,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
@@ -120,8 +122,8 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 		int i0;
 		int i1;
 		if (fabs(angle) > MBBACKANGLE_INNERSWATHLIMIT) {
-			i0 = MAX(i - 1, 0);
-			i1 = MIN(i + 1, nangles - 1);
+			i0 = std::max(i - 1, 0);
+			i1 = std::min(i + 1, nangles - 1);
 		}
 		else {
 			i0 = i;
@@ -191,8 +193,8 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 
 	/* get average amplitude at reference angle */
 	const int iref = (angle_max - ref_angle) / dangle;
-	const int i0 = MAX(iref - 1, 0);
-	const int i1 = MIN(iref + 1, nangles - 1);
+	const int i0 = std::max(iref - 1, 0);
+	const int i1 = std::min(iref + 1, nangles - 1);
 	double ref_amp = 0.0;
 	double sum = 0.0;
 	double sumsq = 0.0;
@@ -1442,7 +1444,7 @@ int main(int argc, char **argv) {
 					for (jy = 0; jy < gridampn_rows; jy++) {
 						const int k = ix * gridampn_rows + jy;
 						gridamphist[k] /= norm;
-						ampmax = MAX(ampmax, gridamphist[k]);
+						ampmax = std::max(ampmax, static_cast<double>(gridamphist[k]));
 					}
 				}
 			}
@@ -1483,7 +1485,7 @@ int main(int argc, char **argv) {
 					for (jy = 0; jy < gridssn_rows; jy++) {
 						const int k = ix * gridssn_rows + jy;
 						gridsshist[k] /= norm;
-						ampmax = MAX(ampmax, gridsshist[k]);
+						ampmax = std::max(ampmax, static_cast<double>(gridsshist[k]));
 					}
 				}
 			}

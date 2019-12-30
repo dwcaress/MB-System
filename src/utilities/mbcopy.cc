@@ -32,6 +32,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -381,7 +383,7 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
     ostore->sid_wgt_samplesright = 0; /* number of right samples */
 
     /* comment */
-    for (int i = 0; i < MIN(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH); i++)
+    for (int i = 0; i < std::min(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH); i++)
       ostore->comment[i] = istore->comment[i];
 
     /* unsupported frame */
@@ -454,7 +456,7 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
     ostore->line_number = 0;
     ostore->start_or_stop = 0;
     ostore->transducer_serial_number = 0;
-    for (int i = 0; i < MIN(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH); i++)
+    for (int i = 0; i < std::min(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH); i++)
       ostore->comment[i] = istore->comment[i];
 
     /* position (position telegrams) */
