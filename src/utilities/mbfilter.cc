@@ -40,6 +40,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -1104,8 +1106,8 @@ int main(int argc, char **argv) {
 		int nhold_ping = 1;
 		int nweightmax = 1;
 		for (int i = 0; i < num_filters; i++) {
-			nhold_ping = MAX(nhold_ping, filters[i].ldim);
-			nweightmax = MAX(nweightmax, filters[i].xdim * filters[i].ldim);
+			nhold_ping = std::max(nhold_ping, filters[i].ldim);
+			nweightmax = std::max(nweightmax, filters[i].xdim * filters[i].ldim);
 		}
 
 		/* allocate memory for weights */
@@ -1309,7 +1311,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* get start of ping output range */
-			const int jbeg = first ? 0 : MIN(nhold / 2 + 1, ndata);
+			const int jbeg = first ? 0 : std::min(nhold / 2 + 1, ndata);
 			if (first) { first = false; }
 
 			/* find number of pings to hold */

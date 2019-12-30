@@ -28,6 +28,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_segy.h"
@@ -795,7 +797,7 @@ int main(int argc, char **argv) {
 							fprintf(sfp, "%s", command);
 
 							sprintf(command, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-O %s_%4.4d_%2.2d_section\n",
-							        output_file, (startshot + i * nshotmax), MIN((startshot + (i + 1) * nshotmax - 1), endshot),
+							        output_file, (startshot + i * nshotmax), std::min((startshot + (i + 1) * nshotmax - 1), endshot),
 							        sweep, delay, lineroot, linenumber, i + 1);
 							fprintf(stderr, "%s", command);
 							fprintf(sfp, "%s", command);
@@ -864,7 +866,7 @@ int main(int argc, char **argv) {
 				}
 				if (status == MB_SUCCESS &&
 				    (buffer_alloc < MB_SEGY_TRACEHEADER_LENGTH || buffer_alloc < segytraceheader.nsamps * samplesize)) {
-					buffer_alloc = MAX(MB_SEGY_TRACEHEADER_LENGTH, segytraceheader.nsamps * samplesize);
+					buffer_alloc = std::max(MB_SEGY_TRACEHEADER_LENGTH, segytraceheader.nsamps * samplesize);
 					status = mb_mallocd(verbose, __FILE__, __LINE__, buffer_alloc, (void **)&buffer, &error);
 					if (status != MB_SUCCESS)
 						buffer_alloc = 0;
@@ -954,8 +956,8 @@ int main(int argc, char **argv) {
 					tracemax = segydata[0];
 					tracerms = 0.0;
 					for (int i = 0; i < segytraceheader.nsamps; i++) {
-						tracemin = MIN(tracemin, segydata[i]);
-						tracemax = MAX(tracemax, segydata[i]);
+						tracemin = std::min(tracemin, static_cast<double>(segydata[i]));
+						tracemax = std::max(tracemax, static_cast<double>(segydata[i]));
 						tracerms += segydata[i] * segydata[i];
 					}
 					tracerms = sqrt(tracerms / segytraceheader.nsamps);
@@ -974,9 +976,9 @@ int main(int argc, char **argv) {
 						endlon = ((double)segytraceheader.src_long) / 360000.0;
 						endlat = ((double)segytraceheader.src_lat) / 360000.0;
 						endshot = segytraceheader.shot_num;
-						linetracemin = MIN(tracemin, linetracemin);
-						linetracemax = MAX(tracemax, linetracemax);
-						linetracelength = MAX(tracelength, linetracelength);
+						linetracemin = std::min(tracemin, linetracemin);
+						linetracemax = std::max(tracemax, linetracemax);
+						linetracelength = std::max(tracelength, linetracelength);
 					}
 
 					/* check for new section plot */
@@ -990,8 +992,8 @@ int main(int argc, char **argv) {
 							seafloordepthmax = 0.01 * ((double)segytraceheader.src_wbd);
 						}
 						else {
-							seafloordepthmin = MIN(seafloordepthmin, 0.01 * ((double)segytraceheader.src_wbd));
-							seafloordepthmax = MAX(seafloordepthmax, 0.01 * ((double)segytraceheader.src_wbd));
+							seafloordepthmin = std::min(seafloordepthmin, 0.01 * ((double)segytraceheader.src_wbd));
+							seafloordepthmax = std::max(seafloordepthmax, 0.01 * ((double)segytraceheader.src_wbd));
 						}
 						if (seafloordepthminplot[nplot] < 0.0) {
 							seafloordepthminplot[nplot] = 0.01 * ((double)segytraceheader.src_wbd);
@@ -999,9 +1001,9 @@ int main(int argc, char **argv) {
 						}
 						else {
 							seafloordepthminplot[nplot] =
-							    MIN(seafloordepthminplot[nplot], 0.01 * ((double)segytraceheader.src_wbd));
+							    std::min(seafloordepthminplot[nplot], 0.01 * ((double)segytraceheader.src_wbd));
 							seafloordepthmaxplot[nplot] =
-							    MAX(seafloordepthmaxplot[nplot], 0.01 * ((double)segytraceheader.src_wbd));
+							    std::max(seafloordepthmaxplot[nplot], 0.01 * ((double)segytraceheader.src_wbd));
 						}
 					}
 
@@ -1389,7 +1391,7 @@ int main(int argc, char **argv) {
 					fprintf(sfp, "%s", command);
 
 					sprintf(command, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-O %s_%4.4d_%2.2d_section\n",
-					        output_file, (startshot + i * nshotmax), MIN((startshot + (i + 1) * nshotmax - 1), endshot), sweep,
+					        output_file, (startshot + i * nshotmax), std::min((startshot + (i + 1) * nshotmax - 1), endshot), sweep,
 					        delay, lineroot, linenumber, i + 1);
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);

@@ -31,6 +31,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "fftw3.h"
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -436,11 +438,11 @@ int main(int argc, char **argv) {
 	int itstart =
 		windowmode == MBSEGYPSD_WINDOW_OFF
 		? 0
-		: MAX((windowstart) / sampleinterval, 0);
+		: std::max((windowstart) / sampleinterval, 0.0);
 	int itend =
 		windowmode == MBSEGYPSD_WINDOW_OFF
 		? ngridy - 1
-		: MIN((windowend) / sampleinterval, ngridy - 1);
+		: std::min((windowend) / sampleinterval, ngridy - 1.0);
 
 
 	/* allocate memory for grid array */
@@ -591,8 +593,8 @@ int main(int argc, char **argv) {
 				double tracemin = trace[0];
 				double tracemax = trace[0];
 				for (int i = 0; i < traceheader.nsamps; i++) {
-					tracemin = MIN(tracemin, trace[i]);
-					tracemax = MAX(tracemin, trace[i]);
+					tracemin = std::min(tracemin, static_cast<double>(trace[i]));
+					tracemax = std::max(tracemin, static_cast<double>(trace[i]));
 				}
 
 				if ((verbose == 0 && nread % 250 == 0) || (nread % 25 == 0)) {
@@ -620,13 +622,13 @@ int main(int argc, char **argv) {
 					/* get bounds of trace in depth window mode */
 					if (windowmode == MBSEGYPSD_WINDOW_DEPTH) {
 						itstart = (int)((dtime + windowstart - timedelay) / sampleinterval);
-						itstart = MAX(itstart, 0);
+						itstart = std::max(itstart, 0);
 						itend = (int)((dtime + windowend - timedelay) / sampleinterval);
-						itend = MIN(itend, ngridy - 1);
+						itend = std::min(itend, ngridy - 1);
 					}
 					else if (windowmode == MBSEGYPSD_WINDOW_SEAFLOOR) {
-						itstart = MAX((stime + windowstart - timedelay) / sampleinterval, 0);
-						itend = MIN((stime + windowend - timedelay) / sampleinterval, ngridy - 1);
+						itstart = std::max((stime + windowstart - timedelay) / sampleinterval, 0.0);
+						itend = std::min((stime + windowend - timedelay) / sampleinterval, ngridy - 1.0);
 					}
 
 					/* loop over the data calculating fft in nfft long sections */
@@ -641,7 +643,7 @@ int main(int argc, char **argv) {
 
 						/* extract data section to be fft'd with taper */
 						const int kstart = itstart + j * nfft;
-						const int kend = MIN(kstart + nfft, itend);
+						const int kend = std::min(kstart + nfft, itend);
 						for (int i = 0; i < nfft; i++) {
 							const int k = itstart + j * nfft + i;
 							if (k <= kend) {
@@ -702,8 +704,8 @@ int main(int argc, char **argv) {
 								grid[k] = 20.0 * log10(spsd[iy] / wpsd[iy]);
 							spsdtot[iy] += grid[k];
 							wpsdtot[iy] += 1.0;
-							gridmintot = MIN(grid[k], gridmintot);
-							gridmaxtot = MAX(grid[k], gridmaxtot);
+							gridmintot = std::min(static_cast<double>(grid[k]), gridmintot);
+							gridmaxtot = std::max(static_cast<double>(grid[k]), gridmaxtot);
 						}
 					}
 				}
@@ -771,8 +773,8 @@ int main(int argc, char **argv) {
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&wpsdtot, &error);
 
 	/* run mbm_grdplot */
-	double xwidth = MIN(0.01 * ngridx, 55.0);
-	double ywidth = MIN(0.01 * ngridy, 28.0);
+	double xwidth = std::min(0.01 * ngridx, 55.0);
+	double ywidth = std::min(0.01 * ngridy, 28.0);
 	char plot_cmd[MB_PATH_MAXLINE] = "";
 	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -S -V -L\"File %s - %s:%s\"", gridfile, xwidth, ywidth, gridfile, title,
 	        zlabel);

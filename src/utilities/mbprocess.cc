@@ -46,6 +46,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
@@ -216,7 +218,7 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
     const double factor = (time_d - corrtable[itable].time_d) / (corrtable[itable + 1].time_d - corrtable[itable].time_d);
     corrtableuse->time_d = time_d;
     // TODO(schwehr): What was this about?
-    // corrtableuse->nangle = MIN(corrtable[itable].nangle, corrtable[itable].nangle);
+    // corrtableuse->nangle = std::min(corrtable[itable].nangle, corrtable[itable].nangle);
     corrtableuse->nangle = corrtable[itable].nangle;
     for (int i = 0; i < corrtableuse->nangle; i++) {
       corrtableuse->angle[i] =
@@ -243,8 +245,8 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
   int ilast = -1;
   for (int i = 0; i < ncorrangle; i++) {
     if (corrtableuse->amplitude[i] != 0.0) {
-      ifirst = MIN(i, ifirst);
-      ilast = MAX(i, ilast);
+      ifirst = std::min(i, ifirst);
+      ilast = std::max(i, ilast);
     }
   }
 
@@ -3025,7 +3027,7 @@ int main(int argc, char **argv) {
                 factor = 1.0;
               ampcorrtable[itable].amplitude[i] =
                   factor * (ampcorrtable[itable].amplitude[i] + ampcorrtable[itable].amplitude[j]);
-              ampcorrtable[itable].sigma[i] = MAX(ampcorrtable[itable].sigma[i], ampcorrtable[itable].sigma[j]);
+              ampcorrtable[itable].sigma[i] = std::max(ampcorrtable[itable].sigma[i], ampcorrtable[itable].sigma[j]);
               ampcorrtable[itable].amplitude[j] = ampcorrtable[itable].amplitude[i];
               ampcorrtable[itable].sigma[j] = ampcorrtable[itable].sigma[i];
             }
@@ -3152,7 +3154,7 @@ int main(int argc, char **argv) {
               sscorrtable[itable].amplitude[i] =
                   factor * (sscorrtable[itable].amplitude[i] + sscorrtable[itable].amplitude[j]);
               sscorrtable[itable].amplitude[j] = sscorrtable[itable].amplitude[i];
-              sscorrtable[itable].sigma[i] = MAX(sscorrtable[itable].sigma[i], sscorrtable[itable].sigma[j]);
+              sscorrtable[itable].sigma[i] = std::max(sscorrtable[itable].sigma[i], sscorrtable[itable].sigma[j]);
               sscorrtable[itable].sigma[j] = sscorrtable[itable].sigma[i];
             }
           }
@@ -5094,8 +5096,8 @@ int main(int argc, char **argv) {
                   betar = 0.5 * M_PI;
                 }
                 else {
-                  alphar = asin(MAX(-1.0, MIN(1.0, (bathalongtrack[i] / range))));
-                  betar = acos(MAX(-1.0, MIN(1.0, (bathacrosstrack[i] / range / cos(alphar)))));
+                  alphar = asin(std::max(-1.0, std::min(1.0, (bathalongtrack[i] / range))));
+                  betar = acos(std::max(-1.0, std::min(1.0, (bathacrosstrack[i] / range / cos(alphar)))));
                 }
                 if (bath[i] < 0.0)
                   betar = 2.0 * M_PI - betar;
@@ -5277,8 +5279,8 @@ int main(int argc, char **argv) {
             /* flag data according to beam number range */
             if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_BATH &&
                 process.mbp_cut_mode[icut] == MBP_CUT_MODE_NUMBER) {
-              istart = MAX((int)process.mbp_cut_min[icut], 0);
-              iend = MIN((int)process.mbp_cut_max[icut], nbath - 1);
+              istart = std::max((int)process.mbp_cut_min[icut], 0);
+              iend = std::min((int)process.mbp_cut_max[icut], nbath - 1);
               for (int i = istart; i <= iend; i++) {
                 if (mb_beam_ok(beamflag[i]))
                   beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
@@ -5356,8 +5358,8 @@ int main(int argc, char **argv) {
 
             /* flag data according to beam number range */
             if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_AMP && process.mbp_cut_mode[icut] == MBP_CUT_MODE_NUMBER) {
-              istart = MAX((int)process.mbp_cut_min[icut], 0);
-              iend = MIN((int)process.mbp_cut_max[icut], namp - 1);
+              istart = std::max((int)process.mbp_cut_min[icut], 0);
+              iend = std::min((int)process.mbp_cut_max[icut], namp - 1);
               for (int i = istart; i <= iend; i++) {
                 if (mb_beam_ok(beamflag[i]))
                   beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
@@ -5388,8 +5390,8 @@ int main(int argc, char **argv) {
             /* flag data according to pixel number range */
             else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_SS &&
                      process.mbp_cut_mode[icut] == MBP_CUT_MODE_NUMBER) {
-              istart = MAX((int)process.mbp_cut_min[icut], 0);
-              iend = MIN((int)process.mbp_cut_max[icut], nss - 1);
+              istart = std::max((int)process.mbp_cut_min[icut], 0);
+              iend = std::min((int)process.mbp_cut_max[icut], nss - 1);
               for (int i = istart; i <= iend; i++) {
                 ss[i] = MB_SIDESCAN_NULL;
               }

@@ -33,6 +33,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_define.h"
 #include "mb_status.h"
 #include "mb_io.h"
@@ -1229,9 +1231,9 @@ int main(int argc, char **argv) {
 					}
 
 					/* take note of min and maxes */
-					beams_bath_max = MAX(beams_bath_max, beams_bath);
-					beams_amp_max = MAX(beams_amp_max, beams_amp);
-					pixels_ss_max = MAX(pixels_ss_max, pixels_ss);
+					beams_bath_max = std::max(beams_bath_max, beams_bath);
+					beams_amp_max = std::max(beams_amp_max, beams_amp);
+					pixels_ss_max = std::max(pixels_ss_max, pixels_ss);
 					if (pass == 0 && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
 						/* update data counts */
 						ntdbeams += beams_bath;
@@ -1423,29 +1425,29 @@ int main(int argc, char **argv) {
 
 						/* get mins and maxs */
 						if (good_nav && beginnav) {
-							lonmin = MIN(lonmin, navlon);
-							lonmax = MAX(lonmax, navlon);
-							latmin = MIN(latmin, navlat);
-							latmax = MAX(latmax, navlat);
+							lonmin = std::min(lonmin, navlon);
+							lonmax = std::max(lonmax, navlon);
+							latmin = std::min(latmin, navlat);
+							latmax = std::max(latmax, navlat);
 						}
 						if (beginsdp) {
-							sdpmin = MIN(sdpmin, sonardepth);
-							sdpmax = MAX(sdpmax, sonardepth);
+							sdpmin = std::min(sdpmin, sonardepth);
+							sdpmax = std::max(sdpmax, sonardepth);
 						}
 						if (beginalt) {
-							altmin = MIN(altmin, altitude);
-							altmax = MAX(altmax, altitude);
+							altmin = std::min(altmin, altitude);
+							altmax = std::max(altmax, altitude);
 						}
 						for (int i = 0; i < beams_bath; i++) {
 							if (mb_beam_ok(beamflag[i])) {
 								if (good_nav && beginnav) {
-									lonmin = MIN(lonmin, bathlon[i]);
-									lonmax = MAX(lonmax, bathlon[i]);
-									latmin = MIN(latmin, bathlat[i]);
-									latmax = MAX(latmax, bathlat[i]);
+									lonmin = std::min(lonmin, bathlon[i]);
+									lonmax = std::max(lonmax, bathlon[i]);
+									latmin = std::min(latmin, bathlat[i]);
+									latmax = std::max(latmax, bathlat[i]);
 								}
-								bathmin = MIN(bathmin, bath[i]);
-								bathmax = MAX(bathmax, bath[i]);
+								bathmin = std::min(bathmin, bath[i]);
+								bathmax = std::max(bathmax, bath[i]);
 								ngdbeams++;
 							}
 							else if (beamflag[i] == MB_FLAG_NULL)
@@ -1455,8 +1457,8 @@ int main(int argc, char **argv) {
 						}
 						for (int i = 0; i < beams_amp; i++) {
 							if (mb_beam_ok(beamflag[i])) {
-								ampmin = MIN(ampmin, amp[i]);
-								ampmax = MAX(ampmax, amp[i]);
+								ampmin = std::min(ampmin, amp[i]);
+								ampmax = std::max(ampmax, amp[i]);
 								ngabeams++;
 							}
 							else if (beamflag[i] == MB_FLAG_NULL)
@@ -1467,13 +1469,13 @@ int main(int argc, char **argv) {
 						for (int i = 0; i < pixels_ss; i++) {
 							if (ss[i] > MB_SIDESCAN_NULL) {
 								if (good_nav && beginnav) {
-									lonmin = MIN(lonmin, sslon[i]);
-									lonmax = MAX(lonmax, sslon[i]);
-									latmin = MIN(latmin, sslat[i]);
-									latmax = MAX(latmax, sslat[i]);
+									lonmin = std::min(lonmin, sslon[i]);
+									lonmax = std::max(lonmax, sslon[i]);
+									latmin = std::min(latmin, sslat[i]);
+									latmax = std::max(latmax, sslat[i]);
 								}
-								ssmin = MIN(ssmin, ss[i]);
-								ssmax = MAX(ssmax, ss[i]);
+								ssmin = std::min(ssmin, ss[i]);
+								ssmax = std::max(ssmax, ss[i]);
 								ngsbeams++;
 							}
 							else if (ss[i] == 0.0)

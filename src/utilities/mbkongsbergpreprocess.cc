@@ -32,6 +32,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
@@ -1469,8 +1471,8 @@ int main(int argc, char **argv) {
 				/* status = */ mb_reallocd(verbose, __FILE__, __LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
 				for (int i = 0; i < ndat_sonardepth; i++) {
 					dat_sonardepth_sonardepthfilter[i] = dat_sonardepth_sonardepth[i];
-					const int j1 = MAX(i - nhalffilter, 0);
-					const int j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
+					const int j1 = std::max(i - nhalffilter, 0);
+					const int j2 = std::min(i + nhalffilter, ndat_sonardepth - 1);
 					int nmedian = 0;
 					for (int j = j1; j <= j2; j++) {
 						median[nmedian] = dat_sonardepth_sonardepth[j];
@@ -1493,8 +1495,8 @@ int main(int argc, char **argv) {
 				for (int i = 0; i < ndat_sonardepth; i++) {
 					dat_sonardepth_sonardepthfilter[i] = 0.0;
 					double sonardepth_filterweight = 0.0;
-					const int j1 = MAX(i - nhalffilter, 0);
-					const int j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
+					const int j1 = std::max(i - nhalffilter, 0);
+					const int j2 = std::min(i + nhalffilter, ndat_sonardepth - 1);
 					for (int j = j1; j <= j2; j++) {
 						const double dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
 						const double weight = exp(-dtol * dtol);
@@ -1528,8 +1530,8 @@ int main(int argc, char **argv) {
 				status &= mb_reallocd(verbose, __FILE__, __LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
 				for (int i = 0; i < nsonardepth; i++) {
 					sonardepth_sonardepthfilter[i] = sonardepth_sonardepth[i];
-					const int j1 = MAX(i - nhalffilter, 0);
-					const int j2 = MIN(i + nhalffilter, nsonardepth - 1);
+					const int j1 = std::max(i - nhalffilter, 0);
+					const int j2 = std::min(i + nhalffilter, nsonardepth - 1);
 					int nmedian = 0;
 					for (int j = j1; j <= j2; j++) {
 						median[nmedian] = dat_sonardepth_sonardepth[j];
@@ -1552,8 +1554,8 @@ int main(int argc, char **argv) {
 				for (int i = 0; i < nsonardepth; i++) {
 					sonardepth_sonardepthfilter[i] = 0.0;
 					double sonardepth_filterweight = 0.0;
-					const int j1 = MAX(i - nhalffilter, 0);
-					const int j2 = MIN(i + nhalffilter, nsonardepth - 1);
+					const int j1 = std::max(i - nhalffilter, 0);
+					const int j2 = std::min(i + nhalffilter, nsonardepth - 1);
 					for (int j = j1; j <= j2; j++) {
 						const double dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
 						const double weight = exp(-dtol * dtol);

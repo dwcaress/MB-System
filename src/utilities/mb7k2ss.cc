@@ -29,6 +29,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
@@ -1355,7 +1357,7 @@ int main(int argc, char **argv) {
 								? sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
 								: (double)(datashort[i]);
-							channelmax = MAX(value, channelmax);
+							channelmax = std::max(value, channelmax);
 						}
 						int portchannelpick = 0;
 						double threshold = bottompickthreshold * channelmax;
@@ -1378,7 +1380,7 @@ int main(int argc, char **argv) {
 								? sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
 								: (double)(datashort[i]);
-							channelmax = MAX(value, channelmax);
+							channelmax = std::max(value, channelmax);
 						}
 						int stbdchannelpick = 0;
 						threshold = bottompickthreshold * channelmax;
@@ -1651,7 +1653,7 @@ int main(int argc, char **argv) {
 								? sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
 								: (double)(datashort[i]);
-							channelmax = MAX(value, channelmax);
+							channelmax = std::max(value, channelmax);
 						}
 						int portchannelpick = 0;
 						double threshold = bottompickthreshold * channelmax;
@@ -1674,7 +1676,7 @@ int main(int argc, char **argv) {
 								? sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
 								: (double)(datashort[i]);
-							channelmax = MAX(value, channelmax);
+							channelmax = std::max(value, channelmax);
 						}
 						int stbdchannelpick = 0;
 						threshold = bottompickthreshold * channelmax;

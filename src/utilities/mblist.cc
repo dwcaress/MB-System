@@ -37,6 +37,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"

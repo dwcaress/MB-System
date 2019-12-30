@@ -33,6 +33,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
@@ -516,7 +518,7 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 		if (priority_azimuth_factor * azi_starboard <= -90.0 || priority_azimuth_factor * azi_starboard >= 90.0)
 			weight_starboard = 0.0;
 		else
-			weight_starboard = MAX(cos(DTR * priority_azimuth_factor * azi_starboard), 0.0);
+			weight_starboard = std::max(cos(DTR * priority_azimuth_factor * azi_starboard), 0.0);
 
 		double azi_port = heading + 90.0 - priority_azimuth;
 		if (azi_port > 180.0)
@@ -527,7 +529,7 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 		if (priority_azimuth_factor * azi_port <= -90.0 || priority_azimuth_factor * azi_port >= 90.0)
 			weight_port = 0.0;
 		else
-			weight_port = MAX(cos(DTR * priority_azimuth_factor * azi_port), 0.0);
+			weight_port = std::max(cos(DTR * priority_azimuth_factor * azi_port), 0.0);
 
 		/* apply the look azimuth priorities */
 		for (int i = 0; i < beams_bath; i++) {
@@ -551,7 +553,7 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 		if (priority_heading_factor * heading_difference <= -90.0 || priority_heading_factor * heading_difference >= 90.0)
 			weight_heading = 0.0;
 		else
-			weight_heading = MAX(cos(DTR * priority_heading_factor * heading_difference), 0.0);
+			weight_heading = std::max(cos(DTR * priority_heading_factor * heading_difference), 0.0);
 
 		/* apply the heading priorities */
 		for (int i = 0; i < beams_bath; i++) {
@@ -968,7 +970,7 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 		if (priority_azimuth_factor * azi_starboard <= -90.0 || priority_azimuth_factor * azi_starboard >= 90.0)
 			weight_starboard = 0.0;
 		else
-			weight_starboard = MAX(cos(DTR * priority_azimuth_factor * azi_starboard), 0.0);
+			weight_starboard = std::max(cos(DTR * priority_azimuth_factor * azi_starboard), 0.0);
 
 		double azi_port = heading + 90.0 - priority_azimuth;
 		if (azi_port > 180.0)
@@ -979,7 +981,7 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 		if (priority_azimuth_factor * azi_port <= -90.0 || priority_azimuth_factor * azi_port >= 90.0)
 			weight_port = 0.0;
 		else
-			weight_port = MAX(cos(DTR * priority_azimuth_factor * azi_port), 0.0);
+			weight_port = std::max(cos(DTR * priority_azimuth_factor * azi_port), 0.0);
 
 		/* apply the look azimuth priorities */
 		for (int i = 0; i < pixels_ss; i++) {
@@ -1003,7 +1005,7 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 		if (priority_heading_factor * heading_difference <= -90.0 || priority_heading_factor * heading_difference >= 90.0)
 			weight_heading = 0.0;
 		else
-			weight_heading = MAX(cos(DTR * priority_heading_factor * heading_difference), 0.0);
+			weight_heading = std::max(cos(DTR * priority_heading_factor * heading_difference), 0.0);
 
 		/* apply the look azimuth priorities */
 		for (int i = 0; i < pixels_ss; i++) {
@@ -1553,30 +1555,30 @@ int main(int argc, char **argv) {
 			yy = gbnd[2];
 			mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 			mb_apply_lonflip(verbose, lonflip, &xlon);
-			obnd[0] = MIN(obnd[0], xlon);
-			obnd[1] = MAX(obnd[1], xlon);
-			obnd[2] = MIN(obnd[2], ylat);
-			obnd[3] = MAX(obnd[3], ylat);
+			obnd[0] = std::min(obnd[0], xlon);
+			obnd[1] = std::max(obnd[1], xlon);
+			obnd[2] = std::min(obnd[2], ylat);
+			obnd[3] = std::max(obnd[3], ylat);
 
 			/* third point */
 			xx = gbnd[0];
 			yy = gbnd[3];
 			mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 			mb_apply_lonflip(verbose, lonflip, &xlon);
-			obnd[0] = MIN(obnd[0], xlon);
-			obnd[1] = MAX(obnd[1], xlon);
-			obnd[2] = MIN(obnd[2], ylat);
-			obnd[3] = MAX(obnd[3], ylat);
+			obnd[0] = std::min(obnd[0], xlon);
+			obnd[1] = std::max(obnd[1], xlon);
+			obnd[2] = std::min(obnd[2], ylat);
+			obnd[3] = std::max(obnd[3], ylat);
 
 			/* fourth point */
 			xx = gbnd[1];
 			yy = gbnd[3];
 			mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 			mb_apply_lonflip(verbose, lonflip, &xlon);
-			obnd[0] = MIN(obnd[0], xlon);
-			obnd[1] = MAX(obnd[1], xlon);
-			obnd[2] = MIN(obnd[2], ylat);
-			obnd[3] = MAX(obnd[3], ylat);
+			obnd[0] = std::min(obnd[0], xlon);
+			obnd[1] = std::max(obnd[1], xlon);
+			obnd[2] = std::min(obnd[2], ylat);
+			obnd[3] = std::max(obnd[3], ylat);
 		}
 
 		/* else translate bounds to UTM */
@@ -1602,28 +1604,28 @@ int main(int argc, char **argv) {
 			xlon = obnd[1];
 			ylat = obnd[2];
 			mb_proj_forward(verbose, pjptr, xlon, ylat, &xx, &yy, &error);
-			gbnd[0] = MIN(gbnd[0], xx);
-			gbnd[1] = MAX(gbnd[1], xx);
-			gbnd[2] = MIN(gbnd[2], yy);
-			gbnd[3] = MAX(gbnd[3], yy);
+			gbnd[0] = std::min(gbnd[0], xx);
+			gbnd[1] = std::max(gbnd[1], xx);
+			gbnd[2] = std::min(gbnd[2], yy);
+			gbnd[3] = std::max(gbnd[3], yy);
 
 			/* third point */
 			xlon = obnd[0];
 			ylat = obnd[3];
 			mb_proj_forward(verbose, pjptr, xlon, ylat, &xx, &yy, &error);
-			gbnd[0] = MIN(gbnd[0], xx);
-			gbnd[1] = MAX(gbnd[1], xx);
-			gbnd[2] = MIN(gbnd[2], yy);
-			gbnd[3] = MAX(gbnd[3], yy);
+			gbnd[0] = std::min(gbnd[0], xx);
+			gbnd[1] = std::max(gbnd[1], xx);
+			gbnd[2] = std::min(gbnd[2], yy);
+			gbnd[3] = std::max(gbnd[3], yy);
 
 			/* fourth point */
 			xlon = obnd[1];
 			ylat = obnd[3];
 			mb_proj_forward(verbose, pjptr, xlon, ylat, &xx, &yy, &error);
-			gbnd[0] = MIN(gbnd[0], xx);
-			gbnd[1] = MAX(gbnd[1], xx);
-			gbnd[2] = MIN(gbnd[2], yy);
-			gbnd[3] = MAX(gbnd[3], yy);
+			gbnd[0] = std::min(gbnd[0], xx);
+			gbnd[1] = std::max(gbnd[1], xx);
+			gbnd[2] = std::min(gbnd[2], yy);
+			gbnd[3] = std::max(gbnd[3], yy);
 		}
 
 		/* calculate grid properties */
@@ -1770,35 +1772,35 @@ int main(int argc, char **argv) {
 		yy = wbnd[2] - (wbnd[3] - wbnd[2]);
 		mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 		mb_apply_lonflip(verbose, lonflip, &xlon);
-		bounds[0] = MIN(bounds[0], xlon);
-		bounds[1] = MAX(bounds[1], xlon);
-		bounds[2] = MIN(bounds[2], ylat);
-		bounds[3] = MAX(bounds[3], ylat);
+		bounds[0] = std::min(bounds[0], xlon);
+		bounds[1] = std::max(bounds[1], xlon);
+		bounds[2] = std::min(bounds[2], ylat);
+		bounds[3] = std::max(bounds[3], ylat);
 
 		/* do third point */
 		xx = wbnd[0] - (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] + (wbnd[3] - wbnd[2]);
 		mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 		mb_apply_lonflip(verbose, lonflip, &xlon);
-		bounds[0] = MIN(bounds[0], xlon);
-		bounds[1] = MAX(bounds[1], xlon);
-		bounds[2] = MIN(bounds[2], ylat);
-		bounds[3] = MAX(bounds[3], ylat);
+		bounds[0] = std::min(bounds[0], xlon);
+		bounds[1] = std::max(bounds[1], xlon);
+		bounds[2] = std::min(bounds[2], ylat);
+		bounds[3] = std::max(bounds[3], ylat);
 
 		/* do fourth point */
 		xx = wbnd[0] + (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] + (wbnd[3] - wbnd[2]);
 		mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 		mb_apply_lonflip(verbose, lonflip, &xlon);
-		bounds[0] = MIN(bounds[0], xlon);
-		bounds[1] = MAX(bounds[1], xlon);
-		bounds[2] = MIN(bounds[2], ylat);
-		bounds[3] = MAX(bounds[3], ylat);
+		bounds[0] = std::min(bounds[0], xlon);
+		bounds[1] = std::max(bounds[1], xlon);
+		bounds[2] = std::min(bounds[2], ylat);
+		bounds[3] = std::max(bounds[3], ylat);
 	}
 
 	/* extend the bounds slightly to be sure no data gets missed */
-	double xx = MIN(0.05 * (bounds[1] - bounds[0]), 0.1);
-	double yy = MIN(0.05 * (bounds[3] - bounds[2]), 0.1);
+	double xx = std::min(0.05 * (bounds[1] - bounds[0]), 0.1);
+	double yy = std::min(0.05 * (bounds[3] - bounds[2]), 0.1);
 	bounds[0] = bounds[0] - xx;
 	bounds[1] = bounds[1] + xx;
 	bounds[2] = bounds[2] - yy;
@@ -1818,7 +1820,7 @@ int main(int argc, char **argv) {
 	if ((clipmode == MBMOSAIC_INTERP_GAP || clipmode == MBMOSAIC_INTERP_NEAR) && clip > xdim && clip > ydim)
 		clipmode = MBMOSAIC_INTERP_ALL;
 	if (clipmode == MBMOSAIC_INTERP_ALL)
-		clip = MAX(xdim, ydim);
+		clip = std::max(xdim, ydim);
 
 	/* set origin used to reduce data value size before conversion from
 	 * double to float when calling the interpolation routines */
@@ -2426,15 +2428,15 @@ int main(int argc, char **argv) {
 										int ix2 = ixx[0];
 										int iy2 = iyy[0];
 										for (int j = 1; j < 4; j++) {
-											ix1 = MIN(ix1, ixx[j]);
-											iy1 = MIN(iy1, iyy[j]);
-											ix2 = MAX(ix2, ixx[j]);
-											iy2 = MAX(iy2, iyy[j]);
+											ix1 = std::min(ix1, ixx[j]);
+											iy1 = std::min(iy1, iyy[j]);
+											ix2 = std::max(ix2, ixx[j]);
+											iy2 = std::max(iy2, iyy[j]);
 										}
-										ix1 = MAX(ix1, 0);
-										ix2 = MIN(ix2, gxdim - 1);
-										iy1 = MAX(iy1, 0);
-										iy2 = MIN(iy2, gydim - 1);
+										ix1 = std::max(ix1, 0);
+										ix2 = std::min(ix2, gxdim - 1);
+										iy1 = std::max(iy1, 0);
+										iy2 = std::min(iy2, gydim - 1);
 
 										/* process if in region of interest */
 										for (int ii = ix1; ii <= ix2; ii++)
@@ -2608,15 +2610,15 @@ int main(int argc, char **argv) {
 										int ix2 = ixx[0];
 										int iy2 = iyy[0];
 										for (int j = 1; j < 4; j++) {
-											ix1 = MIN(ix1, ixx[j]);
-											iy1 = MIN(iy1, iyy[j]);
-											ix2 = MAX(ix2, ixx[j]);
-											iy2 = MAX(iy2, iyy[j]);
+											ix1 = std::min(ix1, ixx[j]);
+											iy1 = std::min(iy1, iyy[j]);
+											ix2 = std::max(ix2, ixx[j]);
+											iy2 = std::max(iy2, iyy[j]);
 										}
-										ix1 = MAX(ix1, 0);
-										ix2 = MIN(ix2, gxdim - 1);
-										iy1 = MAX(iy1, 0);
-										iy2 = MIN(iy2, gydim - 1);
+										ix1 = std::max(ix1, 0);
+										ix2 = std::min(ix2, gxdim - 1);
+										iy1 = std::max(iy1, 0);
+										iy2 = std::min(iy2, gydim - 1);
 
 										/* process if in region of interest */
 										for (int ii = ix1; ii <= ix2; ii++)
@@ -2976,15 +2978,15 @@ int main(int argc, char **argv) {
 										int ix2 = ixx[0];
 										int iy2 = iyy[0];
 										for (int j = 1; j < 4; j++) {
-											ix1 = MIN(ix1, ixx[j]);
-											iy1 = MIN(iy1, iyy[j]);
-											ix2 = MAX(ix2, ixx[j]);
-											iy2 = MAX(iy2, iyy[j]);
+											ix1 = std::min(ix1, ixx[j]);
+											iy1 = std::min(iy1, iyy[j]);
+											ix2 = std::max(ix2, ixx[j]);
+											iy2 = std::max(iy2, iyy[j]);
 										}
-										ix1 = MAX(ix1, 0);
-										ix2 = MIN(ix2, gxdim - 1);
-										iy1 = MAX(iy1, 0);
-										iy2 = MIN(iy2, gydim - 1);
+										ix1 = std::max(ix1, 0);
+										ix2 = std::min(ix2, gxdim - 1);
+										iy1 = std::max(iy1, 0);
+										iy2 = std::min(iy2, gydim - 1);
 
 										/* process if in region of interest */
 										for (int ii = ix1; ii <= ix2; ii++)
@@ -3166,15 +3168,15 @@ int main(int argc, char **argv) {
 										int ix2 = ixx[0];
 										int iy2 = iyy[0];
 										for (int j = 1; j < 4; j++) {
-											ix1 = MIN(ix1, ixx[j]);
-											iy1 = MIN(iy1, iyy[j]);
-											ix2 = MAX(ix2, ixx[j]);
-											iy2 = MAX(iy2, iyy[j]);
+											ix1 = std::min(ix1, ixx[j]);
+											iy1 = std::min(iy1, iyy[j]);
+											ix2 = std::max(ix2, ixx[j]);
+											iy2 = std::max(iy2, iyy[j]);
 										}
-										ix1 = MAX(ix1, 0);
-										ix2 = MIN(ix2, gxdim - 1);
-										iy1 = MAX(iy1, 0);
-										iy2 = MIN(iy2, gydim - 1);
+										ix1 = std::max(ix1, 0);
+										ix2 = std::min(ix2, gxdim - 1);
+										iy1 = std::max(iy1, 0);
+										iy2 = std::min(iy2, gydim - 1);
 
 										/* process if in region of interest */
 										for (int ii = ix1; ii <= ix2; ii++)
@@ -3371,7 +3373,7 @@ int main(int argc, char **argv) {
 		ddx = (float)dx;
 		ddy = (float)dy;
 		if (clipmode == MBMOSAIC_INTERP_ALL)
-			clip = MAX(gxdim, gydim);
+			clip = std::max(gxdim, gydim);
 		mb_zgrid2(sgrid, &gxdim, &gydim, &xmin, &ymin, &ddx, &ddy, sdata, &ndata, static_cast<float *>(work1), static_cast<int *>(work2), static_cast<int *>(work3), &cay, &clip);
 
 		if (clipmode == MBMOSAIC_INTERP_GAP)
@@ -3402,10 +3404,10 @@ int main(int argc, char **argv) {
 						/* loop over rings around point, starting close */
 						for (int ir = 0; ir <= clip && num[kgrid] == false; ir++) {
 							/* set bounds of search */
-							int i1 = MAX(0, i - ir);
-							int i2 = MIN(gxdim - 1, i + ir);
-							int j1 = MAX(0, j - ir);
-							int j2 = MIN(gydim - 1, j + ir);
+							int i1 = std::max(0, i - ir);
+							int i2 = std::min(gxdim - 1, i + ir);
+							int j1 = std::max(0, j - ir);
+							int j2 = std::min(gydim - 1, j + ir);
 
 							int jj = j1;
 							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
@@ -3497,10 +3499,10 @@ int main(int argc, char **argv) {
 						/* loop over rings around point, starting close */
 						for (int ir = 0; ir <= clip && num[kgrid] == false; ir++) {
 							/* set bounds of search */
-							int i1 = MAX(0, i - ir);
-							int i2 = MIN(gxdim - 1, i + ir);
-							int j1 = MAX(0, j - ir);
-							int j2 = MIN(gydim - 1, j + ir);
+							int i1 = std::max(0, i - ir);
+							int i2 = std::min(gxdim - 1, i + ir);
+							int j1 = std::max(0, j - ir);
+							int j2 = std::min(gydim - 1, j + ir);
 
 							int jj = j1;
 							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
