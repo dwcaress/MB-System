@@ -72,10 +72,10 @@ typedef enum {
     stderr if verbose > 1) */
 FILE *outfp;
 
-static const char program_name[] = "MBsegygrid";
-static const char help_message[] =
+constexpr char program_name[] = "MBsegygrid";
+constexpr char help_message[] =
     "MBsegygrid grids trace data from segy data files.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale\n"
     "          -Ddecimatex/decimatey -Gmode/gain[/window] -Rdistancebin[]/startlon/startlat/endlon/endlat]\n"
     "          -Smode[/start/end[/schan/echan]] -Tsweep[/delay]\n"

@@ -39,9 +39,9 @@
 #include "mb_swap.h"
 
 /* allocation */
-const int FILEALLOCNUM = 16;
-const int PINGALLOCNUM = 128;
-const int SNDGALLOCNUM = 128;
+constexpr int FILEALLOCNUM = 16;
+constexpr int PINGALLOCNUM = 128;
+constexpr int SNDGALLOCNUM = 128;
 
 /* mbrphsbias structures */
 struct mbrphsbias_ping_struct {
@@ -88,11 +88,11 @@ struct mbrphsbias_file_struct {
 	struct mbrphsbias_ping_struct *pings;
 };
 
-static const char program_name[] = "MBrphsbias";
-static const char help_message[] =
+constexpr char program_name[] = "MBrphsbias";
+constexpr char help_message[] =
     "MBrphsbias analyzes sonar soundings to solve for bias parameters associated with the attitude sensors "
     "and first order speed of sound.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbrphsbias [-Fformat -Iinfile -Rwest/east/south/north -Sbinsize	\n\t-B]";
 
 /*--------------------------------------------------------------------*/

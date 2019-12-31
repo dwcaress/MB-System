@@ -45,7 +45,7 @@
 #include "mb_status.h"
 
 /* define minimum number of data to fit plane */
-const int MINIMUM_NUMBER_DATA = 100;
+constexpr int MINIMUM_NUMBER_DATA = 100;
 
 /* structure definitions */
 struct bath {
@@ -58,8 +58,8 @@ struct bathptr {
 	struct bath *ptr;
 };
 
-static const char program_name[] = "MBROLLBIAS";
-static const char help_message[] =
+constexpr char program_name[] = "MBROLLBIAS";
+constexpr char help_message[] =
     "MBROLLBIAS is an utility used to assess roll bias of swath\n"
     "sonar systems using bathymetry data from two swaths covering the\n"
     "same seafloor in opposite directions. The program takes two input\n"
@@ -75,7 +75,7 @@ static const char help_message[] =
     "reference used by the swath system is biased to starboard,\n"
     "giving rise to shallow bathymetry to port and deep bathymetry\n"
     "to starboard.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbrollbias -Dxdim/ydim -Fformat1/format2 -Ifile1 -Jfile2 -Llonflip -Rw/e/s/n -V -H]";
 
 /*--------------------------------------------------------------------*/

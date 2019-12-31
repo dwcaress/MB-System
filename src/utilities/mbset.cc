@@ -45,8 +45,8 @@
 #include "mb_status.h"
 #include "mb_swap.h"
 
-static const char program_name[] = "mbset";
-static const char help_message[] =
+constexpr char program_name[] = "mbset";
+constexpr char help_message[] =
     "MBset is a tool for setting values in an mbprocess parameter file.\n"
     "MBprocess is a tool for processing swath sonar bathymetry data\n"
     "which performs a number of functions, including:\n"
@@ -58,7 +58,7 @@ static const char help_message[] =
     "The parameters controlling mbprocess are included in an ascii\n"
     "parameter file. The parameter file syntax is documented by\n"
     "the manual pages for mbprocess and mbset. \n\n";
-static const char usage_message[] = "mbset -Iinfile -PPARAMETER:value [-E -L -N -V -H]";
+constexpr char usage_message[] = "mbset -Iinfile -PPARAMETER:value [-E -L -N -V -H]";
 
 /*--------------------------------------------------------------------*/
 

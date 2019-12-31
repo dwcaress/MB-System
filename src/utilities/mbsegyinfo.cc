@@ -33,10 +33,10 @@
 #include "mb_segy.h"
 #include "mb_status.h"
 
-static const char program_name[] = "MBsegyinfo";
-static const char help_message[] =
+constexpr char program_name[] = "MBsegyinfo";
+constexpr char help_message[] =
     "MBsegyinfo lists table data from a segy data file.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "MBsegyinfo -Ifile [-Llonflip -O -H -V]";
 
 /*--------------------------------------------------------------------*/
