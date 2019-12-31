@@ -73,8 +73,6 @@ typedef enum {
     MBLIST_SEGMENT_MODE_DATALIST = 3,
 } segment_mode_t;
 
-double NaN;
-
 static const char program_name[] = "MBLIST";
 static const char help_message[] =
     "MBLIST prints the specified contents of a swath data\n"
@@ -453,10 +451,12 @@ int printNaN(int verbose, FILE *output, bool ascii, bool *invert, bool *flipsign
     *flipsign = false;
 
   /* print value */
-  if (ascii)
+  if (ascii) {
     fprintf(output, "NaN");
-  else
+  } else {
+    const double NaN = std::numeric_limits<double>::quiet_NaN();
     fwrite(&NaN, sizeof(double), 1, output);
+  }
 
   const int status = MB_SUCCESS;
 
@@ -798,8 +798,6 @@ int main(int argc, char **argv) {
   //   (Time, lon, lat, heading, speed, along-track distance, center beam depth)
   char list[MAX_OPTIONS] = "TXYHSLZ";
   int n_list = 7;
-
-  MB_MAKE_DNAN(NaN);
 
   /* process argument list */
   {

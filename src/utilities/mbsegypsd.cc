@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <limits>
 
 #include "fftw3.h"
 #include "mb_aux.h"
@@ -51,7 +52,6 @@ typedef enum {
     MBSEGYPSD_WINDOW_DEPTH = 3,
 } windowmode_t;
 
-float NaN;
 /* output stream for basic stuff (stdout if verbose <= 1,
     stderr if verbose > 1) */
 FILE *outfp = nullptr;
@@ -500,8 +500,6 @@ int main(int argc, char **argv) {
 	if (verbose > 0)
 		fprintf(outfp, "\n");
 
-	MB_MAKE_FNAN(NaN);
-
 	/* grid controls */
 	double gridmintot = 0.0;
 	double gridmaxtot = 0.0;
@@ -510,7 +508,7 @@ int main(int argc, char **argv) {
 
 		/* fill grid with NaNs */
 		for (int i = 0; i < ngridxy; i++)
-			grid[i] = NaN;
+			grid[i] = std::numeric_limits<float>::quiet_NaN();
 
 		/* generate the fftw plan */
 		fftw_complex *fftw_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * nfft);
@@ -746,8 +744,10 @@ int main(int argc, char **argv) {
 		strcpy(zlabel, "Intensity/Hz");
 	char title[MB_PATH_MAXLINE] = "";
 	sprintf(title, "Power Spectral Density Grid from %s", segyfile);
-	status &= mb_write_gmt_grd(verbose, gridfile, grid, NaN, ngridx, ngridy, xmin, xmax, ymin, ymax, gridmintot, gridmaxtot, dx,
-	                          dy, xlabel, ylabel, zlabel, title, projection, argc, argv, &error);
+	status &= mb_write_gmt_grd(
+		verbose, gridfile, grid, std::numeric_limits<float>::quiet_NaN(),
+		ngridx, ngridy, xmin, xmax, ymin, ymax, gridmintot, gridmaxtot, dx,
+		dy, xlabel, ylabel, zlabel, title, projection, argc, argv, &error);
 
 	/* output average power spectra */
 	FILE *fp  = fopen(psdfile, "w");

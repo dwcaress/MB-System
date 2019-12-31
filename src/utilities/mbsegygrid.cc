@@ -68,8 +68,6 @@ typedef enum {
     MBSEGYGRID_FILTER_COSINE = 1,
 } filtermode_t;
 
-float NaN;
-
 /* output stream for basic stuff (stdout if verbose <= 1,
     stderr if verbose > 1) */
 FILE *outfp;
@@ -268,8 +266,6 @@ int main(int argc, char **argv) {
 	double windowstart;
 	double windowend;
 	windowmode_t windowmode = MBSEGYGRID_WINDOW_OFF;
-
-	MB_MAKE_FNAN(NaN);
 
 	/* process argument list */
 	{
@@ -1016,7 +1012,7 @@ int main(int argc, char **argv) {
 				gridmaxtot = std::max(static_cast<double>(grid[k]), gridmaxtot);
 			}
 			else {
-				grid[k] = NaN;
+				grid[k] = std::numeric_limits<float>::quiet_NaN();
 			}
 		}
 	}
@@ -1052,6 +1048,7 @@ int main(int argc, char **argv) {
 	strcpy(zlabel, "Trace Signal");
 	char title[MB_PATH_MAXLINE] = "";
 	sprintf(title, "Seismic Grid from %s", segyfile);
+        const double NaN = std::numeric_limits<float>::quiet_NaN();
 	status &= mb_write_gmt_grd(verbose, gridfile, grid, NaN, ngridx, ngridy, xmin, xmax, ymin, ymax, gridmintot, gridmaxtot, dx,
 	                          dy, xlabel, ylabel, zlabel, title, projection, argc, argv, &error);
 

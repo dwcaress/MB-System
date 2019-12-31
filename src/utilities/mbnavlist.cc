@@ -41,8 +41,6 @@ typedef enum {
     MBNAVLIST_SEGMENT_MODE_DATALIST = 3,
 } segment_mode_t;
 
-double NaN;
-
 static const char program_name[] = "mbnavlist";
 static const char help_message[] =
     "mbnavlist prints the specified contents of navigation records\n"

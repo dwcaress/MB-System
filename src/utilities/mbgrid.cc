@@ -43,6 +43,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <limits>
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -940,9 +941,7 @@ int main(int argc, char **argv) {
 
 	/* define NaN in case it's needed */
 	if (use_NaN) {
-		float NaN;
-		MB_MAKE_FNAN(NaN);
-		outclipvalue = NaN;
+		outclipvalue = std::numeric_limits<float>::quiet_NaN();
 	}
 
 	bool use_projection = false;

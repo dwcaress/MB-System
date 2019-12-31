@@ -29,6 +29,8 @@
 #include <getopt.h>
 #include <unistd.h>
 
+#include <limits>
+
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_segy.h"
@@ -43,8 +45,6 @@ const int MBLIST_CHECK_OFF_FLAGNAN = 4;
 const int MBLIST_SET_OFF = 0;
 const int MBLIST_SET_ON = 1;
 const int MBLIST_SET_ALL = 2;
-
-double NaN;
 
 static const char program_name[] = "MBsegylist";
 static const char help_message[] =
@@ -127,10 +127,12 @@ int printNaN(int verbose, bool ascii, bool *invert, bool *flipsign, int *error) 
 		*flipsign = false;
 
 	/* print value */
-	if (ascii)
+	if (ascii) {
 		printf("NaN");
-	else
+	} else {
+		const double NaN = std::numeric_limits<double>::quiet_NaN();
 		fwrite(&NaN, sizeof(double), 1, stdout);
+	}
 
 	const int status = MB_SUCCESS;
 
@@ -199,9 +201,6 @@ int main(int argc, char **argv) {
 	n_list++;
 	list[n_list] = 'L';
 	n_list++;
-
-	/* get NaN value */
-	MB_MAKE_DNAN(NaN);
 
 	/* process argument list */
 	{
