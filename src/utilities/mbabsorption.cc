@@ -91,11 +91,10 @@
  *              and successfully backed off the reef.
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 
 #include "mb_define.h"

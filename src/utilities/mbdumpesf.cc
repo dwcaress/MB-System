@@ -20,13 +20,12 @@
  * Date:	March 20, 2008
  */
 
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <string.h>
-#include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>

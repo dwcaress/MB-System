@@ -53,14 +53,13 @@
  * program mbclean (v. 1.0) by David Caress.
  */
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
-#include <string.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <sys/stat.h>
-#include <time.h>
+#include <unistd.h>
 
 #include <algorithm>
 
