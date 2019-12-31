@@ -44,8 +44,6 @@
 const int MAX_OPTIONS = 25;
 const int MBCTDLIST_ALLOC_CHUNK = 1024;
 
-double NaN;
-
 static const char program_name[] = "mbctdlist";
 static const char help_message[] =
     "mbctdlist lists all CTD records within swath data files\n"
