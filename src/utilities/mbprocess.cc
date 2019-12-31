@@ -89,8 +89,8 @@ struct mbprocess_grid_struct {
   float *data;
 };
 
-static const char program_name[] = "mbprocess";
-static const char help_message[] =
+constexpr char program_name[] = "mbprocess";
+constexpr char help_message[] =
     "mbprocess is a tool for processing swath sonar bathymetry data.\n"
     "This program performs a number of functions, including:\n"
     "  - merging navigation\n"
@@ -413,7 +413,7 @@ int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int a
   return (status);
 }
 /*--------------------------------------------------------------------*/
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -S -T -V -H]";
 
 int main(int argc, char **argv) {

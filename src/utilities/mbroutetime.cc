@@ -34,22 +34,22 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-const int MBES_ALLOC_NUM = 128;
-/* const int MBES_ROUTE_WAYPOINT_NONE = 0; */
-/* const int MBES_ROUTE_WAYPOINT_SIMPLE = 1; */
-const int MBES_ROUTE_WAYPOINT_TRANSIT = 2;
-/* const int MBES_ROUTE_WAYPOINT_STARTLINE 3; */
-const int  MBES_ROUTE_WAYPOINT_ENDLINE = 4;
-/* const double MBES_ONLINE_THRESHOLD = 15.0; */
-/* const int MBES_ONLINE_COUNT = 30; */
+constexpr int MBES_ALLOC_NUM = 128;
+/* constexpr int MBES_ROUTE_WAYPOINT_NONE = 0; */
+/* constexpr int MBES_ROUTE_WAYPOINT_SIMPLE = 1; */
+constexpr int MBES_ROUTE_WAYPOINT_TRANSIT = 2;
+/* constexpr int MBES_ROUTE_WAYPOINT_STARTLINE 3; */
+constexpr int  MBES_ROUTE_WAYPOINT_ENDLINE = 4;
+/* constexpr double MBES_ONLINE_THRESHOLD = 15.0; */
+/* constexpr int MBES_ONLINE_COUNT = 30; */
 
-static const char program_name[] = "MBroutetime";
-static const char help_message[] =
+constexpr char program_name[] = "MBroutetime";
+constexpr char help_message[] =
     "MBroutetime outputs a list of the times when a survey hit the waypoints\n"
     "of a planned survey route. This (lon lat time_d) list can then be used by\n"
     "mbextractsegy or mb7k2ss to extract subbottom (or sidescan) data into files\n"
     "corresponding to the lines between waypoints.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbroutetime  -Rroutefile [-Fformat -Ifile -Owaypointtimefile -Urangethreshold -H -V]";
 
 /*--------------------------------------------------------------------*/

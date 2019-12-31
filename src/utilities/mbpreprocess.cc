@@ -40,7 +40,7 @@
 #include "mb_process.h"
 #include "mb_status.h"
 
-const int MBPREPROCESS_ALLOC_CHUNK = 1000;
+constexpr int MBPREPROCESS_ALLOC_CHUNK = 1000;
 
 typedef enum {
     MBPREPROCESS_MERGE_OFF = 0,
@@ -48,28 +48,28 @@ typedef enum {
     MBPREPROCESS_MERGE_ASYNC = 2,
 } merge_t;
 
-// const int MBPREPROCESS_TIME_LATENCY_OFF = 0;
-// const int MBPREPROCESS_TIME_LATENCY_FILE = 1;
-// const int MBPREPROCESS_TIME_LATENCY_CONSTANT = 2;;
-const mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_NONE = 0x00;
-const mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_NAV = 0x01;
-const mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_SENSORDEPTH = 0x02;
-const mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_ALTITUDE = 0x04;
-const mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_HEADING = 0x08;
-const mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_ATTITUDE = 0x10;
-const mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_SOUNDSPEED = 0x20;
-const mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_UNUSED = 0x40;
-const mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY = 0x7F;
-const mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_SURVEY = 0x80;
-const mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_ALL = 0xFF;
+// constexpr int MBPREPROCESS_TIME_LATENCY_OFF = 0;
+// constexpr int MBPREPROCESS_TIME_LATENCY_FILE = 1;
+// constexpr int MBPREPROCESS_TIME_LATENCY_CONSTANT = 2;;
+constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_NONE = 0x00;
+constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_NAV = 0x01;
+constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_SENSORDEPTH = 0x02;
+constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_ALTITUDE = 0x04;
+constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_HEADING = 0x08;
+constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_ATTITUDE = 0x10;
+constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_SOUNDSPEED = 0x20;
+constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_UNUSED = 0x40;
+constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY = 0x7F;
+constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_SURVEY = 0x80;
+constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_ALL = 0xFF;
 
 // #define DEBUG_MBPREPROCESS 1
 
-static const char program_name[] = "mbpreprocess";
-static const char help_message[] =
+constexpr char program_name[] = "mbpreprocess";
+constexpr char help_message[] =
     "mbpreprocess handles preprocessing of swath sonar data as part of setting up an MB-System processing "
     "structure for a dataset.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbpreprocess\n"
     "\t--verbose\n"
     "\t--help\n\n"

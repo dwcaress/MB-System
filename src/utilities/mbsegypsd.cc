@@ -56,11 +56,11 @@ typedef enum {
     stderr if verbose > 1) */
 FILE *outfp = nullptr;
 
-static const char program_name[] = "mbsegypsd";
-static const char help_message[] =
+constexpr char program_name[] = "mbsegypsd";
+constexpr char help_message[] =
     "mbsegypsd calculates the power spectral density function of each trace in a segy data file,\n"
     "outputting the results as a GMT grid file.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbsegypsd -Ifile -Oroot [-Ashotscale\n"
     "          -Ddecimatex -R\n"
     "          -Smode[/start/end[/schan/echan]] -Tsweep[/delay]\n"

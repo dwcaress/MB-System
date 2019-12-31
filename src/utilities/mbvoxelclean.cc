@@ -88,12 +88,12 @@ typedef enum {
     MBVC_OCCUPIED_UNFLAG = 1,
 } occupied_mode_t;
 
-static const char program_name[] = "mbvoxelclean";
-static const char help_message[] =
+constexpr char program_name[] = "mbvoxelclean";
+constexpr char help_message[] =
     "mbvoxelclean parses recursive datalist files and outputs the\n"
     "complete list of data files and formats.\n"
     "The results are dumped to stdout.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbvoxelclean \n"
     "\t[\n"
     "\t--verbose\n"
