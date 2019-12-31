@@ -22,12 +22,11 @@
  * Date:	June 1, 2012
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -2479,7 +2478,7 @@ int main(int argc, char **argv) {
 						}
 
 						/* check for NaN value */
-						if (isnan(ping->png_depth[i])) {
+						if (std::isnan(ping->png_depth[i])) {
 							ping->png_beamflag[i] = MB_FLAG_NULL;
 							ping->png_depth[i] = 0.0;
 						}
