@@ -44,7 +44,7 @@
 #include "mb_define.h"
 #include "mb_process.h"
 
-#define MBSVPLIST_SVP_NUM_ALLOC 24
+constexpr int MBSVPLIST_SVP_NUM_ALLOC = 24;
 typedef enum {
     MBSVPLIST_PRINTMODE_CHANGE = 0,
     MBSVPLIST_PRINTMODE_UNIQUE = 1,
@@ -66,8 +66,8 @@ struct mbsvplist_svp_struct {
 	double velocity[MB_SVP_MAX];
 };
 
-static const char program_name[] = "mbsvplist";
-static const char help_message[] =
+constexpr char program_name[] = "mbsvplist";
+constexpr char help_message[] =
     "mbsvplist lists all water sound velocity\n"
     "profiles (SVPs) within swath data files. Swath bathymetry is\n"
     "calculated from raw angles and travel times by raytracing\n"
@@ -82,7 +82,7 @@ static const char help_message[] =
     "The -T option will output a CSV table of svp#, time, longitude, latitude and number of points for SVPs.\n"
     "When the -Nmin_num_pairs option is used, only svps that have at least min_num_pairs svp values will "
     "be output.(This is particularly useful for .xse data where the svp is entered as a single values svp.)";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbsvplist [-C -D -Fformat -H -Ifile -Mmode -O -Nmin_num_pairs -P -T -V -Z]";
 
 /*--------------------------------------------------------------------*/

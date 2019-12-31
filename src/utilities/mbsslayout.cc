@@ -39,66 +39,66 @@
 #include "mb_status.h"
 #include "mbsys_ldeoih.h"
 
-#define MBSSLAYOUT_ALLOC_CHUNK 1024
-#define MBSSLAYOUT_ALLOC_NUM 128
+constexpr int MBSSLAYOUT_ALLOC_CHUNK = 1024;
+constexpr int MBSSLAYOUT_ALLOC_NUM = 128;
 
-const int MBSSLAYOUT_LINE_OFF = 0;
-const int MBSSLAYOUT_LINE_TIME = 1;
-const int MBSSLAYOUT_LINE_ROUTE = 2;
+constexpr int MBSSLAYOUT_LINE_OFF = 0;
+constexpr int MBSSLAYOUT_LINE_TIME = 1;
+constexpr int MBSSLAYOUT_LINE_ROUTE = 2;
 
-const int MBSSLAYOUT_LAYOUT_FLATBOTTOM = 0;
-const int MBSSLAYOUT_LAYOUT_3DTOPO = 1;
+constexpr int MBSSLAYOUT_LAYOUT_FLATBOTTOM = 0;
+constexpr int MBSSLAYOUT_LAYOUT_3DTOPO = 1;
 
-const int MBSSLAYOUT_ALTITUDE_ALTITUDE = 0;
-const int MBSSLAYOUT_ALTITUDE_BOTTOMPICK = 1;
-const int MBSSLAYOUT_ALTITUDE_TOPO_GRID = 2;
+constexpr int MBSSLAYOUT_ALTITUDE_ALTITUDE = 0;
+constexpr int MBSSLAYOUT_ALTITUDE_BOTTOMPICK = 1;
+constexpr int MBSSLAYOUT_ALTITUDE_TOPO_GRID = 2;
 
-const int MBSSLAYOUT_GAIN_OFF = 0;
-const int MBSSLAYOUT_GAIN_TVG = 1;
+constexpr int MBSSLAYOUT_GAIN_OFF = 0;
+constexpr int MBSSLAYOUT_GAIN_TVG = 1;
 
-const int MBSSLAYOUT_SWATHWIDTH_VARIABLE = 0;
-const int MBSSLAYOUT_SWATHWIDTH_CONSTANT = 1;
+constexpr int MBSSLAYOUT_SWATHWIDTH_VARIABLE = 0;
+constexpr int MBSSLAYOUT_SWATHWIDTH_CONSTANT = 1;
 
-const int MBSSLAYOUT_MERGE_OFF = 0;
-const int MBSSLAYOUT_MERGE_FILE = 1;
-const int MBSSLAYOUT_MERGE_ASYNC = 2;
+constexpr int MBSSLAYOUT_MERGE_OFF = 0;
+constexpr int MBSSLAYOUT_MERGE_FILE = 1;
+constexpr int MBSSLAYOUT_MERGE_ASYNC = 2;
 
-const int MBSSLAYOUT_TIME_LATENCY_OFF = 0;
-const int MBSSLAYOUT_TIME_LATENCY_FILE = 1;
-const int MBSSLAYOUT_TIME_LATENCY_CONSTANT = 2;
+constexpr int MBSSLAYOUT_TIME_LATENCY_OFF = 0;
+constexpr int MBSSLAYOUT_TIME_LATENCY_FILE = 1;
+constexpr int MBSSLAYOUT_TIME_LATENCY_CONSTANT = 2;
 
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_NONE = 0x00;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_NAV = 0x01;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SENSORDEPTH = 0x02;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALTITUDE = 0x04;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_HEADING = 0x08;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ATTITUDE = 0x10;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SOUNDSPEED = 0x20;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_UNUSED = 0x40;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALL_ANCILLIARY = 0x7F;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SURVEY = 0x80;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALL = 0xFF;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_NONE = 0x00;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_NAV = 0x01;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SENSORDEPTH = 0x02;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALTITUDE = 0x04;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_HEADING = 0x08;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ATTITUDE = 0x10;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SOUNDSPEED = 0x20;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_UNUSED = 0x40;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALL_ANCILLIARY = 0x7F;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SURVEY = 0x80;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALL = 0xFF;
 
-const int MBSSLAYOUT_ROUTE_WAYPOINT_NONE = 0;
-const int MBSSLAYOUT_ROUTE_WAYPOINT_SIMPLE = 1;
-const int MBSSLAYOUT_ROUTE_WAYPOINT_TRANSIT = 2;
-const int MBSSLAYOUT_ROUTE_WAYPOINT_STARTLINE = 3;
-const int MBSSLAYOUT_ROUTE_WAYPOINT_ENDLINE = 4;
+constexpr int MBSSLAYOUT_ROUTE_WAYPOINT_NONE = 0;
+constexpr int MBSSLAYOUT_ROUTE_WAYPOINT_SIMPLE = 1;
+constexpr int MBSSLAYOUT_ROUTE_WAYPOINT_TRANSIT = 2;
+constexpr int MBSSLAYOUT_ROUTE_WAYPOINT_STARTLINE = 3;
+constexpr int MBSSLAYOUT_ROUTE_WAYPOINT_ENDLINE = 4;
 
 // #define MBSSLAYOUT_ONLINE_THRESHOLD 15.0
 // #define MBSSLAYOUT_ONLINE_COUNT 30
 
-#define MBSSLAYOUT_SSDIMENSION 4001
+constexpr int MBSSLAYOUT_SSDIMENSION = 4001;
 
-#define MBSSLAYOUT_NUM_ANGLES 171
-const double MBSSLAYOUT_ANGLE_MAX = 85.0;
+constexpr int MBSSLAYOUT_NUM_ANGLES = 171;
+constexpr double MBSSLAYOUT_ANGLE_MAX = 85.0;
 
-static const char program_name[] = "mbsslayout";
-static const char help_message[] =
+constexpr char program_name[] = "mbsslayout";
+constexpr char help_message[] =
     "MBsslayout reads sidescan in raw time series form, lays the sidescan\n"
     "out regularly sampled on a specified topography model, and outputs\n"
     "the sidescan to format 71 (MBF_MBLDEOIH) files.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbsslayout [--verbose --help --input=datalist --format=format";
 
 /*--------------------------------------------------------------------*/

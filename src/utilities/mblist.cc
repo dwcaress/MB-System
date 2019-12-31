@@ -45,7 +45,8 @@
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
 
-#define MAX_OPTIONS 25
+constexpr int MAX_OPTIONS = 25;
+
 typedef enum {
     DUMP_MODE_LIST = 1,
     DUMP_MODE_BATH = 2,
@@ -73,13 +74,13 @@ typedef enum {
     MBLIST_SEGMENT_MODE_DATALIST = 3,
 } segment_mode_t;
 
-static const char program_name[] = "MBLIST";
-static const char help_message[] =
+constexpr char program_name[] = "MBLIST";
+constexpr char help_message[] =
     "MBLIST prints the specified contents of a swath data\n"
     "file to stdout. The form of the output is quite flexible;\n"
     "MBLIST is tailored to produce ascii files in spreadsheet\n"
     "style with data columns separated by tabs.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc\n"
     "    -Fformat -Gdelimiter -H -Ifile -Kdecimate -Llonflip -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end\n"
     "    -Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
