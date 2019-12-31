@@ -50,12 +50,12 @@
 #include <windows.h>
 #endif
 
-const double MBLEVITUS_NO_DATA = -1000000000.0;;
-const int NDEPTH_MAX = 46;
-const int NLEVITUS_MAX = 33;
+constexpr double MBLEVITUS_NO_DATA = -1000000000.0;;
+constexpr int NDEPTH_MAX = 46;
+constexpr int NLEVITUS_MAX = 33;
 
 // TODO(schwehr): warning: excess elements in array initializer
-const float depth[48 /* NDEPTH_MAX + 2 */] =
+constexpr float depth[48 /* NDEPTH_MAX + 2 */] =
     {0.0,    10.0,    20.0,    30.0,    50.0,    75.0,   100.0,  125.0,
      150.0,  200.0,   250.0,   300.0,   400.0,   500.0,  600.0,  700.0,
      800.0,  900.0,   1000.0,  1100.0,  1200.0,  1300.0, 1400.0, 1500.0,
@@ -63,11 +63,11 @@ const float depth[48 /* NDEPTH_MAX + 2 */] =
      5500.0, 6000.0,  6500.0,  7000.0,  7500.0,  8000.0, 8500.0, 9000.0,
      9500.0, 10000.0, 10500.0, 11000.0, 11500.0, 12000.0};
 
-static const char program_name[] = "MBLEVITUS";
-static const char help_message[] =
+constexpr char program_name[] = "MBLEVITUS";
+constexpr char help_message[] =
     "MBLEVITUS generates an average water velocity profile for a\n"
     "specified location from the Levitus temperature and salinity database.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mblevitus [-Rlon/lat -Ooutfile -V -H]";
 
 /*--------------------------------------------------------------------*/

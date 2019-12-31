@@ -33,13 +33,13 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-static const char program_name[] = "mbconfig";
-static const char help_message[] =
+constexpr char program_name[] = "mbconfig";
+constexpr char help_message[] =
     "mbconfig provides command line access to the MB-System installation location, "
     "the compile and libs flags needed to compile and link programs using MB-System "
     "libraries, and the locations of the levitus database and the OTPS tidal "
     "correction software.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbconfig --verbose --help --prefix --cflags --libs "
     "--version --version-id --version-major --version-minor --version-archive";
 

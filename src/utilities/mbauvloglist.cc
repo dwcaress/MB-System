@@ -33,8 +33,8 @@
 #include "mb_define.h"
 #include "mb_status.h"
 
-const int NFIELDSMAX = 512;
-const int MAX_OPTIONS = 512;
+constexpr int NFIELDSMAX = 512;
+constexpr int MAX_OPTIONS = 512;
 typedef enum {
     TYPE_UNKNOWN = 0,
     TYPE_TIMETAG = 1,
@@ -114,9 +114,9 @@ struct printfield {
 	char format[MB_PATH_MAXLINE];
 };
 
-static const char program_name[] = "MBauvloglist";
-static const char help_message[] = "MBauvloglist lists table data from an MBARI AUV mission log file.";
-static const char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonflip -Olist -Rid -S -H -V]";
+constexpr char program_name[] = "MBauvloglist";
+constexpr char help_message[] = "MBauvloglist lists table data from an MBARI AUV mission log file.";
+constexpr char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonflip -Olist -Rid -S -H -V]";
 
 /*--------------------------------------------------------------------*/
 

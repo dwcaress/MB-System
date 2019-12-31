@@ -32,13 +32,13 @@
 #include "mb_status.h"
 
 /* colortable view mode defines */
-const int MBV_COLORTABLE_HAXBY = 0;
-const int MBV_COLORTABLE_BRIGHT = 1;
-const int MBV_COLORTABLE_MUTED = 2;
-const int MBV_COLORTABLE_GRAY = 3;
-const int MBV_COLORTABLE_FLAT = 4;
-const int MBV_COLORTABLE_SEALEVEL1 = 5;
-const int MBV_COLORTABLE_SEALEVEL2 = 6;
+constexpr int MBV_COLORTABLE_HAXBY = 0;
+constexpr int MBV_COLORTABLE_BRIGHT = 1;
+constexpr int MBV_COLORTABLE_MUTED = 2;
+constexpr int MBV_COLORTABLE_GRAY = 3;
+constexpr int MBV_COLORTABLE_FLAT = 4;
+constexpr int MBV_COLORTABLE_SEALEVEL1 = 5;
+constexpr int MBV_COLORTABLE_SEALEVEL2 = 6;
 
 /* colortable view mode defines */
 typedef enum {
@@ -47,20 +47,19 @@ typedef enum {
 } colortable_mode_t;
 
 /* shade view mode defines */
-const int MBV_SHADE_VIEW_NONE = 0;
-const int MBV_SHADE_VIEW_ILLUMINATION = 1;
-const int MBV_SHADE_VIEW_SLOPE = 2;
-const int MBV_SHADE_VIEW_OVERLAY = 3;
+constexpr int MBV_SHADE_VIEW_NONE = 0;
+constexpr int MBV_SHADE_VIEW_ILLUMINATION = 1;
+constexpr int MBV_SHADE_VIEW_SLOPE = 2;
+constexpr int MBV_SHADE_VIEW_OVERLAY = 3;
 
-
-static const char program_name[] = "MBDEFAULTS";
-static const char help_message[] =
+constexpr char program_name[] = "MBDEFAULTS";
+constexpr char help_message[] =
     "MBDEFAULTS sets and retrieves the /default MBIO control\n"
     "parameters stored in the file ~/.mbio_defaults.\n"
     "Only the parameters specified by command line\n"
     "arguments will be changed; if no ~/.mbio_defaults\n"
     "file exists one will be created.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbdefaults [-Bfileiobuffer -Dpsdisplay -Ffbtversion -Iimagedisplay -Llonflip\n"
     "    -Mmbviewsettings\n\t-Ttimegap -Wproject -V -H]";
 

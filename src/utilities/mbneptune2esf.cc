@@ -62,8 +62,8 @@
 #include "mbsys_simrad2.h"
 
 /* length of line name nnnn_yyyymmdd_hhmmss = 20 */
-const int LINE_NAME_LENGTH = 20;
-#define LINE_NAME_BUFFER 21 /* LINE_NAME_LENGTH + 1; */
+constexpr int LINE_NAME_LENGTH = 20;
+constexpr int LINE_NAME_BUFFER = 21; /* LINE_NAME_LENGTH + 1; */
 
 /* use MB-System memory allocation functions */
 #define USE_MB_MALLOC 1
@@ -108,11 +108,11 @@ struct mbclean_ping_struct {
 	double *bathy;
 };
 
-static const char program_name[] = "mbneptune2esf";
-static const char help_message[] =
+constexpr char program_name[] = "mbneptune2esf";
+constexpr char help_message[] =
     "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\n"
     "and applies the flags in the rules file to the esf file of the corresponding line";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
 
 /*--------------------------------------------------------------------*/

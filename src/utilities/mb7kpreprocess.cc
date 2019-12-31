@@ -41,7 +41,7 @@
 #include "mb_status.h"
 #include "mbsys_reson7k.h"
 
-const int MB7KPREPROCESS_ALLOC_CHUNK = 1000;
+constexpr int MB7KPREPROCESS_ALLOC_CHUNK = 1000;
 typedef enum {
     MB7KPREPROCESS_PROCESS = 1,
     MB7KPREPROCESS_TIMESTAMPLIST = 2,
@@ -73,14 +73,14 @@ typedef enum {
     MB7KPREPROCESS_KLUGE_BEAMPATTERNSNELLTWEAK = 9,
 } kluge_t;
 
-static const char program_name[] = "mb7kpreprocess";
-static const char help_message[] =
+constexpr char program_name[] = "mb7kpreprocess";
+constexpr char help_message[] =
     "mb7kpreprocess reads a Reson 7k format file, interpolates the\n"
     "asynchronous navigation and attitude onto the multibeam data,\n"
     "and writes a new 7k file with that information correctly embedded\n"
     "in the multibeam data. This program can also fix various problems\n"
     "with 7k data.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mb7kpreprocess [-A -B -Crollbias/pitchbias -Doffx/offy -Fformat -Ifile -Kklugemode -L  -Ninsfile  "
     "-Ooutfile [-Psonardepthfile | -Plagmax/ratemax] -Ssidescansource -Ttimelag -H -V]";
 

@@ -46,7 +46,7 @@ typedef enum {
     MBBACKANGLE_AMP = 1,
     MBBACKANGLE_SS = 2,
 } backangle_kind_t;
-const double MBBACKANGLE_INNERSWATHLIMIT = 15.0;
+constexpr double MBBACKANGLE_INNERSWATHLIMIT = 15.0;
 typedef enum {
     MBBACKANGLE_BEAMPATTERN_EMPIRICAL = 0,
     MBBACKANGLE_BEAMPATTERN_SIDESCAN = 1,
@@ -73,8 +73,8 @@ struct mbba_grid_struct {
 	float *data;
 };
 
-static const char program_name[] = "mbbackangle";
-static const char help_message[] =
+constexpr char program_name[] = "mbbackangle";
+constexpr char help_message[] =
     "MBbackangle reads a swath sonar data file and generates a set\n"
     "  of tables containing the average amplitude an/or sidescan values\n"
     "  as a function of the angle of interaction (grazing angle)\n"
@@ -82,7 +82,7 @@ static const char help_message[] =
     "  average function for a user defined number of pings. The tables\n"
     "  are output to a \".aga\" and \".sga\" files that can be applied\n"
     "  by MBprocess.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbbackangle -Ifile "
     "[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/min/max/n_columns/n_rows "
     "-Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Zaltitude -V -H]";

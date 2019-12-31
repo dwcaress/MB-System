@@ -84,10 +84,10 @@ typedef enum {
 } grid_data_t;
 
 /* flag for no data in grid */;
-const int NO_DATA_FLAG = 99999;
+constexpr int NO_DATA_FLAG = 99999;
 
 /* number of data to be allocated at a time */
-const int REALLOC_STEP_SIZE = 25;
+constexpr int REALLOC_STEP_SIZE = 25;
 
 /* usage of footprint based weight */
 typedef enum {
@@ -105,7 +105,7 @@ typedef enum {
 } grid_interp_t;
 
 /* comparison threshold */;
-const double MBGRID_TINY = 0.00000001;
+constexpr double MBGRID_TINY = 0.00000001;
 
 /* interpolation algorithm
     The code is set to use either of two
@@ -124,8 +124,8 @@ const double MBGRID_TINY = 0.00000001;
 FILE *outfp = nullptr;
 
 /* program identifiers */
-static const char program_name[] = "mbgrid";
-static const char help_message[] =
+constexpr char program_name[] = "mbgrid";
+constexpr char help_message[] =
     "mbgrid is an utility used to grid bathymetry, amplitude, or\n"
     "sidescan data contained in a set of swath sonar data files.\n"
     "This program uses one of four algorithms (gaussian weighted mean,\n"
@@ -133,7 +133,7 @@ static const char help_message[] =
     "covered swaths and then fills in gaps between\n"
     "the swaths (to the degree specified by the user) using a minimum\n"
     "curvature algorithm.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbgrid   -Ifilelist -Oroot [-Adatatype -Bborder -Cclip[/mode] -Dxdim/ydim\n"
     "          -Edx/dy/units[!]  -Fmode[/threshold] -Ggridkind -Jprojection\n"
     "          -Kbackground -Llonflip -M -N -Ppings -Q  -Rwest/east/south/north\n"

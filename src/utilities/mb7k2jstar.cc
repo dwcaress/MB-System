@@ -52,7 +52,7 @@ typedef enum {
     MB7K2JSTAR_SSGAIN_OFF = 0,
     MB7K2JSTAR_SSGAIN_TVG_1OVERR = 1,
 } ssgain_t;
-const int MBES_ALLOC_NUM = 128;
+constexpr int MBES_ALLOC_NUM = 128;
 typedef enum {
     MBES_ROUTE_WAYPOINT_NONE = 0,
     MBES_ROUTE_WAYPOINT_SIMPLE = 1,
@@ -60,14 +60,14 @@ typedef enum {
     MBES_ROUTE_WAYPOINT_STARTLINE = 3,
     MBES_ROUTE_WAYPOINT_ENDLINE = 4,
 } waypoint_t;
-const int MBES_ONLINE_THRESHOLD = 15.0;
-const int MBES_ONLINE_COUNT = 30;
+constexpr int MBES_ONLINE_THRESHOLD = 15.0;
+constexpr int MBES_ONLINE_COUNT = 30;
 
-static const char help_message[] =
+constexpr char help_message[] =
     "mb7k2jstar extracts Edgetech subbottom profiler and sidescan data\n"
     "from Reson 7k format data and outputs in the Edgetech Jstar format.";
-static const char program_name[] = "mb7k2jstar";
-static const char usage_message[] =
+constexpr char program_name[] = "mb7k2jstar";
+constexpr char usage_message[] =
     "mb7k2jstar [-Ifile -Atype -Bmode[/threshold] -C -Fformat "
     "-Lstartline/lineroot -Ooutfile -Rroutefile -X -H -V]";
 

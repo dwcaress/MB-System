@@ -34,7 +34,7 @@
 #include "mb_segy.h"
 #include "mb_status.h"
 
-const int MBES_ALLOC_NUM = 128;
+constexpr int MBES_ALLOC_NUM = 128;
 typedef enum {
     MBES_ROUTE_WAYPOINT_NONE = 0,
     MBES_ROUTE_WAYPOINT_SIMPLE = 1,
@@ -42,17 +42,17 @@ typedef enum {
     MBES_ROUTE_WAYPOINT_STARTLINE = 3,
     MBES_ROUTE_WAYPOINT_ENDLINE = 4,
 } waypoint_t;
-const double MBES_ONLINE_THRESHOLD = 15.0;
-const int MBES_ONLINE_COUNT = 30;
-const int MBES_NUM_PLOT_MAX = 50;
-const double MBES_MAX_SWEEP = 1.0;
+constexpr double MBES_ONLINE_THRESHOLD = 15.0;
+constexpr int MBES_ONLINE_COUNT = 30;
+constexpr int MBES_NUM_PLOT_MAX = 50;
+constexpr double MBES_MAX_SWEEP = 1.0;
 
-static const char program_name[] = "MBextractsegy";
-static const char help_message[] =
+constexpr char program_name[] = "MBextractsegy";
+constexpr char help_message[] =
     "MBextractsegy extracts subbottom profiler, center beam reflection,\n"
     "or seismic reflection data from data supported by MB-System and\n"
     "rewrites it as a SEGY file in the form used by SIOSEIS.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat\n"
     "    -Ifile -Jxscale/yscale -Lstartline/lineroot\n"
     "    -Osegyfile -Qtimelistfile -Rroutefile\n"

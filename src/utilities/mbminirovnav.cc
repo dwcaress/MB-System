@@ -40,13 +40,13 @@
 #include "mb_process.h"
 #include "mb_status.h"
 
-static const char program_name[] = "mbminirovnav";
-static const char help_message[] =
+constexpr char program_name[] = "mbminirovnav";
+constexpr char help_message[] =
     " MBminirov reads USBL tracking and CTD day files from the MBARI MiniROV\n"
     "\tand produces a single ROV navigation file in one of the standard MBARI\n"
     "\tformats handles preprocessing of swath sonar data as part of setting up\n"
     "\tan MB-System processing structure for a dataset.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbminirovnav\n"
     "\t--help\n\n"
     "\t--input=fileroot\n"

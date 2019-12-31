@@ -36,19 +36,19 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-const int NCHARMAX = 256;
+constexpr int NCHARMAX = 256;
 
 /*--------------------------------------------------------------------*/
 
-static const char program_name[] = "MBauvnavusbl";
-static const char help_message[] =
+constexpr char program_name[] = "MBauvnavusbl";
+constexpr char help_message[] =
     "MBauvnavusbl reads a primary navigation file (usually from a submerged platform\n"
     "swath survey) and also reads secondary navigation (e.g. USBL fixes).\n"
     "The program calculates position offsets between the raw survey navigation\n"
     "and the secondary navigation every 3600 seconds (10 minutes), and then\n"
     "linearly interpolates and applies this adjustment vector for each\n"
     "primary navigation position. The adjusted navigation is output.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbauvnavusbl -Inavfile -Ooutfile -Uusblfile [-Fnavformat -Llonflip -Musblformat -V -H ]";
 
 int main(int argc, char **argv) {

@@ -41,10 +41,10 @@ typedef enum {
     SENSOR_MODIFY = 2,
 } sensor_mode_t;
 
-static const char program_name[] = "mbmakeplatform";
-static const char help_message[] =
+constexpr char program_name[] = "mbmakeplatform";
+constexpr char help_message[] =
     "mbmakeplatform creates or modifies an MB-System platform file.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbmakeplatform \n"
     "\t[\n"
     "\t--verbose\n"

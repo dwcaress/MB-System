@@ -44,8 +44,8 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-const int NFIELDSMAX = 50;
-const int MAX_OPTIONS = 50;
+constexpr int NFIELDSMAX = 50;
+constexpr int MAX_OPTIONS = 50;
 typedef enum {
     TYPE_UNKNOWN = 0,
     TYPE_TIMETAG = 1,
@@ -54,14 +54,14 @@ typedef enum {
     TYPE_ANGLE = 4,
 } field_type_t;
 // TODO(schwehr): Should these be unsigned values for flags?
-// const int KEARFOTT_MONITOR_VALID_DVL = 0x01;
-// const int KEARFOTT_MONITOR_RESERVED = 0x02;
-// const int KEARFOTT_MONITOR_ZUPT_PROCESSED = 0x04;
-// const int KEARFOTT_MONITOR_DVL_REJECTED = 0x08;
-const int KEARFOTT_MONITOR_DVL_PPROCESSED = 0x10;
-// const int KEARFOTT_MONITOR_GPS_REJECTED = 0x20;
-// const int KEARFOTT_MONITOR_GPS_PROCESSED = 0x40;
-// const int KEARFOTT_MONITOR_DEPTH_LOOP_OPEN = 0x80;
+// constexpr int KEARFOTT_MONITOR_VALID_DVL = 0x01;
+// constexpr int KEARFOTT_MONITOR_RESERVED = 0x02;
+// constexpr int KEARFOTT_MONITOR_ZUPT_PROCESSED = 0x04;
+// constexpr int KEARFOTT_MONITOR_DVL_REJECTED = 0x08;
+constexpr int KEARFOTT_MONITOR_DVL_PPROCESSED = 0x10;
+// constexpr int KEARFOTT_MONITOR_GPS_REJECTED = 0x20;
+// constexpr int KEARFOTT_MONITOR_GPS_PROCESSED = 0x40;
+// constexpr int KEARFOTT_MONITOR_DEPTH_LOOP_OPEN = 0x80;
 
 /* auv log data */
 struct field {
@@ -81,8 +81,8 @@ struct printfield {
 	char format[MB_PATH_MAXLINE];
 };
 
-static const char program_name[] = "MBinsreprocess";
-static const char help_message[] =
+constexpr char program_name[] = "MBinsreprocess";
+constexpr char help_message[] =
     "MBinsreprocess reads an INS navigation file (e.g. from a Kearfott SeaDevil),\n"
     "including information about the state of navigation aiding by GPS, DVL,\n"
     "and other navigation sources. It then identifies time periods without\n"
@@ -90,7 +90,7 @@ static const char help_message[] =
     "inertial periods are typically ended with a navigation tear as the INS\n"
     "calculates a new state. This program removes the navigation tears by\n"
     "linear interpolation in time. The adjusted navigation is output.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbinsreprocess --input=filename --output=filename [--help --verbose]";
 
 /*--------------------------------------------------------------------*/

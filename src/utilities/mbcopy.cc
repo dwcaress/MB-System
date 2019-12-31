@@ -67,14 +67,14 @@ typedef enum {
     MBCOPY_STRIPMODE_BATHYONLY = 2,
 } strip_mode_t;
 
-static const char program_name[] = "MBcopy";
-static const char help_message[] =
+constexpr char program_name[] = "MBcopy";
+constexpr char help_message[] =
     "MBcopy copies an input swath sonar data file to an output\n"
     "swath sonar data file with the specified conversions.  Options include\n"
     "windowing in time and space and ping averaging.  The input and\n"
     "output data formats may differ, though not all possible combinations\n"
     "make sense.  The default input and output streams are stdin and stdout.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc\n"
     "\t-Fiformat/oformat/mformat -H -Iinfile -Llonflip -Mmergefile -N -Ooutfile\n"
     "\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";

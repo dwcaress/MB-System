@@ -41,15 +41,15 @@
 #include "mb_process.h"
 #include "mb_status.h"
 
-const int MAX_OPTIONS = 25;
-const int MBCTDLIST_ALLOC_CHUNK = 1024;
+constexpr int MAX_OPTIONS = 25;
+constexpr int MBCTDLIST_ALLOC_CHUNK = 1024;
 
-static const char program_name[] = "mbctdlist";
-static const char help_message[] =
+constexpr char program_name[] = "mbctdlist";
+constexpr char help_message[] =
     "mbctdlist lists all CTD records within swath data files\n"
     "The -O option specifies how the values are output\n"
     "in an mblist-likefashion.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbctdlist [-A -Ddecimate -Fformat -Gdelimeter -H -Ifile -Llonflip -Ooutput_format -V -Zsegment]";
 
 /*--------------------------------------------------------------------*/
