@@ -40,14 +40,14 @@ typedef enum {
     MBHISTOGRAM_SS = 2,
 } histogram_mode_t;
 
-static const char program_name[] = "MBHISTOGRAM";
-static const char help_message[] =
+constexpr char program_name[] = "MBHISTOGRAM";
+constexpr char help_message[] =
     "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n"
     "\tof the bathymetry,  amplitude, or sidescan values. Alternatively,\n"
     "\tmbhistogram can output a list of values which break up the\n"
     "\tdistribution into equal sized regions.\n"
     "\tThe results are dumped to stdout.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip "
     "-Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
 

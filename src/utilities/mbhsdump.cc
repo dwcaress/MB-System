@@ -34,11 +34,11 @@
 #include "mb_status.h"
 #include "mbsys_hsds.h"
 
-static const char program_name[] = "mbhsdump";
-static const char help_message[] =
+constexpr char program_name[] = "mbhsdump";
+constexpr char help_message[] =
     "mbhsdump lists the information contained in data records on\n\tHydrosweep DS data files, including "
     "survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbhsdump [-Fformat -V -H -Iinfile -Okind]";
 
 /*--------------------------------------------------------------------*/

@@ -38,7 +38,7 @@
 #include "mb_status.h"
 #include "mbsys_hysweep.h"
 
-const int MBHYSWEEPPREPROCESS_ALLOC_CHUNK = 1000;
+constexpr int MBHYSWEEPPREPROCESS_ALLOC_CHUNK = 1000;
 
 typedef enum {
     MBHYSWEEPPREPROCESS_PROCESS = 1,
@@ -58,18 +58,18 @@ typedef enum {
     MBHYSWEEPPREPROCESS_SONAR_OFFSET_NAVIGATION = 3,
 } sonar_offset_t;
 
-const int MBHYSWEEPPREPROCESS_OFFSET_MAX = 12;
+constexpr int MBHYSWEEPPREPROCESS_OFFSET_MAX = 12;
 
-// static const int MBHYSWEEPPREPROCESS_NAVFORMAT_NONE = 0;
-static const int MBHYSWEEPPREPROCESS_NAVFORMAT_OFG = 1;
+// constexpr int MBHYSWEEPPREPROCESS_NAVFORMAT_NONE = 0;
+constexpr int MBHYSWEEPPREPROCESS_NAVFORMAT_OFG = 1;
 
-static const char program_name[] = "mbhysweeppreprocess";
-static const char help_message[] =
+constexpr char program_name[] = "mbhysweeppreprocess";
+constexpr char help_message[] =
     "mbhysweeppreprocess reads a Hysweep HSX format file, interpolates the\n"
     "asynchronous navigation and attitude onto the multibeam data,\n"
     "and writes a new HSX file with that information correctly embedded\n"
     "in the multibeam data.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbhysweeppreprocess [-Aoffsettype/x/y/z/t -Brollbias/pitchbias/headingbias -Dsonardepthfile "
     "-Idatalist -Jprojection -L -Mnavformat -Nnavfile -Ttimelag -H -V]";
 

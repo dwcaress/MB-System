@@ -40,7 +40,7 @@
 #include "mb_status.h"
 #include "mbsys_simrad3.h"
 
-const int MBKONSBERGPREPROCESS_ALLOC_CHUNK = 1000;
+constexpr int MBKONSBERGPREPROCESS_ALLOC_CHUNK = 1000;
 
 // typedef enum {
 //     MBKONSBERGPREPROCESS_PROCESS = 1,
@@ -60,7 +60,7 @@ typedef enum {
 //     MBKONSBERGPREPROCESS_SONAR_OFFSET_NAVIGATION = 3,
 // } sonar_offset_t;
 
-const int MBKONSBERGPREPROCESS_OFFSET_MAX = 12;
+constexpr int MBKONSBERGPREPROCESS_OFFSET_MAX = 12;
 
 // typedef enum {
 //     MBKONSBERGPREPROCESS_NAVFORMAT_NONE = 0,
@@ -68,9 +68,9 @@ const int MBKONSBERGPREPROCESS_OFFSET_MAX = 12;
 // } navformat_t;
 
 /* set precision of iterative raytracing depth & distance matching */
-const double MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION = 0.0001;
-const int MBKONSBERGPREPROCESS_BATH_RECALC_NCALCMAX = 50;
-const int MBKONSBERGPREPROCESS_BATH_RECALC_ANGLEMODE = 0;
+constexpr double MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION = 0.0001;
+constexpr int MBKONSBERGPREPROCESS_BATH_RECALC_NCALCMAX = 50;
+constexpr int MBKONSBERGPREPROCESS_BATH_RECALC_ANGLEMODE = 0;
 
 typedef enum {
     MBKONSBERGPREPROCESS_ZMODE_UNKNOWN = 0,
@@ -90,12 +90,12 @@ typedef enum {
     MBKONSBERGPREPROCESS_FILTER_MEDIAN = 2,
 } filter_t;
 
-static const char program_name[] = "mbkongsbergpreprocess";
-static const char help_message[] =
+constexpr char program_name[] = "mbkongsbergpreprocess";
+constexpr char help_message[] =
     "mbkongsbergpreprocess reads a Kongsberg multibeam vendor format file (or datalist of files),\n"
     "interpolates the asynchronous navigation and attitude onto the multibeam data,\n"
     "and writes the data as one or more format 59 files.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbkongsbergpreprocess [-C -Doutputdirectory -Eoffx/offy[/offdepth] -Fformat -Ifile -Ooutfile\n"
     "    -Pfilterlength/filterdepth -Sdatatype/source -Ttimelag -W -H -V]";
 

@@ -83,10 +83,10 @@ typedef enum {
 } y_mode_t;
 
 /* MBIO buffer size default */
-const int MBCLEAN_BUFFER_DEFAULT = 500;
+constexpr int MBCLEAN_BUFFER_DEFAULT = 500;
 
 /* edit action defines */
-const int MBCLEAN_NOACTION = 0;
+constexpr int MBCLEAN_NOACTION = 0;
 
 /* ping structure definition */
 struct mbclean_ping_struct {
@@ -115,12 +115,12 @@ struct bad_struct {
   double bath;
 };
 
-static const char program_name[] = "mbclean";
-static const char help_message[] =
+constexpr char program_name[] = "mbclean";
+constexpr char help_message[] =
     "Mbclean identifies and flags artifacts in swath sonar bathymetry data.\n"
     "Several algorithms are available for identifying artifacts;\n"
     "multiple algorithms can be applied in a single pass.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbclean [-Amax -Blow/high -Cslope/unit -Dmin/max\n"
     "\t-Fformat -Gfraction_low/fraction_high -Iinfile -Krange_min\n"
     "\t-Llonflip -Mmode Ntolerance -Ooutfile -Pmin_speed/max_speed -Q -Rmaxheadingrate\n"

@@ -55,9 +55,9 @@
 #include "mb_swap.h"
 
 /* allocation */
-static const int FILEALLOCNUM = 16;
-static const int PINGALLOCNUM = 128;
-static const int SNDGALLOCNUM = 128;
+constexpr int FILEALLOCNUM = 16;
+constexpr int PINGALLOCNUM = 128;
+constexpr int SNDGALLOCNUM = 128;
 
 struct mbareaclean_file_struct {
 	char filelist[MB_PATH_MAXLINE];
@@ -103,9 +103,9 @@ int *gsndgnum = nullptr;
 int *gsndgnum_alloc = nullptr;
 struct mbareaclean_sndg_struct *sndg = nullptr;
 
-static const char program_name[] = "MBAREACLEAN";
-static const char help_message[] = "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
-static const char usage_message[] =
+constexpr char program_name[] = "MBAREACLEAN";
+constexpr char help_message[] = "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
+constexpr char usage_message[] =
     "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize\n"
     "\t -Mthreshold/nmin -Dthreshold[/nmin[/nmax]] -Ttype -N[-]minbeam/maxbeam]";
 

@@ -39,7 +39,7 @@
 #include "mb_status.h"
 #include "mb_io.h"
 
-const int MBINFO_MAXPINGS = 50;
+constexpr int MBINFO_MAXPINGS = 50;
 
 struct ping {
 	char *beamflag;
@@ -59,8 +59,8 @@ typedef enum {
   MAX_OUTPUT_FORMAT = 2
 } output_format_t ;
 
-static const char program_name[] = "MBINFO";
-static const char usage_message[] =
+constexpr char program_name[] = "MBINFO";
+constexpr char usage_message[] =
     "mbinfo [-Byr/mo/da/hr/mn/sc -C "
     "-Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnx/ny "
     "-N -O -Ppings -Rw/e/s/n -Sspeed -W -V -H -XinfFormat]";
@@ -251,7 +251,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (help) {
-		static const char help_message[] =
+		constexpr char help_message[] =
 		    "MBINFO reads a swath sonar data file and outputs\n"
 	            "some basic statistics.  If pings are averaged (pings > 2)\n"
 	            "MBINFO estimates the variance for each of the swath\n"

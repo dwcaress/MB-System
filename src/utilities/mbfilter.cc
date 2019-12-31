@@ -88,7 +88,7 @@ typedef enum {
 } filter_a_mode_t;
 
 /* MBIO buffer size default */
-const int MBFILTER_BUFFER_DEFAULT = 5000;
+constexpr int MBFILTER_BUFFER_DEFAULT = 5000;
 
 /* ping structure definition */
 struct mbfilter_ping_struct {
@@ -125,7 +125,7 @@ struct mbfilter_ping_struct {
 };
 
 /* filter structure definition */
-const int MBFILTER_NFILTER_MAX = 10;
+constexpr int MBFILTER_NFILTER_MAX = 10;
 struct mbfilter_filter_struct {
 	filter_a_mode_t mode;
 	int xdim;
@@ -137,8 +137,8 @@ struct mbfilter_filter_struct {
 	double hipass_offset;
 };
 
-static const char program_name[] = "MBFILTER";
-static const char help_message[] = "mbfilter applies one or more simple filters to the specified\n\t"
+constexpr char program_name[] = "MBFILTER";
+constexpr char help_message[] = "mbfilter applies one or more simple filters to the specified\n\t"
     "data (sidescan and/or beam amplitude). The filters\n\t"
     "include:\n\t"
     "  - boxcar mean for lo-pass filtering (-S1)\n\t"
@@ -156,7 +156,7 @@ static const char help_message[] = "mbfilter applies one or more simple filters 
     "data, and the hi-pass filters can be used to emphasize\n\t"
     "fine scale structure in the data.\n\t"
     "The default input and output streams are stdin and stdout.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbfilter ["
     "-Akind -Byr/mo/da/hr/mn/sc\n\t"
     "-Cmode/xdim/ldim/iteration\n\t"

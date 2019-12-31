@@ -42,7 +42,7 @@ typedef enum {
     MB7K2SS_SS_FLAT_BOTTOM = 0,
     MB7K2SS_SS_3D_BOTTOM = 1,
 } layout_t;
-const int MB7K2SS_SSDIMENSION = 4001;
+constexpr int MB7K2SS_SSDIMENSION = 4001;
 typedef enum {
     MB7K2SS_SSLOW = 1,
     MB7K2SS_SSHIGH = 2,
@@ -61,8 +61,8 @@ typedef enum {
     MB7K2SS_SSGAIN_TVG_1OVERR = 1,
 } ssgain_t;
 
-const int MB7K2SS_ALLOC_NUM = 128;
-const int MB7K2SS_ALLOC_CHUNK = 1024;
+constexpr int MB7K2SS_ALLOC_NUM = 128;
+constexpr int MB7K2SS_ALLOC_CHUNK = 1024;
 
 typedef enum {
     MB7K2SS_ROUTE_WAYPOINT_NONE = 0,
@@ -72,18 +72,18 @@ typedef enum {
     MB7K2SS_ROUTE_WAYPOINT_ENDLINE = 4,
 } waypoint_t;
 
-const double MB7K2SS_ONLINE_THRESHOLD = 15.0;
-const int MB7K2SS_ONLINE_COUNT = 30;
+constexpr double MB7K2SS_ONLINE_THRESHOLD = 15.0;
+constexpr int MB7K2SS_ONLINE_COUNT = 30;
 
-const int MB7K2SS_NUM_ANGLES = 171;
-const double MB7K2SS_ANGLE_MAX = 85.0;
+constexpr int MB7K2SS_NUM_ANGLES = 171;
+constexpr double MB7K2SS_ANGLE_MAX = 85.0;
 
-static const char program_name[] = "mb7k2ss";
-static const char help_message[] =
+constexpr char program_name[] = "mb7k2ss";
+constexpr char help_message[] =
     "mb7k2ss extracts sidescan sonar data from Reson 7k format data,\n"
     "bins and lays the sidescan onto the seafloor, and outputs files \n"
     "in the MBF_MBLDEOIH formst (MBIO format id 71).\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mb7k2ss [-Ifile -Atype -Bmode[/threshold] -C -D -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile "
     "-Ttopogridfile -X -H -V]";
 

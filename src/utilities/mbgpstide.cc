@@ -67,10 +67,10 @@
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
 
-static const char program_name[] = "mbgpstide";
-static const char help_message[] =
+constexpr char program_name[] = "mbgpstide";
+constexpr char help_message[] =
     "MBgpstide generates tide files from the GPS altitude data in the input files.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbgpstide [-Atideformat -Dinterval -Fformat -Idatalist -M -Ooutput -Roffset -S -Tgeoid -Usource,sensor -V]";
 
 /*--------------------------------------------------------------------*/

@@ -88,53 +88,53 @@ typedef enum {
     MBMOSAIC_PRIORITYTABLE_85DEGREESDN = 8,
 } priority_table_t;
 
-int n_priority_angle_60degreesup = 3;
+constexpr int n_priority_angle_60degreesup = 3;
 double priority_angle_60degreesup_angle[] = {-60, 0, 60};
 double priority_angle_60degreesup_priority[] = {1.0, 0.0, 1.0};
-int n_priority_angle_67degreesup = 3;
+constexpr int n_priority_angle_67degreesup = 3;
 double priority_angle_67degreesup_angle[] = {-67, 0, 67};
 double priority_angle_67degreesup_priority[] = {1.0, 0.0, 1.0};
-int n_priority_angle_75degreesup = 3;
+constexpr int n_priority_angle_75degreesup = 3;
 double priority_angle_75degreesup_angle[] = {-75, 0, 75};
 double priority_angle_75degreesup_priority[] = {1.0, 0.0, 1.0};
-int n_priority_angle_85degreesup = 3;
+constexpr int n_priority_angle_85degreesup = 3;
 double priority_angle_85degreesup_angle[] = {-85, 0, 85};
 double priority_angle_85degreesup_priority[] = {1.0, 0.0, 1.0};
-int n_priority_angle_60degreesdn = 3;
+constexpr int n_priority_angle_60degreesdn = 3;
 double priority_angle_60degreesdn_angle[] = {-60, 0, 60};
 double priority_angle_60degreesdn_priority[] = {0.0, 1.0, 0.0};
-int n_priority_angle_67degreesdn = 3;
+constexpr int n_priority_angle_67degreesdn = 3;
 double priority_angle_67degreesdn_angle[] = {-67, 0, 67};
 double priority_angle_67degreesdn_priority[] = {0.0, 1.0, 0.0};
-int n_priority_angle_75degreesdn = 3;
+constexpr int n_priority_angle_75degreesdn = 3;
 double priority_angle_75degreesdn_angle[] = {-75, 0, 75};
 double priority_angle_75degreesdn_priority[] = {0.0, 1.0, 0.0};
-int n_priority_angle_85degreesdn = 3;
+constexpr int n_priority_angle_85degreesdn = 3;
 double priority_angle_85degreesdn_angle[] = {-85, 0, 85};
 double priority_angle_85degreesdn_priority[] = {0.0, 1.0, 0.0};
 
-const int MB7K2SS_NUM_ANGLES = 171;
-const double MB7K2SS_ANGLE_MAX = 85.0;
+constexpr int MB7K2SS_NUM_ANGLES = 171;
+constexpr double MB7K2SS_ANGLE_MAX = 85.0;
 
 /* flag for no data in grid */;
-const int NO_DATA_FLAG = 99999;
+constexpr int NO_DATA_FLAG = 99999;
 
 /* interpolation mode */;
-const int MBMOSAIC_INTERP_NONE = 0;
-const int MBMOSAIC_INTERP_GAP = 1;
-const int MBMOSAIC_INTERP_NEAR = 2;
-const int MBMOSAIC_INTERP_ALL = 3;
+constexpr int MBMOSAIC_INTERP_NONE = 0;
+constexpr int MBMOSAIC_INTERP_GAP = 1;
+constexpr int MBMOSAIC_INTERP_NEAR = 2;
+constexpr int MBMOSAIC_INTERP_ALL = 3;
 
-const int MBMOSAIC_FOOTPRINT_REAL = 0;
-const int MBMOSAIC_FOOTPRINT_SPACING = 1;
+constexpr int MBMOSAIC_FOOTPRINT_REAL = 0;
+constexpr int MBMOSAIC_FOOTPRINT_SPACING = 1;
 
 struct footprint {
 	double x[4];
 	double y[4];
 };
 
-static const char program_name[] = "mbmosaic";
-static const char help_message[] =
+constexpr char program_name[] = "mbmosaic";
+constexpr char help_message[] =
     "mbmosaic is an utility used to mosaic amplitude or\n"
     "sidescan data contained in a set of swath sonar data files.\n"
     "This program uses one of four algorithms (gaussian weighted mean,\n"
@@ -142,7 +142,7 @@ static const char help_message[] =
     "covered by multibeam swaths and then fills in gaps between\n"
     "the swaths (to the degree specified by the user) using a minimum\n"
     "curvature algorithm.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbmosaic -Ifilelist -Oroot\n"
     "    [-Rwest/east/south/north -Rfactor -Adatatype\n"
     "    -Bborder -Cclip/mode/tension -Dxdim/ydim -Edx/dy/units\n"
