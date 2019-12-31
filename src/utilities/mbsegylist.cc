@@ -36,20 +36,20 @@
 #include "mb_segy.h"
 #include "mb_status.h"
 
-#define MAX_OPTIONS 25
-const int MBLIST_CHECK_ON = 0;
-const int MBLIST_CHECK_ON_NULL = 1;
-const int MBLIST_CHECK_OFF_RAW = 2;
-const int MBLIST_CHECK_OFF_NAN = 3;
-const int MBLIST_CHECK_OFF_FLAGNAN = 4;
-const int MBLIST_SET_OFF = 0;
-const int MBLIST_SET_ON = 1;
-const int MBLIST_SET_ALL = 2;
+constexpr int MAX_OPTIONS = 25;
+constexpr int MBLIST_CHECK_ON = 0;
+constexpr int MBLIST_CHECK_ON_NULL = 1;
+constexpr int MBLIST_CHECK_OFF_RAW = 2;
+constexpr int MBLIST_CHECK_OFF_NAN = 3;
+constexpr int MBLIST_CHECK_OFF_FLAGNAN = 4;
+constexpr int MBLIST_SET_OFF = 0;
+constexpr int MBLIST_SET_ON = 1;
+constexpr int MBLIST_SET_ALL = 2;
 
-static const char program_name[] = "MBsegylist";
-static const char help_message[] =
+constexpr char program_name[] = "MBsegylist";
+constexpr char help_message[] =
     "MBsegylist lists table data from a segy data file.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "MBsegylist -Ifile [-A -Ddecimate -Gdelimiter -Llonflip -Olist -H -V]";
 
 /*--------------------------------------------------------------------*/

@@ -33,7 +33,7 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-#define MAX_OPTIONS 25
+constexpr int MAX_OPTIONS = 25;
 typedef enum {
     MBNAVLIST_SEGMENT_MODE_NONE = 0,
     MBNAVLIST_SEGMENT_MODE_TAG = 1,
@@ -41,13 +41,13 @@ typedef enum {
     MBNAVLIST_SEGMENT_MODE_DATALIST = 3,
 } segment_mode_t;
 
-static const char program_name[] = "mbnavlist";
-static const char help_message[] =
+constexpr char program_name[] = "mbnavlist";
+constexpr char help_message[] =
     "mbnavlist prints the specified contents of navigation records\n"
     "in a swath sonar data file to stdout. The form of the\n"
     "output is quite flexible; mbnavlist is tailored to produce\n"
     "ascii files in spreadsheet style with data columns separated by tabs.";
-static const char usage_message[] =
+constexpr const char usage_message[] =
     "mbnavlist [-Byr/mo/da/hr/mn/sc -Ddecimate -Eyr/mo/da/hr/mn/sc\n"
     "    -Fformat -Gdelimiter -H -Ifile -Kkind -Llonflip\n"
     "    -Ooptions -Rw/e/s/n -Sspeed\n"

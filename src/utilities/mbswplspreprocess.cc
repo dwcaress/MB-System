@@ -68,7 +68,7 @@
 #include "mb_status.h"
 #include "mbsys_swathplus.h"
 
-#define MAX_ERROR_STRING 1024
+constexpr int MAX_ERROR_STRING = 1024;
 
 typedef struct mbdefaults_struct {
 	int verbose;
@@ -128,28 +128,28 @@ typedef struct counts_struct {
 	int ping_sel_sim;
 } counts;
 
-static char help_message[] = "Preprocess SWATHplus SXP formatted files\n"
-                             "\n"
-                             "Options:\n"
-                             "-A        overwrite processed amplitude with raw\n"
-                             "          amplitude data.\n"
-                             "-B        flip flag on rejected/accepted samples.\n"
-                             "-Fformat  MB System format id\n"
-                             "-G        print data records to stdout\n"
-                             "-H        print this help text\n"
-                             "-Iinfile  SXP file to process\n"
-                             "-Jproj4   Proj4 projection command\n"
-                             "-N        do not write output to file, mostly useful with -G\n"
-                             "-Ooutfile basename for output files [default: same as input]\n"
-                             "-R        remove rejected samples from pings.\n"
-                             "-S        split each transducer channel into a separate file\n"
-                             "-V        verbosity\n"
-                             "\n"
-                             "Report bugs to the MB System development team\n";
+constexpr char help_message[] =
+	"Preprocess SWATHplus SXP formatted files\n"
+	"\n"
+	"Options:\n"
+	"-A        overwrite processed amplitude with raw\n"
+	"          amplitude data.\n"
+	"-B        flip flag on rejected/accepted samples.\n"
+	"-Fformat  MB System format id\n"
+	"-G        print data records to stdout\n"
+	"-H        print this help text\n"
+	"-Iinfile  SXP file to process\n"
+	"-Jproj4   Proj4 projection command\n"
+	"-N        do not write output to file, mostly useful with -G\n"
+	"-Ooutfile basename for output files [default: same as input]\n"
+	"-R        remove rejected samples from pings.\n"
+	"-S        split each transducer channel into a separate file\n"
+	"-V        verbosity\n"
+	"\n"
+	"Report bugs to the MB System development team\n";
 
-static char usage_message[] = "mbswplspreprocess [-ABGHNRSV -Fformat -Jproj4command -Obasename] -Ifile";
-
-static char program_name[] = "mbswplspreprocess";
+constexpr char usage_message[] = "mbswplspreprocess [-ABGHNRSV -Fformat -Jproj4command -Obasename] -Ifile";
+constexpr char program_name[] = "mbswplspreprocess";
 
 /*---------------------------------------------------------------*/
 static void default_options(options *opts) {
