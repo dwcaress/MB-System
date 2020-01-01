@@ -1,3 +1,10 @@
+if BUILD_MBTRN
+  MBTRNINCDIR =
+  MBTRNINCDIR += -I${top_srcdir}/src/mbtrn/r7kr
+  MBTRNINCDIR += -I${top_srcdir}/src/mbtrn/utils
+  MBTRNINCDIR += -I${top_srcdir}/src/mbtrn/mframe/src
+endif
+
 bin_PROGRAMS =
 bin_PROGRAMS += mb7k2jstar
 bin_PROGRAMS += mb7k2ss
@@ -18,6 +25,7 @@ AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbio
 AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
+AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += ${libfftw_CPPFLAGS}
