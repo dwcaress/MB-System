@@ -70,6 +70,26 @@ struct mbprocess_sscorr_struct {
 
 /* define grid structure */
 struct mbprocess_grid_struct {
+  mbprocess_grid_struct() :
+      file(""),
+      projectionname(""),
+      projection_mode(0),
+      projection_id(""),
+      nodatavalue(0.0f),
+      nxy(0),
+      n_columns(0),
+      n_rows(0),
+      min(0.0),
+      max(0.0),
+      xmin(0.0),
+      xmax(0.0),
+      ymin(0.0),
+      ymax(0.0),
+      dx(0.0),
+      dy(0.0),
+      data(nullptr) {}
+
+ public:
   mb_path file;
   mb_path projectionname;
   int projection_mode;
@@ -858,7 +878,7 @@ int main(int argc, char **argv) {
 
   /* topography parameters */
   struct mbprocess_grid_struct grid;
-  memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
+  // memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
 
   char buffer[MBP_FILENAMESIZE];
   char dummy[MBP_FILENAMESIZE];
@@ -1349,18 +1369,18 @@ int main(int argc, char **argv) {
           fprintf(stderr, "  Static beam corrections off.\n");
 
         fprintf(stderr, "\nBathymetry Water Sound Speed Reference:\n");
-        if (process.mbp_corrected == true)
+        if (process.mbp_corrected)
           fprintf(stderr, "  Output bathymetry reference:   CORRECTED\n");
-        else if (process.mbp_corrected == false)
+        else if (!process.mbp_corrected)
           fprintf(stderr, "  Output bathymetry reference:   UNCORRECTED\n");
         if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF) {
-          if (process.mbp_corrected == true)
+          if (process.mbp_corrected)
             fprintf(stderr, "  Depths modified from uncorrected to corrected\n");
           else
             fprintf(stderr, "  Depths modified from corrected to uncorrected\n");
         }
         else if (process.mbp_svp_mode == MBP_SVP_ON) {
-          if (process.mbp_corrected == true)
+          if (process.mbp_corrected)
             fprintf(stderr, "  Depths recalculated as corrected\n");
           else
             fprintf(stderr, "  Depths recalculated as uncorrected\n");
@@ -3446,6 +3466,7 @@ int main(int argc, char **argv) {
         /* insert metadata */
         if (strlen(process.mbp_meta_vessel) > 0) {
           sprintf(comment, "METAVESSEL:%s", process.mbp_meta_vessel);
+          // TODO(schwehr): Don't set "status =" for all the mb_put_comment.
           status = mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
@@ -3604,7 +3625,7 @@ int main(int argc, char **argv) {
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
-          if (process.mbp_corrected == false)
+          if (!process.mbp_corrected)
             sprintf(comment, "  uncorrected meters (the depth values are adjusted to be");
           else
             sprintf(comment, "  corrected meters (the depth values obtained by");
@@ -3612,7 +3633,7 @@ int main(int argc, char **argv) {
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
-          if (process.mbp_corrected == false)
+          if (!process.mbp_corrected)
             sprintf(comment, "  consistent with a vertical water velocity of 1500 m/s).");
           else
             sprintf(comment, "  raytracing are not adjusted further).");
@@ -3731,19 +3752,19 @@ int main(int argc, char **argv) {
           }
         }
         if (process.mbp_svp_mode != MBP_SVP_OFF) {
-          if (process.mbp_corrected == true) {
+          if (process.mbp_corrected) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Output bathymetry reference:   CORRECTED");
             status = mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
-          else if (process.mbp_corrected == false) {
+          else if (!process.mbp_corrected) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Output bathymetry reference:   UNCORRECTED");
             status = mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
         }
         if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF) {
-          if (process.mbp_corrected == true) {
+          if (process.mbp_corrected) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Depths modified from uncorrected to corrected.");
             status = mb_put_comment(verbose, ombio_ptr, comment, &error);
@@ -4254,43 +4275,39 @@ int main(int argc, char **argv) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  AVGA tables forced to be symmetric");
             status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-          }
-          else {
+          } else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  AVGA tables allowed to be asymmetric");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Reference grazing angle:       %f deg", process.mbp_sscorr_angle);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (process.mbp_sscorr_slope == MBP_SSCORR_IGNORESLOPE || process.mbp_sscorr_slope == MBP_SSCORR_USESLOPE) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Sidescan correction uses swath bathymetry in file");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-          }
-          else {
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
+          } else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Sidescan correction uses topography grid");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Topography grid file:      %s m", process.mbp_ampsscorr_topofile);
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
           if (process.mbp_sscorr_slope == MBP_SSCORR_IGNORESLOPE) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Sidescan correction ignores seafloor slope");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-          }
-          else {
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
+          } else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Sidescan correction uses seafloor slope");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
-        }
-        else {
+        } else {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Sidescan correction off.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         }
 
         strncpy(comment, "\0", MBP_FILENAMESIZE);
@@ -4350,35 +4367,35 @@ int main(int argc, char **argv) {
             ocomment++;
         }
 
-        if (process.mbp_kluge001 == true) {
+        if (process.mbp_kluge001) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge001 applied (travel time correction to HSDS2 data)");
           status = mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
-        else if (process.mbp_kluge002 == true) {
+        else if (process.mbp_kluge002) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge002 applied (heave correction to Simrad data)");
           status = mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
-        else if (process.mbp_kluge003 == true) {
+        else if (process.mbp_kluge003) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge003 applied (roll correction for USCG Healy SB2112 data)");
           status = mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
-        else if (process.mbp_kluge004 == true) {
+        else if (process.mbp_kluge004) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge004 applied (remove data with overlapping time stamps)");
           status = mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
-        else if (process.mbp_kluge005 == true) {
+        else if (process.mbp_kluge005) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge005 applied (replaces survey record timestamps withtimestamps of "
                            "corresponding merged navigation records)");
@@ -4386,7 +4403,7 @@ int main(int argc, char **argv) {
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
-        else if (process.mbp_kluge006 == true) {
+        else if (process.mbp_kluge006) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(
               comment,
@@ -4395,28 +4412,28 @@ int main(int argc, char **argv) {
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
-        else if (process.mbp_kluge007 == true) {
+        else if (process.mbp_kluge007) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge007 applied (zero alongtrack values > half altitude)");
           status = mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
-        else if (process.mbp_kluge008 == true) {
+        else if (process.mbp_kluge008) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge008 applied (undefined)");
           status = mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
-        else if (process.mbp_kluge009 == true) {
+        else if (process.mbp_kluge009) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge009 applied (undefined)");
           status = mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
-        else if (process.mbp_kluge010 == true) {
+        else if (process.mbp_kluge010) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge010 applied (undefined)");
           status = mb_put_comment(verbose, ombio_ptr, comment, &error);
@@ -4490,7 +4507,7 @@ int main(int argc, char **argv) {
         }
 
         /* compare and save survey data timestamps */
-        if (process.mbp_kluge004 == true && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
+        if (process.mbp_kluge004 && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
           if (time_d <= time_d_lastping) {
             error = MB_ERROR_UNINTELLIGIBLE;
             status = MB_FAILURE;
@@ -4564,11 +4581,11 @@ int main(int argc, char **argv) {
         /* apply kluge001 - enables correction of travel times in
                     Hydrosweep DS2 data from the R/V Maurice
                     Ewing in 2001 and 2002. */
-        if (process.mbp_kluge001 == true && kind == MB_DATA_DATA && (format == 182 || format == 183))
+        if (process.mbp_kluge001 && kind == MB_DATA_DATA && (format == 182 || format == 183))
           status = mbsys_atlas_ttcorr(verbose, imbio_ptr, store_ptr, &error);
 
         /* apply kluge007 - zero alongtrack distances > half the altitude */
-        if (process.mbp_kluge007 == true && kind == MB_DATA_DATA) {
+        if (process.mbp_kluge007 && kind == MB_DATA_DATA) {
           for (int i = 0; i < nbath; i++) {
             if (fabs(bathalongtrack[i]) > 0.5 * altitude)
               bathalongtrack[i] = 0.0;
@@ -4600,7 +4617,7 @@ int main(int argc, char **argv) {
                        mounted sonars)
                      - this correction subtracts the heave
                        value from the sonar depth */
-          if (process.mbp_kluge002 == true && kind == MB_DATA_DATA)
+          if (process.mbp_kluge002 && kind == MB_DATA_DATA)
             draft -= heave;
         }
 
@@ -4611,7 +4628,7 @@ int main(int argc, char **argv) {
                       timestamp errors using MBnavedit and
                       then insert the corrected timestamps
                       into processed data */
-        if (process.mbp_kluge005 == true && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && nnav > 0) {
+        if (process.mbp_kluge005 && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && nnav > 0) {
           time_d = ntime[idata - 1];
           mb_get_date(verbose, time_d, time_i);
         }
@@ -4953,7 +4970,7 @@ int main(int argc, char **argv) {
             --------------------------------------------*/
 
           /* apply kluge006 - resets draft without changing bathymetry */
-          if (process.mbp_kluge006 == true && kind == MB_DATA_DATA) {
+          if (process.mbp_kluge006 && kind == MB_DATA_DATA) {
             draft_org = draft;
           }
 
@@ -4969,7 +4986,7 @@ int main(int argc, char **argv) {
                     corrections, and translate back */
                 if (process.mbp_rollbias_mode != MBP_ROLLBIAS_OFF ||
                     process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON || process.mbp_nav_attitude == MBP_NAV_ON ||
-                    process.mbp_attitude_mode == MBP_ATTITUDE_ON || process.mbp_kluge003 == true) {
+                    process.mbp_attitude_mode == MBP_ATTITUDE_ON || process.mbp_kluge003) {
                   mb_takeoff_to_rollpitch(verbose, angles[i], angles_forward[i], &alpha, &beta, &error);
                   /* apply kluge_003 - enables correction of beam angles in
                        SeaBeam 2112 data
@@ -4986,7 +5003,7 @@ int main(int argc, char **argv) {
                              set to enable bathymetry recalculation
                              by raytracing in order to apply this
                              correction */
-                  if (process.mbp_kluge003 == true)
+                  if (process.mbp_kluge003)
                     beta -= 0.25 * roll;
                   if (process.mbp_nav_attitude == MBP_NAV_ON || process.mbp_attitude_mode == MBP_ATTITUDE_ON) {
                     beta += roll - roll_org;
@@ -5163,7 +5180,7 @@ int main(int argc, char **argv) {
 
           /* change bathymetry water sound reference if required */
           if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF ||
-              (process.mbp_svp_mode == MBP_SVP_ON && process.mbp_corrected == false)) {
+              (process.mbp_svp_mode == MBP_SVP_ON && !process.mbp_corrected)) {
             for (int i = 0; i < nbath; i++) {
               if (beamflag[i] != MB_FLAG_NULL) {
                 /* calculate average water sound speed
@@ -5190,7 +5207,7 @@ int main(int argc, char **argv) {
                   vavg = 1500.0;
 
                 /* if uncorrected value desired */
-                if (process.mbp_corrected == false)
+                if (!process.mbp_corrected)
                   bath[i] = zz * 1500.0 / vavg + depth_offset_use;
                 else
                   bath[i] = zz * vavg / 1500.0 + depth_offset_use;
@@ -5896,7 +5913,7 @@ int main(int argc, char **argv) {
       /* deallocate topography grid */
       if (grid.data != nullptr) {
         mb_freed(verbose, __FILE__, __LINE__, (void **)&grid.data, &error);
-        memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
+        // memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
       }
 
       /* deallocate arrays for navigation */
