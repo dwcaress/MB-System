@@ -14,7 +14,7 @@ import unittest
 class MbhsdumpTest(unittest.TestCase):
 
   def setUp(self):
-    self.cmd = '../../src/utilities/mbhsdump'
+    self.cmd = '../../src/deprecated/mbhsdump'
 
   # Hangs: testNoArgs
 

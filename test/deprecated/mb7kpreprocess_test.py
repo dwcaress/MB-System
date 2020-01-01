@@ -4,17 +4,17 @@
 #
 # See README file for copying and redistribution conditions.
 
-"""Tests for mbinsreprocess command line app."""
+"""Tests for mb7kpreprocess command line app."""
 
 import os
 import subprocess
 import unittest
 
 
-class MbinsreprocessTest(unittest.TestCase):
+class Mb7kpreprocessTest(unittest.TestCase):
 
   def setUp(self):
-    self.cmd = '../../src/utilities/mbinsreprocess'
+    self.cmd = '../../src/deprecated/mb7kpreprocess'
 
   def testNoArgs(self):
     cmd = [self.cmd]
@@ -23,28 +23,28 @@ class MbinsreprocessTest(unittest.TestCase):
       subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
       raised = True
-      self.assertEqual(1, e.returncode)
-      self.assertIn(b'Unable to open log file <stdin> for reading', e.output)
+      self.assertEqual(2, e.returncode)
+      self.assertIn(b'Unable to open data list file:', e.output)
+      self.assertIn(b'datalist.mb-1', e.output)
+      self.assertIn(b'Ancillary data sources', e.output)
     self.assertTrue(raised)
 
   def testHelp(self):
-    cmd = [self.cmd, '--help']
+    cmd = [self.cmd, '-h']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
-    self.assertIn('Version', output)
-    self.assertIn('reads an INS navigation file', output)
+    self.assertIn('mb7kpreprocess reads a Reson 7k', output)
     self.assertIn('usage:', output)
-    self.assertIn('--output=filename', output)
+    self.assertIn('-Crollbias', output)
 
   def testHelpVerbose2(self):
-    cmd = [self.cmd, '--help', '--verbose', '--verbose']
+    cmd = [self.cmd, '-h', '-V', '-V']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
-    self.assertIn('Version', output)
-    self.assertIn('reads an INS navigation file', output)
+    self.assertIn('mb7kpreprocess reads a Reson 7k', output)
     self.assertIn('usage:', output)
-    self.assertIn('--output=filename', output)
+    self.assertIn('-Crollbias', output)
     self.assertIn('dbg2', output)
     self.assertIn('lonflip', output)
-    self.assertIn('ofile:', output)
+    self.assertIn('rollpitch_offset_pitch', output)
 
   # TODO(schwehr): Add tests of actual usage.
 
