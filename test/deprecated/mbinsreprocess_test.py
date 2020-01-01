@@ -4,17 +4,17 @@
 #
 # See README file for copying and redistribution conditions.
 
-"""Tests for mbhysweeppreprocess command line app."""
+"""Tests for mbinsreprocess command line app."""
 
 import os
 import subprocess
 import unittest
 
 
-class MbhysweeppreprocessTest(unittest.TestCase):
+class MbinsreprocessTest(unittest.TestCase):
 
   def setUp(self):
-    self.cmd = '../../src/utilities/mbhysweeppreprocess'
+    self.cmd = '../../src/deprecated/mbinsreprocess'
 
   def testNoArgs(self):
     cmd = [self.cmd]
@@ -23,31 +23,28 @@ class MbhysweeppreprocessTest(unittest.TestCase):
       subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
       raised = True
-      self.assertEqual(2, e.returncode)
-      self.assertIn(b'Data available for merging:', e.output)
-      self.assertIn(b'sonardepth', e.output)
-      self.assertIn(b'Unable to open data list file:', e.output)
-      self.assertIn(b'datalist.mb-1', e.output)
+      self.assertEqual(1, e.returncode)
+      self.assertIn(b'Unable to open log file <stdin> for reading', e.output)
     self.assertTrue(raised)
 
   def testHelp(self):
-    cmd = [self.cmd, '-h']
+    cmd = [self.cmd, '--help']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
     self.assertIn('Version', output)
-    self.assertIn('reads a Hysweep HSX format file', output)
+    self.assertIn('reads an INS navigation file', output)
     self.assertIn('usage:', output)
-    self.assertIn('-Ttimelag', output)
+    self.assertIn('--output=filename', output)
 
   def testHelpVerbose2(self):
-    cmd = [self.cmd, '-h', '-V', '-V']
+    cmd = [self.cmd, '--help', '--verbose', '--verbose']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
     self.assertIn('Version', output)
-    self.assertIn('reads a Hysweep HSX format file', output)
+    self.assertIn('reads an INS navigation file', output)
     self.assertIn('usage:', output)
-    self.assertIn('-Ttimelag', output)
+    self.assertIn('--output=filename', output)
     self.assertIn('dbg2', output)
     self.assertIn('lonflip', output)
-    self.assertIn('timelagmode:', output)
+    self.assertIn('ofile:', output)
 
   # TODO(schwehr): Add tests of actual usage.
 

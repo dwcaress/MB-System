@@ -26,6 +26,7 @@ SUBDIRS += $(XBUILD_SUB_MBTNAV)
 SUBDIRS += mbio
 SUBDIRS += mbaux
 SUBDIRS += utilities
+SUBDIRS += deprecated
 SUBDIRS += $(XBUILD_SUB_MBTRNBIN)
 SUBDIRS += gmt
 SUBDIRS += otps

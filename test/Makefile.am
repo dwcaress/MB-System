@@ -1,4 +1,7 @@
-SUBDIRS = mbio utilities
+SUBDIRS =
+SUBDIRS += mbio
+SUBDIRS += utilities
+SUBDIRS += deprecated
 
 CLEANFILES =
 DISTCLEANFILES =

@@ -1030,6 +1030,7 @@ AC_CONFIG_FILES([\
       src/gsf/Makefile \
       src/mbaux/Makefile \
       src/utilities/Makefile \
+      src/deprecated/Makefile \
       src/gmt/Makefile \
       src/macros/Makefile \
       src/mbedit/Makefile \
@@ -1055,6 +1056,7 @@ AC_CONFIG_FILES([\
       test/Makefile \
       test/mbio/Makefile \
       test/utilities/Makefile \
+      test/deprecated/Makefile \
       ])
 AC_OUTPUT
 

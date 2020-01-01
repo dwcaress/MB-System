@@ -4,17 +4,17 @@
 #
 # See README file for copying and redistribution conditions.
 
-"""Tests for mb7kpreprocess command line app."""
+"""Tests for mbkongsbergpreprocess command line app."""
 
 import os
 import subprocess
 import unittest
 
 
-class Mb7kpreprocessTest(unittest.TestCase):
+class MbkongsbergpreprocessTest(unittest.TestCase):
 
   def setUp(self):
-    self.cmd = '../../src/utilities/mb7kpreprocess'
+    self.cmd = '../../src/deprecated/mbkongsbergpreprocess'
 
   def testNoArgs(self):
     cmd = [self.cmd]
@@ -26,25 +26,26 @@ class Mb7kpreprocessTest(unittest.TestCase):
       self.assertEqual(2, e.returncode)
       self.assertIn(b'Unable to open data list file:', e.output)
       self.assertIn(b'datalist.mb-1', e.output)
-      self.assertIn(b'Ancillary data sources', e.output)
     self.assertTrue(raised)
 
   def testHelp(self):
     cmd = [self.cmd, '-h']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
-    self.assertIn('mb7kpreprocess reads a Reson 7k', output)
+    self.assertIn('Version', output)
+    self.assertIn('reads a Kongsberg multibeam vendor format', output)
     self.assertIn('usage:', output)
-    self.assertIn('-Crollbias', output)
+    self.assertIn('-Sdatatype/source', output)
 
   def testHelpVerbose2(self):
     cmd = [self.cmd, '-h', '-V', '-V']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
-    self.assertIn('mb7kpreprocess reads a Reson 7k', output)
+    self.assertIn('Version', output)
+    self.assertIn('reads a Kongsberg multibeam vendor format', output)
     self.assertIn('usage:', output)
-    self.assertIn('-Crollbias', output)
+    self.assertIn('-Sdatatype/source', output)
     self.assertIn('dbg2', output)
     self.assertIn('lonflip', output)
-    self.assertIn('rollpitch_offset_pitch', output)
+    self.assertIn('depthsensoroffz:', output)
 
   # TODO(schwehr): Add tests of actual usage.
 

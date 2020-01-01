@@ -4,50 +4,42 @@
 #
 # See README file for copying and redistribution conditions.
 
-"""Tests for mbrollbias command line app."""
+"""Tests for mbrphsbias command line app."""
 
 import os
 import subprocess
 import unittest
 
 
-class MbrollbiasTest(unittest.TestCase):
+class MbrphsbiasTest(unittest.TestCase):
 
   def setUp(self):
-    self.cmd = '../../src/utilities/mbrollbias'
+    self.cmd = '../../src/deprecated/mbrphsbias'
 
   def testNoArgs(self):
     cmd = [self.cmd]
-    raised = False
-    try:
-      subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-      raised = True
-      self.assertEqual(12, e.returncode)
-      self.assertIn(b'Grid bounds not properly specified:', e.output)
-      self.assertIn(b'0.0', e.output)
-    self.assertTrue(raised)
+    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
+    self.assertIn('Unable to open data list file:', output)
+    self.assertIn('datalist.mb-1', output)
 
   def testHelp(self):
     cmd = [self.cmd, '-h']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
     self.assertIn('Version', output)
-    self.assertIn('assess roll bias of swath', output)
-    self.assertIn('starboard', output)
+    self.assertIn('sonar soundings to solve for bias parameters', output)
     self.assertIn('usage:', output)
-    self.assertIn('-Jfile2', output)
+    self.assertIn('-Sbinsize', output)
 
   def testHelpVerbose2(self):
     cmd = [self.cmd, '-h', '-V', '-V']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
     self.assertIn('Version', output)
-    self.assertIn('assess roll bias of swath', output)
-    self.assertIn('starboard', output)
+    self.assertIn('sonar soundings to solve for bias parameters', output)
     self.assertIn('usage:', output)
-    self.assertIn('-Jfile2', output)
+    self.assertIn('-Sbinsize', output)
     self.assertIn('dbg2', output)
     self.assertIn('lonflip', output)
-    self.assertIn('grid y dimension:', output)
+    self.assertIn('binsizeset:', output)
 
   # TODO(schwehr): Add tests of actual usage.
 

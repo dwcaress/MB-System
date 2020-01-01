@@ -87,7 +87,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = test/utilities
+subdir = test/deprecated
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
 	$(top_srcdir)/m4/ax_check_link_flag.m4 \
@@ -499,37 +499,28 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 TEST_EXTENSIONS = .py
 
-# TESTS += mbtrnpreprocess_test.py
-# check_SCRIPTS += mbtrnpreprocess_test.py
-TESTS = mbabsorption_test.py mbareaclean_test.py mbauvloglist_test.py \
-	mbbackangle_test.py mbclean_test.py mbconfig_test.py \
-	mbcopy_test.py mbctdlist_test.py mbdatalist_test.py \
-	mbdefaults_test.py mbdumpesf_test.py mbextractsegy_test.py \
-	mbfilter_test.py mbformat_test.py mbgetesf_test.py \
-	mbgpstide_test.py mbgrid_test.py mbhistogram_test.py \
-	mbinfo_test.py mblevitus_test.py mblist_test.py \
-	mbmakeplatform_test.py mbminirovnav_test.py mbmosaic_test.py \
-	mbnavlist_test.py mbpreprocess_test.py mbprocess_test.py \
-	mbrolltimelag_test.py mbroutetime_test.py mbsegygrid_test.py \
-	mbsegyinfo_test.py mbsegylist_test.py mbsegypsd_test.py \
-	mbset_test.py mbsslayout_test.py mbsvplist_test.py \
-	mbsvpselect_test.py mbtime_test.py mbvoxelclean_test.py
+# TODO(schwehr): Why is this not built?
+# TESTS += mbps_test.py
+# check_SCRIPTS += mbps_test.py
+
+# TESTS += mbstripnan_test.py
+# check_SCRIPTS += mbstripnan_test.py
+TESTS = mb7k2jstar_test.py mb7k2ss_test.py mb7kpreprocess_test.py \
+	mbauvnavusbl_test.py mbhsdump_test.py \
+	mbhysweeppreprocess_test.py mbinsreprocess_test.py \
+	mbkongsbergpreprocess_test.py mbneptune2esf_test.py \
+	mbrollbias_test.py mbswplspreprocess_test.py
 
 # if HAVE_PYTHON
-check_SCRIPTS = mbabsorption_test.py mbareaclean_test.py \
-	mbauvloglist_test.py mbbackangle_test.py mbclean_test.py \
-	mbconfig_test.py mbcopy_test.py mbctdlist_test.py \
-	mbdatalist_test.py mbdefaults_test.py mbdumpesf_test.py \
-	mbextractsegy_test.py mbfilter_test.py mbformat_test.py \
-	mbgetesf_test.py mbgpstide_test.py mbgrid_test.py \
-	mbhistogram_test.py mbinfo_test.py mblevitus_test.py \
-	mblist_test.py mbmakeplatform_test.py mbminirovnav_test.py \
-	mbmosaic_test.py mbnavlist_test.py mbpreprocess_test.py \
-	mbprocess_test.py mbrolltimelag_test.py mbroutetime_test.py \
-	mbsegygrid_test.py mbsegyinfo_test.py mbsegylist_test.py \
-	mbsegypsd_test.py mbset_test.py mbsslayout_test.py \
-	mbsvplist_test.py mbsvpselect_test.py mbtime_test.py \
-	mbvoxelclean_test.py
+check_SCRIPTS = mb7k2jstar_test.py mb7k2ss_test.py \
+	mb7kpreprocess_test.py mbauvnavusbl_test.py mbhsdump_test.py \
+	mbhysweeppreprocess_test.py mbinsreprocess_test.py \
+	mbkongsbergpreprocess_test.py mbneptune2esf_test.py \
+	mbrollbias_test.py mbswplspreprocess_test.py
+
+# endif
+CLEANFILES = 
+DISTCLEANFILES = 
 all: all-am
 
 .SUFFIXES:
@@ -543,9 +534,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign test/utilities/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign test/deprecated/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign test/utilities/Makefile
+	  $(AUTOMAKE) --foreign test/deprecated/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -762,10 +753,12 @@ mostlyclean-generic:
 	-test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -852,8 +845,6 @@ uninstall-am:
 
 .PRECIOUS: Makefile
 
-
-# endif
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
