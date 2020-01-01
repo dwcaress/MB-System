@@ -21,13 +21,14 @@
  *              R/V Atlantis, Axial Seamount
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+
+#include <algorithm>
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -41,7 +42,7 @@ typedef enum {
     MB7K2SS_SS_FLAT_BOTTOM = 0,
     MB7K2SS_SS_3D_BOTTOM = 1,
 } layout_t;
-const int MB7K2SS_SSDIMENSION = 4001;
+constexpr int MB7K2SS_SSDIMENSION = 4001;
 typedef enum {
     MB7K2SS_SSLOW = 1,
     MB7K2SS_SSHIGH = 2,
@@ -60,8 +61,8 @@ typedef enum {
     MB7K2SS_SSGAIN_TVG_1OVERR = 1,
 } ssgain_t;
 
-const int MB7K2SS_ALLOC_NUM = 128;
-const int MB7K2SS_ALLOC_CHUNK = 1024;
+constexpr int MB7K2SS_ALLOC_NUM = 128;
+constexpr int MB7K2SS_ALLOC_CHUNK = 1024;
 
 typedef enum {
     MB7K2SS_ROUTE_WAYPOINT_NONE = 0,
@@ -71,18 +72,18 @@ typedef enum {
     MB7K2SS_ROUTE_WAYPOINT_ENDLINE = 4,
 } waypoint_t;
 
-const double MB7K2SS_ONLINE_THRESHOLD = 15.0;
-const int MB7K2SS_ONLINE_COUNT = 30;
+constexpr double MB7K2SS_ONLINE_THRESHOLD = 15.0;
+constexpr int MB7K2SS_ONLINE_COUNT = 30;
 
-const int MB7K2SS_NUM_ANGLES = 171;
-const double MB7K2SS_ANGLE_MAX = 85.0;
+constexpr int MB7K2SS_NUM_ANGLES = 171;
+constexpr double MB7K2SS_ANGLE_MAX = 85.0;
 
-static const char program_name[] = "mb7k2ss";
-static const char help_message[] =
+constexpr char program_name[] = "mb7k2ss";
+constexpr char help_message[] =
     "mb7k2ss extracts sidescan sonar data from Reson 7k format data,\n"
     "bins and lays the sidescan onto the seafloor, and outputs files \n"
     "in the MBF_MBLDEOIH formst (MBIO format id 71).\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mb7k2ss [-Ifile -Atype -Bmode[/threshold] -C -D -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile "
     "-Ttopogridfile -X -H -V]";
 
@@ -471,11 +472,11 @@ int main(int argc, char **argv) {
 	/* new output file obviously needed */
 	new_output_file = true;
 
-	double *routelon = NULL;
-	double *routelat = NULL;
-	double *routeheading = NULL;
-	int *routewaypoint = NULL;
-	double *routetime_d = NULL;
+	double *routelon = nullptr;
+	double *routelat = nullptr;
+	double *routeheading = nullptr;
+	int *routewaypoint = nullptr;
+	double *routetime_d = nullptr;
 	int ntimepoint = 0;
 	bool linechange;
 	double mtodeglon;
@@ -494,7 +495,7 @@ int main(int argc, char **argv) {
 	if (timelist_file_set) {
 		/* open the input file */
 		FILE *fp = fopen(timelist_file, "r");
-		if (fp == NULL) {
+		if (fp == nullptr) {
 			error = MB_ERROR_OPEN_FAIL;
 			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open time list file <%s> for reading\n", timelist_file);
@@ -547,7 +548,7 @@ int main(int argc, char **argv) {
 
 		/* close the file */
 		fclose(fp);
-		fp = NULL;
+		fp = nullptr;
 
 		activewaypoint = 1;
 		mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
@@ -565,8 +566,8 @@ int main(int argc, char **argv) {
 	/* if specified read route file */
 	else if (route_file_set) {
 		/* open the input file */
-		FILE *fp = NULL;
-		if ((fp = fopen(route_file, "r")) == NULL) {
+		FILE *fp = nullptr;
+		if ((fp = fopen(route_file, "r")) == nullptr) {
 			error = MB_ERROR_OPEN_FAIL;
 			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
@@ -629,7 +630,7 @@ int main(int argc, char **argv) {
 
 		/* close the file */
 		fclose(fp);
-		fp = NULL;
+		fp = nullptr;
 
 		/* set starting values */
 		activewaypoint = 1;
@@ -646,7 +647,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* read topography grid if 3D bottom correction specified */
-	void *topogrid_ptr = NULL;
+	void *topogrid_ptr = nullptr;
 	if (sslayoutmode == MB7K2SS_SS_3D_BOTTOM) {
 		status = mb_topogrid_init(verbose, topogridfile, &lonflip, &topogrid_ptr, &error);
 	}
@@ -671,7 +672,7 @@ int main(int argc, char **argv) {
 		sprintf(scriptfile, "%s_ssswathplot.cmd", file);
 	}
 	FILE *sfp = fopen(scriptfile, "w");
-	if (sfp == NULL) {
+	if (sfp == nullptr) {
 		error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 		fprintf(stderr, "\nUnable to open plotting script file <%s> \n", scriptfile);
@@ -680,7 +681,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
@@ -704,25 +705,25 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
-	void *imbio_ptr = NULL;
-	struct mb_io_struct *imb_io_ptr = NULL;
+	void *imbio_ptr = nullptr;
+	struct mb_io_struct *imb_io_ptr = nullptr;
 	int nreaddata = 0;
 	int nreaddatatot = 0;
 
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	double *ttimes = NULL;
-	double *angles = NULL;
-	double *angles_forward = NULL;
-	double *angles_null = NULL;
-	double *bheave = NULL;
-	double *alongtrack_offset = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
+	double *ttimes = nullptr;
+	double *angles = nullptr;
+	double *angles_forward = nullptr;
+	double *angles_null = nullptr;
+	double *bheave = nullptr;
+	double *alongtrack_offset = nullptr;
 
 	int kind;
 	int time_i[7];
@@ -740,17 +741,17 @@ int main(int argc, char **argv) {
 	/* synchronous navigation, heading, attitude data (from multibeam bathymetry records) */
 	int ndat = 0;
 	int ndat_alloc = 0;
-	double *dat_time_d = NULL;
-	double *dat_lon = NULL;
-	double *dat_lat = NULL;
-	double *dat_speed = NULL;
-	double *dat_sonardepth = NULL;
-	double *dat_heading = NULL;
-	double *dat_draft = NULL;
-	double *dat_roll = NULL;
-	double *dat_pitch = NULL;
-	double *dat_heave = NULL;
-	double *dat_altitude = NULL;
+	double *dat_time_d = nullptr;
+	double *dat_lon = nullptr;
+	double *dat_lat = nullptr;
+	double *dat_speed = nullptr;
+	double *dat_sonardepth = nullptr;
+	double *dat_heading = nullptr;
+	double *dat_draft = nullptr;
+	double *dat_roll = nullptr;
+	double *dat_pitch = nullptr;
+	double *dat_heave = nullptr;
+	double *dat_altitude = nullptr;
 
 	/* first read and store all navigation, attitude, heading, sonar depth, and altitude
 	   data from the survey (multibeam) records - loop over all files to be read
@@ -776,14 +777,14 @@ int main(int argc, char **argv) {
 		nreaddata = 0;
 
 		if (error == MB_ERROR_NO_ERROR) {
-			beamflag = NULL;
-			bath = NULL;
-			amp = NULL;
-			bathacrosstrack = NULL;
-			bathalongtrack = NULL;
-			ss = NULL;
-			ssacrosstrack = NULL;
-			ssalongtrack = NULL;
+			beamflag = nullptr;
+			bath = nullptr;
+			amp = nullptr;
+			bathacrosstrack = nullptr;
+			bathalongtrack = nullptr;
+			ss = nullptr;
+			ssacrosstrack = nullptr;
+			ssalongtrack = nullptr;
 		}
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
@@ -930,10 +931,10 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
-	void *ombio_ptr = NULL;
-	struct mb_io_struct *omb_io_ptr = NULL;
-	void *ostore_ptr = NULL;
-	struct mbsys_ldeoih_struct *ostore = NULL;
+	void *ombio_ptr = nullptr;
+	struct mb_io_struct *omb_io_ptr = nullptr;
+	void *ostore_ptr = nullptr;
+	struct mbsys_ldeoih_struct *ostore = nullptr;
 	double ssv;
 	double ssv_use = 1500.0;
 
@@ -1009,14 +1010,14 @@ int main(int argc, char **argv) {
 		int itime = 0;
 
 		if (error == MB_ERROR_NO_ERROR) {
-			beamflag = NULL;
-			bath = NULL;
-			amp = NULL;
-			bathacrosstrack = NULL;
-			bathalongtrack = NULL;
-			ss = NULL;
-			ssacrosstrack = NULL;
-			ssalongtrack = NULL;
+			beamflag = nullptr;
+			bath = nullptr;
+			amp = nullptr;
+			bathacrosstrack = nullptr;
+			bathalongtrack = nullptr;
+			ss = nullptr;
+			ssacrosstrack = nullptr;
+			ssalongtrack = nullptr;
 		}
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
@@ -1062,7 +1063,7 @@ int main(int argc, char **argv) {
 
 		/* set up output file name if needed */
 		if (error == MB_ERROR_NO_ERROR) {
-			if (output_file_set && ombio_ptr == NULL) {
+			if (output_file_set && ombio_ptr == nullptr) {
 				/* set flag to open new output file */
 				new_output_file = true;
 			}
@@ -1228,7 +1229,7 @@ int main(int argc, char **argv) {
 			      (extract_type == MB7K2SS_SSHIGH && kind == MB_DATA_SIDESCAN3)))) {
 
 				/* close any old output file unless a single file has been specified */
-				if (ombio_ptr != NULL) {
+				if (ombio_ptr != nullptr) {
 					/* close the swath file */
 					status = mb_close(verbose, &ombio_ptr, &error);
 
@@ -1355,7 +1356,7 @@ int main(int argc, char **argv) {
 								? sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
 								: (double)(datashort[i]);
-							channelmax = MAX(value, channelmax);
+							channelmax = std::max(value, channelmax);
 						}
 						int portchannelpick = 0;
 						double threshold = bottompickthreshold * channelmax;
@@ -1378,7 +1379,7 @@ int main(int argc, char **argv) {
 								? sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
 								: (double)(datashort[i]);
-							channelmax = MAX(value, channelmax);
+							channelmax = std::max(value, channelmax);
 						}
 						int stbdchannelpick = 0;
 						threshold = bottompickthreshold * channelmax;
@@ -1651,7 +1652,7 @@ int main(int argc, char **argv) {
 								? sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
 								: (double)(datashort[i]);
-							channelmax = MAX(value, channelmax);
+							channelmax = std::max(value, channelmax);
 						}
 						int portchannelpick = 0;
 						double threshold = bottompickthreshold * channelmax;
@@ -1674,7 +1675,7 @@ int main(int argc, char **argv) {
 								? sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]))
 								: (double)(datashort[i]);
-							channelmax = MAX(value, channelmax);
+							channelmax = std::max(value, channelmax);
 						}
 						int stbdchannelpick = 0;
 						threshold = bottompickthreshold * channelmax;
@@ -1954,7 +1955,7 @@ int main(int argc, char **argv) {
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* close output file if still open */
-	if (ombio_ptr != NULL) {
+	if (ombio_ptr != nullptr) {
 		/* close the swath file */
 		status = mb_close(verbose, &ombio_ptr, &error);
 

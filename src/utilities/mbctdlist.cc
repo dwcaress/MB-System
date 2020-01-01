@@ -27,13 +27,12 @@
  * Date:	September 14,  2008
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "mb_aux.h"
@@ -42,17 +41,15 @@
 #include "mb_process.h"
 #include "mb_status.h"
 
-const int MAX_OPTIONS = 25;
-const int MBCTDLIST_ALLOC_CHUNK = 1024;
+constexpr int MAX_OPTIONS = 25;
+constexpr int MBCTDLIST_ALLOC_CHUNK = 1024;
 
-double NaN;
-
-static const char program_name[] = "mbctdlist";
-static const char help_message[] =
+constexpr char program_name[] = "mbctdlist";
+constexpr char help_message[] =
     "mbctdlist lists all CTD records within swath data files\n"
     "The -O option specifies how the values are output\n"
     "in an mblist-likefashion.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbctdlist [-A -Ddecimate -Fformat -Gdelimeter -H -Ifile -Llonflip -Ooutput_format -V -Zsegment]";
 
 /*--------------------------------------------------------------------*/
@@ -267,14 +264,14 @@ int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/**************************************************************************************/
 	/* section 1 - read all data and save nav etc for interpolation onto ctd data */
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
-	void *datalist = NULL;
+	void *datalist = nullptr;
 	char file[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
 	double file_weight;
@@ -295,20 +292,20 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
-	void *mbio_ptr = NULL;
+	void *mbio_ptr = nullptr;
 	double btime_d;
 	double etime_d;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
 
 	void *store_ptr;
 
@@ -326,13 +323,13 @@ int main(int argc, char **argv) {
 
 	int nnav = 0;
 	int nnav_alloc = 0;
-	double *nav_time_d = NULL;
-	double *nav_lon = NULL;
-	double *nav_lat = NULL;
-	double *nav_sonardepth = NULL;
-	double *nav_heading = NULL;
-	double *nav_speed = NULL;
-	double *nav_altitude = NULL;
+	double *nav_time_d = nullptr;
+	double *nav_lon = nullptr;
+	double *nav_lat = nullptr;
+	double *nav_sonardepth = nullptr;
+	double *nav_heading = nullptr;
+	double *nav_speed = nullptr;
+	double *nav_altitude = nullptr;
 	int survey_count_tot = 0;
 
 	/* loop over all files to be read */

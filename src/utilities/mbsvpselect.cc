@@ -182,13 +182,12 @@
  *
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "geodesic.h"
@@ -253,15 +252,15 @@ char buffer_2[BUFSIZ];
 int svp_total = 0;
 int surveyLines_total = 0;
 
-static const char program_name[] = "mbsvpselect";
-static const char help_message[] =
+constexpr char program_name[] = "mbsvpselect";
+constexpr char help_message[] =
     "Program mbsvpselect chooses and implements the best available sound speed\n"
     "model for each swath file in a survey. The user provides a list of the\n"
     "available sound speed models and specifies the criteria used for\n"
     "model selection. The program uses mbset to turn on bathymetry\n"
     "recalculation by raytracing through the sound speed model selected\n"
     "for each swath file.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbsvpselect -H -N -Idatalist -Ssvplist "
     "[-P0, -P1, -P2/period, -P3/range, -P3/range/1]  -V";
 
@@ -510,13 +509,13 @@ void fill_struct_inf(inf *inf_hold, char *holder) {
 
 	/* reading relative inf file */
 	FILE *fileName = fopen(inf_hold->file_name, "r");
-	if (fileName == NULL) {
+	if (fileName == nullptr) {
 		printf("%s could not be opened Please check the datalist files\n", inf_hold->file_name);
 		exit(1);
 	}
 
 	/* reaching start of data key word */
-	while ((fgets(buffer, sizeof buffer, fileName)) != NULL)
+	while ((fgets(buffer, sizeof buffer, fileName)) != nullptr)
 		if (strcmp(buffer, "Start of Data:\n") == 0)
 			break;
 
@@ -546,7 +545,7 @@ void fill_struct_inf(inf *inf_hold, char *holder) {
 
 	/*parsing end of data information*/
 
-	while ((fgets(buffer, sizeof buffer, fileName)) != NULL)
+	while ((fgets(buffer, sizeof buffer, fileName)) != nullptr)
 		if (strcmp(buffer, "End of Data:\n") == 0)
 			break;
 
@@ -613,7 +612,7 @@ void fill_struct_svp(svp *svp_hold, char *holder) {
 
 	/* reading relative svp file */
 	FILE *fileName = fopen(svp_hold->file_name, "r");
-	if (fileName == NULL) {
+	if (fileName == nullptr) {
 		printf("%s could not be opend\n", svp_hold->file_name);
 		exit(1);
 	}
@@ -631,16 +630,16 @@ void fill_struct_svp(svp *svp_hold, char *holder) {
 	char caris_str[] = "Section";
 	char mb1_str[] = "## MB-SVP";
 	char mb2_str[] = "# MB-SVP";
-	char *ptr_caris = NULL;
-	char *ptr_mb1 = NULL;
-	char *ptr_mb2 = NULL;
+	char *ptr_caris = nullptr;
+	char *ptr_mb1 = nullptr;
+	char *ptr_mb2 = nullptr;
 
 	/* reaching start of data */
-	while ((fgets(buffer, sizeof buffer, fileName)) != NULL) {
+	while ((fgets(buffer, sizeof buffer, fileName)) != nullptr) {
 		ptr_caris = strstr(buffer, caris_str);
 		ptr_mb1 = strstr(buffer, mb1_str);
 		ptr_mb2 = strstr(buffer, mb2_str);
-		if (ptr_caris != NULL) {
+		if (ptr_caris != nullptr) {
 			printf("\n%s\n", buffer);
 			sscanf(buffer, "%*s %d-%d  %i:%i:%i %d:%d:%d %d:%d:%d", &year, &yearDay, &svp_hold->svp_datum_time.tm_hour,
 			       &svp_hold->svp_datum_time.tm_min, &svp_hold->svp_datum_time.tm_sec, &s_lat_deg, &s_lat_min, &s_lat_sec,
@@ -662,7 +661,7 @@ void fill_struct_svp(svp *svp_hold, char *holder) {
 			svp_hold->s_lon = convert_decimal(s_lon_deg, s_lon_min, s_lon_sec);
 			break;
 		}
-		else if (ptr_mb1 != NULL) {
+		else if (ptr_mb1 != nullptr) {
 			printf("\n%s\n", buffer);
 			sscanf(buffer, "## MB-SVP %d/%d/%d %d:%d:%lf %Lf %Lf", &year, &month, &svp_hold->svp_datum_time.tm_mday,
 			       &svp_hold->svp_datum_time.tm_hour, &svp_hold->svp_datum_time.tm_min, &seconds, &svp_hold->s_lon,
@@ -678,7 +677,7 @@ void fill_struct_svp(svp *svp_hold, char *holder) {
 
 			break;
 		}
-		else if (ptr_mb2 != NULL) {
+		else if (ptr_mb2 != nullptr) {
 			printf("\n%s\n", buffer);
 			sscanf(buffer, "%*s %*s %d/%d/%d %d:%d:%d %Lf %Lf", &year, &month, &svp_hold->svp_datum_time.tm_mday,
 			       &svp_hold->svp_datum_time.tm_hour, &svp_hold->svp_datum_time.tm_min, &svp_hold->svp_datum_time.tm_sec,
@@ -700,8 +699,8 @@ void fill_struct_svp(svp *svp_hold, char *holder) {
 /* --------------------------------------------------------------- */
 /*copy string and handle possible buffer overlap*/
 char *my_strcpy(char *a, char *b) {
-	if (a == NULL || b == NULL) {
-		return NULL;
+	if (a == nullptr || b == nullptr) {
+		return nullptr;
 	}
 
 	memmove(a, b, strlen(b) + 1);
@@ -725,7 +724,7 @@ int read_recursive2(char *fname) {
 	trim_newline(fname);
 	strcat(fname, ".inf");
 	FILE *dataFile = fopen(fname, "r");
-	if (dataFile != NULL) {
+	if (dataFile != nullptr) {
 		my_strcpy(holder[surveyLines_total], fname);
 		counter += 1;
 		surveyLines_total += 1;
@@ -734,16 +733,16 @@ int read_recursive2(char *fname) {
 	}
 
 	const char *ret = strchr(result, ' ');
-	if (ret == NULL) {
+	if (ret == nullptr) {
 		char file2[1024] = {""};
 		my_strcpy(file2, original);
 		trim_newline(file2);
 		FILE *dataFile2 = fopen(file2, "r");
-		if (dataFile2 == NULL) {
+		if (dataFile2 == nullptr) {
 			printf("Could not open the file %s", file2);
 			return counter;
 		}
-		while ((fgets(dBuffer, sizeof dBuffer, dataFile2)) != NULL) {
+		while ((fgets(dBuffer, sizeof dBuffer, dataFile2)) != nullptr) {
 			//char strHolder[strlen(original)];		INVALID JL
 			char strHolder[1024];
 			my_strcpy(strHolder, original);
@@ -774,7 +773,7 @@ int read_recursive2(char *fname) {
 int read_recursive(char *fileName) {
 	trim_newline(fileName);
 	FILE *dataFile = fopen(fileName, "r");
-	if (dataFile == NULL) {
+	if (dataFile == nullptr) {
 		printf("Could not open the file %s", fileName);
 		return 0;
 	}
@@ -793,7 +792,7 @@ int read_recursive(char *fileName) {
 	// initialize the end condition for the swaths
 
 	int counter = 0;
-	if ((ptr_caris != NULL) || (ptr_mb1 != NULL) || (ptr_mb2 != NULL)) {
+	if ((ptr_caris != nullptr) || (ptr_mb1 != nullptr) || (ptr_mb2 != nullptr)) {
 		my_strcpy(svps[svp_total], fileName);
 		counter += 1;
 	} else {
@@ -856,24 +855,24 @@ void read_list(char *list, char *list_2) {
 
 	/* open datalist.mb-1 for names of the files */
 	FILE *fDatalist = fopen(list, "r");
-	if (fDatalist == NULL) {
+	if (fDatalist == nullptr) {
 		printf("%s Could not be found", list);
 		exit(1);
 	}
 
 	FILE *fSvp = fopen(list_2, "r");
-	if (fSvp == NULL) {
+	if (fSvp == nullptr) {
 		printf("%s Could not be found", list_2);
 		exit(1);
 	}
 	FILE *fresult = fopen("result.txt", "w+");
-	if (fresult == NULL) {
+	if (fresult == nullptr) {
 		printf("result.txt could not be found");
 		exit(1);
 	}
 	// int count_size2;
 	/* ------------------------------ */
-	while ((fgets(dBuffer, sizeof dBuffer, fDatalist)) != NULL) {
+	while ((fgets(dBuffer, sizeof dBuffer, fDatalist)) != nullptr) {
 		/* count_size2 = */ read_recursive2(dBuffer);
 	}
 
@@ -883,7 +882,7 @@ void read_list(char *list, char *list_2) {
 
 	/* Allocate memory for inf_struct */
 	inf *inf_hold = static_cast<inf *>(malloc((surveyLines_total) * sizeof(inf)));
-	if (inf_hold == NULL) {
+	if (inf_hold == nullptr) {
 		printf("no memory for the process end of process");
 		exit(1);
 	}
@@ -897,7 +896,7 @@ void read_list(char *list, char *list_2) {
 	/* reset for svp_hold */
 	/* ------------------------ */
 
-	while ((fgets(sdBuffer, sizeof sdBuffer, fSvp) != NULL)) {
+	while ((fgets(sdBuffer, sizeof sdBuffer, fSvp) != nullptr)) {
 		int count_size = read_recursive(sdBuffer);
 		svp_total += count_size;
 	}
@@ -908,7 +907,7 @@ void read_list(char *list, char *list_2) {
 
 	/* Allocate memory for svp_struct */
 	svp *svp_hold = static_cast<svp *>(malloc((svp_total) * sizeof(svp)));
-	if (svp_hold == NULL) {
+	if (svp_hold == nullptr) {
 		printf("no memory for the process end of process");
 		exit(1);
 	}

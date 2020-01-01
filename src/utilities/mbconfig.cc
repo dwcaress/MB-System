@@ -19,12 +19,11 @@
  * Date:	May 5, 2017
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -34,13 +33,13 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-static const char program_name[] = "mbconfig";
-static const char help_message[] =
+constexpr char program_name[] = "mbconfig";
+constexpr char help_message[] =
     "mbconfig provides command line access to the MB-System installation location, "
     "the compile and libs flags needed to compile and link programs using MB-System "
     "libraries, and the locations of the levitus database and the OTPS tidal "
     "correction software.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbconfig --verbose --help --prefix --cflags --libs "
     "--version --version-id --version-major --version-minor --version-archive";
 
@@ -65,19 +64,19 @@ int main(int argc, char **argv) {
 	/* process argument list */
 	{
 		const struct option options[] =
-			{{"verbose", no_argument, NULL, 0},
-	                {"help", no_argument, NULL, 0},
-	                {"prefix", no_argument, NULL, 0},
-	                {"cflags", no_argument, NULL, 0},
-	                {"libs", no_argument, NULL, 0},
-	                {"version", no_argument, NULL, 0},
-	                {"version-id", no_argument, NULL, 0},
-	                {"version-major", no_argument, NULL, 0},
-	                {"version-minor", no_argument, NULL, 0},
-	                {"version-archive", no_argument, NULL, 0},
-	                {"levitus", no_argument, NULL, 0},
-	                {"otps", no_argument, NULL, 0},
-	                {NULL, 0, NULL, 0}};
+			{{"verbose", no_argument, nullptr, 0},
+	                {"help", no_argument, nullptr, 0},
+	                {"prefix", no_argument, nullptr, 0},
+	                {"cflags", no_argument, nullptr, 0},
+	                {"libs", no_argument, nullptr, 0},
+	                {"version", no_argument, nullptr, 0},
+	                {"version-id", no_argument, nullptr, 0},
+	                {"version-major", no_argument, nullptr, 0},
+	                {"version-minor", no_argument, nullptr, 0},
+	                {"version-archive", no_argument, nullptr, 0},
+	                {"levitus", no_argument, nullptr, 0},
+	                {"otps", no_argument, nullptr, 0},
+	                {nullptr, 0, nullptr, 0}};
 
 		bool errflg = false;
 		int c;

@@ -22,15 +22,16 @@
  * Date:	June 1, 2012
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include <algorithm>
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -39,7 +40,7 @@
 #include "mb_status.h"
 #include "mbsys_simrad3.h"
 
-const int MBKONSBERGPREPROCESS_ALLOC_CHUNK = 1000;
+constexpr int MBKONSBERGPREPROCESS_ALLOC_CHUNK = 1000;
 
 // typedef enum {
 //     MBKONSBERGPREPROCESS_PROCESS = 1,
@@ -59,7 +60,7 @@ typedef enum {
 //     MBKONSBERGPREPROCESS_SONAR_OFFSET_NAVIGATION = 3,
 // } sonar_offset_t;
 
-const int MBKONSBERGPREPROCESS_OFFSET_MAX = 12;
+constexpr int MBKONSBERGPREPROCESS_OFFSET_MAX = 12;
 
 // typedef enum {
 //     MBKONSBERGPREPROCESS_NAVFORMAT_NONE = 0,
@@ -67,9 +68,9 @@ const int MBKONSBERGPREPROCESS_OFFSET_MAX = 12;
 // } navformat_t;
 
 /* set precision of iterative raytracing depth & distance matching */
-const double MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION = 0.0001;
-const int MBKONSBERGPREPROCESS_BATH_RECALC_NCALCMAX = 50;
-const int MBKONSBERGPREPROCESS_BATH_RECALC_ANGLEMODE = 0;
+constexpr double MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION = 0.0001;
+constexpr int MBKONSBERGPREPROCESS_BATH_RECALC_NCALCMAX = 50;
+constexpr int MBKONSBERGPREPROCESS_BATH_RECALC_ANGLEMODE = 0;
 
 typedef enum {
     MBKONSBERGPREPROCESS_ZMODE_UNKNOWN = 0,
@@ -89,12 +90,12 @@ typedef enum {
     MBKONSBERGPREPROCESS_FILTER_MEDIAN = 2,
 } filter_t;
 
-static const char program_name[] = "mbkongsbergpreprocess";
-static const char help_message[] =
+constexpr char program_name[] = "mbkongsbergpreprocess";
+constexpr char help_message[] =
     "mbkongsbergpreprocess reads a Kongsberg multibeam vendor format file (or datalist of files),\n"
     "interpolates the asynchronous navigation and attitude onto the multibeam data,\n"
     "and writes the data as one or more format 59 files.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbkongsbergpreprocess [-C -Doutputdirectory -Eoffx/offy[/offdepth] -Fformat -Ifile -Ooutfile\n"
     "    -Pfilterlength/filterdepth -Sdatatype/source -Ttimelag -W -H -V]";
 
@@ -370,15 +371,15 @@ int main(int argc, char **argv) {
 	int opixels_ss;
 
 	/* MBIO read values */
-	struct mb_io_struct *imb_io_ptr = NULL;
-	struct mbsys_simrad3_struct *istore = NULL;
-	struct mbsys_simrad3_ping_struct *ping = NULL;
-	struct mbsys_simrad3_attitude_struct *attitude = NULL;
-	struct mbsys_simrad3_netattitude_struct *netattitude = NULL;
-	struct mbsys_simrad3_heading_struct *headingr = NULL;
-	void *imbio_ptr = NULL;
-	void *istore_ptr = NULL;
-	void *ombio_ptr = NULL;
+	struct mb_io_struct *imb_io_ptr = nullptr;
+	struct mbsys_simrad3_struct *istore = nullptr;
+	struct mbsys_simrad3_ping_struct *ping = nullptr;
+	struct mbsys_simrad3_attitude_struct *attitude = nullptr;
+	struct mbsys_simrad3_netattitude_struct *netattitude = nullptr;
+	struct mbsys_simrad3_heading_struct *headingr = nullptr;
+	void *imbio_ptr = nullptr;
+	void *istore_ptr = nullptr;
+	void *ombio_ptr = nullptr;
 	int kind;
 	int time_i[7];
 	double time_d;
@@ -392,14 +393,14 @@ int main(int argc, char **argv) {
 	double roll;
 	double pitch;
 	double heave;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* counting variables total */
@@ -443,45 +444,45 @@ int main(int argc, char **argv) {
 
 	/* merge sonardepth from separate parosci pressure sensor data file */
 	int nsonardepth = 0;
-	double *sonardepth_time_d = NULL;
-	double *sonardepth_sonardepth = NULL;
-	double *sonardepth_sonardepthfilter = NULL;
+	double *sonardepth_time_d = nullptr;
+	double *sonardepth_sonardepth = nullptr;
+	double *sonardepth_sonardepthfilter = nullptr;
 
 	/* asynchronous navigation, heading, attitude data */
 	int ndat_nav = 0;
 	int ndat_nav_alloc = 0;
-	double *dat_nav_time_d = NULL;
-	double *dat_nav_lon = NULL;
-	double *dat_nav_lat = NULL;
+	double *dat_nav_time_d = nullptr;
+	double *dat_nav_lon = nullptr;
+	double *dat_nav_lat = nullptr;
 
 	int ndat_sonardepth = 0;
 	int ndat_sonardepth_alloc = 0;
-	double *dat_sonardepth_time_d = NULL;
-	double *dat_sonardepth_sonardepth = NULL;
-	double *dat_sonardepth_sonardepthfilter = NULL;
+	double *dat_sonardepth_time_d = nullptr;
+	double *dat_sonardepth_sonardepth = nullptr;
+	double *dat_sonardepth_sonardepthfilter = nullptr;
 
 	int ndat_heading = 0;
 	int ndat_heading_alloc = 0;
-	double *dat_heading_time_d = NULL;
-	double *dat_heading_heading = NULL;
+	double *dat_heading_time_d = nullptr;
+	double *dat_heading_heading = nullptr;
 
 	int ndat_rph = 0;
 	int ndat_rph_alloc = 0;
-	double *dat_rph_time_d = NULL;
-	double *dat_rph_roll = NULL;
-	double *dat_rph_pitch = NULL;
-	double *dat_rph_heave = NULL;
+	double *dat_rph_time_d = nullptr;
+	double *dat_rph_roll = nullptr;
+	double *dat_rph_pitch = nullptr;
+	double *dat_rph_heave = nullptr;
 
 	/* timelag parameters */
 	double timelag = 0.0;
 	int ntimelag = 0;
-	double *timelag_time_d = NULL;
-	double *timelag_model = NULL;
+	double *timelag_time_d = nullptr;
+	double *timelag_model = nullptr;
 
 	/* output asynchronous and synchronous time series ancillary files */
 
 	int interp_status;
-	FILE *tfp = NULL;
+	FILE *tfp = nullptr;
 	char *result;
 	int testformat;
 
@@ -504,12 +505,12 @@ int main(int argc, char **argv) {
 	int jheading = 0;
 	int jattitude = 0;
 	int jsonardepth = 0;
-	double *median = NULL;
+	double *median = nullptr;
 
 	/* read sonardepth data from file if specified */
 	if (sonardepthdata) {
 		/* count the data points in the auv log file */
-		if ((tfp = fopen(sonardepthfile, "r")) == NULL) {
+		if ((tfp = fopen(sonardepthfile, "r")) == nullptr) {
 			fprintf(stderr, "\nUnable to open sonardepth data file <%s> for reading\n", sonardepthfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -578,7 +579,7 @@ int main(int argc, char **argv) {
 	if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL) {
 		/* count the data points in the timelag file */
 		ntimelag = 0;
-		if ((tfp = fopen(timelagfile, "r")) == NULL) {
+		if ((tfp = fopen(timelagfile, "r")) == nullptr) {
 			fprintf(stderr, "\nUnable to open time lag model File <%s> for reading\n", timelagfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -637,7 +638,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist =  format < 0;
@@ -678,14 +679,14 @@ int main(int argc, char **argv) {
 		istore = (struct mbsys_simrad3_struct *)istore_ptr;
 
 		if (error == MB_ERROR_NO_ERROR) {
-			beamflag = NULL;
-			bath = NULL;
-			amp = NULL;
-			bathacrosstrack = NULL;
-			bathalongtrack = NULL;
-			ss = NULL;
-			ssacrosstrack = NULL;
-			ssalongtrack = NULL;
+			beamflag = nullptr;
+			bath = nullptr;
+			amp = nullptr;
+			bathacrosstrack = nullptr;
+			bathalongtrack = nullptr;
+			ss = nullptr;
+			ssacrosstrack = nullptr;
+			ssalongtrack = nullptr;
 		}
 		if (error == MB_ERROR_NO_ERROR)
 			/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
@@ -1465,12 +1466,12 @@ int main(int argc, char **argv) {
 				        ndat_sonardepth, sonardepthfilterlength);
 				const int nhalffilter = (int)(0.5 * sonardepthfilterlength / dtime);
 				const int nmedian_alloc = 2 * nhalffilter + 1;
-				median = NULL;
+				median = nullptr;
 				/* status = */ mb_reallocd(verbose, __FILE__, __LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
 				for (int i = 0; i < ndat_sonardepth; i++) {
 					dat_sonardepth_sonardepthfilter[i] = dat_sonardepth_sonardepth[i];
-					const int j1 = MAX(i - nhalffilter, 0);
-					const int j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
+					const int j1 = std::max(i - nhalffilter, 0);
+					const int j2 = std::min(i + nhalffilter, ndat_sonardepth - 1);
 					int nmedian = 0;
 					for (int j = j1; j <= j2; j++) {
 						median[nmedian] = dat_sonardepth_sonardepth[j];
@@ -1481,7 +1482,7 @@ int main(int argc, char **argv) {
 						dat_sonardepth_sonardepthfilter[i] = median[nmedian / 2];
 					}
 				}
-				if (median != NULL) {
+				if (median != nullptr) {
 					/* status = */ mb_freed(verbose, __FILE__, __LINE__, (void **)&median, &error);
 					// nmedian_alloc = 0;
 				}
@@ -1493,8 +1494,8 @@ int main(int argc, char **argv) {
 				for (int i = 0; i < ndat_sonardepth; i++) {
 					dat_sonardepth_sonardepthfilter[i] = 0.0;
 					double sonardepth_filterweight = 0.0;
-					const int j1 = MAX(i - nhalffilter, 0);
-					const int j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
+					const int j1 = std::max(i - nhalffilter, 0);
+					const int j2 = std::min(i + nhalffilter, ndat_sonardepth - 1);
 					for (int j = j1; j <= j2; j++) {
 						const double dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
 						const double weight = exp(-dtol * dtol);
@@ -1524,12 +1525,12 @@ int main(int argc, char **argv) {
 				        nsonardepth, sonardepthfilterlength);
 				const int nhalffilter = (int)(0.5 * sonardepthfilterlength / dtime);
 				const int nmedian_alloc = 2 * nhalffilter + 1;
-				median = NULL;
+				median = nullptr;
 				status &= mb_reallocd(verbose, __FILE__, __LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
 				for (int i = 0; i < nsonardepth; i++) {
 					sonardepth_sonardepthfilter[i] = sonardepth_sonardepth[i];
-					const int j1 = MAX(i - nhalffilter, 0);
-					const int j2 = MIN(i + nhalffilter, nsonardepth - 1);
+					const int j1 = std::max(i - nhalffilter, 0);
+					const int j2 = std::min(i + nhalffilter, nsonardepth - 1);
 					int nmedian = 0;
 					for (int j = j1; j <= j2; j++) {
 						median[nmedian] = dat_sonardepth_sonardepth[j];
@@ -1540,7 +1541,7 @@ int main(int argc, char **argv) {
 						dat_sonardepth_sonardepthfilter[i] = median[nmedian / 2];
 					}
 				}
-				if (median != NULL) {
+				if (median != nullptr) {
 					status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&median, &error);
 					// nmedian_alloc = 0;
 				}
@@ -1552,8 +1553,8 @@ int main(int argc, char **argv) {
 				for (int i = 0; i < nsonardepth; i++) {
 					sonardepth_sonardepthfilter[i] = 0.0;
 					double sonardepth_filterweight = 0.0;
-					const int j1 = MAX(i - nhalffilter, 0);
-					const int j2 = MIN(i + nhalffilter, nsonardepth - 1);
+					const int j1 = std::max(i - nhalffilter, 0);
+					const int j2 = std::min(i + nhalffilter, nsonardepth - 1);
 					for (int j = j1; j <= j2; j++) {
 						const double dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
 						const double weight = exp(-dtol * dtol);
@@ -1728,7 +1729,7 @@ int main(int argc, char **argv) {
 				if (buffer[strlen(odir) - 1] != '/')
 					strcat(buffer, "/");
 				char *filenameptr;
-				if (strrchr(ofile, '/') != NULL)
+				if (strrchr(ofile, '/') != nullptr)
 					filenameptr = strrchr(ofile, '/') + 1;
 				else
 					filenameptr = ofile;
@@ -1768,7 +1769,7 @@ int main(int argc, char **argv) {
 				/* initialize synchronous attitude output file */
 				char stafile[MB_PATH_MAXLINE] = "";
 				sprintf(stafile, "%s.sta", ofile);
-				if ((stafp = fopen(stafile, "w")) == NULL) {
+				if ((stafp = fopen(stafile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", stafile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_ERROR_OPEN_FAIL);
@@ -1781,14 +1782,14 @@ int main(int argc, char **argv) {
 			istore = (struct mbsys_simrad3_struct *)istore_ptr;
 
 			if (error == MB_ERROR_NO_ERROR) {
-				beamflag = NULL;
-				bath = NULL;
-				amp = NULL;
-				bathacrosstrack = NULL;
-				bathalongtrack = NULL;
-				ss = NULL;
-				ssacrosstrack = NULL;
-				ssalongtrack = NULL;
+				beamflag = nullptr;
+				bath = nullptr;
+				amp = nullptr;
+				bathacrosstrack = nullptr;
+				bathalongtrack = nullptr;
+				ss = nullptr;
+				ssacrosstrack = nullptr;
+				ssalongtrack = nullptr;
 			}
 			if (error == MB_ERROR_NO_ERROR)
 				/* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
@@ -2477,7 +2478,7 @@ int main(int argc, char **argv) {
 						}
 
 						/* check for NaN value */
-						if (isnan(ping->png_depth[i])) {
+						if (std::isnan(ping->png_depth[i])) {
 							ping->png_beamflag[i] = MB_FLAG_NULL;
 							ping->png_depth[i] = 0.0;
 						}
@@ -2629,7 +2630,7 @@ int main(int argc, char **argv) {
 				char athfile[MB_PATH_MAXLINE] = "";
 				sprintf(athfile, "%s.ath", ofile);
 				FILE *athfp = fopen(athfile, "w");
-				if (athfp == NULL) {
+				if (athfp == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous heading data file <%s> for writing\n", athfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_ERROR_OPEN_FAIL);
@@ -2644,7 +2645,7 @@ int main(int argc, char **argv) {
 				char atsfile[MB_PATH_MAXLINE] = "";
 				sprintf(atsfile, "%s.ats", ofile);
 				FILE *atsfp = fopen(atsfile, "w");
-				if (atsfp == NULL) {
+				if (atsfp == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous sonardepth data file <%s> for writing\n", atsfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_ERROR_OPEN_FAIL);
@@ -2659,7 +2660,7 @@ int main(int argc, char **argv) {
 				char atafile[MB_PATH_MAXLINE] = "";
 				sprintf(atafile, "%s.ata", ofile);
 				FILE *atafp = fopen(atafile, "w");
-				if (atafp == NULL) {
+				if (atafp == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous attitude data file <%s> for writing\n", atafile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_ERROR_OPEN_FAIL);

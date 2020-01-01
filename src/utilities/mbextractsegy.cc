@@ -20,20 +20,21 @@
  * Date:	April 18, 2004
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+
+#include <algorithm>
 
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_segy.h"
 #include "mb_status.h"
 
-const int MBES_ALLOC_NUM = 128;
+constexpr int MBES_ALLOC_NUM = 128;
 typedef enum {
     MBES_ROUTE_WAYPOINT_NONE = 0,
     MBES_ROUTE_WAYPOINT_SIMPLE = 1,
@@ -41,17 +42,17 @@ typedef enum {
     MBES_ROUTE_WAYPOINT_STARTLINE = 3,
     MBES_ROUTE_WAYPOINT_ENDLINE = 4,
 } waypoint_t;
-const double MBES_ONLINE_THRESHOLD = 15.0;
-const int MBES_ONLINE_COUNT = 30;
-const int MBES_NUM_PLOT_MAX = 50;
-const double MBES_MAX_SWEEP = 1.0;
+constexpr double MBES_ONLINE_THRESHOLD = 15.0;
+constexpr int MBES_ONLINE_COUNT = 30;
+constexpr int MBES_NUM_PLOT_MAX = 50;
+constexpr double MBES_MAX_SWEEP = 1.0;
 
-static const char program_name[] = "MBextractsegy";
-static const char help_message[] =
+constexpr char program_name[] = "MBextractsegy";
+constexpr char help_message[] =
     "MBextractsegy extracts subbottom profiler, center beam reflection,\n"
     "or seismic reflection data from data supported by MB-System and\n"
     "rewrites it as a SEGY file in the form used by SIOSEIS.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat\n"
     "    -Ifile -Jxscale/yscale -Lstartline/lineroot\n"
     "    -Osegyfile -Qtimelistfile -Rroutefile\n"
@@ -237,7 +238,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	void *datalist = NULL;
+	void *datalist = nullptr;
 	double file_weight = 1.0;
 	double btime_d;
 	double etime_d;
@@ -248,8 +249,8 @@ int main(int argc, char **argv) {
 	int pixels_ss;
 
 	/* MBIO read values */
-	void *mbio_ptr = NULL;
-	void *store_ptr = NULL;
+	void *mbio_ptr = nullptr;
+	void *store_ptr = nullptr;
 	int kind;
 	int time_i[7];
 	int time_j[5];
@@ -261,14 +262,14 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 	int icomment = 0;
 
@@ -276,28 +277,28 @@ int main(int argc, char **argv) {
 	int samplesize = 0;
 	struct mb_segytraceheader_struct segytraceheader;
 	int segydata_alloc = 0;
-	float *segydata = NULL;
+	float *segydata = nullptr;
 	int buffer_alloc = 0;
-	char *buffer = NULL;
+	char *buffer = nullptr;
 
 	/* route and auto-line data */
 	int ntimepoint = 0;
-	double *routetime_d = NULL;
+	double *routetime_d = nullptr;
 	int nroutepoint = 0;
 	int nroutepointalloc = 0;
 	double lon;
 	double lat;
 	double topo;
-	double *routelon = NULL;
-	double *routelat = NULL;
-	double *routeheading = NULL;
-	int *routewaypoint = NULL;
+	double *routelon = nullptr;
+	double *routelat = nullptr;
+	double *routeheading = nullptr;
+	int *routewaypoint = nullptr;
 	double range = 0.0;
 	double rangelast = 0.0;
 	int activewaypoint = 0;
 
 	/* auto plotting */
-	FILE *sfp = NULL;
+	FILE *sfp = nullptr;
 	mb_path scriptfile = "";
 	double seafloordepthmin = -1.0;
 	double seafloordepthmax = -1.0;
@@ -325,7 +326,7 @@ int main(int argc, char **argv) {
 	double headingdiff;
 	double lastdistance;
 	int oktowrite;
-	FILE *fp = NULL;
+	FILE *fp = nullptr;
 	char *result;
 	int nread;
 	int nwrite;
@@ -346,7 +347,7 @@ int main(int argc, char **argv) {
 	/* if specified read route time list file */
 	if (timelist_file_set) {
 		/* open the input file */
-		if ((fp = fopen(timelist_file, "r")) == NULL) {
+		if ((fp = fopen(timelist_file, "r")) == nullptr) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open time list file <%s> for reading\n", timelist_file);
 			exit(status);
@@ -399,7 +400,7 @@ int main(int argc, char **argv) {
 
 		/* close the file */
 		fclose(fp);
-		fp = NULL;
+		fp = nullptr;
 
 		/* set starting values */
 		activewaypoint = 0;
@@ -425,7 +426,7 @@ int main(int argc, char **argv) {
 	/* if specified read route file */
 	else if (route_file_set) {
 		/* open the input file */
-		if ((fp = fopen(route_file, "r")) == NULL) {
+		if ((fp = fopen(route_file, "r")) == nullptr) {
 			error = MB_ERROR_OPEN_FAIL;
 			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
@@ -488,7 +489,7 @@ int main(int argc, char **argv) {
 
 		/* close the file */
 		fclose(fp);
-		fp = NULL;
+		fp = nullptr;
 
 		/* set starting values */
 		activewaypoint = 1;
@@ -513,7 +514,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* get sample size from sampleformat */
 	if (sampleformat == MB_SEGY_SAMPLEFORMAT_ANALYTIC)
@@ -556,7 +557,7 @@ int main(int argc, char **argv) {
 	else {
 		sprintf(scriptfile, "%s_section.cmd", file);
 	}
-	if ((sfp = fopen(scriptfile, "w")) == NULL) {
+	if ((sfp = fopen(scriptfile, "w")) == nullptr) {
 		error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 		fprintf(stderr, "\nUnable to open plotting script file <%s> \n", scriptfile);
@@ -712,9 +713,9 @@ int main(int argc, char **argv) {
 				/* apply line change */
 				if (linechange) {
 					/* close current output file */
-					if (fp != NULL) {
+					if (fp != nullptr) {
 						fclose(fp);
-						fp = NULL;
+						fp = nullptr;
 
 						/* output count of segy records */
 						fprintf(stderr, "%d records output to segy file %s\n", nwrite, output_file);
@@ -795,7 +796,7 @@ int main(int argc, char **argv) {
 							fprintf(sfp, "%s", command);
 
 							sprintf(command, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-O %s_%4.4d_%2.2d_section\n",
-							        output_file, (startshot + i * nshotmax), MIN((startshot + (i + 1) * nshotmax - 1), endshot),
+							        output_file, (startshot + i * nshotmax), std::min((startshot + (i + 1) * nshotmax - 1), endshot),
 							        sweep, delay, lineroot, linenumber, i + 1);
 							fprintf(stderr, "%s", command);
 							fprintf(sfp, "%s", command);
@@ -864,7 +865,7 @@ int main(int argc, char **argv) {
 				}
 				if (status == MB_SUCCESS &&
 				    (buffer_alloc < MB_SEGY_TRACEHEADER_LENGTH || buffer_alloc < segytraceheader.nsamps * samplesize)) {
-					buffer_alloc = MAX(MB_SEGY_TRACEHEADER_LENGTH, segytraceheader.nsamps * samplesize);
+					buffer_alloc = std::max(MB_SEGY_TRACEHEADER_LENGTH, segytraceheader.nsamps * samplesize);
 					status = mb_mallocd(verbose, __FILE__, __LINE__, buffer_alloc, (void **)&buffer, &error);
 					if (status != MB_SUCCESS)
 						buffer_alloc = 0;
@@ -922,7 +923,7 @@ int main(int argc, char **argv) {
 					oktowrite = MBES_ONLINE_COUNT;
 
 				/* open output segy file if needed */
-				if (fp == NULL && oktowrite > 0) {
+				if (fp == nullptr && oktowrite > 0) {
 					/* set up output filename */
 					if (!output_file_set) {
 						if (nroutepoint > 1 || ntimepoint > 1) {
@@ -936,7 +937,7 @@ int main(int argc, char **argv) {
 
 					/* open the new file */
 					nwrite = 0;
-					if ((fp = fopen(output_file, "w")) == NULL) {
+					if ((fp = fopen(output_file, "w")) == nullptr) {
 						fprintf(stderr, "\nError opening output segy file:\n%s\n", output_file);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 						exit(MB_ERROR_WRITE_FAIL);
@@ -954,8 +955,8 @@ int main(int argc, char **argv) {
 					tracemax = segydata[0];
 					tracerms = 0.0;
 					for (int i = 0; i < segytraceheader.nsamps; i++) {
-						tracemin = MIN(tracemin, segydata[i]);
-						tracemax = MAX(tracemax, segydata[i]);
+						tracemin = std::min(tracemin, static_cast<double>(segydata[i]));
+						tracemax = std::max(tracemax, static_cast<double>(segydata[i]));
 						tracerms += segydata[i] * segydata[i];
 					}
 					tracerms = sqrt(tracerms / segytraceheader.nsamps);
@@ -974,9 +975,9 @@ int main(int argc, char **argv) {
 						endlon = ((double)segytraceheader.src_long) / 360000.0;
 						endlat = ((double)segytraceheader.src_lat) / 360000.0;
 						endshot = segytraceheader.shot_num;
-						linetracemin = MIN(tracemin, linetracemin);
-						linetracemax = MAX(tracemax, linetracemax);
-						linetracelength = MAX(tracelength, linetracelength);
+						linetracemin = std::min(tracemin, linetracemin);
+						linetracemax = std::max(tracemax, linetracemax);
+						linetracelength = std::max(tracelength, linetracelength);
 					}
 
 					/* check for new section plot */
@@ -990,8 +991,8 @@ int main(int argc, char **argv) {
 							seafloordepthmax = 0.01 * ((double)segytraceheader.src_wbd);
 						}
 						else {
-							seafloordepthmin = MIN(seafloordepthmin, 0.01 * ((double)segytraceheader.src_wbd));
-							seafloordepthmax = MAX(seafloordepthmax, 0.01 * ((double)segytraceheader.src_wbd));
+							seafloordepthmin = std::min(seafloordepthmin, 0.01 * ((double)segytraceheader.src_wbd));
+							seafloordepthmax = std::max(seafloordepthmax, 0.01 * ((double)segytraceheader.src_wbd));
 						}
 						if (seafloordepthminplot[nplot] < 0.0) {
 							seafloordepthminplot[nplot] = 0.01 * ((double)segytraceheader.src_wbd);
@@ -999,9 +1000,9 @@ int main(int argc, char **argv) {
 						}
 						else {
 							seafloordepthminplot[nplot] =
-							    MIN(seafloordepthminplot[nplot], 0.01 * ((double)segytraceheader.src_wbd));
+							    std::min(seafloordepthminplot[nplot], 0.01 * ((double)segytraceheader.src_wbd));
 							seafloordepthmaxplot[nplot] =
-							    MAX(seafloordepthmaxplot[nplot], 0.01 * ((double)segytraceheader.src_wbd));
+							    std::max(seafloordepthmaxplot[nplot], 0.01 * ((double)segytraceheader.src_wbd));
 						}
 					}
 
@@ -1303,9 +1304,9 @@ int main(int argc, char **argv) {
 		/* close output file if conditions warrant */
 		if (!read_data || (!output_file_set && nroutepoint < 2 && ntimepoint < 2)) {
 			/* close current output file */
-			if (fp != NULL) {
+			if (fp != nullptr) {
 				fclose(fp);
-				fp = NULL;
+				fp = nullptr;
 
 				/* output count of segy records */
 				fprintf(stderr, "\n%d records output to segy file %s\n", nwrite, output_file);
@@ -1389,7 +1390,7 @@ int main(int argc, char **argv) {
 					fprintf(sfp, "%s", command);
 
 					sprintf(command, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-O %s_%4.4d_%2.2d_section\n",
-					        output_file, (startshot + i * nshotmax), MIN((startshot + (i + 1) * nshotmax - 1), endshot), sweep,
+					        output_file, (startshot + i * nshotmax), std::min((startshot + (i + 1) * nshotmax - 1), endshot), sweep,
 					        delay, lineroot, linenumber, i + 1);
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);

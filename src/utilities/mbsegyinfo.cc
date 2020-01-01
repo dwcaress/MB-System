@@ -18,24 +18,25 @@
  * Date:	June 2, 2004
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <unistd.h>
+
+#include <algorithm>
 
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_segy.h"
 #include "mb_status.h"
 
-static const char program_name[] = "MBsegyinfo";
-static const char help_message[] =
+constexpr char program_name[] = "MBsegyinfo";
+constexpr char help_message[] =
     "MBsegyinfo lists table data from a segy data file.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "MBsegyinfo -Ifile [-Llonflip -O -H -V]";
 
 /*--------------------------------------------------------------------*/
@@ -156,12 +157,12 @@ int main(int argc, char **argv) {
 
 	FILE *stream = verbose <= 1 ? stdout : stderr;
 
-	FILE *output = NULL;
+	FILE *output = nullptr;
 	if (output_usefile) {
 		char output_file[MB_PATH_MAXLINE];
 		strcpy(output_file, read_file);
 		strcat(output_file, ".sinf");
-		if ((output = fopen(output_file, "w")) == NULL)
+		if ((output = fopen(output_file, "w")) == nullptr)
 			output = stream;
 	}
 	else {
@@ -326,21 +327,21 @@ int main(int argc, char **argv) {
 
 			/* get min max values */
 			else {
-				shotmin = MIN(shotmin, traceheader.shot_num);
-				shotmax = MAX(shotmax, traceheader.shot_num);
-				shotmin = MIN(shotmin, traceheader.shot_num);
-				shotmax = MAX(shotmax, traceheader.shot_num);
-				rpmin = MIN(rpmin, traceheader.rp_num);
-				rpmax = MAX(rpmax, traceheader.rp_num);
-				rptracemin = MIN(rptracemin, traceheader.rp_tr);
-				rptracemax = MAX(rptracemax, traceheader.rp_tr);
-				delaymin = MIN(delaymin, delay);
-				delaymax = MAX(delaymax, delay);
+				shotmin = std::min(shotmin, traceheader.shot_num);
+				shotmax = std::max(shotmax, traceheader.shot_num);
+				shotmin = std::min(shotmin, traceheader.shot_num);
+				shotmax = std::max(shotmax, traceheader.shot_num);
+				rpmin = std::min(rpmin, traceheader.rp_num);
+				rpmax = std::max(rpmax, traceheader.rp_num);
+				rptracemin = std::min(rptracemin, traceheader.rp_tr);
+				rptracemax = std::max(rptracemax, traceheader.rp_tr);
+				delaymin = std::min(delaymin, delay);
+				delaymax = std::max(delaymax, delay);
 				if (navlon != 0.0 && navlat != 0.0) {
-					lonmin = MIN(lonmin, navlon);
-					lonmax = MAX(lonmax, navlon);
-					latmin = MIN(latmin, navlat);
-					latmax = MAX(latmax, navlat);
+					lonmin = std::min(lonmin, navlon);
+					lonmax = std::max(lonmax, navlon);
+					latmin = std::min(latmin, navlat);
+					latmax = std::max(latmax, navlat);
 				}
 				lonend = navlon;
 				latend = navlat;
@@ -350,18 +351,18 @@ int main(int argc, char **argv) {
 				for (int i = 0; i < 5; i++) {
 					timend_j[i] = time_j[i];
 				}
-				rangemin = MIN(rangemin, range);
-				rangemax = MAX(rangemax, range);
-				receiverelevationmin = MIN(receiverelevationmin, receiverelevation);
-				receiverelevationmax = MAX(receiverelevationmax, receiverelevation);
-				sourceelevationmin = MIN(sourceelevationmin, sourceelevation);
-				sourceelevationmax = MAX(sourceelevationmax, sourceelevation);
-				sourcedepthmin = MIN(sourcedepthmin, sourcedepth);
-				sourcedepthmax = MAX(sourcedepthmax, sourcedepth);
-				sourcewaterdepthmin = MIN(sourcewaterdepthmin, sourcewaterdepth);
-				sourcewaterdepthmax = MAX(sourcewaterdepthmax, sourcewaterdepth);
-				receiverwaterdepthmin = MIN(receiverwaterdepthmin, receiverwaterdepth);
-				receiverwaterdepthmax = MAX(receiverwaterdepthmax, receiverwaterdepth);
+				rangemin = std::min(rangemin, range);
+				rangemax = std::max(rangemax, range);
+				receiverelevationmin = std::min(receiverelevationmin, receiverelevation);
+				receiverelevationmax = std::max(receiverelevationmax, receiverelevation);
+				sourceelevationmin = std::min(sourceelevationmin, sourceelevation);
+				sourceelevationmax = std::max(sourceelevationmax, sourceelevation);
+				sourcedepthmin = std::min(sourcedepthmin, sourcedepth);
+				sourcedepthmax = std::max(sourcedepthmax, sourcedepth);
+				sourcewaterdepthmin = std::min(sourcewaterdepthmin, sourcewaterdepth);
+				sourcewaterdepthmax = std::max(sourcewaterdepthmax, sourcewaterdepth);
+				receiverwaterdepthmin = std::min(receiverwaterdepthmin, receiverwaterdepth);
+				receiverwaterdepthmax = std::max(receiverwaterdepthmax, receiverwaterdepth);
 			}
 		}
 

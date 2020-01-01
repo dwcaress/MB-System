@@ -21,36 +21,35 @@
  * Date:	May 29, 2004
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <unistd.h>
+
+#include <limits>
 
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_segy.h"
 #include "mb_status.h"
 
-#define MAX_OPTIONS 25
-const int MBLIST_CHECK_ON = 0;
-const int MBLIST_CHECK_ON_NULL = 1;
-const int MBLIST_CHECK_OFF_RAW = 2;
-const int MBLIST_CHECK_OFF_NAN = 3;
-const int MBLIST_CHECK_OFF_FLAGNAN = 4;
-const int MBLIST_SET_OFF = 0;
-const int MBLIST_SET_ON = 1;
-const int MBLIST_SET_ALL = 2;
+constexpr int MAX_OPTIONS = 25;
+constexpr int MBLIST_CHECK_ON = 0;
+constexpr int MBLIST_CHECK_ON_NULL = 1;
+constexpr int MBLIST_CHECK_OFF_RAW = 2;
+constexpr int MBLIST_CHECK_OFF_NAN = 3;
+constexpr int MBLIST_CHECK_OFF_FLAGNAN = 4;
+constexpr int MBLIST_SET_OFF = 0;
+constexpr int MBLIST_SET_ON = 1;
+constexpr int MBLIST_SET_ALL = 2;
 
-double NaN;
-
-static const char program_name[] = "MBsegylist";
-static const char help_message[] =
+constexpr char program_name[] = "MBsegylist";
+constexpr char help_message[] =
     "MBsegylist lists table data from a segy data file.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "MBsegylist -Ifile [-A -Ddecimate -Gdelimiter -Llonflip -Olist -H -V]";
 
 /*--------------------------------------------------------------------*/
@@ -128,10 +127,12 @@ int printNaN(int verbose, bool ascii, bool *invert, bool *flipsign, int *error) 
 		*flipsign = false;
 
 	/* print value */
-	if (ascii)
+	if (ascii) {
 		printf("NaN");
-	else
+	} else {
+		const double NaN = std::numeric_limits<double>::quiet_NaN();
 		fwrite(&NaN, sizeof(double), 1, stdout);
+	}
 
 	const int status = MB_SUCCESS;
 
@@ -200,9 +201,6 @@ int main(int argc, char **argv) {
 	n_list++;
 	list[n_list] = 'L';
 	n_list++;
-
-	/* get NaN value */
-	MB_MAKE_DNAN(NaN);
 
 	/* process argument list */
 	{
@@ -316,7 +314,7 @@ int main(int argc, char **argv) {
 
 	/* initialize reading the segy file */
 	if (mb_segy_read_init(verbose, file, &mbsegyioptr, &asciiheader, &fileheader, &error) != MB_SUCCESS) {
-		char *message = NULL;
+		char *message = nullptr;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error returned from function <mb_segy_read_init>:\n%s\n", message);
 		fprintf(stderr, "\nSEGY File <%s> not initialized for reading\n", file);

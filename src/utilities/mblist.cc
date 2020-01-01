@@ -28,14 +28,15 @@
  *
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <unistd.h>
+
+#include <algorithm>
 
 #include "mb_define.h"
 #include "mb_format.h"
@@ -44,7 +45,8 @@
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
 
-#define MAX_OPTIONS 25
+constexpr int MAX_OPTIONS = 25;
+
 typedef enum {
     DUMP_MODE_LIST = 1,
     DUMP_MODE_BATH = 2,
@@ -72,15 +74,13 @@ typedef enum {
     MBLIST_SEGMENT_MODE_DATALIST = 3,
 } segment_mode_t;
 
-double NaN;
-
-static const char program_name[] = "MBLIST";
-static const char help_message[] =
+constexpr char program_name[] = "MBLIST";
+constexpr char help_message[] =
     "MBLIST prints the specified contents of a swath data\n"
     "file to stdout. The form of the output is quite flexible;\n"
     "MBLIST is tailored to produce ascii files in spreadsheet\n"
     "style with data columns separated by tabs.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc\n"
     "    -Fformat -Gdelimiter -H -Ifile -Kdecimate -Llonflip -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end\n"
     "    -Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
@@ -452,10 +452,12 @@ int printNaN(int verbose, FILE *output, bool ascii, bool *invert, bool *flipsign
     *flipsign = false;
 
   /* print value */
-  if (ascii)
+  if (ascii) {
     fprintf(output, "NaN");
-  else
+  } else {
+    const double NaN = std::numeric_limits<double>::quiet_NaN();
     fwrite(&NaN, sizeof(double), 1, output);
+  }
 
   const int status = MB_SUCCESS;
 
@@ -798,8 +800,6 @@ int main(int argc, char **argv) {
   char list[MAX_OPTIONS] = "TXYHSLZ";
   int n_list = 7;
 
-  MB_MAKE_DNAN(NaN);
-
   /* process argument list */
   {
     bool errflg = false;
@@ -1049,7 +1049,7 @@ int main(int argc, char **argv) {
   int error = MB_ERROR_NO_ERROR;
 
   if (format == 0)
-    mb_get_format(verbose, read_file, NULL, &format, &error);
+    mb_get_format(verbose, read_file, nullptr, &format, &error);
 
   double bathy_scale;
   /* set bathymetry scaling */
@@ -1115,8 +1115,8 @@ int main(int argc, char **argv) {
   bool special_character = false;
 
   /* MBIO read values */
-  void *mbio_ptr = NULL;
-  void *store_ptr = NULL;
+  void *mbio_ptr = nullptr;
+  void *store_ptr = nullptr;
   int kind;
   int time_i[7];
   double time_d;
@@ -1131,15 +1131,15 @@ int main(int argc, char **argv) {
   double roll;
   double pitch;
   double heave;
-  char *beamflag = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  int *detect = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
+  char *beamflag = nullptr;
+  double *bath = nullptr;
+  double *bathacrosstrack = nullptr;
+  double *bathalongtrack = nullptr;
+  int *detect = nullptr;
+  double *amp = nullptr;
+  double *ss = nullptr;
+  double *ssacrosstrack = nullptr;
+  double *ssalongtrack = nullptr;
   char comment[MB_COMMENT_MAXLINE];
   int icomment = 0;
   unsigned int pingnumber;
@@ -1157,11 +1157,11 @@ int main(int argc, char **argv) {
   int ns;
   double angle, depth, slope;
   int ndepths;
-  double *depths = NULL;
-  double *depthacrosstrack = NULL;
+  double *depths = nullptr;
+  double *depthacrosstrack = nullptr;
   int nslopes;
-  double *slopes = NULL;
-  double *slopeacrosstrack = NULL;
+  double *slopes = nullptr;
+  double *slopeacrosstrack = nullptr;
 
   /* course calculation variables */
   double course, course_old;
@@ -1183,7 +1183,7 @@ int main(int argc, char **argv) {
   /* projected coordinate system */
   char projection_id[MB_PATH_MAXLINE];
   int proj_status;
-  void *pjptr = NULL;
+  void *pjptr = nullptr;
   double reference_lon, reference_lat;
   int utm_zone;
   double naveasting, navnorthing, deasting, dnorthing;
@@ -1210,12 +1210,12 @@ int main(int argc, char **argv) {
   int tvg_crossover;
   int nbeams_ss;
   int npixels;
-  int *beam_samples = NULL;
-  int *range = NULL;
-  int *start_sample = NULL;
-  double *depression = NULL;
-  double *bs = NULL;
-  double *ss_pixels = NULL;
+  int *beam_samples = nullptr;
+  int *range = nullptr;
+  int *start_sample = nullptr;
+  double *depression = nullptr;
+  double *bs = nullptr;
+  double *ss_pixels = nullptr;
   double transmit_gain;
   double pulse_length;
   double receive_gain;
@@ -1243,7 +1243,7 @@ int main(int argc, char **argv) {
       outfile = stdout;
     else
       outfile = fopen(output_file, "w");
-    if (NULL == outfile) {
+    if (nullptr == outfile) {
       fprintf(stderr, "Could not open file: %s\n", output_file);
       exit(1);
     }
@@ -1268,7 +1268,7 @@ int main(int argc, char **argv) {
       if (!netcdf_cdl)
         strcat(output_file_temp, ".cdl");
       outfile = fopen(output_file_temp, "w+");
-      if (outfile == NULL) {
+      if (outfile == nullptr) {
         fprintf(stderr, "Unable to open file: %s\n", output_file_temp);
         exit(1);
       }
@@ -1315,10 +1315,10 @@ int main(int argc, char **argv) {
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
     char *user_ptr = (char *)getenv("USER");
-    if (user_ptr == NULL)
+    if (user_ptr == nullptr)
       user_ptr = (char *)getenv("LOGNAME");
     char user[128];
-    if (user_ptr != NULL)
+    if (user_ptr != nullptr)
       strcpy(user, user_ptr);
     else
       strcpy(user, "unknown");
@@ -1330,7 +1330,7 @@ int main(int argc, char **argv) {
     /* get temporary output file for each variable */
     for (int i = 0; i < n_list; i++) {
       output[i] = tmpfile();
-      if (output[i] == NULL) {
+      if (output[i] == nullptr) {
         fprintf(stderr, "Unable to open temp files\n");
         exit(1);
       }
@@ -2867,7 +2867,7 @@ int main(int argc, char **argv) {
       /* get projected navigation if needed */
       if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && use_projection) {
         /* set up projection if this is the first data */
-        if (pjptr == NULL) {
+        if (pjptr == nullptr) {
           /* Default projection is UTM */
           if (strlen(projection_pars) == 0)
             strcpy(projection_pars, "U");

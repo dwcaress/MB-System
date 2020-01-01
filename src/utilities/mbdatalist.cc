@@ -20,12 +20,11 @@
  * Date:	October 10, 2001
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "mb_define.h"
@@ -33,11 +32,11 @@
 #include "mb_process.h"
 #include "mb_status.h"
 
-static const char program_name[] = "mbdatalist";
-static const char help_message[] =
+constexpr char program_name[] = "mbdatalist";
+constexpr char help_message[] =
     "mbdatalist parses recursive datalist files and outputs the\n"
     "complete list of data files and formats. The results are dumped to stdout.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbdatalist [-C -D -Fformat -Ifile -N -O -P -Q -Rw/e/s/n -S -U -Y -Z -V -H]";
 
 /*--------------------------------------------------------------------*/
@@ -67,28 +66,28 @@ int main(int argc, char **argv) {
 	bool remove_locks = false;
 	bool make_datalistp = false;
 	bool reportdatalists = false;
-	FILE *output = NULL;
+	FILE *output = nullptr;
 
 	{
 		int option_index;
 
 		const struct option options[] = {
-			{"verbose", no_argument, NULL, 0},
-	                {"help", no_argument, NULL, 0},
-	                {"copy", no_argument, NULL, 0},
-	                {"report", no_argument, NULL, 0},
-	                {"format", required_argument, NULL, 0},
-	                {"input", required_argument, NULL, 0},
-	                {"make-ancilliary", no_argument, NULL, 0},
-	                {"update-ancilliary", no_argument, NULL, 0},
-	                {"processed", no_argument, NULL, 0},
-	                {"problem", no_argument, NULL, 0},
-	                {"bounds", required_argument, NULL, 0},
-	                {"status", no_argument, NULL, 0},
-	                {"raw", no_argument, NULL, 0},
-	                {"unlock", no_argument, NULL, 0},
-	                {"datalistp", no_argument, NULL, 0},
-	                {NULL, 0, NULL, 0}};
+			{"verbose", no_argument, nullptr, 0},
+	                {"help", no_argument, nullptr, 0},
+	                {"copy", no_argument, nullptr, 0},
+	                {"report", no_argument, nullptr, 0},
+	                {"format", required_argument, nullptr, 0},
+	                {"input", required_argument, nullptr, 0},
+	                {"make-ancilliary", no_argument, nullptr, 0},
+	                {"update-ancilliary", no_argument, nullptr, 0},
+	                {"processed", no_argument, nullptr, 0},
+	                {"problem", no_argument, nullptr, 0},
+	                {"bounds", required_argument, nullptr, 0},
+	                {"status", no_argument, nullptr, 0},
+	                {"raw", no_argument, nullptr, 0},
+	                {"unlock", no_argument, nullptr, 0},
+	                {"datalistp", no_argument, nullptr, 0},
+	                {nullptr, 0, nullptr, 0}};
 
 		bool errflg = false;
 		int c;
@@ -293,7 +292,7 @@ int main(int argc, char **argv) {
 		sprintf(file, "%sp.mb-1", fileroot);
 
 		FILE *fp = fopen(file, "w");
-		if (fp == NULL) {
+		if (fp == nullptr) {
 			fprintf(stderr, "\nUnable to open output file %s\n", file);
 			fprintf(stderr, "Program %s aborted!\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -310,7 +309,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	void *datalist;
 	double file_weight = 1.0;
@@ -464,7 +463,7 @@ int main(int argc, char **argv) {
 					sprintf(command, "cp %s* .", file);
 					/* shellstatus = */ system(command);
 					char *filename = strrchr(file, '/');
-					if (filename != NULL)
+					if (filename != nullptr)
 						filename++;
 					else
 						filename = file;

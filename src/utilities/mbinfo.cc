@@ -33,11 +33,13 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "mb_define.h"
 #include "mb_status.h"
 #include "mb_io.h"
 
-const int MBINFO_MAXPINGS = 50;
+constexpr int MBINFO_MAXPINGS = 50;
 
 struct ping {
 	char *beamflag;
@@ -57,8 +59,8 @@ typedef enum {
   MAX_OUTPUT_FORMAT = 2
 } output_format_t ;
 
-static const char program_name[] = "MBINFO";
-static const char usage_message[] =
+constexpr char program_name[] = "MBINFO";
+constexpr char usage_message[] =
     "mbinfo [-Byr/mo/da/hr/mn/sc -C "
     "-Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnx/ny "
     "-N -O -Ppings -Rw/e/s/n -Sspeed -W -V -H -XinfFormat]";
@@ -249,7 +251,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (help) {
-		static const char help_message[] =
+		constexpr char help_message[] =
 		    "MBINFO reads a swath sonar data file and outputs\n"
 	            "some basic statistics.  If pings are averaged (pings > 2)\n"
 	            "MBINFO estimates the variance for each of the swath\n"
@@ -276,7 +278,7 @@ int main(int argc, char **argv) {
 
 	int error = MB_ERROR_NO_ERROR;
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	double bathy_scale;
 	if (bathy_in_feet)
@@ -296,7 +298,7 @@ int main(int argc, char **argv) {
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 	    output if verbose > 1) */
-	FILE *output = NULL;
+	FILE *output = nullptr;
 
 	/* Open output file if requested */
 	if (output_usefile) {
@@ -315,7 +317,7 @@ int main(int argc, char **argv) {
 		default:
 			break;
 		}
-		if ((output = fopen(output_file, "w")) == NULL)
+		if ((output = fopen(output_file, "w")) == nullptr)
 			output = stream;
 	}
 	else {
@@ -364,14 +366,14 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathlon = NULL;
-	double *bathlat = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *sslon = NULL;
-	double *sslat = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathlon = nullptr;
+	double *bathlat = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *sslon = nullptr;
+	double *sslat = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 	int icomment = 0;
 
@@ -446,32 +448,32 @@ int main(int argc, char **argv) {
 	int nss;
 	double delta;
 	double a, b, dev, mean;
-	double *bathmean = NULL;
-	double *bathvar = NULL;
-	int *nbathvar = NULL;
-	double *ampmean = NULL;
-	double *ampvar = NULL;
-	int *nampvar = NULL;
-	double *ssmean = NULL;
-	double *ssvar = NULL;
-	int *nssvar = NULL;
+	double *bathmean = nullptr;
+	double *bathvar = nullptr;
+	int *nbathvar = nullptr;
+	double *ampmean = nullptr;
+	double *ampvar = nullptr;
+	int *nampvar = nullptr;
+	double *ssmean = nullptr;
+	double *ssvar = nullptr;
+	int *nssvar = nullptr;
 	int nbathtot_alloc = 0;
 	int namptot_alloc = 0;
 	int nsstot_alloc = 0;
-	double *bathmeantot = NULL;
-	double *bathvartot = NULL;
-	int *nbathvartot = NULL;
-	double *ampmeantot = NULL;
-	double *ampvartot = NULL;
-	int *nampvartot = NULL;
-	double *ssmeantot = NULL;
-	double *ssvartot = NULL;
-	int *nssvartot = NULL;
+	double *bathmeantot = nullptr;
+	double *bathvartot = nullptr;
+	int *nbathvartot = nullptr;
+	double *ampmeantot = nullptr;
+	double *ampvartot = nullptr;
+	int *nampvartot = nullptr;
+	double *ssmeantot = nullptr;
+	double *ssvartot = nullptr;
+	int *nssvartot = nullptr;
 
 	/* coverage mask variables */
 	double mask_dx = 0.0;
 	double mask_dy = 0.0;
-	int *mask = NULL;
+	int *mask = nullptr;
 
 	char *fileprint;
 	char string[500];
@@ -527,7 +529,7 @@ int main(int argc, char **argv) {
 		/* loop over all files to be read */
 		while (read_data) {
 
-			void *mbio_ptr = NULL;
+			void *mbio_ptr = nullptr;
 			/* initialize reading the swath file */
 			if (mb_read_init(verbose, file, format, pings_get, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 			                           &mbio_ptr, &btime_d, &etime_d, &beams_bath_alloc, &beams_amp_alloc, &pixels_ss_alloc,
@@ -677,7 +679,7 @@ int main(int argc, char **argv) {
 
 			/* printf out file and format */
 			if (pass == 0) {
-				if (strrchr(file, '/') == NULL)
+				if (strrchr(file, '/') == nullptr)
 					fileprint = file;
 				else
 					fileprint = strrchr(file, '/') + 1;
@@ -1229,9 +1231,9 @@ int main(int argc, char **argv) {
 					}
 
 					/* take note of min and maxes */
-					beams_bath_max = MAX(beams_bath_max, beams_bath);
-					beams_amp_max = MAX(beams_amp_max, beams_amp);
-					pixels_ss_max = MAX(pixels_ss_max, pixels_ss);
+					beams_bath_max = std::max(beams_bath_max, beams_bath);
+					beams_amp_max = std::max(beams_amp_max, beams_amp);
+					pixels_ss_max = std::max(pixels_ss_max, pixels_ss);
 					if (pass == 0 && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
 						/* update data counts */
 						ntdbeams += beams_bath;
@@ -1423,29 +1425,29 @@ int main(int argc, char **argv) {
 
 						/* get mins and maxs */
 						if (good_nav && beginnav) {
-							lonmin = MIN(lonmin, navlon);
-							lonmax = MAX(lonmax, navlon);
-							latmin = MIN(latmin, navlat);
-							latmax = MAX(latmax, navlat);
+							lonmin = std::min(lonmin, navlon);
+							lonmax = std::max(lonmax, navlon);
+							latmin = std::min(latmin, navlat);
+							latmax = std::max(latmax, navlat);
 						}
 						if (beginsdp) {
-							sdpmin = MIN(sdpmin, sonardepth);
-							sdpmax = MAX(sdpmax, sonardepth);
+							sdpmin = std::min(sdpmin, sonardepth);
+							sdpmax = std::max(sdpmax, sonardepth);
 						}
 						if (beginalt) {
-							altmin = MIN(altmin, altitude);
-							altmax = MAX(altmax, altitude);
+							altmin = std::min(altmin, altitude);
+							altmax = std::max(altmax, altitude);
 						}
 						for (int i = 0; i < beams_bath; i++) {
 							if (mb_beam_ok(beamflag[i])) {
 								if (good_nav && beginnav) {
-									lonmin = MIN(lonmin, bathlon[i]);
-									lonmax = MAX(lonmax, bathlon[i]);
-									latmin = MIN(latmin, bathlat[i]);
-									latmax = MAX(latmax, bathlat[i]);
+									lonmin = std::min(lonmin, bathlon[i]);
+									lonmax = std::max(lonmax, bathlon[i]);
+									latmin = std::min(latmin, bathlat[i]);
+									latmax = std::max(latmax, bathlat[i]);
 								}
-								bathmin = MIN(bathmin, bath[i]);
-								bathmax = MAX(bathmax, bath[i]);
+								bathmin = std::min(bathmin, bath[i]);
+								bathmax = std::max(bathmax, bath[i]);
 								ngdbeams++;
 							}
 							else if (beamflag[i] == MB_FLAG_NULL)
@@ -1455,8 +1457,8 @@ int main(int argc, char **argv) {
 						}
 						for (int i = 0; i < beams_amp; i++) {
 							if (mb_beam_ok(beamflag[i])) {
-								ampmin = MIN(ampmin, amp[i]);
-								ampmax = MAX(ampmax, amp[i]);
+								ampmin = std::min(ampmin, amp[i]);
+								ampmax = std::max(ampmax, amp[i]);
 								ngabeams++;
 							}
 							else if (beamflag[i] == MB_FLAG_NULL)
@@ -1467,13 +1469,13 @@ int main(int argc, char **argv) {
 						for (int i = 0; i < pixels_ss; i++) {
 							if (ss[i] > MB_SIDESCAN_NULL) {
 								if (good_nav && beginnav) {
-									lonmin = MIN(lonmin, sslon[i]);
-									lonmax = MAX(lonmax, sslon[i]);
-									latmin = MIN(latmin, sslat[i]);
-									latmax = MAX(latmax, sslat[i]);
+									lonmin = std::min(lonmin, sslon[i]);
+									lonmax = std::max(lonmax, sslon[i]);
+									latmin = std::min(latmin, sslat[i]);
+									latmax = std::max(latmax, sslat[i]);
 								}
-								ssmin = MIN(ssmin, ss[i]);
-								ssmax = MAX(ssmax, ss[i]);
+								ssmin = std::min(ssmin, ss[i]);
+								ssmax = std::max(ssmax, ss[i]);
 								ngsbeams++;
 							}
 							else if (ss[i] == 0.0)
@@ -2415,7 +2417,7 @@ int main(int argc, char **argv) {
 		break;
 	}
 
-	if (output_usefile && output != NULL) {
+	if (output_usefile && output != nullptr) {
 		fclose(output);
 	}
 

@@ -35,15 +35,16 @@
  * Date:	February 27, 2003
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+
+#include <algorithm>
 
 #include "mb_define.h"
 #include "mb_format.h"
@@ -54,9 +55,9 @@
 #include "mb_swap.h"
 
 /* allocation */
-static const int FILEALLOCNUM = 16;
-static const int PINGALLOCNUM = 128;
-static const int SNDGALLOCNUM = 128;
+constexpr int FILEALLOCNUM = 16;
+constexpr int PINGALLOCNUM = 128;
+constexpr int SNDGALLOCNUM = 128;
 
 struct mbareaclean_file_struct {
 	char filelist[MB_PATH_MAXLINE];
@@ -93,18 +94,18 @@ struct mbareaclean_sndg_struct {
 /* sounding storage values and arrays */
 int nfile = 0;
 int nfile_alloc = 0;
-struct mbareaclean_file_struct *files = NULL;
+struct mbareaclean_file_struct *files = nullptr;
 int nsndg = 0;
 int nsndg_alloc = 0;
 int sndg_countstart = 0;
-int **gsndg = NULL;
-int *gsndgnum = NULL;
-int *gsndgnum_alloc = NULL;
-struct mbareaclean_sndg_struct *sndg = NULL;
+int **gsndg = nullptr;
+int *gsndgnum = nullptr;
+int *gsndgnum_alloc = nullptr;
+struct mbareaclean_sndg_struct *sndg = nullptr;
 
-static const char program_name[] = "MBAREACLEAN";
-static const char help_message[] = "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
-static const char usage_message[] =
+constexpr char program_name[] = "MBAREACLEAN";
+constexpr char help_message[] = "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
+constexpr char usage_message[] =
     "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize\n"
     "\t -Mthreshold/nmin -Dthreshold[/nmin[/nmax]] -Ttype -N[-]minbeam/maxbeam]";
 
@@ -119,8 +120,8 @@ int getsoundingptr(int verbose, int soundingid, struct mbareaclean_sndg_struct *
 	}
 
 	/* loop over the files until the sounding is found */
-	*sndgptr = NULL;
-	for (int i = 0; i < nfile && *sndgptr == NULL; i++) {
+	*sndgptr = nullptr;
+	for (int i = 0; i < nfile && *sndgptr == nullptr; i++) {
 		if (soundingid >= files[i].sndg_countstart && soundingid < files[i].sndg_countstart + files[i].nsndg) {
 			const int j = soundingid - files[i].sndg_countstart;
 			*sndgptr = &(files[i].sndg[j]);
@@ -483,7 +484,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR || status != MB_SUCCESS) {
-		char *message = NULL;
+		char *message = nullptr;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -492,7 +493,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	for (int i = 0; i < nx * ny; i++) {
-		gsndg[i] = NULL;
+		gsndg[i] = nullptr;
 		gsndgnum[i] = 0;
 		gsndgnum_alloc[i] = 0;
 	}
@@ -567,7 +568,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
@@ -593,7 +594,7 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
-	void *mbio_ptr = NULL;
+	void *mbio_ptr = nullptr;
 	double btime_d;
 	double etime_d;
 	int beams_bath;
@@ -628,7 +629,7 @@ int main(int argc, char **argv) {
 	double sonardepth;
 	char comment[MB_COMMENT_MAXLINE];
 
-       	void *store_ptr = NULL;
+       	void *store_ptr = nullptr;
 
 	int pingmultiplicity;
 	int pings_tot = 0;
@@ -645,7 +646,7 @@ int main(int argc, char **argv) {
 		int traveltime;
 		int beam_flagging;
 		if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n", format,
 			        message);
@@ -663,7 +664,7 @@ int main(int argc, char **argv) {
 		if (mb_read_init(verbose, swathfileread, formatread, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 		                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) !=
 		    MB_SUCCESS) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swathfileread);
@@ -681,16 +682,16 @@ int main(int argc, char **argv) {
 		}
 
 		/* allocate memory for data arrays */
-		beamflag = NULL;
-		beamflagorg = NULL;
-		detect = NULL;
-		bath = NULL;
-		amp = NULL;
-		bathlon = NULL;
-		bathlat = NULL;
-		ss = NULL;
-		sslon = NULL;
-		sslat = NULL;
+		beamflag = nullptr;
+		beamflagorg = nullptr;
+		detect = nullptr;
+		bath = nullptr;
+		amp = nullptr;
+		bathlon = nullptr;
+		bathlat = nullptr;
+		ss = nullptr;
+		sslon = nullptr;
+		sslat = nullptr;
 		if (error == MB_ERROR_NO_ERROR)
 			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
@@ -714,7 +715,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -729,7 +730,7 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
-				char *message = NULL;
+				char *message = nullptr;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -747,14 +748,14 @@ int main(int argc, char **argv) {
 		files[nfile].ngood = 0;
 		files[nfile].nflagged = 0;
 		files[nfile].nunflagged = 0;
-		files[nfile].ping_time_d = NULL;
-		files[nfile].pingmultiplicity = NULL;
-		files[nfile].ping_altitude = NULL;
+		files[nfile].ping_time_d = nullptr;
+		files[nfile].pingmultiplicity = nullptr;
+		files[nfile].ping_altitude = nullptr;
 		files[nfile].nsndg = 0;
 		files[nfile].nsndg_alloc = SNDGALLOCNUM;
 		files[nfile].sndg_countstart = nsndg;
 		files[nfile].beams_bath = beams_bath;
-		files[nfile].sndg = NULL;
+		files[nfile].sndg = nullptr;
 		status &= mb_mallocd(verbose, __FILE__, __LINE__, files[nfile].nping_alloc * sizeof(double),
 		                    (void **)&(files[nfile].ping_time_d), &error);
 		if (status == MB_SUCCESS)
@@ -767,7 +768,7 @@ int main(int argc, char **argv) {
 			status &= mb_mallocd(verbose, __FILE__, __LINE__, files[nfile].nsndg_alloc * sizeof(struct mbareaclean_sndg_struct),
 			                    (void **)&(files[nfile].sndg), &error);
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -834,7 +835,7 @@ int main(int argc, char **argv) {
 						/* status = */ mb_reallocd(verbose, __FILE__, __LINE__, files[nfile - 1].nping_alloc * sizeof(double),
 						                     (void **)&(files[nfile - 1].ping_altitude), &error);
 					if (error != MB_ERROR_NO_ERROR) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -906,7 +907,7 @@ int main(int argc, char **argv) {
 								                     files[nfile - 1].nsndg_alloc * sizeof(struct mbareaclean_sndg_struct),
 								                     (void **)&files[nfile - 1].sndg, &error);
 								if (error != MB_ERROR_NO_ERROR) {
-									char *message = NULL;
+									char *message = nullptr;
 									mb_error(verbose, error, &message);
 									fprintf(stderr, "\nMBIO Error allocating sounding arrays:\n%s\n", message);
 									fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -920,7 +921,7 @@ int main(int argc, char **argv) {
 								status = mb_reallocd(verbose, __FILE__, __LINE__, gsndgnum_alloc[kgrid] * sizeof(int),
 								                     (void **)&gsndg[kgrid], &error);
 								if (error != MB_ERROR_NO_ERROR) {
-									char *message = NULL;
+									char *message = nullptr;
 									mb_error(verbose, error, &message);
 									fprintf(stderr, "\nMBIO Error allocating sounding arrays:\n%s\n", message);
 									fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1016,12 +1017,12 @@ int main(int argc, char **argv) {
 			const int kgrid = ix * ny + iy;
 			// xx = areabounds[0] + 0.5 * dx + ix * dx;
 			// yy = areabounds[3] + 0.5 * dy + iy * dy;
-			binnummax = MAX(binnummax, gsndgnum[kgrid]);
+			binnummax = std::max(binnummax, gsndgnum[kgrid]);
 		}
         }
 	/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, binnummax * sizeof(double), (void **)&(bindepths), &error);
 	if (error != MB_ERROR_NO_ERROR) {
-		char *message = NULL;
+		char *message = nullptr;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating sounding sorting array:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1135,7 +1136,7 @@ int main(int argc, char **argv) {
 		/* open esf file */
 		status = mb_esf_load(verbose, (char *)program_name, files[i].filelist, false, true, esffile, &esf, &error);
 		bool esffile_open = false;
-		if (status == MB_SUCCESS && esf.esffp != NULL)
+		if (status == MB_SUCCESS && esf.esffp != nullptr)
 			esffile_open = true;
 		if (status == MB_FAILURE && error == MB_ERROR_OPEN_FAIL) {
 			esffile_open = false;
@@ -1190,7 +1191,7 @@ int main(int argc, char **argv) {
 
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bindepths, &error);
 	for (int i = 0; i < nx * ny; i++)
-		if (gsndg[i] != NULL)
+		if (gsndg[i] != nullptr)
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&gsndg[i], &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&gsndg, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&gsndgnum, &error);

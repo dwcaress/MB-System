@@ -21,12 +21,11 @@
  * Date:	January 22, 1993
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "mb_define.h"
@@ -39,12 +38,12 @@ enum MbformatList {
   MBFORMAT_LIST_ROOT = 2
 };
 
-static const char program_name[] = "MBFORMAT";
-static const char help_message[] =
+constexpr char program_name[] = "MBFORMAT";
+constexpr char help_message[] =
     "MBFORMAT is an utility which identifies the swath data formats\n"
     "associated with MBIO format id's.  If no format id is specified,\n"
     "MBFORMAT lists all of the currently supported formats.";
-static const char usage_message[] = "mbformat [-Fformat -Ifile -L -K -V -W -H]";
+constexpr char usage_message[] = "mbformat [-Fformat -Ifile -L -K -V -W -H]";
 
 /*--------------------------------------------------------------------*/
 int main(int argc, char **argv) {

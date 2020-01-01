@@ -20,13 +20,12 @@
  * Date:	March 20, 2008
  */
 
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <string.h>
-#include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -42,11 +41,11 @@ typedef enum {
     OUTPUT_ESF = 1,
 } omode_t;
 
-static const char program_name[] = "mbdumpesf";
-static const char help_message[] =
+constexpr char program_name[] = "mbdumpesf";
+constexpr char help_message[] =
     "mbdumpesf reads an MB-System edit save file and dumps the\n"
     "contents as an ascii table to stdout.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbdumpesf --input=esffile\n"
     "\t[--output=esffile --ignore-unflag --ignore-flag\n"
     "\t--ignore-filter --ignore-zero\n"
@@ -61,8 +60,8 @@ int main(int argc, char **argv) {
 	char iesffile[MB_PATH_MAXLINE];
 	char oesffile[MB_PATH_MAXLINE];
 	omode_t omode = OUTPUT_TEXT;
-	FILE *iesffp = NULL;
-	FILE *oesffp = NULL;
+	FILE *iesffp = nullptr;
+	FILE *oesffp = nullptr;
 
 	bool ignore_unflag = false;
 	bool ignore_flag = false;
@@ -72,15 +71,15 @@ int main(int argc, char **argv) {
 	/* process argument list */
 	{
 		const struct option options[] = {
-			{"verbose", no_argument, NULL, 0},
-			{"help", no_argument, NULL, 0},
-			{"input", required_argument, NULL, 0},
-			{"output", required_argument, NULL, 0},
-			{"ignore-unflag", no_argument, NULL, 0},
-			{"ignore-flag", no_argument, NULL, 0},
-			{"ignore-filter", no_argument, NULL, 0},
-			{"ignore-zero", no_argument, NULL, 0},
-			{NULL, 0, NULL, 0}};
+			{"verbose", no_argument, nullptr, 0},
+			{"help", no_argument, nullptr, 0},
+			{"input", required_argument, nullptr, 0},
+			{"output", required_argument, nullptr, 0},
+			{"ignore-unflag", no_argument, nullptr, 0},
+			{"ignore-flag", no_argument, nullptr, 0},
+			{"ignore-filter", no_argument, nullptr, 0},
+			{"ignore-zero", no_argument, nullptr, 0},
+			{nullptr, 0, nullptr, 0}};
 		int option_index;
 		bool errflg = false;
 		int c;
@@ -190,14 +189,14 @@ int main(int argc, char **argv) {
 	const int fstat = stat(iesffile, &file_status);
 	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		/* open the input esf file */
-		if ((iesffp = fopen(iesffile, "r")) == NULL) {
+		if ((iesffp = fopen(iesffile, "r")) == nullptr) {
 			fprintf(stderr, "\nUnable to edit save file <%s> for reading\n", iesffile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 
 		/* open the output esf file */
-		if (omode == OUTPUT_ESF && (oesffp = fopen(oesffile, "w")) == NULL) {
+		if (omode == OUTPUT_ESF && (oesffp = fopen(oesffile, "w")) == nullptr) {
 			fprintf(stderr, "\nUnable to edit save file <%s> for reading\n", iesffile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -210,7 +209,7 @@ int main(int argc, char **argv) {
 		if (fread(esf_header, MB_PATH_MAXLINE, 1, iesffp) == 1 && strncmp(esf_header, "ESFVERSION", 10) == 0) {
 			nedit = (file_status.st_size - MB_PATH_MAXLINE) / (sizeof(double) + 2 * sizeof(int));
 
-			if (omode == OUTPUT_ESF && oesffp != NULL) {
+			if (omode == OUTPUT_ESF && oesffp != nullptr) {
 				memset(esf_header, 0, MB_PATH_MAXLINE);
 				const int esf_mode = MB_ESF_MODE_EXPLICIT;
 				const time_t right_now = time((time_t *)0);
@@ -218,10 +217,10 @@ int main(int argc, char **argv) {
 				strcpy(date, ctime(&right_now));
 				date[strlen(date) - 1] = '\0';
 				const char *user_ptr = getenv("USER");
-				if (user_ptr == NULL)
+				if (user_ptr == nullptr)
 					user_ptr = getenv("LOGNAME");
 				char user[MBP_FILENAMESIZE];
-				if (user_ptr != NULL)
+				if (user_ptr != nullptr)
 					strcpy(user, user_ptr);
 				else
 					strcpy(user, "unknown");

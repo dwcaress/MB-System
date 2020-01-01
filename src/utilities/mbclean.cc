@@ -53,14 +53,15 @@
  * program mbclean (v. 1.0) by David Caress.
  */
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
-#include <string.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <sys/stat.h>
-#include <time.h>
+#include <unistd.h>
+
+#include <algorithm>
 
 #include "mb_define.h"
 #include "mb_format.h"
@@ -82,10 +83,10 @@ typedef enum {
 } y_mode_t;
 
 /* MBIO buffer size default */
-const int MBCLEAN_BUFFER_DEFAULT = 500;
+constexpr int MBCLEAN_BUFFER_DEFAULT = 500;
 
 /* edit action defines */
-const int MBCLEAN_NOACTION = 0;
+constexpr int MBCLEAN_NOACTION = 0;
 
 /* ping structure definition */
 struct mbclean_ping_struct {
@@ -114,12 +115,12 @@ struct bad_struct {
   double bath;
 };
 
-static const char program_name[] = "mbclean";
-static const char help_message[] =
+constexpr char program_name[] = "mbclean";
+constexpr char help_message[] =
     "Mbclean identifies and flags artifacts in swath sonar bathymetry data.\n"
     "Several algorithms are available for identifying artifacts;\n"
     "multiple algorithms can be applied in a single pass.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbclean [-Amax -Blow/high -Cslope/unit -Dmin/max\n"
     "\t-Fformat -Gfraction_low/fraction_high -Iinfile -Krange_min\n"
     "\t-Llonflip -Mmode Ntolerance -Ooutfile -Pmin_speed/max_speed -Q -Rmaxheadingrate\n"
@@ -141,7 +142,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int acti
   fprintf(stderr, "OUTPUT EDIT: %f %d %d\n", time_d, beam, action);
 
   int status = MB_SUCCESS;
-  if (sofp != NULL) {
+  if (sofp != nullptr) {
 #ifdef BYTESWAPPED
     mb_swap_double(&time_d);
     beam = mb_swap_int(beam);
@@ -564,7 +565,7 @@ int main(int argc, char **argv) {
   int error = MB_ERROR_NO_ERROR;
 
   if (format == 0)
-    mb_get_format(verbose, read_file, NULL, &format, &error);
+    mb_get_format(verbose, read_file, nullptr, &format, &error);
 
   /* determine whether to read one file or a list of files */
   const bool read_datalist = format < 0;
@@ -613,8 +614,8 @@ int main(int argc, char **argv) {
   int pixels_ss;
 
   /* mbio read and write values */
-  void *mbio_ptr = NULL;
-  void *store_ptr = NULL;
+  void *mbio_ptr = nullptr;
+  void *store_ptr = nullptr;
   int kind;
   struct mbclean_ping_struct ping[3];
   int pingsread;
@@ -679,7 +680,7 @@ int main(int argc, char **argv) {
 
     /* check format and get format flags */
     if ((status = mb_format_flags(verbose, &format, &variable_beams, &traveltime, &beam_flagging, &error)) != MB_SUCCESS) {
-      char *message = NULL;
+      char *message = nullptr;
       mb_error(verbose, error, &message);
       fprintf(stderr, "\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n", format,
               message);
@@ -751,7 +752,7 @@ int main(int argc, char **argv) {
       if (mb_read_init(verbose, swathfileread, formatread, pings, lonflip, bounds, btime_i, etime_i, speedmin,
                                  timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) !=
           MB_SUCCESS) {
-        char *message = NULL;
+        char *message = nullptr;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", swathfile);
@@ -788,13 +789,13 @@ int main(int argc, char **argv) {
 
       /* allocate memory for data arrays */
       for (int i = 0; i < 3; i++) {
-        ping[i].beamflag = NULL;
-        ping[i].beamflagorg = NULL;
-        ping[i].bath = NULL;
-        ping[i].bathacrosstrack = NULL;
-        ping[i].bathalongtrack = NULL;
-        ping[i].bathx = NULL;
-        ping[i].bathy = NULL;
+        ping[i].beamflag = nullptr;
+        ping[i].beamflagorg = nullptr;
+        ping[i].bath = nullptr;
+        ping[i].bathacrosstrack = nullptr;
+        ping[i].bathalongtrack = nullptr;
+        ping[i].bathx = nullptr;
+        ping[i].bathy = nullptr;
         if (error == MB_ERROR_NO_ERROR)
           status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
                                      (void **)&ping[i].beamflag, &error);
@@ -817,11 +818,11 @@ int main(int argc, char **argv) {
           status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&ping[i].bathy,
                                      &error);
       }
-      double *amp = NULL;
-      double *ss = NULL;
-      double *ssacrosstrack = NULL;
-      double *ssalongtrack = NULL;
-      double *list = NULL;
+      double *amp = nullptr;
+      double *ss = nullptr;
+      double *ssacrosstrack = nullptr;
+      double *ssalongtrack = nullptr;
+      double *list = nullptr;
       if (error == MB_ERROR_NO_ERROR)
         status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
       if (error == MB_ERROR_NO_ERROR)
@@ -837,7 +838,7 @@ int main(int argc, char **argv) {
 
       /* if error initializing memory then quit */
       if (error != MB_ERROR_NO_ERROR) {
-        char *message = NULL;
+        char *message = nullptr;
         mb_error(verbose, error, &message);
         fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -852,7 +853,7 @@ int main(int argc, char **argv) {
 
         /* handle esf edits */
         status = mb_esf_load(verbose, program_name, swathfile, true, true, esffile, &esf, &error);
-        if (status == MB_SUCCESS && esf.esffp != NULL)
+        if (status == MB_SUCCESS && esf.esffp != nullptr)
           esffile_open = true;
         if (status == MB_FAILURE && error == MB_ERROR_OPEN_FAIL) {
           esffile_open = false;
@@ -986,7 +987,7 @@ int main(int argc, char **argv) {
 
           /* zap outer beams by number if requested */
           if (zap_beams) {
-            for (int i = 0; i < MIN(zap_beams_left, center); i++) {
+            for (int i = 0; i < std::min(zap_beams_left, center); i++) {
               if (mb_beam_ok(ping[irec].beamflag[i])) {
                 if (verbose >= 1)
                   fprintf(stderr, "x: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f\n", ping[irec].time_i[0],
@@ -1000,7 +1001,7 @@ int main(int argc, char **argv) {
                             i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, MBP_EDIT_FILTER, &error);
               }
             }
-            for (int i = 0; i < MIN(zap_beams_right, center); i++) {
+            for (int i = 0; i < std::min(zap_beams_right, center); i++) {
               int j = ping[irec].beams_bath - i - 1;
               if (mb_beam_ok(ping[irec].beamflag[j])) {
                 if (verbose >= 1)

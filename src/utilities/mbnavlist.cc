@@ -21,20 +21,19 @@
  * Date:	November 11, 1999
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_status.h"
 
-#define MAX_OPTIONS 25
+constexpr int MAX_OPTIONS = 25;
 typedef enum {
     MBNAVLIST_SEGMENT_MODE_NONE = 0,
     MBNAVLIST_SEGMENT_MODE_TAG = 1,
@@ -42,15 +41,13 @@ typedef enum {
     MBNAVLIST_SEGMENT_MODE_DATALIST = 3,
 } segment_mode_t;
 
-double NaN;
-
-static const char program_name[] = "mbnavlist";
-static const char help_message[] =
+constexpr char program_name[] = "mbnavlist";
+constexpr char help_message[] =
     "mbnavlist prints the specified contents of navigation records\n"
     "in a swath sonar data file to stdout. The form of the\n"
     "output is quite flexible; mbnavlist is tailored to produce\n"
     "ascii files in spreadsheet style with data columns separated by tabs.";
-static const char usage_message[] =
+constexpr const char usage_message[] =
     "mbnavlist [-Byr/mo/da/hr/mn/sc -Ddecimate -Eyr/mo/da/hr/mn/sc\n"
     "    -Fformat -Gdelimiter -H -Ifile -Kkind -Llonflip\n"
     "    -Ooptions -Rw/e/s/n -Sspeed\n"
@@ -308,7 +305,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
@@ -361,14 +358,14 @@ int main(int argc, char **argv) {
 	double roll;
 	double pitch;
 	double heave;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 	int atime_i[7 * MB_ASYNCH_SAVE_MAX];
 	double atime_d[MB_ASYNCH_SAVE_MAX];
@@ -405,7 +402,7 @@ int main(int argc, char **argv) {
 
 	/* projected coordinate system */
 	int proj_status;
-	void *pjptr = NULL;
+	void *pjptr = nullptr;
 	double reference_lon;
 	double reference_lat;
 	double naveasting;
@@ -436,7 +433,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* initialize reading the swath file */
-		void *mbio_ptr = NULL;
+		void *mbio_ptr = nullptr;
 		if (mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
 			char *message;
@@ -608,7 +605,7 @@ int main(int argc, char **argv) {
 					/* get projected navigation if needed */
 					if (use_projection) {
 						/* set up projection if this is the first data */
-						if (pjptr == NULL) {
+						if (pjptr == nullptr) {
 							/* Default projection is UTM */
 							if (strlen(projection_pars) == 0)
 								strcpy(projection_pars, "U");

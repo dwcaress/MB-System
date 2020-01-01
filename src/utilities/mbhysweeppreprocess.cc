@@ -22,12 +22,11 @@
  * Date:	January 1, 2012
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -39,7 +38,7 @@
 #include "mb_status.h"
 #include "mbsys_hysweep.h"
 
-const int MBHYSWEEPPREPROCESS_ALLOC_CHUNK = 1000;
+constexpr int MBHYSWEEPPREPROCESS_ALLOC_CHUNK = 1000;
 
 typedef enum {
     MBHYSWEEPPREPROCESS_PROCESS = 1,
@@ -59,18 +58,18 @@ typedef enum {
     MBHYSWEEPPREPROCESS_SONAR_OFFSET_NAVIGATION = 3,
 } sonar_offset_t;
 
-const int MBHYSWEEPPREPROCESS_OFFSET_MAX = 12;
+constexpr int MBHYSWEEPPREPROCESS_OFFSET_MAX = 12;
 
-// static const int MBHYSWEEPPREPROCESS_NAVFORMAT_NONE = 0;
-static const int MBHYSWEEPPREPROCESS_NAVFORMAT_OFG = 1;
+// constexpr int MBHYSWEEPPREPROCESS_NAVFORMAT_NONE = 0;
+constexpr int MBHYSWEEPPREPROCESS_NAVFORMAT_OFG = 1;
 
-static const char program_name[] = "mbhysweeppreprocess";
-static const char help_message[] =
+constexpr char program_name[] = "mbhysweeppreprocess";
+constexpr char help_message[] =
     "mbhysweeppreprocess reads a Hysweep HSX format file, interpolates the\n"
     "asynchronous navigation and attitude onto the multibeam data,\n"
     "and writes a new HSX file with that information correctly embedded\n"
     "in the multibeam data.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbhysweeppreprocess [-Aoffsettype/x/y/z/t -Brollbias/pitchbias/headingbias -Dsonardepthfile "
     "-Idatalist -Jprojection -L -Mnavformat -Nnavfile -Ttimelag -H -V]";
 
@@ -117,15 +116,15 @@ int main(int argc, char **argv) {
 	/* platform definition file */
 	char platform_file[MB_PATH_MAXLINE] = "";
 	bool use_platform_file = false;
-	struct mb_platform_struct *platform = NULL;
+	struct mb_platform_struct *platform = nullptr;
 
 	/* MBIO read values */
-	void *imbio_ptr = NULL;
-	struct mb_io_struct *imb_io_ptr = NULL;
-	void *istore_ptr = NULL;
-	struct mbsys_hysweep_struct *istore = NULL;
+	void *imbio_ptr = nullptr;
+	struct mb_io_struct *imb_io_ptr = nullptr;
+	void *istore_ptr = nullptr;
+	struct mbsys_hysweep_struct *istore = nullptr;
 	struct mbsys_hysweep_device_struct *device;
-	void *ombio_ptr = NULL;
+	void *ombio_ptr = nullptr;
 	int kind;
 	int time_i[7];
 	double time_d;
@@ -139,14 +138,14 @@ int main(int argc, char **argv) {
 	double roll, beamroll;
 	double pitch, beampitch;
 	double heave;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* program mode */
@@ -173,55 +172,55 @@ int main(int argc, char **argv) {
 	/* projection */
 	bool projection_set = false;
 	mb_path proj4command = "";
-	void *pjptr = NULL;
+	void *pjptr = nullptr;
 
 	/* merge navigation data file */
 	char navfile[MB_PATH_MAXLINE] = "";
 	bool navdata = false;
 	int navformat = MBHYSWEEPPREPROCESS_NAVFORMAT_OFG;
 	int nnav = 0;
-	double *nav_time_d = NULL;
-	double *nav_lon = NULL;
-	double *nav_lat = NULL;
-	double *nav_heading = NULL;
-	double *nav_sonardepth = NULL;
-	double *nav_altitude = NULL;
+	double *nav_time_d = nullptr;
+	double *nav_lon = nullptr;
+	double *nav_lat = nullptr;
+	double *nav_heading = nullptr;
+	double *nav_sonardepth = nullptr;
+	double *nav_altitude = nullptr;
 
 	/* merge sonardepth from separate data file */
 	char sonardepthfile[MB_PATH_MAXLINE] = "";
 	bool sonardepthdata = false;
 	int nsonardepth = 0;
-	double *sonardepth_time_d = NULL;
-	double *sonardepth_sonardepth = NULL;
+	double *sonardepth_time_d = nullptr;
+	double *sonardepth_sonardepth = nullptr;
 
 	/* asynchronous navigation, heading, attitude data */
 	int ndat_nav = 0;
 	int ndat_nav_alloc = 0;
-	double *dat_nav_time_d = NULL;
-	double *dat_nav_lon = NULL;
-	double *dat_nav_lat = NULL;
+	double *dat_nav_time_d = nullptr;
+	double *dat_nav_lon = nullptr;
+	double *dat_nav_lat = nullptr;
 
 	int ndat_sonardepth = 0;
 	int ndat_sonardepth_alloc = 0;
-	double *dat_sonardepth_time_d = NULL;
-	double *dat_sonardepth_sonardepth = NULL;
+	double *dat_sonardepth_time_d = nullptr;
+	double *dat_sonardepth_sonardepth = nullptr;
 
 	int ndat_heading = 0;
 	int ndat_heading_alloc = 0;
-	double *dat_heading_time_d = NULL;
-	double *dat_heading_heading = NULL;
+	double *dat_heading_time_d = nullptr;
+	double *dat_heading_heading = nullptr;
 
 	int ndat_rph = 0;
 	int ndat_rph_alloc = 0;
-	double *dat_rph_time_d = NULL;
-	double *dat_rph_roll = NULL;
-	double *dat_rph_pitch = NULL;
-	double *dat_rph_heave = NULL;
+	double *dat_rph_time_d = nullptr;
+	double *dat_rph_roll = nullptr;
+	double *dat_rph_pitch = nullptr;
+	double *dat_rph_heave = nullptr;
 
 	int ndat_altitude = 0;
 	int ndat_altitude_alloc = 0;
-	double *dat_altitude_time_d = NULL;
-	double *dat_altitude_altitude = NULL;
+	double *dat_altitude_time_d = nullptr;
+	double *dat_altitude_altitude = nullptr;
 
 	/* timelag parameters */
 	timelag_t timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_OFF;
@@ -230,8 +229,8 @@ int main(int argc, char **argv) {
 	double timelagconstant = 0.0;
 	char timelagfile[MB_PATH_MAXLINE] = "";
 	int ntimelag = 0;
-	// double *timelag_time_d = NULL;
-	// double *timelag_model = NULL;
+	// double *timelag_time_d = nullptr;
+	// double *timelag_model = nullptr;
 
 	/* sensor offset parameters */
 	bool offset_sonar_mode = false;
@@ -268,7 +267,7 @@ int main(int argc, char **argv) {
 	int interp_status;
 	double alpha, beta, theta, phi;
 
-	FILE *tfp = NULL;
+	FILE *tfp = nullptr;
 	struct stat file_status;
 	char buffer[MB_PATH_MAXLINE] = "";
 	int nscan;
@@ -510,7 +509,7 @@ int main(int argc, char **argv) {
 	/* read navigation data from file if specified */
 	if (navdata) {
 		/* count the data points in the nav file */
-		if ((tfp = fopen(navfile, "r")) == NULL) {
+		if ((tfp = fopen(navfile, "r")) == nullptr) {
 			fprintf(stderr, "\nUnable to open nav data file <%s> for reading\n", navfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -519,7 +518,7 @@ int main(int argc, char **argv) {
 		/* count the data records
 		    then rewind the file to the start */
 		nnav = 0;
-		while (fgets(buffer, MB_PATH_MAXLINE, tfp) != NULL) {
+		while (fgets(buffer, MB_PATH_MAXLINE, tfp) != nullptr) {
 			nnav++;
 		}
 		rewind(tfp);
@@ -555,7 +554,7 @@ int main(int argc, char **argv) {
 
 		/* read the data points in the nav file */
 		nnav = 0;
-		while (fgets(buffer, MB_PATH_MAXLINE, tfp) != NULL) {
+		while (fgets(buffer, MB_PATH_MAXLINE, tfp) != nullptr) {
 			if (buffer[0] != '#' && buffer[0] != 'O') {
 				nscan = sscanf(buffer, "%d:%d:%d:%d:%d:%lf %lf %lf %lf %lf %lf %lf", &year, &month, &day, &hour, &minute, &second,
 				               &yearsecond, &northing, &easting, &sonardepth, &altitude, &heading);
@@ -598,7 +597,7 @@ int main(int argc, char **argv) {
 	/* read sonardepth data from separate file if specified */
 	if (sonardepthdata) {
 		/* count the data points in the sonardepth file */
-		if ((tfp = fopen(sonardepthfile, "r")) == NULL) {
+		if ((tfp = fopen(sonardepthfile, "r")) == nullptr) {
 			fprintf(stderr, "\nUnable to open sonardepth data file <%s> for reading\n", sonardepthfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -606,7 +605,7 @@ int main(int argc, char **argv) {
 
 		/* count the data records then rewind the file to the start of the binary data */
 		nsonardepth = 0;
-		while (fgets(buffer, MB_PATH_MAXLINE, tfp) != NULL) {
+		while (fgets(buffer, MB_PATH_MAXLINE, tfp) != nullptr) {
 			nsonardepth++;
 		}
 		rewind(tfp);
@@ -635,7 +634,7 @@ int main(int argc, char **argv) {
 
 		/* read the data points in the separate file */
 		nsonardepth = 0;
-		while (fgets(buffer, MB_PATH_MAXLINE, tfp) != NULL) {
+		while (fgets(buffer, MB_PATH_MAXLINE, tfp) != nullptr) {
 			if (buffer[0] != '#' && buffer[0] != 'O') {
 				nscan = sscanf(buffer, "%d:%d:%d:%d:%d:%lf %lf", &year, &month, &day, &hour, &minute, &second, &sonardepth);
 				if (nscan == 7) {
@@ -658,14 +657,14 @@ int main(int argc, char **argv) {
 		fclose(tfp);
 	}
 
-	double *timelag_time_d = NULL;
-	double *timelag_model = NULL;
+	double *timelag_time_d = nullptr;
+	double *timelag_model = nullptr;
 
 	/* get time lag model if specified */
 	if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL) {
 		/* count the data points in the timelag file */
 		ntimelag = 0;
-		if ((tfp = fopen(timelagfile, "r")) == NULL) {
+		if ((tfp = fopen(timelagfile, "r")) == nullptr) {
 			fprintf(stderr, "\nUnable to open time lag model File <%s> for reading\n", timelagfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
@@ -724,8 +723,8 @@ int main(int argc, char **argv) {
 		/* set sensor 0 (multibeam)
 		        for a single first offsets are for transmit array, second for receive array */
 		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_SONAR_MULTIBEAM, NULL,
-			                                "Multibeam data recorded by Hysweep", NULL, MB_SENSOR_CAPABILITY1_NONE,
+			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_SONAR_MULTIBEAM, nullptr,
+			                                "Multibeam data recorded by Hysweep", nullptr, MB_SENSOR_CAPABILITY1_NONE,
 			                                MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM, 2, 0, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 0, offset_sonar_mode, offset_sonar_x,
@@ -738,7 +737,7 @@ int main(int argc, char **argv) {
 
 		/* set sensor 1 (position sensor) */
 		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_POSITION, NULL, NULL, NULL, 0, 0, 1,
+			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_POSITION, nullptr, nullptr, nullptr, 0, 0, 1,
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0, offset_nav_mode, offset_nav_x, offset_nav_y,
@@ -749,7 +748,7 @@ int main(int argc, char **argv) {
 
 		/* set sensor 2 (heading sensor) */
 		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_COMPASS, NULL, NULL, NULL, 0, 0, 1,
+			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_COMPASS, nullptr, nullptr, nullptr, 0, 0, 1,
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0, offset_mru_mode, offset_mru_x, offset_mru_y,
@@ -760,7 +759,7 @@ int main(int argc, char **argv) {
 
 		/* set sensor 3 (rollpitch sensor) */
 		if (status == MB_SUCCESS)
-			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_VRU, NULL, NULL, NULL, 0, 0, 1, ntimelag,
+			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_VRU, nullptr, nullptr, nullptr, 0, 0, 1, ntimelag,
 			                                &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 3, 0, offset_mru_mode, offset_mru_x, offset_mru_y,
@@ -828,7 +827,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
@@ -884,14 +883,14 @@ int main(int argc, char **argv) {
 		}
 
 		if (error == MB_ERROR_NO_ERROR) {
-			beamflag = NULL;
-			bath = NULL;
-			amp = NULL;
-			bathacrosstrack = NULL;
-			bathalongtrack = NULL;
-			ss = NULL;
-			ssacrosstrack = NULL;
-			ssalongtrack = NULL;
+			beamflag = nullptr;
+			bath = nullptr;
+			amp = nullptr;
+			bathacrosstrack = nullptr;
+			bathalongtrack = nullptr;
+			ss = nullptr;
+			ssacrosstrack = nullptr;
+			ssalongtrack = nullptr;
 		}
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
@@ -949,7 +948,7 @@ int main(int argc, char **argv) {
 
 			/* if not platform defined and if platform_source kind then
 			    extract platform definition */
-			if (platform == NULL && error <= MB_ERROR_NO_ERROR && kind == platform_source && platform_source != MB_DATA_NONE) {
+			if (platform == nullptr && error <= MB_ERROR_NO_ERROR && kind == platform_source && platform_source != MB_DATA_NONE) {
 				/* extract platform */
 				status = mb_extract_platform(verbose, imbio_ptr, istore_ptr, &kind, (void **)&platform, &error);
 
@@ -1517,14 +1516,14 @@ int main(int argc, char **argv) {
 			}
 
 			if (error == MB_ERROR_NO_ERROR) {
-				beamflag = NULL;
-				bath = NULL;
-				amp = NULL;
-				bathacrosstrack = NULL;
-				bathalongtrack = NULL;
-				ss = NULL;
-				ssacrosstrack = NULL;
-				ssalongtrack = NULL;
+				beamflag = nullptr;
+				bath = nullptr;
+				amp = nullptr;
+				bathacrosstrack = nullptr;
+				bathalongtrack = nullptr;
+				ss = nullptr;
+				ssacrosstrack = nullptr;
+				ssalongtrack = nullptr;
 			}
 			if (error == MB_ERROR_NO_ERROR)
 				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
@@ -1733,7 +1732,7 @@ int main(int argc, char **argv) {
 						heave = 0.0;
 					}
 
-					if (platform != NULL) {
+					if (platform != nullptr) {
 						status = mb_platform_position(verbose, (void *)platform, platform->source_bathymetry, 0, navlon, navlat,
 						                              sonardepth, heading, roll, pitch, &navlon, &navlat, &sonardepth, &error);
 					}
@@ -1768,7 +1767,7 @@ int main(int argc, char **argv) {
 					/* deal with case of multibeam sonar - recalculate bathymetry if possible */
 					if (istore->RMB_beam_data_available & 0x0001) {
 						/* get transducer angular offsets */
-						if (platform != NULL) {
+						if (platform != nullptr) {
 							status &=
 							    mb_platform_orientation_offset(verbose, (void *)platform, platform->source_bathymetry, 0,
 							                                   &(tx_align.heading), &(tx_align.roll), &(tx_align.pitch), &error);

@@ -20,16 +20,17 @@
  * Date:	April 21, 2014
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <stdbool.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <time.h>
 #include <unistd.h>
+
+#include <algorithm>
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -38,66 +39,66 @@
 #include "mb_status.h"
 #include "mbsys_ldeoih.h"
 
-#define MBSSLAYOUT_ALLOC_CHUNK 1024
-#define MBSSLAYOUT_ALLOC_NUM 128
+constexpr int MBSSLAYOUT_ALLOC_CHUNK = 1024;
+constexpr int MBSSLAYOUT_ALLOC_NUM = 128;
 
-const int MBSSLAYOUT_LINE_OFF = 0;
-const int MBSSLAYOUT_LINE_TIME = 1;
-const int MBSSLAYOUT_LINE_ROUTE = 2;
+constexpr int MBSSLAYOUT_LINE_OFF = 0;
+constexpr int MBSSLAYOUT_LINE_TIME = 1;
+constexpr int MBSSLAYOUT_LINE_ROUTE = 2;
 
-const int MBSSLAYOUT_LAYOUT_FLATBOTTOM = 0;
-const int MBSSLAYOUT_LAYOUT_3DTOPO = 1;
+constexpr int MBSSLAYOUT_LAYOUT_FLATBOTTOM = 0;
+constexpr int MBSSLAYOUT_LAYOUT_3DTOPO = 1;
 
-const int MBSSLAYOUT_ALTITUDE_ALTITUDE = 0;
-const int MBSSLAYOUT_ALTITUDE_BOTTOMPICK = 1;
-const int MBSSLAYOUT_ALTITUDE_TOPO_GRID = 2;
+constexpr int MBSSLAYOUT_ALTITUDE_ALTITUDE = 0;
+constexpr int MBSSLAYOUT_ALTITUDE_BOTTOMPICK = 1;
+constexpr int MBSSLAYOUT_ALTITUDE_TOPO_GRID = 2;
 
-const int MBSSLAYOUT_GAIN_OFF = 0;
-const int MBSSLAYOUT_GAIN_TVG = 1;
+constexpr int MBSSLAYOUT_GAIN_OFF = 0;
+constexpr int MBSSLAYOUT_GAIN_TVG = 1;
 
-const int MBSSLAYOUT_SWATHWIDTH_VARIABLE = 0;
-const int MBSSLAYOUT_SWATHWIDTH_CONSTANT = 1;
+constexpr int MBSSLAYOUT_SWATHWIDTH_VARIABLE = 0;
+constexpr int MBSSLAYOUT_SWATHWIDTH_CONSTANT = 1;
 
-const int MBSSLAYOUT_MERGE_OFF = 0;
-const int MBSSLAYOUT_MERGE_FILE = 1;
-const int MBSSLAYOUT_MERGE_ASYNC = 2;
+constexpr int MBSSLAYOUT_MERGE_OFF = 0;
+constexpr int MBSSLAYOUT_MERGE_FILE = 1;
+constexpr int MBSSLAYOUT_MERGE_ASYNC = 2;
 
-const int MBSSLAYOUT_TIME_LATENCY_OFF = 0;
-const int MBSSLAYOUT_TIME_LATENCY_FILE = 1;
-const int MBSSLAYOUT_TIME_LATENCY_CONSTANT = 2;
+constexpr int MBSSLAYOUT_TIME_LATENCY_OFF = 0;
+constexpr int MBSSLAYOUT_TIME_LATENCY_FILE = 1;
+constexpr int MBSSLAYOUT_TIME_LATENCY_CONSTANT = 2;
 
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_NONE = 0x00;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_NAV = 0x01;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SENSORDEPTH = 0x02;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALTITUDE = 0x04;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_HEADING = 0x08;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ATTITUDE = 0x10;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SOUNDSPEED = 0x20;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_UNUSED = 0x40;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALL_ANCILLIARY = 0x7F;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SURVEY = 0x80;
-const mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALL = 0xFF;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_NONE = 0x00;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_NAV = 0x01;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SENSORDEPTH = 0x02;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALTITUDE = 0x04;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_HEADING = 0x08;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ATTITUDE = 0x10;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SOUNDSPEED = 0x20;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_UNUSED = 0x40;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALL_ANCILLIARY = 0x7F;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_SURVEY = 0x80;
+constexpr mb_u_char MBSSLAYOUT_TIME_LATENCY_APPLY_ALL = 0xFF;
 
-const int MBSSLAYOUT_ROUTE_WAYPOINT_NONE = 0;
-const int MBSSLAYOUT_ROUTE_WAYPOINT_SIMPLE = 1;
-const int MBSSLAYOUT_ROUTE_WAYPOINT_TRANSIT = 2;
-const int MBSSLAYOUT_ROUTE_WAYPOINT_STARTLINE = 3;
-const int MBSSLAYOUT_ROUTE_WAYPOINT_ENDLINE = 4;
+constexpr int MBSSLAYOUT_ROUTE_WAYPOINT_NONE = 0;
+constexpr int MBSSLAYOUT_ROUTE_WAYPOINT_SIMPLE = 1;
+constexpr int MBSSLAYOUT_ROUTE_WAYPOINT_TRANSIT = 2;
+constexpr int MBSSLAYOUT_ROUTE_WAYPOINT_STARTLINE = 3;
+constexpr int MBSSLAYOUT_ROUTE_WAYPOINT_ENDLINE = 4;
 
 // #define MBSSLAYOUT_ONLINE_THRESHOLD 15.0
 // #define MBSSLAYOUT_ONLINE_COUNT 30
 
-#define MBSSLAYOUT_SSDIMENSION 4001
+constexpr int MBSSLAYOUT_SSDIMENSION = 4001;
 
-#define MBSSLAYOUT_NUM_ANGLES 171
-const double MBSSLAYOUT_ANGLE_MAX = 85.0;
+constexpr int MBSSLAYOUT_NUM_ANGLES = 171;
+constexpr double MBSSLAYOUT_ANGLE_MAX = 85.0;
 
-static const char program_name[] = "mbsslayout";
-static const char help_message[] =
+constexpr char program_name[] = "mbsslayout";
+constexpr char help_message[] =
     "MBsslayout reads sidescan in raw time series form, lays the sidescan\n"
     "out regularly sampled on a specified topography model, and outputs\n"
     "the sidescan to format 71 (MBF_MBLDEOIH) files.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbsslayout [--verbose --help --input=datalist --format=format";
 
 /*--------------------------------------------------------------------*/
@@ -172,60 +173,60 @@ int main(int argc, char **argv) {
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* command line option definitions */
-	static struct option options[] = {{"verbose", no_argument, NULL, 0},
-	                                  {"help", no_argument, NULL, 0},
-	                                  {"verbose", no_argument, NULL, 0},
-	                                  {"input", required_argument, NULL, 0},
-	                                  {"format", required_argument, NULL, 0},
-	                                  {"platform-file", required_argument, NULL, 0},
-	                                  {"platform-target-sensor", required_argument, NULL, 0},
-	                                  {"output-source", required_argument, NULL, 0},
-	                                  {"line-time-list", required_argument, NULL, 0},
-	                                  {"line-position-list", required_argument, NULL, 0},
-	                                  {"line-range-threshold", required_argument, NULL, 0},
-	                                  {"line-name1", required_argument, NULL, 0},
-	                                  {"line-name2", required_argument, NULL, 0},
-	                                  {"output-name1", required_argument, NULL, 0},
-	                                  {"output-name2", required_argument, NULL, 0},
-	                                  {"topo-grid-file", required_argument, NULL, 0},
-	                                  {"altitude-altitude", no_argument, NULL, 0},
-	                                  {"altitude-bottompick", no_argument, NULL, 0},
-	                                  {"altitude-topo-grid", no_argument, NULL, 0},
-	                                  {"altitude-bottompick-threshold", required_argument, NULL, 0},
-	                                  {"channel-swap", required_argument, NULL, 0},
-	                                  {"swath-width", required_argument, NULL, 0},
-	                                  {"gain", required_argument, NULL, 0},
-	                                  {"interpolation", required_argument, NULL, 0},
-	                                  {"nav-file", required_argument, NULL, 0},
-	                                  {"nav-file-format", required_argument, NULL, 0},
-	                                  {"nav-async", required_argument, NULL, 0},
-	                                  {"sensordepth-file", required_argument, NULL, 0},
-	                                  {"sensordepth-file-format", required_argument, NULL, 0},
-	                                  {"sensordepth-async", required_argument, NULL, 0},
-	                                  {"altitude-file", required_argument, NULL, 0},
-	                                  {"altitude-file-format", required_argument, NULL, 0},
-	                                  {"altitude-async", required_argument, NULL, 0},
-	                                  {"heading-file", required_argument, NULL, 0},
-	                                  {"heading-file-format", required_argument, NULL, 0},
-	                                  {"heading-async", required_argument, NULL, 0},
-	                                  {"attitude-file", required_argument, NULL, 0},
-	                                  {"attitude-file-format", required_argument, NULL, 0},
-	                                  {"attitude-async", required_argument, NULL, 0},
-	                                  {"soundspeed-constant", required_argument, NULL, 0},
-	                                  {"soundspeed-file", required_argument, NULL, 0},
-	                                  {"soundspeed-file-format", required_argument, NULL, 0},
-	                                  {"soundspeed-async", required_argument, NULL, 0},
-	                                  {"time-latency-file", required_argument, NULL, 0},
-	                                  {"time-latency-constant", required_argument, NULL, 0},
-	                                  {"time-latency-apply-nav", no_argument, NULL, 0},
-	                                  {"time-latency-apply-sensordepth", no_argument, NULL, 0},
-	                                  {"time-latency-apply-altitude", no_argument, NULL, 0},
-	                                  {"time-latency-apply-heading", no_argument, NULL, 0},
-	                                  {"time-latency-apply-attitude", no_argument, NULL, 0},
-	                                  {"time-latency-apply-all-ancilliary", no_argument, NULL, 0},
-	                                  {"time-latency-apply-survey", no_argument, NULL, 0},
-	                                  {"time-latency-apply-all", no_argument, NULL, 0},
-	                                  {NULL, 0, NULL, 0}};
+	static struct option options[] = {{"verbose", no_argument, nullptr, 0},
+	                                  {"help", no_argument, nullptr, 0},
+	                                  {"verbose", no_argument, nullptr, 0},
+	                                  {"input", required_argument, nullptr, 0},
+	                                  {"format", required_argument, nullptr, 0},
+	                                  {"platform-file", required_argument, nullptr, 0},
+	                                  {"platform-target-sensor", required_argument, nullptr, 0},
+	                                  {"output-source", required_argument, nullptr, 0},
+	                                  {"line-time-list", required_argument, nullptr, 0},
+	                                  {"line-position-list", required_argument, nullptr, 0},
+	                                  {"line-range-threshold", required_argument, nullptr, 0},
+	                                  {"line-name1", required_argument, nullptr, 0},
+	                                  {"line-name2", required_argument, nullptr, 0},
+	                                  {"output-name1", required_argument, nullptr, 0},
+	                                  {"output-name2", required_argument, nullptr, 0},
+	                                  {"topo-grid-file", required_argument, nullptr, 0},
+	                                  {"altitude-altitude", no_argument, nullptr, 0},
+	                                  {"altitude-bottompick", no_argument, nullptr, 0},
+	                                  {"altitude-topo-grid", no_argument, nullptr, 0},
+	                                  {"altitude-bottompick-threshold", required_argument, nullptr, 0},
+	                                  {"channel-swap", required_argument, nullptr, 0},
+	                                  {"swath-width", required_argument, nullptr, 0},
+	                                  {"gain", required_argument, nullptr, 0},
+	                                  {"interpolation", required_argument, nullptr, 0},
+	                                  {"nav-file", required_argument, nullptr, 0},
+	                                  {"nav-file-format", required_argument, nullptr, 0},
+	                                  {"nav-async", required_argument, nullptr, 0},
+	                                  {"sensordepth-file", required_argument, nullptr, 0},
+	                                  {"sensordepth-file-format", required_argument, nullptr, 0},
+	                                  {"sensordepth-async", required_argument, nullptr, 0},
+	                                  {"altitude-file", required_argument, nullptr, 0},
+	                                  {"altitude-file-format", required_argument, nullptr, 0},
+	                                  {"altitude-async", required_argument, nullptr, 0},
+	                                  {"heading-file", required_argument, nullptr, 0},
+	                                  {"heading-file-format", required_argument, nullptr, 0},
+	                                  {"heading-async", required_argument, nullptr, 0},
+	                                  {"attitude-file", required_argument, nullptr, 0},
+	                                  {"attitude-file-format", required_argument, nullptr, 0},
+	                                  {"attitude-async", required_argument, nullptr, 0},
+	                                  {"soundspeed-constant", required_argument, nullptr, 0},
+	                                  {"soundspeed-file", required_argument, nullptr, 0},
+	                                  {"soundspeed-file-format", required_argument, nullptr, 0},
+	                                  {"soundspeed-async", required_argument, nullptr, 0},
+	                                  {"time-latency-file", required_argument, nullptr, 0},
+	                                  {"time-latency-constant", required_argument, nullptr, 0},
+	                                  {"time-latency-apply-nav", no_argument, nullptr, 0},
+	                                  {"time-latency-apply-sensordepth", no_argument, nullptr, 0},
+	                                  {"time-latency-apply-altitude", no_argument, nullptr, 0},
+	                                  {"time-latency-apply-heading", no_argument, nullptr, 0},
+	                                  {"time-latency-apply-attitude", no_argument, nullptr, 0},
+	                                  {"time-latency-apply-all-ancilliary", no_argument, nullptr, 0},
+	                                  {"time-latency-apply-survey", no_argument, nullptr, 0},
+	                                  {"time-latency-apply-all", no_argument, nullptr, 0},
+	                                  {nullptr, 0, nullptr, 0}};
 
 	mb_path read_file = "datalist.mb-1";
 	mb_path platform_file = "";
@@ -858,11 +859,11 @@ int main(int argc, char **argv) {
 	/* load platform definition if specified */
 
 	/* platform definition file */
-	struct mb_platform_struct *platform = NULL;
-	struct mb_sensor_struct *sensor_position = NULL;
-	struct mb_sensor_struct *sensor_depth = NULL;
-	struct mb_sensor_struct *sensor_heading = NULL;
-	struct mb_sensor_struct *sensor_rollpitch = NULL;
+	struct mb_platform_struct *platform = nullptr;
+	struct mb_sensor_struct *sensor_position = nullptr;
+	struct mb_sensor_struct *sensor_depth = nullptr;
+	struct mb_sensor_struct *sensor_heading = nullptr;
+	struct mb_sensor_struct *sensor_rollpitch = nullptr;
 
 	if (use_platform_file) {
 		status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
@@ -885,10 +886,10 @@ int main(int argc, char **argv) {
 		}
 
 		/* get sensor structures */
-		// struct mb_sensor_struct *sensor_bathymetry = NULL;
+		// struct mb_sensor_struct *sensor_bathymetry = nullptr;
 		// if (platform->source_bathymetry >= 0)
 		//	sensor_bathymetry = &(platform->sensors[platform->source_bathymetry]);
-		// struct mb_sensor_struct *sensor_backscatter = NULL;
+		// struct mb_sensor_struct *sensor_backscatter = nullptr;
 		// if (platform->source_backscatter >= 0)
 		//	sensor_backscatter = &(platform->sensors[platform->source_backscatter]);
 		if (platform->source_position >= 0)
@@ -899,17 +900,17 @@ int main(int argc, char **argv) {
 			sensor_heading = &(platform->sensors[platform->source_heading]);
 		if (platform->source_rollpitch >= 0)
 			sensor_rollpitch = &(platform->sensors[platform->source_rollpitch]);
-		// struct mb_sensor_struct *sensor_heave = NULL;
+		// struct mb_sensor_struct *sensor_heave = nullptr;
 		// if (platform->source_heave >= 0)
 		//	sensor_heave = &(platform->sensors[platform->source_heave]);
 		if (target_sensor < 0)
 			target_sensor = platform->source_bathymetry;
-		// struct mb_sensor_struct *sensor_target = NULL;
+		// struct mb_sensor_struct *sensor_target = nullptr;
 		// if (target_sensor >= 0)
 		//	sensor_target = &(platform->sensors[target_sensor]);
 	}
 
-	void *topogrid_ptr = NULL;
+	void *topogrid_ptr = nullptr;
 
 	/* read topography grid if 3D bottom correction specified */
 	if (layout_mode == MBSSLAYOUT_LAYOUT_3DTOPO) {
@@ -929,8 +930,8 @@ int main(int argc, char **argv) {
 
 	int time_latency_num = 0;
 	int time_latency_alloc = 0;
-	double *time_latency_time_d = NULL;
-	double *time_latency_time_latency = NULL;
+	double *time_latency_time_d = nullptr;
+	double *time_latency_time_latency = nullptr;
 
 	/* start by loading time latency model if required */
 	if (time_latency_mode == MB_SENSOR_TIME_LATENCY_MODEL) {
@@ -946,10 +947,10 @@ int main(int argc, char **argv) {
 	/* asynchronous navigation, heading, attitude data */
 	int n_nav = 0;
 	int n_nav_alloc = 0;
-	double *nav_time_d = NULL;
-	double *nav_navlon = NULL;
-	double *nav_navlat = NULL;
-	double *nav_speed = NULL;
+	double *nav_time_d = nullptr;
+	double *nav_navlon = nullptr;
+	double *nav_navlat = nullptr;
+	double *nav_speed = nullptr;
 
 	if (nav_mode == MBSSLAYOUT_MERGE_FILE) {
 		mb_loadnavdata(verbose, nav_file, nav_file_format, lonflip, &n_nav, &n_nav_alloc, &nav_time_d, &nav_navlon, &nav_navlat,
@@ -961,8 +962,8 @@ int main(int argc, char **argv) {
 
 	int n_sensordepth = 0;
 	int n_sensordepth_alloc = 0;
-	double *sensordepth_time_d = NULL;
-	double *sensordepth_sensordepth = NULL;
+	double *sensordepth_time_d = nullptr;
+	double *sensordepth_sensordepth = nullptr;
 
 	if (sensordepth_mode == MBSSLAYOUT_MERGE_FILE) {
 		mb_loadsensordepthdata(verbose, sensordepth_file, sensordepth_file_format, &n_sensordepth, &n_sensordepth_alloc,
@@ -974,8 +975,8 @@ int main(int argc, char **argv) {
 
 	int n_heading = 0;
 	int n_heading_alloc = 0;
-	double *heading_time_d = NULL;
-	double *heading_heading = NULL;
+	double *heading_time_d = nullptr;
+	double *heading_heading = nullptr;
 
 	if (heading_mode == MBSSLAYOUT_MERGE_FILE) {
 		mb_loadheadingdata(verbose, heading_file, heading_file_format, &n_heading, &n_heading_alloc, &heading_time_d,
@@ -987,8 +988,8 @@ int main(int argc, char **argv) {
 
 	int n_altitude = 0;
 	int n_altitude_alloc = 0;
-	double *altitude_time_d = NULL;
-	double *altitude_altitude = NULL;
+	double *altitude_time_d = nullptr;
+	double *altitude_altitude = nullptr;
 
 	if (altitude_mode == MBSSLAYOUT_MERGE_FILE) {
 		mb_loadaltitudedata(verbose, altitude_file, altitude_file_format, &n_altitude, &n_altitude_alloc, &altitude_time_d,
@@ -1000,10 +1001,10 @@ int main(int argc, char **argv) {
 
 	int n_attitude = 0;
 	int n_attitude_alloc = 0;
-	double *attitude_time_d = NULL;
-	double *attitude_roll = NULL;
-	double *attitude_pitch = NULL;
-	double *attitude_heave = NULL;
+	double *attitude_time_d = nullptr;
+	double *attitude_roll = nullptr;
+	double *attitude_pitch = nullptr;
+	double *attitude_heave = nullptr;
 
 	if (attitude_mode == MBSSLAYOUT_MERGE_FILE) {
 		mb_loadattitudedata(verbose, attitude_file, attitude_file_format, &n_attitude, &n_attitude_alloc, &attitude_time_d,
@@ -1015,8 +1016,8 @@ int main(int argc, char **argv) {
 
 	int n_soundspeed = 0;
 	int n_soundspeed_alloc = 0;
-	double *soundspeed_time_d = NULL;
-	double *soundspeed_soundspeed = NULL;
+	double *soundspeed_time_d = nullptr;
+	double *soundspeed_soundspeed = nullptr;
 
 	if (soundspeed_mode == MBSSLAYOUT_MERGE_FILE) {
 		mb_loadsoundspeeddata(verbose, soundspeed_file, soundspeed_file_format, &n_soundspeed, &n_soundspeed_alloc,
@@ -1038,11 +1039,11 @@ int main(int argc, char **argv) {
 	double heading;
 	double time_d;
 	int ntimepoint = 0;
-	double *routelon = NULL;
-	double *routelat = NULL;
-	double *routeheading = NULL;
-	int *routewaypoint = NULL;
-	double *routetime_d = NULL;
+	double *routelon = nullptr;
+	double *routelat = nullptr;
+	double *routeheading = nullptr;
+	int *routewaypoint = nullptr;
+	double *routetime_d = nullptr;
 	int activewaypoint = -1;
 	double mtodeglon;
 	double mtodeglat;
@@ -1059,7 +1060,7 @@ int main(int argc, char **argv) {
 	if (line_mode == MBSSLAYOUT_LINE_TIME) {
 		/* open the input file */
 		FILE *fp = fopen(line_time_list, "r");
-		if (fp == NULL) {
+		if (fp == nullptr) {
 			error = MB_ERROR_OPEN_FAIL;
 			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open time list file <%s> for reading\n", line_time_list);
@@ -1067,7 +1068,7 @@ int main(int argc, char **argv) {
 		}
 		// bool rawroutefile = false;
 		int ntimepointalloc = 0;
-		char *result = NULL;
+		char *result = nullptr;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] != '#') {
 				int i;
@@ -1109,7 +1110,7 @@ int main(int argc, char **argv) {
 		}
 
 		fclose(fp);
-		fp = NULL;
+		fp = nullptr;
 
 		activewaypoint = 1;
 		mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
@@ -1128,14 +1129,14 @@ int main(int argc, char **argv) {
 	else if (line_mode == MBSSLAYOUT_LINE_ROUTE) {
 		/* open the input file */
 		FILE *fp = fopen(line_route, "r");
-		if (fp == NULL) {
+		if (fp == nullptr) {
 			error = MB_ERROR_OPEN_FAIL;
 			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", line_route);
 			exit(status);
 		}
 		bool rawroutefile = false;
-		char *result = NULL;
+		char *result = nullptr;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] == '#') {
 				if (strncmp(comment, "## Route File Version", 21) == 0) {
@@ -1186,7 +1187,7 @@ int main(int argc, char **argv) {
 		}
 
 		fclose(fp);
-		fp = NULL;
+		fp = nullptr;
 
 		/* set starting values */
 		activewaypoint = 1;
@@ -1206,7 +1207,7 @@ int main(int argc, char **argv) {
 	mb_path scriptfile = "";
 	sprintf(scriptfile, "%s_%s_ssswathplot.cmd", line_name1, line_name2);
 	FILE *sfp = fopen(scriptfile, "w");
-	if (sfp == NULL) {
+	if (sfp == nullptr) {
 		error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 		fprintf(stderr, "\nUnable to open plotting script file <%s> \n", scriptfile);
@@ -1217,10 +1218,10 @@ int main(int argc, char **argv) {
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
 		char *user_ptr = getenv("USER");
-		if (user_ptr == NULL)
+		if (user_ptr == nullptr)
 			user_ptr = getenv("LOGNAME");
 		char user[MB_PATH_MAXLINE];
-		if (user_ptr != NULL)
+		if (user_ptr != nullptr)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
@@ -1238,7 +1239,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
@@ -1265,20 +1266,20 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
-	void *imbio_ptr = NULL;
+	void *imbio_ptr = nullptr;
 	double btime_d;
 	double etime_d;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
 
 	/* counts of records read and written */
 	int n_rf_data = 0;
@@ -1291,7 +1292,7 @@ int main(int argc, char **argv) {
 	int n_rf_nav2 = 0;
 	int n_rf_nav3 = 0;
 
-	void *istore_ptr = NULL;
+	void *istore_ptr = nullptr;
 
 	int kind;
 	int time_i[7];
@@ -1353,14 +1354,14 @@ int main(int argc, char **argv) {
 			exit(error);
 		}
 
-		beamflag = NULL;
-		bath = NULL;
-		amp = NULL;
-		bathacrosstrack = NULL;
-		bathalongtrack = NULL;
-		ss = NULL;
-		ssacrosstrack = NULL;
-		ssalongtrack = NULL;
+		beamflag = nullptr;
+		bath = nullptr;
+		amp = nullptr;
+		bathacrosstrack = nullptr;
+		bathalongtrack = nullptr;
+		ss = nullptr;
+		ssacrosstrack = nullptr;
+		ssalongtrack = nullptr;
 		if (error == MB_ERROR_NO_ERROR)
 			/* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
@@ -1469,7 +1470,7 @@ int main(int argc, char **argv) {
 
 				/* allocate memory if needed */
 				if (status == MB_SUCCESS && nanav > 0 && n_nav + nanav >= n_nav_alloc) {
-					n_nav_alloc += MAX(MBSSLAYOUT_ALLOC_CHUNK, nanav);
+					n_nav_alloc += std::max(MBSSLAYOUT_ALLOC_CHUNK, nanav);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_time_d, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlon, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlat, &error);
@@ -1503,7 +1504,7 @@ int main(int argc, char **argv) {
 
 				/* allocate memory if needed */
 				if (status == MB_SUCCESS && nanav > 0 && n_sensordepth + nanav >= n_sensordepth_alloc) {
-					n_sensordepth_alloc += MAX(MBSSLAYOUT_ALLOC_CHUNK, nanav);
+					n_sensordepth_alloc += std::max(MBSSLAYOUT_ALLOC_CHUNK, nanav);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
 					                     (void **)&sensordepth_time_d, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
@@ -1536,7 +1537,7 @@ int main(int argc, char **argv) {
 
 				/* allocate memory if needed */
 				if (status == MB_SUCCESS && n_altitude + 1 >= n_altitude_alloc) {
-					n_altitude_alloc += MAX(MBSSLAYOUT_ALLOC_CHUNK, nanav);
+					n_altitude_alloc += std::max(MBSSLAYOUT_ALLOC_CHUNK, nanav);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
 					                     (void **)&altitude_time_d, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
@@ -1566,7 +1567,7 @@ int main(int argc, char **argv) {
 
 				/* allocate memory if needed */
 				if (status == MB_SUCCESS && nanav > 0 && n_heading + nanav >= n_heading_alloc) {
-					n_heading_alloc += MAX(MBSSLAYOUT_ALLOC_CHUNK, nanav);
+					n_heading_alloc += std::max(MBSSLAYOUT_ALLOC_CHUNK, nanav);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_time_d,
 					                     &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_heading,
@@ -1598,7 +1599,7 @@ int main(int argc, char **argv) {
 
 				/* allocate memory if needed */
 				if (status == MB_SUCCESS && nanav > 0 && n_attitude + nanav >= n_attitude_alloc) {
-					n_attitude_alloc += MAX(MBSSLAYOUT_ALLOC_CHUNK, nanav);
+					n_attitude_alloc += std::max(MBSSLAYOUT_ALLOC_CHUNK, nanav);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double),
 					                     (void **)&attitude_time_d, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_roll,
@@ -1636,7 +1637,7 @@ int main(int argc, char **argv) {
 
 				/* allocate memory if needed */
 				if (status == MB_SUCCESS && nactd > 0 && n_soundspeed + nactd >= n_soundspeed_alloc) {
-					n_soundspeed_alloc += MAX(MBSSLAYOUT_ALLOC_CHUNK, nactd);
+					n_soundspeed_alloc += std::max(MBSSLAYOUT_ALLOC_CHUNK, nactd);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, n_soundspeed_alloc * sizeof(double),
 					                     (void **)&soundspeed_time_d, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, n_soundspeed_alloc * sizeof(double),
@@ -1716,7 +1717,7 @@ int main(int argc, char **argv) {
 	/* position */
 	if (n_nav > 0 && n_nav_alloc >= n_nav) {
 		/* apply time latency correction called for in the platform file */
-		if (sensor_position != NULL && sensor_position->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
+		if (sensor_position != nullptr && sensor_position->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
 			if (verbose > 0)
 				fprintf(stderr, "Applying time latency correction from platform model to %d position data using mode %d\n", n_nav,
 				        sensor_position->time_latency_mode);
@@ -1738,7 +1739,7 @@ int main(int argc, char **argv) {
 	/* sensordepth */
 	if (n_sensordepth > 0 && n_sensordepth_alloc >= n_sensordepth) {
 		/* apply time latency correction called for in the platform file */
-		if (sensor_depth != NULL && sensor_depth->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
+		if (sensor_depth != nullptr && sensor_depth->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
 			if (verbose > 0)
 				fprintf(stderr, "Applying time latency correction from platform model to %d sensordepth data using mode %d\n",
 				        n_sensordepth, sensor_depth->time_latency_mode);
@@ -1761,7 +1762,7 @@ int main(int argc, char **argv) {
 	/* heading */
 	if (n_heading > 0 && n_heading_alloc >= n_heading) {
 		/* apply time latency correction called for in the platform file */
-		if (sensor_heading != NULL && sensor_heading->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
+		if (sensor_heading != nullptr && sensor_heading->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
 			if (verbose > 0)
 				fprintf(stderr, "Applying time latency correction from platform model to %d heading data using mode %d\n",
 				        n_heading, sensor_heading->time_latency_mode);
@@ -1796,7 +1797,7 @@ int main(int argc, char **argv) {
 	if (n_attitude > 0 && n_attitude_alloc >= n_attitude) {
 		/* apply time latency correction called for in the platform file */
 		fprintf(stderr, "Attitude first sample before: %f %f %f\n", attitude_time_d[0], attitude_roll[0], attitude_pitch[0]);
-		if (sensor_rollpitch != NULL && sensor_rollpitch->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
+		if (sensor_rollpitch != nullptr && sensor_rollpitch->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
 			if (verbose > 0)
 				fprintf(stderr, "Applying time latency correction from platform model to %d attitude data using mode %d\n",
 				        n_attitude, sensor_rollpitch->time_latency_mode);
@@ -1890,9 +1891,9 @@ int main(int argc, char **argv) {
 	mb_path ofile = "";
 
 	/* MBIO read values */
-	void *ombio_ptr = NULL;
+	void *ombio_ptr = nullptr;
 	struct mb_io_struct *omb_io_ptr;
-	void *ostore_ptr = NULL;
+	void *ostore_ptr = nullptr;
 	struct mbsys_ldeoih_struct *ostore;
 
 	double soundspeed;
@@ -1914,9 +1915,9 @@ int main(int argc, char **argv) {
 	double beamwidth_xtrack = 0.0;
 	double beamwidth_ltrack = 0.0;
 	int num_samples_port = 0;
-	double *raw_samples_port = NULL;
+	double *raw_samples_port = nullptr;
 	int num_samples_stbd = 0;
-	double *raw_samples_stbd = NULL;
+	double *raw_samples_stbd = nullptr;
 
 	/* bottom layout parameters */
 	int nangle = MBSSLAYOUT_NUM_ANGLES;
@@ -1985,14 +1986,14 @@ int main(int argc, char **argv) {
 		if (line_mode == MBSSLAYOUT_LINE_OFF)
 			new_output_file = true;
 
-		beamflag = NULL;
-		bath = NULL;
-		amp = NULL;
-		bathacrosstrack = NULL;
-		bathalongtrack = NULL;
-		ss = NULL;
-		ssacrosstrack = NULL;
-		ssalongtrack = NULL;
+		beamflag = nullptr;
+		bath = nullptr;
+		amp = nullptr;
+		bathacrosstrack = nullptr;
+		bathalongtrack = nullptr;
+		ss = nullptr;
+		ssacrosstrack = nullptr;
+		ssalongtrack = nullptr;
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
@@ -2121,7 +2122,7 @@ int main(int argc, char **argv) {
 
 				if (output_source != MB_DATA_NONE) {
 					/* close any old output file unless a single file has been specified */
-					if (ombio_ptr != NULL) {
+					if (ombio_ptr != nullptr) {
 						/* close the swath file */
 						/* status = */ mb_close(verbose, &ombio_ptr, &error);
 
@@ -2293,7 +2294,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* if platform defined, do lever arm correction */
-				if (platform != NULL) {
+				if (platform != nullptr) {
 					/* calculate target sensor position */
 					status = mb_platform_position(verbose, (void *)platform, target_sensor, 0, navlon, navlat, sensordepth,
 					                              heading, roll, pitch, &navlon, &navlat, &sensordepth, &error);
@@ -2310,7 +2311,7 @@ int main(int argc, char **argv) {
 					/* get bottom arrival in port trace */
 					channelmax = 0.0;
 					for (int i = 0; i < num_samples_port; i++) {
-						channelmax = MAX(raw_samples_port[i], channelmax);
+						channelmax = std::max(raw_samples_port[i], channelmax);
 					}
 					portchannelpick = 0;
 					threshold = bottompick_threshold * channelmax;
@@ -2322,7 +2323,7 @@ int main(int argc, char **argv) {
 					/* get bottom arrival in starboard trace */
 					channelmax = 0.0;
 					for (int i = 0; i < num_samples_stbd; i++) {
-						channelmax = MAX(raw_samples_stbd[i], channelmax);
+						channelmax = std::max(raw_samples_stbd[i], channelmax);
 					}
 					stbdchannelpick = 0;
 					threshold = bottompick_threshold * channelmax;
@@ -2372,7 +2373,7 @@ int main(int argc, char **argv) {
 
 				/* get swath width and pixel size */
 				if (swath_mode == MBSSLAYOUT_SWATHWIDTH_VARIABLE) {
-					const double rr = 0.5 * soundspeed * sample_interval * MAX(num_samples_port, num_samples_stbd);
+					const double rr = 0.5 * soundspeed * sample_interval * std::max(num_samples_port, num_samples_stbd);
 					swath_width = 2.2 * sqrt(rr * rr - ss_altitude * ss_altitude);
 				}
 				pixel_width = swath_width / (opixels_ss - 1);
@@ -2593,7 +2594,7 @@ int main(int argc, char **argv) {
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* close any open output file */
-	if (ombio_ptr != NULL) {
+	if (ombio_ptr != nullptr) {
 		/* status = */ mb_close(verbose, &ombio_ptr, &error);
 
 		/* generate inf file */

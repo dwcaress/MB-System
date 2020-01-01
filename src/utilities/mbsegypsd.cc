@@ -20,16 +20,18 @@
  * Date:	November 2, 2009
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <time.h>
 #include <unistd.h>
+
+#include <algorithm>
+#include <limits>
 
 #include "fftw3.h"
 #include "mb_aux.h"
@@ -50,16 +52,15 @@ typedef enum {
     MBSEGYPSD_WINDOW_DEPTH = 3,
 } windowmode_t;
 
-float NaN;
 /* output stream for basic stuff (stdout if verbose <= 1,
     stderr if verbose > 1) */
-FILE *outfp = NULL;
+FILE *outfp = nullptr;
 
-static const char program_name[] = "mbsegypsd";
-static const char help_message[] =
+constexpr char program_name[] = "mbsegypsd";
+constexpr char help_message[] =
     "mbsegypsd calculates the power spectral density function of each trace in a segy data file,\n"
     "outputting the results as a GMT grid file.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbsegypsd -Ifile -Oroot [-Ashotscale\n"
     "          -Ddecimatex -R\n"
     "          -Smode[/start/end[/schan/echan]] -Tsweep[/delay]\n"
@@ -121,10 +122,10 @@ int get_segy_limits(int verbose, char *segyfile, tracemode_t *tracemode,
 	/* read sinf file if possible */
 	sprintf(sinffile, "%s.sinf", segyfile);
 	FILE *sfp = fopen(sinffile, "r");
-	if (sfp != NULL) {
+	if (sfp != nullptr) {
 		/* read the sinf file */
 		char line[MB_PATH_MAXLINE] = "";
-		while (fgets(line, MB_PATH_MAXLINE, sfp) != NULL) {
+		while (fgets(line, MB_PATH_MAXLINE, sfp) != nullptr) {
 			if (strncmp(line, "  Trace length (sec):", 21) == 0) {
 				/* nscan = */ sscanf(line, "  Trace length (sec):%lf", timesweep);
 			}
@@ -436,23 +437,23 @@ int main(int argc, char **argv) {
 	int itstart =
 		windowmode == MBSEGYPSD_WINDOW_OFF
 		? 0
-		: MAX((windowstart) / sampleinterval, 0);
+		: std::max((windowstart) / sampleinterval, 0.0);
 	int itend =
 		windowmode == MBSEGYPSD_WINDOW_OFF
 		? ngridy - 1
-		: MIN((windowend) / sampleinterval, ngridy - 1);
+		: std::min((windowend) / sampleinterval, ngridy - 1.0);
 
 
 	/* allocate memory for grid array */
-	float *grid = NULL;
+	float *grid = nullptr;
 	int status = mb_mallocd(verbose, __FILE__, __LINE__, 2 * ngridxy * sizeof(float), (void **)&grid, &error);
-	double *spsd = NULL;
+	double *spsd = nullptr;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&spsd, &error);
-	double *wpsd = NULL;
+	double *wpsd = nullptr;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&wpsd, &error);
-	double *spsdtot = NULL;
+	double *spsdtot = nullptr;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&spsdtot, &error);
-	double *wpsdtot = NULL;
+	double *wpsdtot = nullptr;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&wpsdtot, &error);
 
 	/* zero working psd array */
@@ -499,8 +500,6 @@ int main(int argc, char **argv) {
 	if (verbose > 0)
 		fprintf(outfp, "\n");
 
-	MB_MAKE_FNAN(NaN);
-
 	/* grid controls */
 	double gridmintot = 0.0;
 	double gridmaxtot = 0.0;
@@ -509,7 +508,7 @@ int main(int argc, char **argv) {
 
 		/* fill grid with NaNs */
 		for (int i = 0; i < ngridxy; i++)
-			grid[i] = NaN;
+			grid[i] = std::numeric_limits<float>::quiet_NaN();
 
 		/* generate the fftw plan */
 		fftw_complex *fftw_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * nfft);
@@ -527,7 +526,7 @@ int main(int argc, char **argv) {
 
 			/* read a trace */
 			struct mb_segytraceheader_struct traceheader;
-			float *trace = NULL;
+			float *trace = nullptr;
 			status = mb_segy_read_trace(verbose, mbsegyioptr, &traceheader, &trace, &error);
 
 			/* now process the trace */
@@ -591,8 +590,8 @@ int main(int argc, char **argv) {
 				double tracemin = trace[0];
 				double tracemax = trace[0];
 				for (int i = 0; i < traceheader.nsamps; i++) {
-					tracemin = MIN(tracemin, trace[i]);
-					tracemax = MAX(tracemin, trace[i]);
+					tracemin = std::min(tracemin, static_cast<double>(trace[i]));
+					tracemax = std::max(tracemin, static_cast<double>(trace[i]));
 				}
 
 				if ((verbose == 0 && nread % 250 == 0) || (nread % 25 == 0)) {
@@ -620,13 +619,13 @@ int main(int argc, char **argv) {
 					/* get bounds of trace in depth window mode */
 					if (windowmode == MBSEGYPSD_WINDOW_DEPTH) {
 						itstart = (int)((dtime + windowstart - timedelay) / sampleinterval);
-						itstart = MAX(itstart, 0);
+						itstart = std::max(itstart, 0);
 						itend = (int)((dtime + windowend - timedelay) / sampleinterval);
-						itend = MIN(itend, ngridy - 1);
+						itend = std::min(itend, ngridy - 1);
 					}
 					else if (windowmode == MBSEGYPSD_WINDOW_SEAFLOOR) {
-						itstart = MAX((stime + windowstart - timedelay) / sampleinterval, 0);
-						itend = MIN((stime + windowend - timedelay) / sampleinterval, ngridy - 1);
+						itstart = std::max((stime + windowstart - timedelay) / sampleinterval, 0.0);
+						itend = std::min((stime + windowend - timedelay) / sampleinterval, ngridy - 1.0);
 					}
 
 					/* loop over the data calculating fft in nfft long sections */
@@ -641,7 +640,7 @@ int main(int argc, char **argv) {
 
 						/* extract data section to be fft'd with taper */
 						const int kstart = itstart + j * nfft;
-						const int kend = MIN(kstart + nfft, itend);
+						const int kend = std::min(kstart + nfft, itend);
 						for (int i = 0; i < nfft; i++) {
 							const int k = itstart + j * nfft + i;
 							if (k <= kend) {
@@ -702,8 +701,8 @@ int main(int argc, char **argv) {
 								grid[k] = 20.0 * log10(spsd[iy] / wpsd[iy]);
 							spsdtot[iy] += grid[k];
 							wpsdtot[iy] += 1.0;
-							gridmintot = MIN(grid[k], gridmintot);
-							gridmaxtot = MAX(grid[k], gridmaxtot);
+							gridmintot = std::min(static_cast<double>(grid[k]), gridmintot);
+							gridmaxtot = std::max(static_cast<double>(grid[k]), gridmaxtot);
 						}
 					}
 				}
@@ -745,12 +744,14 @@ int main(int argc, char **argv) {
 		strcpy(zlabel, "Intensity/Hz");
 	char title[MB_PATH_MAXLINE] = "";
 	sprintf(title, "Power Spectral Density Grid from %s", segyfile);
-	status &= mb_write_gmt_grd(verbose, gridfile, grid, NaN, ngridx, ngridy, xmin, xmax, ymin, ymax, gridmintot, gridmaxtot, dx,
-	                          dy, xlabel, ylabel, zlabel, title, projection, argc, argv, &error);
+	status &= mb_write_gmt_grd(
+		verbose, gridfile, grid, std::numeric_limits<float>::quiet_NaN(),
+		ngridx, ngridy, xmin, xmax, ymin, ymax, gridmintot, gridmaxtot, dx,
+		dy, xlabel, ylabel, zlabel, title, projection, argc, argv, &error);
 
 	/* output average power spectra */
 	FILE *fp  = fopen(psdfile, "w");
-	if (fp != NULL) {
+	if (fp != nullptr) {
 		for (int iy = 0; iy < ngridy; iy++) {
 			if (wpsdtot[iy] > 0.0) {
 				spsdtot[iy] = spsdtot[iy] / wpsdtot[iy];
@@ -762,7 +763,7 @@ int main(int argc, char **argv) {
 
 	status &= mb_segy_close(verbose, &mbsegyioptr, &error);
 
-	// float *worktrace = NULL;
+	// float *worktrace = nullptr;
 	// status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&worktrace, &error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&grid, &error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&spsd, &error);
@@ -771,8 +772,8 @@ int main(int argc, char **argv) {
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&wpsdtot, &error);
 
 	/* run mbm_grdplot */
-	double xwidth = MIN(0.01 * ngridx, 55.0);
-	double ywidth = MIN(0.01 * ngridy, 28.0);
+	double xwidth = std::min(0.01 * ngridx, 55.0);
+	double ywidth = std::min(0.01 * ngridy, 28.0);
 	char plot_cmd[MB_PATH_MAXLINE] = "";
 	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -S -V -L\"File %s - %s:%s\"", gridfile, xwidth, ywidth, gridfile, title,
 	        zlabel);

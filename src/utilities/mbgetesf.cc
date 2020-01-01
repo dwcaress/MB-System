@@ -23,13 +23,12 @@
  * Date:	January 24, 2001
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "mb_define.h"
@@ -47,15 +46,15 @@ typedef enum {
     MBGETESF_IMPLICITGOOD = 6,
 } getesf_mode_t;
 
-static const char program_name[] = "mbgetesf";
-static const char help_message[] =
+constexpr char program_name[] = "mbgetesf";
+constexpr char help_message[] =
     "mbgetesf reads a multibeam data file and writes out\n"
     "an edit save file which can be applied to other data files\n"
     "containing the same data (but presumably in a different\n"
     "state of processing).  This allows editing of one data file to\n"
     "be transferred to another with ease.  The programs mbedit and\n"
     "mbprocess can be used to apply the edit events to another file.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbgetesf [-Fformat -Iinfile -Mmode -Oesffile -V -H]";
 
 /*--------------------------------------------------------------------*/
@@ -73,7 +72,7 @@ int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int act
 	int status = MB_SUCCESS;
 
 	/* write out the edit */
-	if (sofp != NULL) {
+	if (sofp != nullptr) {
 #ifdef BYTESWAPPED
 		mb_swap_double(&time_d);
 		beam = mb_swap_int(beam);
@@ -256,9 +255,9 @@ int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
 	if (format == 0)
-		mb_get_format(verbose, ifile, NULL, &format, &error);
+		mb_get_format(verbose, ifile, nullptr, &format, &error);
 
-	void *imbio_ptr = NULL;
+	void *imbio_ptr = nullptr;
 	double btime_d;
 	double etime_d;
 	int beams_bath;
@@ -267,7 +266,7 @@ int main(int argc, char **argv) {
 
 	if (mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
 	                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
-		char *message = NULL;
+		char *message = nullptr;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 		fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
@@ -276,34 +275,34 @@ int main(int argc, char **argv) {
 	}
 
 	/* allocate memory for data arrays */
-	char *beamflag = NULL;
+	char *beamflag = nullptr;
 	if (error == MB_ERROR_NO_ERROR)
 		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
-	double *bath = NULL;
+	double *bath = nullptr;
 	if (error == MB_ERROR_NO_ERROR)
 		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
-	double *amp = NULL;
+	double *amp = nullptr;
 	if (error == MB_ERROR_NO_ERROR)
 		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
-	double *bathacrosstrack = NULL;
+	double *bathacrosstrack = nullptr;
 	if (error == MB_ERROR_NO_ERROR)
 		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
-	double *bathalongtrack = NULL;
+	double *bathalongtrack = nullptr;
 	if (error == MB_ERROR_NO_ERROR)
 		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
-	double *ss = NULL;
+	double *ss = nullptr;
 	if (error == MB_ERROR_NO_ERROR)
 		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
-	double *ssacrosstrack = NULL;
+	double *ssacrosstrack = nullptr;
 	if (error == MB_ERROR_NO_ERROR)
 		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
-	double *ssalongtrack = NULL;
+	double *ssalongtrack = nullptr;
 	if (error == MB_ERROR_NO_ERROR)
 		status &= mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
-		char *message = NULL;
+		char *message = nullptr;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -311,7 +310,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* save file control variables */
-	FILE *sofp = NULL;
+	FILE *sofp = nullptr;
 
 	/* now deal with new edit save file */
 	if (status == MB_SUCCESS) {
@@ -319,9 +318,9 @@ int main(int argc, char **argv) {
 		if (!sofile_set) {
 			sofp = stdout;
 		}
-		else if ((sofp = fopen(sofile, "w")) == NULL) {
+		else if ((sofp = fopen(sofile, "w")) == nullptr) {
 			error = MB_ERROR_OPEN_FAIL;
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nEdit Save File <%s> not initialized for writing\n", sofile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -340,10 +339,10 @@ int main(int argc, char **argv) {
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
 		char *user_ptr = getenv("USER");
-		if (user_ptr == NULL)
+		if (user_ptr == nullptr)
 			user_ptr = getenv("LOGNAME");
 		char user[MBP_FILENAMESIZE];
-		if (user_ptr != NULL)
+		if (user_ptr != nullptr)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
@@ -430,7 +429,7 @@ int main(int argc, char **argv) {
 
 		/* output error messages */
 		if (verbose >= 1 && error < MB_ERROR_NO_ERROR && error >= MB_ERROR_OTHER && error != MB_ERROR_COMMENT) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
 			fprintf(stderr, "Input Record: %d\n", idata);
@@ -438,13 +437,13 @@ int main(int argc, char **argv) {
 			        time_i[6]);
 		}
 		else if (verbose >= 1 && error < MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
 			fprintf(stderr, "Number of good records so far: %d\n", idata);
 		}
 		else if (verbose >= 1 && error != MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nFatal MBIO Error:\n%s\n", message);
 			fprintf(stderr, "Last Good Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4],

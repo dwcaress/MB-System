@@ -23,14 +23,15 @@
  * Date:  February 4, 1993
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <unistd.h>
+
+#include <algorithm>
 
 #include "mb_define.h"
 #include "mb_format.h"
@@ -66,14 +67,14 @@ typedef enum {
     MBCOPY_STRIPMODE_BATHYONLY = 2,
 } strip_mode_t;
 
-static const char program_name[] = "MBcopy";
-static const char help_message[] =
+constexpr char program_name[] = "MBcopy";
+constexpr char help_message[] =
     "MBcopy copies an input swath sonar data file to an output\n"
     "swath sonar data file with the specified conversions.  Options include\n"
     "windowing in time and space and ping averaging.  The input and\n"
     "output data formats may differ, though not all possible combinations\n"
     "make sense.  The default input and output streams are stdin and stdout.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc\n"
     "\t-Fiformat/oformat/mformat -H -Iinfile -Llonflip -Mmergefile -N -Ooutfile\n"
     "\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -133,7 +134,7 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
   }
 
   /* copy the data  */
-  if (istore != NULL && ostore != NULL && (void *)istore != (void *)ostore) {
+  if (istore != nullptr && ostore != nullptr && (void *)istore != (void *)ostore) {
     /* type of data record */
     ostore->kind = istore->kind; /* Survey, nav, Comment */
 
@@ -381,7 +382,7 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
     ostore->sid_wgt_samplesright = 0; /* number of right samples */
 
     /* comment */
-    for (int i = 0; i < MIN(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH); i++)
+    for (int i = 0; i < std::min(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH); i++)
       ostore->comment[i] = istore->comment[i];
 
     /* unsupported frame */
@@ -414,7 +415,7 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
   }
 
   /* copy the data  */
-  if (istore != NULL && ostore != NULL && (void *)istore != (void *)ostore) {
+  if (istore != nullptr && ostore != nullptr && (void *)istore != (void *)ostore) {
     /* type of data record */
     ostore->kind = istore->kind;
     ostore->sonar = MBSYS_ELACMK2_UNKNOWN;
@@ -454,7 +455,7 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
     ostore->line_number = 0;
     ostore->start_or_stop = 0;
     ostore->transducer_serial_number = 0;
-    for (int i = 0; i < MIN(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH); i++)
+    for (int i = 0; i < std::min(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH); i++)
       ostore->comment[i] = istore->comment[i];
 
     /* position (position telegrams) */
@@ -624,7 +625,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
   int istep = 0;
 
   /* copy the data  */
-  if (istore != NULL && ostore != NULL && (void *)istore != (void *)ostore) {
+  if (istore != nullptr && ostore != nullptr && (void *)istore != (void *)ostore) {
     /* type of data record */
     ostore->kind = istore->kind;
     ostore->type = EM2_NONE;
@@ -931,11 +932,11 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
                    to an external 1 PPS signal, if 0 then not */
 
     /* allocate memory for data structure if needed */
-    if (istore->kind == MB_DATA_DATA && ostore->ping == NULL)
+    if (istore->kind == MB_DATA_DATA && ostore->ping == nullptr)
       status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_simrad2_ping_struct), (void **)&(ostore->ping),
                           error);
 
-    if (istore->kind == MB_DATA_DATA && istore->ping != NULL && ostore->ping != NULL) {
+    if (istore->kind == MB_DATA_DATA && istore->ping != nullptr && ostore->ping != nullptr) {
       /* get data structure pointer */
       iping = (struct mbsys_simrad_survey_struct *)istore->ping;
       oping = (struct mbsys_simrad2_ping_struct *)ostore->ping;
@@ -1406,7 +1407,7 @@ int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype
   int status = MB_SUCCESS;
 
   /* copy the data  */
-  if (ostore != NULL) {
+  if (ostore != nullptr) {
     /* set sensorhead and beam widths */
         ostore->sensorhead = sensorhead;
         ostore->topo_type = sensortype;
@@ -1468,7 +1469,7 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
   int status = MB_SUCCESS;
 
   /* copy the data  */
-  if (istore != NULL && ostore != NULL) {
+  if (istore != nullptr && ostore != nullptr) {
     /* output gsf data structure  */
     records = &(ostore->records);
     dataID = &(ostore->dataID);
@@ -1561,16 +1562,16 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
         mb_ping->beam_angle = (double *)realloc(mb_ping->beam_angle, istore->beams_bath * sizeof(double));
         mb_ping->beam_angle_forward = (double *)realloc(mb_ping->beam_angle_forward, istore->beams_bath * sizeof(double));
 
-        if (mb_ping->beam_flags == NULL || mb_ping->depth == NULL || mb_ping->across_track == NULL ||
-            mb_ping->along_track == NULL || mb_ping->travel_time == NULL || mb_ping->beam_angle_forward == NULL ||
-            mb_ping->beam_angle == NULL) {
+        if (mb_ping->beam_flags == nullptr || mb_ping->depth == nullptr || mb_ping->across_track == nullptr ||
+            mb_ping->along_track == nullptr || mb_ping->travel_time == nullptr || mb_ping->beam_angle_forward == nullptr ||
+            mb_ping->beam_angle == nullptr) {
           status = MB_FAILURE;
           *error = MB_ERROR_MEMORY_FAIL;
         }
       }
       if (istore->beams_amp > 0) {
         mb_ping->mr_amplitude = (double *)realloc(mb_ping->mr_amplitude, istore->beams_amp * sizeof(double));
-        if (mb_ping->mr_amplitude == NULL) {
+        if (mb_ping->mr_amplitude == nullptr) {
           status = MB_FAILURE;
           *error = MB_ERROR_MEMORY_FAIL;
         }
@@ -1626,13 +1627,13 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
       gain_correction = 2.2 * (istore->gain & 63) + 6 * istore->power;
 
       /* read amplitude values into storage arrays */
-      if (mb_ping->mc_amplitude != NULL) {
+      if (mb_ping->mc_amplitude != nullptr) {
         for (int i = 0; i < istore->beams_amp; i++) {
           /* note - we are storing 1/2 db increments */
           mb_ping->mc_amplitude[i] = 40 * log10(istore->intensity[i]);
         }
       }
-      else if (mb_ping->mr_amplitude != NULL) {
+      else if (mb_ping->mr_amplitude != nullptr) {
         for (int i = 0; i < istore->beams_amp; i++) {
           mb_ping->mr_amplitude[i] = 40 * log10(istore->intensity[i]) - gain_correction;
         }
@@ -1691,13 +1692,13 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
     else if (istore->kind == MB_DATA_COMMENT) {
       dataID->recordID = GSF_RECORD_COMMENT;
       if (records->comment.comment_length < strlen(istore->comment) + 1) {
-        if ((records->comment.comment = (char *)realloc(records->comment.comment, strlen(istore->comment) + 1)) == NULL) {
+        if ((records->comment.comment = (char *)realloc(records->comment.comment, strlen(istore->comment) + 1)) == nullptr) {
           status = MB_FAILURE;
           *error = MB_ERROR_MEMORY_FAIL;
           records->comment.comment_length = 0;
         }
       }
-      if ((status = MB_SUCCESS) && (records->comment.comment != NULL)) {
+      if ((status = MB_SUCCESS) && (records->comment.comment != nullptr)) {
         strcpy(records->comment.comment, istore->comment);
         records->comment.comment_length = strlen(istore->comment) + 1;
         records->comment.comment_time.tv_sec = (int)istore->png_time_d;
@@ -1919,7 +1920,7 @@ int main(int argc, char **argv) {
   int error = MB_ERROR_NO_ERROR;
 
   if (format == 0)
-    mb_get_format(verbose, ifile, NULL, &format, &error);
+    mb_get_format(verbose, ifile, nullptr, &format, &error);
 
   /* MBIO read control parameters */
   double btime_d;
@@ -1927,19 +1928,19 @@ int main(int argc, char **argv) {
   int ibeams_bath;
   int ibeams_amp;
   int ipixels_ss;
-  void *imbio_ptr = NULL;
+  void *imbio_ptr = nullptr;
 
   /* MBIO write control parameters */
   int obeams_bath;
   int obeams_amp;
   int opixels_ss;
-  void *ombio_ptr = NULL;
+  void *ombio_ptr = nullptr;
 
   /* MBIO merge control parameters */
   int mbeams_bath;
   int mbeams_amp;
   int mpixels_ss;
-  void *mmbio_ptr = NULL;
+  void *mmbio_ptr = nullptr;
 
   /* MBIO read and write values */
   struct mb_io_struct *omb_io_ptr;
@@ -1956,22 +1957,22 @@ int main(int argc, char **argv) {
   double distance;
   double altitude;
   double sonardepth;
-  char *ibeamflag = NULL;
-  double *ibath = NULL;
-  double *ibathacrosstrack = NULL;
-  double *ibathalongtrack = NULL;
-  double *iamp = NULL;
-  double *iss = NULL;
-  double *issacrosstrack = NULL;
-  double *issalongtrack = NULL;
-  char *obeamflag = NULL;
-  double *obath = NULL;
-  double *obathacrosstrack = NULL;
-  double *obathalongtrack = NULL;
-  double *oamp = NULL;
-  double *oss = NULL;
-  double *ossacrosstrack = NULL;
-  double *ossalongtrack = NULL;
+  char *ibeamflag = nullptr;
+  double *ibath = nullptr;
+  double *ibathacrosstrack = nullptr;
+  double *ibathalongtrack = nullptr;
+  double *iamp = nullptr;
+  double *iss = nullptr;
+  double *issacrosstrack = nullptr;
+  double *issalongtrack = nullptr;
+  char *obeamflag = nullptr;
+  double *obath = nullptr;
+  double *obathacrosstrack = nullptr;
+  double *obathalongtrack = nullptr;
+  double *oamp = nullptr;
+  double *oss = nullptr;
+  double *ossacrosstrack = nullptr;
+  double *ossalongtrack = nullptr;
   double draft;
   double roll;
   double pitch;
@@ -1996,14 +1997,14 @@ int main(int argc, char **argv) {
 
   char mcomment[MB_COMMENT_MAXLINE];
   int mnbath, mnamp, mnss;
-  char *mbeamflag = NULL;
-  double *mbath = NULL;
-  double *mbathacrosstrack = NULL;
-  double *mbathalongtrack = NULL;
-  double *mamp = NULL;
-  double *mss = NULL;
-  double *mssacrosstrack = NULL;
-  double *mssalongtrack = NULL;
+  char *mbeamflag = nullptr;
+  double *mbath = nullptr;
+  double *mbathacrosstrack = nullptr;
+  double *mbathalongtrack = nullptr;
+  double *mamp = nullptr;
+  double *mss = nullptr;
+  double *mssacrosstrack = nullptr;
+  double *mssalongtrack = nullptr;
   int idata = 0;
   int icomment = 0;
   int odata = 0;
@@ -2031,7 +2032,7 @@ int main(int argc, char **argv) {
     oformat = iformat;
 
   if (merge && mformat <= 0)
-    mb_get_format(verbose, mfile, NULL, &mformat, &error);
+    mb_get_format(verbose, mfile, nullptr, &mformat, &error);
 
   /* obtain format array locations - format ids will
       be aliased to current ids if old format ids given */
@@ -2235,7 +2236,7 @@ int main(int argc, char **argv) {
   /* insert comments from file into output */
   if (insertcomments) {
     /* open file */
-    if ((fp = fopen(commentfile, "r")) == NULL) {
+    if ((fp = fopen(commentfile, "r")) == nullptr) {
       fprintf(stderr, "\nUnable to Open Comment File <%s> for reading\n", commentfile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_ERROR_OPEN_FAIL);
@@ -2273,10 +2274,10 @@ int main(int argc, char **argv) {
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
     char *user_ptr = getenv("USER");
-    if (user_ptr == NULL)
+    if (user_ptr == nullptr)
       user_ptr = getenv("LOGNAME");
     char user[128];
-    if (user_ptr != NULL)
+    if (user_ptr != nullptr)
       strcpy(user, user_ptr);
     else
       strcpy(user, "unknown");

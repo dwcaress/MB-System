@@ -22,13 +22,14 @@
  * Date:	December 28, 1994
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+
+#include <algorithm>
 
 #include "mb_define.h"
 #include "mb_status.h"
@@ -39,14 +40,14 @@ typedef enum {
     MBHISTOGRAM_SS = 2,
 } histogram_mode_t;
 
-static const char program_name[] = "MBHISTOGRAM";
-static const char help_message[] =
+constexpr char program_name[] = "MBHISTOGRAM";
+constexpr char help_message[] =
     "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n"
     "\tof the bathymetry,  amplitude, or sidescan values. Alternatively,\n"
     "\tmbhistogram can output a list of values which break up the\n"
     "\tdistribution into equal sized regions.\n"
     "\tThe results are dumped to stdout.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip "
     "-Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
 
@@ -230,7 +231,7 @@ int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* figure out histogram dimensions */
 	if (nintervals > 0 && nbins <= 0)
@@ -288,7 +289,7 @@ int main(int argc, char **argv) {
 	int pixels_ss;
 
 	/* MBIO read values */
-	void *mbio_ptr = NULL;
+	void *mbio_ptr = nullptr;
 	int kind;
 	int time_i[7];
 	double time_d;
@@ -299,20 +300,20 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathacrosstrack = nullptr;
+	double *bathalongtrack = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *ssacrosstrack = nullptr;
+	double *ssalongtrack = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* histogram variables */
 	double dvalue_bin;
-	double *histogram = NULL;
-	double *intervals = NULL;
+	double *histogram = nullptr;
+	double *intervals = nullptr;
 	double total;
 	double target;
 	double dinterval;
@@ -465,8 +466,8 @@ int main(int argc, char **argv) {
 								data_first = false;
 							}
 							else {
-								data_min = MIN(bath[i], data_min);
-								data_max = MAX(bath[i], data_max);
+								data_min = std::min(bath[i], data_min);
+								data_max = std::max(bath[i], data_max);
 							}
 						}
 					}
@@ -485,8 +486,8 @@ int main(int argc, char **argv) {
 								data_first = false;
 							}
 							else {
-								data_min = MIN(amp[i], data_min);
-								data_max = MAX(amp[i], data_max);
+								data_min = std::min(amp[i], data_min);
+								data_max = std::max(amp[i], data_max);
 							}
 						}
 					}
@@ -505,8 +506,8 @@ int main(int argc, char **argv) {
 								data_first = false;
 							}
 							else {
-								data_min = MIN(ss[i], data_min);
-								data_max = MAX(ss[i], data_max);
+								data_min = std::min(ss[i], data_min);
+								data_max = std::max(ss[i], data_max);
 							}
 						}
 					}
@@ -565,8 +566,8 @@ int main(int argc, char **argv) {
 		dinterval = (target_max - target_min) / (nintervals - 1);
 
 		/* get intervals */
-		intervals[0] = MAX(data_min, value_min);
-		intervals[nintervals - 1] = MIN(data_max, value_max);
+		intervals[0] = std::max(data_min, value_min);
+		intervals[nintervals - 1] = std::min(data_max, value_max);
 		ibin = 0;
 		for (int j = 1; j < nintervals - 1; j++) {
 			target = target_min + j * dinterval;

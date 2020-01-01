@@ -29,15 +29,14 @@
  * Date:	January 4, 2000
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "mb_define.h"
@@ -46,8 +45,8 @@
 #include "mb_status.h"
 #include "mb_swap.h"
 
-static const char program_name[] = "mbset";
-static const char help_message[] =
+constexpr char program_name[] = "mbset";
+constexpr char help_message[] =
     "MBset is a tool for setting values in an mbprocess parameter file.\n"
     "MBprocess is a tool for processing swath sonar bathymetry data\n"
     "which performs a number of functions, including:\n"
@@ -59,13 +58,13 @@ static const char help_message[] =
     "The parameters controlling mbprocess are included in an ascii\n"
     "parameter file. The parameter file syntax is documented by\n"
     "the manual pages for mbprocess and mbset. \n\n";
-static const char usage_message[] = "mbset -Iinfile -PPARAMETER:value [-E -L -N -V -H]";
+constexpr char usage_message[] = "mbset -Iinfile -PPARAMETER:value [-E -L -N -V -H]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
 	int pargc = 0;
-	char **pargv = NULL;
+	char **pargv = nullptr;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -169,7 +168,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;

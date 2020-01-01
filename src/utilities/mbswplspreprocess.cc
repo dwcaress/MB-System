@@ -56,11 +56,10 @@
  * Date:	Feb 28, 2013
  */
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "mb_define.h"
@@ -69,7 +68,7 @@
 #include "mb_status.h"
 #include "mbsys_swathplus.h"
 
-#define MAX_ERROR_STRING 1024
+constexpr int MAX_ERROR_STRING = 1024;
 
 typedef struct mbdefaults_struct {
 	int verbose;
@@ -129,28 +128,28 @@ typedef struct counts_struct {
 	int ping_sel_sim;
 } counts;
 
-static char help_message[] = "Preprocess SWATHplus SXP formatted files\n"
-                             "\n"
-                             "Options:\n"
-                             "-A        overwrite processed amplitude with raw\n"
-                             "          amplitude data.\n"
-                             "-B        flip flag on rejected/accepted samples.\n"
-                             "-Fformat  MB System format id\n"
-                             "-G        print data records to stdout\n"
-                             "-H        print this help text\n"
-                             "-Iinfile  SXP file to process\n"
-                             "-Jproj4   Proj4 projection command\n"
-                             "-N        do not write output to file, mostly useful with -G\n"
-                             "-Ooutfile basename for output files [default: same as input]\n"
-                             "-R        remove rejected samples from pings.\n"
-                             "-S        split each transducer channel into a separate file\n"
-                             "-V        verbosity\n"
-                             "\n"
-                             "Report bugs to the MB System development team\n";
+constexpr char help_message[] =
+	"Preprocess SWATHplus SXP formatted files\n"
+	"\n"
+	"Options:\n"
+	"-A        overwrite processed amplitude with raw\n"
+	"          amplitude data.\n"
+	"-B        flip flag on rejected/accepted samples.\n"
+	"-Fformat  MB System format id\n"
+	"-G        print data records to stdout\n"
+	"-H        print this help text\n"
+	"-Iinfile  SXP file to process\n"
+	"-Jproj4   Proj4 projection command\n"
+	"-N        do not write output to file, mostly useful with -G\n"
+	"-Ooutfile basename for output files [default: same as input]\n"
+	"-R        remove rejected samples from pings.\n"
+	"-S        split each transducer channel into a separate file\n"
+	"-V        verbosity\n"
+	"\n"
+	"Report bugs to the MB System development team\n";
 
-static char usage_message[] = "mbswplspreprocess [-ABGHNRSV -Fformat -Jproj4command -Obasename] -Ifile";
-
-static char program_name[] = "mbswplspreprocess";
+constexpr char usage_message[] = "mbswplspreprocess [-ABGHNRSV -Fformat -Jproj4command -Obasename] -Ifile";
+constexpr char program_name[] = "mbswplspreprocess";
 
 /*---------------------------------------------------------------*/
 static void default_options(options *opts) {
@@ -810,14 +809,14 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 
 	int status = MB_SUCCESS;
 
-	void *imbio_ptr = NULL;
+	void *imbio_ptr = nullptr;
 	double btime_d;
 	double etime_d;
 	int beams_bath_alloc;
 	int beams_amp_alloc;
 	int pixels_ss_alloc;
 	mb_path ofile[SWPLS_MAX_TXERS];
-	struct mbsys_swathplus_struct *istore = NULL;
+	struct mbsys_swathplus_struct *istore = nullptr;
 
 	/* open the input file */
 	if (mb_read_init(opts->verbose, ifile, opts->format, mbdflts->pings_get, mbdflts->lonflip, mbdflts->bounds,
@@ -845,7 +844,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	bool ofile_init[SWPLS_MAX_TXERS];
 	void *ombio_ptr[SWPLS_MAX_TXERS];
 	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
-		ombio_ptr[i] = NULL;
+		ombio_ptr[i] = nullptr;
 		ofile_init[i] = false;
 	}
 
@@ -876,9 +875,9 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 		if ((status == MB_SUCCESS) && (istore->kind == MB_DATA_DATA) &&
 		    ((istore->type == SWPLS_ID_PROCESSED_PING) || (istore->type == SWPLS_ID_PROCESSED_PING2))) {
 			int obeams_bath, obeams_amp, opixels_ss;
-			struct mb_io_struct *omb_io_ptr = NULL;
-			void *ostore_ptr = NULL;
-			struct mbsys_swathplus_struct *ostore = NULL;
+			struct mb_io_struct *omb_io_ptr = nullptr;
+			void *ostore_ptr = nullptr;
+			struct mbsys_swathplus_struct *ostore = nullptr;
 			int txno = 0;
 			int txidx = 0;
 
@@ -1156,7 +1155,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (opts.format == 0) {
-		mb_get_format(opts.verbose, opts.read_file, NULL, &(opts.format), &error);
+		mb_get_format(opts.verbose, opts.read_file, nullptr, &(opts.format), &error);
 	}
 
 	/* determine whether to read one file or a list of files */

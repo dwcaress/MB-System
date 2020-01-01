@@ -46,14 +46,13 @@
  * Date:	May 29, 2018
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "mb_define.h"
@@ -68,10 +67,10 @@
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
 
-static const char program_name[] = "mbgpstide";
-static const char help_message[] =
+constexpr char program_name[] = "mbgpstide";
+constexpr char help_message[] =
     "MBgpstide generates tide files from the GPS altitude data in the input files.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbgpstide [-Atideformat -Dinterval -Fformat -Idatalist -M -Ooutput -Roffset -S -Tgeoid -Usource,sensor -V]";
 
 /*--------------------------------------------------------------------*/
@@ -106,19 +105,19 @@ int main(int argc, char **argv) {
 		bool help = false;
 
 		const struct option options[] =
-		    {{"verbose", no_argument, NULL, 0},
-		     {"help", no_argument, NULL, 0},
-		     {"tideformat", required_argument, NULL, 0},
-		     {"interval", required_argument, NULL, 0},
-		     {"format", required_argument, NULL, 0},
-		     {"input", required_argument, NULL, 0},
-		     {"setparameters", no_argument, NULL, 0},
-		     {"output", required_argument, NULL, 0},
-		     {"offset", required_argument, NULL, 0},
-		     {"skipexisting", no_argument, NULL, 0},
-		     {"geoid",required_argument , NULL, 0},
-		     {"use", required_argument, NULL, 0},
-		     {NULL, 0, NULL, 0}};
+		    {{"verbose", no_argument, nullptr, 0},
+		     {"help", no_argument, nullptr, 0},
+		     {"tideformat", required_argument, nullptr, 0},
+		     {"interval", required_argument, nullptr, 0},
+		     {"format", required_argument, nullptr, 0},
+		     {"input", required_argument, nullptr, 0},
+		     {"setparameters", no_argument, nullptr, 0},
+		     {"output", required_argument, nullptr, 0},
+		     {"offset", required_argument, nullptr, 0},
+		     {"skipexisting", no_argument, nullptr, 0},
+		     {"geoid",required_argument , nullptr, 0},
+		     {"use", required_argument, nullptr, 0},
+		     {nullptr, 0, nullptr, 0}};
 		int option_index;
 		while ((c = getopt_long(argc, argv, "A:a:D:d:F:f:I:i:MmO:o:R:r:SsT:t:U:u:VvHh", options, &option_index)) != -1)
 		{
@@ -258,14 +257,14 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	FILE *ofp = NULL;
+	FILE *ofp = nullptr;
 
 	/* If a single output file is specified, open and initialise it */
 	if (file_output) {
 		if (strcmp(tide_file, "-") == 0) {
 			ofp = stdout;
 		} else {
-			if ((ofp = fopen(tide_file, "w")) == NULL) {
+			if ((ofp = fopen(tide_file, "w")) == nullptr) {
 				fprintf(stderr, "\nUnable to open tide output file <%s>\n", tide_file);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 				exit(MB_FAILURE);
@@ -287,10 +286,10 @@ int main(int argc, char **argv) {
 			strcpy(date, ctime(&right_now));
 			date[strlen(date) - 1] = '\0';
 			char *user_ptr = getenv("USER");
-			if (user_ptr == NULL)
+			if (user_ptr == nullptr)
 				user_ptr = getenv("LOGNAME");
 			char user[MB_PATH_MAXLINE];
-			if (user_ptr != NULL)
+			if (user_ptr != nullptr)
 				strcpy(user, user_ptr);
 			else
 				strcpy(user, "unknown");
@@ -304,7 +303,7 @@ int main(int argc, char **argv) {
 
 	/* get format if required */
 	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		mb_get_format(verbose, read_file, nullptr, &format, &error);
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
@@ -376,7 +375,7 @@ int main(int argc, char **argv) {
 		else {
 			/* if one output file per input file then open and initialise it */
 			if (!file_output) {
-				if ((ofp = fopen(tide_file, "w")) == NULL) {
+				if ((ofp = fopen(tide_file, "w")) == nullptr) {
 					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to open tide output file <%s>\n", tide_file);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -398,10 +397,10 @@ int main(int argc, char **argv) {
 					strcpy(date, ctime(&right_now));
 					date[strlen(date) - 1] = '\0';
 					char *user_ptr = getenv("USER");
-					if (user_ptr == NULL)
+					if (user_ptr == nullptr)
 						user_ptr = getenv("LOGNAME");
 					char user[MB_PATH_MAXLINE];
-					if (user_ptr != NULL)
+					if (user_ptr != nullptr)
 						strcpy(user, user_ptr);
 					else
 						strcpy(user, "unknown");
@@ -417,7 +416,7 @@ int main(int argc, char **argv) {
 			mb_path swath_file;
 			strcpy(swath_file, file);
 
-			void *mbio_ptr = NULL;
+			void *mbio_ptr = nullptr;
 			double btime_d;
 			double etime_d;
 			int beams_bath;
@@ -436,31 +435,31 @@ int main(int argc, char **argv) {
 			}
 
 			/* allocate memory for data arrays */
-			char *beamflag = NULL;
+			char *beamflag = nullptr;
 			if (error == MB_ERROR_NO_ERROR)
 				/* status = */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
-			double *bath = NULL;
+			double *bath = nullptr;
 			if (error == MB_ERROR_NO_ERROR)
 				/* status = */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
-			double *amp = NULL;
+			double *amp = nullptr;
 			if (error == MB_ERROR_NO_ERROR)
 				/* status = */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
-			double *bathacrosstrack = NULL;
+			double *bathacrosstrack = nullptr;
 			if (error == MB_ERROR_NO_ERROR)
 				/* status = */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
 											&error);
-			double *bathalongtrack = NULL;
+			double *bathalongtrack = nullptr;
 			if (error == MB_ERROR_NO_ERROR)
 				/* status = */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
 											&error);
-			double *ss = NULL;
+			double *ss = nullptr;
 			if (error == MB_ERROR_NO_ERROR)
 				/* status = */ mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
-			double *ssacrosstrack = NULL;
+			double *ssacrosstrack = nullptr;
 			if (error == MB_ERROR_NO_ERROR)
 				/* status = */
 					mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
-			double *ssalongtrack = NULL;
+			double *ssalongtrack = nullptr;
 			if (error == MB_ERROR_NO_ERROR)
 				/* status = */
 					mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
@@ -492,7 +491,7 @@ int main(int argc, char **argv) {
 				} else {
 					sprintf(line, "mblist -F%d -I%s -OXYU | grdtrack -G%s", format, file, geoidgrid);
 				}
-				if ((tfp = popen(line, "r")) != NULL ) {
+				if ((tfp = popen(line, "r")) != nullptr ) {
 					read_geoid = true;
 					if (EOF == fscanf(tfp, "%lf %lf %lf %lf\n", &tidelat, &tidelon, &geoid_time, &geoid_offset)) {
 						pclose(tfp);
@@ -507,7 +506,7 @@ int main(int argc, char **argv) {
 
 			/* read and use data */
 			int nread = 0;
-			void *store_ptr = NULL;
+			void *store_ptr = nullptr;
 			int kind;
 			double time_d;
 			double navlon;
@@ -655,7 +654,7 @@ int main(int argc, char **argv) {
 			}
 
 			// TODO(schwehr): This looks wrong.
-			// Why not if (ofp) {fclose(ofp); ofp = NULL;}
+			// Why not if (ofp) {fclose(ofp); ofp = nullptr;}
 			if (!file_output) {
 				fclose(ofp);
 			}

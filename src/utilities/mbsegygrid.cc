@@ -20,16 +20,17 @@
  * Date:	June 12, 2004
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <time.h>
 #include <unistd.h>
+
+#include <algorithm>
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -67,16 +68,14 @@ typedef enum {
     MBSEGYGRID_FILTER_COSINE = 1,
 } filtermode_t;
 
-float NaN;
-
 /* output stream for basic stuff (stdout if verbose <= 1,
     stderr if verbose > 1) */
 FILE *outfp;
 
-static const char program_name[] = "MBsegygrid";
-static const char help_message[] =
+constexpr char program_name[] = "MBsegygrid";
+constexpr char help_message[] =
     "MBsegygrid grids trace data from segy data files.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale\n"
     "          -Ddecimatex/decimatey -Gmode/gain[/window] -Rdistancebin[]/startlon/startlat/endlon/endlat]\n"
     "          -Smode[/start/end[/schan/echan]] -Tsweep[/delay]\n"
@@ -137,10 +136,10 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 	/* read sinf file if possible */
 	sprintf(sinffile, "%s.sinf", segyfile);
 	FILE *sfp = fopen(sinffile, "r");
-	if (sfp != NULL) {
+	if (sfp != nullptr) {
 		/* read the sinf file */
 		char line[MB_PATH_MAXLINE] = "";
-		while (fgets(line, MB_PATH_MAXLINE, sfp) != NULL) {
+		while (fgets(line, MB_PATH_MAXLINE, sfp) != nullptr) {
 			if (strncmp(line, "  Trace length (sec):", 21) == 0) {
 				sscanf(line, "  Trace length (sec):%lf", timesweep);
 			}
@@ -267,8 +266,6 @@ int main(int argc, char **argv) {
 	double windowstart;
 	double windowend;
 	windowmode_t windowmode = MBSEGYGRID_WINDOW_OFF;
-
-	MB_MAKE_FNAN(NaN);
 
 	/* process argument list */
 	{
@@ -603,15 +600,15 @@ int main(int argc, char **argv) {
 		iyend = ngridy - 1;
 	}
 	else if (windowmode == MBSEGYGRID_WINDOW_ON) {
-		iystart = MAX((windowstart) / sampleinterval, 0);
-		iyend = MIN((windowend) / sampleinterval, ngridy - 1);
+		iystart = std::max((windowstart) / sampleinterval, 0.0);
+		iyend = std::min((windowend) / sampleinterval, ngridy - 1.0);
 	}
 	// TODO(schwehr): What about MBSEGYGRID_WINDOW_SEAFLOOR?
 	// TODO(schwehr): What about MBSEGYGRID_WINDOW_DEPTH?
 
-	float *grid = NULL;
+	float *grid = nullptr;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridxy * sizeof(float), (void **)&grid, &error);
-	float *gridweight = NULL;
+	float *gridweight = nullptr;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridxy * sizeof(float), (void **)&gridweight, &error);
 
 	// TODO(schwehr): When is verbose ever negative?
@@ -665,8 +662,8 @@ int main(int argc, char **argv) {
 	if (verbose > 0)
 		fprintf(outfp, "\n");
 
-	float *worktrace = NULL;
-	float *filtertrace = NULL;
+	float *worktrace = nullptr;
+	float *filtertrace = nullptr;
 	double gridmintot = 0.0;
 	double gridmaxtot = 0.0;
 
@@ -692,7 +689,7 @@ int main(int argc, char **argv) {
 		int nread = 0;
 		while (error <= MB_ERROR_NO_ERROR) {
 			struct mb_segytraceheader_struct traceheader;
-			float *trace = NULL;
+			float *trace = nullptr;
 
 			error = MB_ERROR_NO_ERROR;
 
@@ -813,8 +810,8 @@ int main(int argc, char **argv) {
 				double tracemin = trace[0];
 				double tracemax = trace[0];
 				for (int i = 0; i < traceheader.nsamps; i++) {
-					tracemin = MIN(tracemin, trace[i]);
-					tracemax = MAX(tracemin, trace[i]);
+					tracemin = std::min(tracemin, static_cast<double>(trace[i]));
+					tracemax = std::max(tracemin, static_cast<double>(trace[i]));
 				}
 
 				if ((verbose == 0 && nread % 250 == 0) || (nread % 25 == 0)) {
@@ -838,13 +835,13 @@ int main(int argc, char **argv) {
 					/* get bounds of trace in depth window mode */
 					if (windowmode == MBSEGYGRID_WINDOW_DEPTH) {
 						iystart = (int)((dtime + windowstart - timedelay) / sampleinterval);
-						iystart = MAX(iystart, 0);
+						iystart = std::max(iystart, 0);
 						iyend = (int)((dtime + windowend - timedelay) / sampleinterval);
-						iyend = MIN(iyend, ngridy - 1);
+						iyend = std::min(iyend, ngridy - 1);
 					}
 					else if (windowmode == MBSEGYGRID_WINDOW_SEAFLOOR) {
-						iystart = MAX((stime + windowstart - timedelay) / sampleinterval, 0);
-						iyend = MIN((stime + windowend - timedelay) / sampleinterval, ngridy - 1);
+						iystart = std::max((stime + windowstart - timedelay) / sampleinterval, 0.0);
+						iyend = std::min((stime + windowend - timedelay) / sampleinterval, ngridy - 1.0);
 					}
 
 					/* apply gain if desired */
@@ -853,13 +850,13 @@ int main(int argc, char **argv) {
 							gainmode == MBSEGYGRID_GAIN_TZERO
 							? (dtime - btime + gaindelay) / sampleinterval
 							: (stime - btime + gaindelay) / sampleinterval;
-						igainstart = MAX(0, igainstart);
+						igainstart = std::max(0, igainstart);
 						int igainend;
 						if (gainwindow <= 0.0) {
 							igainend = traceheader.nsamps - 1;
 						} else {
 							igainend = igainstart + gainwindow / sampleinterval;
-							igainend = MIN(traceheader.nsamps - 1, igainend);
+							igainend = std::min(traceheader.nsamps - 1, igainend);
 						}
 						for (int i = 0; i <= igainstart; i++) {
 							trace[i] = 0.0;
@@ -875,12 +872,12 @@ int main(int argc, char **argv) {
 					}
 					else if (gainmode == MBSEGYGRID_GAIN_AGCSEAFLOOR) {
 						int igainstart = (stime - btime - 0.5 * gainwindow) / sampleinterval;
-						igainstart = MAX(0, igainstart);
+						igainstart = std::max(0, igainstart);
 						int igainend = (stime - btime + 0.5 * gainwindow) / sampleinterval;
-						igainend = MIN(traceheader.nsamps - 1, igainend);
+						igainend = std::min(traceheader.nsamps - 1, igainend);
 						double tmax = fabs(trace[igainstart]);
 						for (int i = igainstart; i <= igainend; i++) {
-							tmax = MAX(tmax, fabs(trace[i]));
+							tmax = std::max(tmax, static_cast<double>(fabs(trace[i])));
 						}
 						if (tmax > 0.0)
 							factor = gain / tmax;
@@ -893,13 +890,13 @@ int main(int argc, char **argv) {
 
 					/* apply filtering if desired */
 					if (filtermode != MBSEGYGRID_FILTER_OFF) {
-						if (worktrace == NULL || traceheader.nsamps > worktrace_alloc) {
+						if (worktrace == nullptr || traceheader.nsamps > worktrace_alloc) {
 							status = mb_reallocd(verbose, __FILE__, __LINE__, traceheader.nsamps * sizeof(float),
 							                     (void **)&worktrace, &error);
 							worktrace_alloc = traceheader.nsamps;
 						}
 						const int nfilter = 2 * ((int)(0.5 * filterwindow / sampleinterval)) + 1;
-						if (filtertrace == NULL || nfilter > filtertrace_alloc) {
+						if (filtertrace == nullptr || nfilter > filtertrace_alloc) {
 							status =
 							    mb_reallocd(verbose, __FILE__, __LINE__, nfilter * sizeof(float), (void **)&filtertrace, &error);
 							filtertrace_alloc = nfilter;
@@ -913,8 +910,8 @@ int main(int argc, char **argv) {
 						for (int i = 0; i <= traceheader.nsamps; i++) {
 							worktrace[i] = 0.0;
 							double filtersum = 0.0;
-							const int jstart = MAX(nfilter / 2 - i, 0);
-							const int jend = MIN(nfilter - 1, nfilter - 1 + (traceheader.nsamps - 1 - nfilter / 2 - i));
+							const int jstart = std::max(nfilter / 2 - i, 0);
+							const int jend = std::min(nfilter - 1, nfilter - 1 + (traceheader.nsamps - 1 - nfilter / 2 - i));
 							for (int j = jstart; j <= jend; j++) {
 								const int ii = i - nfilter / 2 + j;
 								worktrace[i] += filtertrace[j] * trace[ii];
@@ -929,7 +926,7 @@ int main(int argc, char **argv) {
 
 					/* apply agc if desired */
 					if (agcmode && agcwindow > 0.0) {
-						if (worktrace == NULL || traceheader.nsamps > worktrace_alloc) {
+						if (worktrace == nullptr || traceheader.nsamps > worktrace_alloc) {
 							status = mb_reallocd(verbose, __FILE__, __LINE__, traceheader.nsamps * sizeof(float),
 							                     (void **)&worktrace, &error);
 							worktrace_alloc = traceheader.nsamps;
@@ -937,12 +934,12 @@ int main(int argc, char **argv) {
 						const int iagchalfwindow = 0.5 * agcwindow / sampleinterval;
 						for (int i = 0; i <= traceheader.nsamps; i++) {
 							int igainstart = i - iagchalfwindow;
-							igainstart = MAX(0, igainstart);
+							igainstart = std::max(0, igainstart);
 							int igainend = i + iagchalfwindow;
-							igainend = MIN(traceheader.nsamps - 1, igainend);
+							igainend = std::min(traceheader.nsamps - 1, igainend);
 							double tmax = 0.0;
 							for (int j = igainstart; j <= igainend; j++) {
-								tmax = MAX(tmax, fabs(trace[j]));
+								tmax = std::max(tmax, static_cast<double>(fabs(trace[j])));
 							}
 							if (tmax > 0.0)
 								worktrace[i] = trace[i] * agcmaxvalue / tmax;
@@ -956,7 +953,7 @@ int main(int argc, char **argv) {
 					else if (agcmode) {
 						double tmax = 0.0;
 						for (int i = 0; i <= traceheader.nsamps; i++) {
-							tmax = MAX(tmax, fabs(trace[i]));
+							tmax = std::max(tmax, static_cast<double>(fabs(trace[i])));
 						}
 						if (tmax > 0.0)
 							factor = agcmaxvalue / tmax;
@@ -1011,11 +1008,11 @@ int main(int argc, char **argv) {
 		for (int k = 0; k < ngridxy; k++) {
 			if (gridweight[k] > 0.0) {
 				grid[k] = grid[k] / gridweight[k];
-				gridmintot = MIN(grid[k], gridmintot);
-				gridmaxtot = MAX(grid[k], gridmaxtot);
+				gridmintot = std::min(static_cast<double>(grid[k]), gridmintot);
+				gridmaxtot = std::max(static_cast<double>(grid[k]), gridmaxtot);
 			}
 			else {
-				grid[k] = NaN;
+				grid[k] = std::numeric_limits<float>::quiet_NaN();
 			}
 		}
 	}
@@ -1051,22 +1048,23 @@ int main(int argc, char **argv) {
 	strcpy(zlabel, "Trace Signal");
 	char title[MB_PATH_MAXLINE] = "";
 	sprintf(title, "Seismic Grid from %s", segyfile);
+        const double NaN = std::numeric_limits<float>::quiet_NaN();
 	status &= mb_write_gmt_grd(verbose, gridfile, grid, NaN, ngridx, ngridy, xmin, xmax, ymin, ymax, gridmintot, gridmaxtot, dx,
 	                          dy, xlabel, ylabel, zlabel, title, projection, argc, argv, &error);
 
 	status &= mb_segy_close(verbose, &mbsegyioptr, &error);
 
 	/* deallocate memory for grid array */
-	if (worktrace != NULL)
+	if (worktrace != nullptr)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&worktrace, &error);
-	if (filtertrace != NULL)
+	if (filtertrace != nullptr)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&filtertrace, &error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&grid, &error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&gridweight, &error);
 
 	/* run mbm_grdplot */
-	const double xwidth = MIN(0.01 * (double)ngridx, 55.0);
-	const double ywidth = MIN(0.01 * (double)ngridy, 28.0);
+	const double xwidth = std::min(0.01 * (double)ngridx, 55.0);
+	const double ywidth = std::min(0.01 * (double)ngridy, 28.0);
 	char plot_cmd[MB_PATH_MAXLINE] = "";
 	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -V -L\"File %s - %s:%s\"", gridfile, xwidth, ywidth, gridfile, title,
 	        zlabel);

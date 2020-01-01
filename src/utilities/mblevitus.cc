@@ -32,12 +32,11 @@
  * Date:	April 15, 1993
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -51,12 +50,12 @@
 #include <windows.h>
 #endif
 
-const double MBLEVITUS_NO_DATA = -1000000000.0;;
-const int NDEPTH_MAX = 46;
-const int NLEVITUS_MAX = 33;
+constexpr double MBLEVITUS_NO_DATA = -1000000000.0;;
+constexpr int NDEPTH_MAX = 46;
+constexpr int NLEVITUS_MAX = 33;
 
 // TODO(schwehr): warning: excess elements in array initializer
-const float depth[48 /* NDEPTH_MAX + 2 */] =
+constexpr float depth[48 /* NDEPTH_MAX + 2 */] =
     {0.0,    10.0,    20.0,    30.0,    50.0,    75.0,   100.0,  125.0,
      150.0,  200.0,   250.0,   300.0,   400.0,   500.0,  600.0,  700.0,
      800.0,  900.0,   1000.0,  1100.0,  1200.0,  1300.0, 1400.0, 1500.0,
@@ -64,11 +63,11 @@ const float depth[48 /* NDEPTH_MAX + 2 */] =
      5500.0, 6000.0,  6500.0,  7000.0,  7500.0,  8000.0, 8500.0, 9000.0,
      9500.0, 10000.0, 10500.0, 11000.0, 11500.0, 12000.0};
 
-static const char program_name[] = "MBLEVITUS";
-static const char help_message[] =
+constexpr char program_name[] = "MBLEVITUS";
+constexpr char help_message[] =
     "MBLEVITUS generates an average water velocity profile for a\n"
     "specified location from the Levitus temperature and salinity database.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mblevitus [-Rlon/lat -Ooutfile -V -H]";
 
 /*--------------------------------------------------------------------*/
@@ -79,8 +78,8 @@ char *GMT_runtime_bindir_win32(char *result) {
 	TCHAR path[PATH_MAX + 1];
 
 	/* Get absolute path of executable */
-	if (GetModuleFileName(NULL, path, PATH_MAX) == PATH_MAX)
-		return NULL;  /* Path too long */
+	if (GetModuleFileName(nullptr, path, PATH_MAX) == PATH_MAX)
+		return nullptr;  /* Path too long */
 
 /* Convert to cstring */
 #ifdef _UNICODE
@@ -129,8 +128,8 @@ int main(int argc, char **argv) {
 			case 'r':
 			{
 				const char *lonptr = strtok(optarg, "/");
-				const char *latptr = strtok(NULL, "/");
-				if (lonptr != NULL && latptr != NULL) {
+				const char *latptr = strtok(nullptr, "/");
+				if (lonptr != nullptr && latptr != nullptr) {
 					longitude = mb_ddmmss_to_degree(lonptr);
 					latitude = mb_ddmmss_to_degree(latptr);
 				}
@@ -190,7 +189,7 @@ int main(int argc, char **argv) {
 	}
 
 	FILE *ifp = fopen(levitusfile, "rb");
-	if (ifp == NULL) {
+	if (ifp == nullptr) {
 		fprintf(stderr, "\nUnable to Open Levitus database file <%s> for reading\n", levitusfile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);
@@ -307,7 +306,7 @@ int main(int argc, char **argv) {
 	}
 
 	FILE *ofp = fopen(ofile, "w");
-	if (ofp == NULL) {
+	if (ofp == nullptr) {
 		fprintf(stderr, "\nUnable to Open output file <%s> for writing\n", ofile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);
@@ -321,10 +320,10 @@ int main(int argc, char **argv) {
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
 		const char *user_ptr = getenv("USER");
-		if (user_ptr == NULL)
+		if (user_ptr == nullptr)
 			user_ptr = getenv("LOGNAME");
 		char user[128];
-		if (user_ptr != NULL)
+		if (user_ptr != nullptr)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");

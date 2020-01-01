@@ -23,12 +23,11 @@
  * Date:	June 5, 2008
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "mb_define.h"
@@ -39,15 +38,15 @@ typedef enum {
     MBTIME_INPUT_CALENDAR  = 1
 } time_mode_t;
 
-static const char program_name[] = "MBTIME";
-static const char help_message[] =
+constexpr char program_name[] = "MBTIME";
+constexpr char help_message[] =
     "MBTIME converts time values between epoch seconds (seconds since\n"
     "1970/01/01 00:00:00.000000) and calendar time (e.g. 2008/006/05/17/24/32/0).\n"
     "The input time is set using the command line arguments -Mtime_d for\n"
     "epoch seconds and -Tyear/month/day/hour/minute/second/microsecond for\n"
     "calendar time. The output time (in the form not specified as input) is\n"
     "written to stdout.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbtime [-Mtime_d -Tyear/month/day/hour/minute/second -V -H]";
 
 /*--------------------------------------------------------------------*/

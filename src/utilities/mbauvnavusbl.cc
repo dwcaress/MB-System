@@ -23,13 +23,12 @@
  * Date:	November 21, 2004
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "mb_aux.h"
@@ -37,19 +36,19 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-const int NCHARMAX = 256;
+constexpr int NCHARMAX = 256;
 
 /*--------------------------------------------------------------------*/
 
-static const char program_name[] = "MBauvnavusbl";
-static const char help_message[] =
+constexpr char program_name[] = "MBauvnavusbl";
+constexpr char help_message[] =
     "MBauvnavusbl reads a primary navigation file (usually from a submerged platform\n"
     "swath survey) and also reads secondary navigation (e.g. USBL fixes).\n"
     "The program calculates position offsets between the raw survey navigation\n"
     "and the secondary navigation every 3600 seconds (10 minutes), and then\n"
     "linearly interpolates and applies this adjustment vector for each\n"
     "primary navigation position. The adjusted navigation is output.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbauvnavusbl -Inavfile -Ooutfile -Uusblfile [-Fnavformat -Llonflip -Musblformat -V -H ]";
 
 int main(int argc, char **argv) {
@@ -165,7 +164,7 @@ int main(int argc, char **argv) {
 	/* count the nav points */
 	int nnav = 0;
 	FILE *fp = fopen(ifile, "r");
-	if (fp == NULL) {
+	if (fp == nullptr) {
 		fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", ifile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);
@@ -185,31 +184,31 @@ int main(int argc, char **argv) {
 
 	/* navigation handling variables */
 	double tieinterval = 600.0;
-	double *ntime = NULL;
-	double *nlon = NULL;
-	double *nlat = NULL;
-	double *nheading = NULL;
-	double *nspeed = NULL;
-	double *nsonardepth = NULL;
-	double *nroll = NULL;
-	double *npitch = NULL;
-	double *nheave = NULL;
+	double *ntime = nullptr;
+	double *nlon = nullptr;
+	double *nlat = nullptr;
+	double *nheading = nullptr;
+	double *nspeed = nullptr;
+	double *nsonardepth = nullptr;
+	double *nroll = nullptr;
+	double *npitch = nullptr;
+	double *nheave = nullptr;
 	int nusbl;
-	double *utime = NULL;
-	double *ulon = NULL;
-	double *ulat = NULL;
-	double *uheading = NULL;
-	double *usonardepth = NULL;
-	double *alon = NULL;
-	double *alat = NULL;
-	double *aheading = NULL;
-	double *asonardepth = NULL;
+	double *utime = nullptr;
+	double *ulon = nullptr;
+	double *ulat = nullptr;
+	double *uheading = nullptr;
+	double *usonardepth = nullptr;
+	double *alon = nullptr;
+	double *alat = nullptr;
+	double *aheading = nullptr;
+	double *asonardepth = nullptr;
 	int ntie;
-	double *ttime = NULL;
-	double *tlon = NULL;
-	double *tlat = NULL;
-	double *theading = NULL;
-	double *tsonardepth = NULL;
+	double *ttime = nullptr;
+	double *tlon = nullptr;
+	double *tlat = nullptr;
+	double *theading = nullptr;
+	double *tsonardepth = nullptr;
 	double loncoravg;
 	double latcoravg;
 
@@ -249,7 +248,7 @@ int main(int argc, char **argv) {
 
 	/* read in nav points */
 	nnav = 0;
-	if ((fp = fopen(ifile, "r")) == NULL) {
+	if ((fp = fopen(ifile, "r")) == nullptr) {
 		fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", ifile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);
@@ -314,7 +313,7 @@ int main(int argc, char **argv) {
 
 	/* count the usbl points */
 	nusbl = 0;
-	if ((fp = fopen(ufile, "r")) == NULL) {
+	if ((fp = fopen(ufile, "r")) == nullptr) {
 		fprintf(stderr, "\nUnable to Open USBL Navigation File <%s> for reading\n", ufile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);
@@ -341,7 +340,7 @@ int main(int argc, char **argv) {
 
 	/* read in usbl points */
 	nusbl = 0;
-	if ((fp = fopen(ufile, "r")) == NULL) {
+	if ((fp = fopen(ufile, "r")) == nullptr) {
 		fprintf(stderr, "\nUnable to Open USBL Navigation File <%s> for reading\n", ufile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);
@@ -353,7 +352,7 @@ int main(int argc, char **argv) {
 
 		if (buffer[0] == '#') {
 			// Ignore comments
-		} else if (strchr(buffer, ',') != NULL) {
+		} else if (strchr(buffer, ',') != nullptr) {
 			int year;
 			int jday;
 			double timetag;
@@ -508,7 +507,7 @@ int main(int argc, char **argv) {
 	fprintf(stderr, "Average lon:%f lat:%f\n", loncoravg, latcoravg);
 
 	/* open output file */
-	if ((fp = fopen(ofile, "w")) == NULL) {
+	if ((fp = fopen(ofile, "w")) == nullptr) {
 		fprintf(stderr, "\nUnable to Open Output Navigation File <%s> for writing\n", ofile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);

@@ -34,14 +34,16 @@
  * Date:	February 22, 1993
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <unistd.h>
+
+#include <algorithm>
+#include <limits>
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -82,10 +84,10 @@ typedef enum {
 } grid_data_t;
 
 /* flag for no data in grid */;
-const int NO_DATA_FLAG = 99999;
+constexpr int NO_DATA_FLAG = 99999;
 
 /* number of data to be allocated at a time */
-const int REALLOC_STEP_SIZE = 25;
+constexpr int REALLOC_STEP_SIZE = 25;
 
 /* usage of footprint based weight */
 typedef enum {
@@ -103,7 +105,7 @@ typedef enum {
 } grid_interp_t;
 
 /* comparison threshold */;
-const double MBGRID_TINY = 0.00000001;
+constexpr double MBGRID_TINY = 0.00000001;
 
 /* interpolation algorithm
     The code is set to use either of two
@@ -119,11 +121,11 @@ const double MBGRID_TINY = 0.00000001;
 
 /* output stream for basic stuff (stdout if verbose <= 1,
     stderr if verbose > 1) */
-FILE *outfp = NULL;
+FILE *outfp = nullptr;
 
 /* program identifiers */
-static const char program_name[] = "mbgrid";
-static const char help_message[] =
+constexpr char program_name[] = "mbgrid";
+constexpr char help_message[] =
     "mbgrid is an utility used to grid bathymetry, amplitude, or\n"
     "sidescan data contained in a set of swath sonar data files.\n"
     "This program uses one of four algorithms (gaussian weighted mean,\n"
@@ -131,7 +133,7 @@ static const char help_message[] =
     "covered swaths and then fills in gaps between\n"
     "the swaths (to the degree specified by the user) using a minimum\n"
     "curvature algorithm.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbgrid   -Ifilelist -Oroot [-Adatatype -Bborder -Cclip[/mode] -Dxdim/ydim\n"
     "          -Edx/dy/units[!]  -Fmode[/threshold] -Ggridkind -Jprojection\n"
     "          -Kbackground -Llonflip -M -N -Ppings -Q  -Rwest/east/south/north\n"
@@ -181,7 +183,7 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 
 	/* open the file */
 	FILE *fp = fopen(outfile, "w");
-	if (fp == NULL) {
+	if (fp == nullptr) {
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 	} else {
@@ -192,10 +194,10 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
 		char *user_ptr = getenv("USER");
-		if (user_ptr == NULL)
+		if (user_ptr == nullptr)
 			user_ptr = getenv("LOGNAME");
 		char user[MB_PATH_MAXLINE];
-		if (user_ptr != NULL)
+		if (user_ptr != nullptr)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
@@ -250,7 +252,7 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
 
 	/* open the file */
 	FILE *fp = fopen(outfile, "w");
-	if (fp == NULL) {
+	if (fp == nullptr) {
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 	} else {
@@ -311,7 +313,7 @@ int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double
 
 	/* open the file */
 	FILE *fp = fopen(outfile, "w");
-	if (fp == NULL) {
+	if (fp == nullptr) {
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 	} else {
@@ -630,7 +632,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'R':
 			case 'r':
-				if (strchr(optarg, '/') == NULL) {
+				if (strchr(optarg, '/') == nullptr) {
 					sscanf(optarg, "%lf", &boundsfactor);
 					if (boundsfactor <= 1.0)
 						boundsfactor = 0.0;
@@ -787,8 +789,8 @@ int main(int argc, char **argv) {
 	int beams_amp;
 	int pixels_ss;
 	char file[MB_PATH_MAXLINE];
-	void *mbio_ptr = NULL;
-	struct mb_io_struct *mb_io_ptr = NULL;
+	void *mbio_ptr = nullptr;
+	struct mb_io_struct *mb_io_ptr = nullptr;
 	int topo_type;
 
 	/* mbgrid control variables */
@@ -821,14 +823,14 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathlon = NULL;
-	double *bathlat = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *sslon = NULL;
-	double *sslat = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathlon = nullptr;
+	double *bathlat = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *sslon = nullptr;
+	double *sslat = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* lon,lat,value triples variables */
@@ -841,32 +843,32 @@ int main(int argc, char **argv) {
 	double xlon, ylat, xx, yy;
 	double factor, weight, topofactor;
 	int offx, offy, xtradim;
-	double *grid = NULL;
-	double *norm = NULL;
-	double *sigma = NULL;
-	double *firsttime = NULL;
-	double *gridsmall = NULL;
-	double *minormax = NULL;
+	double *grid = nullptr;
+	double *norm = nullptr;
+	double *sigma = nullptr;
+	double *firsttime = nullptr;
+	double *gridsmall = nullptr;
+	double *minormax = nullptr;
 #ifdef USESURFACE
-	float *bxdata = NULL;
-	float *bydata = NULL;
-	float *bzdata = NULL;
-	float *sxdata = NULL;
-	float *sydata = NULL;
-	float *szdata = NULL;
+	float *bxdata = nullptr;
+	float *bydata = nullptr;
+	float *bzdata = nullptr;
+	float *sxdata = nullptr;
+	float *sydata = nullptr;
+	float *szdata = nullptr;
 #else
-	float *bdata = NULL;
-	float *sdata = NULL;
-	float *work1 = NULL;
-	int *work2 = NULL;
-	int *work3 = NULL;
+	float *bdata = nullptr;
+	float *sdata = nullptr;
+	float *work1 = nullptr;
+	int *work2 = nullptr;
+	int *work3 = nullptr;
 #endif
 	double bdata_origin_x, bdata_origin_y;
-	float *output = NULL;
-	float *sgrid = NULL;
-	int *cnt = NULL;
+	float *output = nullptr;
+	float *sgrid = nullptr;
+	int *cnt = nullptr;
 	double **data;
-	double *value = NULL;
+	double *value = nullptr;
 	int ndata, ndatafile, nbackground;
 	double zmin, zmax, zclip;
 	int nmax;
@@ -887,8 +889,8 @@ int main(int argc, char **argv) {
 	char sdlabel[MB_PATH_MAXLINE];
 
 	/* other variables */
-	FILE *dfp = NULL;
-	FILE *rfp = NULL;
+	FILE *dfp = nullptr;
+	FILE *rfp = nullptr;
 	int kgrid, kout, kint, ib, ix, iy;
 	int ix1, ix2, iy1, iy2;
 
@@ -939,9 +941,7 @@ int main(int argc, char **argv) {
 
 	/* define NaN in case it's needed */
 	if (use_NaN) {
-		float NaN;
-		MB_MAKE_FNAN(NaN);
-		outclipvalue = NaN;
+		outclipvalue = std::numeric_limits<float>::quiet_NaN();
 	}
 
 	bool use_projection = false;
@@ -996,30 +996,30 @@ int main(int argc, char **argv) {
 			yy = gbnd[2];
 			mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 			mb_apply_lonflip(verbose, lonflip, &xlon);
-			obnd[0] = MIN(obnd[0], xlon);
-			obnd[1] = MAX(obnd[1], xlon);
-			obnd[2] = MIN(obnd[2], ylat);
-			obnd[3] = MAX(obnd[3], ylat);
+			obnd[0] = std::min(obnd[0], xlon);
+			obnd[1] = std::max(obnd[1], xlon);
+			obnd[2] = std::min(obnd[2], ylat);
+			obnd[3] = std::max(obnd[3], ylat);
 
 			/* third point */
 			xx = gbnd[0];
 			yy = gbnd[3];
 			mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 			mb_apply_lonflip(verbose, lonflip, &xlon);
-			obnd[0] = MIN(obnd[0], xlon);
-			obnd[1] = MAX(obnd[1], xlon);
-			obnd[2] = MIN(obnd[2], ylat);
-			obnd[3] = MAX(obnd[3], ylat);
+			obnd[0] = std::min(obnd[0], xlon);
+			obnd[1] = std::max(obnd[1], xlon);
+			obnd[2] = std::min(obnd[2], ylat);
+			obnd[3] = std::max(obnd[3], ylat);
 
 			/* fourth point */
 			xx = gbnd[1];
 			yy = gbnd[3];
 			mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 			mb_apply_lonflip(verbose, lonflip, &xlon);
-			obnd[0] = MIN(obnd[0], xlon);
-			obnd[1] = MAX(obnd[1], xlon);
-			obnd[2] = MIN(obnd[2], ylat);
-			obnd[3] = MAX(obnd[3], ylat);
+			obnd[0] = std::min(obnd[0], xlon);
+			obnd[1] = std::max(obnd[1], xlon);
+			obnd[2] = std::min(obnd[2], ylat);
+			obnd[3] = std::max(obnd[3], ylat);
 		}
 
 		/* else translate bounds to UTM */
@@ -1043,28 +1043,28 @@ int main(int argc, char **argv) {
 			xlon = obnd[1];
 			ylat = obnd[2];
 			mb_proj_forward(verbose, pjptr, xlon, ylat, &xx, &yy, &error);
-			gbnd[0] = MIN(gbnd[0], xx);
-			gbnd[1] = MAX(gbnd[1], xx);
-			gbnd[2] = MIN(gbnd[2], yy);
-			gbnd[3] = MAX(gbnd[3], yy);
+			gbnd[0] = std::min(gbnd[0], xx);
+			gbnd[1] = std::max(gbnd[1], xx);
+			gbnd[2] = std::min(gbnd[2], yy);
+			gbnd[3] = std::max(gbnd[3], yy);
 
 			/* third point */
 			xlon = obnd[0];
 			ylat = obnd[3];
 			mb_proj_forward(verbose, pjptr, xlon, ylat, &xx, &yy, &error);
-			gbnd[0] = MIN(gbnd[0], xx);
-			gbnd[1] = MAX(gbnd[1], xx);
-			gbnd[2] = MIN(gbnd[2], yy);
-			gbnd[3] = MAX(gbnd[3], yy);
+			gbnd[0] = std::min(gbnd[0], xx);
+			gbnd[1] = std::max(gbnd[1], xx);
+			gbnd[2] = std::min(gbnd[2], yy);
+			gbnd[3] = std::max(gbnd[3], yy);
 
 			/* fourth point */
 			xlon = obnd[1];
 			ylat = obnd[3];
 			mb_proj_forward(verbose, pjptr, xlon, ylat, &xx, &yy, &error);
-			gbnd[0] = MIN(gbnd[0], xx);
-			gbnd[1] = MAX(gbnd[1], xx);
-			gbnd[2] = MIN(gbnd[2], yy);
-			gbnd[3] = MAX(gbnd[3], yy);
+			gbnd[0] = std::min(gbnd[0], xx);
+			gbnd[1] = std::max(gbnd[1], xx);
+			gbnd[2] = std::min(gbnd[2], yy);
+			gbnd[3] = std::max(gbnd[3], yy);
 		}
 
 		/* get local scaling of lon lat */
@@ -1223,35 +1223,35 @@ int main(int argc, char **argv) {
 		yy = wbnd[2] - 0.05 * (wbnd[3] - wbnd[2]);
 		mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 		mb_apply_lonflip(verbose, lonflip, &xlon);
-		bounds[0] = MIN(bounds[0], xlon);
-		bounds[1] = MAX(bounds[1], xlon);
-		bounds[2] = MIN(bounds[2], ylat);
-		bounds[3] = MAX(bounds[3], ylat);
+		bounds[0] = std::min(bounds[0], xlon);
+		bounds[1] = std::max(bounds[1], xlon);
+		bounds[2] = std::min(bounds[2], ylat);
+		bounds[3] = std::max(bounds[3], ylat);
 
 		/* do third point */
 		xx = wbnd[0] - 0.05 * (wbnd[1] - wbnd[0]);
 		yy = wbnd[3] + 0.05 * (wbnd[3] - wbnd[2]);
 		mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 		mb_apply_lonflip(verbose, lonflip, &xlon);
-		bounds[0] = MIN(bounds[0], xlon);
-		bounds[1] = MAX(bounds[1], xlon);
-		bounds[2] = MIN(bounds[2], ylat);
-		bounds[3] = MAX(bounds[3], ylat);
+		bounds[0] = std::min(bounds[0], xlon);
+		bounds[1] = std::max(bounds[1], xlon);
+		bounds[2] = std::min(bounds[2], ylat);
+		bounds[3] = std::max(bounds[3], ylat);
 
 		/* do fourth point */
 		xx = wbnd[1] + 0.05 * (wbnd[1] - wbnd[0]);
 		yy = wbnd[3] + 0.05 * (wbnd[3] - wbnd[2]);
 		mb_proj_inverse(verbose, pjptr, xx, yy, &xlon, &ylat, &error);
 		mb_apply_lonflip(verbose, lonflip, &xlon);
-		bounds[0] = MIN(bounds[0], xlon);
-		bounds[1] = MAX(bounds[1], xlon);
-		bounds[2] = MIN(bounds[2], ylat);
-		bounds[3] = MAX(bounds[3], ylat);
+		bounds[0] = std::min(bounds[0], xlon);
+		bounds[1] = std::max(bounds[1], xlon);
+		bounds[2] = std::min(bounds[2], ylat);
+		bounds[3] = std::max(bounds[3], ylat);
 	}
 
 	/* extend the bounds slightly to be sure no data gets missed */
-	xx = MIN(0.05 * (bounds[1] - bounds[0]), 0.1);
-	yy = MIN(0.05 * (bounds[3] - bounds[2]), 0.1);
+	xx = std::min(0.05 * (bounds[1] - bounds[0]), 0.1);
+	yy = std::min(0.05 * (bounds[3] - bounds[2]), 0.1);
 	bounds[0] = bounds[0] - xx;
 	bounds[1] = bounds[1] + xx;
 	bounds[2] = bounds[2] - yy;
@@ -1271,7 +1271,7 @@ int main(int argc, char **argv) {
 	if ((clipmode == MBGRID_INTERP_GAP || clipmode == MBGRID_INTERP_NEAR) && clip > xdim && clip > ydim)
 		clipmode = MBGRID_INTERP_ALL;
 	if (clipmode == MBGRID_INTERP_ALL)
-		clip = MAX(xdim, ydim);
+		clip = std::max(xdim, ydim);
 
 	/* set origin used to reduce data value size before conversion from
 	 * double to float when calling the interpolation routines */
@@ -1492,7 +1492,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, nbackground_alloc * sizeof(float), (void **)&bzdata, &error);
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating background data array:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -1505,7 +1505,7 @@ int main(int argc, char **argv) {
 #else
 		status = mb_mallocd(verbose, __FILE__, __LINE__, 3 * nbackground_alloc * sizeof(float), (void **)&bdata, &error);
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating background interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -1536,7 +1536,7 @@ int main(int argc, char **argv) {
 		sprintf(plot_cmd, "gmt grdinfo %s", backgroundfile);
 		char backgroundfileuse[MB_PATH_MAXLINE];
 		strcpy(backgroundfileuse, backgroundfile);
-		if ((rfp = popen(plot_cmd, "r")) != NULL) {
+		if ((rfp = popen(plot_cmd, "r")) != nullptr) {
 			/* parse the grdinfo results */
 			char plot_stdout[MB_COMMENT_MAXLINE];
 			/* char *bufptr = */ fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
@@ -1599,7 +1599,7 @@ int main(int argc, char **argv) {
 			        bounds[0], bounds[1], bounds[2], bounds[3], dx, dy);
 		}
 		fprintf(stderr, "Executing: %s\n", plot_cmd);
-		if ((rfp = popen(plot_cmd, "r")) != NULL) {
+		if ((rfp = popen(plot_cmd, "r")) != nullptr) {
 			/* loop over reading */
 			nbackground = 0;
 			while (fread(&tlon, sizeof(double), 1, rfp) == 1) {
@@ -1627,7 +1627,7 @@ int main(int argc, char **argv) {
 						status =
 						    mb_reallocd(verbose, __FILE__, __LINE__, nbackground_alloc * sizeof(float), (void **)&bzdata, &error);
 					if (error != MB_ERROR_NO_ERROR) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 						fprintf(outfp, "\nMBIO Error reallocating background data array:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated at line %d in source file %s\n", program_name, __LINE__,
@@ -1645,7 +1645,7 @@ int main(int argc, char **argv) {
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, 3 * nbackground_alloc * sizeof(float), (void **)&bdata, &error);
 					if (error != MB_ERROR_NO_ERROR) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 						fprintf(outfp, "\nMBIO Error allocating background interpolation work arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated at line %d in source file %s\n", program_name, __LINE__,
@@ -1685,7 +1685,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	int *num = NULL;  // TODO(schwehr): Can num be a bool?
+	int *num = nullptr;  // TODO(schwehr): Can num be a bool?
 
 	/* allocate memory for grid arrays */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(double), (void **)&grid, &error);
@@ -1702,7 +1702,7 @@ int main(int argc, char **argv) {
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
-		char *message = NULL;
+		char *message = nullptr;
 		mb_error(verbose, error, &message);
 		fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -1713,7 +1713,7 @@ int main(int argc, char **argv) {
 	/* open datalist file for list of all files that contribute to the grid */
 	strcpy(dfile, fileroot);
 	strcat(dfile, ".mb-1");
-	if ((dfp = fopen(dfile, "w")) == NULL) {
+	if ((dfp = fopen(dfile, "w")) == nullptr) {
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp, "\nUnable to open datalist file: %s\n", dfile);
 	}
@@ -1730,7 +1730,7 @@ int main(int argc, char **argv) {
 		const double sdy = 2.0 * dy;
 		int sxdim = gxdim / 2;
 		int sydim = gydim / 2;
-		int sclip = MAX(gxdim, gydim);
+		int sclip = std::max(gxdim, gydim);
 
 		/* allocate memory for additional arrays */
 		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(double), (void **)&norm, &error);
@@ -1738,7 +1738,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -1801,7 +1801,7 @@ int main(int argc, char **argv) {
 					if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error) != MB_SUCCESS) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -1843,7 +1843,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -1913,7 +1913,7 @@ int main(int argc, char **argv) {
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
-				if (ndatafile > 0 && dfp != NULL) {
+				if (ndatafile > 0 && dfp != nullptr) {
 					if (pstatus == MB_PROCESSED_USE)
 						fprintf(dfp, "P:");
 					else
@@ -1923,15 +1923,15 @@ int main(int argc, char **argv) {
 				}
 			} /* end if (format > 0) */
 		}
-		if (datalist != NULL)
+		if (datalist != nullptr)
 			mb_datalist_close(verbose, &datalist, &error);
 		if (verbose > 0)
 			fprintf(outfp, "\n%d total data points processed\n", ndata);
 
 		/* close datalist if necessary */
-		if (dfp != NULL) {
+		if (dfp != nullptr) {
 			fclose(dfp);
-			dfp = NULL;
+			dfp = nullptr;
 		}
 
 		/* now loop over all points in the low resolution grid */
@@ -1958,7 +1958,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, sxdim * sydim * sizeof(float), (void **)&sgrid, &error);
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2000,7 +2000,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, (sxdim + sydim) * sizeof(int), (void **)&work3, &error);
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2121,7 +2121,7 @@ int main(int argc, char **argv) {
 					if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error) != MB_SUCCESS) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -2163,7 +2163,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2241,8 +2241,8 @@ int main(int argc, char **argv) {
 										/* get slope from low resolution grid */
 										int isx = (bathlon[ib] - wbnd[0] + 0.5 * sdx) / sdx;
 										int isy = (bathlat[ib] - wbnd[2] + 0.5 * sdy) / sdy;
-										isx = MIN(MAX(isx, 0), sxdim - 1);
-										isy = MIN(MAX(isy, 0), sydim - 1);
+										isx = std::min(std::max(isx, 0), sxdim - 1);
+										isy = std::min(std::max(isy, 0), sydim - 1);
 										double dzdx;
 										double dzdy;
 										if (isx == 0) {
@@ -2362,12 +2362,12 @@ int main(int argc, char **argv) {
 													foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
 													foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
 												}
-												foot_dix = 2 * MAX(foot_wix, foot_lix);
-												foot_diy = 2 * MAX(foot_wiy, foot_liy);
-												ix1 = MAX(ix - foot_dix, 0);
-												ix2 = MIN(ix + foot_dix, gxdim - 1);
-												iy1 = MAX(iy - foot_diy, 0);
-												iy2 = MIN(iy + foot_diy, gydim - 1);
+												foot_dix = 2 * std::max(foot_wix, foot_lix);
+												foot_diy = 2 * std::max(foot_wiy, foot_liy);
+												ix1 = std::max(ix - foot_dix, 0);
+												ix2 = std::min(ix + foot_dix, gxdim - 1);
+												iy1 = std::max(iy - foot_diy, 0);
+												iy2 = std::min(iy + foot_diy, gydim - 1);
 
 												/* loop over neighborhood of bins */
 												for (int ii = ix1; ii <= ix2; ii++)
@@ -2457,7 +2457,7 @@ int main(int argc, char **argv) {
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 			} /* end if (format > 0) */
 		}
-		if (datalist != NULL)
+		if (datalist != nullptr)
 			mb_datalist_close(verbose, &datalist, &error);
 		if (verbose > 0)
 			fprintf(outfp, "\n%d total data points processed\n", ndata);
@@ -2550,7 +2550,7 @@ int main(int argc, char **argv) {
 					if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error) != MB_SUCCESS) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -2592,7 +2592,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2755,12 +2755,12 @@ int main(int argc, char **argv) {
 													foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
 													foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
 												}
-												foot_dix = 2 * MAX(foot_wix, foot_lix);
-												foot_diy = 2 * MAX(foot_wiy, foot_liy);
-												ix1 = MAX(ix - foot_dix, 0);
-												ix2 = MIN(ix + foot_dix, gxdim - 1);
-												iy1 = MAX(iy - foot_diy, 0);
-												iy2 = MIN(iy + foot_diy, gydim - 1);
+												foot_dix = 2 * std::max(foot_wix, foot_lix);
+												foot_diy = 2 * std::max(foot_wiy, foot_liy);
+												ix1 = std::max(ix - foot_dix, 0);
+												ix2 = std::min(ix + foot_dix, gxdim - 1);
+												iy1 = std::max(iy - foot_diy, 0);
+												iy2 = std::min(iy + foot_diy, gydim - 1);
 
 												/* loop over neighborhood of bins */
 												for (int ii = ix1; ii <= ix2; ii++)
@@ -2850,7 +2850,7 @@ int main(int argc, char **argv) {
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
-				if (ndatafile > 0 && dfp != NULL) {
+				if (ndatafile > 0 && dfp != nullptr) {
 					if (pstatus == MB_PROCESSED_USE)
 						fprintf(dfp, "P:");
 					else
@@ -2860,15 +2860,15 @@ int main(int argc, char **argv) {
 				}
 			} /* end if (format > 0) */
 		}
-		if (datalist != NULL)
+		if (datalist != nullptr)
 			mb_datalist_close(verbose, &datalist, &error);
 		if (verbose > 0)
 			fprintf(outfp, "\n%d total data points processed\n", ndata);
 
 		/* close datalist if necessary */
-		if (dfp != NULL) {
+		if (dfp != nullptr) {
 			fclose(dfp);
-			dfp = NULL;
+			dfp = nullptr;
 		}
 
 		/* now loop over all points in the output grid */
@@ -2904,7 +2904,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -2921,7 +2921,7 @@ int main(int argc, char **argv) {
 				firsttime[kgrid] = 0.0;
 				cnt[kgrid] = 0;
 				num[kgrid] = 0;
-				data[kgrid] = NULL;
+				data[kgrid] = nullptr;
 			}
 
 		/* read in data */
@@ -2967,7 +2967,7 @@ int main(int argc, char **argv) {
 					if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error) != MB_SUCCESS) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -3003,7 +3003,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -3078,9 +3078,9 @@ int main(int argc, char **argv) {
 										if (time_ok && cnt[kgrid] >= num[kgrid]) {
 											num[kgrid] += REALLOC_STEP_SIZE;
 											if ((data[kgrid] = (double *)realloc(data[kgrid], num[kgrid] * sizeof(double))) ==
-											    NULL) {
+											    nullptr) {
 												error = MB_ERROR_MEMORY_FAIL;
-												char *message = NULL;
+												char *message = nullptr;
 												mb_error(verbose, error, &message);
 												fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 												fprintf(outfp, "The weighted mean algorithm uses much less\n");
@@ -3148,9 +3148,9 @@ int main(int argc, char **argv) {
 										if (time_ok && cnt[kgrid] >= num[kgrid]) {
 											num[kgrid] += REALLOC_STEP_SIZE;
 											if ((data[kgrid] = (double *)realloc(data[kgrid], num[kgrid] * sizeof(double))) ==
-											    NULL) {
+											    nullptr) {
 												error = MB_ERROR_MEMORY_FAIL;
-												char *message = NULL;
+												char *message = nullptr;
 												mb_error(verbose, error, &message);
 												fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 												fprintf(outfp, "The weighted mean algorithm uses much less\n");
@@ -3217,9 +3217,9 @@ int main(int argc, char **argv) {
 										if (time_ok && cnt[kgrid] >= num[kgrid]) {
 											num[kgrid] += REALLOC_STEP_SIZE;
 											if ((data[kgrid] = (double *)realloc(data[kgrid], num[kgrid] * sizeof(double))) ==
-											    NULL) {
+											    nullptr) {
 												error = MB_ERROR_MEMORY_FAIL;
-												char *message = NULL;
+												char *message = nullptr;
 												mb_error(verbose, error, &message);
 												fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 												fprintf(outfp, "The weighted mean algorithm uses much less\n");
@@ -3254,7 +3254,7 @@ int main(int argc, char **argv) {
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
-				if (ndatafile > 0 && dfp != NULL) {
+				if (ndatafile > 0 && dfp != nullptr) {
 					if (pstatus == MB_PROCESSED_USE)
 						fprintf(dfp, "P:");
 					else
@@ -3267,7 +3267,7 @@ int main(int argc, char **argv) {
 			/* if format == 0 then input is lon,lat,values triples file */
 			else if (format == 0 && path[0] != '#') {
 				/* open data file */
-				if ((rfp = fopen(path, "r")) == NULL) {
+				if ((rfp = fopen(path, "r")) == nullptr) {
 					error = MB_ERROR_OPEN_FAIL;
 					fprintf(outfp, "\nUnable to open lon,lat,value triples data path: %s\n", path);
 					fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -3299,9 +3299,9 @@ int main(int argc, char **argv) {
 						/* make sure there is space for the data */
 						if (time_ok && cnt[kgrid] >= num[kgrid]) {
 							num[kgrid] += REALLOC_STEP_SIZE;
-							if ((data[kgrid] = (double *)realloc(data[kgrid], num[kgrid] * sizeof(double))) == NULL) {
+							if ((data[kgrid] = (double *)realloc(data[kgrid], num[kgrid] * sizeof(double))) == nullptr) {
 								error = MB_ERROR_MEMORY_FAIL;
-								char *message = NULL;
+								char *message = nullptr;
 								mb_error(verbose, error, &message);
 								fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 								fprintf(outfp, "The weighted mean algorithm uses much less\n");
@@ -3333,7 +3333,7 @@ int main(int argc, char **argv) {
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, file);
 
 				/* add to datalist if data actually contributed */
-				if (ndatafile > 0 && dfp != NULL) {
+				if (ndatafile > 0 && dfp != nullptr) {
 					if (pstatus == MB_PROCESSED_USE)
 						fprintf(dfp, "P:");
 					else
@@ -3343,15 +3343,15 @@ int main(int argc, char **argv) {
 				}
 			} /* end if (format == 0) */
 		}
-		if (datalist != NULL)
+		if (datalist != nullptr)
 			mb_datalist_close(verbose, &datalist, &error);
 		if (verbose > 0)
 			fprintf(outfp, "\n%d total data points processed\n", ndata);
 
 		/* close datalist if necessary */
-		if (dfp != NULL) {
+		if (dfp != nullptr) {
 			fclose(dfp);
-			dfp = NULL;
+			dfp = nullptr;
 		}
 
 		/* now loop over all points in the output grid */
@@ -3413,7 +3413,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -3476,7 +3476,7 @@ int main(int argc, char **argv) {
 					if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error) != MB_SUCCESS) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -3512,7 +3512,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -3600,10 +3600,10 @@ int main(int argc, char **argv) {
 									/* process if in region of interest */
 									if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim &&
 									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
-										ix1 = MAX(ix - xtradim, 0);
-										ix2 = MIN(ix + xtradim, gxdim - 1);
-										iy1 = MAX(iy - xtradim, 0);
-										iy2 = MIN(iy + xtradim, gydim - 1);
+										ix1 = std::max(ix - xtradim, 0);
+										ix2 = std::min(ix + xtradim, gxdim - 1);
+										iy1 = std::max(iy - xtradim, 0);
+										iy2 = std::min(iy + xtradim, gydim - 1);
 										for (int ii = ix1; ii <= ix2; ii++)
 											for (int jj = iy1; jj <= iy2; jj++) {
 												kgrid = ii * gydim + jj;
@@ -3693,10 +3693,10 @@ int main(int argc, char **argv) {
 									/* process if in region of interest */
 									if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim &&
 									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
-										ix1 = MAX(ix - xtradim, 0);
-										ix2 = MIN(ix + xtradim, gxdim - 1);
-										iy1 = MAX(iy - xtradim, 0);
-										iy2 = MIN(iy + xtradim, gydim - 1);
+										ix1 = std::max(ix - xtradim, 0);
+										ix2 = std::min(ix + xtradim, gxdim - 1);
+										iy1 = std::max(iy - xtradim, 0);
+										iy2 = std::min(iy + xtradim, gydim - 1);
 										for (int ii = ix1; ii <= ix2; ii++)
 											for (int jj = iy1; jj <= iy2; jj++) {
 												kgrid = ii * gydim + jj;
@@ -3782,10 +3782,10 @@ int main(int argc, char **argv) {
 									/* process if in region of interest */
 									if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim &&
 									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
-										ix1 = MAX(ix - xtradim, 0);
-										ix2 = MIN(ix + xtradim, gxdim - 1);
-										iy1 = MAX(iy - xtradim, 0);
-										iy2 = MIN(iy + xtradim, gydim - 1);
+										ix1 = std::max(ix - xtradim, 0);
+										ix2 = std::min(ix + xtradim, gxdim - 1);
+										iy1 = std::max(iy - xtradim, 0);
+										iy2 = std::min(iy + xtradim, gydim - 1);
 										for (int ii = ix1; ii <= ix2; ii++)
 											for (int jj = iy1; jj <= iy2; jj++) {
 												kgrid = ii * gydim + jj;
@@ -3829,7 +3829,7 @@ int main(int argc, char **argv) {
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
-				if (ndatafile > 0 && dfp != NULL) {
+				if (ndatafile > 0 && dfp != nullptr) {
 					if (pstatus == MB_PROCESSED_USE)
 						fprintf(dfp, "P:");
 					else
@@ -3842,7 +3842,7 @@ int main(int argc, char **argv) {
 			/* if format == 0 then input is lon,lat,values triples file */
 			else if (format == 0 && path[0] != '#') {
 				/* open data file */
-				if ((rfp = fopen(path, "r")) == NULL) {
+				if ((rfp = fopen(path, "r")) == nullptr) {
 					error = MB_ERROR_OPEN_FAIL;
 					fprintf(outfp, "\nUnable to open lon,lat,value triples data file1: %s\n", path);
 					fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -3880,10 +3880,10 @@ int main(int argc, char **argv) {
 					/* process the data */
 					if (grid_mode == MBGRID_WEIGHTED_MEAN && ix >= -xtradim && ix < gxdim + xtradim && iy >= -xtradim &&
 					    iy < gydim + xtradim && time_ok) {
-						ix1 = MAX(ix - xtradim, 0);
-						ix2 = MIN(ix + xtradim, gxdim - 1);
-						iy1 = MAX(iy - xtradim, 0);
-						iy2 = MIN(iy + xtradim, gydim - 1);
+						ix1 = std::max(ix - xtradim, 0);
+						ix2 = std::min(ix + xtradim, gxdim - 1);
+						iy1 = std::max(iy - xtradim, 0);
+						iy2 = std::min(iy + xtradim, gydim - 1);
 						for (int ii = ix1; ii <= ix2; ii++)
 							for (int jj = iy1; jj <= iy2; jj++) {
 								kgrid = ii * gydim + jj;
@@ -3924,7 +3924,7 @@ int main(int argc, char **argv) {
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, file);
 
 				/* add to datalist if data actually contributed */
-				if (ndatafile > 0 && dfp != NULL) {
+				if (ndatafile > 0 && dfp != nullptr) {
 					if (pstatus == MB_PROCESSED_USE)
 						fprintf(dfp, "P:");
 					else
@@ -3934,15 +3934,15 @@ int main(int argc, char **argv) {
 				}
 			} /* end if (format == 0) */
 		}
-		if (datalist != NULL)
+		if (datalist != nullptr)
 			mb_datalist_close(verbose, &datalist, &error);
 		if (verbose > 0)
 			fprintf(outfp, "\n%d total data points processed\n", ndata);
 
 		/* close datalist if necessary */
-		if (dfp != NULL) {
+		if (dfp != nullptr) {
 			fclose(dfp);
-			dfp = NULL;
+			dfp = nullptr;
 		}
 
 		/* now loop over all points in the output grid */
@@ -3986,7 +3986,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -4050,7 +4050,7 @@ int main(int argc, char **argv) {
 					if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error) != MB_SUCCESS) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -4086,7 +4086,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -4332,7 +4332,7 @@ int main(int argc, char **argv) {
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
-				if (ndatafile > 0 && dfp != NULL) {
+				if (ndatafile > 0 && dfp != nullptr) {
 					if (pstatus == MB_PROCESSED_USE)
 						fprintf(dfp, "P:");
 					else
@@ -4343,15 +4343,15 @@ int main(int argc, char **argv) {
 			} /* end if (format > 0) */
 
 		}
-		if (datalist != NULL)
+		if (datalist != nullptr)
 			mb_datalist_close(verbose, &datalist, &error);
 		if (verbose > 0)
 			fprintf(outfp, "\n%d total data points processed\n", ndata);
 
 		/* close datalist if necessary */
-		if (dfp != NULL) {
+		if (dfp != nullptr) {
 			fclose(dfp);
-			dfp = NULL;
+			dfp = nullptr;
 		}
 
     /* now read the data again, using only the data within the threshold of
@@ -4407,7 +4407,7 @@ int main(int argc, char **argv) {
 					if (mb_read_init(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
 					                           timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss,
 					                           &error) != MB_SUCCESS) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 						fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
@@ -4443,7 +4443,7 @@ int main(int argc, char **argv) {
 
 					/* if error initializing memory then quit */
 					if (error != MB_ERROR_NO_ERROR) {
-						char *message = NULL;
+						char *message = nullptr;
 						mb_error(verbose, error, &message);
 						fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -4533,10 +4533,10 @@ int main(int argc, char **argv) {
 									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
 										kgrid = ix * gydim + iy;
                     if (fabs(minormax[kgrid] - topofactor * bath[ib]) < minormax_weighted_mean_threshold) {
-  										ix1 = MAX(ix - xtradim, 0);
-  										ix2 = MIN(ix + xtradim, gxdim - 1);
-  										iy1 = MAX(iy - xtradim, 0);
-  										iy2 = MIN(iy + xtradim, gydim - 1);
+  										ix1 = std::max(ix - xtradim, 0);
+  										ix2 = std::min(ix + xtradim, gxdim - 1);
+  										iy1 = std::max(iy - xtradim, 0);
+  										iy2 = std::min(iy + xtradim, gydim - 1);
   										for (int ii = ix1; ii <= ix2; ii++) {
   											for (int jj = iy1; jj <= iy2; jj++) {
   												kgrid = ii * gydim + jj;
@@ -4614,10 +4614,10 @@ int main(int argc, char **argv) {
 									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
 										kgrid = ix * gydim + iy;
                     if (fabs(minormax[kgrid] - amp[ib]) < minormax_weighted_mean_threshold) {
-  										ix1 = MAX(ix - xtradim, 0);
-  										ix2 = MIN(ix + xtradim, gxdim - 1);
-  										iy1 = MAX(iy - xtradim, 0);
-  										iy2 = MIN(iy + xtradim, gydim - 1);
+  										ix1 = std::max(ix - xtradim, 0);
+  										ix2 = std::min(ix + xtradim, gxdim - 1);
+  										iy1 = std::max(iy - xtradim, 0);
+  										iy2 = std::min(iy + xtradim, gydim - 1);
   										for (int ii = ix1; ii <= ix2; ii++)
   											for (int jj = iy1; jj <= iy2; jj++) {
   												kgrid = ii * gydim + jj;
@@ -4693,10 +4693,10 @@ int main(int argc, char **argv) {
 									    iy >= -xtradim && iy < gydim + xtradim && time_ok) {
 										kgrid = ix * gydim + iy;
                     if (fabs(minormax[kgrid] - ss[ib]) < minormax_weighted_mean_threshold) {
-  										ix1 = MAX(ix - xtradim, 0);
-  										ix2 = MIN(ix + xtradim, gxdim - 1);
-  										iy1 = MAX(iy - xtradim, 0);
-  										iy2 = MIN(iy + xtradim, gydim - 1);
+  										ix1 = std::max(ix - xtradim, 0);
+  										ix2 = std::min(ix + xtradim, gxdim - 1);
+  										iy1 = std::max(iy - xtradim, 0);
+  										iy2 = std::min(iy + xtradim, gydim - 1);
   										for (int ii = ix1; ii <= ix2; ii++)
   											for (int jj = iy1; jj <= iy2; jj++) {
   												kgrid = ii * gydim + jj;
@@ -4727,7 +4727,7 @@ int main(int argc, char **argv) {
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
-				if (ndatafile > 0 && dfp != NULL) {
+				if (ndatafile > 0 && dfp != nullptr) {
 					if (pstatus == MB_PROCESSED_USE)
 						fprintf(dfp, "P:");
 					else
@@ -4738,15 +4738,15 @@ int main(int argc, char **argv) {
 			} /* end if (format > 0) */
 
 		}
-		if (datalist != NULL)
+		if (datalist != nullptr)
 			mb_datalist_close(verbose, &datalist, &error);
 		if (verbose > 0)
 			fprintf(outfp, "\n%d total data points processed\n", ndata);
 
 		/* close datalist if necessary */
-		if (dfp != NULL) {
+		if (dfp != nullptr) {
 			fclose(dfp);
-			dfp = NULL;
+			dfp = nullptr;
 		}
 
 		/* now loop over all points in the output grid */
@@ -4800,7 +4800,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(float), (void **)&sgrid, &error);
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -4882,7 +4882,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, (gxdim + gydim) * sizeof(int), (void **)&work3, &error);
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -4958,7 +4958,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		}*/
 		if (clipmode == MBGRID_INTERP_ALL)
-			clip = MAX(gxdim, gydim);
+			clip = std::max(gxdim, gydim);
 		mb_zgrid(sgrid, &gxdim, &gydim, &xmin, &ymin, &ddx, &ddy, sdata, &ndata, work1, work2, work3, &cay, &clip);
 #endif
 
@@ -4992,10 +4992,10 @@ int main(int argc, char **argv) {
 						// TODO(schwehr): Is num an int or a bool?
 						for (int ir = 0; ir <= clip && num[kgrid] == false; ir++) {
 							/* set bounds of search */
-							const int i1 = MAX(0, i - ir);
-							const int i2 = MIN(gxdim - 1, i + ir);
-							const int j1 = MAX(0, j - ir);
-							const int j2 = MIN(gydim - 1, j + ir);
+							const int i1 = std::max(0, i - ir);
+							const int i2 = std::min(gxdim - 1, i + ir);
+							const int j1 = std::max(0, j - ir);
+							const int j2 = std::min(gydim - 1, j + ir);
 
 							int jj = j1;
 							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
@@ -5087,10 +5087,10 @@ int main(int argc, char **argv) {
 						/* loop over rings around point, starting close */
 						for (int ir = 0; ir <= clip && num[kgrid] == false; ir++) {
 							/* set bounds of search */
-							const int i1 = MAX(0, i - ir);
-							const int i2 = MIN(gxdim - 1, i + ir);
-							const int j1 = MAX(0, j - ir);
-							const int j2 = MIN(gydim - 1, j + ir);
+							const int i1 = std::max(0, i - ir);
+							const int i2 = std::min(gxdim - 1, i + ir);
+							const int j1 = std::max(0, j - ir);
+							const int j2 = std::min(gydim - 1, j + ir);
 
 							int jj = j1;
 							for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
@@ -5178,7 +5178,7 @@ int main(int argc, char **argv) {
 #ifdef USESURFACE
 		status = mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(float), (void **)&sgrid, &error);
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating background data array:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -5195,7 +5195,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, (gxdim + gydim) * sizeof(int), (void **)&work3, &error);
 		if (error != MB_ERROR_NO_ERROR) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
 			fprintf(outfp, "\nMBIO Error allocating background interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -5220,7 +5220,7 @@ int main(int argc, char **argv) {
 		float ymin = (float)(wbnd[2] - 0.5 * dy - bdata_origin_y);
 		float ddx = (float)dx;
 		float ddy = (float)dy;
-		clip = MAX(gxdim, gydim);
+		clip = std::max(gxdim, gydim);
 		fprintf(outfp, "\nDoing Zgrid spline interpolation with %d background points...\n", nbackground);
 		mb_zgrid(sgrid, &gxdim, &gydim, &xmin, &ymin, &ddx, &ddy, bdata, &nbackground, work1, work2, work3, &cay, &clip);
 #endif
@@ -5352,7 +5352,7 @@ int main(int argc, char **argv) {
 		                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 	}
 	if (status != MB_SUCCESS) {
-		char *message = NULL;
+		char *message = nullptr;
 		mb_error(verbose, error, &message);
 		fprintf(outfp, "\nError writing output file: %s\n%s\n", ofile, message);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -5400,7 +5400,7 @@ int main(int argc, char **argv) {
 			                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 		}
 		if (status != MB_SUCCESS) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(outfp, "\nError writing output file: %s\n%s\n", ofile, message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
@@ -5447,7 +5447,7 @@ int main(int argc, char **argv) {
 			                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 		}
 		if (status != MB_SUCCESS) {
-			char *message = NULL;
+			char *message = nullptr;
 			mb_error(verbose, error, &message);
 			fprintf(outfp, "\nError writing output file: %s\n%s\n", ofile, message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);

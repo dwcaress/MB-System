@@ -31,13 +31,12 @@
  * 		--output=filename
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "mb_aux.h"
@@ -45,8 +44,8 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-const int NFIELDSMAX = 50;
-const int MAX_OPTIONS = 50;
+constexpr int NFIELDSMAX = 50;
+constexpr int MAX_OPTIONS = 50;
 typedef enum {
     TYPE_UNKNOWN = 0,
     TYPE_TIMETAG = 1,
@@ -55,14 +54,14 @@ typedef enum {
     TYPE_ANGLE = 4,
 } field_type_t;
 // TODO(schwehr): Should these be unsigned values for flags?
-// const int KEARFOTT_MONITOR_VALID_DVL = 0x01;
-// const int KEARFOTT_MONITOR_RESERVED = 0x02;
-// const int KEARFOTT_MONITOR_ZUPT_PROCESSED = 0x04;
-// const int KEARFOTT_MONITOR_DVL_REJECTED = 0x08;
-const int KEARFOTT_MONITOR_DVL_PPROCESSED = 0x10;
-// const int KEARFOTT_MONITOR_GPS_REJECTED = 0x20;
-// const int KEARFOTT_MONITOR_GPS_PROCESSED = 0x40;
-// const int KEARFOTT_MONITOR_DEPTH_LOOP_OPEN = 0x80;
+// constexpr int KEARFOTT_MONITOR_VALID_DVL = 0x01;
+// constexpr int KEARFOTT_MONITOR_RESERVED = 0x02;
+// constexpr int KEARFOTT_MONITOR_ZUPT_PROCESSED = 0x04;
+// constexpr int KEARFOTT_MONITOR_DVL_REJECTED = 0x08;
+constexpr int KEARFOTT_MONITOR_DVL_PPROCESSED = 0x10;
+// constexpr int KEARFOTT_MONITOR_GPS_REJECTED = 0x20;
+// constexpr int KEARFOTT_MONITOR_GPS_PROCESSED = 0x40;
+// constexpr int KEARFOTT_MONITOR_DEPTH_LOOP_OPEN = 0x80;
 
 /* auv log data */
 struct field {
@@ -82,8 +81,8 @@ struct printfield {
 	char format[MB_PATH_MAXLINE];
 };
 
-static const char program_name[] = "MBinsreprocess";
-static const char help_message[] =
+constexpr char program_name[] = "MBinsreprocess";
+constexpr char help_message[] =
     "MBinsreprocess reads an INS navigation file (e.g. from a Kearfott SeaDevil),\n"
     "including information about the state of navigation aiding by GPS, DVL,\n"
     "and other navigation sources. It then identifies time periods without\n"
@@ -91,7 +90,7 @@ static const char help_message[] =
     "inertial periods are typically ended with a navigation tear as the INS\n"
     "calculates a new state. This program removes the navigation tears by\n"
     "linear interpolation in time. The adjusted navigation is output.\n";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbinsreprocess --input=filename --output=filename [--help --verbose]";
 
 /*--------------------------------------------------------------------*/
@@ -113,12 +112,12 @@ int main(int argc, char **argv) {
 
 	{
 		const struct option options[] =
-		    {{"verbose", no_argument, NULL, 0},
-		     {"help", no_argument, NULL, 0},
-		     {"verbose", no_argument, NULL, 0},
-		     {"input", required_argument, NULL, 0},
-		     {"output", required_argument, NULL, 0},
-		     {NULL, 0, NULL, 0}};
+		    {{"verbose", no_argument, nullptr, 0},
+		     {"help", no_argument, nullptr, 0},
+		     {"verbose", no_argument, nullptr, 0},
+		     {"input", required_argument, nullptr, 0},
+		     {"output", required_argument, nullptr, 0},
+		     {nullptr, 0, nullptr, 0}};
 
 		bool errflg = false;
 		int c;
@@ -183,7 +182,7 @@ int main(int argc, char **argv) {
 
 	/* open the input file */
 	FILE *fp = fopen(ifile, "r");
-	if (fp == NULL) {
+	if (fp == nullptr) {
 		fprintf(stderr, "\nUnable to open log file <%s> for reading\n", ifile);
 		exit(status);
 	}
@@ -262,28 +261,28 @@ int main(int argc, char **argv) {
 
 	int error = MB_ERROR_NO_ERROR;
 
-	double *time = NULL;
-	int *mCyclesK = NULL;
-	int *mModeK = NULL;
-	int *mMonK = NULL;
-	double *mLatK = NULL;
-	double *mLonK = NULL;
-	double *mNorthK = NULL;
-	double *mEastK = NULL;
-	double *mDepthK = NULL;
-	double *mRollK = NULL;
-	double *mPitchK = NULL;
-	double *mHeadK = NULL;
-	double *mVbodyxK = NULL;
-	double *mVbodyyK = NULL;
-	double *mVbodyzK = NULL;
-	double *mAccelxK = NULL;
-	double *mAccelyK = NULL;
-	double *mAccelzK = NULL;
-	double *mPrateK = NULL;
-	double *mQrateK = NULL;
-	double *mRrateK = NULL;
-	double *utcTime = NULL;
+	double *time = nullptr;
+	int *mCyclesK = nullptr;
+	int *mModeK = nullptr;
+	int *mMonK = nullptr;
+	double *mLatK = nullptr;
+	double *mLonK = nullptr;
+	double *mNorthK = nullptr;
+	double *mEastK = nullptr;
+	double *mDepthK = nullptr;
+	double *mRollK = nullptr;
+	double *mPitchK = nullptr;
+	double *mHeadK = nullptr;
+	double *mVbodyxK = nullptr;
+	double *mVbodyyK = nullptr;
+	double *mVbodyzK = nullptr;
+	double *mAccelxK = nullptr;
+	double *mAccelyK = nullptr;
+	double *mAccelzK = nullptr;
+	double *mPrateK = nullptr;
+	double *mQrateK = nullptr;
+	double *mRrateK = nullptr;
+	double *utcTime = nullptr;
 
 	if (nrecord > 0) {
 		/* status &= */ mb_mallocd(verbose, __FILE__, __LINE__, nrecord * sizeof(double), (void **)&time, &error);

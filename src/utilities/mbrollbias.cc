@@ -33,12 +33,11 @@
  * Date:	May 16, 1993
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "mb_define.h"
@@ -46,7 +45,7 @@
 #include "mb_status.h"
 
 /* define minimum number of data to fit plane */
-const int MINIMUM_NUMBER_DATA = 100;
+constexpr int MINIMUM_NUMBER_DATA = 100;
 
 /* structure definitions */
 struct bath {
@@ -59,8 +58,8 @@ struct bathptr {
 	struct bath *ptr;
 };
 
-static const char program_name[] = "MBROLLBIAS";
-static const char help_message[] =
+constexpr char program_name[] = "MBROLLBIAS";
+constexpr char help_message[] =
     "MBROLLBIAS is an utility used to assess roll bias of swath\n"
     "sonar systems using bathymetry data from two swaths covering the\n"
     "same seafloor in opposite directions. The program takes two input\n"
@@ -76,7 +75,7 @@ static const char help_message[] =
     "reference used by the swath system is biased to starboard,\n"
     "giving rise to shallow bathymetry to port and deep bathymetry\n"
     "to starboard.";
-static const char usage_message[] =
+constexpr char usage_message[] =
     "mbrollbias -Dxdim/ydim -Fformat1/format2 -Ifile1 -Jfile2 -Llonflip -Rw/e/s/n -V -H]";
 
 /*--------------------------------------------------------------------*/
@@ -369,14 +368,14 @@ int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
 	if (format == 0)
-		mb_get_format(verbose, ifile, NULL, &format, &error);
+		mb_get_format(verbose, ifile, nullptr, &format, &error);
 
 	double btime_d;
 	double etime_d;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
-	void *mbio_ptr = NULL;
+	void *mbio_ptr = nullptr;
 
 	/* mbio read values */
 	int rpings;
@@ -390,22 +389,22 @@ int main(int argc, char **argv) {
 	double distance;
 	double altitude;
 	double sonardepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathlon = NULL;
-	double *bathlat = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *sslon = NULL;
-	double *sslat = NULL;
+	char *beamflag = nullptr;
+	double *bath = nullptr;
+	double *bathlon = nullptr;
+	double *bathlat = nullptr;
+	double *amp = nullptr;
+	double *ss = nullptr;
+	double *sslon = nullptr;
+	double *sslat = nullptr;
 	char comment[MB_COMMENT_MAXLINE];
 
 	/* grid variables */
-	int *icount = NULL;
-	int *jcount = NULL;
-	struct bathptr *idata = NULL;
-	struct bathptr *jdata = NULL;
-	struct bath *zone = NULL;
+	int *icount = nullptr;
+	int *jcount = nullptr;
+	struct bathptr *idata = nullptr;
+	struct bathptr *jdata = nullptr;
+	struct bath *zone = nullptr;
 	int ndatafile;
 	double iaa, ibb, icc, ihh;
 	double jaa, jbb, jcc, jhh;
@@ -659,8 +658,8 @@ int main(int argc, char **argv) {
 	for (int i = 0; i < xdim; i++)
 		for (int j = 0; j < ydim; j++) {
 			const int k = i * ydim + j;
-			idata[k].ptr = NULL;
-			jdata[k].ptr = NULL;
+			idata[k].ptr = nullptr;
+			jdata[k].ptr = nullptr;
 			if (icount[k] > 0) {
 				status =
 				    mb_mallocd(verbose, __FILE__, __LINE__, icount[k] * sizeof(struct bath), (void **)&(idata[k].ptr), &error);
