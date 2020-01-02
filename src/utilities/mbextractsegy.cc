@@ -320,15 +320,10 @@ int main(int argc, char **argv) {
   mb_path command = "";
   mb_path scale = "";
   double mtodeglon, mtodeglat;
-  double lastlon;
-  double lastlat;
-  double lastheading;
   double headingdiff;
-  double lastdistance;
   int oktowrite;
   FILE *fp = nullptr;
   char *result;
-  int nread;
   int nwrite;
   double tracemin, tracemax, tracerms, tracelength;
   double linetracemin, linetracemax, linetracelength, endofdata;
@@ -600,7 +595,6 @@ int main(int argc, char **argv) {
   for (int i = 0; i < 338; i++)
     segyfileheader.extra[i] = 0;
 
-  bool recalculatesweep = false;
   bool linechange;
   int index;  // TODO(schwehr: Localize
 
@@ -648,12 +642,12 @@ int main(int argc, char **argv) {
     }
 
     /* read and print data */
-    nread = 0;
+    int nread = 0;
     // bool first = true;
-    lastlon = 0.0;
-    lastlat = 0.0;
-    lastheading = 0.0;
-    lastdistance = 0.0;
+    double lastlon = 0.0;
+    double lastlat = 0.0;
+    double lastheading = 0.0;
+    double lastdistance = 0.0;
     while (error <= MB_ERROR_NO_ERROR) {
       /* reset error */
       error = MB_ERROR_NO_ERROR;
@@ -755,7 +749,7 @@ int main(int argc, char **argv) {
             endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
             sweep = endofdata - delay;
 
-            recalculatesweep = sweep > MBES_MAX_SWEEP;
+            const bool recalculatesweep = sweep > MBES_MAX_SWEEP;
 
             fprintf(sfp, "# Generate %d section plot(s) of segy file: %s\n", nplot, output_file);
             fprintf(sfp, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
@@ -1346,11 +1340,7 @@ int main(int argc, char **argv) {
         endofdata = seafloordepthmax / 750.0 + linetracelength;
         endofdata = (1 + (int)(endofdata / 0.05)) * 0.05;
         sweep = endofdata - delay;
-        if (sweep > MBES_MAX_SWEEP)
-          recalculatesweep = true;
-        else {
-          recalculatesweep = false;
-        }
+        const bool recalculatesweep = sweep > MBES_MAX_SWEEP;
 
         fprintf(sfp, "# Generate %d section plot(s) of segy file: %s\n", nplot, output_file);
         fprintf(sfp, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
