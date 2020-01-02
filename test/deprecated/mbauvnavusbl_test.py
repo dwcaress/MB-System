@@ -4,17 +4,17 @@
 #
 # See README file for copying and redistribution conditions.
 
-"""Tests for mbswplspreprocess command line app."""
+"""Tests for mbauvnavusbl command line app."""
 
 import os
 import subprocess
 import unittest
 
 
-class MbswplspreprocessTest(unittest.TestCase):
+class MbauvnavusblTest(unittest.TestCase):
 
   def setUp(self):
-    self.cmd = '../../src/utilities/mbswplspreprocess'
+    self.cmd = '../../src/deprecated/mbauvnavusbl'
 
   def testNoArgs(self):
     cmd = [self.cmd]
@@ -24,27 +24,27 @@ class MbswplspreprocessTest(unittest.TestCase):
     except subprocess.CalledProcessError as e:
       raised = True
       self.assertEqual(2, e.returncode)
-      self.assertIn(b'MBIO Error returned from function', e.output)
-      self.assertIn(b'mb_datalist_open', e.output)
-      self.assertIn(b'Unable to open data list file: datalist.mb-1', e.output)
+      self.assertIn(b'Unable to Open Navigation File <stdin> for', e.output)
     self.assertTrue(raised)
 
   def testHelp(self):
     cmd = [self.cmd, '-h']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
     self.assertIn('Version', output)
-    self.assertIn('Preprocess SWATHplus SXP formatted files', output)
-    self.assertIn('-Obasename', output)
+    self.assertIn('USBL fixes', output)
+    self.assertIn('reads a primary navigation file', output)
+    self.assertIn('-Uusblfile', output)
 
   def testHelpVerbose2(self):
     cmd = [self.cmd, '-h', '-V', '-V']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
     self.assertIn('Version', output)
-    self.assertIn('Preprocess SWATHplus SXP formatted files', output)
-    self.assertIn('-Obasename', output)
+    self.assertIn('USBL fixes', output)
+    self.assertIn('reads a primary navigation file', output)
+    self.assertIn('-Uusblfile', output)
     self.assertIn('dbg2', output)
     self.assertIn('lonflip', output)
-    self.assertIn('copy_rawamp:', output)
+    self.assertIn('usbl format:', output)
 
   # TODO(schwehr): Add tests of actual usage.
 

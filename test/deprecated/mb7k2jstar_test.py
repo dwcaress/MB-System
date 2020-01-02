@@ -4,38 +4,41 @@
 #
 # See README file for copying and redistribution conditions.
 
-"""Tests for mbneptune2esf command line app."""
+"""Tests for mb7k2jstar command line app."""
 
 import os
 import subprocess
 import unittest
 
 
-class Mbneptune2esfTest(unittest.TestCase):
+class Mb7k2jstarTest(unittest.TestCase):
 
   def setUp(self):
-    self.cmd = '../../src/utilities/mbneptune2esf'
+    self.cmd = '../../src/deprecated/mb7k2jstar'
 
-  # testNoArgs hangs.
+  def testNoArgs(self):
+    cmd = [self.cmd]
+    raised = False
+    try:
+      subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+      raised = True
+      self.assertEqual(2, e.returncode)
+      self.assertIn(b'Unable to open data list file:', e.output)
+      self.assertIn(b'datalist.mb-1', e.output)
+    self.assertTrue(raised)
 
   def testHelp(self):
     cmd = [self.cmd, '-h']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
-    self.assertIn('Version', output)
-    self.assertIn('Simrad Neptune BinStat rules file', output)
-    self.assertIn('usage:', output)
-    self.assertIn('-Rrules', output)
+    self.assertIn('mb7k2jstar extracts Edgetech', output)
 
   def testHelpVerbose2(self):
     cmd = [self.cmd, '-h', '-V', '-V']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
-    self.assertIn('Version', output)
-    self.assertIn('Simrad Neptune BinStat rules file', output)
-    self.assertIn('usage:', output)
-    self.assertIn('-Rrules', output)
+    self.assertIn('mb7k2jstar extracts Edgetech', output)
     self.assertIn('dbg2', output)
     self.assertIn('lonflip', output)
-    self.assertIn('speedmin:', output)
 
   # TODO(schwehr): Add tests of actual usage.
 

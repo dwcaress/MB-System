@@ -89,25 +89,21 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = mbconfig$(EXEEXT) mb7k2jstar$(EXEEXT) mb7k2ss$(EXEEXT) \
-	mb7kpreprocess$(EXEEXT) mbabsorption$(EXEEXT) \
+bin_PROGRAMS = mbconfig$(EXEEXT) mbabsorption$(EXEEXT) \
 	mbareaclean$(EXEEXT) mbauvloglist$(EXEEXT) \
-	mbauvnavusbl$(EXEEXT) mbbackangle$(EXEEXT) mbclean$(EXEEXT) \
-	mbcopy$(EXEEXT) mbctdlist$(EXEEXT) mbdatalist$(EXEEXT) \
-	mbdefaults$(EXEEXT) mbdumpesf$(EXEEXT) mbextractsegy$(EXEEXT) \
-	mbfilter$(EXEEXT) mbformat$(EXEEXT) mbgetesf$(EXEEXT) \
-	mbgpstide$(EXEEXT) mbgrid$(EXEEXT) mbhistogram$(EXEEXT) \
-	mbhsdump$(EXEEXT) mbhysweeppreprocess$(EXEEXT) mbinfo$(EXEEXT) \
-	mbinsreprocess$(EXEEXT) mbkongsbergpreprocess$(EXEEXT) \
+	mbbackangle$(EXEEXT) mbclean$(EXEEXT) mbcopy$(EXEEXT) \
+	mbctdlist$(EXEEXT) mbdatalist$(EXEEXT) mbdefaults$(EXEEXT) \
+	mbdumpesf$(EXEEXT) mbextractsegy$(EXEEXT) mbfilter$(EXEEXT) \
+	mbformat$(EXEEXT) mbgetesf$(EXEEXT) mbgpstide$(EXEEXT) \
+	mbgrid$(EXEEXT) mbhistogram$(EXEEXT) mbinfo$(EXEEXT) \
 	mblevitus$(EXEEXT) mblist$(EXEEXT) mbmakeplatform$(EXEEXT) \
 	mbminirovnav$(EXEEXT) mbmosaic$(EXEEXT) mbnavlist$(EXEEXT) \
-	mbneptune2esf$(EXEEXT) mbpreprocess$(EXEEXT) \
-	mbprocess$(EXEEXT) mbrollbias$(EXEEXT) mbrolltimelag$(EXEEXT) \
-	mbroutetime$(EXEEXT) mbrphsbias$(EXEEXT) mbsegygrid$(EXEEXT) \
-	mbsegyinfo$(EXEEXT) mbsegylist$(EXEEXT) mbset$(EXEEXT) \
-	mbsslayout$(EXEEXT) mbstripnan$(EXEEXT) mbsvplist$(EXEEXT) \
-	mbsvpselect$(EXEEXT) mbswplspreprocess$(EXEEXT) \
-	mbtime$(EXEEXT) mbvoxelclean$(EXEEXT) $(am__EXEEXT_1)
+	mbpreprocess$(EXEEXT) mbprocess$(EXEEXT) \
+	mbrolltimelag$(EXEEXT) mbroutetime$(EXEEXT) \
+	mbsegygrid$(EXEEXT) mbsegyinfo$(EXEEXT) mbsegylist$(EXEEXT) \
+	mbset$(EXEEXT) mbsslayout$(EXEEXT) mbsvplist$(EXEEXT) \
+	mbsvpselect$(EXEEXT) mbtime$(EXEEXT) mbvoxelclean$(EXEEXT) \
+	$(am__EXEEXT_1)
 @BUILD_GSF_TRUE@am__append_1 = -I${top_srcdir}/src/gsf
 subdir = src/utilities
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -126,31 +122,19 @@ CONFIG_CLEAN_VPATH_FILES =
 @BUILD_FFTW_TRUE@am__EXEEXT_1 = mbsegypsd$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_mb7k2jstar_OBJECTS = mb7k2jstar.$(OBJEXT)
-mb7k2jstar_OBJECTS = $(am_mb7k2jstar_OBJECTS)
-mb7k2jstar_LDADD = $(LDADD)
+am_mbabsorption_OBJECTS = mbabsorption.$(OBJEXT)
+mbabsorption_OBJECTS = $(am_mbabsorption_OBJECTS)
+mbabsorption_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-am_mb7k2ss_OBJECTS = mb7k2ss.$(OBJEXT)
-mb7k2ss_OBJECTS = $(am_mb7k2ss_OBJECTS)
-mb7k2ss_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
-am_mb7kpreprocess_OBJECTS = mb7kpreprocess.$(OBJEXT)
-mb7kpreprocess_OBJECTS = $(am_mb7kpreprocess_OBJECTS)
-mb7kpreprocess_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
-am_mbabsorption_OBJECTS = mbabsorption.$(OBJEXT)
-mbabsorption_OBJECTS = $(am_mbabsorption_OBJECTS)
-mbabsorption_LDADD = $(LDADD)
 am_mbareaclean_OBJECTS = mbareaclean.$(OBJEXT)
 mbareaclean_OBJECTS = $(am_mbareaclean_OBJECTS)
 mbareaclean_LDADD = $(LDADD)
 am_mbauvloglist_OBJECTS = mbauvloglist.$(OBJEXT)
 mbauvloglist_OBJECTS = $(am_mbauvloglist_OBJECTS)
 mbauvloglist_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
-am_mbauvnavusbl_OBJECTS = mbauvnavusbl.$(OBJEXT)
-mbauvnavusbl_OBJECTS = $(am_mbauvnavusbl_OBJECTS)
-mbauvnavusbl_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
 am_mbbackangle_OBJECTS = mbbackangle.$(OBJEXT)
 mbbackangle_OBJECTS = $(am_mbbackangle_OBJECTS)
 mbbackangle_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
@@ -197,23 +181,9 @@ mbgrid_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
 am_mbhistogram_OBJECTS = mbhistogram.$(OBJEXT)
 mbhistogram_OBJECTS = $(am_mbhistogram_OBJECTS)
 mbhistogram_LDADD = $(LDADD)
-am_mbhsdump_OBJECTS = mbhsdump.$(OBJEXT)
-mbhsdump_OBJECTS = $(am_mbhsdump_OBJECTS)
-mbhsdump_LDADD = $(LDADD)
-am_mbhysweeppreprocess_OBJECTS = mbhysweeppreprocess.$(OBJEXT)
-mbhysweeppreprocess_OBJECTS = $(am_mbhysweeppreprocess_OBJECTS)
-mbhysweeppreprocess_DEPENDENCIES =  \
-	${top_builddir}/src/mbaux/libmbaux.la
 am_mbinfo_OBJECTS = mbinfo.$(OBJEXT)
 mbinfo_OBJECTS = $(am_mbinfo_OBJECTS)
 mbinfo_LDADD = $(LDADD)
-am_mbinsreprocess_OBJECTS = mbinsreprocess.$(OBJEXT)
-mbinsreprocess_OBJECTS = $(am_mbinsreprocess_OBJECTS)
-mbinsreprocess_LDADD = $(LDADD)
-am_mbkongsbergpreprocess_OBJECTS = mbkongsbergpreprocess.$(OBJEXT)
-mbkongsbergpreprocess_OBJECTS = $(am_mbkongsbergpreprocess_OBJECTS)
-mbkongsbergpreprocess_DEPENDENCIES =  \
-	${top_builddir}/src/mbaux/libmbaux.la
 am_mblevitus_OBJECTS = mblevitus.$(OBJEXT)
 mblevitus_OBJECTS = $(am_mblevitus_OBJECTS)
 mblevitus_LDADD = $(LDADD)
@@ -232,27 +202,18 @@ mbmosaic_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
 am_mbnavlist_OBJECTS = mbnavlist.$(OBJEXT)
 mbnavlist_OBJECTS = $(am_mbnavlist_OBJECTS)
 mbnavlist_LDADD = $(LDADD)
-am_mbneptune2esf_OBJECTS = mbneptune2esf.$(OBJEXT)
-mbneptune2esf_OBJECTS = $(am_mbneptune2esf_OBJECTS)
-mbneptune2esf_LDADD = $(LDADD)
 am_mbpreprocess_OBJECTS = mbpreprocess.$(OBJEXT)
 mbpreprocess_OBJECTS = $(am_mbpreprocess_OBJECTS)
 mbpreprocess_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
 am_mbprocess_OBJECTS = mbprocess.$(OBJEXT)
 mbprocess_OBJECTS = $(am_mbprocess_OBJECTS)
 mbprocess_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
-am_mbrollbias_OBJECTS = mbrollbias.$(OBJEXT)
-mbrollbias_OBJECTS = $(am_mbrollbias_OBJECTS)
-mbrollbias_LDADD = $(LDADD)
 am_mbrolltimelag_OBJECTS = mbrolltimelag.$(OBJEXT)
 mbrolltimelag_OBJECTS = $(am_mbrolltimelag_OBJECTS)
 mbrolltimelag_LDADD = $(LDADD)
 am_mbroutetime_OBJECTS = mbroutetime.$(OBJEXT)
 mbroutetime_OBJECTS = $(am_mbroutetime_OBJECTS)
 mbroutetime_LDADD = $(LDADD)
-am_mbrphsbias_OBJECTS = mbrphsbias.$(OBJEXT)
-mbrphsbias_OBJECTS = $(am_mbrphsbias_OBJECTS)
-mbrphsbias_LDADD = $(LDADD)
 am_mbsegygrid_OBJECTS = mbsegygrid.$(OBJEXT)
 mbsegygrid_OBJECTS = $(am_mbsegygrid_OBJECTS)
 mbsegygrid_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
@@ -278,19 +239,12 @@ mbset_LDADD = $(LDADD)
 am_mbsslayout_OBJECTS = mbsslayout.$(OBJEXT)
 mbsslayout_OBJECTS = $(am_mbsslayout_OBJECTS)
 mbsslayout_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
-am_mbstripnan_OBJECTS = mbstripnan.$(OBJEXT)
-mbstripnan_OBJECTS = $(am_mbstripnan_OBJECTS)
-mbstripnan_LDADD = $(LDADD)
 am_mbsvplist_OBJECTS = mbsvplist.$(OBJEXT)
 mbsvplist_OBJECTS = $(am_mbsvplist_OBJECTS)
 mbsvplist_LDADD = $(LDADD)
 am_mbsvpselect_OBJECTS = mbsvpselect.$(OBJEXT) geodesic.$(OBJEXT)
 mbsvpselect_OBJECTS = $(am_mbsvpselect_OBJECTS)
 mbsvpselect_LDADD = $(LDADD)
-am_mbswplspreprocess_OBJECTS = mbswplspreprocess.$(OBJEXT)
-mbswplspreprocess_OBJECTS = $(am_mbswplspreprocess_OBJECTS)
-mbswplspreprocess_DEPENDENCIES =  \
-	${top_builddir}/src/mbaux/libmbaux.la
 am_mbtime_OBJECTS = mbtime.$(OBJEXT)
 mbtime_OBJECTS = $(am_mbtime_OBJECTS)
 mbtime_LDADD = $(LDADD)
@@ -313,10 +267,8 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/geodesic.Po \
-	./$(DEPDIR)/mb7k2jstar.Po ./$(DEPDIR)/mb7k2ss.Po \
-	./$(DEPDIR)/mb7kpreprocess.Po ./$(DEPDIR)/mbabsorption.Po \
-	./$(DEPDIR)/mbareaclean.Po ./$(DEPDIR)/mbauvloglist.Po \
-	./$(DEPDIR)/mbauvnavusbl.Po ./$(DEPDIR)/mbbackangle.Po \
+	./$(DEPDIR)/mbabsorption.Po ./$(DEPDIR)/mbareaclean.Po \
+	./$(DEPDIR)/mbauvloglist.Po ./$(DEPDIR)/mbbackangle.Po \
 	./$(DEPDIR)/mbclean.Po ./$(DEPDIR)/mbconfig.Po \
 	./$(DEPDIR)/mbcopy.Po ./$(DEPDIR)/mbctdlist.Po \
 	./$(DEPDIR)/mbdatalist.Po ./$(DEPDIR)/mbdefaults.Po \
@@ -324,21 +276,17 @@ am__depfiles_remade = ./$(DEPDIR)/geodesic.Po \
 	./$(DEPDIR)/mbfilter.Po ./$(DEPDIR)/mbformat.Po \
 	./$(DEPDIR)/mbgetesf.Po ./$(DEPDIR)/mbgpstide.Po \
 	./$(DEPDIR)/mbgrid.Po ./$(DEPDIR)/mbhistogram.Po \
-	./$(DEPDIR)/mbhsdump.Po ./$(DEPDIR)/mbhysweeppreprocess.Po \
-	./$(DEPDIR)/mbinfo.Po ./$(DEPDIR)/mbinsreprocess.Po \
-	./$(DEPDIR)/mbkongsbergpreprocess.Po ./$(DEPDIR)/mblevitus.Po \
+	./$(DEPDIR)/mbinfo.Po ./$(DEPDIR)/mblevitus.Po \
 	./$(DEPDIR)/mblist.Po ./$(DEPDIR)/mbmakeplatform.Po \
 	./$(DEPDIR)/mbminirovnav.Po ./$(DEPDIR)/mbmosaic.Po \
-	./$(DEPDIR)/mbnavlist.Po ./$(DEPDIR)/mbneptune2esf.Po \
-	./$(DEPDIR)/mbpreprocess.Po ./$(DEPDIR)/mbprocess.Po \
-	./$(DEPDIR)/mbrollbias.Po ./$(DEPDIR)/mbrolltimelag.Po \
-	./$(DEPDIR)/mbroutetime.Po ./$(DEPDIR)/mbrphsbias.Po \
-	./$(DEPDIR)/mbsegygrid.Po ./$(DEPDIR)/mbsegyinfo.Po \
-	./$(DEPDIR)/mbsegylist.Po ./$(DEPDIR)/mbsegypsd.Po \
-	./$(DEPDIR)/mbset.Po ./$(DEPDIR)/mbsslayout.Po \
-	./$(DEPDIR)/mbstripnan.Po ./$(DEPDIR)/mbsvplist.Po \
-	./$(DEPDIR)/mbsvpselect.Po ./$(DEPDIR)/mbswplspreprocess.Po \
-	./$(DEPDIR)/mbtime.Po ./$(DEPDIR)/mbvoxelclean.Po
+	./$(DEPDIR)/mbnavlist.Po ./$(DEPDIR)/mbpreprocess.Po \
+	./$(DEPDIR)/mbprocess.Po ./$(DEPDIR)/mbrolltimelag.Po \
+	./$(DEPDIR)/mbroutetime.Po ./$(DEPDIR)/mbsegygrid.Po \
+	./$(DEPDIR)/mbsegyinfo.Po ./$(DEPDIR)/mbsegylist.Po \
+	./$(DEPDIR)/mbsegypsd.Po ./$(DEPDIR)/mbset.Po \
+	./$(DEPDIR)/mbsslayout.Po ./$(DEPDIR)/mbsvplist.Po \
+	./$(DEPDIR)/mbsvpselect.Po ./$(DEPDIR)/mbtime.Po \
+	./$(DEPDIR)/mbvoxelclean.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -376,30 +324,24 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
-	$(mb7kpreprocess_SOURCES) $(mbabsorption_SOURCES) \
-	$(mbareaclean_SOURCES) $(mbauvloglist_SOURCES) \
-	$(mbauvnavusbl_SOURCES) $(mbbackangle_SOURCES) \
+SOURCES = $(mbabsorption_SOURCES) $(mbareaclean_SOURCES) \
+	$(mbauvloglist_SOURCES) $(mbbackangle_SOURCES) \
 	$(mbclean_SOURCES) $(mbconfig_SOURCES) $(mbcopy_SOURCES) \
 	$(mbctdlist_SOURCES) $(mbdatalist_SOURCES) \
 	$(mbdefaults_SOURCES) $(mbdumpesf_SOURCES) \
 	$(mbextractsegy_SOURCES) $(mbfilter_SOURCES) \
 	$(mbformat_SOURCES) $(mbgetesf_SOURCES) $(mbgpstide_SOURCES) \
-	$(mbgrid_SOURCES) $(mbhistogram_SOURCES) $(mbhsdump_SOURCES) \
-	$(mbhysweeppreprocess_SOURCES) $(mbinfo_SOURCES) \
-	$(mbinsreprocess_SOURCES) $(mbkongsbergpreprocess_SOURCES) \
+	$(mbgrid_SOURCES) $(mbhistogram_SOURCES) $(mbinfo_SOURCES) \
 	$(mblevitus_SOURCES) $(mblist_SOURCES) \
 	$(mbmakeplatform_SOURCES) $(mbminirovnav_SOURCES) \
 	$(mbmosaic_SOURCES) $(mbnavlist_SOURCES) \
-	$(mbneptune2esf_SOURCES) $(mbpreprocess_SOURCES) \
-	$(mbprocess_SOURCES) $(mbrollbias_SOURCES) \
+	$(mbpreprocess_SOURCES) $(mbprocess_SOURCES) \
 	$(mbrolltimelag_SOURCES) $(mbroutetime_SOURCES) \
-	$(mbrphsbias_SOURCES) $(mbsegygrid_SOURCES) \
-	$(mbsegyinfo_SOURCES) $(mbsegylist_SOURCES) \
-	$(mbsegypsd_SOURCES) $(mbset_SOURCES) $(mbsslayout_SOURCES) \
-	$(mbstripnan_SOURCES) $(mbsvplist_SOURCES) \
-	$(mbsvpselect_SOURCES) $(mbswplspreprocess_SOURCES) \
-	$(mbtime_SOURCES) $(mbvoxelclean_SOURCES)
+	$(mbsegygrid_SOURCES) $(mbsegyinfo_SOURCES) \
+	$(mbsegylist_SOURCES) $(mbsegypsd_SOURCES) $(mbset_SOURCES) \
+	$(mbsslayout_SOURCES) $(mbsvplist_SOURCES) \
+	$(mbsvpselect_SOURCES) $(mbtime_SOURCES) \
+	$(mbvoxelclean_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -639,17 +581,17 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
 	${libnetcdf_CPPFLAGS} ${libfftw_CPPFLAGS}
 AM_LDFLAGS = 
 mbconfig_SOURCES = mbconfig.cc
-mb7k2jstar_SOURCES = mb7k2jstar.cc
-mb7k2ss_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-mb7k2ss_SOURCES = mb7k2ss.cc
-mb7kpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-mb7kpreprocess_SOURCES = mb7kpreprocess.cc
+# mb7k2jstar_SOURCES = mb7k2jstar.cc
+# mb7k2ss_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+# mb7k2ss_SOURCES = mb7k2ss.cc
+# mb7kpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+# mb7kpreprocess_SOURCES = mb7kpreprocess.cc
 mbabsorption_SOURCES = mbabsorption.cc
 mbareaclean_SOURCES = mbareaclean.cc
 mbauvloglist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbauvloglist_SOURCES = mbauvloglist.cc
-mbauvnavusbl_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-mbauvnavusbl_SOURCES = mbauvnavusbl.cc
+# mbauvnavusbl_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+# mbauvnavusbl_SOURCES = mbauvnavusbl.cc
 mbbackangle_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbbackangle_SOURCES = mbbackangle.cc
 mbclean_SOURCES = mbclean.cc
@@ -668,13 +610,13 @@ mbgpstide_SOURCES = mbgpstide.cc
 mbgrid_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbgrid_SOURCES = mbgrid.cc
 mbhistogram_SOURCES = mbhistogram.cc
-mbhsdump_SOURCES = mbhsdump.cc
-mbhysweeppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-mbhysweeppreprocess_SOURCES = mbhysweeppreprocess.cc
+# mbhsdump_SOURCES = mbhsdump.cc
+# mbhysweeppreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+# mbhysweeppreprocess_SOURCES = mbhysweeppreprocess.cc
 mbinfo_SOURCES = mbinfo.cc
-mbinsreprocess_SOURCES = mbinsreprocess.cc
-mbkongsbergpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.cc
+# mbinsreprocess_SOURCES = mbinsreprocess.cc
+# mbkongsbergpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+# mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.cc
 mblevitus_SOURCES = mblevitus.cc
 mblist_SOURCES = mblist.cc
 mbmakeplatform_SOURCES = mbmakeplatform.cc
@@ -682,15 +624,15 @@ mbminirovnav_SOURCES = mbminirovnav.cc
 mbmosaic_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbmosaic_SOURCES = mbmosaic.cc
 mbnavlist_SOURCES = mbnavlist.cc
-mbneptune2esf_SOURCES = mbneptune2esf.cc
+# mbneptune2esf_SOURCES = mbneptune2esf.cc
 mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbpreprocess_SOURCES = mbpreprocess.cc
 mbprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbprocess_SOURCES = mbprocess.cc
-mbrollbias_SOURCES = mbrollbias.cc
+# mbrollbias_SOURCES = mbrollbias.cc
 mbrolltimelag_SOURCES = mbrolltimelag.cc
 mbroutetime_SOURCES = mbroutetime.cc
-mbrphsbias_SOURCES = mbrphsbias.cc
+# mbrphsbias_SOURCES = mbrphsbias.cc
 mbsegygrid_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbsegygrid_SOURCES = mbsegygrid.cc
 mbsegyinfo_SOURCES = mbsegyinfo.cc
@@ -698,11 +640,11 @@ mbsegylist_SOURCES = mbsegylist.cc
 mbset_SOURCES = mbset.cc
 mbsslayout_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbsslayout_SOURCES = mbsslayout.cc
-mbstripnan_SOURCES = mbstripnan.cc
+# mbstripnan_SOURCES = mbstripnan.cc
 mbsvplist_SOURCES = mbsvplist.cc
 mbsvpselect_SOURCES = mbsvpselect.cc geodesic.c
-mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-mbswplspreprocess_SOURCES = mbswplspreprocess.cc
+# mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+# mbswplspreprocess_SOURCES = mbswplspreprocess.cc
 mbtime_SOURCES = mbtime.cc
 mbvoxelclean_SOURCES = mbvoxelclean.cc
 @BUILD_FFTW_TRUE@mbsegypsd_LDADD =  \
@@ -798,18 +740,6 @@ clean-binPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
-mb7k2jstar$(EXEEXT): $(mb7k2jstar_OBJECTS) $(mb7k2jstar_DEPENDENCIES) $(EXTRA_mb7k2jstar_DEPENDENCIES) 
-	@rm -f mb7k2jstar$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mb7k2jstar_OBJECTS) $(mb7k2jstar_LDADD) $(LIBS)
-
-mb7k2ss$(EXEEXT): $(mb7k2ss_OBJECTS) $(mb7k2ss_DEPENDENCIES) $(EXTRA_mb7k2ss_DEPENDENCIES) 
-	@rm -f mb7k2ss$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mb7k2ss_OBJECTS) $(mb7k2ss_LDADD) $(LIBS)
-
-mb7kpreprocess$(EXEEXT): $(mb7kpreprocess_OBJECTS) $(mb7kpreprocess_DEPENDENCIES) $(EXTRA_mb7kpreprocess_DEPENDENCIES) 
-	@rm -f mb7kpreprocess$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mb7kpreprocess_OBJECTS) $(mb7kpreprocess_LDADD) $(LIBS)
-
 mbabsorption$(EXEEXT): $(mbabsorption_OBJECTS) $(mbabsorption_DEPENDENCIES) $(EXTRA_mbabsorption_DEPENDENCIES) 
 	@rm -f mbabsorption$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbabsorption_OBJECTS) $(mbabsorption_LDADD) $(LIBS)
@@ -821,10 +751,6 @@ mbareaclean$(EXEEXT): $(mbareaclean_OBJECTS) $(mbareaclean_DEPENDENCIES) $(EXTRA
 mbauvloglist$(EXEEXT): $(mbauvloglist_OBJECTS) $(mbauvloglist_DEPENDENCIES) $(EXTRA_mbauvloglist_DEPENDENCIES) 
 	@rm -f mbauvloglist$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbauvloglist_OBJECTS) $(mbauvloglist_LDADD) $(LIBS)
-
-mbauvnavusbl$(EXEEXT): $(mbauvnavusbl_OBJECTS) $(mbauvnavusbl_DEPENDENCIES) $(EXTRA_mbauvnavusbl_DEPENDENCIES) 
-	@rm -f mbauvnavusbl$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mbauvnavusbl_OBJECTS) $(mbauvnavusbl_LDADD) $(LIBS)
 
 mbbackangle$(EXEEXT): $(mbbackangle_OBJECTS) $(mbbackangle_DEPENDENCIES) $(EXTRA_mbbackangle_DEPENDENCIES) 
 	@rm -f mbbackangle$(EXEEXT)
@@ -886,25 +812,9 @@ mbhistogram$(EXEEXT): $(mbhistogram_OBJECTS) $(mbhistogram_DEPENDENCIES) $(EXTRA
 	@rm -f mbhistogram$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbhistogram_OBJECTS) $(mbhistogram_LDADD) $(LIBS)
 
-mbhsdump$(EXEEXT): $(mbhsdump_OBJECTS) $(mbhsdump_DEPENDENCIES) $(EXTRA_mbhsdump_DEPENDENCIES) 
-	@rm -f mbhsdump$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mbhsdump_OBJECTS) $(mbhsdump_LDADD) $(LIBS)
-
-mbhysweeppreprocess$(EXEEXT): $(mbhysweeppreprocess_OBJECTS) $(mbhysweeppreprocess_DEPENDENCIES) $(EXTRA_mbhysweeppreprocess_DEPENDENCIES) 
-	@rm -f mbhysweeppreprocess$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mbhysweeppreprocess_OBJECTS) $(mbhysweeppreprocess_LDADD) $(LIBS)
-
 mbinfo$(EXEEXT): $(mbinfo_OBJECTS) $(mbinfo_DEPENDENCIES) $(EXTRA_mbinfo_DEPENDENCIES) 
 	@rm -f mbinfo$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbinfo_OBJECTS) $(mbinfo_LDADD) $(LIBS)
-
-mbinsreprocess$(EXEEXT): $(mbinsreprocess_OBJECTS) $(mbinsreprocess_DEPENDENCIES) $(EXTRA_mbinsreprocess_DEPENDENCIES) 
-	@rm -f mbinsreprocess$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mbinsreprocess_OBJECTS) $(mbinsreprocess_LDADD) $(LIBS)
-
-mbkongsbergpreprocess$(EXEEXT): $(mbkongsbergpreprocess_OBJECTS) $(mbkongsbergpreprocess_DEPENDENCIES) $(EXTRA_mbkongsbergpreprocess_DEPENDENCIES) 
-	@rm -f mbkongsbergpreprocess$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mbkongsbergpreprocess_OBJECTS) $(mbkongsbergpreprocess_LDADD) $(LIBS)
 
 mblevitus$(EXEEXT): $(mblevitus_OBJECTS) $(mblevitus_DEPENDENCIES) $(EXTRA_mblevitus_DEPENDENCIES) 
 	@rm -f mblevitus$(EXEEXT)
@@ -930,10 +840,6 @@ mbnavlist$(EXEEXT): $(mbnavlist_OBJECTS) $(mbnavlist_DEPENDENCIES) $(EXTRA_mbnav
 	@rm -f mbnavlist$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbnavlist_OBJECTS) $(mbnavlist_LDADD) $(LIBS)
 
-mbneptune2esf$(EXEEXT): $(mbneptune2esf_OBJECTS) $(mbneptune2esf_DEPENDENCIES) $(EXTRA_mbneptune2esf_DEPENDENCIES) 
-	@rm -f mbneptune2esf$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mbneptune2esf_OBJECTS) $(mbneptune2esf_LDADD) $(LIBS)
-
 mbpreprocess$(EXEEXT): $(mbpreprocess_OBJECTS) $(mbpreprocess_DEPENDENCIES) $(EXTRA_mbpreprocess_DEPENDENCIES) 
 	@rm -f mbpreprocess$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbpreprocess_OBJECTS) $(mbpreprocess_LDADD) $(LIBS)
@@ -942,10 +848,6 @@ mbprocess$(EXEEXT): $(mbprocess_OBJECTS) $(mbprocess_DEPENDENCIES) $(EXTRA_mbpro
 	@rm -f mbprocess$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbprocess_OBJECTS) $(mbprocess_LDADD) $(LIBS)
 
-mbrollbias$(EXEEXT): $(mbrollbias_OBJECTS) $(mbrollbias_DEPENDENCIES) $(EXTRA_mbrollbias_DEPENDENCIES) 
-	@rm -f mbrollbias$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mbrollbias_OBJECTS) $(mbrollbias_LDADD) $(LIBS)
-
 mbrolltimelag$(EXEEXT): $(mbrolltimelag_OBJECTS) $(mbrolltimelag_DEPENDENCIES) $(EXTRA_mbrolltimelag_DEPENDENCIES) 
 	@rm -f mbrolltimelag$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbrolltimelag_OBJECTS) $(mbrolltimelag_LDADD) $(LIBS)
@@ -953,10 +855,6 @@ mbrolltimelag$(EXEEXT): $(mbrolltimelag_OBJECTS) $(mbrolltimelag_DEPENDENCIES) $
 mbroutetime$(EXEEXT): $(mbroutetime_OBJECTS) $(mbroutetime_DEPENDENCIES) $(EXTRA_mbroutetime_DEPENDENCIES) 
 	@rm -f mbroutetime$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbroutetime_OBJECTS) $(mbroutetime_LDADD) $(LIBS)
-
-mbrphsbias$(EXEEXT): $(mbrphsbias_OBJECTS) $(mbrphsbias_DEPENDENCIES) $(EXTRA_mbrphsbias_DEPENDENCIES) 
-	@rm -f mbrphsbias$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mbrphsbias_OBJECTS) $(mbrphsbias_LDADD) $(LIBS)
 
 mbsegygrid$(EXEEXT): $(mbsegygrid_OBJECTS) $(mbsegygrid_DEPENDENCIES) $(EXTRA_mbsegygrid_DEPENDENCIES) 
 	@rm -f mbsegygrid$(EXEEXT)
@@ -982,10 +880,6 @@ mbsslayout$(EXEEXT): $(mbsslayout_OBJECTS) $(mbsslayout_DEPENDENCIES) $(EXTRA_mb
 	@rm -f mbsslayout$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbsslayout_OBJECTS) $(mbsslayout_LDADD) $(LIBS)
 
-mbstripnan$(EXEEXT): $(mbstripnan_OBJECTS) $(mbstripnan_DEPENDENCIES) $(EXTRA_mbstripnan_DEPENDENCIES) 
-	@rm -f mbstripnan$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mbstripnan_OBJECTS) $(mbstripnan_LDADD) $(LIBS)
-
 mbsvplist$(EXEEXT): $(mbsvplist_OBJECTS) $(mbsvplist_DEPENDENCIES) $(EXTRA_mbsvplist_DEPENDENCIES) 
 	@rm -f mbsvplist$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbsvplist_OBJECTS) $(mbsvplist_LDADD) $(LIBS)
@@ -993,10 +887,6 @@ mbsvplist$(EXEEXT): $(mbsvplist_OBJECTS) $(mbsvplist_DEPENDENCIES) $(EXTRA_mbsvp
 mbsvpselect$(EXEEXT): $(mbsvpselect_OBJECTS) $(mbsvpselect_DEPENDENCIES) $(EXTRA_mbsvpselect_DEPENDENCIES) 
 	@rm -f mbsvpselect$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbsvpselect_OBJECTS) $(mbsvpselect_LDADD) $(LIBS)
-
-mbswplspreprocess$(EXEEXT): $(mbswplspreprocess_OBJECTS) $(mbswplspreprocess_DEPENDENCIES) $(EXTRA_mbswplspreprocess_DEPENDENCIES) 
-	@rm -f mbswplspreprocess$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mbswplspreprocess_OBJECTS) $(mbswplspreprocess_LDADD) $(LIBS)
 
 mbtime$(EXEEXT): $(mbtime_OBJECTS) $(mbtime_DEPENDENCIES) $(EXTRA_mbtime_DEPENDENCIES) 
 	@rm -f mbtime$(EXEEXT)
@@ -1013,13 +903,9 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geodesic.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb7k2jstar.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb7k2ss.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb7kpreprocess.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbabsorption.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbareaclean.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbauvloglist.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbauvnavusbl.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbbackangle.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbclean.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbconfig.Po@am__quote@ # am--include-marker
@@ -1035,34 +921,25 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgpstide.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrid.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbhistogram.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbhsdump.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbhysweeppreprocess.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbinfo.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbinsreprocess.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbkongsbergpreprocess.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mblevitus.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mblist.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbmakeplatform.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbminirovnav.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbmosaic.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavlist.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbneptune2esf.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbpreprocess.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbprocess.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbrollbias.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbrolltimelag.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbroutetime.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbrphsbias.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsegygrid.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsegyinfo.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsegylist.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsegypsd.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbset.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsslayout.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbstripnan.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsvplist.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsvpselect.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbswplspreprocess.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtime.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbvoxelclean.Po@am__quote@ # am--include-marker
 
@@ -1246,13 +1123,9 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/geodesic.Po
-	-rm -f ./$(DEPDIR)/mb7k2jstar.Po
-	-rm -f ./$(DEPDIR)/mb7k2ss.Po
-	-rm -f ./$(DEPDIR)/mb7kpreprocess.Po
 	-rm -f ./$(DEPDIR)/mbabsorption.Po
 	-rm -f ./$(DEPDIR)/mbareaclean.Po
 	-rm -f ./$(DEPDIR)/mbauvloglist.Po
-	-rm -f ./$(DEPDIR)/mbauvnavusbl.Po
 	-rm -f ./$(DEPDIR)/mbbackangle.Po
 	-rm -f ./$(DEPDIR)/mbclean.Po
 	-rm -f ./$(DEPDIR)/mbconfig.Po
@@ -1268,34 +1141,25 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/mbgpstide.Po
 	-rm -f ./$(DEPDIR)/mbgrid.Po
 	-rm -f ./$(DEPDIR)/mbhistogram.Po
-	-rm -f ./$(DEPDIR)/mbhsdump.Po
-	-rm -f ./$(DEPDIR)/mbhysweeppreprocess.Po
 	-rm -f ./$(DEPDIR)/mbinfo.Po
-	-rm -f ./$(DEPDIR)/mbinsreprocess.Po
-	-rm -f ./$(DEPDIR)/mbkongsbergpreprocess.Po
 	-rm -f ./$(DEPDIR)/mblevitus.Po
 	-rm -f ./$(DEPDIR)/mblist.Po
 	-rm -f ./$(DEPDIR)/mbmakeplatform.Po
 	-rm -f ./$(DEPDIR)/mbminirovnav.Po
 	-rm -f ./$(DEPDIR)/mbmosaic.Po
 	-rm -f ./$(DEPDIR)/mbnavlist.Po
-	-rm -f ./$(DEPDIR)/mbneptune2esf.Po
 	-rm -f ./$(DEPDIR)/mbpreprocess.Po
 	-rm -f ./$(DEPDIR)/mbprocess.Po
-	-rm -f ./$(DEPDIR)/mbrollbias.Po
 	-rm -f ./$(DEPDIR)/mbrolltimelag.Po
 	-rm -f ./$(DEPDIR)/mbroutetime.Po
-	-rm -f ./$(DEPDIR)/mbrphsbias.Po
 	-rm -f ./$(DEPDIR)/mbsegygrid.Po
 	-rm -f ./$(DEPDIR)/mbsegyinfo.Po
 	-rm -f ./$(DEPDIR)/mbsegylist.Po
 	-rm -f ./$(DEPDIR)/mbsegypsd.Po
 	-rm -f ./$(DEPDIR)/mbset.Po
 	-rm -f ./$(DEPDIR)/mbsslayout.Po
-	-rm -f ./$(DEPDIR)/mbstripnan.Po
 	-rm -f ./$(DEPDIR)/mbsvplist.Po
 	-rm -f ./$(DEPDIR)/mbsvpselect.Po
-	-rm -f ./$(DEPDIR)/mbswplspreprocess.Po
 	-rm -f ./$(DEPDIR)/mbtime.Po
 	-rm -f ./$(DEPDIR)/mbvoxelclean.Po
 	-rm -f Makefile
@@ -1344,13 +1208,9 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/geodesic.Po
-	-rm -f ./$(DEPDIR)/mb7k2jstar.Po
-	-rm -f ./$(DEPDIR)/mb7k2ss.Po
-	-rm -f ./$(DEPDIR)/mb7kpreprocess.Po
 	-rm -f ./$(DEPDIR)/mbabsorption.Po
 	-rm -f ./$(DEPDIR)/mbareaclean.Po
 	-rm -f ./$(DEPDIR)/mbauvloglist.Po
-	-rm -f ./$(DEPDIR)/mbauvnavusbl.Po
 	-rm -f ./$(DEPDIR)/mbbackangle.Po
 	-rm -f ./$(DEPDIR)/mbclean.Po
 	-rm -f ./$(DEPDIR)/mbconfig.Po
@@ -1366,34 +1226,25 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/mbgpstide.Po
 	-rm -f ./$(DEPDIR)/mbgrid.Po
 	-rm -f ./$(DEPDIR)/mbhistogram.Po
-	-rm -f ./$(DEPDIR)/mbhsdump.Po
-	-rm -f ./$(DEPDIR)/mbhysweeppreprocess.Po
 	-rm -f ./$(DEPDIR)/mbinfo.Po
-	-rm -f ./$(DEPDIR)/mbinsreprocess.Po
-	-rm -f ./$(DEPDIR)/mbkongsbergpreprocess.Po
 	-rm -f ./$(DEPDIR)/mblevitus.Po
 	-rm -f ./$(DEPDIR)/mblist.Po
 	-rm -f ./$(DEPDIR)/mbmakeplatform.Po
 	-rm -f ./$(DEPDIR)/mbminirovnav.Po
 	-rm -f ./$(DEPDIR)/mbmosaic.Po
 	-rm -f ./$(DEPDIR)/mbnavlist.Po
-	-rm -f ./$(DEPDIR)/mbneptune2esf.Po
 	-rm -f ./$(DEPDIR)/mbpreprocess.Po
 	-rm -f ./$(DEPDIR)/mbprocess.Po
-	-rm -f ./$(DEPDIR)/mbrollbias.Po
 	-rm -f ./$(DEPDIR)/mbrolltimelag.Po
 	-rm -f ./$(DEPDIR)/mbroutetime.Po
-	-rm -f ./$(DEPDIR)/mbrphsbias.Po
 	-rm -f ./$(DEPDIR)/mbsegygrid.Po
 	-rm -f ./$(DEPDIR)/mbsegyinfo.Po
 	-rm -f ./$(DEPDIR)/mbsegylist.Po
 	-rm -f ./$(DEPDIR)/mbsegypsd.Po
 	-rm -f ./$(DEPDIR)/mbset.Po
 	-rm -f ./$(DEPDIR)/mbsslayout.Po
-	-rm -f ./$(DEPDIR)/mbstripnan.Po
 	-rm -f ./$(DEPDIR)/mbsvplist.Po
 	-rm -f ./$(DEPDIR)/mbsvpselect.Po
-	-rm -f ./$(DEPDIR)/mbswplspreprocess.Po
 	-rm -f ./$(DEPDIR)/mbtime.Po
 	-rm -f ./$(DEPDIR)/mbvoxelclean.Po
 	-rm -f Makefile
