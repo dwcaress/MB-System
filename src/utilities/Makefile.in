@@ -242,7 +242,7 @@ mbsslayout_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
 am_mbsvplist_OBJECTS = mbsvplist.$(OBJEXT)
 mbsvplist_OBJECTS = $(am_mbsvplist_OBJECTS)
 mbsvplist_LDADD = $(LDADD)
-am_mbsvpselect_OBJECTS = mbsvpselect.$(OBJEXT) geodesic.$(OBJEXT)
+am_mbsvpselect_OBJECTS = mbsvpselect.$(OBJEXT)
 mbsvpselect_OBJECTS = $(am_mbsvpselect_OBJECTS)
 mbsvpselect_LDADD = $(LDADD)
 am_mbtime_OBJECTS = mbtime.$(OBJEXT)
@@ -266,46 +266,27 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/geodesic.Po \
-	./$(DEPDIR)/mbabsorption.Po ./$(DEPDIR)/mbareaclean.Po \
-	./$(DEPDIR)/mbauvloglist.Po ./$(DEPDIR)/mbbackangle.Po \
-	./$(DEPDIR)/mbclean.Po ./$(DEPDIR)/mbconfig.Po \
-	./$(DEPDIR)/mbcopy.Po ./$(DEPDIR)/mbctdlist.Po \
-	./$(DEPDIR)/mbdatalist.Po ./$(DEPDIR)/mbdefaults.Po \
-	./$(DEPDIR)/mbdumpesf.Po ./$(DEPDIR)/mbextractsegy.Po \
-	./$(DEPDIR)/mbfilter.Po ./$(DEPDIR)/mbformat.Po \
-	./$(DEPDIR)/mbgetesf.Po ./$(DEPDIR)/mbgpstide.Po \
-	./$(DEPDIR)/mbgrid.Po ./$(DEPDIR)/mbhistogram.Po \
-	./$(DEPDIR)/mbinfo.Po ./$(DEPDIR)/mblevitus.Po \
-	./$(DEPDIR)/mblist.Po ./$(DEPDIR)/mbmakeplatform.Po \
-	./$(DEPDIR)/mbminirovnav.Po ./$(DEPDIR)/mbmosaic.Po \
-	./$(DEPDIR)/mbnavlist.Po ./$(DEPDIR)/mbpreprocess.Po \
-	./$(DEPDIR)/mbprocess.Po ./$(DEPDIR)/mbrolltimelag.Po \
-	./$(DEPDIR)/mbroutetime.Po ./$(DEPDIR)/mbsegygrid.Po \
-	./$(DEPDIR)/mbsegyinfo.Po ./$(DEPDIR)/mbsegylist.Po \
-	./$(DEPDIR)/mbsegypsd.Po ./$(DEPDIR)/mbset.Po \
-	./$(DEPDIR)/mbsslayout.Po ./$(DEPDIR)/mbsvplist.Po \
-	./$(DEPDIR)/mbsvpselect.Po ./$(DEPDIR)/mbtime.Po \
-	./$(DEPDIR)/mbvoxelclean.Po
+am__depfiles_remade = ./$(DEPDIR)/mbabsorption.Po \
+	./$(DEPDIR)/mbareaclean.Po ./$(DEPDIR)/mbauvloglist.Po \
+	./$(DEPDIR)/mbbackangle.Po ./$(DEPDIR)/mbclean.Po \
+	./$(DEPDIR)/mbconfig.Po ./$(DEPDIR)/mbcopy.Po \
+	./$(DEPDIR)/mbctdlist.Po ./$(DEPDIR)/mbdatalist.Po \
+	./$(DEPDIR)/mbdefaults.Po ./$(DEPDIR)/mbdumpesf.Po \
+	./$(DEPDIR)/mbextractsegy.Po ./$(DEPDIR)/mbfilter.Po \
+	./$(DEPDIR)/mbformat.Po ./$(DEPDIR)/mbgetesf.Po \
+	./$(DEPDIR)/mbgpstide.Po ./$(DEPDIR)/mbgrid.Po \
+	./$(DEPDIR)/mbhistogram.Po ./$(DEPDIR)/mbinfo.Po \
+	./$(DEPDIR)/mblevitus.Po ./$(DEPDIR)/mblist.Po \
+	./$(DEPDIR)/mbmakeplatform.Po ./$(DEPDIR)/mbminirovnav.Po \
+	./$(DEPDIR)/mbmosaic.Po ./$(DEPDIR)/mbnavlist.Po \
+	./$(DEPDIR)/mbpreprocess.Po ./$(DEPDIR)/mbprocess.Po \
+	./$(DEPDIR)/mbrolltimelag.Po ./$(DEPDIR)/mbroutetime.Po \
+	./$(DEPDIR)/mbsegygrid.Po ./$(DEPDIR)/mbsegyinfo.Po \
+	./$(DEPDIR)/mbsegylist.Po ./$(DEPDIR)/mbsegypsd.Po \
+	./$(DEPDIR)/mbset.Po ./$(DEPDIR)/mbsslayout.Po \
+	./$(DEPDIR)/mbsvplist.Po ./$(DEPDIR)/mbsvpselect.Po \
+	./$(DEPDIR)/mbtime.Po ./$(DEPDIR)/mbvoxelclean.Po
 am__mv = mv -f
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
-	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
-	$(AM_CFLAGS) $(CFLAGS)
-AM_V_CC = $(am__v_CC_@AM_V@)
-am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
-am__v_CC_0 = @echo "  CC      " $@;
-am__v_CC_1 = 
-CCLD = $(CC)
-LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-AM_V_CCLD = $(am__v_CCLD_@AM_V@)
-am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
-am__v_CCLD_0 = @echo "  CCLD    " $@;
-am__v_CCLD_1 = 
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
@@ -563,7 +544,6 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 pyexecdir = @pyexecdir@
 pythondir = @pythondir@
-runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -642,7 +622,7 @@ mbsslayout_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbsslayout_SOURCES = mbsslayout.cc
 # mbstripnan_SOURCES = mbstripnan.cc
 mbsvplist_SOURCES = mbsvplist.cc
-mbsvpselect_SOURCES = mbsvpselect.cc geodesic.c
+mbsvpselect_SOURCES = mbsvpselect.cc
 # mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 # mbswplspreprocess_SOURCES = mbswplspreprocess.cc
 mbtime_SOURCES = mbtime.cc
@@ -660,7 +640,7 @@ all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .cc .lo .o .obj
+.SUFFIXES: .cc .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -902,7 +882,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geodesic.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbabsorption.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbareaclean.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbauvloglist.Po@am__quote@ # am--include-marker
@@ -948,30 +927,6 @@ $(am__depfiles_remade):
 	@echo '# dummy' >$@-t && $(am__mv) $@-t $@
 
 am--depfiles: $(am__depfiles_remade)
-
-.c.o:
-@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
-@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ $<
-
-.c.obj:
-@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
-@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
-
-.c.lo:
-@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
-@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -1122,8 +1077,7 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/geodesic.Po
-	-rm -f ./$(DEPDIR)/mbabsorption.Po
+		-rm -f ./$(DEPDIR)/mbabsorption.Po
 	-rm -f ./$(DEPDIR)/mbareaclean.Po
 	-rm -f ./$(DEPDIR)/mbauvloglist.Po
 	-rm -f ./$(DEPDIR)/mbbackangle.Po
@@ -1207,8 +1161,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/geodesic.Po
-	-rm -f ./$(DEPDIR)/mbabsorption.Po
+		-rm -f ./$(DEPDIR)/mbabsorption.Po
 	-rm -f ./$(DEPDIR)/mbareaclean.Po
 	-rm -f ./$(DEPDIR)/mbauvloglist.Po
 	-rm -f ./$(DEPDIR)/mbbackangle.Po
@@ -1286,8 +1239,8 @@ uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS
 
 
 levitus.h: Makefile
-	echo 'char *levitusfile = "$(mbsystemdatadir)/LevitusAnnual82.dat";' >$@
-	echo 'char *otps_location = "$(OTPS_DIR)";' >>$@
+	echo 'const char *levitusfile = "$(mbsystemdatadir)/LevitusAnnual82.dat";' >$@
+	echo 'const char *otps_location = "$(OTPS_DIR)";' >>$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

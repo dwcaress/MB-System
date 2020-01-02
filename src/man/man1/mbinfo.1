@@ -1,4 +1,4 @@
-.TH mbinfo 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbinfo 1 "31 December 2019" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbinfo\fP \- Output some basic statistics of swath sonar data files.
 
@@ -7,8 +7,8 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbinfo\fP [\fB\-B\fIyr/mo/da/hr/mn/sc\fP \fB\-C \-E\fIyr/mo/da/hr/mn/sc\fP
-\fB\-F\fIformat\fP \fB\-G\fP \fB\-I\fIfilename\fP
-\fB\-L\fIlonflip\fP \fB\-M\fIlondim/latdim\fP
+\fB\-F\fIformat\fP \fB\-G\fP \fB\-I\fIfilename\fP \fB\-L\fIlonflip\fP
+\fB\-M\fIlondim/latdim[/lonmin/lonmax/latmin/latmax]\fP
 \fB\-N\fP \fB\-O\fP \fB\-P\fIping\fP
 \fB\-R\fIwest/east/south/north\fP \fB\-S\fIspeed\fP \fB\-W\fP
 \fB\-X\fIoutputformat\fP \fB\-V \-H\fP]
@@ -86,7 +86,10 @@ maximum longitude and latitude of the bounding box, and
 read the data a second time. Each bin in which a sounding or
 pixel falls will be set to 1. After the second reading pass,
 the data location mask will be output at the end of the
-\fBmbinfo\fP output.
+\fBmbinfo\fP output. If the data bounding box is already known, then
+it can be added to the \fB-M\fP command (e.g.
+\fB\-M\fP\fIlondim/latdim[/lonmin/lonmax/latmin/latmax]\fP). In this
+case, the data will only be read once.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
@@ -197,13 +200,17 @@ Default: \fBmbinfo\fP selects the best longitude range based
 on the first data.
 .TP
 .B \-M
-\fIlondim/latdim\fP
+\fIlondim/latdim[/lonmin/lonmax/latmin/latmax]\fP
 .br
 The program output can be extended to include a coarse
 mask representing where data lies within the file's bounding
 box. This mask is shown as a table of 0's and 1's, where
 the 1's indicate bins with data. The dimensions of the mask
-are specified with the \fB\-M\fP\fIlondim/latdim\fP option.
+are specified with the \fIlondim\fP and \fIlatdim\fP values.
+If the data bounding box is not specified by including
+\fIlonmin\fP, \fIlonmax\fP, \fIlatmin\fP, and \fIlatmax\fP, then
+the data will be read twice, with the bounding box being determined
+during the first read.
 .TP
 .B \-N
 .br

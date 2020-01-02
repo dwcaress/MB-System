@@ -284,15 +284,18 @@ int mb_get_relative_path(int verbose, char *path, char *pwd, int *error);
 int mb_get_shortest_path(int verbose, char *path, int *error);
 int mb_get_basename(int verbose, char *path, int *error);
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error);
-int mb_make_info(int verbose, int force, char *file, int format, int *error);
+bool mb_should_make_fbt(int verbose, int format);
+bool mb_should_make_fnv(int verbose, int format);
+int mb_make_info(int verbose, bool force, char *file, int format, int *error);
 int mb_get_fbt(int verbose, char *file, int *format, int *error);
 int mb_get_fnv(int verbose, char *file, int *format, int *error);
 int mb_get_ffa(int verbose, char *file, int *format, int *error);
 int mb_get_ffs(int verbose, char *file, int *format, int *error);
-int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, double heading, int nbath, int nss, char *beamflag,
-                  double *bath, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
-                  double *ssalongtrack, int *ibeamport, int *ibeamcntr, int *ibeamstbd, int *ipixelport, int *ipixelcntr,
-                  int *ipixelstbd, int *error);
+int mb_swathbounds(int verbose, int checkgood, int nbath, int nss,
+                  char *beamflag, double *bathacrosstrack,
+                  double *ss, double *ssacrosstrack,
+                  int *ibeamport, int *ibeamcntr, int *ibeamstbd,
+                  int *ipixelport, int *ipixelcntr, int *ipixelstbd, int *error);
 int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
                   double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
                   int *beams_amp, int *pixels_ss, int *error);
@@ -555,7 +558,8 @@ int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, 
 int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double sonar_offset_z, double nav_offset_x,
              double nav_offset_y, double nav_offset_z, double vru_offset_x, double vru_offset_y, double vru_offset_z,
              double vru_pitch, double vru_roll, double *lever_x, double *lever_y, double *lever_z, int *error);
-int mb_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void *));
+//int mb_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void *));
+int mb_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *));
 int mb_double_compare(const void *a, const void *b);
 int mb_int_compare(const void *a, const void *b);
 int mb_edit_compare(const void *a, const void *b);

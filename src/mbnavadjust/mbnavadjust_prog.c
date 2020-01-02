@@ -230,6 +230,7 @@ int mbnavadjust_init_globals() {
   project.crossings = NULL;
   project.num_ties = 0;
   project.inversion_status = MBNA_INVERSION_NONE;
+  project.ref_grid_status = MBNA_GRID_NONE;
   project.grid_status = MBNA_GRID_NONE;
   project.modelplot = false;
   project.modelplot_style = MBNA_MODELPLOT_TIMESERIES;
@@ -1864,6 +1865,28 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
   return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbnavadjust_import_reference(char *path) {
+  /* local variables */
+  int status = MB_SUCCESS;
+
+  /* print input debug statements */
+  if (mbna_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2               path:     %s\n", path);
+  }
+
+  /* print output debug statements */
+  if (mbna_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:       %d\n", error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbnavadjust_bin_bathymetry(double altitude, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack,
                                double *bathalongtrack, int mbna_bin_beams_bath, double mbna_bin_pseudobeamwidth,
                                double mbna_bin_swathwidth, char *bin_beamflag, double *bin_bath, double *bin_bathacrosstrack,
@@ -1900,7 +1923,6 @@ int mbnavadjust_bin_bathymetry(double altitude, int beams_bath, char *beamflag, 
 
   return (status);
 }
-
 /*--------------------------------------------------------------------*/
 int mbnavadjust_findcrossings() {
   /* local variables */
@@ -14881,19 +14903,19 @@ int mbnavadjust_open_visualization(int which_grid) {
   char mbv_primary_grid_projection_id[MB_PATH_MAXLINE];
   int mbv_display_projection_mode;
   char mbv_display_projection_id[MB_PATH_MAXLINE];
-  float mbv_primary_nodatavalue;
-  int mbv_primary_nxy;
-  int mbv_primary_nx;
-  int mbv_primary_ny;
-  double mbv_primary_min;
-  double mbv_primary_max;
-  double mbv_primary_xmin;
-  double mbv_primary_xmax;
-  double mbv_primary_ymin;
-  double mbv_primary_ymax;
-  double mbv_primary_dx;
-  double mbv_primary_dy;
-  float *mbv_primary_data;
+  float mbv_primary_nodatavalue = 0.0;
+  int mbv_primary_nxy = 0;
+  int mbv_primary_nx = 0;
+  int mbv_primary_ny = 0;
+  double mbv_primary_min = 0.0;
+  double mbv_primary_max = 0.0;
+  double mbv_primary_xmin = 0.0;
+  double mbv_primary_xmax = 0.0;
+  double mbv_primary_ymin = 0.0;
+  double mbv_primary_ymax = 0.0;
+  double mbv_primary_dx = 0.0;
+  double mbv_primary_dy = 0.0;
+  float *mbv_primary_data = NULL;
 
   int mbv_navpings = 0;
   int mbv_navpings_alloc = 0;

@@ -136,7 +136,7 @@ mbsslayout_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbsslayout_SOURCES = mbsslayout.cc
 # mbstripnan_SOURCES = mbstripnan.cc
 mbsvplist_SOURCES = mbsvplist.cc
-mbsvpselect_SOURCES = mbsvpselect.cc geodesic.c
+mbsvpselect_SOURCES = mbsvpselect.cc
 # mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 # mbswplspreprocess_SOURCES = mbswplspreprocess.cc
 mbtime_SOURCES = mbtime.cc
@@ -157,5 +157,5 @@ CLEANFILES = levitus.h
 DISTCLEANFILES = levitus.h
 
 levitus.h: Makefile
-	echo 'char *levitusfile = "$(mbsystemdatadir)/LevitusAnnual82.dat";' >$@
-	echo 'char *otps_location = "$(OTPS_DIR)";' >>$@
+	echo 'const char *levitusfile = "$(mbsystemdatadir)/LevitusAnnual82.dat";' >$@
+	echo 'const char *otps_location = "$(OTPS_DIR)";' >>$@

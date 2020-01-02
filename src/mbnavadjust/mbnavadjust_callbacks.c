@@ -148,6 +148,7 @@ static int modp_borders[4];
 #define FILE_MODE_NEW 1
 #define FILE_MODE_OPEN 2
 #define FILE_MODE_IMPORT 3
+#define FILE_MODE_REFERENCE 4
 size_t file_mode = FILE_MODE_NONE;
 int format = 0;
 int expose_plot_ok = True;
@@ -3848,6 +3849,9 @@ void do_fileselection_mode(Widget w, XtPointer client_data, XtPointer call_data)
 	else if (file_mode == FILE_MODE_IMPORT) {
 		tmp0 = (XmString)BX_CONVERT(fileSelectionBox, "*.mb-1", XmRXmString, 0, &argok);
 	}
+	else if (file_mode == FILE_MODE_REFERENCE) {
+		tmp0 = (XmString)BX_CONVERT(fileSelectionBox, "*.grd", XmRXmString, 0, &argok);
+	}
 	else {
 		tmp0 = (XmString)BX_CONVERT(fileSelectionBox, "*.nvh", XmRXmString, 0, &argok);
 	}
@@ -3894,6 +3898,10 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 		}
 		if (project.visualization_status == true)
 			do_update_visualization_status();
+	}
+	else if (file_mode == FILE_MODE_REFERENCE) {
+		status = mbnavadjust_import_reference(ifile);
+		do_update_status();
 	}
 }
 
