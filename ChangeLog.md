@@ -22,7 +22,7 @@ and each distribution corresponds to a discrete Github release tag. Releases tha
 include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
-
+- Version 5.7.6beta22    January 2, 2020
 - Version 5.7.6beta21    December 12, 2019
 - Version 5.7.6beta20    November 26, 2019
 - Version 5.7.6beta19    November 22, 2019
@@ -337,6 +337,54 @@ announced releases.
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 
 -------------------------------------------------------------------------------
+
+-----> 5.7.6beta22 (January 2, 2020)
+
+mbprocess, mb_make_info(): Altered mbprocess so that it runs about half as slow
+(twice as fast) as before. This optimization is accomplished by having mbprocess
+generate the fbt and fnv files directly rather than by system() calls to mbcopy
+and mblist, and by having the system() call to mbinfo include the overall area
+bounds so that mbinfo only reads the output file once while generating inf files
+(instead of reading the data twice).
+
+mbnavadjust: Added GUI elements related to defining a reference bathymetry model.
+In the future, it will be possible to tie swath files to a reference bathymetry
+imported from a grid file.
+
+mbextractsegy: Fixed error in the milliseconds of traceheader timestamps.
+
+mblist: improved calculation and handling of swath bounds values.
+
+mbinfo: Augmented the -M data mask option to allow pre-definition of the file's
+area bounds. Previously, the data mask has been requested using -Mmask_nx/mask_ny
+where mask_nx/mask_ny are the dimensions of the mask. In this case, the file is
+read twice - first to get the area bounds of all data while getting the other
+data statistics output by mbinfo, and second to populate the data mask defined
+by the area bounds and the dimensions mask_nx and mask_ny. Now, if the the option
+is given by -Mmask_nx/mask_ny/lonmin/lonmax/latmin/latmax, then the last four values
+define the area bounds and the data need only be read once. Mbprocess now calls
+mbinfo in this way, allowing a speedup of the mbprocess execution.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best practices.
+
+src/utilities: All programs in src/utilities have been migrated to C++.
+
+Deprecated programs: Several programs that are no longer part of the current data processing approach have been declared deprecated and have been moved from
+src/utilities to a new directory src/deprecated. These programs are:
+    mb7k2jstar
+    mb7k2ss
+    mb7kpreprocess
+    mbauvnavusbl
+    mbhsdump
+    mbhysweeppreprocess
+    mbinsreprocess
+    mbkongsbergpreprocess
+    mbneptune2esf
+    mbrollbias
+    mbrphsbias
+    mbstripnan
+    mbswplspreprocess
+The deprecated programs are still built and installed.
 
 -----> 5.7.6beta21 (December 12, 2019)
 

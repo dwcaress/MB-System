@@ -530,12 +530,12 @@ int main(int argc, char **argv) {
 	float *gridamphist = nullptr;
 	float *gridsshist = nullptr;
 	char gridfile[MB_PATH_MAXLINE];
-	char *xlabel = "Grazing Angle (degrees)";
-	char *ylabel = "Amplitude";
+	const char *xlabel = "Grazing Angle (degrees)";
+	const char *ylabel = "Amplitude";
 	char zlabel[MB_PATH_MAXLINE];
 	char title[MB_PATH_MAXLINE];
 	char plot_cmd[MB_PATH_MAXLINE];
-	char *projection = "GenericLinear";
+	const char *projection = "GenericLinear";
 
 	double mtodeglon, mtodeglat;
 	double headingx, headingy;

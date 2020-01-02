@@ -488,7 +488,6 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 pyexecdir = @pyexecdir@
 pythondir = @pythondir@
-runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -517,10 +516,6 @@ check_SCRIPTS = mb7k2jstar_test.py mb7k2ss_test.py \
 	mbhysweeppreprocess_test.py mbinsreprocess_test.py \
 	mbkongsbergpreprocess_test.py mbneptune2esf_test.py \
 	mbrollbias_test.py mbswplspreprocess_test.py
-
-# endif
-CLEANFILES = 
-DISTCLEANFILES = 
 all: all-am
 
 .SUFFIXES:
@@ -753,12 +748,10 @@ mostlyclean-generic:
 	-test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -845,6 +838,8 @@ uninstall-am:
 
 .PRECIOUS: Makefile
 
+
+# endif
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

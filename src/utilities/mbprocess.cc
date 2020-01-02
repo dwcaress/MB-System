@@ -55,6 +55,7 @@
 #include "mb_swap.h"
 #include "mbsys_atlas.h"
 #include "mbsys_kmbes.h"
+#include "mbsys_ldeoih.h"
 #include "mbsys_reson7k.h"
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
@@ -783,7 +784,6 @@ int main(int argc, char **argv) {
   int *staticbeam = nullptr;
   double *staticangle;
   double *staticoffset = nullptr;
-  int itime, iatime;
   double headingx, headingy;
   double mtodeglon, mtodeglat;
   double del_time, dx, dy, dist;
@@ -802,7 +802,7 @@ int main(int argc, char **argv) {
   void *rt_svp = nullptr;
   double ssv;
   int sensorhead = 0;
-  int sensorhead_error = MB_ERROR_NO_ERROR;
+  int sensortype = 0;
 
   /* swath file locking variables */
   int lock_status;
@@ -878,7 +878,6 @@ int main(int argc, char **argv) {
 
   /* topography parameters */
   struct mbprocess_grid_struct grid;
-  // memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
 
   char buffer[MBP_FILENAMESIZE];
   char dummy[MBP_FILENAMESIZE];
@@ -1015,15 +1014,16 @@ int main(int argc, char **argv) {
         if (!testonly) {
           /* want to process, now try to set a lock of the file to be processed */
           if (uselockfiles) {
-            lock_status =
-                mb_pr_lockswathfile(verbose, process.mbp_ifile, MBP_LOCK_PROCESS, program_name, &lock_error);
+            lock_status = mb_pr_lockswathfile(verbose, process.mbp_ifile,
+                                              MBP_LOCK_PROCESS, program_name,
+                                              &lock_error);
             if (lock_status == MB_SUCCESS) {
               proceedprocess = true;
               locked = false;
             }
             else if (lock_error == MB_ERROR_FILE_LOCKED) {
               proceedprocess = false;
-              /* lock_status = */ mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program,
+              mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program,
                                            lock_user, lock_cpu, lock_date, &lock_error);
             }
             else if (lock_error == MB_ERROR_OPEN_FAIL) {
@@ -1034,7 +1034,7 @@ int main(int argc, char **argv) {
 
           /* want to process, but lock files are disabled */
           else {
-            /* lock_status = */ mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program, lock_user,
+            mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program, lock_user,
                                          lock_cpu, lock_date, &lock_error);
             proceedprocess = true;
           }
@@ -1043,7 +1043,7 @@ int main(int argc, char **argv) {
         /* else only testing */
         else {
           /* want to process, check lock status of the file to be processed */
-          /* lock_status = */ mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program, lock_user,
+          mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program, lock_user,
                                        lock_cpu, lock_date, &lock_error);
           if (!locked || !uselockfiles) {
             proceedprocess = true;
@@ -1055,7 +1055,6 @@ int main(int argc, char **argv) {
       }
       else {
         proceedprocess = false;
-        /* lock_status = */
         mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose,
                        lock_program, lock_user, lock_cpu, lock_date,
                        &lock_error);
@@ -1371,7 +1370,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "\nBathymetry Water Sound Speed Reference:\n");
         if (process.mbp_corrected)
           fprintf(stderr, "  Output bathymetry reference:   CORRECTED\n");
-        else if (!process.mbp_corrected)
+        else
           fprintf(stderr, "  Output bathymetry reference:   UNCORRECTED\n");
         if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF) {
           if (process.mbp_corrected)
@@ -3220,6 +3219,54 @@ int main(int argc, char **argv) {
         exit(error);
       }
 
+      /* initialize writing the output fast bathymetry *fbt file */
+      bool make_fbt = false;
+      void *fmbio_ptr = nullptr;
+      void *fstore_ptr = nullptr;
+      struct mb_io_struct *fmb_io_ptr = nullptr;
+      struct mbsys_ldeoih_struct *fstore = nullptr;
+      if (mb_should_make_fbt(verbose, process.mbp_format)) {
+        mb_path fbtfile;
+
+        sprintf(fbtfile, "%s.fbt", process.mbp_ofile);
+        int fbeams_bath = 0;
+        int fbeams_amp = 0;
+        int fpixels_ss = 0;
+        if (mb_write_init(verbose, fbtfile, MBF_MBLDEOIH,
+                          &fmbio_ptr, &fbeams_bath, &fbeams_amp, &fpixels_ss,
+                          &error) != MB_SUCCESS) {
+          char *message = nullptr;
+          mb_error(verbose, error, &message);
+          fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
+          fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", process.mbp_ofile);
+          fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+          exit(error);
+        }
+        fmb_io_ptr = (struct mb_io_struct *)fmbio_ptr;
+        fstore = (struct mbsys_ldeoih_struct *) fmb_io_ptr->store_data;
+        fstore_ptr = (void *) fstore;
+        make_fbt = true;
+      }
+
+      /* initialize writing the output fast navigation *.fnv file */
+      bool make_fnv = false;
+      FILE *nfp = nullptr;
+      if (mb_should_make_fnv(verbose, process.mbp_format)) {
+        mb_path fnvfile;
+        sprintf(fnvfile, "%s.fnv", process.mbp_ofile);
+        if ((nfp = fopen(fnvfile, "w")) == nullptr) {
+            fprintf(stderr, "\nUnable to open output *.fnv file <%s> for reading\n",
+            fnvfile);
+            fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+            exit(MB_ERROR_OPEN_FAIL);
+        }
+        make_fnv = true;
+      }
+
+      /* initialize bounds that will be used in call to mbinfo to generate the *.inf file */
+      bool mask_bounds_init = false;
+      double mask_bounds[4];
+
       /* allocate memory for data arrays */
       if (error == MB_ERROR_NO_ERROR)
         /* status &= */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
@@ -3467,109 +3514,109 @@ int main(int argc, char **argv) {
         if (strlen(process.mbp_meta_vessel) > 0) {
           sprintf(comment, "METAVESSEL:%s", process.mbp_meta_vessel);
           // TODO(schwehr): Don't set "status =" for all the mb_put_comment.
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (strlen(process.mbp_meta_institution) > 0) {
           sprintf(comment, "METAINSTITUTION:%s", process.mbp_meta_institution);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (strlen(process.mbp_meta_platform) > 0) {
           sprintf(comment, "METAPLATFORM:%s", process.mbp_meta_platform);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (strlen(process.mbp_meta_sonar) > 0) {
           sprintf(comment, "METASONAR:%s", process.mbp_meta_sonar);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (strlen(process.mbp_meta_sonarversion) > 0) {
           sprintf(comment, "METASONARVERSION:%s", process.mbp_meta_sonarversion);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (strlen(process.mbp_meta_cruiseid) > 0) {
           sprintf(comment, "METACRUISEID:%s", process.mbp_meta_cruiseid);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (strlen(process.mbp_meta_cruisename) > 0) {
           sprintf(comment, "METACRUISENAME:%s", process.mbp_meta_cruisename);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (strlen(process.mbp_meta_pi) > 0) {
           sprintf(comment, "METAPI:%s", process.mbp_meta_pi);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (strlen(process.mbp_meta_piinstitution) > 0) {
           sprintf(comment, "METAPIINSTITUTION:%s", process.mbp_meta_piinstitution);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (strlen(process.mbp_meta_client) > 0) {
           sprintf(comment, "METACLIENT:%s", process.mbp_meta_client);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_meta_svcorrected > -1) {
           sprintf(comment, "METASVCORRECTED:%d", process.mbp_meta_svcorrected);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_meta_tidecorrected > -1) {
           sprintf(comment, "METATIDECORRECTED:%d", process.mbp_meta_tidecorrected);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_meta_batheditmanual > -1) {
           sprintf(comment, "METABATHEDITMANUAL:%d", process.mbp_meta_batheditmanual);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_meta_batheditauto > -1) {
           sprintf(comment, "METABATHEDITAUTO:%d", process.mbp_meta_batheditauto);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_meta_rollbias < MBP_METANOVALUE) {
           sprintf(comment, "METAROLLBIAS:%f", process.mbp_meta_rollbias);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_meta_pitchbias < MBP_METANOVALUE) {
           sprintf(comment, "METAPITCHBIAS:%f", process.mbp_meta_pitchbias);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_meta_headingbias < MBP_METANOVALUE) {
           sprintf(comment, "METAHEADINGBIAS:%f", process.mbp_meta_headingbias);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_meta_draft < MBP_METANOVALUE) {
           sprintf(comment, "METADRAFT:%f", process.mbp_meta_draft);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
@@ -3629,7 +3676,7 @@ int main(int argc, char **argv) {
             sprintf(comment, "  uncorrected meters (the depth values are adjusted to be");
           else
             sprintf(comment, "  corrected meters (the depth values obtained by");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
@@ -3637,52 +3684,52 @@ int main(int argc, char **argv) {
             sprintf(comment, "  consistent with a vertical water velocity of 1500 m/s).");
           else
             sprintf(comment, "  raytracing are not adjusted further).");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "Depths and crosstrack distances adjusted for roll bias");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  and pitch bias.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "Depths and crosstrack distances adjusted for ");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  change in transducer depth and/or heave.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, "Control Parameters:");
-        status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+        status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (error == MB_ERROR_NO_ERROR)
           ocomment++;
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, "  MBIO data format:   %d", process.mbp_format);
-        status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+        status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (error == MB_ERROR_NO_ERROR)
           ocomment++;
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, "  Input file:         %s", process.mbp_ifile);
-        status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+        status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (error == MB_ERROR_NO_ERROR)
           ocomment++;
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, "  Output file:        %s", process.mbp_ofile);
-        status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+        status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (error == MB_ERROR_NO_ERROR)
           ocomment++;
 
@@ -3690,63 +3737,63 @@ int main(int argc, char **argv) {
           if (process.mbp_angle_mode == MBP_ANGLES_OK) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Angle mode:         angles not altered");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           else if (process.mbp_angle_mode == MBP_ANGLES_SNELL) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Angle mode:         angles corrected using Snell's Law");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           else if (process.mbp_angle_mode == MBP_ANGLES_SNELLNULL) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Angle mode:         angles corrected using Snell's Law and array geometry");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Default SSV:        %f", ssv_default);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           if (ssv_prelimpass) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  SSV initial pass:   on");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  SSV initial pass:   off");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
 
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  SVP file:               %s", process.mbp_svpfile);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Input water sound velocity profile:");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "    depth (m)   velocity (m/s)");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           for (int i = 0; i < nsvp; i++) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "     %10.2f     %10.2f", depth[i], velocity[i]);
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
@@ -3755,64 +3802,64 @@ int main(int argc, char **argv) {
           if (process.mbp_corrected) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Output bathymetry reference:   CORRECTED");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
           else if (!process.mbp_corrected) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Output bathymetry reference:   UNCORRECTED");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
         }
         if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF) {
           if (process.mbp_corrected) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Depths modified from uncorrected to corrected.");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
           else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Depths modified from corrected to uncorrected.");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
         }
 
         if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Roll bias:       OFF");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Roll bias:       %f degrees (starboard: -, port: +)", process.mbp_rollbias);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Port roll bias:  %f degrees (starboard: -, port: +)", process.mbp_rollbias_port);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Starboard roll bias:  %f degrees (starboard: -, port: +)", process.mbp_rollbias_stbd);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_OFF) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Pitch bias:      OFF");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Pitch bias:      %f degrees (aft: -, forward: +)", process.mbp_pitchbias);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
@@ -3820,291 +3867,291 @@ int main(int argc, char **argv) {
         if (process.mbp_draft_mode == MBP_DRAFT_SET) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Draft set:      %f meters", process.mbp_draft);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_draft_mode == MBP_DRAFT_OFFSET) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Draft offset:    %f meters", process.mbp_draft_offset);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLY) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Draft multiplier: %f", process.mbp_draft_mult);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Draft offset:    %f meters", process.mbp_draft_offset);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Draft multiplier: %f", process.mbp_draft_mult);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_draft_mode == MBP_DRAFT_OFF) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Draft:           not modified");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_heave_mode == MBP_HEAVE_OFFSET) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Heave offset: %f meters", process.mbp_heave);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_heave_mode == MBP_HEAVE_MULTIPLY) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Heave multiplier: %f", process.mbp_heave_mult);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_heave_mode == MBP_HEAVE_MULTIPLYOFFSET) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Heave offset: %f meters", process.mbp_heave);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Heave multiplier: %f", process.mbp_heave_mult);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_heave_mode == MBP_HEAVE_OFF) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Heave:           not modified");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_tt_mode == MBP_TT_MULTIPLY) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Travel time multiplier: %f", process.mbp_tt_mult);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_tt_mode == MBP_TT_OFF) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Travel time:     not modified");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_lever_mode == MBP_LEVER_OFF) {
           sprintf(comment, "  Lever calculation off.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else {
           sprintf(comment, "  Lever calculation used to calculate heave correction.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  VRU offset x:                  %f m", process.mbp_vru_offsetx);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  VRU offset y:                  %f m", process.mbp_vru_offsety);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  VRU offset z:                  %f m", process.mbp_vru_offsetz);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Sonar offset x:                %f m", process.mbp_sonar_offsetx);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Sonar offset y:                %f m", process.mbp_sonar_offsety);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Sonar offset z:                %f m", process.mbp_sonar_offsetz);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_tide_mode == MBP_TIDE_OFF) {
           sprintf(comment, "  Tide calculation off.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else {
           sprintf(comment, "  Tide correction applied to bathymetry.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Tide file:                     %s", process.mbp_tidefile);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Tide format:                   %d", process.mbp_tide_format);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_nav_mode == MBP_NAV_OFF) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Merge navigation:          OFF");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_nav_mode == MBP_NAV_ON) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Merged navigation file:    %s", process.mbp_navfile);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
 
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Merged navigation format:  %d", process.mbp_nav_format);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
 
           if (process.mbp_nav_heading == MBP_NAV_ON) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Heading merge:         ON");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Heading merge:         OFF");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           if (process.mbp_nav_speed == MBP_NAV_ON) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Speed merge:           ON");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Speed merge:           OFF");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           if (process.mbp_nav_draft == MBP_NAV_ON) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Draft merge:           ON");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Draft merge:           OFF");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           if (process.mbp_nav_attitude == MBP_NAV_ON) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Attitude merge:        ON");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Attitude merge:        OFF");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           if (process.mbp_nav_algorithm == MBP_NAV_LINEAR) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Navigation algorithm: linear interpolation");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           else if (process.mbp_nav_algorithm == MBP_NAV_SPLINE) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Navigation algorithm: spline interpolation");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
           }
           sprintf(comment, "  Navigation time shift:         %f", process.mbp_nav_timeshift);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_nav_shift == MBP_NAV_ON) {
           sprintf(comment, "  Navigation positions shifted.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Navigation offset x:       %f", process.mbp_nav_offsetx);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Navigation offset y:       %f", process.mbp_nav_offsety);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Navigation offset z:       %f", process.mbp_nav_offsetz);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Navigation shift longitude:%f", process.mbp_nav_shiftlon);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Navigation shift latitude: %f", process.mbp_nav_shiftlat);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else {
           sprintf(comment, "  Navigation positions not shifted.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_navadj_mode == MBP_NAVADJ_OFF) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Merge adjusted navigation: OFF");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_navadj_mode >= MBP_NAVADJ_LL) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Adjusted navigation file: %s", process.mbp_navadjfile);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           if (process.mbp_navadj_mode == MBP_NAVADJ_LL) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Adjusted navigation applied to lon lat only");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
             strncpy(comment, "\0", MBP_FILENAMESIZE);
@@ -4112,7 +4159,7 @@ int main(int argc, char **argv) {
           else if (process.mbp_navadj_mode == MBP_NAVADJ_LLZ) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Adjusted navigation applied to lon lat depth");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             if (error == MB_ERROR_NO_ERROR)
               ocomment++;
             strncpy(comment, "\0", MBP_FILENAMESIZE);
@@ -4121,160 +4168,160 @@ int main(int argc, char **argv) {
             sprintf(comment, "  Adjusted navigation algorithm: linear interpolation");
           else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
             sprintf(comment, "  Adjusted navigation algorithm: spline interpolation");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_attitude_mode == MBP_ATTITUDE_OFF) {
           sprintf(comment, "  Attitude merging:              OFF.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else {
           sprintf(comment, "  Attitude merging:              ON.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Attitude file:                 %s", process.mbp_attitudefile);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Attitude format:               %d", process.mbp_attitude_format);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_sonardepth_mode == MBP_SONARDEPTH_OFF) {
           sprintf(comment, "  Sonardepth merging:              OFF.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else {
           sprintf(comment, "  Sonardepth merging:              ON.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Sonardepth file:                 %s", process.mbp_sonardepthfile);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
           sprintf(comment, "  Sonardepth format:               %d", process.mbp_sonardepth_format);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_heading_mode == MBP_HEADING_OFF) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Heading modify:       OFF");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_heading_mode == MBP_HEADING_CALC || process.mbp_heading_mode == MBP_HEADING_CALCOFFSET) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Heading modify:       COURSE MADE GOOD");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         if (process.mbp_heading_mode == MBP_HEADING_OFFSET || process.mbp_heading_mode == MBP_HEADING_CALCOFFSET) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Heading offset:       %f deg", process.mbp_headingbias);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
 
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, "Amplitude Corrections:");
-        status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+        status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Amplitude vs grazing angle corrections applied to amplitudes.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Amplitude correction file:      %s m", process.mbp_ampcorrfile);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Amplitude correction by subtraction (dB scale)");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
           else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Amplitude correction by division (linear scale)");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
           if (process.mbp_ampcorr_symmetry == MBP_AMPCORR_SYMMETRIC) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  AVGA tables forced to be symmetric");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
           else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  AVGA tables allowed to be asymmetric");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Reference grazing angle:       %f deg", process.mbp_ampcorr_angle);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (process.mbp_ampcorr_slope == MBP_AMPCORR_IGNORESLOPE ||
               process.mbp_ampcorr_slope == MBP_AMPCORR_USESLOPE) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Amplitude correction uses swath bathymetry in file");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
           else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Amplitude correction uses topography grid");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Topography grid file:      %s m", process.mbp_ampsscorr_topofile);
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
           if (process.mbp_ampcorr_slope == MBP_AMPCORR_IGNORESLOPE) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Amplitude correction ignores seafloor slope");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
           else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Amplitude correction uses seafloor slope");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
         }
         else {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Amplitude correction off.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         }
 
         strncpy(comment, "\0", MBP_FILENAMESIZE);
         sprintf(comment, "Sidescan Corrections:");
-        status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+        status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         if (process.mbp_sscorr_mode == MBP_SSCORR_ON) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Amplitude vs grazing angle corrections applied to sidescan.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Sidescan correction file:      %s m", process.mbp_sscorrfile);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Sidescan correction by subtraction (dB scale)");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
           else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  Sidescan correction by division (linear scale)");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           }
           if (process.mbp_sscorr_symmetry == MBP_SSCORR_SYMMETRIC) {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  AVGA tables forced to be symmetric");
-            status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+            status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           } else {
             strncpy(comment, "\0", MBP_FILENAMESIZE);
             sprintf(comment, "  AVGA tables allowed to be asymmetric");
@@ -4326,11 +4373,10 @@ int main(int argc, char **argv) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Sidescan interpolation:        %d", process.mbp_ssrecalc_interpolate);
           status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-        }
-        else {
+        } else {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Sidescan not recalculated.");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
         }
 
         strncpy(comment, "\0", MBP_FILENAMESIZE);
@@ -4355,14 +4401,14 @@ int main(int argc, char **argv) {
         if (process.mbp_edit_mode == MBP_EDIT_OFF) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Merge bath edit:      OFF");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_edit_mode == MBP_EDIT_ON) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Bathy edit file:      %s", process.mbp_editfile);
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
@@ -4370,28 +4416,28 @@ int main(int argc, char **argv) {
         if (process.mbp_kluge001) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge001 applied (travel time correction to HSDS2 data)");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_kluge002) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge002 applied (heave correction to Simrad data)");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_kluge003) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge003 applied (roll correction for USCG Healy SB2112 data)");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_kluge004) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge004 applied (remove data with overlapping time stamps)");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
@@ -4399,7 +4445,7 @@ int main(int argc, char **argv) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge005 applied (replaces survey record timestamps withtimestamps of "
                            "corresponding merged navigation records)");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
@@ -4408,35 +4454,35 @@ int main(int argc, char **argv) {
           sprintf(
               comment,
               "  Processing Kluge006 applied (changes sonar depth / draft values without changing bathymetry values)");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_kluge007) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge007 applied (zero alongtrack values > half altitude)");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_kluge008) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge008 applied (undefined)");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_kluge009) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge009 applied (undefined)");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
         else if (process.mbp_kluge010) {
           strncpy(comment, "\0", MBP_FILENAMESIZE);
           sprintf(comment, "  Processing Kluge010 applied (undefined)");
-          status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+          status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
           if (error == MB_ERROR_NO_ERROR)
             ocomment++;
         }
@@ -4474,6 +4520,11 @@ int main(int argc, char **argv) {
       }
 
       double time_d_lastping = 0.0;
+      int inavtime = 0;
+      int iattitudetime = 0;
+      int isonardepthtime = 0;
+      int inavadjtime = 0;
+      int itidetime = 0;
 
       /*--------------------------------------------
         loop over reading input
@@ -4523,7 +4574,9 @@ int main(int argc, char **argv) {
 
         /* detect multiple pings with the same time stamps */
         if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
+          int sensorhead_error = MB_ERROR_NO_ERROR;
           const int sensorhead_status = mb_sensorhead(verbose, imbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
+          mb_sonartype(verbose, imbio_ptr, store_ptr, &sensortype, &sensorhead_error);
           if (sensorhead_status == MB_SUCCESS) {
             pingmultiplicity = sensorhead;
           }
@@ -4539,7 +4592,7 @@ int main(int argc, char **argv) {
         /* increment counter */
         if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
           idata++;
-        else if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_NAV)
+        else if (error <= MB_ERROR_NO_ERROR && kind == nav_source)
           inav++;
         else if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_COMMENT)
           icomment++;
@@ -4600,8 +4653,8 @@ int main(int argc, char **argv) {
           handle navigation merging
           --------------------------------------------*/
 
-        /* extract the navigation if available */
-        if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
+        /* extract the navigation if available and set scaling that may be needed many times */
+        if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA || kind == nav_source)) {
           status = mb_extract_nav(verbose, imbio_ptr, store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
                                   &heading_org, &draft_org, &roll_org, &pitch_org, &heave_org, &error);
           heading = heading_org;
@@ -4609,6 +4662,10 @@ int main(int argc, char **argv) {
           roll = roll_org;
           pitch = pitch_org;
           heave = heave_org;
+
+          mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
+          headingx = sin(heading * DTR);
+          headingy = cos(heading * DTR);
 
           /* apply kluge002 - enables correction of draft values in Simrad data
                      - some Simrad multibeam data has had an
@@ -4634,25 +4691,21 @@ int main(int argc, char **argv) {
         }
 
         /* interpolate the navigation if desired */
-        // int intstat;
         if (error == MB_ERROR_NO_ERROR && process.mbp_nav_mode == MBP_NAV_ON &&
-            (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
+            (kind == MB_DATA_DATA || kind == nav_source)) {
           /* interpolate navigation */
           if (process.mbp_nav_algorithm == MBP_NAV_SPLINE && time_d >= ntime[0] && time_d <= ntime[nnav - 1]) {
-            /* intstat = */
-                mb_spline_interp(verbose, ntime - 1, nlon - 1, nlonspl - 1, nnav, time_d, &navlon, &itime, &error);
-            /* intstat = */
-                mb_spline_interp(verbose, ntime - 1, nlat - 1, nlatspl - 1, nnav, time_d, &navlat, &itime, &error);
+            mb_spline_interp(verbose, ntime - 1, nlon - 1, nlonspl - 1, nnav, time_d, &navlon, &inavtime, &error);
+            mb_spline_interp(verbose, ntime - 1, nlat - 1, nlatspl - 1, nnav, time_d, &navlat, &inavtime, &error);
           }
           else {
-            /* intstat = */ mb_linear_interp_longitude(verbose, ntime - 1, nlon - 1, nnav, time_d, &navlon, &itime, &error);
-            /* intstat = */ mb_linear_interp_latitude(verbose, ntime - 1, nlat - 1, nnav, time_d, &navlat, &itime, &error);
+            mb_linear_interp_longitude(verbose, ntime - 1, nlon - 1, nnav, time_d, &navlon, &inavtime, &error);
+            mb_linear_interp_latitude(verbose, ntime - 1, nlat - 1, nnav, time_d, &navlat, &inavtime, &error);
           }
 
           /* interpolate heading */
           if (process.mbp_nav_heading == MBP_NAV_ON) {
-            /* intstat = */
-                mb_linear_interp_heading(verbose, ntime - 1, nheading - 1, nnav, time_d, &heading, &itime, &error);
+            mb_linear_interp_heading(verbose, ntime - 1, nheading - 1, nnav, time_d, &heading, &inavtime, &error);
             if (heading < 0.0)
               heading += 360.0;
             else if (heading > 360.0)
@@ -4661,19 +4714,19 @@ int main(int argc, char **argv) {
 
           /* interpolate speed */
           if (process.mbp_nav_speed == MBP_NAV_ON) {
-            /* intstat = */ mb_linear_interp(verbose, ntime - 1, nspeed - 1, nnav, time_d, &speed, &itime, &error);
+            mb_linear_interp(verbose, ntime - 1, nspeed - 1, nnav, time_d, &speed, &inavtime, &error);
           }
 
           /* interpolate draft */
           if (process.mbp_nav_draft == MBP_NAV_ON) {
-            /* intstat = */ mb_linear_interp(verbose, ntime - 1, ndraft - 1, nnav, time_d, &draft, &itime, &error);
+            mb_linear_interp(verbose, ntime - 1, ndraft - 1, nnav, time_d, &draft, &inavtime, &error);
           }
 
           /* interpolate attitude */
           if (process.mbp_nav_attitude == MBP_NAV_ON) {
-            /* intstat = */ mb_linear_interp(verbose, ntime - 1, nroll - 1, nnav, time_d, &roll, &itime, &error);
-            /* intstat = */ mb_linear_interp(verbose, ntime - 1, npitch - 1, nnav, time_d, &pitch, &itime, &error);
-            /* intstat = */ mb_linear_interp(verbose, ntime - 1, nheave - 1, nnav, time_d, &heave, &itime, &error);
+            mb_linear_interp(verbose, ntime - 1, nroll - 1, nnav, time_d, &roll, &inavtime, &error);
+            mb_linear_interp(verbose, ntime - 1, npitch - 1, nnav, time_d, &pitch, &inavtime, &error);
+            mb_linear_interp(verbose, ntime - 1, nheave - 1, nnav, time_d, &heave, &inavtime, &error);
           }
         }
 
@@ -4683,14 +4736,14 @@ int main(int argc, char **argv) {
 
         /* interpolate the attitude if desired */
         if (error == MB_ERROR_NO_ERROR && process.mbp_attitude_mode == MBP_ATTITUDE_ON &&
-            (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
+            (kind == MB_DATA_DATA || kind == nav_source)) {
           /* interpolate adjusted navigation */
-          /* intstat = */
-              mb_linear_interp(verbose, attitudetime - 1, attituderoll - 1, nattitude, time_d, &roll, &iatime, &error);
-          /* intstat = */ mb_linear_interp(verbose, attitudetime - 1, attitudepitch - 1, nattitude, time_d, &pitch, &iatime,
-                                     &error);
-          /* intstat = */ mb_linear_interp(verbose, attitudetime - 1, attitudeheave - 1, nattitude, time_d, &heave, &iatime,
-                                     &error);
+          mb_linear_interp(verbose, attitudetime - 1, attituderoll - 1,
+                            nattitude, time_d, &roll, &iattitudetime, &error);
+          mb_linear_interp(verbose, attitudetime - 1, attitudepitch - 1,
+                            nattitude, time_d, &pitch, &iattitudetime, &error);
+          mb_linear_interp(verbose, attitudetime - 1, attitudeheave - 1,
+                            nattitude, time_d, &heave, &iattitudetime, &error);
         }
 
         /*--------------------------------------------
@@ -4699,10 +4752,10 @@ int main(int argc, char **argv) {
 
         /* interpolate the sonardepth if desired */
         if (error == MB_ERROR_NO_ERROR && process.mbp_sonardepth_mode == MBP_SONARDEPTH_ON &&
-            (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
+            (kind == MB_DATA_DATA || kind == nav_source)) {
           /* interpolate adjusted navigation */
-          /* intstat = */ mb_linear_interp(verbose, fsonardepthtime - 1, fsonardepth - 1, nsonardepth, time_d, &draft,
-                                     &iatime, &error);
+          mb_linear_interp(verbose, fsonardepthtime - 1, fsonardepth - 1, nsonardepth, time_d, &draft,
+                                     &isonardepthtime, &error);
         }
 
         /*--------------------------------------------
@@ -4711,9 +4764,6 @@ int main(int argc, char **argv) {
 
         /* apply position shifts if needed */
         if (process.mbp_nav_shift == MBP_NAV_ON) {
-          mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-          headingx = sin(heading * DTR);
-          headingy = cos(heading * DTR);
           navlon -= (headingy * mtodeglon * process.mbp_nav_offsetx + headingx * mtodeglon * process.mbp_nav_offsety -
                      mtodeglon * process.mbp_nav_shiftx - process.mbp_nav_shiftlon);
           navlat -= (-headingx * mtodeglat * process.mbp_nav_offsetx + headingy * mtodeglat * process.mbp_nav_offsety -
@@ -4724,7 +4774,7 @@ int main(int argc, char **argv) {
           handle draft correction
           --------------------------------------------*/
         /* add user specified draft correction if desired */
-        if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
+        if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA || kind == nav_source)) {
           if (process.mbp_draft_mode == MBP_DRAFT_OFFSET)
             draft = draft + process.mbp_draft_offset;
           else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLY)
@@ -4741,19 +4791,15 @@ int main(int argc, char **argv) {
 
         /* interpolate the adjusted navigation if desired */
         if (error == MB_ERROR_NO_ERROR && process.mbp_navadj_mode >= MBP_NAVADJ_LL &&
-            (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
+            (kind == MB_DATA_DATA || kind == nav_source)) {
           /* interpolate adjusted navigation */
           if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE && time_d >= natime[0] && time_d <= natime[nanav - 1]) {
-            /* intstat = */ mb_spline_interp(verbose, natime - 1, nalon - 1, nalonspl - 1, nanav, time_d, &navlon, &iatime,
-                                       &error);
-            /* intstat = */ mb_spline_interp(verbose, ntime - 1, nalat - 1, nalatspl - 1, nanav, time_d, &navlat, &iatime,
-                                       &error);
+            mb_spline_interp(verbose, natime - 1, nalon - 1, nalonspl - 1, nanav, time_d, &navlon, &inavadjtime, &error);
+            mb_spline_interp(verbose, ntime - 1, nalat - 1, nalatspl - 1, nanav, time_d, &navlat, &inavadjtime, &error);
           }
           else {
-            /* intstat = */
-                mb_linear_interp_longitude(verbose, natime - 1, nalon - 1, nanav, time_d, &navlon, &iatime, &error);
-            /* intstat = */
-                mb_linear_interp_latitude(verbose, natime - 1, nalat - 1, nanav, time_d, &navlat, &iatime, &error);
+            mb_linear_interp_longitude(verbose, natime - 1, nalon - 1, nanav, time_d, &navlon, &inavadjtime, &error);
+            mb_linear_interp_latitude(verbose, natime - 1, nalat - 1, nanav, time_d, &navlat, &inavadjtime, &error);
           }
         }
 
@@ -4766,11 +4812,10 @@ int main(int argc, char **argv) {
             nanav > 1) {
           /* interpolate z offset */
           if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE && time_d >= natime[0] && time_d <= natime[nanav - 1]) {
-            /* intstat = */
-                mb_spline_interp(verbose, natime - 1, naz - 1, nazspl - 1, nanav, time_d, &zoffset, &iatime, &error);
+            mb_spline_interp(verbose, natime - 1, naz - 1, nazspl - 1, nanav, time_d, &zoffset, &inavadjtime, &error);
           }
           else {
-            /* intstat = */ mb_linear_interp(verbose, natime - 1, naz - 1, nanav, time_d, &zoffset, &iatime, &error);
+            mb_linear_interp(verbose, natime - 1, naz - 1, nanav, time_d, &zoffset, &inavadjtime, &error);
           }
 
           /* apply z offset to draft / sonar depth */
@@ -4785,7 +4830,7 @@ int main(int argc, char **argv) {
         if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA
           && process.mbp_tide_mode == MBP_TIDE_ON && ntide > 0) {
           /* interpolate tide */
-          /* intstat = */ mb_linear_interp(verbose, tidetime - 1, tide - 1, ntide, time_d, &tideval, &itime, &error);
+          mb_linear_interp(verbose, tidetime - 1, tide - 1, ntide, time_d, &tideval, &itidetime, &error);
 
           /* apply tide to to draft / sonar depth */
           draft -= tideval;
@@ -4824,28 +4869,29 @@ int main(int argc, char **argv) {
           if (process.mbp_cut_mode[icut] == MBP_CUT_MODE_SPEED)
             calculatespeedheading = true;
         }
-        if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA || kind == nav_source) &&
-            calculatespeedheading) {
-          if (process.mbp_nav_mode == MBP_NAV_ON) {
-            mb_coor_scale(verbose, nlat[itime - 1], &mtodeglon, &mtodeglat);
-            del_time = ntime[itime] - ntime[itime - 1];
-            dx = (nlon[itime] - nlon[itime - 1]) / mtodeglon;
-            dy = (nlat[itime] - nlat[itime - 1]) / mtodeglat;
+        if (error == MB_ERROR_NO_ERROR
+            && (kind == MB_DATA_DATA || kind == nav_source)
+            && calculatespeedheading) {
+          if (process.mbp_nav_mode == MBP_NAV_ON && inavtime > 0) {
+            mb_coor_scale(verbose, nlat[inavtime - 1], &mtodeglon, &mtodeglat);
+            del_time = ntime[inavtime] - ntime[inavtime - 1];
+            dx = (nlon[inavtime] - nlon[inavtime - 1]) / mtodeglon;
+            dy = (nlat[inavtime] - nlat[inavtime - 1]) / mtodeglat;
           }
-          else if (process.mbp_navadj_mode >= MBP_NAVADJ_LL) {
-            mb_coor_scale(verbose, nalat[iatime - 1], &mtodeglon, &mtodeglat);
-            del_time = natime[iatime] - natime[iatime - 1];
-            dx = (nalon[iatime] - nalon[iatime - 1]) / mtodeglon;
-            dy = (nalat[iatime] - nalat[iatime - 1]) / mtodeglat;
+          else if (process.mbp_navadj_mode >= MBP_NAVADJ_LL && inavadjtime > 0) {
+            mb_coor_scale(verbose, nalat[inavadjtime - 1], &mtodeglon, &mtodeglat);
+            del_time = natime[inavadjtime] - natime[inavadjtime - 1];
+            dx = (nalon[inavadjtime] - nalon[inavadjtime - 1]) / mtodeglon;
+            dy = (nalat[inavadjtime] - nalat[inavadjtime - 1]) / mtodeglat;
           }
-          else if ((kind == MB_DATA_DATA && idata > 1) || (kind == MB_DATA_NAV && inav > 1)) {
+          else if ((kind == MB_DATA_DATA && idata > 1) || (kind == nav_source && inav > 1)) {
             mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
             del_time = time_d - time_d_old;
             dx = (navlon - navlon_old) / mtodeglon;
             dy = (navlat - navlat_old) / mtodeglat;
           }
           if ((process.mbp_nav_mode == MBP_NAV_ON) || (process.mbp_navadj_mode >= MBP_NAVADJ_LL) ||
-              ((kind == MB_DATA_DATA && idata > 1) || (kind == MB_DATA_NAV && inav > 1))) {
+              ((kind == MB_DATA_DATA && idata > 1) || (kind == nav_source && inav > 1))) {
             dist = sqrt(dx * dx + dy * dy);
             if (del_time > 0.0) {
               speedcalc = 3.6 * dist / del_time;
@@ -4878,7 +4924,7 @@ int main(int argc, char **argv) {
         }
 
         /* adjust heading if required */
-        if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA || kind == MB_DATA_NAV) &&
+        if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA || kind == nav_source) &&
             (process.mbp_heading_mode == MBP_HEADING_OFFSET || process.mbp_heading_mode == MBP_HEADING_CALCOFFSET)) {
           heading += process.mbp_headingbias;
           if (heading >= 360.0)
@@ -5235,6 +5281,7 @@ int main(int argc, char **argv) {
 
           /* apply static corrections */
           if (process.mbp_static_mode == MBP_STATIC_ANGLE_ON && nstatic > 0) {
+            int istatic = 0;
             mb_pr_set_bathyslope(verbose, nsmooth, nbath, beamflag, bath, bathacrosstrack, &ndepths, depths,
                                  depthacrosstrack, &nslopes, slopes, slopeacrosstrack, depthsmooth, &error);
             for (int i = 0; i < nbath; i++) {
@@ -5256,7 +5303,7 @@ int main(int argc, char **argv) {
 
                     /* Get offset from SBO file */
                     status = mb_linear_interp(verbose, staticangle - 1, staticoffset - 1, nstatic, angle,
-                                              &correction, &itime, &error);
+                                              &correction, &istatic, &error);
                     bath[i] -= correction;
                   }
                 }
@@ -5332,7 +5379,7 @@ int main(int argc, char **argv) {
           --------------------------------------------*/
 
         /* insert the altered navigation if available */
-        if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
+        if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA || kind == nav_source)) {
           if (heading >= 360.0)
             heading -= 360.0;
           else if (heading < 0.0)
@@ -5802,7 +5849,7 @@ int main(int argc, char **argv) {
           if (status == MB_SUCCESS) {
             if (kind == MB_DATA_DATA)
               odata++;
-            else if (kind == MB_DATA_NAV)
+            else if (kind == nav_source)
               onav++;
             else if (kind == MB_DATA_COMMENT)
               ocomment++;
@@ -5819,6 +5866,113 @@ int main(int argc, char **argv) {
                     time_i[4], time_i[5], time_i[6]);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(error);
+          }
+
+          if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
+
+            /* output fbt */
+            if (make_fbt) {
+              fstore->sensorhead = sensorhead;
+              fstore->topo_type = sensortype;
+              struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+              fstore->beam_xwidth = imb_io_ptr->beamwidth_xtrack;
+              fstore->beam_lwidth = imb_io_ptr->beamwidth_ltrack;
+              fstore->kind = kind;
+              mb_insert_nav(verbose, fmbio_ptr, fstore_ptr, time_i, time_d,
+                            navlon, navlat, speed, heading, draft,
+                            roll, pitch, heave, &error);
+              mb_insert_altitude(verbose, fmbio_ptr, fstore_ptr, draft, altitude, &error);
+              status = mb_insert(verbose, fmbio_ptr, fstore_ptr, kind, time_i, time_d,
+                                  navlon, navlat, speed, heading, nbath, namp, nss,
+                                  beamflag, bath, amp, bathacrosstrack, bathalongtrack,
+                                  ss, ssacrosstrack, ssalongtrack, comment, &error);
+              status = mb_put_all(verbose, fmbio_ptr, fstore_ptr, false,
+                                  kind, time_i, time_d, navlon, navlat, speed,
+                                  heading, nbath, 0, 0,
+                                  beamflag, bath, nullptr, bathacrosstrack, bathalongtrack,
+                                  nullptr, nullptr, nullptr, comment, &error);
+            }
+
+            /* output fnv */
+            /* mblist output: tMXYHScRPr=X=Y+X+Y */
+            if (make_fnv) {
+              double seconds = time_i[5] + 1e-6 * time_i[6];
+              int beam_port, beam_vertical, beam_stbd;
+              int pixel_port, pixel_vertical, pixel_stbd;
+              status = mb_swathbounds(verbose, true, nbath, 0,
+                                  beamflag, bathacrosstrack, nullptr, nullptr,
+                                  &beam_port, &beam_vertical, &beam_stbd,
+                                  &pixel_port, &pixel_vertical, &pixel_stbd, &error);
+              mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
+              headingx = sin(heading * DTR);
+              headingy = cos(heading * DTR);
+              double portlon = navlon
+                                + headingy * mtodeglon * bathacrosstrack[beam_port]
+                                + headingx * mtodeglon * bathalongtrack[beam_port];
+              double portlat = navlat
+                                - headingx * mtodeglat * bathacrosstrack[beam_port]
+                                + headingy * mtodeglat * bathalongtrack[beam_port];
+              double stbdlon = navlon
+                                + headingy * mtodeglon * bathacrosstrack[beam_stbd]
+                                + headingx * mtodeglon * bathalongtrack[beam_stbd];
+              double stbdlat = navlat
+                                - headingx * mtodeglat * bathacrosstrack[beam_stbd]
+                                + headingy * mtodeglat * bathalongtrack[beam_stbd];
+
+              fprintf(nfp, "%.4d %.2d %.2d %.2d %.2d %09.6f\t%.6f\t"
+                            "%15.10f\t%15.10f\t%7.3f\t%6.3f\t%.4f\t%6.3f\t%6.3f\t%7.4f\t"
+                            "%15.10f\t%15.10f\t%15.10f\t%15.10f\n",
+                      time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], seconds,
+                      time_d, navlon, navlat, heading, speed, sonardepth, roll, pitch, heave,
+                      portlon, portlat, stbdlon, stbdlat);
+            }
+
+            /* get bounds for mbinfo call to generate the *.inf file
+                - use only data with good navigation and valid soundings or pixels */
+            if (fabs(navlon) >= 0.005 || fabs(navlat) >= 0.005) {
+              if (mask_bounds_init) {
+                mask_bounds[0] = std::min(mask_bounds[0], navlon);
+                mask_bounds[1] = std::max(mask_bounds[1], navlon);
+                mask_bounds[2] = std::min(mask_bounds[2], navlat);
+                mask_bounds[3] = std::max(mask_bounds[3], navlat);
+              } else {
+                mask_bounds[0] = navlon;
+                mask_bounds[1] = navlon;
+                mask_bounds[2] = navlat;
+                mask_bounds[3] = navlat;
+                mask_bounds_init = true;
+              }
+              for (int i=0; i<nbath; i++) {
+                if (mb_beam_ok(beamflag[i])) {
+                  double bathlon = navlon
+                              + headingy * mtodeglon * bathacrosstrack[i]
+                              + headingx * mtodeglon * bathalongtrack[i];
+                  double bathlat = navlat
+                              - headingx * mtodeglat * bathacrosstrack[i]
+                              + headingy * mtodeglat * bathalongtrack[i];
+
+                  mask_bounds[0] = std::min(mask_bounds[0], bathlon);
+                  mask_bounds[1] = std::max(mask_bounds[1], bathlon);
+                  mask_bounds[2] = std::min(mask_bounds[2], bathlat);
+                  mask_bounds[3] = std::max(mask_bounds[3], bathlat);
+                }
+              }
+              for (int i=0; i<nss; i++) {
+                if (ss[i] > MB_SIDESCAN_NULL) {
+                  double sslon = navlon
+                              + headingy * mtodeglon * ssacrosstrack[i]
+                              + headingx * mtodeglon * ssalongtrack[i];
+                  double sslat = navlat
+                              - headingx * mtodeglat * ssacrosstrack[i]
+                              + headingy * mtodeglat * ssalongtrack[i];
+                  mask_bounds[0] = std::min(mask_bounds[0], sslon);
+                  mask_bounds[1] = std::max(mask_bounds[1], sslon);
+                  mask_bounds[2] = std::min(mask_bounds[2], sslat);
+                  mask_bounds[3] = std::max(mask_bounds[3], sslat);
+                }
+              }
+            }
+
           }
         }
       }
@@ -5871,17 +6025,36 @@ int main(int argc, char **argv) {
       status = MB_SUCCESS;
       error = MB_ERROR_NO_ERROR;
 
-      status &= mb_close(verbose, &imbio_ptr, &error);
+      // close the input raw file
       status &= mb_close(verbose, &ombio_ptr, &error);
 
-      /* unlock the raw swath file */
-      if (uselockfiles) {
-        /* lock_status = */ mb_pr_unlockswathfile(verbose, process.mbp_ifile, MBP_LOCK_PROCESS, program_name, &lock_error);
-      }
+      // close the output processed file
+      status &= mb_close(verbose, &imbio_ptr, &error);
 
-      /* close the *.resf file */
+      // close the output fbt file
+      if (make_fbt)
+        status &= mb_close(verbose, &fmbio_ptr, &error);
+
+      //close the output fnv file
+      if (make_fnv)
+        fclose(nfp);
+
+      // use mbinfo to generate the inf file - specify the mask bounds so that
+      // only one read pass is necessary
+      char command[MB_PATH_MAXLINE];
+      sprintf(command, "mbinfo -F %d -I %s -G -N -O -M10/10/%.9f/%.9f/%.9f/%.9f",
+              process.mbp_format, process.mbp_ofile,
+              mask_bounds[0], mask_bounds[1], mask_bounds[2], mask_bounds[3]);
+      system(command);
+
+      // close the *.resf file
       if (resf_fp != nullptr) {
         fclose(resf_fp);
+      }
+
+      // unlock the raw swath file
+      if (uselockfiles) {
+        mb_pr_unlockswathfile(verbose, process.mbp_ifile, MBP_LOCK_PROCESS, program_name, &lock_error);
       }
 
       /* deallocate arrays for amplitude correction tables */
@@ -5913,7 +6086,6 @@ int main(int argc, char **argv) {
       /* deallocate topography grid */
       if (grid.data != nullptr) {
         mb_freed(verbose, __FILE__, __LINE__, (void **)&grid.data, &error);
-        // memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
       }
 
       /* deallocate arrays for navigation */
@@ -5990,11 +6162,6 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d output nav records\n", onav);
         fprintf(stderr, "%d output comment records\n", ocomment);
         fprintf(stderr, "%d output other records\n", oother);
-      }
-
-      /* generate inf file */
-      if (status == MB_SUCCESS) {
-        status = mb_make_info(verbose, true, process.mbp_ofile, process.mbp_format, &error);
       }
 
     } /* end processing file */

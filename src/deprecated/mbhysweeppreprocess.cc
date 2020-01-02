@@ -722,10 +722,12 @@ int main(int argc, char **argv) {
 
 		/* set sensor 0 (multibeam)
 		        for a single first offsets are for transmit array, second for receive array */
-		if (status == MB_SUCCESS)
+		if (status == MB_SUCCESS) {
+      mb_longname datatype = "Multibeam data recorded by Hysweep";
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_SONAR_MULTIBEAM, nullptr,
-			                                "Multibeam data recorded by Hysweep", nullptr, MB_SENSOR_CAPABILITY1_NONE,
+			                                datatype, nullptr, MB_SENSOR_CAPABILITY1_NONE,
 			                                MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM, 2, 0, &error);
+    }
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 0, offset_sonar_mode, offset_sonar_x,
 			                                       offset_sonar_y, offset_sonar_z, offset_sonar_mode, offset_sonar_heading,

@@ -2170,10 +2170,10 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		mb_segytraceheader_ptr->elev_scalar = -100; /* 0.01 m precision for depths */
 		mb_segytraceheader_ptr->coord_scalar = -100; /* 0.01 arc second precision for position
 		                     = 0.3 m precision at equator */
-		mb_segytraceheader_ptr->src_long = (int)(longitude * 600000.0);
-		mb_segytraceheader_ptr->src_lat = (int)(latitude * 600000.0);
-		mb_segytraceheader_ptr->grp_long = (int)(longitude * 600000.0);
-		mb_segytraceheader_ptr->grp_lat = (int)(latitude * 600000.0);
+		mb_segytraceheader_ptr->src_long = (int)(longitude * 360000.0);
+		mb_segytraceheader_ptr->src_lat = (int)(latitude * 360000.0);
+		mb_segytraceheader_ptr->grp_long = (int)(longitude * 360000.0);
+		mb_segytraceheader_ptr->grp_lat = (int)(latitude * 360000.0);
 		mb_segytraceheader_ptr->coord_units = 2;
 		mb_segytraceheader_ptr->wvel = watersoundspeed;
 		mb_segytraceheader_ptr->sbvel = 0;

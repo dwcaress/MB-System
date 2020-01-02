@@ -341,9 +341,13 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
  * function write_cdfgrd writes output grid to a
  * GMT version 2 netCDF grd file
  */
-int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue, int n_columns, int n_rows, double xmin, double xmax,
-                     double ymin, double ymax, double zmin, double zmax, double dx, double dy, char *xlab, char *ylab, char *zlab,
-                     char *titl, char *projection, int argc, char **argv, int *error) {
+int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
+                      float nodatavalue, int n_columns, int n_rows,
+                      double xmin, double xmax, double ymin, double ymax,
+                      double zmin, double zmax, double dx, double dy,
+                      const char *xlab, const char *ylab, const char *zlab,
+                     const char *titl, const char *projection,
+                     int argc, char **argv, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");

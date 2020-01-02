@@ -190,7 +190,8 @@
 #include <getopt.h>
 #include <unistd.h>
 
-#include "geodesic.h"
+#include <geodesic.h>
+
 #include "mb_define.h"
 #include "mb_status.h"
 
@@ -953,7 +954,12 @@ void read_list(char *list, char *list_2) {
 	struct geod_geodesic g;
 	double azi1, azi2;
 
-	geod_init(&g, A_, F_);
+  // WGS84 ellipsoid parameters
+  const double radius_equatorial = 6378137.0;
+  const double radius_polar = 6356752.314245;
+  const double flattening = 0.00335281066;
+
+	geod_init(&g, radius_equatorial, flattening);
 	size = surveyLines_total;
 	for (int i = 0; i < size; i++) {
 #ifdef _WIN32

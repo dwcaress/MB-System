@@ -1177,8 +1177,10 @@ int main(int argc, char **argv) {
   double headingx, headingy, mtodeglon, mtodeglat;
 
   /* swathbounds variables */
-  int beam_port, beam_stbd;
-  int pixel_port, pixel_stbd;
+  int beam_port = 0;
+  int beam_stbd = 0;
+  int pixel_port = 0;
+  int pixel_stbd = 0;
 
   /* projected coordinate system */
   char projection_id[MB_PATH_MAXLINE];
@@ -2035,7 +2037,7 @@ int main(int argc, char **argv) {
           invert_next_value = false;
           break;
 
-        case 'x': /* longitude degress + decimal minutes */
+        case 'x': /* longitude degrees + decimal minutes */
           strcpy(variable, "longitude_minutes");
 
           fprintf(output[i], "\t%s = ", variable);
@@ -2654,8 +2656,7 @@ int main(int argc, char **argv) {
 
   bool use_course = false;
   bool use_time_interval = false;
-  // bool use_swathbounds = false;  // TODO(schwehr): Set but not used.
-  // bool use_nav = false;  // TODO(schwehr): Unused?
+  bool use_swathbounds = false;
   double time_d_ref = 0;
 
   /* loop over all files to be read */
@@ -2703,14 +2704,12 @@ int main(int argc, char **argv) {
             use_detects = true;
           if (list[i] == 'N' || list[i] == 'n')
             use_pingnumber = true;
-          // if (list[i] == 'X' || list[i] == 'x' || list[i] == 'Y' || list[i] == 'y')
-          //   use_nav = true;
           if (list[i] == '.')
             raw_next_value = true;
-          // if (list[i] == '=')
-          //   use_swathbounds = true;
-          // if (list[i] == '+')
-          //   use_swathbounds = true;
+          if (list[i] == '=')
+            use_swathbounds = true;
+          if (list[i] == '+')
+            use_swathbounds = true;
         }
         else {
           if (list[i] == 'T' || list[i] == 't' || list[i] == 'U' || list[i] == 'l')
@@ -2926,10 +2925,14 @@ int main(int argc, char **argv) {
       if (error == MB_ERROR_NO_ERROR) {
         /* find vertical-most non-null beam
             and port and starboard-most good beams */
-        status = mb_swathbounds(verbose, true, navlon, navlat, heading, beams_bath, pixels_ss, beamflag, bath,
-                                bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, &beam_port,
-                                &beam_vertical, &beam_stbd, &pixel_port, &pixel_vertical, &pixel_stbd, &error);
-
+        if (use_swathbounds) {
+          status = mb_swathbounds(verbose, true, beams_bath, pixels_ss,
+                                beamflag, bathacrosstrack,
+                                ss, ssacrosstrack,
+                                &beam_port, &beam_vertical, &beam_stbd,
+                                &pixel_port, &pixel_vertical, &pixel_stbd, &error);
+        }
+        
         /* set and/or check beams and pixels to be output */
         status &= set_output(verbose, beams_bath, beams_amp, pixels_ss, use_bath, use_amp, use_ss, dump_mode, beam_set,
                             pixel_set, beam_vertical, pixel_vertical, &beam_start, &beam_end, &beam_exclude_percent,
@@ -3542,7 +3545,7 @@ int main(int argc, char **argv) {
                   sensorrelative_next_value = false;
                   projectednav_next_value = false;
                   break;
-                case 'x': /* longitude degress + decimal minutes */
+                case 'x': /* longitude degrees + decimal minutes */
                   dlon = navlon;
                   if (!sensornav_next_value && (beam_set != MBLIST_SET_OFF || k != j))
                     dlon +=
@@ -4338,7 +4341,7 @@ int main(int argc, char **argv) {
                   sensorrelative_next_value = false;
                   projectednav_next_value = false;
                   break;
-                case 'x': /* longitude degress + decimal minutes */
+                case 'x': /* longitude degrees + decimal minutes */
                   dlon = navlon;
                   if (!sensornav_next_value && (pixel_set != MBLIST_SET_OFF || k != j))
                     dlon += headingy * mtodeglon * ssacrosstrack[k] + headingx * mtodeglon * ssalongtrack[k];

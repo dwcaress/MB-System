@@ -201,6 +201,7 @@ int mbnavadjust_file_new(char *projectname);
 int mbnavadjust_file_open(char *projectname);
 int mbnavadjust_import_data(char *path, int format);
 int mbnavadjust_import_file(char *path, int format, int firstfile);
+int mbnavadjust_import_reference(char *path);
 int mbnavadjust_bin_bathymetry(double altitude, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack,
                                double *bathalongtrack, int mbna_bin_beams_bath, double mbna_bin_pseudobeamwidth,
                                double mbna_bin_swathwidth, char *bin_beamflag, double *bin_bath, double *bin_bathacrosstrack,
