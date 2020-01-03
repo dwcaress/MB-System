@@ -1326,8 +1326,6 @@ if (($use_scale && $plot_scale) || ($use_width && $plot_width))
   $plot_width = $dxx;
   $plot_height = $dyy;
 
-print "dxx:$dxx dyy:$dyy plot_width:$plot_width plot_height:$plot_height\n";
-
   # decide which plot orientation to use
   if ($orientation == 1)
     {
@@ -1549,8 +1547,6 @@ if ($originset)
     $xoffset = $xorigin;
     $yoffset = $yorigin;
     }
-
-print "xoffset:$xoffset width:$width plot_width:$plot_width space_left:$space_left space_right:$space_right  yoffset:$yoffset height:$height plot_height:$plot_height space_bottom:$space_bottom space_top:$space_top\n";
 
 # get plot degree annotation for geographic maps
 $degree_format = "ddd:mm";

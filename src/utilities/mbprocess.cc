@@ -5893,6 +5893,11 @@ int main(int argc, char **argv) {
                                   nullptr, nullptr, nullptr, comment, &error);
             }
 
+            // get scaling for both fnv and inf calculations
+            mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
+            headingx = sin(heading * DTR);
+            headingy = cos(heading * DTR);
+
             /* output fnv */
             /* mblist output: tMXYHScRPr=X=Y+X+Y */
             if (make_fnv) {
@@ -5903,9 +5908,6 @@ int main(int argc, char **argv) {
                                   beamflag, bathacrosstrack, nullptr, nullptr,
                                   &beam_port, &beam_vertical, &beam_stbd,
                                   &pixel_port, &pixel_vertical, &pixel_stbd, &error);
-              mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-              headingx = sin(heading * DTR);
-              headingy = cos(heading * DTR);
               double portlon = navlon
                                 + headingy * mtodeglon * bathacrosstrack[beam_port]
                                 + headingx * mtodeglon * bathalongtrack[beam_port];

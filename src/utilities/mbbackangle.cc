@@ -303,7 +303,7 @@ int main(int argc, char **argv) {
 	double angle_max = 80.0;
 	int pings_avg = 50;
 	bool corr_slope = false;
-	double ref_angle_default = 30.0;
+	double ref_angle = 30.0;
 	/* topography parameters */
 	struct mbba_grid_struct grid;
 	memset(&grid, 0, sizeof(struct mbba_grid_struct));
@@ -414,7 +414,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'R':
 			case 'r':
-				sscanf(optarg, "%lf", &ref_angle_default);
+				sscanf(optarg, "%lf", &ref_angle);
 				break;
 			case 'T':
 			case 't':
@@ -613,7 +613,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       grid.file:    %s\n", grid.file);
 		fprintf(stderr, "dbg2       nangles:      %d\n", nangles);
 		fprintf(stderr, "dbg2       angle_max:    %f\n", angle_max);
-		fprintf(stderr, "dbg2       ref_angle:    %f\n", ref_angle_default);
+		fprintf(stderr, "dbg2       ref_angle:    %f\n", ref_angle);
 		fprintf(stderr, "dbg2       beammode:     %d\n", beammode);
 		fprintf(stderr, "dbg2       ssbeamwidth:  %f\n", ssbeamwidth);
 		fprintf(stderr, "dbg2       ssdepression: %f\n", ssdepression);
@@ -837,19 +837,17 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
-	/* Deal with ESF File if avialable */
-	if (status == MB_SUCCESS) {
-		char esffile[MB_PATH_MAXLINE];
-		status = mb_esf_load(verbose, program_name, swathfile, true, false, esffile, &esf, &error);
-	}
-	double ref_angle = 0.0;
-
 	/* loop over all files to be read */
 	while (read_data) {
 
 		/* obtain format array location - format id will
 		    be aliased to current id if old format id given */
-		status &= mb_format(verbose, &format, &error);
+		mb_format(verbose, &format, &error);
+
+		/* output information */
+		if (verbose > 0) {
+			fprintf(stderr, "\nprocessing swath file: %s %d\n", swathfile, format);
+		}
 
 		/* initialize reading the swath sonar file */
 		if (mb_read_init(verbose, swathfile, format, 1, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
@@ -870,11 +868,10 @@ int main(int argc, char **argv) {
 			ss_corr_type = MBP_SSCORR_UNKNOWN;
 		else
 			ss_corr_type = MBP_SSCORR_SUBTRACTION;
-                if (format == MBF_3DWISSLR || format == MBF_3DWISSLP)
+    if (format == MBF_3DWISSLR || format == MBF_3DWISSLP)
 			amp_corr_type = MBP_AMPCORR_DIVISION;
-	        else
+	  else
 			amp_corr_type = MBP_AMPCORR_SUBTRACTION;
-		ref_angle = ref_angle_default;
 
 		/* allocate memory for data arrays */
 		if (error == MB_ERROR_NO_ERROR)
@@ -947,10 +944,11 @@ int main(int argc, char **argv) {
 			exit(error);
 		}
 
-		/* output information */
-		if (error == MB_ERROR_NO_ERROR && verbose > 0) {
-			fprintf(stderr, "\nprocessing swath file: %s %d\n", swathfile, format);
-		}
+  	/* Deal with esf file if avialable */
+  	if (status == MB_SUCCESS) {
+  		mb_path esffile;
+  		status = mb_esf_load(verbose, program_name, swathfile, true, false, esffile, &esf, &error);
+  	}
 
 		/* initialize grid arrays */
 		if (error == MB_ERROR_NO_ERROR) {
@@ -1111,18 +1109,20 @@ int main(int argc, char **argv) {
 				navg = 0;
 				time_d_avg = 0.0;
 				altitude_avg = 0.0;
-				if (amplitude_on)
+				if (amplitude_on) {
 					for (int i = 0; i < nangles; i++) {
 						nmeanamp[i] = 0;
 						meanamp[i] = 0.0;
 						sigmaamp[i] = 0.0;
 					}
-				if (sidescan_on)
+        }
+				if (sidescan_on) {
 					for (int i = 0; i < nangles; i++) {
 						nmeanss[i] = 0;
 						meanss[i] = 0.0;
 						sigmass[i] = 0.0;
 					}
+        }
 			}
 
 			/* process the pings */
@@ -1414,7 +1414,10 @@ int main(int argc, char **argv) {
 		}
 
 		/* close the swath sonar file */
-		status &= mb_close(verbose, &mbio_ptr, &error);
+    status = MB_SUCCESS;
+    error = MB_ERROR_NO_ERROR;
+		status = mb_close(verbose, &mbio_ptr, &error);
+
 		/* Close ESF file if avialable and open */
 		if (esf.edit != nullptr || esf.esffp != nullptr)
 			mb_esf_close(verbose, &esf, &error);
@@ -1460,7 +1463,7 @@ int main(int argc, char **argv) {
 			                 gridampdy, xlabel, ylabel, zlabel, title, projection, argc, argv, &error);
 
 			/* run mbm_grdplot */
-			sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -MGQ100 -MXI%s -V -L\"File %s - %s:%s\"", gridfile, amptablefile,
+			sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -MGQ100 -MXI%s -L\"File %s - %s:%s\"", gridfile, amptablefile,
 			        gridfile, title, zlabel);
 			if (verbose) {
 				fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", plot_cmd);
@@ -1501,7 +1504,7 @@ int main(int argc, char **argv) {
 			                 title, projection, argc, argv, &error);
 
 			/* run mbm_grdplot */
-			sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -S -MGQ100 -MXI%s -V -L\"File %s - %s:%s\"", gridfile, sstablefile,
+			sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -S -MGQ100 -MXI%s -L\"File %s - %s:%s\"", gridfile, sstablefile,
 			        gridfile, title, zlabel);
 			if (verbose) {
 				fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", plot_cmd);
@@ -1513,14 +1516,16 @@ int main(int argc, char **argv) {
 		}
 
 		/* set amplitude correction in parameter file */
-		if (amplitude_on)
+		if (amplitude_on) {
 			status &= mb_pr_update_ampcorr(verbose, swathfile, true, amptablefile, amp_corr_type, corr_symmetry, ref_angle,
 			                              amp_corr_slope, grid.file, &error);
+    }
 
 		/* set sidescan correction in parameter file */
-		if (sidescan_on)
+		if (sidescan_on) {
 			status &= mb_pr_update_sscorr(verbose, swathfile, true, sstablefile, ss_corr_type, corr_symmetry, ref_angle,
 			                             ss_corr_slope, grid.file, &error);
+    }
 
 		/* output information */
 		if (error == MB_ERROR_NO_ERROR && verbose > 0) {
@@ -1537,7 +1542,7 @@ int main(int argc, char **argv) {
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
-			if ((status &= mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
+			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 				read_data = true;
 			else
 				read_data = false;
@@ -1545,6 +1550,8 @@ int main(int argc, char **argv) {
 		else {
 			read_data = false;
 		}
+    status = MB_SUCCESS;
+    error = MB_ERROR_NO_ERROR;
 
 		/* end loop over files in list */
 	}

@@ -1903,7 +1903,7 @@ int main(int argc, char **argv) {
 								}
 						}
 					}
-					/* status = */ mb_close(verbose, &mbio_ptr, &error);
+					mb_close(verbose, &mbio_ptr, &error);
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
@@ -2447,7 +2447,7 @@ int main(int argc, char **argv) {
 								}
 						}
 					}
-					status = mb_close(verbose, &mbio_ptr, &error);
+					mb_close(verbose, &mbio_ptr, &error);
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
@@ -2840,7 +2840,7 @@ int main(int argc, char **argv) {
 								}
 						}
 					}
-					status = mb_close(verbose, &mbio_ptr, &error);
+					mb_close(verbose, &mbio_ptr, &error);
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
@@ -3244,7 +3244,7 @@ int main(int argc, char **argv) {
 								}
 						}
 					}
-					status = mb_close(verbose, &mbio_ptr, &error);
+					mb_close(verbose, &mbio_ptr, &error);
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
@@ -3819,7 +3819,7 @@ int main(int argc, char **argv) {
 								}
 						}
 					}
-					status = mb_close(verbose, &mbio_ptr, &error);
+					mb_close(verbose, &mbio_ptr, &error);
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
@@ -4322,7 +4322,7 @@ int main(int argc, char **argv) {
 								}
 						}
 					}
-					status = mb_close(verbose, &mbio_ptr, &error);
+					mb_close(verbose, &mbio_ptr, &error);
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
@@ -4717,7 +4717,7 @@ int main(int argc, char **argv) {
 								}
 						}
 					}
-					/* status = */ mb_close(verbose, &mbio_ptr, &error);
+					mb_close(verbose, &mbio_ptr, &error);
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
