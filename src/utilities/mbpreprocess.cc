@@ -39,6 +39,7 @@
 #include "mb_io.h"
 #include "mb_process.h"
 #include "mb_status.h"
+#include "mbsys_ldeoih.h"
 
 constexpr int MBPREPROCESS_ALLOC_CHUNK = 1000;
 
@@ -2302,6 +2303,9 @@ int main(int argc, char **argv) {
 
   /* loop over all files to be read */
   while (read_data) {
+    int sensorhead = 0;
+    int sensortype = 0;
+
     /* get output format - in some cases this may be a
      * different, generally extended format
      * more suitable for processing than the original */
@@ -2384,6 +2388,54 @@ int main(int argc, char **argv) {
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(error);
       }
+
+      /* initialize writing the output fast bathymetry *fbt file */
+      bool make_fbt = false;
+      void *fmbio_ptr = nullptr;
+      void *fstore_ptr = nullptr;
+      struct mb_io_struct *fmb_io_ptr = nullptr;
+      struct mbsys_ldeoih_struct *fstore = nullptr;
+      if (mb_should_make_fbt(verbose, oformat)) {
+        mb_path fbtfile;
+
+        sprintf(fbtfile, "%s.fbt", ofile);
+        int fbeams_bath = 0;
+        int fbeams_amp = 0;
+        int fpixels_ss = 0;
+        if (mb_write_init(verbose, fbtfile, MBF_MBLDEOIH,
+                          &fmbio_ptr, &fbeams_bath, &fbeams_amp, &fpixels_ss,
+                          &error) != MB_SUCCESS) {
+          char *message = nullptr;
+          mb_error(verbose, error, &message);
+          fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
+          fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
+          fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+          exit(error);
+        }
+        fmb_io_ptr = (struct mb_io_struct *)fmbio_ptr;
+        fstore = (struct mbsys_ldeoih_struct *) fmb_io_ptr->store_data;
+        fstore_ptr = (void *) fstore;
+        make_fbt = true;
+      }
+
+      /* initialize writing the output fast navigation *.fnv file */
+      bool make_fnv = false;
+      FILE *nfp = nullptr;
+      if (mb_should_make_fnv(verbose, oformat)) {
+        mb_path fnvfile;
+        sprintf(fnvfile, "%s.fnv", ofile);
+        if ((nfp = fopen(fnvfile, "w")) == nullptr) {
+            fprintf(stderr, "\nUnable to open output *.fnv file <%s> for reading\n",
+            fnvfile);
+            fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+            exit(MB_ERROR_OPEN_FAIL);
+        }
+        make_fnv = true;
+      }
+
+      /* initialize bounds that will be used in call to mbinfo to generate the *.inf file */
+      bool mask_bounds_init = false;
+      double mask_bounds[4];
 
       beamflag = nullptr;
       bath = nullptr;
@@ -2526,6 +2578,13 @@ int main(int argc, char **argv) {
         if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE) {
           error = MB_ERROR_NO_ERROR;
           status = MB_SUCCESS;
+        }
+
+        /* detect multiple pings with the same time stamps */
+        if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
+          int sensorhead_error = MB_ERROR_NO_ERROR;
+          const int sensorhead_status = mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &sensorhead_error);
+          mb_sonartype(verbose, imbio_ptr, istore_ptr, &sensortype, &sensorhead_error);
         }
 
         /* count records */
@@ -2832,8 +2891,116 @@ int main(int argc, char **argv) {
             exit(error);
           }
 
-          /* output synchronous attitude */
+          // output ancilliary files
           if (kind == MB_DATA_DATA) {
+
+            /* output fbt */
+            if (make_fbt) {
+              fstore->sensorhead = sensorhead;
+              fstore->topo_type = sensortype;
+              struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+              fstore->beam_xwidth = imb_io_ptr->beamwidth_xtrack;
+              fstore->beam_lwidth = imb_io_ptr->beamwidth_ltrack;
+              fstore->kind = kind;
+              mb_insert_nav(verbose, fmbio_ptr, fstore_ptr, time_i, time_d,
+                            navlon, navlat, speed, heading, draft,
+                            roll, pitch, heave, &error);
+              mb_insert_altitude(verbose, fmbio_ptr, fstore_ptr, draft, altitude, &error);
+              status = mb_insert(verbose, fmbio_ptr, fstore_ptr, kind, time_i, time_d,
+                                  navlon, navlat, speed, heading, obeams_bath, obeams_amp, opixels_ss,
+                                  beamflag, bath, amp, bathacrosstrack, bathalongtrack,
+                                  ss, ssacrosstrack, ssalongtrack, comment, &error);
+              status = mb_put_all(verbose, fmbio_ptr, fstore_ptr, false,
+                                  kind, time_i, time_d, navlon, navlat, speed,
+                                  heading, obeams_bath, 0, 0,
+                                  beamflag, bath, nullptr, bathacrosstrack, bathalongtrack,
+                                  nullptr, nullptr, nullptr, comment, &error);
+            }
+
+            // get scaling for both fnv and inf calculations
+            double mtodeglon, mtodeglat;
+            mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
+            double headingx = sin(heading * DTR);
+            double headingy = cos(heading * DTR);
+
+            /* output fnv */
+            /* mblist output: tMXYHScRPr=X=Y+X+Y */
+            if (make_fnv) {
+              double seconds = time_i[5] + 1e-6 * time_i[6];
+              int beam_port, beam_vertical, beam_stbd;
+              int pixel_port, pixel_vertical, pixel_stbd;
+              status = mb_swathbounds(verbose, true, obeams_bath, 0,
+                                  beamflag, bathacrosstrack, nullptr, nullptr,
+                                  &beam_port, &beam_vertical, &beam_stbd,
+                                  &pixel_port, &pixel_vertical, &pixel_stbd, &error);
+              double portlon = navlon
+                                + headingy * mtodeglon * bathacrosstrack[beam_port]
+                                + headingx * mtodeglon * bathalongtrack[beam_port];
+              double portlat = navlat
+                                - headingx * mtodeglat * bathacrosstrack[beam_port]
+                                + headingy * mtodeglat * bathalongtrack[beam_port];
+              double stbdlon = navlon
+                                + headingy * mtodeglon * bathacrosstrack[beam_stbd]
+                                + headingx * mtodeglon * bathalongtrack[beam_stbd];
+              double stbdlat = navlat
+                                - headingx * mtodeglat * bathacrosstrack[beam_stbd]
+                                + headingy * mtodeglat * bathalongtrack[beam_stbd];
+
+              fprintf(nfp, "%.4d %.2d %.2d %.2d %.2d %09.6f\t%.6f\t"
+                            "%15.10f\t%15.10f\t%7.3f\t%6.3f\t%.4f\t%6.3f\t%6.3f\t%7.4f\t"
+                            "%15.10f\t%15.10f\t%15.10f\t%15.10f\n",
+                      time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], seconds,
+                      time_d, navlon, navlat, heading, speed, sensordepth, roll, pitch, heave,
+                      portlon, portlat, stbdlon, stbdlat);
+            }
+
+            /* get bounds for mbinfo call to generate the *.inf file
+                - use only data with good navigation and valid soundings or pixels */
+            if (fabs(navlon) >= 0.005 || fabs(navlat) >= 0.005) {
+              if (mask_bounds_init) {
+                mask_bounds[0] = std::min(mask_bounds[0], navlon);
+                mask_bounds[1] = std::max(mask_bounds[1], navlon);
+                mask_bounds[2] = std::min(mask_bounds[2], navlat);
+                mask_bounds[3] = std::max(mask_bounds[3], navlat);
+              } else {
+                mask_bounds[0] = navlon;
+                mask_bounds[1] = navlon;
+                mask_bounds[2] = navlat;
+                mask_bounds[3] = navlat;
+                mask_bounds_init = true;
+              }
+              for (int i=0; i<obeams_bath; i++) {
+                if (mb_beam_ok(beamflag[i])) {
+                  double bathlon = navlon
+                              + headingy * mtodeglon * bathacrosstrack[i]
+                              + headingx * mtodeglon * bathalongtrack[i];
+                  double bathlat = navlat
+                              - headingx * mtodeglat * bathacrosstrack[i]
+                              + headingy * mtodeglat * bathalongtrack[i];
+
+                  mask_bounds[0] = std::min(mask_bounds[0], bathlon);
+                  mask_bounds[1] = std::max(mask_bounds[1], bathlon);
+                  mask_bounds[2] = std::min(mask_bounds[2], bathlat);
+                  mask_bounds[3] = std::max(mask_bounds[3], bathlat);
+                }
+              }
+              for (int i=0; i<opixels_ss; i++) {
+                if (ss[i] > MB_SIDESCAN_NULL) {
+                  double sslon = navlon
+                              + headingy * mtodeglon * ssacrosstrack[i]
+                              + headingx * mtodeglon * ssalongtrack[i];
+                  double sslat = navlat
+                              - headingx * mtodeglat * ssacrosstrack[i]
+                              + headingy * mtodeglat * ssalongtrack[i];
+                  mask_bounds[0] = std::min(mask_bounds[0], sslon);
+                  mask_bounds[1] = std::max(mask_bounds[1], sslon);
+                  mask_bounds[2] = std::min(mask_bounds[2], sslat);
+                  mask_bounds[3] = std::max(mask_bounds[3], sslat);
+                }
+              }
+            }
+
+            /* output synchronous attitude */
             index = 0;
             mb_put_binary_double(true, time_d, &buffer[index]);
             index += 8;
@@ -2945,30 +3112,35 @@ int main(int argc, char **argv) {
         fprintf(stderr, "     %d att3 records\n", n_wf_att3);
       }
 
-      /* close the input swath file */
+      /* close the input ("logged") swath file */
       status &= mb_close(verbose, &imbio_ptr, &error);
 	n_rt_files++;
 
-      /* close the output swath file */
+      /* close the output ("raw") swath file */
       status &= mb_close(verbose, &ombio_ptr, &error);
             n_wt_files++;
+
+      // close the output fbt file
+      if (make_fbt)
+        status &= mb_close(verbose, &fmbio_ptr, &error);
+
+      //close the output fnv file
+      if (make_fnv)
+        fclose(nfp);
+
+      // use mbinfo to generate the inf file - specify the mask bounds so that
+      // only one read pass is necessary
+      char command[MB_PATH_MAXLINE];
+      sprintf(command, "mbinfo -F %d -I %s -G -N -O -M10/10/%.9f/%.9f/%.9f/%.9f",
+              oformat, ofile,
+              mask_bounds[0], mask_bounds[1], mask_bounds[2], mask_bounds[3]);
+      system(command);
 
       /* close the synchronous attitude file */
       fclose(afp);
 
-      /* if success then generate ancillary files */
+      /* if success then generate other ancillary files */
       if (status == MB_SUCCESS) {
-
-        /* generate inf fnv and fbt files */
-        status &= mb_make_info(verbose, true, ofile, oformat, &error);
-
-        /* generate gef files
-         * - deprecated in favor of *resf files generated by mbprocess
-         * - DWC 11 February 2018 */
-        //sprintf(command, "mbgetesf -I %s -M4 -O %s.gef", ofile, ofile);
-        //if (verbose > 0)
-        //  fprintf(stderr, "Generating gef file for %s\n", ofile);
-        //shellstatus = system(command);
 
         /* generate asynchronous heading file */
         if (n_heading > 0) {

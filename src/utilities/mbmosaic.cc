@@ -2640,10 +2640,7 @@ int main(int argc, char **argv) {
 							}
 						}
 					}
-					status &= mb_close(verbose, &mbio_ptr, &error);
-					if (status == MB_FAILURE) {
-						fprintf(stderr,"WARNING: status is MB_FAILURE\n");
-					}
+					mb_close(verbose, &mbio_ptr, &error);
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
@@ -3207,10 +3204,7 @@ int main(int argc, char **argv) {
 							}
 						}
 					}
-					status &= mb_close(verbose, &mbio_ptr, &error);
-					if (status == MB_FAILURE) {
-						fprintf(stderr,"WARNING: status is MB_FAILURE (2)\n");
-					}
+					mb_close(verbose, &mbio_ptr, &error);
 					status = MB_SUCCESS;
 					error = MB_ERROR_NO_ERROR;
 				}
