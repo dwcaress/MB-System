@@ -548,6 +548,8 @@ int main(int argc, char **argv) {
             preprocess_pars.multibeam_sidescan_source = MB_PR_SSSOURCE_CALIBRATEDSNIPPET;
           else if (optarg[0] == 'B' || optarg[0] == 'b')
             preprocess_pars.multibeam_sidescan_source = MB_PR_SSSOURCE_WIDEBEAMBACKSCATTER;
+          else if (optarg[0] == 'W' || optarg[0] == 'w')
+            preprocess_pars.multibeam_sidescan_source = MB_PR_SSSOURCE_CALIBRATEDWIDEBEAMBACKSCATTER;
         }
         else if (strcmp("sounding-amplitude-filter", options[option_index].name) == 0) {
           const int n = sscanf(optarg, "%lf", &preprocess_pars.sounding_amplitude_threshold);
@@ -1084,16 +1086,6 @@ int main(int argc, char **argv) {
   double aheave[MB_NAV_MAX];
 
   /* counts of records read and written */
-  // int n_rf_data = 0;
-  // int n_rf_comment = 0;
-  // int n_rf_nav = 0;
-  // int n_rf_nav1 = 0;
-  // int n_rf_nav2 = 0;
-  // int n_rf_nav3 = 0;
-  // int n_rf_att = 0;
-  // int n_rf_att1 = 0;
-  // int n_rf_att2 = 0;
-  // int n_rf_att3 = 0;
   int n_rt_data = 0;
   int n_rt_comment = 0;
   int n_rt_nav = 0;
@@ -1106,16 +1098,6 @@ int main(int argc, char **argv) {
   int n_rt_att3 = 0;
   int n_rt_files = 0;
 
-  // int n_wf_data = 0;
-  // int n_wf_comment = 0;
-  // int n_wf_nav = 0;
-  // int n_wf_nav1 = 0;
-  // int n_wf_nav2 = 0;
-  // int n_wf_nav3 = 0;
-  // int n_wf_att = 0;
-  // int n_wf_att1 = 0;
-  // int n_wf_att2 = 0;
-  // int n_wf_att3 = 0;
   int n_wt_data = 0;
   int n_wt_comment = 0;
   int n_wt_nav = 0;
@@ -1128,9 +1110,6 @@ int main(int argc, char **argv) {
   int n_wt_att3 = 0;
   int n_wt_files = 0;
 
-  // int shellstatus;
-  // mb_path command = "";
-
   mb_path afile = "";
   FILE *afp = nullptr;
   struct stat file_status;
@@ -1139,7 +1118,6 @@ int main(int argc, char **argv) {
   int istart, iend;
   int input_size, input_modtime, output_size, output_modtime;
 
-  // mb_path fnvfile = "";
   int isensor, ioffset;
 
   int testformat;
@@ -1149,7 +1127,6 @@ int main(int argc, char **argv) {
   int jheading = 0;
   int jaltitude = 0;
   int jattitude = 0;
-  // int index = 0;
   char buffer[16] = "";
 
   /*-------------------------------------------------------------------*/
@@ -2294,6 +2271,9 @@ int main(int argc, char **argv) {
 
   /* loop over all files to be read */
   while (read_data) {
+    int sensorhead = 0;
+    int sensortype = 0;
+
     /* get output format - in some cases this may be a
      * different, generally extended format
      * more suitable for processing than the original */
@@ -2553,6 +2533,7 @@ int main(int argc, char **argv) {
       /* start read+process,+output loop */
       while (error <= MB_ERROR_NO_ERROR) {
         /* reset error */
+        status = MB_SUCCESS;
         error = MB_ERROR_NO_ERROR;
 
         /* read next data record */
@@ -2572,7 +2553,6 @@ int main(int argc, char **argv) {
         int sensortype = 0;
         if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
           int sensorhead_error = MB_ERROR_NO_ERROR;
-          // const int sensorhead_status =
           mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &sensorhead_error);
           mb_sonartype(verbose, imbio_ptr, istore_ptr, &sensortype, &sensorhead_error);
         }
@@ -2774,10 +2754,6 @@ int main(int argc, char **argv) {
           preprocess_pars.soundspeed_time_d = soundspeed_time_d;
           preprocess_pars.soundspeed_soundspeed = soundspeed_soundspeed;
 
-          if (status == MB_FAILURE) {
-            // TODO(caress): Need a message that is more useful.
-            fprintf(stderr, "WARNING: status == MB_FAILURE\n");
-          }
           /* attempt to execute a preprocess function for these data */
           status = mb_preprocess(verbose, imbio_ptr, istore_ptr, (void *)platform, (void *)&preprocess_pars, &error);
 
@@ -2801,7 +2777,7 @@ int main(int argc, char **argv) {
               sensordepth_changed = true;
 
               /* calculate target sensor attitude */
-              status &= mb_platform_orientation_target(verbose, (void *)platform, target_sensor, 0, heading, roll, pitch,
+              status = mb_platform_orientation_target(verbose, (void *)platform, target_sensor, 0, heading, roll, pitch,
                                   &heading, &roll, &pitch, &error);
               roll_delta = roll - roll_org;
               pitch_delta = pitch - pitch_org;
@@ -2886,6 +2862,18 @@ int main(int argc, char **argv) {
 
           // output ancilliary files
           if (kind == MB_DATA_DATA) {
+
+            status = mb_extract(verbose, ombio_ptr, istore_ptr, &kind, time_i, &time_d,
+                                &navlon, &navlat, &speed, &heading,
+                                &obeams_bath, &obeams_amp, &opixels_ss,
+                                beamflag, bath, amp, bathacrosstrack, bathalongtrack,
+                                ss, ssacrosstrack, ssalongtrack, comment, &error);
+            status = mb_extract_nav(verbose, ombio_ptr, istore_ptr, &kind, time_i, &time_d,
+                                &navlon, &navlat, &speed, &heading, &draft,
+                                &roll, &pitch, &heave, &error);
+            status = mb_extract_altitude(verbose, ombio_ptr, istore_ptr, &kind,
+                                &sensordepth, &altitude, &error);
+
 
             /* output fbt */
             if (make_fbt) {
@@ -3113,11 +3101,11 @@ int main(int argc, char **argv) {
 
       /* close the input ("logged") swath file */
       status &= mb_close(verbose, &imbio_ptr, &error);
-	n_rt_files++;
+	    n_rt_files++;
 
       /* close the output ("raw") swath file */
       status &= mb_close(verbose, &ombio_ptr, &error);
-            n_wt_files++;
+      n_wt_files++;
 
       // close the output fbt file
       if (make_fbt)

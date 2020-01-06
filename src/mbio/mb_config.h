@@ -76,7 +76,7 @@
 /* Build libmbtnav */
 #define MBTNAV_ENABLED 1
 
-/* Build libmbtrn and mbtrnpreprocess */
+/* Build libmbtrn and mbtrnpp */
 #define MBTRN_ENABLED 1
 
 /* Build graphical tools */
@@ -116,7 +116,7 @@
 #define VERSION "5.7.6beta22"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "3 January 2020"
+#define VERSION_DATE "6 January 2020"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

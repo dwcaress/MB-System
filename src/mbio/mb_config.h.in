@@ -75,7 +75,7 @@
 /* Build libmbtnav */
 #undef MBTNAV_ENABLED
 
-/* Build libmbtrn and mbtrnpreprocess */
+/* Build libmbtrn and mbtrnpp */
 #undef MBTRN_ENABLED
 
 /* Build graphical tools */

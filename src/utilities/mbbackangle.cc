@@ -947,7 +947,8 @@ int main(int argc, char **argv) {
   	/* Deal with esf file if avialable */
   	if (status == MB_SUCCESS) {
   		mb_path esffile;
-  		status = mb_esf_load(verbose, program_name, swathfile, true, false, esffile, &esf, &error);
+  		mb_esf_load(verbose, program_name, swathfile, true, false, esffile, &esf, &error);
+      error = MB_ERROR_NO_ERROR;
   	}
 
 		/* initialize grid arrays */
@@ -1088,20 +1089,24 @@ int main(int argc, char **argv) {
 				time_d_avg /= navg;
 				altitude_avg /= navg;
 				if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL) {
-					if (amplitude_on)
+					if (amplitude_on) {
 						output_table(verbose, atfp, ntable, navg, time_d_avg, nangles, angle_max, dangle, symmetry, nmeanamp,
 						             meanamp, sigmaamp, &error);
-					if (sidescan_on)
+				  }
+					if (sidescan_on) {
 						output_table(verbose, stfp, ntable, navg, time_d_avg, nangles, angle_max, dangle, symmetry, nmeanss,
 						             meanss, sigmass, &error);
+				  }
 				}
 				else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN) {
-					if (amplitude_on)
+					if (amplitude_on) {
 						output_model(verbose, atfp, ssbeamwidth, ssdepression, ref_angle, ntable, navg, time_d_avg, altitude_avg,
 						             nangles, angle_max, dangle, symmetry, nmeanamp, meanamp, sigmaamp, &error);
-					if (sidescan_on)
+				  }
+					if (sidescan_on) {
 						output_model(verbose, stfp, ssbeamwidth, ssdepression, ref_angle, ntable, navg, time_d_avg, altitude_avg,
 						             nangles, angle_max, dangle, symmetry, nmeanss, meanss, sigmass, &error);
+				  }
 				}
 				ntable++;
 
@@ -1598,12 +1603,14 @@ int main(int argc, char **argv) {
 		fprintf(atfp, "## Default altitude:      %f\n", altitude_default);
 		fprintf(atfp, "## Slope correction:      %d\n", amp_corr_slope);
 		fprintf(atfp, "## Data type:             beam amplitude\n");
-		if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
+		if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL) {
 			output_table(verbose, atfp, 0, ntotavg, time_d_totavg, nangles, angle_max, dangle, symmetry, nmeantotamp, meantotamp,
 			             sigmatotamp, &error);
-		else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN)
+    }
+		else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN) {
 			output_model(verbose, atfp, ssbeamwidth, ssdepression, ref_angle, 0, ntotavg, time_d_totavg, altitude_totavg, nangles,
 			             angle_max, dangle, symmetry, nmeantotamp, meantotamp, sigmatotamp, &error);
+    }
 		fclose(atfp);
 	}
 	if (!dump && sidescan_on) {
@@ -1643,12 +1650,14 @@ int main(int argc, char **argv) {
 		fprintf(stfp, "## Default altitude:      %f\n", altitude_default);
 		fprintf(stfp, "## Slope Correction:      %d\n", ss_corr_slope);
 		fprintf(stfp, "## Data type:             sidescan\n");
-		if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
+		if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL) {
 			output_table(verbose, stfp, 0, ntotavg, time_d_totavg, nangles, angle_max, dangle, symmetry, nmeantotss, meantotss,
 			             sigmatotss, &error);
-		else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN)
+    }
+		else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN) {
 			output_model(verbose, stfp, ssbeamwidth, ssdepression, ref_angle, 0, ntotavg, time_d_totavg, altitude_totavg, nangles,
 			             angle_max, dangle, symmetry, nmeantotss, meantotss, sigmatotss, &error);
+    }
 		fclose(stfp);
 	}
 

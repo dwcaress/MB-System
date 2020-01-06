@@ -749,6 +749,8 @@ struct mb_io_struct {
   int (*mb_io_insert_rawss)(int verbose, void *mbio_ptr, void *store_ptr, int kind, int sidescan_type, double sample_interval,
                             double beamwidth_xtrack, double beamwidth_ltrack, int num_samples_port, double *rawss_port,
                             int num_samples_stbd, double *rawss_stbd, int *error);
+  int (*mb_io_makess)(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
+                         int swath_width_set, double *swath_width, int pixel_int, int *error);
   int (*mb_io_extract_segytraceheader)(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void *segytraceheader_ptr,
                                        int *error);
   int (*mb_io_extract_segy)(int verbose, void *mbio_ptr, void *store_ptr, int *sampleformat, int *kind,

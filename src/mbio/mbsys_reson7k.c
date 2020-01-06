@@ -5654,7 +5654,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           ss_source = R7KRECID_7kBackscatterImageData;
 
         /* regenerate sidescan */
-        status &= mbsys_reson7k_makess(verbose, mbio_ptr, store_ptr, ss_source, false, pixel_size, false, swath_width,
+        status &= mbsys_reson7k_makess_source(verbose, mbio_ptr, store_ptr, ss_source, false, pixel_size, false, swath_width,
                                       true, error);
       }
       /*--------------------------------------------------------------*/
@@ -9216,9 +9216,12 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 
   return (status);
 }
+
 /*--------------------------------------------------------------------*/
-int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,
-                         int swath_width_set, double *swath_width, int pixel_int, int *error) {
+int mbsys_reson7k_makess_source(int verbose, void *mbio_ptr, void *store_ptr,
+                        int source, int pixel_size_set, double *pixel_size,
+                        int swath_width_set, double *swath_width, int pixel_int,
+                        int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -9438,7 +9441,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
        error_flag > 1 indicates a problem */
     if (source == R7KRECID_7kCalibratedSnippetData && calibratedsnippet->error_flag < 3) {
       for (int i = 0; i < calibratedsnippet->number_beams; i++) {
-        s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries = 
+        s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries =
             (s7kr_calibratedsnippettimeseries *)&(calibratedsnippet->calibratedsnippettimeseries[i]);
         const int ibeam = calibratedsnippettimeseries->beam_number;
 
@@ -9727,6 +9730,55 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
   }
 
   const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return value:\n");
+    fprintf(stderr, "dbg2       pixel_size:      %f\n", *pixel_size);
+    fprintf(stderr, "dbg2       swath_width:     %f\n", *swath_width);
+    fprintf(stderr, "dbg2       error:           %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:          %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
+                         int swath_width_set, double *swath_width, int pixel_int, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:       %p\n", (void *)store_ptr);
+    fprintf(stderr, "dbg2       pixel_size_set:  %d\n", pixel_size_set);
+    fprintf(stderr, "dbg2       pixel_size:      %f\n", *pixel_size);
+    fprintf(stderr, "dbg2       swath_width_set: %d\n", swath_width_set);
+    fprintf(stderr, "dbg2       swath_width:     %f\n", *swath_width);
+    fprintf(stderr, "dbg2       pixel_int:       %d\n", pixel_int);
+  }
+
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
+
+  // check for a prior sidescan source choice
+  int source = store->processedsidescan.ss_source;
+
+  /* if necessary pick a source for the backscatter */
+  if (source == R7KRECID_None) {
+    if (store->read_calibratedsnippet)
+      source = R7KRECID_7kCalibratedSnippetData;
+    else if (store->read_v2snippet)
+      source = R7KRECID_7kV2SnippetData;
+    else if (store->read_beam)
+      source = R7KRECID_7kBeamData;
+    else if (store->read_backscatter)
+      source = R7KRECID_7kBackscatterImageData;
+  }
+
+  int status = mbsys_reson7k_makess_source(verbose, mbio_ptr, store_ptr, source,
+                        pixel_size_set, pixel_size, swath_width_set, swath_width,
+                        pixel_int, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

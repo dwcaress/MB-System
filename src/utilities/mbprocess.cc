@@ -54,11 +54,7 @@
 #include "mb_status.h"
 #include "mb_swap.h"
 #include "mbsys_atlas.h"
-#include "mbsys_kmbes.h"
 #include "mbsys_ldeoih.h"
-#include "mbsys_reson7k.h"
-#include "mbsys_simrad2.h"
-#include "mbsys_simrad3.h"
 
 /* define sidescan correction table structure */
 struct mbprocess_sscorr_struct {
@@ -5388,24 +5384,14 @@ int main(int argc, char **argv) {
                                  roll, pitch, heave, &error);
         }
 
-        /* insert the altered bathymetry, recalculate the sidescan,
+        /* insert the altered bathymetry, recalculate the sidescan (if that is defined),
             and extract the results if desired */
         if (process.mbp_ssrecalc_mode == MBP_SSRECALC_ON && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
           status = mb_insert(verbose, imbio_ptr, store_ptr, kind, time_i, time_d, navlon, navlat, speed, heading, nbath,
                              namp, nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack,
                              ssalongtrack, comment, &error);
-          if (process.mbp_format == MBF_EM300MBA)
-            status = mbsys_simrad2_makess(verbose, imbio_ptr, store_ptr, pixel_size_set, &pixel_size, swath_width_set,
+          status = mb_makess(verbose, imbio_ptr, store_ptr, pixel_size_set, &pixel_size, swath_width_set,
                                           &swath_width, pixel_int, &error);
-          else if (process.mbp_format == MBF_EM710MBA)
-            status = mbsys_simrad3_makess(verbose, imbio_ptr, store_ptr, pixel_size_set, &pixel_size, swath_width_set,
-                                          &swath_width, pixel_int, &error);
-          else if (process.mbp_format == MBF_KEMKMALL)
-            status = mbsys_kmbes_makess(verbose, imbio_ptr, store_ptr, pixel_size_set, &pixel_size, swath_width_set,
-                                          &swath_width, pixel_int, &error);
-          else if (process.mbp_format == MBF_RESON7KR)
-            status = mbsys_reson7k_makess(verbose, imbio_ptr, store_ptr, R7KRECID_7kV2SnippetData, pixel_size_set,
-                                          &pixel_size, swath_width_set, &swath_width, pixel_int, &error);
           status &= mb_extract(verbose, imbio_ptr, store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
                               &nbath, &namp, &nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
                               ssacrosstrack, ssalongtrack, comment, &error);

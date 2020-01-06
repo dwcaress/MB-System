@@ -36,6 +36,10 @@
 #include "mb_swap.h"
 #include "mbsys_reson7k.h"
 
+#ifdef MBTRN_ENABLED
+#include "r7k-reader.h"
+#endif
+
 /* turn on debug statements here */
 //#define MBR_RESON7KR_DEBUG 1
 //#define MBR_RESON7KR_DEBUG2 1
@@ -9364,8 +9368,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       ss_source = R7KRECID_7kBackscatterImageData;
     else
       ss_source = 0;
-    status =
-        mbsys_reson7k_makess(verbose, mbio_ptr, store_ptr, ss_source, false, pixel_size, false, swath_width, true, error);
+    status = mbsys_reson7k_makess_source(verbose, mbio_ptr, store_ptr, ss_source, false, pixel_size, false, swath_width, true, error);
   }
 
   /* set error and kind in mb_io_ptr */
@@ -17266,6 +17269,7 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_detects = &mbsys_reson7k_detects;
   mb_io_ptr->mb_io_gains = &mbsys_reson7k_gains;
   mb_io_ptr->mb_io_copyrecord = &mbsys_reson7k_copy;
+  mb_io_ptr->mb_io_makess = &mbsys_reson7k_makess;
   mb_io_ptr->mb_io_extract_rawss = NULL;
   mb_io_ptr->mb_io_insert_rawss = NULL;
   mb_io_ptr->mb_io_extract_segytraceheader = &mbsys_reson7k_extract_segytraceheader;
@@ -17313,6 +17317,7 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error) {
     fprintf(stderr, "dbg2       insert_svp:         %p\n", (void *)mb_io_ptr->mb_io_insert_svp);
     fprintf(stderr, "dbg2       ttimes:             %p\n", (void *)mb_io_ptr->mb_io_ttimes);
     fprintf(stderr, "dbg2       detects:            %p\n", (void *)mb_io_ptr->mb_io_detects);
+    fprintf(stderr, "dbg2       makess:             %p\n", (void *)mb_io_ptr->mb_io_makess);
     fprintf(stderr, "dbg2       extract_rawss:      %p\n", (void *)mb_io_ptr->mb_io_extract_rawss);
     fprintf(stderr, "dbg2       insert_rawss:       %p\n", (void *)mb_io_ptr->mb_io_insert_rawss);
     fprintf(stderr, "dbg2       extract_segytraceheader: %p\n", (void *)mb_io_ptr->mb_io_extract_segytraceheader);
