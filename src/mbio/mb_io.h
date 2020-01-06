@@ -28,14 +28,6 @@
 #include "mb_status.h"
 #include "mb_process.h"
 
-#ifdef MBTRN_ENABLED
-#include "r7k-reader.h"
-#include "r7kc.h"
-#include "msocket.h"
-#include "mfile.h"
-#include "merror.h"
-#endif
-
 /* ---------------------------------------------------------------------------*/
 /* Survey Platform definitions and structures for the
  * mb_platform_*() functions */
