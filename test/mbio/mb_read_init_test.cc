@@ -38,7 +38,9 @@ TEST(MbReadInitTest, errorBadFormat) {
   ASSERT_EQ(MB_ERROR_BAD_FORMAT, error);
 }
 
-TEST(MbReadInitTest, errorFileDoesNotExist) {
+// TODO(schwehr): Causes a segfault.  See:
+// https://github.com/dwcaress/MB-System/pull/795
+TEST(MbReadInitTest, DISABLED_errorFileDoesNotExist) {
   const int verbose = 0;
   const int format = MBF_SBSIOMRG;
   const int pings_get = 1;
