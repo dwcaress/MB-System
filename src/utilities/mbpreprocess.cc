@@ -156,7 +156,6 @@ int main(int argc, char **argv) {
   bool use_platform_file = false;
   int target_sensor = -1;
   mb_path nav_file = "";
-  memset(nav_file, 0, sizeof(mb_path));
 
   /* output fnv files for each sensor */
   bool output_sensor_fnv = false;
@@ -1006,9 +1005,6 @@ int main(int argc, char **argv) {
   double kluge_last_time_d;
   double dtime_d_expect;
   double dtime_d;
-  double correction_start_time_d = 0.0;
-  int correction_start_index = 0;
-  int correction_end_index = -1;
   bool kluge_fix_wissl_timestamps_setup1 = false;
   bool kluge_fix_wissl_timestamps_setup2 = false;
 
@@ -1088,16 +1084,16 @@ int main(int argc, char **argv) {
   double aheave[MB_NAV_MAX];
 
   /* counts of records read and written */
-  int n_rf_data = 0;
-  int n_rf_comment = 0;
-  int n_rf_nav = 0;
-  int n_rf_nav1 = 0;
-  int n_rf_nav2 = 0;
-  int n_rf_nav3 = 0;
-  int n_rf_att = 0;
-  int n_rf_att1 = 0;
-  int n_rf_att2 = 0;
-  int n_rf_att3 = 0;
+  // int n_rf_data = 0;
+  // int n_rf_comment = 0;
+  // int n_rf_nav = 0;
+  // int n_rf_nav1 = 0;
+  // int n_rf_nav2 = 0;
+  // int n_rf_nav3 = 0;
+  // int n_rf_att = 0;
+  // int n_rf_att1 = 0;
+  // int n_rf_att2 = 0;
+  // int n_rf_att3 = 0;
   int n_rt_data = 0;
   int n_rt_comment = 0;
   int n_rt_nav = 0;
@@ -1108,18 +1104,18 @@ int main(int argc, char **argv) {
   int n_rt_att1 = 0;
   int n_rt_att2 = 0;
   int n_rt_att3 = 0;
-    int n_rt_files = 0;
+  int n_rt_files = 0;
 
-  int n_wf_data = 0;
-  int n_wf_comment = 0;
-  int n_wf_nav = 0;
-  int n_wf_nav1 = 0;
-  int n_wf_nav2 = 0;
-  int n_wf_nav3 = 0;
-  int n_wf_att = 0;
-  int n_wf_att1 = 0;
-  int n_wf_att2 = 0;
-  int n_wf_att3 = 0;
+  // int n_wf_data = 0;
+  // int n_wf_comment = 0;
+  // int n_wf_nav = 0;
+  // int n_wf_nav1 = 0;
+  // int n_wf_nav2 = 0;
+  // int n_wf_nav3 = 0;
+  // int n_wf_att = 0;
+  // int n_wf_att1 = 0;
+  // int n_wf_att2 = 0;
+  // int n_wf_att3 = 0;
   int n_wt_data = 0;
   int n_wt_comment = 0;
   int n_wt_nav = 0;
@@ -1143,7 +1139,7 @@ int main(int argc, char **argv) {
   int istart, iend;
   int input_size, input_modtime, output_size, output_modtime;
 
-  mb_path fnvfile = "";
+  // mb_path fnvfile = "";
   int isensor, ioffset;
 
   int testformat;
@@ -1153,7 +1149,7 @@ int main(int argc, char **argv) {
   int jheading = 0;
   int jaltitude = 0;
   int jattitude = 0;
-  int index = 0;
+  // int index = 0;
   char buffer[16] = "";
 
   /*-------------------------------------------------------------------*/
@@ -1422,16 +1418,16 @@ int main(int argc, char **argv) {
     }
 
     /* zero file count records */
-    n_rf_data = 0;
-    n_rf_comment = 0;
-    n_rf_nav = 0;
-    n_rf_nav1 = 0;
-    n_rf_nav2 = 0;
-    n_rf_nav3 = 0;
-    n_rf_att = 0;
-    n_rf_att1 = 0;
-    n_rf_att2 = 0;
-    n_rf_att3 = 0;
+    int n_rf_data = 0;
+    int n_rf_comment = 0;
+    int n_rf_nav = 0;
+    int n_rf_nav1 = 0;
+    int n_rf_nav2 = 0;
+    int n_rf_nav3 = 0;
+    int n_rf_att = 0;
+    int n_rf_att1 = 0;
+    int n_rf_att2 = 0;
+    int n_rf_att3 = 0;
 
     /* read data */
     while (error <= MB_ERROR_NO_ERROR) {
@@ -1793,8 +1789,6 @@ int main(int argc, char **argv) {
   }
 #endif
 
-  bool correction_on = false;
-
   /* deal with correcting MBARI Mapping AUV pressure depth time jumps */
   if (kluge_timejumps_mbaripressure) {
     if (verbose > 0) {
@@ -1804,10 +1798,14 @@ int main(int argc, char **argv) {
 
     /* sensordepth */
     if (n_sensordepth > 2 && n_sensordepth_alloc >= n_sensordepth) {
-      correction_on = false;
       dtime_d_expect = (sensordepth_time_d[n_sensordepth-1] - sensordepth_time_d[0]) / (n_sensordepth - 1);
-      if (fabs((sensordepth_time_d[1] - sensordepth_time_d[0]) -  dtime_d_expect) < kluge_timejumps_mba_threshold)
+      if (fabs((sensordepth_time_d[1] - sensordepth_time_d[0]) -  dtime_d_expect) < kluge_timejumps_mba_threshold) {
           dtime_d_expect = (sensordepth_time_d[1] - sensordepth_time_d[0]);
+      }
+      bool correction_on = false;
+      double correction_start_time_d = 0.0;
+      int correction_start_index = 0;
+      int correction_end_index = -1;
       for (int i = 2;i<n_sensordepth;i++) {
         dtime_d = sensordepth_time_d[i] - sensordepth_time_d[i-1];
         if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_mba_threshold) {
@@ -2220,37 +2218,29 @@ int main(int argc, char **argv) {
       correcting survey data, and outputting everything */
 
   /* zero file count records */
-  n_rf_data = 0;
-  n_rf_comment = 0;
-  n_rf_nav = 0;
-  n_rf_nav1 = 0;
-  n_rf_nav2 = 0;
-  n_rf_nav3 = 0;
-  n_rf_att = 0;
-  n_rf_att1 = 0;
-  n_rf_att2 = 0;
-  n_rf_att3 = 0;
+  int n_rf_data = 0;
+  int n_rf_comment = 0;
+  int n_rf_nav = 0;
+  int n_rf_nav1 = 0;
+  int n_rf_nav2 = 0;
+  int n_rf_nav3 = 0;
+  int n_rf_att = 0;
+  int n_rf_att1 = 0;
+  int n_rf_att2 = 0;
+  int n_rf_att3 = 0;
   n_rt_data = 0;
-  n_rt_comment = 0;
-  n_rt_nav = 0;
-  n_rt_nav1 = 0;
-  n_rt_nav2 = 0;
-  n_rt_nav3 = 0;
-  n_rt_att = 0;
-  n_rt_att1 = 0;
-  n_rt_att2 = 0;
-  n_rt_att3 = 0;
-    n_rt_files = 0;
-  n_wf_data = 0;
-  n_wf_comment = 0;
-  n_wf_nav = 0;
-  n_wf_nav1 = 0;
-  n_wf_nav2 = 0;
-  n_wf_nav3 = 0;
-  n_wf_att = 0;
-  n_wf_att1 = 0;
-  n_wf_att2 = 0;
-  n_wf_att3 = 0;
+  n_rt_files = 0;
+
+  int n_wf_data = 0;
+  int n_wf_comment = 0;
+  int n_wf_nav = 0;
+  int n_wf_nav1 = 0;
+  int n_wf_nav2 = 0;
+  int n_wf_nav3 = 0;
+  int n_wf_att = 0;
+  int n_wf_att1 = 0;
+  int n_wf_att2 = 0;
+  int n_wf_att3 = 0;
   n_wt_data = 0;
   n_wt_comment = 0;
   n_wt_nav = 0;
@@ -2261,7 +2251,7 @@ int main(int argc, char **argv) {
   n_wt_att1 = 0;
   n_wt_att2 = 0;
   n_wt_att3 = 0;
-    n_wt_files = 0;
+  n_wt_files = 0;
 
   /* if requested to output integrated nav for all survey sensors, open files */
   if (output_sensor_fnv && platform != nullptr) {
@@ -2272,6 +2262,7 @@ int main(int argc, char **argv) {
         if (verbose > 0)
           fprintf(stderr, "Outputting sensor %d with capability %d\n", isensor, platform->sensors[isensor].capability2);
         for (ioffset = 0; ioffset < platform->sensors[isensor].num_offsets; ioffset++) {
+          mb_path fnvfile = "";
           sprintf(fnvfile, "sensor_%2.2d_%2.2d_%2.2d.fnv", isensor, ioffset, platform->sensors[isensor].type);
           if (verbose > 0)
             fprintf(stderr, "Outputting sensor %d offset %d in fnv file:%s\n", isensor, ioffset, fnvfile);
@@ -2303,9 +2294,6 @@ int main(int argc, char **argv) {
 
   /* loop over all files to be read */
   while (read_data) {
-    int sensorhead = 0;
-    int sensortype = 0;
-
     /* get output format - in some cases this may be a
      * different, generally extended format
      * more suitable for processing than the original */
@@ -2435,7 +2423,7 @@ int main(int argc, char **argv) {
 
       /* initialize bounds that will be used in call to mbinfo to generate the *.inf file */
       bool mask_bounds_init = false;
-      double mask_bounds[4];
+      double mask_bounds[4] = {0.0, 0.0, 0.0, 0.0};
 
       beamflag = nullptr;
       bath = nullptr;
@@ -2565,7 +2553,6 @@ int main(int argc, char **argv) {
       /* start read+process,+output loop */
       while (error <= MB_ERROR_NO_ERROR) {
         /* reset error */
-        status = MB_SUCCESS;
         error = MB_ERROR_NO_ERROR;
 
         /* read next data record */
@@ -2581,9 +2568,12 @@ int main(int argc, char **argv) {
         }
 
         /* detect multiple pings with the same time stamps */
+        int sensorhead = 0;
+        int sensortype = 0;
         if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
           int sensorhead_error = MB_ERROR_NO_ERROR;
-          const int sensorhead_status = mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &sensorhead_error);
+          // const int sensorhead_status =
+          mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &sensorhead_error);
           mb_sonartype(verbose, imbio_ptr, istore_ptr, &sensortype, &sensorhead_error);
         }
 
@@ -2632,13 +2622,6 @@ int main(int argc, char **argv) {
           n_rt_att3++;
         }
 
-        bool timestamp_changed = false;
-        bool nav_changed = false;
-        bool heading_changed = false;
-        bool sensordepth_changed = false;
-        bool attitude_changed = false;
-        bool altitude_changed = false;
-
         /* apply preprocessing to survey data records */
         if (status == MB_SUCCESS &&
           (kind == MB_DATA_DATA || kind == MB_DATA_SUBBOTTOM_MCS || kind == MB_DATA_SUBBOTTOM_CNTRBEAM ||
@@ -2652,6 +2635,7 @@ int main(int argc, char **argv) {
           status &= mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth_org, &altitude_org, &error);
 
           /* apply time jump fix */
+          bool timestamp_changed = false;
           if (kluge_timejumps) {
             if (kind == MB_DATA_DATA) {
               if (n_rf_data == 1)
@@ -2709,30 +2693,35 @@ int main(int argc, char **argv) {
           /* use available asynchronous ancillary data to replace
             nav sensordepth heading attitude values for record timestamp  */
           // int interp_status = MB_SUCCESS;
+          bool nav_changed = false;
           if (n_nav > 0) {
             /* interp_status = */ mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_navlon - 1, n_nav, time_d,
                                   &navlon_org, &jnav, &interp_error);
             /* interp_status = */ mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_navlat - 1, n_nav, time_d, &navlat_org,
                                   &jnav, &interp_error);
             /* interp_status = */
-              mb_linear_interp(verbose, nav_time_d - 1, nav_speed - 1, n_nav, time_d, &speed_org, &jnav, &interp_error);
+            mb_linear_interp(verbose, nav_time_d - 1, nav_speed - 1, n_nav, time_d, &speed_org, &jnav, &interp_error);
             nav_changed = true;
           }
+          bool sensordepth_changed = false;
           if (n_sensordepth > 0) {
             /* interp_status = */ mb_linear_interp(verbose, sensordepth_time_d - 1, sensordepth_sensordepth - 1, n_sensordepth,
                              time_d, &sensordepth_org, &jsensordepth, &interp_error);
             sensordepth_changed = true;
           }
+          bool heading_changed = false;
           if (n_heading > 0) {
             /* interp_status = */ mb_linear_interp_heading(verbose, heading_time_d - 1, heading_heading - 1, n_heading, time_d,
                                  &heading_org, &jheading, &interp_error);
             heading_changed = true;
           }
+          bool altitude_changed = false;
           if (n_altitude > 0) {
             /* interp_status = */ mb_linear_interp(verbose, altitude_time_d - 1, altitude_altitude - 1, n_altitude, time_d,
                              &altitude_org, &jaltitude, &interp_error);
             altitude_changed = true;
           }
+          bool attitude_changed = false;
           if (n_attitude > 0) {
             /* interp_status = */ mb_linear_interp(verbose, attitude_time_d - 1, attitude_roll - 1, n_attitude, time_d,
                              &roll_org, &jattitude, &interp_error);
@@ -2785,6 +2774,10 @@ int main(int argc, char **argv) {
           preprocess_pars.soundspeed_time_d = soundspeed_time_d;
           preprocess_pars.soundspeed_soundspeed = soundspeed_soundspeed;
 
+          if (status == MB_FAILURE) {
+            // TODO(caress): Need a message that is more useful.
+            fprintf(stderr, "WARNING: status == MB_FAILURE\n");
+          }
           /* attempt to execute a preprocess function for these data */
           status = mb_preprocess(verbose, imbio_ptr, istore_ptr, (void *)platform, (void *)&preprocess_pars, &error);
 
@@ -2808,7 +2801,7 @@ int main(int argc, char **argv) {
               sensordepth_changed = true;
 
               /* calculate target sensor attitude */
-              status = mb_platform_orientation_target(verbose, (void *)platform, target_sensor, 0, heading, roll, pitch,
+              status &= mb_platform_orientation_target(verbose, (void *)platform, target_sensor, 0, heading, roll, pitch,
                                   &heading, &roll, &pitch, &error);
               roll_delta = roll - roll_org;
               pitch_delta = pitch - pitch_org;
@@ -2910,7 +2903,7 @@ int main(int argc, char **argv) {
                                   navlon, navlat, speed, heading, obeams_bath, obeams_amp, opixels_ss,
                                   beamflag, bath, amp, bathacrosstrack, bathalongtrack,
                                   ss, ssacrosstrack, ssalongtrack, comment, &error);
-              status = mb_put_all(verbose, fmbio_ptr, fstore_ptr, false,
+              status &= mb_put_all(verbose, fmbio_ptr, fstore_ptr, false,
                                   kind, time_i, time_d, navlon, navlat, speed,
                                   heading, obeams_bath, 0, 0,
                                   beamflag, bath, nullptr, bathacrosstrack, bathalongtrack,
@@ -2918,37 +2911,43 @@ int main(int argc, char **argv) {
             }
 
             // get scaling for both fnv and inf calculations
-            double mtodeglon, mtodeglat;
+            double mtodeglon;
+            double mtodeglat;
             mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-            double headingx = sin(heading * DTR);
-            double headingy = cos(heading * DTR);
+            const double headingx = sin(heading * DTR);
+            const double headingy = cos(heading * DTR);
 
             /* output fnv */
             /* mblist output: tMXYHScRPr=X=Y+X+Y */
             if (make_fnv) {
               double seconds = time_i[5] + 1e-6 * time_i[6];
-              int beam_port, beam_vertical, beam_stbd;
-              int pixel_port, pixel_vertical, pixel_stbd;
+              int beam_port;
+              int beam_vertical;
+              int beam_stbd;
+              int pixel_port;
+              int pixel_vertical;
+              int pixel_stbd;
               status = mb_swathbounds(verbose, true, obeams_bath, 0,
                                   beamflag, bathacrosstrack, nullptr, nullptr,
                                   &beam_port, &beam_vertical, &beam_stbd,
                                   &pixel_port, &pixel_vertical, &pixel_stbd, &error);
-              double portlon = navlon
+              const double portlon = navlon
                                 + headingy * mtodeglon * bathacrosstrack[beam_port]
                                 + headingx * mtodeglon * bathalongtrack[beam_port];
-              double portlat = navlat
+              const double portlat = navlat
                                 - headingx * mtodeglat * bathacrosstrack[beam_port]
                                 + headingy * mtodeglat * bathalongtrack[beam_port];
-              double stbdlon = navlon
+              const double stbdlon = navlon
                                 + headingy * mtodeglon * bathacrosstrack[beam_stbd]
                                 + headingx * mtodeglon * bathalongtrack[beam_stbd];
-              double stbdlat = navlat
+              const double stbdlat = navlat
                                 - headingx * mtodeglat * bathacrosstrack[beam_stbd]
                                 + headingy * mtodeglat * bathalongtrack[beam_stbd];
 
-              fprintf(nfp, "%.4d %.2d %.2d %.2d %.2d %09.6f\t%.6f\t"
-                            "%15.10f\t%15.10f\t%7.3f\t%6.3f\t%.4f\t%6.3f\t%6.3f\t%7.4f\t"
-                            "%15.10f\t%15.10f\t%15.10f\t%15.10f\n",
+              fprintf(nfp,
+                      "%.4d %.2d %.2d %.2d %.2d %09.6f\t%.6f\t"
+                      "%15.10f\t%15.10f\t%7.3f\t%6.3f\t%.4f\t%6.3f\t%6.3f\t%7.4f\t"
+                      "%15.10f\t%15.10f\t%15.10f\t%15.10f\n",
                       time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], seconds,
                       time_d, navlon, navlat, heading, speed, sensordepth, roll, pitch, heave,
                       portlon, portlat, stbdlon, stbdlat);
@@ -3001,7 +3000,7 @@ int main(int argc, char **argv) {
             }
 
             /* output synchronous attitude */
-            index = 0;
+            int index = 0;
             mb_put_binary_double(true, time_d, &buffer[index]);
             index += 8;
             mb_put_binary_float(true, (float)roll, &buffer[index]);
@@ -3131,6 +3130,7 @@ int main(int argc, char **argv) {
       // use mbinfo to generate the inf file - specify the mask bounds so that
       // only one read pass is necessary
       char command[MB_PATH_MAXLINE];
+      // TODO(schwehr): Is is possible to have mask_bounds[0] not set.
       sprintf(command, "mbinfo -F %d -I %s -G -N -O -M10/10/%.9f/%.9f/%.9f/%.9f",
               oformat, ofile,
               mask_bounds[0], mask_bounds[1], mask_bounds[2], mask_bounds[3]);
@@ -3167,7 +3167,7 @@ int main(int argc, char **argv) {
             if (verbose > 0)
               fprintf(stderr, "Generating bah file for %s using samples %d:%d out of %d\n", ofile, istart, iend, n_heading);
             for (int i = istart; i < iend; i++) {
-              index = 0;
+              int index = 0;
               mb_put_binary_double(true, heading_time_d[i], &buffer[index]);
               index += 8;
               mb_put_binary_float(true, (float)heading_heading[i], &buffer[index]);
@@ -3204,7 +3204,7 @@ int main(int argc, char **argv) {
               fprintf(stderr, "Generating bas file for %s using samples %d:%d out of %d\n", ofile, istart, iend,
                 n_sensordepth);
             for (int i = istart; i < iend; i++) {
-              index = 0;
+              int index = 0;
               mb_put_binary_double(true, sensordepth_time_d[i], &buffer[index]);
               index += 8;
               mb_put_binary_float(true, (float)sensordepth_sensordepth[i], &buffer[index]);
@@ -3241,7 +3241,7 @@ int main(int argc, char **argv) {
               fprintf(stderr, "Generating baa file for %s using samples %d:%d out of %d\n", ofile, istart, iend,
                 n_attitude);
             for (int i = istart; i < iend; i++) {
-              index = 0;
+              int index = 0;
               mb_put_binary_double(true, attitude_time_d[i], &buffer[index]);
               index += 8;
               mb_put_binary_float(true, (float)attitude_roll[i], &buffer[index]);
