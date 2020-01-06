@@ -7469,6 +7469,7 @@ int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_pulses = &mbsys_kmbes_pulses;
   mb_io_ptr->mb_io_gains = &mbsys_kmbes_gains;
   mb_io_ptr->mb_io_copyrecord = &mbsys_kmbes_copy;
+  mb_io_ptr->mb_io_makess = &mbsys_kmbes_makess;
   mb_io_ptr->mb_io_extract_rawss = NULL;
   mb_io_ptr->mb_io_insert_rawss = NULL;
   mb_io_ptr->mb_io_extract_segytraceheader = NULL;
@@ -7516,6 +7517,7 @@ int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
     fprintf(stderr, "dbg2       insert_svp:         %p\n", (void *)mb_io_ptr->mb_io_insert_svp);
     fprintf(stderr, "dbg2       ttimes:             %p\n", (void *)mb_io_ptr->mb_io_ttimes);
     fprintf(stderr, "dbg2       detects:            %p\n", (void *)mb_io_ptr->mb_io_detects);
+    fprintf(stderr, "dbg2       makess:             %p\n", (void *)mb_io_ptr->mb_io_makess);
     fprintf(stderr, "dbg2       extract_rawss:      %p\n", (void *)mb_io_ptr->mb_io_extract_rawss);
     fprintf(stderr, "dbg2       insert_rawss:       %p\n", (void *)mb_io_ptr->mb_io_insert_rawss);
     fprintf(stderr, "dbg2       extract_segytraceheader: %p\n", (void *)mb_io_ptr->mb_io_extract_segytraceheader);

@@ -40,6 +40,10 @@
 #include "mb_swap.h"
 #include "mbsys_reson7k3.h"
 
+#ifdef MBTRN_ENABLED
+#include "r7k-reader.h"
+#endif
+
 /* turn on debug statements here */
 //#define MBR_RESON7K3_DEBUG 1
 //#define MBR_RESON7K3_DEBUG2 1
@@ -18773,6 +18777,7 @@ int mbr_register_reson7k3(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_detects = &mbsys_reson7k3_detects;
   mb_io_ptr->mb_io_gains = &mbsys_reson7k3_gains;
   mb_io_ptr->mb_io_copyrecord = &mbsys_reson7k3_copy;
+  mb_io_ptr->mb_io_makess = &mbsys_reson7k3_makess;
   mb_io_ptr->mb_io_extract_rawss = NULL;
   mb_io_ptr->mb_io_insert_rawss = NULL;
   mb_io_ptr->mb_io_extract_segytraceheader = NULL;
@@ -18820,6 +18825,7 @@ int mbr_register_reson7k3(int verbose, void *mbio_ptr, int *error) {
     fprintf(stderr, "dbg2       insert_svp:         %p\n", (void *)mb_io_ptr->mb_io_insert_svp);
     fprintf(stderr, "dbg2       ttimes:             %p\n", (void *)mb_io_ptr->mb_io_ttimes);
     fprintf(stderr, "dbg2       detects:            %p\n", (void *)mb_io_ptr->mb_io_detects);
+    fprintf(stderr, "dbg2       makess:             %p\n", (void *)mb_io_ptr->mb_io_makess);
     fprintf(stderr, "dbg2       extract_rawss:      %p\n", (void *)mb_io_ptr->mb_io_extract_rawss);
     fprintf(stderr, "dbg2       insert_rawss:       %p\n", (void *)mb_io_ptr->mb_io_insert_rawss);
     fprintf(stderr, "dbg2       extract_segytraceheader: %p\n", (void *)mb_io_ptr->mb_io_extract_segytraceheader);

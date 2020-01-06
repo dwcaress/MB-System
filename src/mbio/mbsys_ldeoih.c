@@ -365,10 +365,11 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
     }
     const double ss_scale = pow(2.0, (double)(store->ss_scalepower));
     for (int i = 0; i < *nss; i++) {
-      if (store->ss[i] != 0)
+      if (store->ss[i] != 0) {
         ss[i] = ss_scale * store->ss[i];
-      else
+      } else {
         ss[i] = MB_SIDESCAN_NULL;
+      }
       ssacrosstrack[i] = store->distance_scale * store->ss_acrosstrack[i];
       ssalongtrack[i] = store->distance_scale * store->ss_alongtrack[i];
     }
@@ -595,7 +596,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
     if (nss > store->pixels_ss_alloc) {
       store->pixels_ss_alloc = nss;
       /* if (store != NULL) */ {
-        status &= mb_reallocd(verbose, __FILE__, __LINE__, store->pixels_ss_alloc * sizeof(short), 
+        status &= mb_reallocd(verbose, __FILE__, __LINE__, store->pixels_ss_alloc * sizeof(short),
                             (void **)&store->ss, error);
         status &= mb_reallocd(verbose, __FILE__, __LINE__, store->pixels_ss_alloc * sizeof(short),
                             (void **)&store->ss_acrosstrack, error);
@@ -622,36 +623,61 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
     }
 
     /* get scaling */
+    bool notdepthfirst = false;
+    bool notdistfirst = false;
+    bool notssfirst = false;
     double depthmax = 0.0;
     double distmax = 0.0;
     double ssmax = 0.0;
     for (int i = 0; i < nbath; i++) {
       if (beamflag[i] != MB_FLAG_NULL) {
-        depthmax = MAX(depthmax, fabs(bath[i] - store->sonardepth));
-        distmax = MAX(distmax, fabs(bathacrosstrack[i]));
-        distmax = MAX(distmax, fabs(bathalongtrack[i]));
+        if (notdepthfirst) {
+          depthmax = MAX(depthmax, fabs(bath[i] - store->sonardepth));
+          distmax = MAX(distmax, fabs(bathacrosstrack[i]));
+          distmax = MAX(distmax, fabs(bathalongtrack[i]));
+        } else {
+          notdepthfirst = true;
+          notdistfirst = true;
+          depthmax = fabs(bath[i] - store->sonardepth);
+          distmax = fabs(bathacrosstrack[i]);
+          distmax = fabs(bathalongtrack[i]);
+        }
       }
     }
     for (int i = 0; i < nss; i++) {
       if (ss[i] > MB_SIDESCAN_NULL) {
-        distmax = MAX(distmax, fabs(ssacrosstrack[i]));
-        distmax = MAX(distmax, fabs(ssalongtrack[i]));
-        ssmax = MAX(ssmax, fabs(ss[i]));
+        if (notdistfirst) {
+          distmax = MAX(distmax, fabs(ssacrosstrack[i]));
+          distmax = MAX(distmax, fabs(ssalongtrack[i]));
+        } else {
+          notdistfirst = true;
+          distmax = fabs(ssacrosstrack[i]);
+          distmax = fabs(ssalongtrack[i]);
+        }
+        if (notssfirst) {
+          ssmax = MAX(ssmax, fabs(ss[i]));
+        } else {
+          notssfirst = true;
+          ssmax = fabs(ss[i]);
+        }
       }
     }
-    if (depthmax > 0.0)
+    if (notdepthfirst) {
       store->depth_scale = 0.001 * (float)(MAX((depthmax / 30.0), 1.0));
-    if (distmax > 0.0)
+    } else {
+      store->depth_scale = 0.001;
+    }
+    if (notdistfirst) {
       store->distance_scale = 0.001 * (float)(MAX((distmax / 30.0), 1.0));
-    double ss_scale = 0.0;
-    if (ssmax > 0.0) {
+    } else {
+      store->distance_scale = 0.001;
+    }
+    if (notssfirst) {
       store->ss_scalepower = (mb_s_char)(log2(ssmax / 32767.0)) + 1;
-      ss_scale = pow(2.0, (double)(store->ss_scalepower));
-    }
-    else {
+    } else {
       store->ss_scalepower = 0;
-      ss_scale = 1.0;
     }
+    double const ss_scale = pow(2.0, (double)(store->ss_scalepower));
 
     /* set beam widths */
     if (store->beam_xwidth == 0.0)
@@ -678,17 +704,21 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
     }
     store->beams_amp = namp;
     for (int i = 0; i < namp; i++) {
-      store->amp[i] = amp[i];
+      if (beamflag[i] != MB_FLAG_NULL) {
+        store->amp[i] = amp[i];
+      }
     }
     store->pixels_ss = nss;
     int ngood = 0;
     for (int i = 0; i < nss; i++) {
       if (ss[i] > MB_SIDESCAN_NULL) {
         store->ss[i] = (short)(ss[i] / ss_scale);
+        if (store->ss[i] == 0)
+          store->ss[i] = 1; //making sure only flagged ss values are exactly zero.
         ngood++;
-      }
-      else
+      } else{
         store->ss[i] = 0;
+      }
       store->ss_acrosstrack[i] = ssacrosstrack[i] / store->distance_scale;
       store->ss_alongtrack[i] = ssalongtrack[i] / store->distance_scale;
     }

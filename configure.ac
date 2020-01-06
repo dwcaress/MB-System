@@ -24,7 +24,7 @@ AC_INIT([mbsystem],[5.7.6beta22],[http://listserver.mbari.org/sympa/arc/mbsystem
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 # AC_LANG([C++])
-AC_DEFINE(VERSION_DATE, "3 January 2020", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "6 January 2020", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -906,7 +906,7 @@ AM_CONDITIONAL([BUILD_MBTRN], [test $build_mbtrn = yes])
 if test "$build_mbtrn" = "yes" ; then
     dnl Building mbtrn tools
     AS_ECHO(["Building mbtrn tools"])
-    AC_DEFINE(MBTRN_ENABLED, 1, [Build libmbtrn and mbtrnpreprocess])
+    AC_DEFINE(MBTRN_ENABLED, 1, [Build libmbtrn and mbtrnpp])
 else
     dnl Not building mbtrn tools
     AS_ECHO(["Not building mbtrn tools"])
@@ -923,7 +923,7 @@ AC_ARG_ENABLE(mbtnav, [AS_HELP_STRING([--enable-mbtnav], [build mbtnav tools])],
 AM_CONDITIONAL([BUILD_MBTNAV], [test $build_mbtnav = yes])
 if test "$build_mbtnav" = "yes" ; then
 dnl Building mbtnav tools
-AS_ECHO(["Building mbtnav tools"])
+AS_ECHO(["Building mbtnav tools (i.e. embed a TRN instance in mbtrnpp)"])
 AC_DEFINE(MBTNAV_ENABLED, 1, [Build libmbtnav])
 else
 dnl Not building mbtnav tools

@@ -1514,6 +1514,47 @@ int mb_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *tr
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+  int mb_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
+                         int swath_width_set, double *swath_width, int pixel_int, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:       %p\n", (void *)store_ptr);
+    fprintf(stderr, "dbg2       pixel_size_set:  %d\n", pixel_size_set);
+    fprintf(stderr, "dbg2       pixel_size:      %f\n", *pixel_size);
+    fprintf(stderr, "dbg2       swath_width_set: %d\n", swath_width_set);
+    fprintf(stderr, "dbg2       swath_width:     %f\n", *swath_width);
+    fprintf(stderr, "dbg2       pixel_int:       %d\n", pixel_int);
+  }
+
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
+	if (mb_io_ptr->mb_io_makess != NULL) {
+		status = (*mb_io_ptr->mb_io_makess)(verbose, mbio_ptr, store_ptr, pixel_size_set, pixel_size,
+                           swath_width_set, swath_width, pixel_int, error);
+	}
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+	}
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return value:\n");
+    fprintf(stderr, "dbg2       pixel_size:      %f\n", *pixel_size);
+    fprintf(stderr, "dbg2       swath_width:     %f\n", *swath_width);
+    fprintf(stderr, "dbg2       error:           %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:          %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
 int mb_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *sample_interval,
                                int *num_samples_port, int *num_samples_stbd, int *error) {
 	if (verbose >= 2) {

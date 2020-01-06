@@ -2571,7 +2571,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 # AC_LANG([C++])
 
-$as_echo "#define VERSION_DATE \"3 January 2020\"" >>confdefs.h
+$as_echo "#define VERSION_DATE \"6 January 2020\"" >>confdefs.h
 
 
 ac_aux_dir=
@@ -20599,7 +20599,7 @@ else
 fi
 
 if test "$build_mbtnav" = "yes" ; then
-$as_echo "Building mbtnav tools"
+$as_echo "Building mbtnav tools (i.e. embed a TRN instance in mbtrnpp)"
 
 $as_echo "#define MBTNAV_ENABLED 1" >>confdefs.h
 

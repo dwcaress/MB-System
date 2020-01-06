@@ -5860,7 +5860,7 @@ int main(int argc, char **argv) {
 							        header->RecordNumber, image->ping_number, image->width, image->height);
 					}
 					/* regenerate sidescan */
-					status = mbsys_reson7k_makess(verbose, imbio_ptr, istore_ptr, ss_source, false, &pixel_size, false,
+					status = mbsys_reson7k_makess_source(verbose, imbio_ptr, istore_ptr, ss_source, false, &pixel_size, false,
 					                              &swath_width, true, &error);
 				}
 				/* handle reference point data */

@@ -1273,10 +1273,12 @@ int main(int argc, char **argv) {
 				if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
 					if (datakind == MBFILTER_SS) {
 						for (int i = 0; i < ping[ndata].pixels_ss; i++) {
-							if (ping[ndata].ss[i] > MB_SIDESCAN_NULL)
+							if (ping[ndata].ss[i] > MB_SIDESCAN_NULL) {
 								ping[ndata].pixelflag[i] = MB_FLAG_NONE;
-							else
+              }
+							else {
 								ping[ndata].pixelflag[i] = MB_FLAG_NULL;
+              }
 						}
 					}
 					status = mb_extract_nav(verbose, imbio_ptr, store_ptr, &kind, ping[ndata].time_i, &ping[ndata].time_d,
@@ -1398,18 +1400,24 @@ int main(int argc, char **argv) {
 								/* loop over surrounding pings and values */
 								for (int jj = ja; jj <= jb; jj++) {
 									for (int ii = ia; ii <= ib; ii++) {
-										double *dataptr1 = ping[jj].data_i_ptr;
-										char *flagptr1 = ping[jj].flag_ptr;
-										if ((jj != j || ii != i) && mb_beam_ok(flagptr1[ii])) {
-											values[nweight] = dataptr1[ii];
-											double ddis = 0.0;
-											if (ndx > 0)
-												ddis += (ii - i) * (ii - i) / (ndx * ndx);
-											if (ndl > 0)
-												ddis += (jj - j) * (jj - j) / (ndl * ndl);
-											distances[nweight] = sqrt(ddis);
-											nweight++;
-										}
+                    if (ii < ping[jj].ndatapts) {
+  										double *dataptr1 = ping[jj].data_i_ptr;
+  										char *flagptr1 = ping[jj].flag_ptr;
+  										if ((jj != j || ii != i) && mb_beam_ok(flagptr1[ii])) {
+  											values[nweight] = dataptr1[ii];
+  											double ddis = 0.0;
+                        if (ndx > 0) {
+                          double di = ((double) (ii - i)) / ((double)ndx);
+                          ddis += di * di;
+                        }
+                        if (ndl > 0) {
+                          double dj = ((double) (jj - j)) / ((double)ndl);
+                          ddis += dj * dj;
+                        }
+  											distances[nweight] = sqrt(ddis);
+  											nweight++;
+  										}
+                    }
 									}
 								}
 							}
@@ -1444,20 +1452,27 @@ int main(int argc, char **argv) {
 
 					/* reset initial array and add offset
 					    if done with final iteration */
-					if (iteration == filters[ifilter].iteration - 1)
-						for (int j = 0; j < ndata; j++)
-							for (int i = 0; i < ping[j].ndatapts; i++)
+					if (iteration == filters[ifilter].iteration - 1) {
+						for (int j = 0; j < ndata; j++) {
+							for (int i = 0; i < ping[j].ndatapts; i++) {
 								ping[j].data_i_ptr[i] = ping[j].data_f_ptr[i] + filters[ifilter].hipass_offset;
-					else
-						for (int j = 0; j < ndata; j++)
-							for (int i = 0; i < ping[j].ndatapts; i++)
+              }
+            }
+					} else {
+						for (int j = 0; j < ndata; j++) {
+							for (int i = 0; i < ping[j].ndatapts; i++) {
 								ping[j].data_i_ptr[i] = ping[j].data_f_ptr[i];
+              }
+            }
+          }
 
 					/* save results if done with final iteration */
 					if (ndata > 0 && iteration == filters[ifilter].iteration - 1) {
-						for (int j = jbeg; j <= jend; j++)
-							for (int i = 0; i < ping[j].ndatapts; i++)
+						for (int j = jbeg; j <= jend; j++) {
+							for (int i = 0; i < ping[j].ndatapts; i++) {
 								ping[j].datasave[i] = ping[j].data_i_ptr[i];
+              }
+            }
 					}
 
 					iteration++;

@@ -4987,13 +4987,12 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
         ss_source = R7KRECID_CalibratedSideScan;
       else if (pars->multibeam_sidescan_source == MB_PR_SSSOURCE_WIDEBEAMBACKSCATTER)
         ss_source = R7KRECID_SideScan;
-
     }
 
     /* regenerate SideScan */
     if (!store->read_ProcessedSideScan
       || pars->recalculate_bathymetry) {
-      status = mbsys_reson7k3_makess(verbose, mbio_ptr, store_ptr, ss_source,
+      status = mbsys_reson7k3_makess_source(verbose, mbio_ptr, store_ptr, ss_source,
                                       false, pixel_size, false, swath_width,
                                       true, error);
     }
@@ -7991,7 +7990,7 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_reson7k3_makess(
+int mbsys_reson7k3_makess_source(
     int verbose, void *mbio_ptr, void *store_ptr, int source,
     int pixel_size_set,  // TODO(schwehr): bool
     double *pixel_size,
@@ -8768,4 +8767,48 @@ int mbsys_reson7k3_makess(
 
   return (status);
 }
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
+                         int swath_width_set, double *swath_width, int pixel_int, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:       %p\n", (void *)store_ptr);
+    fprintf(stderr, "dbg2       pixel_size_set:  %d\n", pixel_size_set);
+    fprintf(stderr, "dbg2       pixel_size:      %f\n", *pixel_size);
+    fprintf(stderr, "dbg2       swath_width_set: %d\n", swath_width_set);
+    fprintf(stderr, "dbg2       swath_width:     %f\n", *swath_width);
+    fprintf(stderr, "dbg2       pixel_int:       %d\n", pixel_int);
+  }
+
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
+
+  // check for a prior sidescan source choice
+  int source = store->ProcessedSideScan.ss_source;
+  if (source != R7KRECID_SnippetBackscatteringStrength
+      && source != R7KRECID_Snippet
+      && source != R7KRECID_CalibratedSideScan
+      && source != R7KRECID_SideScan) {
+      source = R7KRECID_None;
+  }
+
+  int status = mbsys_reson7k3_makess_source(verbose, mbio_ptr, store_ptr, source,
+                        pixel_size_set, pixel_size, swath_width_set, swath_width,
+                        pixel_int, error);
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return value:\n");
+    fprintf(stderr, "dbg2       pixel_size:      %f\n", *pixel_size);
+    fprintf(stderr, "dbg2       swath_width:     %f\n", *swath_width);
+    fprintf(stderr, "dbg2       error:           %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:          %d\n", status);
+  }
+
+  return (status);
+}
+
 /*--------------------------------------------------------------------*/

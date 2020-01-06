@@ -2417,7 +2417,9 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
                                    double *sensor6, double *sensor7, double *sensor8, int *error);
 int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_reson7k_checkheader(s7k_header header);
-int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,
+int mbsys_reson7k_makess_source(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,
+                         int swath_width_set, double *swath_width, int pixel_int, int *error);
+int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
 int mbsys_reson7k_print_header(int verbose, s7k_header *header, int *error);
 int mbsys_reson7k_print_reference(int verbose, s7kr_reference *reference, int *error);
