@@ -48,6 +48,26 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
 		fprintf(stderr, "dbg2       *time_d: %f\n", *time_d);
 	}
 
+	const int year = time_i[0];
+	const int month = time_i[1];
+	const int day = time_i[2];
+	const int hour = time_i[3];
+	const int minute = time_i[4];
+	const int second = time_i[5];
+	const int microsec = time_i[6];
+
+	// See http://www.cplusplus.com/reference/ctime/tm/
+	if (year < 1930 || year > 3000 ||
+	    month < 1 || month > 12 ||
+	    day < 1 || day > 31 ||
+	    hour < 0 || hour > 23 ||
+	    minute < 0 || minute > 59 ||
+	    second < 0 || second > 59 ||  // Do not handle leap seconds
+	    microsec < 0 || microsec > 999999) {
+		fprintf(stderr, "ERROR: invalid time\n");
+		return MB_FAILURE;
+	}
+
 	/* get time */
 	int yearday = yday[time_i[1] - 1];
 	if (((time_i[0] % 4 == 0 && time_i[0] % 100 != 0) || time_i[0] % 400 == 0) && (time_i[1] > 2))

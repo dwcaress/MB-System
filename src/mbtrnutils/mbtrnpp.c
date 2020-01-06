@@ -44,6 +44,7 @@
 #include "mbsys_ldeoih.h"
 #include "mbsys_kmbes.h"
 
+#include "merror.h"
 #include "mconfig.h"
 #include "r7kc.h"
 #include "msocket.h"
