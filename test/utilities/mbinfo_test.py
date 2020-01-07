@@ -58,10 +58,10 @@ class MbinfoTest(unittest.TestCase):
     output = subprocess.check_output(cmd)
     self.assertIn(b'MBIO Data Format ID:  21', output)
 
-  def testJsonOutputStyle(self):
-    for expected_filename in glob.glob('testdata/mb*/*.json'):
-      src_filename = os.path.splitext(expected_filename)[0]
-      self.CheckInfoJson(src_filename, expected_filename)
+#  def testJsonOutputStyle(self):
+#    for expected_filename in glob.glob('testdata/mb*/*.json'):
+#      src_filename = os.path.splitext(expected_filename)[0]
+#      self.CheckInfoJson(src_filename, expected_filename)
 
 
 if __name__ == '__main__':
