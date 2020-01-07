@@ -38,7 +38,7 @@
 #include "netcdf.h"
 #include "../surf/mb_sapi.h"
 #ifdef _WIN32
-#	include <rpc/xdr.h>			/* Don't understand whay this is now need. It wasn't till recently. 26 Juin 2018 (JL)*/
+#	include <rpc/xdr.h>			/* Don't understand why this is now need. It wasn't till recently. 26 Juin 2018 (JL)*/
 #endif
 
 /*--------------------------------------------------------------------*/
@@ -97,11 +97,8 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	if (status == MB_FAILURE) {
 		/* free memory for mbio descriptor */
 		if (mbio_ptr != NULL) {
-			const int status_save = status;
-			const int error_save = *error;
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)mbio_ptr, error);
-			status = status_save;
-			*error = error_save;
+			int mem_error = MB_ERROR_NO_ERROR;
+			mb_freed(verbose, __FILE__, __LINE__, (void **)mbio_ptr, &mem_error);
 		}
 
 		/* output debug information */
@@ -153,6 +150,28 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	status = mb_get_time(verbose, mb_io_ptr->etime_i, etime_d);
 	mb_io_ptr->btime_d = *btime_d;
 	mb_io_ptr->etime_d = *etime_d;
+
+	/* quit if there is a problem */
+	if (status == MB_FAILURE) {
+    // had to be a bad time value
+    *error = MB_ERROR_BAD_TIME;
+
+		/* free memory for mbio descriptor */
+		if (mbio_ptr != NULL) {
+			int mem_error = MB_ERROR_NO_ERROR;
+			mb_freed(verbose, __FILE__, __LINE__, (void **)mbio_ptr, &mem_error);
+		}
+
+		/* output debug information */
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", __func__);
+			fprintf(stderr, "dbg2  Return values:\n");
+			fprintf(stderr, "dbg2       error:      %d\n", *error);
+			fprintf(stderr, "dbg2  Return status:\n");
+			fprintf(stderr, "dbg2       status:  %d\n", status);
+		}
+		return (status);
+	}
 
 	/* set the number of beams and allocate storage arrays */
 	*beams_bath = mb_io_ptr->beams_bath_max;

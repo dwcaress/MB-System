@@ -196,12 +196,12 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 		char *user_ptr = getenv("USER");
 		if (user_ptr == nullptr)
 			user_ptr = getenv("LOGNAME");
-		char user[MB_PATH_MAXLINE];
+		char user[MB_PATH_MAXLINE] = "";
 		if (user_ptr != nullptr)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
-		char host[MB_PATH_MAXLINE];
+		char host[MB_PATH_MAXLINE] = "";
 		/* i = */ gethostname(host, MB_PATH_MAXLINE);
 		fprintf(fp, "program run by %s on %s at %s\n", user, host, date);
 		fprintf(fp, "%d %d\n%f %f %f %f\n", nx, ny, xmin, xmax, ymin, ymax);
@@ -458,11 +458,10 @@ int main(int argc, char **argv) {
 	bool first_in_stays = true;
 	bool check_time = false;
 	double timediff = 300.0;
-	double tension =
 #ifdef USESURFACE
-	    0.35;
+  double tension = 0.35;
 #else
-	    0.0;
+  double tension = 0.0;
 #endif
         ;
 	double boundsfactor = 0.0;
@@ -470,15 +469,15 @@ int main(int argc, char **argv) {
 	bool more = false;
 	bool use_NaN = false;
 	int grdrasterid = 0;
-	char projection_pars[MB_PATH_MAXLINE];
+	char projection_pars[MB_PATH_MAXLINE] = "";
 	bool projection_pars_f = false;
 	char filelist[MB_PATH_MAXLINE] = "datalist.mb-1";
-	char backgroundfile[MB_PATH_MAXLINE];
+	char backgroundfile[MB_PATH_MAXLINE] = "";
 	grid_type_t gridkind = MBGRID_GMTGRD;
 	double minormax_weighted_mean_threshold = 1.0;
 	grid_alg_t grid_mode = MBGRID_WEIGHTED_MEAN;
 	bool set_spacing = false;
-	char units[MB_PATH_MAXLINE];
+	char units[MB_PATH_MAXLINE] = "";
 	double dx_set = 0.0;
 	double dy_set = 0.0;
 	bool spacing_priority = false;
@@ -786,7 +785,7 @@ int main(int argc, char **argv) {
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
-	char file[MB_PATH_MAXLINE];
+	char file[MB_PATH_MAXLINE] = "";
 	void *mbio_ptr = nullptr;
 	struct mb_io_struct *mb_io_ptr = nullptr;
 	int topo_type;
@@ -800,13 +799,13 @@ int main(int argc, char **argv) {
 	float outclipvalue = NO_DATA_FLAG;
 	int rformat;
 	int pstatus;
-	char path[MB_PATH_MAXLINE];
-	char ppath[MB_PATH_MAXLINE];
-	char dpath[MB_PATH_MAXLINE];
-	char rfile[MB_PATH_MAXLINE];
-	char ofile[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	char plot_cmd[MB_COMMENT_MAXLINE];
+	char path[MB_PATH_MAXLINE] = "";
+	char ppath[MB_PATH_MAXLINE] = "";
+	char dpath[MB_PATH_MAXLINE] = "";
+	char rfile[MB_PATH_MAXLINE] = "";
+	char ofile[MB_PATH_MAXLINE] = "";
+	char dfile[MB_PATH_MAXLINE] = "";
+	char plot_cmd[MB_COMMENT_MAXLINE] = "";
 	int plot_status;
 
 	/* mbio read values */
@@ -879,12 +878,12 @@ int main(int argc, char **argv) {
 	double mtodeglon, mtodeglat;
 
 	/* output char strings */
-	char xlabel[MB_PATH_MAXLINE];
-	char ylabel[MB_PATH_MAXLINE];
-	char zlabel[MB_PATH_MAXLINE];
-	char title[MB_PATH_MAXLINE];
-	char nlabel[MB_PATH_MAXLINE];
-	char sdlabel[MB_PATH_MAXLINE];
+	char xlabel[MB_PATH_MAXLINE] = "";
+	char ylabel[MB_PATH_MAXLINE] = "";
+	char zlabel[MB_PATH_MAXLINE] = "";
+	char title[MB_PATH_MAXLINE] = "";
+	char nlabel[MB_PATH_MAXLINE] = "";
+	char sdlabel[MB_PATH_MAXLINE] = "";
 
 	/* other variables */
 	FILE *dfp = nullptr;
@@ -1532,7 +1531,7 @@ int main(int argc, char **argv) {
 
 		/* if needed translate grid to normal registration */
 		sprintf(plot_cmd, "gmt grdinfo %s", backgroundfile);
-		char backgroundfileuse[MB_PATH_MAXLINE];
+		char backgroundfileuse[MB_PATH_MAXLINE] = "";
 		strcpy(backgroundfileuse, backgroundfile);
 		if ((rfp = popen(plot_cmd, "r")) != nullptr) {
 			/* parse the grdinfo results */

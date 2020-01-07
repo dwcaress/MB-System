@@ -1,0 +1,55 @@
+
+Swath Data File:      tahoe_98_134.0.em1000.mb51
+MBIO Data Format ID:  51
+Format name:          MBF_EMOLDRAW
+Informal Description: Old Simrad vendor multibeam format
+Attributes:           Simrad EM1000, EM12S, EM12D, 
+                      and EM121 multibeam sonars,
+                      bathymetry, amplitude, and sidescan,
+                      60 beams for EM1000, 81 beams for EM12S/D,
+		      121 beams for EM121, variable pixels,
+		      ascii + binary, Simrad.
+
+Data Totals:
+Number of Records:                           2
+Bathymetry Data (121 beams):
+  Number of Beams:              242
+  Number of Good Beams:         120     49.59%
+  Number of Zero Beams:         122     50.41%
+  Number of Flagged Beams:        0      0.00%
+Amplitude Data (121 beams):
+  Number of Beams:              242
+  Number of Good Beams:         120     49.59%
+  Number of Zero Beams:         122     50.41%
+  Number of Flagged Beams:        0      0.00%
+Sidescan Data (1024 pixels):
+  Number of Pixels:            2048
+  Number of Good Pixels:       1354     66.11%
+  Number of Zero Pixels:          0      0.00%
+  Number of Flagged Pixels:     694     33.89%
+
+Navigation Totals:
+Total Time:             0.0001 hours
+Total Track Length:     0.0000 km
+Average Speed:          0.0000 km/hr ( 0.0000 knots)
+
+Start of Data:
+Time:  08 10 1998 22:24:29.250000  JD222 (1998-08-10T22:24:29.250000)
+Lon:  -120.011418333     Lat:    39.214781667     Depth:    23.1800 meters
+Speed:  0.0000 km/hr ( 0.0000 knots)  Heading: 294.8000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude:   23.1800 m
+
+End of Data:
+Time:  08 10 1998 22:24:29.510000  JD222 (1998-08-10T22:24:29.510000)
+Lon:  -120.011418333     Lat:    39.214781667     Depth:    23.1200 meters
+Speed:  0.0000 km/hr ( 0.0000 knots)  Heading: 294.6000 degrees
+Sonar Depth:   -0.0200 m  Sonar Altitude:   23.1400 m
+
+Limits:
+Minimum Longitude:    -120.011834641   Maximum Longitude:    -120.011084198
+Minimum Latitude:       39.214082934   Maximum Latitude:       39.215351565
+Minimum Sonar Depth:     0.0000   Maximum Sonar Depth:     0.0000
+Minimum Altitude:       23.1400   Maximum Altitude:       23.1800
+Minimum Depth:          19.7200   Maximum Depth:          24.5200
+Minimum Amplitude:     -39.5000   Maximum Amplitude:     -16.5000
+Minimum Sidescan:      -63.5000   Maximum Sidescan:       -8.5000

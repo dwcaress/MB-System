@@ -1,0 +1,48 @@
+
+Swath Data File:      TN136HS.309.snipped.mb22
+MBIO Data Format ID:  22
+Format name:          MBF_HSLDEDMB
+Informal Description: EDMB Hydrosweep
+Attributes:           Hydrosweep DS, bathymetry, 59 beams, binary, NRL.
+
+Data Totals:
+Number of Records:                           2
+Bathymetry Data (59 beams):
+  Number of Beams:              118
+  Number of Good Beams:         115     97.46%
+  Number of Zero Beams:           3      2.54%
+  Number of Flagged Beams:        0      0.00%
+Amplitude Data (0 beams):
+  Number of Beams:                0
+  Number of Good Beams:           0      0.00%
+  Number of Zero Beams:           0      0.00%
+  Number of Flagged Beams:        0      0.00%
+Sidescan Data (0 pixels):
+  Number of Pixels:               0
+  Number of Good Pixels:          0      0.00%
+  Number of Zero Pixels:          0      0.00%
+  Number of Flagged Pixels:       0      0.00%
+
+Navigation Totals:
+Total Time:            -0.3406 hours
+Total Track Length:     0.0036 km
+Average Speed:          0.0000 km/hr ( 0.0000 knots)
+
+Start of Data:
+Time:  11 05 2001 00:31:11.000000  JD309 (2001-11-05T00:31:11.000000)
+Lon:  -124.501602000     Lat:    40.838493300     Depth:  4626.0000 meters
+Speed:  1.4400 km/hr ( 0.7784 knots)  Heading: 324.5000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude: 4626.0000 m
+
+End of Data:
+Time:  11 05 2001 00:10:45.000000  JD309 (2001-11-05T00:10:45.000000)
+Lon:  -124.501632500     Lat:    40.838516200     Depth:  4623.0000 meters
+Speed:  0.3600 km/hr ( 0.1946 knots)  Heading: 324.9000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude: 4623.0000 m
+
+Limits:
+Minimum Longitude:    -124.543277152   Maximum Longitude:    -124.459477361
+Minimum Latitude:       40.816164757   Maximum Latitude:       40.861313385
+Minimum Sonar Depth:     0.0000   Maximum Sonar Depth:     0.0000
+Minimum Altitude:     4623.0000   Maximum Altitude:     4626.0000
+Minimum Depth:        4482.0000   Maximum Depth:        4683.0000

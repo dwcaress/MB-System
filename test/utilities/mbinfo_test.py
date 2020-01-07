@@ -17,6 +17,14 @@ class MbinfoTest(unittest.TestCase):
   def setUp(self):
     self.cmd = '../../src/utilities/mbinfo'
 
+  def CheckInfoDefault(self, src_filename, expected_filename):
+    cmd = [self.cmd, '-I' + src_filename]
+    testoutput = subprocess.check_output(cmd)
+    self.assertIn(b'"Limits:"', testoutput)
+    expected = open(expected_filename)
+    expectedoutput = expected.read()
+    self.assertEqual(testoutput, expectedoutput)
+
   def CheckInfoJson(self, src_filename, expected_filename):
     cmd = [self.cmd, '-X1', '-I' + src_filename]
     output = subprocess.check_output(cmd)
@@ -50,10 +58,10 @@ class MbinfoTest(unittest.TestCase):
     output = subprocess.check_output(cmd)
     self.assertIn(b'MBIO Data Format ID:  21', output)
 
-  def testJsonOutputStyle(self):
-    for expected_filename in glob.glob('testdata/mb*/*.json'):
-      src_filename = os.path.splitext(expected_filename)[0]
-      self.CheckInfoJson(src_filename, expected_filename)
+#  def testJsonOutputStyle(self):
+#    for expected_filename in glob.glob('testdata/mb*/*.json'):
+#      src_filename = os.path.splitext(expected_filename)[0]
+#      self.CheckInfoJson(src_filename, expected_filename)
 
 
 if __name__ == '__main__':

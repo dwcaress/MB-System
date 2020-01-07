@@ -81,8 +81,8 @@ TEST(MbGetTime, Positive) {
 }
 
 TEST(MbGetTime, Invalid) {
-  const double expected_t = -1.0;
-  double t = expected_t;
+  const double expected_t = 0.0;
+  double t = -1.0;
   // Year
   {
     int time[7] = {1929, 1, 9, 13, 57, 16, 137096};
@@ -146,7 +146,7 @@ TEST(MbGetTime, Invalid) {
     int time[7] = {2018, 1, 9, 13, 57, 16, 1000000};
     EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
   }
-  // t is unchanged
+  // t should be set to zero
   EXPECT_EQ(expected_t, t);
 }
 

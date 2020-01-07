@@ -129,7 +129,7 @@
 
 /* MBIO minimum and maximum error values */
 #define MB_ERROR_MIN -25
-#define MB_ERROR_MAX 16
+#define MB_ERROR_MAX 17
 
 /* MBIO function fatal error values */
 #define MB_ERROR_NO_ERROR 0
@@ -149,6 +149,7 @@
 #define MB_ERROR_BAD_SYSTEM 14
 #define MB_ERROR_BAD_DATA 15
 #define MB_ERROR_MISSING_DATA 16
+#define MB_ERROR_BAD_TIME 17
 
 /* MBIO function nonfatal error values */
 #define MB_ERROR_TIME_GAP -1
@@ -225,7 +226,8 @@ static char *fatal_error_msg[] = {"No error",
                                   "Invalid buffer id",
                                   "Invalid system id - this should not happen!",
                                   "This data file is not in the specified format!",
-                                  "Required data are missing"};
+                                  "Required data are missing",
+                                  "Bad time value"};
 static char *nonfatal_error_msg[] = {
     "No error",
     "Time gap in data",

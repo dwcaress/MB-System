@@ -37,7 +37,7 @@
 #include "netcdf.h"
 #include "../surf/mb_sapi.h"
 #ifdef _WIN32
-#	include <rpc/xdr.h>			/* Don't understand whay this is now need. It wasn't till recently. 26 Juin 2018 (JL)*/
+#	include <rpc/xdr.h>			/* Don't understand why this is now need. It wasn't till recently. 26 Juin 2018 (JL)*/
 #endif
 
 

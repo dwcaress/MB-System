@@ -1,0 +1,52 @@
+
+Swath Data File:      nbp1403-filtered-em120.mb56
+MBIO Data Format ID:  56
+Format name:          MBF_EM300RAW
+Informal Description: Simrad current multibeam vendor format
+Attributes:           Simrad EM120, EM300, EM1002, EM3000, 
+                      bathymetry, amplitude, and sidescan,
+                      up to 254 beams, variable pixels, ascii + binary, Simrad.
+
+Data Totals:
+Number of Records:                           3
+Bathymetry Data (191 beams):
+  Number of Beams:              573
+  Number of Good Beams:         572     99.83%
+  Number of Zero Beams:           1      0.17%
+  Number of Flagged Beams:        0      0.00%
+Amplitude Data (191 beams):
+  Number of Beams:              573
+  Number of Good Beams:         572     99.83%
+  Number of Zero Beams:           1      0.17%
+  Number of Flagged Beams:        0      0.00%
+Sidescan Data (1024 pixels):
+  Number of Pixels:            3072
+  Number of Good Pixels:       2105     68.52%
+  Number of Zero Pixels:          0      0.00%
+  Number of Flagged Pixels:     967     31.48%
+
+Navigation Totals:
+Total Time:             0.0049 hours
+Total Track Length:     0.0106 km
+Average Speed:          2.1729 km/hr ( 1.1745 knots)
+
+Start of Data:
+Time:  04 06 2014 10:03:25.683000  JD96 (2014-04-06T10:03:25.683000)
+Lon:  -150.000054500     Lat:   -58.000092100     Depth:  2884.4000 meters
+Speed:  2.3040 km/hr ( 1.2454 knots)  Heading: 260.6700 degrees
+Sonar Depth:    7.4400 m  Sonar Altitude: 2876.9600 m
+
+End of Data:
+Time:  04 06 2014 10:03:43.170000  JD96 (2014-04-06T10:03:43.170000)
+Lon:  -150.000230000     Lat:   -58.000109350     Depth:  2872.6500 meters
+Speed:  2.3040 km/hr ( 1.2454 knots)  Heading: 260.1700 degrees
+Sonar Depth:    7.5300 m  Sonar Altitude: 2865.1200 m
+
+Limits:
+Minimum Longitude:    -150.012489248   Maximum Longitude:    -149.985376416
+Minimum Latitude:      -58.033533197   Maximum Latitude:      -57.968840764
+Minimum Sonar Depth:     7.0000   Maximum Sonar Depth:     7.5300
+Minimum Altitude:     2865.1200   Maximum Altitude:     2876.9600
+Minimum Depth:        2581.3200   Maximum Depth:        3051.7200
+Minimum Amplitude:     -33.5000   Maximum Amplitude:      -8.5000
+Minimum Sidescan:      -57.6200   Maximum Sidescan:       -5.5000

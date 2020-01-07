@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
 	double depth_offset_z = 0.0;
 	/* depth sensor offset (+ makes platform deeper) */
 	double sonardepthoffset = 0.0;
-	char platform_file[MB_PATH_MAXLINE];
+	char platform_file[MB_PATH_MAXLINE] = "";
 	bool use_platform_file = false;
 	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
 
@@ -132,16 +132,16 @@ int main(int argc, char **argv) {
 	double kluge_timejump_threshold = 0.0;
 	bool kluge_donotrecalculatebathy = false;
 	preprocess_mode_t mode = MB7KPREPROCESS_PROCESS;
-	char rockfile[MB_PATH_MAXLINE];
+	char rockfile[MB_PATH_MAXLINE] = "";
 	bool rockdata = false;
-	char insfile[MB_PATH_MAXLINE];
+	char insfile[MB_PATH_MAXLINE] = "";
 	bool insdata = false;
-	char ofile[MB_PATH_MAXLINE];
+	char ofile[MB_PATH_MAXLINE] = "";
 	bool ofile_set = false;
-	char buffer[MB_PATH_MAXLINE];  // TODO(schwehr): Localize
+	char buffer[MB_PATH_MAXLINE] = "";  // TODO(schwehr): Localize
 	/* merge sonardepth from separate parosci pressure sensor data file */
 	bool sonardepthdata = false;
-	char sonardepthfile[MB_PATH_MAXLINE];
+	char sonardepthfile[MB_PATH_MAXLINE] = "";
 	bool sonardepthfilter = false;
 	double sonardepthfilterlength = 20.0;
 	double sonardepthfilterdepth = 20.0;
@@ -157,10 +157,10 @@ int main(int argc, char **argv) {
 	int heading_source = MB_DATA_HEADING;
 	int sonardepth_source = MB_DATA_HEIGHT;
 	timelag_t timelagmode = MB7KPREPROCESS_TIMELAG_OFF;
-	char timelagfile[MB_PATH_MAXLINE];
+	char timelagfile[MB_PATH_MAXLINE] = "";
 	double timelagconstant = 0.0;
 	timedelay_t timedelaymode = MB7KPREPROCESS_TIMEDELAY_UNDEFINED;
-	char dslfile[MB_PATH_MAXLINE];
+	char dslfile[MB_PATH_MAXLINE] = "";
 	bool dsldata = false;
 	/* multibeam sensor offsets */
 	double mbtransmit_offset_x = 0.0;
@@ -639,8 +639,8 @@ int main(int argc, char **argv) {
 	}
 
 	char *result;  // TODO(schwehr): Localize
-	char valuetype[MB_PATH_MAXLINE];
-	char value[MB_PATH_MAXLINE];
+	char valuetype[MB_PATH_MAXLINE] = "";
+	char value[MB_PATH_MAXLINE] = "";
 	double *ins_time_d = nullptr;
 	double *ins_lon = nullptr;
 	double *ins_lat = nullptr;
@@ -1329,8 +1329,8 @@ int main(int argc, char **argv) {
 	const bool read_datalist = format < 0;
 	bool read_data;
 	void *datalist;
-	char ifile[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
+	char ifile[MB_PATH_MAXLINE] = "";
+	char dfile[MB_PATH_MAXLINE] = "";
 	double file_weight;
 
 	/* open file list */
@@ -1568,7 +1568,7 @@ int main(int argc, char **argv) {
 
 	s7kr_bluefin *bluefin;
 
-	char timedelayfile[MB_PATH_MAXLINE];
+	char timedelayfile[MB_PATH_MAXLINE] = "";
 
 	int ntimedelay = 0;
 	int ntimedelaycount = 0;
@@ -4139,7 +4139,7 @@ int main(int argc, char **argv) {
 		while (read_data && format == MBF_RESON7KR) {
 			/* figure out the output file name */
 			if (!ofile_set) {
-				char fileroot[MB_PATH_MAXLINE];
+				char fileroot[MB_PATH_MAXLINE] = "";
 				status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
 				if (testformat == MBF_RESON7KR && strncmp(".s7k", &ifile[strlen(ifile) - 4], 4) == 0)
 					sprintf(ofile, "%s.mb%d", fileroot, testformat);
@@ -4183,8 +4183,8 @@ int main(int argc, char **argv) {
 				nfile_write++;
 
 				/* initialize ctd output file */
-				char ctdfile[MB_PATH_MAXLINE];
-				char fileroot[MB_PATH_MAXLINE];
+				char ctdfile[MB_PATH_MAXLINE] = "";
+				char fileroot[MB_PATH_MAXLINE] = "";
 				sprintf(ctdfile, "%s_ctd.txt", fileroot);
 				if ((tfp = fopen(ctdfile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open ctd data file <%s> for writing\n", ctdfile);
@@ -4195,7 +4195,7 @@ int main(int argc, char **argv) {
 				 * initialize asynchronous heading output
 				 * file
 				 */
-				char athfile[MB_PATH_MAXLINE];
+				char athfile[MB_PATH_MAXLINE] = "";
 				sprintf(athfile, "%s.ath", ofile);
 				if ((athfp = fopen(athfile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous heading data file <%s> for writing\n", athfile);
@@ -4206,7 +4206,7 @@ int main(int argc, char **argv) {
 				 * initialize asynchronous sonardepth output
 				 * file
 				 */
-				char atsfile[MB_PATH_MAXLINE];
+				char atsfile[MB_PATH_MAXLINE] = "";
 				sprintf(atsfile, "%s.ats", ofile);
 				if ((atsfp = fopen(atsfile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous sonardepth data file <%s> for writing\n", atsfile);
@@ -4217,7 +4217,7 @@ int main(int argc, char **argv) {
 				 * initialize asynchronous attitude output
 				 * file
 				 */
-				char atafile[MB_PATH_MAXLINE];
+				char atafile[MB_PATH_MAXLINE] = "";
 				sprintf(atafile, "%s.ata", ofile);
 				if ((atafp = fopen(atafile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous attitude data file <%s> for writing\n", atafile);
@@ -4228,7 +4228,7 @@ int main(int argc, char **argv) {
 				 * initialize synchronous attitude output
 				 * file
 				 */
-				char stafile[MB_PATH_MAXLINE];
+				char stafile[MB_PATH_MAXLINE] = "";
 				sprintf(stafile, "%s.sta", ofile);
 				if ((stafp = fopen(stafile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", stafile);

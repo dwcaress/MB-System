@@ -1,0 +1,49 @@
+
+Swath Data File:      TN136HS.309.snipped.mb161
+MBIO Data Format ID:  161
+Format name:          MBF_MGD77DAT
+Informal Description: NGDC MGD77 underway geophysics format
+Attributes:           single beam bathymetry, nav, magnetics,
+                      gravity, ascii, NOAA NGDC
+
+Data Totals:
+Number of Records:                           2
+Bathymetry Data (1 beams):
+  Number of Beams:                2
+  Number of Good Beams:           2     100.00%
+  Number of Zero Beams:           0      0.00%
+  Number of Flagged Beams:        0      0.00%
+Amplitude Data (0 beams):
+  Number of Beams:                0
+  Number of Good Beams:           0      0.00%
+  Number of Zero Beams:           0      0.00%
+  Number of Flagged Beams:        0      0.00%
+Sidescan Data (0 pixels):
+  Number of Pixels:               0
+  Number of Good Pixels:          0      0.00%
+  Number of Zero Pixels:          0      0.00%
+  Number of Flagged Pixels:       0      0.00%
+
+Navigation Totals:
+Total Time:             0.0014 hours
+Total Track Length:     0.0034 km
+Average Speed:          2.4338 km/hr ( 1.3156 knots)
+
+Start of Data:
+Time:  11 05 2001 00:01:43.979999  JD309 (2001-11-05T00:01:43.979999)
+Lon:  -124.501600000     Lat:    40.838490000     Depth:   462.6000 meters
+Speed:  0.0000 km/hr ( 0.0000 knots)  Heading:   0.0000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude:  462.6000 m
+
+End of Data:
+Time:  11 05 2001 00:01:48.960000  JD309 (2001-11-05T00:01:48.960000)
+Lon:  -124.501630000     Lat:    40.838510000     Depth:   462.4000 meters
+Speed:  2.4338 km/hr ( 1.3156 knots)  Heading:   0.0000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude:  462.4000 m
+
+Limits:
+Minimum Longitude:    -124.501630000   Maximum Longitude:    -124.501600000
+Minimum Latitude:       40.838490000   Maximum Latitude:       40.838510000
+Minimum Sonar Depth:     0.0000   Maximum Sonar Depth:     0.0000
+Minimum Altitude:      462.4000   Maximum Altitude:      462.6000
+Minimum Depth:         462.4000   Maximum Depth:         462.6000
