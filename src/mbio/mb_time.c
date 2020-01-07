@@ -271,6 +271,9 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
  *  day of the year.
  */
 int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
+
+  int status = MB_SUCCESS;
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -282,27 +285,52 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
     fprintf(stderr, "dbg2       microsecond:%d\n", time_j[4]);
   }
 
-  /* get the date */
-  time_i[0] = time_j[0];
-  time_i[3] = time_j[2] / MB_IMININHOUR;
-  time_i[4] = time_j[2] - time_i[3] * MB_IMININHOUR;
-  time_i[5] = time_j[3];
-  time_i[6] = time_j[4];
-  int leapday;
-  if (((time_j[0] % 4 == 0 && time_j[0] % 100 != 0) || time_j[0] % 400 == 0) && time_j[1] > yday[2])
-    leapday = 1;
-  else
-    leapday = 0;
-  time_i[1] = 0;
-  for (int i = 0; i < 12; i++)
-    if (time_j[1] > (yday[i] + leapday))
-      time_i[1] = i + 1;
-  if (leapday == 1 && time_j[1] == yday[2] + 1)
-    leapday = 0;
-  time_i[2] = time_j[1] - yday[time_i[1] - 1] - leapday;
+  // See http://www.cplusplus.com/reference/ctime/tm/
+  if (time_j[0] < 1930 || time_j[0] > 3000       // year
+      || time_j[1] < 1 || time_j[1] > 366        // yearday counted from 1
+      || time_j[2] < 0 || time_j[2] > 1439       // minute counted from 0
+      || time_j[3] < 0 || time_j[3] > 59         // second counted from 0
+      || time_j[4] < 0 || time_j[4] > 999999) {  // microsecond counted from 0
+    time_i[0] = 0;
+    time_i[1] = 0;
+    time_i[2] = 0;
+    time_i[3] = 0;
+    time_i[4] = 0;
+    time_i[5] = 0;
+    time_i[6] = 0;
+    status = MB_FAILURE;
+    if (verbose > 0) {
+      fprintf(stderr, "\nWarning in MB-System function %s: invalid time values:\n", __func__);
+      fprintf(stderr, "\tyear:         %d\n", time_j[0]);
+      fprintf(stderr, "\tyearday:      %d\n", time_j[1]);
+      fprintf(stderr, "\tdayminute:    %d\n", time_j[2]);
+      fprintf(stderr, "\tsecond:       %d\n", time_j[3]);
+      fprintf(stderr, "\tmicrosecond:  %d\n", time_j[4]);
+    }
+  }
 
-  /* assume success */
-  const int status = MB_SUCCESS;
+  /* get time */
+  else {
+
+    /* get the date */
+    time_i[0] = time_j[0];
+    time_i[3] = time_j[2] / MB_IMININHOUR;
+    time_i[4] = time_j[2] - time_i[3] * MB_IMININHOUR;
+    time_i[5] = time_j[3];
+    time_i[6] = time_j[4];
+    int leapday;
+    if (((time_j[0] % 4 == 0 && time_j[0] % 100 != 0) || time_j[0] % 400 == 0) && time_j[1] > yday[2])
+      leapday = 1;
+    else
+      leapday = 0;
+    time_i[1] = 0;
+    for (int i = 0; i < 12; i++)
+      if (time_j[1] > (yday[i] + leapday))
+        time_i[1] = i + 1;
+    if (leapday == 1 && time_j[1] == yday[2] + 1)
+      leapday = 0;
+    time_i[2] = time_j[1] - yday[time_i[1] - 1] - leapday;
+  }
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
