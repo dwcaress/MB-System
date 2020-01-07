@@ -38,6 +38,7 @@ TEST(MbReadInitTest, errorBadFormat) {
   ASSERT_EQ(MB_ERROR_BAD_FORMAT, error);
 }
 
+
 TEST(MbReadInitTest, errorBadTime) {
   const int verbose = 0;
   const int format = MBF_SBSIOMRG;
