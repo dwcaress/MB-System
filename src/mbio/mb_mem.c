@@ -530,6 +530,7 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       sourcefile: %s\n", sourcefile);
 		fprintf(stderr, "dbg2       sourceline: %d\n", sourceline);
+		fprintf(stderr, "dbg2       *ptr:       %p\n", (void *)ptr);
 		fprintf(stderr, "dbg2       ptr:        %p\n", (void *)*ptr);
 	}
 

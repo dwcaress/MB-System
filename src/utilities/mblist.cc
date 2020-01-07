@@ -793,7 +793,7 @@ int main(int argc, char **argv) {
   char output_file[MB_PATH_MAXLINE] = "-";
   bool segment = false;
   segment_mode_t segment_mode = MBLIST_SEGMENT_MODE_NONE;
-  char segment_tag[MB_PATH_MAXLINE];
+  char segment_tag[MB_PATH_MAXLINE] = "";
 
   // set up the default list controls
   //   (Time, lon, lat, heading, speed, along-track distance, center beam depth)
@@ -1062,8 +1062,8 @@ int main(int argc, char **argv) {
   const bool read_datalist = format < 0;
   bool read_data;
   void *datalist;
-  char file[MB_PATH_MAXLINE];
-  char dfile[MB_PATH_MAXLINE];
+  char file[MB_PATH_MAXLINE] = "";
+  char dfile[MB_PATH_MAXLINE] = "";
   double file_weight;
 
   /* open file list */
@@ -1183,7 +1183,7 @@ int main(int argc, char **argv) {
   int pixel_stbd = 0;
 
   /* projected coordinate system */
-  char projection_id[MB_PATH_MAXLINE];
+  char projection_id[MB_PATH_MAXLINE] = "";
   int proj_status;
   void *pjptr = nullptr;
   double reference_lon, reference_lat;
@@ -1224,7 +1224,7 @@ int main(int argc, char **argv) {
 
   int nbeams;
 
-  char output_file_temp[MB_PATH_MAXLINE];
+  char output_file_temp[MB_PATH_MAXLINE] = "";
 
   /* netcdf variables */
   int lcount = 0;
@@ -1337,7 +1337,7 @@ int main(int argc, char **argv) {
         exit(1);
       }
 
-      char variable[MB_PATH_MAXLINE];  // TODO(schwehr): Localize to all the use sites.
+      char variable[MB_PATH_MAXLINE] = "";  // TODO(schwehr): Localize to all the use sites.
       if (!raw_next_value) {
         switch (list[i]) {
         case '/': /* Inverts next simple value */
@@ -2932,7 +2932,7 @@ int main(int argc, char **argv) {
                                 &beam_port, &beam_vertical, &beam_stbd,
                                 &pixel_port, &pixel_vertical, &pixel_stbd, &error);
         }
-        
+
         /* set and/or check beams and pixels to be output */
         status &= set_output(verbose, beams_bath, beams_amp, pixels_ss, use_bath, use_amp, use_ss, dump_mode, beam_set,
                             pixel_set, beam_vertical, pixel_vertical, &beam_start, &beam_end, &beam_exclude_percent,

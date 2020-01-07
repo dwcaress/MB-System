@@ -17,6 +17,14 @@ class MbinfoTest(unittest.TestCase):
   def setUp(self):
     self.cmd = '../../src/utilities/mbinfo'
 
+  def CheckInfoDefault(self, src_filename, expected_filename):
+    cmd = [self.cmd, '-I' + src_filename]
+    testoutput = subprocess.check_output(cmd)
+    self.assertIn(b'"Limits:"', testoutput)
+    expected = open(expected_filename)
+    expectedoutput = expected.read()
+    self.assertEqual(testoutput, expectedoutput)
+
   def CheckInfoJson(self, src_filename, expected_filename):
     cmd = [self.cmd, '-X1', '-I' + src_filename]
     output = subprocess.check_output(cmd)

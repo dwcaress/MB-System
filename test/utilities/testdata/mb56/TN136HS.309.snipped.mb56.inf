@@ -1,0 +1,51 @@
+
+Swath Data File:      TN136HS.309.snipped.mb56
+MBIO Data Format ID:  56
+Format name:          MBF_EM300RAW
+Informal Description: Simrad current multibeam vendor format
+Attributes:           Simrad EM120, EM300, EM1002, EM3000, 
+                      bathymetry, amplitude, and sidescan,
+                      up to 254 beams, variable pixels, ascii + binary, Simrad.
+
+Data Totals:
+Number of Records:                           2
+Bathymetry Data (59 beams):
+  Number of Beams:              118
+  Number of Good Beams:         115     97.46%
+  Number of Zero Beams:           3      2.54%
+  Number of Flagged Beams:        0      0.00%
+Amplitude Data (59 beams):
+  Number of Beams:              118
+  Number of Good Beams:         115     97.46%
+  Number of Zero Beams:           3      2.54%
+  Number of Flagged Beams:        0      0.00%
+Sidescan Data (1024 pixels):
+  Number of Pixels:            2048
+  Number of Good Pixels:          0      0.00%
+  Number of Zero Pixels:          0      0.00%
+  Number of Flagged Pixels:    2048     100.00%
+
+Navigation Totals:
+Total Time:             0.0014 hours
+Total Track Length:     0.0000 km
+Average Speed:          0.0000 km/hr ( 0.0000 knots)
+
+Start of Data:
+Time:  11 05 2001 00:01:44.000000  JD309 (2001-11-05T00:01:44.000000)
+Lon:     0.000000000     Lat:     0.000000000     Depth:   462.6000 meters
+Speed:  0.0000 km/hr ( 0.0000 knots)  Heading: 324.5000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude:  462.6000 m
+
+End of Data:
+Time:  11 05 2001 00:01:49.000000  JD309 (2001-11-05T00:01:49.000000)
+Lon:     0.000000000     Lat:     0.000000000     Depth:   462.4000 meters
+Speed:  0.0000 km/hr ( 0.0000 knots)  Heading: 324.9000 degrees
+Sonar Depth:    5.6000 m  Sonar Altitude:  456.8000 m
+
+Limits:
+Minimum Longitude:      -0.003155169   Maximum Longitude:       0.003191536
+Minimum Latitude:       -0.002242476   Maximum Latitude:        0.002291842
+Minimum Sonar Depth:     5.6000   Maximum Sonar Depth:     5.6000
+Minimum Altitude:      456.8000   Maximum Altitude:      462.6000
+Minimum Depth:         448.2000   Maximum Depth:         468.3000
+Minimum Amplitude:       0.0000   Maximum Amplitude:       0.0000

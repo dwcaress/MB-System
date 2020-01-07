@@ -1,0 +1,49 @@
+
+Swath Data File:      TN136HS.309.snipped.mb221
+MBIO Data Format ID:  221
+Format name:          MBF_SWPLSSXI
+Informal Description: SEA interferometric sonar vendor intermediate format
+Attributes:           SEA SWATHplus,
+                      bathymetry and amplitude,
+                      variable beams, binary, SEA.
+
+Data Totals:
+Number of Records:                           0
+Bathymetry Data (0 beams):
+  Number of Beams:                0
+  Number of Good Beams:           0      0.00%
+  Number of Zero Beams:           0      0.00%
+  Number of Flagged Beams:        0      0.00%
+Amplitude Data (0 beams):
+  Number of Beams:                0
+  Number of Good Beams:           0      0.00%
+  Number of Zero Beams:           0      0.00%
+  Number of Flagged Beams:        0      0.00%
+Sidescan Data (0 pixels):
+  Number of Pixels:               0
+  Number of Good Pixels:          0      0.00%
+  Number of Zero Pixels:          0      0.00%
+  Number of Flagged Pixels:       0      0.00%
+
+Navigation Totals:
+Total Time:             0.0000 hours
+Total Track Length:     0.0000 km
+Average Speed:          0.0000 km/hr ( 0.0000 knots)
+
+Start of Data:
+Time:  00 00 0000 00:00:00.000000  JD0 (0000-00-00T00:00:00.000000)
+Lon:     0.000000000     Lat:     0.000000000     Depth:     0.0000 meters
+Speed:  0.0000 km/hr ( 0.0000 knots)  Heading:   0.0000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude:    0.0000 m
+
+End of Data:
+Time:  00 00 0000 00:00:00.000000  JD0 (0000-00-00T00:00:00.000000)
+Lon:     0.000000000     Lat:     0.000000000     Depth:     0.0000 meters
+Speed:  0.0000 km/hr ( 0.0000 knots)  Heading:   0.0000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude:    0.0000 m
+
+Limits:
+Minimum Longitude:       0.000000000   Maximum Longitude:       0.000000000
+Minimum Latitude:        0.000000000   Maximum Latitude:        0.000000000
+Minimum Sonar Depth:     0.0000   Maximum Sonar Depth:     0.0000
+Minimum Altitude:        0.0000   Maximum Altitude:        0.0000

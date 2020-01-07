@@ -391,8 +391,8 @@ CXXFLAGS="-std=c++11" \
     --with-otps-dir=/usr/local/src/OTPS2 \
     --enable-hardening \
     --enable-mbtrn \
-    --enable-mbtnav
-    #--enable-test
+    --enable-mbtnav \
+    --enable-test
     #--enable-pcltools
 
 make

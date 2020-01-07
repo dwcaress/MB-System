@@ -187,12 +187,12 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 		char *user_ptr = getenv("USER");
 		if (user_ptr == nullptr)
 			user_ptr = getenv("LOGNAME");
-		char user[MB_PATH_MAXLINE];
+		char user[MB_PATH_MAXLINE] = "";
 		if (user_ptr != nullptr)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
-		char host[MB_PATH_MAXLINE];
+		char host[MB_PATH_MAXLINE] = "";
 		/* i = */ gethostname(host, MB_PATH_MAXLINE);
 		fprintf(fp, "program run by %s on %s at %s\n", user, host, date);
 		fprintf(fp, "%d %d\n%f %f %f %f\n", nx, ny, xmin, xmax, ymin, ymax);
@@ -1085,7 +1085,7 @@ int main(int argc, char **argv) {
 	double scale = 1.0;
 	double extend = 0.0;
 	priority_table_t priority_source = MBMOSAIC_PRIORITYTABLE_FILE;
-	char pfile[MB_PATH_MAXLINE];
+	char pfile[MB_PATH_MAXLINE] = "";
 	int n_priority_angle = 0;
 	double *priority_angle_angle = nullptr;
 	double *priority_angle_priority = nullptr;

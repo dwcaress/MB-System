@@ -75,7 +75,8 @@ int mb_version(int verbose, char *version_string, int *version_id, int *version_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bounds[4], int *btime_i, int *etime_i,
+int mb_default_defaults(int verbose, int *format, int *pings, int *lonflip,
+                double bounds[4], int *btime_i, int *etime_i,
                 double *speedmin, double *timegap) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -108,6 +109,55 @@ int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bound
 	*speedmin = 0.0;
 	*timegap = 1.0;
 
+	/* successful no matter what happens */
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       format:     %d\n", *format);
+		fprintf(stderr, "dbg2       pings:      %d\n", *pings);
+		fprintf(stderr, "dbg2       lonflip:    %d\n", *lonflip);
+		fprintf(stderr, "dbg2       bounds[0]:  %f\n", bounds[0]);
+		fprintf(stderr, "dbg2       bounds[1]:  %f\n", bounds[1]);
+		fprintf(stderr, "dbg2       bounds[2]:  %f\n", bounds[2]);
+		fprintf(stderr, "dbg2       bounds[3]:  %f\n", bounds[3]);
+		fprintf(stderr, "dbg2       btime_i[0]: %d\n", btime_i[0]);
+		fprintf(stderr, "dbg2       btime_i[1]: %d\n", btime_i[1]);
+		fprintf(stderr, "dbg2       btime_i[2]: %d\n", btime_i[2]);
+		fprintf(stderr, "dbg2       btime_i[3]: %d\n", btime_i[3]);
+		fprintf(stderr, "dbg2       btime_i[4]: %d\n", btime_i[4]);
+		fprintf(stderr, "dbg2       btime_i[5]: %d\n", btime_i[5]);
+		fprintf(stderr, "dbg2       btime_i[6]: %d\n", btime_i[6]);
+		fprintf(stderr, "dbg2       etime_i[0]: %d\n", etime_i[0]);
+		fprintf(stderr, "dbg2       etime_i[1]: %d\n", etime_i[1]);
+		fprintf(stderr, "dbg2       etime_i[2]: %d\n", etime_i[2]);
+		fprintf(stderr, "dbg2       etime_i[3]: %d\n", etime_i[3]);
+		fprintf(stderr, "dbg2       etime_i[4]: %d\n", etime_i[4]);
+		fprintf(stderr, "dbg2       etime_i[5]: %d\n", etime_i[5]);
+		fprintf(stderr, "dbg2       etime_i[6]: %d\n", etime_i[6]);
+		fprintf(stderr, "dbg2       speedmin:   %f\n", *speedmin);
+		fprintf(stderr, "dbg2       timegap:    %f\n", *timegap);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mb_defaults(int verbose, int *format, int *pings, int *lonflip,
+                double bounds[4], int *btime_i, int *etime_i,
+                double *speedmin, double *timegap) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
+	}
+
+	/* set system default values */
+	int status = mb_default_defaults(verbose, format, pings, lonflip,
+                  bounds, btime_i, etime_i, speedmin, timegap);
+
 	/* set the filename */
 	const char *home_ptr = getenv(HOME);
 	if (home_ptr != NULL) {
@@ -128,9 +178,6 @@ int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bound
 			fclose(fp);
 		}
 	}
-
-	/* successful no matter what happens */
-	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

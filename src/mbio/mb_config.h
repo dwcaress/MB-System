@@ -110,7 +110,7 @@
 #define STDC_HEADERS 1
 
 /* Build unit tests */
-/* #undef TEST_ENABLED */
+#define TEST_ENABLED 1
 
 /* Version number of package */
 #define VERSION "5.7.6beta22"
