@@ -1367,6 +1367,10 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 
 /*--------------------------------------------------------------------------*/
 void mb_set_colors(int ncolor, int *red, int *green, int *blue) {
+	(void)ncolor;  // Unused parameter
+	(void)red;  // Unused parameter
+	(void)green;  // Unused parameter
+	(void)blue;  // Unused parameter
 	return;
 }
 /*--------------------------------------------------------------------------*/
@@ -1429,6 +1433,7 @@ void mbcontour_plot(double x, double y, int ipen) {
 }
 /*--------------------------------------------------------------------------*/
 void mbcontour_setline(int linewidth) {
+	(void)linewidth;  // Unused parameter
 	// PSL_setlinewidth(PSL, (double)linewidth);
 	return;
 }
