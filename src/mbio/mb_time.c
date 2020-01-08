@@ -16,7 +16,7 @@
  * various time formats.
  *
  * MB-System uses these functions rather than system time functions in order to
- * insure that no time zone corrections are made.These functions make no
+ * insure that no time zone corrections are made. These functions make no
  * presumption about the time standard in use (e.g. GPS time, UTC time, time in
  * any particular time zone) because the time will be whatever was used for the
  * data during logging. Leap-days are handled, but no implementation of or
@@ -41,8 +41,6 @@ static const int yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334
  *   1/1/70 00:00:00 calculated from (yy/mm/dd/hr/mi/sc). */
 int mb_get_time(int verbose, int time_i[7], double *time_d) {
 
-  int status = MB_SUCCESS;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -57,6 +55,8 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
     fprintf(stderr, "dbg2       time_d:  %p\n", time_d);
     fprintf(stderr, "dbg2       *time_d: %f\n", *time_d);
   }
+
+  int status = MB_SUCCESS;
 
   // See http://www.cplusplus.com/reference/ctime/tm/
   if (time_i[0] < 1930 || time_i[0] > 3000       // year
@@ -102,7 +102,6 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
-  /* return success */
   return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -156,7 +155,6 @@ int mb_get_date(int verbose, double time_d, int time_i[7]) {
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
-  /* return success */
   return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -171,13 +169,11 @@ int mb_get_date_string(int verbose, double time_d, char *string) {
     fprintf(stderr, "dbg2       time_d:  %f\n", time_d);
   }
 
-  /* get the date */
   int time_i[7];
   mb_get_date(verbose, time_d, time_i);
   sprintf(string, "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5],
           time_i[6]);
 
-  /* assume success */
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
@@ -188,16 +184,12 @@ int mb_get_date_string(int verbose, double time_d, char *string) {
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
-  /* return success */
   return (status);
 }
 /*--------------------------------------------------------------------*/
 /*   function mb_get_jtime returns the day of year calculated
  *  from (yy/mm/dd/hr/mi/sc). */
 int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
-
-  int status = MB_SUCCESS;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -210,6 +202,8 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
     fprintf(stderr, "dbg2       second:  %d\n", time_i[5]);
     fprintf(stderr, "dbg2       microsec:%d\n", time_i[6]);
   }
+
+  int status = MB_SUCCESS;
 
   // See http://www.cplusplus.com/reference/ctime/tm/
   if (time_i[0] < 1930 || time_i[0] > 3000       // year
@@ -262,7 +256,6 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
     fprintf(stderr, "dbg2       status:     %d\n", status);
   }
 
-  /* return success */
   return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -271,9 +264,6 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
  *  day of the year.
  */
 int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
-
-  int status = MB_SUCCESS;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -284,6 +274,8 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
     fprintf(stderr, "dbg2       second:     %d\n", time_j[3]);
     fprintf(stderr, "dbg2       microsecond:%d\n", time_j[4]);
   }
+
+  int status = MB_SUCCESS;
 
   // See http://www.cplusplus.com/reference/ctime/tm/
   if (time_j[0] < 1930 || time_j[0] > 3000       // year
@@ -346,7 +338,6 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
     fprintf(stderr, "dbg2       status:     %d\n", status);
   }
 
-  /* return success */
   return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -374,7 +365,6 @@ int mb_fix_y2k(int verbose, int year_short, int *year_long) {
   else
     *year_long = year_short + 2000;
 
-  /* assume success */
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
@@ -413,7 +403,6 @@ int mb_unfix_y2k(int verbose, int year_long, int *year_short) {
   /* get the two digit year value */
   *year_short = year_long % 100;
 
-  /* assume success */
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
@@ -424,7 +413,6 @@ int mb_unfix_y2k(int verbose, int year_long, int *year_short) {
     fprintf(stderr, "dbg2       status:     %d\n", status);
   }
 
-  /* return success */
   return (status);
 }
 /*--------------------------------------------------------------------*/
