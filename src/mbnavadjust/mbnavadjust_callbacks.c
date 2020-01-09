@@ -19,17 +19,14 @@
  *
  * Author:	D. W. Caress
  * Date:	March 22, 2000
- *
- *
  */
-/*--------------------------------------------------------------------*/
 
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <time.h>
+#include <unistd.h>
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1900)
@@ -77,6 +74,7 @@
 /*
  * Macros to make code look nicer between ANSI and K&R.
  */
+// TODO(schwehr): Make this go away!  No more K&R code please.
 #ifndef ARGLIST
 #if (NeedFunctionPrototypes == 0)
 #define PROTOTYPE(p) ()
@@ -429,6 +427,9 @@ void BxUnmanageCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, clien
 
 /* ARGSUSED */
 void BxExitCB ARGLIST((w, client, call)) UARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
+	(void)w;  // Unused paramter
+	(void)client;  // Unused paramter
+
 	long exitValue = EXIT_FAILURE;
 	exit(exitValue);
 }
@@ -2405,6 +2406,9 @@ void do_naverr_test_graphics() {
 /*--------------------------------------------------------------------*/
 
 void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmListCallbackStruct *acs;
 	acs = (XmListCallbackStruct *)call_data;
     char selected_item[STRING_MAX];
@@ -2757,6 +2761,9 @@ int do_check_globaltie_listok(int ifile, int isection) {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_cont_expose(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -2766,6 +2773,9 @@ void do_naverr_cont_expose(Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void do_naverr_corr_expose(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -2775,6 +2785,9 @@ void do_naverr_corr_expose(Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void do_naverr_cont_input(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	XEvent *event = acs->event;
@@ -2887,6 +2900,9 @@ void do_naverr_cont_input(Widget w, XtPointer client_data, XtPointer call_data) 
 /*--------------------------------------------------------------------*/
 
 void do_naverr_corr_input(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XEvent *event;
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
@@ -2947,6 +2963,9 @@ void do_naverr_corr_input(Widget w, XtPointer client_data, XtPointer call_data) 
 /*--------------------------------------------------------------------*/
 
 void do_naverr_zcorr_input(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XEvent *event;
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
@@ -3018,6 +3037,9 @@ void do_naverr_zcorr_input(Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void do_naverr_previous(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3036,6 +3058,9 @@ void do_naverr_previous(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_next(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3054,6 +3079,9 @@ void do_naverr_next(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_nextunset(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3072,6 +3100,9 @@ void do_naverr_nextunset(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_addtie(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3093,6 +3124,9 @@ void do_naverr_addtie(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_deletetie(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3114,6 +3148,9 @@ void do_naverr_deletetie(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_selecttie(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3133,6 +3170,9 @@ void do_naverr_selecttie(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_unset(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3155,6 +3195,9 @@ void do_naverr_unset(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_setnone(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3177,6 +3220,9 @@ void do_naverr_setnone(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_setoffset(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3198,6 +3244,9 @@ void do_naverr_setoffset(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_resettie(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3218,6 +3267,9 @@ void do_naverr_resettie(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_dismiss_naverr(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3249,6 +3301,9 @@ void do_dismiss_naverr(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 void do_naverr_fullsize(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3265,6 +3320,9 @@ void do_naverr_fullsize(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_zerooffset(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3285,6 +3343,9 @@ void do_naverr_zerooffset(Widget w, XtPointer client_data, XtPointer call_data) 
 /*--------------------------------------------------------------------*/
 
 void do_naverr_zerozoffset(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3303,6 +3364,9 @@ void do_naverr_zerozoffset(Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void do_naverr_applyzoffset(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3324,6 +3388,9 @@ void do_naverr_applyzoffset(Widget w, XtPointer client_data, XtPointer call_data
 /*--------------------------------------------------------------------*/
 
 void do_naverr_minmisfit(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3352,6 +3419,9 @@ void do_naverr_minmisfit(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_minxymisfit(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3376,6 +3446,9 @@ void do_naverr_minxymisfit(Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void do_naverr_misfitcenter(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3400,6 +3473,9 @@ void do_naverr_misfitcenter(Widget w, XtPointer client_data, XtPointer call_data
 /*--------------------------------------------------------------------*/
 
 void do_biases_apply(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	struct mbna_file *file1;
@@ -3446,6 +3522,9 @@ void do_biases_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_biases_applyall(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	double heading_bias;
@@ -3487,6 +3566,9 @@ void do_biases_applyall(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_biases_init(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	struct mbna_file *file1;
@@ -3530,6 +3612,9 @@ void do_biases_init(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_biases_toggle(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	int ivalue;
@@ -3557,6 +3642,9 @@ void do_biases_toggle(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_biases_heading(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	int ivalue;
@@ -3570,6 +3658,9 @@ void do_biases_heading(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_biases_roll(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	int ivalue;
@@ -3583,6 +3674,9 @@ void do_biases_roll(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_controls_apply(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	int ivalue;
@@ -3640,12 +3734,18 @@ void do_controls_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 void do_scale_controls_sectionlength(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*--------------------------------------------------------------------*/
 void do_scale_controls_sectionsoundings(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	int ivalue;
@@ -3668,12 +3768,18 @@ void do_scale_controls_sectionsoundings(Widget w, XtPointer client_data, XtPoint
 
 /*--------------------------------------------------------------------*/
 void do_scale_controls_decimation(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*--------------------------------------------------------------------*/
 void do_scale_contourinterval(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	int ivalue;
@@ -3704,6 +3810,9 @@ void do_scale_contourinterval(Widget w, XtPointer client_data, XtPointer call_da
 
 /*--------------------------------------------------------------------*/
 void do_scale_controls_tickinterval(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	int ivalue;
@@ -3734,6 +3843,9 @@ void do_scale_controls_tickinterval(Widget w, XtPointer client_data, XtPointer c
 
 /*--------------------------------------------------------------------*/
 void do_controls_scale_colorinterval(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	int ivalue;
@@ -3764,18 +3876,27 @@ void do_controls_scale_colorinterval(Widget w, XtPointer client_data, XtPointer 
 /*--------------------------------------------------------------------*/
 
 void do_scale_controls_smoothing(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 }
 /*--------------------------------------------------------------------*/
 
 void do_scale_controls_zoffset(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*--------------------------------------------------------------------*/
 void do_file_new(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	fprintf(stderr, "do_file_new\n");
@@ -3783,6 +3904,9 @@ void do_file_new(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 void do_file_open(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	fprintf(stderr, "do_file_open\n");
@@ -3790,6 +3914,9 @@ void do_file_open(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 void do_file_importdata(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	fprintf(stderr, "do_file_importdata\n");
@@ -3797,6 +3924,9 @@ void do_file_importdata(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 void do_file_close(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	int error = MB_ERROR_NO_ERROR;
@@ -3813,6 +3943,9 @@ void do_file_close(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 void do_quit(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3834,6 +3967,9 @@ void do_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 void do_fileselection_mode(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3865,6 +4001,9 @@ void do_fileselection_mode(Widget w, XtPointer client_data, XtPointer call_data)
 
 /*--------------------------------------------------------------------*/
 void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	char ifile[STRING_MAX];
 	char format_text[40];
 	XmAnyCallbackStruct *acs;
@@ -3907,6 +4046,9 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 void do_fileselection_cancel(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3916,6 +4058,9 @@ void do_fileselection_cancel(Widget w, XtPointer client_data, XtPointer call_dat
 /*--------------------------------------------------------------------*/
 
 void do_view_showallsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3937,6 +4082,9 @@ void do_view_showallsurveys(Widget w, XtPointer client_data, XtPointer call_data
 /*--------------------------------------------------------------------*/
 
 void do_view_showselectedsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3958,6 +4106,9 @@ void do_view_showselectedsurveys(Widget w, XtPointer client_data, XtPointer call
 /*--------------------------------------------------------------------*/
 
 void do_view_showselectedblock(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3979,6 +4130,9 @@ void do_view_showselectedblock(Widget w, XtPointer client_data, XtPointer call_d
 /*--------------------------------------------------------------------*/
 
 void do_view_showselectedfile(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4000,6 +4154,9 @@ void do_view_showselectedfile(Widget w, XtPointer client_data, XtPointer call_da
 /*--------------------------------------------------------------------*/
 
 void do_view_showwithselectedsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4021,6 +4178,9 @@ void do_view_showwithselectedsurveys(Widget w, XtPointer client_data, XtPointer 
 /*--------------------------------------------------------------------*/
 
 void do_view_showwithselectedfile(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4042,6 +4202,9 @@ void do_view_showwithselectedfile(Widget w, XtPointer client_data, XtPointer cal
 /*--------------------------------------------------------------------*/
 
 void do_view_showselectedsection(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4063,6 +4226,9 @@ void do_view_showselectedsection(Widget w, XtPointer client_data, XtPointer call
 /*--------------------------------------------------------------------*/
 
 void do_view_showsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4084,6 +4250,9 @@ void do_view_showsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_view_showblocks(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4104,6 +4273,9 @@ void do_view_showblocks(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 void do_view_showdata(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4124,6 +4296,9 @@ void do_view_showdata(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_view_showsections(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4144,6 +4319,9 @@ void do_view_showsections(Widget w, XtPointer client_data, XtPointer call_data) 
 
 /*--------------------------------------------------------------------*/
 void do_view_showcrossings(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4164,6 +4342,9 @@ void do_view_showcrossings(Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void do_view_showmediocrecrossings(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4184,6 +4365,9 @@ void do_view_showmediocrecrossings(Widget w, XtPointer client_data, XtPointer ca
 /*--------------------------------------------------------------------*/
 
 void do_view_showgoodcrossings(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4204,6 +4388,9 @@ void do_view_showgoodcrossings(Widget w, XtPointer client_data, XtPointer call_d
 /*--------------------------------------------------------------------*/
 
 void do_view_showbettercrossings(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4224,6 +4411,9 @@ void do_view_showbettercrossings(Widget w, XtPointer client_data, XtPointer call
 
 /*--------------------------------------------------------------------*/
 void do_view_showtruecrossings(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4244,6 +4434,9 @@ void do_view_showtruecrossings(Widget w, XtPointer client_data, XtPointer call_d
 
 /*--------------------------------------------------------------------*/
 void do_view_showties(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4265,6 +4458,9 @@ void do_view_showties(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 void do_view_showtiessorted(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4287,6 +4483,9 @@ void do_view_showtiessorted(Widget w, XtPointer client_data, XtPointer call_data
 /*--------------------------------------------------------------------*/
 
 void do_action_poornav(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4297,6 +4496,9 @@ void do_action_poornav(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_action_goodnav(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4307,6 +4509,9 @@ void do_action_goodnav(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_action_fixednav(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4316,6 +4521,9 @@ void do_action_fixednav(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_action_fixedxynav(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4325,6 +4533,9 @@ void do_action_fixedxynav(Widget w, XtPointer client_data, XtPointer call_data) 
 /*--------------------------------------------------------------------*/
 
 void do_action_fixedznav(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4334,6 +4545,9 @@ void do_action_fixedznav(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_action_tie_xy(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4349,6 +4563,9 @@ void do_action_tie_xy(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_action_z(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4364,6 +4581,9 @@ void do_action_z(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_action_tie_xyz(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4379,6 +4599,9 @@ void do_action_tie_xyz(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_action_autopick(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4398,6 +4621,9 @@ void do_action_autopick(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_action_autopickhorizontal(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4417,6 +4643,9 @@ void do_action_autopickhorizontal(Widget w, XtPointer client_data, XtPointer cal
 /*--------------------------------------------------------------------*/
 
 void do_action_autosetsvsvertical(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4437,6 +4666,9 @@ void do_action_autosetsvsvertical(Widget w, XtPointer client_data, XtPointer cal
 /*--------------------------------------------------------------------*/
 
 void do_action_analyzecrossings(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	if (project.modelplot == true) {
@@ -4452,6 +4684,9 @@ void do_action_analyzecrossings(Widget w, XtPointer client_data, XtPointer call_
 /*--------------------------------------------------------------------*/
 
 void do_action_checknewcrossings(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4468,6 +4703,9 @@ void do_action_checknewcrossings(Widget w, XtPointer client_data, XtPointer call
 /*--------------------------------------------------------------------*/
 
 void do_zerozoffsets(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4484,6 +4722,9 @@ void do_zerozoffsets(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_action_invertnav(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4504,6 +4745,9 @@ void do_action_invertnav(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_action_updategrids(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4524,6 +4768,9 @@ void do_action_updategrids(Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void do_apply_nav(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	mbnavadjust_applynav();
@@ -4533,6 +4780,9 @@ void do_apply_nav(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_modelplot_show(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	Window modp_xid;
@@ -4597,6 +4847,9 @@ void do_modelplot_show(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_modelplot_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4609,6 +4862,10 @@ void do_modelplot_dismiss(Widget w, XtPointer client_data, XtPointer call_data) 
 /*--------------------------------------------------------------------*/
 
 void do_modelplot_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unused) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+	(void)unused;  // Unused paramter
+
 	Window modp_xid;
 	XConfigureEvent *cevent = (XConfigureEvent *)event;
 	Dimension width, height;
@@ -4679,6 +4936,9 @@ void do_modelplot_resize(Widget w, XtPointer client_data, XEvent *event, Boolean
 /*--------------------------------------------------------------------*/
 
 void do_modelplot_fullsize(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4713,6 +4973,9 @@ void do_modelplot_fullsize(Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void do_modelplot_input(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	XEvent *event = acs->event;
@@ -4835,6 +5098,9 @@ void do_modelplot_input(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_modelplot_expose(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4849,6 +5115,9 @@ void do_modelplot_expose(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_modelplot_tieoffsets(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	// fprintf(stderr,"Called do_modelplot_tieoffsets %d\n",XmToggleButtonGetState(toggleButton_modelplot_tieoffsets));
@@ -4868,6 +5137,9 @@ void do_modelplot_tieoffsets(Widget w, XtPointer client_data, XtPointer call_dat
 /*--------------------------------------------------------------------*/
 
 void do_modelplot_perturbation(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	// fprintf(stderr,"Called do_modelplot_perturbation %d\n",XmToggleButtonGetState(toggleButton_modelplot_perturbation));
@@ -4887,6 +5159,9 @@ void do_modelplot_perturbation(Widget w, XtPointer client_data, XtPointer call_d
 /*--------------------------------------------------------------------*/
 
 void do_modelplot_timeseries(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	// fprintf(stderr,"Called do_modelplot_timeseries %d\n",XmToggleButtonGetState(toggleButton_modelplot_timeseries));
@@ -4906,6 +5181,9 @@ void do_modelplot_timeseries(Widget w, XtPointer client_data, XtPointer call_dat
 /*--------------------------------------------------------------------*/
 
 void do_modelplot_clearblock(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused paramter
+	(void)client_data;  // Unused paramter
+
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	/* fprintf(stderr,"Called do_modelplot_clearblock\n"); */
@@ -4929,6 +5207,8 @@ void do_modelplot_clearblock(Widget w, XtPointer client_data, XtPointer call_dat
 /*--------------------------------------------------------------------*/
 
 void do_visualize(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void) w;
+	(void) client_data;
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4938,6 +5218,8 @@ void do_visualize(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 int do_visualize_dismiss_notify(size_t instance) {
+	(void)instance;  // Unused paramter
+
 	int status;
 
 	status = mbnavadjust_dismiss_visualization();
@@ -5102,6 +5384,9 @@ void do_picknav_notify(size_t instance) {
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void do_mbnavadjust_addcrossing(Widget w, XtPointer client, XtPointer call) {
+	(void)w;  // Unused paramter
+	(void)client;  // Unused paramter
+
 	int error;
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call;
@@ -5148,6 +5433,9 @@ void do_mbnavadjust_addcrossing(Widget w, XtPointer client, XtPointer call) {
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void do_fileselection_list(Widget w, XtPointer client, XtPointer call) {
+	(void)w;  // Unused paramter
+	(void)client;  // Unused paramter
+
 	int error;
 	char fileroot[MB_PATH_MAXLINE];
 	int form;
