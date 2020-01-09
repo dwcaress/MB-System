@@ -91,7 +91,26 @@
 
 #define GMT_PROG_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
 
-/* MBIO include files */
+// Stop warnings about packaging collision between GDAL's cpl_port.h and mb_config.h
+#ifdef PACKAGE_BUGREPORT
+#undef PACKAGE_BUGREPORT
+#endif
+#ifdef PACKAGE_NAME
+#undef PACKAGE_NAME
+#endif
+#ifdef PACKAGE_STRING
+#undef PACKAGE_STRING
+#endif
+#ifdef PACKAGE_TARNAME
+#undef PACKAGE_TARNAME
+#endif
+#ifdef PACKAGE_URL
+#undef PACKAGE_URL
+#endif
+#ifdef PACKAGE_VERSION
+#undef PACKAGE_VERSION
+#endif
+
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_define.h"
@@ -1347,7 +1366,13 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 }
 
 /*--------------------------------------------------------------------------*/
-void mb_set_colors(int ncolor, int *red, int *green, int *blue) { return; }
+void mb_set_colors(int ncolor, int *red, int *green, int *blue) {
+	(void)ncolor;  // Unused parameter
+	(void)red;  // Unused parameter
+	(void)green;  // Unused parameter
+	(void)blue;  // Unused parameter
+	return;
+}
 /*--------------------------------------------------------------------------*/
 void mbcontour_plot(double x, double y, int ipen) {
 	double xx, yy;
@@ -1408,6 +1433,7 @@ void mbcontour_plot(double x, double y, int ipen) {
 }
 /*--------------------------------------------------------------------------*/
 void mbcontour_setline(int linewidth) {
+	(void)linewidth;  // Unused parameter
 	// PSL_setlinewidth(PSL, (double)linewidth);
 	return;
 }
