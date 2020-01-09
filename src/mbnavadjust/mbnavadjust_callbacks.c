@@ -22,9 +22,11 @@
  */
 
 #include <assert.h>
+#include <ctype.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -38,35 +40,31 @@
 #endif
 
 #include <X11/cursorfont.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <X11/Intrinsic.h>
 #include <X11/keysym.h>
 #include <X11/keysymdef.h>
+#include <X11/StringDefs.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #include <Xm/FileSB.h>
+#include <Xm/List.h>
 #include <Xm/Text.h>
 #include <Xm/TextF.h>
 #include <Xm/ToggleB.h>
 #include <Xm/Xm.h>
-#include <Xm/List.h>
 
 #define MBNAVADJUST_DECLARE_GLOBALS
-#include "mbnavadjust_extrawidgets.h"
+#include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_status.h"
-#include "mb_aux.h"
-#include "mbnavadjust_io.h"
-#include "mbnavadjust.h"
 #include "mb_xgraphics.h"
+#include "mbnavadjust.h"
+#include "mbnavadjust_creation.h"
+#include "mbnavadjust_extrawidgets.h"
+#include "mbnavadjust_io.h"
 #include "mbview.h"
 
-#include "mbnavadjust_creation.h"
-
 /*--------------------------------------------------------------------*/
-
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
 
 #ifndef FIXED
 #define FIXED "fixed"
@@ -190,7 +188,6 @@ void BxManageCB(Widget w, XtPointer client, XtPointer call) {
  *      Notes:        * This function expects that there is an application
  *                      shell from which all other widgets are descended.
  */
-#include <X11/StringDefs.h>
 
 /* ARGSUSED */
 void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
@@ -396,10 +393,6 @@ void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
  *			XtPointer	client:	the integer exit value.
  *			XtPointer	call:	the call data (unused).
  */
-
-#ifdef VMS
-#include <stdlib.h>
-#endif
 
 /* ARGSUSED */
 void BxExitCB(Widget w, XtPointer client, XtPointer call) {
