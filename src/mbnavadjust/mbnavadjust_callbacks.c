@@ -599,8 +599,6 @@ void do_update_status() {
 	int num_surveys, num_blocks, num_files, num_crossings, num_ties, num_sections;
 	double btime_d, etime_d;
 	int btime_i[7], etime_i[7];
-	double dr1, dr2, dr3, rs;
-	double dx, dy, dz, s;
 	char *tiestatus;
 	char *tiestatus_xyz = "XYZ";
 	char *tiestatus_xy = "XY ";
@@ -612,7 +610,7 @@ void do_update_status() {
 	char *filestatus_fixedxy = "fixedxy";
 	char *filestatus_fixedz = "fixedz ";
 	char *filestatus_unknown = "unknown";
-    int *tie_list = NULL;
+	int *tie_list = NULL;
 	int n_tcrossing = 0;
 	int n_50crossing = 0;
 	int n_25crossing = 0;
