@@ -155,16 +155,13 @@ XmString tmp0;
 void BxManageCB(Widget w, XtPointer client, XtPointer call) {
 	(void)call;  // Unused parameter
 
-	WidgetList widgets;
-	int i;
-
 	/*
 	 * This function returns a NULL terminated WidgetList.  The memory for
 	 * the list needs to be freed when it is no longer needed.
 	 */
-	widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
+	WidgetList widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
 
-	i = 0;
+	int i = 0;
 	while (widgets && widgets[i] != NULL) {
 		XtManageChild(widgets[i]);
 		i++;
@@ -198,14 +195,10 @@ void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
 	Boolean first = True;
 	String rscs = XtNewString((String)client);
 	String *valueList = (String *)XtCalloc(CHUNK, sizeof(String));
-	char *start;
-	char *ptr, *cptr;
-	String name;
-	String rsc;
-	int i, count = 0;
-	Widget *current;
+	int count = 0;
 
-	for (start = rscs; rscs && *rscs; rscs = strtok(NULL, "\n")) {
+	char *start = rscs;
+	for (; rscs && *rscs; rscs = strtok(NULL, "\n")) {
 		if (first) {
 			rscs = strtok(rscs, "\n");
 			first = False;
@@ -218,12 +211,12 @@ void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
 	}
 	XtFree((char *)start);
 
-	for (i = 0; i < count; i++) {
+	for (int i = 0; i < count; i++) {
 		/*
 		 * First, extract the widget name and generate a string to
 		 * pass to BxWidgetIdsFromNames().
 		 */
-		cptr = strrchr(valueList[i], '.');
+		char *cptr = strrchr(valueList[i], '.');
 		if (cptr != NULL) {
 			*cptr = '\000';
 		}
@@ -234,11 +227,11 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 			XtFree((char *)(valueList[i]));
 			continue;
 		}
-		name = valueList[i];
+		String name = valueList[i];
 		while ((name && *name) && isspace(*name)) {
 			name++;
 		}
-		ptr = name + strlen(name) - 1;
+		char *ptr = name + strlen(name) - 1;
 		while (ptr && *ptr) {
 			if (isspace(*ptr)) {
 				ptr--;
@@ -262,7 +255,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 		/*
 		 * Next, get the resource name to set.
 		 */
-		rsc = ++cptr;
+		String rsc = ++cptr;
 		cptr = strchr(rsc, '=');
 		if (cptr != NULL) {
 			*cptr = '\000';
@@ -325,7 +318,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 		/*
 		 * Now convert the widget name to a Widget ID
 		 */
-		current = BxWidgetIdsFromNames(w, "BxSetValuesCB", name);
+		Widget *current = BxWidgetIdsFromNames(w, "BxSetValuesCB", name);
 		if (current[0] == NULL) {
 			XtFree((char *)(valueList[i]));
 			continue;
@@ -365,16 +358,13 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
 	(void)call;  // Unused parameter
 
-	WidgetList widgets;
-	int i;
-
 	/*
 	 * This function returns a NULL terminated WidgetList.  The memory for
 	 * the list needs to be freed when it is no longer needed.
 	 */
-	widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
+	WidgetList widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
 
-	i = 0;
+	int i = 0;
 	while (widgets && widgets[i] != NULL) {
 		XtUnmanageChild(widgets[i]);
 		i++;
@@ -400,15 +390,13 @@ void BxExitCB(Widget w, XtPointer client, XtPointer call) {
 	(void)client;  // Unused parameter
 	(void)call;  // Unused parameter
 
-	long exitValue = EXIT_FAILURE;
-	exit(exitValue);
+	exit(EXIT_FAILURE);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_mbnavadjust_init(int argc, char **argv) {
-	int i, j;
-	String translations = "<Btn1Down>:	DrawingAreaInput() ManagerGadgetArm() \n\
+	const String translations = "<Btn1Down>:	DrawingAreaInput() ManagerGadgetArm() \n\
 	     <Btn1Up>:		DrawingAreaInput() ManagerGadgetActivate() \n\
 	     <Btn1Motion>:	DrawingAreaInput() ManagerGadgetButtonMotion() \n\
 	     <Btn2Down>:	DrawingAreaInput() ManagerGadgetArm() \n\
@@ -468,8 +456,8 @@ void do_mbnavadjust_init(int argc, char **argv) {
 	status = XLookupColor(display, colormap, "yellow", &db_color, &colors[6]);
 	if ((status = XAllocColor(display, colormap, &colors[6])) == 0)
 		fprintf(stderr, "Failure to allocate color: yellow\n");
-	j = 7;
-	for (i = 0; i < 16; i++) {
+	int j = 7;
+	for (int i = 0; i < 16; i++) {
 		colors[j + i].red = 65535;
 		/* colors[j+i].green = i * 4096; */
 		colors[j + i].green = i * 2048;
@@ -481,7 +469,7 @@ void do_mbnavadjust_init(int argc, char **argv) {
 		}
 	}
 	j += 16;
-	for (i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++) {
 		colors[j + i].red = 65535 - i * 4096;
 		/* colors[j+i].green = 65535; */
 		colors[j + i].green = 32767 + i * 2048;
@@ -493,7 +481,7 @@ void do_mbnavadjust_init(int argc, char **argv) {
 		}
 	}
 	j += 16;
-	for (i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++) {
 		colors[j + i].red = 0;
 		colors[j + i].green = 65535;
 		colors[j + i].blue = i * 4096;
@@ -504,7 +492,7 @@ void do_mbnavadjust_init(int argc, char **argv) {
 		}
 	}
 	j += 16;
-	for (i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++) {
 		colors[j + i].red = 0;
 		colors[j + i].green = 65535 - i * 4096;
 		colors[j + i].blue = 65535;
@@ -515,7 +503,7 @@ void do_mbnavadjust_init(int argc, char **argv) {
 		}
 	}
 	j += 16;
-	for (i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++) {
 		colors[j + i].red = i * 4096;
 		colors[j + i].green = 0;
 		colors[j + i].blue = 65535;
@@ -533,7 +521,7 @@ void do_mbnavadjust_init(int argc, char **argv) {
 	if (status == 0) {
 		fprintf(stderr, "Failure to allocate color[%d]: %d %d %d\n", j, colors[j].red, colors[j].green, colors[j].blue);
 	}
-	for (i = 0; i < NCOLORS; i++) {
+	for (int i = 0; i < NCOLORS; i++) {
 		mpixel_values[i] = colors[i].pixel;
 	}
 	status = mbnavadjust_set_colors(NCOLORS, (int *)mpixel_values);
@@ -580,37 +568,6 @@ void do_set_controls() {
 /*--------------------------------------------------------------------*/
 
 void do_update_status() {
-	XmString *xstr;
-	struct mbna_file *file;
-	struct mbna_file *file2;
-	struct mbna_section *section;
-	struct mbna_crossing *crossing;
-	struct mbna_tie *tie;
-	char status_char;
-	char truecrossing;
-	int iselect, ivalue, imax;
-	int num_surveys, num_blocks, num_files, num_crossings, num_ties, num_sections;
-	double btime_d, etime_d;
-	int btime_i[7], etime_i[7];
-	char *tiestatus;
-	char *tiestatus_xyz = "XYZ";
-	char *tiestatus_xy = "XY ";
-	char *tiestatus_z = "  Z";
-	char *filestatus;
-	char *filestatus_poor = " poor  ";
-	char *filestatus_good = " good  ";
-	char *filestatus_fixed = " fixed ";
-	char *filestatus_fixedxy = "fixedxy";
-	char *filestatus_fixedz = "fixedz ";
-	char *filestatus_unknown = "unknown";
-	int *tie_list = NULL;
-	int n_tcrossing = 0;
-	int n_50crossing = 0;
-	int n_25crossing = 0;
-	int n_allcrossing = 0;
-	int n_tie = 0;
-	int i, ii, j, k, kk;
-
 	/* set status label */
 	sprintf(string,
 	        ":::t\"Project: %s\":t\"Number of Files:                             %4d     Selected Survey:%4d\":t\"Number of "
@@ -655,6 +612,38 @@ void do_update_status() {
 		fprintf(stderr, "%s", string);
 	}
 
+	// TODO(schwehr): Localize vars
+	XmString *xstr;
+	struct mbna_file *file;
+	struct mbna_file *file2;
+	struct mbna_section *section;
+	struct mbna_crossing *crossing;
+	struct mbna_tie *tie;
+	char status_char;
+	char truecrossing;
+	int iselect, ivalue, imax;
+	int num_surveys, num_blocks, num_files, num_crossings, num_ties, num_sections;
+	double btime_d, etime_d;
+	int btime_i[7], etime_i[7];
+	char *tiestatus;
+	char *tiestatus_xyz = "XYZ";
+	char *tiestatus_xy = "XY ";
+	char *tiestatus_z = "  Z";
+	char *filestatus;
+	char *filestatus_poor = " poor  ";
+	char *filestatus_good = " good  ";
+	char *filestatus_fixed = " fixed ";
+	char *filestatus_fixedxy = "fixedxy";
+	char *filestatus_fixedz = "fixedz ";
+	char *filestatus_unknown = "unknown";
+	int *tie_list = NULL;
+	int n_tcrossing = 0;
+	int n_50crossing = 0;
+	int n_25crossing = 0;
+	int n_allcrossing = 0;
+	int n_tie = 0;
+	int j, k, kk;
+
 	/* set list_data */
 	iselect = MBNA_SELECT_NONE;
 	XmListDeleteAllItems(list_data);
@@ -667,7 +656,7 @@ void do_update_status() {
 			/* count the number of surveys */
 			num_surveys = 0;
 			num_files = 0;
-			for (i = 0; i < project.num_files; i++) {
+			for (int i = 0; i < project.num_files; i++) {
 				file = &(project.files[i]);
 				if (file->block == num_surveys) {
 					num_surveys++;
@@ -681,7 +670,7 @@ void do_update_status() {
 			/* generate list */
 			num_surveys = 0;
 			num_files = 0;
-			for (i = 0; i < project.num_files; i++) {
+			for (int i = 0; i < project.num_files; i++) {
 				file = &(project.files[i]);
 
 				if (i == 0) {
@@ -691,7 +680,7 @@ void do_update_status() {
 					/* find end time for this block */
 					num_files = 0;
 					btime_d = file->sections[0].etime_d;
-					for (ii = i; ii < project.num_files; ii++) {
+					for (int ii = i; ii < project.num_files; ii++) {
 						file2 = &(project.files[ii]);
 						if (file2->block == file->block) {
 							etime_d = file2->sections[file2->num_sections - 1].etime_d;
@@ -728,7 +717,7 @@ void do_update_status() {
 				}
 			}
 			XmListAddItems(list_data, xstr, num_surveys, 0);
-			for (i = 0; i < num_surveys; i++) {
+			for (int i = 0; i < num_surveys; i++) {
 				XmStringFree(xstr[i]);
 			}
 			free(xstr);
@@ -747,7 +736,7 @@ void do_update_status() {
 			/* count the number of blocks */
 			num_surveys = 0;
 			num_blocks = 0;
-			for (i = 0; i < project.num_files; i++) {
+			for (int i = 0; i < project.num_files; i++) {
 				file = &(project.files[i]);
 				if (file->block == num_surveys) {
 					num_surveys++;
@@ -758,7 +747,7 @@ void do_update_status() {
 
 			/* generate list */
 			num_blocks = 0;
-			for (i = 0; i < num_surveys; i++) {
+			for (int i = 0; i < num_surveys; i++) {
 				for (j = 0; j <= i; j++) {
 					n_tcrossing = 0;
 					n_50crossing = 0;
@@ -788,7 +777,7 @@ void do_update_status() {
 				}
 			}
 			XmListAddItems(list_data, xstr, num_blocks, 0);
-			for (i = 0; i < num_surveys; i++) {
+			for (int i = 0; i < num_surveys; i++) {
 				XmStringFree(xstr[i]);
 			}
 			free(xstr);
@@ -821,7 +810,7 @@ void do_update_status() {
 		if (project.num_files > 0) {
 			/* count files */
 			num_files = 0;
-			for (i = 0; i < project.num_files; i++) {
+			for (int i = 0; i < project.num_files; i++) {
 				file = &(project.files[i]);
 				if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
 				    (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
@@ -835,7 +824,7 @@ void do_update_status() {
 			/* generate list */
 			num_files = 0;
 			iselect = MBNA_SELECT_NONE;
-			for (i = 0; i < project.num_files; i++) {
+			for (int i = 0; i < project.num_files; i++) {
 				file = &(project.files[i]);
 				if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
 				    (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
@@ -865,7 +854,7 @@ void do_update_status() {
 				}
 			}
 			XmListAddItems(list_data, xstr, num_files, 0);
-			for (i = 0; i < num_files; i++) {
+			for (int i = 0; i < num_files; i++) {
 				XmStringFree(xstr[i]);
 			}
 			free(xstr);
@@ -898,7 +887,7 @@ void do_update_status() {
 		if (project.num_files > 0) {
 			/* count sections */
 			num_sections = 0;
-			for (i = 0; i < project.num_files; i++) {
+			for (int i = 0; i < project.num_files; i++) {
 				file = &(project.files[i]);
 				for (j = 0; j < file->num_sections; j++) {
 					section = &(file->sections[j]);
@@ -917,7 +906,7 @@ void do_update_status() {
 			/* generate list */
 			num_sections = 0;
 			iselect = MBNA_SELECT_NONE;
-			for (i = 0; i < project.num_files; i++) {
+			for (int i = 0; i < project.num_files; i++) {
 				file = &(project.files[i]);
 				for (j = 0; j < file->num_sections; j++) {
 					section = &(file->sections[j]);
@@ -944,7 +933,7 @@ void do_update_status() {
 				}
 			}
 			XmListAddItems(list_data, xstr, num_sections, 0);
-			for (i = 0; i < num_sections; i++) {
+			for (int i = 0; i < num_sections; i++) {
 				XmStringFree(xstr[i]);
 			}
 			free(xstr);
@@ -977,7 +966,7 @@ void do_update_status() {
 		if (project.num_files > 0) {
 			/* count crossings */
 			num_crossings = 0;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true)
 					num_crossings++;
 			}
@@ -986,7 +975,7 @@ void do_update_status() {
 			/* generate list */
 			num_crossings = 0;
 			iselect = MBNA_SELECT_NONE;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true) {
 					crossing = &(project.crossings[i]);
 					if (crossing->status == MBNA_CROSSING_STATUS_NONE)
@@ -1012,7 +1001,7 @@ void do_update_status() {
 				}
 			}
 			XmListAddItems(list_data, xstr, num_crossings, 0);
-			for (i = 0; i < num_crossings; i++) {
+			for (int i = 0; i < num_crossings; i++) {
 				XmStringFree(xstr[i]);
 			}
 			free(xstr);
@@ -1046,7 +1035,7 @@ void do_update_status() {
 		if (project.num_files > 0) {
 			/* count crossings */
 			num_crossings = 0;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true)
 					num_crossings++;
 			}
@@ -1055,7 +1044,7 @@ void do_update_status() {
 			/* generate list */
 			num_crossings = 0;
 			iselect = MBNA_SELECT_NONE;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true) {
 					crossing = &(project.crossings[i]);
 					if (crossing->status == MBNA_CROSSING_STATUS_NONE)
@@ -1081,7 +1070,7 @@ void do_update_status() {
 				}
 			}
 			XmListAddItems(list_data, xstr, num_crossings, 0);
-			for (i = 0; i < num_crossings; i++) {
+			for (int i = 0; i < num_crossings; i++) {
 				XmStringFree(xstr[i]);
 			}
 			free(xstr);
@@ -1115,7 +1104,7 @@ void do_update_status() {
 		if (project.num_files > 0) {
 			/* count crossings */
 			num_crossings = 0;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true)
 					num_crossings++;
 			}
@@ -1124,7 +1113,7 @@ void do_update_status() {
 			/* generate list */
 			num_crossings = 0;
 			iselect = MBNA_SELECT_NONE;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true) {
 					crossing = &(project.crossings[i]);
 					if (crossing->status == MBNA_CROSSING_STATUS_NONE)
@@ -1150,7 +1139,7 @@ void do_update_status() {
 				}
 			}
 			XmListAddItems(list_data, xstr, num_crossings, 0);
-			for (i = 0; i < num_crossings; i++) {
+			for (int i = 0; i < num_crossings; i++) {
 				XmStringFree(xstr[i]);
 			}
 			free(xstr);
@@ -1184,7 +1173,7 @@ void do_update_status() {
 		if (project.num_files > 0) {
 			/* count crossings */
 			num_crossings = 0;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true)
 					num_crossings++;
 			}
@@ -1193,7 +1182,7 @@ void do_update_status() {
 			/* generate list */
 			num_crossings = 0;
 			iselect = MBNA_SELECT_NONE;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true) {
 					crossing = &(project.crossings[i]);
 					if (crossing->status == MBNA_CROSSING_STATUS_NONE)
@@ -1219,7 +1208,7 @@ void do_update_status() {
 				}
 			}
 			XmListAddItems(list_data, xstr, num_crossings, 0);
-			for (i = 0; i < num_crossings; i++) {
+			for (int i = 0; i < num_crossings; i++) {
 				XmStringFree(xstr[i]);
 			}
 			free(xstr);
@@ -1252,7 +1241,7 @@ void do_update_status() {
 		if (project.num_files > 0) {
 			/* count crossings */
 			num_crossings = 0;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true)
 					num_crossings++;
 			}
@@ -1261,7 +1250,7 @@ void do_update_status() {
 			/* generate list */
 			num_crossings = 0;
 			iselect = MBNA_SELECT_NONE;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true) {
 					crossing = &(project.crossings[i]);
 					if (crossing->status == MBNA_CROSSING_STATUS_NONE)
@@ -1287,7 +1276,7 @@ void do_update_status() {
 				}
 			}
 			XmListAddItems(list_data, xstr, num_crossings, 0);
-			for (i = 0; i < num_crossings; i++) {
+			for (int i = 0; i < num_crossings; i++) {
 				XmStringFree(xstr[i]);
 			}
 			free(xstr);
@@ -1322,7 +1311,7 @@ void do_update_status() {
 			num_ties = 0;
 
 			/* count crossing ties */
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true) {
 					crossing = &(project.crossings[i]);
 					num_ties += crossing->num_ties;
@@ -1330,7 +1319,7 @@ void do_update_status() {
 			}
 
 			/* count global ties */
-			for (i = 0; i < project.num_files; i++) {
+			for (int i = 0; i < project.num_files; i++) {
 				file = &(project.files[i]);
 				for (j = 0; j < file->num_sections; j++) {
 					section = &(file->sections[j]);
@@ -1348,7 +1337,7 @@ void do_update_status() {
 			iselect = MBNA_SELECT_NONE;
 
 			/* start with crossing ties */
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true) {
 					crossing = &(project.crossings[i]);
 					for (j = 0; j < crossing->num_ties; j++) {
@@ -1402,7 +1391,7 @@ void do_update_status() {
 			}
 
 			/* now list global ties */
-			for (i = 0; i < project.num_files; i++) {
+			for (int i = 0; i < project.num_files; i++) {
 				file = &(project.files[i]);
 				for (j = 0; j < file->num_sections; j++) {
 					section = &(file->sections[j]);
@@ -1481,7 +1470,7 @@ void do_update_status() {
 		if (project.num_files > 0) {
 			/* count crossing ties */
 			num_ties = 0;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true) {
 					crossing = &(project.crossings[i]);
 					num_ties += crossing->num_ties;
@@ -1496,7 +1485,7 @@ void do_update_status() {
 
             /* get list of tie pointers */
             num_ties = 0;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i = 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true) {
 					crossing = &(project.crossings[i]);
 					for (j = 0; j < crossing->num_ties; j++) {
@@ -1513,8 +1502,8 @@ void do_update_status() {
 			iselect = MBNA_SELECT_NONE;
             kk = 0;
             for (k  = num_ties - 1; k >= 0; k--) {
-                i = tie_list[k] / 100;
-				if (do_check_crossing_listok(i) == true) {
+                const int i = tie_list[k] / 100;
+                if (do_check_crossing_listok(i) == true) {
                     crossing = &(project.crossings[i]);
                     j = tie_list[k] % 100;
                     tie = (struct mbna_tie *)&crossing->ties[j];
@@ -2023,8 +2012,6 @@ void do_update_status() {
 /*--------------------------------------------------------------------*/
 
 void do_update_modelplot_status() {
-	struct mbna_crossing *crossing;
-
 	/* deal with modelplot */
 	if (project.modelplot == true) {
 		/* set model view clear block button sensitivity */
@@ -2034,6 +2021,8 @@ void do_update_modelplot_status() {
 		else {
 			XtVaSetValues(pushButton_modelplot_clearblock, XmNsensitive, True, NULL);
 		}
+
+		struct mbna_crossing *crossing;
 
 		/* set model view status label */
 		if (project.modelplot_style == MBNA_MODELPLOT_TIMESERIES) {
@@ -2085,26 +2074,24 @@ void do_update_modelplot_status() {
 /*--------------------------------------------------------------------*/
 
 void do_update_visualization_status() {
-	int error = MB_ERROR_NO_ERROR;
-	struct mbview_shareddata_struct *shareddata;
-	struct mbna_file *file_1, *file_2;
-	struct mbna_crossing *crossing;
-	mb_path name = "";
-
 	// fprintf(stderr,"do_update_visualization_status: mbna_crossing_select:%d mbna_tie_select:%d\n",
 	// mbna_crossing_select,mbna_tie_select);
 	/* deal with modelplot */
 	if (project.visualization_status == true) {
+	int error = MB_ERROR_NO_ERROR;
 		if (mbna_crossing_select != MBNA_SELECT_NONE) {
+
 			/* clear any navadjust related interactive nav picks */
+			struct mbview_shareddata_struct *shareddata;
 			mbview_getsharedptr(mbna_verbose, &shareddata, &error);
 			shareddata->nav_selected_mbnavadjust[0] = MBV_SELECT_NONE;
 			shareddata->nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
 
 			/* select the data sections associated with the loaded crossing */
-			crossing = &(project.crossings[mbna_crossing_select]);
+			struct mbna_crossing *crossing = &(project.crossings[mbna_crossing_select]);
 			mbview_clearnavpicks(0);
 
+			mb_path name;
 			sprintf(name, "%4.4d:%4.4d", crossing->file_id_1, crossing->section_1);
 			mbview_picknavbyname(mbna_verbose, 0, name, &error);
 
@@ -2113,8 +2100,8 @@ void do_update_visualization_status() {
 
 			/* select the route associated with the selected tie */
 			if (mbna_tie_select != MBNA_SELECT_NONE) {
-				file_1 = (struct mbna_file *)&project.files[crossing->file_id_1];
-				file_2 = (struct mbna_file *)&project.files[crossing->file_id_2];
+				struct mbna_file *file_1 = (struct mbna_file *)&project.files[crossing->file_id_1];
+				struct mbna_file *file_2 = (struct mbna_file *)&project.files[crossing->file_id_2];
 				sprintf(name, "%4.4d:%1d %2.2d:%4.4d:%2.2d %2.2d:%4.4d:%2.2d", mbna_crossing_select, mbna_tie_select,
 				        file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
 				        crossing->section_2);
@@ -2191,30 +2178,26 @@ void do_naverr_init() {
 /*--------------------------------------------------------------------*/
 
 void do_update_naverr() {
-	struct mbna_crossing *crossing;
-	struct mbna_tie *tie;
-	double plot_width, misfit_width;
-	double zoom_factor;
-	double timediff;
-
 	if (mbna_current_crossing >= 0) {
-		/* get zoom factor */
-		if ((mbna_plot_lon_max - mbna_plot_lon_min) > 0.0)
-			zoom_factor = 100.0 * MAX((mbna_lon_max - mbna_lon_min) / (mbna_plot_lon_max - mbna_plot_lon_min),
-			                          (mbna_lat_max - mbna_lat_min) / (mbna_plot_lat_max - mbna_plot_lat_min));
-		else
-			zoom_factor = 0.0;
-		plot_width = (mbna_plot_lon_max - mbna_plot_lon_min) / mbna_mtodeglon;
-		misfit_width = (mbna_plot_lon_max - mbna_plot_lon_min) / mbna_mtodeglon;
+
+		const double zoom_factor =
+			(mbna_plot_lon_max - mbna_plot_lon_min) > 0.0
+			? 100.0 * MAX((mbna_lon_max - mbna_lon_min) / (mbna_plot_lon_max - mbna_plot_lon_min),
+			              (mbna_lat_max - mbna_lat_min) / (mbna_plot_lat_max - mbna_plot_lat_min))
+			: 0.0;
+
+		const double plot_width = (mbna_plot_lon_max - mbna_plot_lon_min) / mbna_mtodeglon;
+		const double misfit_width = (mbna_plot_lon_max - mbna_plot_lon_min) / mbna_mtodeglon;
 
 		/* get time difference */
-		timediff = (project.files[mbna_file_id_2].sections[mbna_section_2].btime_d -
-		            project.files[mbna_file_id_1].sections[mbna_section_1].btime_d) /
-		           86400.0;
+		const double timediff =
+			(project.files[mbna_file_id_2].sections[mbna_section_2].btime_d -
+		         project.files[mbna_file_id_1].sections[mbna_section_1].btime_d) /
+		        86400.0;
 
 		/* set main naverr status label */
-		crossing = &project.crossings[mbna_current_crossing];
-		tie = &crossing->ties[mbna_current_tie];
+		struct mbna_crossing *crossing = &project.crossings[mbna_current_crossing];
+		struct mbna_tie *tie = &crossing->ties[mbna_current_tie];
 		if (crossing->status == MBNA_CROSSING_STATUS_NONE) {
 			sprintf(string, ":::t\"Crossing: %d of %d\"\
 :t\"Sections: %2.2d:%3.3d:%3.3d and %2.2d:%3.3d:%3.3d\"\
@@ -2337,39 +2320,37 @@ void do_naverr_offsetlabel() {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_test_graphics() {
-	int i, j, k;
-	int ox, oy, dx, dy;
-	double rx, ry, rr, r;
-
 	/* now test graphics */
-	ox = 0;
-	oy = 0;
-	dx = (cont_borders[1] - cont_borders[0]) / 16;
-	dy = (cont_borders[3] - cont_borders[2]) / 16;
-	rx = cont_borders[1] - ox;
-	ry = cont_borders[3] - oy;
-	rr = sqrt(rx * rx + ry * ry);
-	for (i = 0; i < 16; i++)
-		for (j = 0; j < 16; j++) {
-			k = 16 * j + i;
+	int ox = 0;
+	int oy = 0;
+	int dx = (cont_borders[1] - cont_borders[0]) / 16;
+	int dy = (cont_borders[3] - cont_borders[2]) / 16;
+	double rx = cont_borders[1] - ox;
+	double ry = cont_borders[3] - oy;
+	double rr = sqrt(rx * rx + ry * ry);
+	for (int i = 0; i < 16; i++) {
+		for (int j = 0; j < 16; j++) {
+			const int k = 16 * j + i;
 			ox = i * dx;
 			oy = j * dy;
 			xg_fillrectangle(cont_xgid, ox, oy, dx, dy, mpixel_values[k], 0);
 			xg_fillrectangle(cont_xgid, ox + dx / 4, oy + dy / 4, dx / 2, dy / 2, k, 0);
 		}
+	}
 	ox = (corr_borders[1] - corr_borders[0]) / 2;
 	oy = (corr_borders[3] - corr_borders[2]) / 2;
 	rx = corr_borders[1] - ox;
 	ry = corr_borders[3] - oy;
 	rr = sqrt(rx * rx + ry * ry);
-	for (i = corr_borders[0]; i < corr_borders[1]; i++)
-		for (j = corr_borders[2]; j < corr_borders[3]; j++) {
+	for (int i = corr_borders[0]; i < corr_borders[1]; i++) {
+		for (int j = corr_borders[2]; j < corr_borders[3]; j++) {
 			rx = i - ox;
 			ry = j - oy;
-			r = sqrt(rx * rx + ry * ry);
-			k = 6 + (int)(80 * r / rr);
+			const double r = sqrt(rx * rx + ry * ry);
+			const int k = 6 + (int)(80 * r / rr);
 			xg_fillrectangle(corr_xgid, i, j, 1, 1, mpixel_values[k], 0);
 		}
+	}
 }
 /*--------------------------------------------------------------------*/
 
@@ -2377,26 +2358,24 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 
-	XmListCallbackStruct *acs;
-	acs = (XmListCallbackStruct *)call_data;
-    char selected_item[STRING_MAX];
-    char *tmp = NULL;
-	struct mbna_file *file;
-	int *position_list = NULL;
 	int position_count = 0;
-	int num_files, num_sections, num_crossings, num_ties, num_surveys, num_blocks;
-	int found;
-    int nscan;
-	int i, j;
+	int *position_list = NULL;
 
 	if (XmListGetSelectedPos(list_data, &position_list, &position_count)) {
+		XmListCallbackStruct *acs = (XmListCallbackStruct *)call_data;
+		char selected_item[STRING_MAX];
+		char *tmp = NULL;
+		struct mbna_file *file;
+		int num_files, num_sections, num_crossings, num_ties, num_surveys, num_blocks;
+		int found;
+
 		if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
 			mbna_section_select = 0;
 			mbna_file_select = MBNA_SELECT_NONE;
 			mbna_survey_select = position_list[0] - 1;
 
 			/* get selected file from list */
-			for (i = 0; i < project.num_files; i++) {
+			for (int i= 0; i < project.num_files; i++) {
 				file = &(project.files[i]);
 				if (mbna_file_select == MBNA_SELECT_NONE && mbna_survey_select == file->block) {
 					mbna_file_select = i;
@@ -2410,10 +2389,10 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
 			mbna_block_select = position_list[0] - 1;
 			num_surveys = 0;
 			num_blocks = 0;
-			for (i = 0; i < project.num_files; i++) {
+			for (int i= 0; i < project.num_files; i++) {
 				file = &(project.files[i]);
 				if (file->block == num_surveys) {
-					for (j = 0; j <= num_surveys; j++) {
+					for (int j = 0; j <= num_surveys; j++) {
 						if (mbna_block_select == num_blocks) {
 							mbna_block_select1 = j;
 							mbna_block_select2 = num_surveys;
@@ -2430,7 +2409,7 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
 			num_files = 0;
 
 			/* get selected file from list */
-			for (i = 0; i < project.num_files; i++) {
+			for (int i= 0; i < project.num_files; i++) {
 				file = &(project.files[i]);
 				if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
 				    (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
@@ -2450,9 +2429,9 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
 		else if (mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS) {
 			/* get selected section from list */
 			num_sections = 0;
-			for (i = 0; i < project.num_files; i++) {
+			for (int i= 0; i < project.num_files; i++) {
 				file = &(project.files[i]);
-				for (j = 0; j < file->num_sections; j++) {
+				for (int j = 0; j < file->num_sections; j++) {
 					if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
 					    (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
 					    (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
@@ -2475,7 +2454,7 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
 		         mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS) {
 			/* get selected crossing from list */
 			num_crossings = 0;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i= 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true) {
 					if (num_crossings == position_list[0] - 1) {
 						mbna_crossing_select = i;
@@ -2503,9 +2482,9 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
 			num_crossings = 0;
 			num_ties = 0;
 			found = false;
-			for (i = 0; i < project.num_crossings; i++) {
+			for (int i= 0; i < project.num_crossings; i++) {
 				if (do_check_crossing_listok(i) == true) {
-					for (j = 0; j < project.crossings[i].num_ties; j++) {
+					for (int j = 0; j < project.crossings[i].num_ties; j++) {
 						if (num_ties == position_list[0] - 1) {
 							mbna_crossing_select = i;
 							mbna_tie_select = j;
@@ -2540,7 +2519,9 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
                 strncpy(selected_item, tmp, STRING_MAX);
                 XtFree(tmp);
                 tmp = NULL;
-                nscan = sscanf(selected_item, "%d %d ", &i, &j);
+		int i;
+		int j;
+                const int nscan = sscanf(selected_item, "%d %d ", &i, &j);
                 if (nscan == 2 && i >= 0 && i < project.num_crossings
                     && do_check_crossing_listok(i) == true
                     && j >= 0 && j < project.crossings[i].num_ties) {
@@ -2631,10 +2612,9 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
 
 int do_check_crossing_listok(int icrossing) {
 	int use_status = false;
-	struct mbna_crossing *crossing;
 
 	/* get crossing */
-	crossing = &(project.crossings[icrossing]);
+	struct mbna_crossing *crossing = &(project.crossings[icrossing]);
 
 	/* check for list type */
 	if (icrossing == mbna_crossing_select) {
@@ -2699,16 +2679,12 @@ int do_check_crossing_listok(int icrossing) {
 /*--------------------------------------------------------------------*/
 
 int do_check_globaltie_listok(int ifile, int isection) {
-	int use_status = false;
-	struct mbna_file *file;
-	struct mbna_section *section;
-
 	/* get file and section */
-	file = &(project.files[ifile]);
-	section = &(file->sections[isection]);
+	struct mbna_file *file = &(project.files[ifile]);
+	struct mbna_section *section = &(file->sections[isection]);
 
 	/* if there is a global time check for view mode */
-	use_status = false;
+	int use_status = false;
 	if (section->global_tie_status != MBNA_TIE_NONE) {
 		if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
 		    (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
@@ -2731,9 +2707,9 @@ int do_check_globaltie_listok(int ifile, int isection) {
 void do_naverr_cont_expose(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 }
@@ -2743,9 +2719,9 @@ void do_naverr_cont_expose(Widget w, XtPointer client_data, XtPointer call_data)
 void do_naverr_corr_expose(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 }
@@ -2756,13 +2732,12 @@ void do_naverr_cont_input(Widget w, XtPointer client_data, XtPointer call_data) 
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
-	XEvent *event = acs->event;
-	double x1, x2, y1, y2;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* If there is input in the drawing area */
 	if (acs->reason == XmCR_INPUT) {
+		XEvent *event = acs->event;
+
 		/* Check for mouse pressed. */
 		if (event->xany.type == ButtonPress) {
 			/* If left mouse button is pushed then save position. */
@@ -2815,10 +2790,10 @@ void do_naverr_cont_input(Widget w, XtPointer client_data, XtPointer call_data) 
 				mbna_zoom_x2 = event->xbutton.x;
 				mbna_zoom_y2 = event->xbutton.y;
 
-				x1 = mbna_zoom_x1 / mbna_plotx_scale + mbna_plot_lon_min;
-				y1 = (cont_borders[3] - mbna_zoom_y1) / mbna_ploty_scale + mbna_plot_lat_min;
-				x2 = mbna_zoom_x2 / mbna_plotx_scale + mbna_plot_lon_min;
-				y2 = (cont_borders[3] - mbna_zoom_y2) / mbna_ploty_scale + mbna_plot_lat_min;
+				const double x1 = mbna_zoom_x1 / mbna_plotx_scale + mbna_plot_lon_min;
+				const double y1 = (cont_borders[3] - mbna_zoom_y1) / mbna_ploty_scale + mbna_plot_lat_min;
+				const double x2 = mbna_zoom_x2 / mbna_plotx_scale + mbna_plot_lon_min;
+				const double y2 = (cont_borders[3] - mbna_zoom_y2) / mbna_ploty_scale + mbna_plot_lat_min;
 
 				/* get new plot bounds */
 				mbna_plot_lon_min = MIN(x1, x2);
@@ -2871,13 +2846,12 @@ void do_naverr_corr_input(Widget w, XtPointer client_data, XtPointer call_data) 
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 
-	XEvent *event;
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
-	event = acs->event;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* If there is input in the drawing area */
 	if (acs->reason == XmCR_INPUT) {
+		XEvent *event = acs->event;
+
 		/* Check for mouse pressed. */
 		if (event->xany.type == ButtonPress) {
 			/* If left mouse button is pushed then save position. */
@@ -2934,13 +2908,12 @@ void do_naverr_zcorr_input(Widget w, XtPointer client_data, XtPointer call_data)
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 
-	XEvent *event;
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
-	event = acs->event;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* If there is input in the drawing area */
 	if (acs->reason == XmCR_INPUT) {
+		XEvent *event = acs->event;
+
 		/* Check for mouse pressed. */
 		if (event->xany.type == ButtonPress) {
 			/* If left mouse button is pushed then save position. */
@@ -3007,9 +2980,9 @@ void do_naverr_zcorr_input(Widget w, XtPointer client_data, XtPointer call_data)
 void do_naverr_previous(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_naverr_previous();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -3028,9 +3001,9 @@ void do_naverr_previous(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_naverr_next(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_naverr_next();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -3049,9 +3022,9 @@ void do_naverr_next(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_naverr_nextunset(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_naverr_nextunset();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -3070,9 +3043,9 @@ void do_naverr_nextunset(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_naverr_addtie(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_naverr_addtie();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -3094,9 +3067,9 @@ void do_naverr_addtie(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_naverr_deletetie(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_naverr_deletetie();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -3118,9 +3091,9 @@ void do_naverr_deletetie(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_naverr_selecttie(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_naverr_selecttie();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -3140,9 +3113,9 @@ void do_naverr_selecttie(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_naverr_unset(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_naverr_unset();
 	mbnavadjust_naverr_next();
@@ -3165,9 +3138,9 @@ void do_naverr_unset(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_naverr_setnone(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_naverr_skip();
 	mbnavadjust_naverr_nextunset();
@@ -3190,9 +3163,9 @@ void do_naverr_setnone(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_naverr_setoffset(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_naverr_save();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -3214,9 +3187,9 @@ void do_naverr_setoffset(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_naverr_resettie(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_naverr_resettie();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -3237,9 +3210,9 @@ void do_naverr_resettie(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_dismiss_naverr(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* unload loaded crossing */
 	if (mbna_naverr_load == true) {
@@ -3271,9 +3244,9 @@ void do_dismiss_naverr(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_naverr_fullsize(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* reset the plot bounds */
 	mbna_plot_lon_min = mbna_lon_min;
@@ -3290,9 +3263,9 @@ void do_naverr_fullsize(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_naverr_zerooffset(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* move offset */
 	mbna_offset_x = 0.0;
@@ -3313,9 +3286,9 @@ void do_naverr_zerooffset(Widget w, XtPointer client_data, XtPointer call_data) 
 void do_naverr_zerozoffset(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* move offset */
 	mbna_offset_z = 0.0;
@@ -3334,9 +3307,9 @@ void do_naverr_zerozoffset(Widget w, XtPointer client_data, XtPointer call_data)
 void do_naverr_applyzoffset(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* recalculate minimum misfit at current z offset */
 	mbnavadjust_get_misfitxy();
@@ -3358,9 +3331,9 @@ void do_naverr_applyzoffset(Widget w, XtPointer client_data, XtPointer call_data
 void do_naverr_minmisfit(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* move offset */
 	mbna_offset_x = mbna_minmisfit_x;
@@ -3389,9 +3362,9 @@ void do_naverr_minmisfit(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_naverr_minxymisfit(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* move offset */
 	mbna_offset_x = mbna_minmisfit_xh;
@@ -3416,9 +3389,9 @@ void do_naverr_minxymisfit(Widget w, XtPointer client_data, XtPointer call_data)
 void do_naverr_misfitcenter(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (XmToggleButtonGetState(toggleButton_misfitcenter_zero))
 		mbna_misfit_center = MBNA_MISFIT_ZEROCENTER;
@@ -3443,18 +3416,15 @@ void do_naverr_misfitcenter(Widget w, XtPointer client_data, XtPointer call_data
 void do_biases_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
-	struct mbna_file *file1;
-	struct mbna_file *file2;
-	int ivalue;
-	int isection;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* get file structures */
-	file1 = &(project.files[mbna_file_id_1]);
-	file2 = &(project.files[mbna_file_id_2]);
+	struct mbna_file *file1 = &(project.files[mbna_file_id_1]);
+	struct mbna_file *file2 = &(project.files[mbna_file_id_2]);
 
+	int ivalue;
 	XtVaGetValues(scale_biases_heading1, XmNvalue, &ivalue, NULL);
 	file1->heading_bias = 0.1 * ivalue;
 
@@ -3468,10 +3438,10 @@ void do_biases_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 	file2->roll_bias = 0.1 * ivalue;
 
 	/* set contours out of date */
-	for (isection = 0; isection < file1->num_sections; isection++) {
+	for (int isection = 0; isection < file1->num_sections; isection++) {
 		file1->sections[isection].contoursuptodate = false;
 	}
-	for (isection = 0; isection < file2->num_sections; isection++) {
+	for (int isection = 0; isection < file2->num_sections; isection++) {
 		file2->sections[isection].contoursuptodate = false;
 	}
 
@@ -3492,29 +3462,25 @@ void do_biases_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_biases_applyall(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
-	double heading_bias;
-	double roll_bias;
-	struct mbna_file *file;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int ivalue;
-	int ifile, isection;
 
 	/* get bias values */
 	XtVaGetValues(scale_biases_heading1, XmNvalue, &ivalue, NULL);
-	heading_bias = 0.1 * ivalue;
+	const double heading_bias = 0.1 * ivalue;
 	XtVaGetValues(scale_biases_roll1, XmNvalue, &ivalue, NULL);
-	roll_bias = 0.1 * ivalue;
+	const double roll_bias = 0.1 * ivalue;
 
 	/* loop over files */
-	for (ifile = 0; ifile < project.num_files; ifile++) {
-		file = &(project.files[ifile]);
+	for (int ifile = 0; ifile < project.num_files; ifile++) {
+		struct mbna_file *file = &(project.files[ifile]);
 		file->heading_bias = heading_bias;
 		file->roll_bias = roll_bias;
 
 		/* set contours out of date */
-		for (isection = 0; isection < file->num_sections; isection++) {
+		for (int isection = 0; isection < file->num_sections; isection++) {
 			file->sections[isection].contoursuptodate = false;
 		}
 	}
@@ -3536,18 +3502,16 @@ void do_biases_applyall(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_biases_init(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
-	struct mbna_file *file1;
-	struct mbna_file *file2;
-	char value_text[128];
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* get file structures */
-	file1 = &(project.files[mbna_file_id_1]);
-	file2 = &(project.files[mbna_file_id_2]);
+	struct mbna_file *file1 = &(project.files[mbna_file_id_1]);
+	struct mbna_file *file2 = &(project.files[mbna_file_id_2]);
 
 	/* set biases label */
+	char value_text[128];
 	sprintf(value_text, ":::t\"Section ID\'s (file:section):\":t\"  Section 1: %4.4d:%4.4d\"\"  Section 2: %4.4d:%4.4d\"",
 	        mbna_file_id_1, mbna_section_1, mbna_file_id_2, mbna_section_2);
 	set_label_multiline_string(label_biases_files, value_text);
@@ -3582,14 +3546,14 @@ void do_biases_init(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_biases_toggle(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
-	int ivalue;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (XmToggleButtonGetState(toggleButton_biases_together)) {
 		if (mbna_bias_mode == MBNA_BIAS_DIFFERENT) {
 			mbna_bias_mode = MBNA_BIAS_SAME;
+			int ivalue;
 			XtVaGetValues(scale_biases_heading1, XmNvalue, &ivalue, NULL);
 			XtVaSetValues(scale_biases_heading2, XmNvalue, ivalue, XmNsensitive, False, NULL);
 			XtVaGetValues(scale_biases_roll1, XmNvalue, &ivalue, NULL);
@@ -3612,12 +3576,12 @@ void do_biases_toggle(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_biases_heading(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
-	int ivalue;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbna_bias_mode == MBNA_BIAS_SAME) {
+		int ivalue;
 		XtVaGetValues(scale_biases_heading1, XmNvalue, &ivalue, NULL);
 		XtVaSetValues(scale_biases_heading2, XmNvalue, ivalue, XmNsensitive, False, NULL);
 	}
@@ -3628,12 +3592,12 @@ void do_biases_heading(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_biases_roll(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
-	int ivalue;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbna_bias_mode == MBNA_BIAS_SAME) {
+		int ivalue;
 		XtVaGetValues(scale_biases_roll1, XmNvalue, &ivalue, NULL);
 		XtVaSetValues(scale_biases_roll2, XmNvalue, ivalue, XmNsensitive, False, NULL);
 	}
@@ -3644,16 +3608,15 @@ void do_biases_roll(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_controls_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
-	int ivalue;
-	int error = MB_ERROR_NO_ERROR;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* get value of decimation slider */
 	XtVaGetValues(scale_controls_decimation, XmNvalue, &project.decimation, NULL);
 
 	/* get values of section length slider */
+	int ivalue;
 	XtVaGetValues(scale_controls_sectionlength, XmNvalue, &ivalue, NULL);
 	project.section_length = ((double)ivalue) / 100.0;
 
@@ -3687,6 +3650,7 @@ void do_controls_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 		project.files[mbna_file_id_2].sections[mbna_section_2].contoursuptodate = false;
 
 	mbnavadjust_crossing_replot();
+	int error = MB_ERROR_NO_ERROR;
 	mbnavadjust_write_project(mbna_verbose, &project, &error);
 	mbnavadjust_get_misfit();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -3704,20 +3668,21 @@ void do_controls_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_scale_controls_sectionlength(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*--------------------------------------------------------------------*/
 void do_scale_controls_sectionsoundings(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int ivalue;
-	int imin, imax;
+	int imin;
+	int imax;
 
 	/* get values of section soundings slider */
 	XtVaGetValues(scale_controls_sectionsoundings, XmNvalue, &ivalue, XmNminimum, &imin, XmNmaximum, &imax, NULL);
@@ -3738,18 +3703,18 @@ void do_scale_controls_sectionsoundings(Widget w, XtPointer client_data, XtPoint
 void do_scale_controls_decimation(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*--------------------------------------------------------------------*/
 void do_scale_contourinterval(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int ivalue;
 	int imax;
 
@@ -3780,9 +3745,9 @@ void do_scale_contourinterval(Widget w, XtPointer client_data, XtPointer call_da
 void do_scale_controls_tickinterval(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int ivalue;
 	int imax;
 
@@ -3813,9 +3778,9 @@ void do_scale_controls_tickinterval(Widget w, XtPointer client_data, XtPointer c
 void do_controls_scale_colorinterval(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int ivalue;
 	int imax;
 
@@ -3846,27 +3811,27 @@ void do_controls_scale_colorinterval(Widget w, XtPointer client_data, XtPointer 
 void do_scale_controls_smoothing(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 /*--------------------------------------------------------------------*/
 
 void do_scale_controls_zoffset(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*--------------------------------------------------------------------*/
 void do_file_new(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	fprintf(stderr, "do_file_new\n");
 }
 
@@ -3874,9 +3839,9 @@ void do_file_new(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_file_open(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	fprintf(stderr, "do_file_open\n");
 }
 
@@ -3884,9 +3849,9 @@ void do_file_open(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_file_importdata(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	fprintf(stderr, "do_file_importdata\n");
 }
 
@@ -3894,9 +3859,9 @@ void do_file_importdata(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_file_close(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int error = MB_ERROR_NO_ERROR;
 
 	mbnavadjust_close_project(mbna_verbose, &project, &error);
@@ -3913,9 +3878,9 @@ void do_file_close(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* unload loaded crossing */
 	if (mbna_naverr_load == true) {
@@ -3937,9 +3902,9 @@ void do_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_fileselection_mode(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	file_mode = (size_t)client_data;
 
@@ -3971,13 +3936,12 @@ void do_fileselection_mode(Widget w, XtPointer client_data, XtPointer call_data)
 void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	char ifile[STRING_MAX];
-	char format_text[40];
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* get input filename */
+	char ifile[STRING_MAX];
 	get_text_string(fileSelectionBox_text, ifile);
 
 	/* desl with selection */
@@ -3990,6 +3954,7 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 		do_update_status();
 	}
 	else if (file_mode == FILE_MODE_IMPORT) {
+		char format_text[40];
 		get_text_string(textField_format, format_text);
 		sscanf(format_text, "%d", &format);
 		status = mbnavadjust_import_data(ifile, format);
@@ -4016,9 +3981,9 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_fileselection_cancel(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	file_mode = FILE_MODE_NONE;
 }
@@ -4028,9 +3993,9 @@ void do_fileselection_cancel(Widget w, XtPointer client_data, XtPointer call_dat
 void do_view_showallsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_mode != MBNA_VIEW_MODE_ALL) {
         project.modelplot_uptodate = false;
@@ -4052,9 +4017,9 @@ void do_view_showallsurveys(Widget w, XtPointer client_data, XtPointer call_data
 void do_view_showselectedsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_mode != MBNA_VIEW_MODE_SURVEY) {
         project.modelplot_uptodate = false;
@@ -4076,9 +4041,9 @@ void do_view_showselectedsurveys(Widget w, XtPointer client_data, XtPointer call
 void do_view_showselectedblock(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_mode != MBNA_VIEW_MODE_BLOCK) {
         project.modelplot_uptodate = false;
@@ -4100,9 +4065,9 @@ void do_view_showselectedblock(Widget w, XtPointer client_data, XtPointer call_d
 void do_view_showselectedfile(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_mode != MBNA_VIEW_MODE_FILE) {
         project.modelplot_uptodate = false;
@@ -4124,9 +4089,9 @@ void do_view_showselectedfile(Widget w, XtPointer client_data, XtPointer call_da
 void do_view_showwithselectedsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_mode != MBNA_VIEW_MODE_WITHSURVEY) {
         project.modelplot_uptodate = false;
@@ -4148,9 +4113,9 @@ void do_view_showwithselectedsurveys(Widget w, XtPointer client_data, XtPointer 
 void do_view_showwithselectedfile(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_mode != MBNA_VIEW_MODE_WITHFILE) {
         project.modelplot_uptodate = false;
@@ -4172,9 +4137,9 @@ void do_view_showwithselectedfile(Widget w, XtPointer client_data, XtPointer cal
 void do_view_showselectedsection(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_mode != MBNA_VIEW_MODE_WITHSECTION) {
         project.modelplot_uptodate = false;
@@ -4196,9 +4161,9 @@ void do_view_showselectedsection(Widget w, XtPointer client_data, XtPointer call
 void do_view_showsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_list != MBNA_VIEW_LIST_SURVEYS) {
         project.modelplot_uptodate = false;
@@ -4220,9 +4185,9 @@ void do_view_showsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_view_showblocks(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_list != MBNA_VIEW_LIST_BLOCKS) {
         project.modelplot_uptodate = false;
@@ -4243,9 +4208,9 @@ void do_view_showblocks(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_view_showdata(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_list != MBNA_VIEW_LIST_FILES) {
         project.modelplot_uptodate = false;
@@ -4266,9 +4231,9 @@ void do_view_showdata(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_view_showsections(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_list != MBNA_VIEW_LIST_FILESECTIONS) {
         project.modelplot_uptodate = false;
@@ -4289,9 +4254,9 @@ void do_view_showsections(Widget w, XtPointer client_data, XtPointer call_data) 
 void do_view_showcrossings(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_list != MBNA_VIEW_LIST_CROSSINGS) {
         project.modelplot_uptodate = false;
@@ -4312,9 +4277,9 @@ void do_view_showcrossings(Widget w, XtPointer client_data, XtPointer call_data)
 void do_view_showmediocrecrossings(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_list != MBNA_VIEW_LIST_MEDIOCRECROSSINGS) {
         project.modelplot_uptodate = false;
@@ -4335,9 +4300,9 @@ void do_view_showmediocrecrossings(Widget w, XtPointer client_data, XtPointer ca
 void do_view_showgoodcrossings(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_list != MBNA_VIEW_LIST_GOODCROSSINGS) {
         project.modelplot_uptodate = false;
@@ -4358,9 +4323,9 @@ void do_view_showgoodcrossings(Widget w, XtPointer client_data, XtPointer call_d
 void do_view_showbettercrossings(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
     if (mbna_view_list != MBNA_VIEW_LIST_BETTERCROSSINGS) {
         project.modelplot_uptodate = false;
@@ -4381,13 +4346,13 @@ void do_view_showbettercrossings(Widget w, XtPointer client_data, XtPointer call
 void do_view_showtruecrossings(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-    if (mbna_view_list != MBNA_VIEW_LIST_TRUECROSSINGS) {
-        project.modelplot_uptodate = false;
-    }
+	if (mbna_view_list != MBNA_VIEW_LIST_TRUECROSSINGS) {
+        	project.modelplot_uptodate = false;
+	}
 	mbna_view_list = MBNA_VIEW_LIST_TRUECROSSINGS;
 	do_update_status();
 	if (project.modelplot == true) {
@@ -4404,13 +4369,13 @@ void do_view_showtruecrossings(Widget w, XtPointer client_data, XtPointer call_d
 void do_view_showties(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-    if (mbna_view_list != MBNA_VIEW_LIST_TIES) {
-        project.modelplot_uptodate = false;
-    }
+	if (mbna_view_list != MBNA_VIEW_LIST_TIES) {
+	        project.modelplot_uptodate = false;
+	}
 	mbna_view_list = MBNA_VIEW_LIST_TIES;
 	do_update_status();
 	do_update_status();
@@ -4428,13 +4393,13 @@ void do_view_showties(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_view_showtiessorted(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-    if (mbna_view_list != MBNA_VIEW_LIST_TIESSORTED) {
-        project.modelplot_uptodate = false;
-    }
+	if (mbna_view_list != MBNA_VIEW_LIST_TIESSORTED) {
+	        project.modelplot_uptodate = false;
+	}
 	mbna_view_list = MBNA_VIEW_LIST_TIESSORTED;
 	do_update_status();
 	do_update_status();
@@ -4453,9 +4418,9 @@ void do_view_showtiessorted(Widget w, XtPointer client_data, XtPointer call_data
 void do_action_poornav(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_poornav_file();
 	do_update_status();
@@ -4466,9 +4431,9 @@ void do_action_poornav(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_action_goodnav(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_goodnav_file();
 	do_update_status();
@@ -4479,9 +4444,9 @@ void do_action_goodnav(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_action_fixednav(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_fixednav_file();
 	do_update_status();
@@ -4491,9 +4456,9 @@ void do_action_fixednav(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_action_fixedxynav(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_fixedxynav_file();
 	do_update_status();
@@ -4503,9 +4468,9 @@ void do_action_fixedxynav(Widget w, XtPointer client_data, XtPointer call_data) 
 void do_action_fixedznav(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_fixedznav_file();
 	do_update_status();
@@ -4515,9 +4480,9 @@ void do_action_fixedznav(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_action_tie_xy(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_set_tie_xy();
 	do_update_status();
@@ -4533,9 +4498,9 @@ void do_action_tie_xy(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_action_z(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_set_tie_z();
 	do_update_status();
@@ -4569,9 +4534,9 @@ void do_action_tie_xyz(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_action_autopick(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbna_status = MBNA_STATUS_AUTOPICK;
 	mbnavadjust_autopick(true);
@@ -4591,9 +4556,9 @@ void do_action_autopick(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_action_autopickhorizontal(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbna_status = MBNA_STATUS_AUTOPICK;
 	mbnavadjust_autopick(false);
@@ -4613,9 +4578,9 @@ void do_action_autopickhorizontal(Widget w, XtPointer client_data, XtPointer cal
 void do_action_autosetsvsvertical(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbna_status = MBNA_STATUS_AUTOPICK;
 	mbnavadjust_autosetsvsvertical();
@@ -4636,9 +4601,9 @@ void do_action_autosetsvsvertical(Widget w, XtPointer client_data, XtPointer cal
 void do_action_analyzecrossings(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	if (project.modelplot == true) {
 		do_update_modelplot_status();
 		mbnavadjust_modelplot_plot(__FILE__, __LINE__);
@@ -4654,9 +4619,9 @@ void do_action_analyzecrossings(Widget w, XtPointer client_data, XtPointer call_
 void do_action_checknewcrossings(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_findcrossings();
 	do_update_status();
@@ -4673,9 +4638,9 @@ void do_action_checknewcrossings(Widget w, XtPointer client_data, XtPointer call
 void do_zerozoffsets(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_zerozoffsets();
 	do_update_status();
@@ -4692,9 +4657,9 @@ void do_zerozoffsets(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_action_invertnav(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbna_status = MBNA_STATUS_NAVSOLVE;
 	mbnavadjust_invertnav();
@@ -4715,9 +4680,9 @@ void do_action_invertnav(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_action_updategrids(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbna_status = MBNA_STATUS_NAVSOLVE;
 	mbnavadjust_updategrid();
@@ -4738,9 +4703,9 @@ void do_action_updategrids(Widget w, XtPointer client_data, XtPointer call_data)
 void do_apply_nav(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	mbnavadjust_applynav();
 	do_update_status();
 }
@@ -4750,13 +4715,13 @@ void do_apply_nav(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_modelplot_show(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
-	Window modp_xid;
-	Dimension width, height;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* get drawingArea size */
+	Dimension width;
+	Dimension height;
 	XtVaGetValues(drawingArea_modelplot, XmNwidth, &width, XmNheight, &height, NULL);
 	mbna_modelplot_width = width;
 	mbna_modelplot_height = height;
@@ -4766,7 +4731,7 @@ void do_modelplot_show(Widget w, XtPointer client_data, XtPointer call_data) {
 	modp_borders[3] = mbna_modelplot_height - 1;
 
 	/* Setup just the "canvas" part of the screen. */
-	modp_xid = XtWindow(drawingArea_modelplot);
+	Window modp_xid = XtWindow(drawingArea_modelplot);
 
 	/* Setup the "graphics Context" for just the "canvas" */
 	xgcv.background = WhitePixelOfScreen(DefaultScreenOfDisplay(display));
@@ -4796,7 +4761,7 @@ void do_modelplot_show(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	/* set status flag */
 	project.modelplot = true;
-    project.modelplot_uptodate = false;
+	project.modelplot_uptodate = false;
 	mbna_modelplot_zoom = false;
 	mbna_modelplot_zoom_x1 = 0;
 	mbna_modelplot_zoom_x2 = 0;
@@ -4817,9 +4782,9 @@ void do_modelplot_show(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_modelplot_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* deallocate graphics */
 	project.modelplot = false;
@@ -4834,13 +4799,13 @@ void do_modelplot_resize(Widget w, XtPointer client_data, XEvent *event, Boolean
 	(void)client_data;  // Unused parameter
 	(void)unused;  // Unused parameter
 
-	Window modp_xid;
 	XConfigureEvent *cevent = (XConfigureEvent *)event;
-	Dimension width, height;
 
 	/* do this only if a resize event happens */
 	if (cevent->type == ConfigureNotify) {
 		/* get new shell size */
+		Dimension width;
+		Dimension height;
 		XtVaGetValues(bulletinBoard_modelplot, XmNwidth, &width, XmNheight, &height, NULL);
 
 		/* do this only if the shell was REALLY resized and not just moved */
@@ -4867,7 +4832,7 @@ void do_modelplot_resize(Widget w, XtPointer client_data, XEvent *event, Boolean
 			modp_borders[3] = mbna_modelplot_height - 1;
 
 			/* Setup just the "canvas" part of the screen. */
-			modp_xid = XtWindow(drawingArea_modelplot);
+			Window modp_xid = XtWindow(drawingArea_modelplot);
 
 			/* Setup the "graphics Context" for just the "canvas" */
 			xgcv.background = WhitePixelOfScreen(DefaultScreenOfDisplay(display));
@@ -4896,7 +4861,7 @@ void do_modelplot_resize(Widget w, XtPointer client_data, XEvent *event, Boolean
 			status = mbnavadjust_set_modelplot_graphics(modp_xgid, modp_borders);
 
 			/* set to replot the model after the final resize when the expose events start */
-            project.modelplot_uptodate = false;
+			project.modelplot_uptodate = false;
 		}
 	}
 }
@@ -4906,9 +4871,9 @@ void do_modelplot_resize(Widget w, XtPointer client_data, XEvent *event, Boolean
 void do_modelplot_fullsize(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* replot model */
 	mbna_modelplot_zoom_x1 = 0;
@@ -4932,7 +4897,7 @@ void do_modelplot_fullsize(Widget w, XtPointer client_data, XtPointer call_data)
 		mbna_block_select2 = MBNA_SELECT_NONE;
 	}
 
-    project.modelplot_uptodate = false;
+	project.modelplot_uptodate = false;
 	mbnavadjust_modelplot_setzoom();
 	mbnavadjust_modelplot_plot(__FILE__, __LINE__);
 	do_update_modelplot_status();
@@ -4944,12 +4909,12 @@ void do_modelplot_input(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
-	XEvent *event = acs->event;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* If there is input in the drawing area */
 	if (acs->reason == XmCR_INPUT) {
+		XEvent *event = acs->event;
+
 		/* Check for mouse pressed. */
 		if (event->xany.type == ButtonPress) {
 			/* If left mouse button is pushed */
@@ -5068,15 +5033,15 @@ void do_modelplot_input(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_modelplot_expose(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* update model status */
 	do_update_modelplot_status();
 
 	/* replot the model */
-    //project.modelplot_uptodate = false;
+	// project.modelplot_uptodate = false;
 	mbnavadjust_modelplot_plot(__FILE__, __LINE__);
 }
 
@@ -5085,14 +5050,14 @@ void do_modelplot_expose(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_modelplot_tieoffsets(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	// fprintf(stderr,"Called do_modelplot_tieoffsets %d\n",XmToggleButtonGetState(toggleButton_modelplot_tieoffsets));
 
 	if (XmToggleButtonGetState(toggleButton_modelplot_tieoffsets)) {
 		project.modelplot_style = MBNA_MODELPLOT_TIEOFFSETS;
-        project.modelplot_uptodate = false;
+		project.modelplot_uptodate = false;
 
 		/* update model status */
 		do_update_modelplot_status();
@@ -5107,14 +5072,14 @@ void do_modelplot_tieoffsets(Widget w, XtPointer client_data, XtPointer call_dat
 void do_modelplot_perturbation(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	// fprintf(stderr,"Called do_modelplot_perturbation %d\n",XmToggleButtonGetState(toggleButton_modelplot_perturbation));
 
 	if (XmToggleButtonGetState(toggleButton_modelplot_perturbation)) {
 		project.modelplot_style = MBNA_MODELPLOT_PERTURBATION;
-        project.modelplot_uptodate = false;
+		project.modelplot_uptodate = false;
 
 		/* update model status */
 		do_update_modelplot_status();
@@ -5129,14 +5094,14 @@ void do_modelplot_perturbation(Widget w, XtPointer client_data, XtPointer call_d
 void do_modelplot_timeseries(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	// fprintf(stderr,"Called do_modelplot_timeseries %d\n",XmToggleButtonGetState(toggleButton_modelplot_timeseries));
 
 	if (XmToggleButtonGetState(toggleButton_modelplot_timeseries)) {
 		project.modelplot_style = MBNA_MODELPLOT_TIMESERIES;
-        project.modelplot_uptodate = false;
+		project.modelplot_uptodate = false;
 
 		/* update model status */
 		do_update_modelplot_status();
@@ -5151,9 +5116,9 @@ void do_modelplot_timeseries(Widget w, XtPointer client_data, XtPointer call_dat
 void do_modelplot_clearblock(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	/* fprintf(stderr,"Called do_modelplot_clearblock\n"); */
 
 	mbnavadjust_modelplot_clearblock();
@@ -5175,10 +5140,11 @@ void do_modelplot_clearblock(Widget w, XtPointer client_data, XtPointer call_dat
 /*--------------------------------------------------------------------*/
 
 void do_visualize(Widget w, XtPointer client_data, XtPointer call_data) {
-	(void) w;
-	(void) client_data;
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_open_visualization(MBNA_GRID_ADJUSTED);
 }
@@ -5188,9 +5154,7 @@ void do_visualize(Widget w, XtPointer client_data, XtPointer call_data) {
 int do_visualize_dismiss_notify(size_t instance) {
 	(void)instance;  // Unused parameter
 
-	int status;
-
-	status = mbnavadjust_dismiss_visualization();
+	const int status = mbnavadjust_dismiss_visualization();
 
 	do_visualize_sensitivity();
 
@@ -5209,13 +5173,6 @@ void do_visualize_sensitivity(void) {
 /*--------------------------------------------------------------------*/
 
 void do_pickroute_notify(size_t instance) {
-	int status = MB_SUCCESS;
-	int error = MB_ERROR_NO_ERROR;
-	struct mbview_shareddata_struct *shareddata;
-	struct mbview_route_struct *route;
-	int icrossing, itie, ifile1, isection1, isnav1, ifile2, isection2, isnav2;
-
-	/* print input debug statements */
 	if (mbna_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5225,10 +5182,21 @@ void do_pickroute_notify(size_t instance) {
 	if (mbna_verbose > 0)
 		fprintf(stderr, "do_pickroute_notify:%zu\n", instance);
 
+	int error = MB_ERROR_NO_ERROR;
+	struct mbview_shareddata_struct *shareddata;
 	/* get selected route and translate to selected crossing */
-	status = mbview_getsharedptr(mbna_verbose, &shareddata, &error);
+	int status = mbview_getsharedptr(mbna_verbose, &shareddata, &error);
+
 	if (shareddata->route_selected != MBV_SELECT_NONE) {
-		route = &shareddata->routes[shareddata->route_selected];
+		struct mbview_route_struct *route = &shareddata->routes[shareddata->route_selected];
+		int icrossing;
+		int itie;
+		int ifile1;
+		int isection1;
+		int isnav1;
+		int ifile2;
+		int isection2;
+		int isnav2;
 		sscanf(route->name, "%d:%d %d:%d:%d %d:%d:%d", &icrossing, &itie, &ifile1, &isection1, &isnav1, &ifile2, &isection2,
 		       &isnav2);
 
@@ -5271,12 +5239,6 @@ void do_pickroute_notify(size_t instance) {
 /*--------------------------------------------------------------------*/
 
 void do_picknav_notify(size_t instance) {
-	int status = MB_SUCCESS;
-	int error = MB_ERROR_NO_ERROR;
-	struct mbview_shareddata_struct *shareddata;
-	struct mbview_nav_struct *nav1, *nav2;
-	int ifile1, isection1, ifile2, isection2;
-
 	/* print input debug statements */
 	if (mbna_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5284,8 +5246,12 @@ void do_picknav_notify(size_t instance) {
 		fprintf(stderr, "dbg2       instance:    %zu\n", instance);
 	}
 
+	// int status = MB_SUCCESS;
+	int error = MB_ERROR_NO_ERROR;
+	struct mbview_shareddata_struct *shareddata;
+
 	/* get shared data */
-	status = mbview_getsharedptr(mbna_verbose, &shareddata, &error);
+	int status = mbview_getsharedptr(mbna_verbose, &shareddata, &error);
 
 	// fprintf(stderr,"\n*************\ndo_picknav_notify:%zu  selected: %d %d  navadjust: %d %d\n",
 	// instance,shareddata->nav_selected[0],shareddata->nav_selected[1],
@@ -5319,8 +5285,14 @@ void do_picknav_notify(size_t instance) {
 	/* get selected navigation and translate to selected crossing */
 	if (shareddata->nav_selected_mbnavadjust[0] != MBV_SELECT_NONE &&
 	    shareddata->nav_selected_mbnavadjust[1] != MBV_SELECT_NONE) {
-		nav1 = (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[0]];
-		nav2 = (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[1]];
+		struct mbview_nav_struct *nav1 =
+			(struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[0]];
+		struct mbview_nav_struct *nav2 =
+			(struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[1]];
+		int ifile1;
+		int isection1;
+		int ifile2;
+		int isection2;
 		sscanf(nav1->name, "%d:%d", &ifile1, &isection1);
 		sscanf(nav2->name, "%d:%d", &ifile2, &isection2);
 		// fprintf(stderr,"do_picknav_notify: nav1->name:%s   nav2->name:%s\n",nav1->name,nav2->name);
@@ -5354,13 +5326,11 @@ void do_picknav_notify(size_t instance) {
 void do_mbnavadjust_addcrossing(Widget w, XtPointer client, XtPointer call) {
 	(void)w;  // Unused parameter
 	(void)client;  // Unused parameter
+	(void)call;  // Unused parameter
 
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call;
 	int error;
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call;
 	struct mbview_shareddata_struct *shareddata;
-	struct mbview_nav_struct *nav1, *nav2;
-	int ifile1, isection1, ifile2, isection2;
 
 	/* get shared data */
 	status = mbview_getsharedptr(mbna_verbose, &shareddata, &error);
@@ -5375,8 +5345,14 @@ void do_mbnavadjust_addcrossing(Widget w, XtPointer client, XtPointer call) {
 	    shareddata->nav_selected_mbnavadjust[1] != MBNA_SELECT_NONE &&
 	    shareddata->nav_selected_mbnavadjust[0] != shareddata->nav_selected_mbnavadjust[1]) {
 		/* add and select a new crossing */
-		nav1 = (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[0]];
-		nav2 = (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[1]];
+		struct mbview_nav_struct *nav1 =
+			(struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[0]];
+		struct mbview_nav_struct *nav2 =
+			(struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[1]];
+		int ifile1;
+		int isection1;
+		int ifile2;
+		int isection2;
 		sscanf(nav1->name, "%d:%d", &ifile1, &isection1);
 		sscanf(nav2->name, "%d:%d", &ifile2, &isection2);
 		status = mbnavadjust_addcrossing(ifile1, isection1, ifile2, isection2);
@@ -5389,7 +5365,7 @@ void do_mbnavadjust_addcrossing(Widget w, XtPointer client, XtPointer call) {
 			do_update_status();
 		}
 		if (project.modelplot == true) {
-            project.modelplot_uptodate = false;
+		        project.modelplot_uptodate = false;
 			do_update_modelplot_status();
 			mbnavadjust_modelplot_plot(__FILE__, __LINE__);
 		}
@@ -5403,23 +5379,22 @@ void do_mbnavadjust_addcrossing(Widget w, XtPointer client, XtPointer call) {
 void do_fileselection_list(Widget w, XtPointer client, XtPointer call) {
 	(void)w;  // Unused parameter
 	(void)client;  // Unused parameter
+	(void)call;  // Unused parameter
 
-	int error;
-	char fileroot[MB_PATH_MAXLINE];
-	int form;
-	char value_text[128];
-
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call;
 
 	/* get selected text */
 	get_text_string(fileSelectionBox_text, string);
 
 	/* get output file */
 	if ((int)strlen(string) > 0) {
+		int error;
+		char fileroot[MB_PATH_MAXLINE];
+		int form;
 		status = mb_get_format(mbna_verbose, string, fileroot, &form, &error);
 		if (status == MB_SUCCESS) {
 			format = form;
+			char value_text[128];
 			sprintf(value_text, "%d", format);
 			XmTextFieldSetString(textField_format, value_text);
 		}
@@ -5429,21 +5404,19 @@ void do_fileselection_list(Widget w, XtPointer client, XtPointer call) {
 /*--------------------------------------------------------------------*/
 
 int do_wait_until_viewed(XtAppContext app) {
-	Widget topshell;
-	Window topwindow;
-	XWindowAttributes xwa;
-	XEvent event;
-
-	/* set app_context */
 	app_context = app;
 
 	/* find the top level shell */
+	Widget topshell;
 	for (topshell = scrolledWindow_datalist; !XtIsTopLevelShell(topshell); topshell = XtParent(topshell))
 		;
 
 	/* keep processing events until it is viewed */
 	if (XtIsRealized(topshell)) {
-		topwindow = XtWindow(topshell);
+		Window topwindow = XtWindow(topshell);
+
+		XWindowAttributes xwa;
+		XEvent event;
 
 		/* wait for the window to be mapped */
 		while (XGetWindowAttributes(XtDisplay(form_mbnavadjust), topwindow, &xwa) && xwa.map_state != IsViewable) {
@@ -5460,11 +5433,6 @@ int do_wait_until_viewed(XtAppContext app) {
 /*--------------------------------------------------------------------*/
 
 int do_message_on(char *message) {
-	Widget diashell, topshell;
-	Window diawindow, topwindow;
-	XWindowAttributes xwa;
-	XEvent event;
-
 	if (mbna_verbose >= 1)
 		fprintf(stderr, "%s\n", message);
 
@@ -5472,13 +5440,20 @@ int do_message_on(char *message) {
 	XtManageChild(bulletinBoard_message);
 
 	/* force the label to be visible */
+	Widget diashell;
 	for (diashell = label_message; !XtIsShell(diashell); diashell = XtParent(diashell))
 		;
+
+	Widget topshell;
 	for (topshell = diashell; !XtIsTopLevelShell(topshell); topshell = XtParent(topshell))
 		;
+
 	if (XtIsRealized(diashell) && XtIsRealized(topshell)) {
-		diawindow = XtWindow(diashell);
-		topwindow = XtWindow(topshell);
+		Window diawindow = XtWindow(diashell);
+		Window topwindow = XtWindow(topshell);
+
+		XWindowAttributes xwa;
+		XEvent event;
 
 		/* wait for the dialog to be mapped */
 		while (XGetWindowAttributes(XtDisplay(bulletinBoard_message), diawindow, &xwa) && xwa.map_state != IsViewable) {
@@ -5520,13 +5495,8 @@ int do_message_off() {
 /*--------------------------------------------------------------------*/
 
 int do_info_add(char *info, int timetag) {
-	int pos;
-	char tag[STRING_MAX];
-	time_t right_now;
-	char date[32], user[128], *user_ptr, host[128];
-
 	/* reposition to end of text */
-	pos = XmTextGetLastPosition(text_messages);
+	int pos = XmTextGetLastPosition(text_messages);
 	XmTextSetInsertionPosition(text_messages, pos);
 
 	/* add text */
@@ -5539,16 +5509,21 @@ int do_info_add(char *info, int timetag) {
 
 	/* put time tag in if requested */
 	if (timetag == true) {
-		right_now = time((time_t *)0);
+		time_t right_now = time((time_t *)0);
+		char date[32];
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
+		const char *user_ptr = getenv("USER");
+		if (user_ptr == NULL)
 			user_ptr = getenv("LOGNAME");
+		char user[128];
 		if (user_ptr != NULL)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
+		char host[128];
 		gethostname(host, 128);
+		char tag[STRING_MAX];
 		sprintf(tag, " > User <%s> on cpu <%s> at <%s>\n", user, host, date);
 		pos = XmTextGetLastPosition(text_messages);
 		XmTextSetInsertionPosition(text_messages, pos);
@@ -5589,9 +5564,7 @@ void do_bell(int length) { XBell(display, length); }
 /*--------------------------------------------------------------------*/
 
 void set_label_string(Widget w, String str) {
-	XmString xstr;
-
-	xstr = XmStringCreateLocalized(str);
+	XmString xstr = XmStringCreateLocalized(str);
 	if (xstr != NULL)
 		XtVaSetValues(w, XmNlabelString, xstr, NULL);
 	else
@@ -5604,10 +5577,9 @@ void set_label_string(Widget w, String str) {
 /*--------------------------------------------------------------------*/
 
 void set_label_multiline_string(Widget w, String str) {
-	XmString xstr;
 	Boolean argok;
 
-	xstr = (XtPointer)BX_CONVERT(w, str, XmRXmString, 0, &argok);
+	XmString xstr = (XtPointer)BX_CONVERT(w, str, XmRXmString, 0, &argok);
 	if (xstr != NULL && argok)
 		XtVaSetValues(w, XmNlabelString, xstr, NULL);
 	else
@@ -5620,9 +5592,7 @@ void set_label_multiline_string(Widget w, String str) {
 /*--------------------------------------------------------------------*/
 
 void get_text_string(Widget w, String str) {
-	char *str_tmp;
-
-	str_tmp = (char *)XmTextGetString(w);
+	char *str_tmp = (char *)XmTextGetString(w);
 	strcpy(str, str_tmp);
 	XtFree(str_tmp);
 }
