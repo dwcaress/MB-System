@@ -1,3 +1,7 @@
+// Copyright 2020 Google Inc. All Rights Reserved.
+//
+// See README file for copying and redistribution conditions.
+
 #include <cstdio>
 #include <cstdlib>
 
