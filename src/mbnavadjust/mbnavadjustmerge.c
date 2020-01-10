@@ -18,28 +18,23 @@
  *
  * Author:  D. W. Caress
  * Date:  April 14, 2014
- *
- *
  */
 
-/* standard include files */
+#include <getopt.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
+#include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_process.h"
-#include "mb_aux.h"
+#include "mb_status.h"
 #include "mbnavadjust_io.h"
 
-/* local defines */
 #define MBNAVADJUSTMERGE_MODE_NONE 0
 #define MBNAVADJUSTMERGE_MODE_ADD 1
 #define MBNAVADJUSTMERGE_MODE_MERGE 2
