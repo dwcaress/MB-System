@@ -22,6 +22,10 @@ TESTS += mb_format_test
 check_PROGRAMS += mb_format_test
 mb_format_test_SOURCES = mb_format_test.cc
 
+TESTS += mb_mem_test
+check_PROGRAMS += mb_mem_test
+mb_mem_test_SOURCES = mb_mem_test.cc
+
 TESTS += mb_read_init_test
 check_PROGRAMS += mb_read_init_test
 mb_read_init_test_SOURCES = mb_read_init_test.cc
