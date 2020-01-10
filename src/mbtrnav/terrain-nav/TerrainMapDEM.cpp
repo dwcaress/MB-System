@@ -333,7 +333,7 @@ void
 TerrainMapDEM::
 interpolateDepth(double xi, double yi, double& zi, double& var) {
 	//Check that a map has been extracted
-	if((this->map.xpts == NULL)) {
+	if(this->map.xpts == NULL) {
 		logs(TL_OMASK(TL_TERRAIN_MAP_DEM, TL_LOG),"ERROR: tried to access map values without first extracting map"
 			   " information");
 		return;
@@ -632,7 +632,7 @@ void
 TerrainMapDEM::
 interpolateDepthMat(double* xi, double* yi, Matrix& zi, Matrix& var) {
 	//Check that a map has been extracted
-	if((this->map.xpts == NULL)) {
+	if(this->map.xpts == NULL) {
 		logs(TL_OMASK(TL_TERRAIN_MAP_DEM, TL_LOG),"ERROR: tried to access map values without first extracting map"
 			   " information");
 		return;
