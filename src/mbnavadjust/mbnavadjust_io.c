@@ -2309,7 +2309,9 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
 int mbnavadjust_crossing_focuspoint(int verbose, struct mbna_project *project, int crossing_id,
                                     double offset_x, double offset_y, int *isnav1_focus, int *isnav2_focus,
                                     double *lon_focus, double *lat_focus, int *error) {
-  /* local variables */
+  (void)isnav1_focus;  // Unused parameter
+  (void)isnav2_focus;  // Unused parameter
+
   int status = MB_SUCCESS;
   struct mbna_file *file;
   struct mbna_crossing *crossing;
