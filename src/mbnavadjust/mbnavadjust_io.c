@@ -24,25 +24,21 @@
 
 /*--------------------------------------------------------------------*/
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <time.h>
-#include <math.h>
 #include <sys/stat.h>
+#include <time.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
+#include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_io.h"
 #include "mb_process.h"
-#include "mb_aux.h"
-#include "mbsys_ldeoih.h"
-
-/* define mbnavadjust io structures */
+#include "mb_status.h"
 #include "mbnavadjust_io.h"
+#include "mbsys_ldeoih.h"
 
 /* get NaN detector */
 #if defined(isnanf)
