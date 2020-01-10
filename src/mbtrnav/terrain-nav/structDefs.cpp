@@ -1233,7 +1233,7 @@ commsT::commsT(char type, int param, measT& m)
 	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
 	// Measure update message?
 	//
-	if((msg_type == TRN_MEAS)) {
+	if(msg_type == TRN_MEAS) {
 		mt = m;
 	} else {
 		fprintf(stderr,"MU msg NOT created\n");
