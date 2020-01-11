@@ -100,7 +100,7 @@ if ((fabs(dlon) <= EPSLN) || (fabs(fabs(lat) - HALF_PI) <= EPSLN))
    }
 al = .5 * fabs((PI / dlon) - (dlon / PI));
 asq = al * al;
-sincos(theta,&sinth,&costh);
+gsincos(theta,&sinth,&costh);
 g = costh / (sinth + costh - 1.0);
 gsq = g * g;
 m = g * (2.0 / sinth - 1.0);

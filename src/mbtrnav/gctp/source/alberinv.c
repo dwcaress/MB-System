@@ -75,18 +75,18 @@ temp = r_minor / r_major;
 es = 1.0 - SQUARE(temp);
 e3 = sqrt(es);
 
-sincos(lat1, &sin_po, &cos_po);
+gsincos(lat1, &sin_po, &cos_po);
 con = sin_po;
 
 ms1 = msfnz(e3,sin_po,cos_po);
 qs1 = qsfnz(e3,sin_po,cos_po);
 
-sincos(lat2,&sin_po,&cos_po);
+gsincos(lat2,&sin_po,&cos_po);
 
 ms2 = msfnz(e3,sin_po,cos_po);
 qs2 = qsfnz(e3,sin_po,cos_po);
 
-sincos(lat0,&sin_po,&cos_po);
+gsincos(lat0,&sin_po,&cos_po);
 
 qs0 = qsfnz(e3,sin_po,cos_po);
 

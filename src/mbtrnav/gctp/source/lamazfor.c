@@ -55,7 +55,7 @@ lon_center = center_long;
 lat_center = center_lat;
 false_easting = false_east;
 false_northing = false_north;
-sincos(center_lat, &sin_lat_o, &cos_lat_o);
+gsincos(center_lat, &sin_lat_o, &cos_lat_o);
 
 /* Report parameters to the user
   -----------------------------*/
@@ -87,8 +87,8 @@ char mess[60];
 /* Forward equations
   -----------------*/
 delta_lon = adjust_lon(lon - lon_center);
-sincos(lat, &sin_lat, &cos_lat);
-sincos(delta_lon, &sin_delta_lon, &cos_delta_lon);
+gsincos(lat, &sin_lat, &cos_lat);
+gsincos(delta_lon, &sin_delta_lon, &cos_delta_lon);
 g = sin_lat_o * sin_lat + cos_lat_o * cos_lat * cos_delta_lon;
 if (g == -1.0) 
    {

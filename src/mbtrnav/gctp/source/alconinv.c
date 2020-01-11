@@ -87,7 +87,7 @@ e = sqrt(es);
 esphi = e * sin(lat_center);
 chi = 2.0 * atan(tan((HALF_PI + lat_center)/2.0) * 
             pow(((1.0 - esphi)/(1.0 + esphi)),(e/2.0))) - HALF_PI;
-sincos(chi,&sin_p26,&cos_p26);
+gsincos(chi,&sin_p26,&cos_p26);
 
 
 /* Report parameters to the user
@@ -214,7 +214,7 @@ while (ds > EPSLN);
 ------------------------------------------------------*/
 rh = sqrt(xp * xp + yp * yp);
 z = 2.0 * atan(rh / 2.0);
-sincos(z,&sinz,&cosz);
+gsincos(z,&sinz,&cosz);
 *lon = lon_center;
 if (fabs(rh) <= EPSLN)
    {

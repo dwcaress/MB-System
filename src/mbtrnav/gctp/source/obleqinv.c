@@ -73,7 +73,7 @@ offsetp(false_easting,false_northing);
 /* Calculate the sine and cosine of the latitude of the center of the map
    and store in static storage for common use.
   -------------------------------------------*/
-sincos(lat_o, &sin_lat_o, &cos_lat_o);
+gsincos(lat_o, &sin_lat_o, &cos_lat_o);
 return(OK);
 }
 
@@ -112,8 +112,8 @@ temp = sqrt(x_prime * x_prime + y_prime * y_prime) / 2.0;
 z = 2.0 * asin(temp);
 Az = atan2(x_prime, y_prime);
 diff_angle = Az - theta;
-sincos(diff_angle, &sin_diff_angle, &cos_diff_angle);
-sincos(z, &sin_z, &cos_z);
+gsincos(diff_angle, &sin_diff_angle, &cos_diff_angle);
+gsincos(z, &sin_z, &cos_z);
 *lat = asin(sin_lat_o * cos_z + cos_lat_o * sin_z * cos_diff_angle);
 *lon = adjust_lon(lon_center + atan2((sin_z * sin_diff_angle), (cos_lat_o *
 		 cos_z - sin_lat_o * sin_z * cos_diff_angle)));
