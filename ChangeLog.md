@@ -22,7 +22,7 @@ and each distribution corresponds to a discrete Github release tag. Releases tha
 include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
-- Version 5.7.6beta22    January 3, 2020
+- Version 5.7.6beta22    January 11, 2020
 - Version 5.7.6beta21    December 12, 2019
 - Version 5.7.6beta20    November 26, 2019
 - Version 5.7.6beta19    November 22, 2019
@@ -225,9 +225,9 @@ announced releases.
 - Version 5.3.2006       January 4, 2013
 - Version 5.3.2005       December 31, 2012
 - Version 5.3.2004       December 12, 2012
-- Version 5.3.2000       Navember 14, 2012
-- Version 5.3.1999       Navember 13, 2012
-- Version 5.3.1998       Navember 6, 2012
+- Version 5.3.2000       November 14, 2012
+- Version 5.3.1999       November 13, 2012
+- Version 5.3.1998       November 6, 2012
 - Version 5.3.1994       October 27, 2012
 - Version 5.3.1988       September 29, 2012
 - Version 5.3.1986       September 12, 2012
@@ -338,7 +338,7 @@ MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 
 -------------------------------------------------------------------------------
 
------> 5.7.6beta22 (January 3, 2020)
+-----> 5.7.6beta22 (January 11, 2020)
 
 mbprocess, mbpreprocess, mb_make_info(): Altered mbprocess and mbpreprocess so
 that both run about half as slow (twice as fast) as before. This optimization is
@@ -370,7 +370,12 @@ is given by -Mmask_nx/mask_ny/lonmin/lonmax/latmin/latmax, then the last four va
 define the area bounds and the data need only be read once. Mbprocess now calls
 mbinfo in this way, allowing a speedup of the mbprocess execution.
 
-Code style: Kurt Schwehr is systematically altering the code to conform to best practices.
+mbgrid: Added data min max values to the per file shell output when verbose > 0
+
+Code style: Kurt Schwehr is systematically altering the code to conform to best practices and adding build tests. The tests are performed by running
+    make check
+and are executed automatically by the Travis CI service integrated with Github
+whenever commits are made to the Github repository.
 
 src/utilities: All programs in src/utilities have been migrated to C++.
 
@@ -3429,7 +3434,7 @@ other software packages with the acrosstrack and alongtrack distances switched.
 Mbmosaic: Fixed azimuthal priority weighting so that directional mosaicing is
 more reliable.
 
------> 5.3.2000 (Navember 14, 2012)
+-----> 5.3.2000 (November 14, 2012)
 
 Mbinfo: Changed mbinfo to gracefully handle the situation of reading a file that
 has no data records while the -P option is specified (gracefully means not
@@ -3437,7 +3442,7 @@ seg faulting).
 
 Mbmosaic: fixed bug in the use of the azimuth weighting factor.
 
------> 5.3.1999 (Navember 13, 2012)
+-----> 5.3.1999 (November 13, 2012)
 
 Mbm_route2mission: Added multibeam pulse length as a command line argument.
 
@@ -3447,7 +3452,7 @@ those z-offsets.
 
 Format 88 (mbf_reson7kr): Fixed bug that caused seg faults with pings that have no valid soundings.
 
------> 5.3.1998 (Navember 6, 2012)
+-----> 5.3.1998 (November 6, 2012)
 
 Mb7kpreprocess: Added -C option to apply roll bias and pitch bias during preprocessing. Fixed
 rotation calculations so that side-looking and up looking mapping data can be handled

@@ -1788,6 +1788,9 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
+        bool first = true;
+        double dmin = 0.0;
+        double dmax = 0.0;
 				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
@@ -1896,6 +1899,14 @@ int main(int argc, char **argv) {
 										cnt[kgrid]++;
 										ndata++;
 										ndatafile++;
+                    if (first) {
+                      first = false;
+                      dmin = topofactor * bath[ib];
+                      dmax = topofactor * bath[ib];
+                    } else {
+                      dmin = std::min(topofactor * bath[ib], dmin);
+                      dmax = std::max(topofactor * bath[ib], dmax);
+                    }
 									}
 								}
 						}
@@ -1906,7 +1917,9 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds)
+				if (verbose > 0)
+					fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+				else if (file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
@@ -2108,6 +2121,9 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
+        bool first = true;
+        double dmin = 0.0;
+        double dmax = 0.0;
 				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
@@ -2230,6 +2246,14 @@ int main(int argc, char **argv) {
 											cnt[kgrid]++;
 											ndata++;
 											ndatafile++;
+                      if (first) {
+                        first = false;
+                        dmin = topofactor * bath[ib];
+                        dmax = topofactor * bath[ib];
+                      } else {
+                        dmin = std::min(topofactor * bath[ib], dmin);
+                        dmax = std::max(topofactor * bath[ib], dmax);
+                      }
 										}
 									}
 
@@ -2425,6 +2449,14 @@ int main(int argc, char **argv) {
 													}
 												ndata++;
 												ndatafile++;
+                        if (first) {
+                          first = false;
+                          dmin = topofactor * bath[ib];
+                          dmax = topofactor * bath[ib];
+                        } else {
+                          dmin = std::min(topofactor * bath[ib], dmin);
+                          dmax = std::max(topofactor * bath[ib], dmax);
+                        }
 											}
 
 											/* else for xyz data without footprint */
@@ -2438,6 +2470,14 @@ int main(int argc, char **argv) {
 												cnt[kgrid]++;
 												ndata++;
 												ndatafile++;
+                        if (first) {
+                          first = false;
+                          dmin = topofactor * bath[ib];
+                          dmax = topofactor * bath[ib];
+                        } else {
+                          dmin = std::min(topofactor * bath[ib], dmin);
+                          dmax = std::max(topofactor * bath[ib], dmax);
+                        }
 											}
 										}
 									}
@@ -2450,7 +2490,9 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds)
+				if (verbose > 0)
+					fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+				else if (file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 			} /* end if (format > 0) */
 		}
@@ -2537,6 +2579,9 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
+        bool first = true;
+        double dmin = 0.0;
+        double dmax = 0.0;
 				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
@@ -2695,6 +2740,14 @@ int main(int argc, char **argv) {
 											cnt[kgrid]++;
 											ndata++;
 											ndatafile++;
+                      if (first) {
+                        first = false;
+                        dmin = topofactor * bath[ib];
+                        dmax = topofactor * bath[ib];
+                      } else {
+                        dmin = std::min(topofactor * bath[ib], dmin);
+                        dmax = std::max(topofactor * bath[ib], dmax);
+                      }
 										}
 
 										/* else deal with multibeam data that have beam footprints */
@@ -2818,6 +2871,14 @@ int main(int argc, char **argv) {
 													}
 												ndata++;
 												ndatafile++;
+                        if (first) {
+                          first = false;
+                          dmin = topofactor * bath[ib];
+                          dmax = topofactor * bath[ib];
+                        } else {
+                          dmin = std::min(topofactor * bath[ib], dmin);
+                          dmax = std::max(topofactor * bath[ib], dmax);
+                        }
 											}
 
 											/* else for xyz data without footprint */
@@ -2831,6 +2892,14 @@ int main(int argc, char **argv) {
 												cnt[kgrid]++;
 												ndata++;
 												ndatafile++;
+                        if (first) {
+                          first = false;
+                          dmin = topofactor * bath[ib];
+                          dmax = topofactor * bath[ib];
+                        } else {
+                          dmin = std::min(topofactor * bath[ib], dmin);
+                          dmax = std::max(topofactor * bath[ib], dmax);
+                        }
 											}
 										}
 									}
@@ -2843,7 +2912,9 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds)
+				if (verbose > 0)
+					fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+				else if (file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
@@ -2954,6 +3025,9 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
+        bool first = true;
+        double dmin = 0.0;
+        double dmax = 0.0;
 				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
@@ -3097,6 +3171,14 @@ int main(int argc, char **argv) {
 											cnt[kgrid]++;
 											ndata++;
 											ndatafile++;
+                      if (first) {
+                        first = false;
+                        dmin = topofactor * bath[ib];
+                        dmax = topofactor * bath[ib];
+                      } else {
+                        dmin = std::min(topofactor * bath[ib], dmin);
+                        dmax = std::max(topofactor * bath[ib], dmax);
+                      }
 										}
 									}
 								}
@@ -3167,6 +3249,14 @@ int main(int argc, char **argv) {
 											cnt[kgrid]++;
 											ndata++;
 											ndatafile++;
+                      if (first) {
+                        first = false;
+                        dmin = amp[ib];
+                        dmax = amp[ib];
+                      } else {
+                        dmin = std::min(amp[ib], dmin);
+                        dmax = std::max(amp[ib], dmax);
+                      }
 										}
 									}
 								}
@@ -3236,6 +3326,14 @@ int main(int argc, char **argv) {
 											cnt[kgrid]++;
 											ndata++;
 											ndatafile++;
+                      if (first) {
+                        first = false;
+                        dmin = ss[ib];
+                        dmax = ss[ib];
+                      } else {
+                        dmin = std::min(ss[ib], dmin);
+                        dmax = std::max(ss[ib], dmax);
+                      }
 										}
 									}
 								}
@@ -3247,7 +3345,9 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds)
+				if (verbose > 0)
+					fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+				else if (file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
@@ -3263,6 +3363,7 @@ int main(int argc, char **argv) {
 
 			/* if format == 0 then input is lon,lat,values triples file */
 			else if (format == 0 && path[0] != '#') {
+
 				/* open data file */
 				if ((rfp = fopen(path, "r")) == nullptr) {
 					error = MB_ERROR_OPEN_FAIL;
@@ -3273,6 +3374,9 @@ int main(int argc, char **argv) {
 				}
 
 				/* loop over reading */
+        bool first = true;
+        double dmin = 0.0;
+        double dmax = 0.0;
 				while (fscanf(rfp, "%lf %lf %lf", &tlon, &tlat, &tvalue) != EOF) {
 					/* reproject data positions if necessary */
 					if (use_projection)
@@ -3318,6 +3422,14 @@ int main(int argc, char **argv) {
 							cnt[kgrid]++;
 							ndata++;
 							ndatafile++;
+              if (first) {
+                first = false;
+                dmin = topofactor * tvalue;
+                dmax = topofactor * tvalue;
+              } else {
+                dmin = std::min(topofactor * tvalue, dmin);
+                dmax = std::max(topofactor * tvalue, dmax);
+              }
 						}
 					}
 				}
@@ -3327,6 +3439,8 @@ int main(int argc, char **argv) {
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
 				if (verbose > 0)
+					fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, file, dmin, dmax);
+				else if (ndatafile > 0)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, file);
 
 				/* add to datalist if data actually contributed */
@@ -3463,6 +3577,9 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
+        bool first = true;
+        double dmin = 0.0;
+        double dmax = 0.0;
 				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
@@ -3617,6 +3734,14 @@ int main(int argc, char **argv) {
 											}
 										ndata++;
 										ndatafile++;
+                    if (first) {
+                      first = false;
+                      dmin = topofactor * bath[ib];
+                      dmax = topofactor * bath[ib];
+                    } else {
+                      dmin = std::min(topofactor * bath[ib], dmin);
+                      dmax = std::max(topofactor * bath[ib], dmax);
+                    }
 									}
 									else if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok) {
 										kgrid = ix * gydim + iy;
@@ -3633,6 +3758,14 @@ int main(int argc, char **argv) {
 										}
 										ndata++;
 										ndatafile++;
+                    if (first) {
+                      first = false;
+                      dmin = topofactor * bath[ib];
+                      dmax = topofactor * bath[ib];
+                    } else {
+                      dmin = std::min(topofactor * bath[ib], dmin);
+                      dmax = std::max(topofactor * bath[ib], dmax);
+                    }
 									}
 								}
 						}
@@ -3709,6 +3842,14 @@ int main(int argc, char **argv) {
 											}
 										ndata++;
 										ndatafile++;
+                    if (first) {
+                      first = false;
+                      dmin = topofactor * bath[ib];
+                      dmax = topofactor * bath[ib];
+                    } else {
+                      dmin = std::min(topofactor * bath[ib], dmin);
+                      dmax = std::max(topofactor * bath[ib], dmax);
+                    }
 									}
 									else if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim && time_ok) {
 										kgrid = ix * gydim + iy;
@@ -3723,6 +3864,14 @@ int main(int argc, char **argv) {
 										}
 										ndata++;
 										ndatafile++;
+                    if (first) {
+                      first = false;
+                      dmin = amp[ib];
+                      dmax = amp[ib];
+                    } else {
+                      dmin = std::min(amp[ib], dmin);
+                      dmax = std::max(amp[ib], dmax);
+                    }
 									}
 								}
 						}
@@ -3822,7 +3971,9 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds)
+				if (verbose > 0)
+					fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+				else if (file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
@@ -3848,6 +3999,9 @@ int main(int argc, char **argv) {
 				}
 
 				/* loop over reading */
+        bool first = true;
+        double dmin = 0.0;
+        double dmax = 0.0;
 				while (fscanf(rfp, "%lf %lf %lf", &tlon, &tlat, &tvalue) != EOF) {
 					/* reproject data positions if necessary */
 					if (use_projection)
@@ -3918,6 +4072,8 @@ int main(int argc, char **argv) {
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
 				if (verbose > 0)
+					fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, file, dmin, dmax);
+				else if (ndatafile > 0)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, file);
 
 				/* add to datalist if data actually contributed */
@@ -4037,6 +4193,9 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
+        bool first = true;
+        double dmin = 0.0;
+        double dmax = 0.0;
 				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
@@ -4179,8 +4338,16 @@ int main(int argc, char **argv) {
 											minormax[kgrid] = topofactor * bath[ib];
 											cnt[kgrid]++;
 										}
-  								ndata++;
-  								ndatafile++;
+  								  ndata++;
+  								  ndatafile++;
+                    if (first) {
+                      first = false;
+                      dmin = topofactor * bath[ib];
+                      dmax = topofactor * bath[ib];
+                    } else {
+                      dmin = std::min(topofactor * bath[ib], dmin);
+                      dmax = std::max(topofactor * bath[ib], dmax);
+                    }
                   }
 								}
 						}
@@ -4246,8 +4413,16 @@ int main(int argc, char **argv) {
 											minormax[kgrid] = amp[ib];
 											cnt[kgrid]++;
 										}
-  								ndata++;
-  								ndatafile++;
+  								  ndata++;
+  								  ndatafile++;
+                    if (first) {
+                      first = false;
+                      dmin = amp[ib];
+                      dmax = amp[ib];
+                    } else {
+                      dmin = std::min(amp[ib], dmin);
+                      dmax = std::max(amp[ib], dmax);
+                    }
                   }
 								}
 						}
@@ -4313,8 +4488,16 @@ int main(int argc, char **argv) {
 											minormax[kgrid] = ss[ib];
 											cnt[kgrid]++;
 										}
-  								ndata++;
-  								ndatafile++;
+  								  ndata++;
+  								  ndatafile++;
+                    if (first) {
+                      first = false;
+                      dmin = topofactor * bath[ib];
+                      dmax = topofactor * bath[ib];
+                    } else {
+                      dmin = std::min(topofactor * bath[ib], dmin);
+                      dmax = std::max(topofactor * bath[ib], dmax);
+                    }
                   }
 								}
 						}
@@ -4325,7 +4508,9 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds)
+				if (verbose > 0)
+					fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+				else if (file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
@@ -4394,6 +4579,9 @@ int main(int argc, char **argv) {
 				}
 
 				/* initialize the swath sonar file */
+        bool first = true;
+        double dmin = 0.0;
+        double dmax = 0.0;
 				if (file_in_bounds) {
 					/* check for "fast bathymetry" or "fbt" file */
 					if (datatype == MBGRID_DATA_TOPOGRAPHY || datatype == MBGRID_DATA_BATHYMETRY) {
@@ -4549,8 +4737,16 @@ int main(int argc, char **argv) {
   													cnt[kgrid]++;
                         }
   										}
-  									ndata++;
-  									ndatafile++;
+  									  ndata++;
+  									  ndatafile++;
+                      if (first) {
+                        first = false;
+                        dmin = topofactor * bath[ib];
+                        dmax = topofactor * bath[ib];
+                      } else {
+                        dmin = std::min(topofactor * bath[ib], dmin);
+                        dmax = std::max(topofactor * bath[ib], dmax);
+                      }
                     }
 									}
 								}
@@ -4630,6 +4826,14 @@ int main(int argc, char **argv) {
   											}
   										ndata++;
   										ndatafile++;
+                      if (first) {
+                        first = false;
+                        dmin = amp[ib];
+                        dmax = amp[ib];
+                      } else {
+                        dmin = std::min(amp[ib], dmin);
+                        dmax = std::max(amp[ib], dmax);
+                      }
   									}
                   }
 								}
@@ -4709,6 +4913,14 @@ int main(int argc, char **argv) {
   											}
   										ndata++;
   										ndatafile++;
+                      if (first) {
+                        first = false;
+                        dmin = topofactor * bath[ib];
+                        dmax = topofactor * bath[ib];
+                      } else {
+                        dmin = std::min(topofactor * bath[ib], dmin);
+                        dmax = std::max(topofactor * bath[ib], dmax);
+                      }
   									}
                   }
 								}
@@ -4720,7 +4932,9 @@ int main(int argc, char **argv) {
 				}
 				if (verbose >= 2)
 					fprintf(outfp, "\n");
-				if (verbose > 0 || file_in_bounds)
+				if (verbose > 0)
+					fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+				else if (file_in_bounds)
 					fprintf(outfp, "%d data points processed in %s\n", ndatafile, rfile);
 
 				/* add to datalist if data actually contributed */
