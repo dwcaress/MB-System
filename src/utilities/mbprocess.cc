@@ -67,25 +67,25 @@ struct mbprocess_sscorr_struct {
 
 /* define grid structure */
 struct mbprocess_grid_struct {
-  mbprocess_grid_struct() :
-      file(""),
-      projectionname(""),
-      projection_mode(0),
-      projection_id(""),
-      nodatavalue(0.0f),
-      nxy(0),
-      n_columns(0),
-      n_rows(0),
-      min(0.0),
-      max(0.0),
-      xmin(0.0),
-      xmax(0.0),
-      ymin(0.0),
-      ymax(0.0),
-      dx(0.0),
-      dy(0.0),
-      data(nullptr) {}
-
+//  mbprocess_grid_struct() :
+//      file(""),
+//      projectionname(""),
+//      projection_mode(0),
+//      projection_id(""),
+//      nodatavalue(0.0f),
+//      nxy(0),
+//      n_columns(0),
+//      n_rows(0),
+//      min(0.0),
+//      max(0.0),
+//      xmin(0.0),
+//      xmax(0.0),
+//      ymin(0.0),
+//      ymax(0.0),
+//      dx(0.0),
+//      dy(0.0),
+//      data(nullptr) {}
+//
  public:
   mb_path file;
   mb_path projectionname;
