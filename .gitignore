@@ -129,3 +129,4 @@ test/utilities/datalist_xcorr.txt
 test/utilities/datalist_timelagmodel.txt
 test/utilities/datalist_timelaghist.txt
 test/utilities/datalist_timelagest.txt
+*.cmd

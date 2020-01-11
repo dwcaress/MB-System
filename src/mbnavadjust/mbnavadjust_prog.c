@@ -10727,10 +10727,10 @@ int mbnavadjust_updategrid() {
         fprintf(stderr, "%s", message);
 
       /* generate new nav files */
-      for (int i = 0; i < project.num_files; i++) {
-        file = &project.files[i];
-        sprintf(npath, "%s/nvs_%4.4d.mb166", project.datadir, i);
-        sprintf(apath, "%s/nvs_%4.4d.na%d", project.datadir, i, file->output_id);
+      for (int ifile = 0; ifile < project.num_files; ifile++) {
+        file = &project.files[ifile];
+        sprintf(npath, "%s/nvs_%4.4d.mb166", project.datadir, ifile);
+        sprintf(apath, "%s/nvs_%4.4d.na%d", project.datadir, ifile, file->output_id);
         if (file->status == MBNA_FILE_FIXEDNAV) {
           sprintf(message, " > Not outputting updated nav to fixed file %s\n", apath);
           do_info_add(message, false);
@@ -10816,7 +10816,7 @@ int mbnavadjust_updategrid() {
                 if (isnav < section->num_snav - 2) {
                   isnav++;
                 }
-                else if (isection < file->num_sections) {
+                else if (isection < file->num_sections - 1) {
                   isection++;
                   section = &file->sections[isection];
                   isnav = 0;
@@ -10826,9 +10826,15 @@ int mbnavadjust_updategrid() {
               /* update the nav if possible (and it should be...) */
               if (time_d < section->snav_time_d[isnav]) {
                 factor = 0.0;
+fprintf(stderr,"%s:%4.4d:%s: Nav time outside expected section: %f < %f ifile:%d isection:%d isnav:%d\n",
+__FILE__, __LINE__, __func__, time_d, section->snav_time_d[isnav],
+ifile, isection, isnav);
               }
               else if (time_d > section->snav_time_d[isnav + 1]) {
                 factor = 1.0;
+fprintf(stderr,"%s:%4.4d:%s: Nav time outside expected section: %f > %f ifile:%d isection:%d isnav+1:%d\n",
+__FILE__, __LINE__, __func__, time_d, section->snav_time_d[isnav + 1],
+ifile, isection, isnav+1);
               }
               else {
                 if (section->snav_time_d[isnav + 1] > section->snav_time_d[isnav]) {
@@ -10839,8 +10845,12 @@ int mbnavadjust_updategrid() {
                   else if (fabs(time_d - section->snav_time_d[isnav+1]) < 1.0)
                   fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav+1]);*/
                 }
-                else
+                else {
                   factor = 0.0;
+fprintf(stderr,"%s:%4.4d:%s: Nav time outside expected section: %f >= %f ifile:%d isection:%d isnav:%d\n",
+__FILE__, __LINE__, __func__, section->snav_time_d[isnav], section->snav_time_d[isnav + 1],
+ifile, isection, isnav);
+                }
               }
 
               /* update and output only nonzero navigation */
@@ -10857,11 +10867,11 @@ int mbnavadjust_updategrid() {
                     print has the time_d value come out as "nan" - this is the worst sort
                     of kluge for a real but mysterious bug - apologies to all who find this
                     - DWC 18 Aug 2007 R/V Atlantis Cobb Segment JDF Ridge */
-                sprintf(ostring,
-                        "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f "
-                        "%.2f %.3f\r\n",
-                        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d,
-                        navlon, navlat, heading, speed, draft, roll, pitch, heave, zoffset);
+//                sprintf(ostring,
+//                        "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f "
+//                        "%.2f %.3f\r\n",
+//                        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d,
+//                        navlon, navlat, heading, speed, draft, roll, pitch, heave, zoffset);
                 sprintf(ostring,
                         "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f "
                         "%.2f %.3f\r\n",
@@ -10981,10 +10991,10 @@ int mbnavadjust_applynav() {
     do_message_on(message);
 
     /* generate new nav files */
-    for (int i = 0; i < project.num_files; i++) {
-      file = &project.files[i];
-      sprintf(npath, "%s/nvs_%4.4d.mb166", project.datadir, i);
-      sprintf(apath, "%s/nvs_%4.4d.na%d", project.datadir, i, file->output_id);
+    for (int ifile = 0; ifile < project.num_files; ifile++) {
+      file = &project.files[ifile];
+      sprintf(npath, "%s/nvs_%4.4d.mb166", project.datadir, ifile);
+      sprintf(apath, "%s/nvs_%4.4d.na%d", project.datadir, ifile, file->output_id);
       sprintf(opath, "%s.na%d", file->path, file->output_id);
       if (file->status == MBNA_FILE_FIXEDNAV) {
         sprintf(message, " > Not outputting updated nav to fixed file %s\n", opath);
@@ -11088,7 +11098,7 @@ int mbnavadjust_applynav() {
               if (isnav < section->num_snav - 2) {
                 isnav++;
               }
-              else if (isection < file->num_sections) {
+              else if (isection < file->num_sections - 1) {
                 isection++;
                 section = &file->sections[isection];
                 isnav = 0;
@@ -11098,9 +11108,15 @@ int mbnavadjust_applynav() {
             /* update the nav if possible (and it should be...) */
             if (time_d < section->snav_time_d[isnav]) {
               factor = 0.0;
+fprintf(stderr,"%s:%4.4d:%s: Nav time outside expected section: %f < %f ifile:%d isection:%d isnav:%d\n",
+__FILE__, __LINE__, __func__, time_d, section->snav_time_d[isnav],
+ifile, isection, isnav);
             }
             else if (time_d > section->snav_time_d[isnav + 1]) {
               factor = 1.0;
+fprintf(stderr,"%s:%4.4d:%s: Nav time outside expected section: %f > %f ifile:%d isection:%d isnav+1:%d\n",
+__FILE__, __LINE__, __func__, time_d, section->snav_time_d[isnav + 1],
+ifile, isection, isnav+1);
             }
             else {
               if (section->snav_time_d[isnav + 1] > section->snav_time_d[isnav]) {
@@ -11111,8 +11127,12 @@ int mbnavadjust_applynav() {
                 else if (fabs(time_d - section->snav_time_d[isnav+1]) < 1.0)
                 fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav+1]);*/
               }
-              else
-                factor = 0.0;
+                else {
+                  factor = 0.0;
+fprintf(stderr,"%s:%4.4d:%s: Nav time outside expected section: %f >= %f ifile:%d isection:%d isnav:%d\n",
+__FILE__, __LINE__, __func__, section->snav_time_d[isnav], section->snav_time_d[isnav + 1],
+ifile, isection, isnav);
+                }
             }
 
             /* update and output only nonzero navigation */
@@ -11129,11 +11149,11 @@ int mbnavadjust_applynav() {
                   print has the time_d value come out as "nan" - this is the worst sort
                   of kluge for a real but mysterious bug - apologies to all who find this
                   - DWC 18 Aug 2007 R/V Atlantis Cobb Segment JDF Ridge */
-              sprintf(ostring,
-                      "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f %.2f "
-                      "%.3f\r\n",
-                      time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d, navlon,
-                      navlat, heading, speed, draft, roll, pitch, heave, zoffset);
+//              sprintf(ostring,
+//                      "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f %.2f "
+//                      "%.3f\r\n",
+//                      time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d, navlon,
+//                      navlat, heading, speed, draft, roll, pitch, heave, zoffset);
               sprintf(ostring,
                       "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f %.2f "
                       "%.3f\r\n",

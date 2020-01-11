@@ -396,7 +396,7 @@ CXXFLAGS="-std=c++11" \
     #--enable-pcltools
 
 make
-
+make check
 make install
 
 cd src/htmlsrc ; make_mbhtml ; cd ../..

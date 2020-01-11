@@ -4693,26 +4693,31 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
      * (ashamedly, this was true for MB-System through 4.3.2000)
      * - if so, switch the arrays */
     if (bathymetry->acrossalongerror == MB_MAYBE) {
-      acrosstrackmax = 0.0;
-      alongtrackmax = 0.0;
-      for (int i = 0; i < bathymetry->number_beams; i++) {
-        acrosstrackmax = MAX(acrosstrackmax, fabs(bathymetry->acrosstrack[i]));
-        alongtrackmax = MAX(alongtrackmax, fabs(bathymetry->alongtrack[i]));
-      }
-      if (alongtrackmax > acrosstrackmax) {
-        bathymetry->nacrossalongerroryes++;
-      }
-      else {
-        bathymetry->nacrossalongerrorno++;
-      }
-      if (bathymetry->nacrossalongerroryes > 10) {
-        bathymetry->acrossalongerror = MB_YES;
-      }
-      else if (bathymetry->nacrossalongerrorno > 10) {
+      if (header->s7kTime.Year > 2012) {
         bathymetry->acrossalongerror = MB_NO;
       }
+      else {
+        acrosstrackmax = 0.0;
+        alongtrackmax = 0.0;
+        for (int i = 0; i < bathymetry->number_beams; i++) {
+          acrosstrackmax = MAX(acrosstrackmax, fabs(bathymetry->acrosstrack[i]));
+          alongtrackmax = MAX(alongtrackmax, fabs(bathymetry->alongtrack[i]));
+        }
+        if (alongtrackmax > acrosstrackmax) {
+          bathymetry->nacrossalongerroryes++;
+        }
+        else {
+          bathymetry->nacrossalongerrorno++;
+        }
+        if (bathymetry->nacrossalongerroryes > 10) {
+          bathymetry->acrossalongerror = MB_YES;
+        }
+        else if (bathymetry->nacrossalongerrorno > 10) {
+          bathymetry->acrossalongerror = MB_NO;
+        }
+      }
     }
-    if (bathymetry->acrossalongerror ||
+    if (bathymetry->acrossalongerror == MB_YES ||
         (bathymetry->acrossalongerror == MB_MAYBE && alongtrackmax > acrosstrackmax)) {
       for (int i = 0; i < bathymetry->number_beams; i++) {
         acrosstrackmax = bathymetry->acrosstrack[i];

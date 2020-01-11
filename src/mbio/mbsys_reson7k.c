@@ -5315,6 +5315,11 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
             rx_orientation.pitch = beampitch;
             rx_orientation.heading = beamheading;
             reference_heading = heading;
+//fprintf(stderr,"%s:%4.4d:%s: beam:%d tx:%f %f %f %f rx:%f %f %f %f hdg:%f\n",
+//__FILE__, __LINE__, __func__,
+//j, tx_steer, tx_orientation.roll, tx_orientation.pitch, tx_orientation.heading,
+//rx_steer, rx_orientation.roll, rx_orientation.pitch, rx_orientation.heading,
+//reference_heading);
 
             status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
                                  reference_heading, &beamAzimuth, &beamDepression, error);
@@ -5332,6 +5337,10 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
             bathymetry->depth[i] = zz + sensordepth - 0.5 * (heave + beamheave);
             bathymetry->pointing_angle[i] = DTR * theta;
             bathymetry->azimuth_angle[i] = DTR * phi;
+//fprintf(stderr,"%s:%4.4d:%s: beam:%d zxy:%f %f %f  angles:%f %f\n",
+//__FILE__, __LINE__, __func__,
+//j, bathymetry->depth[i], bathymetry->acrosstrack[i], bathymetry->alongtrack[i],
+//bathymetry->pointing_angle[i], bathymetry->azimuth_angle[i]);
           }
         }
 
