@@ -100,7 +100,7 @@ if (fabs(lat) <= .0000001)
    }
 else
    {
-   sincos(lat,&sinphi,&cosphi);
+   gsincos(lat,&sinphi,&cosphi);
    ml = mlfn(e0, e1, e2, e3, lat);
    ms = msfnz(e,sinphi,cosphi);
    con *= sinphi;

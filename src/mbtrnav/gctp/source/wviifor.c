@@ -68,7 +68,7 @@ double s, c0, c1;
 /* Forward equations
   -----------------*/
 delta_lon = adjust_lon(lon - lon_center);
-sincos((delta_lon/3.0), &sin_lon, &cos_lon);
+gsincos((delta_lon/3.0), &sin_lon, &cos_lon);
 s = 0.90631 * sin(lat);
 c0 = sqrt(1-s*s);
 c1 = sqrt(2.0 / (1.0 + c0 * cos_lon));

@@ -161,7 +161,7 @@ for (i=0;;i++)
    }
 if (fabs(phi) < HALF_PI)
    {
-   sincos(phi, &sin_phi, &cos_phi);
+   gsincos(phi, &sin_phi, &cos_phi);
    tan_phi = tan(phi);
    c    = esp * SQUARE(cos_phi);
    cs   = SQUARE(c);
