@@ -22,6 +22,7 @@
 
 #include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -116,83 +117,92 @@ struct mbnavadjust_mod {
   double dt;
 };
 
+static char program_name[] = "mbnavadjustmerge";
+static char help_message[] = "mbnavadjustmerge merges two existing mbnavadjust projects.\n";
+static char usage_message[] =
+    "mbnavadjustmerge --input=project_path \n"
+    "\t[--input=project_path\n"
+    "\t--output=project_path\n"
+    "\t--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]\n"
+    "\t--set-global-tie-xyz=file:section[:snav]\n"
+    "\t--set-global-tie-xyonly=file:section[:snav]\n"
+    "\t--set-global-tie-zonly=file:section[:snav]\n"
+    "\t--unset-global-tie=file:section\n"
+    "\t--unset-all-global-ties\n"
+    "\t--add-crossing=file1:section1/file2:section2\n"
+    "\t--set-tie=file1/file2/xoffset/yoffset/zoffset\n"
+    "\t--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset\n"
+    "\t--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset/xsigma/ysigma/zsigma\n"
+    "\t--set-tie-xyz=file1:section1/file2:section2\n"
+    "\t--set-tie-xyonly=file1:section1/file2:section2\n"
+    "\t--set-tie-zonly=file1:section1/file2:section2\n"
+    "\t--set-ties-xyz-all\n"
+    "\t--set-ties-xyonly-all\n"
+    "\t--set-ties-zonly-all\n"
+    "\t--set-ties-xyz-with-file=file\n"
+    "\t--set-ties-xyonly-with-file=file\n"
+    "\t--set-ties-zonly-with-file=file\n"
+    "\t--set-ties-xyz-with-survey=survey\n"
+    "\t--set-ties-xyonly-with-survey=survey\n"
+    "\t--set-ties-zonly-with-survey=survey\n"
+    "\t--set-ties-xyz-by-survey=survey\n"
+    "\t--set-ties-xyonly-by-survey=survey\n"
+    "\t--set-ties-zonly-by-survey=survey\n"
+    "\t--set-ties-xyz-by-block=survey1/survey2\n"
+    "\t--set-ties-xyonly-by-block=survey1/survey2\n"
+    "\t--set-ties-zonly-by-block=survey1/survey2\n"
+    "\t--set-ties-zoffset-by-block=survey1/survey2/zoffset\n"
+    "\t--set-ties-xyonly-by-time=timethreshold\n"
+    "\t--unset-tie=file1:section1/file2:section2\n"
+    "\t--unset-ties-with-file=file\n"
+    "\t--unset-ties-with-survey=survey\n"
+    "\t--unset-ties-by-survey=survey\n"
+    "\t--unset-ties-by-block=survey1/survey2\n"
+    "\t--unset-all-ties\n"
+    "\t--skip-unset-crossings\n"
+    "\t--unset-skipped-crossings\n"
+    "\t--unset-skipped-crossings-by-block=survey1/survey2\n"
+    "\t--unset-skipped-crossings-between-surveys\n"
+    "\t--insert-discontinuity=file:section\n"
+    "\t--reimport-file=file\n"
+    "\t--reimport-all-files\n"
+    "\t--import-tie-list=file\n"
+    "\t--export-tie-list=file\n"
+    "\t--triangulate\n"
+    "\t--triangulate-all\n"
+    "\t--triangulate-scale=scale\n"
+    "\t--triangulate-section=file:section\n"
+    "\t--unset-short-section-ties=min_length"
+    "\t--skip-short-section-crossings=min_length"
+    "\t--verbose --help]\n";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-  char program_name[] = "mbnavadjustmerge";
-  char help_message[] = "mbnavadjustmerge merges two existing mbnavadjust projects.\n";
-  char usage_message[] = "mbnavadjustmerge --input=project_path \n"
-                          "\t[--input=project_path\n"
-                          "\t--output=project_path\n"
-                          "\t--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]\n"
-                          "\t--set-global-tie-xyz=file:section[:snav]\n"
-                          "\t--set-global-tie-xyonly=file:section[:snav]\n"
-                          "\t--set-global-tie-zonly=file:section[:snav]\n"
-                          "\t--unset-global-tie=file:section\n"
-                          "\t--unset-all-global-ties\n"
-                          "\t--add-crossing=file1:section1/file2:section2\n"
-                          "\t--set-tie=file1/file2/xoffset/yoffset/zoffset\n"
-                          "\t--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset\n"
-                          "\t--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset/xsigma/ysigma/zsigma\n"
-                          "\t--set-tie-xyz=file1:section1/file2:section2\n"
-                          "\t--set-tie-xyonly=file1:section1/file2:section2\n"
-                          "\t--set-tie-zonly=file1:section1/file2:section2\n"
-                          "\t--set-ties-xyz-all\n"
-                          "\t--set-ties-xyonly-all\n"
-                          "\t--set-ties-zonly-all\n"
-                          "\t--set-ties-xyz-with-file=file\n"
-                          "\t--set-ties-xyonly-with-file=file\n"
-                          "\t--set-ties-zonly-with-file=file\n"
-                          "\t--set-ties-xyz-with-survey=survey\n"
-                          "\t--set-ties-xyonly-with-survey=survey\n"
-                          "\t--set-ties-zonly-with-survey=survey\n"
-                          "\t--set-ties-xyz-by-survey=survey\n"
-                          "\t--set-ties-xyonly-by-survey=survey\n"
-                          "\t--set-ties-zonly-by-survey=survey\n"
-                          "\t--set-ties-xyz-by-block=survey1/survey2\n"
-                          "\t--set-ties-xyonly-by-block=survey1/survey2\n"
-                          "\t--set-ties-zonly-by-block=survey1/survey2\n"
-                          "\t--set-ties-zoffset-by-block=survey1/survey2/zoffset\n"
-                          "\t--set-ties-xyonly-by-time=timethreshold\n"
-                          "\t--unset-tie=file1:section1/file2:section2\n"
-                          "\t--unset-ties-with-file=file\n"
-                          "\t--unset-ties-with-survey=survey\n"
-                          "\t--unset-ties-by-survey=survey\n"
-                          "\t--unset-ties-by-block=survey1/survey2\n"
-                          "\t--unset-all-ties\n"
-                          "\t--skip-unset-crossings\n"
-                          "\t--unset-skipped-crossings\n"
-                          "\t--unset-skipped-crossings-by-block=survey1/survey2\n"
-                          "\t--unset-skipped-crossings-between-surveys\n"
-                          "\t--insert-discontinuity=file:section\n"
-                          "\t--reimport-file=file\n"
-                          "\t--reimport-all-files\n"
-                          "\t--import-tie-list=file\n"
-                          "\t--export-tie-list=file\n"
-                          "\t--triangulate\n"
-                          "\t--triangulate-all\n"
-                          "\t--triangulate-scale=scale\n"
-                          "\t--triangulate-section=file:section\n"
-                          "\t--unset-short-section-ties=min_length"
-                          "\t--skip-short-section-crossings=min_length"
-                          "\t--verbose --help]\n";
-  extern char *optarg;
-  int option_index;
-  int errflg = 0;
-  int c;
-  int help = 0;
-
-  /* MBIO status variables */
-  int status = MB_SUCCESS;
   int verbose = 0;
   int error = MB_ERROR_NO_ERROR;
 
-  /* command line option definitions */
-  /* mbnavadjustmerge --verbose
-   *     --help
-   *     --input=project_path
-   *     --output=project_path
-   */
+  int project_inputbase_set = false;
+  mb_path project_inputbase_path = "";
+  int project_inputadd_set = false;
+  mb_path project_inputadd_path = "";
+  int project_output_set = false;
+  mb_path project_output_path = "";
+
+  int num_mods = 0;
+  struct mbnavadjust_mod mods[NUMBER_MODS_MAX];
+  memset(mods, 0, NUMBER_MODS_MAX * sizeof(struct mbnavadjust_mod));
+
+  int import_tie_list_set = false;
+  mb_path import_tie_list_path;
+  int export_tie_list_set = false;
+  mb_path export_tie_list_path;
+
+  int triangulate = TRIANGULATE_NONE;
+  double triangle_scale = 0.0;
+  double minimum_section_length = 0.0;
+
+  {
   static struct option options[] = {{"verbose", no_argument, NULL, 0},
                                     {"help", no_argument, NULL, 0},
                                     {"input", required_argument, NULL, 0},
@@ -249,102 +259,10 @@ int main(int argc, char **argv) {
                                     {"skip-short-section-crossings", required_argument, NULL, 0},
                                     {NULL, 0, NULL, 0}};
 
-  /* mbnavadjustmerge controls */
-  int mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_NONE;
-  mb_path project_inputbase_path;
-  mb_path project_inputadd_path;
-  mb_path project_output_path;
-  mb_path import_tie_list_path;
-  mb_path export_tie_list_path;
-  int project_inputbase_set = false;
-  int project_inputadd_set = false;
-  int project_output_set = false;
-  int import_tie_list_set = false;
-  int export_tie_list_set = false;
-  int update_datalist = false;
-  struct mbna_project project_inputbase;
-  struct mbna_project project_inputadd;
-  struct mbna_project project_output;
-
-  /* mbnavadjustmerge mod parameters */
-  struct mbnavadjust_mod mods[NUMBER_MODS_MAX];
-  int num_mods = 0;
-
-  struct mbna_file *file1;
-  struct mbna_section *section1;
-  struct mbna_file *file2;
-  struct mbna_section *section2;
-  struct mbna_file *file;
-  struct mbna_section *section;
-  struct mbna_crossing *crossing;
-  struct mbna_tie *tie;
-
-  int triangulate = TRIANGULATE_NONE;
-  double triangle_scale = 0.0;
-
-  int num_import_tie;
-  int num_import_globaltie;
-  int import_status = IMPORT_NONE;
-  int import_tie_status;
-  mb_path import_tie_file_1_path;
-  mb_path import_tie_file_2_path;
-  mb_path import_tie_file_1_name;
-  mb_path import_tie_file_2_name;
-  double import_tie_snav_1_time_d;
-  double import_tie_snav_2_time_d;
-  double import_tie_offset_x_m;
-  double import_tie_offset_y_m;
-  double import_tie_offset_z_m;
-  double import_tie_sigmar1;
-  double import_tie_sigmax1[3];
-  double import_tie_sigmar2;
-  double import_tie_sigmax2[3];
-  double import_tie_sigmar3;
-  double import_tie_sigmax3[3];
-  int import_tie_file_1;
-  int import_tie_file_2;
-  int import_tie_section_1_id;
-  int import_tie_section_2_id;
-  int import_tie_snav_1;
-  int import_tie_snav_2;
-  int num_old_ties, num_new_ties;
-  mb_path import_globaltie_file_path;
-  mb_path import_globaltie_file_name;
-  int import_globaltie_status;
-  int import_globaltie_file;
-  int import_globaltie_section_id;
-  int import_globaltie_snav;
-  double import_globaltie_snav_time_d;
-  double import_globaltie_offset_x_m;
-  double import_globaltie_offset_y_m;
-  double import_globaltie_offset_z_m;
-  double import_globaltie_offset_xsigma;
-  double import_globaltie_offset_ysigma;
-  double import_globaltie_offset_zsigma;
-  double minimum_section_length = 0.0;
-  FILE *tfp;
-
-  char buffer[BUFFER_MAX];
-  char *result = NULL;
-  int nscan;
-  int shellstatus;
-  mb_path command = "";
-  mb_path filename = "";
-  double mtodeglon, mtodeglat;
-  int current_crossing;
-  bool found = false;
-  bool found_crossing = false;
-  int imod, ifile, icrossing, itie, itie_set, isection, isnav;
-  double timediff, timediffmin;
-  mb_path tmp_mb_path = "";
-  int tmp_int;
-  double tmp_double;
-  int i, j, k;
-
-  memset(project_inputbase_path, 0, sizeof(mb_path));
-  memset(project_inputadd_path, 0, sizeof(mb_path));
-  memset(project_output_path, 0, sizeof(mb_path));
-  memset(mods, 0, NUMBER_MODS_MAX * sizeof(struct mbnavadjust_mod));
+  int option_index;
+  int errflg = 0;
+  int c;
+  bool help = 0;
 
   /* process argument list */
   while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
@@ -399,6 +317,7 @@ int main(int argc, char **argv) {
           --set-global-tie=file:section/xoffset/yoffset/zoffset */
       else if (strcmp("set-global-tie", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d:%d/%lf/%lf/%lf/%lf/%lf/%lf", &mods[num_mods].file1,
                               &mods[num_mods].section1, &mods[num_mods].snav1, &mods[num_mods].xoffset,
                               &mods[num_mods].yoffset, &mods[num_mods].zoffset, &mods[num_mods].xsigma,
@@ -448,6 +367,7 @@ int main(int argc, char **argv) {
           --set-global-tie-zonly=file:section:snav */
       else if (strcmp("set-global-tie-xyz", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d:%d", &mods[num_mods].file1, &mods[num_mods].section1,
                               &mods[num_mods].snav1)) == 3) {
             mods[num_mods].mode = MOD_MODE_SET_GLOBAL_TIE_XYZ;
@@ -468,6 +388,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("set-global-tie-xyonly", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d:%d", &mods[num_mods].file1, &mods[num_mods].section1,
                               &mods[num_mods].snav1)) == 3) {
             mods[num_mods].mode = MOD_MODE_SET_GLOBAL_TIE_XY;
@@ -488,6 +409,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("set-global-tie-zonly", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d:%d", &mods[num_mods].file1, &mods[num_mods].section1,
                               &mods[num_mods].snav1)) == 3) {
             mods[num_mods].mode = MOD_MODE_SET_GLOBAL_TIE_Z;
@@ -513,6 +435,7 @@ int main(int argc, char **argv) {
           --unset-all-global-ties  */
       else if (strcmp("unset-global-tie", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d", &mods[num_mods].file1, &mods[num_mods].section1)) == 2) {
             mods[num_mods].mode = MOD_MODE_UNSET_GLOBAL_TIE;
             num_mods++;
@@ -540,6 +463,7 @@ int main(int argc, char **argv) {
           --add-crossing=file1:section1/file2:section2 */
       else if (strcmp("add-crossing", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d/%d:%d", &mods[num_mods].file1, &mods[num_mods].section1,
                               &mods[num_mods].file2, &mods[num_mods].section2)) == 4) {
             mods[num_mods].mode = MOD_MODE_ADD_CROSSING;
@@ -565,6 +489,7 @@ int main(int argc, char **argv) {
           --set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset */
       else if (strcmp("set-tie", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d/%d:%d/%lf/%lf/%lf/%lf/%lf/%lf", &mods[num_mods].file1,
                               &mods[num_mods].section1, &mods[num_mods].file2, &mods[num_mods].section2,
                               &mods[num_mods].xoffset, &mods[num_mods].yoffset, &mods[num_mods].zoffset,
@@ -636,6 +561,7 @@ int main(int argc, char **argv) {
           --set-tie-zonly=file1:section1/file2:section2 */
       else if (strcmp("set-tie-xyz", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d/%d:%d", &mods[num_mods].file1, &mods[num_mods].section1,
                               &mods[num_mods].file2, &mods[num_mods].section2)) == 4) {
             mods[num_mods].mode = MOD_MODE_SET_TIE_XYZ;
@@ -657,6 +583,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("set-tie-xyonly", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d/%d:%d", &mods[num_mods].file1, &mods[num_mods].section1,
                               &mods[num_mods].file2, &mods[num_mods].section2)) == 4) {
             mods[num_mods].mode = MOD_MODE_SET_TIE_XY;
@@ -678,6 +605,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("set-tie-zonly", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d/%d:%d", &mods[num_mods].file1, &mods[num_mods].section1,
                               &mods[num_mods].file2, &mods[num_mods].section2)) == 4) {
             mods[num_mods].mode = MOD_MODE_SET_TIE_Z;
@@ -741,6 +669,7 @@ int main(int argc, char **argv) {
           --set-ties-zonly-with-file=file */
       else if (strcmp("set-ties-xyz-with-file", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 1) {
             mods[num_mods].mode = MOD_MODE_SET_TIES_XYZ_FILE;
             num_mods++;
@@ -756,6 +685,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("set-ties-xyonly-with-file", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 1) {
             mods[num_mods].mode = MOD_MODE_SET_TIES_XY_FILE;
             num_mods++;
@@ -772,6 +702,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("set-ties-xyz-with-file", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 1) {
             mods[num_mods].mode = MOD_MODE_SET_TIES_Z_FILE;
             num_mods++;
@@ -793,6 +724,7 @@ int main(int argc, char **argv) {
           --set-ties-zonly-with-survey=survey */
       else if (strcmp("set-ties-xyz-with-survey", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].survey1)) == 1) {
             mods[num_mods].mode = MOD_MODE_SET_TIES_XYZ_SURVEY;
             num_mods++;
@@ -809,6 +741,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("set-ties-xyonly-with-survey", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].survey1)) == 1) {
             mods[num_mods].mode = MOD_MODE_SET_TIES_XY_SURVEY;
             num_mods++;
@@ -825,6 +758,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("set-ties-zonly-with-survey", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].survey1)) == 1) {
             mods[num_mods].mode = MOD_MODE_SET_TIES_Z_SURVEY;
             num_mods++;
@@ -847,6 +781,7 @@ int main(int argc, char **argv) {
           --set-ties-zonly-by-survey=survey */
       else if (strcmp("set-ties-xyz-by-survey", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].survey1)) == 1) {
             mods[num_mods].mode = MOD_MODE_SET_TIES_XYZ_BYSURVEY;
             num_mods++;
@@ -863,6 +798,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("set-ties-xyonly-by-survey", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].survey1)) == 1) {
             mods[num_mods].mode = MOD_MODE_SET_TIES_XY_BYSURVEY;
             num_mods++;
@@ -879,6 +815,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("set-ties-zonly-by-survey", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].survey1)) == 1) {
             mods[num_mods].mode = MOD_MODE_SET_TIES_Z_BYSURVEY;
             num_mods++;
@@ -901,6 +838,7 @@ int main(int argc, char **argv) {
           --set-ties-zonly-by-block=survey1/survey2 */
       else if (strcmp("set-ties-xyz-by-block", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d/%d", &mods[num_mods].survey1, &mods[num_mods].survey2)) == 2) {
             mods[num_mods].mode = MOD_MODE_SET_TIES_XYZ_BLOCK;
             num_mods++;
@@ -916,6 +854,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("set-ties-xyonly-by-block", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d/%d", &mods[num_mods].survey1, &mods[num_mods].survey2)) == 2) {
             mods[num_mods].mode = MOD_MODE_SET_TIES_XY_BLOCK;
             num_mods++;
@@ -932,6 +871,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("set-ties-xyz-by-block", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d/%d", &mods[num_mods].survey1, &mods[num_mods].survey2)) == 2) {
             mods[num_mods].mode = MOD_MODE_SET_TIES_Z_BLOCK;
             num_mods++;
@@ -951,6 +891,7 @@ int main(int argc, char **argv) {
           --set-ties-zoffset-by-block=survey1/survey2/zoffset */
       else if (strcmp("set-ties-zoffset-by-block", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d/%d/%lf", &mods[num_mods].survey1, &mods[num_mods].survey2,
                               &mods[num_mods].zoffset)) == 3) {
             mods[num_mods].mode = MOD_MODE_SET_TIES_ZOFFSET_BLOCK;
@@ -971,6 +912,7 @@ int main(int argc, char **argv) {
           --set-ties-xyonly-by-time=timethreshold[y | d | h | m] */
       else if (strcmp("set-ties-xyonly-by-time", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%lfy", &mods[num_mods].dt)) == 1) {
             mods[num_mods].dt *= MB_SECINYEAR;
             mods[num_mods].mode = MOD_MODE_SET_TIES_XY_BY_TIME;
@@ -1015,6 +957,7 @@ int main(int argc, char **argv) {
           --unset-ties-all */
       else if (strcmp("unset-tie", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d/%d:%d", &mods[num_mods].file1, &mods[num_mods].section1,
                               &mods[num_mods].file2, &mods[num_mods].section2)) == 4) {
             mods[num_mods].mode = MOD_MODE_UNSET_TIE;
@@ -1030,6 +973,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("unset-ties-with-file", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 1) {
             mods[num_mods].mode = MOD_MODE_UNSET_TIES_FILE;
             num_mods++;
@@ -1044,6 +988,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("unset-ties-with-survey", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].survey1)) == 1) {
             mods[num_mods].mode = MOD_MODE_UNSET_TIES_SURVEY;
             num_mods++;
@@ -1058,6 +1003,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("unset-ties-by-survey", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].survey1)) == 1) {
             mods[num_mods].mode = MOD_MODE_UNSET_TIES_BYSURVEY;
             num_mods++;
@@ -1072,6 +1018,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("unset-ties-by-block", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d/%d",
             &mods[num_mods].survey1, &mods[num_mods].survey2)) == 2) {
             mods[num_mods].mode = MOD_MODE_UNSET_TIES_BLOCK;
@@ -1126,6 +1073,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("unset-skipped-crossings-by-block", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d", &mods[num_mods].survey1, &mods[num_mods].survey2)) == 2) {
             mods[num_mods].mode = MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK;
             num_mods++;
@@ -1152,6 +1100,7 @@ int main(int argc, char **argv) {
           --insert-discontinuity */
       else if (strcmp("insert-discontinuity", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d", &mods[num_mods].file1, &mods[num_mods].section1)) == 2) {
             mods[num_mods].mode = MOD_MODE_INSERT_DISCONTINUITY;
             num_mods++;
@@ -1168,6 +1117,7 @@ int main(int argc, char **argv) {
           --reimport-all-files */
       else if (strcmp("reimport-file", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 2) {
             mods[num_mods].mode = MOD_MODE_REIMPORT_FILE;
             num_mods++;
@@ -1229,6 +1179,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("triangulate-section", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%d:%d", &mods[num_mods].file1, &mods[num_mods].section1)) == 2) {
             mods[num_mods].mode = MOD_MODE_TRIANGULATE_SECTION;
             num_mods++;
@@ -1244,6 +1195,7 @@ int main(int argc, char **argv) {
       }
       else if (strcmp("triangulate-scale", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
           if ((nscan = sscanf(optarg, "%lf", &triangle_scale)) != 1) {
             fprintf(stderr, "Failure to parse --triangulate-scale=%s\n\tmod command ignored\n\n", optarg);
           }
@@ -1259,6 +1211,7 @@ int main(int argc, char **argv) {
       else if (strcmp("unset-short-section-ties", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
           mods[num_mods].mode = MOD_MODE_UNSET_SHORT_SECTION_TIES;
+          int nscan;
           if ((nscan = sscanf(optarg, "%lf", &minimum_section_length)) == 1) {
             num_mods++;
           }
@@ -1274,6 +1227,7 @@ int main(int argc, char **argv) {
       else if (strcmp("skip-short-section-crossings", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
           mods[num_mods].mode = MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS;
+          int nscan;
           if ((nscan = sscanf(optarg, "%lf", &minimum_section_length)) == 1) {
             num_mods++;
           }
@@ -1328,7 +1282,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       num_mods:                   %d\n", num_mods);
     fprintf(stderr, "dbg2       mod# mode survey1 file1 section1 survey2 file2 section2 "
                     "xoffset yoffset zoffset xsigma ysigma zsigma dt\n");
-    for (i = 0; i < num_mods; i++) {
+    for (int i = 0; i < num_mods; i++) {
       fprintf(stderr, "dbg2       mods[%d]: %d  %d %d %d   %d %d %d  %f %f %f  %f %f %f  %f\n", i, mods[i].mode,
               mods[i].survey1, mods[i].file1, mods[i].section1, mods[i].survey2, mods[i].file2, mods[i].section2,
               mods[i].xoffset, mods[i].yoffset, mods[i].zoffset, mods[i].xsigma, mods[i].ysigma, mods[i].zsigma,
@@ -1342,6 +1296,78 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\nusage: %s\n", usage_message);
     exit(error);
   }
+
+  }
+
+  /* mbnavadjustmerge controls */
+  int mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_NONE;
+  int update_datalist = false;
+
+  struct mbna_file *file1;
+  struct mbna_section *section1;
+  struct mbna_file *file2;
+  struct mbna_section *section2;
+  struct mbna_file *file;
+  struct mbna_section *section;
+  struct mbna_crossing *crossing;
+  struct mbna_tie *tie;
+
+  int num_import_tie;
+  int num_import_globaltie;
+  int import_status = IMPORT_NONE;
+  int import_tie_status;
+  mb_path import_tie_file_1_path;
+  mb_path import_tie_file_2_path;
+  mb_path import_tie_file_1_name;
+  mb_path import_tie_file_2_name;
+  double import_tie_snav_1_time_d;
+  double import_tie_snav_2_time_d;
+  double import_tie_offset_x_m;
+  double import_tie_offset_y_m;
+  double import_tie_offset_z_m;
+  double import_tie_sigmar1;
+  double import_tie_sigmax1[3];
+  double import_tie_sigmar2;
+  double import_tie_sigmax2[3];
+  double import_tie_sigmar3;
+  double import_tie_sigmax3[3];
+  int import_tie_file_1;
+  int import_tie_file_2;
+  int import_tie_section_1_id;
+  int import_tie_section_2_id;
+  int import_tie_snav_1;
+  int import_tie_snav_2;
+  int num_old_ties, num_new_ties;
+  mb_path import_globaltie_file_path;
+  mb_path import_globaltie_file_name;
+  int import_globaltie_status;
+  int import_globaltie_file;
+  int import_globaltie_section_id;
+  int import_globaltie_snav;
+  double import_globaltie_snav_time_d;
+  double import_globaltie_offset_x_m;
+  double import_globaltie_offset_y_m;
+  double import_globaltie_offset_z_m;
+  double import_globaltie_offset_xsigma;
+  double import_globaltie_offset_ysigma;
+  double import_globaltie_offset_zsigma;
+  FILE *tfp;
+
+  char buffer[BUFFER_MAX];
+  char *result = NULL;
+  int shellstatus;
+  mb_path command = "";
+  mb_path filename = "";
+  double mtodeglon, mtodeglat;
+  int current_crossing;
+  bool found = false;
+  bool found_crossing = false;
+  int imod, ifile, icrossing, itie, itie_set, isection, isnav;
+  double timediff, timediffmin;
+  mb_path tmp_mb_path = "";
+  int tmp_int;
+  double tmp_double;
+  int i, j, k;
 
   /* figure out mbnavadjust project merge mode */
   if (project_inputbase_set == false) {
@@ -1399,10 +1425,14 @@ int main(int argc, char **argv) {
     mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_MERGE;
   }
 
-  /* initialize the project structures */
+  struct mbna_project project_inputbase;
   memset(&project_inputbase, 0, sizeof(struct mbna_project));
+  struct mbna_project project_inputadd;
   memset(&project_inputadd, 0, sizeof(struct mbna_project));
+  struct mbna_project project_output;
   memset(&project_output, 0, sizeof(struct mbna_project));
+
+  int status = MB_SUCCESS;
 
   /* if merging two projects then read the first, create new output project */
   if (mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_MERGE || mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_COPY) {
@@ -3025,6 +3055,7 @@ int main(int argc, char **argv) {
       }
       else if (strncmp(buffer, "TIE", 3) == 0) {
         /* read the first line of the next tie */
+        int nscan;
         if ((nscan = sscanf(buffer, "TIE %s %s %d %lf %lf %lf %lf %lf", import_tie_file_1_path, import_tie_file_2_path,
                             &import_tie_status, &import_tie_snav_1_time_d, &import_tie_snav_2_time_d,
                             &import_tie_offset_x_m, &import_tie_offset_y_m, &import_tie_offset_z_m)) == 8) {
@@ -3042,6 +3073,7 @@ int main(int argc, char **argv) {
         }
       }
       else if (strncmp(buffer, "GLOBALTIE", 9) == 0) {
+        int nscan;
         if ((nscan = sscanf(buffer, "GLOBALTIE %s %d %lf %lf %lf %lf %lf %lf %lf", import_globaltie_file_path,
                             &import_globaltie_status, &import_globaltie_snav_time_d, &import_globaltie_offset_x_m,
                             &import_globaltie_offset_y_m, &import_globaltie_offset_z_m, &import_globaltie_offset_xsigma,
