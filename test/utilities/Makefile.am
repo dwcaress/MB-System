@@ -113,7 +113,7 @@ check_SCRIPTS += mbsslayout_test.py
 TESTS += mbsvplist_test.py
 check_SCRIPTS += mbsvplist_test.py
 
-if BUILDMBSVPSELECT
+if BUILD_MBSVPSELECT
 TESTS += mbsvpselect_test.py
 check_SCRIPTS += mbsvpselect_test.py
 endif

@@ -87,6 +87,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@BUILD_MBSVPSELECT_TRUE@am__append_1 = mbsvpselect_test.py
+@BUILD_MBSVPSELECT_TRUE@am__append_2 = mbsvpselect_test.py
 subdir = test/utilities
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -514,7 +516,7 @@ TESTS = mbabsorption_test.py mbareaclean_test.py mbauvloglist_test.py \
 	mbrolltimelag_test.py mbroutetime_test.py mbsegygrid_test.py \
 	mbsegyinfo_test.py mbsegylist_test.py mbsegypsd_test.py \
 	mbset_test.py mbsslayout_test.py mbsvplist_test.py \
-	mbsvpselect_test.py mbtime_test.py mbvoxelclean_test.py
+	$(am__append_1) mbtime_test.py mbvoxelclean_test.py
 
 # if HAVE_PYTHON
 check_SCRIPTS = mbabsorption_test.py mbareaclean_test.py \
@@ -529,7 +531,7 @@ check_SCRIPTS = mbabsorption_test.py mbareaclean_test.py \
 	mbprocess_test.py mbrolltimelag_test.py mbroutetime_test.py \
 	mbsegygrid_test.py mbsegyinfo_test.py mbsegylist_test.py \
 	mbsegypsd_test.py mbset_test.py mbsslayout_test.py \
-	mbsvplist_test.py mbsvpselect_test.py mbtime_test.py \
+	mbsvplist_test.py $(am__append_2) mbtime_test.py \
 	mbvoxelclean_test.py
 all: all-am
 

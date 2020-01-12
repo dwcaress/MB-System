@@ -372,6 +372,12 @@ mbinfo in this way, allowing a speedup of the mbprocess execution.
 
 mbgrid: Added data min max values to the per file shell output when verbose > 0
 
+mbsvpselect: This program depends on geodesic calculations that are now part of
+the Proj software package (from version 6 onwards). Previously the src/utilities
+directory had included the files geodetic.h and geodetic.c to provide this capability;
+those are now not included. Consequently, if MB-System is built with Proj versions 4 or 5,
+then mbsvpselect will not be built.
+
 Code style: Kurt Schwehr is systematically altering the code to conform to best practices and adding build tests. The tests are performed by running
     make check
 and are executed automatically by the Travis CI service integrated with Github

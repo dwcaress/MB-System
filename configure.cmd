@@ -378,8 +378,7 @@ autoupdate
 autoreconf --force --install --warnings=all
 
 LDFLAGS="-L/opt/X11/lib" \
-CFLAGS="-g -I/opt/X11/include -DWITH_GCTP_SINCOS" \
-CXXFLAGS="-std=c++11" \
+CFLAGS="-g -I/opt/X11/include" \
 ./configure \
     --prefix=/usr/local \
     --with-proj-include=/usr/local/opt/proj/include \
