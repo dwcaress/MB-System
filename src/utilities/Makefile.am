@@ -1,7 +1,9 @@
 if BUILD_FFTW
- FFTW_PROG = mbsegypsd
+  FFTW_PROG = mbsegypsd
 endif
-
+if BUILD_MBSVPSELECT
+  MBSVPSELECT_PROG = mbsvpselect
+endif
 if BUILD_MBTRN
   MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
 endif
@@ -42,7 +44,7 @@ bin_PROGRAMS += mbsegylist
 bin_PROGRAMS += mbset
 bin_PROGRAMS += mbsslayout
 bin_PROGRAMS += mbsvplist
-bin_PROGRAMS += mbsvpselect
+bin_PROGRAMS += $(MBSVPSELECT_PROG)
 bin_PROGRAMS += mbtime
 bin_PROGRAMS += mbvoxelclean
 bin_PROGRAMS += $(FFTW_PROG)

@@ -102,8 +102,8 @@ bin_PROGRAMS = mbconfig$(EXEEXT) mbabsorption$(EXEEXT) \
 	mbrolltimelag$(EXEEXT) mbroutetime$(EXEEXT) \
 	mbsegygrid$(EXEEXT) mbsegyinfo$(EXEEXT) mbsegylist$(EXEEXT) \
 	mbset$(EXEEXT) mbsslayout$(EXEEXT) mbsvplist$(EXEEXT) \
-	mbsvpselect$(EXEEXT) mbtime$(EXEEXT) mbvoxelclean$(EXEEXT) \
-	$(am__EXEEXT_1)
+	$(am__EXEEXT_1) mbtime$(EXEEXT) mbvoxelclean$(EXEEXT) \
+	$(am__EXEEXT_2)
 @BUILD_GSF_TRUE@am__append_1 = -I${top_srcdir}/src/gsf
 subdir = src/utilities
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -120,7 +120,8 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/mbio/mb_config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-@BUILD_FFTW_TRUE@am__EXEEXT_1 = mbsegypsd$(EXEEXT)
+@BUILD_MBSVPSELECT_TRUE@am__EXEEXT_1 = mbsvpselect$(EXEEXT)
+@BUILD_FFTW_TRUE@am__EXEEXT_2 = mbsegypsd$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_mbabsorption_OBJECTS = mbabsorption.$(OBJEXT)
@@ -556,6 +557,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_FFTW_TRUE@FFTW_PROG = mbsegypsd
+@BUILD_MBSVPSELECT_TRUE@MBSVPSELECT_PROG = mbsvpselect
 @BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
 include_HEADERS = levitus.h
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
