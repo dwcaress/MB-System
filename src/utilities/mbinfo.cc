@@ -26,13 +26,13 @@
  */
 
 #include <getopt.h>
-#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
+#include <cmath>
 #include <algorithm>
 
 #include "mb_define.h"
@@ -2144,7 +2144,7 @@ int main(int argc, char **argv) {
       fprintf(output, " ----     -      ----     --------    -----\n");
       for (int i = 0; i < beams_bath_max; i++)
         fprintf(output, "%4d  %5d   %8.2f   %8.2f  %8.2f\n", i, nbathvartot[i], bathy_scale * bathmeantot[i],
-                bathy_scale * bathy_scale * bathvartot[i], bathy_scale * sqrt(bathvartot[i]));
+                bathy_scale * bathy_scale * bathvartot[i], bathy_scale * std::sqrt(bathvartot[i]));
       fprintf(output, "\n");
       break;
     case JSON:
@@ -2155,8 +2155,8 @@ int main(int argc, char **argv) {
       for (int i = 0; i < beams_bath_max; i++) {
         if (i > 0)
           fprintf(output, ",\n");
-        double sigma = bathy_scale * sqrt(bathvartot[i]);
-        if (isnan(sigma))
+        double sigma = bathy_scale * std::sqrt(bathvartot[i]);
+        if (std::isnan(sigma))
           sigma = 0.0;
         fprintf(output, "{\"row\":\"%d,%d,%.2f,%.2f,%.2f\"}", i, nbathvartot[i], bathy_scale * bathmeantot[i],
                 bathy_scale * bathy_scale * bathvartot[i], sigma);
@@ -2169,8 +2169,8 @@ int main(int argc, char **argv) {
       fprintf(output, "\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
       fprintf(output, "\t\t<values>\n");
       for (int i = 0; i < beams_bath_max; i++) {
-        double sigma = bathy_scale * sqrt(bathvartot[i]);
-        if (isnan(sigma))
+        double sigma = bathy_scale * std::sqrt(bathvartot[i]);
+        if (std::isnan(sigma))
           sigma = 0.0;
         fprintf(output, "\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n", i, nbathvartot[i], bathy_scale * bathmeantot[i],
                 bathy_scale * bathy_scale * bathvartot[i], sigma);
@@ -2191,7 +2191,7 @@ int main(int argc, char **argv) {
       fprintf(output, " ----     -      ----     --------    -----\n");
       for (int i = 0; i < beams_amp_max; i++)
         fprintf(output, "%4d  %5d   %8.2f   %8.2f  %8.2f\n", i, nampvartot[i], ampmeantot[i], ampvartot[i],
-                sqrt(ampvartot[i]));
+                std::sqrt(ampvartot[i]));
       fprintf(output, "\n");
       break;
     case JSON:
@@ -2202,8 +2202,8 @@ int main(int argc, char **argv) {
       for (int i = 0; i < beams_amp_max; i++) {
         if (i > 0)
           fprintf(output, ",\n");
-        double sigma = sqrt(ampvartot[i]);
-        if (isnan(sigma))
+        double sigma = std::sqrt(ampvartot[i]);
+        if (std::isnan(sigma))
           sigma = 0;
         fprintf(output, "{\"row\" : \"%d,%d,%.2f,%.2f,%.2f\"}", i, nampvartot[i], ampmeantot[i], ampvartot[i], sigma);
       }
@@ -2215,8 +2215,8 @@ int main(int argc, char **argv) {
       fprintf(output, "\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
       fprintf(output, "\t\t<values>\n");
       for (int i = 0; i < beams_amp_max; i++) {
-        double sigma = sqrt(ampvartot[i]);
-        if (isnan(sigma))
+        double sigma = std::sqrt(ampvartot[i]);
+        if (std::isnan(sigma))
           sigma = 0.0;
         fprintf(output, "\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n", i, nampvartot[i], ampmeantot[i], ampvartot[i], sigma);
       }
@@ -2236,7 +2236,7 @@ int main(int argc, char **argv) {
       fprintf(output, " ----     -      ----     --------    -----\n");
       for (int i = 0; i < pixels_ss_max; i++)
         fprintf(output, "%4d  %5d   %8.2f   %8.2f  %8.2f\n", i, nssvartot[i], ssmeantot[i], ssvartot[i],
-                sqrt(ssvartot[i]));
+                std::sqrt(ssvartot[i]));
       fprintf(output, "\n");
       break;
     case JSON:
@@ -2247,8 +2247,8 @@ int main(int argc, char **argv) {
       for (int i = 0; i < pixels_ss_max; i++) {
         if (i > 0)
           fprintf(output, ",\n");
-        double sigma = sqrt(ssvartot[i]);
-        if (isnan(sigma))
+        double sigma = std::sqrt(ssvartot[i]);
+        if (std::isnan(sigma))
           sigma = 0.0;
         fprintf(output, "{\"row\":\"%d,%d,%.2f,%.2f,%.2f\"}", i, nssvartot[i], ssmeantot[i], ssvartot[i], sigma);
       }
@@ -2260,8 +2260,8 @@ int main(int argc, char **argv) {
       fprintf(output, "\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
       fprintf(output, "\t\t<values>\n");
       for (int i = 0; i < pixels_ss_max; i++) {
-        double sigma = sqrt(ssvartot[i]);
-        if (isnan(sigma))
+        double sigma = std::sqrt(ssvartot[i]);
+        if (std::isnan(sigma))
           sigma = 0.0;
         fprintf(output, "\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n", i, nssvartot[i], ssmeantot[i], ssvartot[i], sigma);
       }
