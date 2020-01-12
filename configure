@@ -683,6 +683,8 @@ libnetcdf_LIBS
 NETCDF
 NC_CONF
 libproj_CPPFLAGS
+BUILD_MBSVPSELECT_FALSE
+BUILD_MBSVPSELECT_TRUE
 libproj_LIBS
 libproj_CFLAGS
 PKG_CONFIG_LIBDIR
@@ -20154,7 +20156,16 @@ save_CPPFLAGS=$CPPFLAGS
 save_CFLAGS=$CFLAGS
 if test "$FOUND_PROJ4" = "yes" ; then
     libproj_CPPFLAGS="$libproj_CPPFLAGS -DUSE_PROJ4_API"
+        $as_echo "Only have PROJ4 without geodesic calculations, will not build mbsvpselect..."
 fi
+ if test $FOUND_PROJ6 = yes; then
+  BUILD_MBSVPSELECT_TRUE=
+  BUILD_MBSVPSELECT_FALSE='#'
+else
+  BUILD_MBSVPSELECT_TRUE='#'
+  BUILD_MBSVPSELECT_FALSE=
+fi
+
 CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
 CFLAGS="$CFLAGS $libproj_CPPFLAGS"
 ac_fn_c_check_header_mongrel "$LINENO" "proj.h" "ac_cv_header_proj_h" "$ac_includes_default"
@@ -21779,6 +21790,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_PYTHON_TRUE}" && test -z "${HAVE_PYTHON_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_PYTHON\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_MBSVPSELECT_TRUE}" && test -z "${BUILD_MBSVPSELECT_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_MBSVPSELECT\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_FFTW_TRUE}" && test -z "${BUILD_FFTW_FALSE}"; then
@@ -24304,7 +24319,7 @@ fi
 if test $FOUND_PROJ6 = yes; then
     $as_echo "PROJ: Using PROJ 6 API"
 else
-    $as_echo "PROJ: Using PROJ 4/5 API"
+    $as_echo "PROJ: Using PROJ 4/5 API (will not build mbsvpselect)"
 fi
 
 $as_echo "libgmt_CPPFLAGS:     $libgmt_CPPFLAGS"

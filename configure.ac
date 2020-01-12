@@ -416,7 +416,10 @@ save_CPPFLAGS=$CPPFLAGS
 save_CFLAGS=$CFLAGS
 if test "$FOUND_PROJ4" = "yes" ; then
     libproj_CPPFLAGS="$libproj_CPPFLAGS -DUSE_PROJ4_API"
+    dnl Only have PROJ4 without geodesic calculations, will not build mbsvpselect...
+    AS_ECHO(["Only have PROJ4 without geodesic calculations, will not build mbsvpselect..."])
 fi
+AM_CONDITIONAL([BUILD_MBSVPSELECT], [test $FOUND_PROJ6 = yes])
 CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
 CFLAGS="$CFLAGS $libproj_CPPFLAGS"
 AC_CHECK_HEADER(proj.h, [FOUND_PROJ_HEADER_projh=yes], [FOUND_PROJ_HEADER_projh=no],)
@@ -1100,7 +1103,7 @@ fi
 if test $FOUND_PROJ6 = yes; then
     AS_ECHO(["PROJ: Using PROJ 6 API"])
 else
-    AS_ECHO(["PROJ: Using PROJ 4/5 API"])
+    AS_ECHO(["PROJ: Using PROJ 4/5 API (will not build mbsvpselect)"])
 fi
 
 AS_ECHO(["libgmt_CPPFLAGS:     $libgmt_CPPFLAGS"])

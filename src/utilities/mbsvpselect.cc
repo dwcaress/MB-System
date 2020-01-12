@@ -951,20 +951,15 @@ void read_list(char *list, char *list_2) {
 			       "interpretation \n");
 	}
 	int n = 0;
-	//struct geod_geodesic g;
-  // isolated geod calls into mb_geod functions in mb_proj.c - DWC January 11, 2020
-  void *g_ptr = nullptr;
+	struct geod_geodesic g;
 	double azi1, azi2;
-  int error = MB_ERROR_NO_ERROR;
 
   // WGS84 ellipsoid parameters
   const double radius_equatorial = 6378137.0;
   const double radius_polar = 6356752.314245;
   const double flattening = 0.00335281066;
 
-	//geod_init(&g, radius_equatorial, flattening);
-  // isolated geod calls into mb_geod functions in mb_proj.c - DWC January 11, 2020
-  mb_geod_init(verbose, radius_equatorial, flattening, &g_ptr, &error);
+	geod_init(&g, radius_equatorial, flattening);
 	size = surveyLines_total;
 	for (int i = 0; i < size; i++) {
 #ifdef _WIN32
@@ -985,11 +980,8 @@ void read_list(char *list, char *list_2) {
 				}
 				double temp_dist = 0.0;
 				for (int j = 0; j < size_2; j++) {
-					//geod_inverse(&g, inf_hold[i].ave_lat, inf_hold[i].ave_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
-					//             &azi1, &azi2);
-					mb_geod_inverse(verbose, g_ptr, inf_hold[i].ave_lat, inf_hold[i].ave_lon,
-                          svp_hold[j].s_lat, svp_hold[j].s_lon,
-                          &dist[0][j], &azi1, &azi2, &error);
+					geod_inverse(&g, inf_hold[i].ave_lat, inf_hold[i].ave_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
+					             &azi1, &azi2);
 					if (j == 0) {
 						temp_dist = dist[0][j];
 					}
@@ -1035,11 +1027,8 @@ void read_list(char *list, char *list_2) {
 				}
 				double temp_dist = 0.0;
 				for (int j = 0; j < size_2; j++) {
-					//geod_inverse(&g, inf_hold[i].s_lat, inf_hold[i].s_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
-					//             &azi1, &azi2);
-					mb_geod_inverse(verbose, g_ptr, inf_hold[i].s_lat, inf_hold[i].s_lon,
-                        svp_hold[j].s_lat, svp_hold[j].s_lon,
-                        &dist[0][j], &azi1, &azi2, &error);
+					geod_inverse(&g, inf_hold[i].s_lat, inf_hold[i].s_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
+					             &azi1, &azi2);
 					if (j == 0) {
 						temp_dist = dist[0][j];
 					}
@@ -1085,11 +1074,8 @@ void read_list(char *list, char *list_2) {
 				}
 				double temp_dist = 0.0;
 				for (int j = 0; j < size_2; j++) {
-					//geod_inverse(&g, inf_hold[i].e_lat, inf_hold[i].e_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
-					//             &azi1, &azi2);
-					mb_geod_inverse(verbose, g_ptr, inf_hold[i].e_lat, inf_hold[i].e_lon,
-                          svp_hold[j].s_lat, svp_hold[j].s_lon,
-                          &dist[0][j], &azi1, &azi2, &error);
+					geod_inverse(&g, inf_hold[i].e_lat, inf_hold[i].e_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
+					             &azi1, &azi2);
 					if (j == 0) {
 						temp_dist = dist[0][j];
 					}
@@ -1201,11 +1187,8 @@ void read_list(char *list, char *list_2) {
 
 					/* dist[i][j] = distVincenty(inf_hold[i].ave_lat, inf_hold[i].ave_lon,
 					 svp_hold[j].s_lat, svp_hold[j].s_lon); */
-					//geod_inverse(&g, inf_hold[i].ave_lat, inf_hold[i].ave_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
-					//             &azi1, &azi2);
-					mb_geod_inverse(verbose, g_ptr, inf_hold[i].ave_lat, inf_hold[i].ave_lon,
-                          svp_hold[j].s_lat, svp_hold[j].s_lon,
-                          &dist[0][j], &azi1, &azi2, &error);
+					geod_inverse(&g, inf_hold[i].ave_lat, inf_hold[i].ave_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
+					             &azi1, &azi2);
 					if (verbose == 1)
 						printf("Time difference number %d is : %lf\n", j, time_hold[0][j]);
 					printf("position difference number %d is : %lf\n", j, dist[0][j]);
@@ -1299,11 +1282,8 @@ void read_list(char *list, char *list_2) {
 					min_hold[0][j] = abs(inf_hold[i].s_datum_time.tm_min - svp_hold[j].svp_datum_time.tm_min);
 					time_hold[0][j] = fabs(difftime(inf_hold[i].s_Time, svp_hold[j].svp_Time));
 					// processing distance differences
-					//geod_inverse(&g, inf_hold[i].ave_lat, inf_hold[i].ave_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
-					//             &azi1, &azi2);
-					mb_geod_inverse(verbose, g_ptr, inf_hold[i].ave_lat, inf_hold[i].ave_lon,
-                          svp_hold[j].s_lat, svp_hold[j].s_lon,
-                          &dist[0][j], &azi1, &azi2, &error);
+					geod_inverse(&g, inf_hold[i].ave_lat, inf_hold[i].ave_lon, svp_hold[j].s_lat, svp_hold[j].s_lon, &dist[0][j],
+					             &azi1, &azi2);
 					dist[0][j] -= p_4_range;
 					// if the SVP is within the range
 					puts("==================================================");
@@ -1460,7 +1440,6 @@ void read_list(char *list, char *list_2) {
 			}
 		}
 	}
-  mb_geod_free(verbose, &g_ptr, &error);
 	free(inf_hold);
 	free(svp_hold);
 	fclose(fDatalist);
