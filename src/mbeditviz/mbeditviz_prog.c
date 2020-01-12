@@ -12,7 +12,6 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- *
  * MBeditviz is an interactive swath bathymetry editor and patch
  * test tool for  MB-System.
  * It can work with any data format supported by the MBIO library.
@@ -21,28 +20,23 @@
  *
  * Author:	D. W. Caress
  * Date:	May 1, 2007
- *
  */
 
-/* Standard includes */
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
 #include <ctype.h>
 #include <math.h>
-#include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
+#include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_aux.h"
+#include "mb_status.h"
 #include "mbsys_singlebeam.h"
-
-/* mbview include file */
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1900)
@@ -53,7 +47,6 @@
 #include <Xm/Xm.h>
 #include "mbview.h"
 
-/* mbeditviz include file - define globals here */
 #define MBEDITVIZ_DECLARE_GLOBALS
 #include "mbeditviz.h"
 
