@@ -58,6 +58,19 @@
 char *GMT_runtime_bindir_win32(char *result);
 #endif
 
+// structure definition and function prototypes taken from geodesic.h in Proj 4.9.
+// - some package managers do not install geodesic.h along with proj_api.h
+struct geod_geodesic {
+  double a;                   /**< the equatorial radius */
+  double f;                   /**< the flattening */
+  double f1, e2, ep2, n, b, c2, etol2;
+  double A3x[6], C3x[15], C4x[21];
+};
+void geod_init(struct geod_geodesic* g, double a, double f);
+void geod_inverse(const struct geod_geodesic* g,
+                double lat1, double lon1, double lat2, double lon2,
+                double* ps12, double* pazi1, double* pazi2);
+
 /*--------------------------------------------------------------------*/
 int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 
@@ -275,6 +288,7 @@ int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, d
 #else
 
 #include <proj.h>
+#include <geodesic.h>
 
 /*--------------------------------------------------------------------*/
 int mb_proj6_init(int verbose, char *source_crs, char *target_crs, void **pjptr, int *error) {
@@ -522,6 +536,95 @@ int mb_proj_inverse(int verbose, void *pjptr, double u, double v, double *uu, do
 
   return (status);
 }
-/*--------------------------------------------------------------------*/
 
-#endif
+#endif // end of proj 6 section
+
+// Geod section identical for proj 4 and proj 6 as long as struct geod_geodesic
+// and the geod_* functions have been defined
+/*--------------------------------------------------------------------*/
+int mb_geod_init(int verbose, double radius_equatorial, double flattening, void **g_ptr, int *error) {
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
+    fprintf(stderr, "dbg2       radius_equatorial:  %f\n", radius_equatorial);
+    fprintf(stderr, "dbg2       flattening:         %f\n", flattening);
+  }
+
+  // allocate the geod structure
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct geod_geodesic), g_ptr, error);
+
+  // Call the proj function
+  geod_init(*g_ptr, radius_equatorial, flattening);
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       *g_ptr:          %p\n", (void *)*g_ptr);
+    fprintf(stderr, "dbg2       error:           %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:          %d\n", status);
+  }
+
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mb_geod_free(int verbose, void **g_ptr, int *error) {
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
+    fprintf(stderr, "dbg2       *g_ptr:             %p\n", (void *)*g_ptr);
+  }
+
+  // allocate the geod structure
+	const int status = mb_freed(verbose, __FILE__, __LINE__, g_ptr, error);
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       *g_ptr:             %p\n", (void *)*g_ptr);
+    fprintf(stderr, "dbg2       error:              %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:             %d\n", status);
+  }
+
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mb_geod_inverse(int verbose, void *g_ptr,
+                    double lat1, double lon1, double lat2, double lon2,
+                    double *distance, double *azimuth1, double *azimuth2, int *error) {
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
+    fprintf(stderr, "dbg2       lat1:               %f\n", lat1);
+    fprintf(stderr, "dbg2       lon1:               %f\n", lon1);
+    fprintf(stderr, "dbg2       lat2:               %f\n", lat2);
+    fprintf(stderr, "dbg2       lon2:               %f\n", lon2);
+  }
+
+  const int status = MB_SUCCESS;
+  geod_inverse((struct geod_geodesic *)g_ptr, lat1, lon1, lat2, lon2, distance, azimuth1, azimuth2);
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       distance:        %f\n", *distance);
+    fprintf(stderr, "dbg2       azimuth1:        %f\n", *azimuth1);
+    fprintf(stderr, "dbg2       azimuth2:        %f\n", *azimuth2);
+    fprintf(stderr, "dbg2       error:           %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:          %d\n", status);
+  }
+
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
