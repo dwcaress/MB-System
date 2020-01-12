@@ -613,6 +613,11 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error);
 int mb_proj_free(int verbose, void **pjptr, int *error);
 int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *easting, double *northing, int *error);
 int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, double *lon, double *lat, int *error);
+int mb_geod_init(int verbose, double radius_equatorial, double flattening, void **g_ptr, int *error);
+int mb_geod_free(int verbose, void **g_ptr, int *error);
+int mb_geod_inverse(int verbose, void *g_ptr,
+                    double lat1, double lon1, double lat2, double lon2,
+                    double *distance, double *azimuth1, double *azimuth2, int *error);
 
 /* mb_spline function prototypes */
 int mb_spline_init(int verbose, const double *x, const double *y, int n, double yp1, double ypn, double *y2, int *error);
