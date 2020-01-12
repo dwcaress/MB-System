@@ -3313,7 +3313,6 @@ int mbeditviz_selectregion(size_t instance) {
 	struct mbev_file_struct *file = NULL;
 	struct mbev_ping_struct *ping = NULL;
 	struct mbview_region_struct *region = NULL;
-	float *histogram = NULL;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	double dx, dy, dz;
 	double x, y;
@@ -3321,8 +3320,7 @@ int mbeditviz_selectregion(size_t instance) {
 	double heading, sonardepth;
 	double rolldelta, pitchdelta;
 	double mtodeglon, mtodeglat;
-	double range, beam_xtrack, beam_ltrack, beam_z;
-	double alphar, betar;
+	double beam_xtrack, beam_ltrack, beam_z;
 	int i, ifile, iping, ibeam;
 
 	/* print input debug statements */
@@ -3511,9 +3509,7 @@ int mbeditviz_selectarea(size_t instance) {
 	double heading, sonardepth;
 	double rolldelta, pitchdelta;
 	double mtodeglon, mtodeglat;
-	double range, beam_xtrack, beam_ltrack, beam_z;
-	double alphar, betar;
-	int i;
+	double beam_xtrack, beam_ltrack, beam_z;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
@@ -3681,8 +3677,8 @@ int mbeditviz_selectnav(size_t instance) {
 	double heading, sonardepth;
 	double rolldelta, pitchdelta;
 	double mtodeglon, mtodeglat;
-	double range, beam_xtrack, beam_ltrack, beam_z;
-	double alphar, betar;
+	double beam_xtrack, beam_ltrack, beam_z;
+	// double alphar, betar;
 	int i;
 
 	/* print input debug statements */
@@ -4019,8 +4015,8 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
 	double heading, sonardepth;
 	double rolldelta, pitchdelta;
 	double mtodeglon, mtodeglat;
-	double range, beam_xtrack, beam_ltrack, beam_z;
-	double alphar, betar;
+	double beam_xtrack, beam_ltrack, beam_z;
+	// double alphar, betar;
 	int ifilelast, ipinglast;
 	int i;
 
@@ -4125,8 +4121,9 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
 	double heading, sonardepth;
 	double rolldelta, pitchdelta;
 	double mtodeglon, mtodeglat;
-	double range, beam_xtrack, beam_ltrack, beam_z;
-	double alphar, betar;
+	// double range;
+	double beam_xtrack, beam_ltrack, beam_z;
+	// double alphar, betar;
 
 	if (mbev_verbose > 0)
 		fprintf(stderr, "mbeditviz_mb3dsoundings_biasapply:%f %f %f %f %f\n", rollbias, pitchbias, headingbias, timelag, snell);
@@ -4539,7 +4536,8 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 	double local_grid_dx, local_grid_dy;
 	double local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax;
 	int local_grid_n_columns, local_grid_n_rows;
-	double rollbias, rollbias_org;
+	double rollbias;
+	double rollbias_org;
 	double pitchbias, pitchbias_org;
 	double headingbias, headingbias_org;
 	double timelag, timelag_org;
