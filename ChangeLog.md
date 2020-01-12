@@ -22,7 +22,7 @@ and each distribution corresponds to a discrete Github release tag. Releases tha
 include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
-- Version 5.7.6beta22    January 11, 2020
+- Version 5.7.6beta23    January 11, 2020
 - Version 5.7.6beta21    December 12, 2019
 - Version 5.7.6beta20    November 26, 2019
 - Version 5.7.6beta19    November 22, 2019
@@ -338,7 +338,7 @@ MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 
 -------------------------------------------------------------------------------
 
------> 5.7.6beta22 (January 11, 2020)
+-----> 5.7.6beta23 (January 11, 2020)
 
 mbprocess, mbpreprocess, mb_make_info(): Altered mbprocess and mbpreprocess so
 that both run about half as slow (twice as fast) as before. This optimization is
