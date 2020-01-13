@@ -285,7 +285,7 @@ hardcode_into_libs=yes
 sys_lib_search_path_spec="/usr/lib/gcc/x86_64-redhat-linux/4.8.5 /usr/lib64 /lib64 /usr/lib /lib "
 
 # Detected run-time system search path for libraries.
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib64/atlas /usr/lib64/dyninst /usr/lib64/iscsi /usr/lib64/mysql "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib64/atlas /usr/lib64//bind9-export/ /usr/lib64/dyninst /usr/lib64/iscsi /usr/lib64/mysql "
 
 # Explicit LT_SYS_LIBRARY_PATH set during ./configure time.
 configure_time_lt_sys_library_path=""
