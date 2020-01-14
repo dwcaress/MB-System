@@ -144,9 +144,7 @@ WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
  *			XtPointer	call:	the call data (unused).
  */
 
-#ifdef VMS
 #include <stdlib.h>
-#endif
 /*---------------------------------------------------------------------------------------*/
 
 /* ARGSUSED */
