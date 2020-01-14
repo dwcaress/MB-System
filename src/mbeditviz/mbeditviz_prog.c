@@ -12,7 +12,6 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- *
  * MBeditviz is an interactive swath bathymetry editor and patch
  * test tool for  MB-System.
  * It can work with any data format supported by the MBIO library.
@@ -21,28 +20,23 @@
  *
  * Author:	D. W. Caress
  * Date:	May 1, 2007
- *
  */
 
-/* Standard includes */
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
 #include <ctype.h>
 #include <math.h>
-#include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
+#include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_aux.h"
+#include "mb_status.h"
 #include "mbsys_singlebeam.h"
-
-/* mbview include file */
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1900)
@@ -53,7 +47,6 @@
 #include <Xm/Xm.h>
 #include "mbview.h"
 
-/* mbeditviz include file - define globals here */
 #define MBEDITVIZ_DECLARE_GLOBALS
 #include "mbeditviz.h"
 
@@ -88,26 +81,16 @@ double mbdef_btime_d;
 double mbdef_etime_d;
 double mbdef_speedmin;
 double mbdef_timegap;
-int mbdef_uselockfiles;
+int mbdef_uselockfiles;  // TODO(schwehr): Make a bool
 
 /*--------------------------------------------------------------------*/
 int mbeditviz_init(int argc, char **argv) {
-	/* local variables */
-	int input_file_set = false;
-	int delete_input_file = false;
+	bool input_file_set = false;
+	bool delete_input_file = false;
 	mb_path ifile;
 	mb_path shell_command;
 	int shellstatus;
-	int i;
 
-	/* parsing variables */
-	extern char *optarg;
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* set default global control parameters */
 	mbev_status = MB_SUCCESS;
 	mbev_error = MB_ERROR_NO_ERROR;
 	mbev_verbose = 0;
@@ -119,13 +102,13 @@ int mbeditviz_init(int argc, char **argv) {
 	mbev_num_files_loaded = 0;
 	mbev_num_pings_loaded = 0;
 	mbev_num_soundings_loaded = 0;
-	for (i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		mbev_bounds[i] = 0.0;
 	}
 	mbev_files = NULL;
 	mbev_grid.status = MBEV_GRID_NONE;
 	mbev_grid.projection_id[0] = 0;
-	for (i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		mbev_grid.bounds[i] = 0.0;
 		mbev_grid.boundsutm[i] = 0.0;
 	}
@@ -142,14 +125,14 @@ int mbeditviz_init(int argc, char **argv) {
 	mbev_grid.wgt = NULL;
 	mbev_grid.val = NULL;
 	mbev_grid.sgm = NULL;
-	for (i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		mbev_grid_bounds[i] = 0.0;
 		mbev_grid_boundsutm[i] = 0.0;
 	}
 	mbev_grid_cellsize = 0.0;
 	mbev_grid_n_columns = 0;
 	mbev_grid_n_rows = 0;
-  mbev_selected.displayed = false;
+	mbev_selected.displayed = false;
 	mbev_selected.xorigin = 0.0;
 	mbev_selected.yorigin = 0.0;
 	mbev_selected.zorigin = 0.0;
@@ -203,7 +186,12 @@ int mbeditviz_init(int argc, char **argv) {
 	mbdef_speedmin = 0.0;
 	mbdef_timegap = 1000000000.0;
 
-	/* process argument list */
+	{
+	int errflg = 0;
+	int c;
+	int help = 0;
+	int flag = 0;
+
 	while ((c = getopt(argc, argv, "VvHhF:f:GgI:i:Rr")) != -1)
 		switch (c) {
 		case 'H':
@@ -271,26 +259,25 @@ int mbeditviz_init(int argc, char **argv) {
 		fprintf(stderr, "\nusage: %s\n", usage_message);
 		exit(mbev_error);
 	}
+	}
 
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       argc:      %d\n", argc);
-		for (i = 0; i < argc; i++)
+		for (int i = 0; i < argc; i++)
 			fprintf(stderr, "dbg2       argv[%d]:    %s\n", i, argv[i]);
 	}
 
 	/* If specified read input data */
-	if (input_file_set == true) {
+	if (input_file_set) {
 		mbev_status = mbeditviz_open_data(ifile, mbdef_format);
-		if (delete_input_file == true) {
+		if (delete_input_file) {
 			sprintf(shell_command, "rm %s &", ifile);
 			shellstatus = system(shell_command);
 		}
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBeditviz function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -299,16 +286,10 @@ int mbeditviz_init(int argc, char **argv) {
 		fprintf(stderr, "dbg2       mbev_status:  %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_get_format(char *file, int *form) {
-	/* local variables */
-	char tmp[MB_PATH_MAXLINE];
-	int tform;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -318,11 +299,12 @@ int mbeditviz_get_format(char *file, int *form) {
 
 	/* get filenames */
 	/* look for MB suffix convention */
+	char tmp[MB_PATH_MAXLINE];
+	int tform;
 	if ((mbev_status = mb_get_format(mbev_verbose, file, tmp, &tform, &mbev_error)) == MB_SUCCESS) {
 		*form = tform;
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -332,19 +314,10 @@ int mbeditviz_get_format(char *file, int *form) {
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_open_data(char *path, int format) {
-	/* local variables */
-	double weight;
-	int filestatus;
-	char fileraw[MB_PATH_MAXLINE];
-	char fileprocessed[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -355,6 +328,12 @@ int mbeditviz_open_data(char *path, int format) {
 	/* get format if required */
 	if (format == 0)
 		mb_get_format(mbev_verbose, path, NULL, &format, &mbev_error);
+
+	double weight;
+	int filestatus;
+	char fileraw[MB_PATH_MAXLINE];
+	char fileprocessed[MB_PATH_MAXLINE];
+	char dfile[MB_PATH_MAXLINE];
 
 	/* loop until all inf files are read */
 	bool done = false;
@@ -381,7 +360,6 @@ int mbeditviz_open_data(char *path, int format) {
 	do_mbeditviz_message_off();
 	do_mbeditviz_update_gui();
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -390,19 +368,10 @@ int mbeditviz_open_data(char *path, int format) {
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_import_file(char *path, int format) {
-	/* local variables */
-	char *root;
-	struct mbev_file_struct *file;
-	struct stat file_status;
-	int fstatus;
-	void *nptr;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -410,8 +379,13 @@ int mbeditviz_import_file(char *path, int format) {
 		fprintf(stderr, "dbg2       format:      %d\n", format);
 	}
 
+	struct mbev_file_struct *file;
+	struct stat file_status;
+	int fstatus;
+	void *nptr;
+
 	/* turn on message */
-	root = (char *)strrchr(path, '/');
+	char *root = (char *)strrchr(path, '/');
 	if (root == NULL)
 		root = path;
 	else
@@ -472,7 +446,7 @@ int mbeditviz_import_file(char *path, int format) {
 		/* load processing parameters */
 		if (mbev_status == MB_SUCCESS) {
 			mbev_status = mb_pr_readpar(mbev_verbose, file->path, false, &(file->process), &mbev_error);
-			if (file->process.mbp_format_specified == false) {
+			if (!file->process.mbp_format_specified) {
 				file->process.mbp_format_specified = true;
 				file->process.mbp_format = file->format;
 			}
@@ -489,7 +463,6 @@ int mbeditviz_import_file(char *path, int format) {
 		}
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -498,12 +471,16 @@ int mbeditviz_import_file(char *path, int format) {
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_load_file(int ifile) {
-	/* local variables */
+	if (mbev_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       ifile:       %d\n", ifile);
+	}
+
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	mb_path swathfile = "";
@@ -570,24 +547,16 @@ int mbeditviz_load_file(int ifile) {
 	float value_float;
 	int read_size;
 	int index;
-	int i;
-
-	/* print input debug statements */
-	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       ifile:       %d\n", ifile);
-	}
 
 	/* lock the file if it needs loading */
 	mbev_status = MB_SUCCESS;
 	mbev_error = MB_ERROR_NO_ERROR;
-	if (ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status == false &&
+	if (ifile >= 0 && ifile < mbev_num_files && !mbev_files[ifile].load_status &&
 	    mbev_files[ifile].raw_info.nrecords > 0) {
 		file = &(mbev_files[ifile]);
 
 		/* try to lock file */
-		if (mbdef_uselockfiles == true) {
+		if (mbdef_uselockfiles) {
 			mbev_status = mb_pr_lockswathfile(mbev_verbose, file->path, MBP_LOCK_EDITBATHY, program_name, &mbev_error);
 		}
 		else {
@@ -640,7 +609,7 @@ int mbeditviz_load_file(int ifile) {
 	}
 
 	/* load the file if it needs loading and has been locked */
-	if (mbev_status == MB_SUCCESS && ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status == false &&
+	if (mbev_status == MB_SUCCESS && ifile >= 0 && ifile < mbev_num_files && !mbev_files[ifile].load_status &&
 	    mbev_files[ifile].raw_info.nrecords > 0) {
 		file = &(mbev_files[ifile]);
 
@@ -663,7 +632,7 @@ int mbeditviz_load_file(int ifile) {
 		/* open the file for reading */
 		if (mbev_status == MB_SUCCESS) {
 			/* read processed file if available, raw otherwise (fbt if possible) */
-			if (file->processed_info_loaded == true)
+			if (file->processed_info_loaded)
 				strcpy(swathfile, file->process.mbp_ofile);
 			else
 				strcpy(swathfile, file->path);
@@ -1013,7 +982,7 @@ int mbeditviz_load_file(int ifile) {
 
 			/* if processed file read, then reset the beam edits to the original raw state
 			 * by reading in an *.resf (reverse edit save file) generated by mbprocess */
-			if (file->processed_info_loaded == true) {
+			if (file->processed_info_loaded) {
 				/* check if reverse edit save file (*.resf) exists and is up to date */
 				if ((fstatus = stat(file->path, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
 					rawmodtime = file_status.st_mtime;
@@ -1044,7 +1013,7 @@ int mbeditviz_load_file(int ifile) {
 					mbev_status = MB_SUCCESS;
 					mbev_error = MB_ERROR_NO_ERROR;
 				}
-				if (file->esf_open == true) {
+				if (file->esf_open) {
 					/* loop over pings applying edits */
 					do_mbeditviz_message_on("MBeditviz is recreating original beam states...");
 					if (mbev_verbose > 0)
@@ -1067,7 +1036,7 @@ int mbeditviz_load_file(int ifile) {
 					}
 
 					/* close the esf */
-					if (file->esf_open == true) {
+					if (file->esf_open) {
 						mb_esf_close(mbev_verbose, &file->esf, &mbev_error);
 						file->esf_open = false;
 					}
@@ -1085,7 +1054,7 @@ int mbeditviz_load_file(int ifile) {
 				mbev_status = MB_SUCCESS;
 				mbev_error = MB_ERROR_NO_ERROR;
 			}
-			if (file->esf_open == true) {
+			if (file->esf_open) {
 				/* loop over pings applying edits */
 				if (mbev_verbose > 0)
 					fprintf(stderr, "MBeditviz is applying %d saved edits from version %d esf file %s\n", file->esf.nedit,
@@ -1122,7 +1091,7 @@ int mbeditviz_load_file(int ifile) {
 					fprintf(stderr, "Total unused beam edits for file %s: %d\n", swathfile, n_unused);
 
 				/* close the esf */
-				if (file->esf_open == true) {
+				if (file->esf_open) {
 					mb_esf_close(mbev_verbose, &file->esf, &mbev_error);
 					file->esf_open = false;
 				}
@@ -1154,7 +1123,7 @@ int mbeditviz_load_file(int ifile) {
 				/* read the asynchronous heading data */
 				if ((afp = fopen(asyncfile, "r")) != NULL) {
 					read_size = sizeof(double) + sizeof(float);
-					for (i = 0; i < file->n_async_heading; i++) {
+					for (int i = 0; i < file->n_async_heading; i++) {
 						nread = fread(buffer, read_size, 1, afp);
 						index = 0;
 						mb_get_binary_double(true, &buffer[index], &file->async_heading_time_d[i]);
@@ -1263,7 +1232,7 @@ int mbeditviz_load_file(int ifile) {
 				/* read the asynchronous sonardepth data */
 				if ((afp = fopen(asyncfile, "rb")) != NULL) {
 					read_size = sizeof(double) + sizeof(float);
-					for (i = 0; i < file->n_async_sonardepth; i++) {
+					for (int i = 0; i < file->n_async_sonardepth; i++) {
 						nread = fread(buffer, read_size, 1, afp);
 						index = 0;
 						mb_get_binary_double(true, &buffer[index], &file->async_sonardepth_time_d[i]);
@@ -1380,7 +1349,7 @@ int mbeditviz_load_file(int ifile) {
 				/* read the asynchronous attitude data */
 				if ((afp = fopen(asyncfile, "rb")) != NULL) {
 					read_size = sizeof(double) + 2 * sizeof(float);
-					for (i = 0; i < file->n_async_attitude; i++) {
+					for (int i = 0; i < file->n_async_attitude; i++) {
 						if ((nread = fread(buffer, read_size, 1, afp)) == 1) {
 							index = 0;
 							mb_get_binary_double(true, &buffer[index], &file->async_attitude_time_d[i]);
@@ -1528,7 +1497,7 @@ int mbeditviz_load_file(int ifile) {
 				/* read the synchronous attitude data */
 				if ((afp = fopen(asyncfile, "rb")) != NULL) {
 					read_size = sizeof(double) + 2 * sizeof(float);
-					for (i = 0; i < file->n_sync_attitude; i++) {
+					for (int i = 0; i < file->n_sync_attitude; i++) {
 						if ((nread = fread(buffer, read_size, 1, afp)) == 1) {
 							index = 0;
 							mb_get_binary_double(true, &buffer[index], &file->sync_attitude_time_d[i]);
@@ -1657,7 +1626,6 @@ int mbeditviz_load_file(int ifile) {
 		}
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1666,22 +1634,12 @@ int mbeditviz_load_file(int ifile) {
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping, double rollbias, double pitchbias,
                             double headingbias, double timelag, double *heading, double *sonardepth, double *rolldelta,
                             double *pitchdelta) {
-	/* local variables */
-	double time_d;
-	int intstat;
-	int iheading = 0;
-	int isonardepth = 0;
-	int iattitude = 0;
-	double rollasync, pitchasync, headingasync;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1692,6 +1650,13 @@ int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_
 		fprintf(stderr, "dbg2       headingbias: %f\n", headingbias);
 		fprintf(stderr, "dbg2       timelag:     %f\n", timelag);
 	}
+
+	double time_d;
+	int intstat;
+	int iheading = 0;
+	int isonardepth = 0;
+	int iattitude = 0;
+	double rollasync, pitchasync, headingasync;
 
 	/* apply timelag to get new values of lon, lat, heading, rollbias, pitchbias */
 	if (file != NULL && ping != NULL) {
@@ -1744,7 +1709,6 @@ int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_
 		iattitude);*/
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1757,17 +1721,12 @@ int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 
 int mbeditviz_snell_correction(double snell, double roll, double *beam_xtrack,
 							   double *beam_ltrack, double *beam_z) {
-	/* local variables */
-	double range, alphar, betar;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1777,6 +1736,8 @@ int mbeditviz_snell_correction(double snell, double roll, double *beam_xtrack,
 		fprintf(stderr, "dbg2       beam_ltrack: %f\n", *beam_ltrack);
 		fprintf(stderr, "dbg2       beam_z:      %f\n", *beam_z);
 	}
+
+	double range, alphar, betar;
 
 	/* if beamforming sound speed correction to be applied */
 	if (snell != 1.0) {
@@ -1837,7 +1798,6 @@ int mbeditviz_snell_correction(double snell, double roll, double *beam_xtrack,
 		}
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1849,7 +1809,6 @@ int mbeditviz_snell_correction(double snell, double roll, double *beam_xtrack,
 		fprintf(stderr, "dbg2       mbev_status:    %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
@@ -1857,10 +1816,6 @@ int mbeditviz_snell_correction(double snell, double roll, double *beam_xtrack,
 int mbeditviz_beam_position(double navlon, double navlat, double mtodeglon, double mtodeglat, double rawbath, double acrosstrack,
                             double alongtrack, double sonardepth, double rolldelta, double pitchdelta, double heading,
                             double *bathcorr, double *lon, double *lat) {
-	/* local variables */
-	double newbath, neweasting, newnorthing;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1882,6 +1837,9 @@ int mbeditviz_beam_position(double navlon, double navlat, double mtodeglon, doub
 	     rolldelta:  Roll relative to previous correction and bias included
 	     pitchdelta: Pitch relative to previous correction and bias included
 	     heading:    Heading absolute (bias included) */
+	double newbath;
+	double neweasting;
+	double newnorthing;
 	mb_platform_math_attitude_rotate_beam(mbev_verbose, acrosstrack, alongtrack, rawbath, rolldelta, pitchdelta, heading,
 	                                      &neweasting, &newnorthing, &newbath, &mbev_error);
 
@@ -1911,7 +1869,6 @@ int mbeditviz_beam_position(double navlon, double navlat, double mtodeglon, doub
 		fprintf(stderr, "     lat:         %f\n", *lat);
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1923,19 +1880,10 @@ int mbeditviz_beam_position(double navlon, double navlat, double mtodeglon, doub
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_unload_file(int ifile) {
-	/* local variables */
-	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
-	int lock_status;
-	int lock_error = MB_ERROR_NO_ERROR;
-	int iping;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1943,12 +1891,16 @@ int mbeditviz_unload_file(int ifile) {
 	}
 
 	/* unload the file */
-	if (ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status == true) {
+	if (ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status) {
+
+		struct mbev_ping_struct *ping;
+		int lock_status;
+		int lock_error = MB_ERROR_NO_ERROR;
 
 		/* release memory */
-		file = &(mbev_files[ifile]);
+		struct mbev_file_struct *file = &(mbev_files[ifile]);
 		if (file->pings != NULL) {
-			for (iping = 0; iping < file->num_pings; iping++) {
+			for (int iping = 0; iping < file->num_pings; iping++) {
 				ping = &(file->pings[iping]);
 				if (ping->beamflag != NULL) {
 					free(ping->beamflag);
@@ -2077,11 +2029,10 @@ int mbeditviz_unload_file(int ifile) {
 		mbev_num_files_loaded--;
 
 		/* unlock the file */
-		if (mbdef_uselockfiles == true)
+		if (mbdef_uselockfiles)
 			lock_status = mb_pr_unlockswathfile(mbev_verbose, file->path, MBP_LOCK_EDITBATHY, program_name, &lock_error);
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2090,15 +2041,10 @@ int mbeditviz_unload_file(int ifile) {
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_delete_file(int ifile) {
-	/* local variables */
-	int i;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2106,17 +2052,16 @@ int mbeditviz_delete_file(int ifile) {
 	}
 
 	/* unload the file if needed */
-	if (ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status == true) {
+	if (ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status) {
 		mbeditviz_unload_file(ifile);
 	}
 
 	/* delete the file */
-	for (i = ifile; i < mbev_num_files - 1; i++) {
+	for (int i = ifile; i < mbev_num_files - 1; i++) {
 		mbev_files[i] = mbev_files[i + 1];
 	}
 	mbev_num_files--;
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2125,17 +2070,14 @@ int mbeditviz_delete_file(int ifile) {
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 /* approximate error function altered from numerical recipies */
 double mbeditviz_erf(double x) {
-	double t, z, erfc_d, erf_d;
-
-	z = fabs(x);
-	t = 1.0 / (1.0 + 0.5 * z);
-	erfc_d =
+	const double z = fabs(x);
+	const double t = 1.0 / (1.0 + 0.5 * z);
+	double erfc_d =
 	    t *
 	    exp(-z * z - 1.26551223 +
 	        t * (1.00002368 +
@@ -2144,7 +2086,7 @@ double mbeditviz_erf(double x) {
 	                       t * (-0.18628806 +
 	                            t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
 	erfc_d = x >= 0.0 ? erfc_d : 2.0 - erfc_d;
-	erf_d = 1.0 - erfc_d;
+	const double erf_d = 1.0 - erfc_d;
 	return erf_d;
 }
 /*--------------------------------------------------------------------*/
@@ -2154,11 +2096,6 @@ double mbeditviz_erf(double x) {
  */
 int mbeditviz_bin_weight(double foot_a, double foot_b, double scale, double pcx, double pcy, double dx, double dy, double *px,
                          double *py, double *weight, int *use) {
-	double fa, fb;
-	double xe, ye, ang, ratio;
-	int i;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2202,8 +2139,8 @@ int mbeditviz_bin_weight(double foot_a, double foot_b, double scale, double pcx,
 	    DWC 11/18/99 */
 
 	/* get integrated weight */
-	fa = scale * foot_a;
-	fb = scale * foot_b;
+	const double fa = scale * foot_a;
+	const double fb = scale * foot_b;
 	*weight = 0.25 * (mbeditviz_erf((pcx + dx) / fa) - mbeditviz_erf((pcx - dx) / fa)) *
 	          (mbeditviz_erf((pcy + dy) / fb) - mbeditviz_erf((pcy - dy) / fb));
 
@@ -2214,11 +2151,12 @@ int mbeditviz_bin_weight(double foot_a, double foot_b, double scale, double pcx,
 	/* check ratio of each corner footprint 1/e distance */
 	else {
 		*use = MBEV_USE_NO;
-		for (i = 0; i < 4; i++) {
-			ang = RTD * atan2(py[i], px[i]);
-			xe = foot_a * cos(DTR * ang);
-			ye = foot_b * sin(DTR * ang);
-			ratio = sqrt((px[i] * px[i] + py[i] * py[i]) / (xe * xe + ye * ye));
+		// TODO(schwehr): This appears to overwrite *use 4 times?
+		for (int i = 0; i < 4; i++) {
+			const double ang = RTD * atan2(py[i], px[i]);
+			const double xe = foot_a * cos(DTR * ang);
+			const double ye = foot_b * sin(DTR * ang);
+			const double ratio = sqrt((px[i] * px[i] + py[i] * py[i]) / (xe * xe + ye * ye));
 			if (ratio <= 1.0)
 				*use = MBEV_USE_YES;
 			else if (ratio <= 2.0)
@@ -2226,7 +2164,6 @@ int mbeditviz_bin_weight(double foot_a, double foot_b, double scale, double pcx,
 		}
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2237,47 +2174,39 @@ int mbeditviz_bin_weight(double foot_a, double foot_b, double scale, double pcx,
 		fprintf(stderr, "dbg2       mbev_status:%d\n", mbev_status);
 	}
 
-	/* return status */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_get_grid_bounds() {
-	/* local variables */
-	struct mbev_file_struct *file;
-	struct mb_info_struct *info;
-	double depth_min, depth_max;
-	double altitude_min, altitude_max;
-	int first;
-	double xx, yy;
-	double reference_lon, reference_lat;
-	int utm_zone;
-	int proj_status;
-	char projection_id[MB_PATH_MAXLINE];
-	void *pjptr;
-	int ifile;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 	}
 
+	double depth_max;
+	double altitude_min;
+	double altitude_max;
+	double reference_lon;
+	double reference_lat;
+
 	/* find lon lat bounds of loaded files */
 	if (mbev_num_files_loaded > 0) {
-		first = true;
-		for (ifile = 0; ifile < mbev_num_files; ifile++) {
-			file = &mbev_files[ifile];
-			if (file->load_status == true) {
-				if (file->processed_info_loaded == true)
+		bool first = true;
+		// double depth_min;
+		for (int ifile = 0; ifile < mbev_num_files; ifile++) {
+			struct mbev_file_struct *file = &mbev_files[ifile];
+			if (file->load_status) {
+				struct mb_info_struct *info;
+				if (file->processed_info_loaded)
 					info = &(file->processed_info);
 				else
 					info = &(file->raw_info);
-				if (first == true) {
+				if (first) {
 					mbev_grid_bounds[0] = info->lon_min;
 					mbev_grid_bounds[1] = info->lon_max;
 					mbev_grid_bounds[2] = info->lat_min;
 					mbev_grid_bounds[3] = info->lat_max;
-					depth_min = info->depth_min;
+					// depth_min = info->depth_min;
 					depth_max = info->depth_max;
 					altitude_min = info->altitude_min;
 					altitude_max = info->altitude_max;
@@ -2292,7 +2221,7 @@ int mbeditviz_get_grid_bounds() {
 					mbev_grid_bounds[1] = MAX(mbev_grid_bounds[1], info->lon_max);
 					mbev_grid_bounds[2] = MIN(mbev_grid_bounds[2], info->lat_min);
 					mbev_grid_bounds[3] = MAX(mbev_grid_bounds[3], info->lat_max);
-					depth_min = MIN(depth_min, info->depth_min);
+					// depth_min = MIN(depth_min, info->depth_min);
 					depth_max = MIN(depth_max, info->depth_max);
 					altitude_min = MIN(altitude_min, info->altitude_min);
 					altitude_max = MIN(altitude_max, info->altitude_max);
@@ -2313,6 +2242,9 @@ int mbeditviz_get_grid_bounds() {
 		mbev_error = MB_ERROR_NO_ERROR;
 	}
 
+
+	void *pjptr;
+
 	/* get projection */
 	if (mbev_status == MB_SUCCESS) {
 		/* get projection */
@@ -2322,12 +2254,13 @@ int mbeditviz_get_grid_bounds() {
 			reference_lon += 360.0;
 		if (reference_lon >= 180.0)
 			reference_lon -= 360.0;
-		utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
+		const int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
+		char projection_id[MB_PATH_MAXLINE];
 		if (reference_lat >= 0.0)
 			sprintf(projection_id, "UTM%2.2dN", utm_zone);
 		else
 			sprintf(projection_id, "UTM%2.2dS", utm_zone);
-		proj_status = mb_proj_init(mbev_verbose, projection_id, &(pjptr), &mbev_error);
+		const int proj_status = mb_proj_init(mbev_verbose, projection_id, &(pjptr), &mbev_error);
 		if (proj_status != MB_SUCCESS) {
 			mbev_status = MB_FAILURE;
 			mbev_error = MB_ERROR_BAD_PARAMETER;
@@ -2339,6 +2272,8 @@ int mbeditviz_get_grid_bounds() {
 		/* get projected bounds */
 
 		/* first point */
+		double xx;
+		double yy;
 		mb_proj_forward(mbev_verbose, pjptr, mbev_grid_bounds[0], mbev_grid_bounds[2], &xx, &yy, &mbev_error);
 		mbev_grid_boundsutm[0] = xx;
 		mbev_grid_boundsutm[1] = xx;
@@ -2403,7 +2338,6 @@ int mbeditviz_get_grid_bounds() {
 		mb_proj_free(mbev_verbose, &(pjptr), &mbev_error);
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2412,19 +2346,11 @@ int mbeditviz_get_grid_bounds() {
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 
 /*--------------------------------------------------------------------*/
 int mbeditviz_setup_grid() {
-	/* local variables */
-	double xx, yy;
-	double reference_lon, reference_lat;
-	int utm_zone;
-	int proj_status;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2454,18 +2380,18 @@ int mbeditviz_setup_grid() {
 	/* get projection */
 	if (mbev_status == MB_SUCCESS) {
 		/* get projection */
-		reference_lon = 0.5 * (mbev_grid.bounds[0] + mbev_grid.bounds[1]);
-		reference_lat = 0.5 * (mbev_grid.bounds[2] + mbev_grid.bounds[3]);
+		double reference_lon = 0.5 * (mbev_grid.bounds[0] + mbev_grid.bounds[1]);
+		const double reference_lat = 0.5 * (mbev_grid.bounds[2] + mbev_grid.bounds[3]);
 		if (reference_lon < 180.0)
 			reference_lon += 360.0;
 		if (reference_lon >= 180.0)
 			reference_lon -= 360.0;
-		utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
+		int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
 		if (reference_lat >= 0.0)
 			sprintf(mbev_grid.projection_id, "UTM%2.2dN", utm_zone);
 		else
 			sprintf(mbev_grid.projection_id, "UTM%2.2dS", utm_zone);
-		proj_status = mb_proj_init(mbev_verbose, mbev_grid.projection_id, &(mbev_grid.pjptr), &mbev_error);
+		const int proj_status = mb_proj_init(mbev_verbose, mbev_grid.projection_id, &(mbev_grid.pjptr), &mbev_error);
 		if (proj_status != MB_SUCCESS) {
 			mbev_status = MB_FAILURE;
 			mbev_error = MB_ERROR_BAD_PARAMETER;
@@ -2477,6 +2403,8 @@ int mbeditviz_setup_grid() {
 		/* get projected bounds */
 
 		/* first point */
+		double xx;
+		double yy;
 		mb_proj_forward(mbev_verbose, mbev_grid.pjptr, mbev_grid.bounds[0], mbev_grid.bounds[2], &xx, &yy, &mbev_error);
 		mbev_grid.boundsutm[0] = xx;
 		mbev_grid.boundsutm[1] = xx;
@@ -2536,7 +2464,6 @@ int mbeditviz_setup_grid() {
 			mbev_status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2545,19 +2472,11 @@ int mbeditviz_setup_grid() {
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 
 /*--------------------------------------------------------------------*/
 int mbeditviz_project_soundings() {
-	/* local variables */
-	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
-	int ifile, iping, ibeam;
-	int filecount;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2566,18 +2485,18 @@ int mbeditviz_project_soundings() {
 	/* project all soundings into the grid coordinates */
 	if (mbev_status == MB_SUCCESS) {
 		/* loop over loaded files */
-		filecount = 0;
-		for (ifile = 0; ifile < mbev_num_files; ifile++) {
-			file = &mbev_files[ifile];
-			if (file->load_status == true) {
+		int filecount = 0;
+		for (int ifile = 0; ifile < mbev_num_files; ifile++) {
+			struct mbev_file_struct *file = &mbev_files[ifile];
+			if (file->load_status) {
 				filecount++;
 				sprintf(message, "Projecting file %d of %d...", filecount, mbev_num_files_loaded);
 				do_mbeditviz_message_on(message);
-				for (iping = 0; iping < file->num_pings; iping++) {
-					ping = &(file->pings[iping]);
+				for (int iping = 0; iping < file->num_pings; iping++) {
+					struct mbev_ping_struct *ping = &(file->pings[iping]);
 					mb_proj_forward(mbev_verbose, mbev_grid.pjptr, ping->navlon, ping->navlat, &ping->navlonx, &ping->navlaty,
 					                &mbev_error);
-					for (ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
+					for (int ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
 						if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam])) {
 							mb_proj_forward(mbev_verbose, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
 							                &ping->bathx[ibeam], &ping->bathy[ibeam], &mbev_error);
@@ -2588,7 +2507,6 @@ int mbeditviz_project_soundings() {
 		}
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2597,21 +2515,11 @@ int mbeditviz_project_soundings() {
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 
 /*--------------------------------------------------------------------*/
 int mbeditviz_make_grid() {
-	/* local variables */
-	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
-	int first;
-	int ifile, iping, ibeam;
-	int filecount;
-	int i, j, k;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2641,16 +2549,16 @@ int mbeditviz_make_grid() {
 	memset(mbev_grid.sgm, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
 
 	/* loop over loaded files */
-	filecount = 0;
-	for (ifile = 0; ifile < mbev_num_files; ifile++) {
-		file = &mbev_files[ifile];
-		if (file->load_status == true) {
+	int filecount = 0;
+	for (int ifile = 0; ifile < mbev_num_files; ifile++) {
+		struct mbev_file_struct *file = &mbev_files[ifile];
+		if (file->load_status) {
 			filecount++;
 			sprintf(message, "Gridding file %d of %d...", filecount, mbev_num_files_loaded);
 			do_mbeditviz_message_on(message);
-			for (iping = 0; iping < file->num_pings; iping++) {
-				ping = &(file->pings[iping]);
-				for (ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
+			for (int iping = 0; iping < file->num_pings; iping++) {
+				struct mbev_ping_struct *ping = &(file->pings[iping]);
+				for (int ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
 					if (mb_beam_ok(ping->beamflag[ibeam])) {
 						mbeditviz_grid_beam(file, ping, ibeam, true, false);
 					}
@@ -2659,14 +2567,14 @@ int mbeditviz_make_grid() {
 		}
 	}
 	mbev_grid.nodatavalue = MBEV_NODATA;
-	first = true;
-	for (i = 0; i < mbev_grid.n_columns; i++)
-		for (j = 0; j < mbev_grid.n_rows; j++) {
-			k = i * mbev_grid.n_rows + j;
+	bool first = true;
+	for (int i = 0; i < mbev_grid.n_columns; i++)
+		for (int j = 0; j < mbev_grid.n_rows; j++) {
+			const int k = i * mbev_grid.n_rows + j;
 			if (mbev_grid.wgt[k] > 0.0) {
 				mbev_grid.val[k] = mbev_grid.sum[k] / mbev_grid.wgt[k];
 				mbev_grid.sgm[k] = sqrt(fabs(mbev_grid.sgm[k] / mbev_grid.wgt[k] - mbev_grid.val[k] * mbev_grid.val[k]));
-				if (first == true) {
+				if (first) {
 					mbev_grid.min = mbev_grid.val[k];
 					mbev_grid.max = mbev_grid.val[k];
 					mbev_grid.smin = mbev_grid.sgm[k];
@@ -2688,7 +2596,6 @@ int mbeditviz_make_grid() {
 	if (mbev_grid.status == MBEV_GRID_NONE)
 		mbev_grid.status = MBEV_GRID_NOTVIEWED;
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2697,28 +2604,14 @@ int mbeditviz_make_grid() {
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 
 /*--------------------------------------------------------------------*/
-int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *ping, int ibeam, int beam_ok, int apply_now) {
-	/* local variables */
-	double xx, yy;
-	double foot_dx, foot_dy, foot_dxn, foot_dyn;
-	double foot_lateral, foot_range, foot_theta;
-	double foot_dtheta, foot_dphi;
-	double foot_hwidth, foot_hlength;
-	int foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy;
-	double xx0, yy0, bdx, bdy, xx1, xx2, yy1, yy2;
-	double prx[5], pry[5];
-	double weight;
-	int use_weight;
-	int ix1, ix2, iy1, iy2;
-	int ii, jj, kk;
-	int i, j;
-
-	/* print input debug statements */
+int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *ping, int ibeam,
+                        int beam_ok,  // TODO(schwehr): bool
+                        int apply_now  // TODO(schwehr): bool
+                        ) {
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2730,15 +2623,22 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 	}
 
 	/* find location of beam center */
-	i = (ping->bathx[ibeam] - mbev_grid.boundsutm[0] + 0.5 * mbev_grid.dx) / mbev_grid.dx;
-	j = (ping->bathy[ibeam] - mbev_grid.boundsutm[2] + 0.5 * mbev_grid.dy) / mbev_grid.dy;
+	const int i = (ping->bathx[ibeam] - mbev_grid.boundsutm[0] + 0.5 * mbev_grid.dx) / mbev_grid.dx;
+	const int j = (ping->bathy[ibeam] - mbev_grid.boundsutm[2] + 0.5 * mbev_grid.dy) / mbev_grid.dy;
 
 	/* proceed if beam in grid */
 	if (i >= 0 && i < mbev_grid.n_columns && j >= 0 && j < mbev_grid.n_rows) {
-    /* shoal bias gridding mode */
-    if (mbev_grid_algorithm == MBEV_GRID_ALGORITHM_SHOALBIAS) {
+		double foot_dx, foot_dy, foot_dxn, foot_dyn;
+		double foot_lateral, foot_range, foot_theta;
+		double foot_dtheta, foot_dphi;
+		double foot_hwidth, foot_hlength;
+		int foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy;
+		int ix1, ix2, iy1, iy2;
+
+		/* shoal bias gridding mode */
+		if (mbev_grid_algorithm == MBEV_GRID_ALGORITHM_SHOALBIAS) {
 			/* get location in grid arrays */
-			kk = i * mbev_grid.n_rows + j;
+			const int kk = i * mbev_grid.n_rows + j;
 
 			if (isnan(ping->bathcorr[ibeam])) {
 				fprintf(stderr, "\nFunction mbeditviz_grid_beam(): Encountered NaN value in swath data from file: %s\n",
@@ -2751,14 +2651,14 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 			}
 
 			/* add to weights and sums */
-			if (beam_ok == true && (-ping->bathcorr[ibeam]) >  mbev_grid.sum[kk]) {
+			if (beam_ok && (-ping->bathcorr[ibeam]) >  mbev_grid.sum[kk]) {
 				mbev_grid.wgt[kk] = 1.0;
 				mbev_grid.sum[kk] = (-ping->bathcorr[ibeam]);
 				mbev_grid.sgm[kk] = ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
 			}
 
 			/* recalculate grid cell if desired */
-			if (apply_now == true) {
+			if (apply_now) {
 				/* recalculate grid cell */
 				if (mbev_grid.wgt[kk] > 0.0) {
 					mbev_grid.val[kk] = mbev_grid.sum[kk] / mbev_grid.wgt[kk];
@@ -2781,7 +2681,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 		/* simple gridding mode */
 		else if (file->topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM || mbev_grid_algorithm == MBEV_GRID_ALGORITHM_SIMPLEMEAN) {
 			/* get location in grid arrays */
-			kk = i * mbev_grid.n_rows + j;
+			const int kk = i * mbev_grid.n_rows + j;
 
 			if (isnan(ping->bathcorr[ibeam])) {
 				fprintf(stderr, "\nFunction mbeditviz_grid_beam(): Encountered NaN value in swath data from file: %s\n",
@@ -2794,7 +2694,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 			}
 
 			/* add to weights and sums */
-			if (beam_ok == true) {
+			if (beam_ok) {
 				mbev_grid.wgt[kk] += 1.0;
 				mbev_grid.sum[kk] += (-ping->bathcorr[ibeam]);
 				mbev_grid.sgm[kk] += ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
@@ -2808,7 +2708,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 			}
 
 			/* recalculate grid cell if desired */
-			if (apply_now == true) {
+			if (apply_now) {
 				/* recalculate grid cell */
 				if (mbev_grid.wgt[kk] > 0.0) {
 					mbev_grid.val[kk] = mbev_grid.sum[kk] / mbev_grid.wgt[kk];
@@ -2866,23 +2766,25 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 			iy2 = MIN(j + foot_diy, mbev_grid.n_rows - 1);
 
 			/* loop over neighborhood of bins */
-			for (ii = ix1; ii <= ix2; ii++)
-				for (jj = iy1; jj <= iy2; jj++) {
+			for (int ii = ix1; ii <= ix2; ii++)
+				for (int jj = iy1; jj <= iy2; jj++) {
 					/* find distance of bin center from sounding center */
-					xx = (mbev_grid.boundsutm[0] + ii * mbev_grid.dx + 0.5 * mbev_grid.dx - ping->bathx[ibeam]);
-					yy = (mbev_grid.boundsutm[2] + jj * mbev_grid.dy + 0.5 * mbev_grid.dy - ping->bathy[ibeam]);
+					const double xx = (mbev_grid.boundsutm[0] + ii * mbev_grid.dx + 0.5 * mbev_grid.dx - ping->bathx[ibeam]);
+					const double yy = (mbev_grid.boundsutm[2] + jj * mbev_grid.dy + 0.5 * mbev_grid.dy - ping->bathy[ibeam]);
 
 					/* get center and corners of bin in meters from sounding center */
-					xx0 = xx;
-					yy0 = yy;
-					bdx = 0.5 * mbev_grid.dx;
-					bdy = 0.5 * mbev_grid.dy;
-					xx1 = xx0 - bdx;
-					xx2 = xx0 + bdx;
-					yy1 = yy0 - bdy;
-					yy2 = yy0 + bdy;
+					const double xx0 = xx;
+					const double yy0 = yy;
+					const double bdx = 0.5 * mbev_grid.dx;
+					const double bdy = 0.5 * mbev_grid.dy;
+					const double xx1 = xx0 - bdx;
+					const double xx2 = xx0 + bdx;
+					const double yy1 = yy0 - bdy;
+					const double yy2 = yy0 + bdy;
 
 					/* rotate center and corners of bin to footprint coordinates */
+					double prx[5];
+					double pry[5];
 					prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
 					pry[0] = -xx0 * foot_dyn + yy0 * foot_dxn;
 					prx[1] = xx1 * foot_dxn + yy1 * foot_dyn;
@@ -2895,16 +2797,18 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 					pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
 
 					/* get weight integrated over bin */
+					double weight;
+					int use_weight;
 					mbeditviz_bin_weight(foot_hwidth, foot_hlength, 1.0, prx[0], pry[0], bdx, bdy, &prx[1], &pry[1], &weight,
 					                     &use_weight);
 
 					/* if beam affects cell apply using weight */
 					if (use_weight == MBEV_USE_YES) {
 						/* get location in grid arrays */
-						kk = ii * mbev_grid.n_rows + jj;
+						const int kk = ii * mbev_grid.n_rows + jj;
 
 						/* add to weights and sums */
-						if (beam_ok == true) {
+						if (beam_ok) {
 							mbev_grid.wgt[kk] += weight;
 							mbev_grid.sum[kk] += weight * (-ping->bathcorr[ibeam]);
 							mbev_grid.sgm[kk] += weight * ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
@@ -2918,7 +2822,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 						}
 
 						/* recalculate grid cell if desired */
-						if (apply_now == true) {
+						if (apply_now) {
 							/* recalculate grid cell */
 							if (mbev_grid.wgt[kk] > 0.0) {
 								mbev_grid.val[kk] = mbev_grid.sum[kk] / mbev_grid.wgt[kk];
@@ -2942,7 +2846,6 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 		}
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2951,44 +2854,32 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 
 /*--------------------------------------------------------------------*/
 int mbeditviz_make_grid_simple() {
-	/* local variables */
-	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
-	struct mb_info_struct *info;
-	double depth_min, depth_max;
-	double altitude_min, altitude_max;
-	int first;
-	double xx, yy;
-	double reference_lon, reference_lat;
-	int utm_zone;
-	int proj_status;
-	int ifile, iping, ibeam;
-	int filecount;
-	int i, j, k;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 	}
 
+	double depth_min, depth_max;
+	double altitude_min, altitude_max;
+	bool first;
+
 	/* find lon lat bounds of loaded files */
 	if (mbev_num_files_loaded > 0) {
 		first = true;
-		for (ifile = 0; ifile < mbev_num_files; ifile++) {
-			file = &mbev_files[ifile];
-			if (file->load_status == true) {
-				if (file->processed_info_loaded == true)
+		for (int ifile = 0; ifile < mbev_num_files; ifile++) {
+			struct mbev_file_struct *file = &mbev_files[ifile];
+			if (file->load_status) {
+				struct mb_info_struct *info;
+				if (file->processed_info_loaded)
 					info = &(file->processed_info);
 				else
 					info = &(file->raw_info);
-				if (first == true) {
+				if (first) {
 					mbev_grid.bounds[0] = info->lon_min;
 					mbev_grid.bounds[1] = info->lon_max;
 					mbev_grid.bounds[2] = info->lat_min;
@@ -3022,6 +2913,7 @@ int mbeditviz_make_grid_simple() {
 			}
 		}
 	}
+
 	if (mbev_num_files_loaded <= 0 || mbev_grid.bounds[1] <= mbev_grid.bounds[0] || mbev_grid.bounds[3] <= mbev_grid.bounds[2]) {
 		mbev_status = MB_FAILURE;
 		mbev_error = MB_ERROR_BAD_PARAMETER;
@@ -3034,23 +2926,27 @@ int mbeditviz_make_grid_simple() {
 	/* get projection */
 	if (mbev_status == MB_SUCCESS) {
 		/* get projection */
-		reference_lon = 0.5 * (mbev_grid.bounds[0] + mbev_grid.bounds[1]);
-		reference_lat = 0.5 * (mbev_grid.bounds[2] + mbev_grid.bounds[3]);
+		double reference_lon = 0.5 * (mbev_grid.bounds[0] + mbev_grid.bounds[1]);
+		const double reference_lat = 0.5 * (mbev_grid.bounds[2] + mbev_grid.bounds[3]);
 		if (reference_lon < 180.0)
 			reference_lon += 360.0;
 		if (reference_lon >= 180.0)
 			reference_lon -= 360.0;
-		utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
+		int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
 		if (reference_lat >= 0.0)
 			sprintf(mbev_grid.projection_id, "UTM%2.2dN", utm_zone);
 		else
 			sprintf(mbev_grid.projection_id, "UTM%2.2dS", utm_zone);
-		proj_status = mb_proj_init(mbev_verbose, mbev_grid.projection_id, &(mbev_grid.pjptr), &mbev_error);
+		const int proj_status = mb_proj_init(mbev_verbose, mbev_grid.projection_id, &(mbev_grid.pjptr), &mbev_error);
 		if (proj_status != MB_SUCCESS) {
 			mbev_status = MB_FAILURE;
 			mbev_error = MB_ERROR_BAD_PARAMETER;
 		}
 	}
+
+	double xx, yy;
+	int iping, ibeam;
+	int filecount;
 
 	/* get grid cell size and dimensions */
 	if (mbev_status == MB_SUCCESS) {
@@ -3137,23 +3033,23 @@ int mbeditviz_make_grid_simple() {
 	if (mbev_status == MB_SUCCESS) {
 		/* loop over loaded files */
 		filecount = 0;
-		for (ifile = 0; ifile < mbev_num_files; ifile++) {
-			file = &mbev_files[ifile];
-			if (file->load_status == true) {
+		for (int ifile = 0; ifile < mbev_num_files; ifile++) {
+			struct mbev_file_struct *file = &mbev_files[ifile];
+			if (file->load_status) {
 				filecount++;
 				sprintf(message, "Gridding file %d of %d...", filecount, mbev_num_files_loaded);
 				do_mbeditviz_message_on(message);
 				for (iping = 0; iping < file->num_pings; iping++) {
-					ping = &(file->pings[iping]);
+					struct mbev_ping_struct *ping = &(file->pings[iping]);
 					for (ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
 						if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam])) {
 							mb_proj_forward(mbev_verbose, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
 							                &ping->bathx[ibeam], &ping->bathy[ibeam], &mbev_error);
 						}
 						if (mb_beam_ok(ping->beamflag[ibeam])) {
-							i = (ping->bathx[ibeam] - mbev_grid.boundsutm[0] + 0.5 * mbev_grid.dx) / mbev_grid.dx;
-							j = (ping->bathy[ibeam] - mbev_grid.boundsutm[2] + 0.5 * mbev_grid.dy) / mbev_grid.dy;
-							k = i * mbev_grid.n_rows + j;
+							const int i = (ping->bathx[ibeam] - mbev_grid.boundsutm[0] + 0.5 * mbev_grid.dx) / mbev_grid.dx;
+							const int j = (ping->bathy[ibeam] - mbev_grid.boundsutm[2] + 0.5 * mbev_grid.dy) / mbev_grid.dy;
+							const int k = i * mbev_grid.n_rows + j;
 							mbev_grid.sum[k] += (-ping->bathcorr[ibeam]);
 							mbev_grid.wgt[k] += 1.0;
 							mbev_grid.sgm[k] += ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
@@ -3164,13 +3060,13 @@ int mbeditviz_make_grid_simple() {
 		}
 		mbev_grid.nodatavalue = MBEV_NODATA;
 		first = true;
-		for (i = 0; i < mbev_grid.n_columns; i++)
-			for (j = 0; j < mbev_grid.n_rows; j++) {
-				k = i * mbev_grid.n_rows + j;
+		for (int i = 0; i < mbev_grid.n_columns; i++)
+			for (int j = 0; j < mbev_grid.n_rows; j++) {
+				const int k = i * mbev_grid.n_rows + j;
 				if (mbev_grid.wgt[k] > 0.0) {
 					mbev_grid.val[k] = mbev_grid.sum[k] / mbev_grid.wgt[k];
 					mbev_grid.sgm[k] = sqrt(fabs(mbev_grid.sgm[k] / mbev_grid.wgt[k] - mbev_grid.val[k] * mbev_grid.val[k]));
-					if (first == true) {
+					if (first) {
 						mbev_grid.min = mbev_grid.val[k];
 						mbev_grid.max = mbev_grid.val[k];
 						mbev_grid.smin = mbev_grid.sgm[k];
@@ -3192,7 +3088,6 @@ int mbeditviz_make_grid_simple() {
 		mbev_grid.status = MBEV_GRID_NOTVIEWED;
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3201,19 +3096,10 @@ int mbeditviz_make_grid_simple() {
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_destroy_grid() {
-	/* local variables */
-	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
-	int action;
-	int ifile, iping, ibeam;
-	int i;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3222,12 +3108,17 @@ int mbeditviz_destroy_grid() {
 	if (mbev_verbose > 0)
 		fprintf(stderr, "mbeditviz_destroy_grid status:%d\n", mbev_status);
 
+	struct mbev_file_struct *file;
+	struct mbev_ping_struct *ping;
+	int action;
+	int ifile, iping, ibeam;
+
 	/* loop over all files and output edits as necessary */
 	for (ifile = 0; ifile < mbev_num_files; ifile++) {
 		file = &mbev_files[ifile];
 		if (mbev_verbose > 0)
 			fprintf(stderr, "ifile:%d load_status:%d esf_open:%d\n", ifile, file->load_status, file->esf_open);
-		if (file->load_status == true && file->esf_open == true) {
+		if (file->load_status && file->esf_open) {
 			for (iping = 0; iping < file->num_pings; iping++) {
 				ping = &(file->pings[iping]);
 				for (ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
@@ -3286,7 +3177,7 @@ int mbeditviz_destroy_grid() {
 
 		/* reset parameters */
 		memset(mbev_grid.projection_id, 0, MB_PATH_MAXLINE);
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			mbev_grid.bounds[i] = 0.0;
 			mbev_grid.boundsutm[i] = 0.0;
 		}
@@ -3299,7 +3190,6 @@ int mbeditviz_destroy_grid() {
 		mbev_grid.status = MBEV_GRID_NONE;
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3308,41 +3198,25 @@ int mbeditviz_destroy_grid() {
 		fprintf(stderr, "dbg2       mbev_status: %d\n", mbev_status);
 	}
 
-	/* return */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_selectregion(size_t instance) {
-	struct mbview_struct *mbviewdata = NULL;
-	struct mbev_file_struct *file = NULL;
-	struct mbev_ping_struct *ping = NULL;
-	struct mbview_region_struct *region = NULL;
-	float *histogram = NULL;
-	double xmin, xmax, ymin, ymax, zmin, zmax;
-	double dx, dy, dz;
-	double x, y;
-	double xx, yy;
-	double heading, sonardepth;
-	double rolldelta, pitchdelta;
-	double mtodeglon, mtodeglat;
-	double range, beam_xtrack, beam_ltrack, beam_z;
-	double alphar, betar;
-	int i, ifile, iping, ibeam;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:     %zu\n", instance);
 	}
 
-	/* check data source for selected area */
-	mbev_status = mbview_getdataptr(mbev_verbose, instance, &mbviewdata, &mbev_error);
+	struct mbview_struct *mbviewdata = NULL;
 
 	/* check if area is currently defined */
 	if (mbev_status == MB_SUCCESS && mbviewdata->region_type == MBV_REGION_QUAD) {
+		/* check data source for selected area */
+		mbev_status = mbview_getdataptr(mbev_verbose, instance, &mbviewdata, &mbev_error);
+
 		/* get area */
-		region = (struct mbview_region_struct *)&mbviewdata->region;
+		struct mbview_region_struct *region = (struct mbview_region_struct *)&mbviewdata->region;
 
 		/* get region bounds */
 		if (mbev_verbose > 0)
@@ -3353,13 +3227,13 @@ int mbeditviz_selectregion(size_t instance) {
 			        region->cornerpoints[0].ygrid, region->cornerpoints[1].xgrid, region->cornerpoints[2].ygrid,
 			        region->cornerpoints[2].xgrid, region->cornerpoints[2].ygrid, region->cornerpoints[3].xgrid,
 			        region->cornerpoints[3].ygrid);
-		xmin = region->cornerpoints[0].xgrid;
-		xmax = region->cornerpoints[0].xgrid;
-		ymin = region->cornerpoints[0].ygrid;
-		ymax = region->cornerpoints[0].ygrid;
-		zmin = region->cornerpoints[0].zdata;
-		zmax = region->cornerpoints[0].zdata;
-		for (i = 1; i < 4; i++) {
+		double xmin = region->cornerpoints[0].xgrid;
+		double xmax = region->cornerpoints[0].xgrid;
+		double ymin = region->cornerpoints[0].ygrid;
+		double ymax = region->cornerpoints[0].ygrid;
+		double zmin = region->cornerpoints[0].zdata;
+		double zmax = region->cornerpoints[0].zdata;
+		for (int i = 1; i < 4; i++) {
 			xmin = MIN(xmin, region->cornerpoints[i].xgrid);
 			xmax = MAX(xmax, region->cornerpoints[i].xgrid);
 			ymin = MIN(ymin, region->cornerpoints[i].ygrid);
@@ -3372,8 +3246,8 @@ int mbeditviz_selectregion(size_t instance) {
 		mbev_selected.xorigin = 0.5 * (xmin + xmax);
 		mbev_selected.yorigin = 0.5 * (ymin + ymax);
 		mbev_selected.zorigin = 0.5 * (zmin + zmax);
-		dx = xmax - xmin;
-		dy = ymax - ymin;
+		double dx = xmax - xmin;
+		double dy = ymax - ymin;
 		mbev_selected.xmin = -0.5 * dx;
 		mbev_selected.ymin = -0.5 * dy;
 		mbev_selected.xmax = 0.5 * dx;
@@ -3386,16 +3260,31 @@ int mbeditviz_selectregion(size_t instance) {
 		mbev_selected.num_soundings_unflagged = 0;
 		mbev_selected.num_soundings_flagged = 0;
 
+		// double z;  // TODO(schwehr): Why did this become unused?
+		// double x, y;
+		// double heading;
+		// double sonardepth;
+		// double rolldelta;
+		// double pitchdelta;
+		// double mtodeglon, mtodeglat;
+		// double beam_xtrack, beam_ltrack, beam_z;
+
 		/* loop over all files */
-		for (ifile = 0; ifile < mbev_num_files; ifile++) {
-			file = &mbev_files[ifile];
-			if (file->load_status == true) {
-				for (iping = 0; iping < file->num_pings; iping++) {
-					ping = &(file->pings[iping]);
+		for (int ifile = 0; ifile < mbev_num_files; ifile++) {
+			struct mbev_file_struct *file = &mbev_files[ifile];
+			if (file->load_status) {
+				for (int iping = 0; iping < file->num_pings; iping++) {
+					struct mbev_ping_struct *ping = &(file->pings[iping]);
+					double heading;
+					double sonardepth;
+					double rolldelta;
+					double pitchdelta;
 					mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
 					                        mbev_timelag, &heading, &sonardepth, &rolldelta, &pitchdelta);
+					double mtodeglon;
+					double mtodeglat;
 					mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
-					for (ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
+					for (int ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
 						if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam])) {
 							if (ping->bathx[ibeam] >= xmin && ping->bathx[ibeam] <= xmax && ping->bathy[ibeam] >= ymin &&
 							    ping->bathy[ibeam] <= ymax) {
@@ -3416,9 +3305,9 @@ int mbeditviz_selectregion(size_t instance) {
 								mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
 
 								/* get sounding relative to sonar */
-								beam_xtrack = ping->bathacrosstrack[ibeam];
-								beam_ltrack = ping->bathalongtrack[ibeam];
-								beam_z = ping->bath[ibeam] - ping->sonardepth;
+								double beam_xtrack = ping->bathacrosstrack[ibeam];
+								double beam_ltrack = ping->bathalongtrack[ibeam];
+								double beam_z = ping->bath[ibeam] - ping->sonardepth;
 
 								/* if beamforming sound speed correction to be applied */
 								if (mbev_snell != 1.0) {
@@ -3435,10 +3324,10 @@ int mbeditviz_selectregion(size_t instance) {
 								                &ping->bathx[ibeam], &ping->bathy[ibeam], &mbev_error);
 
 								/* get local position in selected region */
-								x = ping->bathx[ibeam] - mbev_selected.xorigin;
-								y = ping->bathy[ibeam] - mbev_selected.yorigin;
-								xx = x * mbev_selected.sinbearing + y * mbev_selected.cosbearing;
-								yy = -x * mbev_selected.cosbearing + y * mbev_selected.sinbearing;
+								const double x = ping->bathx[ibeam] - mbev_selected.xorigin;
+								const double y = ping->bathy[ibeam] - mbev_selected.yorigin;
+								const double xx = x * mbev_selected.sinbearing + y * mbev_selected.cosbearing;
+								const double yy = -x * mbev_selected.cosbearing + y * mbev_selected.sinbearing;
 								mbev_selected.soundings[mbev_selected.num_soundings].x = xx;
 								mbev_selected.soundings[mbev_selected.num_soundings].y = yy;
 								/*mbev_selected.soundings[mbev_selected.num_soundings].x
@@ -3483,7 +3372,7 @@ int mbeditviz_selectregion(size_t instance) {
 
 		/* get zscaling */
 		mbev_selected.zscale = mbev_selected.scale;
-		dz = zmax - zmin;
+		const double dz = zmax - zmin;
 		mbev_selected.zorigin = 0.5 * (zmin + zmax);
 		mbev_selected.zmin = -0.5 * dz;
 		mbev_selected.zmax = 0.5 * dz;
@@ -3491,7 +3380,6 @@ int mbeditviz_selectregion(size_t instance) {
 			fprintf(stderr, "mbeditviz_selectregion: num_soundings:%d\n", mbev_selected.num_soundings);
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3500,26 +3388,10 @@ int mbeditviz_selectregion(size_t instance) {
 		fprintf(stderr, "dbg2       mbev_status:%d\n", mbev_status);
 	}
 
-	/* return status */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_selectarea(size_t instance) {
-	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
-	struct mbview_struct *mbviewdata;
-	struct mbview_area_struct *area;
-	int ifile, iping, ibeam;
-	double x, y, xx, yy;
-	double zmin, zmax;
-	double heading, sonardepth;
-	double rolldelta, pitchdelta;
-	double mtodeglon, mtodeglat;
-	double range, beam_xtrack, beam_ltrack, beam_z;
-	double alphar, betar;
-	int i;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3527,12 +3399,13 @@ int mbeditviz_selectarea(size_t instance) {
 	}
 
 	/* check data source for selected area */
+	struct mbview_struct *mbviewdata;
 	mbev_status = mbview_getdataptr(mbev_verbose, instance, &mbviewdata, &mbev_error);
 
 	/* check if area is currently defined */
 	if (mbev_status == MB_SUCCESS && mbviewdata->area_type == MBV_AREA_QUAD) {
 		/* get area */
-		area = (struct mbview_area_struct *)&mbviewdata->area;
+		struct mbview_area_struct *area = (struct mbview_area_struct *)&mbviewdata->area;
 		if (mbev_verbose > 0)
 			fprintf(stderr, "mbeditviz_selectarea: rollbias:%f pitchbias:%f headingbias:%f timelag:%f snell:%f\n", mbev_rollbias,
 			        mbev_pitchbias, mbev_headingbias, mbev_timelag, mbev_snell);
@@ -3557,21 +3430,32 @@ int mbeditviz_selectarea(size_t instance) {
 		mbev_selected.num_soundings_unflagged = 0;
 		mbev_selected.num_soundings_flagged = 0;
 
+		double zmin;
+		double zmax;
+		// double heading, sonardepth;
+		// double rolldelta, pitchdelta;
+
 		/* loop over all files */
-		for (ifile = 0; ifile < mbev_num_files; ifile++) {
-			file = &mbev_files[ifile];
-			if (file->load_status == true) {
-				for (iping = 0; iping < file->num_pings; iping++) {
-					ping = &(file->pings[iping]);
+		for (int ifile = 0; ifile < mbev_num_files; ifile++) {
+			struct mbev_file_struct *file = &mbev_files[ifile];
+			if (file->load_status) {
+				for (int iping = 0; iping < file->num_pings; iping++) {
+					struct mbev_ping_struct *ping = &(file->pings[iping]);
+					double heading;
+					double sonardepth;
+					double rolldelta;
+					double pitchdelta;
 					mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
 					                        mbev_timelag, &heading, &sonardepth, &rolldelta, &pitchdelta);
+					double mtodeglon;
+					double mtodeglat;
 					mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
-					for (ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
+					for (int ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
 						if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam])) {
-							x = ping->bathx[ibeam] - mbev_selected.xorigin;
-							y = ping->bathy[ibeam] - mbev_selected.yorigin;
-							yy = -x * mbev_selected.cosbearing + y * mbev_selected.sinbearing;
-							xx = x * mbev_selected.sinbearing + y * mbev_selected.cosbearing;
+							double x = ping->bathx[ibeam] - mbev_selected.xorigin;
+							double y = ping->bathy[ibeam] - mbev_selected.yorigin;
+							double yy = -x * mbev_selected.cosbearing + y * mbev_selected.sinbearing;
+							double xx = x * mbev_selected.sinbearing + y * mbev_selected.cosbearing;
 							if (xx >= mbev_selected.xmin && xx <= mbev_selected.xmax && yy >= mbev_selected.ymin &&
 							    yy <= mbev_selected.ymax) {
 								/* allocate memory if needed */
@@ -3591,9 +3475,9 @@ int mbeditviz_selectarea(size_t instance) {
 								mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
 
 								/* get sounding relative to sonar */
-								beam_xtrack = ping->bathacrosstrack[ibeam];
-								beam_ltrack = ping->bathalongtrack[ibeam];
-								beam_z = ping->bath[ibeam] - ping->sonardepth;
+								double beam_xtrack = ping->bathacrosstrack[ibeam];
+								double beam_ltrack = ping->bathalongtrack[ibeam];
+								double beam_z = ping->bath[ibeam] - ping->sonardepth;
 
 								/* if beamforming sound speed correction to be applied */
 								if (mbev_snell != 1.0) {
@@ -3653,7 +3537,7 @@ int mbeditviz_selectarea(size_t instance) {
 
 		/* get zscaling */
 		mbev_selected.zscale = mbev_selected.scale;
-		double dz = zmax - zmin;
+		const double dz = zmax - zmin;
 		mbev_selected.zorigin = 0.5 * (zmin + zmax);
 		mbev_selected.zmin = -0.5 * dz;
 		mbev_selected.zmax = 0.5 * dz;
@@ -3661,7 +3545,6 @@ int mbeditviz_selectarea(size_t instance) {
 			fprintf(stderr, "mbeditviz_selectarea: num_soundings:%d\n", mbev_selected.num_soundings);
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3670,26 +3553,10 @@ int mbeditviz_selectarea(size_t instance) {
 		fprintf(stderr, "dbg2       mbev_status:%d\n", mbev_status);
 	}
 
-	/* return status */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
 int mbeditviz_selectnav(size_t instance) {
-	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
-	struct mbview_shareddata_struct *mbviewshared;
-	struct mbview_navpointw_struct *navpts;
-	int inavcount;
-	int ifile, iping, ibeam;
-	double xmin, xmax, ymin, ymax, zmin, zmax;
-	double heading, sonardepth;
-	double rolldelta, pitchdelta;
-	double mtodeglon, mtodeglat;
-	double range, beam_xtrack, beam_ltrack, beam_z;
-	double alphar, betar;
-	int i;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3699,6 +3566,7 @@ int mbeditviz_selectnav(size_t instance) {
 		fprintf(stderr, "mbeditviz_selectnav: \n");
 
 	/* check shared data source for selected nav */
+	struct mbview_shareddata_struct *mbviewshared;
 	mbev_status = mbview_getsharedptr(mbev_verbose, &mbviewshared, &mbev_error);
 
 	/* check if any nav is currently selected */
@@ -3717,18 +3585,34 @@ int mbeditviz_selectnav(size_t instance) {
 		if (mbev_verbose > 0)
 			fprintf(stderr, "mbeditviz_selectnav: rollbias:%f pitchbias:%f headingbias:%f timelag:%f snell:%f\n", mbev_rollbias,
 			        mbev_pitchbias, mbev_headingbias, mbev_timelag, mbev_snell);
-		inavcount = 0;
-		for (ifile = 0; ifile < mbev_num_files; ifile++) {
-			file = &mbev_files[ifile];
-			if (file->load_status == true) {
+		int inavcount = 0;
+		struct mbview_navpointw_struct *navpts;
+		double xmin;
+		double xmax;
+		double ymin;
+		double ymax;
+		double zmin;
+		double zmax;
+		// double heading, sonardepth;
+		// double rolldelta, pitchdelta;
+
+		for (int ifile = 0; ifile < mbev_num_files; ifile++) {
+			struct mbev_file_struct *file = &mbev_files[ifile];
+			if (file->load_status) {
 				navpts = (struct mbview_navpointw_struct *)mbviewshared->navs[inavcount].navpts;
-				for (iping = 0; iping < file->num_pings; iping++) {
-					if (navpts[iping].selected == true) {
-						ping = &(file->pings[iping]);
+				for (int iping = 0; iping < file->num_pings; iping++) {
+					if (navpts[iping].selected) {
+						struct mbev_ping_struct *ping = &(file->pings[iping]);
+						double heading;
+						double sonardepth;
+						double rolldelta;
+						double pitchdelta;
 						mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
 						                        mbev_timelag, &heading, &sonardepth, &rolldelta, &pitchdelta);
+						double mtodeglon;
+						double mtodeglat;
 						mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
-						for (ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
+						for (int ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
 							if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam])) {
 								/* allocate memory if needed */
 								if (mbev_selected.num_soundings >= mbev_selected.num_soundings_alloc) {
@@ -3747,9 +3631,9 @@ int mbeditviz_selectnav(size_t instance) {
 								mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
 
 								/* get sounding relative to sonar */
-								beam_xtrack = ping->bathacrosstrack[ibeam];
-								beam_ltrack = ping->bathalongtrack[ibeam];
-								beam_z = ping->bath[ibeam] - ping->sonardepth;
+								double beam_xtrack = ping->bathacrosstrack[ibeam];
+								double beam_ltrack = ping->bathalongtrack[ibeam];
+								double beam_z = ping->bath[ibeam] - ping->sonardepth;
 
 								/* if beamforming sound speed correction to be applied */
 								if (mbev_snell != 1.0) {
@@ -3814,11 +3698,11 @@ int mbeditviz_selectnav(size_t instance) {
 		}
 
 		/* get origin and scaling */
-		double dx = xmax - xmin;
-		double dy = ymax - ymin;
-		double dz = zmax - zmin;
-		double xorigin = 0.5 * (xmin + xmax);
-		double yorigin = 0.5 * (ymin + ymax);
+		const double dx = xmax - xmin;
+		const double dy = ymax - ymin;
+		const double dz = zmax - zmin;
+		const double xorigin = 0.5 * (xmin + xmax);
+		const double yorigin = 0.5 * (ymin + ymax);
 		mbev_selected.zorigin = 0.5 * (zmin + zmax);
 		mbev_selected.scale = 2.0 / sqrt(dy * dy + dx * dx);
 		mbev_selected.zscale = mbev_selected.scale;
@@ -3828,7 +3712,7 @@ int mbeditviz_selectnav(size_t instance) {
 		mbev_selected.ymax = 0.5 * dy;
 		mbev_selected.zmin = -0.5 * dz;
 		mbev_selected.zmax = 0.5 * dz;
-		for (i = 0; i < mbev_selected.num_soundings; i++) {
+		for (int i = 0; i < mbev_selected.num_soundings; i++) {
 			mbev_selected.soundings[i].x = mbev_selected.soundings[i].x - xorigin;
 			mbev_selected.soundings[i].y = mbev_selected.soundings[i].y - yorigin;
 		}
@@ -3836,7 +3720,6 @@ int mbeditviz_selectnav(size_t instance) {
 			fprintf(stderr, "mbeditviz_selectarea: num_soundings:%d\n", mbev_selected.num_soundings);
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3845,7 +3728,6 @@ int mbeditviz_selectnav(size_t instance) {
 		fprintf(stderr, "dbg2       mbev_status:%d\n", mbev_status);
 	}
 
-	/* return status */
 	return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
@@ -3853,14 +3735,13 @@ void mbeditviz_mb3dsoundings_dismiss() {
 	if (mbev_verbose > 0)
 		fprintf(stderr, "mbeditviz_mb3dsoundings_dismiss\n");
 
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 	}
 
 	/* release the memory of the soundings */
-  mbev_selected.displayed = false;
+	mbev_selected.displayed = false;
 	if (mbev_selected.num_soundings_alloc > 0) {
 		if (mbev_selected.soundings != NULL) {
 			free(mbev_selected.soundings);
@@ -3886,7 +3767,6 @@ void mbeditviz_mb3dsoundings_dismiss() {
 		mbev_selected.num_soundings_alloc = 0;
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3897,13 +3777,9 @@ void mbeditviz_mb3dsoundings_dismiss() {
 }
 /*--------------------------------------------------------------------*/
 void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag, int flush) {
-	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
-	int action;
 	/* fprintf(stderr,"mbeditviz_mb3dsoundings_edit:%d %d %d beamflag:%d flush:%d\n",
 	ifile, iping, ibeam, beamflag, flush); */
 
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3916,8 +3792,8 @@ void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag
 
 	/* apply current edit event */
 	if (flush != MB3DSDG_EDIT_FLUSHPREVIOUS) {
-		file = &mbev_files[ifile];
-		ping = &(file->pings[iping]);
+		struct mbev_file_struct *file = &mbev_files[ifile];
+		struct mbev_ping_struct *ping = &(file->pings[iping]);
 
 		/* check for real flag state change */
 		if (mb_beam_ok(ping->beamflag[ibeam]) != mb_beam_ok(beamflag)) {
@@ -3928,7 +3804,7 @@ void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag
 		/* output edits if desired */
 		if (mbev_mode_output == MBEV_OUTPUT_MODE_EDIT) {
 			/* open esf and ess files if not already open */
-			if (file->esf_open == false) {
+			if (!file->esf_open) {
 				mbev_status = mb_esf_load(mbev_verbose, program_name, file->path, false, MBP_ESF_APPEND, file->esffile,
 				                          &(file->esf), &mbev_error);
 				if (mbev_status == MB_SUCCESS) {
@@ -3942,7 +3818,8 @@ void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag
 			}
 
 			/* save the edits to the esf stream */
-			if (file->esf_open == true) {
+			if (file->esf_open) {
+				int action;
 				if (mb_beam_ok(beamflag))
 					action = MBP_EDIT_UNFLAG;
 				else if (mb_beam_check_flag_filter2(beamflag))
@@ -3967,7 +3844,6 @@ void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag
 		mbview_plothigh(0);
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3978,12 +3854,9 @@ void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag
 }
 /*--------------------------------------------------------------------*/
 void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostring) {
-	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
 	if (mbev_verbose > 0)
 		fprintf(stderr, "mbeditviz_mb3dsoundings_info:%d %d %d\n", ifile, iping, ibeam);
 
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3993,8 +3866,8 @@ void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostr
 	}
 
 	/* generate info string */
-	file = &mbev_files[ifile];
-	ping = &(file->pings[iping]);
+	struct mbev_file_struct *file = &mbev_files[ifile];
+	struct mbev_ping_struct *ping = &(file->pings[iping]);
 	sprintf(infostring,
 	        "Beam %d of %d   Ping %d of %d   File:%s\nPing Time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f\nLon:%.6f Lat:%.6f "
 	        "Depth:%.3f X:%.3f L:%.3f",
@@ -4003,7 +3876,6 @@ void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostr
 	        ping->bathlat[ibeam], ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam]);
 	fprintf(stderr, "\nbathcorr:%f bath:%f sonardepth:%f", ping->bathcorr[ibeam], ping->bath[ibeam], ping->sonardepth);
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4015,23 +3887,9 @@ void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostr
 }
 /*--------------------------------------------------------------------*/
 void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double headingbias, double timelag, double snell) {
-	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
-	int ifile, iping, ibeam;
-	double x, y, xx, yy;
-	double zmin, zmax, dz;
-	double heading, sonardepth;
-	double rolldelta, pitchdelta;
-	double mtodeglon, mtodeglat;
-	double range, beam_xtrack, beam_ltrack, beam_z;
-	double alphar, betar;
-	int ifilelast, ipinglast;
-	int i;
-
 	if (mbev_verbose > 0)
 		fprintf(stderr, "mbeditviz_mb3dsoundings_bias:%f %f %f %f %f\n", rollbias, pitchbias, headingbias, timelag, snell);
 
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4048,17 +3906,29 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
 	mbev_headingbias = headingbias;
 	mbev_timelag = timelag;
 	mbev_snell = snell;
-	ifilelast = -1;
-	ipinglast = -1;
+	int ifilelast = -1;
+	int ipinglast = -1;
+
+	// int ifile, iping, ibeam;
+	// double x, y, xx, yy;
+	double zmin;
+	double zmax;
+	// double heading, sonardepth;
+	// double rolldelta, pitchdelta;
+	// double mtodeglon, mtodeglat;
+	// double beam_xtrack, beam_ltrack, beam_z;
 
 	/* apply bias parameters */
-	for (i = 0; i < mbev_selected.num_soundings; i++) {
-		ifile = mbev_selected.soundings[i].ifile;
-		iping = mbev_selected.soundings[i].iping;
-		ibeam = mbev_selected.soundings[i].ibeam;
-		file = &mbev_files[ifile];
-		ping = &(file->pings[iping]);
+	for (int i = 0; i < mbev_selected.num_soundings; i++) {
+		const int ifile = mbev_selected.soundings[i].ifile;
+		const int iping = mbev_selected.soundings[i].iping;
+		const int ibeam = mbev_selected.soundings[i].ibeam;
+		struct mbev_file_struct *file = &mbev_files[ifile];
+		struct mbev_ping_struct *ping = &(file->pings[iping]);
 
+		double heading, sonardepth;
+		double rolldelta, pitchdelta;
+		double mtodeglon, mtodeglat;
 		if (ifile != ifilelast || iping != ipinglast) {
 			mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
 			                        mbev_timelag, &heading, &sonardepth, &rolldelta, &pitchdelta);
@@ -4068,9 +3938,9 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
 		}
 
 		/* get sounding relative to sonar */
-		beam_xtrack = ping->bathacrosstrack[ibeam];
-		beam_ltrack = ping->bathalongtrack[ibeam];
-		beam_z = ping->bath[ibeam] - ping->sonardepth;
+		double beam_xtrack = ping->bathacrosstrack[ibeam];
+		double beam_ltrack = ping->bathalongtrack[ibeam];
+		double beam_z = ping->bath[ibeam] - ping->sonardepth;
 
 		/* if beamforming sound speed correction to be applied */
 		if (mbev_snell != 1.0) {
@@ -4084,10 +3954,10 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
 		                        heading, &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 		mb_proj_forward(mbev_verbose, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam], &ping->bathx[ibeam],
 		                &ping->bathy[ibeam], &mbev_error);
-		x = ping->bathx[ibeam] - mbev_selected.xorigin;
-		y = ping->bathy[ibeam] - mbev_selected.yorigin;
-		xx = x * mbev_selected.sinbearing + y * mbev_selected.cosbearing;
-		yy = -x * mbev_selected.cosbearing + y * mbev_selected.sinbearing;
+		const double x = ping->bathx[ibeam] - mbev_selected.xorigin;
+		const double y = ping->bathy[ibeam] - mbev_selected.yorigin;
+		const double xx = x * mbev_selected.sinbearing + y * mbev_selected.cosbearing;
+		const double yy = -x * mbev_selected.cosbearing + y * mbev_selected.sinbearing;
 
 		/* get local position in selected region */
 		mbev_selected.soundings[i].x = xx;
@@ -4105,14 +3975,13 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
 
 	/* get zscaling */
 	mbev_selected.zscale = mbev_selected.scale;
-	dz = zmax - zmin;
+	const double dz = zmax - zmin;
 	mbev_selected.zorigin = 0.5 * (zmin + zmax);
 	mbev_selected.zmin = -0.5 * dz;
 	mbev_selected.zmax = 0.5 * dz;
-	for (i = 0; i < mbev_selected.num_soundings; i++)
+	for (int i = 0; i < mbev_selected.num_soundings; i++)
 		mbev_selected.soundings[i].z = mbev_selected.soundings[i].z - mbev_selected.zorigin;
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4123,19 +3992,9 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
 }
 /*--------------------------------------------------------------------*/
 void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double headingbias, double timelag, double snell) {
-	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
-	int ifile, iping, ibeam;
-	double heading, sonardepth;
-	double rolldelta, pitchdelta;
-	double mtodeglon, mtodeglat;
-	double range, beam_xtrack, beam_ltrack, beam_z;
-	double alphar, betar;
-
 	if (mbev_verbose > 0)
 		fprintf(stderr, "mbeditviz_mb3dsoundings_biasapply:%f %f %f %f %f\n", rollbias, pitchbias, headingbias, timelag, snell);
 
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4158,21 +4017,29 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
 	        mbev_timelag, mbev_snell);
 	do_mbeditviz_message_on(message);
 
+	// double heading, sonardepth;
+	// double rolldelta, pitchdelta;
+	// double mtodeglon, mtodeglat;
+	// double beam_xtrack, beam_ltrack, beam_z;
+
 	/* apply bias parameters to swath data */
-	for (ifile = 0; ifile < mbev_num_files; ifile++) {
-		file = &mbev_files[ifile];
-		if (file->load_status == true) {
-			for (iping = 0; iping < file->num_pings; iping++) {
-				ping = &(file->pings[iping]);
+	for (int ifile = 0; ifile < mbev_num_files; ifile++) {
+		struct mbev_file_struct *file = &mbev_files[ifile];
+		if (file->load_status) {
+			for (int iping = 0; iping < file->num_pings; iping++) {
+				struct mbev_ping_struct *ping = &(file->pings[iping]);
+				double heading, sonardepth;
+				double rolldelta, pitchdelta;
 				mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
 				                        mbev_timelag, &heading, &sonardepth, &rolldelta, &pitchdelta);
+				double mtodeglon, mtodeglat;
 				mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
-				for (ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
+				for (int ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
 					if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam])) {
 						/* get sounding relative to sonar */
-						beam_xtrack = ping->bathacrosstrack[ibeam];
-						beam_ltrack = ping->bathalongtrack[ibeam];
-						beam_z = ping->bath[ibeam] - ping->sonardepth;
+						double beam_xtrack = ping->bathacrosstrack[ibeam];
+						double beam_ltrack = ping->bathalongtrack[ibeam];
+						double beam_z = ping->bath[ibeam] - ping->sonardepth;
 
 						/* if beamforming sound speed correction to be applied */
 						if (mbev_snell != 1.0) {
@@ -4205,7 +4072,6 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
 	/* redisplay grid */
 	mbview_plothigh(0);
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4218,32 +4084,10 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
 void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingthreshold)
 
 {
-	struct mb3dsoundings_sounding_struct *sounding;
-	int isounding;
-	int n_columns, n_rows, nz, cn_columns, cn_rows, cnz;
-	double dx, dy, dz;
-	int **coarsevoxels = NULL;
-	int *ncoarsevoxels = NULL;
-	int *ncoarsevoxels_alloc = NULL;
-	int nvoxels_alloc;
-	int voxel_size;
-	int nvoxels_alloc_chunk;
-	int *voxels = NULL;
-	int *voxel;
-	int nvoxels, nvoxels_occupied;
-	int occupied_voxel;
-	size_t alloc_size;
-	int ncoarsevoxelstot, nvoxelstot;
-	int found, ivoxel, ivoxeluse, nsoundingsinvoxel, nflagged;
-	int i, j, k;
-	int i0, i1, j0, j1, k0, k1;
-	int ii, jj, kk, ll, iii, jjj, kkk;
-
 	if (mbev_verbose > 0)
 		fprintf(stderr, "mbeditviz_mb3dsoundings_flagsparsevoxels: sizemultiplier:%d nsoundingthreshold:%d\n", sizemultiplier,
 		        nsoundingthreshold);
 
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4263,74 +4107,88 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 	fprintf(stderr, "\tflag threshold: n < %d soundings within 3X3X3 voxel volume\n", nsoundingthreshold);
 
 	/* get number of voxels */
-	dx = sizemultiplier * mbev_grid_cellsize;
-	dy = sizemultiplier * mbev_grid_cellsize;
-	dz = sizemultiplier * mbev_grid_cellsize;
-	n_columns = (mbev_selected.xmax - mbev_selected.xmin) / dx;
-	n_rows = (mbev_selected.ymax - mbev_selected.ymin) / dy;
-	nz = (mbev_selected.zmax - mbev_selected.zmin) / dz;
-	cn_columns = n_columns / 10 + 1;
-	cn_rows = n_rows / 10 + 1;
-	cnz = nz / 10 + 1;
+	const double dx = sizemultiplier * mbev_grid_cellsize;
+	const double dy = sizemultiplier * mbev_grid_cellsize;
+	const double dz = sizemultiplier * mbev_grid_cellsize;
+	int n_columns = (mbev_selected.xmax - mbev_selected.xmin) / dx;
+	int n_rows = (mbev_selected.ymax - mbev_selected.ymin) / dy;
+	int nz = (mbev_selected.zmax - mbev_selected.zmin) / dz;
+	int cn_columns = n_columns / 10 + 1;
+	int cn_rows = n_rows / 10 + 1;
+	int cnz = nz / 10 + 1;
 	n_columns = 10 * cn_columns;
 	n_rows = 10 * cn_rows;
 	nz = 10 * cnz;
-	nvoxels_occupied = 0;
+	int nvoxels_occupied = 0;
 	// fprintf(stderr,"Volume Bounds: %f %f  %f %f  %f %f  dxyz:%f  Dims: %d %d %d\n",
 	// mbev_selected.xmin,mbev_selected.xmax,mbev_selected.ymin,mbev_selected.ymax,mbev_selected.zmin,mbev_selected.zmax,
 	// dx,n_columns,n_rows,nz);
 
 	/* allocate arrays for lists of occupied voxels */
 	// fprintf(stderr,"\nArray pointers before: %p %p %p\n",ncoarsevoxels,ncoarsevoxels_alloc,coarsevoxels);
-	alloc_size = cn_columns * cn_rows * cnz * sizeof(int);
+	size_t alloc_size = cn_columns * cn_rows * cnz * sizeof(int);
 	// fprintf(stderr,"Alloc sizes: %zu ", alloc_size);
+	int *ncoarsevoxels = NULL;
 	if ((mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, alloc_size, (void **)&ncoarsevoxels, &mbev_error)) ==
 	    MB_SUCCESS)
 		memset(ncoarsevoxels, 0, alloc_size);
+	int *ncoarsevoxels_alloc = NULL;
 	if ((mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, alloc_size, (void **)&ncoarsevoxels_alloc, &mbev_error)) ==
 	    MB_SUCCESS)
 		memset(ncoarsevoxels_alloc, 0, alloc_size);
 	alloc_size = cn_columns * cn_rows * cnz * sizeof(int *);
 	// fprintf(stderr," %zu\n", alloc_size);
+	int **coarsevoxels = NULL;
 	if ((mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, alloc_size, (void **)&coarsevoxels, &mbev_error)) ==
 	    MB_SUCCESS)
 		memset(coarsevoxels, 0, alloc_size);
-	voxel_size = (mbev_nsoundingthreshold + 5);
-	nvoxels_alloc_chunk = n_columns * n_rows * 2 / 10; /* figure occupied voxels likely to number about twice a horizontal slice */
+	const int voxel_size = (mbev_nsoundingthreshold + 5);
+	const int nvoxels_alloc_chunk = n_columns * n_rows * 2 / 10; /* figure occupied voxels likely to number about twice a horizontal slice */
 	// fprintf(stderr,"Array pointers after: %p %p %p\n",ncoarsevoxels,ncoarsevoxels_alloc,coarsevoxels);
+
+	// TODO(schwehr): Localize variables.
+	int nvoxels_alloc;
+	int *voxels = NULL;
+	int *voxel;
+	int nvoxels;
+	bool occupied_voxel;
+	int ncoarsevoxelstot;
+	int nvoxelstot;
+	bool found;
+	int ivoxel;
+	int ivoxeluse;
+	int nsoundingsinvoxel;
+	int nflagged;
 
 	/* loop over all soundings setting occupied voxels as needed */
 	if (mbev_status == MB_SUCCESS) {
-		for (isounding = 0; isounding < mbev_selected.num_soundings; isounding++) {
-			sounding = &mbev_selected.soundings[isounding];
+		for (int isounding = 0; isounding < mbev_selected.num_soundings; isounding++) {
+			struct mb3dsoundings_sounding_struct *sounding = &mbev_selected.soundings[isounding];
 			if (mb_beam_ok(sounding->beamflag)) {
-				i = (sounding->x - mbev_selected.xmin) / dx;
-				j = (sounding->y - mbev_selected.ymin) / dy;
-				k = (sounding->z - mbev_selected.zmin) / dz;
+				const int i = (sounding->x - mbev_selected.xmin) / dx;
+				const int j = (sounding->y - mbev_selected.ymin) / dy;
+				const int k = (sounding->z - mbev_selected.zmin) / dz;
 
 				/* loop over the neighborhood (+/- 1) of the voxel containing
 				 * this sounding, setting occupancy for the containing voxel and
 				 * neighbor occupancy for the surrounding voxels */
-				i0 = MAX(i - 1, 0);
-				i1 = MIN(i + 1, n_columns - 1);
-				j0 = MAX(j - 1, 0);
-				j1 = MIN(j + 1, n_rows - 1);
-				k0 = MAX(k - 1, 0);
-				k1 = MIN(k + 1, nz - 1);
-				for (iii = i0; iii <= i1; iii++) {
-					for (jjj = j0; jjj <= j1; jjj++) {
-						for (kkk = k0; kkk <= k1; kkk++) {
+				const int i0 = MAX(i - 1, 0);
+				const int i1 = MIN(i + 1, n_columns - 1);
+				const int j0 = MAX(j - 1, 0);
+				const int j1 = MIN(j + 1, n_rows - 1);
+				const int k0 = MAX(k - 1, 0);
+				const int k1 = MIN(k + 1, nz - 1);
+				for (int iii = i0; iii <= i1; iii++) {
+					for (int jjj = j0; jjj <= j1; jjj++) {
+						for (int kkk = k0; kkk <= k1; kkk++) {
 							/* is this the occupied voxel or a neighbor */
-							if (i == iii && j == jjj && k == kkk)
-								occupied_voxel = true;
-							else
-								occupied_voxel = false;
+							occupied_voxel = i == iii && j == jjj && k == kkk;
 
 							/* get coarse voxel */
-							ii = i / 10;
-							jj = j / 10;
-							kk = k / 10;
-							ll = ii + jj * cn_columns + kk * cn_columns * cn_rows;
+							const int ii = i / 10;
+							const int jj = j / 10;
+							const int kk = k / 10;
+							const int ll = ii + jj * cn_columns + kk * cn_columns * cn_rows;
 
 							/* look for voxel already set in the appropriate coarse voxel */
 							nvoxels = ncoarsevoxels[ll];
@@ -4339,7 +4197,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 
 							found = false;
 							if (nvoxels > 0 && voxels != NULL) {
-								for (ivoxel = 0; ivoxel < nvoxels && found == false; ivoxel++) {
+								for (ivoxel = 0; ivoxel < nvoxels && !found; ivoxel++) {
 									voxel = &voxels[ivoxel * voxel_size];
 									if (iii == voxel[0] && jjj == voxel[1] && kkk == voxel[2]) {
 										found = true;
@@ -4349,7 +4207,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 							}
 
 							/* if needed allocate more space for a new voxel to the list */
-							if (found == false && nvoxels_alloc <= nvoxels) {
+							if (!found && nvoxels_alloc <= nvoxels) {
 								nvoxels_alloc += nvoxels_alloc_chunk;
 								alloc_size = nvoxels_alloc * voxel_size * sizeof(int);
 								mbev_status = mb_reallocd(mbev_verbose, __FILE__, __LINE__, alloc_size,
@@ -4364,7 +4222,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 							}
 
 							/* if needed add a new voxel to the list */
-							if (mbev_status == MB_SUCCESS && found == false) {
+							if (mbev_status == MB_SUCCESS && !found) {
 								ivoxeluse = nvoxels;
 								voxel = &voxels[ivoxeluse * voxel_size];
 								voxel[0] = iii;
@@ -4379,7 +4237,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 							/* add sounding to voxel list */
 							if (mbev_status == MB_SUCCESS) {
 								voxel = &voxels[ivoxeluse * voxel_size];
-								if (occupied_voxel == true) {
+								if (occupied_voxel) {
 									nsoundingsinvoxel = voxel[3];
 									if (nsoundingsinvoxel < mbev_nsoundingthreshold) {
 										voxel[5 + nsoundingsinvoxel] = isounding;
@@ -4421,7 +4279,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 		/* count occupied voxels */
 		ncoarsevoxelstot = 0;
 		nvoxelstot = 0;
-		for (ll = 0; ll < cn_columns * cn_rows * cnz; ll++) {
+		for (int ll = 0; ll < cn_columns * cn_rows * cnz; ll++) {
 			if (ncoarsevoxels[ll] > 0) {
 				ncoarsevoxelstot++;
 				voxels = coarsevoxels[ll];
@@ -4438,14 +4296,14 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 		/* loop over all occupied voxels */
 		nflagged = 0;
 		nvoxels = 0;
-		for (ll = 0; ll < cn_columns * cn_rows * cnz; ll++) {
+		for (int ll = 0; ll < cn_columns * cn_rows * cnz; ll++) {
 			voxels = coarsevoxels[ll];
 			for (ivoxel = 0; ivoxel < ncoarsevoxels[ll]; ivoxel++) {
 				voxel = &voxels[ivoxel * voxel_size];
 				if (voxel[3] > 0 && (voxel[3] + voxel[4]) < mbev_nsoundingthreshold) {
-					for (i = 0; i < voxel[3]; i++) {
-						isounding = voxel[5 + i];
-						sounding = &mbev_selected.soundings[isounding];
+					for (int i = 0; i < voxel[3]; i++) {
+						int isounding = voxel[5 + i];
+						struct mb3dsoundings_sounding_struct *sounding = &mbev_selected.soundings[isounding];
 						sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 
 						/* apply the flag in the primary application */
@@ -4475,7 +4333,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 	}
 
 	/* deallocate arrays */
-	for (ll = 0; ll < cn_columns * cn_rows * cnz; ll++)
+	for (int ll = 0; ll < cn_columns * cn_rows * cnz; ll++)
 		mbev_status = mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&coarsevoxels[ll], &mbev_error);
 	mbev_status = mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&ncoarsevoxels, &mbev_error);
 	mbev_status = mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&ncoarsevoxels_alloc, &mbev_error);
@@ -4487,7 +4345,6 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 	/* redisplay grid */
 	mbview_plothigh(0);
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4498,13 +4355,10 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 }
 /*--------------------------------------------------------------------*/
 void mbeditviz_mb3dsoundings_colorsoundings(int color) {
-	struct mb3dsoundings_sounding_struct *sounding;
-	int isounding;
 
 	if (mbev_verbose > 0)
 		fprintf(stderr, "mbeditviz_mb3dsoundings_colorsoundings:%d\n", color);
 
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4513,15 +4367,14 @@ void mbeditviz_mb3dsoundings_colorsoundings(int color) {
 
 	/* apply the specified color to all unflagged, currently selected soundings
 	    (currently selected soundings are displayed in the 3D soundings view) */
-	for (isounding = 0; isounding < mbev_selected.num_soundings; isounding++) {
-		sounding = &mbev_selected.soundings[isounding];
+	for (int isounding = 0; isounding < mbev_selected.num_soundings; isounding++) {
+		struct mb3dsoundings_sounding_struct *sounding = &mbev_selected.soundings[isounding];
 		if (mb_beam_ok(sounding->beamflag)) {
 			sounding->beamcolor = color;
 			mbev_files[sounding->ifile].pings[sounding->iping].beamcolor[sounding->ibeam] = color;
 		}
 	}
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4533,40 +4386,9 @@ void mbeditviz_mb3dsoundings_colorsoundings(int color) {
 /*--------------------------------------------------------------------*/
 void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best, double *pitchbias_best, double *headingbias_best,
                                                 double *timelag_best, double *snell_best) {
-	mb_path message_string = "";
-	double *local_grid_first = NULL;
-	double *local_grid_sum = NULL;
-	double *local_grid_sum2 = NULL;
-	double *local_grid_variance = NULL;
-	int *local_grid_num = NULL;
-	double variance_total;
-	double variance_total_best = 0.0;
-	int variance_total_num = 0;
-	double local_grid_dx, local_grid_dy;
-	double local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax;
-	int local_grid_n_columns, local_grid_n_rows;
-	double rollbias, rollbias_org;
-	double pitchbias, pitchbias_org;
-	double headingbias, headingbias_org;
-	double timelag, timelag_org;
-	double snell, snell_org;
-	double rollbias_start, rollbias_end, drollbias;
-	double pitchbias_start, pitchbias_end, dpitchbias;
-	double headingbias_start, headingbias_end, dheadingbias;
-	double timelag_start, timelag_end, dtimelag;
-	double snell_start, snell_end, dsnell;
-	size_t size_double, size_int;
-	int niterate;
-	int first = true;
-	char *marker1 = "       ";
-	char *marker2 = " ******";
-	char *marker = NULL;
-	int i;
-
 	if (mbev_verbose > 0)
 		fprintf(stderr, "mbeditviz_mb3dsoundings_optimizebiasvalues: %d\n", mode);
 
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4579,35 +4401,37 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 	}
 
 	/* get and save initial bias values */
-	rollbias_org = *rollbias_best;
-	pitchbias_org = *pitchbias_best;
-	headingbias_org = *headingbias_best;
-	timelag_org = *timelag_best;
-	snell_org = *snell_best;
+	// const double rollbias_org = *rollbias_best;
+	// const double pitchbias_org = *pitchbias_best;
+	// const double headingbias_org = *headingbias_best;
+	// const double timelag_org = *timelag_best;
+	// const double snell_org = *snell_best;
 
 	/* create grid of bins to calculate variance */
-	local_grid_dx = 2 * mbev_grid.dx;
-	local_grid_dy = 2 * mbev_grid.dy;
-	local_grid_xmin = mbev_selected.xmin - 0.25 * (mbev_selected.xmax - mbev_selected.xmin);
-	local_grid_xmax = mbev_selected.xmax + 0.25 * (mbev_selected.xmax - mbev_selected.xmin);
-	local_grid_ymin = mbev_selected.ymin - 0.25 * (mbev_selected.ymax - mbev_selected.ymin);
-	local_grid_ymax = mbev_selected.ymax + 0.25 * (mbev_selected.ymax - mbev_selected.ymin);
-	local_grid_n_columns = (local_grid_xmax - local_grid_xmin) / local_grid_dx + 1;
-	local_grid_n_rows = (local_grid_ymax - local_grid_ymin) / local_grid_dy + 1;
+	const double local_grid_dx = 2 * mbev_grid.dx;
+	const double local_grid_dy = 2 * mbev_grid.dy;
+	const double local_grid_xmin = mbev_selected.xmin - 0.25 * (mbev_selected.xmax - mbev_selected.xmin);
+	double local_grid_xmax = mbev_selected.xmax + 0.25 * (mbev_selected.xmax - mbev_selected.xmin);
+	const double local_grid_ymin = mbev_selected.ymin - 0.25 * (mbev_selected.ymax - mbev_selected.ymin);
+	double local_grid_ymax = mbev_selected.ymax + 0.25 * (mbev_selected.ymax - mbev_selected.ymin);
+	const int local_grid_n_columns = (local_grid_xmax - local_grid_xmin) / local_grid_dx + 1;
+	const int local_grid_n_rows = (local_grid_ymax - local_grid_ymin) / local_grid_dy + 1;
 	local_grid_xmax = local_grid_xmin + local_grid_n_columns * local_grid_dx;
 	local_grid_ymax = local_grid_ymin + local_grid_n_rows * local_grid_dy;
 
 	/* allocate arrays for calculating variance */
-	size_double = local_grid_n_columns * local_grid_n_rows * sizeof(double);
-	size_int = local_grid_n_columns * local_grid_n_rows * sizeof(int);
+	const size_t size_double = local_grid_n_columns * local_grid_n_rows * sizeof(double);
+	const size_t size_int = local_grid_n_columns * local_grid_n_rows * sizeof(int);
+	double *local_grid_first = NULL;
 	mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_first, &mbev_error);
+	double *local_grid_sum = NULL;
 	mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_sum, &mbev_error);
+	double *local_grid_sum2 = NULL;
 	mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_sum2, &mbev_error);
+	double *local_grid_variance = NULL;
 	mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_variance, &mbev_error);
+	int *local_grid_num = NULL;
 	mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_int, (void **)&local_grid_num, &mbev_error);
-
-	/* set flag to set best total variance on first calculation */
-	first = true;
 
 	/* now loop over all different values of bias parameters looking for the
 	 * combination that minimizes the overall variance
@@ -4630,6 +4454,29 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		fprintf(stderr,"  Mode: Snell Correction\n");
 	fprintf(stderr,"------------------------\n");
 
+	/* set flag to set best total variance on first calculation */
+	bool first = true;
+
+	// TODO(schwehr): Localize variables.
+	mb_path message_string = "";
+	double variance_total;
+	double variance_total_best = 0.0;
+	int variance_total_num = 0;
+	double rollbias;
+	double pitchbias;
+	double headingbias;
+	double timelag;
+	double snell;
+	double rollbias_start, rollbias_end, drollbias;
+	double pitchbias_start, pitchbias_end, dpitchbias;
+	double headingbias_start, headingbias_end, dheadingbias;
+	double timelag_start, timelag_end, dtimelag;
+	double snell_start, snell_end, dsnell;
+	int niterate;
+	char *marker1 = "       ";
+	char *marker2 = " ******";
+	char *marker = NULL;
+
 	/* Roll bias */
 	if (mode & MB3DSDG_OPTIMIZEBIASVALUES_R) {
 		/* start with coarse roll bias */
@@ -4641,13 +4488,13 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		headingbias = *headingbias_best;
 		timelag = *timelag_best;
 		snell = *snell_best;
-		for (i = 0; i < niterate; i++) {
+		for (int i = 0; i < niterate; i++) {
 			rollbias = rollbias_start + i * drollbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first)) {
 				first = false;
 				*rollbias_best = rollbias;
 				variance_total_best = variance_total;
@@ -4672,13 +4519,13 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		headingbias = *headingbias_best;
 		timelag = *timelag_best;
 		snell = *snell_best;
-		for (i = 0; i < niterate; i++) {
+		for (int i = 0; i < niterate; i++) {
 			rollbias = rollbias_start + i * drollbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first)) {
 				first = false;
 				*rollbias_best = rollbias;
 				variance_total_best = variance_total;
@@ -4706,13 +4553,13 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		headingbias = *headingbias_best;
 		timelag = *timelag_best;
 		snell = *snell_best;
-		for (i = 0; i < niterate; i++) {
+		for (int i = 0; i < niterate; i++) {
 			pitchbias = pitchbias_start + i * dpitchbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first)) {
 				first = false;
 				*pitchbias_best = pitchbias;
 				variance_total_best = variance_total;
@@ -4737,13 +4584,13 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		headingbias = *headingbias_best;
 		timelag = *timelag_best;
 		snell = *snell_best;
-		for (i = 0; i < niterate; i++) {
+		for (int i = 0; i < niterate; i++) {
 			pitchbias = pitchbias_start + i * dpitchbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first)) {
 				first = false;
 				*pitchbias_best = pitchbias;
 				variance_total_best = variance_total;
@@ -4771,13 +4618,13 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		dheadingbias = (headingbias_end - headingbias_start) / (niterate - 1);
 		timelag = *timelag_best;
 		snell = *snell_best;
-		for (i = 0; i < niterate; i++) {
+		for (int i = 0; i < niterate; i++) {
 			headingbias = headingbias_start + i * dheadingbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first)) {
 				first = false;
 				*headingbias_best = headingbias;
 				variance_total_best = variance_total;
@@ -4802,13 +4649,13 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		dheadingbias = (headingbias_end - headingbias_start) / (niterate - 1);
 		timelag = *timelag_best;
 		snell = *snell_best;
-		for (i = 0; i < niterate; i++) {
+		for (int i = 0; i < niterate; i++) {
 			headingbias = headingbias_start + i * dheadingbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first)) {
 				first = false;
 				*headingbias_best = headingbias;
 				variance_total_best = variance_total;
@@ -4836,13 +4683,13 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		headingbias = *headingbias_best;
 		timelag = *timelag_best;
 		snell = *snell_best;
-		for (i = 0; i < niterate; i++) {
+		for (int i = 0; i < niterate; i++) {
 			rollbias = rollbias_start + i * drollbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first)) {
 				first = false;
 				*rollbias_best = rollbias;
 				variance_total_best = variance_total;
@@ -4870,13 +4717,13 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		headingbias = *headingbias_best;
 		timelag = *timelag_best;
 		snell = *snell_best;
-		for (i = 0; i < niterate; i++) {
+		for (int i = 0; i < niterate; i++) {
 			pitchbias = pitchbias_start + i * dpitchbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first)) {
 				first = false;
 				*pitchbias_best = pitchbias;
 				variance_total_best = variance_total;
@@ -4904,13 +4751,13 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		dheadingbias = (headingbias_end - headingbias_start) / (niterate - 1);
 		timelag = *timelag_best;
 		snell = *snell_best;
-		for (i = 0; i < niterate; i++) {
+		for (int i = 0; i < niterate; i++) {
 			headingbias = headingbias_start + i * dheadingbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first)) {
 				first = false;
 				*headingbias_best = headingbias;
 				variance_total_best = variance_total;
@@ -4939,13 +4786,13 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		dtimelag = (timelag_end - timelag_start) / (niterate - 1);
 		timelag = *timelag_best;
 		snell = *snell_best;
-		for (i = 0; i < niterate; i++) {
+		for (int i = 0; i < niterate; i++) {
 			timelag = timelag_start + i * dtimelag;
 			mbeditviz_mb3dsoundings_getbiasvariance(
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first)) {
 				first = false;
 				*timelag_best = timelag;
 				variance_total_best = variance_total;
@@ -4971,13 +4818,13 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		dtimelag = (timelag_end - timelag_start) / (niterate - 1);
 		timelag = *timelag_best;
 		snell = *snell_best;
-		for (i = 0; i < niterate; i++) {
+		for (int i = 0; i < niterate; i++) {
 			timelag = timelag_start + i * dtimelag;
 			mbeditviz_mb3dsoundings_getbiasvariance(
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first)) {
 				first = false;
 				*timelag_best = timelag;
 				variance_total_best = variance_total;
@@ -5006,13 +4853,13 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		snell_end = *snell_best + 0.1;
 		dsnell = (snell_end - snell_start) / (niterate - 1);
 		snell = *snell_best;
-		for (i = 0; i < niterate; i++) {
+		for (int i = 0; i < niterate; i++) {
 			snell = snell_start + i * dsnell;
 			mbeditviz_mb3dsoundings_getbiasvariance(
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first)) {
 				first = false;
 				*snell_best = snell;
 				variance_total_best = variance_total;
@@ -5038,13 +4885,13 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		snell_end = *snell_best + 0.009;
 		dsnell = (snell_end - snell_start) / (niterate - 1);
 		snell = *snell_best;
-		for (i = 0; i < niterate; i++) {
+		for (int i = 0; i < niterate; i++) {
 			snell = snell_start + i * dsnell;
 			mbeditviz_mb3dsoundings_getbiasvariance(
 			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
-			if (variance_total_num > 0 && (variance_total < variance_total_best || first == true)) {
+			if (variance_total_num > 0 && (variance_total < variance_total_best || first)) {
 				first = false;
 				*snell_best = snell;
 				variance_total_best = variance_total;
@@ -5073,7 +4920,6 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 
 	mbeditviz_mb3dsoundings_bias(*rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best);
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -5094,13 +4940,6 @@ void mbeditviz_mb3dsoundings_getbiasvariance(double local_grid_xmin, double loca
                                              double *local_grid_sum2, double *local_grid_variance, int *local_grid_num,
                                              double rollbias, double pitchbias, double headingbias, double timelag, double snell,
                                              int *variance_total_num, double *variance_total) {
-	struct mb3dsoundings_sounding_struct *sounding;
-	double z;
-	size_t size_double, size_int;
-	int isounding;
-	int i, j, k;
-
-	/* print input debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5130,8 +4969,8 @@ void mbeditviz_mb3dsoundings_getbiasvariance(double local_grid_xmin, double loca
 	/* initialize variance */
 	*variance_total = 0.0;
 	*variance_total_num = 0;
-	size_double = local_grid_n_columns * local_grid_n_rows * sizeof(double);
-	size_int = local_grid_n_columns * local_grid_n_rows * sizeof(int);
+	const size_t size_double = local_grid_n_columns * local_grid_n_rows * sizeof(double);
+	const size_t size_int = local_grid_n_columns * local_grid_n_rows * sizeof(int);
 	memset(local_grid_first, 0, size_double);
 	memset(local_grid_sum, 0, size_double);
 	memset(local_grid_sum2, 0, size_double);
@@ -5139,25 +4978,25 @@ void mbeditviz_mb3dsoundings_getbiasvariance(double local_grid_xmin, double loca
 	memset(local_grid_num, 0, size_int);
 
 	/* calculate variance of soundings in each bin, and then the total variance */
-	for (isounding = 0; isounding < mbev_selected.num_soundings; isounding++) {
-		sounding = &mbev_selected.soundings[isounding];
+	for (int isounding = 0; isounding < mbev_selected.num_soundings; isounding++) {
+		struct mb3dsoundings_sounding_struct *sounding = &mbev_selected.soundings[isounding];
 		if (mb_beam_ok(sounding->beamflag)) {
-			i = (sounding->x - local_grid_xmin) / local_grid_dx;
-			j = (sounding->y - local_grid_ymin) / local_grid_dy;
+			const int i = (sounding->x - local_grid_xmin) / local_grid_dx;
+			const int j = (sounding->y - local_grid_ymin) / local_grid_dy;
 			if (i >= 0 && i < local_grid_n_columns && j >= 0 && j < local_grid_n_rows) {
-				k = i * local_grid_n_rows + j;
+				const int k = i * local_grid_n_rows + j;
 				if (local_grid_num[k] == 0)
 					local_grid_first[k] = sounding->z;
-				z = sounding->z - local_grid_first[k];
+				const double z = sounding->z - local_grid_first[k];
 				local_grid_sum[k] += z;
 				local_grid_sum2[k] += z * z;
 				local_grid_num[k] += 1;
 			}
 		}
 	}
-	for (i = 0; i < local_grid_n_columns; i++) {
-		for (j = 0; j < local_grid_n_rows; j++) {
-			k = i * local_grid_n_rows + j;
+	for (int i = 0; i < local_grid_n_columns; i++) {
+		for (int j = 0; j < local_grid_n_rows; j++) {
+			const int k = i * local_grid_n_rows + j;
 			if (local_grid_num[k] > 0) {
 				local_grid_variance[k] =
 				    (local_grid_sum2[k] - (local_grid_sum[k] * local_grid_sum[k] / local_grid_num[k])) / local_grid_num[k];
@@ -5170,7 +5009,6 @@ void mbeditviz_mb3dsoundings_getbiasvariance(double local_grid_xmin, double loca
 		(*variance_total) /= (*variance_total_num);
 	// fprintf(stderr,"variance_total_num:%d variance_total:%f\n",*variance_total_num,*variance_total);
 
-	/* print output debug statements */
 	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
