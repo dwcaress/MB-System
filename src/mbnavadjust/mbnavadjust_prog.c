@@ -4974,7 +4974,9 @@ void mbnavadjust_newpen(int icolor) {
   return;
 }
 /*--------------------------------------------------------------------*/
-void mbnavadjust_setline(int linewidth) { return; }
+void mbnavadjust_setline(int linewidth) {
+  (void)linewidth;  // Unused parameter
+}
 /*--------------------------------------------------------------------*/
 void mbnavadjust_justify_string(double height, char *string, double *s) {
   int len;
@@ -4988,7 +4990,13 @@ void mbnavadjust_justify_string(double height, char *string, double *s) {
   return;
 }
 /*--------------------------------------------------------------------*/
-void mbnavadjust_plot_string(double x, double y, double hgt, double angle, char *label) { return; }
+void mbnavadjust_plot_string(double x, double y, double hgt, double angle, char *label) {
+  (void)x;  // Unused parameter
+  (void)y;  // Unused parameter
+  (void)hgt;  // Unused parameter
+  (void)angle;  // Unused parameter
+  (void)label;  // Unused parameter
+}
 /*--------------------------------------------------------------------*/
 
 void mbnavadjust_naverr_scale() {
@@ -6839,6 +6847,7 @@ int mbnavadjust_zerozoffsets() {
 }
 /*--------------------------------------------------------------------*/
 void mb_aprod(int mode, int m, int n, double x[], double y[], void *UsrWrk) {
+  (void)n;  // Unused parameter
   // mode == 1 : compute y = y + A*x
   // mode == 2 : compute x = x + A(transpose)*y
   struct mbna_matrix *matrix;
