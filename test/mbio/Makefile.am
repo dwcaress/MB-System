@@ -18,6 +18,10 @@ AM_LDFLAGS += -lpthread
 TESTS =
 check_PROGRAMS =
 
+TESTS += mb_defaults_test
+check_PROGRAMS += mb_defaults_test
+mb_defaults_test_SOURCES = mb_defaults_test.cc
+
 TESTS += mb_format_test
 check_PROGRAMS += mb_format_test
 mb_format_test_SOURCES = mb_format_test.cc
