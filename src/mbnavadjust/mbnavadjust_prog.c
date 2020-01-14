@@ -20,8 +20,6 @@
  *
  * Author:  D. W. Caress
  * Date:  March 23, 2000
- *
- *
  */
 
 /*--------------------------------------------------------------------*/
@@ -342,7 +340,6 @@ int mbnavadjust_init(int argc, char **argv) {
   int status = MB_SUCCESS;
   int fileflag = 0;
   char ifile[STRING_MAX];
-  int i;
 
   /* parsing variables */
   extern char *optarg;
@@ -444,7 +441,6 @@ int mbnavadjust_init(int argc, char **argv) {
 int mbnavadjust_set_colors(int ncol, int *pixels) {
   /* local variables */
   int status = MB_SUCCESS;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -475,7 +471,6 @@ int mbnavadjust_set_colors(int ncol, int *pixels) {
 int mbnavadjust_set_borders(int *cn_brdr, int *cr_brdr, int *zc_brdr) {
   /* local variables */
   int status = MB_SUCCESS;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -701,7 +696,6 @@ int mbnavadjust_file_open(char *projectname) {
   struct stat file_status;
   char *slashptr, *nameptr, *bufptr;
   struct stat statbuf;
-  int i, j, k;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -887,7 +881,6 @@ int mbnavadjust_import_data(char *path, int iformat) {
   double weight;
   int form;
   int firstfile;
-  int i, j;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -1029,7 +1022,7 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
   double angle, dt, alongtrackdistance, xtrackavg, xtrackmax;
   int nxtrack;
 
-  int output_id, found;
+  int output_id;
   int obeams_bath, obeams_amp, opixels_ss;
   int iform;
   int nread, first;
@@ -1060,7 +1053,7 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
     int status_sensorhead = MB_SUCCESS;
     int error_sensorhead = MB_ERROR_NO_ERROR;
   void *tptr;
-  int i, j, k;
+  int j;
   int ii1, jj1;
 
   /* print input debug statements */
@@ -1893,7 +1886,6 @@ int mbnavadjust_bin_bathymetry(double altitude, int beams_bath, char *beamflag, 
                                double *bin_bathalongtrack, int *error) {
   /* local variables */
   int status = MB_SUCCESS;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -1928,7 +1920,6 @@ int mbnavadjust_findcrossings() {
   /* local variables */
   int status = MB_SUCCESS;
   struct mbna_crossing *crossing;
-  int ifile, icrossing;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -2088,14 +2079,15 @@ int mbnavadjust_findcrossingsfile(int ifile) {
   struct mbna_section *section1, *section2;
   struct mbna_crossing *crossing;
   int found, overlap, disqualify;
-  int isection, jfile, jsection, jsectionmax, icrossing;
+  int jsectionmax;
   double lonoffset1, latoffset1, lonoffset2, latoffset2;
   double lonmin1, lonmax1, latmin1, latmax1;
   double lonmin2, lonmax2, latmin2, latmax2;
   double cell1lonmin, cell1lonmax, cell1latmin, cell1latmax;
   double cell2lonmin, cell2lonmax, cell2latmin, cell2latmax;
   double dx1, dy1, dx2, dy2;
-  int ii1, jj1, kk1, ii2, jj2, kk2;
+  int kk1;
+  int kk2;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -2257,7 +2249,6 @@ int mbnavadjust_addcrossing(int ifile1, int isection1, int ifile2, int isection2
   int status = MB_SUCCESS;
   struct mbna_crossing *crossing;
   int disqualify;
-  int icrossing;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -2350,7 +2341,6 @@ int mbnavadjust_poornav_file() {
   /* local variables */
   int status = MB_SUCCESS;
   int block;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -2399,7 +2389,6 @@ int mbnavadjust_goodnav_file() {
   /* local variables */
   int status = MB_SUCCESS;
   int block;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -2451,7 +2440,6 @@ int mbnavadjust_fixednav_file() {
   /* local variables */
   int status = MB_SUCCESS;
   int block;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 0) {
@@ -2504,7 +2492,6 @@ int mbnavadjust_fixedxynav_file() {
   /* local variables */
   int status = MB_SUCCESS;
   int block;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 0) {
@@ -2557,7 +2544,6 @@ int mbnavadjust_fixedznav_file() {
   /* local variables */
   int status = MB_SUCCESS;
   int block;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 0) {
@@ -2742,7 +2728,6 @@ int mbnavadjust_naverr_save() {
   struct mbna_section *section;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -2998,7 +2983,7 @@ int mbnavadjust_naverr_next() {
   int status = MB_SUCCESS;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
-  int i, j, k;
+  int j, k;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -3099,7 +3084,7 @@ int mbnavadjust_naverr_previous() {
   int status = MB_SUCCESS;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
-  int i, j, k;
+  int j, k;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -3195,7 +3180,7 @@ int mbnavadjust_naverr_nextunset() {
   int status = MB_SUCCESS;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
-  int i, j, k;
+  int j, k;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -3372,7 +3357,6 @@ int mbnavadjust_naverr_addtie() {
   struct mbna_file *file1, *file2;
   int found;
   int ix, iy;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -3622,7 +3606,6 @@ int mbnavadjust_deletetie(int icrossing, int jtie, int delete_status) {
   struct mbna_tie *tie;
   struct mbna_section *section1, *section2;
   struct mbna_file *file1, *file2;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -3727,7 +3710,6 @@ int mbnavadjust_naverr_resettie() {
   struct mbna_section *section1, *section2;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -4150,8 +4132,6 @@ int mbnavadjust_crossing_load() {
 int mbnavadjust_crossing_unload() {
   /* local variables */
   int status = MB_SUCCESS;
-  struct pingraw *pingraw;
-  int i;
 
   // fprintf(stderr,"\n%s called: mbna_current_crossing:%d mbna_current_tie:%d\n",
   // __func__,mbna_current_crossing,mbna_current_tie);
@@ -4274,7 +4254,6 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy) {
   struct mbna_crossing *crossing;
   struct mbna_section *section;
   double distance;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -4443,11 +4422,11 @@ int mbnavadjust_get_misfit() {
   double rsave3;
   int found;
   int igx, igy;
-  int ic, jc, kc, lc;
+  int lc;
   int ioff, joff, istart, iend, jstart, jend;
-  int i1, i2, j1, j2, k1, k2;
+  int i2, j2, k1, k2;
   int imin, jmin, kmin;
-  int i, j, k, l, ll;
+  int k, ll;
   void *tptr;
 
   /* print input debug statements */
@@ -5005,7 +4984,7 @@ int mbnavadjust_get_misfit() {
 int mbnavadjust_get_misfitxy() {
   /* local variables */
   int status = MB_SUCCESS;
-  int ic, jc, kc, lc;
+  int kc, lc;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -5207,7 +5186,7 @@ void mbnavadjust_naverr_plot(int plotmode) {
   int snav_1, snav_2;
   double dmisfit;
   int fill, found;
-  int i, j, k, kk, l;
+  int i, j, k, l;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -5637,13 +5616,11 @@ int mbnavadjust_autopick(int do_vertical) {
   struct mbna_crossing *crossing;
   struct mbna_file *file1, *file2;
   struct mbna_section *section1, *section2;
-  struct mbna_tie *tie;
   double dlon, dlat, overlap_scale;
   int process;
   int nprocess;
   int isnav1_focus, isnav2_focus;
   double lon_focus, lat_focus;
-  int i, j, k;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -6113,8 +6090,6 @@ int mbnavadjust_autosetsvsvertical() {
   double *byfix = NULL;
   double *bzfix = NULL;
 
-  int ifile, isection, isnav, icrossing, itie;
-
   int nnav = 0;
   int nblock = 0;
   int ndiscontinuity = 0;
@@ -6132,8 +6107,6 @@ int mbnavadjust_autosetsvsvertical() {
   int irow, inav;
   int index_m, index_n;
   int jbvb, jbvb1, jbvb2;
-  int iblock, jblock;
-  int i, j;
 
   int ok_to_invert;
   double damp;
@@ -6961,7 +6934,6 @@ int mbnavadjust_zerozoffsets() {
   int status = MB_SUCCESS;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
-  int i, j;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -7020,7 +6992,7 @@ void mb_aprod(int mode, int m, int n, double x[], double y[], void *UsrWrk) {
   // mode == 1 : compute y = y + A*x
   // mode == 2 : compute x = x + A(transpose)*y
   struct mbna_matrix *matrix;
-  int i, j, k;
+  int k;
 
   matrix = (struct mbna_matrix *)UsrWrk;
 
@@ -7088,8 +7060,6 @@ int mbnavadjust_invertnav() {
   double rms_solution, rms_solution_total, rms_misfit_initial, rms_misfit_previous, rms_misfit_current;
   int nrms;
 
-  int ifile, isection, isnav, icrossing, itie;
-
   int nnav = 0;
   int nblock = 0;
   int ndiscontinuity = 0;
@@ -7110,7 +7080,7 @@ int mbnavadjust_invertnav() {
   double distance_sum, chunk_distance;
   double damping;
 
-  int n_iteration, iteration;
+  int n_iteration;
   double convergence = 1000.0;
   double offset_x, offset_y, offset_z, projected_offset;
   double weight, zweight;
@@ -7819,12 +7789,12 @@ int mbnavadjust_invertnav() {
                         /* get absolute id for first snav point */
                         file1 = &project.files[crossing->file_id_1];
                         section1 = &file1->sections[crossing->section_1];
-                        int nc1 = section1->snav_invert_id[tie->snav_1];
+                        // int nc1 = section1->snav_invert_id[tie->snav_1];
 
                         /* get absolute id for second snav point */
                         file2 = &project.files[crossing->file_id_2];
                         section2 = &file2->sections[crossing->section_2];
-                        int nc2 = section2->snav_invert_id[tie->snav_2];
+                        // int nc2 = section2->snav_invert_id[tie->snav_2];
 
                         /* get offset vector for this tie */
                         if (tie->status != MBNA_TIE_Z) {
@@ -9034,12 +9004,12 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
                         /* get absolute id for first snav point */
                         file1 = &project.files[crossing->file_id_1];
                         section1 = &file1->sections[crossing->section_1];
-                        int nc1 = section1->snav_invert_id[tie->snav_1];
+                        // int nc1 = section1->snav_invert_id[tie->snav_1];
 
                         /* get absolute id for second snav point */
                         file2 = &project.files[crossing->file_id_2];
                         section2 = &file2->sections[crossing->section_2];
-                        int nc2 = section2->snav_invert_id[tie->snav_2];
+                        // int nc2 = section2->snav_invert_id[tie->snav_2];
 
                         /* get offset vector for this tie */
                         if (tie->status != MBNA_TIE_Z) {
@@ -9304,8 +9274,6 @@ int mbnavadjust_invertnav_old() {
   double *bzfix = NULL;
   double rms_misfit_initial, rms_misfit_current;
 
-  int ifile, isection, isnav, icrossing, itie;
-
   int nnav = 0;
   int nblock = 0;
   int ndiscontinuity = 0;
@@ -9323,12 +9291,11 @@ int mbnavadjust_invertnav_old() {
   int irow, inav, nc1, nc2;
   int index_m, index_n;
   int jbvb, jbvb1, jbvb2;
-  int iblock, jblock;
-  int i, j, k;
+  int k;
 
   double offset_x, offset_y, offset_z, projected_offset;
   double weight;
-    double smoothweight;
+  double smoothweight;
   int ok_to_invert;
   double damp;
   double atol;
@@ -10663,7 +10630,6 @@ int mbnavadjust_updategrid() {
   double seconds;
   double lon_min, lon_max, lat_min, lat_max;
   int shellstatus;
-  int i, j;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -10974,7 +10940,6 @@ int mbnavadjust_applynav() {
   double mbp_rollbias_stbd;
   int isection, isnav;
   double seconds;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -11239,7 +11204,6 @@ ifile, isection, isnav);
 int mbnavadjust_set_modelplot_graphics(void *mp_xgid, int *mp_brdr) {
   /* local variables */
   int status = MB_SUCCESS;
-  int i;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -11427,7 +11391,7 @@ int mbnavadjust_modelplot_pick_timeseries(int x, int y) {
   int pick_section;
   int pick_snav;
   int ntieselect;
-  int i, j, ix, iy, iping;
+  int ix, iy, iping;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -11625,9 +11589,8 @@ int mbnavadjust_modelplot_pick_perturbation(int x, int y) {
   int pick_section;
   int pick_snav;
   int ntieselect;
-  int i, j, ix, iy, iping;
+  int ix, iy, iping;
 
-  /* print input debug statements */
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2       x:           %d\n", x);
@@ -11828,7 +11791,7 @@ int mbnavadjust_modelplot_pick_tieoffsets(int x, int y) {
   int pick_file;
   int pick_section;
   int pick_snav;
-  int i, j, ix, iy;
+  int ix, iy;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -11943,7 +11906,7 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
   int pick_file;
   int pick_section;
   int pick_snav;
-  int i, j, ix, iy, iping;
+  int ix, iy, iping;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -12606,10 +12569,7 @@ int mbnavadjust_modelplot_clearblock() {
   int status = MB_SUCCESS;
   struct mbna_crossing *crossing;
   int block1, block2;
-  int i, j;
-  /*fprintf(stderr,"Called %s\n",__func__);*/
 
-  /* print input debug statements */
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
@@ -12717,7 +12677,6 @@ int mbnavadjust_modelplot_plot_timeseries() {
   int stringwidth, stringascent, stringdescent;
   int pixel;
   int ixo, iyo, ix, iy;
-  int i, j, isnav;
   int imodelplot_start, imodelplot_end;
   // fprintf(stderr,"Called %s\n",__func__);
 
@@ -13549,7 +13508,6 @@ int mbnavadjust_modelplot_plot_perturbation() {
   int stringwidth, stringascent, stringdescent;
   int pixel;
   int ixo, iyo, ix, iy;
-  int i, j, isnav;
   int imodelplot_start, imodelplot_end;
   // fprintf(stderr,"Called %s\n",__func__);
 
@@ -14426,9 +14384,6 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
   int num_ties_block;
   int num_blocks;
   int plot_index;
-  int isurvey1, isurvey2;
-  int i, j;
-  // fprintf(stderr,"Called %s\n",__func__);
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -14972,7 +14927,6 @@ int mbnavadjust_open_visualization(int which_grid) {
   double seconds, roll, pitch, heave;
   double sonardepth;
   int nscan;
-  int i, j;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -15371,7 +15325,6 @@ int mbnavadjust_reset_visualization_navties() {
   int navtieeditmode;
   mb_path navtiename;
   int id;
-  int i, j;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
@@ -15557,7 +15510,6 @@ int mbnavadjust_visualization_selectcrossingfromnav(int ifile1, int isection1, i
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
   int found;
-  int icrossing;
 
   /* print input debug statements */
   if (mbna_verbose >= 2) {
