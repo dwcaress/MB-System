@@ -87,12 +87,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-TESTS = mb_defaults_test$(EXEEXT) mb_format_test$(EXEEXT) \
-	mb_mem_test$(EXEEXT) mb_read_init_test$(EXEEXT) \
-	mb_time_test$(EXEEXT)
-check_PROGRAMS = mb_defaults_test$(EXEEXT) mb_format_test$(EXEEXT) \
-	mb_mem_test$(EXEEXT) mb_read_init_test$(EXEEXT) \
-	mb_time_test$(EXEEXT)
+TESTS = mb_defaults_test$(EXEEXT) mb_error_test$(EXEEXT) \
+	mb_format_test$(EXEEXT) mb_mem_test$(EXEEXT) \
+	mb_read_init_test$(EXEEXT) mb_time_test$(EXEEXT)
+check_PROGRAMS = mb_defaults_test$(EXEEXT) mb_error_test$(EXEEXT) \
+	mb_format_test$(EXEEXT) mb_mem_test$(EXEEXT) \
+	mb_read_init_test$(EXEEXT) mb_time_test$(EXEEXT)
 subdir = test/mbio
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -115,6 +115,9 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+am_mb_error_test_OBJECTS = mb_error_test.$(OBJEXT)
+mb_error_test_OBJECTS = $(am_mb_error_test_OBJECTS)
+mb_error_test_LDADD = $(LDADD)
 am_mb_format_test_OBJECTS = mb_format_test.$(OBJEXT)
 mb_format_test_OBJECTS = $(am_mb_format_test_OBJECTS)
 mb_format_test_LDADD = $(LDADD)
@@ -143,8 +146,9 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/mb_defaults_test.Po \
-	./$(DEPDIR)/mb_format_test.Po ./$(DEPDIR)/mb_mem_test.Po \
-	./$(DEPDIR)/mb_read_init_test.Po ./$(DEPDIR)/mb_time_test.Po
+	./$(DEPDIR)/mb_error_test.Po ./$(DEPDIR)/mb_format_test.Po \
+	./$(DEPDIR)/mb_mem_test.Po ./$(DEPDIR)/mb_read_init_test.Po \
+	./$(DEPDIR)/mb_time_test.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -164,9 +168,9 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(mb_defaults_test_SOURCES) $(mb_format_test_SOURCES) \
-	$(mb_mem_test_SOURCES) $(mb_read_init_test_SOURCES) \
-	$(mb_time_test_SOURCES)
+SOURCES = $(mb_defaults_test_SOURCES) $(mb_error_test_SOURCES) \
+	$(mb_format_test_SOURCES) $(mb_mem_test_SOURCES) \
+	$(mb_read_init_test_SOURCES) $(mb_time_test_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -586,6 +590,7 @@ AM_LDFLAGS = $(GTEST_LDFLAGS) $(GTEST_LIBS) \
 	$(top_builddir)/third_party/googletest/lib/libgtest.la \
 	-lpthread
 mb_defaults_test_SOURCES = mb_defaults_test.cc
+mb_error_test_SOURCES = mb_error_test.cc
 mb_format_test_SOURCES = mb_format_test.cc
 mb_mem_test_SOURCES = mb_mem_test.cc
 mb_read_init_test_SOURCES = mb_read_init_test.cc
@@ -637,6 +642,10 @@ mb_defaults_test$(EXEEXT): $(mb_defaults_test_OBJECTS) $(mb_defaults_test_DEPEND
 	@rm -f mb_defaults_test$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mb_defaults_test_OBJECTS) $(mb_defaults_test_LDADD) $(LIBS)
 
+mb_error_test$(EXEEXT): $(mb_error_test_OBJECTS) $(mb_error_test_DEPENDENCIES) $(EXTRA_mb_error_test_DEPENDENCIES) 
+	@rm -f mb_error_test$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(mb_error_test_OBJECTS) $(mb_error_test_LDADD) $(LIBS)
+
 mb_format_test$(EXEEXT): $(mb_format_test_OBJECTS) $(mb_format_test_DEPENDENCIES) $(EXTRA_mb_format_test_DEPENDENCIES) 
 	@rm -f mb_format_test$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mb_format_test_OBJECTS) $(mb_format_test_LDADD) $(LIBS)
@@ -660,6 +669,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_defaults_test.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_error_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_format_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_mem_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_read_init_test.Po@am__quote@ # am--include-marker
@@ -901,6 +911,13 @@ mb_defaults_test.log: mb_defaults_test$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+mb_error_test.log: mb_error_test$(EXEEXT)
+	@p='mb_error_test$(EXEEXT)'; \
+	b='mb_error_test'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 mb_format_test.log: mb_format_test$(EXEEXT)
 	@p='mb_format_test$(EXEEXT)'; \
 	b='mb_format_test'; \
@@ -989,6 +1006,7 @@ clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/mb_defaults_test.Po
+	-rm -f ./$(DEPDIR)/mb_error_test.Po
 	-rm -f ./$(DEPDIR)/mb_format_test.Po
 	-rm -f ./$(DEPDIR)/mb_mem_test.Po
 	-rm -f ./$(DEPDIR)/mb_read_init_test.Po
@@ -1039,6 +1057,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/mb_defaults_test.Po
+	-rm -f ./$(DEPDIR)/mb_error_test.Po
 	-rm -f ./$(DEPDIR)/mb_format_test.Po
 	-rm -f ./$(DEPDIR)/mb_mem_test.Po
 	-rm -f ./$(DEPDIR)/mb_read_init_test.Po
