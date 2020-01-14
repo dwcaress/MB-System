@@ -237,9 +237,7 @@ void BxUnmanageCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, clien
  *			XtPointer	call:	the call data (unused).
  */
 
-#ifdef VMS
 #include <stdlib.h>
-#endif
 
 /* ARGSUSED */
 void BxExitCB ARGLIST((w, client, call)) UARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {

@@ -277,9 +277,7 @@ WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
  *      XtPointer  call:  the call data (unused).
  */
 
-#ifdef VMS
 #include <stdlib.h>
-#endif
 
 /* ARGSUSED */
 void BxExitCB ARGLIST((w, client, call)) UARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
