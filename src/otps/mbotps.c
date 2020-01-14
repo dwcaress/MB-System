@@ -81,31 +81,37 @@
 #define MBOTPS_MODE_NAV_WRT_STATION     0x03
 #define MBOTPS_DEFAULT_MODEL "atlas_v1"
 
-/*--------------------------------------------------------------------*/
-
-int main
-(
-  int argc,
-  char **argv
-)
-{
-  static char program_name[] = "mbotps";
-  static char help_message[] =
+static char program_name[] = "mbotps";
+static char help_message[] =
     "MBotps predicts tides using methods and data derived from the OSU Tidal Prediction Software (OTPS) distributions.";
-  static char usage_message[] =
+static char usage_message[] =
     "mbotps [-Atideformat -Byear/month/day/hour/minute/second -Ctidestationformat\n"
     "\t-Dinterval -Eyear/month/day/hour/minute/second -Fformat\n"
     "\t-Idatalist -Lopts_path -Ntidestationfile -Ooutput -Potps_location\n"
     "\t-Rlon/lat -S -Tmodel -Utidestationlon/tidestationlat -V]";
+/*--------------------------------------------------------------------*/
+
+int main(int argc, char **argv) {
+  int verbose = 0;
+  int format;
+  int pings;
+  int lonflip;
+  double bounds[4];
+  int btime_i[7];
+  int etime_i[7];
+  double speedmin;
+  double timegap;
+
+  int status = mb_defaults(
+      verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i,
+      &speedmin, &timegap);
+
   extern char *optarg;
   int errflg = 0;
   int c;
   int help = 0;
   int flag = 0;
 
-  /* MBIO status variables */
-  int status = MB_SUCCESS;
-  int verbose = 0;
   int error = MB_ERROR_NO_ERROR;
   char *message;
 
@@ -118,12 +124,6 @@ int main
   mb_path swath_file;
   mb_path file;
   mb_path dfile;
-  int format;
-  int pings;
-  int lonflip;
-  double bounds[4];
-  double speedmin;
-  double timegap;
   int beams_bath;
   int beams_amp;
   int pixels_ss;
@@ -160,8 +160,6 @@ int main
   double tidelat;
   double btime_d;
   double etime_d;
-  int btime_i[7];
-  int etime_i[7];
   double interval = 300.0;
   mb_path tide_file;
   int mbprocess_update = false;
@@ -198,9 +196,6 @@ int main
   FILE *tfp, *mfp, *ofp;
   struct stat file_status;
   int fstat;
-  double start_time_d;
-  double end_time_d;
-  int istart, iend;
   int proceed = true;
   int input_size, input_modtime, output_size, output_modtime;
   mb_path lltfile = "";
@@ -228,17 +223,6 @@ int main
   double depth;
   char *result;
   int i;
-
-  /* get current default values */
-  status = mb_defaults(verbose,
-    &format,
-    &pings,
-    &lonflip,
-    bounds,
-    btime_i,
-    etime_i,
-    &speedmin,
-    &timegap);
 
   /* set default input to datalist.mb-1 */
   strcpy(read_file, "datalist.mb-1");
@@ -1495,15 +1479,12 @@ int main
   if (verbose >= 4)
     status = mb_memory_list(verbose, &error);
 
-  /* print output debug statements */
-  if (verbose >= 2)
-    {
+  if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
     fprintf(stderr, "dbg2  Ending status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
-    }
+  }
 
-  /* end it all */
-  exit(error);
-}  /* main */
+  return(error);
+}
 /*--------------------------------------------------------------------*/
