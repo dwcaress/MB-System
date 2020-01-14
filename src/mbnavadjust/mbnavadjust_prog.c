@@ -69,6 +69,7 @@ struct pingraw {
   double *bathacrosstrack;
   double *bathalongtrack;
 };
+
 struct swathraw {
   /* raw swath data */
   int file_id;
@@ -665,7 +666,8 @@ int mbnavadjust_file_open(char *projectname) {
   struct mbna_crossing *crossing;
   char path[STRING_MAX];
   struct stat file_status;
-  char *slashptr, *nameptr, *bufptr;
+  char *slashptr;
+  char *nameptr;
   struct stat statbuf;
 
   if (mbna_verbose >= 2) {
@@ -699,7 +701,7 @@ int mbnavadjust_file_open(char *projectname) {
         strncpy(project.path, projectname, strlen(projectname) - strlen(nameptr));
       }
       else {
-        bufptr = getcwd(project.path, MB_PATH_MAXLINE);
+        /* char *bufptr = */ getcwd(project.path, MB_PATH_MAXLINE);
         strcat(project.path, "/");
       }
       strcpy(project.home, project.path);
@@ -1015,8 +1017,7 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
   double mbp_rollbias_port;
   double mbp_rollbias_stbd;
   double depthmax, distmax, depthscale, distscale;
-    int status_sensorhead = MB_SUCCESS;
-    int error_sensorhead = MB_ERROR_NO_ERROR;
+  int error_sensorhead = MB_ERROR_NO_ERROR;
   void *tptr;
   int j;
   int ii1, jj1;
@@ -1183,7 +1184,8 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 
             /* deal with survey data */
       if (kind == MB_DATA_DATA) {
-        status_sensorhead = mb_sensorhead(mbna_verbose, imbio_ptr, istore_ptr, &sensorhead, &error_sensorhead);
+        /* int status_sensorhead = */
+        mb_sensorhead(mbna_verbose, imbio_ptr, istore_ptr, &sensorhead, &error_sensorhead);
         if (sonartype == MB_TOPOGRAPHY_TYPE_UNKNOWN) {
           status = mb_sonartype(mbna_verbose, imbio_ptr, istore_ptr, &sonartype, &error);
                 }
@@ -4292,7 +4294,7 @@ int mbnavadjust_get_misfit() {
   int lc;
   int ioff, joff, istart, iend, jstart, jend;
   int i2, j2, k1, k2;
-  int imin, jmin, kmin;
+  // int imin, jmin, kmin;
   int k, ll;
   void *tptr;
 
@@ -4558,8 +4560,9 @@ int mbnavadjust_get_misfit() {
               mbna_minmisfit_x = (ic - gridm_nx / 2) * grid_dx + mbna_misfit_offset_x;
               mbna_minmisfit_y = (jc - gridm_ny / 2) * grid_dy + mbna_misfit_offset_y;
               mbna_minmisfit_z = zmin + zoff_dz * kc;
-              imin = ic;
-              jmin = jc, kmin = kc;
+              // const int imin = ic;
+              // const int jmin = jc;
+              // const int kmin = kc;
               found = true;
               /* zoff = zmin + zoff_dz * kc;
               fprintf(stderr,"DEBUG %s %d: ic:%d jc:%d kc:%d misfit:%f %f %d  pos:%f %f %f zoff:%f
@@ -4587,8 +4590,9 @@ int mbnavadjust_get_misfit() {
               mbna_minmisfit_x = (ic - gridm_nx / 2) * grid_dx + mbna_misfit_offset_x;
               mbna_minmisfit_y = (jc - gridm_ny / 2) * grid_dy + mbna_misfit_offset_y;
               mbna_minmisfit_z = zmin + zoff_dz * kc;
-              imin = ic;
-              jmin = jc, kmin = kc;
+              // imin = ic;
+              // jmin = jc;
+              // kmin = kc;
               found = true;
             }
             /* fprintf(stderr,"DEBUG %s %d: ijk:%d %d %d gridm:%d %f  misfit:%f %f %d  pos:%f %f %f\n",
@@ -5042,7 +5046,6 @@ void mbnavadjust_naverr_plot(int plotmode) {
   static int izx1, izy1, izx2, izy2;
   static int pixel, ipixel;
   int snav_1, snav_2;
-  double dmisfit;
   int fill, found;
   int i, j, k, l;
 
@@ -5281,7 +5284,7 @@ void mbnavadjust_naverr_plot(int plotmode) {
     /* plot misfit */
     ixo = corr_borders[0] + (corr_borders[1] - corr_borders[0]) / 2;
     iyo = corr_borders[2] + (corr_borders[3] - corr_borders[2]) / 2;
-    dmisfit = log10(misfit_max - misfit_min) / 79.99;
+    // const double dmisfit = log10(misfit_max - misfit_min) / 79.99;
     k = (int)((mbna_offset_z - zmin) / zoff_dz);
     for (int i = 0; i < gridm_nx; i++)
       for (int j = 0; j < gridm_ny; j++) {
@@ -6930,7 +6933,8 @@ int mbnavadjust_invertnav() {
   double convergence = 1000.0;
   double offset_x, offset_y, offset_z, projected_offset;
   double weight, zweight;
-  double smooth_max, d_smooth, smooth_exp, smoothweight;
+  double smooth_exp;
+  double smoothweight;
   int ok_to_invert;
   int found;
   double factor;
@@ -8095,8 +8099,8 @@ int mbnavadjust_invertnav() {
             rms_misfit_current = 0.0;
             for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
                 crossing = &project.crossings[icrossing];
-                int nc1;
-                int nc2;
+                // int nc1;
+                // int nc2;
                 if (crossing->status == MBNA_CROSSING_STATUS_SET)
                     for (int itie = 0; itie < crossing->num_ties; itie++) {
                         /* get tie */
@@ -8105,12 +8109,12 @@ int mbnavadjust_invertnav() {
                         /* get absolute id for first snav point */
                         file1 = &project.files[crossing->file_id_1];
                         section1 = &file1->sections[crossing->section_1];
-                        nc1 = section1->snav_invert_id[tie->snav_1];
+                        // const int nc1 = section1->snav_invert_id[tie->snav_1];
 
                         /* get absolute id for second snav point */
                         file2 = &project.files[crossing->file_id_2];
                         section2 = &file2->sections[crossing->section_2];
-                        nc2 = section2->snav_invert_id[tie->snav_2];
+                        // const int nc2 = section2->snav_invert_id[tie->snav_2];
 
                         /* get offset vector for this tie */
                         if (tie->status != MBNA_TIE_Z) {
@@ -8171,8 +8175,8 @@ int mbnavadjust_invertnav() {
 
         matrix_scale = 1000.0;
         n_iteration = 1;
-        smooth_max = 2.0 * project.smoothing;
-        d_smooth = (smooth_max - project.smoothing) / 5;
+        // const double smooth_max = 2.0 * project.smoothing;
+        // const double d_smooth = (smooth_max - project.smoothing) / 5;
         convergence = 1000.0;
         for (int iteration=0; iteration < n_iteration && convergence > 1.0; iteration ++) {
 
@@ -10469,7 +10473,6 @@ int mbnavadjust_updategrid() {
   int isection, isnav;
   double seconds;
   double lon_min, lon_max, lat_min, lat_max;
-  int shellstatus;
 
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -10511,7 +10514,7 @@ int mbnavadjust_updategrid() {
 
     sprintf(command, "chmod +x %s/mbgrid_adj.cmd", project.datadir);
     fprintf(stderr, "Executing:\n%s\n\n", command);
-    shellstatus = system(command);
+    /* const int shellstatus = */ system(command);
 
     /* run mbdatalist to create datalistp.mb-1, update ancillary files,
         and clear any processing lock files */
@@ -10521,7 +10524,7 @@ int mbnavadjust_updategrid() {
       fprintf(stderr, "%s", message);
     sprintf(command, "cd %s ; mbdatalist -Idatalist.mb-1 -O -Y -Z -V", project.datadir);
     fprintf(stderr, "Executing:\n%s\n\n", command);
-    shellstatus = system(command);
+    /* const int shellstatus = */ system(command);
 
     if (project.inversion_status != MBNA_INVERSION_NONE) {
       /* set message */
@@ -10710,7 +10713,7 @@ ifile, isection, isnav);
         fprintf(stderr, "%s", message);
       sprintf(command, "cd %s ; mbprocess", project.datadir);
       fprintf(stderr, "Executing:\n%s\n\n", command);
-      shellstatus = system(command);
+      /* const int shellstatus = */ system(command);
     }
 
     if (project.grid_status != MBNA_GRID_CURRENT) {
@@ -10721,7 +10724,7 @@ ifile, isection, isnav);
         fprintf(stderr, "%s", message);
       sprintf(command, "cd %s ; ./mbgrid_adj.cmd", project.datadir);
       fprintf(stderr, "Executing:\n%s\n\n", command);
-      shellstatus = system(command);
+      /* const int shellstatus = */ system(command);
       project.grid_status = MBNA_GRID_CURRENT;
 
       /* write current project */
@@ -11600,17 +11603,15 @@ int mbnavadjust_modelplot_pick_perturbation(int x, int y) {
 
 int mbnavadjust_modelplot_pick_tieoffsets(int x, int y) {
   int status = MB_SUCCESS;
-  struct mbna_file *file;
-  struct mbna_section *section;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
   int range;
   int rangemin;
   int pick_crossing;
   int pick_tie;
-  int pick_file;
-  int pick_section;
-  int pick_snav;
+  // int pick_file;
+  // int pick_section;
+  // int pick_snav;
   int ix, iy;
 
   if (mbna_verbose >= 2) {
@@ -11632,8 +11633,8 @@ int mbnavadjust_modelplot_pick_tieoffsets(int x, int y) {
         tie = &(crossing->ties[j]);
 
         /* handle first snav point */
-        file = &project.files[crossing->file_id_1];
-        section = &file->sections[crossing->section_1];
+        // struct mbna_file *file = &project.files[crossing->file_id_1];
+        // struct mbna_section *section = &file->sections[crossing->section_1];
 
         ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (tie->isurveyplotindex - mbna_modelplot_tiestart));
 
@@ -11643,9 +11644,9 @@ int mbnavadjust_modelplot_pick_tieoffsets(int x, int y) {
           rangemin = range;
           pick_crossing = i;
           pick_tie = j;
-          pick_file = crossing->file_id_1;
-          pick_section = crossing->section_1;
-          pick_snav = tie->snav_1;
+          // pick_file = crossing->file_id_1;
+          // pick_section = crossing->section_1;
+          // pick_snav = tie->snav_1;
         }
 
         iy = mbna_modelplot_yo_lat - (int)(mbna_modelplot_yscale * tie->offset_y_m);
@@ -11654,9 +11655,9 @@ int mbnavadjust_modelplot_pick_tieoffsets(int x, int y) {
           rangemin = range;
           pick_crossing = i;
           pick_tie = j;
-          pick_file = crossing->file_id_1;
-          pick_section = crossing->section_1;
-          pick_snav = tie->snav_1;
+          // pick_file = crossing->file_id_1;
+          // pick_section = crossing->section_1;
+          // pick_snav = tie->snav_1;
         }
 
         iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * tie->offset_z_m);
@@ -11665,9 +11666,9 @@ int mbnavadjust_modelplot_pick_tieoffsets(int x, int y) {
           rangemin = range;
           pick_crossing = i;
           pick_tie = j;
-          pick_file = crossing->file_id_1;
-          pick_section = crossing->section_1;
-          pick_snav = tie->snav_1;
+          // pick_file = crossing->file_id_1;
+          // pick_section = crossing->section_1;
+          // pick_snav = tie->snav_1;
         }
       }
     }
@@ -11720,9 +11721,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
   int rangemin;
   int pick_crossing;
   int pick_tie;
-  int pick_file;
-  int pick_section;
-  int pick_snav;
+  // int pick_file;
+  // int pick_section;
+  // int pick_snav;
   int ix, iy, iping;
 
   if (mbna_verbose >= 2) {
@@ -11763,9 +11764,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
                   rangemin = range;
                   pick_crossing = i;
                   pick_tie = j;
-                  pick_file = crossing->file_id_2;
-                  pick_section = crossing->section_2;
-                  pick_snav = tie->snav_2;
+                  // pick_file = crossing->file_id_2;
+                  // pick_section = crossing->section_2;
+                  // pick_snav = tie->snav_2;
                 }
                 /*fprintf(stderr,"range:%d rangemin:%d\n",range,rangemin);*/
 
@@ -11776,9 +11777,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
                   rangemin = range;
                   pick_crossing = i;
                   pick_tie = j;
-                  pick_file = crossing->file_id_2;
-                  pick_section = crossing->section_2;
-                  pick_snav = tie->snav_2;
+                  // pick_file = crossing->file_id_2;
+                  // pick_section = crossing->section_2;
+                  // pick_snav = tie->snav_2;
                 }
                 /*fprintf(stderr,"range:%d rangemin:%d\n",range,rangemin);*/
 
@@ -11788,9 +11789,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
                   rangemin = range;
                   pick_crossing = i;
                   pick_tie = j;
-                  pick_file = crossing->file_id_2;
-                  pick_section = crossing->section_2;
-                  pick_snav = tie->snav_2;
+                  // pick_file = crossing->file_id_2;
+                  // pick_section = crossing->section_2;
+                  // pick_snav = tie->snav_2;
                 }
                 /*fprintf(stderr,"range:%d rangemin:%d\n",range,rangemin);*/
               }
@@ -11815,9 +11816,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
                   rangemin = range;
                   pick_crossing = i;
                   pick_tie = j;
-                  pick_file = crossing->file_id_1;
-                  pick_section = crossing->section_1;
-                  pick_snav = tie->snav_1;
+                  // pick_file = crossing->file_id_1;
+                  // pick_section = crossing->section_1;
+                  // pick_snav = tie->snav_1;
                 }
                 /*fprintf(stderr,"range:%d rangemin:%d\n",range,rangemin);*/
 
@@ -11828,9 +11829,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
                   rangemin = range;
                   pick_crossing = i;
                   pick_tie = j;
-                  pick_file = crossing->file_id_1;
-                  pick_section = crossing->section_1;
-                  pick_snav = tie->snav_1;
+                  // pick_file = crossing->file_id_1;
+                  // pick_section = crossing->section_1;
+                  // pick_snav = tie->snav_1;
                 }
                 /*fprintf(stderr,"range:%d rangemin:%d\n",range,rangemin);*/
 
@@ -11840,9 +11841,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
                   rangemin = range;
                   pick_crossing = i;
                   pick_tie = j;
-                  pick_file = crossing->file_id_1;
-                  pick_section = crossing->section_1;
-                  pick_snav = tie->snav_1;
+                  // pick_file = crossing->file_id_1;
+                  // pick_section = crossing->section_1;
+                  // pick_snav = tie->snav_1;
                 }
                 /*fprintf(stderr,"range:%d rangemin:%d\n",range,rangemin);*/
               }
@@ -11900,9 +11901,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
               rangemin = range;
               pick_crossing = i;
               pick_tie = MBNA_SELECT_NONE;
-              pick_file = crossing->file_id_1;
-              pick_section = crossing->section_1;
-              pick_snav = section->num_snav / 2;
+              // pick_file = crossing->file_id_1;
+              // pick_section = crossing->section_1;
+              // pick_snav = section->num_snav / 2;
             }
 
             iy = mbna_modelplot_yo_lat -
@@ -11912,9 +11913,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
               rangemin = range;
               pick_crossing = i;
               pick_tie = MBNA_SELECT_NONE;
-              pick_file = crossing->file_id_1;
-              pick_section = crossing->section_1;
-              pick_snav = section->num_snav / 2;
+              // pick_file = crossing->file_id_1;
+              // pick_section = crossing->section_1;
+              // pick_snav = section->num_snav / 2;
             }
 
             iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * section->snav_z_offset[section->num_snav / 2]);
@@ -11923,9 +11924,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
               rangemin = range;
               pick_crossing = i;
               pick_tie = MBNA_SELECT_NONE;
-              pick_file = crossing->file_id_1;
-              pick_section = crossing->section_1;
-              pick_snav = section->num_snav / 2;
+              // pick_file = crossing->file_id_1;
+              // pick_section = crossing->section_1;
+              // pick_snav = section->num_snav / 2;
             }
 
             /* handle second snav point */
@@ -11942,9 +11943,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
               rangemin = range;
               pick_crossing = i;
               pick_tie = MBNA_SELECT_NONE;
-              pick_file = crossing->file_id_2;
-              pick_section = crossing->section_2;
-              pick_snav = section->num_snav / 2;
+              // pick_file = crossing->file_id_2;
+              // pick_section = crossing->section_2;
+              // pick_snav = section->num_snav / 2;
             }
 
             iy = mbna_modelplot_yo_lat -
@@ -11954,9 +11955,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
               rangemin = range;
               pick_crossing = i;
               pick_tie = MBNA_SELECT_NONE;
-              pick_file = crossing->file_id_2;
-              pick_section = crossing->section_2;
-              pick_snav = section->num_snav / 2;
+              // pick_file = crossing->file_id_2;
+              // pick_section = crossing->section_2;
+              // pick_snav = section->num_snav / 2;
             }
 
             iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * section->snav_z_offset[section->num_snav / 2]);
@@ -11965,9 +11966,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
               rangemin = range;
               pick_crossing = i;
               pick_tie = MBNA_SELECT_NONE;
-              pick_file = crossing->file_id_2;
-              pick_section = crossing->section_2;
-              pick_snav = section->num_snav / 2;
+              // pick_file = crossing->file_id_2;
+              // pick_section = crossing->section_2;
+              // pick_snav = section->num_snav / 2;
             }
           }
         }
@@ -12030,9 +12031,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
                   rangemin = range;
                   pick_crossing = i;
                   pick_tie = j;
-                  pick_file = crossing->file_id_2;
-                  pick_section = crossing->section_2;
-                  pick_snav = tie->snav_2;
+                  // pick_file = crossing->file_id_2;
+                  // pick_section = crossing->section_2;
+                  // pick_snav = tie->snav_2;
                 }
                 /*fprintf(stderr,"range:%d rangemin:%d\n",range,rangemin);*/
 
@@ -12044,9 +12045,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
                   rangemin = range;
                   pick_crossing = i;
                   pick_tie = j;
-                  pick_file = crossing->file_id_2;
-                  pick_section = crossing->section_2;
-                  pick_snav = tie->snav_2;
+                  // pick_file = crossing->file_id_2;
+                  // pick_section = crossing->section_2;
+                  // pick_snav = tie->snav_2;
                 }
                 /*fprintf(stderr,"range:%d rangemin:%d\n",range,rangemin);*/
 
@@ -12057,9 +12058,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
                   rangemin = range;
                   pick_crossing = i;
                   pick_tie = j;
-                  pick_file = crossing->file_id_2;
-                  pick_section = crossing->section_2;
-                  pick_snav = tie->snav_2;
+                  // pick_file = crossing->file_id_2;
+                  // pick_section = crossing->section_2;
+                  // pick_snav = tie->snav_2;
                 }
                 /*fprintf(stderr,"range:%d rangemin:%d\n",range,rangemin);*/
               }
@@ -12085,9 +12086,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
                   rangemin = range;
                   pick_crossing = i;
                   pick_tie = j;
-                  pick_file = crossing->file_id_1;
-                  pick_section = crossing->section_1;
-                  pick_snav = tie->snav_1;
+                  // pick_file = crossing->file_id_1;
+                  // pick_section = crossing->section_1;
+                  // pick_snav = tie->snav_1;
                 }
                 /*fprintf(stderr,"range:%d rangemin:%d\n",range,rangemin);*/
 
@@ -12099,9 +12100,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
                   rangemin = range;
                   pick_crossing = i;
                   pick_tie = j;
-                  pick_file = crossing->file_id_1;
-                  pick_section = crossing->section_1;
-                  pick_snav = tie->snav_1;
+                  // pick_file = crossing->file_id_1;
+                  // pick_section = crossing->section_1;
+                  // pick_snav = tie->snav_1;
                 }
                 /*fprintf(stderr,"range:%d rangemin:%d\n",range,rangemin);*/
 
@@ -12112,9 +12113,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
                   rangemin = range;
                   pick_crossing = i;
                   pick_tie = j;
-                  pick_file = crossing->file_id_1;
-                  pick_section = crossing->section_1;
-                  pick_snav = tie->snav_1;
+                  // pick_file = crossing->file_id_1;
+                  // pick_section = crossing->section_1;
+                  // pick_snav = tie->snav_1;
                 }
                 /*fprintf(stderr,"range:%d rangemin:%d\n",range,rangemin);*/
               }
@@ -12173,9 +12174,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
               rangemin = range;
               pick_crossing = i;
               pick_tie = MBNA_SELECT_NONE;
-              pick_file = crossing->file_id_1;
-              pick_section = crossing->section_1;
-              pick_snav = section->num_snav / 2;
+              // pick_file = crossing->file_id_1;
+              // pick_section = crossing->section_1;
+              // pick_snav = section->num_snav / 2;
             }
 
             iy = mbna_modelplot_yo_lat -
@@ -12186,9 +12187,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
               rangemin = range;
               pick_crossing = i;
               pick_tie = MBNA_SELECT_NONE;
-              pick_file = crossing->file_id_1;
-              pick_section = crossing->section_1;
-              pick_snav = section->num_snav / 2;
+              // pick_file = crossing->file_id_1;
+              // pick_section = crossing->section_1;
+              // pick_snav = section->num_snav / 2;
             }
 
             iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale *
@@ -12198,9 +12199,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
               rangemin = range;
               pick_crossing = i;
               pick_tie = MBNA_SELECT_NONE;
-              pick_file = crossing->file_id_1;
-              pick_section = crossing->section_1;
-              pick_snav = section->num_snav / 2;
+              // pick_file = crossing->file_id_1;
+              // pick_section = crossing->section_1;
+              // pick_snav = section->num_snav / 2;
             }
 
             /* handle second snav point */
@@ -12218,9 +12219,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
               rangemin = range;
               pick_crossing = i;
               pick_tie = MBNA_SELECT_NONE;
-              pick_file = crossing->file_id_2;
-              pick_section = crossing->section_2;
-              pick_snav = section->num_snav / 2;
+              // pick_file = crossing->file_id_2;
+              // pick_section = crossing->section_2;
+              // pick_snav = section->num_snav / 2;
             }
 
             iy = mbna_modelplot_yo_lat -
@@ -12231,9 +12232,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
               rangemin = range;
               pick_crossing = i;
               pick_tie = MBNA_SELECT_NONE;
-              pick_file = crossing->file_id_2;
-              pick_section = crossing->section_2;
-              pick_snav = section->num_snav / 2;
+              // pick_file = crossing->file_id_2;
+              // pick_section = crossing->section_2;
+              // pick_snav = section->num_snav / 2;
             }
 
             iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale *
@@ -12243,9 +12244,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
               rangemin = range;
               pick_crossing = i;
               pick_tie = MBNA_SELECT_NONE;
-              pick_file = crossing->file_id_2;
-              pick_section = crossing->section_2;
-              pick_snav = section->num_snav / 2;
+              // pick_file = crossing->file_id_2;
+              // pick_section = crossing->section_2;
+              // pick_snav = section->num_snav / 2;
             }
           }
         }
@@ -12302,9 +12303,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
             rangemin = range;
             pick_crossing = i;
             pick_tie = j;
-            pick_file = crossing->file_id_1;
-            pick_section = crossing->section_1;
-            pick_snav = tie->snav_1;
+            // pick_file = crossing->file_id_1;
+            // pick_section = crossing->section_1;
+            // pick_snav = tie->snav_1;
           }
 
           iy = mbna_modelplot_yo_lat - (int)(mbna_modelplot_yscale * tie->offset_y_m);
@@ -12313,9 +12314,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
             rangemin = range;
             pick_crossing = i;
             pick_tie = j;
-            pick_file = crossing->file_id_1;
-            pick_section = crossing->section_1;
-            pick_snav = tie->snav_1;
+            // pick_file = crossing->file_id_1;
+            // pick_section = crossing->section_1;
+            // pick_snav = tie->snav_1;
           }
 
           iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * tie->offset_z_m);
@@ -12324,9 +12325,9 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
             rangemin = range;
             pick_crossing = i;
             pick_tie = j;
-            pick_file = crossing->file_id_1;
-            pick_section = crossing->section_1;
-            pick_snav = tie->snav_1;
+            // pick_file = crossing->file_id_1;
+            // pick_section = crossing->section_1;
+            // pick_snav = tie->snav_1;
           }
         }
       }
@@ -14167,7 +14168,6 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
   struct mbna_section *section;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
-  int num_ties;
   int num_surveys;
   double lon_offset_min;
   double lon_offset_max;
@@ -14195,7 +14195,7 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
   /* plot model if an inversion has been performed */
   if (project.open == true && project.inversion_status != MBNA_INVERSION_NONE && project.modelplot == true) {
     /* get number of ties and surveys */
-    num_ties = project.num_ties;
+    // const int num_ties = project.num_ties;
     mbna_num_ties_plot = 0;
     num_surveys = 0;
 
@@ -14660,8 +14660,6 @@ int mbnavadjust_open_visualization(int which_grid) {
   double mbv_slope_colortable_max;
   int mbv_secondary_colortable;
   int mbv_secondary_colortable_mode;
-  double mbv_secondary_colortable_min;
-  double mbv_secondary_colortable_max;
   double mbv_exageration;
   double mbv_modelelevation3d;
   double mbv_modelazimuth3d;
@@ -14804,8 +14802,8 @@ int mbnavadjust_open_visualization(int which_grid) {
       mbv_slope_colortable_max = 0.5;
       mbv_secondary_colortable = MBV_COLORTABLE_HAXBY;
       mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
-      mbv_secondary_colortable_min = 0.0;
-      mbv_secondary_colortable_max = 0.0;
+      // double mbv_secondary_colortable_min = 0.0;
+      // double mbv_secondary_colortable_max = 0.0;
       mbv_exageration = 1.0;
       mbv_modelelevation3d = 90.0;
       mbv_modelazimuth3d = 0.0;
@@ -15389,9 +15387,6 @@ int mbnavadjust_visualization_selectcrossingfromnav(int ifile1, int isection1, i
       /* turn off message */
       do_message_off();
     }
-    // fprintf(stderr,"Done with mbnavadjust_visualization_selectcrossingfromnav: mbna_current_crossing:%d
-    // mbna_crossing_select:%d mbna_current_tie:%d mbna_tie_select:%d\n",
-    // mbna_current_crossing,mbna_crossing_select,mbna_current_tie,mbna_tie_select);
   }
 
   if (mbna_verbose >= 2) {
@@ -15404,5 +15399,4 @@ int mbnavadjust_visualization_selectcrossingfromnav(int ifile1, int isection1, i
 
   return (status);
 }
-
 /*--------------------------------------------------------------------*/
