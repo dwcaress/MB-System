@@ -474,7 +474,6 @@ int mbnavadjust_set_borders(int *cn_brdr, int *cr_brdr, int *zc_brdr) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavadjust_set_graphics(void *cn_xgid, void *cr_xgid, void *zc_xgid) {
-
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -508,9 +507,6 @@ int mbnavadjust_file_new(char *projectname) {
     fprintf(stderr, "dbg2       projectname:  %s\n", projectname);
   }
 
-  char *slashptr, *nameptr;
-  struct stat statbuf;
-
   /* no new project if one already open */
   int status = MB_SUCCESS;
   if (project.open) {
@@ -522,12 +518,8 @@ int mbnavadjust_file_new(char *projectname) {
 
   /* get filenames and see if they can be generated */
   else {
-    nameptr = (char *)NULL;
-    slashptr = strrchr(projectname, '/');
-    if (slashptr != (char *)NULL)
-      nameptr = slashptr + 1;
-    else
-      nameptr = projectname;
+    char *slashptr = strrchr(projectname, '/');
+    char *nameptr = slashptr != NULL ? slashptr + 1 : projectname;
     if (strlen(nameptr) > 4 && strcmp(&nameptr[strlen(nameptr) - 4], ".nvh") == 0)
       nameptr[strlen(nameptr) - 4] = '\0';
     if (strlen(nameptr) > 0) {
@@ -541,6 +533,7 @@ int mbnavadjust_file_new(char *projectname) {
       strcat(project.datadir, ".dir");
 
       /* no new project if file or directory already exist */
+      struct stat statbuf;
       if (stat(project.home, &statbuf) == 0) {
         strcpy(error1, "Unable to create new project!");
         strcpy(error2, "Home file already exists.");
@@ -660,15 +653,6 @@ int mbnavadjust_file_open(char *projectname) {
     fprintf(stderr, "dbg2       projectname:  %s\n", projectname);
   }
 
-  struct mbna_file *file;
-  struct mbna_section *section;
-  struct mbna_crossing *crossing;
-  char path[STRING_MAX];
-  struct stat file_status;
-  char *slashptr;
-  char *nameptr;
-  struct stat statbuf;
-
   /* no new project if one already open */
   int status = MB_SUCCESS;
   if (project.open) {
@@ -676,21 +660,15 @@ int mbnavadjust_file_open(char *projectname) {
     sprintf(error2, "Project %s", project.name);
     strcpy(error3, "is already open.");
     status = MB_FAILURE;
-  }
-
-  /* get filenames and see if they can be generated */
-  else {
-    nameptr = (char *)NULL;
-    slashptr = strrchr(projectname, '/');
-    if (slashptr != (char *)NULL)
-      nameptr = slashptr + 1;
-    else
-      nameptr = projectname;
+  } else {
+    /* get filenames and see if they can be generated */
+    char *slashptr = strrchr(projectname, '/');
+    char *nameptr = slashptr != NULL ? slashptr + 1 : projectname;
     if (strlen(nameptr) > 4 && strcmp(&nameptr[strlen(nameptr) - 4], ".nvh") == 0)
       nameptr[strlen(nameptr) - 4] = '\0';
     if (strlen(nameptr) > 0) {
       strcpy(project.name, nameptr);
-      if (slashptr != (char *)NULL) {
+      if (slashptr != NULL) {
         strncpy(project.path, projectname, strlen(projectname) - strlen(nameptr));
       }
       else {
@@ -707,6 +685,7 @@ int mbnavadjust_file_open(char *projectname) {
                     project.name, project.path, project.home, project.datadir);
 
       /* can't open unless file or directory already exist */
+      struct stat statbuf;
       if (stat(project.home, &statbuf) != 0) {
         strcpy(error1, "Unable to open project!");
         strcpy(error2, "Home file does not exist.");
@@ -749,7 +728,7 @@ int mbnavadjust_file_open(char *projectname) {
         else if (mbna_reset_crossings) {
           for (int i = 0; i < project.num_crossings; i++) {
             /* read each crossing */
-            crossing = &project.crossings[i];
+            struct mbna_crossing *crossing = &project.crossings[i];
 
             /* reset status */
             crossing->status = MBNA_CROSSING_STATUS_NONE;
@@ -761,9 +740,9 @@ int mbnavadjust_file_open(char *projectname) {
             project.grid_status = MBNA_GRID_OLD;
           }
           for (int i = 0; i < project.num_files; i++) {
-            file = &project.files[i];
+            struct mbna_file *file = &project.files[i];
             for (int j = 0; j < file->num_sections; j++) {
-              section = &file->sections[j];
+              struct mbna_section *section = &file->sections[j];
               for (int k = 0; k < section->num_snav; k++) {
                 section->snav_lon_offset[section->num_snav] = 0.0;
                 section->snav_lat_offset[section->num_snav] = 0.0;
@@ -773,13 +752,13 @@ int mbnavadjust_file_open(char *projectname) {
           }
         }
 
-            /* set plotting functions */
-            mbnavadjust_set_plot_functions(mbna_verbose, &project,
-                                           &mbnavadjust_plot,
-                                           &mbnavadjust_newpen,
-                                           &mbnavadjust_setline,
-                                           &mbnavadjust_justify_string,
-                                           &mbnavadjust_plot_string, &error);
+        /* set plotting functions */
+        mbnavadjust_set_plot_functions(mbna_verbose, &project,
+                                       &mbnavadjust_plot,
+                                       &mbnavadjust_newpen,
+                                       &mbnavadjust_setline,
+                                       &mbnavadjust_justify_string,
+                                       &mbnavadjust_plot_string, &error);
       }
     }
     else {
@@ -818,7 +797,9 @@ int mbnavadjust_file_open(char *projectname) {
     }
 
     /* update topography grid if it does not exist */
+    char path[STRING_MAX];
     sprintf(path, "%s/ProjectTopoAdj.grd", project.datadir);
+    struct stat file_status;
     if (stat(path, &file_status) != 0) {
       status = mbnavadjust_updategrid();
     }
@@ -849,11 +830,10 @@ int mbnavadjust_import_data(char *path, int iformat) {
   char dfile[STRING_MAX];
   double weight;
   int form;
-  int firstfile;
 
   /* loop until all files read */
   bool done = false;
-  firstfile = true;
+  bool firstfile = true;
   while (!done) {
     if (iformat > 0) {
       status = mbnavadjust_import_file(path, iformat, firstfile);
@@ -938,13 +918,28 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
   }
 
   int status = MB_SUCCESS;
-  struct stat file_status;
-  int fstat = 0;
   char ipath[STRING_MAX];
   char mb_suffix[STRING_MAX];
+  int iform;
+
+  /* get potential processed file name */
+  // TODO(schwehr): are not the if and else blocks effectively the same?
+  if ((status = mb_get_format(mbna_verbose, path, ipath, &iform, &error)) == MB_SUCCESS && iform == iformat) {
+    strcat(ipath, "p");
+    sprintf(mb_suffix, ".mb%d", iformat);
+    strcat(ipath, mb_suffix);
+  } else {
+    // else just add p.mbXXX to file name
+    strcat(ipath, "p");
+    sprintf(mb_suffix, ".mb%d", iformat);
+    strcat(ipath, mb_suffix);
+    status = MB_SUCCESS;
+    error = MB_ERROR_NO_ERROR;
+  }
+
+  struct stat file_status;
   char npath[STRING_MAX];
   char opath[STRING_MAX];
-  char *root = NULL;
 
   /* mbio read and write values */
   void *imbio_ptr = NULL;
@@ -968,14 +963,6 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
   int beams_bath = 0;
   int beams_amp = 0;
   int pixels_ss = 0;
-  char *beamflag = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
   char comment[MB_COMMENT_MAXLINE];
 
   int sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
@@ -989,12 +976,9 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
   double angle, dt, alongtrackdistance, xtrackavg, xtrackmax;
   int nxtrack;
 
-  int output_id;
   int obeams_bath, obeams_amp, opixels_ss;
-  int iform;
   int nread;
   bool first;
-  int good_beams;
   double headingx, headingy, mtodeglon, mtodeglat;
   double lon, lat;
   double navlon_old, navlat_old;
@@ -1005,9 +989,6 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
   struct mbna_section *csection = NULL;
   struct mbsys_ldeoih_struct *ostore = NULL;
   struct mb_io_struct *omb_io_ptr = NULL;
-  int new_sections = 0;
-  int new_pings = 0;
-  int new_crossings = 0;
   double dx1, dy1;
   int mbp_heading_mode;
   double mbp_headingbias;
@@ -1018,27 +999,10 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
   double depthmax, distmax, depthscale, distscale;
   int error_sensorhead = MB_ERROR_NO_ERROR;
   void *tptr;
-  int j;
   int ii1, jj1;
 
-  /* get potential processed file name */
-  if ((status = mb_get_format(mbna_verbose, path, ipath, &iform, &error)) == MB_SUCCESS && iform == iformat) {
-    strcat(ipath, "p");
-    sprintf(mb_suffix, ".mb%d", iformat);
-    strcat(ipath, mb_suffix);
-  }
-
-  /* else just add p.mbXXX to file name */
-  else {
-    strcat(ipath, "p");
-    sprintf(mb_suffix, ".mb%d", iformat);
-    strcat(ipath, mb_suffix);
-    status = MB_SUCCESS;
-    error = MB_ERROR_NO_ERROR;
-  }
-
   /* look for processed file and use if available */
-  fstat = stat(ipath, &file_status);
+  const int fstat = stat(ipath, &file_status);
   if (fstat != 0 || (file_status.st_mode & S_IFMT) == S_IFDIR) {
     strcpy(ipath, path);
   }
@@ -1047,7 +1011,7 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
    * - increment output id so this mbnavadjust project outputs
    *   a unique nav file for this input file */
   /* Now only use a value of 0 for output_id  - all output navigation should be *.na0 files */
-  output_id = 0;
+  int output_id = 0;
   //found = false;
   //while (!found) {
   //  sprintf(opath, "%s.na%d", path, output_id);
@@ -1061,7 +1025,7 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
   //}
 
   /* turn on message */
-  root = (char *)strrchr(ipath, '/');
+  char *root = (char *)strrchr(ipath, '/');
   if (root == NULL)
     root = ipath;
   sprintf(message, "Importing format %d data from %s", iformat, root);
@@ -1070,10 +1034,10 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
   bool output_open = false;
   project.inversion_status = MBNA_INVERSION_NONE;
   project.grid_status = MBNA_GRID_OLD;
-  new_sections = 0;
-  new_pings = 0;
-  new_crossings = 0;
-  good_beams = 0;
+  int new_sections = 0;
+  int new_pings = 0;
+  int new_crossings = 0;
+  int good_beams = 0;
 
   /* allocate mbna_file array if needed */
   if (project.num_files_alloc <= project.num_files) {
@@ -1103,16 +1067,17 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
     }
   }
 
+  char *beamflag = NULL;
+  double *bath = NULL;
+  double *bathacrosstrack = NULL;
+  double *bathalongtrack = NULL;
+  double *amp = NULL;
+  double *ss = NULL;
+  double *ssacrosstrack = NULL;
+  double *ssalongtrack = NULL;
+
   /* allocate memory for data arrays */
   if (status == MB_SUCCESS) {
-    beamflag = NULL;
-    bath = NULL;
-    amp = NULL;
-    bathacrosstrack = NULL;
-    bathalongtrack = NULL;
-    ss = NULL;
-    ssacrosstrack = NULL;
-    ssalongtrack = NULL;
     if (error == MB_ERROR_NO_ERROR)
       status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
     if (error == MB_ERROR_NO_ERROR)
@@ -1245,7 +1210,7 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
             if (mb_beam_ok(beamflag[i])) {
               /* get apparent acrosstrack beam angle and bin accordingly */
               angle = RTD * atan(bathacrosstrack[i] / (bath[i] - sonardepth));
-              j = (int)floor((angle + 0.5 * mbna_bin_swathwidth + 0.5 * mbna_bin_pseudobeamwidth) /
+              const int j = (int)floor((angle + 0.5 * mbna_bin_swathwidth + 0.5 * mbna_bin_pseudobeamwidth) /
                              mbna_bin_pseudobeamwidth);
               /* fprintf(stderr,"i:%d bath:%f %f %f sonardepth:%f angle:%f j:%d\n",
               i,bath[i],bathacrosstrack[i],bathalongtrack[i],sonardepth,angle,j); */
@@ -1875,12 +1840,11 @@ int mbnavadjust_findcrossings() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  struct mbna_crossing *crossing;
-
   /* turn on message */
   sprintf(message, "Checking for crossings...");
   do_message_on(message);
+
+  int status = MB_SUCCESS;
 
   /* loop over files looking for new crossings */
   if (project.open && project.num_files > 0) {
@@ -1908,7 +1872,7 @@ int mbnavadjust_findcrossings() {
     project.num_truecrossings = 0;
     project.num_truecrossings_analyzed = 0;
     for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
-      crossing = &(project.crossings[icrossing]);
+      struct mbna_crossing *crossing = &(project.crossings[icrossing]);
 
       /* recalculate crossing overlap */
       mbnavadjust_crossing_overlap(mbna_verbose, &project, icrossing, &error);
@@ -1952,19 +1916,11 @@ int mbnavadjust_crossing_compare(const void *a, const void *b) {
 
   const int a1id = aa->file_id_1 * 1000 + aa->section_1;
   const int a2id = aa->file_id_2 * 1000 + aa->section_2;
-  int aid;
-  if (a1id > a2id)
-    aid = a1id;
-  else
-    aid = a2id;
+  const int aid = a1id > a2id ? a1id : a2id;
 
   const int b1id = bb->file_id_1 * 1000 + bb->section_1;
   const int b2id = bb->file_id_2 * 1000 + bb->section_2;
-  int bid;
-  if (b1id > b2id)
-    bid = b1id;
-  else
-    bid = b2id;
+  const int bid =  b1id > b2id ? b1id : b2id;
 
   if (aid > bid)
     return (1);
@@ -2020,63 +1976,47 @@ int mbnavadjust_findcrossingsfile(int ifile) {
   }
 
   int status = MB_SUCCESS;
-  struct mbna_file *file1, *file2;
-  struct mbna_section *section1, *section2;
-  struct mbna_crossing *crossing;
-  bool found;
-  int overlap;
-  bool disqualify;
-  int jsectionmax;
-  double lonoffset1, latoffset1, lonoffset2, latoffset2;
-  double lonmin1, lonmax1, latmin1, latmax1;
-  double lonmin2, lonmax2, latmin2, latmax2;
-  double cell1lonmin, cell1lonmax, cell1latmin, cell1latmax;
-  double cell2lonmin, cell2lonmax, cell2latmin, cell2latmax;
-  double dx1, dy1, dx2, dy2;
-  int kk1;
-  int kk2;
 
   /* loop over files and sections, comparing sections from project.files[ifile] with all previous sections */
   if (project.open && project.num_files > 0) {
-    file2 = &(project.files[ifile]);
+    struct mbna_file *file2 = &(project.files[ifile]);
 
     /* loop over all sections */
     for (int isection = 0; isection < file2->num_sections; isection++) {
-      section2 = &(file2->sections[isection]);
-      lonoffset2 = section2->snav_lon_offset[section2->num_snav / 2];
-      latoffset2 = section2->snav_lat_offset[section2->num_snav / 2];
+      // double cell1lonmin, cell1lonmax, cell1latmin, cell1latmax;
+      // double cell2lonmin, cell2lonmax, cell2latmin, cell2latmax;
+      struct mbna_section *section2 = &(file2->sections[isection]);
+      const double lonoffset2 = section2->snav_lon_offset[section2->num_snav / 2];
+      const double latoffset2 = section2->snav_lat_offset[section2->num_snav / 2];
 
       /* get coverage mask adjusted for most recent inversion solution */
-      lonmin2 = section2->lonmin + lonoffset2;
-      lonmax2 = section2->lonmax + lonoffset2;
-      latmin2 = section2->latmin + latoffset2;
-      latmax2 = section2->latmax + latoffset2;
-      dx2 = (section2->lonmax - section2->lonmin) / (MBNA_MASK_DIM - 1);
-      dy2 = (section2->latmax - section2->latmin) / (MBNA_MASK_DIM - 1);
+      const double lonmin2 = section2->lonmin + lonoffset2;
+      const double lonmax2 = section2->lonmax + lonoffset2;
+      const double latmin2 = section2->latmin + latoffset2;
+      const double latmax2 = section2->latmax + latoffset2;
+      const double dx2 = (section2->lonmax - section2->lonmin) / (MBNA_MASK_DIM - 1);
+      const double dy2 = (section2->latmax - section2->latmin) / (MBNA_MASK_DIM - 1);
 
       /* now loop over all previous sections looking for crossings */
       for (int jfile = 0; jfile <= ifile; jfile++) {
-        file1 = &(project.files[jfile]);
-        if (jfile < ifile)
-          jsectionmax = file1->num_sections;
-        else
-          jsectionmax = isection;
+        struct mbna_file *file1 = &(project.files[jfile]);
+        const int jsectionmax = jfile < ifile ? file1->num_sections : isection;
         for (int jsection = 0; jsection < jsectionmax; jsection++) {
-          section1 = &(file1->sections[jsection]);
-          lonoffset1 = section1->snav_lon_offset[section1->num_snav / 2];
-          latoffset1 = section1->snav_lat_offset[section1->num_snav / 2];
+          struct mbna_section *section1 = &(file1->sections[jsection]);
+          const double lonoffset1 = section1->snav_lon_offset[section1->num_snav / 2];
+          const double latoffset1 = section1->snav_lat_offset[section1->num_snav / 2];
 
           /* get coverage mask adjusted for most recent inversion solution */
-          lonmin1 = section1->lonmin + lonoffset1;
-          lonmax1 = section1->lonmax + lonoffset1;
-          latmin1 = section1->latmin + latoffset1;
-          latmax1 = section1->latmax + latoffset1;
-          dx1 = (section1->lonmax - section1->lonmin) / (MBNA_MASK_DIM - 1);
-          dy1 = (section1->latmax - section1->latmin) / (MBNA_MASK_DIM - 1);
+          const double lonmin1 = section1->lonmin + lonoffset1;
+          const double lonmax1 = section1->lonmax + lonoffset1;
+          const double latmin1 = section1->latmin + latoffset1;
+          const double latmax1 = section1->latmax + latoffset1;
+          const double dx1 = (section1->lonmax - section1->lonmin) / (MBNA_MASK_DIM - 1);
+          const double dy1 = (section1->latmax - section1->latmin) / (MBNA_MASK_DIM - 1);
 
           /* check if there is overlap given the current navigation model */
-          overlap = 0;
-          disqualify = false;
+          int overlap = 0;
+          bool disqualify = false;
           if (jfile == ifile && jsection == isection - 1 && section2->continuity)
             disqualify = true;
           else if (jfile == ifile - 1 && jsection == file1->num_sections - 1 && isection == 0 &&
@@ -2084,26 +2024,25 @@ int mbnavadjust_findcrossingsfile(int ifile) {
             disqualify = true;
           else if (!(lonmin2 < lonmax1 && lonmax2 > lonmin1 && latmin2 < latmax1 && latmax2 > latmin1)) {
             disqualify = true;
-          }
-          else {
+          } else {
             /* loop over the coverage mask cells looking for overlap */
             for (int ii2 = 0; ii2 < MBNA_MASK_DIM && overlap == 0; ii2++)
               for (int jj2 = 0; jj2 < MBNA_MASK_DIM && overlap == 0; jj2++) {
-                kk2 = ii2 + jj2 * MBNA_MASK_DIM;
+                const int kk2 = ii2 + jj2 * MBNA_MASK_DIM;
                 if (section2->coverage[kk2] == 1) {
-                  cell2lonmin = lonmin2 + ii2 * dx2;
-                  cell2lonmax = lonmin2 + (ii2 + 1) * dx2;
-                  cell2latmin = latmin2 + jj2 * dy2;
-                  cell2latmax = latmin2 + (jj2 + 1) * dy2;
+                  const double cell2lonmin = lonmin2 + ii2 * dx2;
+                  const double cell2lonmax = lonmin2 + (ii2 + 1) * dx2;
+                  const double cell2latmin = latmin2 + jj2 * dy2;
+                  const double cell2latmax = latmin2 + (jj2 + 1) * dy2;
 
-                  for (int ii1 = 0; ii1 < MBNA_MASK_DIM && overlap == 0; ii1++)
+                  for (int ii1 = 0; ii1 < MBNA_MASK_DIM && overlap == 0; ii1++) {
                     for (int jj1 = 0; jj1 < MBNA_MASK_DIM && overlap == 0; jj1++) {
-                      kk1 = ii1 + jj1 * MBNA_MASK_DIM;
+                      const int kk1 = ii1 + jj1 * MBNA_MASK_DIM;
                       if (section1->coverage[kk1] == 1) {
-                        cell1lonmin = lonmin1 + ii1 * dx1;
-                        cell1lonmax = lonmin1 + (ii1 + 1) * dx1;
-                        cell1latmin = latmin1 + jj1 * dy2;
-                        cell1latmax = latmin1 + (jj1 + 1) * dy1;
+                        const double cell1lonmin = lonmin1 + ii1 * dx1;
+                        const double cell1lonmax = lonmin1 + (ii1 + 1) * dx1;
+                        const double cell1latmin = latmin1 + jj1 * dy2;
+                        const double cell1latmax = latmin1 + (jj1 + 1) * dy1;
 
                         /* check if these two cells overlap */
                         if (cell2lonmin < cell1lonmax && cell2lonmax > cell1lonmin &&
@@ -2112,6 +2051,7 @@ int mbnavadjust_findcrossingsfile(int ifile) {
                         }
                       }
                     }
+                  }
                 }
               }
           }
@@ -2119,9 +2059,9 @@ int mbnavadjust_findcrossingsfile(int ifile) {
           /* if not disqualified and overlap found, then this is a crossing */
           /* check to see if the crossing exists, if not add it */
           if (!disqualify && overlap > 0) {
-            found = false;
+            bool found = false;
             for (int icrossing = 0; icrossing < project.num_crossings && !found; icrossing++) {
-              crossing = &(project.crossings[icrossing]);
+              struct mbna_crossing *crossing = &(project.crossings[icrossing]);
               if (crossing->file_id_2 == ifile && crossing->file_id_1 == jfile && crossing->section_2 == isection &&
                   crossing->section_1 == jsection) {
                 found = true;
@@ -2145,7 +2085,7 @@ int mbnavadjust_findcrossingsfile(int ifile) {
               }
 
               /* add crossing to list */
-              crossing = (struct mbna_crossing *)&project.crossings[project.num_crossings];
+              struct mbna_crossing *crossing = (struct mbna_crossing *)&project.crossings[project.num_crossings];
               crossing->status = MBNA_CROSSING_STATUS_NONE;
               crossing->truecrossing = false;
               crossing->overlap = 0;
@@ -2193,12 +2133,8 @@ int mbnavadjust_addcrossing(int ifile1, int isection1, int ifile2, int isection2
     fprintf(stderr, "dbg2                       isection2:     %d\n", isection2);
   }
 
-  int status = MB_SUCCESS;
-  struct mbna_crossing *crossing;
-  int disqualify;
-
   /* check that file and section id's are reasonable */
-  disqualify = false;
+  bool disqualify = false;
   if (ifile1 == ifile2 && isection1 == isection2)
     disqualify = true;
   if (!disqualify && (ifile1 < 0 || ifile1 >= project.num_files || ifile2 < 0 || ifile2 >= project.num_files))
@@ -2210,7 +2146,7 @@ int mbnavadjust_addcrossing(int ifile1, int isection1, int ifile2, int isection2
   /* check that this crossing does not already exist */
   if (!disqualify) {
     for (int icrossing = 0; icrossing < project.num_crossings && !disqualify; icrossing++) {
-      crossing = (struct mbna_crossing *)&project.crossings[icrossing];
+      struct mbna_crossing *crossing = (struct mbna_crossing *)&project.crossings[icrossing];
       if ((ifile1 == crossing->file_id_1 && isection1 == crossing->section_1 && ifile2 == crossing->file_id_2 &&
            isection2 == crossing->section_2) ||
           (ifile1 == crossing->file_id_1 && isection1 == crossing->section_1 && ifile2 == crossing->file_id_2 &&
@@ -2218,6 +2154,8 @@ int mbnavadjust_addcrossing(int ifile1, int isection1, int ifile2, int isection2
         disqualify = true;
     }
   }
+
+  int status = MB_SUCCESS;
 
   /* if crossing ok and not yet defined then create it */
   if (!disqualify) {
@@ -2235,7 +2173,7 @@ int mbnavadjust_addcrossing(int ifile1, int isection1, int ifile2, int isection2
 
     if (status == MB_SUCCESS) {
       /* add crossing to list */
-      crossing = (struct mbna_crossing *)&project.crossings[project.num_crossings];
+      struct mbna_crossing *crossing = (struct mbna_crossing *)&project.crossings[project.num_crossings];
       crossing->status = MBNA_CROSSING_STATUS_NONE;
       crossing->truecrossing = false;
       crossing->overlap = 0;
@@ -2279,18 +2217,18 @@ int mbnavadjust_poornav_file() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  int block;
 
   /* set selected file's block to poor nav */
   if (project.open && project.num_files > 0 && mbna_file_select >= 0 && mbna_file_select < project.num_files) {
     /* get affected survey block */
+    int block;
     if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
       block = mbna_survey_select;
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_FILES) {
       block = project.files[mbna_file_select].block;
     }
+    // TODO(schwehr): else?
 
     /* set all files in block of selected file to poor nav */
     for (int i = 0; i < project.num_files; i++) {
@@ -2308,6 +2246,8 @@ int mbnavadjust_poornav_file() {
     do_info_add(message, true);
   }
 
+  const int status = MB_SUCCESS;
+
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2324,18 +2264,17 @@ int mbnavadjust_goodnav_file() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  int block;
-
   /* set selected file's block to good nav */
   if (project.open && project.num_files > 0 && mbna_file_select >= 0 && mbna_file_select < project.num_files) {
     /* get affected survey block */
+    int block;
     if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
       block = mbna_survey_select;
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_FILES) {
       block = project.files[mbna_file_select].block;
     }
+    // TODO(schwehr): else?
 
     /* set all files in block of selected file to good nav */
     for (int i = 0; i < project.num_files; i++) {
@@ -2355,6 +2294,8 @@ int mbnavadjust_goodnav_file() {
     do_info_add(message, true);
   }
 
+  const int status = MB_SUCCESS;
+
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2372,18 +2313,17 @@ int mbnavadjust_fixednav_file() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  int block;
-
   /* set selected file's block to good nav */
   if (project.open && project.num_files > 0 && mbna_file_select >= 0 && mbna_file_select < project.num_files) {
     /* get affected survey block */
+    int block;
     if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
       block = mbna_survey_select;
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_FILES) {
       block = project.files[mbna_file_select].block;
     }
+    // TODO(schwehr): else?
 
     /* set all files in block of selected file to fixed nav */
     for (int i = 0; i < project.num_files; i++) {
@@ -2404,6 +2344,8 @@ int mbnavadjust_fixednav_file() {
     do_info_add(message, true);
   }
 
+  const int status = MB_SUCCESS;
+
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2421,18 +2363,17 @@ int mbnavadjust_fixedxynav_file() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  int block;
-
   /* set selected file's block to good nav */
   if (project.open && project.num_files > 0 && mbna_file_select >= 0 && mbna_file_select < project.num_files) {
     /* get affected survey block */
+    int block;
     if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
       block = mbna_survey_select;
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_FILES) {
       block = project.files[mbna_file_select].block;
     }
+    // TODO(schwehr): else?
 
     /* set all files in block of selected file to fixed nav */
     for (int i = 0; i < project.num_files; i++) {
@@ -2453,6 +2394,8 @@ int mbnavadjust_fixedxynav_file() {
     do_info_add(message, true);
   }
 
+  const int status = MB_SUCCESS;
+
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2470,18 +2413,18 @@ int mbnavadjust_fixedznav_file() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  int block;
 
   /* set selected file's block to good nav */
   if (project.open && project.num_files > 0 && mbna_file_select >= 0 && mbna_file_select < project.num_files) {
     /* get affected survey block */
+    int block;
     if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
       block = mbna_survey_select;
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_FILES) {
       block = project.files[mbna_file_select].block;
     }
+    // TODO(schwehr): else?
 
     /* set all files in block of selected file to fixed nav */
     for (int i = 0; i < project.num_files; i++) {
@@ -2502,6 +2445,8 @@ int mbnavadjust_fixedznav_file() {
     do_info_add(message, true);
   }
 
+  const int status = MB_SUCCESS;
+
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2519,15 +2464,11 @@ int mbnavadjust_set_tie_xyz() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  struct mbna_crossing *crossing;
-  struct mbna_tie *tie;
-
   /* set selected file's block to good nav */
   if (project.open && project.num_files > 0 && mbna_crossing_select >= 0 && mbna_tie_select >= 0) {
     /* set tie to fix xyz */
-    crossing = &(project.crossings[mbna_crossing_select]);
-    tie = (struct mbna_tie *)&crossing->ties[mbna_tie_select];
+    struct mbna_crossing *crossing = &(project.crossings[mbna_crossing_select]);
+    struct mbna_tie *tie = (struct mbna_tie *)&crossing->ties[mbna_tie_select];
     tie->status = MBNA_TIE_XYZ;
     fprintf(stderr, "Set crossing %d tie %d to fix XYZ\n", mbna_crossing_select, mbna_tie_select);
     if (project.inversion_status == MBNA_INVERSION_CURRENT)
@@ -2541,6 +2482,8 @@ int mbnavadjust_set_tie_xyz() {
     sprintf(message, "Set crossing %d tie %d to fix XYZ\n", mbna_crossing_select, mbna_tie_select);
     do_info_add(message, true);
   }
+
+  const int status = MB_SUCCESS;
 
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -2559,15 +2502,11 @@ int mbnavadjust_set_tie_xy() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  struct mbna_crossing *crossing;
-  struct mbna_tie *tie;
-
   /* set selected file's block to good nav */
   if (project.open && project.num_files > 0 && mbna_crossing_select >= 0 && mbna_tie_select >= 0) {
     /* set tie to fix xy */
-    crossing = &(project.crossings[mbna_crossing_select]);
-    tie = (struct mbna_tie *)&crossing->ties[mbna_tie_select];
+    struct mbna_crossing *crossing = &(project.crossings[mbna_crossing_select]);
+    struct mbna_tie *tie = (struct mbna_tie *)&crossing->ties[mbna_tie_select];
     tie->status = MBNA_TIE_XY;
     fprintf(stderr, "Set crossing %d tie %d to fix XY\n", mbna_crossing_select, mbna_tie_select);
     if (project.inversion_status == MBNA_INVERSION_CURRENT)
@@ -2581,6 +2520,8 @@ int mbnavadjust_set_tie_xy() {
     sprintf(message, "Set crossing %d tie %d to fix XY\n", mbna_crossing_select, mbna_tie_select);
     do_info_add(message, true);
   }
+
+  const int status = MB_SUCCESS;
 
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -2599,15 +2540,13 @@ int mbnavadjust_set_tie_z() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  struct mbna_crossing *crossing;
-  struct mbna_tie *tie;
+  const int status = MB_SUCCESS;
 
   /* set selected file's block to good nav */
   if (project.open && project.num_files > 0 && mbna_crossing_select >= 0 && mbna_tie_select >= 0) {
     /* set tie to fix z */
-    crossing = &(project.crossings[mbna_crossing_select]);
-    tie = (struct mbna_tie *)&crossing->ties[mbna_tie_select];
+    struct mbna_crossing *crossing = &(project.crossings[mbna_crossing_select]);
+    struct mbna_tie *tie = (struct mbna_tie *)&crossing->ties[mbna_tie_select];
     tie->status = MBNA_TIE_Z;
     fprintf(stderr, "Set crossing %d tie %d to fix Z\n", mbna_crossing_select, mbna_tie_select);
     if (project.inversion_status == MBNA_INVERSION_CURRENT)
@@ -2639,24 +2578,18 @@ int mbnavadjust_naverr_save() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  struct mbna_file *file;
-  struct mbna_section *section;
-  struct mbna_crossing *crossing;
-  struct mbna_tie *tie;
-
   /* save offsets if crossing loaded and ties set */
   if (project.open && project.num_crossings > 0 && mbna_naverr_load && mbna_current_crossing >= 0 &&
       mbna_current_tie >= 0) {
     /* save offsets if ties set */
-    crossing = &project.crossings[mbna_current_crossing];
+    struct mbna_crossing *crossing = &project.crossings[mbna_current_crossing];
     if (crossing->num_ties > 0 && mbna_current_tie >= 0) {
       /* get relevant tie */
-      tie = &crossing->ties[mbna_current_tie];
+      struct mbna_tie *tie = &crossing->ties[mbna_current_tie];
 
       /* reset tie counts for snavs */
-      file = &project.files[crossing->file_id_1];
-      section = &file->sections[crossing->section_1];
+      struct mbna_file *file = &project.files[crossing->file_id_1];
+      struct mbna_section *section = &file->sections[crossing->section_1];
       section->snav_num_ties[tie->snav_1]--;
       file = &project.files[crossing->file_id_2];
       section = &file->sections[crossing->section_2];
@@ -2753,6 +2686,8 @@ int mbnavadjust_naverr_save() {
     }
   }
 
+  const int status = MB_SUCCESS;
+
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2772,10 +2707,6 @@ int mbnavadjust_naverr_specific(int new_crossing, int new_tie) {
     fprintf(stderr, "dbg2               new_tie:      %d\n", new_tie);
   }
 
-  int status = MB_SUCCESS;
-  struct mbna_crossing *crossing;
-  struct mbna_tie *tie;
-
   /* get current crossing */
   if (project.open && project.num_crossings > 0) {
     /* get next crossing */
@@ -2793,7 +2724,7 @@ int mbnavadjust_naverr_specific(int new_crossing, int new_tie) {
 
     /* retrieve crossing parameters */
     if (mbna_current_crossing >= 0) {
-      crossing = &project.crossings[mbna_current_crossing];
+      struct mbna_crossing *crossing = &project.crossings[mbna_current_crossing];
       mbna_file_id_1 = crossing->file_id_1;
       mbna_section_1 = crossing->section_1;
       mbna_file_id_2 = crossing->file_id_2;
@@ -2801,7 +2732,7 @@ int mbnavadjust_naverr_specific(int new_crossing, int new_tie) {
       if (crossing->num_ties > 0) {
         if (mbna_current_tie < 0)
           mbna_current_tie = 0;
-        tie = &crossing->ties[mbna_current_tie];
+        struct mbna_tie *tie = &crossing->ties[mbna_current_tie];
         mbna_snav_1 = tie->snav_1;
         mbna_snav_1_time_d = tie->snav_1_time_d;
         mbna_snav_2 = tie->snav_2;
@@ -2873,6 +2804,8 @@ int mbnavadjust_naverr_specific(int new_crossing, int new_tie) {
     }
   }
 
+  const int status = MB_SUCCESS;
+
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2891,15 +2824,12 @@ int mbnavadjust_naverr_next() {
   }
 
   int status = MB_SUCCESS;
-  struct mbna_crossing *crossing;
-  struct mbna_tie *tie;
-  int j, k;
 
   /* find next current crossing */
   if (project.open && project.num_crossings > 0) {
     /* get next good crossing */
-    j = -1;
-    k = -1;
+    int j = -1;
+    int k = -1;
     for (int i = 0; i < project.num_crossings; i++) {
       if (do_check_crossing_listok(i) && i != mbna_current_crossing) {
         if (j < 0)
@@ -2919,7 +2849,7 @@ int mbnavadjust_naverr_next() {
 
   /* retrieve crossing parameters */
   if (mbna_current_crossing >= 0) {
-    crossing = &project.crossings[mbna_current_crossing];
+    struct mbna_crossing *crossing = &project.crossings[mbna_current_crossing];
     mbna_file_id_1 = crossing->file_id_1;
     mbna_section_1 = crossing->section_1;
     mbna_file_id_2 = crossing->file_id_2;
@@ -2927,7 +2857,7 @@ int mbnavadjust_naverr_next() {
     if (crossing->num_ties > 0) {
       if (mbna_current_tie == -1)
         mbna_current_tie = 0;
-      tie = &crossing->ties[0];
+      struct mbna_tie *tie = &crossing->ties[0];
       mbna_snav_1 = tie->snav_1;
       mbna_snav_1_time_d = tie->snav_1_time_d;
       mbna_snav_2 = tie->snav_2;
@@ -2986,16 +2916,11 @@ int mbnavadjust_naverr_previous() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  struct mbna_crossing *crossing;
-  struct mbna_tie *tie;
-  int j, k;
-
   /* find previous current crossing */
   if (project.open && project.num_crossings > 0) {
     /* get next good crossing */
-    j = -1;
-    k = -1;
+    int j = -1;
+    int k = -1;
     for (int i = 0; i < project.num_crossings; i++) {
       if (do_check_crossing_listok(i) && i != mbna_current_crossing) {
         if (i < mbna_current_crossing)
@@ -3014,7 +2939,7 @@ int mbnavadjust_naverr_previous() {
 
   /* retrieve crossing parameters */
   if (mbna_current_crossing >= 0) {
-    crossing = &project.crossings[mbna_current_crossing];
+    struct mbna_crossing *crossing = &project.crossings[mbna_current_crossing];
     mbna_file_id_1 = crossing->file_id_1;
     mbna_section_1 = crossing->section_1;
     mbna_file_id_2 = crossing->file_id_2;
@@ -3022,7 +2947,7 @@ int mbnavadjust_naverr_previous() {
     if (crossing->num_ties > 0) {
       if (mbna_current_tie == -1)
         mbna_current_tie = 0;
-      tie = &crossing->ties[0];
+      struct mbna_tie *tie = &crossing->ties[0];
       mbna_snav_1 = tie->snav_1;
       mbna_snav_1_time_d = tie->snav_1_time_d;
       mbna_snav_2 = tie->snav_2;
@@ -3062,6 +2987,8 @@ int mbnavadjust_naverr_previous() {
     do_message_off();
   }
 
+  const int status = MB_SUCCESS;
+
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3079,19 +3006,14 @@ int mbnavadjust_naverr_nextunset() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  struct mbna_crossing *crossing;
-  struct mbna_tie *tie;
-  int j, k;
-
   /* find next current unset crossing */
   if (project.open && project.num_crossings > 0) {
     /* get next good crossing */
-    j = -1;
-    k = -1;
+    int j = -1;
+    int k = -1;
     for (int i = 0; i < project.num_crossings; i++) {
       if (do_check_crossing_listok(i) && i != mbna_current_crossing) {
-        crossing = &(project.crossings[i]);
+        struct mbna_crossing *crossing = &(project.crossings[i]);
         if (crossing->status == MBNA_CROSSING_STATUS_NONE) {
           if (j < 0)
             j = i;
@@ -3111,14 +3033,14 @@ int mbnavadjust_naverr_nextunset() {
 
   /* retrieve crossing parameters */
   if (mbna_current_crossing >= 0) {
-    crossing = &project.crossings[mbna_current_crossing];
+    struct mbna_crossing *crossing = &project.crossings[mbna_current_crossing];
     mbna_file_id_1 = crossing->file_id_1;
     mbna_section_1 = crossing->section_1;
     mbna_file_id_2 = crossing->file_id_2;
     mbna_section_2 = crossing->section_2;
     if (crossing->num_ties > 0) {
       mbna_current_tie = 0;
-      tie = &crossing->ties[0];
+      struct mbna_tie *tie = &crossing->ties[0];
       mbna_snav_1 = tie->snav_1;
       mbna_snav_1_time_d = tie->snav_1_time_d;
       mbna_snav_2 = tie->snav_2;
@@ -3145,6 +3067,8 @@ int mbnavadjust_naverr_nextunset() {
       mbna_current_tie = -1;
     }
   }
+
+  int status = MB_SUCCESS;
 
   /* load the crossing */
   if (mbna_current_crossing >= 0) {
@@ -3180,22 +3104,16 @@ int mbnavadjust_naverr_selecttie() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  struct mbna_crossing *crossing;
-  struct mbna_tie *tie;
-  struct mbna_section *section1, *section2;
-  struct mbna_file *file1, *file2;
-
   /* get current crossing */
   if (project.open && project.num_crossings > 0) {
     /* retrieve crossing parameters */
     if (mbna_current_crossing >= 0 && project.crossings[mbna_current_crossing].num_ties > 0) {
       /* select next tie */
-      crossing = &project.crossings[mbna_current_crossing];
+      struct mbna_crossing *crossing = &project.crossings[mbna_current_crossing];
       mbna_current_tie++;
       if (mbna_current_tie > crossing->num_ties - 1)
         mbna_current_tie = 0;
-      tie = &crossing->ties[mbna_current_tie];
+      struct mbna_tie *tie = &crossing->ties[mbna_current_tie];
       mbna_snav_1 = tie->snav_1;
       mbna_snav_2 = tie->snav_2;
       mbna_snav_1_time_d = tie->snav_1_time_d;
@@ -3205,14 +3123,14 @@ int mbnavadjust_naverr_selecttie() {
       mbna_offset_z = tie->offset_z_m;
       tie->offset_x_m = mbna_offset_x / mbna_mtodeglon;
       tie->offset_y_m = mbna_offset_y / mbna_mtodeglat;
-      file1 = (struct mbna_file *)&project.files[mbna_file_id_1];
-      file2 = (struct mbna_file *)&project.files[mbna_file_id_2];
-      section1 = (struct mbna_section *)&file1->sections[mbna_section_1];
-      section2 = (struct mbna_section *)&file2->sections[mbna_section_2];
+      struct mbna_file *file1 = (struct mbna_file *)&project.files[mbna_file_id_1];
+      struct mbna_file *file2 = (struct mbna_file *)&project.files[mbna_file_id_2];
+      struct mbna_section *section1 = (struct mbna_section *)&file1->sections[mbna_section_1];
+      struct mbna_section *section2 = (struct mbna_section *)&file2->sections[mbna_section_2];
       mbna_invert_offset_x = section2->snav_lon_offset[mbna_snav_2] - section1->snav_lon_offset[mbna_snav_1];
       mbna_invert_offset_y = section2->snav_lat_offset[mbna_snav_2] - section1->snav_lat_offset[mbna_snav_1];
       mbna_invert_offset_z = section2->snav_z_offset[mbna_snav_2] - section1->snav_z_offset[mbna_snav_1];
-            project.modelplot_uptodate = false;
+      project.modelplot_uptodate = false;
     }
   }
 
@@ -3228,6 +3146,8 @@ int mbnavadjust_naverr_selecttie() {
     mbna_crossing_select = MBNA_SELECT_NONE;
     mbna_tie_select = MBNA_SELECT_NONE;
   }
+
+  const int status = MB_SUCCESS;
 
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -3246,28 +3166,20 @@ int mbnavadjust_naverr_addtie() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  int status = MB_SUCCESS;
-  struct mbna_crossing *crossing;
-  struct mbna_tie *tie;
-  struct mbna_section *section1, *section2;
-  struct mbna_file *file1, *file2;
-  bool found;
-  int ix, iy;
-
   /* get current crossing */
   if (project.open && project.num_crossings > 0) {
     /* retrieve crossing parameters */
     if (mbna_current_crossing >= 0 && project.crossings[mbna_current_crossing].num_ties < MBNA_SNAV_NUM) {
       /* add tie and set number */
-      crossing = &project.crossings[mbna_current_crossing];
-      file1 = (struct mbna_file *)&project.files[mbna_file_id_1];
-      file2 = (struct mbna_file *)&project.files[mbna_file_id_2];
-      section1 = (struct mbna_section *)&file1->sections[mbna_section_1];
-      section2 = (struct mbna_section *)&file2->sections[mbna_section_2];
+      struct mbna_crossing *crossing = &project.crossings[mbna_current_crossing];
+      struct mbna_file *file1 = (struct mbna_file *)&project.files[mbna_file_id_1];
+      struct mbna_file *file2 = (struct mbna_file *)&project.files[mbna_file_id_2];
+      struct mbna_section *section1 = (struct mbna_section *)&file1->sections[mbna_section_1];
+      struct mbna_section *section2 = (struct mbna_section *)&file2->sections[mbna_section_2];
       mbna_current_tie = crossing->num_ties;
       crossing->num_ties++;
       project.num_ties++;
-      tie = &crossing->ties[mbna_current_tie];
+      struct mbna_tie *tie = &crossing->ties[mbna_current_tie];
 
       if (crossing->status == MBNA_CROSSING_STATUS_NONE) {
         project.num_crossings_analyzed++;
@@ -3278,7 +3190,7 @@ int mbnavadjust_naverr_addtie() {
 
       /* look for unused pair of nav points */
       tie->snav_1 = -1;
-      found = false;
+      bool found = false;
       while (!found) {
         found = true;
         tie->snav_1++;
@@ -3355,8 +3267,8 @@ int mbnavadjust_naverr_addtie() {
         project.inversion_status = MBNA_INVERSION_OLD;
 
       /* now put tie in center of plot */
-      ix = (int)(0.5 * (mbna_plot_lon_max - mbna_plot_lon_min) * mbna_plotx_scale);
-      iy = (int)(cont_borders[3] - (0.5 * (mbna_plot_lat_max - mbna_plot_lat_min) * mbna_ploty_scale));
+      const int ix = (int)(0.5 * (mbna_plot_lon_max - mbna_plot_lon_min) * mbna_plotx_scale);
+      const int iy = (int)(cont_borders[3] - (0.5 * (mbna_plot_lat_max - mbna_plot_lat_min) * mbna_ploty_scale));
       mbnavadjust_naverr_snavpoints(ix, iy);
       tie->snav_1 = mbna_snav_1;
       tie->snav_2 = mbna_snav_2;
@@ -3367,8 +3279,8 @@ int mbnavadjust_naverr_addtie() {
       section1->snav_num_ties[tie->snav_1]++;
       section2->snav_num_ties[tie->snav_2]++;
 
-            /* set flag to update model plot */
-            project.modelplot_uptodate = false;
+      /* set flag to update model plot */
+      project.modelplot_uptodate = false;
 
       /* write updated project */
       project.save_count++;
@@ -3425,6 +3337,8 @@ int mbnavadjust_naverr_addtie() {
     mbna_crossing_select = MBNA_SELECT_NONE;
     mbna_tie_select = MBNA_SELECT_NONE;
   }
+
+  const int status = MB_SUCCESS;
 
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -4206,10 +4120,10 @@ int mbnavadjust_sections_intersect(int crossing_id) {
     fprintf(stderr, "dbg2       crossing_id:  %d\n", crossing_id);
   }
 
-  double xa1, ya1, xa2, ya2;
-  double xb1, yb1, xb2, yb2;
-  double dxa, dya, dxb, dyb;
-  double s, t;
+  // double xa1, ya1, xa2, ya2;
+  // double xb1, yb1, xb2, yb2;
+  // double dxa, dya, dxb, dyb;
+  // double s, t;
 
   /* get crossing */
   struct mbna_crossing *crossing = (struct mbna_crossing *)&project.crossings[crossing_id];
@@ -4217,34 +4131,28 @@ int mbnavadjust_sections_intersect(int crossing_id) {
   /* get section endpoints */
   struct mbna_file *file = &project.files[crossing->file_id_1];
   struct mbna_section *section = &file->sections[crossing->section_1];
-  xa1 = section->snav_lon[0] + section->snav_lon_offset[0];
-  ya1 = section->snav_lat[0] + section->snav_lat_offset[0];
-  xa2 = section->snav_lon[section->num_snav - 1] + section->snav_lon_offset[section->num_snav - 1];
-  ya2 = section->snav_lat[section->num_snav - 1] + section->snav_lat_offset[section->num_snav - 1];
+  const double xa1 = section->snav_lon[0] + section->snav_lon_offset[0];
+  const double ya1 = section->snav_lat[0] + section->snav_lat_offset[0];
+  const double xa2 = section->snav_lon[section->num_snav - 1] + section->snav_lon_offset[section->num_snav - 1];
+  const double ya2 = section->snav_lat[section->num_snav - 1] + section->snav_lat_offset[section->num_snav - 1];
   file = &project.files[crossing->file_id_2];
   section = &file->sections[crossing->section_2];
-  xb1 = section->snav_lon[0] + section->snav_lon_offset[0];
-  yb1 = section->snav_lat[0] + section->snav_lat_offset[0];
-  xb2 = section->snav_lon[section->num_snav - 1] + section->snav_lon_offset[section->num_snav - 1];
-  yb2 = section->snav_lat[section->num_snav - 1] + section->snav_lat_offset[section->num_snav - 1];
+  const double xb1 = section->snav_lon[0] + section->snav_lon_offset[0];
+  const double yb1 = section->snav_lat[0] + section->snav_lat_offset[0];
+  const double xb2 = section->snav_lon[section->num_snav - 1] + section->snav_lon_offset[section->num_snav - 1];
+  const double yb2 = section->snav_lat[section->num_snav - 1] + section->snav_lat_offset[section->num_snav - 1];
 
   /* check for parallel sections */
-  dxa = xa2 - xa1;
-  dya = ya2 - ya1;
-  dxb = xb2 - xb1;
-  dyb = yb2 - yb1;
+  const double dxa = xa2 - xa1;
+  const double dya = ya2 - ya1;
+  const double dxb = xb2 - xb1;
+  const double dyb = yb2 - yb1;
   bool answer = false;
-  if ((dxb * dya - dyb * dxa) == 0.0) {
-    answer = false;
-  }
-  else {
+  if ((dxb * dya - dyb * dxa) != 0.0) {
     /* check for crossing sections */
-    s = (dxa * (yb1 - ya1) + dya * (xa1 - xb1)) / (dxb * dya - dyb * dxa);
-    t = (dxb * (ya1 - yb1) + dyb * (xb1 - xa1)) / (dyb * dxa - dxb * dya);
-    if (s >= 0.0 && s <= 1.0 && t >= 0.0 && t <= 1.0)
-      answer = true;
-    else
-      answer = false;
+    const double s = (dxa * (yb1 - ya1) + dya * (xa1 - xb1)) / (dxb * dya - dyb * dxa);
+    const double t = (dxb * (ya1 - yb1) + dyb * (xb1 - xa1)) / (dyb * dxa - dxb * dya);
+    answer = s >= 0.0 && s <= 1.0 && t >= 0.0 && t <= 1.0;
   }
 
   if (mbna_verbose >= 2) {
