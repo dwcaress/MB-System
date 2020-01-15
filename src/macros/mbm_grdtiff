@@ -906,12 +906,13 @@ if ($color_mode && !$file_cpt)
 	# regions using grdhisteq on first data file
 	if ($stretch_color)
 		{
+		$ncolors_minus = $ncolors - 1;
 		if ($verbose)
 			{
 			print "Running gmt module grdhisteq...\n";
+      print "\tgmt grdhisteq $files_data[0] -C$ncolors_minus -D\n";
 			}
-		$ncolors_minus = $ncolors - 1;
-		@grdhisteq = `grdhisteq $files_data[0] -C$ncolors_minus -D`;
+		@grdhisteq = `gmt grdhisteq $files_data[0] -C$ncolors_minus -D`;
 		foreach $d (@grdhisteq) {
 			($d1, $d2) = $d =~ /(\S+)\s+(\S+).*/;
 			push(@hist, $d1);

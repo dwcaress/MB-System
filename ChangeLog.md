@@ -22,6 +22,7 @@ and each distribution corresponds to a discrete Github release tag. Releases tha
 include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
+- Version 5.7.6beta23    January 15, 2020
 - Version 5.7.6beta23    January 11, 2020
 - Version 5.7.6beta21    December 12, 2019
 - Version 5.7.6beta20    November 26, 2019
@@ -338,9 +339,29 @@ MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 
 -------------------------------------------------------------------------------
 
+-----> 5.7.6beta24 (January 15, 2020)
+
+Build system: The configure.ac file now uses the AX_CXX_COMPILE_STDCXX(11) macro
+to require that the code conform to the C++11 standard. Some preprocessor
+directives have been added to src/utilities/mbprocess.cc to handle the case of
+building with gcc 4.8.1 through 4.8.5, which has errors in implementing structure
+constructors consistent with this standard. Also, instances of isnan() calls
+throughout the codebase have been changed to std::isnan(), and in these cases
+the "#include <math.h>" has been replaced by "#include <cmath". The order of
+libraries in src/mbtrn/Makefile.am has been changed so that libmframe.la is
+installed before libr7kr.la (which depends on libmframe.la). With respect to
+libproj, configure.ac now checks for Proj 4 vs Proj 5/6 using proj_create() for
+Proj 5/6 and pj_init_plus() for Proj 4. This in turn sets preprocessor values
+that determine which Proj API is used bye the functions in src/mbio/mb_proj.c.
+
+Code style: Kurt Schwehr is systematically altering the code to conform to best practices and adding build tests. The tests are performed by running
+    make check
+and are executed automatically by the Travis CI service integrated with Github
+whenever commits are made to the Github repository.
+
 -----> 5.7.6beta23 (January 11, 2020)
 
-mbprocess, mbpreprocess, mb_make_info(): Altered mbprocess and mbpreprocess so
+MBprocess, mbpreprocess, mb_make_info(): Altered mbprocess and mbpreprocess so
 that both run about half as slow (twice as fast) as before. This optimization is
 accomplished by having mbprocess and mbpreprocess generate fbt and fnv files
 directly rather than by system() calls to mbcopy and mblist, and by having the
@@ -348,19 +369,19 @@ system() call to mbinfo include the overall area bounds so that mbinfo only
 reads the output file once while generating inf files (instead of reading the
 data twice).
 
-mbnavadjust: Added GUI elements related to defining a reference bathymetry model.
+MBnavadjust: Added GUI elements related to defining a reference bathymetry model.
 In the future, it will be possible to tie swath files to a reference bathymetry
 imported from a grid file.
 
-mbbackangle: Fixed error in datalist read logic that was preventing it reading
+MBbackangle: Fixed error in datalist read logic that was preventing it reading
 more than the first file (problem created by changing the handling of status and
 error values from MBIO calls).
 
-mbextractsegy: Fixed error in the milliseconds of traceheader timestamps.
+MBextractsegy: Fixed error in the milliseconds of traceheader timestamps.
 
-mblist: Improved calculation and handling of swath bounds values.
+MBlist: Improved calculation and handling of swath bounds values.
 
-mbinfo: Augmented the -M data mask option to allow pre-definition of the file's
+MBinfo: Augmented the -M data mask option to allow pre-definition of the file's
 area bounds. Previously, the data mask has been requested using -Mmask_nx/mask_ny
 where mask_nx/mask_ny are the dimensions of the mask. In this case, the file is
 read twice - first to get the area bounds of all data while getting the other
@@ -370,9 +391,9 @@ is given by -Mmask_nx/mask_ny/lonmin/lonmax/latmin/latmax, then the last four va
 define the area bounds and the data need only be read once. Mbprocess now calls
 mbinfo in this way, allowing a speedup of the mbprocess execution.
 
-mbgrid: Added data min max values to the per file shell output when verbose > 0
+MBgrid: Added data min max values to the per file shell output when verbose > 0
 
-mbsvpselect: This program depends on geodesic calculations that are now part of
+MBsvpselect: This program depends on geodesic calculations that are now part of
 the Proj software package (from version 6 onwards). Previously the src/utilities
 directory had included the files geodetic.h and geodetic.c to provide this capability;
 those are now not included. Consequently, if MB-System is built with Proj versions 4 or 5,
