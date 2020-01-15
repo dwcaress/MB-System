@@ -835,7 +835,7 @@ static char *getNextCStrDelim ARGLIST((str)) GRA(char *, str) {
 		return (NULL); /* At end */
 
 #ifdef __CENTERLINE__
-	len = mblen((char *)NULL, sizeof(wchar_t));
+	len = mblen(NULL, sizeof(wchar_t));
 #else
 	len = mblen(NULL, sizeof(wchar_t));
 #endif
@@ -961,7 +961,7 @@ static Boolean CvtStringToXmString ARGLIST((d, args, num_args, fromVal, toVal, d
 	 */
 	if (*num_args != 0) {
 		XtAppWarningMsg(XtDisplayToApplicationContext(d), "cvtStringToXmString", "wrongParameters", "XtToolkitError",
-		                "String to XmString converter needs no extra arguments", (String *)NULL, (Cardinal *)NULL);
+		                "String to XmString converter needs no extra arguments", NULL, NULL);
 	}
 
 	/*
@@ -1031,7 +1031,7 @@ static Boolean CvtStringToXmStringTable ARGLIST((d, args, num_args, fromVal, toV
 	 */
 	if (*num_args != 0) {
 		XtAppWarningMsg(XtDisplayToApplicationContext(d), "cvtStringToXmStringTable", "wrongParameters", "XtToolkitError",
-		                "String to XmStringTable converter needs no extra arguments", (String *)NULL, (Cardinal *)NULL);
+		                "String to XmStringTable converter needs no extra arguments", NULL, NULL);
 	}
 
 	/*

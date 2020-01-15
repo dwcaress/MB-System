@@ -85,9 +85,9 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
     status = mbnavadjust_close_project(verbose, project, error);
 
   /* check path to see if new project can be created */
-  char *nameptr = (char *)NULL;
+  char *nameptr = NULL;
   char *slashptr = strrchr(projectpath, '/');
-  if (slashptr != (char *)NULL)
+  if (slashptr != NULL)
     nameptr = slashptr + 1;
   else
     nameptr = projectpath;

@@ -22,14 +22,10 @@
  * MBARI
  */
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <unistd.h>
-
-#if defined(_WIN32) && !defined(isnan)
-#define isnan(x) _isnan(x)
-#endif
 
 struct node {
 	double lon;
@@ -44,10 +40,10 @@ int main() {
 	struct node n;
         const size_t chunk = sizeof(n);
 	while ((fread(&n, chunk, 1, stdin) != chunk)) {
-		if (isnan(n.lon) || isnan(n.lat) || isnan(n.height)) {
+		if (std::isnan(n.lon) || std::isnan(n.lat) || std::isnan(n.height)) {
 			continue;
 		}
 		fwrite(&n, chunk, 1, stdout);
 	}
-	exit(0);
+	exit(EXIT_SUCCESS);
 }
