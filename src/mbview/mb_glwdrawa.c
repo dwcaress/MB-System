@@ -402,7 +402,7 @@ static void createColormap(mbGLwDrawingAreaWidget w, int offset, XrmValue *value
 	} * cmapCache;
 	static int cacheEntries = 0;
 	static int cacheMalloced = 0;
-	register int i;
+	int i;
 
 	assert(w->mbglwDrawingArea.visualInfo);
 
@@ -480,7 +480,7 @@ static void Initialize(mbGLwDrawingAreaWidget req, mbGLwDrawingAreaWidget neww, 
 }
 
 static void Realize(Widget w, Mask *valueMask, XSetWindowAttributes *attributes) {
-	register mbGLwDrawingAreaWidget mbglw = (mbGLwDrawingAreaWidget)w;
+	mbGLwDrawingAreaWidget mbglw = (mbGLwDrawingAreaWidget)w;
 	mbGLwDrawingAreaCallbackStruct cb;
 	Widget parentShell;
 	Status status;
@@ -566,7 +566,7 @@ static void Destroy(mbGLwDrawingAreaWidget mbglw) {
 	Widget parentShell;
 	Status status;
 	int countReturn;
-	register int i;
+	int i;
 
 	if (mbglw->mbglwDrawingArea.myList && mbglw->mbglwDrawingArea.attribList) {
 		XtFree((XtPointer)mbglw->mbglwDrawingArea.attribList);
