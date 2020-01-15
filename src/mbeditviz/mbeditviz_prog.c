@@ -89,7 +89,6 @@ int mbeditviz_init(int argc, char **argv) {
 	bool delete_input_file = false;
 	mb_path ifile;
 	mb_path shell_command;
-	int shellstatus;
 
 	mbev_status = MB_SUCCESS;
 	mbev_error = MB_ERROR_NO_ERROR;
@@ -274,7 +273,7 @@ int mbeditviz_init(int argc, char **argv) {
 		mbev_status = mbeditviz_open_data(ifile, mbdef_format);
 		if (delete_input_file) {
 			sprintf(shell_command, "rm %s &", ifile);
-			shellstatus = system(shell_command);
+			/* const int shellstatus = */ system(shell_command);
 		}
 	}
 
@@ -500,7 +499,6 @@ int mbeditviz_load_file(int ifile) {
 	mb_path error3 = "";
 
 	/* swath file locking variables */
-	int lock_status;
 	int locked;
 	int lock_purpose;
 	mb_path lock_program = "";
@@ -539,11 +537,9 @@ int mbeditviz_load_file(int ifile) {
 	double mtodeglon, mtodeglat;
 	double heading, sonardepth;
 	double rolldelta, pitchdelta;
-	int swathbounds;
 	int icenter, iport, istbd;
 	double centerdistance, portdistance, stbddistance;
 	int iping, ibeam, iedit;
-	int shellstatus;
 	float value_float;
 	int read_size;
 	int index;
@@ -580,7 +576,8 @@ int mbeditviz_load_file(int ifile) {
 
 			/* if locked get lock info */
 			if (mbev_error == MB_ERROR_FILE_LOCKED) {
-				lock_status = mb_pr_lockinfo(mbev_verbose, file->path, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
+				// const int lock_status =
+				 mb_pr_lockinfo(mbev_verbose, file->path, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
 				                             lock_date, &mbev_error);
 
 				sprintf(error1, "Unable to open input file:");
@@ -903,8 +900,8 @@ int mbeditviz_load_file(int ifile) {
 					if (format == MBF_MBPRONAV) {
 						mbev_status = mbsys_singlebeam_swathbounds(mbev_verbose, imbio_ptr, istore_ptr, &kind, &ping->portlon,
 						                                           &ping->portlat, &ping->stbdlon, &ping->stbdlat, &mbev_error);
-						if (ping->portlon != ping->stbdlon || ping->portlat != ping->stbdlat)
-							swathbounds = true;
+						// if (ping->portlon != ping->stbdlon || ping->portlat != ping->stbdlat)
+						//	swathbounds = true;
 					}
 
 					else {
@@ -996,7 +993,7 @@ int mbeditviz_load_file(int ifile) {
 				if (rawmodtime >= resfmodtime) {
 					sprintf(command, "mbprocess -I %s -P", file->path);
 					fprintf(stderr, "Generating *.resf file by rerunning mbprocess:\n\t%s\n", command);
-					shellstatus = system(command);
+					/* const int shellstatus = */ system(command);
 				}
 
 				/* now read and apply the reverse edits */
@@ -1652,7 +1649,6 @@ int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_
 	}
 
 	double time_d;
-	int intstat;
 	int iheading = 0;
 	int isonardepth = 0;
 	int iattitude = 0;
@@ -1664,8 +1660,9 @@ int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_
 		time_d = ping->time_d + timelag;
 
 		/* if asyncronous sonardepth available, interpolate new value */
+		// int intstat;
 		if (timelag != 0.0 && file->n_async_sonardepth > 0) {
-			intstat = mb_linear_interp(mbev_verbose, file->async_sonardepth_time_d - 1, file->async_sonardepth_sonardepth - 1,
+			/* intstat = */ mb_linear_interp(mbev_verbose, file->async_sonardepth_time_d - 1, file->async_sonardepth_sonardepth - 1,
 			                           file->n_async_sonardepth, time_d, sonardepth, &isonardepth, &mbev_error);
 		}
 		else {
@@ -1674,7 +1671,7 @@ int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_
 
 		/* if asyncronous heading available, interpolate new value */
 		if (timelag != 0.0 && file->n_async_heading > 0) {
-			intstat = mb_linear_interp_heading(mbev_verbose, file->async_heading_time_d - 1, file->async_heading_heading - 1,
+			/* intstat = */ mb_linear_interp_heading(mbev_verbose, file->async_heading_time_d - 1, file->async_heading_heading - 1,
 			                                   file->n_async_heading, time_d, &headingasync, &iheading, &mbev_error);
 		}
 		else {
@@ -1683,9 +1680,9 @@ int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_
 
 		/* if asynchronous roll and pitch available, interpolate new values */
 		if (timelag != 0.0 && file->n_async_attitude > 0) {
-			intstat = mb_linear_interp(mbev_verbose, file->async_attitude_time_d - 1, file->async_attitude_roll - 1,
+			/* intstat = */ mb_linear_interp(mbev_verbose, file->async_attitude_time_d - 1, file->async_attitude_roll - 1,
 			                           file->n_async_attitude, time_d, &rollasync, &iattitude, &mbev_error);
-			intstat = mb_linear_interp(mbev_verbose, file->async_attitude_time_d - 1, file->async_attitude_pitch - 1,
+			/* intstat = */ mb_linear_interp(mbev_verbose, file->async_attitude_time_d - 1, file->async_attitude_pitch - 1,
 			                           file->n_async_attitude, time_d, &pitchasync, &iattitude, &mbev_error);
 		}
 		else {
@@ -1894,7 +1891,6 @@ int mbeditviz_unload_file(int ifile) {
 	if (ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status) {
 
 		struct mbev_ping_struct *ping;
-		int lock_status;
 		int lock_error = MB_ERROR_NO_ERROR;
 
 		/* release memory */
@@ -2029,8 +2025,10 @@ int mbeditviz_unload_file(int ifile) {
 		mbev_num_files_loaded--;
 
 		/* unlock the file */
-		if (mbdef_uselockfiles)
-			lock_status = mb_pr_unlockswathfile(mbev_verbose, file->path, MBP_LOCK_EDITBATHY, program_name, &lock_error);
+		if (mbdef_uselockfiles) {
+			// const int lock_status =
+			mb_pr_unlockswathfile(mbev_verbose, file->path, MBP_LOCK_EDITBATHY, program_name, &lock_error);
+		}
 	}
 
 	if (mbev_verbose >= 2) {
@@ -4472,7 +4470,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 	double headingbias_start, headingbias_end, dheadingbias;
 	double timelag_start, timelag_end, dtimelag;
 	double snell_start, snell_end, dsnell;
-	int niterate;
+	// int niterate;
 	char *marker1 = "       ";
 	char *marker2 = " ******";
 	char *marker = NULL;
@@ -4480,7 +4478,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 	/* Roll bias */
 	if (mode & MB3DSDG_OPTIMIZEBIASVALUES_R) {
 		/* start with coarse roll bias */
-		niterate = 11;
+		int niterate = 11;
 		rollbias_start = *rollbias_best - 5.0;
 		rollbias_end = *rollbias_best + 5.0;
 		drollbias = (rollbias_end - rollbias_start) / (niterate - 1);
@@ -4546,7 +4544,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 	if (mode & MB3DSDG_OPTIMIZEBIASVALUES_P) {
 		/* start with coarse pitch bias */
 		rollbias = *rollbias_best;
-		niterate = 11;
+		int niterate = 11;
 		pitchbias_start = *pitchbias_best - 5.0;
 		pitchbias_end = *pitchbias_best + 5.0;
 		dpitchbias = (pitchbias_end - pitchbias_start) / (niterate - 1);
@@ -4612,7 +4610,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		/* start with coarse heading bias */
 		rollbias = *rollbias_best;
 		pitchbias = *pitchbias_best;
-		niterate = 11;
+		int niterate = 11;
 		headingbias_start = *headingbias_best - 5.0;
 		headingbias_end = *headingbias_best + 5.0;
 		dheadingbias = (headingbias_end - headingbias_start) / (niterate - 1);
@@ -4675,7 +4673,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 	/* Redo roll bias if doing a combination of bias parameters */
 	if (mode & MB3DSDG_OPTIMIZEBIASVALUES_R && mode != MB3DSDG_OPTIMIZEBIASVALUES_R) {
 		/* now do fine roll bias */
-		niterate = 19;
+		int niterate = 19;
 		rollbias_start = *rollbias_best - 0.9;
 		rollbias_end = *rollbias_best + 0.9;
 		drollbias = (rollbias_end - rollbias_start) / (niterate - 1);
@@ -4710,7 +4708,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 	if (mode & MB3DSDG_OPTIMIZEBIASVALUES_P && mode != MB3DSDG_OPTIMIZEBIASVALUES_P) {
 		/* now do fine pitch bias */
 		rollbias = *rollbias_best;
-		niterate = 19;
+		int niterate = 19;
 		pitchbias_start = *pitchbias_best - 0.9;
 		pitchbias_end = *pitchbias_best + 0.9;
 		dpitchbias = (pitchbias_end - pitchbias_start) / (niterate - 1);
@@ -4745,7 +4743,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		/* now do fine heading bias */
 		rollbias = *rollbias_best;
 		pitchbias = *pitchbias_best;
-		niterate = 19;
+		int niterate = 19;
 		headingbias_start = *headingbias_best - 0.9;
 		headingbias_end = *headingbias_best + 0.9;
 		dheadingbias = (headingbias_end - headingbias_start) / (niterate - 1);
@@ -4780,7 +4778,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		rollbias = *rollbias_best;
 		pitchbias = *pitchbias_best;
 		headingbias = *headingbias_best;
-		niterate = 21;
+		int niterate = 21;
 		timelag_start = *timelag_best - 1.0;
 		timelag_end = *timelag_best + 1.0;
 		dtimelag = (timelag_end - timelag_start) / (niterate - 1);
@@ -4848,7 +4846,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		pitchbias = *pitchbias_best;
 		headingbias = *headingbias_best;
 		timelag = *timelag_best;
-		niterate = 21;
+		int niterate = 21;
 		snell_start = *snell_best - 0.1;
 		snell_end = *snell_best + 0.1;
 		dsnell = (snell_end - snell_start) / (niterate - 1);
