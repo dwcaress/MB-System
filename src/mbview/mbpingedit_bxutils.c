@@ -228,8 +228,8 @@ static wchar_t *CStrCommonWideCharsGet();
  *      int :  0; s1 == s2
  *             1; s1 != s2
  */
-static int StrCasecmp ARGLIST((s1, s2)) ARG(register char *, s1) GRA(register char *, s2) {
-	register int c1, c2;
+static int StrCasecmp ARGLIST((s1, s2)) ARG(char *, s1) GRA(char *, s2) {
+	int c1, c2;
 
 	while (*s1 && *s2) {
 		c1 = isupper(*s1) ? tolower(*s1) : *s1;
@@ -276,8 +276,8 @@ static int mblen ARGLIST((s, n)) ARG(char *, s) GRA(size_t, n) { return (1); }
  *      int : the number of characters found
  */
 static int strlenWc ARGLIST((ptr)) GRA(wchar_t *, ptr) {
-	register wchar_t *p = ptr;
-	register int x = 0;
+	wchar_t *p = ptr;
+	int x = 0;
 
 	if (!ptr)
 		return (0);
@@ -1864,8 +1864,8 @@ LFUNC(XpmDataClose, void, (bxxpmData * mdata));
 
 /* RGB utility */
 
-LFUNC(xpm_xynormalizeimagebits, void, (register unsigned char *bp, register XImage *img));
-LFUNC(xpm_znormalizeimagebits, void, (register unsigned char *bp, register XImage *img));
+LFUNC(xpm_xynormalizeimagebits, void, (unsigned char *bp, XImage *img));
+LFUNC(xpm_znormalizeimagebits, void, (unsigned char *bp, XImage *img));
 
 /* Image utility */
 
@@ -1934,8 +1934,8 @@ LFUNC(atoui, unsigned int, (char *p, unsigned int l, unsigned int *ui_return));
 #define Const
 #endif
 
-static unsigned int atoui ARGLIST((p, l, ui_return)) ARG(register char *, p) ARG(unsigned int, l) GRA(unsigned int *, ui_return) {
-	register int n, i;
+static unsigned int atoui ARGLIST((p, l, ui_return)) ARG(char *, p) ARG(unsigned int, l) GRA(unsigned int *, ui_return) {
+	int n, i;
 
 	n = 0;
 	for (i = 0; i < l; i++)
@@ -2569,9 +2569,9 @@ static int CreateXImage ARGLIST((display, visual, depth, width, height, image_re
  * level. Assuming that we use only ZPixmap images.
  */
 
-LFUNC(_putbits, void, (register char *src, int dstoffset, register int numbits, register char *dst));
+LFUNC(_putbits, void, (char *src, int dstoffset, int numbits, char *dst));
 
-LFUNC(_XReverse_Bytes, void, (register unsigned char *bpt, register int nb));
+LFUNC(_XReverse_Bytes, void, (unsigned char *bpt, int nb));
 
 static unsigned char Const _reverse_byte[0x100] = {
     0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0, 0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0, 0x08, 0x88, 0x48, 0xc8,
@@ -2588,15 +2588,15 @@ static unsigned char Const _reverse_byte[0x100] = {
     0x3b, 0xbb, 0x7b, 0xfb, 0x07, 0x87, 0x47, 0xc7, 0x27, 0xa7, 0x67, 0xe7, 0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7, 0x77, 0xf7,
     0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef, 0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff};
 
-static void _XReverse_Bytes ARGLIST((bpt, nb)) ARG(register unsigned char *, bpt) GRA(register int, nb) {
+static void _XReverse_Bytes ARGLIST((bpt, nb)) ARG(unsigned char *, bpt) GRA(int, nb) {
 	do {
 		*bpt = _reverse_byte[*bpt];
 		bpt++;
 	} while (--nb > 0);
 }
 
-static void xpm_xynormalizeimagebits ARGLIST((bp, img)) ARG(register unsigned char *, bp) GRA(register XImage *, img) {
-	register unsigned char c;
+static void xpm_xynormalizeimagebits ARGLIST((bp, img)) ARG(unsigned char *, bp) GRA(XImage *, img) {
+	unsigned char c;
 
 	if (img->byte_order != img->bitmap_bit_order) {
 		switch (img->bitmap_unit) {
@@ -2621,8 +2621,8 @@ static void xpm_xynormalizeimagebits ARGLIST((bp, img)) ARG(register unsigned ch
 		_XReverse_Bytes(bp, img->bitmap_unit >> 3);
 }
 
-static void xpm_znormalizeimagebits ARGLIST((bp, img)) ARG(register unsigned char *, bp) GRA(register XImage *, img) {
-	register unsigned char c;
+static void xpm_znormalizeimagebits ARGLIST((bp, img)) ARG(unsigned char *, bp) GRA(XImage *, img) {
+	unsigned char c;
 
 	switch (img->bits_per_pixel) {
 
@@ -2656,14 +2656,14 @@ static void xpm_znormalizeimagebits ARGLIST((bp, img)) ARG(register unsigned cha
 static unsigned char Const _lomask[0x09] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
 static unsigned char Const _himask[0x09] = {0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80, 0x00};
 
-static void _putbits ARGLIST((src, dstoffset, numbits, dst)) ARG(register char *, src) /* address of source bit string */
+static void _putbits ARGLIST((src, dstoffset, numbits, dst)) ARG(char *, src) /* address of source bit string */
     ARG(int, dstoffset)        /* bit offset into destination;
                                 * range is 0-31 */
-    ARG(register int, numbits) /* number of bits to copy to
+    ARG(int, numbits) /* number of bits to copy to
                                 * destination */
-    GRA(register char *, dst)  /* address of destination bit string */
+    GRA(char *, dst)  /* address of destination bit string */
 {
-	register unsigned char chlo, chhi;
+	unsigned char chlo, chhi;
 	int hibits;
 
 	dst = dst + (dstoffset >> 3);
@@ -2706,11 +2706,11 @@ static void SetImagePixels ARGLIST((image, width, height, pixelindex, pixels)) A
     ARG(unsigned int, height) ARG(unsigned int *, pixelindex) GRA(Pixel *, pixels) {
 	Pixel pixel;
 	unsigned long px;
-	register char *src;
-	register char *dst;
+	char *src;
+	char *dst;
 	int nbytes;
-	register unsigned int *iptr;
-	register int x, y, i;
+	unsigned int *iptr;
+	int x, y, i;
 
 	iptr = pixelindex;
 	if (image->depth == 1) {
@@ -2771,10 +2771,10 @@ static unsigned long byteorderpixel = MSBFirst << 24;
 
 static void SetImagePixels32 ARGLIST((image, width, height, pixelindex, pixels)) ARG(XImage *, image) ARG(unsigned int, width)
     ARG(unsigned int, height) ARG(unsigned int *, pixelindex) GRA(Pixel *, pixels) {
-	register unsigned char *addr;
-	register unsigned int *paddr;
-	register unsigned int *iptr;
-	register int x, y;
+	unsigned char *addr;
+	unsigned int *paddr;
+	unsigned int *iptr;
+	int x, y;
 
 	iptr = pixelindex;
 #ifndef WORD64
@@ -2813,9 +2813,9 @@ static void SetImagePixels32 ARGLIST((image, width, height, pixelindex, pixels))
 
 static void SetImagePixels16 ARGLIST((image, width, height, pixelindex, pixels)) ARG(XImage *, image) ARG(unsigned int, width)
     ARG(unsigned int, height) ARG(unsigned int *, pixelindex) GRA(Pixel *, pixels) {
-	register unsigned char *addr;
-	register unsigned int *iptr;
-	register int x, y;
+	unsigned char *addr;
+	unsigned int *iptr;
+	int x, y;
 
 	iptr = pixelindex;
 	if (image->byte_order == MSBFirst)
@@ -2842,8 +2842,8 @@ static void SetImagePixels8 ARGLIST((image, width, height, pixelindex, pixels)) 
     ARG(unsigned int, height) ARG(unsigned int *, pixelindex) GRA(Pixel *, pixels)
 
 {
-	register unsigned int *iptr;
-	register int x, y;
+	unsigned int *iptr;
+	int x, y;
 
 	iptr = pixelindex;
 	for (y = 0; y < height; y++)
@@ -2859,8 +2859,8 @@ static void SetImagePixels1 ARGLIST((image, width, height, pixelindex, pixels)) 
     ARG(unsigned int, height) ARG(unsigned int *, pixelindex) GRA(Pixel *, pixels) {
 	unsigned char bit;
 	int xoff, yoff;
-	register unsigned int *iptr;
-	register int x, y;
+	unsigned int *iptr;
+	int x, y;
 
 	if (image->byte_order != image->bitmap_bit_order)
 		SetImagePixels(image, width, height, pixelindex, pixels);
@@ -3051,7 +3051,7 @@ static void xpmNextString ARGLIST((mdata)) GRA(bxxpmData *, mdata) {
  */
 static int xpmGetC ARGLIST((mdata)) GRA(bxxpmData *, mdata) {
 	int c;
-	register unsigned int n = 0, a;
+	unsigned int n = 0, a;
 	unsigned int notend;
 
 	switch (mdata->type) {
@@ -3138,7 +3138,7 @@ static int xpmUngetC ARGLIST((c, mdata)) ARG(int, c) GRA(bxxpmData *, mdata) {
  * skip whitespace and return the following word
  */
 static unsigned int xpmNextWord ARGLIST((mdata, buf)) ARG(bxxpmData *, mdata) GRA(char *, buf) {
-	register unsigned int n = 0;
+	unsigned int n = 0;
 	int c;
 
 	switch (mdata->type) {

@@ -913,7 +913,7 @@ static const int THRESHOLD = 16; /* Best choice for natural merge cut-off. */
 /*
  * Arguments are as for qsort.
  */
-int mb_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void *)) {
+int mb_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *)) {
 
 	if (size < PSIZE / 2) { /* Pointers must fit into 2 * size. */
 		/*errno = EINVAL;*/
