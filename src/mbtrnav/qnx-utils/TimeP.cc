@@ -64,9 +64,9 @@ double TimeP::seconds(TimeIF::TimeSpec *timeSpec)
 unsigned long TimeP::milliseconds()
 {
   struct timespec timeNow;
- 
+
   TimeP::gettime(&timeNow);
-  
+
   if (!_epochAssigned) {
     // Initialize epoch the first time through 
     _epoch.tv_sec  = timeNow.tv_sec;
@@ -111,9 +111,9 @@ void TimeP::secsToHourMinSec(double secs, char *timestring)
   int hrs;
   int min;
   int isecs;
-  
+
   isecs = secs;
-  
+
   if ((days = isecs / SecondsPerDay) > 0)
   {
     isecs = isecs % SecondsPerDay;
@@ -127,7 +127,7 @@ void TimeP::secsToHourMinSec(double secs, char *timestring)
     isecs = isecs % SecondsPerMinute;
   }
   secs = isecs + (secs - (int )secs);
-  
+
   sprintf(timestring, "%03d:%02d:%02d:%02.1f", days, hrs, min, secs);
 
   return;
@@ -157,7 +157,7 @@ int TimeP::hourMinSecToSecs(char *timestring, double *secs)
   }
 
   *secs = 0.;
-  
+
   switch (nflds)
   {
     case 4:
@@ -168,7 +168,7 @@ int TimeP::hourMinSecToSecs(char *timestring, double *secs)
     *secs += val[3];
     return 0;
     break;
-    
+
     case 3:
     /* Specified hours, mins, secs */
     *secs += val[0] * SecondsPerHour;
@@ -176,11 +176,11 @@ int TimeP::hourMinSecToSecs(char *timestring, double *secs)
     *secs += val[2];
     return 0;
     break;
-    
+
 
     default:
     return -1;
-    
+
   }
 }
 
@@ -205,11 +205,11 @@ int TimeP::dayOfYear(int year, int month, int day)
   int i, leap;
   if ( (year < 0) || (month < 1) || (month > 12) || (day < 1) || (day > 31))
     return -1;
-  
+
   leap = ((year % 4 == 0) && (year % 100 != 0)) || ( (year % 400) == 0);
   for (i = 1; i < month; i++)
     day += _monthDays[leap][i];
-  
+
   return day;
 }
 
@@ -222,7 +222,7 @@ int TimeP::dayOfYearToMonthDay(int doy, int year, int *month, int *day)
   leap = leapYear(year);
   if (doy < 1 || (!leap && doy > 365) || (leap && doy > 366))
     return -1;
-  
+
   *month = 0;
   for (sum = 0, *month = 0; sum + _monthDays[leap][*month] < doy; 
        sum += _monthDays[leap][*month], (*month)++)

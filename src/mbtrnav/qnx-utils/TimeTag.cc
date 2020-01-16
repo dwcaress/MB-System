@@ -62,8 +62,8 @@ const char *TimeTag::ascii()
   putenv(tzone);
 
   struct tm *timePtr = gmtime(&secs);
-  
-  if (strftime(_asciiBuffer, sizeof(_asciiBuffer), "%Y:%j:%H:%M:%S", 
+
+  if (strftime(_asciiBuffer, sizeof(_asciiBuffer), "%Y:%j:%H:%M:%S",
 	       timePtr) <= 0) {
     printf("TimeTag::ascii() - %s\n", strerror(errno));
   }
@@ -142,7 +142,7 @@ void TimeTag::parseValue(const char *stringRep)
 	throw Exception(errorBuf);
       }
       timeStruct.tm_hour = atoi(token);
-      
+
       state = ParseMinutes;
       break;
 
@@ -184,7 +184,7 @@ void TimeTag::parseValue(const char *stringRep)
     sprintf(errorBuf, 
 	    "TimeTag::parseValue() - bad number of tokens in \"%s\"", 
 	    stringRep);
-    
+
     throw Exception(errorBuf);
   }
 
@@ -210,7 +210,7 @@ int TimeTag::dayOfYearToMonthDay(int doy, int year, int *month, int *day)
   leap = leapYear(year);
   if (doy < 1 || (!leap && doy > 365) || (leap && doy > 366))
     return -1;
-  
+
   *month = 0;
   for (sum = 0, *month = 0; sum + _monthDays[leap][*month] < doy; 
        sum += _monthDays[leap][*month], (*month)++)
