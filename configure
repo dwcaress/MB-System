@@ -3766,7 +3766,7 @@ $as_echo "#define HAVE_CXX11 1" >>confdefs.h
 
 
 
-$as_echo "#define VERSION_DATE \"15 January 2020\"" >>confdefs.h
+$as_echo "#define VERSION_DATE \"16 January 2020\"" >>confdefs.h
 
 
 ac_aux_dir=
@@ -19640,9 +19640,9 @@ if test "$GOT_PROJ" = "yes" ; then
         $as_echo "PROJ library location specified: $proj_libdir - check if libproj is there..."
     save_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -L$proj_libdir"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_create in -lproj" >&5
-$as_echo_n "checking for proj_create in -lproj... " >&6; }
-if ${ac_cv_lib_proj_proj_create+:} false; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_normalize_for_visualization in -lproj" >&5
+$as_echo_n "checking for proj_normalize_for_visualization in -lproj... " >&6; }
+if ${ac_cv_lib_proj_proj_normalize_for_visualization+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -19656,27 +19656,27 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char proj_create ();
+char proj_normalize_for_visualization ();
 int
 main ()
 {
-return proj_create ();
+return proj_normalize_for_visualization ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_proj_proj_create=yes
+  ac_cv_lib_proj_proj_normalize_for_visualization=yes
 else
-  ac_cv_lib_proj_proj_create=no
+  ac_cv_lib_proj_proj_normalize_for_visualization=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_create" >&5
-$as_echo "$ac_cv_lib_proj_proj_create" >&6; }
-if test "x$ac_cv_lib_proj_proj_create" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_normalize_for_visualization" >&5
+$as_echo "$ac_cv_lib_proj_proj_normalize_for_visualization" >&6; }
+if test "x$ac_cv_lib_proj_proj_normalize_for_visualization" = xyes; then :
   FOUND_PROJ_LIB=yes
 else
   FOUND_PROJ_LIB=no
@@ -19684,7 +19684,7 @@ fi
 
     if test "$FOUND_PROJ_LIB" = "yes"; then
         FOUND_PROJ6=yes
-        $as_echo "Found PROJ 5/6 library libproj"
+        $as_echo "Found PROJ library libproj from version 6.1 or later"
     else
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pj_init_plus in -lproj" >&5
 $as_echo_n "checking for pj_init_plus in -lproj... " >&6; }
@@ -19730,7 +19730,7 @@ fi
 
         if test "$FOUND_PROJ_LIB" = "yes"; then
             FOUND_PROJ4=yes
-            $as_echo "Found PROJ 4 library libproj"
+            $as_echo "Found PROJ library libproj with PROJ4 api available"
         fi
     fi
     if test "$FOUND_PROJ_LIB" = "no"; then
@@ -19932,9 +19932,9 @@ else
 $as_echo "yes" >&6; }
 	FOUND_PROJ_LIB=yes
 fi
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_create in -lproj" >&5
-$as_echo_n "checking for proj_create in -lproj... " >&6; }
-if ${ac_cv_lib_proj_proj_create+:} false; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_normalize_for_visualization in -lproj" >&5
+$as_echo_n "checking for proj_normalize_for_visualization in -lproj... " >&6; }
+if ${ac_cv_lib_proj_proj_normalize_for_visualization+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -19948,27 +19948,27 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char proj_create ();
+char proj_normalize_for_visualization ();
 int
 main ()
 {
-return proj_create ();
+return proj_normalize_for_visualization ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_proj_proj_create=yes
+  ac_cv_lib_proj_proj_normalize_for_visualization=yes
 else
-  ac_cv_lib_proj_proj_create=no
+  ac_cv_lib_proj_proj_normalize_for_visualization=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_create" >&5
-$as_echo "$ac_cv_lib_proj_proj_create" >&6; }
-if test "x$ac_cv_lib_proj_proj_create" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_normalize_for_visualization" >&5
+$as_echo "$ac_cv_lib_proj_proj_normalize_for_visualization" >&6; }
+if test "x$ac_cv_lib_proj_proj_normalize_for_visualization" = xyes; then :
   FOUND_PROJ_LIB=yes
 else
   FOUND_PROJ_LIB=no
@@ -19976,7 +19976,7 @@ fi
 
     if test "$FOUND_PROJ_LIB" = "yes"; then
         FOUND_PROJ6=yes
-        $as_echo "Found PROJ 5/6 library libproj"
+        $as_echo "Found PROJ library libproj from version 6.1 or later"
     else
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pj_init_plus in -lproj" >&5
 $as_echo_n "checking for pj_init_plus in -lproj... " >&6; }
@@ -20022,7 +20022,7 @@ fi
 
         if test "$FOUND_PROJ_LIB" = "yes"; then
             FOUND_PROJ4=yes
-            $as_echo "Found PROJ 4 library libproj"
+            $as_echo "Found PROJ library libproj with PROJ4 api available"
         fi
     fi
     if test "$FOUND_PROJ_LIB" = "no"; then
@@ -20033,9 +20033,9 @@ fi
 fi
 if test "$FOUND_PROJ_LIB" = "no" ; then
         $as_echo "Did not find PROJ library pkg-config package, looking in the other usual places..."
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_create in -lproj" >&5
-$as_echo_n "checking for proj_create in -lproj... " >&6; }
-if ${ac_cv_lib_proj_proj_create+:} false; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_normalize_for_visualization in -lproj" >&5
+$as_echo_n "checking for proj_normalize_for_visualization in -lproj... " >&6; }
+if ${ac_cv_lib_proj_proj_normalize_for_visualization+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -20049,27 +20049,27 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char proj_create ();
+char proj_normalize_for_visualization ();
 int
 main ()
 {
-return proj_create ();
+return proj_normalize_for_visualization ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_proj_proj_create=yes
+  ac_cv_lib_proj_proj_normalize_for_visualization=yes
 else
-  ac_cv_lib_proj_proj_create=no
+  ac_cv_lib_proj_proj_normalize_for_visualization=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_create" >&5
-$as_echo "$ac_cv_lib_proj_proj_create" >&6; }
-if test "x$ac_cv_lib_proj_proj_create" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_normalize_for_visualization" >&5
+$as_echo "$ac_cv_lib_proj_proj_normalize_for_visualization" >&6; }
+if test "x$ac_cv_lib_proj_proj_normalize_for_visualization" = xyes; then :
   FOUND_PROJ_LIB=yes
 else
   FOUND_PROJ_LIB=no
@@ -20077,7 +20077,7 @@ fi
 
     if test "$FOUND_PROJ_LIB" = "yes"; then
       FOUND_PROJ6=yes
-      $as_echo "Found PROJ 5/6 library libproj"
+      $as_echo "Found PROJ library libproj from version 6.1 or later"
     else
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pj_init_plus in -lproj" >&5
 $as_echo_n "checking for pj_init_plus in -lproj... " >&6; }
@@ -20123,7 +20123,7 @@ fi
 
       if test "$FOUND_PROJ_LIB" = "yes" ; then
         FOUND_PROJ4=yes
-        $as_echo "Found PROJ 4 library libproj"
+        $as_echo "Found PROJ library libproj with PROJ4 api available"
       fi
     fi
     if test "$FOUND_PROJ_LIB" = "yes" ; then
@@ -20179,7 +20179,7 @@ fi
 FOUND_PROJ_HEADERS="no"
 if test "$FOUND_PROJ_HEADER_projh" = "yes"; then
     FOUND_PROJ_HEADERS="yes"
-  $as_echo "Found PROJ header proj.h"
+  $as_echo "Found PROJ 5/6 header proj.h"
 fi
 ac_fn_c_check_header_mongrel "$LINENO" "proj_api.h" "ac_cv_header_proj_api_h" "$ac_includes_default"
 if test "x$ac_cv_header_proj_api_h" = xyes; then :
@@ -20191,7 +20191,7 @@ fi
 
 if test "$FOUND_PROJ_HEADER_proj_apih" = "yes"; then
   FOUND_PROJ_HEADERS="yes"
-  $as_echo "Found PROJ header proj_api.h"
+  $as_echo "Found PROJ 4 header proj_api.h"
 fi
 if test "$FOUND_PROJ_HEADERS" = "no" ; then
   if test "$GOT_PROJ" = "yes" ; then
@@ -24317,9 +24317,9 @@ else
     $as_echo "Byteswapping: Disabled"
 fi
 if test $FOUND_PROJ6 = yes; then
-    $as_echo "PROJ: Using PROJ 5/6 API"
+    $as_echo "PROJ: Using PROJ library libproj with version 6.1 or later API"
 else
-    $as_echo "PROJ: Using PROJ 4 API (will not build mbsvpselect)"
+    $as_echo "PROJ: Using PROJ library libproj with version 4 API (will not build mbsvpselect)"
 fi
 
 $as_echo "libgmt_CPPFLAGS:     $libgmt_CPPFLAGS"
