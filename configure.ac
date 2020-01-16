@@ -28,7 +28,7 @@ AC_LANG(C)
 dnl Require c++11
 AX_CXX_COMPILE_STDCXX(11)
 
-AC_DEFINE(VERSION_DATE, "15 January 2020", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "16 January 2020", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -336,15 +336,15 @@ if test "$GOT_PROJ" = "yes" ; then
     AS_ECHO(["PROJ library location specified: $proj_libdir - check if libproj is there..."])
     save_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -L$proj_libdir"
-    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+    AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
     if test "$FOUND_PROJ_LIB" = "yes"; then
         FOUND_PROJ6=yes
-        AS_ECHO(["Found PROJ 5/6 library libproj"])
+        AS_ECHO(["Found PROJ library libproj from version 6.1 or later"])
     else
         AC_CHECK_LIB([proj], [pj_init_plus], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
         if test "$FOUND_PROJ_LIB" = "yes"; then
             FOUND_PROJ4=yes
-            AS_ECHO(["Found PROJ 4 library libproj"])
+            AS_ECHO(["Found PROJ library libproj with PROJ4 api available"])
         fi
     fi
     if test "$FOUND_PROJ_LIB" = "no"; then
@@ -357,15 +357,15 @@ else
     dnl Look for pkg-config PROJ package...
     AS_ECHO(["Look for pkg-config PROJ package..."])
     PKG_CHECK_MODULES([libproj], [proj], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no])
-    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+    AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
     if test "$FOUND_PROJ_LIB" = "yes"; then
         FOUND_PROJ6=yes
-        AS_ECHO(["Found PROJ 5/6 library libproj"])
+        AS_ECHO(["Found PROJ library libproj from version 6.1 or later"])
     else
         AC_CHECK_LIB([proj], [pj_init_plus], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
         if test "$FOUND_PROJ_LIB" = "yes"; then
             FOUND_PROJ4=yes
-            AS_ECHO(["Found PROJ 4 library libproj"])
+            AS_ECHO(["Found PROJ library libproj with PROJ4 api available"])
         fi
     fi
     if test "$FOUND_PROJ_LIB" = "no"; then
@@ -377,15 +377,15 @@ fi
 if test "$FOUND_PROJ_LIB" = "no" ; then
     dnl Did not find PROJ library pkg-config package, looking in the other usual places...
     AS_ECHO(["Did not find PROJ library pkg-config package, looking in the other usual places..."])
-    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no],)
+    AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no],)
     if test "$FOUND_PROJ_LIB" = "yes"; then
       FOUND_PROJ6=yes
-      AS_ECHO(["Found PROJ 5/6 library libproj"])
+      AS_ECHO(["Found PROJ library libproj from version 6.1 or later"])
     else
       AC_CHECK_LIB([proj], [pj_init_plus], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
       if test "$FOUND_PROJ_LIB" = "yes" ; then
         FOUND_PROJ4=yes
-        AS_ECHO(["Found PROJ 4 library libproj"])
+        AS_ECHO(["Found PROJ library libproj with PROJ4 api available"])
       fi
     fi
     if test "$FOUND_PROJ_LIB" = "yes" ; then
@@ -427,12 +427,12 @@ FOUND_PROJ_HEADERS="no"
 if test "$FOUND_PROJ_HEADER_projh" = "yes"; then
   dnl Found PROJ6 headers
   FOUND_PROJ_HEADERS="yes"
-  AS_ECHO(["Found PROJ header proj.h"])
+  AS_ECHO(["Found PROJ 5/6 header proj.h"])
 fi
 AC_CHECK_HEADER(proj_api.h, [FOUND_PROJ_HEADER_proj_apih=yes], [FOUND_PROJ_HEADER_proj_apih=no],)
 if test "$FOUND_PROJ_HEADER_proj_apih" = "yes"; then
   FOUND_PROJ_HEADERS="yes"
-  AS_ECHO(["Found PROJ header proj_api.h"])
+  AS_ECHO(["Found PROJ 4 header proj_api.h"])
 fi
 if test "$FOUND_PROJ_HEADERS" = "no" ; then
   if test "$GOT_PROJ" = "yes" ; then
@@ -1101,9 +1101,9 @@ else
     AS_ECHO(["Byteswapping: Disabled"])
 fi
 if test $FOUND_PROJ6 = yes; then
-    AS_ECHO(["PROJ: Using PROJ 5/6 API"])
+    AS_ECHO(["PROJ: Using PROJ library libproj with version 6.1 or later API"])
 else
-    AS_ECHO(["PROJ: Using PROJ 4 API (will not build mbsvpselect)"])
+    AS_ECHO(["PROJ: Using PROJ library libproj with version 4 API (will not build mbsvpselect)"])
 fi
 
 AS_ECHO(["libgmt_CPPFLAGS:     $libgmt_CPPFLAGS"])

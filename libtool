@@ -1,6 +1,6 @@
 #! /bin/sh
 # Generated automatically by config.status (mbsystem) 5.7.6beta24
-# Libtool was configured on host haxby.shore.mbari.org:
+# Libtool was configured on host Haxby.local:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
 # Provide generalized library-building support services.

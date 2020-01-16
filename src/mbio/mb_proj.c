@@ -47,6 +47,7 @@
 /*--------------------------------------------------------------------*/
 // If necessary use the obsolete PROJ 4 API
 #ifdef USE_PROJ4_API
+#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 
 /*--------------------------------------------------------------------*/
 
