@@ -350,9 +350,13 @@ throughout the codebase have been changed to std::isnan(), and in these cases
 the "#include <math.h>" has been replaced by "#include <cmath". The order of
 libraries in src/mbtrn/Makefile.am has been changed so that libmframe.la is
 installed before libr7kr.la (which depends on libmframe.la). With respect to
-libproj, configure.ac now checks for Proj 4 vs Proj 5/6 using proj_create() for
-Proj 5/6 and pj_init_plus() for Proj 4. This in turn sets preprocessor values
-that determine which Proj API is used bye the functions in src/mbio/mb_proj.c.
+libproj, configure.ac now checks for Proj 4 vs Proj 6 using
+proj_normalize_for_visualization() for the Proj 6 API and pj_init_plus() for
+the Proj 4 api. Since proj_normalize_for_visualization() did not get added to the
+Proj 6 API until release 6.1.0, this means that the deprecated Proj 4 api
+will continue to be used when building with Proj releases 5.0 through 6.0.
+In practice, the build system sets preprocessor values that determine at compile
+time which Proj API is used by the functions in src/mbio/mb_proj.c.
 
 Code style: Kurt Schwehr is systematically altering the code to conform to best practices and adding build tests. The tests are performed by running
     make check
