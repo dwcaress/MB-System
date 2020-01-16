@@ -896,7 +896,9 @@ int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, in
         uint32_t send_bytes=0;
         char *msg_out=NULL;
 
-        if(strcmp(msg,"REQ")==0 || strcmp(msg,"PING")==0){
+        if(strcmp(msg,"REQ")==0 ||
+           strcmp(msg,"CON")==0||
+            strcmp(msg,"PING")==0){
             msg_out=strdup("ACK");
             send_len=4;
         }else{

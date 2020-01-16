@@ -410,27 +410,33 @@ static void s_termination_handler (int signum)
 static void s_trnw_estimate_show(trn_estimate_t *self, bool verbose, uint16_t indent)
 {
     if (NULL != self) {
-        fprintf(stderr,"%*s[self      %10p]\n",indent,(indent>0?" ":""), self);
-        fprintf(stderr,"%*s[time      %10s%.3lf]\n",indent,(indent>0?" ":""),"",self->time);
-        fprintf(stderr,"%*s[x         %10s%.3lf]\n",indent,(indent>0?" ":""),"",self->x);
-        fprintf(stderr,"%*s[y         %10s%.3lf]\n",indent,(indent>0?" ":""),"",self->y);
-        fprintf(stderr,"%*s[z         %10s%.3lf]\n",indent,(indent>0?" ":""),"",self->z);
+        fprintf(stderr,"%*s[self        %15p]\n",indent,(indent>0?" ":""), self);
+        fprintf(stderr,"%*s[time        %15.3lf]\n",indent,(indent>0?" ":""),self->time);
+        fprintf(stderr,"%*s[x           %15.3lf]\n",indent,(indent>0?" ":""),self->x);
+        fprintf(stderr,"%*s[y           %15.3lf]\n",indent,(indent>0?" ":""),self->y);
+        fprintf(stderr,"%*s[z           %15.3lf]\n",indent,(indent>0?" ":""),self->z);
         for(int i=0;i<4;i++)
-        fprintf(stderr,"%*s[cov[%d]   %10s%.3lf]\n",indent,(indent>0?" ":""),i,"",self->cov[i]);
+        fprintf(stderr,"%*s[cov[%d]     %15.3lf]\n",indent,(indent>0?" ":""),i,self->cov[i]);
     }
 }
 
 static void s_trnw_offset_show(trn_offset_pub_t *self, bool verbose, uint16_t indent)
 {
     if (NULL != self) {
-        fprintf(stderr,"%*s[self           %10p]\n",indent,(indent>0?" ":""), self);
+        fprintf(stderr,"%*s[self        %15p]\n",indent,(indent>0?" ":""), self);
         fprintf(stderr,"%*s[ pt ]\n",indent,(indent>0?" ":""));
         s_trnw_estimate_show(&self->est[0],verbose,indent+1);
         fprintf(stderr,"%*s[ mle ]\n",indent,(indent>0?" ":""));
         s_trnw_estimate_show(&self->est[1],verbose,indent+1);
         fprintf(stderr,"%*s[ mse ]\n",indent,(indent>0?" ":""));
         s_trnw_estimate_show(&self->est[2],verbose,indent+1);
-        fprintf(stderr,"%*s[reinit         %10d]\n",indent,(indent>0?" ":""), self->reinit_count);
+        fprintf(stderr,"%*s[reinit       %15d]\n",indent,(indent>0?" ":""), self->reinit_count);
+        fprintf(stderr,"%*s[reinit_t     %15.3lf]\n",indent,(indent>0?" ":""),self->reinit_tlast);
+        fprintf(stderr,"%*s[filt_state   %15d]\n",indent,(indent>0?" ":""), self->filter_state);
+        fprintf(stderr,"%*s[success      %15d]\n",indent,(indent>0?" ":""), self->success);
+        fprintf(stderr,"%*s[cycle        %15d]\n",indent,(indent>0?" ":""), self->cycle);
+        fprintf(stderr,"%*s[mb1_time     %15.3lf]\n",indent,(indent>0?" ":""),self->mb1_time);
+        fprintf(stderr,"%*s[update_time  %15.3lf]\n",indent,(indent>0?" ":""),self->update_time);
     }
 }
 
@@ -551,7 +557,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                         }
                         hbeat_counter++;
                         PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"hbeat[%d/%d]\n",hbeat_counter,cfg->hbeat));
-                        if ( (hbeat_counter!=0) && (hbeat_counter%cfg->hbeat==0)) {
+                        if ( (hbeat_counter!=0) &&  (cfg->hbeat>0) && (hbeat_counter%cfg->hbeat==0)) {
                             state=TRNSM_HBEAT_EXPIRED;
                         }
                     }else{

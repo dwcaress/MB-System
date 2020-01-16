@@ -221,9 +221,25 @@ typedef struct trn_estimate_s{
 }trn_estimate_t;
 
 typedef struct trn_offset_pub_s{
+    // sync bytes (see NW_PUB_SYNC)
     uint32_t sync;
+    // TRN estimates
+    // 0:pose_t 1:mle 2:mmse
     trn_estimate_t est[3];
+    // number of reinits
     int reinit_count;
+    // time of last reinint (not implemented)
+    double reinit_tlast;
+    // TRN filter state
+    int filter_state;
+    // last measurement successful
+    int success;
+    // MB1 cycle counter
+    int cycle;
+    // MB1 timestamp
+    double mb1_time;
+    // TRN update time (taken in mbtrnpp)
+    double update_time;
 }trn_offset_pub_t;
 #pragma pack(pop)
 
@@ -235,6 +251,11 @@ typedef struct trn_update_s{
     pt_cdata_t *mse_dat;
     int reinit_count;
     double reinit_tlast;
+    int filter_state;
+    int success;
+    int cycle;
+    double mb1_time;
+    double update_time;
 }trn_update_t;
 
 typedef struct mt_cdata_s{

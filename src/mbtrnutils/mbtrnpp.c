@@ -347,7 +347,7 @@ int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose);
 int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, bool verbose);
 int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg);
 int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **mt_out, trn_config_t *cfg);
-int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, pt_cdata_t **pt_out, pt_cdata_t **mle_out, pt_cdata_t **mse_out);
+int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, trn_update_t *pstate);
 int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg);
 
 int mbtrnpp_trn_pub_ostream(trn_update_t *update, FILE *stream);
@@ -2631,7 +2631,7 @@ char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int inden
 {
     if(NULL!=dest && NULL!=update){
         char *cp=dest;
-        snprintf(dest,len-1,"%*sMLE: %.2lf,%.4lf,%.4lf,%.4lf\n%*sMSE: %.2lf,%.4lf,%.4lf,%.4lf\n%*sCOV: %.2lf,%.2lf,%.2lf\n%*s RI: %d\n",
+        snprintf(dest,len-1,"%*sMLE: %.2lf,%.4lf,%.4lf,%.4lf\n%*sMSE: %.2lf,%.4lf,%.4lf,%.4lf\n%*sCOV: %.2lf,%.2lf,%.2lf\n%*s RI: %d filter_state: %d success: %d cycle: %d mb1_time: %0.3lf update_time: %0.3lf\n",
                  indent,"",
                  update->mle_dat->time,
                  (update->mle_dat->x-update->pt_dat->x),
@@ -2647,7 +2647,12 @@ char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int inden
                  sqrt(update->mse_dat->covariance[2]),
                  sqrt(update->mse_dat->covariance[5]),
                  indent,"",
-                 update->reinit_count
+                 update->reinit_count,
+                 update->filter_state,
+                 update->success,
+                 update->cycle,
+                 update->mb1_time,
+                 update->update_time
                  );
     }
     return dest;
@@ -2730,7 +2735,7 @@ int mbtrnpp_trn_pub_olog(trn_update_t *update,
                          sqrt(update->mse_dat->covariance[0]),
                          sqrt(update->mse_dat->covariance[2]),
                          sqrt(update->mse_dat->covariance[5]));
-        mlog_tprintf(log_id,"trn_reinit_flag,%d\n",update->reinit_count);
+        mlog_tprintf(log_id,"trn_reinit_flag,%d,fstate,%d,success,%d,cycle,%d,mb1_time,%0.3lf,update_time, %0.3lf\n",update->reinit_count,update->filter_state,update->success,update->cycle,update->cycle,update->mb1_time,update->update_time);
     }
 
     return retval;
@@ -2764,7 +2769,13 @@ int mbtrnpp_trn_pub_osocket(trn_update_t *update,
                         {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
                     }
                 },
-                update->reinit_count
+                update->reinit_count,
+                update->reinit_tlast,
+                update->filter_state,
+                update->success,
+                update->cycle,
+                update->mb1_time,
+                update->update_time
             };
 
             if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
@@ -2900,39 +2911,39 @@ int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, bool verbose)
 }
 
 /*--------------------------------------------------------------------*/
+int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, trn_update_t *pstate) {
+    int retval = -1;
+    uint32_t uret = 0;
+    bool meas_valid = false;
+    wposet_t *mle = wposet_dnew();
+    wposet_t *mse = wposet_dnew();
 
-int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, pt_cdata_t **pt_out, pt_cdata_t **mle_out, pt_cdata_t **mse_out) {
-  int retval = -1;
-  uint32_t uret = 0;
-  bool meas_valid = false;
-  wposet_t *mle = wposet_dnew();
-  wposet_t *mse = wposet_dnew();
+    if ( (NULL != self) && (NULL != pt) && (NULL != pstate)) {
 
-  if (NULL != self && NULL != pt && NULL != mle_out && NULL != mse_out) {
+        wtnav_estimate_pose(self, mle, 1);
+        wtnav_estimate_pose(self, mse, 2);
 
-    wtnav_estimate_pose(self, mle, 1);
-    wtnav_estimate_pose(self, mse, 2);
+        //        fprintf(stderr,"%s:%d MLE,MSE\n",__FUNCTION__,__LINE__);
+        //        wposet_show(mle,true,5);
+        //        fprintf(stderr,"\n");
+        //        wposet_show(mse,true,5);
 
-    //        fprintf(stderr,"%s:%d MLE,MSE\n",__FUNCTION__,__LINE__);
-    //        wposet_show(mle,true,5);
-    //        fprintf(stderr,"\n");
-    //        wposet_show(mse,true,5);
-
-    if (wtnav_last_meas_successful(self)) {
-      wposet_pose_to_cdata(pt_out, pt);
-      wposet_pose_to_cdata(mle_out, mle);
-      wposet_pose_to_cdata(mse_out, mse);
-      retval = 0;
+        if (wtnav_last_meas_successful(self)) {
+            wposet_pose_to_cdata(&pstate->pt_dat, pt);
+            wposet_pose_to_cdata(&pstate->mle_dat, mle);
+            wposet_pose_to_cdata(&pstate->mse_dat, mse);
+            pstate->success=1;
+            retval = 0;
+        }
+        else {
+            PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "Last Meas Invalid\n"));
+            mlog_tprintf(trn_ulog_id,"ERR: last meas invalid\n");
+        }
+        wposet_destroy(mle);
+        wposet_destroy(mse);
     }
-    else {
-      PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "Last Meas Invalid\n"));
-        mlog_tprintf(trn_ulog_id,"ERR: last meas invalid\n");
-    }
-    wposet_destroy(mle);
-    wposet_destroy(mse);
-  }
 
-  return retval;
+    return retval;
 }
 
 /*--------------------------------------------------------------------*/
@@ -3070,7 +3081,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 
                 wmeast_t *mt = NULL;
                 wposet_t *pt = NULL;
-                trn_update_t trn_state={NULL,NULL,NULL,0},*pstate=&trn_state;
+                trn_update_t trn_state={NULL,NULL,NULL,0,0,0,0,0.0,0.0},*pstate=&trn_state;
 
                 if(NULL!=tnav && NULL!=mb1 && NULL!=cfg){
 
@@ -3085,7 +3096,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                         // get TRN bias estimates
                         MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_BIASEST_XT], mtime_dtime());
 
-                        test=mbtrnpp_trn_get_bias_estimates(tnav, pt, &pstate->pt_dat, &pstate->mle_dat, &pstate->mse_dat);
+                        test=mbtrnpp_trn_get_bias_estimates(tnav, pt, pstate);
 
                         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_BIASEST_XT], mtime_dtime());
 
@@ -3096,6 +3107,10 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                                 MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
 
                                 pstate->reinit_count = wtnav_get_num_reinits(tnav);
+                                pstate->filter_state = wtnav_get_filter_state(tnav);
+                                pstate->cycle=mb1_count;
+                                pstate->mb1_time=mb1->sounding.ts;
+                                pstate->update_time=mtime_etime();
 
                                 MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
 
@@ -3858,3 +3873,4 @@ int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error) {
   /* return */
   return (status);
 }
+
