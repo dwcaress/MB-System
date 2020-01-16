@@ -19,7 +19,7 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.6beta23],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.7.6beta24],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
@@ -28,7 +28,7 @@ AC_LANG(C)
 dnl Require c++11
 AX_CXX_COMPILE_STDCXX(11)
 
-AC_DEFINE(VERSION_DATE, "11 January 2020", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "15 January 2020", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -336,15 +336,15 @@ if test "$GOT_PROJ" = "yes" ; then
     AS_ECHO(["PROJ library location specified: $proj_libdir - check if libproj is there..."])
     save_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -L$proj_libdir"
-    AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
     if test "$FOUND_PROJ_LIB" = "yes"; then
         FOUND_PROJ6=yes
-        AS_ECHO(["Found PROJ 6 library libproj"])
+        AS_ECHO(["Found PROJ 5/6 library libproj"])
     else
         AC_CHECK_LIB([proj], [pj_init_plus], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
         if test "$FOUND_PROJ_LIB" = "yes"; then
             FOUND_PROJ4=yes
-            AS_ECHO(["Found PROJ 4/5 library libproj"])
+            AS_ECHO(["Found PROJ 4 library libproj"])
         fi
     fi
     if test "$FOUND_PROJ_LIB" = "no"; then
@@ -357,15 +357,15 @@ else
     dnl Look for pkg-config PROJ package...
     AS_ECHO(["Look for pkg-config PROJ package..."])
     PKG_CHECK_MODULES([libproj], [proj], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no])
-    AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
     if test "$FOUND_PROJ_LIB" = "yes"; then
         FOUND_PROJ6=yes
-        AS_ECHO(["Found PROJ 6 library libproj"])
+        AS_ECHO(["Found PROJ 5/6 library libproj"])
     else
         AC_CHECK_LIB([proj], [pj_init_plus], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
         if test "$FOUND_PROJ_LIB" = "yes"; then
             FOUND_PROJ4=yes
-            AS_ECHO(["Found PROJ 4/5 library libproj"])
+            AS_ECHO(["Found PROJ 4 library libproj"])
         fi
     fi
     if test "$FOUND_PROJ_LIB" = "no"; then
@@ -377,15 +377,15 @@ fi
 if test "$FOUND_PROJ_LIB" = "no" ; then
     dnl Did not find PROJ library pkg-config package, looking in the other usual places...
     AS_ECHO(["Did not find PROJ library pkg-config package, looking in the other usual places..."])
-    AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no],)
+    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no],)
     if test "$FOUND_PROJ_LIB" = "yes"; then
       FOUND_PROJ6=yes
-      AS_ECHO(["Found PROJ 6 library libproj"])
+      AS_ECHO(["Found PROJ 5/6 library libproj"])
     else
       AC_CHECK_LIB([proj], [pj_init_plus], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
       if test "$FOUND_PROJ_LIB" = "yes" ; then
         FOUND_PROJ4=yes
-        AS_ECHO(["Found PROJ 4/5 library libproj"])
+        AS_ECHO(["Found PROJ 4 library libproj"])
       fi
     fi
     if test "$FOUND_PROJ_LIB" = "yes" ; then
@@ -416,8 +416,8 @@ save_CPPFLAGS=$CPPFLAGS
 save_CFLAGS=$CFLAGS
 if test "$FOUND_PROJ4" = "yes" ; then
     libproj_CPPFLAGS="$libproj_CPPFLAGS -DUSE_PROJ4_API"
-    dnl Only have PROJ4 without geodesic calculations, will not build mbsvpselect...
-    AS_ECHO(["Only have PROJ4 without geodesic calculations, will not build mbsvpselect..."])
+    dnl Only have PROJ 4 without geodesic calculations, will not build mbsvpselect...
+    AS_ECHO(["Only have PROJ 4 without geodesic calculations, will not build mbsvpselect..."])
 fi
 AM_CONDITIONAL([BUILD_MBSVPSELECT], [test $FOUND_PROJ6 = yes])
 CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
@@ -1101,9 +1101,9 @@ else
     AS_ECHO(["Byteswapping: Disabled"])
 fi
 if test $FOUND_PROJ6 = yes; then
-    AS_ECHO(["PROJ: Using PROJ 6 API"])
+    AS_ECHO(["PROJ: Using PROJ 5/6 API"])
 else
-    AS_ECHO(["PROJ: Using PROJ 4/5 API (will not build mbsvpselect)"])
+    AS_ECHO(["PROJ: Using PROJ 4 API (will not build mbsvpselect)"])
 fi
 
 AS_ECHO(["libgmt_CPPFLAGS:     $libgmt_CPPFLAGS"])

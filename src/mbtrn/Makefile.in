@@ -453,25 +453,25 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-lib_LTLIBRARIES = libr7kr.la libmframe.la 
+lib_LTLIBRARIES = libmframe.la libr7kr.la
 include_HEADERS = \
-				mframe/src/mframe.h \
-				mframe/src/mcbuf.h \
-                mframe/src/msocket.h \
-                mframe/src/mthread.h \
-				mframe/src/mfile.h \
-				mframe/src/mtime.h\
-                mframe/src/medebug.h \
-                mframe/src/mmdebug.h \
-				mframe/src/merror.h \
-				mframe/src/mlog.h \
-                mframe/src/mlist.h \
-                mframe/src/mstats.h \
-                utils/mconfig.h \
-                utils/mb1_msg.h \
-                utils/mb71_msg.h \
-                r7kr/r7k-reader.h \
-				r7kr/r7kc.h
+        mframe/src/mframe.h \
+        mframe/src/mcbuf.h \
+        mframe/src/msocket.h \
+        mframe/src/mthread.h \
+        mframe/src/mfile.h \
+        mframe/src/mtime.h\
+        mframe/src/medebug.h \
+        mframe/src/mmdebug.h \
+        mframe/src/merror.h \
+        mframe/src/mlog.h \
+        mframe/src/mlist.h \
+        mframe/src/mstats.h \
+        utils/mconfig.h \
+        utils/mb1_msg.h \
+        utils/mb71_msg.h \
+        r7kr/r7k-reader.h \
+        r7kr/r7kc.h
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
@@ -486,27 +486,27 @@ AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/ut
 
 libmframe_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmframe_la_SOURCES = mframe/src/mframe.c \
-				mframe/src/mcbuf.c \
-				mframe/src/msocket.c \
-                mframe/src/mthread.c \
-                mframe/src/mfile.c \
-                mframe/src/mtime.c\
-                mframe/src/mmdebug.c \
-                mframe/src/merror.c \
-                mframe/src/mlog.c \
-                mframe/src/mlist.c \
-                mframe/src/mstats.c \
-                mframe/src/mswap.c \
-                mframe/src/mutils.c \
-				utils/mconfig.c
+        mframe/src/mcbuf.c \
+        mframe/src/msocket.c \
+        mframe/src/mthread.c \
+        mframe/src/mfile.c \
+        mframe/src/mtime.c\
+        mframe/src/mmdebug.c \
+        mframe/src/merror.c \
+        mframe/src/mlog.c \
+        mframe/src/mlist.c \
+        mframe/src/mstats.c \
+        mframe/src/mswap.c \
+        mframe/src/mutils.c \
+        utils/mconfig.c
 
 libmframe_la_LIBADD = 
 libr7kr_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libr7kr_la_SOURCES = utils/mconfig.c \
-				utils/mb1_msg.c \
-				utils/mb71_msg.c \
-                r7kr/r7k-reader.c \
-                r7kr/r7kc.c
+        utils/mb1_msg.c \
+        utils/mb71_msg.c \
+        r7kr/r7k-reader.c \
+        r7kr/r7kc.c
 
 libr7kr_la_LIBADD = libmframe.la -lpthread
 stream7k_SOURCES = utils/stream7k.c
