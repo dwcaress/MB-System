@@ -104,34 +104,8 @@ static char value_text[MB_PATH_MAXLINE];
 
 #include "creation-c.h"
 
-/*
- * Macros to make code look nicer between ANSI and K&R.
- */
-#ifndef ARGLIST
-#if (NeedFunctionPrototypes == 0)
-#define PROTOTYPE(p) ()
-#define ARGLIST(p) p
-#define ARG(a, b) a b;
-#define GRA(a, b) a b;
-#define UARG(a, b) a b;
-#define GRAU(a, b) a b;
-#else
-#define PROTOTYPE(p) p
-#define ARGLIST(p)	(
-#define ARG(a, b) a b,
-#define GRA(a, b)	a b)
-#ifdef __cplusplus
-#define UARG(a, b) a,
-#define GRAU(a, b)      a)
-#else
-#define UARG(a, b) a b,
-#define GRAU(a, b)      a b)
-#endif
-#endif
-#endif
-
-Widget BxFindTopShell PROTOTYPE((Widget));
-WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
+Widget BxFindTopShell(Widget);
+WidgetList BxWidgetIdsFromNames(Widget, char *, char *);
 
 /*      Function Name:	BxExitCB
  *
@@ -148,7 +122,7 @@ WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
 /*---------------------------------------------------------------------------------------*/
 
 /* ARGSUSED */
-void BxExitCB ARGLIST((w, client, call)) UARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
+void BxExitCB(Widget w, XtPointer client, XtPointer call) {
 	long exitValue = EXIT_FAILURE;
 	exit(exitValue);
 }

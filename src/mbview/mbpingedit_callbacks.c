@@ -86,36 +86,8 @@
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
 
-/*------------------------------------------------------------------------------*/
-/* code used in original BX application, not used for library */
-/*
- * Macros to make code look nicer between ANSI and K&R.
- */
-#ifndef ARGLIST
-#if (NeedFunctionPrototypes == 0)
-#define PROTOTYPE(p) ()
-#define ARGLIST(p) p
-#define ARG(a, b) a b;
-#define GRA(a, b) a b;
-#define UARG(a, b) a b;
-#define GRAU(a, b) a b;
-#else
-#define PROTOTYPE(p) p
-#define ARGLIST(p)	(
-#define ARG(a, b) a b,
-#define GRA(a, b)	a b)
-#ifdef __cplusplus
-#define UARG(a, b) a,
-#define GRAU(a, b)      a)
-#else
-#define UARG(a, b) a b,
-#define GRAU(a, b)      a b)
-#endif
-#endif
-#endif
-
-Widget BxFindTopShell PROTOTYPE((Widget));
-WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
+Widget BxFindTopShell(Widget);
+WidgetList BxWidgetIdsFromNames(Widget, char *, char *);
 
 /*------------------------------------------------------------------------------*/
 /* code below used for mbpingedit library                                       */
@@ -327,7 +299,7 @@ void do_mbpingedit_flag_view(Widget w, XtPointer client_data, XtPointer call_dat
 /* ARGSUSED */
 /*------------------------------------------------------------------------------*/
 
-void BxManageCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
+void BxManageCB(Widget w, XtPointer client, XtPointer call) {
 	WidgetList widgets;
 	int i;
 
@@ -364,7 +336,7 @@ void BxManageCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, client)
 /* ARGSUSED */
 /*------------------------------------------------------------------------------*/
 
-void BxUnmanageCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
+void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
 	WidgetList widgets;
 	int i;
 
