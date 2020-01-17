@@ -693,7 +693,7 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	static bool line_save_flag = false;
-	static char raw_line[MBF_HSATLRAW_MAXLINE] = "\0";
+	static char raw_line[MBF_HSATLRAW_MAXLINE] = "";
 	static int type = MBF_HSATLRAW_NONE;
 	static int shift = 0;
 
