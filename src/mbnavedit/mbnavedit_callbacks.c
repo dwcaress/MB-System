@@ -67,38 +67,12 @@
 #include <string.h>
 #include <ctype.h>
 
-/*
- * Macros to make code look nicer between ANSI and K&R.
- */
-#ifndef ARGLIST
-#if (NeedFunctionPrototypes == 0)
-#define PROTOTYPE(p) ()
-#define ARGLIST(p) p
-#define ARG(a, b) a b;
-#define GRA(a, b) a b;
-#define UARG(a, b) a b;
-#define GRAU(a, b) a b;
-#else
-#define PROTOTYPE(p) p
-#define ARGLIST(p)	(
-#define ARG(a, b) a b,
-#define GRA(a, b)	a b)
-#ifdef __cplusplus
-#define UARG(a, b) a,
-#define GRAU(a, b)      a)
-#else
-#define UARG(a, b) a b,
-#define GRAU(a, b)      a b)
-#endif
-#endif
-#endif
-
 #ifndef FIXED
 #define FIXED "fixed"
 #endif
 
-Widget BxFindTopShell PROTOTYPE((Widget));
-WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
+Widget BxFindTopShell(Widget);
+WidgetList BxWidgetIdsFromNames(Widget, char *, char *);
 
 /*--------------------------------------------------------------------*/
 
@@ -164,7 +138,7 @@ int selected = 0; /* indicates an input file is selected */
  *			XtPointer	call:	the call data (unused).
  */
 
-void BxExitCB ARGLIST((w, client, call)) UARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
+void BxExitCB(Widget w, XtPointer client, XtPointer call) {
 	int status;
 	long exitValue = EXIT_FAILURE;
 
@@ -192,7 +166,7 @@ void BxExitCB ARGLIST((w, client, call)) UARG(Widget, w) ARG(XtPointer, client) 
  *		       	shell from which all other widgets are descended.
  */
 
-void BxManageCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
+void BxManageCB(Widget w, XtPointer client, XtPointer call) {
 	WidgetList widgets;
 	int i;
 
@@ -226,7 +200,7 @@ void BxManageCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, client)
  *		       	shell from which all other widgets are descended.
  */
 
-void BxUnmanageCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
+void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
 	WidgetList widgets;
 	int i;
 
@@ -270,7 +244,7 @@ void BxUnmanageCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, clien
  */
 #include <X11/StringDefs.h>
 
-void BxSetValuesCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
+void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
 #define CHUNK 512
 
 	Boolean first = True;
