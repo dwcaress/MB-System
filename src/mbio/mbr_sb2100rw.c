@@ -882,7 +882,7 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
-	static char raw_line[MBF_SB2100RW_MAXLINE] = "\0";
+	static char raw_line[MBF_SB2100RW_MAXLINE] = "";
 	static int type = MBF_SB2100RW_NONE;
 
 	if (verbose >= 2) {

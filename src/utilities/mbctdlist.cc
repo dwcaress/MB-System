@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
 	int decimate = 1;
 	char read_file[MB_PATH_MAXLINE] = "datalist.mb-1";
 	bool segment = false;
-	char segment_tag[MB_PATH_MAXLINE] = "\0";
+	char segment_tag[MB_PATH_MAXLINE] = "";
 
 	{
 		bool errflg = false;
