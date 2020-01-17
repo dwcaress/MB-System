@@ -14,18 +14,17 @@ Last Updated January 16, 2020
 
 MB-System Copyright (C) 1993-2020 by
 
-David W. Caress  
-(caress@mbari.org)  
-Monterey Bay Aquarium Research Institute  
+David W. Caress
+(caress@mbari.org)
+Monterey Bay Aquarium Research Institute
 Moss Landing, CA 95039
 
-Dale N. Chayes (dale@ccom.unh.edu)  
-Center for Coastal & Ocean Mapping/Joint Hydrographic Center  
-University of New Hampshire  
+Dale N. Chayes (dale@ccom.unh.edu)
+Center for Coastal & Ocean Mapping/Joint Hydrographic Center
+University of New Hampshire
 Durham, New Hampshire 03824
-  
-All Rights Reserved  
-All Wrongs Remembered
+
+All Rights Reserved
 
 -------------------------------------------------------------------------------
 
@@ -44,11 +43,11 @@ https://www.gnu.org/licenses/gpl-3.0.en.html
 
 The MB-System distribution includes some source code derived from packages that
 are distributed separately and have been authored by programmers other than the
-MB-System team. This includes:  
+MB-System team. This includes:
 
-* The Generic Sensor Format (GSF) library source located in mbsystem/src/gsf. The GSF package is maintained and distributed by Leidos Corporation under contract to the United States Naval Oceanographic Office. The current GSF source distribution is made available by Leidos at https://www.leidos.com/products/ocean-marine#gsf using the LGPLv2.1 license.  
-* The SURF API (SAPI) library source located in mbsystem/src/surf. The SAPI package was released under the GNU General Public License by Atlas Hydrographic in 2001.  
-* The MR1PR library source located in mbsystem/src/mr1pr. This package was openly released by primary author Roger Davis of the Hawaii Mapping Research Group in 2000. 
+* The Generic Sensor Format (GSF) library source located in mbsystem/src/gsf. The GSF package is maintained and distributed by Leidos Corporation under contract to the United States Naval Oceanographic Office. The current GSF source distribution is made available by Leidos at https://www.leidos.com/products/ocean-marine#gsf using the LGPLv2.1 license.
+* The SURF API (SAPI) library source located in mbsystem/src/surf. The SAPI package was released under the GNU General Public License by Atlas Hydrographic in 2001.
+* The MR1PR library source located in mbsystem/src/mr1pr. This package was openly released by primary author Roger Davis of the Hawaii Mapping Research Group in 2000.
 * The mb_mergesort() function found in mbsystem/src/mbio/mb_esf.c derives from the GNU-Darwin Distribution. This code is released under both the Apple Public Source License Version 1.1 and the BSD license, with original copyright by the Regents of the University of California.
 
 The MB-System does not come with any warranties, nor is it guaranteed to work
