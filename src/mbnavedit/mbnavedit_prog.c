@@ -263,7 +263,7 @@ int mbnavedit_init_globals() {
 	mean_time_window = 100;
 	drift_lon = 0;
 	drift_lat = 0;
-	strcpy(ifile, "\0");
+	strcpy(ifile, "");
 	plot_width = DEFAULT_PLOT_WIDTH;
 	plot_height = DEFAULT_PLOT_HEIGHT;
 	number_plots = 0;
@@ -343,7 +343,7 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
-	strcpy(ifile, "\0");
+	strcpy(ifile, "");
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:NnPpXx")) != -1)

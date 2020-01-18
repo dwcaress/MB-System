@@ -115,7 +115,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 			ssacrosstrack[i] = 0.0;
 			ssalongtrack[i] = 0.0;
 		}
-		strcpy(comment, "\0");
+		strcpy(comment, "");
 
 		/* get the data */
 		status =

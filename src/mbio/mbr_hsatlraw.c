@@ -377,7 +377,7 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error) {
 		}
 
 		/* comment (LDEOCOMM) */
-		strncpy(data->comment, "\0", MBF_HSATLRAW_MAXLINE);
+		strncpy(data->comment,  "", MBF_HSATLRAW_MAXLINE);
 	}
 
 	/* assume success */
@@ -927,7 +927,7 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 	bool done = false;
 	do {
 		/* read next line in file */
-		strncpy(line, "\0", MBF_HSATLRAW_MAXLINE);
+		strncpy(line, "", MBF_HSATLRAW_MAXLINE);
 		result = fgets(line, MBF_HSATLRAW_MAXLINE, mbfp);
 
 		/* check for eof */

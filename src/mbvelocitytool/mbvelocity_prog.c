@@ -236,9 +236,9 @@ int mbvt_init(int argc, char **argv) {
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 	nbeams = 16;
-	strcpy(ifile, "\0");
-	strcpy(sfile, "\0");
-	strcpy(wfile, "\0");
+	strcpy(ifile, "");
+	strcpy(sfile, "");
+	strcpy(wfile, "");
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "B:b:E:e:F:f:I:i:S:s:W:w:VvHh")) != -1)
@@ -381,7 +381,7 @@ int mbvt_quit() {
 	if (edit == true) {
 		edit = false;
 		profile->n = 0;
-		strcpy(profile->name, "\0");
+		strcpy(profile->name, "");
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_x, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_y, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->depth, &error);
@@ -585,7 +585,7 @@ int mbvt_open_edit_profile(char *file) {
 	if (edit == true) {
 		edit = false;
 		profile->n = 0;
-		strcpy(profile->name, "\0");
+		strcpy(profile->name, "");
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_x, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_y, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->depth, &error);
@@ -631,7 +631,7 @@ int mbvt_open_edit_profile(char *file) {
 		fprintf(stderr, "\nUnable to Open Velocity Profile File <%s> for reading\n", file);
 		return (status);
 	}
-	strncpy(buffer, "\0", sizeof(buffer));
+	strncpy(buffer, "", sizeof(buffer));
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer) {
 		if (buffer[0] != '#') {
 			sscanf(buffer, "%lf %lf", &(profile->depth[profile->n]), &(profile->velocity[profile->n]));
@@ -644,7 +644,7 @@ int mbvt_open_edit_profile(char *file) {
 			}
 			profile->n++;
 		}
-		strncpy(buffer, "\0", sizeof(buffer));
+		strncpy(buffer, "", sizeof(buffer));
 	}
 	fclose(fp);
 
@@ -695,7 +695,7 @@ int mbvt_new_edit_profile() {
 	if (edit == true) {
 		edit = false;
 		profile->n = 0;
-		strcpy(profile->name, "\0");
+		strcpy(profile->name, "");
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_x, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_y, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->depth, &error);
@@ -1116,7 +1116,7 @@ int mbvt_open_display_profile(char *file) {
 		fprintf(stderr, "\nUnable to Open Velocity Profile File <%s> for reading\n", file);
 		return (status);
 	}
-	strncpy(buffer, "\0", sizeof(buffer));
+	strncpy(buffer, "", sizeof(buffer));
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer) {
 		if (buffer[0] != '#') {
 			sscanf(buffer, "%lf %lf", &(profile->depth[profile->n]), &(profile->velocity[profile->n]));
@@ -1129,7 +1129,7 @@ int mbvt_open_display_profile(char *file) {
 			}
 			profile->n++;
 		}
-		strncpy(buffer, "\0", sizeof(buffer));
+		strncpy(buffer, "", sizeof(buffer));
 	}
 	fclose(fp);
 
@@ -1217,7 +1217,7 @@ int mbvt_delete_display_profile(int select) {
 		profile = &profile_display[select];
 		profile->n = 0;
 		profile->nalloc = 0;
-		strcpy(profile->name, "\0");
+		strcpy(profile->name, "");
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->depth, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->velocity, &error);
 

@@ -1228,25 +1228,25 @@ int main(int argc, char **argv) {
 			sprintf(comment, "  filter iterations:            %d", contrast_iter);
 			status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		}
-		strncpy(comment, "\0", 256);
+		strncpy(comment, "", 256);
 		sprintf(comment, "Control Parameters:");
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-		strncpy(comment, "\0", 256);
+		strncpy(comment, "", 256);
 		sprintf(comment, "  MBIO data format:   %d", format);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-		strncpy(comment, "\0", 256);
+		strncpy(comment, "", 256);
 		sprintf(comment, "  Input file:         %s", file);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-		strncpy(comment, "\0", 256);
+		strncpy(comment, "", 256);
 		sprintf(comment, "  Output file:        %s", ofile);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-		strncpy(comment, "\0", 256);
+		strncpy(comment, "", 256);
 		sprintf(comment, "  Longitude flip:     %d", lonflip);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-		strncpy(comment, "\0", 256);
+		strncpy(comment, "", 256);
 		sprintf(comment, "  Data kind:         %d", datakind);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-		strncpy(comment, "\0", 256);
+		strncpy(comment, "", 256);
 		sprintf(comment, " ");
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 

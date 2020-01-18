@@ -1492,7 +1492,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "\0", 25);
+    strncpy(date, "", 25);
     right_now = time((time_t *)0);
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
@@ -1569,7 +1569,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "\0", 25);
+    strncpy(date, "", 25);
     right_now = time((time_t *)0);
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
@@ -1647,7 +1647,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "\0", 25);
+    strncpy(date, "", 25);
     right_now = time((time_t *)0);
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
@@ -1725,7 +1725,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "\0", 25);
+    strncpy(date, "", 25);
     right_now = time((time_t *)0);
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
@@ -1802,7 +1802,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "\0", 25);
+    strncpy(date, "", 25);
     right_now = time((time_t *)0);
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
@@ -1879,7 +1879,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "\0", 25);
+    strncpy(date, "", 25);
     right_now = time((time_t *)0);
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
@@ -1955,7 +1955,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "\0", 25);
+    strncpy(date, "", 25);
     right_now = time((time_t *)0);
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';

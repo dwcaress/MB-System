@@ -469,7 +469,7 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
   if (argc > 0)
     strncpy(program_name, argv[0], MB_PATH_MAXLINE);
   else
-    strcpy(program_name, "\0");
+    strcpy(program_name, "");
   const time_t right_now = time((time_t *)0);
   char date[32];
   strcpy(date, ctime(&right_now));
