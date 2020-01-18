@@ -215,7 +215,7 @@ int mbr_zero_sb2100rw(int verbose, void *data_ptr, int *error) {
 		}
 
 		/* comment (TR) */
-		strncpy(data->comment, "\0", MBF_SB2100RW_MAXLINE);
+		strncpy(data->comment, "", MBF_SB2100RW_MAXLINE);
 	}
 
 	/* assume success */
@@ -314,7 +314,7 @@ int mbr_sb2100rw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 	bool done = false;
 	do {
 		/* read next line in file */
-		strncpy(line, "\0", MBF_SB2100RW_MAXLINE);
+		strncpy(line, "", MBF_SB2100RW_MAXLINE);
 		result = fgets(line, MBF_SB2100RW_MAXLINE, mbfp);
 
 		/* check size of line */

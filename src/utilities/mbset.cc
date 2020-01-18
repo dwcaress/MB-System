@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
 	int nscan;
 
 	/* set default input and output */
-	strcpy(mbp_ifile, "\0");
+	strcpy(mbp_ifile, "");
 	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */

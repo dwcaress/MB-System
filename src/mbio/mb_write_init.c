@@ -101,11 +101,11 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	mb_io_ptr->file_pos = 0;
 	mb_io_ptr->file_bytes = 0;
 	mb_io_ptr->mbfp2 = NULL;
-	strcpy(mb_io_ptr->file2, "\0");
+	strcpy(mb_io_ptr->file2, "");
 	mb_io_ptr->file2_pos = 0;
 	mb_io_ptr->file2_bytes = 0;
 	mb_io_ptr->mbfp3 = NULL;
-	strcpy(mb_io_ptr->file3, "\0");
+	strcpy(mb_io_ptr->file3, "");
 	mb_io_ptr->file3_pos = 0;
 	mb_io_ptr->file3_bytes = 0;
 	mb_io_ptr->ncid = 0;

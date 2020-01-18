@@ -225,7 +225,7 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 		}
 
 		/* comment (LDEOCOMM) */
-		strncpy(data->comment, "\0", MBF_HSLDEOIH_MAXLINE);
+		strncpy(data->comment, "", MBF_HSLDEOIH_MAXLINE);
 
 		/* processed backscatter */
 		data->back_scale = 0.0;

@@ -2243,7 +2243,7 @@ int main(int argc, char **argv) {
     }
 
     /* read and output comment lines */
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     while ((result = fgets(comment, 256, fp)) == comment) {
       kind = MB_DATA_COMMENT;
       comment[(int)strlen(comment) - 1] = '\0';
@@ -2259,12 +2259,12 @@ int main(int argc, char **argv) {
   /* write comments to beginning of output file */
   if (stripmode == MBCOPY_STRIPMODE_NONE) {
     kind = MB_DATA_COMMENT;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "These data copied by program %s", program_name);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "MB-system Version %s", MB_VERSION);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
@@ -2283,91 +2283,91 @@ int main(int argc, char **argv) {
       strcpy(user, "unknown");
     char host[128];
     gethostname(host, 128);
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "Control Parameters:");
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "  Input file:         %s", ifile);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "  Input MBIO format:  %d", iformat);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
     if (merge) {
-      strncpy(comment, "\0", 256);
+      strncpy(comment, "", 256);
       sprintf(comment, "  Merge file:         %s", mfile);
       status = mb_put_comment(verbose, ombio_ptr, comment, &error);
       if (error == MB_ERROR_NO_ERROR)
         ocomment++;
-      strncpy(comment, "\0", 256);
+      strncpy(comment, "", 256);
       sprintf(comment, "  Merge MBIO format:  %d", mformat);
       status = mb_put_comment(verbose, ombio_ptr, comment, &error);
       if (error == MB_ERROR_NO_ERROR)
         ocomment++;
     }
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "  Output file:        %s", ofile);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "  Output MBIO format: %d", oformat);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "  Ping averaging:     %d", pings);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "  Longitude flip:     %d", lonflip);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "  Longitude bounds:   %f %f", bounds[0], bounds[1]);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "  Latitude bounds:    %f %f", bounds[2], bounds[3]);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "  Begin time:         %d %d %d %d %d %d %d", btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4],
             btime_i[5], btime_i[6]);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "  End time:           %d %d %d %d %d %d %d", etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4],
             etime_i[5], etime_i[6]);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "  Minimum speed:      %f", speedmin);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, "  Time gap:           %f", timegap);
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
       ocomment++;
-    strncpy(comment, "\0", 256);
+    strncpy(comment, "", 256);
     sprintf(comment, " ");
     status = mb_put_comment(verbose, ombio_ptr, comment, &error);
     if (error == MB_ERROR_NO_ERROR)
