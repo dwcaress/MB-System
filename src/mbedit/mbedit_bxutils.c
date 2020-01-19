@@ -928,6 +928,9 @@ static wchar_t *CStrCommonWideCharsGet() {
 static Boolean CvtStringToXmString(
     Display * d, XrmValue *args, Cardinal *num_args,
     XrmValue * fromVal, XrmValue * toVal, XtPointer data) {
+	(void)args;  // Unused param
+	(void)data;  // Unused param
+
 	static XmString resStr;
 	char *str;
 
@@ -994,6 +997,8 @@ static Boolean CvtStringToXmString(
 static Boolean CvtStringToXmStringTable(
     Display * d, XrmValue * args, Cardinal *num_args,
     XrmValue * fromVal, XrmValue *toVal, XtPointer data) {
+	(void)data;  // Unused param
+
 	static XmString *CStrTable;
 	XmString *tblPtr;
 	char *str;
@@ -1141,6 +1146,8 @@ void RegisterBxConverters(XtAppContext appContext) {
 XtPointer BX_CONVERT(
     Widget w, char * from_string, char *to_type, int to_size,
     Boolean *success) {
+	(void)to_size;  // Unused param
+
 	XrmValue fromVal, toVal; /* resource holders		*/
 	Boolean convResult;      /* return value			*/
 	XtPointer val;           /* Pointer size return value    */
@@ -1270,7 +1277,9 @@ XtPointer CONVERT(
  */
 
 #ifndef IGNORE_MENU_POST
-void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean * dispatch) {
+void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
+	(void)p;  // Unused param
+	(void)dispatch;  // Unused param
 	Arg args[2];
 	int argcnt;
 	int button;
@@ -1316,7 +1325,8 @@ void MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean* dispatch) {
  */
 void BX_SET_BACKGROUND_COLOR(
     Widget w, ArgList args, Cardinal *argcnt, Pixel bg_color) {
-
+	(void)w;  // Unused param
+    // On Debian testing in 2020, XmVERSION is 2.
 #if ((XmVERSION == 1) && (XmREVISION > 0))
 
 	/*
