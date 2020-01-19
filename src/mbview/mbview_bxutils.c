@@ -88,32 +88,6 @@
 #define UNSET (-1)
 
 /*
- * Set state of inclusion of prototypes properly
- */
-#ifdef NeedFunctionPrototypes
-#define ARGLIST(p)	(
-#define ARG(a, b) a b,
-#define GRA(a, b)	a b)
-#else
-#define ARGLIST(p) p
-#define ARG(a, b) a b;
-#define GRA(a, b) a b;
-#endif
-
-#ifdef NeedFunctionPrototypes
-#ifdef __cplusplus
-#define UARG(a, b) a,
-#define GRAU(a, b)	a)
-#else
-#define UARG(a, b) a b,
-#define GRAU(a, b)	a b)
-#endif
-#else
-#define UARG(a, b) a b;
-#define GRAU(a, b) a b;
-#endif
-
-/*
  * Set up strcasecmp function
  */
 #if defined(LOCAL_STRCASECMP)
@@ -237,7 +211,7 @@ static wchar_t *CStrCommonWideCharsGet();
  *      int :  0; s1 == s2
  *             1; s1 != s2
  */
-static int StrCasecmp ARGLIST((s1, s2)) ARG(char *, s1) GRA(char *, s2) {
+static int StrCasecmp(char * s1, char *s2) {
 	int c1, c2;
 
 	while (*s1 && *s2) {
@@ -256,7 +230,6 @@ static int StrCasecmp ARGLIST((s1, s2)) ARG(char *, s1) GRA(char *, s2) {
 }
 #endif
 
-#ifndef SUPPORTS_WCHARS
 /*
  * Function:
  *      len = mblen(s, n);
@@ -270,7 +243,8 @@ static int StrCasecmp ARGLIST((s1, s2)) ARG(char *, s1) GRA(char *, s2) {
  * Output:
  *      int : always 1
  */
-static int mblen ARGLIST((s, n)) ARG(char *, s) GRA(size_t, n) { return (1); }
+#ifndef SUPPORTS_WCHARS
+static int mblen(char *s, size_t n) { return (1); }
 #endif
 
 /*
@@ -284,7 +258,7 @@ static int mblen ARGLIST((s, n)) ARG(char *, s) GRA(size_t, n) { return (1); }
  * Output:
  *      int : the number of characters found
  */
-static int strlenWc ARGLIST((ptr)) GRA(wchar_t *, ptr) {
+static int strlenWc(wchar_t *ptr) {
 	wchar_t *p = ptr;
 	int x = 0;
 
@@ -308,7 +282,7 @@ static int strlenWc ARGLIST((ptr)) GRA(wchar_t *, ptr) {
  * Output:
  *      bytesConv - size_t : number of bytes converted
  */
-static size_t doMbstowcs ARGLIST((wcs, mbs, n)) ARG(wchar_t *, wcs) ARG(char *, mbs) GRA(size_t, n) {
+static size_t doMbstowcs(wchar_t *wcs, char *mbs, size_t n) {
 #ifndef SUPPORTS_WCHARS
 	int i;
 
@@ -334,7 +308,7 @@ static size_t doMbstowcs ARGLIST((wcs, mbs, n)) ARG(wchar_t *, wcs) ARG(char *, 
  * Output:
  *      bytesConv - size_t : number of bytes converted
  */
-static size_t doWcstombs ARGLIST((mbs, wcs, n)) ARG(char *, mbs) ARG(wchar_t *, wcs) GRA(size_t, n) {
+static size_t doWcstombs(char *mbs, wchar_t *wcs, size_t n) {
 #ifndef SUPPORTS_WCHARS
 	int i;
 
@@ -369,8 +343,7 @@ static size_t doWcstombs ARGLIST((mbs, wcs, n)) ARG(char *, mbs) ARG(wchar_t *, 
  * Output:
  *      None
  */
-static void copyWcsToMbs ARGLIST((mbs, wcs, len, process_it)) ARG(char *, mbs) ARG(wchar_t *, wcs) ARG(int, len)
-    GRA(Boolean, process_it) {
+static void copyWcsToMbs(char *mbs, wchar_t *wcs, int len, Boolean process_it) {
 	static wchar_t *tbuf = NULL;
 	static int tbufSize = 0;
 
@@ -464,7 +437,7 @@ static void copyWcsToMbs ARGLIST((mbs, wcs, len, process_it)) ARG(char *, mbs) A
  *	NOTE:  if wide is NULL, then this returns the number of bytes in
  *	       the multibyte character.
  */
-static int dombtowc ARGLIST((wide, multi, size)) ARG(wchar_t *, wide) ARG(char *, multi) GRA(size_t, size) {
+static int dombtowc(wchar_t *wide, char *multi, size_t size) {
 	int retVal = 0;
 
 #ifndef SUPPORTS_WCHARS
@@ -497,7 +470,7 @@ static int dombtowc ARGLIST((wide, multi, size)) ARG(wchar_t *, wide) ARG(char *
  *	ptr - wchar_t* : pointer to character, if found, points to end
  *			of string otherwise ('\0').
  */
-static wchar_t *getNextSeparator ARGLIST((str)) GRA(wchar_t *, str) {
+static wchar_t *getNextSeparator(wchar_t *str) {
 	wchar_t *ptr = str;
 	wchar_t *commonWChars = CStrCommonWideCharsGet();
 
@@ -540,9 +513,9 @@ static wchar_t *getNextSeparator ARGLIST((str)) GRA(wchar_t *, str) {
  *	more - Boolean : True if more of the string to parse.
  *			False means done.
  */
-static Boolean extractSegment ARGLIST((str, tagStart, tagLen, txtStart, txtLen, pDir, pSep)) ARG(wchar_t **, str)
-    ARG(wchar_t **, tagStart) ARG(int *, tagLen) ARG(wchar_t **, txtStart) ARG(int *, txtLen) ARG(int *, pDir)
-        GRA(Boolean *, pSep) {
+static Boolean extractSegment(
+    wchar_t **str, wchar_t **tagStart, int *tagLen, wchar_t **txtStart,
+    int *txtLen, int *pDir, Boolean *pSep) {
 	wchar_t *start;
 	wchar_t *text;
 	int textL;
@@ -713,7 +686,7 @@ static Boolean extractSegment ARGLIST((str, tagStart, tagLen, txtStart, txtLen, 
  * Outputs:
  *	xstr - XmString : the allocated return structure
  */
-static XmString StringToXmString ARGLIST((str)) GRA(char *, str) {
+static XmString StringToXmString(char *str) {
 	static char *tagBuf = NULL;
 	static int tagBufLen = 0;
 	static char *textBuf = NULL;
@@ -831,7 +804,7 @@ static XmString StringToXmString ARGLIST((str)) GRA(char *, str) {
  *      nextCStr - char* : pointer to the next delimiter. Returns NULL if no
  *			delimiter found.
  */
-static char *getNextCStrDelim ARGLIST((str)) GRA(char *, str) {
+static char *getNextCStrDelim(char *str) {
 	char *comma = str;
 	Boolean inQuotes = False;
 	int len;
@@ -891,7 +864,7 @@ static char *getNextCStrDelim ARGLIST((str)) GRA(char *, str) {
  * Output:
  *      cnt - int : the number of XmStrings found
  */
-static int getCStrCount ARGLIST((str)) GRA(char *, str) {
+static int getCStrCount(char *str) {
 	int x = 1;
 	char *newStr;
 
@@ -963,8 +936,9 @@ static wchar_t *CStrCommonWideCharsGet() {
  * Output:
  *      None
  */
-static void CvtXmStringDestructor ARGLIST((app, converted, data, args, num_args)) UARG(XtAppContext, app)
-    ARG(XrmValue *, converted) UARG(XtPointer, data) UARG(XrmValue *, args) GRAU(Cardinal *, num_args) {
+static void CvtXmStringDestructor(
+    XtAppContext app, XrmValue *converted, XtPointer data, XrmValue *args,
+    Cardinal *num_args) {
 	XmString freestr = (XmString)converted->addr;
 	if (freestr != NULL)
 		XmStringFree(freestr);
@@ -986,8 +960,9 @@ static void CvtXmStringDestructor ARGLIST((app, converted, data, args, num_args)
  * Output:
  *	Standard.
  */
-static Boolean CvtStringToXmString ARGLIST((d, args, num_args, fromVal, toVal, data)) ARG(Display *, d) UARG(XrmValue *, args)
-    ARG(Cardinal *, num_args) ARG(XrmValue *, fromVal) ARG(XrmValue *, toVal) GRAU(XtPointer, data) {
+static Boolean CvtStringToXmString(
+    Display *d, XrmValue *args, Cardinal *num_args, XrmValue *fromVal,
+    XrmValue *toVal, XtPointer data) {
 	static XmString resStr;
 	char *str;
 
@@ -1051,8 +1026,9 @@ static Boolean CvtStringToXmString ARGLIST((d, args, num_args, fromVal, toVal, d
  * Output:
  *	Standard.
  */
-static Boolean CvtStringToXmStringTable ARGLIST((d, args, num_args, fromVal, toVal, data)) ARG(Display *, d) ARG(XrmValue *, args)
-    ARG(Cardinal *, num_args) ARG(XrmValue *, fromVal) ARG(XrmValue *, toVal) GRAU(XtPointer, data) {
+static Boolean CvtStringToXmStringTable(
+    Display *d, XrmValue *args, Cardinal *num_args, XrmValue *fromVal,
+    XrmValue *toVal, XtPointer data) {
 	static XmString *CStrTable;
 	XmString *tblPtr;
 	char *str;
@@ -1177,8 +1153,9 @@ static Boolean CvtStringToXmStringTable ARGLIST((d, args, num_args, fromVal, toV
  * Output:
  *      None
  */
-static void CvtXmStringTableDestructor ARGLIST((app, converted, data, args, num_args)) UARG(XtAppContext, app)
-    ARG(XrmValue *, converted) UARG(XtPointer, data) UARG(XrmValue *, args) GRAU(Cardinal *, num_args) {
+static void CvtXmStringTableDestructor(
+    XtAppContext app, XrmValue *converted, XtPointer data, XrmValue *args,
+    Cardinal *num_args) {
 	XmString *ptr = (XmString *)converted->addr;
 	while (*ptr != NULL) {
 		XmStringFree(*ptr);
@@ -1204,7 +1181,7 @@ static void CvtXmStringTableDestructor ARGLIST((app, converted, data, args, num_
  * Output:
  *      None
  */
-void RegisterBxConverters ARGLIST((appContext)) GRA(XtAppContext, appContext) {
+void RegisterBxConverters(XtAppContext appContext) {
 	XtAppSetTypeConverter(appContext, XmRString, XmRXmString, (XtTypeConverter)&CvtStringToXmString, NULL, 0, XtCacheNone,
 	                      (XtDestructor)&CvtXmStringDestructor);
 
@@ -1227,8 +1204,8 @@ void RegisterBxConverters ARGLIST((appContext)) GRA(XtAppContext, appContext) {
  *      None
  */
 #ifndef IGNORE_CONVERT
-XtPointer BX_CONVERT ARGLIST((w, from_string, to_type, to_size, success)) ARG(Widget, w) ARG(char *, from_string)
-    ARG(char *, to_type) UARG(int, to_size) GRA(Boolean *, success) {
+XtPointer BX_CONVERT(
+    Widget w, char *from_string, char *to_type, int to_size, Boolean *success) {
 	XrmValue fromVal, toVal; /* resource holders		*/
 	Boolean convResult;      /* return value			*/
 	XtPointer val;           /* Pointer size return value    */
@@ -1336,8 +1313,8 @@ XtPointer BX_CONVERT ARGLIST((w, from_string, to_type, to_size, success)) ARG(Wi
 }
 
 #ifdef DEFINE_OLD_BXUTILS
-XtPointer CONVERT ARGLIST((w, from_string, to_type, to_size, success)) ARG(Widget, w) ARG(char *, from_string)
-    ARG(char *, to_type) ARG(int, to_size) GRA(Boolean *, success) {
+XtPointer CONVERT(
+    Widget w, char *from_string, char *to_type, int to_size, Boolean *success) {
 	return (BX_CONVERT(w, from_string, to_type, to_size, success));
 }
 #endif /* DEFINE_OLD_BXUTILS */
@@ -1358,7 +1335,7 @@ XtPointer CONVERT ARGLIST((w, from_string, to_type, to_size, success)) ARG(Widge
  */
 
 #ifndef IGNORE_MENU_POST
-void BX_MENU_POST ARGLIST((p, mw, ev, dispatch)) UARG(Widget, p) ARG(XtPointer, mw) ARG(XEvent *, ev) GRAU(Boolean *, dispatch) {
+void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
 	Arg args[2];
 	int argcnt;
 	int button;
@@ -1376,7 +1353,8 @@ void BX_MENU_POST ARGLIST((p, mw, ev, dispatch)) UARG(Widget, p) ARG(XtPointer, 
 }
 
 #ifdef DEFINE_OLD_BXUTILS
-void MENU_POST ARGLIST((p, mw, ev, dispatch)) ARG(Widget, p) ARG(XtPointer, mw) ARG(XEvent *, ev) GRA(Boolean *, dispatch) {
+void MENU_POST(
+    Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
 	BX_MENU_POST(p, mw, ev, dispatch);
 }
 #endif /* DEFINE_OLD_BXUTILS */
@@ -1402,8 +1380,7 @@ void MENU_POST ARGLIST((p, mw, ev, dispatch)) ARG(Widget, p) ARG(XtPointer, mw) 
  *          only when doing a set values, shadow colors are automatically
  *          calculated at creation time.
  */
-void BX_SET_BACKGROUND_COLOR ARGLIST((w, args, argcnt, bg_color)) ARG(Widget, w) ARG(ArgList, args) ARG(Cardinal *, argcnt)
-    GRA(Pixel, bg_color) {
+void BX_SET_BACKGROUND_COLOR(Widget w, ArgList args, Cardinal *argcnt, Pixel bg_color) {
 	int i;
 	int topShadowLoc;
 	int bottomShadowLoc;
@@ -1478,8 +1455,7 @@ void BX_SET_BACKGROUND_COLOR ARGLIST((w, args, argcnt, bg_color)) ARG(Widget, w)
 }
 
 #ifdef DEFINE_OLD_BXUTILS
-void SET_BACKGROUND_COLOR ARGLIST((w, args, argcnt, bg_color)) ARG(Widget, w) ARG(ArgList, args) ARG(Cardinal *, argcnt)
-    GRA(Pixel, bg_color) {
+void SET_BACKGROUND_COLOR(Widget w, ArgList args, Cardinal *argcnt, Pixel bg_color) {
 	BX_SET_BACKGROUND_COLOR(w, args, argcnt, bg_color);
 }
 #endif /* DEFINE_OLD_BXUTILS */
@@ -1497,7 +1473,7 @@ void SET_BACKGROUND_COLOR ARGLIST((w, args, argcnt, bg_color)) ARG(Widget, w) AR
 #ifndef _BX_FIND_TOP_SHELL
 #define _BX_FIND_TOP_SHELL
 
-Widget BxFindTopShell ARGLIST((start)) GRA(Widget, start) {
+Widget BxFindTopShell(Widget start) {
 	Widget p;
 
 	while ((p = XtParent(start))) {
@@ -1523,7 +1499,8 @@ Widget BxFindTopShell ARGLIST((start)) GRA(Widget, start) {
 #ifndef _BX_WIDGETIDS_FROM_NAMES
 #define _BX_WIDGETIDS_FROM_NAMES
 
-WidgetList BxWidgetIdsFromNames ARGLIST((ref, cbName, stringList)) ARG(Widget, ref) ARG(char, *cbName) GRA(char, *stringList) {
+WidgetList BxWidgetIdsFromNames(
+    Widget ref, char *cbName, char *stringList) {
 	WidgetList wgtIds = NULL;
 	int wgtCount = 0;
 	Widget inst;
@@ -1630,7 +1607,7 @@ Cannot find widget %s\n",
 }
 #endif /* _BX_WIDGETIDS_FROM_NAMES */
 
-XtPointer BX_SINGLE ARGLIST((val)) GRA(float, val) {
+XtPointer BX_SINGLE(float val) {
 	XtPointer pointer;
 
 	pointer = (XtPointer)XtMalloc(sizeof(float));
@@ -1640,10 +1617,10 @@ XtPointer BX_SINGLE ARGLIST((val)) GRA(float, val) {
 }
 
 #ifdef DEFINE_OLD_BXUTILS
-XtPointer SINGLE ARGLIST((val)) GRA(float, val) { return (BX_SINGLE(val)); }
+XtPointer SINGLE(float val) { return (BX_SINGLE(val)); }
 #endif /* DEFINE_OLD_BXUTILS */
 
-XtPointer BX_DOUBLE ARGLIST((val)) GRA(double, val) {
+XtPointer BX_DOUBLE(double val) {
 	XtPointer pointer;
 
 	pointer = (XtPointer)XtMalloc(sizeof(double));
@@ -1653,7 +1630,7 @@ XtPointer BX_DOUBLE ARGLIST((val)) GRA(double, val) {
 }
 
 #ifdef DEFINE_OLD_BXUTILS
-XtPointer DOUBLE ARGLIST((val)) GRA(double, val) { return (BX_DOUBLE(val)); }
+XtPointer DOUBLE(double val) { return (BX_DOUBLE(val)); }
 #endif /* DEFINE_OLD_BXUTILS */
 
 /****************************************************************************
@@ -1943,7 +1920,7 @@ LFUNC(atoui, unsigned int, (char *p, unsigned int l, unsigned int *ui_return));
 #define Const
 #endif
 
-static unsigned int atoui ARGLIST((p, l, ui_return)) ARG(char *, p) ARG(unsigned int, l) GRA(unsigned int *, ui_return) {
+static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
 	int n, i;
 
 	n = 0;
@@ -1961,9 +1938,9 @@ static unsigned int atoui ARGLIST((p, l, ui_return)) ARG(char *, p) ARG(unsigned
 		return 0;
 }
 
-static int BxXpmCreatePixmapFromData ARGLIST((display, d, data, pixmap_return, shapemask_return, attributes))
-    ARG(Display *, display) ARG(Drawable, d) ARG(char **, data) ARG(Pixmap *, pixmap_return) ARG(Pixmap *, shapemask_return)
-        GRA(BxXpmAttributes *, attributes) {
+static int BxXpmCreatePixmapFromData(
+    Display *display, Drawable d, char **data, Pixmap *pixmap_return,
+    Pixmap *shapemask_return, BxXpmAttributes *attributes) {
 	XImage *image, **imageptr = NULL;
 	XImage *shapeimage, **shapeimageptr = NULL;
 	int ErrorStatus;
@@ -2015,8 +1992,9 @@ static int BxXpmCreatePixmapFromData ARGLIST((display, d, data, pixmap_return, s
 	return (ErrorStatus);
 }
 
-static int BxXpmCreateImageFromData ARGLIST((display, data, image_return, shapeimage_return, attributes)) ARG(Display *, display)
-    ARG(char **, data) ARG(XImage **, image_return) ARG(XImage **, shapeimage_return) GRA(BxXpmAttributes *, attributes) {
+static int BxXpmCreateImageFromData(
+    Display *display, char **data, XImage **image_return,
+    XImage **shapeimage_return, BxXpmAttributes *attributes) {
 	bxxpmData mdata;
 	int ErrorStatus;
 	bxxpmInternAttrib attrib;
@@ -2053,7 +2031,7 @@ static int BxXpmCreateImageFromData ARGLIST((display, data, image_return, shapei
 /*
  * open the given array to be read or written as an bxxpmData which is returned
  */
-static int xpmOpenArray ARGLIST((data, mdata)) ARG(char **, data) GRA(bxxpmData *, mdata) {
+static int xpmOpenArray(char **data, bxxpmData *mdata) {
 	mdata->type = BXXPMARRAY;
 	mdata->stream.data = data;
 	mdata->cptr = *data;
@@ -2069,7 +2047,7 @@ static int xpmOpenArray ARGLIST((data, mdata)) ARG(char **, data) GRA(bxxpmData 
  * Intialize the bxxpmInternAttrib pointers to Null to know
  * which ones must be freed later on.
  */
-static void xpmInitInternAttrib ARGLIST((attrib)) GRA(bxxpmInternAttrib *, attrib) {
+static void xpmInitInternAttrib(bxxpmInternAttrib *attrib) {
 	attrib->ncolors = 0;
 	attrib->colorTable = NULL;
 	attrib->pixelindex = NULL;
@@ -2101,8 +2079,9 @@ static void xpmInitInternAttrib ARGLIST((attrib)) GRA(bxxpmInternAttrib *, attri
  * This function parses an Xpm file or data and store the found informations
  * in an an bxxpmInternAttrib structure which is returned.
  */
-static int xpmParseData ARGLIST((data, attrib_return, attributes)) ARG(bxxpmData *, data) ARG(bxxpmInternAttrib *, attrib_return)
-    GRA(BxXpmAttributes *, attributes) {
+static int xpmParseData(
+    bxxpmData * data, bxxpmInternAttrib *attrib_return,
+    BxXpmAttributes *attributes) {
 	/* variables to return */
 	unsigned int width, height;
 	unsigned int ncolors = 0;
@@ -2282,9 +2261,10 @@ static int xpmParseData ARGLIST((data, attrib_return, attributes)) ARG(bxxpmData
  * return 0 if success, 1 otherwise.
  */
 
-static int SetColor ARGLIST((display, colormap, colorname, color_index, image_pixel, mask_pixel, mask_pixel_index))
-    ARG(Display *, display) ARG(Colormap, colormap) ARG(char *, colorname) ARG(unsigned int, color_index)
-        ARG(Pixel *, image_pixel) ARG(Pixel *, mask_pixel) GRA(unsigned int *, mask_pixel_index) {
+static int SetColor(
+    Display *display, Colormap colormap, char *colorname,
+    unsigned int color_index, Pixel *image_pixel, Pixel *mask_pixel,
+    unsigned int *mask_pixel_index) {
 	XColor xcolor;
 
 	if (STRCASECMP(colorname, (char *)BX_TRANSPARENT_COLOR)) {
@@ -2316,9 +2296,9 @@ static int SetColor ARGLIST((display, colormap, colorname, color_index, image_pi
 		return (status);                                                                                                         \
 	}
 
-static int xpmCreateImage ARGLIST((display, attrib, image_return, shapeimage_return, attributes)) ARG(Display *, display)
-    ARG(bxxpmInternAttrib *, attrib) ARG(XImage **, image_return) ARG(XImage **, shapeimage_return)
-        GRA(BxXpmAttributes *, attributes) {
+static int xpmCreateImage(
+    Display *display, bxxpmInternAttrib *attrib, XImage **image_return,
+    XImage **shapeimage_return, BxXpmAttributes *attributes) {
 	/* variables stored in the BxXpmAttributes structure */
 	Visual *visual;
 	Colormap colormap;
@@ -2538,9 +2518,9 @@ static int xpmCreateImage ARGLIST((display, attrib, image_return, shapeimage_ret
 /*
  * Create an XImage
  */
-static int CreateXImage ARGLIST((display, visual, depth, width, height, image_return)) ARG(Display *, display)
-    ARG(Visual *, visual) ARG(unsigned int, depth) ARG(unsigned int, width) ARG(unsigned int, height)
-        GRA(XImage **, image_return) {
+static int CreateXImage(
+    Display *display, Visual *visual, unsigned int depth, unsigned int width,
+    unsigned int height, XImage **image_return) {
 	int bitmap_pad;
 
 	/* first get bitmap_pad */
@@ -2597,14 +2577,14 @@ static unsigned char Const _reverse_byte[0x100] = {
     0x3b, 0xbb, 0x7b, 0xfb, 0x07, 0x87, 0x47, 0xc7, 0x27, 0xa7, 0x67, 0xe7, 0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7, 0x77, 0xf7,
     0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef, 0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff};
 
-static void _XReverse_Bytes ARGLIST((bpt, nb)) ARG(unsigned char *, bpt) GRA(int, nb) {
+static void _XReverse_Bytes(unsigned char *bpt, int nb) {
 	do {
 		*bpt = _reverse_byte[*bpt];
 		bpt++;
 	} while (--nb > 0);
 }
 
-static void xpm_xynormalizeimagebits ARGLIST((bp, img)) ARG(unsigned char *, bp) GRA(XImage *, img) {
+static void xpm_xynormalizeimagebits(unsigned char *bp, XImage *img) {
 	unsigned char c;
 
 	if (img->byte_order != img->bitmap_bit_order) {
@@ -2630,7 +2610,7 @@ static void xpm_xynormalizeimagebits ARGLIST((bp, img)) ARG(unsigned char *, bp)
 		_XReverse_Bytes(bp, img->bitmap_unit >> 3);
 }
 
-static void xpm_znormalizeimagebits ARGLIST((bp, img)) ARG(unsigned char *, bp) GRA(XImage *, img) {
+static void xpm_znormalizeimagebits(unsigned char *bp, XImage *img) {
 	unsigned char c;
 
 	switch (img->bits_per_pixel) {
@@ -2665,12 +2645,13 @@ static void xpm_znormalizeimagebits ARGLIST((bp, img)) ARG(unsigned char *, bp) 
 static unsigned char Const _lomask[0x09] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
 static unsigned char Const _himask[0x09] = {0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80, 0x00};
 
-static void _putbits ARGLIST((src, dstoffset, numbits, dst)) ARG(char *, src) /* address of source bit string */
-    ARG(int, dstoffset)        /* bit offset into destination;
+static void _putbits(
+    char *src, /* address of source bit string */
+    int dstoffset,        /* bit offset into destination;
                                 * range is 0-31 */
-    ARG(int, numbits) /* number of bits to copy to
+    int numbits, /* number of bits to copy to
                                 * destination */
-    GRA(char *, dst)  /* address of destination bit string */
+    char *dst)  /* address of destination bit string */
 {
 	unsigned char chlo, chhi;
 	int hibits;
@@ -2711,8 +2692,9 @@ static void _putbits ARGLIST((src, dstoffset, numbits, dst)) ARG(char *, src) /*
  *	copy the temp back into the destination image data
  */
 
-static void SetImagePixels ARGLIST((image, width, height, pixelindex, pixels)) ARG(XImage *, image) ARG(unsigned int, width)
-    ARG(unsigned int, height) ARG(unsigned int *, pixelindex) GRA(Pixel *, pixels) {
+static void SetImagePixels(
+    XImage *image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels) {
 	Pixel pixel;
 	unsigned long px;
 	char *src;
@@ -2778,8 +2760,9 @@ static unsigned long byteorderpixel = MSBFirst << 24;
 
 #endif
 
-static void SetImagePixels32 ARGLIST((image, width, height, pixelindex, pixels)) ARG(XImage *, image) ARG(unsigned int, width)
-    ARG(unsigned int, height) ARG(unsigned int *, pixelindex) GRA(Pixel *, pixels) {
+static void SetImagePixels32(
+    XImage *image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels) {
 	unsigned char *addr;
 	unsigned int *paddr;
 	unsigned int *iptr;
@@ -2820,8 +2803,9 @@ static void SetImagePixels32 ARGLIST((image, width, height, pixelindex, pixels))
  * write pixels into a 16-bits Z image data structure
  */
 
-static void SetImagePixels16 ARGLIST((image, width, height, pixelindex, pixels)) ARG(XImage *, image) ARG(unsigned int, width)
-    ARG(unsigned int, height) ARG(unsigned int *, pixelindex) GRA(Pixel *, pixels) {
+static void SetImagePixels16(
+    XImage *image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels) {
 	unsigned char *addr;
 	unsigned int *iptr;
 	int x, y;
@@ -2847,10 +2831,9 @@ static void SetImagePixels16 ARGLIST((image, width, height, pixelindex, pixels))
  * write pixels into a 8-bits Z image data structure
  */
 
-static void SetImagePixels8 ARGLIST((image, width, height, pixelindex, pixels)) ARG(XImage *, image) ARG(unsigned int, width)
-    ARG(unsigned int, height) ARG(unsigned int *, pixelindex) GRA(Pixel *, pixels)
-
-{
+static void SetImagePixels8(
+    XImage *image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels) {
 	unsigned int *iptr;
 	int x, y;
 
@@ -2864,8 +2847,9 @@ static void SetImagePixels8 ARGLIST((image, width, height, pixelindex, pixels)) 
  * write pixels into a 1-bit depth image data structure and **offset null**
  */
 
-static void SetImagePixels1 ARGLIST((image, width, height, pixelindex, pixels)) ARG(XImage *, image) ARG(unsigned int, width)
-    ARG(unsigned int, height) ARG(unsigned int *, pixelindex) GRA(Pixel *, pixels) {
+static void SetImagePixels1(
+    XImage *image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels) {
 	unsigned char bit;
 	int xoff, yoff;
 	unsigned int *iptr;
@@ -2905,7 +2889,8 @@ static void SetImagePixels1 ARGLIST((image, width, height, pixelindex, pixels)) 
  * the bxxpmInternAttrib structure.
  */
 
-static void xpmSetAttributes ARGLIST((attrib, attributes)) ARG(bxxpmInternAttrib *, attrib) GRA(BxXpmAttributes *, attributes) {
+static void xpmSetAttributes(
+    bxxpmInternAttrib *attrib, BxXpmAttributes *attributes) {
 	if (attributes) {
 		if (attributes->valuemask & BxXpmReturnInfos) {
 			attributes->cpp = attrib->cpp;
@@ -2926,7 +2911,7 @@ static void xpmSetAttributes ARGLIST((attrib, attributes)) ARG(bxxpmInternAttrib
  * but the structure itself
  */
 
-static void BxXpmFreeAttributes ARGLIST((attributes)) GRA(BxXpmAttributes *, attributes) {
+static void BxXpmFreeAttributes(BxXpmAttributes *attributes) {
 	if (attributes) {
 		if (attributes->valuemask & BxXpmReturnPixels && attributes->pixels) {
 			free((char *)attributes->pixels);
@@ -2964,7 +2949,7 @@ static void BxXpmFreeAttributes ARGLIST((attributes)) GRA(BxXpmAttributes *, att
  * Free the bxxpmInternAttrib pointers which have been allocated
  */
 
-static void xpmFreeInternAttrib ARGLIST((attrib)) GRA(bxxpmInternAttrib *, attrib) {
+static void xpmFreeInternAttrib(bxxpmInternAttrib *attrib) {
 	unsigned int a;
 
 	if (attrib->colorTable)
@@ -2984,7 +2969,7 @@ static void xpmFreeInternAttrib ARGLIST((attrib)) GRA(bxxpmInternAttrib *, attri
 /*
  * close the file related to the bxxpmData if any
  */
-static void XpmDataClose ARGLIST((mdata)) GRA(bxxpmData *, mdata) {
+static void XpmDataClose(bxxpmData *mdata) {
 	switch (mdata->type) {
 	case BXXPMARRAY:
 		break;
@@ -3003,7 +2988,7 @@ static void XpmDataClose ARGLIST((mdata)) GRA(bxxpmData *, mdata) {
  * skip whitespace and compute the following unsigned int,
  * returns 1 if one is found and 0 if not
  */
-static int xpmNextUI ARGLIST((mdata, ui_return)) ARG(bxxpmData *, mdata) GRA(unsigned int *, ui_return) {
+static int xpmNextUI(bxxpmData *mdata, unsigned int *ui_return) {
 	char buf[BUFSIZ];
 	int l;
 
@@ -3014,7 +2999,7 @@ static int xpmNextUI ARGLIST((mdata, ui_return)) ARG(bxxpmData *, mdata) GRA(uns
 /*
  * get the current comment line
  */
-static void xpmGetCmt ARGLIST((mdata, cmt)) ARG(bxxpmData *, mdata) GRA(char **, cmt) {
+static void xpmGetCmt(bxxpmData *mdata, char **cmt) {
 	switch (mdata->type) {
 	case BXXPMARRAY:
 		*cmt = NULL;
@@ -3036,7 +3021,7 @@ static void xpmGetCmt ARGLIST((mdata, cmt)) ARG(bxxpmData *, mdata) GRA(char **,
 /*
  * skip to the end of the current string and the beginning of the next one
  */
-static void xpmNextString ARGLIST((mdata)) GRA(bxxpmData *, mdata) {
+static void xpmNextString(bxxpmData *mdata) {
 	int c;
 
 	switch (mdata->type) {
@@ -3058,7 +3043,7 @@ static void xpmNextString ARGLIST((mdata)) GRA(bxxpmData *, mdata) {
 /*
  * return the current character, skipping comments
  */
-static int xpmGetC ARGLIST((mdata)) GRA(bxxpmData *, mdata) {
+static int xpmGetC(bxxpmData *mdata) {
 	int c;
 	unsigned int n = 0, a;
 	unsigned int notend;
@@ -3129,7 +3114,7 @@ static int xpmGetC ARGLIST((mdata)) GRA(bxxpmData *, mdata) {
 /*
  * push the given character back
  */
-static int xpmUngetC ARGLIST((c, mdata)) ARG(int, c) GRA(bxxpmData *, mdata) {
+static int xpmUngetC(int c, bxxpmData *mdata) {
 	switch (mdata->type) {
 	case BXXPMARRAY:
 		return (*--mdata->cptr = c);
@@ -3146,7 +3131,7 @@ static int xpmUngetC ARGLIST((c, mdata)) ARG(int, c) GRA(bxxpmData *, mdata) {
 /*
  * skip whitespace and return the following word
  */
-static unsigned int xpmNextWord ARGLIST((mdata, buf)) ARG(bxxpmData *, mdata) GRA(char *, buf) {
+static unsigned int xpmNextWord(bxxpmData *mdata, char *buf) {
 	unsigned int n = 0;
 	int c;
 
@@ -3179,7 +3164,7 @@ static unsigned int xpmNextWord ARGLIST((mdata, buf)) ARG(bxxpmData *, mdata) GR
 	return (n);
 }
 
-static int BxXpmVisualType ARGLIST((visual)) GRA(Visual *, visual) {
+static int BxXpmVisualType(Visual *visual) {
 #if defined(__cplusplus) || defined(c_plusplus)
 	switch (visual->c_class)
 #else
@@ -3205,7 +3190,7 @@ static int BxXpmVisualType ARGLIST((visual)) GRA(Visual *, visual) {
  * Free the computed color table
  */
 
-static void xpmFreeColorTable ARGLIST((colorTable, ncolors)) ARG(char ***, colorTable) GRA(int, ncolors) {
+static void xpmFreeColorTable(char ***colorTable, int ncolors) {
 	int a, b;
 
 	if (colorTable) {
@@ -3252,7 +3237,7 @@ typedef XpmAttributes BxXpmAttributes;
 
 #endif /* USE_XPM_LIBRARY */
 
-Pixmap XPM_PIXMAP ARGLIST((w, pixmapName)) ARG(Widget, w) GRA(char **, pixmapName) {
+Pixmap XPM_PIXMAP(Widget w, char **pixmapName) {
 	BxXpmAttributes attributes;
 	int argcnt;
 	Arg args[10];
@@ -3316,7 +3301,7 @@ typedef struct _UIAppDefault {
 	char *value;     /* value read from app-defaults */
 } UIAppDefault;
 
-void setDefaultResources ARGLIST((_name, w, resourceSpec)) ARG(char *, _name) ARG(Widget, w) GRA(String *, resourceSpec) {
+void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
 	int i;
 	Display *dpy = XtDisplay(w); /* Retrieve the display pointer */
 	XrmDatabase rdb = NULL;      /* A resource data base */
@@ -3353,7 +3338,7 @@ void setDefaultResources ARGLIST((_name, w, resourceSpec)) ARG(char *, _name) AR
  * (resource databse) and fills in the table (defs) if the app default
  * value exists.
  */
-void InitAppDefaults ARGLIST((parent, defs)) ARG(Widget, parent) GRA(UIAppDefault *, defs) {
+void InitAppDefaults(Widget parent, UIAppDefault *defs) {
 	XrmQuark cQuark;
 	XrmQuark rsc[10];
 	XrmRepresentation rep;
@@ -3423,8 +3408,7 @@ void InitAppDefaults ARGLIST((parent, defs)) ARG(Widget, parent) GRA(UIAppDefaul
  * To override a specific instance, use a tightly coupled app defaults
  * resource line (use .).
  */
-void SetAppDefaults ARGLIST((w, defs, inst_name, override_inst)) ARG(Widget, w) ARG(UIAppDefault *, defs) ARG(char *, inst_name)
-    GRA(Boolean, override_inst) {
+void SetAppDefaults(Widget w, UIAppDefault *defs, char *inst_name, Boolean override_inst) {
 	Display *dpy = XtDisplay(w); /*  Retrieve the display */
 	XrmDatabase rdb = NULL;      /* A resource data base */
 	char buf[1000];
