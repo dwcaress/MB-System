@@ -2219,7 +2219,7 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
           fprintf(stderr, "dbg5       buffer:  %s\n", buffer);
         }
 
-        strncpy(buffer, "\0", sizeof(buffer));
+        strncpy(buffer, "", sizeof(buffer));
         if (site_ok == true)
           nsite++;
       }

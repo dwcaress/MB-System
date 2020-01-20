@@ -344,7 +344,7 @@ int mbr_rt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* navigation source (ERGNPOSI) */
 		store->pos_corr_x = 0.0;
 		store->pos_corr_y = 0.0;
-		strncpy(store->sensors, "\0", 8);
+		strncpy(store->sensors, "", 8);
 
 		/* comment (LDEOCMNT) */
 		strncpy(store->comment, &datacomment[2], MBSYS_HSDS_MAXLINE);

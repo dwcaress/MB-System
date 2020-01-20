@@ -339,7 +339,7 @@ int mbedit_init(int argc, char **argv, int *startup_file) {
 	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
-	strcpy(ifile, "\0");
+	strcpy(ifile, "");
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:SsXx")) != -1) {

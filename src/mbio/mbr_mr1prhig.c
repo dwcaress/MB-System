@@ -178,7 +178,7 @@ int mbr_zero_mr1prhig(int verbose, struct mbf_mr1prhig_struct *data, int *error)
 		}
 
 		/* comment */
-		strncpy(data->comment, "\0", MBF_MR1PRHIG_MAXLINE);
+		strncpy(data->comment, "", MBF_MR1PRHIG_MAXLINE);
 	}
 
 	/* assume success */
@@ -928,7 +928,7 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 			lenhc = strlen(mb_io_ptr->hdr_comment);
 		len = lenc + lenhc + 1;
 		status = mb_mallocd(verbose, __FILE__, __LINE__, len, (void **)&tmp, error);
-		strcpy(tmp, "\0");
+		strcpy(tmp, "");
 		if (lenhc > 0)
 			strcpy(tmp, mb_io_ptr->hdr_comment);
 		if (lenc > 0)

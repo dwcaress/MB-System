@@ -253,7 +253,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);
 	}
-	strncpy(buffer, "\0", sizeof(buffer));
+	strncpy(buffer, "", sizeof(buffer));
 
 
 	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer) {
@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "dbg5       nav[%d]: %f %f %f\n", nnav, ntime[nnav], nlon[nnav], nlat[nnav]);
 			}
 		}
-		strncpy(buffer, "\0", sizeof(buffer));
+		strncpy(buffer, "", sizeof(buffer));
 	}
 	fclose(fp);
 
@@ -345,7 +345,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(MB_ERROR_OPEN_FAIL);
 	}
-	strncpy(buffer, "\0", sizeof(buffer));
+	strncpy(buffer, "", sizeof(buffer));
 	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer) {
 		bool nav_ok = false;
 		int nget = 0;
@@ -428,7 +428,7 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "dbg5       nav[%d]: %f %f %f\n", nusbl, utime[nusbl], ulon[nusbl], ulat[nusbl]);
 			}
 		}
-		strncpy(buffer, "\0", sizeof(buffer));
+		strncpy(buffer, "", sizeof(buffer));
 	}
 
 	fclose(fp);

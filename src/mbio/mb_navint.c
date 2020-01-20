@@ -1299,7 +1299,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 
 				/* deal with nav in L-DEO processed nav format */
 				else if (merge_nav_format == 5) {
-					strncpy(dummy, "\0", 128);
+					strncpy(dummy, "", 128);
 					if (buffer[2] == '+') {
 						time_j[0] = atoi(strncpy(dummy, buffer, 2));
 						mb_fix_y2k(verbose, time_j[0], &time_j[0]);
@@ -1309,15 +1309,15 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 						time_j[0] = atoi(strncpy(dummy, buffer, 4));
 						ioff = 5;
 					}
-					strncpy(dummy, "\0", 128);
+					strncpy(dummy, "", 128);
 					time_j[1] = atoi(strncpy(dummy, buffer + ioff, 3));
-					strncpy(dummy, "\0", 128);
+					strncpy(dummy, "", 128);
 					ioff += 4;
 					hr = atoi(strncpy(dummy, buffer + ioff, 2));
-					strncpy(dummy, "\0", 128);
+					strncpy(dummy, "", 128);
 					ioff += 3;
 					time_j[2] = atoi(strncpy(dummy, buffer + ioff, 2)) + 60 * hr;
-					strncpy(dummy, "\0", 128);
+					strncpy(dummy, "", 128);
 					ioff += 3;
 					time_j[3] = atoi(strncpy(dummy, buffer + ioff, 2));
 					time_j[4] = 0;
@@ -1325,22 +1325,22 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 					mb_get_time(verbose, time_i, &time_d);
 					n_time_d[nrecord] = time_d;
 
-					strncpy(NorS, "\0", sizeof(NorS));
+					strncpy(NorS, "", sizeof(NorS));
 					ioff += 7;
 					NorS[0] = buffer[ioff];
 					ioff += 1;
-					strncpy(dummy, "\0", 128);
+					strncpy(dummy, "", 128);
 					mlat = atof(strncpy(dummy, buffer + ioff, 3));
-					strncpy(dummy, "\0", 128);
+					strncpy(dummy, "", 128);
 					ioff += 3;
 					llat = atof(strncpy(dummy, buffer + ioff, 8));
-					strncpy(EorW, "\0", sizeof(EorW));
+					strncpy(EorW, "", sizeof(EorW));
 					ioff += 9;
 					EorW[0] = buffer[ioff];
-					strncpy(dummy, "\0", 128);
+					strncpy(dummy, "", 128);
 					ioff += 1;
 					mlon = atof(strncpy(dummy, buffer + ioff, 4));
-					strncpy(dummy, "\0", 128);
+					strncpy(dummy, "", 128);
 					ioff += 4;
 					llon = atof(strncpy(dummy, buffer + ioff, 8));
 					n_lon[nrecord] = mlon + llon / 60.;
@@ -1360,7 +1360,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 					if (strncmp(buffer, "$", 1) == 0) {
 						if (strncmp(&buffer[3], "DAT", 3) == 0 && len > 15) {
 							time_set = false;
-							strncpy(dummy, "\0", 128);
+							strncpy(dummy, "", 128);
 							time_i[0] = atoi(strncpy(dummy, buffer + 7, 4));
 							time_i[1] = atoi(strncpy(dummy, buffer + 11, 2));
 							time_i[2] = atoi(strncpy(dummy, buffer + 13, 2));
@@ -1369,25 +1369,25 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 							time_set = false;
 							/* find start of ",hhmmss.ss" */
 							if ((bufftmp = strchr(buffer, ',')) != NULL) {
-								strncpy(dummy, "\0", 128);
+								strncpy(dummy, "", 128);
 								time_i[3] = atoi(strncpy(dummy, bufftmp + 1, 2));
-								strncpy(dummy, "\0", 128);
+								strncpy(dummy, "", 128);
 								time_i[4] = atoi(strncpy(dummy, bufftmp + 3, 2));
-								strncpy(dummy, "\0", 128);
+								strncpy(dummy, "", 128);
 								time_i[5] = atoi(strncpy(dummy, bufftmp + 5, 2));
 								if (bufftmp[7] == '.') {
-									strncpy(dummy, "\0", 128);
+									strncpy(dummy, "", 128);
 									time_i[6] = 10000 * atoi(strncpy(dummy, bufftmp + 8, 2));
 								}
 								else
 									time_i[6] = 0;
 								/* find start of ",dd,mm,yyyy" */
 								if ((bufftmp = strchr(&bufftmp[1], ',')) != NULL) {
-									strncpy(dummy, "\0", 128);
+									strncpy(dummy, "", 128);
 									time_i[2] = atoi(strncpy(dummy, bufftmp + 1, 2));
-									strncpy(dummy, "\0", 128);
+									strncpy(dummy, "", 128);
 									time_i[1] = atoi(strncpy(dummy, bufftmp + 4, 2));
-									strncpy(dummy, "\0", 128);
+									strncpy(dummy, "", 128);
 									time_i[0] = atoi(strncpy(dummy, bufftmp + 7, 4));
 									time_set = true;
 								}
@@ -1401,23 +1401,23 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 							if ((bufftmp = strchr(buffer, ',')) != NULL) {
 								if (merge_nav_format == 7)
 									bufftmp = strchr(&bufftmp[1], ',');
-								strncpy(dummy, "\0", 128);
+								strncpy(dummy, "", 128);
 								degree = atoi(strncpy(dummy, bufftmp + 1, 2));
-								strncpy(dummy, "\0", 128);
+								strncpy(dummy, "", 128);
 								dminute = atof(strncpy(dummy, bufftmp + 3, 5));
-								strncpy(NorS, "\0", sizeof(NorS));
+								strncpy(NorS, "", sizeof(NorS));
 								bufftmp = strchr(&bufftmp[1], ',');
 								strncpy(NorS, bufftmp + 1, 1);
 								n_lat[nrecord] = degree + dminute / 60.;
 								if (strncmp(NorS, "S", 1) == 0)
 									n_lat[nrecord] = -n_lat[nrecord];
 								bufftmp = strchr(&bufftmp[1], ',');
-								strncpy(dummy, "\0", 128);
+								strncpy(dummy, "", 128);
 								degree = atoi(strncpy(dummy, bufftmp + 1, 3));
-								strncpy(dummy, "\0", 128);
+								strncpy(dummy, "", 128);
 								dminute = atof(strncpy(dummy, bufftmp + 4, 5));
 								bufftmp = strchr(&bufftmp[1], ',');
-								strncpy(EorW, "\0", sizeof(EorW));
+								strncpy(EorW, "", sizeof(EorW));
 								strncpy(EorW, bufftmp + 1, 1);
 								n_lon[nrecord] = degree + dminute / 60.;
 								if (strncmp(EorW, "W", 1) == 0)
@@ -1529,7 +1529,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 						        n_lat[nrecord]);
 					}
 				}
-				strncpy(buffer, "\0", sizeof(buffer));
+				strncpy(buffer, "", sizeof(buffer));
 			}
 
 			/* get the good record count */
@@ -1717,7 +1717,7 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 						        n_sensordepth[nrecord]);
 					}
 				}
-				strncpy(buffer, "\0", sizeof(buffer));
+				strncpy(buffer, "", sizeof(buffer));
 			}
 
 			/* get the good record count */
@@ -1890,7 +1890,7 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 						fprintf(stderr, "dbg5       altitude[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_altitude[nrecord]);
 					}
 				}
-				strncpy(buffer, "\0", sizeof(buffer));
+				strncpy(buffer, "", sizeof(buffer));
 			}
 
 			/* get the good record count */
@@ -2074,7 +2074,7 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 						fprintf(stderr, "dbg5       heading[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_heading[nrecord]);
 					}
 				}
-				strncpy(buffer, "\0", sizeof(buffer));
+				strncpy(buffer, "", sizeof(buffer));
 			}
 
 			/* get the good record count */
@@ -2276,7 +2276,7 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 						        n_pitch[nrecord], n_heave[nrecord]);
 					}
 				}
-				strncpy(buffer, "\0", sizeof(buffer));
+				strncpy(buffer, "", sizeof(buffer));
 			}
 
 			/* get the good record count */
@@ -2451,7 +2451,7 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 						fprintf(stderr, "dbg5       soundspeed[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_soundspeed[nrecord]);
 					}
 				}
-				strncpy(buffer, "\0", sizeof(buffer));
+				strncpy(buffer, "", sizeof(buffer));
 			}
 
 			/* get the good record count */
@@ -2625,7 +2625,7 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 						fprintf(stderr, "dbg5       timeshift[%d]: %f %f\n", nrecord, n_time_d[nrecord], n_timeshift[nrecord]);
 					}
 				}
-				strncpy(buffer, "\0", sizeof(buffer));
+				strncpy(buffer, "", sizeof(buffer));
 			}
 
 			/* get the good record count */

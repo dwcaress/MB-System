@@ -663,7 +663,7 @@ int main(int argc, char **argv) {
             tidestation_tide[ntidestation]);
           }
         }
-      strncpy(line, "\0", sizeof(line));
+      strncpy(line, "", sizeof(line));
       }
     fclose(tfp);
 
