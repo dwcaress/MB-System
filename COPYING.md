@@ -36,7 +36,7 @@ more restrictive GNU GPL license in order to insure that anyone who distributes
 software based in whole or in part on MB-System also distributes their
 modified MB-System source code and any additional source code.
 
-The file "GPL", also located at the top of the MB-System source code
+The file "GPL.md", also located at the top of the MB-System source code
 distribution directory structure, contains the text of the GNU GPL version 3.
 This text and associated explanations are available at the GNU Project website
 https://www.gnu.org/licenses/gpl-3.0.en.html
