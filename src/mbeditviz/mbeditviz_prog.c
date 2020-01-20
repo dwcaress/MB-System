@@ -3208,10 +3208,11 @@ int mbeditviz_selectregion(size_t instance) {
 
 	struct mbview_struct *mbviewdata = NULL;
 
+	/* check data source for selected area */
+	mbev_status = mbview_getdataptr(mbev_verbose, instance, &mbviewdata, &mbev_error);
+
 	/* check if area is currently defined */
 	if (mbev_status == MB_SUCCESS && mbviewdata->region_type == MBV_REGION_QUAD) {
-		/* check data source for selected area */
-		mbev_status = mbview_getdataptr(mbev_verbose, instance, &mbviewdata, &mbev_error);
 
 		/* get area */
 		struct mbview_region_struct *region = (struct mbview_region_struct *)&mbviewdata->region;
