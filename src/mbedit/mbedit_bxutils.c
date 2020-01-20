@@ -27,72 +27,27 @@
  * times.
  */
 
-/*****************************************************************************
- *       INCLUDE FILES
- *****************************************************************************/
-#ifdef HAVE_CONFIG_H
-#include <mb_config.h>
-#endif
+#include <ctype.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+#include <mb_config.h>
 #include <Xm/Xm.h>
 #include <Xm/RowColumn.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
-#include <stdint.h>		/* For the int64_t */
 
-/*
- * Include stdlib.h and malloc.h if code is C++, ANSI, or Extended ANSI.
- */
-#if defined(__cplusplus) || defined(__STDC__) || defined(__EXTENSIONS__)
-#include <stdlib.h>
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#endif
-
-/*****************************************************************************
- *       TYPDEFS AND DEFINES
- *****************************************************************************/
-
-/*
- * Undefine this if you want to use native strcasecmp.
- */
+// Undefine this if you want to use native strcasecmp.
 #define LOCAL_STRCASECMP
 
-#ifdef _NO_PROTO
-#ifdef NeedFunctionPrototypes
-#undef NeedFunctionPrototypes
-#endif
-#endif
-
-/*
- * Define SUPPORTS_WCHARS if the system supports wide character sets
- * Note: the following line flags the VAXC compiler and not the
- * DECC compiler running VAXC emulation.
- */
-#if !((defined(VAXC) && !defined(__DECC)) || defined(__CENTERLINE__))
+// Define SUPPORTS_WCHARS if the system supports wide character sets
 #define SUPPORTS_WCHARS
-#endif
 
-/*
- * Handy definition used in SET_BACKGROUND_COLOR
- */
+// Handy definition used in SET_BACKGROUND_COLOR
 #define UNSET (-1)
 
-/*
- * Set up strcasecmp function
- */
-#if defined(LOCAL_STRCASECMP)
 #define STRCASECMP StrCasecmp
-#ifndef NeedFunctionPrototypes
-static int StrCasecmp();
-#else
 static int StrCasecmp(char *, char *);
-#endif
-#else
-#define STRCASECMP strcasecmp
-#endif
 
 /*
  * Define XTPOINTER so it works with all releases of
@@ -140,39 +95,6 @@ enum {
 	NUM_COMMON_WCHARS
 };
 
-/*****************************************************************************
- *       GLOBAL DECLARATIONS
- *****************************************************************************/
-
-/*****************************************************************************
- *       EXTERNAL DECLARATIONS
- *****************************************************************************/
-
-/*****************************************************************************
- *	STATIC DECLARATION
- *****************************************************************************/
-
-#ifndef NeedFunctionPrototypes
-
-#ifndef SUPPORTS_WCHARS
-static int mblen();
-#endif
-static int strlenWc();
-static size_t doMbstowcs();
-static size_t doWcstombs();
-static void copyWcsToMbs();
-static int dombtowc();
-static Boolean extractSegment();
-static XmString StringToXmString();
-static char *getNextCStrDelim();
-static int getCStrCount();
-static wchar_t *CStrCommonWideCharsGet();
-
-#else
-
-#ifndef SUPPORTS_WCHARS
-static int mblen(char *, size_t);
-#endif
 static int strlenWc(wchar_t *);
 static size_t doMbstowcs(wchar_t *, char *, size_t);
 static size_t doWcstombs(char *, wchar_t *, size_t);
@@ -183,14 +105,6 @@ static XmString StringToXmString(char *);
 static char *getNextCStrDelim(char *);
 static int getCStrCount(char *);
 static wchar_t *CStrCommonWideCharsGet();
-
-#endif
-
-/*****************************************************************************
- *	STATIC CODE
- *****************************************************************************/
-
-#if defined(LOCAL_STRCASECMP)
 
 /*
  * Function:
@@ -205,11 +119,10 @@ static wchar_t *CStrCommonWideCharsGet();
  *             1; s1 != s2
  */
 static int StrCasecmp(char * s1, char * s2) {
-	int c1, c2;
 
 	while (*s1 && *s2) {
-		c1 = isupper(*s1) ? tolower(*s1) : *s1;
-		c2 = isupper(*s2) ? tolower(*s2) : *s2;
+		const int c1 = isupper(*s1) ? tolower(*s1) : *s1;
+		const int c2 = isupper(*s2) ? tolower(*s2) : *s2;
 		if (c1 != c2) {
 			return (1);
 		}
@@ -221,7 +134,6 @@ static int StrCasecmp(char * s1, char * s2) {
 	}
 	return (0);
 }
-#endif
 
 /*
  * Function:
@@ -236,9 +148,8 @@ static int StrCasecmp(char * s1, char * s2) {
  * Output:
  *      int : always 1
  */
-#ifndef SUPPORTS_WCHARS
-static int mblen(char * s, size_t n) { return (1); }
-#endif
+// See man mblen - In C99
+// static int mblen(char * s, size_t n) { return (1); }
 
 /*
  * Function:
@@ -251,13 +162,14 @@ static int mblen(char * s, size_t n) { return (1); }
  * Output:
  *      int : the number of characters found
  */
+// TODO(schwehr): Use wcslen
 static int strlenWc(wchar_t * ptr) {
 	wchar_t *p = ptr;
-	int x = 0;
 
 	if (!ptr)
 		return (0);
 
+	int x = 0;
 	while (*p++)
 		x++;
 	return (x);
@@ -275,18 +187,9 @@ static int strlenWc(wchar_t * ptr) {
  * Output:
  *      bytesConv - size_t : number of bytes converted
  */
+// See man mbstowcs for C99
 static size_t doMbstowcs(wchar_t * wcs, char * mbs, size_t n) {
-#ifndef SUPPORTS_WCHARS
-	int i;
-
-	for (i = 0; i < n && mbs[i] != 0; ++i) {
-		wcs[i] = mbs[i];
-	}
-	wcs[i++] = 0;
-	return (i);
-#else
 	return (mbstowcs(wcs, mbs, n));
-#endif
 }
 
 /*
@@ -301,24 +204,12 @@ static size_t doMbstowcs(wchar_t * wcs, char * mbs, size_t n) {
  * Output:
  *      bytesConv - size_t : number of bytes converted
  */
-static size_t doWcstombs(char * mbs, wchar_t * wcs, size_t n) {
-#ifndef SUPPORTS_WCHARS
-	int i;
-
-	for (i = 0; i < n && wcs[i] != 0; ++i) {
-		mbs[i] = wcs[i];
-	}
-	mbs[i] = 0;
-	return (i);
-#else
-	size_t retval;
-
-	retval = wcstombs(mbs, wcs, (n * sizeof(wchar_t)));
+static size_t doWcstombs(char *mbs, wchar_t * wcs, size_t n) {
+	const size_t retval = wcstombs(mbs, wcs, (n * sizeof(wchar_t)));
 	if (retval == (size_t)-1)
 		return (0);
 	else
 		return (retval);
-#endif
 }
 
 /*
@@ -338,20 +229,9 @@ static size_t doWcstombs(char * mbs, wchar_t * wcs, size_t n) {
  */
 static
 void copyWcsToMbs(char * mbs, wchar_t * wcs, int len, Boolean process_it) {
+	// Make sure there's room in the buffer
 	static wchar_t *tbuf = NULL;
 	static int tbufSize = 0;
-
-	int numCvt;
-	int lenToConvert;
-	wchar_t *fromP = wcs;
-	wchar_t *x = &fromP[len];
-	wchar_t *toP;
-	wchar_t *commonWChars = CStrCommonWideCharsGet();
-	wchar_t tmp;
-
-	/*
-	 * Make sure there's room in the buffer
-	 */
 	if (tbufSize < len) {
 		tbuf = (wchar_t *)XtRealloc((char *)tbuf, (len + 1) * sizeof(wchar_t));
 		tbufSize = len;
@@ -360,8 +240,11 @@ void copyWcsToMbs(char * mbs, wchar_t * wcs, int len, Boolean process_it) {
 	/*
 	 * Now copy and process
 	 */
-	toP = tbuf;
-	lenToConvert = 0;
+	wchar_t *toP = tbuf;
+	int lenToConvert = 0;
+	wchar_t *fromP = wcs;
+	wchar_t *x = &fromP[len];
+	wchar_t *commonWChars = CStrCommonWideCharsGet();
 	while (fromP < x) {
 		/*
 		 * Check for quoted characters
@@ -374,7 +257,7 @@ void copyWcsToMbs(char * mbs, wchar_t * wcs, int len, Boolean process_it) {
 				lenToConvert++;
 				break;
 			}
-			tmp = *fromP++;
+			const wchar_t tmp = *fromP++;
 			if (tmp == commonWChars[WideN]) {
 				*toP++ = commonWChars[WNewLine];
 			}
@@ -406,9 +289,9 @@ void copyWcsToMbs(char * mbs, wchar_t * wcs, int len, Boolean process_it) {
 		lenToConvert++;
 	}
 
-	tmp = tbuf[lenToConvert];
+	const wchar_t tmp = tbuf[lenToConvert];
 	tbuf[lenToConvert] = (wchar_t)0;
-	numCvt = doWcstombs(mbs, tbuf, lenToConvert);
+	const int numCvt = doWcstombs(mbs, tbuf, lenToConvert);
 	tbuf[lenToConvert] = tmp;
 
 	mbs[numCvt] = '\0';
@@ -432,8 +315,6 @@ void copyWcsToMbs(char * mbs, wchar_t * wcs, int len, Boolean process_it) {
  *	       the multibyte character.
  */
 static int dombtowc(wchar_t * wide, char * multi, size_t size) {
-	int retVal = 0;
-
 #ifndef SUPPORTS_WCHARS
 	if ((multi == NULL) || (*multi == '\000')) {
 		if (wide)
@@ -441,15 +322,16 @@ static int dombtowc(wchar_t * wide, char * multi, size_t size) {
 		return (0);
 	}
 
+	int retVal = 0;
 	for (retVal = 0; retVal < size && multi[retVal] != '\000'; retVal++) {
 		if (wide != NULL) {
 			wide[retVal] = multi[retVal];
 		}
 	}
-#else
-	retVal = mbtowc(wide, multi, size);
-#endif
 	return (retVal);
+#else
+	return mbtowc(wide, multi, size);
+#endif
 }
 
 /*
@@ -469,18 +351,14 @@ static wchar_t *getNextSeparator(wchar_t * str) {
 	wchar_t *commonWChars = CStrCommonWideCharsGet();
 
 	while (*ptr) {
-		/*
-		 * Check for separator
-		 */
+		// Check for separator
 		if ((*ptr == commonWChars[WHash]) || (*ptr == commonWChars[WQuote]) || (*ptr == commonWChars[WColon])) {
 			return (ptr);
-		}
-		else if (*ptr == commonWChars[WBackSlash]) {
+		} else if (*ptr == commonWChars[WBackSlash]) {
 			ptr++;
 			if (*ptr)
 				ptr++; /* Skip quoted character */
-		}
-		else {
+		} else {
 			ptr++;
 		}
 	}
@@ -510,38 +388,23 @@ static wchar_t *getNextSeparator(wchar_t * str) {
 static Boolean extractSegment(
     wchar_t ** str, wchar_t ** tagStart, int * tagLen,
     wchar_t ** txtStart, int * txtLen, int * pDir, Boolean * pSep) {
-	wchar_t *start;
-	wchar_t *text;
-	int textL;
-	Boolean tagSeen;
-	wchar_t *tag;
-	int tagL;
-	Boolean modsSeen;
-	Boolean sep;
-	int dir;
-	Boolean done;
 	Boolean checkDir;
-	wchar_t *commonWChars;
 	wchar_t emptyStrWcs[1];
 
-	/*
-	 * Initialize variables
-	 */
-	text = NULL;
-	textL = 0;
-	tagSeen = False;
-	tag = NULL;
-	tagL = 0;
-	modsSeen = False;
-	dir = XmSTRING_DIRECTION_L_TO_R;
-	sep = False;
-	done = False;
-	commonWChars = CStrCommonWideCharsGet();
+	wchar_t *text = NULL;
+	int textL = 0;
+	Boolean tagSeen = False;
+	wchar_t *tag = NULL;
+	int tagL = 0;
+	Boolean modsSeen = False;
+	int dir = XmSTRING_DIRECTION_L_TO_R;
+	Boolean sep = False;
+	Boolean done = False;
+	wchar_t *commonWChars = CStrCommonWideCharsGet();
 
-	/*
-	 * Guard against nulls
-	 */
-	if (!(start = *str)) {
+	// Guard against nulls
+	wchar_t *start = *str;
+	if (!start) {
 		start = emptyStrWcs;
 		emptyStrWcs[0] = commonWChars[WNull];
 	}
@@ -667,7 +530,8 @@ static Boolean extractSegment(
 	if (pSep)
 		*pSep = sep;
 
-	return ((*start == commonWChars[WNull]) ? False : True);
+	return *start != commonWChars[WNull];
+	// return ((*start == commonWChars[WNull]) ? False : True);
 }
 
 /*
@@ -681,12 +545,23 @@ static Boolean extractSegment(
  *	xstr - XmString : the allocated return structure
  */
 static XmString StringToXmString(char *str) {
+	if (!str)
+		return (NULL);
+
 	static char *tagBuf = NULL;
 	static int tagBufLen = 0;
 	static char *textBuf = NULL;
 	static int textBufLen = 0;
 
-	wchar_t *ctx;
+	// For expediencies sake, we'll overallocate this buffer so that
+	// the wcs is guaranteed to fit (1 wc per byte in original string).
+	wchar_t *wcStr = (wchar_t *)XtMalloc((strlen(str) + 1) * sizeof(wchar_t));
+	doMbstowcs(wcStr, str, strlen(str) + 1);
+
+	// Create the beginning segment
+	int curDir = XmSTRING_DIRECTION_L_TO_R;
+	XmString xmStr = XmStringDirectionCreate(curDir);
+
 	wchar_t *tag;
 	int tagLen;
 	wchar_t *text;
@@ -694,51 +569,22 @@ static XmString StringToXmString(char *str) {
 	Boolean sep;
 	int dir;
 
-	Boolean more;
-	wchar_t *wcStr;
-	int curDir;
-	XmString xmStr;
-	XmString s1;
-	XmString s2;
-
-	if (!str)
-		return (NULL);
-
-	/*
-	 * For expediencies sake, we'll overallocate this buffer so that
-	 * the wcs is guaranteed to fit (1 wc per byte in original string).
-	 */
-	wcStr = (wchar_t *)XtMalloc((strlen(str) + 1) * sizeof(wchar_t));
-	doMbstowcs(wcStr, str, strlen(str) + 1);
-
-	/*
-	 * Create the beginning segment
-	 */
-	curDir = XmSTRING_DIRECTION_L_TO_R;
-	xmStr = XmStringDirectionCreate(curDir);
-
-	/*
-	 * Convert the string.
-	 */
-	more = True;
-	ctx = wcStr;
+	// Convert the string.
+	Boolean more = True;
+	wchar_t *ctx = wcStr;
 	while (more) {
 		more = extractSegment(&ctx, &tag, &tagLen, &text, &textLen, &dir, &sep);
-		/*
-		 * Pick up a direction change
-		 */
+		// Pick up a direction change
 		if (dir != curDir) {
 			curDir = dir;
-			s1 = XmStringDirectionCreate(curDir);
-			s2 = xmStr;
+			XmString s1 = XmStringDirectionCreate(curDir);
+			XmString s2 = xmStr;
 			xmStr = XmStringConcat(s2, s1);
 			XmStringFree(s1);
 			XmStringFree(s2);
 		}
 
-		/*
-		 * Create the segment. Text and tag first.
-		 */
+		// Create the segment. Text and tag first.
 		if (textLen) {
 			if (textBufLen <= (textLen * sizeof(wchar_t))) {
 				textBufLen = (textLen + 1) * sizeof(wchar_t);
@@ -752,8 +598,7 @@ static XmString StringToXmString(char *str) {
 					tagBuf = (char *)XtRealloc(tagBuf, tagBufLen);
 				}
 				copyWcsToMbs(tagBuf, tag, tagLen, False);
-			}
-			else {
+			} else {
 				if (!tagBuf) {
 					tagBufLen = strlen(XmSTRING_DEFAULT_CHARSET) + 1;
 					tagBuf = (char *)XtMalloc(tagBufLen);
@@ -761,28 +606,23 @@ static XmString StringToXmString(char *str) {
 				strcpy(tagBuf, XmSTRING_DEFAULT_CHARSET);
 			}
 
-			s1 = XmStringCreate(textBuf, tagBuf);
-			s2 = xmStr;
+			XmString s1 = XmStringCreate(textBuf, tagBuf);
+			XmString s2 = xmStr;
 			xmStr = XmStringConcat(s2, s1);
 			XmStringFree(s1);
 			XmStringFree(s2);
 		}
 
-		/*
-		 * Add in the separators.
-		 */
+		// Add in the separators.
 		if (sep) {
-			s1 = XmStringSeparatorCreate();
-			s2 = xmStr;
+			XmString s1 = XmStringSeparatorCreate();
+			XmString s2 = xmStr;
 			xmStr = XmStringConcat(s2, s1);
 			XmStringFree(s1);
 			XmStringFree(s2);
 		}
 	}
 
-	/*
-	 * Free up memory and return
-	 */
 	XtFree((char *)wcStr);
 	return (xmStr);
 }
@@ -799,20 +639,15 @@ static XmString StringToXmString(char *str) {
  *			delimiter found.
  */
 static char *getNextCStrDelim(char * str) {
-	char *comma = str;
-	Boolean inQuotes = False;
-	int len;
-
 	if (!str)
 		return (NULL);
 	if (!*str)
 		return (NULL); /* At end */
 
-#ifdef __CENTERLINE__
-	len = mblen(NULL, sizeof(wchar_t));
-#else
-	len = mblen(NULL, sizeof(wchar_t));
-#endif
+	char *comma = str;
+	Boolean inQuotes = False;
+
+	int len = mblen(NULL, sizeof(wchar_t));
 	while (*comma) {
 		if ((len = mblen(comma, sizeof(wchar_t))) > 1) {
 			comma += len;
@@ -825,18 +660,14 @@ static char *getNextCStrDelim(char * str) {
 			continue;
 		}
 
-		/*
-		 * See if we have a delimiter
-		 */
+		// See if we have a delimiter
 		if (!inQuotes) {
 			if ((*comma == ',') || (*comma == '\012')) {
 				return (comma);
 			}
 		}
 
-		/*
-		 * Deal with quotes
-		 */
+		// Deal with quotes
 		if (*comma == '\"') {
 			inQuotes = ~inQuotes;
 		}
@@ -859,13 +690,13 @@ static char *getNextCStrDelim(char * str) {
  *      cnt - int : the number of XmStrings found
  */
 static int getCStrCount(char * str) {
-	int x = 1;
-	char *newStr;
-
 	if (!str)
 		return (0);
 	if (!*str)
 		return (0);
+
+	int x = 1;
+	char *newStr;
 
 	while ((newStr = getNextCStrDelim(str))) {
 		x++;
@@ -895,14 +726,10 @@ static wchar_t *CStrCommonWideCharsGet() {
 	                             "l",    "n",  "r",  "t",  "v",  "F",  "L",  "R",  "T", "0", "1"};
 
 	if (CommonWideChars == NULL) {
-		int i;
-
-		/*
-		 * Allocate and create the array.
-		 */
+		// Allocate and create the array.
 		CommonWideChars = (wchar_t *)XtMalloc(NUM_COMMON_WCHARS * sizeof(wchar_t));
 
-		for (i = 0; i < NUM_COMMON_WCHARS; i++) {
+		for (int i = 0; i < NUM_COMMON_WCHARS; i++) {
 			(void)dombtowc(&(CommonWideChars[i]), characters[i], 1);
 		}
 	}
@@ -928,45 +755,35 @@ static wchar_t *CStrCommonWideCharsGet() {
 static Boolean CvtStringToXmString(
     Display * d, XrmValue *args, Cardinal *num_args,
     XrmValue * fromVal, XrmValue * toVal, XtPointer data) {
-	static XmString resStr;
-	char *str;
+	(void)args;  // Unused param
+	(void)data;  // Unused param
 
-	/*
-	 * This converter takes no parameters
-	 */
+	// This converter takes no parameters
 	if (*num_args != 0) {
 		XtAppWarningMsg(XtDisplayToApplicationContext(d), "cvtStringToXmString", "wrongParameters", "XtToolkitError",
 		                "String to XmString converter needs no extra arguments", NULL, NULL);
 	}
 
-	/*
-	 * See if this is a simple string
-	 */
-	str = (char *)fromVal->addr;
+	// See if this is a simple string
+	char *str = (char *)fromVal->addr;
+	static XmString resStr;
 	if (strncmp(str, "::", 2)) {
 		resStr = XmStringCreateLtoR(fromVal->addr, XmSTRING_DEFAULT_CHARSET);
-	}
-	else {
-		/*
-		 * Convert into internal format
-		 */
+	} else {
+		// Convert into internal format
 		resStr = StringToXmString(fromVal->addr + 2); /* skip :: */
 	}
 
-	/*
-	 * Done, return result
-	 */
+	// Done, return result
 	if (toVal->addr == NULL) {
 		toVal->addr = (XTPOINTER)&resStr;
 		toVal->size = sizeof(XmString);
-	}
-	else if (toVal->size < sizeof(XmString)) {
+	} else if (toVal->size < sizeof(XmString)) {
 		toVal->size = sizeof(XmString);
 		XtDisplayStringConversionWarning(d, fromVal->addr, "XmString");
 		XmStringFree(resStr);
 		return (False);
-	}
-	else {
+	} else {
 		*(XmString *)toVal->addr = resStr;
 		toVal->size = sizeof(XmString);
 	}
@@ -994,48 +811,38 @@ static Boolean CvtStringToXmString(
 static Boolean CvtStringToXmStringTable(
     Display * d, XrmValue * args, Cardinal *num_args,
     XrmValue * fromVal, XrmValue *toVal, XtPointer data) {
-	static XmString *CStrTable;
-	XmString *tblPtr;
-	char *str;
-	char *tmpBuf;
-	char *nextDelim;
-	XrmValue fVal;
-	XrmValue tVal;
+	(void)data;  // Unused param
 
-	/*
-	 * This converter takes no parameters
-	 */
+
+	// This converter takes no parameters
 	if (*num_args != 0) {
 		XtAppWarningMsg(XtDisplayToApplicationContext(d), "cvtStringToXmStringTable", "wrongParameters", "XtToolkitError",
 		                "String to XmStringTable converter needs no extra arguments", NULL, NULL);
 	}
 
-	/*
-	 * Set str and make sure there's somethin' there
-	 */
-	if (!(str = (char *)fromVal->addr)) {
+	// Set str and make sure there's somethin' there
+	char *str = (char *)fromVal->addr;
+	if (!str) {
 		str = "";
 	}
 
-	/*
-	 * Allocate the XmStrings + 1 for NULL termination
-	 */
+	// Allocate the XmStrings + 1 for NULL termination
+	static XmString *CStrTable;
 	CStrTable = (XmString *)XtMalloc((getCStrCount(str) + 1) * sizeof(XmString *));
 
-	/*
-	 * Use the string converter for the strings
-	 */
-	tmpBuf = (char *)XtMalloc(strlen(str) + 1);
+	// Use the string converter for the strings
+	char *tmpBuf = (char *)XtMalloc(strlen(str) + 1);
 	strcpy(tmpBuf, str);
 	str = tmpBuf;
 
-	/*
-	 * Create strings
-	 */
-	tblPtr = CStrTable;
+	// Create strings
+	XmString *tblPtr = CStrTable;
 	if (*str) {
+		XrmValue fVal;
+		XrmValue tVal;
+
 		while (str) {
-			nextDelim = getNextCStrDelim(str);
+			char *nextDelim = getNextCStrDelim(str);
 
 			/*
 			 * Overwrite nextDelim
@@ -1069,14 +876,11 @@ static Boolean CvtStringToXmStringTable(
 	}
 	XtFree(tmpBuf);
 
-	/*
-	 * Null terminate
-	 */
+	// Null terminate
 	*tblPtr = NULL;
 
-	/*
-	 * Done, return result
-	 */
+	// Done, return result
+
 	if (toVal->addr == NULL) {
 		toVal->addr = (XTPOINTER)&CStrTable;
 		toVal->size = sizeof(XmString);
@@ -1141,9 +945,7 @@ void RegisterBxConverters(XtAppContext appContext) {
 XtPointer BX_CONVERT(
     Widget w, char * from_string, char *to_type, int to_size,
     Boolean *success) {
-	XrmValue fromVal, toVal; /* resource holders		*/
-	Boolean convResult;      /* return value			*/
-	XtPointer val;           /* Pointer size return value    */
+	(void)to_size;  // Unused param
 
 	/*
 	 * We will assume that the conversion is going to fail and change this
@@ -1155,6 +957,7 @@ XtPointer BX_CONVERT(
 	 * set the fromVal structure up with the string information that
 	 * the caller passed in.
 	 */
+	XrmValue fromVal;
 	fromVal.size = strlen(from_string) + 1;
 	fromVal.addr = from_string;
 
@@ -1163,6 +966,7 @@ XtPointer BX_CONVERT(
 	 * get back we will set this up so that the converter will point us
 	 * at a block of valid data.
 	 */
+	XrmValue toVal;
 	toVal.size = 0;
 	toVal.addr = NULL;
 
@@ -1170,7 +974,7 @@ XtPointer BX_CONVERT(
 	 * Now lets try to convert this data by calling this handy-dandy Xt
 	 * routine.
 	 */
-	convResult = XtConvertAndStore(w, XmRString, &fromVal, to_type, &toVal);
+	Boolean convResult = XtConvertAndStore(w, XmRString, &fromVal, to_type, &toVal);
 
 	/*
 	 * Now we have two conditions here.  One the conversion was a success
@@ -1189,6 +993,8 @@ XtPointer BX_CONVERT(
 	 * well.  Now we have to handle the special cases for type and
 	 * size constraints.
 	 */
+	XtPointer val;  /* Pointer size return value */
+
 	if (!strcmp(to_type, "String")) {
 		/*
 		 * Since strings are handled different in Xt we have to deal with
@@ -1270,7 +1076,9 @@ XtPointer CONVERT(
  */
 
 #ifndef IGNORE_MENU_POST
-void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean * dispatch) {
+void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
+	(void)p;  // Unused param
+	(void)dispatch;  // Unused param
 	Arg args[2];
 	int argcnt;
 	int button;
@@ -1316,7 +1124,8 @@ void MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean* dispatch) {
  */
 void BX_SET_BACKGROUND_COLOR(
     Widget w, ArgList args, Cardinal *argcnt, Pixel bg_color) {
-
+	(void)w;  // Unused param
+    // On Debian testing in 2020, XmVERSION is 2.
 #if ((XmVERSION == 1) && (XmREVISION > 0))
 
 	/*
@@ -1435,15 +1244,13 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 	int wgtCount = 0;
 	Widget inst;
 	Widget current;
-	String tmp;
 	String start;
 	String widget;
-	char *ptr;
 
 	/*
 	 * For backward compatibility, remove [ and ] from the list.
 	 */
-	tmp = start = XtNewString(stringList);
+	String tmp = start = XtNewString(stringList);
 	if ((start = strchr(start, '[')) != NULL)
 		start++;
 	else
@@ -1452,7 +1259,7 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 	while ((start && *start) && isspace(*start)) {
 		start++;
 	}
-	ptr = strrchr(start, ']');
+	char *ptr = strrchr(start, ']');
 	if (ptr) {
 		*ptr = '\0';
 	}
@@ -1851,9 +1658,9 @@ LFUNC(atoui, unsigned int, (char *p, unsigned int l, unsigned int *ui_return));
 #endif
 
 static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
-	int n, i;
+	int i;
 
-	n = 0;
+	int n = 0;
 	for (i = 0; i < l; i++)
 		if (*p >= '0' && *p <= '9')
 			n = n * 10 + *p++ - '0';
@@ -1877,9 +1684,7 @@ static int BxXpmCreatePixmapFromData(
 	XGCValues gcv;
 	GC gc;
 
-	/*
-	 * initialize return values
-	 */
+	// initialize return values
 	if (pixmap_return) {
 		*pixmap_return = (Pixmap)NULL;
 		imageptr = &image;
@@ -1929,9 +1734,7 @@ static int BxXpmCreateImageFromData(
 	int ErrorStatus;
 	bxxpmInternAttrib attrib;
 
-	/*
-	 * initialize return values
-	 */
+	// initialize return values
 	if (image_return)
 		*image_return = NULL;
 	if (shapeimage_return)
@@ -2579,13 +2382,12 @@ static void _putbits(
     int numbits,     // number of bits to copy to destination
     char *dst)      // address of destination bit string
 {
-	unsigned char chlo, chhi;
-	int hibits;
+	unsigned char chhi;
 
 	dst = dst + (dstoffset >> 3);
 	dstoffset = dstoffset & 7;
-	hibits = 8 - dstoffset;
-	chlo = *dst & _lomask[dstoffset];
+	const int hibits = 8 - dstoffset;
+	unsigned char chlo = *dst & _lomask[dstoffset];
 	for (;;) {
 		chhi = (*src << dstoffset) & _himask[dstoffset];
 		if (numbits <= hibits) {
@@ -2626,10 +2428,9 @@ static void SetImagePixels(
 	char *src;
 	char *dst;
 	int nbytes;
-	unsigned int *iptr;
 	int x, y, i;
 
-	iptr = pixelindex;
+	unsigned int *iptr = pixelindex;
 	if (image->depth == 1) {
 		for (y = 0; y < height; y++)
 			for (x = 0; x < width; x++, iptr++) {
@@ -2760,12 +2561,9 @@ static void SetImagePixels16(
 static void SetImagePixels8(
     XImage *image, unsigned int width, unsigned int height, unsigned int *pixelindex, Pixel *pixels)
 {
-	unsigned int *iptr;
-	int x, y;
-
-	iptr = pixelindex;
-	for (y = 0; y < height; y++)
-		for (x = 0; x < width; x++, iptr++)
+	unsigned int *iptr = pixelindex;
+	for (int y = 0; y < height; y++)
+		for (int x = 0; x < width; x++, iptr++)
 			image->data[BXZINDEX8(x, y, image)] = (char)pixels[*iptr];
 }
 
