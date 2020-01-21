@@ -28,6 +28,7 @@
  */
 
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -119,7 +120,6 @@ static wchar_t *CStrCommonWideCharsGet();
  *             1; s1 != s2
  */
 static int StrCasecmp(char * s1, char * s2) {
-
 	while (*s1 && *s2) {
 		const int c1 = isupper(*s1) ? tolower(*s1) : *s1;
 		const int c2 = isupper(*s2) ? tolower(*s2) : *s2;
@@ -388,19 +388,8 @@ static wchar_t *getNextSeparator(wchar_t * str) {
 static Boolean extractSegment(
     wchar_t ** str, wchar_t ** tagStart, int * tagLen,
     wchar_t ** txtStart, int * txtLen, int * pDir, Boolean * pSep) {
-	Boolean checkDir;
-	wchar_t emptyStrWcs[1];
-
-	wchar_t *text = NULL;
-	int textL = 0;
-	Boolean tagSeen = False;
-	wchar_t *tag = NULL;
-	int tagL = 0;
-	Boolean modsSeen = False;
-	int dir = XmSTRING_DIRECTION_L_TO_R;
-	Boolean sep = False;
-	Boolean done = False;
 	wchar_t *commonWChars = CStrCommonWideCharsGet();
+	wchar_t emptyStrWcs[1];
 
 	// Guard against nulls
 	wchar_t *start = *str;
@@ -408,6 +397,13 @@ static Boolean extractSegment(
 		start = emptyStrWcs;
 		emptyStrWcs[0] = commonWChars[WNull];
 	}
+
+	wchar_t *text = NULL;
+	int textL = 0;
+	wchar_t *tag = NULL;
+	int tagL = 0;
+	int dir = XmSTRING_DIRECTION_L_TO_R;
+	bool sep = false;
 
 	/*
 	 * If the first character of the string isn't a # or a ", then we
@@ -420,17 +416,18 @@ static Boolean extractSegment(
 			text = NULL;
 		}
 		start += textL;
-	}
-	else {
-		done = False;
+	} else {
+		bool modsSeen = false;
+		bool done = false;
+		bool tagSeen = false;
 		while (!done) {
 			if (*start == commonWChars[WHash]) {
 				if (tagSeen) {
-					done = True;
+					done = true;
 					break;
 				}
 				else {
-					tagSeen = True;
+					tagSeen = true;
 					tag = ++start;
 					start = getNextSeparator(tag);
 					if ((tagL = start - tag) == 0) {
@@ -454,11 +451,11 @@ static Boolean extractSegment(
 				if (*start == commonWChars[WQuote]) {
 					start++;
 				}
-				done = True;
+				done = true;
 			}
 			else if (*start == commonWChars[WColon]) {
 				if (modsSeen) {
-					done = True;
+					done = true;
 					break;
 				}
 
@@ -466,19 +463,19 @@ static Boolean extractSegment(
 				 * If the next character is a t or f, the we've got
 				 * a separator.
 				 */
-				modsSeen = True;
-				checkDir = False;
+				modsSeen = true;
+				bool checkDir = false;
 				start++;
 				if ((*start == commonWChars[WideT]) || (*start == commonWChars[WideUT]) || (*start == commonWChars[WideOne])) {
-					sep = True;
+					sep = true;
 					start++;
-					checkDir = True;
+					checkDir = true;
 				}
 				else if ((*start == commonWChars[WideF]) || (*start == commonWChars[WideUF]) ||
 				         (*start == commonWChars[WideZero])) {
-					sep = False;
+					sep = false;
 					start++;
-					checkDir = True;
+					checkDir = true;
 				}
 				else if ((*start == commonWChars[WideR]) || (*start == commonWChars[WideUR])) {
 					start++;
@@ -1658,9 +1655,8 @@ LFUNC(atoui, unsigned int, (char *p, unsigned int l, unsigned int *ui_return));
 #endif
 
 static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
-	int i;
-
 	int n = 0;
+	int i;
 	for (i = 0; i < l; i++)
 		if (*p >= '0' && *p <= '9')
 			n = n * 10 + *p++ - '0';
@@ -2428,23 +2424,23 @@ static void SetImagePixels(
 	char *src;
 	char *dst;
 	int nbytes;
-	int x, y, i;
+	int x, y;
 
 	unsigned int *iptr = pixelindex;
 	if (image->depth == 1) {
 		for (y = 0; y < height; y++)
 			for (x = 0; x < width; x++, iptr++) {
 				pixel = pixels[*iptr];
-				for (i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
+				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
 					((unsigned char *)&pixel)[i] = (unsigned char)px;
 				src = &image->data[BXXYINDEX(x, y, image)];
 				dst = (char *)&px;
 				px = 0;
 				nbytes = image->bitmap_unit >> 3;
-				for (i = nbytes; --i >= 0;)
+				for (int i = nbytes; --i >= 0;)
 					*dst++ = *src++;
 				BXXYNORMALIZE(&px, image);
-				i = ((x + image->xoffset) % image->bitmap_unit);
+				int i = ((x + image->xoffset) % image->bitmap_unit);
 				_putbits((char *)&pixel, i, 1, (char *)&px);
 				BXXYNORMALIZE(&px, image);
 				src = (char *)&px;
@@ -2459,20 +2455,20 @@ static void SetImagePixels(
 				pixel = pixels[*iptr];
 				if (image->depth == 4)
 					pixel &= 0xf;
-				for (i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
+				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
 					((unsigned char *)&pixel)[i] = (unsigned char)px;
 				src = &image->data[BXZINDEX(x, y, image)];
 				dst = (char *)&px;
 				px = 0;
 				nbytes = (image->bits_per_pixel + 7) >> 3;
-				for (i = nbytes; --i >= 0;)
+				for (int i = nbytes; --i >= 0;)
 					*dst++ = *src++;
 				BXZNORMALIZE(&px, image);
 				_putbits((char *)&pixel, (x * image->bits_per_pixel) & 7, image->bits_per_pixel, (char *)&px);
 				BXZNORMALIZE(&px, image);
 				src = (char *)&px;
 				dst = &image->data[BXZINDEX(x, y, image)];
-				for (i = nbytes; --i >= 0;)
+				for (int i = nbytes; --i >= 0;)
 					*dst++ = *src++;
 			}
 	}
