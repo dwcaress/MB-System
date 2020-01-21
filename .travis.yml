@@ -19,7 +19,7 @@ matrix:
 
   - os: linux
     name: Ubuntu Focal (20.04) Build-Deps Docker Image
-    if: type = cron
+    if: repo = dwcaress/MB-System AND type = cron
     services: docker
     env:
       - TRAVIS_CONFIG=docker_dep_image
@@ -29,7 +29,7 @@ matrix:
 
 
   - os: linux
-    if: type = cron
+    if: repo = dwcaress/MB-System AND type = cron
     name: Ubuntu Focal (20.04) GMT 6.0.0 PROJ 6.3 Build-Deps Docker Image
     services: docker
     env:
@@ -41,7 +41,7 @@ matrix:
       - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-focal-proj6.3-gmt6.0.0
 
   - os: linux
-    if: type = cron
+    if: repo = dwcaress/MB-System AND type = cron
     name: Ubuntu Bionic (18.04) Build-Deps Docker Image
     services: docker
     env:
@@ -51,7 +51,7 @@ matrix:
       - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-bionic
 
   - os: linux
-    if: type = cron
+    if: repo = dwcaress/MB-System AND type = cron
     name: Ubuntu Disco (19.04) Build-Deps Docker Image
     services: docker
     env:
@@ -61,7 +61,7 @@ matrix:
       - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-disco
 
   - os: linux
-    if: type = cron
+    if: repo = dwcaress/MB-System AND type = cron
     name: Ubuntu Xenial (16.04) Build-Deps Docker Image
     services: docker
     env:
@@ -72,7 +72,7 @@ matrix:
       - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-xenial
 
   - os: linux
-    if: type = cron
+    if: repo = dwcaress/MB-System AND type = cron
     name: CentOS 7 Build-Deps Docker Image
     services: docker
     env:
