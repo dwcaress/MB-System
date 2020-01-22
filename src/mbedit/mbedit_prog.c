@@ -1844,7 +1844,7 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
 
 						/* reset the beam value */
 						if (!mb_beam_ok(ping[i].beamflag[j]) && !mb_beam_check_flag_unusable(ping[i].beamflag[j]))
-							ping[i].beamflag[j] = ping[i].beamflag[j] = mb_beam_set_flag_none(ping[i].beamflag[j]);
+							ping[i].beamflag[j] = mb_beam_set_flag_none(ping[i].beamflag[j]);
 						if (verbose >= 1) {
 							fprintf(stderr, "\nping: %d beam:%d depth:%10.3f ", i, j, ping[i].bath[j]);
 							fprintf(stderr, " flagged\n");
@@ -3340,7 +3340,7 @@ int mbedit_filter_ping(int iping) {
 						/* reset the beam value - if beam was originally flagged
 						    then reset to the original flag value */
 						if (mb_beam_ok(ping[iping].beamflagorg[j]))
-							ping[iping].beamflag[j] = ping[iping].beamflag[j] = mb_beam_set_flag_filter2(ping[iping].beamflag[j]);
+							ping[iping].beamflag[j] = mb_beam_set_flag_filter2(ping[iping].beamflag[j]);
 						else
 							ping[iping].beamflag[j] = ping[iping].beamflagorg[j];
 						if (verbose >= 1) {
@@ -3361,7 +3361,7 @@ int mbedit_filter_ping(int iping) {
 						/* reset the beam value - if beam was originally flagged
 						    then reset to the original flag value */
 						if (mb_beam_ok(ping[iping].beamflagorg[j]))
-							ping[iping].beamflag[j] = ping[iping].beamflag[j] = mb_beam_set_flag_filter2(ping[iping].beamflag[j]);
+							ping[iping].beamflag[j] = mb_beam_set_flag_filter2(ping[iping].beamflag[j]);
 						else
 							ping[iping].beamflag[j] = ping[iping].beamflagorg[j];
 						if (verbose >= 1) {
@@ -3388,7 +3388,7 @@ int mbedit_filter_ping(int iping) {
 							/* reset the beam value - if beam was originally flagged
 							    then reset to the original flag value */
 							if (mb_beam_ok(ping[iping].beamflagorg[j]))
-								ping[iping].beamflag[j] = ping[iping].beamflag[j] =
+								ping[iping].beamflag[j] =
 								    mb_beam_set_flag_filter2(ping[iping].beamflag[j]);
 							else
 								ping[iping].beamflag[j] = ping[iping].beamflagorg[j];
@@ -3412,7 +3412,7 @@ int mbedit_filter_ping(int iping) {
 							/* reset the beam value - if beam was originally flagged
 							    then reset to the original flag value */
 							if (mb_beam_ok(ping[iping].beamflagorg[j]))
-								ping[iping].beamflag[j] = ping[iping].beamflag[j] =
+								ping[iping].beamflag[j] =
 								    mb_beam_set_flag_filter2(ping[iping].beamflag[j]);
 							else
 								ping[iping].beamflag[j] = ping[iping].beamflagorg[j];
