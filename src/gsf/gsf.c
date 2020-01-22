@@ -8679,6 +8679,9 @@ gsfIsStarboardPing(const gsfRecords *data)
 int
 gsfLoadDepthScaleFactorAutoOffset(gsfSwathBathyPing *ping, unsigned int subrecordID, int reset, double min_depth, double max_depth, double *last_corrector, char c_flag, double precision)
 {
+    // MBSYSTEM MODIFICATION
+    (void)min_depth;  // Unused parameter
+
     double          offset;
     double          fraction;
     double          layer;
