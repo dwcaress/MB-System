@@ -23,10 +23,9 @@
 #define MB_DEFINE_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <mb_config.h>
 
 #ifdef _WIN32
 	/* https://www.zachburlingame.com/2011/05/resolving-redefinition-errors-betwen-ws2def-h-and-winsock-h/ */
@@ -35,19 +34,6 @@ extern "C" {
 #	endif
 #	include <WinSock2.h>
 #	include <Windows.h>
-
-#	include <mb_config.h>
-#else
-#	ifdef HAVE_CONFIG_H
-#		ifndef MBSYSTEM_CONFIG_DEFINED
-#			include <mb_config.h>
-#		endif
-#	endif
-#endif
-
-/* include for mb_s_char types */
-#if HAVE_STDINT_H
-#include <stdint.h>
 #endif
 
 /* For XDR/RPC */
@@ -57,6 +43,10 @@ extern "C" {
 #ifdef HAVE_RPC_TYPES_H
 #include <rpc/types.h>
 #include <rpc/xdr.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /* for Windows */
