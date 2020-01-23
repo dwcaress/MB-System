@@ -28,8 +28,8 @@
 
 /*--------------------------------------------------------------------*/
 
-
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -292,28 +292,21 @@ static int jbeam_save = 0;
 static double *bathlist;
 
 /* color control values */
-#define WHITE 0
-#define BLACK 1
-#define RED 2
-#define GREEN 3
-#define BLUE 4
-#define CORAL 5
-#define LIGHTGREY 6
-#define XG_SOLIDLINE 0
-#define XG_DASHLINE 1
+typedef enum {
+    WHITE = 0,
+    BLACK = 1,
+    RED = 2,
+    GREEN = 3,
+    BLUE = 4,
+    CORAL = 5,
+    LIGHTGREY = 6,
+} mbedit_color_t;
+
 static int ncolors;
 static unsigned int pixel_values[256];
 
 /*--------------------------------------------------------------------*/
 int mbedit_init(int argc, char **argv, int *startup_file) {
-	int fileflag = 0;
-	int i;
-
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 	status = mb_uselockfiles(verbose, &uselockfiles);
 	format = 0;
@@ -340,6 +333,13 @@ int mbedit_init(int argc, char **argv, int *startup_file) {
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 	strcpy(ifile, "");
+
+	int fileflag = 0;
+
+	int errflg = 0;
+	int c;
+	int help = 0;
+	int flag = 0;
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:SsXx")) != -1) {
@@ -432,7 +432,7 @@ int mbedit_init(int argc, char **argv, int *startup_file) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       argc:      %d\n", argc);
-		for (i = 0; i < argc; i++)
+		for (int i = 0; i < argc; i++)
 			fprintf(stderr, "dbg2       argv[%d]:    %s\n", i, argv[i]);
 	}
 
