@@ -4516,9 +4516,9 @@ void do_action_z(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_action_tie_xyz(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_set_tie_xyz();
 	do_update_status();
