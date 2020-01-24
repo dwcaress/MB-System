@@ -234,12 +234,16 @@ typedef struct trn_offset_pub_s{
     int filter_state;
     // last measurement successful
     int success;
-    // MB1 cycle counter
+    // mbtrnpp MB1 cycle counter
     int cycle;
+    // MB1 ping number
+    int ping_number;
     // MB1 timestamp
     double mb1_time;
     // TRN update time (taken in mbtrnpp)
     double update_time;
+    // TRN is converged !=0
+    short int is_converged;
 }trn_offset_pub_t;
 #pragma pack(pop)
 
@@ -254,8 +258,11 @@ typedef struct trn_update_s{
     int filter_state;
     int success;
     int cycle;
+    int ping_number;
     double mb1_time;
     double update_time;
+    // TRN is converged !=0
+    short int is_converged;
 }trn_update_t;
 
 typedef struct mt_cdata_s{
