@@ -664,10 +664,6 @@ void GMT_mbgrdtiff_set_proj_limits(struct GMT_CTRL *GMT, struct GMT_GRID_HEADER 
 	 * nx/ny are set accordingly.  Not that some of these may change
 	 * if gmt_project_init is called at a later stage */
 
-	unsigned int i, k;
-	bool all_lats = false, all_lons = false;
-	double x, y;
-
 	r->n_columns = g->n_columns;
 	r->n_rows = g->n_rows;
 	r->registration = g->registration;
@@ -680,6 +676,9 @@ void GMT_mbgrdtiff_set_proj_limits(struct GMT_CTRL *GMT, struct GMT_GRID_HEADER 
 	if (GMT->current.proj.projection == GMT_GENPER && GMT->current.proj.g_width != 0.0)
 		return;
 
+	bool all_lats = false;
+	bool all_lons = false;
+
 	if (gmt_M_is_geographic(GMT, GMT_IN)) {
 		all_lats = gmt_M_180_range(g->wesn[YHI], g->wesn[YLO]);
 		all_lons = gmt_M_grd_is_global(GMT, g);
@@ -691,9 +690,12 @@ void GMT_mbgrdtiff_set_proj_limits(struct GMT_CTRL *GMT, struct GMT_GRID_HEADER 
 
 	r->wesn[XLO] = r->wesn[YLO] = +DBL_MAX;
 	r->wesn[XHI] = r->wesn[YHI] = -DBL_MAX;
-	k = (g->registration == GMT_GRID_NODE_REG) ? 1 : 0;
+	const unsigned int k = (g->registration == GMT_GRID_NODE_REG) ? 1 : 0;
 
-	for (i = 0; i < g->n_columns - k; i++) { /* South and north sides */
+	double x;
+	double y;
+
+	for (unsigned int i = 0; i < g->n_columns - k; i++) { /* South and north sides */
 		gmt_geo_to_xy(GMT, g->wesn[XLO] + i * g->inc[GMT_X], g->wesn[YLO], &x, &y);
 		r->wesn[XLO] = MIN(r->wesn[XLO], x), r->wesn[XHI] = MAX(r->wesn[XHI], x);
 		r->wesn[YLO] = MIN(r->wesn[YLO], y), r->wesn[YHI] = MAX(r->wesn[YHI], y);
@@ -701,7 +703,7 @@ void GMT_mbgrdtiff_set_proj_limits(struct GMT_CTRL *GMT, struct GMT_GRID_HEADER 
 		r->wesn[XLO] = MIN(r->wesn[XLO], x), r->wesn[XHI] = MAX(r->wesn[XHI], x);
 		r->wesn[YLO] = MIN(r->wesn[YLO], y), r->wesn[YHI] = MAX(r->wesn[YHI], y);
 	}
-	for (i = 0; i < g->n_rows - k; i++) { /* East and west sides */
+	for (unsigned int i = 0; i < g->n_rows - k; i++) { /* East and west sides */
 		gmt_geo_to_xy(GMT, g->wesn[XLO], g->wesn[YHI] - i * g->inc[GMT_Y], &x, &y);
 		r->wesn[XLO] = MIN(r->wesn[XLO], x), r->wesn[XHI] = MAX(r->wesn[XHI], x);
 		r->wesn[YLO] = MIN(r->wesn[YLO], y), r->wesn[YHI] = MAX(r->wesn[YHI], y);
@@ -722,16 +724,16 @@ void GMT_mbgrdtiff_set_proj_limits(struct GMT_CTRL *GMT, struct GMT_GRID_HEADER 
 }
 /*--------------------------------------------------------------------*/
 
-#define bailout(code)                                                                                                            \
-	{                                                                                                                            \
-		gmt_M_free_options(mode);                                                                                                \
-		return (code);                                                                                                           \
+#define bailout(code)                      \
+	{                                  \
+		gmt_M_free_options(mode);  \
+		return (code);             \
 	}
-#define Return(code)                                                                                                             \
-	{                                                                                                                            \
-		Free_mbgrdtiff_Ctrl(GMT, Ctrl);                                                                                          \
-		gmt_end_module(GMT, GMT_cpy);                                                                                            \
-		bailout(code);                                                                                                           \
+#define Return(code)                             \
+	{                                        \
+		Free_mbgrdtiff_Ctrl(GMT, Ctrl);  \
+		gmt_end_module(GMT, GMT_cpy);    \
+		bailout(code);                   \
 	}
 
 int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
@@ -757,20 +759,19 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	int value_int;
 	double value_double;
 	size_t write_size;
-	int i;
 
-	bool done, need_to_project, normal_x, normal_y, resampled = false, gray_only = false;
+	bool need_to_project;
+	bool gray_only = false;
 	bool nothing_inside = false, use_intensity_grid;
-	unsigned int k, nx = 0, ny = 0, grid_registration = GMT_GRID_NODE_REG, n_grids;
-	unsigned int colormask_offset = 0, try;
-	unsigned int  row, actual_row, col;
-	uint64_t node_RGBA = 0; /* uint64_t for the RGB(A) image array. */
+	unsigned int grid_registration = GMT_GRID_NODE_REG;
+	unsigned int n_grids;
+	unsigned int colormask_offset = 0;
+	// unsigned int try;
+	// unsigned int actual_row;
 	uint64_t node, kk, nm, byte;
-	int index = 0, ks, error = 0;
-	int nx8;
-	int shift;
-	int b_or_w;
-	int k8;
+	int index = 0;
+	int ks;
+	int error = 0;
 
 	unsigned char *bitimage_1 = NULL, *bitimage_8 = NULL, *bitimage_24 = NULL, *rgb_used = NULL, i_rgb[3];
 
@@ -778,13 +779,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	double x0 = 0.0, y0 = 0.0, rgb[4] = {0.0, 0.0, 0.0, 0.0};
 	double *NaN_rgb = NULL, red[4] = {1.0, 0.0, 0.0, 0.0}, wesn[4];
 
-	struct GMT_GRID *Grid_orig[3] = {NULL, NULL, NULL}, *Grid_proj[3] = {NULL, NULL, NULL};
-	struct GMT_GRID *Intens_orig = NULL, *Intens_proj = NULL;
-	struct GMT_PALETTE *P = NULL;
-	struct MBGRDTIFF_CTRL *Ctrl = NULL;
-	struct GMT_CTRL *GMT = NULL, *GMT_cpy = NULL; /* General GMT interal parameters */
 	// struct PSL_CTRL *PSL = NULL;                      /* General PSL interal parameters */
-	struct GMT_GRID_HEADER *header_work = NULL;       /* Pointer to a GMT header for the image or grid */
 	struct GMTAPI_CTRL *API = gmt_get_api_ptr(V_API); /* Cast from void to GMTAPI_CTRL pointer */
 
 	/*----------------------- Standard module initialization and parsing ----------------------*/
@@ -804,7 +799,10 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 
 	/* Parse the command-line arguments */
 
-	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+	struct GMT_CTRL *GMT_cpy = NULL;
+	struct GMT_CTRL *GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+
+	struct MBGRDTIFF_CTRL *Ctrl = NULL;
 	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options))
 		Return(API->error);
 	Ctrl = New_mbgrdtiff_Ctrl(GMT); /* Allocate and initialize a new control structure */
@@ -817,8 +815,9 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	use_intensity_grid = (Ctrl->Intensity.active && !Ctrl->Intensity.constant); /* We want to use the intensity grid */
 
 	/* Read the illumination grid header right away so we can use its region to set that of an image (if requested) */
-	if (use_intensity_grid) { /* Illumination grid wanted */
+	struct GMT_GRID *Intens_orig = NULL;
 
+	if (use_intensity_grid) { /* Illumination grid wanted */
 		GMT_Report(API, GMT_MSG_VERBOSE, "Allocates memory and read intensity file\n");
 
 		if ((Intens_orig = GMT_Read_Data(API, GMT_IS_GRID, GMT_IS_FILE, GMT_IS_SURFACE, GMT_GRID_HEADER_ONLY, NULL,
@@ -829,8 +828,10 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 
 	GMT_Report(API, GMT_MSG_VERBOSE, "Allocates memory and read data file\n");
 
+	struct GMT_GRID *Grid_orig[3] = {NULL, NULL, NULL};
+
 	if (!Ctrl->D.active) {
-		for (k = 0; k < n_grids; k++) {
+		for (unsigned int k = 0; k < n_grids; k++) {
 			if ((Grid_orig[k] = GMT_Read_Data(API, GMT_IS_GRID, GMT_IS_FILE, GMT_IS_SURFACE, GMT_GRID_HEADER_ONLY, NULL,
 			                                  Ctrl->I.file[k], NULL)) == NULL) { /* Get header only */
 				Return(API->error);
@@ -840,6 +841,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 			Ctrl->C.active = true; /* Use default CPT stuff */
 	}
 
+	struct GMT_GRID_HEADER *header_work = NULL;       /* Pointer to a GMT header for the image or grid */
 	if (n_grids)
 		header_work = Grid_orig[0]->header; /* OK, we are in GRID mode and this was not set further above. Do it now */
 
@@ -901,6 +903,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		Return(EXIT_SUCCESS);
 	}
 
+	unsigned int nx = 0;
+	unsigned int ny = 0;
 	if (n_grids) {
 		nx = gmt_M_get_n(GMT, wesn[XLO], wesn[XHI], Grid_orig[0]->header->inc[GMT_X], Grid_orig[0]->header->registration);
 		ny = gmt_M_get_n(GMT, wesn[YLO], wesn[YHI], Grid_orig[0]->header->inc[GMT_Y], Grid_orig[0]->header->registration);
@@ -908,7 +912,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 
 	/* Read data */
 
-	for (k = 0; k < n_grids; k++) {
+	for (unsigned int k = 0; k < n_grids; k++) {
 		if (GMT_Read_Data(API, GMT_IS_GRID, GMT_IS_FILE, GMT_IS_SURFACE, GMT_GRID_DATA_ONLY, wesn, Ctrl->I.file[k],
 		                  Grid_orig[k]) == NULL) { /* Get grid data */
 			Return(API->error);
@@ -933,6 +937,10 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		}
 	}
 
+	struct GMT_GRID *Grid_proj[3] = {NULL, NULL, NULL};
+	struct GMT_GRID *Intens_proj = NULL;
+	// bool resampled = false;
+
 	if (need_to_project) { /* Need to resample the grd file */
 		int nx_proj = 0, ny_proj = 0;
 		double inc[2] = {0.0, 0.0};
@@ -942,7 +950,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 			nx_proj = nx;
 			ny_proj = ny;
 		}
-		for (k = 0; k < n_grids; k++) {
+		for (unsigned int k = 0; k < n_grids; k++) {
 			if (!Grid_proj[k] && (Grid_proj[k] = GMT_Duplicate_Data(API, GMT_IS_GRID, GMT_DUPLICATE_NONE, Grid_orig[k])) == NULL)
 				Return(API->error); /* Just to get a header we can change */
 
@@ -981,11 +989,11 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 				Return(API->error);
 			}
 		}
-		resampled = true;
+		// resampled = true;
 	}
 	else { /* Simply set Grid_proj[i]/Intens_proj to point to Grid_orig[i]/Intens_orig */
 		struct GMT_GRID_HEADER tmp_header;
-		for (k = 0; k < n_grids; k++) { /* Must get a copy so we can change one without affecting the other */
+		for (unsigned int k = 0; k < n_grids; k++) { /* Must get a copy so we can change one without affecting the other */
 			gmt_M_memcpy(&tmp_header, Grid_orig[k]->header, 1, struct GMT_GRID_HEADER);
 			Grid_proj[k] = Grid_orig[k];
 			// GMT_mbgrdtiff_set_proj_limits (GMT, Grid_proj[k]->header, &tmp_header, need_to_project);
@@ -1004,6 +1012,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	nm = header_work->nm;
 	nx = header_work->n_columns;
 	ny = header_work->n_rows;
+
+	struct GMT_PALETTE *P = NULL;
 
 	/* Get/calculate a color palette file */
 	if (!Ctrl->I.do_rgb) {
@@ -1041,26 +1051,28 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		image_size = 3 * nm + colormask_offset;
 		bitimage_24 = gmt_M_memory(GMT, NULL, image_size, unsigned char);
 		if (P && Ctrl->Q.active) {
-			for (k = 0; k < 3; k++)
+			for (unsigned int k = 0; k < 3; k++)
 				bitimage_24[k] = gmt_M_u255(P->bfn[GMT_NAN].rgb[k]);
 		}
 		tiff_image = bitimage_24;
 	}
-	normal_x = !(GMT->current.proj.projection == GMT_LINEAR && !GMT->current.proj.xyz_pos[0] && !resampled);
-	normal_y = !(GMT->current.proj.projection == GMT_LINEAR && !GMT->current.proj.xyz_pos[1] && !resampled);
-	normal_x = true;
-	normal_y = true;
-	for (try = 0, done = false; !done && try < 2;
-	     try ++) { /* Evaluate colors at least once, or twice if -Q and we need to select another NaN color */
-		for (row = 0, byte = colormask_offset; row < ny; row++) {
-			actual_row = (normal_y) ? row : ny - row - 1;
+	// normal_x = !(GMT->current.proj.projection == GMT_LINEAR && !GMT->current.proj.xyz_pos[0] && !resampled);
+	// normal_y = !(GMT->current.proj.projection == GMT_LINEAR && !GMT->current.proj.xyz_pos[1] && !resampled);
+	const bool normal_x = true;
+	const bool normal_y = true;
+	uint64_t node_RGBA = 0; /* uint64_t for the RGB(A) image array. */
+	bool done = false;
+	for (int try = 0; !done && try < 2; try++) {
+		/* Evaluate colors at least once, or twice if -Q and we need to select another NaN color */
+		for (unsigned int row = 0, byte = colormask_offset; row < ny; row++) {
+			const unsigned int actual_row = normal_y ? row : ny - row - 1;
 			kk = gmt_M_ijpgi(header_work, actual_row, 0);
 			if (Ctrl->D.active && row == 0)
 				node_RGBA = kk;              /* First time per row equals 'node', after grows alone */
-			for (col = 0; col < nx; col++) { /* Compute rgb for each pixel */
+			for (unsigned int col = 0; col < nx; col++) { /* Compute rgb for each pixel */
 				node = kk + (normal_x ? col : nx - col - 1);
 				if (Ctrl->I.do_rgb) {
-					for (k = 0; k < 3; k++) {
+					for (unsigned int k = 0; k < 3; k++) {
 						if (gmt_M_is_fnan(Grid_proj[k]->data[node])) { /* If one is NaN they are all assumed to be NaN */
 							k = 3;                                     /* To exit the k-loop */
 							gmt_M_rgb_copy(rgb, NaN_rgb);
@@ -1094,7 +1106,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 				else if (Ctrl->M.active) /* Convert rgb to gray using the gmt_M_yiq transformation */
 					bitimage_8[byte++] = gmt_M_u255(gmt_M_yiq(rgb));
 				else {
-					for (k = 0; k < 3; k++)
+					for (unsigned int k = 0; k < 3; k++)
 						bitimage_24[byte++] = i_rgb[k] = gmt_M_u255(rgb[k]);
 					if (Ctrl->Q.active && index != GMT_NAN - 3) /* Keep track of all r/g/b combinations used except for NaN */
 						rgb_used[(i_rgb[0] * 256 + i_rgb[1]) * 256 + i_rgb[2]] = true;
@@ -1125,7 +1137,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 					GMT_Report(API, GMT_MSG_VERBOSE, "Warning: transparency color reset from %s to color %d/%d/%d\n",
 					           gmt_putrgb(GMT, P->bfn[GMT_NAN].rgb), (int)bitimage_24[0], (int)bitimage_24[1],
 					           (int)bitimage_24[2]);
-					for (k = 0; k < 3; k++)
+					for (unsigned int k = 0; k < 3; k++)
 						P->bfn[GMT_NAN].rgb[k] = gmt_M_is255(bitimage_24[k]); /* Set new NaN color */
 				}
 			}
@@ -1136,7 +1148,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	if (Ctrl->Q.active)
 		gmt_M_free(GMT, rgb_used);
 
-	for (k = 1; k < n_grids; k++) { /* Not done with Grid_proj[0] yet, hence we start loop at k = 1 */
+	for (unsigned int k = 1; k < n_grids; k++) { /* Not done with Grid_proj[0] yet, hence we start loop at k = 1 */
 		if (need_to_project && GMT_Destroy_Data(API, &Grid_proj[k]) != GMT_OK) {
 			GMT_Report(API, GMT_MSG_NORMAL, "Failed to free Grid_proj[k]\n");
 		}
@@ -1174,17 +1186,19 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 
 		GMT_Report(API, GMT_MSG_VERBOSE, "Creating 1-bit B/W image\n");
 
-		nx8 = irint(ceil(nx / 8.0)); /* Image width must equal a multiple of 8 bits */
+		const int nx8 = irint(ceil(nx / 8.0)); /* Image width must equal a multiple of 8 bits */
 		// const int nx_pixels = nx8 * 8;
 		image_size = nx8 * ny;
 		bitimage_1 = gmt_M_memory(GMT, NULL, image_size, unsigned char);
 		tiff_image = bitimage_1;
 
-		for (row = k = k8 = 0; row < ny; row++) {
-			shift = 0;
+		int k8 = 0;
+		unsigned int k = 0;
+		for (unsigned int row = 0; row < ny; row++) {
+			int shift = 0;
 			byte = 0;
-			for (col = 0; col < nx; col++, k++) {
-				b_or_w = (bitimage_8[k] == 255);
+			for (unsigned int col = 0; col < nx; col++, k++) {
+				const int b_or_w = (bitimage_8[k] == 255);
 				byte |= b_or_w;
 				shift++;
 				if (shift == 8) { /* Time to dump out byte */
@@ -1306,7 +1320,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	index += 2;
 
 	/* loop over all tags */
-	for (i = 0; i < NUMBER_TAGS; i++) {
+	for (int i = 0; i < NUMBER_TAGS; i++) {
 		mb_put_binary_short(false, tiff_tag[i], &tiff_header[index]);
 		index += 2;
 		mb_put_binary_short(false, tiff_type[i], &tiff_header[index]);
