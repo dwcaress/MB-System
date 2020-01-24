@@ -883,14 +883,14 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 		nplot = 50;
 
 	/* if nothing set to be plotted, plot contours and track */
-	if (plot_contours == false && plot_triangles == false && plot_track == false && plot_pingnumber == false) {
+	if (!plot_contours && !plot_triangles && !plot_track && !plot_pingnumber) {
 		plot_contours = true;
 		plot_track = true;
 	}
-	if (plot_name == true && plot_track == false && plot_pingnumber == false) {
+	if (plot_name && !plot_track && !plot_pingnumber) {
 		plot_track = true;
 	}
-	if (plot_track == false && plot_pingnumber == true) {
+	if (!plot_track && plot_pingnumber) {
 		plot_track = true;
 		time_tick_int = 10000000.0;
 		time_annot_int = 10000000.0;
@@ -912,7 +912,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	double etime_d;
 	mb_path file;
 	mb_path dfile;
-	int file_in_bounds = false;
+	int file_in_bounds = false;  // TOOD(schwehr): bool
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -944,12 +944,8 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	unsigned int pingnumber;
 
 	/* plot control variables */
-	int plot;
-	int flush;
-	int save_new;
 	int *npings = NULL;
 	double label_spacing_map;
-	int plotted_name = false;
 	double time_tick_len_map = 0.1;
 	double name_hgt_map = 0.1;
 	double pingnumber_tick_len_map;
@@ -964,7 +960,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	/*---------------------------- This is the mbcontour main code ----------------------------*/
 
 	/* read contours from file */
-	if (set_contours == true) {
+	if (set_contours) {
 		/* open contour file */
 		if ((fp = fopen(contourfile, "r")) == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
@@ -1112,12 +1108,12 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* determine whether to read one file or a list of files */
-	bool read_datalist = format < 0;
+	const bool read_datalist = format < 0;
 
 	/* open file list */
 	int nping_read = 0;
 	bool read_data = false;
-	if (read_datalist == true) {
+	if (read_datalist) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
@@ -1137,7 +1133,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	/* loop over files in file list */
 	if (verbose == 1)
 		fprintf(stderr, "\n");
-	while (read_data == true) {
+	while (read_data) {
 		/* check for mbinfo file - get file bounds if possible */
 		status = mb_check_info(verbose, file, lonflip, bounds, &file_in_bounds, &error);
 		if (status == MB_FAILURE) {
@@ -1147,14 +1143,14 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 		}
 
 		/* read if data may be in bounds */
-		if (file_in_bounds == true) {
+		if (file_in_bounds) {
 			/* check for "fast bathymetry" or "fbt" file */
-			if (plot_contours == true) {
+			if (plot_contours) {
 				mb_get_fbt(verbose, file, &format, &error);
 			}
 
 			/* else check for "fast nav" or "fnv" file */
-			else if (plot_track == true || plot_pingnumber == true) {
+			else if (plot_track || plot_pingnumber) {
 				mb_get_fnv(verbose, file, &format, &error);
 			}
 
@@ -1225,7 +1221,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 			npings = &swath_plot->npings;
 			*npings = 0;
 			bool done = false;
-			plotted_name = false;
+			bool plotted_name = false;
 			while (done == false) {
 				/* read the next ping */
 				status = mb_read(verbose, mbio_ptr, &kind, &pings_read, time_i, &time_d, &navlon, &navlat, &speed, &heading,
@@ -1299,7 +1295,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 				}
 
 				/* scale bathymetry if necessary */
-				if (error == MB_ERROR_NO_ERROR && bathy_in_feet == true) {
+				if (error == MB_ERROR_NO_ERROR && bathy_in_feet) {
 					for (int i = 0; i < beams_bath; i++) {
 						bath[i] = 3.2808399 * bath[i];
 					}
@@ -1313,8 +1309,8 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 
 				/* decide whether to plot, whether to
 				    save the new ping, and if done */
-				plot = false;
-				flush = false;
+				bool plot = false;
+				bool flush = false;
 				if (*npings >= nplot)
 					plot = true;
 				if (*npings > 0 && (error > MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP || error == MB_ERROR_OUT_BOUNDS ||
@@ -1322,14 +1318,14 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 					plot = true;
 					flush = true;
 				}
-				save_new = false;
+				bool save_new = false;
 				if (error == MB_ERROR_TIME_GAP)
 					save_new = true;
 				if (error > MB_ERROR_NO_ERROR)
 					done = true;
 
 				/* if enough pings read in, plot them */
-				if (plot == true) {
+				if (plot) {
 
 					/* print debug statements */
 					if (verbose >= 2) {
@@ -1343,29 +1339,29 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 					}
 
 					/* plot data */
-					if (plot_contours == true || plot_triangles == true)
+					if (plot_contours || plot_triangles)
 						mb_contour(verbose, swath_plot, &error);
 
 					/* plot nav track */
-					if (plot_track == true)
+					if (plot_track)
 						mb_track(verbose, swath_plot, &error);
 
 					/* annotate pingnumber */
-					if (plot_pingnumber == true) {
+					if (plot_pingnumber) {
 						mb_trackpingnumber(verbose, swath_plot, &error);
 					}
 
-					if (plot_name == true && plotted_name == false) {
+					if (plot_name && !plotted_name) {
 						mb_trackname(verbose, name_perp, swath_plot, file, &error);
 						plotted_name = true;
 					}
 
 					/* reorganize data */
-					if (flush == true && save_new == true) {
+					if (flush && save_new) {
 						status = mbcontour_ping_copy(verbose, 0, *npings, swath_plot, &error);
 						*npings = 1;
 					}
-					else if (flush == true) {
+					else if (flush) {
 						*npings = 0;
 					}
 					else if (*npings > 1) {
@@ -1381,7 +1377,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 		} /* end if file in bounds */
 
 		/* figure out whether and what to read next */
-		if (read_datalist == true) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 				read_data = true;
 			else
@@ -1393,7 +1389,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == true)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
 	gmt_map_clip_off(GMT);
