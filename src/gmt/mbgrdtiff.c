@@ -216,7 +216,8 @@
  */
 /*--------------------------------------------------------------------*/
 
-/* MBIO include files */
+#include <stdbool.h>
+
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_define.h"
@@ -427,8 +428,8 @@ struct MBGRDTIFF_CTRL {
 	} M;
 	struct Nudge { /* -N<nudge_x>/<nudge_y> */
 		bool active;
-    double nudge_x;
-    double nudge_y;
+		double nudge_x;
+		double nudge_y;
 	} Nudge;
 	struct mbO { /* -O */
 		bool active;
@@ -438,12 +439,6 @@ struct MBGRDTIFF_CTRL {
 		bool active;
 	} Q;
 };
-
-void *New_mbgrdtiff_Ctrl(struct GMT_CTRL *GMT);
-void Free_mbgrdtiff_Ctrl(struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl);
-int GMT_mbgrdtiff_usage(struct GMTAPI_CTRL *API, int level);
-int GMT_mbgrdtiff_parse(struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl, struct GMT_OPTION *options);
-void GMT_mbgrdtiff_set_proj_limits(struct GMT_CTRL *GMT, struct GMT_GRID_HEADER *r, struct GMT_GRID_HEADER *g, bool projected);
 
 /*--------------------------------------------------------------------*/
 
