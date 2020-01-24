@@ -30,7 +30,6 @@
  *                              plotters in real time)
  * Date:	January 27, 2015 (recast as GMT5 module, code supporting pen
  *                                  plotters removed)
- *
  */
 
 #define THIS_MODULE_NAME "mbcontour"
@@ -40,6 +39,7 @@
 
 /* GMT5 header file */
 #include "gmt_dev.h"
+
 /*  Compatibility with old lower-function/macro names use prior to GMT 5.3.0 */
 #if GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION < 3
 #define gmt_M_180_range GMT_180_RANGE
@@ -111,10 +111,10 @@
 #undef PACKAGE_VERSION
 #endif
 
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_define.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_status.h"
 
 EXTERN_MSC int GMT_mbcontour(void *V_API, int mode, void *args);
 
@@ -204,7 +204,6 @@ struct MBCONTOUR_CTRL {
 /*--------------------------------------------------------------------*/
 /* Global variables */
 
-/* GMT and PSlib control */
 struct PSL_CTRL *PSL = NULL; /* General PSL interal parameters */
 struct GMT_CTRL *GMT = NULL; /* General GMT interal parameters */
 
@@ -232,11 +231,6 @@ int ncontour_plot_alloc = 0;
 double *contour_x = NULL;
 double *contour_y = NULL;
 
-void *New_mbcontour_Ctrl(struct GMT_CTRL *GMT);
-void Free_mbcontour_Ctrl(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl);
-int GMT_mbcontour_usage(struct GMTAPI_CTRL *API, int level);
-int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struct GMT_OPTION *options);
-
 int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int *error);
 void mbcontour_plot(double x, double y, int ipen);
 void mbcontour_setline(int linewidth);
@@ -248,20 +242,19 @@ void mbcontour_plot_string(double x, double y, double hgt, double angle, char *l
 /*--------------------------------------------------------------------*/
 
 void *New_mbcontour_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a new control structure */
-	struct MBCONTOUR_CTRL *Ctrl;
-	int status;
 	int verbose = 0;
 	double dummybounds[4];
 	int dummyformat;
 	int dummypings;
 
-	Ctrl = gmt_M_memory(GMT, NULL, 1, struct MBCONTOUR_CTRL);
+	struct MBCONTOUR_CTRL *Ctrl = gmt_M_memory(GMT, NULL, 1, struct MBCONTOUR_CTRL);
 
 	/* Initialize values whose defaults are not 0/false/NULL */
 
 	/* get current mb default values */
-	status = mb_defaults(verbose, &dummyformat, &dummypings, &Ctrl->L.lonflip, dummybounds, Ctrl->b.time_i, Ctrl->e.time_i,
-	                     &Ctrl->S.speedmin, &Ctrl->T.timegap);
+	// const int status =
+	mb_defaults(verbose, &dummyformat, &dummypings, &Ctrl->L.lonflip, dummybounds, Ctrl->b.time_i, Ctrl->e.time_i,
+		&Ctrl->S.speedmin, &Ctrl->T.timegap);
 
 	Ctrl->A.active = false;
 	Ctrl->A.cont_int = 25.;
@@ -368,7 +361,8 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 	 * returned when registering these sources/destinations with the API.
 	 */
 
-	unsigned int n_errors = 0, n_files = 0;
+	unsigned int n_errors = 0;
+	unsigned int n_files = 0;
 	int n;
 	struct GMT_OPTION *opt = NULL;
 	struct GMTAPI_CTRL *API = GMT->parent;
@@ -692,7 +686,6 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	int count;
 	int setcolors;
 	double clipx[4], clipy[4];
-	int i;
 
 	/*----------------------- Standard module initialization and parsing ----------------------*/
 
@@ -746,7 +739,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 		label_spacing = Ctrl->A.label_spacing;
 	}
 	if (Ctrl->b.active) {
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			btime_i[i] = Ctrl->b.time_i[i];
 	}
 	if (Ctrl->C.active) {
@@ -762,7 +755,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 		time_tick_len = Ctrl->D.time_tick_len;
 	}
 	if (Ctrl->e.active) {
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			etime_i[i] = Ctrl->e.time_i[i];
 	}
 	if (Ctrl->F.active)
@@ -1123,16 +1116,16 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 					}
 
 					/* insert the data */
-					for (i = 0; i < 7; i++)
+					for (int i = 0; i < 7; i++)
 						pingcur->time_i[i] = time_i[i];
 					pingcur->time_d = time_d;
 					pingcur->navlon = navlon;
 					pingcur->navlat = navlat;
 					pingcur->heading = heading;
-                    pingcur->sensordepth = sensordepth;
+					pingcur->sensordepth = sensordepth;
 					pingcur->beams_bath = beams_bath;
 					pingcur->pingnumber = pingnumber;
-					for (i = 0; i < beams_bath; i++) {
+					for (int i = 0; i < beams_bath; i++) {
 						pingcur->beamflag[i] = beamflag[i];
 						pingcur->bath[i] = bath[i];
 						pingcur->bathlon[i] = bathlon[i];
@@ -1144,7 +1137,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 
 				/* null out any unused beams for formats with
 				variable numbers of beams */
-				for (i = beams_bath; i < swath_plot->beams_bath; i++)
+				for (int i = beams_bath; i < swath_plot->beams_bath; i++)
 					beamflag[i] = MB_FLAG_NULL;
 
 				/* print debug statements */
@@ -1164,7 +1157,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 
 				/* scale bathymetry if necessary */
 				if (error == MB_ERROR_NO_ERROR && bathy_in_feet == true) {
-					for (i = 0; i < beams_bath; i++) {
+					for (int i = 0; i < beams_bath; i++) {
 						bath[i] = 3.2808399 * bath[i];
 					}
 				}
@@ -1198,7 +1191,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 					/* print debug statements */
 					if (verbose >= 2) {
 						fprintf(stderr, "\ndbg2  Plotting %d pings in program <%s>\n", *npings, program_name);
-						for (i = 0; i < *npings; i++) {
+						for (int i = 0; i < *npings; i++) {
 							pingcur = &swath_plot->pings[i];
 							fprintf(stderr, "dbg2       %4d  %4d %2d %2d %2d %2d %2d %6.6d\n", i, pingcur->time_i[0],
 							        pingcur->time_i[1], pingcur->time_i[2], pingcur->time_i[3], pingcur->time_i[4],
@@ -1282,7 +1275,6 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	if (verbose >= 2)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
@@ -1297,13 +1289,6 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 
 /*--------------------------------------------------------------------------*/
 int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int *error) {
-	int status = MB_SUCCESS;
-
-	struct ping *ping1;
-	struct ping *ping2;
-	int i;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBCONTOUR function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1317,9 +1302,10 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 		        swath->pings[two].time_i[4], swath->pings[two].time_i[5], swath->pings[two].time_i[6]);
 	}
 
-	/* get ping structures */
-	ping1 = &swath->pings[one];
-	ping2 = &swath->pings[two];
+	struct ping *ping1 = &swath->pings[one];
+	struct ping *ping2 = &swath->pings[two];
+
+	int status = MB_SUCCESS;
 
 	/* make sure enough memory is allocated */
 	if (ping1->beams_bath_alloc < ping2->beams_bath) {
@@ -1333,7 +1319,7 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 	}
 
 	/* copy things */
-	for (i = 0; i < 7; i++)
+	for (int i = 0; i < 7; i++)
 		ping1->time_i[i] = ping2->time_i[i];
 	ping1->time_d = ping2->time_d;
 	ping1->navlon = ping2->navlon;
@@ -1341,7 +1327,7 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 	ping1->heading = ping2->heading;
 	ping1->pingnumber = ping2->pingnumber;
 	ping1->beams_bath = ping2->beams_bath;
-	for (i = 0; i < ping2->beams_bath; i++) {
+	for (int i = 0; i < ping2->beams_bath; i++) {
 		ping1->beamflag[i] = ping2->beamflag[i];
 		ping1->bath[i] = ping2->bath[i];
 		ping1->bathlon[i] = ping2->bathlon[i];
@@ -1353,7 +1339,6 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBCONTOUR function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1371,28 +1356,23 @@ void mb_set_colors(int ncolor, int *red, int *green, int *blue) {
 	(void)red;  // Unused parameter
 	(void)green;  // Unused parameter
 	(void)blue;  // Unused parameter
-	return;
 }
 /*--------------------------------------------------------------------------*/
 void mbcontour_plot(double x, double y, int ipen) {
-	double xx, yy;
-	double *p;
-
 	/* make sure contour arrays are large enough */
 	if (ncontour_plot >= ncontour_plot_alloc) {
 		ncontour_plot_alloc += MBCONTOUR_PLOT_ALLOC_INC;
-		if ((p = (double *)realloc(contour_x, sizeof(double) * (ncontour_plot_alloc))) != NULL) {
+		double *p = (double *)realloc(contour_x, sizeof(double) * (ncontour_plot_alloc));
+		if (p != NULL) {
 			contour_x = p;
-		}
-		else {
+		} else {
 			free(contour_x);
 			contour_x = NULL;
 			ncontour_plot_alloc = 0;
 		}
 		if ((p = (double *)realloc(contour_y, sizeof(double) * (ncontour_plot_alloc))) != NULL) {
 			contour_y = p;
-		}
-		else {
+		} else {
 			free(contour_y);
 			contour_y = NULL;
 			ncontour_plot_alloc = 0;
@@ -1400,6 +1380,8 @@ void mbcontour_plot(double x, double y, int ipen) {
 	}
 
 	/* convert to map units */
+	double xx;
+	double yy;
 	gmt_geo_to_xy(GMT, x, y, &xx, &yy);
 
 	/* if command is move then start new contour */
@@ -1428,50 +1410,40 @@ void mbcontour_plot(double x, double y, int ipen) {
 
 		ncontour_plot = 0;
 	}
-
-	return;
 }
 /*--------------------------------------------------------------------------*/
 void mbcontour_setline(int linewidth) {
 	(void)linewidth;  // Unused parameter
 	// PSL_setlinewidth(PSL, (double)linewidth);
-	return;
 }
 /*--------------------------------------------------------------------------*/
 void mbcontour_newpen(int ipen) {
-	double rgb[4];
-	rgb[3] = 0; /* To not fall into the transparency case of pslib.c/psl_putcolor()  */
-
 	if (ipen > -1 && ipen < ncolor) {
-		rgb[0] = ((double)red[ipen]) / 255.0;
-		rgb[1] = ((double)green[ipen]) / 255.0;
-		rgb[2] = ((double)blue[ipen]) / 255.0;
+		double rgb[4] = {
+			red[ipen] / 255.0,
+			green[ipen] / 255.0,
+			blue[ipen] / 255.0,
+			0, // To not fall into the transparency case of pslib.c/psl_putcolor()
+		};
 		PSL_setcolor(PSL, rgb, PSL_IS_STROKE);
 	}
-	return;
 }
 /*--------------------------------------------------------------------------*/
 void mbcontour_justify_string(double height, char *string, double *s) {
-	int len;
-
-	len = strlen(string);
+	const int len = strlen(string);
 	s[0] = 0.0;
 	s[1] = 0.185 * height * len;
 	s[2] = 0.37 * len * height;
 	s[3] = 0.37 * len * height;
-
-	return;
 }
 /*--------------------------------------------------------------------------*/
 void mbcontour_plot_string(double x, double y, double hgt, double angle, char *label) {
-	double fontsize;
-	double xx, yy;
-	int justify = 5;
-	int mode = 0;
-
-	fontsize = 72.0 * hgt / inchtolon;
+	double xx;
+	double yy;
+	const double fontsize = 72.0 * hgt / inchtolon;
 	gmt_geo_to_xy(GMT, x, y, &xx, &yy);
+	const int justify = 5;
+	const int mode = 0;
 	PSL_plottext(PSL, xx, yy, fontsize, label, angle, justify, mode);
-	return;
 }
 /*--------------------------------------------------------------------------*/
