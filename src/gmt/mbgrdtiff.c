@@ -758,7 +758,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	int keyindex;
 
 	double mtodeglon, mtodeglat;
-  unsigned short value_short;
+	unsigned short value_short;
 	int value_int;
 	double value_double;
 	size_t write_size;
@@ -767,16 +767,20 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	bool done, need_to_project, normal_x, normal_y, resampled = false, gray_only = false;
 	bool nothing_inside = false, use_intensity_grid;
 	unsigned int k, nx = 0, ny = 0, grid_registration = GMT_GRID_NODE_REG, n_grids;
-	unsigned int colormask_offset = 0, try
-		, row, actual_row, col;
+	unsigned int colormask_offset = 0, try;
+	unsigned int  row, actual_row, col;
 	uint64_t node_RGBA = 0; /* uint64_t for the RGB(A) image array. */
 	uint64_t node, kk, nm, byte;
 	int index = 0, ks, error = 0;
-	int nx8, shift, b_or_w, nx_pixels, k8;
+	int nx8;
+	int shift;
+	int b_or_w;
+	int k8;
 
 	unsigned char *bitimage_1 = NULL, *bitimage_8 = NULL, *bitimage_24 = NULL, *rgb_used = NULL, i_rgb[3];
 
-	double dx, dy, x_side, y_side, x0 = 0.0, y0 = 0.0, rgb[4] = {0.0, 0.0, 0.0, 0.0};
+	double dx, dy;
+	double x0 = 0.0, y0 = 0.0, rgb[4] = {0.0, 0.0, 0.0, 0.0};
 	double *NaN_rgb = NULL, red[4] = {1.0, 0.0, 0.0, 0.0}, wesn[4];
 
 	struct GMT_GRID *Grid_orig[3] = {NULL, NULL, NULL}, *Grid_proj[3] = {NULL, NULL, NULL};
@@ -784,8 +788,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	struct GMT_PALETTE *P = NULL;
 	struct MBGRDTIFF_CTRL *Ctrl = NULL;
 	struct GMT_CTRL *GMT = NULL, *GMT_cpy = NULL; /* General GMT interal parameters */
-	struct GMT_OPTION *options = NULL;
-	struct PSL_CTRL *PSL = NULL;                      /* General PSL interal parameters */
+	// struct PSL_CTRL *PSL = NULL;                      /* General PSL interal parameters */
 	struct GMT_GRID_HEADER *header_work = NULL;       /* Pointer to a GMT header for the image or grid */
 	struct GMTAPI_CTRL *API = gmt_get_api_ptr(V_API); /* Cast from void to GMTAPI_CTRL pointer */
 
@@ -795,7 +798,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		return (GMT_NOT_A_SESSION);
 	if (mode == GMT_MODULE_PURPOSE)
 		return (GMT_mbgrdtiff_usage(API, GMT_MODULE_PURPOSE)); /* Return the purpose of program */
-	options = GMT_Create_Options(API, mode, args);
+	struct GMT_OPTION *options = GMT_Create_Options(API, mode, args);
 	if (API->error)
 		return (API->error); /* Set or get option list */
 
@@ -893,7 +896,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 
 	if (nothing_inside) {
 		/* No grid to plot; just do empty map and bail */
-		PSL = gmt_plotinit(GMT, options);
+		// struct PSL_CTRL *PSL =
+		gmt_plotinit(GMT, options);
 		gmt_plane_perspective(GMT, GMT->current.proj.z_project.view_plane, GMT->current.proj.z_level);
 		gmt_plotcanvas(GMT); /* Fill canvas if requested */
 		gmt_map_basemap(GMT);
@@ -1163,8 +1167,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		y0 -= 0.5 * dy;
 	}
 
-	x_side = dx * header_work->n_columns;
-	y_side = dy * header_work->n_rows;
+	// double x_side = dx * header_work->n_columns;
+	// double y_side = dy * header_work->n_rows;
 
 	if (P && gray_only)
 		for (kk = 0, P->is_bw = true; P->is_bw && kk < nm; kk++)
@@ -1176,7 +1180,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		GMT_Report(API, GMT_MSG_VERBOSE, "Creating 1-bit B/W image\n");
 
 		nx8 = irint(ceil(nx / 8.0)); /* Image width must equal a multiple of 8 bits */
-		nx_pixels = nx8 * 8;
+		// const int nx_pixels = nx8 * 8;
 		image_size = nx8 * ny;
 		bitimage_1 = gmt_M_memory(GMT, NULL, image_size, unsigned char);
 		tiff_image = bitimage_1;
@@ -1207,7 +1211,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 			}
 		}
 
-		x_side = nx_pixels * dx;
+		// x_side = nx_pixels * dx;
 		// PSL_plotbitimage (PSL, x0, y0, x_side, y_side, PSL_BL, bit, nx_pixels, ny, Ctrl->G.f_rgb, Ctrl->G.b_rgb);
 	}
 	else if ((P && gray_only) || Ctrl->M.active) {
