@@ -415,25 +415,25 @@ do
 
     if [ ${a:2:5} == "mbhbn" ]
     then
-    OPT_HBEAT=$a
+    OPT_MBHBN=$a
     vout "ovr OPT_MBHBN: $OPT_MBHBN"
     fi
 
     if [ ${a:2:5} == "mbhbt" ]
     then
-    OPT_HBEAT=$a
+    OPT_MBHBT=$a
     vout "ovr OPT_MBHBT: $OPT_MBHBT"
     fi
 
     if [ ${a:2:6} == "trnhbt" ]
     then
-    OPT_HBEAT=$a
+    OPT_TRNHBT=$a
     vout "ovr OPT_TRNHBT: $OPT_TRNHBT"
     fi
 
     if [ ${a:2:7} == "trnuhbt" ]
     then
-    OPT_HBEAT=$a
+    OPT_TRNUHBT=$a
     vout "ovr OPT_TRNUHBT: $OPT_TRNUHBT"
     fi
 
