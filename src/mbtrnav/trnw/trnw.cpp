@@ -243,7 +243,7 @@ bool wtnav_is_converged(wtnav_t *self)
     bool retval=false;
    if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
-       if(NULL!=obj){
+       if(NULL!=obj && NULL!=obj->tNavFilter){
        retval = obj->tNavFilter->isConverged();
        }
     }
