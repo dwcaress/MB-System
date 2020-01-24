@@ -32,6 +32,8 @@
  *                                  plotters removed)
  */
 
+#include <stdbool.h>
+
 #define THIS_MODULE_NAME "mbcontour"
 #define THIS_MODULE_LIB "mbgmt"
 #define THIS_MODULE_PURPOSE "Plot swath bathymetry, amplitude, or backscatter"
@@ -299,13 +301,6 @@ void Free_mbcontour_Ctrl(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl) { /*
 }
 
 int GMT_mbcontour_usage(struct GMTAPI_CTRL *API, int level) {
-	//	char help_message[] =  "mbcontour is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry
-	//or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBCONTOUR in conjunction
-	//with the usual GMT programs."; 	char usage_message[] = "mbcontour -Ccptfile -Jparameters -Rwest/east/south/north
-	//\n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec
-	//-fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift
-	//-Yy-shift \n\t-Zmode[F] -V -H]";
-
 	gmt_show_name_and_purpose(API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE)
 		return (GMT_NOERROR);
@@ -730,39 +725,191 @@ void mb_set_colors(int ncolor, int *red, int *green, int *blue) {
 
 /*--------------------------------------------------------------------------*/
 int GMT_mbcontour(void *V_API, int mode, void *args) {
-	static const char program_name[] = "mbcontour";
-
-	struct GMT_PALETTE *CPTcolor = NULL;
+	/*----------------------- Standard module initialization and parsing ----------------------*/
 	struct GMT_CTRL *GMT_cpy = NULL; /* General GMT interal parameters */
 	struct GMT_OPTION *options = NULL;
 	struct GMTAPI_CTRL *API = gmt_get_api_ptr(V_API); /* Cast from void to GMTAPI_CTRL pointer */
 	struct MBCONTOUR_CTRL *Ctrl = NULL;
-
-	/* MBIO status variables */
-	int status = MB_SUCCESS;
-	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
-	char *message = NULL;
 
-	/* MBIO read control parameters */
-	mb_path read_file;
-	int read_datalist = false;
-	int read_data = false;
+	if (API == NULL)
+		return (GMT_NOT_A_SESSION);
+	if (mode == GMT_MODULE_PURPOSE)
+		return (GMT_mbcontour_usage(API, GMT_MODULE_PURPOSE)); /* Return the purpose of program */
+	options = GMT_Create_Options(API, mode, args);
+	if (API->error)
+		return (API->error); /* Set or get option list */
+
+	if (!options || options->option == GMT_OPT_USAGE)
+		bailout(GMT_mbcontour_usage(API, GMT_USAGE)); /* Return the usage message */
+	if (options->option == GMT_OPT_SYNOPSIS)
+		bailout(GMT_mbcontour_usage(API, GMT_SYNOPSIS)); /* Return the synopsis */
+
+	/* Parse the command-line arguments */
+
+	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options)) {
+		fprintf(stderr, "Error from GMT_Parse_common():%d\n", API->error);
+		Return(API->error);
+	}
+
+	Ctrl = (struct MBCONTOUR_CTRL *)New_mbcontour_Ctrl(GMT); /* Allocate and initialize a new control structure */
+	if ((error = GMT_mbcontour_parse(GMT, Ctrl, options))) {
+		fprintf(stderr, "Error from GMT_mbcontour_parse():%d\n", error);
+		Return(error);
+	}
+
+	/*-------------------------------- Variable initialization --------------------------------*/
+
+	/* get current mb default values */
+	int verbose = 0;
+	int format;
+	int pings;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double speedmin;
+	double timegap;
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	if (Ctrl->p.active)
+		pings = Ctrl->p.pings; /* If pings were set by user, prefer it */
+
+	bool plot_contours = false;
+
+	double cont_int = 25.;
+	double col_int = 100.;
+	double tick_int = 100.;
+	double label_int = 100.;
+	double tick_len = 0.05;
+	double label_hgt = 0.1;
+	double label_spacing = 0.0;
+	double tick_len_map = 0.05;
+	double label_hgt_map = 0.1;
+
+	/* set modes */
+	if (Ctrl->A.active) {
+		plot_contours = true;
+		cont_int = Ctrl->A.cont_int;
+		col_int = Ctrl->A.col_int;
+		tick_int = Ctrl->A.tick_int;
+		label_int = Ctrl->A.label_int;
+		tick_len = Ctrl->A.tick_len;
+		label_hgt = Ctrl->A.label_hgt;
+		label_spacing = Ctrl->A.label_spacing;
+	}
+	if (Ctrl->b.active) {
+		for (int i = 0; i < 7; i++)
+			btime_i[i] = Ctrl->b.time_i[i];
+	}
+
+	bool set_contours = false;
+	char contourfile[MB_PATH_MAXLINE];
+	if (Ctrl->C.active) {
+		plot_contours = true;
+		set_contours = true;
+		strcpy(contourfile, Ctrl->C.contourfile);
+	}
+	bool plot_track = false;
+	double time_tick_int = 0.25;
+	double time_annot_int = 1.0;
+	double date_annot_int = 4.0;
+	double time_tick_len = 0.1;
+	if (Ctrl->D.active) {
+		plot_track = true;
+		time_tick_int = Ctrl->D.time_tick_int;
+		time_annot_int = Ctrl->D.time_annot_int;
+		date_annot_int = Ctrl->D.date_annot_int;
+		time_tick_len = Ctrl->D.time_tick_len;
+	}
+	if (Ctrl->e.active) {
+		for (int i = 0; i < 7; i++)
+			etime_i[i] = Ctrl->e.time_i[i];
+	}
+	if (Ctrl->F.active)
+		format = Ctrl->F.format;
+	bool plot_name = false;
+	double name_hgt = 0.1;
+	bool name_perp = false;
+	if (Ctrl->G.active) {
+		plot_name = true;
+		name_hgt = Ctrl->G.name_hgt;
+		name_perp = Ctrl->G.name_perp;
+	}
+	mb_path read_file = "datalist.mb-1";
+	if (Ctrl->I.active) {
+		strcpy(read_file, Ctrl->I.inputfile);
+	}
+	bool lonflip_set = false;
+	if (Ctrl->L.active) {
+		lonflip_set = true;
+		lonflip = Ctrl->L.lonflip;
+	}
+	bool plot_pingnumber = false;
+	int pingnumber_tick_int = 50;
+	int pingnumber_annot_int = 100;
+	double pingnumber_tick_len = 0.1;
+	if (Ctrl->M.active) {
+		plot_pingnumber = true;
+		pingnumber_tick_int = (int)Ctrl->M.pingnumber_tick_int;
+		pingnumber_annot_int = (int)Ctrl->M.pingnumber_annot_int;
+		pingnumber_tick_len = Ctrl->M.pingnumber_tick_len;
+	}
+	int nplot = 0;
+	if (Ctrl->N.active)
+		nplot = Ctrl->N.nplot;
+	bool plot_triangles = false;
+	if (Ctrl->Q.active)
+		plot_triangles = true;
+	if (Ctrl->S.active)
+		speedmin = Ctrl->S.speedmin;
+	if (Ctrl->T.active)
+		timegap = Ctrl->T.timegap;
+	bool bathy_in_feet = false;
+	if (Ctrl->W.active)
+		bathy_in_feet = true;
+	int contour_algorithm = MB_CONTOUR_OLD;
+	if (Ctrl->Z.active)
+		contour_algorithm = Ctrl->Z.contour_algorithm;
+
+	/* set verbosity */
+	verbose = GMT->common.V.active;
+
+	/* set number of pings to be plotted if not set */
+	if (nplot == 0 && contour_algorithm == MB_CONTOUR_TRIANGLES)
+		nplot = 5;
+	else if (nplot == 0)
+		nplot = 50;
+
+	/* if nothing set to be plotted, plot contours and track */
+	if (plot_contours == false && plot_triangles == false && plot_track == false && plot_pingnumber == false) {
+		plot_contours = true;
+		plot_track = true;
+	}
+	if (plot_name == true && plot_track == false && plot_pingnumber == false) {
+		plot_track = true;
+	}
+	if (plot_track == false && plot_pingnumber == true) {
+		plot_track = true;
+		time_tick_int = 10000000.0;
+		time_annot_int = 10000000.0;
+		date_annot_int = 10000000.0;
+	}
+
+	static const char program_name[] = "mbcontour";
+
+	if (verbose == 1) {
+		fprintf(stderr, "\nProgram %s\n", program_name);
+		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+	}
+
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
 	FILE *fp;
-	int format;
-	int pings;
-	int lonflip;
-	int lonflip_set = false;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
 	double btime_d;
 	double etime_d;
-	double speedmin;
-	double timegap;
 	mb_path file;
 	mb_path dfile;
 	int file_in_bounds = false;
@@ -797,43 +944,14 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	unsigned int pingnumber;
 
 	/* plot control variables */
-	int contour_algorithm = MB_CONTOUR_OLD;
-	char contourfile[MB_PATH_MAXLINE];
 	int plot;
 	int flush;
 	int save_new;
 	int *npings = NULL;
-	int nping_read;
-	int nplot = 0;
-	int plot_contours = false;
-	int plot_triangles = false;
-	int set_contours = false;
-	double cont_int = 25.;
-	double col_int = 100.;
-	double tick_int = 100.;
-	double label_int = 100.;
-	double tick_len = 0.05;
-	double label_hgt = 0.1;
-	double label_spacing = 0.0;
-	double tick_len_map = 0.05;
-	double label_hgt_map = 0.1;
 	double label_spacing_map;
-	int plot_name = false;
 	int plotted_name = false;
-	int plot_track = false;
-	double time_tick_int = 0.25;
-	double time_annot_int = 1.0;
-	double date_annot_int = 4.0;
-	double time_tick_len = 0.1;
 	double time_tick_len_map = 0.1;
-	double name_hgt = 0.1;
 	double name_hgt_map = 0.1;
-	int name_perp = false;
-	int bathy_in_feet = false;
-	int plot_pingnumber = false;
-	int pingnumber_tick_int = 50;
-	int pingnumber_annot_int = 100;
-	double pingnumber_tick_len = 0.1;
 	double pingnumber_tick_len_map;
 
 	/* other variables */
@@ -842,140 +960,6 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	int count;
 	int setcolors;
 	double clipx[4], clipy[4];
-
-	/*----------------------- Standard module initialization and parsing ----------------------*/
-
-	if (API == NULL)
-		return (GMT_NOT_A_SESSION);
-	if (mode == GMT_MODULE_PURPOSE)
-		return (GMT_mbcontour_usage(API, GMT_MODULE_PURPOSE)); /* Return the purpose of program */
-	options = GMT_Create_Options(API, mode, args);
-	if (API->error)
-		return (API->error); /* Set or get option list */
-
-	if (!options || options->option == GMT_OPT_USAGE)
-		bailout(GMT_mbcontour_usage(API, GMT_USAGE)); /* Return the usage message */
-	if (options->option == GMT_OPT_SYNOPSIS)
-		bailout(GMT_mbcontour_usage(API, GMT_SYNOPSIS)); /* Return the synopsis */
-
-	/* Parse the command-line arguments */
-
-	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
-	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options)) {
-		fprintf(stderr, "Error from GMT_Parse_common():%d\n", API->error);
-		Return(API->error);
-	}
-
-	Ctrl = (struct MBCONTOUR_CTRL *)New_mbcontour_Ctrl(GMT); /* Allocate and initialize a new control structure */
-	if ((error = GMT_mbcontour_parse(GMT, Ctrl, options))) {
-		fprintf(stderr, "Error from GMT_mbcontour_parse():%d\n", error);
-		Return(error);
-	}
-
-	/*-------------------------------- Variable initialization --------------------------------*/
-
-	/* get current mb default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
-	if (Ctrl->p.active)
-		pings = Ctrl->p.pings; /* If pings were set by user, prefer it */
-
-	/* set default input to datalist.mb-1 */
-	strcpy(read_file, "datalist.mb-1");
-
-	/* set modes */
-	if (Ctrl->A.active) {
-		plot_contours = true;
-		cont_int = Ctrl->A.cont_int;
-		col_int = Ctrl->A.col_int;
-		tick_int = Ctrl->A.tick_int;
-		label_int = Ctrl->A.label_int;
-		tick_len = Ctrl->A.tick_len;
-		label_hgt = Ctrl->A.label_hgt;
-		label_spacing = Ctrl->A.label_spacing;
-	}
-	if (Ctrl->b.active) {
-		for (int i = 0; i < 7; i++)
-			btime_i[i] = Ctrl->b.time_i[i];
-	}
-	if (Ctrl->C.active) {
-		plot_contours = true;
-		set_contours = true;
-		strcpy(contourfile, Ctrl->C.contourfile);
-	}
-	if (Ctrl->D.active) {
-		plot_track = true;
-		time_tick_int = Ctrl->D.time_tick_int;
-		time_annot_int = Ctrl->D.time_annot_int;
-		date_annot_int = Ctrl->D.date_annot_int;
-		time_tick_len = Ctrl->D.time_tick_len;
-	}
-	if (Ctrl->e.active) {
-		for (int i = 0; i < 7; i++)
-			etime_i[i] = Ctrl->e.time_i[i];
-	}
-	if (Ctrl->F.active)
-		format = Ctrl->F.format;
-	if (Ctrl->G.active) {
-		plot_name = true;
-		name_hgt = Ctrl->G.name_hgt;
-		name_perp = Ctrl->G.name_perp;
-	}
-	if (Ctrl->I.active) {
-		strcpy(read_file, Ctrl->I.inputfile);
-	}
-	if (Ctrl->L.active) {
-		lonflip_set = true;
-		lonflip = Ctrl->L.lonflip;
-	}
-	if (Ctrl->M.active) {
-		plot_pingnumber = true;
-		pingnumber_tick_int = (int)Ctrl->M.pingnumber_tick_int;
-		pingnumber_annot_int = (int)Ctrl->M.pingnumber_annot_int;
-		pingnumber_tick_len = Ctrl->M.pingnumber_tick_len;
-	}
-	if (Ctrl->N.active)
-		nplot = Ctrl->N.nplot;
-	if (Ctrl->Q.active)
-		plot_triangles = true;
-	if (Ctrl->S.active)
-		speedmin = Ctrl->S.speedmin;
-	if (Ctrl->T.active)
-		timegap = Ctrl->T.timegap;
-	if (Ctrl->W.active)
-		bathy_in_feet = true;
-	if (Ctrl->Z.active)
-		contour_algorithm = Ctrl->Z.contour_algorithm;
-
-	/* set verbosity */
-	verbose = GMT->common.V.active;
-
-	/* set number of pings to be plotted if not set */
-	if (nplot == 0 && contour_algorithm == MB_CONTOUR_TRIANGLES)
-		nplot = 5;
-	else if (nplot == 0)
-		nplot = 50;
-
-	/* if nothing set to be plotted, plot contours and track */
-	if (plot_contours == false && plot_triangles == false && plot_track == false && plot_pingnumber == false) {
-		plot_contours = true;
-		plot_track = true;
-	}
-	if (plot_name == true && plot_track == false && plot_pingnumber == false) {
-		plot_track = true;
-	}
-	if (plot_track == false && plot_pingnumber == true) {
-		plot_track = true;
-		time_tick_int = 10000000.0;
-		time_annot_int = 10000000.0;
-		date_annot_int = 10000000.0;
-	}
-
-	/* print starting message */
-	if (verbose == 1) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
 
 	/*---------------------------- This is the mbcontour main code ----------------------------*/
 
@@ -1128,11 +1112,11 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = true;
+	bool read_datalist = format < 0;
 
 	/* open file list */
-	nping_read = 0;
+	int nping_read = 0;
+	bool read_data = false;
 	if (read_datalist == true) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
@@ -1178,6 +1162,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 			if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 			                           &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
 			    MB_SUCCESS) {
+				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 				fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -1205,6 +1190,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1222,6 +1208,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating contour control structure:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1437,10 +1424,10 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
+	struct GMT_PALETTE *CPTcolor = NULL;
 	if (!Ctrl->C.active && GMT_Destroy_Data(API, &CPTcolor) != GMT_OK) {
 		Return(API->error);
 	}
 	Return(EXIT_SUCCESS);
 }
-
 /*--------------------------------------------------------------------------*/
