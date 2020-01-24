@@ -922,7 +922,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
       else if (strcmp("trnhbt", options[option_index].name) == 0) {
           sscanf(optarg, "%lf", &trnsvr_hbto);
       }
-      else if (strcmp("trnhbt", options[option_index].name) == 0) {
+      else if (strcmp("trnuhbt", options[option_index].name) == 0) {
           sscanf(optarg, "%lf", &trnusvr_hbto);
       }
       // ping delay
@@ -2631,7 +2631,7 @@ char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int inden
 {
     if(NULL!=dest && NULL!=update){
         char *cp=dest;
-        snprintf(dest,len-1,"%*sMLE: %.2lf,%.4lf,%.4lf,%.4lf\n%*sMSE: %.2lf,%.4lf,%.4lf,%.4lf\n%*sCOV: %.2lf,%.2lf,%.2lf\n%*s RI: %d filter_state: %d success: %d cycle: %d mb1_time: %0.3lf update_time: %0.3lf\n",
+        snprintf(dest,len-1,"%*sMLE: %.2lf,%.4lf,%.4lf,%.4lf\n%*sMSE: %.2lf,%.4lf,%.4lf,%.4lf\n%*sCOV: %.2lf,%.2lf,%.2lf\n%*s RI: %d filter_state: %d success: %d cycle: %d ping: %d mb1_time: %0.3lf update_time: %0.3lf isconv:%hd\n",
                  indent,"",
                  update->mle_dat->time,
                  (update->mle_dat->x-update->pt_dat->x),
@@ -2651,8 +2651,10 @@ char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int inden
                  update->filter_state,
                  update->success,
                  update->cycle,
+                 update->ping_number,
                  update->mb1_time,
-                 update->update_time
+                 update->update_time,
+                 update->is_converged
                  );
     }
     return dest;
@@ -2735,7 +2737,7 @@ int mbtrnpp_trn_pub_olog(trn_update_t *update,
                          sqrt(update->mse_dat->covariance[0]),
                          sqrt(update->mse_dat->covariance[2]),
                          sqrt(update->mse_dat->covariance[5]));
-        mlog_tprintf(log_id,"trn_reinit_flag,%d,fstate,%d,success,%d,cycle,%d,mb1_time,%0.3lf,update_time, %0.3lf\n",update->reinit_count,update->filter_state,update->success,update->cycle,update->cycle,update->mb1_time,update->update_time);
+        mlog_tprintf(log_id,"trn_state,reinit_flag,%d,fstate,%d,success,%d,cycle,%d,ping,%d,mb1_time,%0.3lf,update_time,%0.3lf,isconv,%hd\n",update->reinit_count,update->filter_state,update->success,update->cycle,update->ping_number,update->mb1_time,update->update_time,update->is_converged);
     }
 
     return retval;
@@ -2774,8 +2776,10 @@ int mbtrnpp_trn_pub_osocket(trn_update_t *update,
                 update->filter_state,
                 update->success,
                 update->cycle,
+                update->ping_number,
                 update->mb1_time,
-                update->update_time
+                update->update_time,
+                update->is_converged
             };
 
             if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
@@ -3072,7 +3076,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUSVR_XT], mtime_dtime());
 
         if (do_process) {
-            mlog_tprintf(trn_ulog_id,"trn_update_start,%lf,%d\n",mtime_etime(),++process_count);
+            mlog_tprintf(trn_ulog_id,"trn_update_start,%lf,%lf,%d\n",mtime_etime(),mb1->sounding.ts,++process_count);
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRN_PROCN]);
 
             if(NULL!=tnav && NULL!=mb1 && NULL!=cfg){
@@ -3108,7 +3112,9 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 
                                 pstate->reinit_count = wtnav_get_num_reinits(tnav);
                                 pstate->filter_state = wtnav_get_filter_state(tnav);
+                                pstate->is_converged = (wtnav_is_converged(tnav) ? 1 : 0);
                                 pstate->cycle=mb1_count;
+                                pstate->ping_number=mb1->sounding.ping_number;
                                 pstate->mb1_time=mb1->sounding.ts;
                                 pstate->update_time=mtime_etime();
 
