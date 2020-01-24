@@ -304,14 +304,12 @@ struct MBSWATH_CTRL {
 
 
 void *New_mbswath_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a new control structure */
-	struct MBSWATH_CTRL *Ctrl;
 	int verbose = 0;
 	double dummybounds[4];
 	int dummyformat;
 	int dummypings;
-	int i;
 
-	Ctrl = gmt_M_memory(GMT, NULL, 1, struct MBSWATH_CTRL);
+	struct MBSWATH_CTRL *Ctrl = gmt_M_memory(GMT, NULL, 1, struct MBSWATH_CTRL);
 
 	/* Initialize values whose defaults are not 0/false/NULL */
 
@@ -343,7 +341,7 @@ void *New_mbswath_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a new 
 	Ctrl->Z.usefiltered = false;
 
 	/* mbswath variables */
-	for (i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		Ctrl->bounds[i] = 0.0;
 		Ctrl->clipx[i] = 0.0;
 		Ctrl->clipy[i] = 0.0;
@@ -443,7 +441,8 @@ int GMT_mbswath_parse(struct GMT_CTRL *GMT, struct MBSWATH_CTRL *Ctrl, struct GM
 	 * returned when registering these sources/destinations with the API.
 	 */
 
-	unsigned int n_errors = 0, n_files = 0;
+	unsigned int n_errors = 0;
+	unsigned int n_files = 0;
 	struct GMT_OPTION *opt = NULL;
 	struct GMTAPI_CTRL *API = GMT->parent;
 	int n;
@@ -637,23 +636,9 @@ int GMT_mbswath_parse(struct GMT_CTRL *GMT, struct MBSWATH_CTRL *Ctrl, struct GM
 
 /*--------------------------------------------------------------------*/
 int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
-	int status = MB_SUCCESS;
-	struct swath *swath;
-	struct ping *pingcur;
-	struct footprint *print;
-	int dobath, doss;
-	double headingx, headingy;
-	double dx, dy, r, dlon1, dlon2, dlat1, dlat2, tt, x, y;
-	double ddlonx, ddlaty, rfactor;
-	static double dddepth = 0.0;
-	int setprint;
-	int i, j, k;
-
-	/* get swath */
-	swath = Ctrl->swath_plot;
+	struct swath *swath = Ctrl->swath_plot;
 	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)Ctrl->mbio_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -669,6 +654,8 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 	}
 
 	/* set mode of operation */
+	bool dobath;
+	bool doss;
 	if (Ctrl->Z.mode != MBSWATH_SS && Ctrl->Z.mode != MBSWATH_SS_FILTER) {
 		dobath = true;
 		doss = false;
@@ -678,18 +665,24 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 		doss = true;
 	}
 
+	struct ping *pingcur;
+
 	/* set all footprint flags to zero */
-	for (i = 0; i < swath->npings; i++) {
+	for (int i = 0; i < swath->npings; i++) {
 		pingcur = &swath->data[i];
-		for (j = 0; j < pingcur->beams_bath; j++)
+		for (int j = 0; j < pingcur->beams_bath; j++)
 			pingcur->bathflag[j] = false;
-		for (j = 0; j < pingcur->pixels_ss; j++)
+		for (int j = 0; j < pingcur->pixels_ss; j++)
 			pingcur->ssflag[j] = false;
 	}
 
+	double headingx;
+	double headingy;
+	double rfactor;
+
 	/* get fore-aft components of beam footprints */
 	if (swath->npings > 1 && Ctrl->A.mode == MBSWATH_FOOTPRINT_FAKE) {
-		for (i = 0; i < swath->npings; i++) {
+		for (int i = 0; i < swath->npings; i++) {
 			/* initialize */
 			pingcur = &swath->data[i];
 			pingcur->lonaft = 0.0;
@@ -701,9 +694,9 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 			if (i > 0) {
 				headingx = sin(pingcur->heading * DTR);
 				headingy = cos(pingcur->heading * DTR);
-				dx = (swath->data[i - 1].navlon - pingcur->navlon) / Ctrl->mtodeglon;
-				dy = (swath->data[i - 1].navlat - pingcur->navlat) / Ctrl->mtodeglat;
-				r = sqrt(dx * dx + dy * dy);
+				const double dx = (swath->data[i - 1].navlon - pingcur->navlon) / Ctrl->mtodeglon;
+				const double dy = (swath->data[i - 1].navlat - pingcur->navlat) / Ctrl->mtodeglat;
+				const double r = sqrt(dx * dx + dy * dy);
 				pingcur->lonaft = Ctrl->footprint_factor * r * headingx * Ctrl->mtodeglon;
 				pingcur->lataft = Ctrl->footprint_factor * r * headingy * Ctrl->mtodeglat;
 			}
@@ -712,9 +705,9 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 			if (i < swath->npings - 1) {
 				headingx = sin(pingcur->heading * DTR);
 				headingy = cos(pingcur->heading * DTR);
-				dx = (swath->data[i + 1].navlon - pingcur->navlon) / Ctrl->mtodeglon;
-				dy = (swath->data[i + 1].navlat - pingcur->navlat) / Ctrl->mtodeglat;
-				r = sqrt(dx * dx + dy * dy);
+				const double dx = (swath->data[i + 1].navlon - pingcur->navlon) / Ctrl->mtodeglon;
+				const double dy = (swath->data[i + 1].navlat - pingcur->navlat) / Ctrl->mtodeglat;
+				const double r = sqrt(dx * dx + dy * dy);
 				pingcur->lonfor = Ctrl->footprint_factor * r * headingx * Ctrl->mtodeglon;
 				pingcur->latfor = Ctrl->footprint_factor * r * headingy * Ctrl->mtodeglat;
 			}
@@ -739,8 +732,8 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 		pingcur = &swath->data[0];
 		headingx = sin(pingcur->heading * DTR);
 		headingy = cos(pingcur->heading * DTR);
-		tt = pingcur->bath[pingcur->beams_bath / 2] / 750.0; /* in s */
-		r = tt * pingcur->speed * 0.55555556;                /* in m */
+		const double tt = pingcur->bath[pingcur->beams_bath / 2] / 750.0; /* in s */
+		const double r = tt * pingcur->speed * 0.55555556;                /* in m */
 		pingcur->lonaft = -Ctrl->footprint_factor * r * headingx * Ctrl->mtodeglon;
 		pingcur->lataft = -Ctrl->footprint_factor * r * headingy * Ctrl->mtodeglat;
 		pingcur->lonfor = Ctrl->footprint_factor * r * headingx * Ctrl->mtodeglon;
@@ -752,9 +745,17 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 		rfactor = 0.5 * sin(DTR * Ctrl->footprint_factor);
 	}
 
+	double dlon1, dlon2;
+	double dlat1, dlat2;
+	double x, y;
+	double ddlonx, ddlaty;
+	static double dddepth = 0.0;  // TODO(schwehr): Why static?
+	bool setprint;
+
 	/* loop over the inner beams and get
 	    the obvious footprint boundaries */
-	for (i = 0; i < swath->npings; i++) {
+	struct footprint *print;
+	for (int i = 0; i < swath->npings; i++) {
 		pingcur = &swath->data[i];
 
 		/* get heading if using fore-aft beam width */
@@ -765,7 +766,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 
 		/* do bathymetry */
 		if (dobath == true)
-			for (j = 1; j < pingcur->beams_bath - 1; j++)
+			for (int j = 1; j < pingcur->beams_bath - 1; j++)
 				if (mb_beam_ok(pingcur->beamflag[j])) {
 					x = pingcur->bathlon[j];
 					y = pingcur->bathlat[j];
@@ -804,7 +805,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 							dddepth = pingcur->altitude;
 						else
 							dddepth = pingcur->bath[j];
-						r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
+						const double r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
 						pingcur->lonaft = -r * headingx * Ctrl->mtodeglon;
 						pingcur->lataft = -r * headingy * Ctrl->mtodeglat;
 						pingcur->lonfor = r * headingx * Ctrl->mtodeglon;
@@ -836,7 +837,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 
 		/* do sidescan */
 		if (doss == true)
-			for (j = 1; j < pingcur->pixels_ss - 1; j++)
+			for (int j = 1; j < pingcur->pixels_ss - 1; j++)
 				if (pingcur->ss[j] > MB_SIDESCAN_NULL) {
 					x = pingcur->sslon[j];
 					y = pingcur->sslat[j];
@@ -875,7 +876,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 							dddepth = pingcur->altitude;
 						else if (pingcur->beams_bath > 0 && mb_beam_ok(pingcur->beamflag[pingcur->beams_bath / 2]))
 							dddepth = pingcur->bath[pingcur->beams_bath / 2];
-						r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
+						const double r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
 						pingcur->lonaft = -r * headingx * Ctrl->mtodeglon;
 						pingcur->lataft = -r * headingy * Ctrl->mtodeglat;
 						pingcur->lonfor = r * headingx * Ctrl->mtodeglon;
@@ -908,7 +909,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 
 	/* loop over the outer beams and get
 	    the obvious footprint boundaries */
-	for (i = 0; i < swath->npings; i++) {
+	for (int i = 0; i < swath->npings; i++) {
 		pingcur = &swath->data[i];
 
 		/* get heading if using fore-aft beam width */
@@ -919,7 +920,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 
 		/* do bathymetry with more than 2 soundings */
 		if (dobath == true && pingcur->beams_bath > 2) {
-			j = 0;
+			int j = 0;
 			if (mb_beam_ok(pingcur->beamflag[j]) && mb_beam_ok(pingcur->beamflag[j + 1])) {
 				x = pingcur->bathlon[j];
 				y = pingcur->bathlat[j];
@@ -940,7 +941,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 						dddepth = pingcur->altitude;
 					else
 						dddepth = pingcur->bath[j];
-					r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
+					const double r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
 					pingcur->lonaft = -r * headingx * Ctrl->mtodeglon;
 					pingcur->lataft = -r * headingy * Ctrl->mtodeglat;
 					pingcur->lonfor = r * headingx * Ctrl->mtodeglon;
@@ -977,7 +978,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 						dddepth = pingcur->altitude;
 					else
 						dddepth = pingcur->bath[j];
-					r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
+					const double r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
 					pingcur->lonaft = -r * headingx * Ctrl->mtodeglon;
 					pingcur->lataft = -r * headingy * Ctrl->mtodeglat;
 					pingcur->lonfor = r * headingx * Ctrl->mtodeglon;
@@ -1008,7 +1009,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 					dddepth = pingcur->altitude;
 				else
 					dddepth = pingcur->bath[0];
-				r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
+				const double r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
 
 				dlon2 = -r * headingy * Ctrl->mtodeglon;
 				dlat2 = -r * headingx * Ctrl->mtodeglat;
@@ -1031,7 +1032,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 
 		/* do sidescan */
 		if (doss == true && pingcur->pixels_ss > 2) {
-			j = 0;
+			int j = 0;
 			if (pingcur->ss[j] > MB_SIDESCAN_NULL && pingcur->ss[j + 1] > MB_SIDESCAN_NULL) {
 				x = pingcur->sslon[j];
 				y = pingcur->sslat[j];
@@ -1052,7 +1053,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 						dddepth = pingcur->altitude;
 					else if (pingcur->beams_bath > 0 && mb_beam_ok(pingcur->beamflag[pingcur->beams_bath / 2]))
 						dddepth = pingcur->bath[pingcur->beams_bath / 2];
-					r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
+					const double r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
 					pingcur->lonaft = -r * headingx * Ctrl->mtodeglon;
 					pingcur->lataft = -r * headingy * Ctrl->mtodeglat;
 					pingcur->lonfor = r * headingx * Ctrl->mtodeglon;
@@ -1090,7 +1091,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 						dddepth = pingcur->altitude;
 					else if (pingcur->beams_bath > 0 && mb_beam_ok(pingcur->beamflag[pingcur->beams_bath / 2]))
 						dddepth = pingcur->bath[pingcur->beams_bath / 2];
-					r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
+					const double r = rfactor * sqrt(ddlonx * ddlonx + ddlaty * ddlaty + dddepth * dddepth);
 					pingcur->lonaft = -r * headingx * Ctrl->mtodeglon;
 					pingcur->lataft = -r * headingy * Ctrl->mtodeglat;
 					pingcur->lonfor = r * headingx * Ctrl->mtodeglon;
@@ -1109,40 +1110,36 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Beam footprints found in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2       npings:         %d\n", swath->npings);
 		fprintf(stderr, "dbg2       error:          %d\n", *error);
-		fprintf(stderr, "dbg2       status:         %d\n", status);
-		for (i = 0; i < swath->npings; i++) {
+		for (int i = 0; i < swath->npings; i++) {
 			fprintf(stderr, "dbg2\ndbg2       ping:           %d\n", i);
 			pingcur = &swath->data[i];
 			if (dobath == true)
-				for (j = 0; j < pingcur->beams_bath; j++) {
+				for (int j = 0; j < pingcur->beams_bath; j++) {
 					print = &pingcur->bathfoot[j];
 					fprintf(stderr, "dbg2       %d  %d %g %g   ", j, pingcur->bathflag[j], pingcur->bathlon[j],
 					        pingcur->bathlat[j]);
-					for (k = 0; k < 4; k++)
+					for (int k = 0; k < 4; k++)
 						fprintf(stderr, "  %g %g", print->x[k], print->y[k]);
 					fprintf(stderr, "\n");
 				}
 			if (doss == true)
-				for (j = 0; j < pingcur->pixels_ss; j++) {
+				for (int j = 0; j < pingcur->pixels_ss; j++) {
 					print = &pingcur->ssfoot[j];
 					fprintf(stderr, "dbg2       %d  %d %g %g   ", j, pingcur->ssflag[j], pingcur->sslon[j], pingcur->sslat[j]);
-					for (k = 0; k < 4; k++)
+					for (int k = 0; k < 4; k++)
 						fprintf(stderr, "  %g %g", print->x[k], print->y[k]);
 					fprintf(stderr, "\n");
 				}
 		}
 	}
 
-	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1156,24 +1153,8 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GMT, struct GMT_PALETTE *CPT, int *error) {
-	int status = MB_SUCCESS;
-	struct swath *swath;
-	struct ping *ping0;
-	struct ping *ping1;
-	struct ping *ping2;
-	int drvcount;
-	double dx, dy, dd;
-	double dst2;
-	double drvx, drvy;
-	double sinx, cosy;
-	double graylevel;
-	double rgb[4];
-	int i, j;
+	struct swath *swath = Ctrl->swath_plot;
 
-	/* get swath */
-	swath = Ctrl->swath_plot;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1199,6 +1180,17 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 		fprintf(stderr, "dbg2       Ctrl->mtodeglat:          %f\n", Ctrl->mtodeglat);
 	}
 
+	struct ping *ping0;
+	struct ping *ping1;
+	struct ping *ping2;
+	int drvcount;
+	double dx, dy, dd;
+	double dst2;
+	double drvx, drvy;
+	double sinx, cosy;
+	double graylevel;
+	double rgb[4];
+
 	/* get shading from directional bathymetric gradient */
 	if (Ctrl->Z.mode == MBSWATH_BATH_RELIEF) {
 		/* get directional factors */
@@ -1206,13 +1198,13 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 		cosy = cos(DTR * Ctrl->G.azimuth);
 
 		/* loop over the pings and beams */
-		for (i = 0; i < swath->npings; i++) {
+		for (int i = 0; i < swath->npings; i++) {
 			if (i > 0)
 				ping0 = &swath->data[i - 1];
 			ping1 = &swath->data[i];
 			if (i < swath->npings - 1)
 				ping2 = &swath->data[i + 1];
-			for (j = 0; j < ping1->beams_bath; j++)
+			for (int j = 0; j < ping1->beams_bath; j++)
 				if (mb_beam_ok(ping1->beamflag[j])) {
 					/* do across track components */
 					drvcount = 0;
@@ -1282,13 +1274,13 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 	/* get shading from amplitude data using cpt file */
 	else if (Ctrl->Z.mode == MBSWATH_BATH_AMP && Ctrl->N.active) {
 		/* loop over the pings and beams */
-		for (i = 0; i < swath->npings; i++) {
+		for (int i = 0; i < swath->npings; i++) {
 			if (i > 0)
 				ping0 = &swath->data[i - 1];
 			ping1 = &swath->data[i];
 			if (i < swath->npings - 1)
 				ping2 = &swath->data[i + 1];
-			for (j = 0; j < ping1->beams_bath; j++)
+			for (int j = 0; j < ping1->beams_bath; j++)
 				if (mb_beam_ok(ping1->beamflag[j])) {
 					/* calculate shading */
 					if (mb_beam_ok(ping1->beamflag[j])) {
@@ -1309,13 +1301,13 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 		// double median = Ctrl->G.azimuth;
 
 		/* loop over the pings and beams */
-		for (i = 0; i < swath->npings; i++) {
+		for (int i = 0; i < swath->npings; i++) {
 			if (i > 0)
 				ping0 = &swath->data[i - 1];
 			ping1 = &swath->data[i];
 			if (i < swath->npings - 1)
 				ping2 = &swath->data[i + 1];
-			for (j = 0; j < ping1->beams_bath; j++)
+			for (int j = 0; j < ping1->beams_bath; j++)
 				if (mb_beam_ok(ping1->beamflag[j])) {
 					/* calculate shading */
 					if (mb_beam_ok(ping1->beamflag[j]))
@@ -1326,16 +1318,14 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Shading values in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2       npings:         %d\n", swath->npings);
 		fprintf(stderr, "dbg2       error:          %d\n", *error);
-		fprintf(stderr, "dbg2       status:         %d\n", status);
-		for (i = 0; i < swath->npings; i++) {
+		for (int i = 0; i < swath->npings; i++) {
 			fprintf(stderr, "dbg2\ndbg2       ping:           %d\n", i);
 			ping1 = &swath->data[i];
-			for (j = 0; j < ping1->beams_bath; j++) {
+			for (int j = 0; j < ping1->beams_bath; j++) {
 				fprintf(stderr, "dbg2       %d  %d  %g  %g\n", j, ping1->bathflag[j], ping1->bath[j], ping1->bathshade[j]);
 			}
 		}
@@ -1343,9 +1333,8 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1367,9 +1356,7 @@ int mbswath_plot_box(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GM
 	int ixx1, ixx2;
 	double dx, dy;
 	int ncross, xcross[10];
-	int i, j, k;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1398,7 +1385,7 @@ int mbswath_plot_box(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GM
 	/* if image plot then rasterize the box */
 	else if (Ctrl->image_type == MBSWATH_IMAGE_8 || Ctrl->image_type == MBSWATH_IMAGE_24) {
 		/* get bounds of box in pixels */
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			ix[i] = (int)(Ctrl->nx * x[i] / Ctrl->x_inch);
 			iy[i] = (int)(Ctrl->ny * y[i] / Ctrl->y_inch);
 		}
@@ -1410,7 +1397,7 @@ int mbswath_plot_box(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GM
 		ixmax = ix[0];
 		iymin = iy[0];
 		iymax = iy[0];
-		for (i = 1; i < 4; i++) {
+		for (int i = 1; i < 4; i++) {
 			if (ix[i] < ixmin)
 				ixmin = ix[i];
 			if (ix[i] > ixmax)
@@ -1433,7 +1420,7 @@ int mbswath_plot_box(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GM
 		for (iyy = iymin; iyy <= iymax; iyy++) {
 			/* find crossings */
 			ncross = 0;
-			for (i = 0; i < 4; i++) {
+			for (int i = 0; i < 4; i++) {
 				if ((iy[i] <= iyy && iy[i + 1] >= iyy) || (iy[i] >= iyy && iy[i + 1] <= iyy)) {
 					if (iy[i] == iy[i + 1]) {
 						xcross[ncross] = ix[i];
@@ -1451,7 +1438,7 @@ int mbswath_plot_box(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GM
 			}
 
 			/* plot lines between crossings */
-			for (j = 0; j < ncross - 1; j++) {
+			for (int j = 0; j < ncross - 1; j++) {
 				if (xcross[j] < xcross[j + 1]) {
 					ixx1 = xcross[j];
 					ixx2 = xcross[j + 1];
@@ -1471,13 +1458,13 @@ int mbswath_plot_box(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GM
 				for (ixx = ixx1; ixx <= ixx2; ixx++) {
 					/*			fprintf(stderr,"plot %d %d\n",ixx,iyy);*/
 					if (Ctrl->image_type == MBSWATH_IMAGE_8) {
-						k = Ctrl->nx * (Ctrl->ny - iyy) + ixx;
+						const int k = Ctrl->nx * (Ctrl->ny - iyy) + ixx;
 						Ctrl->bitimage[k] = (unsigned char)(255 * YIQ(rgb));
 						// fprintf(stderr,"k:%d rgb: %f %f %f   bitimage: %u\n",
 						// k,rgb[0],rgb[1],rgb[2],Ctrl->bitimage[k]);
 					}
 					else {
-						k = 3 * (Ctrl->nx * (Ctrl->ny - iyy) + ixx);
+						const int k = 3 * (Ctrl->nx * (Ctrl->ny - iyy) + ixx);
 						Ctrl->bitimage[k] = (unsigned char)(255 * rgb[0]);
 						Ctrl->bitimage[k + 1] = (unsigned char)(255 * rgb[1]);
 						Ctrl->bitimage[k + 2] = (unsigned char)(255 * rgb[2]);
@@ -1493,7 +1480,6 @@ int mbswath_plot_box(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GM
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1514,12 +1500,10 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 	double *x, *y;
 	double xx[4], yy[4];
 	double rgb[4];
-	int i, j, k;
 
 	/* get swath */
 	swath = Ctrl->swath_plot;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1549,14 +1533,14 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 
 	if (Ctrl->Z.mode == MBSWATH_BATH || Ctrl->Z.mode == MBSWATH_BATH_RELIEF || Ctrl->Z.mode == MBSWATH_BATH_AMP) {
 		/* loop over all pings and beams and plot the good ones */
-		for (i = first; i < first + nplot; i++) {
+		for (int i = first; i < first + nplot; i++) {
 			pingcur = &swath->data[i];
-			for (j = 0; j < pingcur->beams_bath; j++)
+			for (int j = 0; j < pingcur->beams_bath; j++)
 				if (pingcur->bathflag[j] == true) {
 					print = &pingcur->bathfoot[j];
 					x = &(print->x[0]);
 					y = &(print->y[0]);
-					for (k = 0; k < 4; k++)
+					for (int k = 0; k < 4; k++)
 						gmt_geo_to_xy(GMT, x[k], y[k], &xx[k], &yy[k]);
 					/* int cpt_index = */ gmt_get_rgb_from_z(GMT, CPT, pingcur->bath[j], rgb);
 					if (Ctrl->Z.mode == MBSWATH_BATH_RELIEF || Ctrl->Z.mode == MBSWATH_BATH_AMP) {
@@ -1572,14 +1556,14 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 	}
 	else if (Ctrl->Z.mode == MBSWATH_AMP) {
 		/* loop over all pings and beams and plot the good ones */
-		for (i = first; i < first + nplot; i++) {
+		for (int i = first; i < first + nplot; i++) {
 			pingcur = &swath->data[i];
-			for (j = 0; j < pingcur->beams_amp; j++)
+			for (int j = 0; j < pingcur->beams_amp; j++)
 				if (pingcur->bathflag[j] == true) {
 					print = &pingcur->bathfoot[j];
 					x = &(print->x[0]);
 					y = &(print->y[0]);
-					for (k = 0; k < 4; k++)
+					for (int k = 0; k < 4; k++)
 						gmt_geo_to_xy(GMT, x[k], y[k], &xx[k], &yy[k]);
 					/* int cpt_index = */ gmt_get_rgb_from_z(GMT, CPT, pingcur->amp[j], rgb);
 					status = mbswath_plot_box(verbose, Ctrl, GMT, PSL, xx, yy, rgb, error);
@@ -1588,14 +1572,14 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 	}
 	else if (Ctrl->Z.mode == MBSWATH_SS) {
 		/* loop over all pings and beams and plot the good ones */
-		for (i = first; i < first + nplot; i++) {
+		for (int i = first; i < first + nplot; i++) {
 			pingcur = &swath->data[i];
-			for (j = 0; j < pingcur->pixels_ss; j++)
+			for (int j = 0; j < pingcur->pixels_ss; j++)
 				if (pingcur->ssflag[j] == true) {
 					print = &pingcur->ssfoot[j];
 					x = &(print->x[0]);
 					y = &(print->y[0]);
-					for (k = 0; k < 4; k++)
+					for (int k = 0; k < 4; k++)
 						gmt_geo_to_xy(GMT, x[k], y[k], &xx[k], &yy[k]);
 					/* int cpt_index = */ gmt_get_rgb_from_z(GMT, CPT, pingcur->ss[j], rgb);
 					status = mbswath_plot_box(verbose, Ctrl, GMT, PSL, xx, yy, rgb, error);
@@ -1607,7 +1591,6 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1624,9 +1607,7 @@ int mbswath_plot_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *
 	int status = MB_SUCCESS;
 	double size = 0.005;
 	int ix, iy;
-	int k;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1654,11 +1635,11 @@ int mbswath_plot_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *
 
 		/* plot pixel */
 		if (Ctrl->image_type == MBSWATH_IMAGE_8) {
-			k = Ctrl->nx * (Ctrl->ny - iy) + ix;
+			const int k = Ctrl->nx * (Ctrl->ny - iy) + ix;
 			Ctrl->bitimage[k] = (unsigned char)YIQ(rgb);
 		}
 		else {
-			k = 3 * (Ctrl->nx * (Ctrl->ny - iy) + ix);
+			const int k = 3 * (Ctrl->nx * (Ctrl->ny - iy) + ix);
 			Ctrl->bitimage[k] = (unsigned char)(255 * rgb[0]);
 			Ctrl->bitimage[k + 1] = (unsigned char)(255 * rgb[1]);
 			Ctrl->bitimage[k + 2] = (unsigned char)(255 * rgb[2]);
@@ -1669,7 +1650,6 @@ int mbswath_plot_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1688,12 +1668,10 @@ int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_C
 	struct ping *pingcur;
 	double xx, yy;
 	double rgb[4];
-	int i, j;
 
 	/* get swath */
 	swath = Ctrl->swath_plot;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1722,9 +1700,9 @@ int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_C
 
 	if (Ctrl->Z.mode == MBSWATH_BATH || Ctrl->Z.mode == MBSWATH_BATH_RELIEF || Ctrl->Z.mode == MBSWATH_BATH_AMP) {
 		/* loop over all pings and beams and plot the good ones */
-		for (i = first; i < first + nplot; i++) {
+		for (int i = first; i < first + nplot; i++) {
 			pingcur = &swath->data[i];
-			for (j = 0; j < pingcur->beams_bath; j++)
+			for (int j = 0; j < pingcur->beams_bath; j++)
 				if (mb_beam_ok(pingcur->beamflag[j])) {
 					gmt_geo_to_xy(GMT, pingcur->bathlon[j], pingcur->bathlat[j], &xx, &yy);
 					/* int cpt_index = */ gmt_get_rgb_from_z(GMT, CPT, pingcur->bath[j], rgb);
@@ -1736,9 +1714,9 @@ int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_C
 	}
 	else if (Ctrl->Z.mode == MBSWATH_AMP) {
 		/* loop over all pings and beams and plot the good ones */
-		for (i = first; i < first + nplot; i++) {
+		for (int i = first; i < first + nplot; i++) {
 			pingcur = &swath->data[i];
-			for (j = 0; j < pingcur->beams_amp; j++)
+			for (int j = 0; j < pingcur->beams_amp; j++)
 				if (mb_beam_ok(pingcur->beamflag[j])) {
 					gmt_geo_to_xy(GMT, pingcur->bathlon[j], pingcur->bathlat[j], &xx, &yy);
 					/* int cpt_index = */ gmt_get_rgb_from_z(GMT, CPT, pingcur->amp[j], rgb);
@@ -1748,9 +1726,9 @@ int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_C
 	}
 	else if (Ctrl->Z.mode == MBSWATH_SS) {
 		/* loop over all pings and beams and plot the good ones */
-		for (i = first; i < first + nplot; i++) {
+		for (int i = first; i < first + nplot; i++) {
 			pingcur = &swath->data[i];
-			for (j = 0; j < pingcur->pixels_ss; j++)
+			for (int j = 0; j < pingcur->pixels_ss; j++)
 				if (pingcur->ss[j] > MB_SIDESCAN_NULL) {
 					gmt_geo_to_xy(GMT, pingcur->sslon[j], pingcur->sslat[j], &xx, &yy);
 					/* int cpt_index = */ gmt_get_rgb_from_z(GMT, CPT, pingcur->ss[j], rgb);
@@ -1763,7 +1741,6 @@ int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_C
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1780,9 +1757,7 @@ int mbswath_ping_copy(int verbose, int one, int two, struct swath *swath, int *e
 
 	struct ping *ping1;
 	struct ping *ping2;
-	int i, j;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1798,7 +1773,7 @@ int mbswath_ping_copy(int verbose, int one, int two, struct swath *swath, int *e
 	ping2 = &swath->data[two];
 	ping1->pings = ping2->pings;
 	ping1->kind = ping2->kind;
-	for (i = 0; i < 7; i++)
+	for (int i = 0; i < 7; i++)
 		ping1->time_i[i] = ping2->time_i[i];
 	ping1->time_d = ping2->time_d;
 	ping1->navlon = ping2->navlon;
@@ -1812,26 +1787,26 @@ int mbswath_ping_copy(int verbose, int one, int two, struct swath *swath, int *e
 	ping1->beams_bath = ping2->beams_bath;
 	ping1->beams_amp = ping2->beams_amp;
 	ping1->pixels_ss = ping2->pixels_ss;
-	for (i = 0; i < ping1->beams_bath; i++) {
+	for (int i = 0; i < ping1->beams_bath; i++) {
 		ping1->beamflag[i] = ping2->beamflag[i];
 		ping1->bath[i] = ping2->bath[i];
 		ping1->bathlon[i] = ping2->bathlon[i];
 		ping1->bathlat[i] = ping2->bathlat[i];
 		ping1->bathflag[i] = ping2->bathflag[i];
-		for (j = 0; j < 4; j++) {
+		for (int j = 0; j < 4; j++) {
 			ping1->bathfoot[i].x[j] = ping2->bathfoot[i].x[j];
 			ping1->bathfoot[i].y[j] = ping2->bathfoot[i].y[j];
 		}
 	}
-	for (i = 0; i < ping1->beams_amp; i++) {
+	for (int i = 0; i < ping1->beams_amp; i++) {
 		ping1->amp[i] = ping2->amp[i];
 	}
-	for (i = 0; i < ping1->pixels_ss; i++) {
+	for (int i = 0; i < ping1->pixels_ss; i++) {
 		ping1->ss[i] = ping2->ss[i];
 		ping1->sslon[i] = ping2->sslon[i];
 		ping1->sslat[i] = ping2->sslat[i];
 		ping1->ssflag[i] = ping2->ssflag[i];
-		for (j = 0; j < 4; j++) {
+		for (int j = 0; j < 4; j++) {
 			ping1->ssfoot[i].x[j] = ping2->ssfoot[i].x[j];
 			ping1->ssfoot[i].y[j] = ping2->ssfoot[i].y[j];
 		}
@@ -1841,7 +1816,6 @@ int mbswath_ping_copy(int verbose, int one, int two, struct swath *swath, int *e
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1925,7 +1899,6 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 	int plot;
 	int flush;
 	int save_new;
-	int i;
 	int pings;
 
 	/*----------------------- Standard module initialization and parsing ----------------------*/
@@ -2138,7 +2111,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 			Ctrl->swath_plot->beams_bath = Ctrl->beams_bath_max;
 			Ctrl->swath_plot->beams_amp = Ctrl->beams_amp_max;
 			Ctrl->swath_plot->pixels_ss = Ctrl->pixels_ss_max;
-			for (i = 0; i < MAXPINGS; i++) {
+			for (int i = 0; i < MAXPINGS; i++) {
 				pingcur = &(Ctrl->swath_plot->data[i]);
 				pingcur->beamflag = NULL;
 				pingcur->bath = NULL;
@@ -2221,7 +2194,6 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 				            &(pingcur->pixels_ss), pingcur->beamflag, pingcur->bath, pingcur->amp, pingcur->bathlon,
 				            pingcur->bathlat, pingcur->ss, pingcur->sslon, pingcur->sslat, pingcur->comment, &error);
 
-				/* print debug statements */
 				if (verbose >= 2) {
 					fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
 					fprintf(stderr, "dbg2       kind:           %d\n", pingcur->kind);
@@ -2230,14 +2202,14 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 					fprintf(stderr, "dbg2       pixels_ss:      %d\n", pingcur->pixels_ss);
 					fprintf(stderr, "dbg2       error:          %d\n", error);
 					fprintf(stderr, "dbg2       status:         %d\n", status);
-					for (i = 0; i < pingcur->beams_bath; i++) {
+					for (int i = 0; i < pingcur->beams_bath; i++) {
 						fprintf(stderr, "bath[%4d]:  %3d  %f  %f  %f\n", i, pingcur->beamflag[i], pingcur->bath[i],
 						        pingcur->bathlon[i], pingcur->bathlat[i]);
 					}
-					for (i = 0; i < pingcur->beams_amp; i++) {
+					for (int i = 0; i < pingcur->beams_amp; i++) {
 						fprintf(stderr, "amp[%4d]:  %f  %f  %f\n", i, pingcur->amp[i], pingcur->bathlon[i], pingcur->bathlat[i]);
 					}
-					for (i = 0; i < pingcur->pixels_ss; i++) {
+					for (int i = 0; i < pingcur->pixels_ss; i++) {
 						fprintf(stderr, "ss[%4d]:  %f  %f  %f\n", i, pingcur->ss[i], pingcur->sslon[i], pingcur->sslat[i]);
 					}
 				}
@@ -2256,7 +2228,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 
 				/* scale amplitudes if necessary */
 				if (error == MB_ERROR_NO_ERROR && (mode == MBSWATH_BATH_AMP || mode == MBSWATH_AMP) && Ctrl->D.mode > 0) {
-					for (i = 0; i < pingcur->beams_amp; i++) {
+					for (int i = 0; i < pingcur->beams_amp; i++) {
 						if (mb_beam_ok(pingcur->beamflag[i]) && Ctrl->D.mode == 1) {
 							pingcur->amp[i] =
 							    Ctrl->D.ampscale * (pingcur->amp[i] - Ctrl->D.ampmin) / (Ctrl->D.ampmax - Ctrl->D.ampmin);
@@ -2282,14 +2254,14 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 
 				/* scale bathymetry from meters to feet if necessary */
 				if (error == MB_ERROR_NO_ERROR && Ctrl->W.active == true) {
-					for (i = 0; i < pingcur->beams_bath; i++) {
+					for (int i = 0; i < pingcur->beams_bath; i++) {
 						pingcur->bath[i] = 3.2808399 * pingcur->bath[i];
 					}
 				}
 
 				/* scale sidescan if necessary */
 				if (error == MB_ERROR_NO_ERROR && mode == MBSWATH_SS && Ctrl->D.mode > 0) {
-					for (i = 0; i < pingcur->pixels_ss; i++) {
+					for (int i = 0; i < pingcur->pixels_ss; i++) {
 						if (pingcur->ss[i] > MB_SIDESCAN_NULL && Ctrl->D.mode == 1) {
 							pingcur->ss[i] =
 							    Ctrl->D.ampscale * (pingcur->ss[i] - Ctrl->D.ampmin) / (Ctrl->D.ampmax - Ctrl->D.ampmin);
@@ -2368,7 +2340,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 						start = true;
 					}
 					else if (*npings > 1) {
-						for (i = 0; i < 2; i++)
+						for (int i = 0; i < 2; i++)
 							status = mbswath_ping_copy(verbose, i, *npings - 2 + i, Ctrl->swath_plot, &error);
 						*npings = 2;
 					}
