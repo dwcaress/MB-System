@@ -231,16 +231,7 @@ int ncontour_plot_alloc = 0;
 double *contour_x = NULL;
 double *contour_y = NULL;
 
-int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int *error);
-void mbcontour_plot(double x, double y, int ipen);
-void mbcontour_setline(int linewidth);
-void mbcontour_newpen(int ipen);
-void mbcontour_justify_string(double height, char *string, double *s);
-void mbcontour_plot_string(double x, double y, double hgt, double angle, char *label);
-
-
 /*--------------------------------------------------------------------*/
-
 void *New_mbcontour_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a new control structure */
 	int verbose = 0;
 	double dummybounds[4];
@@ -572,8 +563,173 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 		bailout(code);                                                                                                           \
 	}
 
-int GMT_mbcontour(void *V_API, int mode, void *args) {
+/*--------------------------------------------------------------------------*/
+int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBCONTOUR function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       one:        %d\n", one);
+		fprintf(stderr, "dbg2       two:        %d\n", two);
+		fprintf(stderr, "dbg2       swath:      %p\n", swath);
+		fprintf(stderr, "dbg2       pings:      %d\n", swath->npings);
+		fprintf(stderr, "dbg2       time_i[two]:%4d  %4d %2d %2d %2d %2d %2d %6.6d\n", two, swath->pings[two].time_i[0],
+		        swath->pings[two].time_i[1], swath->pings[two].time_i[2], swath->pings[two].time_i[3],
+		        swath->pings[two].time_i[4], swath->pings[two].time_i[5], swath->pings[two].time_i[6]);
+	}
 
+	struct ping *ping1 = &swath->pings[one];
+	struct ping *ping2 = &swath->pings[two];
+
+	int status = MB_SUCCESS;
+
+	/* make sure enough memory is allocated */
+	if (ping1->beams_bath_alloc < ping2->beams_bath) {
+		status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath * sizeof(char), (void **)&(ping1->beamflag), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath * sizeof(double), (void **)&(ping1->bath), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath * sizeof(double), (void **)&(ping1->bathlon), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath * sizeof(double), (void **)&(ping1->bathlat), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath * sizeof(int), (void **)&(ping1->bflag[0]), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath * sizeof(int), (void **)&(ping1->bflag[1]), error);
+		ping1->beams_bath_alloc = ping2->beams_bath;
+	}
+
+	/* copy things */
+	for (int i = 0; i < 7; i++)
+		ping1->time_i[i] = ping2->time_i[i];
+	ping1->time_d = ping2->time_d;
+	ping1->navlon = ping2->navlon;
+	ping1->navlat = ping2->navlat;
+	ping1->heading = ping2->heading;
+	ping1->pingnumber = ping2->pingnumber;
+	ping1->beams_bath = ping2->beams_bath;
+	for (int i = 0; i < ping2->beams_bath; i++) {
+		ping1->beamflag[i] = ping2->beamflag[i];
+		ping1->bath[i] = ping2->bath[i];
+		ping1->bathlon[i] = ping2->bathlon[i];
+		ping1->bathlat[i] = ping2->bathlat[i];
+		ping1->bflag[0][i] = ping2->bflag[1][i];
+	}
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBCONTOUR function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+
+/*--------------------------------------------------------------------------*/
+void mbcontour_plot(double x, double y, int ipen) {
+	/* make sure contour arrays are large enough */
+	if (ncontour_plot >= ncontour_plot_alloc) {
+		ncontour_plot_alloc += MBCONTOUR_PLOT_ALLOC_INC;
+		double *p = (double *)realloc(contour_x, sizeof(double) * (ncontour_plot_alloc));
+		if (p != NULL) {
+			contour_x = p;
+		} else {
+			free(contour_x);
+			contour_x = NULL;
+			ncontour_plot_alloc = 0;
+		}
+		if ((p = (double *)realloc(contour_y, sizeof(double) * (ncontour_plot_alloc))) != NULL) {
+			contour_y = p;
+		} else {
+			free(contour_y);
+			contour_y = NULL;
+			ncontour_plot_alloc = 0;
+		}
+	}
+
+	/* convert to map units */
+	double xx;
+	double yy;
+	gmt_geo_to_xy(GMT, x, y, &xx, &yy);
+
+	/* if command is move then start new contour */
+	if (ipen == MBCONTOUR_PLOT_MOVE) {
+		ncontour_plot = 0;
+		contour_x[ncontour_plot] = xx;
+		contour_y[ncontour_plot] = yy;
+		ncontour_plot++;
+	}
+
+	/* else if command is to draw then add the point to the list */
+	else if (ipen == MBCONTOUR_PLOT_DRAW) {
+		contour_x[ncontour_plot] = xx;
+		contour_y[ncontour_plot] = yy;
+		ncontour_plot++;
+	}
+
+	/* else if command is to areokw then add the point to the list
+	    and call PSL_plotline() */
+	else if (ipen == MBCONTOUR_PLOT_STROKE) {
+		contour_x[ncontour_plot] = xx;
+		contour_y[ncontour_plot] = yy;
+		ncontour_plot++;
+
+		PSL_plotline(PSL, contour_x, contour_y, ncontour_plot, PSL_MOVE + PSL_STROKE);
+
+		ncontour_plot = 0;
+	}
+}
+
+/*--------------------------------------------------------------------------*/
+void mbcontour_setline(int linewidth) {
+	(void)linewidth;  // Unused parameter
+	// PSL_setlinewidth(PSL, (double)linewidth);
+}
+
+/*--------------------------------------------------------------------------*/
+void mbcontour_newpen(int ipen) {
+	if (ipen > -1 && ipen < ncolor) {
+		double rgb[4] = {
+			red[ipen] / 255.0,
+			green[ipen] / 255.0,
+			blue[ipen] / 255.0,
+			0, // To not fall into the transparency case of pslib.c/psl_putcolor()
+		};
+		PSL_setcolor(PSL, rgb, PSL_IS_STROKE);
+	}
+}
+
+/*--------------------------------------------------------------------------*/
+void mbcontour_justify_string(double height, char *string, double *s) {
+	const int len = strlen(string);
+	s[0] = 0.0;
+	s[1] = 0.185 * height * len;
+	s[2] = 0.37 * len * height;
+	s[3] = 0.37 * len * height;
+}
+
+/*--------------------------------------------------------------------------*/
+void mbcontour_plot_string(double x, double y, double hgt, double angle, char *label) {
+	double xx;
+	double yy;
+	const double fontsize = 72.0 * hgt / inchtolon;
+	gmt_geo_to_xy(GMT, x, y, &xx, &yy);
+	const int justify = 5;
+	const int mode = 0;
+	PSL_plottext(PSL, xx, yy, fontsize, label, angle, justify, mode);
+}
+
+/*--------------------------------------------------------------------------*/
+void mb_set_colors(int ncolor, int *red, int *green, int *blue) {
+	(void)ncolor;  // Unused parameter
+	(void)red;  // Unused parameter
+	(void)green;  // Unused parameter
+	(void)blue;  // Unused parameter
+}
+
+/*--------------------------------------------------------------------------*/
+int GMT_mbcontour(void *V_API, int mode, void *args) {
 	static const char program_name[] = "mbcontour";
 
 	struct GMT_PALETTE *CPTcolor = NULL;
@@ -1287,163 +1443,4 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	Return(EXIT_SUCCESS);
 }
 
-/*--------------------------------------------------------------------------*/
-int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int *error) {
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBCONTOUR function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       one:        %d\n", one);
-		fprintf(stderr, "dbg2       two:        %d\n", two);
-		fprintf(stderr, "dbg2       swath:      %p\n", swath);
-		fprintf(stderr, "dbg2       pings:      %d\n", swath->npings);
-		fprintf(stderr, "dbg2       time_i[two]:%4d  %4d %2d %2d %2d %2d %2d %6.6d\n", two, swath->pings[two].time_i[0],
-		        swath->pings[two].time_i[1], swath->pings[two].time_i[2], swath->pings[two].time_i[3],
-		        swath->pings[two].time_i[4], swath->pings[two].time_i[5], swath->pings[two].time_i[6]);
-	}
-
-	struct ping *ping1 = &swath->pings[one];
-	struct ping *ping2 = &swath->pings[two];
-
-	int status = MB_SUCCESS;
-
-	/* make sure enough memory is allocated */
-	if (ping1->beams_bath_alloc < ping2->beams_bath) {
-		status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath * sizeof(char), (void **)&(ping1->beamflag), error);
-		status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath * sizeof(double), (void **)&(ping1->bath), error);
-		status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath * sizeof(double), (void **)&(ping1->bathlon), error);
-		status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath * sizeof(double), (void **)&(ping1->bathlat), error);
-		status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath * sizeof(int), (void **)&(ping1->bflag[0]), error);
-		status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath * sizeof(int), (void **)&(ping1->bflag[1]), error);
-		ping1->beams_bath_alloc = ping2->beams_bath;
-	}
-
-	/* copy things */
-	for (int i = 0; i < 7; i++)
-		ping1->time_i[i] = ping2->time_i[i];
-	ping1->time_d = ping2->time_d;
-	ping1->navlon = ping2->navlon;
-	ping1->navlat = ping2->navlat;
-	ping1->heading = ping2->heading;
-	ping1->pingnumber = ping2->pingnumber;
-	ping1->beams_bath = ping2->beams_bath;
-	for (int i = 0; i < ping2->beams_bath; i++) {
-		ping1->beamflag[i] = ping2->beamflag[i];
-		ping1->bath[i] = ping2->bath[i];
-		ping1->bathlon[i] = ping2->bathlon[i];
-		ping1->bathlat[i] = ping2->bathlat[i];
-		ping1->bflag[0][i] = ping2->bflag[1][i];
-	}
-
-	/* assume success */
-	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBCONTOUR function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-
-/*--------------------------------------------------------------------------*/
-void mb_set_colors(int ncolor, int *red, int *green, int *blue) {
-	(void)ncolor;  // Unused parameter
-	(void)red;  // Unused parameter
-	(void)green;  // Unused parameter
-	(void)blue;  // Unused parameter
-}
-/*--------------------------------------------------------------------------*/
-void mbcontour_plot(double x, double y, int ipen) {
-	/* make sure contour arrays are large enough */
-	if (ncontour_plot >= ncontour_plot_alloc) {
-		ncontour_plot_alloc += MBCONTOUR_PLOT_ALLOC_INC;
-		double *p = (double *)realloc(contour_x, sizeof(double) * (ncontour_plot_alloc));
-		if (p != NULL) {
-			contour_x = p;
-		} else {
-			free(contour_x);
-			contour_x = NULL;
-			ncontour_plot_alloc = 0;
-		}
-		if ((p = (double *)realloc(contour_y, sizeof(double) * (ncontour_plot_alloc))) != NULL) {
-			contour_y = p;
-		} else {
-			free(contour_y);
-			contour_y = NULL;
-			ncontour_plot_alloc = 0;
-		}
-	}
-
-	/* convert to map units */
-	double xx;
-	double yy;
-	gmt_geo_to_xy(GMT, x, y, &xx, &yy);
-
-	/* if command is move then start new contour */
-	if (ipen == MBCONTOUR_PLOT_MOVE) {
-		ncontour_plot = 0;
-		contour_x[ncontour_plot] = xx;
-		contour_y[ncontour_plot] = yy;
-		ncontour_plot++;
-	}
-
-	/* else if command is to draw then add the point to the list */
-	else if (ipen == MBCONTOUR_PLOT_DRAW) {
-		contour_x[ncontour_plot] = xx;
-		contour_y[ncontour_plot] = yy;
-		ncontour_plot++;
-	}
-
-	/* else if command is to areokw then add the point to the list
-	    and call PSL_plotline() */
-	else if (ipen == MBCONTOUR_PLOT_STROKE) {
-		contour_x[ncontour_plot] = xx;
-		contour_y[ncontour_plot] = yy;
-		ncontour_plot++;
-
-		PSL_plotline(PSL, contour_x, contour_y, ncontour_plot, PSL_MOVE + PSL_STROKE);
-
-		ncontour_plot = 0;
-	}
-}
-/*--------------------------------------------------------------------------*/
-void mbcontour_setline(int linewidth) {
-	(void)linewidth;  // Unused parameter
-	// PSL_setlinewidth(PSL, (double)linewidth);
-}
-/*--------------------------------------------------------------------------*/
-void mbcontour_newpen(int ipen) {
-	if (ipen > -1 && ipen < ncolor) {
-		double rgb[4] = {
-			red[ipen] / 255.0,
-			green[ipen] / 255.0,
-			blue[ipen] / 255.0,
-			0, // To not fall into the transparency case of pslib.c/psl_putcolor()
-		};
-		PSL_setcolor(PSL, rgb, PSL_IS_STROKE);
-	}
-}
-/*--------------------------------------------------------------------------*/
-void mbcontour_justify_string(double height, char *string, double *s) {
-	const int len = strlen(string);
-	s[0] = 0.0;
-	s[1] = 0.185 * height * len;
-	s[2] = 0.37 * len * height;
-	s[3] = 0.37 * len * height;
-}
-/*--------------------------------------------------------------------------*/
-void mbcontour_plot_string(double x, double y, double hgt, double angle, char *label) {
-	double xx;
-	double yy;
-	const double fontsize = 72.0 * hgt / inchtolon;
-	gmt_geo_to_xy(GMT, x, y, &xx, &yy);
-	const int justify = 5;
-	const int mode = 0;
-	PSL_plottext(PSL, xx, yy, fontsize, label, angle, justify, mode);
-}
 /*--------------------------------------------------------------------------*/
