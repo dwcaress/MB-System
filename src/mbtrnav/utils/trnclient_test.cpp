@@ -130,6 +130,7 @@ void out_csv(double time, measT *mt, poseT *pt, poseT *mle, poseT *mse, char goo
     fprintf(stderr,"%.3lf,%.3lf,%.4lf,%.4lf,%.4lf,",time,mle->time,mle->x,mle->y,mle->z);
     fprintf(stderr,"%.3lf,%.4lf,%.4lf,%.4lf,",mse->time,mse->x,mse->y,mse->z);
     fprintf(stderr,"%.4lf,%.4lf,%.4lf,",pt->x, pt->y, pt->z);
+    fprintf(stderr,"%.4lf,%.4lf,%.4lf,",mse->vn_x, mse->vn_y, mse->vn_z);
     fprintf(stderr,"%.3lf,%.3lf,%.3lf,",(N_COVAR>=6?sqrt(mse->covariance[0]):-1.0),(N_COVAR>=6?sqrt(mse->covariance[2]):-1.0),(N_COVAR>=6?sqrt(mse->covariance[5]):-1.0));
     fprintf(stderr,"%d,%d\n",fs,nr);
 }
@@ -143,7 +144,6 @@ void static s_trn_cycle(trn_worker_t *worker)
         worker->mse.covariance[2] = worker->mse.covariance[3] = 0.;
 
         worker->tnav->estimatePose( &worker->mle, 1);
-
         worker->tnav->estimatePose( &worker->mse, 2);
 
         char goodMeas = worker->tnav->lastMeasSuccessful();
