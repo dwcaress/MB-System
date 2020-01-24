@@ -65,6 +65,7 @@
 #include "medebug.h"
 #include "mutils.h"
 #include "mconfig.h"
+#include "mtime.h"
 #include "trn_msg.h"
 
 /////////////////////////
@@ -177,6 +178,8 @@
 //};
 //static mmd_module_config_t mmd_config_default= {MOD_MBTNAV,"MOD_MBTNAV",MBTNAV_CH_COUNT,((MM_ERR|MM_WARN)|MBTNAV_1),trnc_ch_names};
 
+typedef enum{OF_ASCII=0x1, OF_CSV=0x2, OF_HEX=0x4}ofmt_flag_t;
+
 /// @typedef struct app_cfg_s app_cfg_t
 /// @brief application configuration parameter structure
 typedef struct app_cfg_s{
@@ -201,6 +204,9 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::bsize
     /// @brief buffer size
     uint32_t bsize;
+    /// @var app_cfg_s::ofmt
+    /// @brief output format flags
+    ofmt_flag_t ofmt;
 }app_cfg_t;
 
 /// @typedef enum trnc_action_t trnc_action_t
@@ -240,6 +246,7 @@ static void s_show_help()
     "--hbeat=n      : hbeat interval (packets)\n"
     "--blocking=0|1 : blocking receive [0:1]\n"
     "--bsize=n      : buffer size\n"
+    "--ofmt=a|c|h   : output formats (one or more of a:ascii c:csv h:hex)\n"
 //    "--port=n       : UDP server port\n"
     "\n";
     printf("%s",help_message);
@@ -271,6 +278,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"blocking", required_argument, NULL, 0},
         {"cycles", required_argument, NULL, 0},
         {"bsize", required_argument, NULL, 0},
+        {"ofmt", required_argument, NULL, 0},
        {NULL, 0, NULL, 0}};
 
     // process argument list 
@@ -323,11 +331,32 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 else if (strcmp("cycles", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->cycles);
                 }
-                // buffer size 
+                // buffer size
                 else if (strcmp("bsize", options[option_index].name) == 0) {
                     sscanf(optarg,"%u",&cfg->bsize);
                     cfg->bsize = (cfg->bsize>0 ? cfg->bsize : MBTNAV_BUF_LEN);
 
+                }
+                // output format
+                else if (strcmp("ofmt", options[option_index].name) == 0) {
+                	char *cp=optarg;
+                 	while(*cp!='\0'){
+                        switch(toupper(*cp)){
+                            case 'A':
+                                cfg->ofmt |= OF_ASCII;
+                                break;
+                            case 'H':
+                                cfg->ofmt |= OF_HEX;
+                                break;
+                            case 'C':
+                                cfg->ofmt |= OF_CSV;
+                                break;
+                            default:
+                                fprintf(stderr,"WARN: unknown output format[%c]\n",*cp);
+                                break;
+                        }
+                        cp++;
+                    }
                 }
                 break;
             default:
@@ -384,6 +413,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"block   [%s]\n",(cfg->blocking==0?"N":"Y")));
     PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"cycles  [%d]\n",cfg->cycles));
     PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"bsize   [%d]\n",cfg->bsize));
+    PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"ofmt    [%x]\n",cfg->ofmt));
 }
 // End function parse_args
 
@@ -435,9 +465,30 @@ static void s_trnw_offset_show(trn_offset_pub_t *self, bool verbose, uint16_t in
         fprintf(stderr,"%*s[filt_state   %15d]\n",indent,(indent>0?" ":""), self->filter_state);
         fprintf(stderr,"%*s[success      %15d]\n",indent,(indent>0?" ":""), self->success);
         fprintf(stderr,"%*s[cycle        %15d]\n",indent,(indent>0?" ":""), self->cycle);
+        fprintf(stderr,"%*s[ping_number  %15d]\n",indent,(indent>0?" ":""), self->ping_number);
         fprintf(stderr,"%*s[mb1_time     %15.3lf]\n",indent,(indent>0?" ":""),self->mb1_time);
         fprintf(stderr,"%*s[update_time  %15.3lf]\n",indent,(indent>0?" ":""),self->update_time);
+        fprintf(stderr,"%*s[is_converged %15d]\n",indent,(indent>0?" ":""), self->is_converged);
     }
+}
+
+static void s_out_csv(trn_offset_pub_t *self)
+{
+    double time=mtime_etime();//s_etime();
+        trn_estimate_t *pt=&self->est[0];
+        trn_estimate_t *mle=&self->est[1];
+        trn_estimate_t *mse=&self->est[2];
+    // system time,
+    // mle_time, mle.x, mle.y, mle.z
+    // mmse_time, mmse.x, mmse.y, mmse.z
+    // pt.x, pt.y, pt.z
+    // cov[0],cov[2],cov[5]
+    // reinit_count, filter_state, lm_successful, mb1_cycle, mb1_ping_number, isconverged
+    fprintf(stderr,"%.3lf,%.3lf,%.4lf,%.4lf,%.4lf,",time,mle->time,mle->x,mle->y,mle->z);
+    fprintf(stderr,"%.3lf,%.4lf,%.4lf,%.4lf,",mse->time,mse->x,mse->y,mse->z);
+    fprintf(stderr,"%.4lf,%.4lf,%.4lf,",pt->x, pt->y, pt->z);
+    fprintf(stderr,"%.3lf,%.3lf,%.3lf,",(N_COVAR>=6?sqrt(mse->cov[0]):-1.0),(N_COVAR>=6?sqrt(mse->cov[2]):-1.0),(N_COVAR>=6?sqrt(mse->cov[5]):-1.0));
+    fprintf(stderr,"%d,%d,%d,%d,%d,%hd\n",self->reinit_count,self->filter_state,self->success,self->cycle,self->ping_number,self->is_converged);
 }
 
 /// @fn int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
@@ -539,7 +590,6 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                     trn_rx_bytes+=test;
                     trn_rx_count++;
                     
-                    mfu_hex_show(msg_buf, test, 16, true, 5);
 
                     // check message type
                     if(frame->sync==MBTRN_MSGTYPE_ACK){
@@ -593,7 +643,14 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             
             // action: show message
             if (action == TRNAT_SHOW_MSG) {
+                if( (cfg->ofmt&OF_HEX) != 0)
+                mfu_hex_show(msg_buf, test, 16, true, 5);
+
+                if( (cfg->ofmt&OF_ASCII) != 0)
                 s_trnw_offset_show(frame,true,5);
+
+                if( (cfg->ofmt&OF_CSV) != 0)
+                    s_out_csv(frame);
             }
             
             // action: quit state machine
@@ -680,7 +737,8 @@ int main(int argc, char **argv)
         MBTNAV_BLOCK_DFL,
         MBTNAV_CYCLES_DFL,
         MBTNAV_HBEAT_DFL,
-        MBTNAV_BUF_LEN
+        MBTNAV_BUF_LEN,
+        0x0
     };
 
     // configure signal handling
