@@ -211,7 +211,7 @@ struct GMT_CTRL *GMT = NULL; /* General GMT interal parameters */
 
 /* pen variables */
 int ncolor;
-int nlevel;
+// int nlevel;
 double *level = NULL;
 int *red = NULL;
 int *green = NULL;
@@ -785,8 +785,6 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	double tick_len = 0.05;
 	double label_hgt = 0.1;
 	double label_spacing = 0.0;
-	double tick_len_map = 0.05;
-	double label_hgt_map = 0.1;
 
 	/* set modes */
 	if (Ctrl->A.active) {
@@ -904,65 +902,15 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	double file_weight;
-	FILE *fp;
-	double btime_d;
-	double etime_d;
-	mb_path file;
-	mb_path dfile;
-	int file_in_bounds = false;  // TOOD(schwehr): bool
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	void *mbio_ptr = NULL;
-
-	/* mbio read values */
-	struct swath *swath_plot = NULL;
-	struct ping *pingcur = NULL;
-	int kind;
-	int pings_read;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sensordepth;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathlon = NULL;
-	double *bathlat = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *sslon = NULL;
-	double *sslat = NULL;
-	mb_path comment;
-	unsigned int pingnumber;
-
-	/* plot control variables */
-	int *npings = NULL;
-	double label_spacing_map;
-	double time_tick_len_map = 0.1;
-	double name_hgt_map = 0.1;
-	double pingnumber_tick_len_map;
-
-	/* other variables */
-	mb_path line;
-	mb_path labelstr, tickstr;
-	int count;
-	int setcolors;
-	double clipx[4], clipy[4];
-
 	/*---------------------------- This is the mbcontour main code ----------------------------*/
+
+	int nlevel = 0;
 
 	/* read contours from file */
 	if (set_contours) {
 		/* open contour file */
-		if ((fp = fopen(contourfile, "r")) == NULL) {
+		FILE *fp = fopen(contourfile, "r");
+		if (fp == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open contour file: %s\n", contourfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -971,6 +919,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 
 		/* count lines in file */
 		nlevel = 0;
+		mb_path line;
 		while (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
 			nlevel++;
 		fclose(fp);
@@ -997,9 +946,11 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 		/* read contour levels from file */
 		nlevel = 0;
 		while (fgets(line, MB_PATH_MAXLINE, fp) != NULL) {
-			count = sscanf(line, "%lf %s %s %d %d %d", &level[nlevel], labelstr, tickstr, &red[nlevel], &green[nlevel],
+			mb_path labelstr;
+			mb_path tickstr;
+			const int count = sscanf(line, "%lf %s %s %d %d %d", &level[nlevel], labelstr, tickstr, &red[nlevel], &green[nlevel],
 			               &blue[nlevel]);
-			setcolors = true;
+			bool setcolors = true;
 			if (count >= 2 && labelstr[0] == 'a')
 				label[nlevel] = 1;
 			else if (count >= 2 && labelstr[0] == 'n')
@@ -1085,6 +1036,8 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	gmt_map_clip_on(GMT, GMT->session.no_rgb, 3);
 
 	/* Set particulars of output image for the postscript plot */
+	double clipx[4];
+	double clipy[4];
 	gmt_geo_to_xy(GMT, GMT->common.R.wesn[0], GMT->common.R.wesn[2], &clipx[0], &clipy[0]);
 	gmt_geo_to_xy(GMT, GMT->common.R.wesn[1], GMT->common.R.wesn[2], &clipx[1], &clipy[1]);
 	gmt_geo_to_xy(GMT, GMT->common.R.wesn[1], GMT->common.R.wesn[3], &clipx[2], &clipy[2]);
@@ -1096,12 +1049,12 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	inchtolon = (GMT->common.R.wesn[1] - GMT->common.R.wesn[0]) / (clipx[1] - clipx[0]);
 
 	/* scale label and tick sizes */
-	label_hgt_map = inchtolon * label_hgt;
-	label_spacing_map = inchtolon * label_spacing;
-	tick_len_map = inchtolon * tick_len;
-	time_tick_len_map = inchtolon * time_tick_len;
-	name_hgt_map = inchtolon * name_hgt;
-	pingnumber_tick_len_map = inchtolon * pingnumber_tick_len;
+	const double label_hgt_map =  inchtolon * label_hgt;
+	const double label_spacing_map = inchtolon * label_spacing;
+	const double tick_len_map = inchtolon * tick_len;
+	const double time_tick_len_map = inchtolon * time_tick_len;
+	const double name_hgt_map = inchtolon * name_hgt;
+	const double pingnumber_tick_len_map = inchtolon * pingnumber_tick_len;
 
 	/* get format if required */
 	if (format == 0)
@@ -1113,7 +1066,13 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	/* open file list */
 	int nping_read = 0;
 	bool read_data = false;
+	void *datalist;
+	double file_weight;
+	mb_path file;
+	mb_path dfile;
+
 	if (read_datalist) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
@@ -1130,11 +1089,27 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 		read_data = true;
 	}
 
+	// TODO(schwehr): Localize variables
+
+	struct swath *swath_plot = NULL;
+	struct ping *pingcur = NULL;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathlon = NULL;
+	double *bathlat = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *sslon = NULL;
+	double *sslat = NULL;
+	unsigned int pingnumber;
+
 	/* loop over files in file list */
 	if (verbose == 1)
 		fprintf(stderr, "\n");
+
 	while (read_data) {
 		/* check for mbinfo file - get file bounds if possible */
+		int file_in_bounds = false;  // TOOD(schwehr): bool
 		status = mb_check_info(verbose, file, lonflip, bounds, &file_in_bounds, &error);
 		if (status == MB_FAILURE) {
 			file_in_bounds = true;
@@ -1154,7 +1129,12 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 				mb_get_fnv(verbose, file, &format, &error);
 			}
 
-			/* call mb_read_init() */
+			double btime_d;
+			double etime_d;
+			int beams_bath;
+			int beams_amp;
+			int pixels_ss;
+			void *mbio_ptr = NULL;
 			if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 			                           &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
 			    MB_SUCCESS) {
@@ -1218,11 +1198,24 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 				fprintf(stderr, "processing data in %s...\n", file);
 
 			/* loop over reading */
-			npings = &swath_plot->npings;
+			int *npings = &swath_plot->npings;
 			*npings = 0;
 			bool done = false;
 			bool plotted_name = false;
 			while (done == false) {
+				mb_path comment;
+				int kind;
+				int pings_read;
+				int time_i[7];
+				double time_d;
+				double navlon;
+				double navlat;
+				double speed;
+				double heading;
+				double distance;
+				double altitude;
+				double sensordepth;
+
 				/* read the next ping */
 				status = mb_read(verbose, mbio_ptr, &kind, &pings_read, time_i, &time_d, &navlon, &navlat, &speed, &heading,
 				                 &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
