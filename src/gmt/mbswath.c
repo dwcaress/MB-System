@@ -27,7 +27,6 @@
  * Author:	D. W. Caress
  * Date:	May 30, 1993 (original standalone program for GMT3 and GMT4)
  * Date:	January 27, 2015 (recast as GMT5 module)
- *
  */
 
 #define THIS_MODULE_NAME "mbswath"
@@ -322,7 +321,6 @@ int mbswath_ping_copy(int verbose, int one, int two, struct swath *swath, int *e
 
 void *New_mbswath_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a new control structure */
 	struct MBSWATH_CTRL *Ctrl;
-	int status;
 	int verbose = 0;
 	double dummybounds[4];
 	int dummyformat;
@@ -334,7 +332,8 @@ void *New_mbswath_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a new 
 	/* Initialize values whose defaults are not 0/false/NULL */
 
 	/* get current mb default values */
-	status = mb_defaults(verbose, &dummyformat, &dummypings, &Ctrl->L.lonflip, dummybounds, Ctrl->b.time_i, Ctrl->e.time_i,
+	// int status =
+	mb_defaults(verbose, &dummyformat, &dummypings, &Ctrl->L.lonflip, dummybounds, Ctrl->b.time_i, Ctrl->e.time_i,
 	                     &Ctrl->S.speed, &Ctrl->T.timegap);
 
 	Ctrl->A.factor = 1.0;
@@ -1239,12 +1238,11 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 	double ddlonx, ddlaty, rfactor;
 	static double dddepth = 0.0;
 	int setprint;
-	struct mb_io_struct *mb_io_ptr;
 	int i, j, k;
 
 	/* get swath */
 	swath = Ctrl->swath_plot;
-	mb_io_ptr = (struct mb_io_struct *)Ctrl->mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)Ctrl->mbio_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1758,10 +1756,8 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 	double dst2;
 	double drvx, drvy;
 	double sinx, cosy;
-	double median;
 	double graylevel;
 	double rgb[4];
-	int cpt_index;
 	int i, j;
 
 	/* get swath */
@@ -1887,7 +1883,7 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 					/* calculate shading */
 					if (mb_beam_ok(ping1->beamflag[j])) {
 						/* get shading value from cpt */
-						cpt_index = gmt_get_rgb_from_z(GMT, CPT, ping1->amp[j], rgb);
+						/* int cpt_index = */ gmt_get_rgb_from_z(GMT, CPT, ping1->amp[j], rgb);
 						graylevel = (rgb[0] + rgb[1] + rgb[2]) / 3.0;
 						ping1->bathshade[j] = Ctrl->G.magnitude * (graylevel - Ctrl->G.azimuth) / 128.;
 					}
@@ -1900,7 +1896,7 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 	/* get shading from amplitude data */
 	else if (Ctrl->Z.mode == MBSWATH_BATH_AMP) {
 		/* get median value from value entered as azimuth */
-		median = Ctrl->G.azimuth;
+		// double median = Ctrl->G.azimuth;
 
 		/* loop over the pings and beams */
 		for (i = 0; i < swath->npings; i++) {
@@ -1960,7 +1956,6 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 	double *x, *y;
 	double xx[4], yy[4];
 	double rgb[4];
-	int cpt_index;
 	int i, j, k;
 
 	/* get swath */
@@ -2005,7 +2000,7 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 					y = &(print->y[0]);
 					for (k = 0; k < 4; k++)
 						gmt_geo_to_xy(GMT, x[k], y[k], &xx[k], &yy[k]);
-					cpt_index = gmt_get_rgb_from_z(GMT, CPT, pingcur->bath[j], rgb);
+					/* int cpt_index = */ gmt_get_rgb_from_z(GMT, CPT, pingcur->bath[j], rgb);
 					if (Ctrl->Z.mode == MBSWATH_BATH_RELIEF || Ctrl->Z.mode == MBSWATH_BATH_AMP) {
 						// fprintf(stderr,"Illuminate: shade:%f rgb: %f %f %f ",pingcur->bathshade[j], rgb[0],rgb[1],rgb[2]);
 						gmt_illuminate(GMT, pingcur->bathshade[j], rgb);
@@ -2028,7 +2023,7 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 					y = &(print->y[0]);
 					for (k = 0; k < 4; k++)
 						gmt_geo_to_xy(GMT, x[k], y[k], &xx[k], &yy[k]);
-					cpt_index = gmt_get_rgb_from_z(GMT, CPT, pingcur->amp[j], rgb);
+					/* int cpt_index = */ gmt_get_rgb_from_z(GMT, CPT, pingcur->amp[j], rgb);
 					status = mbswath_plot_box(verbose, Ctrl, GMT, PSL, xx, yy, rgb, error);
 				}
 		}
@@ -2044,7 +2039,7 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 					y = &(print->y[0]);
 					for (k = 0; k < 4; k++)
 						gmt_geo_to_xy(GMT, x[k], y[k], &xx[k], &yy[k]);
-					cpt_index = gmt_get_rgb_from_z(GMT, CPT, pingcur->ss[j], rgb);
+					/* int cpt_index = */ gmt_get_rgb_from_z(GMT, CPT, pingcur->ss[j], rgb);
 					status = mbswath_plot_box(verbose, Ctrl, GMT, PSL, xx, yy, rgb, error);
 				}
 		}
@@ -2073,7 +2068,6 @@ int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_C
 	struct ping *pingcur;
 	double xx, yy;
 	double rgb[4];
-	int cpt_index;
 	int i, j;
 
 	/* get swath */
@@ -2113,7 +2107,7 @@ int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_C
 			for (j = 0; j < pingcur->beams_bath; j++)
 				if (mb_beam_ok(pingcur->beamflag[j])) {
 					gmt_geo_to_xy(GMT, pingcur->bathlon[j], pingcur->bathlat[j], &xx, &yy);
-					cpt_index = gmt_get_rgb_from_z(GMT, CPT, pingcur->bath[j], rgb);
+					/* int cpt_index = */ gmt_get_rgb_from_z(GMT, CPT, pingcur->bath[j], rgb);
 					if (Ctrl->Z.mode == MBSWATH_BATH_RELIEF || Ctrl->Z.mode == MBSWATH_BATH_AMP)
 						gmt_illuminate(GMT, pingcur->bathshade[j], rgb);
 					status = mbswath_plot_point(verbose, Ctrl, GMT, PSL, xx, yy, rgb, error);
@@ -2127,7 +2121,7 @@ int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_C
 			for (j = 0; j < pingcur->beams_amp; j++)
 				if (mb_beam_ok(pingcur->beamflag[j])) {
 					gmt_geo_to_xy(GMT, pingcur->bathlon[j], pingcur->bathlat[j], &xx, &yy);
-					cpt_index = gmt_get_rgb_from_z(GMT, CPT, pingcur->amp[j], rgb);
+					/* int cpt_index = */ gmt_get_rgb_from_z(GMT, CPT, pingcur->amp[j], rgb);
 					status = mbswath_plot_point(verbose, Ctrl, GMT, PSL, xx, yy, rgb, error);
 				}
 		}
@@ -2139,7 +2133,7 @@ int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_C
 			for (j = 0; j < pingcur->pixels_ss; j++)
 				if (pingcur->ss[j] > MB_SIDESCAN_NULL) {
 					gmt_geo_to_xy(GMT, pingcur->sslon[j], pingcur->sslat[j], &xx, &yy);
-					cpt_index = gmt_get_rgb_from_z(GMT, CPT, pingcur->ss[j], rgb);
+					/* int cpt_index = */ gmt_get_rgb_from_z(GMT, CPT, pingcur->ss[j], rgb);
 					status = mbswath_plot_point(verbose, Ctrl, GMT, PSL, xx, yy, rgb, error);
 				}
 		}
