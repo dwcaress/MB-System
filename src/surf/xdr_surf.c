@@ -10,49 +10,32 @@
 #define _XDR_SURF
 #include "xdr_surf.h"
 
-
 /* ***********************************************************************
 *  ENDE DES DEKLARATIONSTEILS                                            *
 *********************************************************************** */
 
-/***************************************/
-/* SURF-stringconversions              */
-/***************************************/
+// SURF string conversions
 
-XdrSurf xdr_SurfString(XDR *xdrs,char *gp)
-{
-  u_int sizeS;
-
-  sizeS=STRING_SIZE;
-  return(xdr_bytes(xdrs,&gp,&sizeS,sizeS));
+XdrSurf xdr_SurfString(XDR *xdrs, char *gp) {
+  const u_int sizeS = STRING_SIZE;
+  return xdr_bytes(xdrs, &gp, &sizeS, sizeS);
 }
 
-XdrSurf xdr_SurfText(XDR *xdrs,char *gp)
-{
-  u_int sizeS;
-
-  sizeS=TEXT_SIZE;
-  return(xdr_bytes(xdrs,&gp,&sizeS,sizeS));
+XdrSurf xdr_SurfText(XDR *xdrs, char *gp) {
+  const u_int sizeS = TEXT_SIZE;
+  return xdr_bytes(xdrs, &gp, &sizeS, sizeS);
 }
 
-XdrSurf xdr_SurfTime(XDR *xdrs,char *gp)
-{
-  u_int sizeT;
-
-  sizeT=TIME_SIZE;
-  return(xdr_bytes(xdrs,&gp,&sizeT,sizeT));
+XdrSurf xdr_SurfTime(XDR *xdrs, char *gp) {
+  const u_int sizeT = TIME_SIZE;
+  return xdr_bytes(xdrs, &gp, &sizeT, sizeT);
 }
 
-/***************************************/
-/* SURF-filehandles                    */
-/***************************************/
+// SURF file handles
 
-/* handle XDR-formatted files for READ */
-FILE* xdrSurfOpenRead(XDR *xdrs,const char* filename)
-{
-  FILE* fp;
-
-  fp = fopen(filename,"rb+");
+// handle XDR-formatted files for READ
+FILE* xdrSurfOpenRead(XDR *xdrs, const char* filename) {
+  FILE* fp = fopen(filename,"rb+");
   if(fp != NULL)
   {
     xdrstdio_create(xdrs,fp,XDR_DECODE);
