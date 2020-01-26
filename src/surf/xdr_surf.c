@@ -1,55 +1,23 @@
-/*-----------------------------------------------------------------------
-/ P R O G R A M M K O P F
-/ ------------------------------------------------------------------------
-/ ------------------------------------------------------------------------
-/  DATEINAME        : xdr_surf.c Version 3.0
-/  ERSTELLUNGSDATUM : 28.07.93
-/ ------------------------------------------------------------------------
-/
-/ ------------------------------------------------------------------------
-/ COPYRIGHT (C) 1993: ATLAS ELEKTRONIK GMBH, 28305 BREMEN
-/ ------------------------------------------------------------------------
-/
-/  See README file for copying and redistribution conditions.
-/
-/
-/ HIER/SACHN: P: RP ____ _ ___ __
-/ BENENNUNG :
-/ ERSTELLER : Peter Block    : SAS3
-/ FREIGABE  : __.__.__  GS__
-/ AEND/STAND: __.__.__  __
-/ PRUEFVERM.:
-*/
-
-
-
-#define _XDR_SURF
+// DATEINAME        : xdr_surf.c Version 3.0
+// ERSTELLUNGSDATUM : 28.07.93
+// COPYRIGHT (C) 1993: ATLAS ELEKTRONIK GMBH, 28305 BREMEN
+// See README file for copying and redistribution conditions.
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#define _XDR_SURF
 #include "xdr_surf.h"
 
 
-
 /* ***********************************************************************
-*                                                                        *
 *  ENDE DES DEKLARATIONSTEILS                                            *
-*                                                                        *
 *********************************************************************** */
 
-
-
-
-
 /***************************************/
-/*                                     */
 /* SURF-stringconversions              */
-/*                                     */
 /***************************************/
-
-
 
 XdrSurf xdr_SurfString(XDR *xdrs,char *gp)
 {
@@ -59,7 +27,6 @@ XdrSurf xdr_SurfString(XDR *xdrs,char *gp)
   return(xdr_bytes(xdrs,&gp,&sizeS,sizeS));
 }
 
-
 XdrSurf xdr_SurfText(XDR *xdrs,char *gp)
 {
   u_int sizeS;
@@ -67,7 +34,6 @@ XdrSurf xdr_SurfText(XDR *xdrs,char *gp)
   sizeS=TEXT_SIZE;
   return(xdr_bytes(xdrs,&gp,&sizeS,sizeS));
 }
-
 
 XdrSurf xdr_SurfTime(XDR *xdrs,char *gp)
 {
@@ -77,21 +43,11 @@ XdrSurf xdr_SurfTime(XDR *xdrs,char *gp)
   return(xdr_bytes(xdrs,&gp,&sizeT,sizeT));
 }
 
-
-
-
-
-
 /***************************************/
-/*                                     */
 /* SURF-filehandles                    */
-/*                                     */
 /***************************************/
-
-
 
 /* handle XDR-formatted files for READ */
-
 FILE* xdrSurfOpenRead(XDR *xdrs,const char* filename)
 {
   FILE* fp;
@@ -104,11 +60,7 @@ FILE* xdrSurfOpenRead(XDR *xdrs,const char* filename)
   return(fp);
 }
 
-
-
-
 /* handle XDR-formatted files for WRITE */
-
 FILE* xdrSurfOpenWrite(XDR *xdrs,const char* filename)
 {
   FILE* fp;
@@ -121,14 +73,9 @@ FILE* xdrSurfOpenWrite(XDR *xdrs,const char* filename)
   return(fp);
 }
 
-
-
 /***************************************/
-/*                                     */
 /* SURF-conversions for     SIX-files  */
-/*                                     */
 /***************************************/
-
 
 short getSurfVersion(char* version)
 {
@@ -137,8 +84,6 @@ short getSurfVersion(char* version)
  return(((short)(version[6]))*256 + ((short)(version[8])));
 }
 
-
-
 XdrSurf xdr_SurfCheckVersion(XDR *xdrs,SurfDescriptor *gp,char* label,
                                   short* newVersion,short* oldVersion)
 {
@@ -146,7 +91,6 @@ XdrSurf xdr_SurfCheckVersion(XDR *xdrs,SurfDescriptor *gp,char* label,
   char* toLabel;
 
   /* Get the label and check the consistency of the stream */
-
   toLabel = (char *)gp->label;
   sizeL=LABEL_SIZE;
   if (xdr_bytes(xdrs,&toLabel,&sizeL,sizeL) != SURF_SUCCESS)
@@ -161,13 +105,11 @@ XdrSurf xdr_SurfCheckVersion(XDR *xdrs,SurfDescriptor *gp,char* label,
   return(SURF_SUCCESS);
 }
 
-
 void insertDefaultSixDescriptor(short typ,SurfSixDescriptor *gp)
 {
  gp->typ = typ;
  gp->nr  = 0l;
 }
-
 
 void insertDefaultSdaDescriptor(short typ,SurfSdaDescriptor *gp)
 {
@@ -175,13 +117,11 @@ void insertDefaultSdaDescriptor(short typ,SurfSdaDescriptor *gp)
  gp->nr  = 0l;
 }
 
-
 void insertDefaultNrOfDescriptor(short typ,SurfNrofDescriptor *gp)
 {
  gp->typ = typ;
  gp->nr  = 0l;
 }
-
 
 XdrSurf xdr_SurfSixDescriptor(XDR *xdrs,SurfSixDescriptor *gp)
 {
@@ -190,14 +130,12 @@ XdrSurf xdr_SurfSixDescriptor(XDR *xdrs,SurfSixDescriptor *gp)
           xdr_u_long(xdrs,&gp->nr)                         );
 }
 
-
 XdrSurf xdr_SurfSdaDescriptor(XDR *xdrs,SurfSdaDescriptor *gp)
 {
   return(
           xdr_short(xdrs,&gp->typ)                         &&
           xdr_u_long(xdrs,&gp->nr)                         );
 }
-
 
 XdrSurf xdr_SurfNrofDescriptor(XDR *xdrs,SurfNrofDescriptor *gp)
 {
@@ -206,7 +144,6 @@ XdrSurf xdr_SurfNrofDescriptor(XDR *xdrs,SurfNrofDescriptor *gp)
           xdr_u_long(xdrs,&gp->nr)                         );
 }
 
-
 XdrSurf xdr_SurfDescriptor(XDR *xdrs,SurfDescriptor *gp,
                                   short* newVersion,short* oldVersion)
 {
@@ -214,7 +151,6 @@ XdrSurf xdr_SurfDescriptor(XDR *xdrs,SurfDescriptor *gp,
   short newVers,oldVers,vers20,vers30;
 
   /* Get the first Label and check the Version of the stream */
-
   vers20 = getSurfVersion(SURF_VERS2_0);
   vers30 = getSurfVersion(SURF_VERS3_0);
 
@@ -334,12 +270,6 @@ XdrSurf xdr_SurfDescriptor(XDR *xdrs,SurfDescriptor *gp,
   return(status);
 }
 
-
-
-
-
-
-
 XdrSurf xdr_SurfGlobalData(XDR *xdrs,SurfGlobalData *gp)
 {
   char buffer[LABEL_SIZE];
@@ -418,9 +348,6 @@ XdrSurf xdr_SurfGlobalData(XDR *xdrs,SurfGlobalData *gp)
     xdr_float(xdrs,&gp->modifiedStartStopDistance)                         );
 }
 
-
-
-
 XdrSurf xdr_SurfStatistics(XDR *xdrs,SurfStatistics *gp)
 {
   char buffer[LABEL_SIZE];
@@ -466,9 +393,6 @@ XdrSurf xdr_SurfStatistics(XDR *xdrs,SurfStatistics *gp)
             xdr_float(xdrs,&gp->maxDepth)                                 );
 }
 
-
-
-
 XdrSurf xdr_SurfPositionPolarfix(XDR *xdrs,SurfPositionPolarfix *gp)
 {
 
@@ -495,8 +419,6 @@ XdrSurf xdr_SurfPositionPolarfix(XDR *xdrs,SurfPositionPolarfix *gp)
      xdr_float(xdrs,&gp->polarfixAntennaPositionHeight)                 );
 }
 
-
-
 XdrSurf xdr_SurfPositionAnySensor(XDR *xdrs,SurfPositionAnySensor* gp)
 {
   return(
@@ -522,9 +444,6 @@ XdrSurf xdr_SurfPositionAnySensor(XDR *xdrs,SurfPositionAnySensor* gp)
      xdr_float(xdrs,&gp->sensorAntennaPositionHeight)   );
 }
 
-
-
-
 XdrSurf xdr_SurfUnknownPositionSensor(XDR *xdrs,char *gp)
 {
   u_int sizeU;
@@ -532,9 +451,6 @@ XdrSurf xdr_SurfUnknownPositionSensor(XDR *xdrs,char *gp)
   sizeU=UNION_SIZE;
   return(xdr_bytes(xdrs,&gp,&sizeU,sizeU));
 }
-
-
-
 
 XdrSurf xdr_PositionSensorArray(XDR *xdrs,SurfPositionSensorArray *gp,short oldVers)
 {
@@ -603,11 +519,6 @@ XdrSurf xdr_PositionSensorArray(XDR *xdrs,SurfPositionSensorArray *gp,short oldV
   }
 }
 
-
-
-
-
-
 XdrSurf xdr_SurfMultiBeamAngleTable(XDR *xdrs,
                                     SurfMultiBeamAngleTable *gp,
                                     u_short maxBeamNr)
@@ -653,11 +564,6 @@ XdrSurf xdr_SurfMultiBeamAngleTable(XDR *xdrs,
   return(ret);
 }
 
-
-
-
-
-
 XdrSurf xdr_SurfTransducerParameterTable(XDR *xdrs,
                                          SurfTransducerParameterTable *gp)
 {
@@ -666,7 +572,6 @@ XdrSurf xdr_SurfTransducerParameterTable(XDR *xdrs,
   char* toLabel;
 
   /* Get the Label and check the consistency of the stream */
-
   sizeL=LABEL_SIZE;
   toLabel = (char *)gp->label;
 
@@ -691,12 +596,6 @@ XdrSurf xdr_SurfTransducerParameterTable(XDR *xdrs,
             xdr_float(xdrs,&gp->transducerTwoThetaMFreq)        &&
             xdr_float(xdrs,&gp->transducerTwoThetaLFreq)        );
 }
-
-
-
-
-
-
 
 XdrSurf xdr_SurfCProfileTable(XDR *xdrs,
                               SurfCProfileTable *gp,
@@ -747,10 +646,6 @@ XdrSurf xdr_SurfCProfileTable(XDR *xdrs,
   return(ret);
 }
 
-
-
-
-
 XdrSurf xdr_SurfCProfileTableTpes(XDR *xdrs,
                               SurfCProfileTpeTable *gp,
                               u_short maxNrOfElementsPerTable)
@@ -795,12 +690,6 @@ XdrSurf xdr_SurfCProfileTableTpes(XDR *xdrs,
   }
   return(ret);
 }
-
-
-
-
-
-
 
 XdrSurf xdr_SurfPolygons(XDR *xdrs,
                          SurfPolygons *gp,
@@ -848,12 +737,6 @@ XdrSurf xdr_SurfPolygons(XDR *xdrs,
   return(ret);
 }
 
-
-
-
-
-
-
 XdrSurf xdr_SurfEventText(XDR *xdrs,char *gp)
 {
   u_int sizeE;
@@ -861,7 +744,6 @@ XdrSurf xdr_SurfEventText(XDR *xdrs,char *gp)
   sizeE=EVENT_SIZE;
   return(xdr_bytes(xdrs,&gp,&sizeE,sizeE));
 }
-
 
 XdrSurf xdr_SurfEvents  (XDR *xdrs,
                          SurfEvents   *gp,
@@ -911,11 +793,6 @@ XdrSurf xdr_SurfEvents  (XDR *xdrs,
   return(ret);
 }
 
-
-
-
-
-
 XdrSurf xdr_SurfTpeStatics(XDR *xdrs,SurfTpeStatics *gp)
 {
   char buffer[LABEL_SIZE];
@@ -923,7 +800,6 @@ XdrSurf xdr_SurfTpeStatics(XDR *xdrs,SurfTpeStatics *gp)
   char* toLabel;
 
   /* Get the Label and check the consistency of the stream */
-
   sizeL=LABEL_SIZE;
   toLabel = (char *)gp->label;
 
@@ -971,11 +847,6 @@ XdrSurf xdr_SurfTpeStatics(XDR *xdrs,SurfTpeStatics *gp)
     xdr_double(xdrs,&gp->reserve4)                             );
 }
 
-
-
-
-
-
 XdrSurf xdr_SurfFreeText (XDR *xdrs,
                          SurfFreeText   *gp,
                          u_short maxNrOfElementsPerTable)
@@ -1022,9 +893,6 @@ XdrSurf xdr_SurfFreeText (XDR *xdrs,
   return(ret);
 }
 
-
-
-
 static XdrSurf xdr_SurfReductionParameters(XDR *xdrs,SurfReductionParameters *gp)
 {
   return(
@@ -1037,7 +905,6 @@ static XdrSurf xdr_SurfReductionParameters(XDR *xdrs,SurfReductionParameters *gp
     xdr_u_short(xdrs,&gp->toBeam)                              &&
     xdr_u_short(xdrs,&gp->reduceOuterBeams)                    );
 }
-
 
 static XdrSurf xdr_SurfLastFilterParameters(XDR *xdrs,SurfLastFilterParameters *gp)
 {
@@ -1056,8 +923,6 @@ static XdrSurf xdr_SurfLastFilterParameters(XDR *xdrs,SurfLastFilterParameters *
     xdr_double(xdrs,&gp->dFuture2)                             );
 }
 
-
-
 XdrSurf xdr_SurfAddStatistics(XDR *xdrs,SurfAddStatistics *gp)
 {
   char buffer[LABEL_SIZE];
@@ -1065,7 +930,6 @@ XdrSurf xdr_SurfAddStatistics(XDR *xdrs,SurfAddStatistics *gp)
   char *toLabel,*toText;
 
   /* Get the Label and check the consistency of the stream */
-
   sizeL=LABEL_SIZE;
   toLabel = (char *)gp->label;
   sizeT=TEXT_SIZE ;
@@ -1112,8 +976,6 @@ XdrSurf xdr_SurfAddStatistics(XDR *xdrs,SurfAddStatistics *gp)
     xdr_u_short(xdrs,&(gp->iFuture[7]))                        );
 }
 
-
-
 XdrSurf xdr_SurfVendorText(XDR *xdrs,SurfVendorText *gp)
 {
   u_int sizeT = TEXT_SIZE;
@@ -1121,7 +983,6 @@ XdrSurf xdr_SurfVendorText(XDR *xdrs,SurfVendorText *gp)
 
   return(xdr_bytes(xdrs,&toText,&sizeT,sizeT));
 }
-
 
 XdrSurf xdr_SurfFreeSixDataDescr(XDR *xdrs,SurfFreeSixDataDescr *gp)
 {
@@ -1131,7 +992,6 @@ XdrSurf xdr_SurfFreeSixDataDescr(XDR *xdrs,SurfFreeSixDataDescr *gp)
   return(xdr_bytes(xdrs,&toText,&sizeT,sizeT));
 }
 
-
 XdrSurf xdr_SurfFreeSndgDataDescr(XDR *xdrs,SurfFreeSndgDataDescr *gp)
 {
   u_int sizeT = STRING_SIZE;
@@ -1139,7 +999,6 @@ XdrSurf xdr_SurfFreeSndgDataDescr(XDR *xdrs,SurfFreeSndgDataDescr *gp)
 
   return(xdr_bytes(xdrs,&toText,&sizeT,sizeT));
 }
-
 
 XdrSurf xdr_SurfFreeBeamDataDescr(XDR *xdrs,SurfFreeBeamDataDescr *gp)
 {
@@ -1149,25 +1008,14 @@ XdrSurf xdr_SurfFreeBeamDataDescr(XDR *xdrs,SurfFreeBeamDataDescr *gp)
   return(xdr_bytes(xdrs,&toText,&sizeT,sizeT));
 }
 
-
 XdrSurf xdr_SurfFreeSixAttachedData(XDR *xdrs,SurfFreeSixAttachedData *gp)
 {
   return(xdr_double(xdrs,gp));
 }
 
-
-
-
 /***************************************/
-/*                                     */
 /* SURF-conversions for     SDA-files  */
-/*                                     */
 /***************************************/
-
-
-
-
-
 
 XdrSurf xdr_SurfSoundingData(XDR *xdrs,SurfSoundingData *gp,short versLess2)
 {
@@ -1209,17 +1057,10 @@ XdrSurf xdr_SurfSoundingData(XDR *xdrs,SurfSoundingData *gp,short versLess2)
  }
 }
 
-
-
-
-
 XdrSurf xdr_SurfFreeSoundingAttachedData(XDR *xdrs,SurfFreeSoundingAttachedData *gp)
 {
   return(xdr_float(xdrs,gp));
 }
-
-
-
 
 XdrSurf xdr_SurfCenterPosition(XDR *xdrs,SurfCenterPosition *gp)
 {
@@ -1230,10 +1071,6 @@ XdrSurf xdr_SurfCenterPosition(XDR *xdrs,SurfCenterPosition *gp)
               xdr_float(xdrs,&gp->centerPositionY)                 &&
               xdr_float(xdrs,&gp->speed)                           );
 }
-
-
-
-
 
 XdrSurf xdr_SurfSingleBeamDepth(XDR *xdrs,SurfSingleBeamDepth *gp)
 {
@@ -1246,10 +1083,6 @@ XdrSurf xdr_SurfSingleBeamDepth(XDR *xdrs,SurfSingleBeamDepth *gp)
               xdr_float(xdrs,&gp->depthLFreq)                      );
 }
 
-
-
-
-
 XdrSurf xdr_SurfMultiBeamDepth(XDR *xdrs,SurfMultiBeamDepth *gp)
 {
 
@@ -1260,20 +1093,12 @@ XdrSurf xdr_SurfMultiBeamDepth(XDR *xdrs,SurfMultiBeamDepth *gp)
               xdr_float(xdrs,&gp->beamPositionStar)                );
 }
 
-
-
-
-
 XdrSurf xdr_SurfMultiBeamTT(XDR *xdrs,SurfMultiBeamTT *gp)
 {
 
   return(
               xdr_float(xdrs,&gp->travelTimeOfRay)                 );
 }
-
-
-
-
 
 XdrSurf xdr_SurfMultiBeamReceive(XDR *xdrs,SurfMultiBeamReceive *gp)
 {
@@ -1283,16 +1108,10 @@ XdrSurf xdr_SurfMultiBeamReceive(XDR *xdrs,SurfMultiBeamReceive *gp)
               xdr_float(xdrs,&gp->heaveWhileReceiving)             );
 }
 
-
-
-
 XdrSurf xdr_SurfAmplitudes(XDR *xdrs,SurfAmplitudes *gp)
 {
   return(     xdr_u_short(xdrs,&gp->beamAmplitude)                 );
 }
-
-
-
 
 XdrSurf xdr_SurfExtendedAmplitudes(XDR *xdrs,SurfExtendedAmplitudes *gp)
 {
@@ -1301,16 +1120,10 @@ XdrSurf xdr_SurfExtendedAmplitudes(XDR *xdrs,SurfExtendedAmplitudes *gp)
               xdr_u_short(xdrs,&gp->beamAmplitude)                 );
 }
 
-
-
-
 XdrSurf xdr_SurfFreeBeamAttachedData(XDR *xdrs,SurfFreeBeamAttachedData *gp)
 {
   return(xdr_float(xdrs,gp));
 }
-
-
-
 
 XdrSurf xdr_SurfSignalParameter(XDR *xdrs,SurfSignalParameter *gp,short nrSets)
 {
@@ -1332,9 +1145,6 @@ XdrSurf xdr_SurfSignalParameter(XDR *xdrs,SurfSignalParameter *gp,short nrSets)
   return(ret);
 }
 
-
-
-
 XdrSurf xdr_SurfTxParameter(XDR *xdrs,SurfTxParameter *gp,short nrSets)
 {
  XdrSurf ret;
@@ -1351,9 +1161,6 @@ XdrSurf xdr_SurfTxParameter(XDR *xdrs,SurfTxParameter *gp,short nrSets)
   }
   return(ret);
 }
-
-
-
 
 XdrSurf xdr_SurfSignalAmplitudes(XDR *xdrs,SurfSignalAmplitudes *gp,
                                                    u_short nrAmplitudes)
@@ -1378,9 +1185,6 @@ XdrSurf xdr_SurfSignalAmplitudes(XDR *xdrs,SurfSignalAmplitudes *gp,
   }
   return(ret);
 }
-
-
-
 
 XdrSurf xdr_SurfSidescanData(XDR *xdrs,SurfSidescanData *gp,
                                                    u_short nrSsData)
@@ -1410,9 +1214,6 @@ XdrSurf xdr_SurfSidescanData(XDR *xdrs,SurfSidescanData *gp,
   return(ret);
 }
 
-
-
-
 XdrSurf xdr_SurfTpeValues(XDR *xdrs,SurfTpeValues *gp)
 {
   return(     xdr_float(xdrs,&gp->depthTpe)                            &&
@@ -1420,15 +1221,7 @@ XdrSurf xdr_SurfTpeValues(XDR *xdrs,SurfTpeValues *gp)
               xdr_float(xdrs,&gp->minDetectionVolumeTpe)               );
 }
 
-
-
-
 XdrSurf xdr_SurfPositionCepData(XDR *xdrs,SurfPositionCepData *gp)
 {
   return(     xdr_float(xdrs,gp)                                       );
 }
-
-
-
-
-
