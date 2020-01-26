@@ -1,17 +1,15 @@
-/*
-/  See README file for copying and redistribution conditions.
-*/
+// See README file for copying and redistribution conditions.
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef _WIN32
 #include <string.h>
+
+#ifdef _WIN32
 #include "types_win32.h"
 #else
-#include <string.h>
 #include <unistd.h>
 #endif
-#include <math.h>
 
 
 #include "xdr_surf.h"
@@ -111,25 +109,48 @@ static SurfGlobalData defaultGlobalData =
 };
 
 
-static SurfStatistics defaultStatistics =
-{
- SURF_STATISTICS_LABEL
+static SurfStatistics defaultStatistics = {
+  SURF_STATISTICS_LABEL,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f
 };
 
-static SurfPositionSensorArray defaultPositionSensorArray =
-{
- SURF_POSITION_SENSOR_LABEL,
- UNKNOWNPOSSENS
+static SurfPositionSensorArray defaultPositionSensorArray = {
+  SURF_POSITION_SENSOR_LABEL,
+  UNKNOWNPOSSENS,
+  ""
 };
 
-static SurfTransducerParameterTable defaultTransducerTable =
-{
- SURF_TRANSDUCER_TABLE_LABEL
+static SurfTransducerParameterTable defaultTransducerTable = {
+  SURF_TRANSDUCER_TABLE_LABEL,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f,
+  0.0f
 };
 
-static SurfMultiBeamAngleTable defaultAngleTable =
-{
- SURF_MULTIBEAM_ANGLE_LABEL
+static SurfMultiBeamAngleTable defaultAngleTable = {
+  SURF_MULTIBEAM_ANGLE_LABEL,
+  0,
+  {0.0f}
 };
 
 
@@ -140,11 +161,10 @@ static long createSDAs(void)
  SdaInfo*          sapiToSdaInfo;
  SurfSoundingData* toSdaBlock;
  size_t         sizeOfSdaBlock;
- u_long  nrSoundings,nrBeams;
  u_long  ii,jj;
 
- nrSoundings = sapiToSurfData->nrOfSoundings;
- nrBeams     = sapiToSurfData->nrOfMultiBeamDepth;
+ u_long nrSoundings = sapiToSurfData->nrOfSoundings;
+ // u_long nrBeams     = sapiToSurfData->nrOfMultiBeamDepth;
 
  sapiToSdaInfo = (SdaInfo*)calloc(1,sizeof(SdaInfo));
  sapiToSurfData->toSdaInfo = sapiToSdaInfo;
