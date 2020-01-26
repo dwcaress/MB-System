@@ -19,11 +19,9 @@
 *  Stelle im SDA-Thread und update des Pointerarrays        *
 *  auf diese Thread-Position                                *
 ************************************************************/
-
 MoveInSdaThread surf_moveInSdaThread(SurfDataInfo* toSurfDataInfo,
                                 ModeMoveInSdaThread mode,
                                 u_long        nrOfSteps )
-
 {
  SurfSdaThread* toThread;
  u_long index,ii;
@@ -159,14 +157,13 @@ XdrSurf surf_backupSdaBlock(SurfDataInfo* toSurfDataInfo)
 void surf_restoreSdaBlock(SurfDataInfo* toSurfDataInfo)
 {
  SurfSdaThread* toThread;
- SdaInfo*  toSdaInfo;
  SurfSoundingData* toSdaBlock;
  SurfSoundingData* toSaveSdaBlock;
  u_long index;
 
  index = toSurfDataInfo->activeThreadIndex;
  toThread  = toSurfDataInfo->toSdaThread;
- toSdaInfo = toSurfDataInfo->toSdaInfo;
+ // SdaInfo *toSdaInfo = toSurfDataInfo->toSdaInfo;
  toSdaBlock = toThread->thread[index].sounding;
  toSaveSdaBlock = toThread->thread[index].saveSounding;
 
@@ -335,26 +332,37 @@ void surf_timeSizetoSurfTm(char* timeSize,SurfTm* surfTm)
  {
   case 12:
           day=day+30;
+          // fall through
   case 11:
           day=day+31;
+          // fall through
   case 10:
           day=day+30;
+          // fall through
   case  9:
           day=day+31;
+          // fall through
   case  8:
           day=day+31;
+          // fall through
   case  7:
           day=day+30;
+          // fall through
   case  6:
           day=day+31;
+          // fall through
   case  5:
           day=day+30;
+          // fall through
   case  4:
           day=day+31;
+          // fall through
   case  3:
           day=day+28;
+          // fall through
   case  2:
           day=day+31;
+          // fall through
   default:
           break;
  }
@@ -409,26 +417,37 @@ void surf_putJulianDayIntoTm(SurfTm* surfTm)
  {
   case 12:
           day=day+30;
+          // fall through
   case 11:
           day=day+31;
+          // fall through
   case 10:
           day=day+30;
+          // fall through
   case  9:
           day=day+31;
+          // fall through
   case  8:
           day=day+31;
+          // fall through
   case  7:
           day=day+30;
+          // fall through
   case  6:
           day=day+31;
+          // fall through
   case  5:
           day=day+30;
+          // fall through
   case  4:
           day=day+31;
+          // fall through
   case  3:
           day=day+28;
+          // fall through
   case  2:
           day=day+31;
+          // fall through
   default:
           break;
  }
