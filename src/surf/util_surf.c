@@ -1,68 +1,8 @@
-/*-----------------------------------------------------------------------
-/ P R O G R A M M K O P F
-/ ------------------------------------------------------------------------
-/ ------------------------------------------------------------------------
-/  DATEINAME        : util_surf.c
-/  ERSTELLUNGSDATUM : 13.08.93
-/ ------------------------------------------------------------------------
-/
-/ ------------------------------------------------------------------------
-/ COPYRIGHT (C) 1993: ATLAS ELEKTRONIK GMBH, 28305 BREMEN
-/ ------------------------------------------------------------------------
-/
-/  See README file for copying and redistribution conditions.
-/
-/
-/ HIER/SACHN: P: RP ____ _ ___ __
-/ BENENNUNG :
-/ ERSTELLER : Peter Block    : SAS3
-/ FREIGABE  : __.__.__  GS__
-/ AEND/STAND: __.__.__  __
-/ PRUEFVERM.:
-*/
-
-/*
-/ SPRACHE          : UNIX-C
-/ COMPILER         : Silicon Graphix
-/ BETRIEBSSYSTEM   : IRIX
-/ HARDWARE-UMGEBUNG: SGI Crimson
-/ URSPRUNGSHINWEIS :
-/
-/ ------------------------------------------------------------------------
-/ PROGRAMMBESCHREIBUNG:
-/ ------------------------------------------------------------------------
-/
-/    Utility-LIBRARY-Functions for SURF-presentation V2.0
-/
-/ ------------------------------------------------------------------------
-/ NAME, STRUKTUR UND KURZBESCHREIBUNG DER EINGABEPARAMETER:
-/ ------------------------------------------------------------------------
-/
-/    see mem_surf.h & util_surf.h
-/
-/ ------------------------------------------------------------------------
-/ NAME, STRUKTUR UND KURZBESCHREIBUNG DER AUSGABEPARAMETER:
-/ ------------------------------------------------------------------------
-/
-/    see mem_surf.h & util_surf.h
-/
-/ ------------------------------------------------------------------------
-/ VERHALTEN IM FEHLERFALL:
-/ ------------------------------------------------------------------------
-/
-/    see mem_surf.h & util_surf.h
-/
-/ ------------------------------------------------------------------------
-/ E N D E   D E S   P R O G R A M M K O P F E S
-/ ------------------------------------------------------------------------
-*/
-/* ***********************************************************************
-*                                                                        *
-*  BEGINN DES DEKLARATIONSTEILS                                          *
-*                                                                        *
-*********************************************************************** */
-
-
+// DATEINAME        : util_surf.c
+// ERSTELLUNGSDATUM : 13.08.93
+// COPYRIGHT (C) 1993: ATLAS ELEKTRONIK GMBH, 28305 BREMEN
+//
+// See README file for copying and redistribution conditions.
 #define _UTIL_SURF
 
 #include <stdio.h>
@@ -72,45 +12,13 @@
 #include "xdr_surf.h"
 #include "mem_surf.h"
 #include "util_surf.h"
-
-
-/* ***********************************************************************
-*                                                                        *
-*  ENDE DES DEKLARATIONSTEILS                                            *
-*                                                                        *
-*********************************************************************** */
-
-static char sccsid[50] = {"@(#)libsurf.a  Version 3.1 15.12.1998"};
-
-
-/* There are C++ - Compilers, which omit unreferenced statics */
-char* forCCsurf(void)
-{
- return(sccsid);
-}
-
-
-
-
+// Funktionen zur Manipulationen im SDA-Thread
 
 /************************************************************
-*************************************************************
-*                                                           *
-*  Funktionen zur Manipulationen im SDA-Thread              *
-*                                                           *
-*                                                           *
-*************************************************************
-************************************************************/
-
-
-/************************************************************
-*                                                           *
 *  Setzen des Threadindex an eine 'mode' entsprechende      *
 *  Stelle im SDA-Thread und update des Pointerarrays        *
 *  auf diese Thread-Position                                *
-*                                                           *
 ************************************************************/
-
 
 MoveInSdaThread surf_moveInSdaThread(SurfDataInfo* toSurfDataInfo,
                                 ModeMoveInSdaThread mode,
@@ -212,17 +120,9 @@ MoveInSdaThread surf_moveInSdaThread(SurfDataInfo* toSurfDataInfo,
  return(STEP_DONE);
 }
 
-
-
-
-
 /************************************************************
-*                                                           *
 *  Retten eines SDA-Blocks bevor Daten manipuliert werden   *
-*                                                           *
-*                                                           *
 ************************************************************/
-
 
 XdrSurf surf_backupSdaBlock(SurfDataInfo* toSurfDataInfo)
 {
@@ -252,17 +152,9 @@ XdrSurf surf_backupSdaBlock(SurfDataInfo* toSurfDataInfo)
  return(SURF_SUCCESS);
 }
 
-
-
-
-
 /************************************************************
-*                                                           *
 *  Verwerfen der Manipulation eines SDA-Blocks              *
-*                                                           *
-*                                                           *
 ************************************************************/
-
 
 void surf_restoreSdaBlock(SurfDataInfo* toSurfDataInfo)
 {
@@ -286,19 +178,12 @@ void surf_restoreSdaBlock(SurfDataInfo* toSurfDataInfo)
  }
 }
 
-
-
-
-
 /************************************************************
-*                                                           *
 *  Einfuegen eines neuen SDA-Blocks (je nach 'where' vor    *
 *    oder hinter die aktuelle Position) und fuellen des     *
 *    neuen Datenblocks mit den Daten an der akt. Position.  *
 *  Die akt. Position steht anscliessend auf dem neuen Block *
-*                                                           *
 ************************************************************/
-
 
 XdrSurf surf_insertNewSdaBlockAtActualPosition(SurfDataInfo* toSurfDataInfo,
                                                SDAinsertMode where)
@@ -377,31 +262,14 @@ XdrSurf surf_insertNewSdaBlockAtActualPosition(SurfDataInfo* toSurfDataInfo,
  return(SURF_SUCCESS);
 }
 
-
-
-
-
-
-
-
 /************************************************************
-*************************************************************
-*                                                           *
 *  Funktionen zur Zeit-Darstellung in Surf                  *
-*                                                           *
-*                                                           *
-*************************************************************
 ************************************************************/
 
 /************************************************************
-*                                                           *
 *  erzeugt aus ASCII-Text in 'TIME_SIZE' Structure          *
 *                fuer SurfTimeDate                          *
-*                                                           *
 ************************************************************/
-
-
-
 void surf_timeSizetoTimeDate(char* timeSize,SurfTimeDate* timeDate)
 {
  u_short ii,jj;
@@ -433,21 +301,14 @@ void surf_timeSizetoTimeDate(char* timeSize,SurfTimeDate* timeDate)
  timeDate->time[jj] = 0; /* cstring !! */
 }
 
-
-
 /************************************************************
-*                                                           *
 *  erzeugt aus ASCII-Text in 'TIME_SIZE' Structure          *
 *      Darstellung in 'SurfTm'                              *
-*                                                           *
 ************************************************************/
-
-
 int twoDigitsToInt (char* timeSize,u_short where)
 {
  return(((timeSize[where] - '0') * 10) + (timeSize[where+1] - '0'));
 }
-
 
 void surf_timeSizetoSurfTm(char* timeSize,SurfTm* surfTm)
 {
@@ -515,16 +376,10 @@ void surf_timeSizetoSurfTm(char* timeSize,SurfTm* surfTm)
  surfTm->tmTime.tm_isdst   = 0;
 }
 
-
-
-
 /************************************************************
-*                                                           *
 *  erzeugt aus ASCII-Text in 'TIME_SIZE' Structure          *
 *      Darstellung als "long" fuer HDB                      *
-*                                                           *
 ************************************************************/
-
 
 long surf_timeSizeToInt(char* timeSize)
 {
@@ -535,17 +390,11 @@ long surf_timeSizeToInt(char* timeSize)
  return(atol(buffer));
 }
 
-
-
-
-
 /************************************************************
 *                                                           *
 *  ergaenzt eine Darstellung in 'SurfTm' um den Julian Day  *
 *                                                           *
 ************************************************************/
-
-
 void surf_putJulianDayIntoTm(SurfTm* surfTm)
 {
  int year,month,day;
@@ -584,7 +433,6 @@ void surf_putJulianDayIntoTm(SurfTm* surfTm)
           break;
  }
 
-
  if((year%4) == 0)                   /* aktuelles jahr = Schaltjahr */
  {
   if(month > 2)
@@ -594,24 +442,15 @@ void surf_putJulianDayIntoTm(SurfTm* surfTm)
  surfTm->tmTime.tm_yday    = day;
 }
 
-
-
-
-
 /************************************************************
-*                                                           *
 *  erzeugt aus Darstellung in 'SurfTm'                      *
 *              ASCII-Text in 'TIME_SIZE' Structure          *
-*                                                           *
 ************************************************************/
-
-
 void intToTwoDigitsInSurfTime (char* timeSize,u_short where,int what)
 {
   timeSize[where]    = (char)(what/10) + '0';
   timeSize[where+1]  = (char)(what%10) + '0';
 }
-
 
 void surf_surfTmToTimeSize(char* timeSize,SurfTm* surfTm)
 {
@@ -635,18 +474,10 @@ void surf_surfTmToTimeSize(char* timeSize,SurfTm* surfTm)
  timeSize[15] = 0;
 }
 
-
-
-
 /************************************************************
-*                                                           *
 *  erzeugt aus ASCII-Text in 'TIME_SIZE' Structure          *
 *      Tageszeit in Sekunden   (SurfTime - Format)          *
-*                                                           *
 ************************************************************/
-
-
-
 SurfTime surf_timeOfTheDayFromTimeSize (char* timeSize)
 {
  SurfTime ret;
@@ -667,19 +498,10 @@ SurfTime surf_timeOfTheDayFromTimeSize (char* timeSize)
  return((SurfTime) ret);
 }
 
-
-
-
-
 /************************************************************
-*                                                           *
 *  erzeugt aus 'SurfTm'                                     *
 *      Tageszeit in Sekunden   (SurfTime - Format)          *
-*                                                           *
 ************************************************************/
-
-
-
 SurfTime surf_timeOfTheDayFromSurfTm (SurfTm* surfTm)
 {
  SurfTime ret;
@@ -692,19 +514,10 @@ SurfTime surf_timeOfTheDayFromSurfTm (SurfTm* surfTm)
  return(ret);
 }
 
-
-
-
-
 /************************************************************
-*                                                           *
 *  erzeugt aus 'SurfTm'                                     *
 *     absolute Zeit in Sekunden   (SurfTime - Format)       *
-*                                                           *
 ************************************************************/
-
-
-
 SurfTime surf_timeAbsoluteFromSurfTm (SurfTm* surfTm)
 {
  SurfTime ret;
@@ -727,17 +540,11 @@ SurfTime surf_timeAbsoluteFromSurfTm (SurfTm* surfTm)
  return((SurfTime) ret);
 }
 
-
-
 /************************************************************
-*                                                           *
 *  erzeugt die Differenz in Sekunden aus zwei Zeiten in     *
 *     einer Darstellung in 'SurfTm'                         *
 *     unter Beruecksichtigung der Sekunden-Bruchteile       *
-*                                                           *
 ************************************************************/
-
-
 SurfTime surf_difftime (SurfTm* later,SurfTm* earlier)
 {
  SurfTime ret,laterTime,earlierTime;
@@ -746,13 +553,8 @@ SurfTime surf_difftime (SurfTm* later,SurfTm* earlier)
  earlierTime = surf_timeAbsoluteFromSurfTm (earlier);
 
  ret = laterTime - earlierTime;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ;
- return((SurfTime) ret);
+                                                                                                                                                 return((SurfTime) ret);
 }
-
-
-
-
 
 void surf_setVendorText(SurfDataInfo* toSurfData)
 {
@@ -776,18 +578,3 @@ void surf_setVendorText(SurfDataInfo* toSurfData)
  }
 #endif
 }
-
-
-
-
-
-/*********************************************************************
-*         H I S T O R I E
-**********************************************************************
-*  Edition  History
-*   date    comments                                            by
-* --------  ------------------------------------------------ ---------
-* 13-08-93  created                                             pb
-* 21-10-93  new: surf_timeSizeToInt                             pb
-* 13-06-95  neue Version 2.0 (Sidescan-Backscatter)             pb
-*********************************************************************/
