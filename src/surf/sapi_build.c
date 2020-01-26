@@ -19,11 +19,9 @@
 #define  __SAPI__
 #include "mb_sapi.h"
 
-
 extern SurfDataInfo*      sapiToSurfData;
 extern SurfSoundingData*  sapiToSdaBlock;
 extern Boolean            loadIntoMemory;
-
 
 static SurfDescriptor defaultDescriptor =
 {
@@ -81,7 +79,6 @@ static SurfDescriptor defaultDescriptor =
  EOD_M
 };
 
-
 static SurfGlobalData defaultGlobalData =
 {
  SURF_GLOBAL_DATA_LABEL,
@@ -107,7 +104,6 @@ static SurfGlobalData defaultGlobalData =
  0.0,0.0,0.0,0.0,
  0.0
 };
-
 
 static SurfStatistics defaultStatistics = {
   SURF_STATISTICS_LABEL,
@@ -153,66 +149,46 @@ static SurfMultiBeamAngleTable defaultAngleTable = {
   {0.0f}
 };
 
+static long createSDAs(void) {
+  const u_long nrSoundings = sapiToSurfData->nrOfSoundings;
+  // u_long nrBeams     = sapiToSurfData->nrOfMultiBeamDepth;
 
-
-
-static long createSDAs(void)
-{
- SdaInfo*          sapiToSdaInfo;
- SurfSoundingData* toSdaBlock;
- size_t         sizeOfSdaBlock;
- u_long  ii,jj;
-
- u_long nrSoundings = sapiToSurfData->nrOfSoundings;
- // u_long nrBeams     = sapiToSurfData->nrOfMultiBeamDepth;
-
- sapiToSdaInfo = (SdaInfo*)calloc(1,sizeof(SdaInfo));
- sapiToSurfData->toSdaInfo = sapiToSdaInfo;
- if (sapiToSdaInfo == NULL)
- {
-  free_SdaMemory(sapiToSurfData);
-  return(-1);
- }
- sapiToSurfData->toSdaThread =
-           (SurfSdaThread*)calloc((u_int)nrSoundings,sizeof(SurfSdaThread));
- if (sapiToSurfData->toSdaThread == NULL)
- {
-  free_SdaMemory(sapiToSurfData);
-  return(-1);
- }
-
- sizeOfSdaBlock = initializeSdaInfo(sapiToSurfData,sapiToSdaInfo);
- for(ii=0;ii < nrSoundings;ii++)
- {
-  toSdaBlock = (SurfSoundingData*)calloc(1,sizeOfSdaBlock);
-  if(toSdaBlock == NULL)
-  {
-   for(jj=0;jj<ii;jj++)
-   {
-    if(sapiToSurfData->toSdaThread->thread[jj].sounding != NULL)
-            free(sapiToSurfData->toSdaThread->thread[jj].sounding);
-    sapiToSurfData->toSdaThread->thread[jj].sounding = NULL;
-   }
-   free_SdaMemory(sapiToSurfData);
-   return(-1);
+  SdaInfo *sapiToSdaInfo = (SdaInfo*)calloc(1,sizeof(SdaInfo));
+  sapiToSurfData->toSdaInfo = sapiToSdaInfo;
+  if (sapiToSdaInfo == NULL) {
+    free_SdaMemory(sapiToSurfData);
+    return(-1);
   }
-  else
-  {
-   sapiToSurfData->toSdaThread->thread[ii].sounding = toSdaBlock;
+  sapiToSurfData->toSdaThread =
+      (SurfSdaThread*)calloc((u_int)nrSoundings,sizeof(SurfSdaThread));
+  if (sapiToSurfData->toSdaThread == NULL) {
+    free_SdaMemory(sapiToSurfData);
+    return(-1);
   }
- }
- return(0);
+
+  const size_t sizeOfSdaBlock = initializeSdaInfo(sapiToSurfData, sapiToSdaInfo);
+  SurfSoundingData *toSdaBlock;
+  for(u_long ii = 0; ii < nrSoundings; ii++) {
+    toSdaBlock = (SurfSoundingData*)calloc(1,sizeOfSdaBlock);
+    if(toSdaBlock == NULL) {
+      for (u_long jj = 0; jj < ii; jj++) {
+        if(sapiToSurfData->toSdaThread->thread[jj].sounding != NULL)
+          free(sapiToSurfData->toSdaThread->thread[jj].sounding);
+        sapiToSurfData->toSdaThread->thread[jj].sounding = NULL;
+      }
+      free_SdaMemory(sapiToSurfData);
+      return(-1);
+    } else {
+      sapiToSurfData->toSdaThread->thread[ii].sounding = toSdaBlock;
+    }
+  }
+  return(0);
 }
-
-
-
 
 long SAPI_createSurfBody(long nrSoundings,
                          long nrBeams,
                          long maxNrSidescanSamplesPerSounding,
-                         long errorprint)
-{
-
+                         long errorprint) {
  defaultDescriptor.soundings.nr=nrSoundings;
  defaultGlobalData.numberOfMeasuredSoundings =nrSoundings;
  defaultGlobalData.actualNumberOfSoundingSets=nrSoundings;
