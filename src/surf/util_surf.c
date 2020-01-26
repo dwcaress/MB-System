@@ -24,10 +24,9 @@ MoveInSdaThread surf_moveInSdaThread(SurfDataInfo* toSurfDataInfo,
                                 u_long        nrOfSteps )
 {
  SurfSdaThread* toThread;
- u_long index,ii;
 
- index = toSurfDataInfo->activeThreadIndex;
- ii = toSurfDataInfo->nrOfSoundings - 1;
+ u_long index = toSurfDataInfo->activeThreadIndex;
+ u_long ii = toSurfDataInfo->nrOfSoundings - 1;
  switch(mode)
  {
    case BACK_ONE_STEP :
@@ -124,17 +123,11 @@ MoveInSdaThread surf_moveInSdaThread(SurfDataInfo* toSurfDataInfo,
 
 XdrSurf surf_backupSdaBlock(SurfDataInfo* toSurfDataInfo)
 {
- SurfSdaThread* toThread;
- SdaInfo* toSdaInfo;
- SurfSoundingData* toSdaBlock;
- SurfSoundingData* toSaveSdaBlock;
- u_long index;
-
- index = toSurfDataInfo->activeThreadIndex;
- toThread  = toSurfDataInfo->toSdaThread;
- toSdaInfo = toSurfDataInfo->toSdaInfo;
- toSdaBlock = toThread->thread[index].sounding;
- toSaveSdaBlock = toThread->thread[index].saveSounding;
+ u_long index = toSurfDataInfo->activeThreadIndex;
+ SurfSdaThread* toThread  = toSurfDataInfo->toSdaThread;
+ SdaInfo* toSdaInfo = toSurfDataInfo->toSdaInfo;
+ SurfSoundingData* toSdaBlock = toThread->thread[index].sounding;
+ SurfSoundingData* toSaveSdaBlock = toThread->thread[index].saveSounding;
 
  if(toSaveSdaBlock == NULL)
  {
@@ -156,16 +149,11 @@ XdrSurf surf_backupSdaBlock(SurfDataInfo* toSurfDataInfo)
 
 void surf_restoreSdaBlock(SurfDataInfo* toSurfDataInfo)
 {
- SurfSdaThread* toThread;
- SurfSoundingData* toSdaBlock;
- SurfSoundingData* toSaveSdaBlock;
- u_long index;
-
- index = toSurfDataInfo->activeThreadIndex;
- toThread  = toSurfDataInfo->toSdaThread;
+ const u_long index = toSurfDataInfo->activeThreadIndex;
+ SurfSdaThread* toThread  = toSurfDataInfo->toSdaThread;
  // SdaInfo *toSdaInfo = toSurfDataInfo->toSdaInfo;
- toSdaBlock = toThread->thread[index].sounding;
- toSaveSdaBlock = toThread->thread[index].saveSounding;
+ SurfSoundingData* toSdaBlock = toThread->thread[index].sounding;
+ SurfSoundingData* toSaveSdaBlock = toThread->thread[index].saveSounding;
 
  if(toSaveSdaBlock != NULL)
  {
@@ -185,28 +173,20 @@ void surf_restoreSdaBlock(SurfDataInfo* toSurfDataInfo)
 XdrSurf surf_insertNewSdaBlockAtActualPosition(SurfDataInfo* toSurfDataInfo,
                                                SDAinsertMode where)
 {
- SurfSdaThread* toThread;
- SurfSdaThread* toNewThread;
- SdaInfo* toSdaInfo;
- SurfSoundingData* toSdaBlock;
- SurfSoundingData* toNewSdaBlock;
- u_long index,newBlockIndex,oldLengthOfThread,newLengthOfThread,ii;
-
- index = toSurfDataInfo->activeThreadIndex;
- toThread  = toSurfDataInfo->toSdaThread;
- toSdaInfo = toSurfDataInfo->toSdaInfo;
- toSdaBlock = toThread->thread[index].sounding;
- oldLengthOfThread = toSurfDataInfo->nrOfSoundings;
- newLengthOfThread = oldLengthOfThread + 1;
+ u_long index = toSurfDataInfo->activeThreadIndex;
+ SurfSdaThread* toThread = toSurfDataInfo->toSdaThread;
+ SdaInfo* toSdaInfo = toSurfDataInfo->toSdaInfo;
+ SurfSoundingData* toSdaBlock = toThread->thread[index].sounding;
+ u_long oldLengthOfThread = toSurfDataInfo->nrOfSoundings;
+ u_long newLengthOfThread = oldLengthOfThread + 1;
 
  /* allocate the necessary memory */
-
- toNewSdaBlock = (SurfSoundingData*)calloc(1,toSdaInfo->allS);
+ SurfSoundingData* toNewSdaBlock = (SurfSoundingData*)calloc(1,toSdaInfo->allS);
  if(toNewSdaBlock == NULL)
  {
   return(SURF_CANT_GET_MEMORY);
  }
- toNewThread = (SurfSdaThread *)
+ SurfSdaThread* toNewThread = (SurfSdaThread *)
                    calloc((u_int)newLengthOfThread,sizeof(SurfSdaThread));
  if(toNewThread == NULL)
  {
@@ -220,16 +200,18 @@ XdrSurf surf_insertNewSdaBlockAtActualPosition(SurfDataInfo* toSurfDataInfo,
 
  /* fill the thread - structure */
 
- for(ii=0;ii<=index;ii++)
+ for(u_long ii=0;ii<=index;ii++)
  {
   memcpy(&(toNewThread->thread[ii].sounding),
          &(toThread->thread[ii].sounding),sizeof(SurfSdaThreadElement));
  }
- for(ii=index;ii<oldLengthOfThread;ii++)
+ for(u_long ii=index;ii<oldLengthOfThread;ii++)
  {
   memcpy(&(toNewThread->thread[ii+1].sounding),
          &(toThread->thread[ii].sounding),sizeof(SurfSdaThreadElement));
  }
+
+ u_long newBlockIndex;
 
  switch (where)
  {
@@ -269,10 +251,8 @@ XdrSurf surf_insertNewSdaBlockAtActualPosition(SurfDataInfo* toSurfDataInfo,
 ************************************************************/
 void surf_timeSizetoTimeDate(char* timeSize,SurfTimeDate* timeDate)
 {
- u_short ii,jj;
-
- jj=0;
- for(ii=0;ii<(u_short)6;ii++)
+ u_short jj=0;
+ for(u_short ii=0;ii<(u_short)6;ii++)
  {
   if((ii==2) || (ii==4))
   {
@@ -285,7 +265,7 @@ void surf_timeSizetoTimeDate(char* timeSize,SurfTimeDate* timeDate)
  timeDate->date[jj] = 0; /* cstring !! */
 
  jj=0;
- for(ii=6;ii<(u_short)12;ii++)
+ for(u_short ii=6;ii<(u_short)12;ii++)
  {
   if((ii==8) || (ii==10))
   {
@@ -309,22 +289,16 @@ int twoDigitsToInt (char* timeSize,u_short where)
 
 void surf_timeSizetoSurfTm(char* timeSize,SurfTm* surfTm)
 {
- u_int year,month,day,switchCount,daySince1970;
-
- /* hour,minute,second,secfrac */
-
  surfTm->fractionalSeconds = twoDigitsToInt(timeSize,13);
  surfTm->tmTime.tm_sec     = twoDigitsToInt(timeSize,10);
  surfTm->tmTime.tm_min     = twoDigitsToInt(timeSize,8);
  surfTm->tmTime.tm_hour    = twoDigitsToInt(timeSize,6);
 
- /* day,month,year */
-
- day                       = twoDigitsToInt(timeSize,0);
+ u_int day                 = twoDigitsToInt(timeSize,0);
  surfTm->tmTime.tm_mday    = day;
- month                     = twoDigitsToInt(timeSize,2);
+ u_int month               = twoDigitsToInt(timeSize,2);
  surfTm->tmTime.tm_mon     = month - 1;
- year                      = twoDigitsToInt(timeSize,4);
+ u_int year                = twoDigitsToInt(timeSize,4);
  if (year<70) year = year + 100;
  surfTm->tmTime.tm_year    = year;
 
@@ -367,9 +341,9 @@ void surf_timeSizetoSurfTm(char* timeSize,SurfTm* surfTm)
           break;
  }
 
- switchCount = (year >> 2) - 17;     /* alle 4 jahre 1 Schalttag,
+ const u_int switchCount = (year >> 2) - 17;     /* alle 4 jahre 1 Schalttag,
                                         17 Schalttage von 1900->1970 */
- daySince1970 = day + switchCount + ((year-70)*365);
+ u_int daySince1970 = day + switchCount + ((year-70)*365);
  if((year%4) == 0)                   /* aktuelles jahr = Schaltjahr */
  {
   if(month > 2)
@@ -405,13 +379,9 @@ long surf_timeSizeToInt(char* timeSize)
 ************************************************************/
 void surf_putJulianDayIntoTm(SurfTm* surfTm)
 {
- int year,month,day;
-
- /* day,month,year */
-
- day =  surfTm->tmTime.tm_mday-1;
- month = surfTm->tmTime.tm_mon + 1;
- year = surfTm->tmTime.tm_year;
+ int day =  surfTm->tmTime.tm_mday-1;
+ int month = surfTm->tmTime.tm_mon + 1;
+ int year = surfTm->tmTime.tm_year;
 
  switch(month)
  {
@@ -473,20 +443,16 @@ void intToTwoDigitsInSurfTime (char* timeSize,u_short where,int what)
 
 void surf_surfTmToTimeSize(char* timeSize,SurfTm* surfTm)
 {
- int year;
-
  /* hour,minute,second,secfrac */
-
  intToTwoDigitsInSurfTime(timeSize,13,surfTm->fractionalSeconds);
  intToTwoDigitsInSurfTime(timeSize,10,surfTm->tmTime.tm_sec );
  intToTwoDigitsInSurfTime(timeSize, 8,surfTm->tmTime.tm_min );
  intToTwoDigitsInSurfTime(timeSize, 6,surfTm->tmTime.tm_hour);
 
  /* day,month,year */
-
  intToTwoDigitsInSurfTime(timeSize,0,surfTm->tmTime.tm_mday);
  intToTwoDigitsInSurfTime(timeSize,2,surfTm->tmTime.tm_mon + 1 );
- year = surfTm->tmTime.tm_year;
+ int year = surfTm->tmTime.tm_year;
  if (year >= 100) year = year - 100;
  intToTwoDigitsInSurfTime(timeSize,4,year);
  timeSize[12] = '.';
@@ -499,17 +465,13 @@ void surf_surfTmToTimeSize(char* timeSize,SurfTm* surfTm)
 ************************************************************/
 SurfTime surf_timeOfTheDayFromTimeSize (char* timeSize)
 {
- SurfTime ret;
- int fracSec,sec,min,hour;
+ const int fracSec = twoDigitsToInt(timeSize,13);
+ const int sec     = twoDigitsToInt(timeSize,10);
+ const int min     = twoDigitsToInt(timeSize,8);
+ const int hour    = twoDigitsToInt(timeSize,6);
 
- /* hour,minute,second,secfrac */
-
- fracSec = twoDigitsToInt(timeSize,13);
- sec     = twoDigitsToInt(timeSize,10);
- min     = twoDigitsToInt(timeSize,8);
- hour    = twoDigitsToInt(timeSize,6);
-
- ret = ((SurfTime)(fracSec)  / 100.0)
+ SurfTime ret =
+     ((SurfTime)(fracSec)  / 100.0)
      + ((SurfTime)(sec    )         )
      + ((SurfTime)(min    ) *   60.0)
      + ((SurfTime)(hour   ) * 3600.0);
@@ -523,9 +485,8 @@ SurfTime surf_timeOfTheDayFromTimeSize (char* timeSize)
 ************************************************************/
 SurfTime surf_timeOfTheDayFromSurfTm (SurfTm* surfTm)
 {
- SurfTime ret;
-
- ret = ((SurfTime)(surfTm->fractionalSeconds)  / 100.0)
+ SurfTime ret =
+     ((SurfTime)(surfTm->fractionalSeconds)  / 100.0)
      + ((SurfTime)(surfTm->tmTime.tm_sec    )         )
      + ((SurfTime)(surfTm->tmTime.tm_min    ) *   60.0)
      + ((SurfTime)(surfTm->tmTime.tm_hour   ) * 3600.0);
@@ -539,22 +500,19 @@ SurfTime surf_timeOfTheDayFromSurfTm (SurfTm* surfTm)
 ************************************************************/
 SurfTime surf_timeAbsoluteFromSurfTm (SurfTm* surfTm)
 {
- SurfTime ret;
- int year,switchDays;
-
  surf_putJulianDayIntoTm(surfTm);
 
- ret = surf_timeOfTheDayFromSurfTm (surfTm);
- ret = ret + ((SurfTime)(surfTm->tmTime.tm_yday) * 24.0 * 3600.0 );
+ SurfTime ret = surf_timeOfTheDayFromSurfTm (surfTm);
+ ret += ((SurfTime)(surfTm->tmTime.tm_yday) * 24.0 * 3600.0 );
 
- year  = surfTm->tmTime.tm_year;
- switchDays = (year/4) - 17;
+ int year = surfTm->tmTime.tm_year;
+ int switchDays = (year/4) - 17;
  if((year%4) == 0)
             switchDays--;
  year  = year - 70 ;
 
- ret = ret + ((SurfTime)(switchDays)   * 24.0 * 3600.0 );
- ret = ret + ((SurfTime)(year) * 365.0 * 24.0 * 3600.0 );
+ ret += ((SurfTime)(switchDays)   * 24.0 * 3600.0 );
+ ret += ((SurfTime)(year) * 365.0 * 24.0 * 3600.0 );
 
  return((SurfTime) ret);
 }
@@ -566,13 +524,9 @@ SurfTime surf_timeAbsoluteFromSurfTm (SurfTm* surfTm)
 ************************************************************/
 SurfTime surf_difftime (SurfTm* later,SurfTm* earlier)
 {
- SurfTime ret,laterTime,earlierTime;
-
- laterTime   = surf_timeAbsoluteFromSurfTm (later);
- earlierTime = surf_timeAbsoluteFromSurfTm (earlier);
-
- ret = laterTime - earlierTime;
-                                                                                                                                                 return((SurfTime) ret);
+ const SurfTime laterTime   = surf_timeAbsoluteFromSurfTm (later);
+ const SurfTime earlierTime = surf_timeAbsoluteFromSurfTm (earlier);
+                                                                                                                                                 return laterTime - earlierTime;
 }
 
 void surf_setVendorText(SurfDataInfo* toSurfData)
@@ -584,11 +538,10 @@ void surf_setVendorText(SurfDataInfo* toSurfData)
  toSurfData->toVendorText = &vendorText;
  toSurfData->nrOfVendorText = 1;
 #else
- SurfVendorText* toVendorText=NULL;
- static SurfVendorText vendorText =
- {{"This SURF-Dataset is generated by STN-Atlas utilities !" }};
+ static const SurfVendorText vendorText =
+     {{"This SURF-Dataset is generated by STN-Atlas utilities !"}};
 
- toVendorText=(SurfVendorText*)calloc(1,sizeof(SurfVendorText));
+ SurfVendorText* toVendorText = (SurfVendorText*)calloc(1,sizeof(SurfVendorText));
  if(toVendorText != NULL)
  {
   strcpy(toVendorText->text,vendorText.text);
