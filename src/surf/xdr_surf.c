@@ -127,7 +127,7 @@ XdrSurf xdr_SurfDescriptor(XDR *xdrs, SurfDescriptor *gp,
 {
   /* Get the first Label and check the Version of the stream */
   const short vers20 = getSurfVersion(SURF_VERS2_0);
-  const vers30 = getSurfVersion(SURF_VERS3_0);
+  const short vers30 = getSurfVersion(SURF_VERS3_0);
 
   short newVers;
   short oldVers;
