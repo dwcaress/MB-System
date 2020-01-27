@@ -66,8 +66,8 @@ short getSurfVersion(char* version)
 }
 
 XdrSurf xdr_SurfCheckVersion(XDR *xdrs, SurfDescriptor *gp, char* label,
-                                  short* newVersion, short* oldVersion)
-{
+                             short* newVersion, short* oldVersion) {
+  (void)label;  // Unused parameter
   /* Get the label and check the consistency of the stream */
   char* toLabel = (char *)gp->label;
   u_int sizeL = LABEL_SIZE;
