@@ -13,6 +13,8 @@
 #include "util_surf.h"
 #include "pb_math.h"
 
+#define HALF_PI (double)(3.14159265359/2.0)
+
 double pbAtan2(double y, double x) {
   if (fabs(x) > 0.0)
     return atan2(y, x);

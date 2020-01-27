@@ -11,8 +11,6 @@
 #define PI 3.14159265359
 #endif
 
-#define HALF_PI (double)(3.14159265359/2.0)
-
 typedef  int   Boolean;
 #define  True  1
 #define  False 0
