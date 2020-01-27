@@ -416,7 +416,7 @@ XdrSurf xdr_SurfPositionAnySensor(XDR *xdrs, SurfPositionAnySensor* gp)
 
 XdrSurf xdr_SurfUnknownPositionSensor(XDR *xdrs, char *gp)
 {
-  const u_int sizeU = UNION_SIZE;
+  u_int sizeU = UNION_SIZE;
   return xdr_bytes(xdrs, &gp, &sizeU, sizeU);
 }
 
@@ -679,7 +679,7 @@ XdrSurf xdr_SurfPolygons(XDR *xdrs,
 
 XdrSurf xdr_SurfEventText(XDR *xdrs, char *gp)
 {
-  const u_int sizeE = EVENT_SIZE;
+  u_int sizeE = EVENT_SIZE;
   return xdr_bytes(xdrs, &gp, &sizeE, sizeE);
 }
 
