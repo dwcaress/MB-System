@@ -17,17 +17,17 @@
 // SURF string conversions
 
 XdrSurf xdr_SurfString(XDR *xdrs, char *gp) {
-  const u_int sizeS = STRING_SIZE;
+  u_int sizeS = STRING_SIZE;
   return xdr_bytes(xdrs, &gp, &sizeS, sizeS);
 }
 
 XdrSurf xdr_SurfText(XDR *xdrs, char *gp) {
-  const u_int sizeS = TEXT_SIZE;
+  u_int sizeS = TEXT_SIZE;
   return xdr_bytes(xdrs, &gp, &sizeS, sizeS);
 }
 
 XdrSurf xdr_SurfTime(XDR *xdrs, char *gp) {
-  const u_int sizeT = TIME_SIZE;
+  u_int sizeT = TIME_SIZE;
   return xdr_bytes(xdrs, &gp, &sizeT, sizeT);
 }
 
