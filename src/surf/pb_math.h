@@ -4,6 +4,9 @@
 //
 // See README file for copying and redistribution conditions.
 
+#ifndef SURF_PB_MATH_H_
+#define SURF_PB_MATH_H_
+
 #ifndef PI
 #define PI 3.14159265359
 #endif
@@ -65,17 +68,15 @@ typedef struct {
 #define RAD_TO_METER_Y(LAT)      ((double)(LAT*M_PER_RAD_LAT))
 #define RAD_TO_METER_X(LON,LAT)  ((double)(LON*(M_PER_RAD_LON(LAT))))
 
-#ifdef _PB_MATH
-
 double pbAtan2(double y,double x);
 
 double setToPlusMinusPI(double angle);
 void rotateCoordinates(double rotAngle,XY_Coords* origCoords,
-                                       XY_Coords* targetCoords);
+                                     XY_Coords* targetCoords);
 void xyToRhoPhi(double x0,double y0,double pointX,double pointY,
-                                             double* rho,double* phi);
+                                      double* rho,double* phi);
 void lambdaPhiToRhoPhi(double x0,double y0,double pointX,double pointY,
-                                             double* rho,double* phi);
+                                      double* rho,double* phi);
 Boolean signf(double value);
 Boolean signsh(short value);
 
@@ -92,36 +93,5 @@ double temperatureToCMean(double salinity,double temperature);
 SurfTime surfTimeOfDayFromAbsTime (SurfTime absTime);
 void timeFromRelTime (SurfTime relTime,char*buffer);
 Boolean relTimeFromTime (char*buffer,SurfTime* relTime);
-#endif
 
-#ifndef _PB_MATH
-
-extern double pbAtan2(double y,double x);
-
-extern double setToPlusMinusPI(double angle);
-extern void rotateCoordinates(double rotAngle,XY_Coords* origCoords,
-                                            XY_Coords* targetCoords);
-extern void xyToRhoPhi(double x0,double y0,double pointX,double pointY,
-                                             double* rho,double* phi);
-extern void lambdaPhiToRhoPhi(double x0,double y0,double pointX,double pointY,
-                                             double* rho,double* phi);
-extern Boolean signf(double value);
-extern Boolean signsh(short value);
-
-extern Boolean depthFromTT(FanParam* fanParam,Boolean isPitchcompensated);
-extern Boolean TTfromDepth(FanParam* fanParam,Boolean isPitchcompensated);
-extern Boolean draughtFromDepth(FanParam* fanParam);
-extern Boolean heaveFromDepth(FanParam* fanParam);
-
-extern double cMeanToTemperature(double salinity,double cMean);
-extern double temperatureToCMeanDelGrosso(double salinity,double temperature);
-extern double temperatureToCMeanMedwin(double salinity,double temperature);
-extern double temperatureToCMean(double salinity,double temperature);
-
-#ifndef WITHOUT_SURF
-extern SurfTime surfTimeOfDayFromAbsTime (SurfTime absTime);
-extern void timeFromRelTime (SurfTime relTime,char*buffer);
-extern Boolean relTimeFromTime (char*buffer,SurfTime* relTime);
-#endif
-
-#endif
+#endif  // SURF_PB_MATH_H_
