@@ -13,26 +13,6 @@
 
 #define HALF_PI (double)(3.14159265359/2.0)
 
-#define RAD_TO_DEG(a) ((a>=+0.0)?                                \
-                                (double)((180.0*a)/PI)           \
-                               :                                 \
-                                (double)(360.0 - ((180.0*a)/PI)) )
-
-#define RAD_TO_PLUMINUS_DEG(a) ((double)((180.0*a)/PI))
-#define RAD_TO_PLUMINUS_MIN(a) ((double)((180.0*60.0*a)/PI))
-
-#define DEG_TO_RAD(a) ((a<=180.0)?                               \
-                                (double)((PI*a)/180.0)           \
-                                :                                \
-                                (double)((PI*(a - 360.0))/180.0) )
-
-#define DEG_TO_TWO_PI(a)        ((double)((PI*a)/180.0) )
-#define MIN_TO_RAD(a)           ((double)((PI*a)/(180.0*60.0)) )
-#define SET_TO_PLUS_PI(a) ((a<0.0)?                              \
-                                ((double)(a+(2.0*PI)))           \
-                                :                                \
-                                ((double)(a))                    )
-
 typedef  int   Boolean;
 #define  True  1
 #define  False 0
