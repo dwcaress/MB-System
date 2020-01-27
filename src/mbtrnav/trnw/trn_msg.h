@@ -202,7 +202,7 @@ typedef struct pt_cdata_s{
 #define TRNW_PUB_SYNC 0x53445400
 #pragma pack(push,1)
 typedef struct trn_estimate_s{
-    // Time (epoch? s)
+    // Time (epoch s)
     double time;
     // North
     double x;
@@ -234,16 +234,18 @@ typedef struct trn_offset_pub_s{
     int filter_state;
     // last measurement successful
     int success;
+    // TRN is_converged (TRN isConverged())
+    short int is_converged;
+    // TRN is_valid (covariance thresholds)
+    short int is_valid;
     // mbtrnpp MB1 cycle counter
-    int cycle;
+    int mb1_cycle;
     // MB1 ping number
     int ping_number;
     // MB1 timestamp
     double mb1_time;
     // TRN update time (taken in mbtrnpp)
     double update_time;
-    // TRN is converged !=0
-    short int is_converged;
 }trn_offset_pub_t;
 #pragma pack(pop)
 
@@ -257,12 +259,12 @@ typedef struct trn_update_s{
     double reinit_tlast;
     int filter_state;
     int success;
-    int cycle;
+    short int is_converged;
+    short int is_valid;
+    int mb1_cycle;
     int ping_number;
     double mb1_time;
     double update_time;
-    // TRN is converged !=0
-    short int is_converged;
 }trn_update_t;
 
 typedef struct mt_cdata_s{
