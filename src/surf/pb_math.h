@@ -2,7 +2,7 @@
 / H E A D E R K O P F
 / ------------------------------------------------------------------------
 / ------------------------------------------------------------------------
-/  DATEINAME        : hydEdit_math.h 
+/  DATEINAME        : hydEdit_math.h
 /  ERSTELLUNGSDATUM : 20.09.93
 / ----------------------------------------------------------------------*/
 /*!
@@ -102,7 +102,7 @@ typedef struct {
 #define RAD_TO_METER_Y(LAT)      ((double)(LAT*M_PER_RAD_LAT))
 #define RAD_TO_METER_X(LON,LAT)  ((double)(LON*(M_PER_RAD_LON(LAT))))
 
-#ifdef _PB_MATH  
+#ifdef _PB_MATH
 
 double pbAtan2(double y,double x);
 
@@ -130,7 +130,7 @@ SurfTime surfTimeOfDayFromAbsTime (SurfTime absTime);
 void timeFromRelTime (SurfTime relTime,char*buffer);
 Boolean relTimeFromTime (char*buffer,SurfTime* relTime);
 
-                                       
+
 #endif
 
 
@@ -138,7 +138,7 @@ Boolean relTimeFromTime (char*buffer,SurfTime* relTime);
 
 
 
-#ifndef _PB_MATH  
+#ifndef _PB_MATH
 
 extern double pbAtan2(double y,double x);
 

@@ -1,56 +1,19 @@
 /*-----------------------------------------------------------------------
-/ H E A D E R K O P F
-/ ------------------------------------------------------------------------
-/ ------------------------------------------------------------------------
-/  DATEINAME        : mem_surf.h    Version 3.0
-/  ERSTELLUNGSDATUM : 28.07.93
-/ ------------------------------------------------------------------------
-/
-/ ------------------------------------------------------------------------
+/ DATEINAME        : mem_surf.h    Version 3.0
+/ ERSTELLUNGSDATUM : 28.07.93
 / COPYRIGHT (C) 1993: ATLAS ELEKTRONIK GMBH, 28305 BREMEN
-/ ------------------------------------------------------------------------
 /
 /  See README file for copying and redistribution conditions.
-/
-/
-/ HIER/SACHN: P: RP ____ _ ___ __
-/ BENENNUNG :
-/ ERSTELLER : Peter Block    : SAS3
-/ FREIGABE  : __.__.__  GS__
-/ AEND/STAND: __.__.__  __
-/ PRUEFVERM.:
-
-
-
-/ SPRACHE          : UNIX-C
-/ COMPILER         : Silicon Graphix
-/ BETRIEBSSYSTEM   : IRIX
-/ HARDWARE-UMGEBUNG: SGI Crimson
-/ URSPRUNGSHINWEIS :
-/
-/ ------------------------------------------------------------------------
-/ BESCHREIBUNG:  Definitions describing SURF-functions for memory-admin.
-/                V2.0
-/ ------------------------------------------------------------------------
-/
-/ ------------------------------------------------------------------------
-/ E N D E   D E S   K O P F E S
-/ ------------------------------------------------------------------------
-
 *************************************************************************/
 
 #ifndef _mem_surf_h_
 #define _mem_surf_h_
-
 
 enum _SurfThreadFlag {
                         OLD_BLOCK       ,
                         INSERTED_BLOCK
                      };
 typedef enum _SurfThreadFlag SurfThreadFlag;
-
-
-
 
 typedef struct
             {
@@ -59,15 +22,10 @@ typedef struct
               SurfThreadFlag                 flag           ;
             } SurfSdaThreadElement;
 
-
-
 typedef struct
             {
               SurfSdaThreadElement           thread[1]      ;
             } SurfSdaThread;
-
-
-
 
 typedef struct
             {
@@ -124,9 +82,6 @@ typedef struct
               size_t                         ssDataS               ;
               size_t                         allS                  ;
             } SdaInfo;
-
-
-
 
 typedef struct
             {
@@ -194,72 +149,29 @@ typedef struct
               short                          sourceVersionLess2  ;
             } SurfDataInfo;
 
-
-
-
-
-
-#ifdef _MEM_SURF
-
-
-
-XdrSurf mem_ReadSixStructure(char* filename,
-                                    SurfDataInfo* toSurfDataInfo);
-XdrSurf mem_WriteSixStructure(char* filename,
-                                    SurfDataInfo* toSurfDataInfo);
-XdrSurf mem_ReadSdaStructure(char* filename,
-                                    SurfDataInfo* toSurfDataInfo);
-XdrSurf mem_WriteSdaStructure(char* filename,
-                                    SurfDataInfo* toSurfDataInfo);
-XdrSurf mem_destroyAWholeSurfStructure(SurfDataInfo* toSurfDataInfo);
-
-XdrSurf mem_buildSurfSdaStructure(SurfDataInfo* toSurfDataInfo);
-
-
-XdrSurf freeSixBlocks(SurfDataInfo* toSurfDataInfo,XdrSurf returnvalue);
-XdrSurf checkAndLoadSurfDescriptor(SurfDescriptor* toSurfDescriptor,
-                                      SurfDataInfo* toSurfDataInfo);
-XdrSurf checkAndUpdateSurfDescriptor(SurfDescriptor* toSurfDescriptor,
-                                      SurfDataInfo* toSurfDataInfo);
-size_t initializeSdaInfo(SurfDataInfo* toSurfDataInfo,SdaInfo* toSdaInfo);
-void setPointersInSdaInfo(void* toSdaBlock,SdaInfo* toSdaInfo);
-void free_SdaMemory(SurfDataInfo* toSurfDataInfo);
-
-SurfMultiBeamAngleTable* getSurfAngleTable(SurfMultiBeamAngleTable*
-                                toAngleTable,short nrBeams,long index);
-SurfCProfileTable* getSurfCProfileTable(SurfCProfileTable*
-                                toCProf,short nrCPElements,long index);
-SurfCProfileTpeTable* getSurfCProfileTpeTable(SurfCProfileTpeTable*
-                                toCProfTpe,short nrCPElements,long index);
-#else
-
 /********************************************/
 /*                                          */
 /*        general LIBRARY-functions         */
 /*                                          */
 /********************************************/
 
-
-
-extern XdrSurf mem_ReadSixStructure(char* filename,
+XdrSurf mem_ReadSixStructure(char* filename,
                                     SurfDataInfo* toSurfDataInfo);
 
 /* This function doesn't destroy the internal data-structures */
-
-extern XdrSurf mem_WriteSixStructure(char* filename,
+XdrSurf mem_WriteSixStructure(char* filename,
                                     SurfDataInfo* toSurfDataInfo);
 
-extern XdrSurf mem_ReadSdaStructure(char* filename,
+XdrSurf mem_ReadSdaStructure(char* filename,
                                     SurfDataInfo* toSurfDataInfo);
 
 /* This function doesn't destroy the internal data-structures */
-
-extern XdrSurf mem_WriteSdaStructure(char* filename,
+XdrSurf mem_WriteSdaStructure(char* filename,
                                     SurfDataInfo* toSurfDataInfo);
 
-extern XdrSurf mem_destroyAWholeSurfStructure(SurfDataInfo* toSurfDataInfo);
+XdrSurf mem_destroyAWholeSurfStructure(SurfDataInfo* toSurfDataInfo);
 
-extern XdrSurf mem_buildSurfSdaStructure(SurfDataInfo* toSurfDataInfo);
+XdrSurf mem_buildSurfSdaStructure(SurfDataInfo* toSurfDataInfo);
 
 
 /*****************************************************/
@@ -272,26 +184,23 @@ extern XdrSurf mem_buildSurfSdaStructure(SurfDataInfo* toSurfDataInfo);
 
 
 
-extern XdrSurf freeSixBlocks(SurfDataInfo* toSurfDataInfo,XdrSurf returnvalue);
+XdrSurf freeSixBlocks(SurfDataInfo* toSurfDataInfo,XdrSurf returnvalue);
 
-extern XdrSurf checkAndLoadSurfDescriptor(SurfDescriptor* toSurfDescriptor,
+XdrSurf checkAndLoadSurfDescriptor(SurfDescriptor* toSurfDescriptor,
                                           SurfDataInfo* toSurfDataInfo);
-extern XdrSurf checkAndUpdateSurfDescriptor(SurfDescriptor* toSurfDescriptor,
+XdrSurf checkAndUpdateSurfDescriptor(SurfDescriptor* toSurfDescriptor,
                                             SurfDataInfo* toSurfDataInfo);
-extern size_t initializeSdaInfo(SurfDataInfo* toSurfDataInfo,
+size_t initializeSdaInfo(SurfDataInfo* toSurfDataInfo,
                                 SdaInfo* toSdaInfo);
-extern void setPointersInSdaInfo(void* toSdaBlock,
+void setPointersInSdaInfo(void* toSdaBlock,
                                  SdaInfo* toSdaInfo);
-extern void free_SdaMemory(SurfDataInfo* toSurfDataInfo);
+void free_SdaMemory(SurfDataInfo* toSurfDataInfo);
 
-extern SurfMultiBeamAngleTable* getSurfAngleTable(SurfMultiBeamAngleTable*
+SurfMultiBeamAngleTable* getSurfAngleTable(SurfMultiBeamAngleTable*
                                 toAngleTable,short nrBeams,long index);
-extern SurfCProfileTable* getSurfCProfileTable(SurfCProfileTable*
+SurfCProfileTable* getSurfCProfileTable(SurfCProfileTable*
                                 toCProf,short nrCPElements,long index);
-extern SurfCProfileTpeTable* getSurfCProfileTpeTable(SurfCProfileTpeTable*
+SurfCProfileTpeTable* getSurfCProfileTpeTable(SurfCProfileTpeTable*
                                 toCProfTpe,short nrCPElements,long index);
 
-#endif
-
-
-#endif
+#endif  // _mem_surf_h_
