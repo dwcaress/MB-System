@@ -46,7 +46,7 @@
 /* Return-values of XDR-SURF-routines */
 
 typedef short XdrSurf;
- 
+
 #define SURF_FAILURE                    0
 #define SURF_SUCCESS                    1
 #define SURF_WRONG_VERSION              2
@@ -57,8 +57,8 @@ typedef short XdrSurf;
 #define SURF_EOF                        7
 #define SURF_BAD_POSITION               8
 
-      
-#ifdef _XDR_SURF 
+
+#ifdef _XDR_SURF
 
 short getSurfVersion(char* version);
 
@@ -114,7 +114,7 @@ XdrSurf xdr_SurfSignalParameter(XDR *xdrs,SurfSignalParameter *gp,short nrSets);
 XdrSurf xdr_SurfTxParameter(XDR *xdrs,SurfTxParameter *gp,short nrSets);
 XdrSurf xdr_SurfSignalAmplitudes(XDR* xdrs,SurfSignalAmplitudes *gp,
                                            u_short nrAmplitudes);
-                                          
+
 XdrSurf xdr_SurfAmplitudes(XDR *xdrs,SurfAmplitudes *gp);
 XdrSurf xdr_SurfExtendedAmplitudes(XDR *xdrs,SurfExtendedAmplitudes *gp);
 XdrSurf xdr_SurfSidescanData(XDR *xdrs,SurfSidescanData *gp,
@@ -179,12 +179,12 @@ extern XdrSurf xdr_SurfTxParameter(XDR *xdrs,SurfTxParameter *gp,
                                                               short nrSets);
 extern XdrSurf xdr_SurfSignalAmplitudes(XDR* xdrs,SurfSignalAmplitudes *gp,
                                                       u_short nrAmplitudes);
-                                          
+
 extern XdrSurf xdr_SurfAmplitudes(XDR *xdrs,SurfAmplitudes *gp);
 extern XdrSurf xdr_SurfExtendedAmplitudes(XDR *xdrs,SurfExtendedAmplitudes *gp);
 extern XdrSurf xdr_SurfSidescanData(XDR *xdrs,SurfSidescanData *gp,
                                                               u_short nrSsData);
-                                          
+
 
 #endif /* ifdef _XDR_SURF */
 

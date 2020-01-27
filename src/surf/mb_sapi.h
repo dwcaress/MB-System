@@ -1,46 +1,9 @@
-/*-----------------------------------------------------------------------
-/ H E A D E R K O P F
-/ ------------------------------------------------------------------------
-/ ------------------------------------------------------------------------
-/  DATEINAME        : sapi.h
-/  ERSTELLUNGSDATUM : 21.05.96
-/ ----------------------------------------------------------------------*/
-/*!
-/ ------------------------------------------------------------------------
-/ COPYRIGHT (C) 1993: ATLAS ELEKTRONIK GMBH, 28305 BREMEN
-/ ------------------------------------------------------------------------
-/
-/  See README file for copying and redistribution conditions.
-/
-/
-/ HIER/SACHN: P: RP ____ _ ___ __
-/ BENENNUNG :
-/ ERSTELLER : Peter Block    : SHD2
-/ FREIGABE  : __.__.__  GS__
-/ AEND/STAND: __.__.__  __
-/ PRUEFVERM.:
-*/
+// DATEINAME        : sapi.h
+// ERSTELLUNGSDATUM : 21.05.96
+// COPYRIGHT (C) 1993: ATLAS ELEKTRONIK GMBH, 28305 BREMEN
 
-/*
-/ SPRACHE          : UNIX-C
-/ COMPILER         : Silicon Graphix
-/ BETRIEBSSYSTEM   : IRIX
-/ HARDWARE-UMGEBUNG: SGI Crimson
-/ URSPRUNGSHINWEIS :
-/
-/ ------------------------------------------------------------------------
-/ BESCHREIBUNG:       Definitions describing the "SURF-Format" 3
-/                                               & SURF-API-lib V3.1.4
-/ ------------------------------------------------------------------------
-/
-/ ------------------------------------------------------------------------
-/ E N D E   D E S   K O P F E S
-/ ------------------------------------------------------------------------
-*/
-/************************************************************************/
-
-
-
+// BESCHREIBUNG:       Definitions describing the "SURF-Format" 3
+//                                               & SURF-API-lib V3.1.4
 
 #ifndef _SAPI
 #define _SAPI
@@ -80,10 +43,7 @@
 
    name-strings and Label-strings are presented in
    c-string-annotation    ABCDEFG<0x0>
-
 */
-
-
 
 #define LABEL_SIZE          16
 #define STRING_SIZE         16
