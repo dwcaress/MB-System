@@ -339,7 +339,7 @@ void recalculateData(void)
  double cmean;
 
  memset(&fanParam, 0, sizeof(FanParam));
- 
+
  if(sapiToSurfData!=NULL)
  {
   toGlobalData = sapiToSurfData->toGlobalData;

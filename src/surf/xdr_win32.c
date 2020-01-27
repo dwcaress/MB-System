@@ -59,7 +59,7 @@ static long htonl(long val)
 
  return((long)ret);
 
-    
+
 
 }
 
@@ -95,7 +95,7 @@ static int xdrPutLong(XDR* xdrs,long *lp)
 
  mylong = htonl(*lp);
 
- lp = &mylong; 
+ lp = &mylong;
 
  if (fwrite((char*)lp, sizeof(long), 1, (FILE *)xdrs->x_private) != 1)
 
@@ -121,7 +121,7 @@ static int xdrGetBytes(XDR* xdrs,char* addr,u_int len)
 
     return(FALSE);
 
- }   
+ }
 
  return(TRUE);
 
@@ -143,7 +143,7 @@ static int xdrPutBytes(XDR* xdrs,char* addr,u_int len)
 
     return(FALSE);
 
- }   
+ }
 
  return(TRUE);
 
@@ -243,7 +243,7 @@ int xdr_short(XDR *xdrs,short *sp)
 
   case XDR_DECODE:
 
-      if(xdrGetLong(xdrs, &val) == TRUE) 
+      if(xdrGetLong(xdrs, &val) == TRUE)
 
       {
 
@@ -307,7 +307,7 @@ int xdr_u_short(XDR *xdrs,u_short* ulp)
 
  }
 
- return(FALSE);                   
+ return(FALSE);
 
 }
 
@@ -321,11 +321,11 @@ int xdr_u_int(XDR* xdrs,u_int* ip)
 
 {
 
- if (sizeof (u_int) == sizeof (u_long)) 
+ if (sizeof (u_int) == sizeof (u_long))
 
-   return (xdr_u_long(xdrs,(u_long*)ip)); 
+   return (xdr_u_long(xdrs,(u_long*)ip));
 
- else 
+ else
 
    return (xdr_u_short(xdrs,(u_short*)ip));
 
@@ -341,11 +341,11 @@ int xdr_int(XDR* xdrs,int *ip)
 
 {
 
- if (sizeof (int) == sizeof (long)) 
+ if (sizeof (int) == sizeof (long))
 
-   return (xdr_long(xdrs,(long *)ip)); 
+   return (xdr_long(xdrs,(long *)ip));
 
- else 
+ else
 
    return (xdr_short(xdrs,(short *)ip));
 
@@ -367,7 +367,7 @@ int xdr_char(XDR *xdrs,char *cp)
 
  ii = (int)(*cp);
 
- if (xdr_int(xdrs, &ii)) 
+ if (xdr_int(xdrs, &ii))
 
  {
 
@@ -407,7 +407,7 @@ int xdr_u_char(XDR *xdrs,u_char *cp)
 
  }
 
- return(FALSE); 
+ return(FALSE);
 
 }
 
@@ -439,7 +439,7 @@ int xdr_opaque(XDR *xdrs,char* cp,unsigned int cnt)
 
  {
 
-  case XDR_DECODE: 
+  case XDR_DECODE:
 
      if (!xdrGetBytes(xdrs, cp, cnt)) return(FALSE);
 
@@ -463,7 +463,7 @@ int xdr_opaque(XDR *xdrs,char* cp,unsigned int cnt)
 
      break;
 
- } 
+ }
 
  return (FALSE);
 
@@ -491,7 +491,7 @@ int xdr_bytes(XDR *xdrs,char **cpp,u_int *sizep,u_int maxsize)
 
 
 
- if (!xdr_u_int(xdrs, sizep)) 
+ if (!xdr_u_int(xdrs, sizep))
 
    return (FALSE);
 
@@ -499,13 +499,13 @@ int xdr_bytes(XDR *xdrs,char **cpp,u_int *sizep,u_int maxsize)
 
  nodesize = *sizep;
 
- if((nodesize > maxsize) && (xdrs->x_op != XDR_FREE)) 
+ if((nodesize > maxsize) && (xdrs->x_op != XDR_FREE))
 
    return (FALSE);
 
 
 
- switch (xdrs->x_op) 
+ switch (xdrs->x_op)
 
  {
 
@@ -513,7 +513,7 @@ int xdr_bytes(XDR *xdrs,char **cpp,u_int *sizep,u_int maxsize)
 
        if (nodesize == 0) return (TRUE);
 
-       if (sp == NULL) 
+       if (sp == NULL)
 
        {
 
@@ -529,7 +529,7 @@ int xdr_bytes(XDR *xdrs,char **cpp,u_int *sizep,u_int maxsize)
 
   case XDR_FREE:
 
-	if (sp != NULL) 
+	if (sp != NULL)
 
         {
 
@@ -563,7 +563,7 @@ int xdr_float(XDR* xdrs,float *fp)
 
 /*
 
-//  What IEEE single precision floating point 
+//  What IEEE single precision floating point
 
 // struct	ieee_single {
 
@@ -579,7 +579,7 @@ int xdr_float(XDR* xdrs,float *fp)
 
 {
 
-  switch (xdrs->x_op) 
+  switch (xdrs->x_op)
 
   {
 
