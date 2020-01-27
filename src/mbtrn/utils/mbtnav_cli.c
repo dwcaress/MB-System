@@ -464,11 +464,12 @@ static void s_trnw_offset_show(trn_offset_pub_t *self, bool verbose, uint16_t in
         fprintf(stderr,"%*s[reinit_t     %15.3lf]\n",indent,(indent>0?" ":""),self->reinit_tlast);
         fprintf(stderr,"%*s[filt_state   %15d]\n",indent,(indent>0?" ":""), self->filter_state);
         fprintf(stderr,"%*s[success      %15d]\n",indent,(indent>0?" ":""), self->success);
-        fprintf(stderr,"%*s[cycle        %15d]\n",indent,(indent>0?" ":""), self->cycle);
+        fprintf(stderr,"%*s[is_converged %15hd]\n",indent,(indent>0?" ":""), self->is_converged);
+        fprintf(stderr,"%*s[is_valid     %15hd]\n",indent,(indent>0?" ":""), self->is_valid);
+        fprintf(stderr,"%*s[mb1_cycle    %15d]\n",indent,(indent>0?" ":""), self->mb1_cycle);
         fprintf(stderr,"%*s[ping_number  %15d]\n",indent,(indent>0?" ":""), self->ping_number);
         fprintf(stderr,"%*s[mb1_time     %15.3lf]\n",indent,(indent>0?" ":""),self->mb1_time);
         fprintf(stderr,"%*s[update_time  %15.3lf]\n",indent,(indent>0?" ":""),self->update_time);
-        fprintf(stderr,"%*s[is_converged %15d]\n",indent,(indent>0?" ":""), self->is_converged);
     }
 }
 
@@ -488,7 +489,7 @@ static void s_out_csv(trn_offset_pub_t *self)
     fprintf(stderr,"%.3lf,%.4lf,%.4lf,%.4lf,",mse->time,mse->x,mse->y,mse->z);
     fprintf(stderr,"%.4lf,%.4lf,%.4lf,",pt->x, pt->y, pt->z);
     fprintf(stderr,"%.3lf,%.3lf,%.3lf,",(N_COVAR>=6?sqrt(mse->cov[0]):-1.0),(N_COVAR>=6?sqrt(mse->cov[2]):-1.0),(N_COVAR>=6?sqrt(mse->cov[5]):-1.0));
-    fprintf(stderr,"%d,%d,%d,%d,%d,%hd\n",self->reinit_count,self->filter_state,self->success,self->cycle,self->ping_number,self->is_converged);
+    fprintf(stderr,"%d,%d,%d,%d,%d,%hd,%hd\n",self->reinit_count,self->filter_state,self->success,self->mb1_cycle,self->ping_number,self->is_converged,self->is_valid);
 }
 
 /// @fn int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
