@@ -521,11 +521,16 @@ static int s_app_main(app_cfg_t *cfg)
                                        cfg->cfg,
                                        cfg->particles,
                                        cfg->logdir,
+                                       0,
 //                                      "/home/headley/tmp/maps/PortTiles",
 //                                      "/home/headley/tmp/config/mappingAUV_specs.cfg",
 //                                      "/home/headley/tmp/config/particles.cfg",
 //                                      "logs",
-                                      0);
+                                       TRN_MAX_NCOV_DFL,
+                                       TRN_MAX_NERR_DFL,
+                                       TRN_MAX_ECOV_DFL,
+                                       TRN_MAX_EERR_DFL
+                                      );
 
     wtnav_t *trn = wtnav_new(trn_cfg);
 
