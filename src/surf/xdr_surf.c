@@ -40,7 +40,7 @@ FILE* xdrSurfOpenRead(XDR *xdrs, const char* filename) {
   {
     xdrstdio_create(xdrs,fp,XDR_DECODE);
   }
-  return(fp);
+  return fp;
 }
 
 /* handle XDR-formatted files for WRITE */
@@ -53,7 +53,7 @@ FILE* xdrSurfOpenWrite(XDR *xdrs,const char* filename)
   {
     xdrstdio_create(xdrs,fp,XDR_ENCODE);
   }
-  return(fp);
+  return fp;
 }
 
 /***************************************/
@@ -62,9 +62,9 @@ FILE* xdrSurfOpenWrite(XDR *xdrs,const char* filename)
 
 short getSurfVersion(char* version)
 {
- if(strlen(version) != 9) return(0);
- if(strncmp(version, "SURF ", 5) != 0) return(0);
- return(((short)(version[6]))*256 + ((short)(version[8])));
+ if(strlen(version) != 9) return 0;
+ if(strncmp(version, "SURF ", 5) != 0) return 0;
+ return ((short)(version[6]))*256 + ((short)(version[8]));
 }
 
 XdrSurf xdr_SurfCheckVersion(XDR *xdrs, SurfDescriptor *gp, char* label,
@@ -78,14 +78,14 @@ XdrSurf xdr_SurfCheckVersion(XDR *xdrs, SurfDescriptor *gp, char* label,
   sizeL=LABEL_SIZE;
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   *oldVersion = getSurfVersion(gp->label);
   *newVersion = getSurfVersion(SURF_VERSION);
-  if(*oldVersion == 0) return(SURF_WRONG_VERSION);
-  if(*oldVersion > *newVersion) return(SURF_WRONG_VERSION);
+  if(*oldVersion == 0) return SURF_WRONG_VERSION;
+  if(*oldVersion > *newVersion) return SURF_WRONG_VERSION;
   strcpy((char *)gp->label, SURF_VERSION);
-  return(SURF_SUCCESS);
+  return SURF_SUCCESS;
 }
 
 void insertDefaultSixDescriptor(short typ, SurfSixDescriptor *gp)
@@ -108,23 +108,23 @@ void insertDefaultNrOfDescriptor(short typ, SurfNrofDescriptor *gp)
 
 XdrSurf xdr_SurfSixDescriptor(XDR *xdrs, SurfSixDescriptor *gp)
 {
-  return(
+  return
           xdr_short(xdrs, &gp->typ)                         &&
-          xdr_u_long(xdrs, &gp->nr)                         );
+          xdr_u_long(xdrs, &gp->nr);
 }
 
 XdrSurf xdr_SurfSdaDescriptor(XDR *xdrs, SurfSdaDescriptor *gp)
 {
-  return(
+  return
           xdr_short(xdrs, &gp->typ)                         &&
-          xdr_u_long(xdrs, &gp->nr)                         );
+          xdr_u_long(xdrs, &gp->nr);
 }
 
 XdrSurf xdr_SurfNrofDescriptor(XDR *xdrs, SurfNrofDescriptor *gp)
 {
-  return(
+  return
           xdr_short(xdrs, &gp->typ)                         &&
-          xdr_u_long(xdrs, &gp->nr)                         );
+          xdr_u_long(xdrs, &gp->nr);
 }
 
 XdrSurf xdr_SurfDescriptor(XDR *xdrs, SurfDescriptor *gp,
@@ -138,7 +138,7 @@ XdrSurf xdr_SurfDescriptor(XDR *xdrs, SurfDescriptor *gp,
   vers30 = getSurfVersion(SURF_VERS3_0);
 
   status = xdr_SurfCheckVersion(xdrs, gp, SURF_VERSION, &newVers, &oldVers);
-  if (status != SURF_SUCCESS) return(status);
+  if (status != SURF_SUCCESS) return status;
 
   *newVersion = newVers;
   *oldVersion = oldVers;
@@ -250,7 +250,7 @@ XdrSurf xdr_SurfDescriptor(XDR *xdrs, SurfDescriptor *gp,
 
   status = status &&
         ( xdr_short                 (xdrs, &gp->eod)                    );
-  return(status);
+  return status;
 }
 
 XdrSurf xdr_SurfGlobalData(XDR *xdrs, SurfGlobalData *gp)
@@ -266,19 +266,19 @@ XdrSurf xdr_SurfGlobalData(XDR *xdrs, SurfGlobalData *gp)
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if(strncpy(buffer, SURF_GLOBAL_DATA_LABEL, sizeL) == NULL)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if((strncmp(gp->label, (const char*)buffer, sizeL)) != 0)
   {
-   return(SURF_CORRUPTED_DATASET);
+   return SURF_CORRUPTED_DATASET;
   }
 
 
-  return(
+  return
     xdr_SurfString(xdrs, (char*)&gp->shipsName)                             &&
     xdr_SurfTime(xdrs, (char*)&gp->startTimeOfProfile)                      &&
     xdr_SurfString(xdrs, (char*)&gp->regionOfProfile)                       &&
@@ -328,7 +328,7 @@ XdrSurf xdr_SurfGlobalData(XDR *xdrs, SurfGlobalData *gp)
     xdr_float(xdrs, &gp->modifiedTrackStartY)                               &&
     xdr_float(xdrs, &gp->modifiedTrackStopX)                                &&
     xdr_float(xdrs, &gp->modifiedTrackStopY)                                &&
-    xdr_float(xdrs, &gp->modifiedStartStopDistance)                         );
+    xdr_float(xdrs, &gp->modifiedStartStopDistance);
 }
 
 XdrSurf xdr_SurfStatistics(XDR *xdrs, SurfStatistics *gp)
@@ -344,18 +344,18 @@ XdrSurf xdr_SurfStatistics(XDR *xdrs, SurfStatistics *gp)
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if(strncpy(buffer, SURF_STATISTICS_LABEL, sizeL) == NULL)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if((strncmp(gp->label, (const char*)buffer, sizeL)) != 0)
   {
-   return(SURF_CORRUPTED_DATASET);
+   return SURF_CORRUPTED_DATASET;
   }
 
-  return(
+  return
             xdr_double(xdrs, &gp->minNorthing)                             &&
             xdr_double(xdrs, &gp->maxNorthing)                             &&
             xdr_double(xdrs, &gp->minEasting)                              &&
@@ -373,13 +373,12 @@ XdrSurf xdr_SurfStatistics(XDR *xdrs, SurfStatistics *gp)
             xdr_float(xdrs, &gp->minBeamPositionAhead)                     &&
             xdr_float(xdrs, &gp->maxBeamPositionAhead)                     &&
             xdr_float(xdrs, &gp->minDepth)                                 &&
-            xdr_float(xdrs, &gp->maxDepth)                                 );
+            xdr_float(xdrs, &gp->maxDepth);
 }
 
 XdrSurf xdr_SurfPositionPolarfix(XDR *xdrs, SurfPositionPolarfix *gp)
 {
-
-  return(
+  return
      xdr_float(xdrs, &gp->polarfixLocationX)                             &&
      xdr_float(xdrs, &gp->polarfixLocationY)                             &&
      xdr_float(xdrs, &gp->polarfixLocationZ)                             &&
@@ -399,12 +398,12 @@ XdrSurf xdr_SurfPositionPolarfix(XDR *xdrs, SurfPositionPolarfix *gp)
      xdr_float(xdrs, &gp->polarfixEditReferenceAngle)                    &&
      xdr_float(xdrs, &gp->polarfixAntennaPositionAhead)                  &&
      xdr_float(xdrs, &gp->polarfixAntennaPositionStar)                   &&
-     xdr_float(xdrs, &gp->polarfixAntennaPositionHeight)                 );
+     xdr_float(xdrs, &gp->polarfixAntennaPositionHeight);
 }
 
 XdrSurf xdr_SurfPositionAnySensor(XDR *xdrs, SurfPositionAnySensor* gp)
 {
-  return(
+  return
      xdr_float(xdrs, &gp->none1)                         &&
      xdr_float(xdrs, &gp->none2)                         &&
      xdr_float(xdrs, &gp->none3)                         &&
@@ -424,7 +423,7 @@ XdrSurf xdr_SurfPositionAnySensor(XDR *xdrs, SurfPositionAnySensor* gp)
      xdr_float(xdrs, &gp->none17)                        &&
      xdr_float(xdrs, &gp->sensorAntennaPositionAhead)    &&
      xdr_float(xdrs, &gp->sensorAntennaPositionStar)     &&
-     xdr_float(xdrs, &gp->sensorAntennaPositionHeight)   );
+     xdr_float(xdrs, &gp->sensorAntennaPositionHeight);
 }
 
 XdrSurf xdr_SurfUnknownPositionSensor(XDR *xdrs, char *gp)
@@ -432,7 +431,7 @@ XdrSurf xdr_SurfUnknownPositionSensor(XDR *xdrs, char *gp)
   u_int sizeU;
 
   sizeU=UNION_SIZE;
-  return(xdr_bytes(xdrs, &gp, &sizeU, sizeU));
+  return xdr_bytes(xdrs, &gp, &sizeU, sizeU);
 }
 
 XdrSurf xdr_PositionSensorArray(XDR *xdrs, SurfPositionSensorArray *gp, short oldVers)
@@ -454,34 +453,33 @@ XdrSurf xdr_PositionSensorArray(XDR *xdrs, SurfPositionSensorArray *gp, short ol
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if(strncpy(buffer, SURF_POSITION_SENSOR_LABEL, sizeL) == NULL)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if((strncmp(gp->label, (const char*)buffer, sizeL)) != 0)
   {
-   return(SURF_CORRUPTED_DATASET);
+   return SURF_CORRUPTED_DATASET;
   }
 
   /* Try to get the specific Sensor */
 
   if (xdr_SurfString(xdrs, (char*)&gp->positionSensorName) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
 
   /* Test if Polarfix */
 
   if(strncpy(buffer, POLARFIX, sizeS) == NULL)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if(strncmp(gp->positionSensorName, (const char*)buffer, sizeS) == 0)
   {
-   return(xdr_SurfPositionPolarfix(xdrs,
-                            (SurfPositionPolarfix*)gp->sensorUnion));
+   return xdr_SurfPositionPolarfix(xdrs, (SurfPositionPolarfix*)gp->sensorUnion);
   }
   else
   {
@@ -492,12 +490,12 @@ XdrSurf xdr_PositionSensorArray(XDR *xdrs, SurfPositionSensorArray *gp, short ol
     toAny->sensorAntennaPositionAhead = (float)0.0;
     toAny->sensorAntennaPositionStar  = (float)0.0;
     toAny->sensorAntennaPositionHeight= (float)0.0;
-    return(ret);
+    return ret;
    }
    else
    {
-    return(xdr_SurfPositionAnySensor(xdrs,
-                            (SurfPositionAnySensor*)gp->sensorUnion));
+    return xdr_SurfPositionAnySensor(xdrs,
+                            (SurfPositionAnySensor*)gp->sensorUnion);
    }
   }
 }
@@ -519,20 +517,20 @@ XdrSurf xdr_SurfMultiBeamAngleTable(XDR *xdrs,
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if(strncpy(buffer, SURF_MULTIBEAM_ANGLE_LABEL, sizeL) == NULL)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if((strncmp(gp->label, (const char*)buffer, sizeL)) != 0)
   {
-   return(SURF_CORRUPTED_DATASET);
+   return SURF_CORRUPTED_DATASET;
   }
 
   if(maxBeamNr == 0)
   {
-   return(SURF_NR_OF_TABLE_ELEMENTS_ZERO);
+   return SURF_NR_OF_TABLE_ELEMENTS_ZERO;
   }
 
   ret = xdr_u_short(xdrs, &gp->actualNumberOfBeams);
@@ -544,7 +542,7 @@ XdrSurf xdr_SurfMultiBeamAngleTable(XDR *xdrs,
     ret = SURF_FAILURE;
    }
   }
-  return(ret);
+  return ret;
 }
 
 XdrSurf xdr_SurfTransducerParameterTable(XDR *xdrs,
@@ -560,24 +558,24 @@ XdrSurf xdr_SurfTransducerParameterTable(XDR *xdrs,
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if(strncpy(buffer, SURF_TRANSDUCER_TABLE_LABEL, sizeL) == NULL)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if((strncmp(gp->label, (const char*)buffer, sizeL)) != 0)
   {
-   return(SURF_CORRUPTED_DATASET);
+   return SURF_CORRUPTED_DATASET;
   }
 
-  return(
+  return
             xdr_float(xdrs, &gp->transducerDepth)                &&
             xdr_float(xdrs, &gp->transducerPositionAhead)        &&
             xdr_float(xdrs, &gp->transducerPositionStar)         &&
             xdr_float(xdrs, &gp->transducerTwoThetaHFreq)        &&
             xdr_float(xdrs, &gp->transducerTwoThetaMFreq)        &&
-            xdr_float(xdrs, &gp->transducerTwoThetaLFreq)        );
+            xdr_float(xdrs, &gp->transducerTwoThetaLFreq);
 }
 
 XdrSurf xdr_SurfCProfileTable(XDR *xdrs,
@@ -598,25 +596,25 @@ XdrSurf xdr_SurfCProfileTable(XDR *xdrs,
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if(strncpy(buffer, SURF_C_PROFILE_LABEL, sizeL) == NULL)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if((strncmp(gp->label, (const char*)buffer, sizeL)) != 0)
   {
-   return(SURF_CORRUPTED_DATASET);
+   return SURF_CORRUPTED_DATASET;
   }
 
   if(maxNrOfElementsPerTable == 0)
   {
-   return(SURF_NR_OF_TABLE_ELEMENTS_ZERO);
+   return SURF_NR_OF_TABLE_ELEMENTS_ZERO;
   }
 
   if((xdr_float(xdrs, &gp->relTime)                != SURF_SUCCESS) ||
      (xdr_u_short(xdrs, &gp->numberOfActualValues) != SURF_SUCCESS))
-    return(SURF_FAILURE);
+    return SURF_FAILURE;
   for(n = 0;n < maxNrOfElementsPerTable;n++)
   {
    if((xdr_float(xdrs, &gp->values[n].depth)  != SURF_SUCCESS)  ||
@@ -626,7 +624,7 @@ XdrSurf xdr_SurfCProfileTable(XDR *xdrs,
     ret = SURF_FAILURE;
    }
   }
-  return(ret);
+  return ret;
 }
 
 XdrSurf xdr_SurfCProfileTableTpes(XDR *xdrs,
@@ -647,20 +645,20 @@ XdrSurf xdr_SurfCProfileTableTpes(XDR *xdrs,
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if(strncpy(buffer, SURF_C_PROFILE_TPE_LABEL, sizeL) == NULL)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if((strncmp(gp->label, (const char*)buffer, sizeL)) != 0)
   {
-   return(SURF_CORRUPTED_DATASET);
+   return SURF_CORRUPTED_DATASET;
   }
 
   if(maxNrOfElementsPerTable == 0)
   {
-   return(SURF_NR_OF_TABLE_ELEMENTS_ZERO);
+   return SURF_NR_OF_TABLE_ELEMENTS_ZERO;
   }
 
   for(n = 0;n < maxNrOfElementsPerTable;n++)
@@ -671,7 +669,7 @@ XdrSurf xdr_SurfCProfileTableTpes(XDR *xdrs,
     ret = SURF_FAILURE;
    }
   }
-  return(ret);
+  return ret;
 }
 
 XdrSurf xdr_SurfPolygons(XDR *xdrs,
@@ -691,20 +689,20 @@ XdrSurf xdr_SurfPolygons(XDR *xdrs,
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if(strncpy(buffer, SURF_POLYGONS_LABEL, sizeL) == NULL)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if((strncmp(gp->label, (const char*)buffer, sizeL)) != 0)
   {
-   return(SURF_CORRUPTED_DATASET);
+   return SURF_CORRUPTED_DATASET;
   }
 
   if(maxNrOfElementsPerTable == 0)
   {
-   return(SURF_NR_OF_TABLE_ELEMENTS_ZERO);
+   return SURF_NR_OF_TABLE_ELEMENTS_ZERO;
   }
 
   ret = SURF_SUCCESS;
@@ -717,7 +715,7 @@ XdrSurf xdr_SurfPolygons(XDR *xdrs,
     ret = SURF_FAILURE;
    }
   }
-  return(ret);
+  return ret;
 }
 
 XdrSurf xdr_SurfEventText(XDR *xdrs, char *gp)
@@ -725,7 +723,7 @@ XdrSurf xdr_SurfEventText(XDR *xdrs, char *gp)
   u_int sizeE;
 
   sizeE=EVENT_SIZE;
-  return(xdr_bytes(xdrs, &gp, &sizeE, sizeE));
+  return xdr_bytes(xdrs, &gp, &sizeE, sizeE);
 }
 
 XdrSurf xdr_SurfEvents  (XDR *xdrs,
@@ -745,20 +743,20 @@ XdrSurf xdr_SurfEvents  (XDR *xdrs,
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if(strncpy(buffer, SURF_EVENT_LABEL, sizeL) == NULL)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if((strncmp(gp->label, (const char*)buffer, sizeL)) != 0)
   {
-   return(SURF_CORRUPTED_DATASET);
+   return SURF_CORRUPTED_DATASET;
   }
 
   if(maxNrOfElementsPerTable == 0)
   {
-   return(SURF_NR_OF_TABLE_ELEMENTS_ZERO);
+   return SURF_NR_OF_TABLE_ELEMENTS_ZERO;
   }
 
   ret = SURF_SUCCESS;
@@ -773,7 +771,7 @@ XdrSurf xdr_SurfEvents  (XDR *xdrs,
     ret = SURF_FAILURE;
    }
   }
-  return(ret);
+  return ret;
 }
 
 XdrSurf xdr_SurfTpeStatics(XDR *xdrs, SurfTpeStatics *gp)
@@ -788,18 +786,18 @@ XdrSurf xdr_SurfTpeStatics(XDR *xdrs, SurfTpeStatics *gp)
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if(strncpy(buffer, SURF_TPE_STATICS_LABEL, sizeL) == NULL)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if((strncmp(gp->label, (const char*)buffer, sizeL)) != 0)
   {
-   return(SURF_CORRUPTED_DATASET);
+   return SURF_CORRUPTED_DATASET;
   }
 
-  return(
+  return
     xdr_u_long(xdrs, &gp->tpeFlag       )                       &&
     xdr_SurfTime(xdrs, (char*)&gp->timeDateOfLastTpeCalculation)&&
     xdr_double(xdrs, &gp->ltncyHprMb)                           &&
@@ -827,7 +825,7 @@ XdrSurf xdr_SurfTpeStatics(XDR *xdrs, SurfTpeStatics *gp)
     xdr_double(xdrs, &gp->reserve1)                             &&
     xdr_double(xdrs, &gp->reserve2)                             &&
     xdr_double(xdrs, &gp->reserve3)                             &&
-    xdr_double(xdrs, &gp->reserve4)                             );
+    xdr_double(xdrs, &gp->reserve4);
 }
 
 XdrSurf xdr_SurfFreeText (XDR *xdrs,
@@ -847,20 +845,20 @@ XdrSurf xdr_SurfFreeText (XDR *xdrs,
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if(strncpy(buffer, SURF_FREE_TEXT_LABEL, sizeL) == NULL)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if((strncmp(gp->label, (const char*)buffer, sizeL)) != 0)
   {
-   return(SURF_CORRUPTED_DATASET);
+   return SURF_CORRUPTED_DATASET;
   }
 
   if(maxNrOfElementsPerTable == 0)
   {
-   return(SURF_NR_OF_TABLE_ELEMENTS_ZERO);
+   return SURF_NR_OF_TABLE_ELEMENTS_ZERO;
   }
 
   ret = SURF_SUCCESS;
@@ -873,12 +871,12 @@ XdrSurf xdr_SurfFreeText (XDR *xdrs,
     ret = SURF_FAILURE;
    }
   }
-  return(ret);
+  return ret;
 }
 
 static XdrSurf xdr_SurfReductionParameters(XDR *xdrs, SurfReductionParameters *gp)
 {
-  return(
+  return
     xdr_double(xdrs, &gp->variation)                            &&
     xdr_double(xdrs, &gp->pointDistance)                        &&
     xdr_double(xdrs, &gp->maxAstar)                             &&
@@ -886,12 +884,12 @@ static XdrSurf xdr_SurfReductionParameters(XDR *xdrs, SurfReductionParameters *g
     xdr_u_short(xdrs, &gp->isReduced)                           &&
     xdr_u_short(xdrs, &gp->fromBeam)                            &&
     xdr_u_short(xdrs, &gp->toBeam)                              &&
-    xdr_u_short(xdrs, &gp->reduceOuterBeams)                    );
+    xdr_u_short(xdrs, &gp->reduceOuterBeams);
 }
 
 static XdrSurf xdr_SurfLastFilterParameters(XDR *xdrs, SurfLastFilterParameters *gp)
 {
-  return(
+  return
     xdr_double(xdrs, &gp->depthMinDepth)                        &&
     xdr_double(xdrs, &gp->depthMaxDepth)                        &&
     xdr_double(xdrs, &gp->depthSlopeOver2)                      &&
@@ -903,7 +901,7 @@ static XdrSurf xdr_SurfLastFilterParameters(XDR *xdrs, SurfLastFilterParameters 
     xdr_double(xdrs, &gp->posFilterRadius)                      &&
     xdr_double(xdrs, &gp->posMaxCourseChange)                   &&
     xdr_double(xdrs, &gp->dFuture1)                             &&
-    xdr_double(xdrs, &gp->dFuture2)                             );
+    xdr_double(xdrs, &gp->dFuture2);
 }
 
 XdrSurf xdr_SurfAddStatistics(XDR *xdrs, SurfAddStatistics *gp)
@@ -920,18 +918,18 @@ XdrSurf xdr_SurfAddStatistics(XDR *xdrs, SurfAddStatistics *gp)
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if(strncpy(buffer, SURF_ADD_STATISTICS_LABEL, sizeL) == NULL)
   {
-   return(SURF_FAILURE);
+   return SURF_FAILURE;
   }
   if((strncmp(gp->label, (const char*)buffer, sizeL)) != 0)
   {
-   return(SURF_CORRUPTED_DATASET);
+   return SURF_CORRUPTED_DATASET;
   }
 
-  return(
+  return
     xdr_u_long(xdrs, &gp->flag)                                 &&
     xdr_u_long(xdrs, &gp->nrNotDeletedDepth)                    &&
     xdr_u_long(xdrs, &gp->nrNotReducedDepth)                    &&
@@ -956,7 +954,7 @@ XdrSurf xdr_SurfAddStatistics(XDR *xdrs, SurfAddStatistics *gp)
     xdr_u_short(xdrs, &(gp->iFuture[4]))                        &&
     xdr_u_short(xdrs, &(gp->iFuture[5]))                        &&
     xdr_u_short(xdrs, &(gp->iFuture[6]))                        &&
-    xdr_u_short(xdrs, &(gp->iFuture[7]))                        );
+    xdr_u_short(xdrs, &(gp->iFuture[7]));
 }
 
 XdrSurf xdr_SurfVendorText(XDR *xdrs, SurfVendorText *gp)
@@ -964,7 +962,7 @@ XdrSurf xdr_SurfVendorText(XDR *xdrs, SurfVendorText *gp)
   u_int sizeT = TEXT_SIZE;
   char *toText = (char *)gp->text;
 
-  return(xdr_bytes(xdrs, &toText, &sizeT, sizeT));
+  return xdr_bytes(xdrs, &toText, &sizeT, sizeT);
 }
 
 XdrSurf xdr_SurfFreeSixDataDescr(XDR *xdrs, SurfFreeSixDataDescr *gp)
@@ -972,7 +970,7 @@ XdrSurf xdr_SurfFreeSixDataDescr(XDR *xdrs, SurfFreeSixDataDescr *gp)
   u_int sizeT = STRING_SIZE;
   char *toText = (char *)gp->descr;
 
-  return(xdr_bytes(xdrs, &toText, &sizeT, sizeT));
+  return xdr_bytes(xdrs, &toText, &sizeT, sizeT);
 }
 
 XdrSurf xdr_SurfFreeSndgDataDescr(XDR *xdrs, SurfFreeSndgDataDescr *gp)
@@ -980,7 +978,7 @@ XdrSurf xdr_SurfFreeSndgDataDescr(XDR *xdrs, SurfFreeSndgDataDescr *gp)
   u_int sizeT = STRING_SIZE;
   char *toText = (char *)gp->descr;
 
-  return(xdr_bytes(xdrs, &toText, &sizeT, sizeT));
+  return xdr_bytes(xdrs, &toText, &sizeT, sizeT);
 }
 
 XdrSurf xdr_SurfFreeBeamDataDescr(XDR *xdrs, SurfFreeBeamDataDescr *gp)
@@ -988,12 +986,12 @@ XdrSurf xdr_SurfFreeBeamDataDescr(XDR *xdrs, SurfFreeBeamDataDescr *gp)
   u_int sizeT = STRING_SIZE;
   char *toText = (char *)gp->descr;
 
-  return(xdr_bytes(xdrs, &toText, &sizeT, sizeT));
+  return xdr_bytes(xdrs, &toText, &sizeT, sizeT);
 }
 
 XdrSurf xdr_SurfFreeSixAttachedData(XDR *xdrs, SurfFreeSixAttachedData *gp)
 {
-  return(xdr_double(xdrs, gp));
+  return xdr_double(xdrs, gp);
 }
 
 /***************************************/
@@ -1005,7 +1003,7 @@ XdrSurf xdr_SurfSoundingData(XDR *xdrs, SurfSoundingData *gp, short versLess2)
  if(versLess2 == 1) /* Version < 2.0 */
  {
   gp->dynChartZero = (float)0.0;
-  return(
+  return
               xdr_u_short(xdrs, &gp->soundingFlag)                  &&
               xdr_u_short(xdrs, &gp->indexToAngle)                  &&
               xdr_u_short(xdrs, &gp->indexToTransducer)             &&
@@ -1018,11 +1016,11 @@ XdrSurf xdr_SurfSoundingData(XDR *xdrs, SurfSoundingData *gp, short versLess2)
               xdr_float(xdrs, &gp->rollWhileTransmitting)           &&
               xdr_float(xdrs, &gp->pitchWhileTransmitting)          &&
               xdr_float(xdrs, &gp->cKeel)                           &&
-              xdr_float(xdrs, &gp->cMean)                           );
+              xdr_float(xdrs, &gp->cMean);
  }
  else
  {
-  return(
+  return
               xdr_u_short(xdrs, &gp->soundingFlag)                  &&
               xdr_u_short(xdrs, &gp->indexToAngle)                  &&
               xdr_u_short(xdrs, &gp->indexToTransducer)             &&
@@ -1036,76 +1034,75 @@ XdrSurf xdr_SurfSoundingData(XDR *xdrs, SurfSoundingData *gp, short versLess2)
               xdr_float(xdrs, &gp->pitchWhileTransmitting)          &&
               xdr_float(xdrs, &gp->cKeel)                           &&
               xdr_float(xdrs, &gp->cMean)                           &&
-              xdr_float(xdrs, &gp->dynChartZero)                    );
+              xdr_float(xdrs, &gp->dynChartZero);
  }
 }
 
 XdrSurf xdr_SurfFreeSoundingAttachedData(XDR *xdrs, SurfFreeSoundingAttachedData *gp)
 {
-  return(xdr_float(xdrs, gp));
+  return xdr_float(xdrs, gp);
 }
 
 XdrSurf xdr_SurfCenterPosition(XDR *xdrs, SurfCenterPosition *gp)
 {
 
-  return(
+  return
               xdr_u_short(xdrs, &gp->positionFlag)                  &&
               xdr_float(xdrs, &gp->centerPositionX)                 &&
               xdr_float(xdrs, &gp->centerPositionY)                 &&
-              xdr_float(xdrs, &gp->speed)                           );
+              xdr_float(xdrs, &gp->speed);
 }
 
 XdrSurf xdr_SurfSingleBeamDepth(XDR *xdrs, SurfSingleBeamDepth *gp)
 {
 
-  return(
+  return
               xdr_u_short(xdrs, &gp->depthFlag)                     &&
               xdr_float(xdrs, &gp->travelTimeOfRay)                 &&
               xdr_float(xdrs, &gp->depthHFreq)                      &&
               xdr_float(xdrs, &gp->depthMFreq)                      &&
-              xdr_float(xdrs, &gp->depthLFreq)                      );
+              xdr_float(xdrs, &gp->depthLFreq);
 }
 
 XdrSurf xdr_SurfMultiBeamDepth(XDR *xdrs, SurfMultiBeamDepth *gp)
 {
 
-  return(
+  return
               xdr_u_short(xdrs, &gp->depthFlag)                     &&
               xdr_float(xdrs, &gp->depth)                           &&
               xdr_float(xdrs, &gp->beamPositionAhead)               &&
-              xdr_float(xdrs, &gp->beamPositionStar)                );
+              xdr_float(xdrs, &gp->beamPositionStar);
 }
 
 XdrSurf xdr_SurfMultiBeamTT(XDR *xdrs, SurfMultiBeamTT *gp)
 {
-
-  return(
-              xdr_float(xdrs, &gp->travelTimeOfRay)                 );
+  return xdr_float(xdrs, &gp->travelTimeOfRay);
 }
 
 XdrSurf xdr_SurfMultiBeamReceive(XDR *xdrs, SurfMultiBeamReceive *gp)
 {
 
-  return(
+  return
               xdr_float(xdrs, &gp->headingWhileReceiving)           &&
-              xdr_float(xdrs, &gp->heaveWhileReceiving)             );
+              xdr_float(xdrs, &gp->heaveWhileReceiving);
 }
 
 XdrSurf xdr_SurfAmplitudes(XDR *xdrs, SurfAmplitudes *gp)
 {
-  return(     xdr_u_short(xdrs, &gp->beamAmplitude)                 );
+  return xdr_u_short(xdrs, &gp->beamAmplitude);
 }
 
 XdrSurf xdr_SurfExtendedAmplitudes(XDR *xdrs, SurfExtendedAmplitudes *gp)
 {
-  return(     xdr_float(xdrs, &gp->mtau)                            &&
-              xdr_u_short(xdrs, &gp->nis)                           &&
-              xdr_u_short(xdrs, &gp->beamAmplitude)                 );
+  return
+      xdr_float(xdrs, &gp->mtau)                            &&
+      xdr_u_short(xdrs, &gp->nis)                           &&
+      xdr_u_short(xdrs, &gp->beamAmplitude);
 }
 
 XdrSurf xdr_SurfFreeBeamAttachedData(XDR *xdrs, SurfFreeBeamAttachedData *gp)
 {
-  return(xdr_float(xdrs, gp));
+  return xdr_float(xdrs, gp);
 }
 
 XdrSurf xdr_SurfSignalParameter(XDR *xdrs, SurfSignalParameter *gp, short nrSets)
@@ -1125,7 +1122,7 @@ XdrSurf xdr_SurfSignalParameter(XDR *xdrs, SurfSignalParameter *gp, short nrSets
           xdr_float(xdrs, &gp->rxSets[ii].time)  &&
           xdr_float(xdrs, &gp->rxSets[ii].gain)    );
   }
-  return(ret);
+  return ret;
 }
 
 XdrSurf xdr_SurfTxParameter(XDR *xdrs, SurfTxParameter *gp, short nrSets)
@@ -1142,7 +1139,7 @@ XdrSurf xdr_SurfTxParameter(XDR *xdrs, SurfTxParameter *gp, short nrSets)
           xdr_float(xdrs, &gp->txSets[ii].txBeamAngle)    &&
           xdr_float(xdrs, &gp->txSets[ii].pulseLength)    );
   }
-  return(ret);
+  return ret;
 }
 
 XdrSurf xdr_SurfSignalAmplitudes(XDR *xdrs, SurfSignalAmplitudes *gp,
@@ -1166,7 +1163,7 @@ XdrSurf xdr_SurfSignalAmplitudes(XDR *xdrs, SurfSignalAmplitudes *gp,
      ret = SURF_FAILURE;
    }
   }
-  return(ret);
+  return ret;
 }
 
 XdrSurf xdr_SurfSidescanData(XDR *xdrs, SurfSidescanData *gp,
@@ -1194,17 +1191,18 @@ XdrSurf xdr_SurfSidescanData(XDR *xdrs, SurfSidescanData *gp,
      ret = SURF_FAILURE;
    }
   }
-  return(ret);
+  return ret;
 }
 
 XdrSurf xdr_SurfTpeValues(XDR *xdrs, SurfTpeValues *gp)
 {
-  return(     xdr_float(xdrs, &gp->depthTpe)                            &&
-              xdr_float(xdrs, &gp->posTpe)                              &&
-              xdr_float(xdrs, &gp->minDetectionVolumeTpe)               );
+  return
+      xdr_float(xdrs, &gp->depthTpe)                            &&
+      xdr_float(xdrs, &gp->posTpe)                              &&
+      xdr_float(xdrs, &gp->minDetectionVolumeTpe);
 }
 
 XdrSurf xdr_SurfPositionCepData(XDR *xdrs, SurfPositionCepData *gp)
 {
-  return(     xdr_float(xdrs, gp)                                       );
+  return xdr_float(xdrs, gp);
 }
