@@ -166,6 +166,12 @@ init_vars(){
     # TRN_FILT_BANK       3
 	#OPT_TRN_FTYPE="--trn-ftype=2"
 
+    # set TRN valid covariance limits
+    #OPT_TRN_NCOV="--trn-ncov=30.0"
+    #OPT_TRN_NERR="--trn-nerr=50.0"
+    #OPT_TRN_ECOV="--trn-ecov=30.0"
+    #OPT_TRN_EERR="--trn-eerr=50.0"
+
 	# ignore multibeam gain threshold
 	#OPT_TRN_NOMBGAIN="--trn-nombgain"
 
@@ -545,6 +551,30 @@ do
     vout "ovr OPT_TRN_FTYPE: $OPT_TRN_FTYPE"
     fi
 
+    if [ ${a:2:8} == "trn-ncov" ]
+    then
+    OPT_TRN_NCOV=$a
+    vout "ovr OPT_TRN_NCOV: $OPT_TRN_NCOV"
+    fi
+
+    if [ ${a:2:8} == "trn-nerr" ]
+    then
+    OPT_TRN_NERR=$a
+    vout "ovr OPT_TRN_NERR: $OPT_TRN_NERR"
+    fi
+
+    if [ ${a:2:8} == "trn-ecov" ]
+    then
+    OPT_TRN_ECOV=$a
+    vout "ovr OPT_TRN_ECOV: $OPT_TRN_ECOV"
+    fi
+
+    if [ ${a:2:8} == "trn-eerr" ]
+    then
+    OPT_TRN_EERR=$a
+    vout "ovr OPT_TRN_EERR: $OPT_TRN_EERR"
+    fi
+
     if [ ${a:2:8} == "trn-decn" ]
     then
     OPT_TRN_DECN=$a
@@ -572,7 +602,7 @@ done
 
 
 # set cmdline options
-APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATSEC $OPT_STATFLAGS $OPT_MBHBN $OPT_MBHBT $OPT_TRNHBT $OPT_TRNUHBT $OPT_DELAY $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_LOG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_TRN_NOMBGAIN $OPT_TRN_SEL  $OPT_HELP"
+APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATSEC $OPT_STATFLAGS $OPT_MBHBN $OPT_MBHBT $OPT_TRNHBT $OPT_TRNUHBT $OPT_DELAY $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_LOG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_NCOV $OPT_TRN_NERR $OPT_TRN_ECOV $OPT_TRN_EERR $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_TRN_NOMBGAIN $OPT_TRN_SEL $OPT_HELP"
 
 # check required TRN options
 if [ ! -z "${OPT_TRN_EN}" ]
