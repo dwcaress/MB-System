@@ -46,9 +46,7 @@ FILE* xdrSurfOpenRead(XDR *xdrs, const char* filename) {
 /* handle XDR-formatted files for WRITE */
 FILE* xdrSurfOpenWrite(XDR *xdrs,const char* filename)
 {
-  FILE* fp;
-
-  fp = fopen(filename,"wb+");
+  FILE* fp = fopen(filename,"wb+");
   if(fp != NULL)
   {
     xdrstdio_create(xdrs,fp,XDR_ENCODE);
@@ -62,20 +60,17 @@ FILE* xdrSurfOpenWrite(XDR *xdrs,const char* filename)
 
 short getSurfVersion(char* version)
 {
- if(strlen(version) != 9) return 0;
- if(strncmp(version, "SURF ", 5) != 0) return 0;
- return ((short)(version[6]))*256 + ((short)(version[8]));
+  if(strlen(version) != 9) return 0;
+  if(strncmp(version, "SURF ", 5) != 0) return 0;
+  return ((short)(version[6]))*256 + (short)(version[8]);
 }
 
 XdrSurf xdr_SurfCheckVersion(XDR *xdrs, SurfDescriptor *gp, char* label,
                                   short* newVersion, short* oldVersion)
 {
-  u_int sizeL;
-  char* toLabel;
-
   /* Get the label and check the consistency of the stream */
-  toLabel = (char *)gp->label;
-  sizeL=LABEL_SIZE;
+  char* toLabel = (char *)gp->label;
+  u_int sizeL = LABEL_SIZE;
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
    return SURF_FAILURE;
@@ -130,14 +125,13 @@ XdrSurf xdr_SurfNrofDescriptor(XDR *xdrs, SurfNrofDescriptor *gp)
 XdrSurf xdr_SurfDescriptor(XDR *xdrs, SurfDescriptor *gp,
                                   short* newVersion, short* oldVersion)
 {
-  XdrSurf status;
-  short newVers, oldVers, vers20, vers30;
-
   /* Get the first Label and check the Version of the stream */
-  vers20 = getSurfVersion(SURF_VERS2_0);
-  vers30 = getSurfVersion(SURF_VERS3_0);
+  const short vers20 = getSurfVersion(SURF_VERS2_0);
+  const vers30 = getSurfVersion(SURF_VERS3_0);
 
-  status = xdr_SurfCheckVersion(xdrs, gp, SURF_VERSION, &newVers, &oldVers);
+  short newVers;
+  short oldVers;
+  XdrSurf status = xdr_SurfCheckVersion(xdrs, gp, SURF_VERSION, &newVers, &oldVers);
   if (status != SURF_SUCCESS) return status;
 
   *newVersion = newVers;
@@ -255,19 +249,16 @@ XdrSurf xdr_SurfDescriptor(XDR *xdrs, SurfDescriptor *gp,
 
 XdrSurf xdr_SurfGlobalData(XDR *xdrs, SurfGlobalData *gp)
 {
-  char buffer[LABEL_SIZE];
-  u_int sizeL;
-  char* toLabel;
-
   /* Get the Label and check the consistency of the stream */
 
-  sizeL=LABEL_SIZE;
-  toLabel = (char *)gp->label;
+  u_int sizeL = LABEL_SIZE;
+  char *toLabel = (char *)gp->label;
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
    return SURF_FAILURE;
   }
+  char buffer[LABEL_SIZE];
   if(strncpy(buffer, SURF_GLOBAL_DATA_LABEL, sizeL) == NULL)
   {
    return SURF_FAILURE;
@@ -333,19 +324,16 @@ XdrSurf xdr_SurfGlobalData(XDR *xdrs, SurfGlobalData *gp)
 
 XdrSurf xdr_SurfStatistics(XDR *xdrs, SurfStatistics *gp)
 {
-  char buffer[LABEL_SIZE];
-  u_int sizeL;
-  char* toLabel;
-
   /* Get the Label and check the consistency of the stream */
 
-  sizeL=LABEL_SIZE;
-  toLabel = (char *)gp->label;
+  u_int sizeL = LABEL_SIZE;
+  char* toLabel = (char *)gp->label;
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
    return SURF_FAILURE;
   }
+  char buffer[LABEL_SIZE];
   if(strncpy(buffer, SURF_STATISTICS_LABEL, sizeL) == NULL)
   {
    return SURF_FAILURE;
@@ -428,28 +416,20 @@ XdrSurf xdr_SurfPositionAnySensor(XDR *xdrs, SurfPositionAnySensor* gp)
 
 XdrSurf xdr_SurfUnknownPositionSensor(XDR *xdrs, char *gp)
 {
-  u_int sizeU;
-
-  sizeU=UNION_SIZE;
+  const u_int sizeU = UNION_SIZE;
   return xdr_bytes(xdrs, &gp, &sizeU, sizeU);
 }
 
 XdrSurf xdr_PositionSensorArray(XDR *xdrs, SurfPositionSensorArray *gp, short oldVers)
 {
-  SurfPositionAnySensor* toAny;
-  XdrSurf ret;
-  char buffer[LABEL_SIZE];
-  u_int sizeL, sizeS;
-  char* toLabel;
-  short vers30;
-
-  vers30 = getSurfVersion(SURF_VERS3_0);
+  short vers30 = getSurfVersion(SURF_VERS3_0);
 
   /* Get the Label and check the consistency of the stream */
 
-  sizeL=LABEL_SIZE;
-  sizeS=STRING_SIZE;
-  toLabel = (char *)gp->label;
+  u_int sizeL = LABEL_SIZE;
+  u_int sizeS = STRING_SIZE;
+  char* toLabel = (char *)gp->label;
+  char buffer[LABEL_SIZE];
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
@@ -477,6 +457,9 @@ XdrSurf xdr_PositionSensorArray(XDR *xdrs, SurfPositionSensorArray *gp, short ol
   {
    return SURF_FAILURE;
   }
+
+  SurfPositionAnySensor* toAny;
+  XdrSurf ret;
   if(strncmp(gp->positionSensorName, (const char*)buffer, sizeS) == 0)
   {
    return xdr_SurfPositionPolarfix(xdrs, (SurfPositionPolarfix*)gp->sensorUnion);
@@ -504,21 +487,17 @@ XdrSurf xdr_SurfMultiBeamAngleTable(XDR *xdrs,
                                     SurfMultiBeamAngleTable *gp,
                                     u_short maxBeamNr)
 {
-  XdrSurf ret;
-  char buffer[LABEL_SIZE];
-  u_int sizeL;
-  u_short n;
-  char* toLabel;
 
   /* Get the Label and check the consistency of the stream */
 
-  sizeL=LABEL_SIZE;
-  toLabel = (char *)gp->label;
+  u_int sizeL = LABEL_SIZE;
+  char* toLabel = (char *)gp->label;
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
    return SURF_FAILURE;
   }
+  char buffer[LABEL_SIZE];
   if(strncpy(buffer, SURF_MULTIBEAM_ANGLE_LABEL, sizeL) == NULL)
   {
    return SURF_FAILURE;
@@ -533,8 +512,8 @@ XdrSurf xdr_SurfMultiBeamAngleTable(XDR *xdrs,
    return SURF_NR_OF_TABLE_ELEMENTS_ZERO;
   }
 
-  ret = xdr_u_short(xdrs, &gp->actualNumberOfBeams);
-  for(n = 0;n < maxBeamNr;n++)
+  XdrSurf ret = xdr_u_short(xdrs, &gp->actualNumberOfBeams);
+  for(u_short n = 0;n < maxBeamNr;n++)
   {
    if(xdr_float(xdrs, &gp->beamAngle[n]) != SURF_SUCCESS)
    {
@@ -548,18 +527,16 @@ XdrSurf xdr_SurfMultiBeamAngleTable(XDR *xdrs,
 XdrSurf xdr_SurfTransducerParameterTable(XDR *xdrs,
                                          SurfTransducerParameterTable *gp)
 {
-  char buffer[LABEL_SIZE];
-  u_int sizeL;
-  char* toLabel;
 
   /* Get the Label and check the consistency of the stream */
-  sizeL=LABEL_SIZE;
-  toLabel = (char *)gp->label;
+  u_int sizeL = LABEL_SIZE;
+  char* toLabel = (char *)gp->label;
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
    return SURF_FAILURE;
   }
+  char buffer[LABEL_SIZE];
   if(strncpy(buffer, SURF_TRANSDUCER_TABLE_LABEL, sizeL) == NULL)
   {
    return SURF_FAILURE;
@@ -582,22 +559,17 @@ XdrSurf xdr_SurfCProfileTable(XDR *xdrs,
                               SurfCProfileTable *gp,
                               u_short maxNrOfElementsPerTable)
 {
-  XdrSurf ret;
-  char buffer[LABEL_SIZE];
-  u_int sizeL;
-  u_short n;
-  char* toLabel;
-
   /* Get the Label and check the consistency of the stream */
 
-  ret = SURF_SUCCESS;
-  sizeL=LABEL_SIZE;
-  toLabel = (char *)gp->label;
+  XdrSurf ret = SURF_SUCCESS;
+  u_int sizeL = LABEL_SIZE;
+  char* toLabel = (char *)gp->label;
 
   if (xdr_bytes(xdrs, &toLabel, &sizeL, sizeL) != SURF_SUCCESS)
   {
    return SURF_FAILURE;
   }
+  char buffer[LABEL_SIZE];
   if(strncpy(buffer, SURF_C_PROFILE_LABEL, sizeL) == NULL)
   {
    return SURF_FAILURE;
@@ -615,7 +587,7 @@ XdrSurf xdr_SurfCProfileTable(XDR *xdrs,
   if((xdr_float(xdrs, &gp->relTime)                != SURF_SUCCESS) ||
      (xdr_u_short(xdrs, &gp->numberOfActualValues) != SURF_SUCCESS))
     return SURF_FAILURE;
-  for(n = 0;n < maxNrOfElementsPerTable;n++)
+  for(u_short n = 0;n < maxNrOfElementsPerTable;n++)
   {
    if((xdr_float(xdrs, &gp->values[n].depth)  != SURF_SUCCESS)  ||
       (xdr_float(xdrs, &gp->values[n].cValue) != SURF_SUCCESS)  )
