@@ -1,42 +1,8 @@
-/*-----------------------------------------------------------------------
-/ H E A D E R K O P F
-/ ------------------------------------------------------------------------
-/ ------------------------------------------------------------------------
-/  DATEINAME        : hydEdit_math.h
-/  ERSTELLUNGSDATUM : 20.09.93
-/ ----------------------------------------------------------------------*/
-/*!
-/ ------------------------------------------------------------------------
-/ COPYRIGHT (C) 1993: ATLAS ELEKTRONIK GMBH, 28305 BREMEN
-/ ------------------------------------------------------------------------
-/
-/  See README file for copying and redistribution conditions.
-/
-/
-/ HIER/SACHN: P: RP ____ _ ___ __
-/ BENENNUNG :
-/ ERSTELLER : Peter Block    : SAS3
-/ FREIGABE  : __.__.__  GS__
-/ AEND/STAND: __.__.__  __
-/ PRUEFVERM.:
-*/
-
-/*
-/ SPRACHE          : UNIX-C
-/ COMPILER         : Silicon Graphix
-/ BETRIEBSSYSTEM   : IRIX
-/ HARDWARE-UMGEBUNG: SGI Crimson
-/ URSPRUNGSHINWEIS :
-/
-/ ------------------------------------------------------------------------
-/ BESCHREIBUNG: Header fuer Vertikaltiefenparametereditor
-/ ------------------------------------------------------------------------
-/
-/ ------------------------------------------------------------------------
-/ E N D E   D E S   K O P F E S
-/ ------------------------------------------------------------------------
-*/
-/************************************************************************/
+// DATEINAME        : hydEdit_math.h
+// ERSTELLUNGSDATUM : 20.09.93
+// COPYRIGHT (C) 1993: ATLAS ELEKTRONIK GMBH, 28305 BREMEN
+//
+// See README file for copying and redistribution conditions.
 
 #ifndef PI
 #define PI 3.14159265359
@@ -73,8 +39,6 @@ typedef struct {
                  double    y;
                } XY_Coords;
 
-
-
 typedef struct {
                  double    angle;
                  double    cmean;
@@ -90,7 +54,6 @@ typedef struct {
                  double    posStar;
                  double    posAhead;
                } FanParam;
-
 
 /* Plattkarten-Projektion */
 
@@ -129,14 +92,7 @@ double temperatureToCMean(double salinity,double temperature);
 SurfTime surfTimeOfDayFromAbsTime (SurfTime absTime);
 void timeFromRelTime (SurfTime relTime,char*buffer);
 Boolean relTimeFromTime (char*buffer,SurfTime* relTime);
-
-
 #endif
-
-
-
-
-
 
 #ifndef _PB_MATH
 
@@ -169,14 +125,3 @@ extern Boolean relTimeFromTime (char*buffer,SurfTime* relTime);
 #endif
 
 #endif
-
-
-/*********************************************************************
-*         H I S T O R I E
-**********************************************************************
-*  Edition  History
-*   date    comments                                            by
-* --------  ------------------------------------------------ ---------
-* 20-09-93  created                                            Block
-*********************************************************************/
-
