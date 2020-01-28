@@ -135,7 +135,8 @@ init_vars(){
     # RESON3  134.89.32.110
     # TRNSVR_PORT  28000
     # TRNUSVR_PORT 8000
-    OPT_TRNOUT="--trn-out=trnsvr:${TRN_OUTHOST}:28000,trnu"
+	OPT_TRNOUT="--trn-out=trnsvr:${TRN_OUTHOST}:28000,trnu"
+	OPT_TRNOUT="--trn-out=trnsvr:${TRN_OUTHOST}:28000,trnu,trnusvr:${TRN_OUTHOST}:8000"
 
     # enable/disable TRN processing
     # (requires map,par,log,cfg)
@@ -188,7 +189,7 @@ init_vars(){
     # drop TRN clients after OPT_MBHBT seconds
 	#OPT_TRNHBT="--trnhbt=15"
     # drop TRNU clients after OPT_MBHBT seconds
-    #OPT_TRNUHBT="--trnuhbt=0"
+    OPT_TRNUHBT="--trnuhbt=30"
 
     # delay between TRN messages (msec)
     #OPT_DELAY="--delay=0"
