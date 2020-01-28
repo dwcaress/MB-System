@@ -42,19 +42,19 @@ void SAPI_printAPIandSURFversion(void) {
 static void freeControlData(void) {
   SdaInfo* sapiToSdaInfo = NULL;
 
-  if(sapiToSurfData != NULL) {
+  if (sapiToSurfData != NULL) {
     sapiToSdaInfo = sapiToSurfData->toSdaInfo;
-    if(sapiToSurfData->xdrs != NULL) {
+    if (sapiToSurfData->xdrs != NULL) {
       free((char*)sapiToSurfData->xdrs);
       sapiToSurfData->xdrs=NULL;
     }
-    if(sapiToSurfData->fp != NULL) fclose(sapiToSurfData->fp);
+    if (sapiToSurfData->fp != NULL) fclose(sapiToSurfData->fp);
     free((char*)sapiToSurfData);
     sapiToSurfData=NULL;
   }
-  if(sapiToSdaInfo != NULL && loadIntoMemory != True )
+  if (sapiToSdaInfo != NULL && loadIntoMemory != True )
     free((char*)sapiToSdaInfo);
-  if(sapiToSdaBlock != NULL) free((char*)sapiToSdaBlock);
+  if (sapiToSdaBlock != NULL) free((char*)sapiToSdaBlock);
   sapiToSurfData = NULL;
   sapiToSdaInfo = NULL;
   sapiToSdaBlock = NULL;
@@ -77,8 +77,8 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
   XdrSurf ret;
   size_t  sizeOfSdaBlock;
 
-  if(access(surfDir, 0) != 0) {
-    if(errorprint != 0)
+  if (access(surfDir, 0) != 0) {
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't access path: '%s' !\n", surfDir);
     return -1l;
   }
@@ -87,7 +87,7 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
 
   sapiToSurfData = (SurfDataInfo*)calloc(1, sizeof(SurfDataInfo));
   if (sapiToSurfData == NULL) {
-    if(errorprint != 0)
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't allocate sufficient memory' !\n");
     return -1l;
   }
@@ -102,36 +102,36 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
   strcat(filesda, surfFile);
   strcat(filesda, ".sda");
 
-  if(access(filesix, 4) !=0) {
+  if (access(filesix, 4) !=0) {
     freeControlData();
-    if(errorprint != 0)
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't access file: '%s' !\n", filesix);
     return -1;
   }
-  if(access(filesda, 4) !=0) {
+  if (access(filesda, 4) !=0) {
     freeControlData();
-    if(errorprint != 0)
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't access file: '%s' !\n", filesda);
     return -1;
   }
 
   ret = mem_ReadSixStructure(filesix, sapiToSurfData);
-  if(ret != SURF_SUCCESS) {
+  if (ret != SURF_SUCCESS) {
     mem_destroyAWholeSurfStructure(sapiToSurfData);
     freeControlData();
-    if(errorprint != 0)
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't read file: '%s' !\n", filesix);
     return -1l;
   }
 
   // Special mode for rewrite read the whole surfFile into memory
 
-  if(loadIntoMemory==True) {
+  if (loadIntoMemory==True) {
     ret = mem_ReadSdaStructure(filesda, sapiToSurfData);
-    if(ret != SURF_SUCCESS) {
+    if (ret != SURF_SUCCESS) {
       mem_destroyAWholeSurfStructure(sapiToSurfData);
       freeControlData();
-      if(errorprint != 0)
+      if (errorprint != 0)
         fprintf(stderr, "SAPI-Error: Can't read file: '%s' !\n", filesda);
       return -1l;
     }
@@ -142,9 +142,9 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
   // Allocate the necessary memory for a SDA-structure and read
   // the first SDA-Block from file
 
-  if(sapiToSurfData->nrOfSoundings <=0) {
+  if (sapiToSurfData->nrOfSoundings <=0) {
     freeControlData();
-    if(errorprint != 0)
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: nr of soundings = %d!\n", (int)(sapiToSurfData->nrOfSoundings));
     return -1l;
   }
@@ -156,9 +156,9 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
 
   sapiToSurfData->xdrs = (XDR*)calloc(1, sizeof(XDR));  /* ????? */
 
-  if((sapiToSurfData->xdrs == NULL) || (sapiToSdaInfo == NULL)) {
+  if ((sapiToSurfData->xdrs == NULL) || (sapiToSdaInfo == NULL)) {
     freeControlData();
-    if(errorprint != 0)
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't allocate sufficient memory' !\n");
     return -1l;
   }
@@ -166,9 +166,9 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
   sizeOfSdaBlock = initializeSdaInfo(sapiToSurfData, sapiToSdaInfo);
   sapiToSdaBlock = (SurfSoundingData*)calloc(1, sizeOfSdaBlock);
 
-  if((sapiToSurfData->xdrs == NULL) || (sapiToSdaInfo == NULL)) {
+  if ((sapiToSurfData->xdrs == NULL) || (sapiToSdaInfo == NULL)) {
     freeControlData();
-    if(errorprint != 0)
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't allocate sufficient memory' !\n");
     return -1l;
   }
@@ -178,17 +178,17 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
   // Open file Read and read first Block
 
   sapiToSurfData->fp = xdrSurfOpenRead(sapiToSurfData->xdrs, (const char*)filesda);
-  if(sapiToSurfData->fp == NULL) {
+  if (sapiToSurfData->fp == NULL) {
     freeControlData();
-    if(errorprint != 0)
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't open file: '%s' !\n", filesda);
     return -1l;
   }
 
   ret = mem_convertOneSdaBlock2(sapiToSurfData->xdrs, sapiToSdaInfo, sapiToSurfData->sourceVersionLess2);
-  if(ret != SURF_SUCCESS) {
+  if (ret != SURF_SUCCESS) {
     freeControlData();
-    if(errorprint != 0)
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't read file: '%s' !\n", filesda);
     return -1l;
   }
@@ -200,18 +200,18 @@ long SAPI_nextSounding(long errorprint) {
   XdrSurf ret;
   SdaInfo* sapiToSdaInfo = NULL;
 
-  if(sapiToSurfData != NULL) sapiToSdaInfo = sapiToSurfData->toSdaInfo;
-  if((sapiToSurfData == NULL) || (sapiToSdaInfo == NULL)) {
-    if(errorprint != 0)
+  if (sapiToSurfData != NULL) sapiToSdaInfo = sapiToSurfData->toSdaInfo;
+  if ((sapiToSurfData == NULL) || (sapiToSdaInfo == NULL)) {
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: No SURF-data open !\n");
     return -1l;
   }
 
   // Special mode for rewrite read the whole surfFile into memory
 
-  if(loadIntoMemory==True) {
-    if(surf_moveInSdaThread(sapiToSurfData, FORE_ONE_STEP, 0) == END_OF_THREAD) {
-      if(errorprint != 0)
+  if (loadIntoMemory==True) {
+    if (surf_moveInSdaThread(sapiToSurfData, FORE_ONE_STEP, 0) == END_OF_THREAD) {
+      if (errorprint != 0)
         fprintf(stderr, "SAPI-Error: End of file !\n");
       return -1l;
     }
@@ -219,8 +219,8 @@ long SAPI_nextSounding(long errorprint) {
   }
 
   ret = mem_convertOneSdaBlock2(sapiToSurfData->xdrs, sapiToSdaInfo, sapiToSurfData->sourceVersionLess2);
-  if(ret != SURF_SUCCESS) {
-    if(errorprint != 0)
+  if (ret != SURF_SUCCESS) {
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't read file or EOF !\n");
     return -1l;
   }
@@ -230,18 +230,18 @@ long SAPI_nextSounding(long errorprint) {
 long SAPI_rewind(long errorprint) {
   SdaInfo* sapiToSdaInfo = NULL;
 
-  if(sapiToSurfData != NULL) sapiToSdaInfo = sapiToSurfData->toSdaInfo;
+  if (sapiToSurfData != NULL) sapiToSdaInfo = sapiToSurfData->toSdaInfo;
 
   // Special mode for rewrite read the whole surfFile into memory
-  if(loadIntoMemory==True) {
-    if((sapiToSurfData == NULL) || (sapiToSdaInfo == NULL)) {
+  if (loadIntoMemory==True) {
+    if ((sapiToSurfData == NULL) || (sapiToSdaInfo == NULL)) {
       return -1l;
     }
     surf_moveInSdaThread(sapiToSurfData, TO_START, 0);
     return 0l;
   }
 
-  if((sapiToSurfData == NULL) || (sapiToSurfData->xdrs == NULL)
+  if ((sapiToSurfData == NULL) || (sapiToSurfData->xdrs == NULL)
      || (sapiToSdaInfo == NULL) || (sapiToSurfData->fp == NULL)) {
     return -1l;
   }
@@ -251,8 +251,8 @@ long SAPI_rewind(long errorprint) {
 }
 
 void SAPI_close(void) {
-  if(sapiToSurfData != NULL) {
-    if(sapiToSurfData->fp != NULL) fclose(sapiToSurfData->fp);
+  if (sapiToSurfData != NULL) {
+    if (sapiToSurfData->fp != NULL) fclose(sapiToSurfData->fp);
     sapiToSurfData->fp = NULL;
     mem_destroyAWholeSurfStructure(sapiToSurfData);
     sapiToSurfData = NULL;
@@ -290,23 +290,23 @@ void recalculateData(void) {
 
   memset(&fanParam,  0,  sizeof(FanParam));
 
-  if(sapiToSurfData!=NULL) {
+  if (sapiToSurfData!=NULL) {
     toGlobalData = sapiToSurfData->toGlobalData;
     toStatistics = sapiToSurfData->toStatistics;
 
     nrBeams = (short) sapiToSurfData->nrBeams;
     nrSoundings = sapiToSurfData->nrOfSoundings;
 
-    if(toGlobalData->presentationOfPosition=='X')
+    if (toGlobalData->presentationOfPosition=='X')
       posIsMeter=True;
 
     isPitchcompensated = True;
-    if(strncmp(toGlobalData->nameOfSounder, "MD", 2) == 0)
+    if (strncmp(toGlobalData->nameOfSounder, "MD", 2) == 0)
       isPitchcompensated = False;
-    if(strncmp(toGlobalData->nameOfSounder, "FS", 2) == 0)
+    if (strncmp(toGlobalData->nameOfSounder, "FS", 2) == 0)
       isPitchcompensated = False;
 
-    if(toGlobalData->typeOfSounder != 'F') {
+    if (toGlobalData->typeOfSounder != 'F') {
       minBeamPositionStar  = 0.0;
       maxBeamPositionStar  = 0.0;
       minBeamPositionAhead = 0.0;
@@ -338,7 +338,7 @@ void recalculateData(void) {
       surf_moveInSdaThread(sapiToSurfData, ABS_POSITION, ii);
       soundingFlag = sapiToSurfData->toSdaInfo->toSoundings->soundingFlag;
 
-      if((soundingFlag & (SF_DELETED | SF_ALL_BEAMS_DELETED)) == 0) {
+      if ((soundingFlag & (SF_DELETED | SF_ALL_BEAMS_DELETED)) == 0) {
         firstSounding ++;
         relTime = (double) sapiToSurfData->toSdaInfo->toSoundings->relTime;
         posX = (double)
@@ -347,18 +347,18 @@ void recalculateData(void) {
                (sapiToSurfData->toSdaInfo->toActCenterPosition->centerPositionY) + refY;
         speed = (double)
                 (sapiToSurfData->toSdaInfo->toActCenterPosition->speed);
-        if(firstSounding == 0) {
+        if (firstSounding == 0) {
           lastX = posX;
           lastY = posY;
         }
-        if(posX > maxX) maxX = posX;
-        if(posX < minX) minX = posX;
-        if(posY > maxY) maxY = posY;
-        if(posY < minY) minY = posY;
-        if(speed > maxSpeed) maxSpeed = speed;
-        if(speed < minSpeed) minSpeed = speed;
+        if (posX > maxX) maxX = posX;
+        if (posX < minX) minX = posX;
+        if (posY > maxY) maxY = posY;
+        if (posY < minY) minY = posY;
+        if (speed > maxSpeed) maxSpeed = speed;
+        if (speed < minSpeed) minSpeed = speed;
 
-        if(posIsMeter==True) {
+        if (posIsMeter==True) {
           deltaX = posX - lastX;
           deltaY = posY - lastY;
         } else {
@@ -369,7 +369,7 @@ void recalculateData(void) {
         }
         relWay = relWay + sqrt((deltaX*deltaX) + (deltaY*deltaY));
         sapiToSurfData->toSdaInfo->toSoundings->relWay = (float)relWay;
-        if(firstSounding == 0) {
+        if (firstSounding == 0) {
           toGlobalData->modifiedTrackStartX = (float)(posX - refX);
           toGlobalData->modifiedTrackStartY = (float)(posY - refY);
         }
@@ -390,14 +390,14 @@ void recalculateData(void) {
         fanParam.cmean   = (double)
                            sapiToSurfData->toSdaInfo->toSoundings->cMean;
 
-        if(roll > maxRoll) maxRoll = roll;
-        if(roll < minRoll) minRoll = roll;
-        if(fanParam.pitchTx > maxPitch) maxPitch = fanParam.pitchTx;
-        if(fanParam.pitchTx < minPitch) minPitch = fanParam.pitchTx;
-        if(fanParam.heaveTx > maxHeave) maxHeave = fanParam.heaveTx;
-        if(fanParam.heaveTx < minHeave) minHeave = fanParam.heaveTx;
+        if (roll > maxRoll) maxRoll = roll;
+        if (roll < minRoll) minRoll = roll;
+        if (fanParam.pitchTx > maxPitch) maxPitch = fanParam.pitchTx;
+        if (fanParam.pitchTx < minPitch) minPitch = fanParam.pitchTx;
+        if (fanParam.heaveTx > maxHeave) maxHeave = fanParam.heaveTx;
+        if (fanParam.heaveTx < minHeave) minHeave = fanParam.heaveTx;
 
-        if(toGlobalData->typeOfSounder == 'F') {
+        if (toGlobalData->typeOfSounder == 'F') {
           indexToAngle =
               (short)sapiToSurfData->toSdaInfo->toSoundings->indexToAngle;
           toAngles = getSurfAngleTable(sapiToSurfData->toAngleTables,
@@ -406,12 +406,12 @@ void recalculateData(void) {
           allBeamsDeleted=True;
           for(beam = 0; beam < nrBeams; beam++) {
             depthFlag = sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depthFlag;
-            if((depthFlag & SB_DELETED) == 0) {
+            if ((depthFlag & SB_DELETED) == 0) {
               allBeamsDeleted=False;
               fanParam.angle = toAngles->beamAngle[beam];
               indexToTransducer =
                   (short)sapiToSurfData->toSdaInfo->toSoundings->indexToTransducer;
-              if((sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depthFlag & SB_TRANSDUCER_PLUS1) != 0)
+              if ((sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depthFlag & SB_TRANSDUCER_PLUS1) != 0)
                 indexToTransducer++;
               fanParam.draught = (double)
                                  sapiToSurfData->toTransducers[indexToTransducer].transducerDepth;
@@ -419,7 +419,7 @@ void recalculateData(void) {
                                                sapiToSurfData->toTransducers[indexToTransducer].transducerPositionAhead;
               fanParam.transducerOffsetStar  = (double)
                                                sapiToSurfData->toTransducers[indexToTransducer].transducerPositionStar;
-              if(sapiToSurfData->toSdaInfo->toMultiBeamRec != NULL)
+              if (sapiToSurfData->toSdaInfo->toMultiBeamRec != NULL)
                 fanParam.heaveRx = (double)
                                    sapiToSurfData->toSdaInfo->toMultiBeamRec[beam].heaveWhileReceiving;
               else
@@ -427,24 +427,24 @@ void recalculateData(void) {
               fanParam.travelTime = (double)
                                     sapiToSurfData->toSdaInfo->toMultiBeamTT[beam].travelTimeOfRay;
 
-              if(depthFromTT(&fanParam, isPitchcompensated) == True) {
+              if (depthFromTT(&fanParam, isPitchcompensated) == True) {
                 depth=fanParam.depth - tide;
                 sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depth = (float)depth;
                 sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].beamPositionAhead =
                     (float)fanParam.posAhead;
                 sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].beamPositionStar  =
                     (float)fanParam.posStar;
-                if(depth < minDepth)
+                if (depth < minDepth)
                   minDepth = depth;
-                if(depth > maxDepth)
+                if (depth > maxDepth)
                   maxDepth = depth;
-                if(fanParam.posStar < minBeamPositionStar)
+                if (fanParam.posStar < minBeamPositionStar)
                   minBeamPositionStar = fanParam.posStar;
-                if(fanParam.posStar > maxBeamPositionStar)
+                if (fanParam.posStar > maxBeamPositionStar)
                   maxBeamPositionStar = fanParam.posStar;
-                if(fanParam.posAhead < minBeamPositionAhead)
+                if (fanParam.posAhead < minBeamPositionAhead)
                   minBeamPositionAhead = fanParam.posAhead;
-                if(fanParam.posAhead > maxBeamPositionAhead)
+                if (fanParam.posAhead > maxBeamPositionAhead)
                   maxBeamPositionAhead = fanParam.posAhead;
                 depthStatisticsFound=True;
               } else {
@@ -453,45 +453,45 @@ void recalculateData(void) {
               }
             }
           } /*for(beam = 0;beam < nrBeams;beam++)*/
-          if(allBeamsDeleted==True) {
+          if (allBeamsDeleted==True) {
             sapiToSurfData->toSdaInfo->toSoundings->soundingFlag =
                 soundingFlag | SF_DELETED | SF_ALL_BEAMS_DELETED;
           }
-          // if(toGlobalData->typeOfSounder == 'F')
+          // if (toGlobalData->typeOfSounder == 'F')
         } else {
           cmean = (double)sapiToSurfData->toSdaInfo->toSoundings->cMean;
           sapiToSurfData->toSdaInfo->toSoundings->cKeel = (float)cmean;
-          if((sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthFlag & SB_DELETED) == 0) {
+          if ((sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthFlag & SB_DELETED) == 0) {
             depth = (double)sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthLFreq;
-            if(depth != 0.0) {
-              if(depth < minDepth)
+            if (depth != 0.0) {
+              if (depth < minDepth)
                 minDepth = depth;
-              if(depth > maxDepth)
+              if (depth > maxDepth)
                 maxDepth = depth;
               depthStatisticsFound=True;
             }
             depth = (double)sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthMFreq;
-            if(depth != 0.0) {
-              if(depth < minDepth)
+            if (depth != 0.0) {
+              if (depth < minDepth)
                 minDepth = depth;
-              if(depth > maxDepth)
+              if (depth > maxDepth)
                 maxDepth = depth;
               depthStatisticsFound=True;
             }
             depth = (double)sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthHFreq;
-            if(depth != 0.0) {
-              if(depth < minDepth)
+            if (depth != 0.0) {
+              if (depth < minDepth)
                 minDepth = depth;
-              if(depth > maxDepth)
+              if (depth > maxDepth)
                 maxDepth = depth;
               depthStatisticsFound=True;
             }
           }
         }
-      }  // if((soundingFlag & SF_DELETED) == 0)
+      }  // if ((soundingFlag & SF_DELETED) == 0)
     }  // for(ii=0;ii<nrSoundings;ii++)
 
-    if(depthStatisticsFound==False) {
+    if (depthStatisticsFound==False) {
       minDepth = maxDepth = 0.0;
       minBeamPositionStar = maxBeamPositionStar = 0.0;
       minBeamPositionAhead = maxBeamPositionAhead = 0.0;
@@ -536,32 +536,32 @@ long SAPI_writeBackFromMemory(char* surfDir, char* surfFile, long errorprint) {
   char filesda[300];
   XdrSurf ret;
 
-  if(sapiToSurfData == NULL) {
-    if(errorprint != 0)
+  if (sapiToSurfData == NULL) {
+    if (errorprint != 0)
       fprintf(stderr,
               "SAPI-Error: There is no open SURF-file for writing back !\n");
     return -1l;
   }
 
-  if(loadIntoMemory==False) {
-    if(errorprint != 0)
+  if (loadIntoMemory==False) {
+    if (errorprint != 0)
       fprintf(stderr,
               "SAPI-Error: For writing back you have to open\n     the file with SAPI_openIntoMemory(..)!\n");
     return -1l;
   }
 
-  if(access(surfDir, 0) != 0) {
-    if(errorprint != 0)
+  if (access(surfDir, 0) != 0) {
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't access path: '%s' !\n", surfDir);
     return -1l;
   }
 
   recalculateData();
 
-  if(sapiToSurfData->toFreeText != NULL) free(sapiToSurfData->toFreeText);
+  if (sapiToSurfData->toFreeText != NULL) free(sapiToSurfData->toFreeText);
   sapiToSurfData->toFreeText =
       (SurfFreeText*)calloc(1, SIZE_OF_FREE_TEXT_ARRAY(20));
-  if(sapiToSurfData->toFreeText != NULL) {
+  if (sapiToSurfData->toFreeText != NULL) {
     sapiToSurfData->nrFreeTextUnits=20;
     sprintf(sapiToSurfData->toFreeText->label, SURF_FREE_TEXT_LABEL);
     sprintf(sapiToSurfData->toFreeText->blocks[0].text, "%s%s%s",
@@ -579,15 +579,15 @@ long SAPI_writeBackFromMemory(char* surfDir, char* surfFile, long errorprint) {
   strcat(filesda, ".sda");
 
   ret = mem_WriteSdaStructure(filesda, sapiToSurfData);
-  if(ret == SURF_SUCCESS) {
+  if (ret == SURF_SUCCESS) {
     ret = mem_WriteSixStructure(filesix, sapiToSurfData);
-    if(ret != SURF_SUCCESS) {
-      if(errorprint != 0)
+    if (ret != SURF_SUCCESS) {
+      if (errorprint != 0)
         fprintf(stderr, "SAPI-Error: Can't write back file: '%s' !\n", filesix);
       return -1;
     }
   } else {
-    if(errorprint != 0)
+    if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't write back file: '%s' !\n", filesda);
     return -1;
   }
