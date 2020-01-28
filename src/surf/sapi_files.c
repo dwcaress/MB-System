@@ -126,7 +126,7 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
 
   // Special mode for rewrite read the whole surfFile into memory
 
-  if (loadIntoMemory==True) {
+  if (loadIntoMemory) {
     ret = mem_ReadSdaStructure(filesda, sapiToSurfData);
     if (ret != SURF_SUCCESS) {
       mem_destroyAWholeSurfStructure(sapiToSurfData);
@@ -209,7 +209,7 @@ long SAPI_nextSounding(long errorprint) {
 
   // Special mode for rewrite read the whole surfFile into memory
 
-  if (loadIntoMemory==True) {
+  if (loadIntoMemory) {
     if (surf_moveInSdaThread(sapiToSurfData, FORE_ONE_STEP, 0) == END_OF_THREAD) {
       if (errorprint != 0)
         fprintf(stderr, "SAPI-Error: End of file !\n");
@@ -233,7 +233,7 @@ long SAPI_rewind(long errorprint) {
   if (sapiToSurfData != NULL) sapiToSdaInfo = sapiToSurfData->toSdaInfo;
 
   // Special mode for rewrite read the whole surfFile into memory
-  if (loadIntoMemory==True) {
+  if (loadIntoMemory) {
     if ((sapiToSurfData == NULL) || (sapiToSdaInfo == NULL)) {
       return -1l;
     }
@@ -358,7 +358,7 @@ void recalculateData(void) {
         if (speed > maxSpeed) maxSpeed = speed;
         if (speed < minSpeed) minSpeed = speed;
 
-        if (posIsMeter==True) {
+        if (posIsMeter) {
           deltaX = posX - lastX;
           deltaY = posY - lastY;
         } else {
@@ -407,7 +407,7 @@ void recalculateData(void) {
           for(beam = 0; beam < nrBeams; beam++) {
             depthFlag = sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depthFlag;
             if ((depthFlag & SB_DELETED) == 0) {
-              allBeamsDeleted=False;
+              allBeamsDeleted = False;
               fanParam.angle = toAngles->beamAngle[beam];
               indexToTransducer =
                   (short)sapiToSurfData->toSdaInfo->toSoundings->indexToTransducer;
@@ -453,7 +453,7 @@ void recalculateData(void) {
               }
             }
           } /*for(beam = 0;beam < nrBeams;beam++)*/
-          if (allBeamsDeleted==True) {
+          if (allBeamsDeleted) {
             sapiToSurfData->toSdaInfo->toSoundings->soundingFlag =
                 soundingFlag | SF_DELETED | SF_ALL_BEAMS_DELETED;
           }
@@ -491,7 +491,7 @@ void recalculateData(void) {
       }  // if ((soundingFlag & SF_DELETED) == 0)
     }  // for(ii=0;ii<nrSoundings;ii++)
 
-    if (depthStatisticsFound==False) {
+    if (!depthStatisticsFound) {
       minDepth = maxDepth = 0.0;
       minBeamPositionStar = maxBeamPositionStar = 0.0;
       minBeamPositionAhead = maxBeamPositionAhead = 0.0;
@@ -543,7 +543,7 @@ long SAPI_writeBackFromMemory(char* surfDir, char* surfFile, long errorprint) {
     return -1l;
   }
 
-  if (loadIntoMemory==False) {
+  if (!loadIntoMemory) {
     if (errorprint != 0)
       fprintf(stderr,
               "SAPI-Error: For writing back you have to open\n     the file with SAPI_openIntoMemory(..)!\n");
