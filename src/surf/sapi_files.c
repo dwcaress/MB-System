@@ -1,17 +1,14 @@
-/*
-/  See README file for copying and redistribution conditions.
-*/
+// See README file for copying and redistribution conditions.
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef _WIN32
 #include <string.h>
+#ifdef _WIN32
 #include "types_win32.h"
 #else
-#include <string.h>
 #include <unistd.h>
 #endif
-#include <math.h>
 
 #include "xdr_surf.h"
 #include "mem_surf.h"
@@ -27,19 +24,17 @@
 #define access _access
 #endif
 
-extern XdrSurf mem_convertOneSdaBlock2(XDR* xdrs,SdaInfo* sdaInfo,short versLess2);
-extern size_t initializeSdaInfo(SurfDataInfo* toSurfDataInfo,SdaInfo* toSdaInfo);
-extern void setPointersInSdaInfo(void* toSdaBlock,SdaInfo* toSdaInfo);
-long SAPI_openFile(char* surfDir,char* surfFile,long errorprint);
+extern XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo* sdaInfo, short versLess2);
+extern size_t initializeSdaInfo(SurfDataInfo *toSurfDataInfo, SdaInfo *toSdaInfo);
+extern void setPointersInSdaInfo(void *toSdaBlock, SdaInfo *toSdaInfo);
+long SAPI_openFile(char *surfDir, char *surfFile, long errorprint);
 
 
-SurfDataInfo*      sapiToSurfData;
-SurfSoundingData*  sapiToSdaBlock;
-Boolean            loadIntoMemory=False;
+SurfDataInfo *sapiToSurfData;
+SurfSoundingData *sapiToSdaBlock;
+Boolean loadIntoMemory = False;
 
-
-void SAPI_printAPIandSURFversion(void)
-{
+void SAPI_printAPIandSURFversion(void) {
  fprintf(stderr,"Version: %s\n         %s\n",SAPI_VERSION,SURF_VERSION);
 }
 
@@ -683,5 +678,3 @@ long SAPI_writeBackFromMemory(char* surfDir,char* surfFile,long errorprint)
 
  return((long)0);
 }
-
-
