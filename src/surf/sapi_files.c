@@ -1,6 +1,7 @@
 // See README file for copying and redistribution conditions.
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,12 +33,11 @@ long SAPI_openFile(char *surfDir, char *surfFile, long errorprint);
 
 SurfDataInfo *sapiToSurfData;
 SurfSoundingData *sapiToSdaBlock;
-Boolean loadIntoMemory = False;
+bool loadIntoMemory = false;
 
 void SAPI_printAPIandSURFversion(void) {
   fprintf(stderr, "Version: %s\n         %s\n", SAPI_VERSION, SURF_VERSION);
 }
-
 
 static void freeControlData(void) {
   SdaInfo* sapiToSdaInfo = NULL;
@@ -52,7 +52,7 @@ static void freeControlData(void) {
     free((char*)sapiToSurfData);
     sapiToSurfData=NULL;
   }
-  if (sapiToSdaInfo != NULL && loadIntoMemory != True )
+  if (sapiToSdaInfo != NULL && !loadIntoMemory)
     free((char*)sapiToSdaInfo);
   if (sapiToSdaBlock != NULL) free((char*)sapiToSdaBlock);
   sapiToSurfData = NULL;
@@ -61,12 +61,12 @@ static void freeControlData(void) {
 }
 
 long SAPI_openIntoMemory(char* surfDir, char* surfFile, long errorprint) {
-  loadIntoMemory = True;
+  loadIntoMemory = true;
   return SAPI_openFile(surfDir, surfFile, errorprint);
 }
 
 long SAPI_open(char* surfDir,char* surfFile,long errorprint) {
-  loadIntoMemory = False;
+  loadIntoMemory = false;
   return SAPI_openFile(surfDir, surfFile, errorprint);
 }
 
@@ -266,9 +266,9 @@ void recalculateData(void) {
   SurfGlobalData* toGlobalData;
   SurfStatistics* toStatistics;
   SurfMultiBeamAngleTable* toAngles;
-  Boolean isPitchcompensated, allBeamsDeleted;
-  Boolean depthStatisticsFound = False;
-  Boolean posIsMeter = False;
+  bool isPitchcompensated, allBeamsDeleted;
+  bool depthStatisticsFound = false;
+  bool posIsMeter = false;
   FanParam fanParam;
   short indexToAngle, indexToTransducer;
   u_short depthFlag, soundingFlag;
@@ -298,13 +298,13 @@ void recalculateData(void) {
     nrSoundings = sapiToSurfData->nrOfSoundings;
 
     if (toGlobalData->presentationOfPosition=='X')
-      posIsMeter=True;
+      posIsMeter = true;
 
-    isPitchcompensated = True;
+    isPitchcompensated = true;
     if (strncmp(toGlobalData->nameOfSounder, "MD", 2) == 0)
-      isPitchcompensated = False;
+      isPitchcompensated = false;
     if (strncmp(toGlobalData->nameOfSounder, "FS", 2) == 0)
-      isPitchcompensated = False;
+      isPitchcompensated = false;
 
     if (toGlobalData->typeOfSounder != 'F') {
       minBeamPositionStar  = 0.0;
@@ -403,11 +403,11 @@ void recalculateData(void) {
           toAngles = getSurfAngleTable(sapiToSurfData->toAngleTables,
                                        nrBeams, indexToAngle);
 
-          allBeamsDeleted=True;
+          allBeamsDeleted = true;
           for(beam = 0; beam < nrBeams; beam++) {
             depthFlag = sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depthFlag;
             if ((depthFlag & SB_DELETED) == 0) {
-              allBeamsDeleted = False;
+              allBeamsDeleted = false;
               fanParam.angle = toAngles->beamAngle[beam];
               indexToTransducer =
                   (short)sapiToSurfData->toSdaInfo->toSoundings->indexToTransducer;
@@ -427,7 +427,7 @@ void recalculateData(void) {
               fanParam.travelTime = (double)
                                     sapiToSurfData->toSdaInfo->toMultiBeamTT[beam].travelTimeOfRay;
 
-              if (depthFromTT(&fanParam, isPitchcompensated) == True) {
+              if (depthFromTT(&fanParam, isPitchcompensated)) {
                 depth=fanParam.depth - tide;
                 sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depth = (float)depth;
                 sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].beamPositionAhead =
@@ -446,7 +446,7 @@ void recalculateData(void) {
                   minBeamPositionAhead = fanParam.posAhead;
                 if (fanParam.posAhead > maxBeamPositionAhead)
                   maxBeamPositionAhead = fanParam.posAhead;
-                depthStatisticsFound=True;
+                depthStatisticsFound = true;
               } else {
                 sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depthFlag =
                     depthFlag | SB_DELETED;
@@ -468,7 +468,7 @@ void recalculateData(void) {
                 minDepth = depth;
               if (depth > maxDepth)
                 maxDepth = depth;
-              depthStatisticsFound=True;
+              depthStatisticsFound = true;
             }
             depth = (double)sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthMFreq;
             if (depth != 0.0) {
@@ -476,7 +476,7 @@ void recalculateData(void) {
                 minDepth = depth;
               if (depth > maxDepth)
                 maxDepth = depth;
-              depthStatisticsFound=True;
+              depthStatisticsFound = true;
             }
             depth = (double)sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthHFreq;
             if (depth != 0.0) {
@@ -484,7 +484,7 @@ void recalculateData(void) {
                 minDepth = depth;
               if (depth > maxDepth)
                 maxDepth = depth;
-              depthStatisticsFound=True;
+              depthStatisticsFound = true;
             }
           }
         }

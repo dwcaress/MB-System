@@ -1,6 +1,7 @@
 // See README file for copying and redistribution conditions.
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,7 +22,7 @@
 
 extern SurfDataInfo*      sapiToSurfData;
 extern SurfSoundingData*  sapiToSdaBlock;
-extern Boolean            loadIntoMemory;
+extern bool loadIntoMemory;
 
 static SurfDescriptor defaultDescriptor =
 {
@@ -275,7 +276,7 @@ long SAPI_createSurfBody(long nrSoundings,
 
  surf_moveInSdaThread(sapiToSurfData,TO_START,0);
 
- loadIntoMemory = True;
+ loadIntoMemory = true;
 
  return((long)0);
 }
