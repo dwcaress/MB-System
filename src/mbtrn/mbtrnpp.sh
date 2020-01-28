@@ -142,7 +142,7 @@ init_vars(){
     # (requires map,par,log,cfg)
     OPT_TRN_EN="--trn-en"
 	OPT_TRN_DIS="--trn-dis"
-	OPT_TRN_SEL=${OPT_TRN_DIS}
+	OPT_TRN_SEL=${OPT_TRN_EN}
 
 	# set TRN UTM zone
     # Monterey Bay 10
