@@ -30,7 +30,6 @@ extern size_t initializeSdaInfo(SurfDataInfo *toSurfDataInfo, SdaInfo *toSdaInfo
 extern void setPointersInSdaInfo(void *toSdaBlock, SdaInfo *toSdaInfo);
 long SAPI_openFile(char *surfDir, char *surfFile, long errorprint);
 
-
 SurfDataInfo *sapiToSurfData;
 SurfSoundingData *sapiToSdaBlock;
 bool loadIntoMemory = false;
@@ -71,12 +70,6 @@ long SAPI_open(char* surfDir,char* surfFile,long errorprint) {
 }
 
 long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
-  SdaInfo* sapiToSdaInfo = NULL;
-  char filesix[300];
-  char filesda[300];
-  XdrSurf ret;
-  size_t  sizeOfSdaBlock;
-
   if (access(surfDir, 0) != 0) {
     if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't access path: '%s' !\n", surfDir);
@@ -92,11 +85,13 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
     return -1l;
   }
 
+  char filesix[300];
   strncpy(filesix, surfDir, 250);
   strcat(filesix, "/");
   strcat(filesix, surfFile);
   strcat(filesix, ".six");
 
+  char filesda[300];
   strncpy(filesda, surfDir, 250);
   strcat(filesda, "/");
   strcat(filesda, surfFile);
@@ -115,7 +110,7 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
     return -1;
   }
 
-  ret = mem_ReadSixStructure(filesix, sapiToSurfData);
+  XdrSurf ret = mem_ReadSixStructure(filesix, sapiToSurfData);
   if (ret != SURF_SUCCESS) {
     mem_destroyAWholeSurfStructure(sapiToSurfData);
     freeControlData();
@@ -142,7 +137,7 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
   // Allocate the necessary memory for a SDA-structure and read
   // the first SDA-Block from file
 
-  if (sapiToSurfData->nrOfSoundings <=0) {
+  if (sapiToSurfData->nrOfSoundings <=0 ) {
     freeControlData();
     if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: nr of soundings = %d!\n", (int)(sapiToSurfData->nrOfSoundings));
@@ -151,7 +146,7 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
 
   // Allocate structure for xdr-conversion and SdaInfo and Sda-Thread
 
-  sapiToSdaInfo = (SdaInfo*)calloc(1, sizeof(SdaInfo));
+  SdaInfo* sapiToSdaInfo = (SdaInfo*)calloc(1, sizeof(SdaInfo));
   sapiToSurfData->toSdaInfo = sapiToSdaInfo;
 
   sapiToSurfData->xdrs = (XDR*)calloc(1, sizeof(XDR));  /* ????? */
@@ -163,7 +158,7 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
     return -1l;
   }
 
-  sizeOfSdaBlock = initializeSdaInfo(sapiToSurfData, sapiToSdaInfo);
+  const size_t sizeOfSdaBlock = initializeSdaInfo(sapiToSurfData, sapiToSdaInfo);
   sapiToSdaBlock = (SurfSoundingData*)calloc(1, sizeOfSdaBlock);
 
   if ((sapiToSurfData->xdrs == NULL) || (sapiToSdaInfo == NULL)) {
@@ -197,11 +192,9 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
 }
 
 long SAPI_nextSounding(long errorprint) {
-  XdrSurf ret;
-  SdaInfo* sapiToSdaInfo = NULL;
-
-  if (sapiToSurfData != NULL) sapiToSdaInfo = sapiToSurfData->toSdaInfo;
-  if ((sapiToSurfData == NULL) || (sapiToSdaInfo == NULL)) {
+  SdaInfo* sapiToSdaInfo =
+      sapiToSurfData == NULL ? NULL : sapiToSurfData->toSdaInfo;
+  if (sapiToSurfData == NULL || sapiToSdaInfo == NULL) {
     if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: No SURF-data open !\n");
     return -1l;
@@ -218,7 +211,8 @@ long SAPI_nextSounding(long errorprint) {
     return 0l;
   }
 
-  ret = mem_convertOneSdaBlock2(sapiToSurfData->xdrs, sapiToSdaInfo, sapiToSurfData->sourceVersionLess2);
+  const XdrSurf ret = mem_convertOneSdaBlock2(
+      sapiToSurfData->xdrs, sapiToSdaInfo, sapiToSurfData->sourceVersionLess2);
   if (ret != SURF_SUCCESS) {
     if (errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't read file or EOF !\n");
@@ -228,21 +222,20 @@ long SAPI_nextSounding(long errorprint) {
 }
 
 long SAPI_rewind(long errorprint) {
-  SdaInfo* sapiToSdaInfo = NULL;
-
-  if (sapiToSurfData != NULL) sapiToSdaInfo = sapiToSurfData->toSdaInfo;
+  SdaInfo* sapiToSdaInfo =
+      sapiToSurfData == NULL ? NULL : sapiToSurfData->toSdaInfo;
 
   // Special mode for rewrite read the whole surfFile into memory
   if (loadIntoMemory) {
-    if ((sapiToSurfData == NULL) || (sapiToSdaInfo == NULL)) {
+    if (sapiToSurfData == NULL || sapiToSdaInfo == NULL) {
       return -1l;
     }
     surf_moveInSdaThread(sapiToSurfData, TO_START, 0);
     return 0l;
   }
 
-  if ((sapiToSurfData == NULL) || (sapiToSurfData->xdrs == NULL)
-     || (sapiToSdaInfo == NULL) || (sapiToSurfData->fp == NULL)) {
+  if (sapiToSurfData == NULL || sapiToSurfData->xdrs == NULL ||
+      sapiToSdaInfo == NULL || sapiToSurfData->fp == NULL) {
     return -1l;
   }
 
@@ -263,279 +256,282 @@ void SAPI_close(void) {
 }
 
 void recalculateData(void) {
-  SurfGlobalData* toGlobalData;
-  SurfStatistics* toStatistics;
-  SurfMultiBeamAngleTable* toAngles;
-  bool isPitchcompensated, allBeamsDeleted;
-  bool depthStatisticsFound = false;
-  bool posIsMeter = false;
+  if (sapiToSurfData == NULL) {
+    return;
+  }
+
+  const double minDef = 999999999.0;  // TODO(schwehr): Use DBL_MAX
+  const double maxDef = -999999999.0;
+
+  SurfGlobalData *toGlobalData = sapiToSurfData->toGlobalData;
+  SurfStatistics *toStatistics = sapiToSurfData->toStatistics;
+
+  short nrBeams = (short) sapiToSurfData->nrBeams;
+  long nrSoundings = sapiToSurfData->nrOfSoundings;
+
+  const bool posIsMeter = toGlobalData->presentationOfPosition == 'X';
+
+  bool isPitchcompensated = true;
+  if (strncmp(toGlobalData->nameOfSounder, "MD", 2) == 0)
+    isPitchcompensated = false;
+  if (strncmp(toGlobalData->nameOfSounder, "FS", 2) == 0)
+    isPitchcompensated = false;
+  
+  double minBeamPositionStar;
+  double maxBeamPositionStar;
+  double minBeamPositionAhead;
+  double maxBeamPositionAhead;
+  if (toGlobalData->typeOfSounder != 'F') {
+    minBeamPositionStar = 0.0;
+    maxBeamPositionStar = 0.0;
+    minBeamPositionAhead = 0.0;
+    maxBeamPositionAhead = 0.0;
+  } else {
+    minBeamPositionStar = minDef;
+    maxBeamPositionStar = maxDef;
+    minBeamPositionAhead = minDef;
+    maxBeamPositionAhead = maxDef;
+  }
+  double minDepth = minDef;
+  double maxDepth = maxDef;
+  double minX = minDef;
+  double minY = minDef;
+  double maxX = maxDef;
+  double maxY = maxDef;
+
+  double minSpeed = minDef;
+  double maxSpeed = maxDef;
+  double minRoll = minDef;
+  double maxRoll = maxDef;
+  double minPitch = minDef;
+  double maxPitch = maxDef;
+  double minHeave = minDef;
+  double maxHeave = maxDef;
+
+  const double refX = toGlobalData->referenceOfPositionX;
+  const double refY = toGlobalData->referenceOfPositionY;
+  double posX = 0.0;
+  double posY = 0.0;
+  double relWay = 0.0;
+  double relTime = 0.0;
+
   FanParam fanParam;
-  short indexToAngle, indexToTransducer;
-  u_short depthFlag, soundingFlag;
-  long ii, nrSoundings, firstSounding;
-  short beam, nrBeams;
-  double tide, depth;
-  double minDef= 999999999.0;
-  double maxDef=-999999999.0;
-  double minBeamPositionStar, maxBeamPositionStar;
-  double minBeamPositionAhead, maxBeamPositionAhead;
-  double minDepth, maxDepth;
-  double minX, maxX, minY, maxY, refX, refY, relWay, relTime;
-  double posX, posY, deltaX, deltaY, lastX, lastY;
-  double speed, minSpeed, maxSpeed;
-  double roll, minRoll, maxRoll;
-  double minPitch, maxPitch;
-  double minHeave, maxHeave;
-  double cmean;
+  memset(&fanParam, 0, sizeof(fanParam));
 
-  memset(&fanParam,  0,  sizeof(FanParam));
+  bool depthStatisticsFound = false;
+  short indexToAngle;
+  short indexToTransducer;
+  u_short depthFlag;
+  u_short soundingFlag;
+  double lastX;
+  double lastY;
 
-  if (sapiToSurfData!=NULL) {
-    toGlobalData = sapiToSurfData->toGlobalData;
-    toStatistics = sapiToSurfData->toStatistics;
+  long firstSounding = -1;
+  for (long ii = 0; ii < nrSoundings; ii++) {
+    surf_moveInSdaThread(sapiToSurfData, ABS_POSITION, ii);
+    soundingFlag = sapiToSurfData->toSdaInfo->toSoundings->soundingFlag;
 
-    nrBeams = (short) sapiToSurfData->nrBeams;
-    nrSoundings = sapiToSurfData->nrOfSoundings;
-
-    if (toGlobalData->presentationOfPosition=='X')
-      posIsMeter = true;
-
-    isPitchcompensated = true;
-    if (strncmp(toGlobalData->nameOfSounder, "MD", 2) == 0)
-      isPitchcompensated = false;
-    if (strncmp(toGlobalData->nameOfSounder, "FS", 2) == 0)
-      isPitchcompensated = false;
-
-    if (toGlobalData->typeOfSounder != 'F') {
-      minBeamPositionStar  = 0.0;
-      maxBeamPositionStar  = 0.0;
-      minBeamPositionAhead = 0.0;
-      maxBeamPositionAhead = 0.0;
-    } else {
-      minBeamPositionStar  = minDef;
-      maxBeamPositionStar  = maxDef;
-      minBeamPositionAhead = minDef;
-      maxBeamPositionAhead = maxDef;
-    }
-    minDepth = minDef;
-    maxDepth = maxDef;
-    minX = minDef;
-    minY = minDef;
-    maxX = maxDef;
-    maxY = maxDef;
-
-    minSpeed=minRoll=minPitch=minHeave=minDef;
-    maxSpeed=maxRoll=maxPitch=maxHeave=maxDef;
-
-    refX  = toGlobalData->referenceOfPositionX;
-    refY  = toGlobalData->referenceOfPositionY;
-    posX = posY = 0.0;
-    relWay = 0.0;
-    relTime=0.0;
-
-    firstSounding = -1;
-    for(ii=0;ii<nrSoundings;ii++) {
-      surf_moveInSdaThread(sapiToSurfData, ABS_POSITION, ii);
-      soundingFlag = sapiToSurfData->toSdaInfo->toSoundings->soundingFlag;
-
-      if ((soundingFlag & (SF_DELETED | SF_ALL_BEAMS_DELETED)) == 0) {
-        firstSounding ++;
-        relTime = (double) sapiToSurfData->toSdaInfo->toSoundings->relTime;
-        posX = (double)
-               (sapiToSurfData->toSdaInfo->toActCenterPosition->centerPositionX) + refX;
-        posY = (double)
-               (sapiToSurfData->toSdaInfo->toActCenterPosition->centerPositionY) + refY;
-        speed = (double)
-                (sapiToSurfData->toSdaInfo->toActCenterPosition->speed);
-        if (firstSounding == 0) {
-          lastX = posX;
-          lastY = posY;
-        }
-        if (posX > maxX) maxX = posX;
-        if (posX < minX) minX = posX;
-        if (posY > maxY) maxY = posY;
-        if (posY < minY) minY = posY;
-        if (speed > maxSpeed) maxSpeed = speed;
-        if (speed < minSpeed) minSpeed = speed;
-
-        if (posIsMeter) {
-          deltaX = posX - lastX;
-          deltaY = posY - lastY;
-        } else {
-          deltaX = setToPlusMinusPI(posX - lastX);
-          deltaY = setToPlusMinusPI(posY - lastY);
-          deltaY = RAD_TO_METER_Y(deltaY);
-          deltaX = RAD_TO_METER_X(deltaX, lastY);
-        }
-        relWay = relWay + sqrt((deltaX*deltaX) + (deltaY*deltaY));
-        sapiToSurfData->toSdaInfo->toSoundings->relWay = (float)relWay;
-        if (firstSounding == 0) {
-          toGlobalData->modifiedTrackStartX = (float)(posX - refX);
-          toGlobalData->modifiedTrackStartY = (float)(posY - refY);
-        }
+    if ((soundingFlag & (SF_DELETED | SF_ALL_BEAMS_DELETED)) == 0) {
+      firstSounding++;
+      relTime = (double) sapiToSurfData->toSdaInfo->toSoundings->relTime;
+      posX = (double)
+             (sapiToSurfData->toSdaInfo->toActCenterPosition->centerPositionX) + refX;
+      posY = (double)
+             (sapiToSurfData->toSdaInfo->toActCenterPosition->centerPositionY) + refY;
+      const double speed = (double)
+                           (sapiToSurfData->toSdaInfo->toActCenterPosition->speed);
+      if (firstSounding == 0) {
         lastX = posX;
         lastY = posY;
+      }
+      if (posX > maxX) maxX = posX;
+      if (posX < minX) minX = posX;
+      if (posY > maxY) maxY = posY;
+      if (posY < minY) minY = posY;
+      if (speed > maxSpeed) maxSpeed = speed;
+      if (speed < minSpeed) minSpeed = speed;
 
-        tide = (double)sapiToSurfData->toSdaInfo->toSoundings->tide;
+      double deltaX;
+      double deltaY;
+      if (posIsMeter) {
+        deltaX = posX - lastX;
+        deltaY = posY - lastY;
+      } else {
+        deltaX = setToPlusMinusPI(posX - lastX);
+        deltaY = setToPlusMinusPI(posY - lastY);
+        deltaY = RAD_TO_METER_Y(deltaY);
+        deltaX = RAD_TO_METER_X(deltaX, lastY);
+      }
+      relWay = relWay + sqrt((deltaX*deltaX) + (deltaY*deltaY));
+      sapiToSurfData->toSdaInfo->toSoundings->relWay = (float)relWay;
+      if (firstSounding == 0) {
+        toGlobalData->modifiedTrackStartX = (float)(posX - refX);
+        toGlobalData->modifiedTrackStartY = (float)(posY - refY);
+      }
+      lastX = posX;
+      lastY = posY;
 
-        roll =
-            (double)sapiToSurfData->toSdaInfo->toSoundings->rollWhileTransmitting;
-        fanParam.pitchTx =
-            (double)sapiToSurfData->toSdaInfo->toSoundings->pitchWhileTransmitting
-            +(double)sapiToSurfData->toGlobalData->offsetPitchFore;
-        fanParam.heaveTx = (double)
-                           sapiToSurfData->toSdaInfo->toSoundings->heaveWhileTransmitting;
-        fanParam.ckeel   = (double)
-                           sapiToSurfData->toSdaInfo->toSoundings->cKeel;
-        fanParam.cmean   = (double)
-                           sapiToSurfData->toSdaInfo->toSoundings->cMean;
+      const double tide = (double)sapiToSurfData->toSdaInfo->toSoundings->tide;
 
-        if (roll > maxRoll) maxRoll = roll;
-        if (roll < minRoll) minRoll = roll;
-        if (fanParam.pitchTx > maxPitch) maxPitch = fanParam.pitchTx;
-        if (fanParam.pitchTx < minPitch) minPitch = fanParam.pitchTx;
-        if (fanParam.heaveTx > maxHeave) maxHeave = fanParam.heaveTx;
-        if (fanParam.heaveTx < minHeave) minHeave = fanParam.heaveTx;
+      const double roll =
+          (double)sapiToSurfData->toSdaInfo->toSoundings->rollWhileTransmitting;
+      fanParam.pitchTx =
+          (double)sapiToSurfData->toSdaInfo->toSoundings->pitchWhileTransmitting
+          + (double)sapiToSurfData->toGlobalData->offsetPitchFore;
+      fanParam.heaveTx = (double)
+                         sapiToSurfData->toSdaInfo->toSoundings->heaveWhileTransmitting;
+      fanParam.ckeel   = (double)
+                         sapiToSurfData->toSdaInfo->toSoundings->cKeel;
+      fanParam.cmean   = (double)
+                         sapiToSurfData->toSdaInfo->toSoundings->cMean;
 
-        if (toGlobalData->typeOfSounder == 'F') {
-          indexToAngle =
-              (short)sapiToSurfData->toSdaInfo->toSoundings->indexToAngle;
-          toAngles = getSurfAngleTable(sapiToSurfData->toAngleTables,
-                                       nrBeams, indexToAngle);
+      if (roll > maxRoll) maxRoll = roll;
+      if (roll < minRoll) minRoll = roll;
+      if (fanParam.pitchTx > maxPitch) maxPitch = fanParam.pitchTx;
+      if (fanParam.pitchTx < minPitch) minPitch = fanParam.pitchTx;
+      if (fanParam.heaveTx > maxHeave) maxHeave = fanParam.heaveTx;
+      if (fanParam.heaveTx < minHeave) minHeave = fanParam.heaveTx;
 
-          allBeamsDeleted = true;
-          for(beam = 0; beam < nrBeams; beam++) {
-            depthFlag = sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depthFlag;
-            if ((depthFlag & SB_DELETED) == 0) {
-              allBeamsDeleted = false;
-              fanParam.angle = toAngles->beamAngle[beam];
-              indexToTransducer =
-                  (short)sapiToSurfData->toSdaInfo->toSoundings->indexToTransducer;
-              if ((sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depthFlag & SB_TRANSDUCER_PLUS1) != 0)
-                indexToTransducer++;
-              fanParam.draught = (double)
-                                 sapiToSurfData->toTransducers[indexToTransducer].transducerDepth;
-              fanParam.transducerOffsetAhead = (double)
-                                               sapiToSurfData->toTransducers[indexToTransducer].transducerPositionAhead;
-              fanParam.transducerOffsetStar  = (double)
-                                               sapiToSurfData->toTransducers[indexToTransducer].transducerPositionStar;
-              if (sapiToSurfData->toSdaInfo->toMultiBeamRec != NULL)
-                fanParam.heaveRx = (double)
-                                   sapiToSurfData->toSdaInfo->toMultiBeamRec[beam].heaveWhileReceiving;
-              else
-                fanParam.heaveRx = 0.0;
-              fanParam.travelTime = (double)
-                                    sapiToSurfData->toSdaInfo->toMultiBeamTT[beam].travelTimeOfRay;
+      if (toGlobalData->typeOfSounder == 'F') {
+        indexToAngle =
+            (short)sapiToSurfData->toSdaInfo->toSoundings->indexToAngle;
+        SurfMultiBeamAngleTable *toAngles = getSurfAngleTable(sapiToSurfData->toAngleTables,
+                                     nrBeams, indexToAngle);
 
-              if (depthFromTT(&fanParam, isPitchcompensated)) {
-                depth=fanParam.depth - tide;
-                sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depth = (float)depth;
-                sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].beamPositionAhead =
-                    (float)fanParam.posAhead;
-                sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].beamPositionStar  =
-                    (float)fanParam.posStar;
-                if (depth < minDepth)
-                  minDepth = depth;
-                if (depth > maxDepth)
-                  maxDepth = depth;
-                if (fanParam.posStar < minBeamPositionStar)
-                  minBeamPositionStar = fanParam.posStar;
-                if (fanParam.posStar > maxBeamPositionStar)
-                  maxBeamPositionStar = fanParam.posStar;
-                if (fanParam.posAhead < minBeamPositionAhead)
-                  minBeamPositionAhead = fanParam.posAhead;
-                if (fanParam.posAhead > maxBeamPositionAhead)
-                  maxBeamPositionAhead = fanParam.posAhead;
-                depthStatisticsFound = true;
-              } else {
-                sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depthFlag =
-                    depthFlag | SB_DELETED;
-              }
+        bool allBeamsDeleted = true;
+        for (short beam = 0; beam < nrBeams; beam++) {
+          depthFlag = sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depthFlag;
+          if ((depthFlag & SB_DELETED) == 0) {
+            allBeamsDeleted = false;
+            fanParam.angle = toAngles->beamAngle[beam];
+            indexToTransducer =
+                (short)sapiToSurfData->toSdaInfo->toSoundings->indexToTransducer;
+            if ((sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depthFlag & SB_TRANSDUCER_PLUS1) != 0)
+              indexToTransducer++;
+            fanParam.draught =
+                (double)sapiToSurfData->toTransducers[indexToTransducer].transducerDepth;
+            fanParam.transducerOffsetAhead =
+                (double)sapiToSurfData->toTransducers[indexToTransducer].transducerPositionAhead;
+            fanParam.transducerOffsetStar =
+                (double)sapiToSurfData->toTransducers[indexToTransducer].transducerPositionStar;
+            if (sapiToSurfData->toSdaInfo->toMultiBeamRec != NULL)
+              fanParam.heaveRx =
+                  (double)sapiToSurfData->toSdaInfo->toMultiBeamRec[beam].heaveWhileReceiving;
+            else
+              fanParam.heaveRx = 0.0;
+            fanParam.travelTime =
+                (double)sapiToSurfData->toSdaInfo->toMultiBeamTT[beam].travelTimeOfRay;
+            
+            if (depthFromTT(&fanParam, isPitchcompensated)) {
+              const double depth = fanParam.depth - tide;
+              sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depth = (float)depth;
+              sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].beamPositionAhead =
+                  (float)fanParam.posAhead;
+              sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].beamPositionStar  =
+                  (float)fanParam.posStar;
+              if (depth < minDepth)
+                minDepth = depth;
+              if (depth > maxDepth)
+                maxDepth = depth;
+              if (fanParam.posStar < minBeamPositionStar)
+                minBeamPositionStar = fanParam.posStar;
+              if (fanParam.posStar > maxBeamPositionStar)
+                maxBeamPositionStar = fanParam.posStar;
+              if (fanParam.posAhead < minBeamPositionAhead)
+                minBeamPositionAhead = fanParam.posAhead;
+              if (fanParam.posAhead > maxBeamPositionAhead)
+                maxBeamPositionAhead = fanParam.posAhead;
+              depthStatisticsFound = true;
+            } else {
+              sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depthFlag =
+                  depthFlag | SB_DELETED;
             }
-          } /*for(beam = 0;beam < nrBeams;beam++)*/
-          if (allBeamsDeleted) {
-            sapiToSurfData->toSdaInfo->toSoundings->soundingFlag =
-                soundingFlag | SF_DELETED | SF_ALL_BEAMS_DELETED;
           }
-          // if (toGlobalData->typeOfSounder == 'F')
-        } else {
-          cmean = (double)sapiToSurfData->toSdaInfo->toSoundings->cMean;
-          sapiToSurfData->toSdaInfo->toSoundings->cKeel = (float)cmean;
-          if ((sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthFlag & SB_DELETED) == 0) {
-            depth = (double)sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthLFreq;
-            if (depth != 0.0) {
-              if (depth < minDepth)
-                minDepth = depth;
-              if (depth > maxDepth)
-                maxDepth = depth;
-              depthStatisticsFound = true;
-            }
-            depth = (double)sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthMFreq;
-            if (depth != 0.0) {
-              if (depth < minDepth)
-                minDepth = depth;
-              if (depth > maxDepth)
-                maxDepth = depth;
-              depthStatisticsFound = true;
-            }
-            depth = (double)sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthHFreq;
-            if (depth != 0.0) {
-              if (depth < minDepth)
-                minDepth = depth;
-              if (depth > maxDepth)
-                maxDepth = depth;
-              depthStatisticsFound = true;
-            }
+        } /*for(beam = 0;beam < nrBeams;beam++)*/
+        if (allBeamsDeleted) {
+          sapiToSurfData->toSdaInfo->toSoundings->soundingFlag =
+              soundingFlag | SF_DELETED | SF_ALL_BEAMS_DELETED;
+        }
+        // if (toGlobalData->typeOfSounder == 'F')
+      } else {
+        const double cmean = (double)sapiToSurfData->toSdaInfo->toSoundings->cMean;
+        sapiToSurfData->toSdaInfo->toSoundings->cKeel = (float)cmean;
+        if ((sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthFlag & SB_DELETED) == 0) {
+          double depth = (double)sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthLFreq;
+          if (depth != 0.0) {
+            if (depth < minDepth)
+              minDepth = depth;
+            if (depth > maxDepth)
+              maxDepth = depth;
+            depthStatisticsFound = true;
+          }
+          depth = (double)sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthMFreq;
+          if (depth != 0.0) {
+            if (depth < minDepth)
+              minDepth = depth;
+            if (depth > maxDepth)
+              maxDepth = depth;
+            depthStatisticsFound = true;
+          }
+          depth = (double)sapiToSurfData->toSdaInfo->toSingleBeamDepth->depthHFreq;
+          if (depth != 0.0) {
+            if (depth < minDepth)
+              minDepth = depth;
+            if (depth > maxDepth)
+              maxDepth = depth;
+            depthStatisticsFound = true;
           }
         }
-      }  // if ((soundingFlag & SF_DELETED) == 0)
-    }  // for(ii=0;ii<nrSoundings;ii++)
+      }
+    }  // if ((soundingFlag & SF_DELETED) == 0)
+  }  // for(ii=0;ii<nrSoundings;ii++)
 
-    if (!depthStatisticsFound) {
-      minDepth = maxDepth = 0.0;
-      minBeamPositionStar = maxBeamPositionStar = 0.0;
-      minBeamPositionAhead = maxBeamPositionAhead = 0.0;
-      minX = maxX = minY = maxY = 0.0;
-    }
-
-    toStatistics->minDepth  = (float)minDepth;
-    toStatistics->maxDepth  = (float)maxDepth;
-    toStatistics->minBeamPositionStar  = (float)minBeamPositionStar;
-    toStatistics->maxBeamPositionStar  = (float)maxBeamPositionStar;
-    toStatistics->minBeamPositionAhead  = (float)minBeamPositionAhead;
-    toStatistics->maxBeamPositionAhead  = (float)maxBeamPositionAhead;
-
-    toStatistics->minEasting  = minX;
-    toStatistics->maxEasting  = maxX;
-    toStatistics->minNorthing = minY;
-    toStatistics->maxNorthing = maxY;
-
-    toStatistics->minSpeed=(float)minSpeed;
-    toStatistics->maxSpeed=(float)maxSpeed;
-    toStatistics->minRoll=(float)minRoll;
-    toStatistics->maxRoll=(float)maxRoll;
-    toStatistics->minPitch=(float)minPitch;
-    toStatistics->maxPitch=(float)maxPitch;
-    toStatistics->minHeave=(float)minHeave;
-    toStatistics->maxHeave=(float)maxHeave;
-
-    toGlobalData->modifiedTrackStopX  = (float)(posX - refX);
-    toGlobalData->modifiedTrackStopY  = (float)(posY - refY);
-    toGlobalData->modifiedStartStopDistance = (float)(relWay);
-    toGlobalData->originalTrackStartX = toGlobalData->modifiedTrackStartX;
-    toGlobalData->originalTrackStartY = toGlobalData->modifiedTrackStartY;
-    toGlobalData->originalTrackStopX  = toGlobalData->modifiedTrackStopX;
-    toGlobalData->originalTrackStopY  = toGlobalData->modifiedTrackStopY;
-    toGlobalData->originalStartStopDistance = (float)(relWay);
-    toGlobalData->originalStartStopTime     = relTime;
+  if (!depthStatisticsFound) {
+    minDepth = 0.0;
+    maxDepth = 0.0;
+    minBeamPositionStar = 0.0;
+    maxBeamPositionStar = 0.0;
+    minBeamPositionAhead = 0.0;
+    maxBeamPositionAhead = 0.0;
+    minX = 0.0;
+    maxX = 0.0;
+    minY = 0.0;
+    maxY = 0.0;
   }
+
+  toStatistics->minDepth = (float)minDepth;
+  toStatistics->maxDepth = (float)maxDepth;
+  toStatistics->minBeamPositionStar = (float)minBeamPositionStar;
+  toStatistics->maxBeamPositionStar = (float)maxBeamPositionStar;
+  toStatistics->minBeamPositionAhead = (float)minBeamPositionAhead;
+  toStatistics->maxBeamPositionAhead = (float)maxBeamPositionAhead;
+
+  toStatistics->minEasting = minX;
+  toStatistics->maxEasting = maxX;
+  toStatistics->minNorthing = minY;
+  toStatistics->maxNorthing = maxY;
+
+  toStatistics->minSpeed = (float)minSpeed;
+  toStatistics->maxSpeed = (float)maxSpeed;
+  toStatistics->minRoll = (float)minRoll;
+  toStatistics->maxRoll = (float)maxRoll;
+  toStatistics->minPitch = (float)minPitch;
+  toStatistics->maxPitch = (float)maxPitch;
+  toStatistics->minHeave = (float)minHeave;
+  toStatistics->maxHeave = (float)maxHeave;
+
+  toGlobalData->modifiedTrackStopX = (float)(posX - refX);
+  toGlobalData->modifiedTrackStopY = (float)(posY - refY);
+  toGlobalData->modifiedStartStopDistance = (float)(relWay);
+  toGlobalData->originalTrackStartX = toGlobalData->modifiedTrackStartX;
+  toGlobalData->originalTrackStartY = toGlobalData->modifiedTrackStartY;
+  toGlobalData->originalTrackStopX = toGlobalData->modifiedTrackStopX;
+  toGlobalData->originalTrackStopY = toGlobalData->modifiedTrackStopY;
+  toGlobalData->originalStartStopDistance = (float)(relWay);
+  toGlobalData->originalStartStopTime = relTime;
 }
 
 long SAPI_writeBackFromMemory(char* surfDir, char* surfFile, long errorprint) {
-  char filesix[300];
-  char filesda[300];
-  XdrSurf ret;
-
   if (sapiToSurfData == NULL) {
     if (errorprint != 0)
       fprintf(stderr,
@@ -568,17 +564,19 @@ long SAPI_writeBackFromMemory(char* surfDir, char* surfFile, long errorprint) {
             "@(", "#)", "This SURF-Dataset was NOT generated by STN-Atlas !");
   }
 
+  char filesix[300];
   strncpy(filesix, surfDir, 250);
   strcat(filesix, "/");
   strcat(filesix, surfFile);
   strcat(filesix, ".six");
 
+  char filesda[300];
   strncpy(filesda, surfDir, 250);
   strcat(filesda, "/");
   strcat(filesda, surfFile);
   strcat(filesda, ".sda");
 
-  ret = mem_WriteSdaStructure(filesda, sapiToSurfData);
+  XdrSurf ret = mem_WriteSdaStructure(filesda, sapiToSurfData);
   if (ret == SURF_SUCCESS) {
     ret = mem_WriteSixStructure(filesix, sapiToSurfData);
     if (ret != SURF_SUCCESS) {
