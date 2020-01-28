@@ -1,48 +1,11 @@
-/*-----------------------------------------------------------------------
-/ H E A D E R K O P F
-/ ------------------------------------------------------------------------
-/ ------------------------------------------------------------------------
-/  DATEINAME        : surf.h     Version 3.0
-/  ERSTELLUNGSDATUM : 29.07.93
-/ ----------------------------------------------------------------------*/
-/*!
-/ ------------------------------------------------------------------------
-/ COPYRIGHT (C) 1993: ATLAS ELEKTRONIK GMBH, 28305 BREMEN
-/ ------------------------------------------------------------------------
-/
-/  See README file for copying and redistribution conditions.
-/
-/
-/ HIER/SACHN: P: RP ____ _ ___ __
-/ BENENNUNG :
-/ ERSTELLER : Peter Block    : SAS3
-/ FREIGABE  : __.__.__  GS__
-/ AEND/STAND: __.__.__  __
-/ PRUEFVERM.:
-*/
+// DATEINAME        : surf.h     Version 3.0
+// ERSTELLUNGSDATUM : 29.07.93
+// COPYRIGHT (C) 1993: ATLAS ELEKTRONIK GMBH, 28305 BREMEN
+//
+// See README file for copying and redistribution conditions.
 
-/*
-/ SPRACHE          : UNIX-C
-/ COMPILER         : Silicon Graphix
-/ BETRIEBSSYSTEM   : IRIX
-/ HARDWARE-UMGEBUNG: SGI Crimson
-/ URSPRUNGSHINWEIS :
-/
-/ ------------------------------------------------------------------------
-/ BESCHREIBUNG:       Definitions describing the "SURF-Format" V2.0
-/ ------------------------------------------------------------------------
-/
-/ ------------------------------------------------------------------------
-/ E N D E   D E S   K O P F E S
-/ ------------------------------------------------------------------------
-*/
-/************************************************************************/
-
-
-
-
-#ifndef _SURF
-#define _SURF
+#ifndef SURF_SURF_H_
+#define SURF_SURF_H_
 
 #ifndef SURF20
 #define SURF20
@@ -59,9 +22,6 @@
 #include <rpc/xdr.h>
 #endif
 /*
-#include "strings_surf.h"
-*/
-/*
    time/date-sets are presented in ASCII-Characters
       DDMMYYHHMMSS.NN<0x0>
    name-strings and Label-strings are presented in
@@ -73,37 +33,22 @@
 #define TIME_SIZE           16
 #define TEXT_SIZE           80
 
-
-/* if number of sets or contents are modified ,
-   you should update VERSION !!! */
-
-
 #define SURF_VERSION "SURF V3.0"
-
 #define SURF_VERS3_0 "SURF V3.0"
 #define SURF_VERS2_0 "SURF V2.0"
 
+// SURF elements describing six files
 
-/***************************************/
-/*                                     */
-/* SURF-elements describing SIX-files  */
-/*                                     */
-/***************************************/
+// datatypes of different SURF datasets
 
-
-
-/* datatypes of different SURF-datasets */
-
-   /* marker types */
-
+// marker types
 #define      MIN_M          -4
 #define      EOD_M          -4
 #define      NROF_M         -3
 #define      SDA_M          -2
 #define      SIX_M          -1
 
-   /* six types */
-
+// six types
 #define      DESCRIPTOR      1
 #define      GLOBALDATA      2
 #define      STATISTICS      3
@@ -124,8 +69,7 @@
 #define      CPROFTPES      18
 #define      MAXSIX         18
 
-   /* sda types */
-
+// sda types
 #define      MINSDA          40
 #define      SOUNDING        40
 #define      CENTERPOSITION  41
@@ -146,8 +90,7 @@
 #define      BEAMATTDATA     56
 #define      MAXSDA          56
 
-   /* nrof types */
-
+// nrof types
 #define      MAX_NROF_BEAMS_PER_TABLE          80
 #define      MAX_NROF_CPROFILES_PER_TABLE      81
 #define      MAX_NROF_POLYGONS_PER_TABLE       82
@@ -165,8 +108,7 @@
 #endif
 
 
-/* SURF-dataset "Descriptor" */
-
+// SURF dataset "Descriptor"
 #define SURF_DESCRIPTOR_LABEL SURF_VERSION
 
 typedef short SurfMarkerDescriptor;
@@ -1020,7 +962,6 @@ typedef float SurfFreeBeamAttachedData;
 
 
 /* SURF-dataset "RxSignalparameter" */                 /* new V2.0 */
-
 typedef struct
             {
              float time;               /* scale : sec  */
@@ -1074,14 +1015,12 @@ typedef struct
 /* SURF-dataset "Signalamplitudes"  */
         /* wird nicht mehr benutzt ab V2.0 */
 
-typedef struct
-            {
-              u_short amplitudesFlag                 ;
-              u_short actualNrOfAmplitudes           ;
-              float   maxAmplPosAstar                ;
-              u_char  amplitudes[1]                  ;
-            } SurfSignalAmplitudes;
-
+typedef struct {
+  u_short amplitudesFlag;
+  u_short actualNrOfAmplitudes;
+  float   maxAmplPosAstar;
+  u_char  amplitudes[1];
+} SurfSignalAmplitudes;
 
 #define SIZE_OF_SURF_SIGNAL_AMPLITUDES_ARRAY(NR_OF_AMPLITUDES) \
         (NR_OF_AMPLITUDES == 0)?\
@@ -1091,20 +1030,17 @@ typedef struct
         ((NR_OF_AMPLITUDES - 1) * sizeof(u_char)))
 
 
-/* SURF-dataset "Sidescandata"  */
-
-typedef struct
-            {
-              SURF_U_LONG  sidescanFlag                   ;  /* new V2.0 */
-              u_short actualNrOfSsDataPort           ;
-              u_short actualNrOfSsDataStb            ;
-              float   minSsPosPort                   ;
-              float   minSsPosStb                    ;
-              float   maxSsPosPort                   ;
-              float   maxSsPosStb                    ;
-              u_char  ssData[1]                      ;
-            } SurfSidescanData;
-
+// SURF dataset "Sidescandata"
+typedef struct {
+  SURF_U_LONG  sidescanFlag;  // new V2.0
+  u_short actualNrOfSsDataPort;
+  u_short actualNrOfSsDataStb;
+  float   minSsPosPort;
+  float   minSsPosStb;
+  float   maxSsPosPort;
+  float   maxSsPosStb;
+  u_char  ssData[1];
+} SurfSidescanData;
 
 #define SIZE_OF_SURF_SIDESCAN_DATA_ARRAY(NR_OF_AMPLITUDES) \
         (NR_OF_AMPLITUDES == 0)?\
@@ -1113,24 +1049,14 @@ typedef struct
         (sizeof(SurfSidescanData) + \
         ((NR_OF_AMPLITUDES - 1) * sizeof(u_char)))
 
-
-
-
-/* SURF-dataset "TPE-values"  */                         /* new V3.0 */
-
-typedef struct
-            {
-              float   depthTpe                       ;
-              float   posTpe                         ;
-              float   minDetectionVolumeTpe          ;
-            } SurfTpeValues;
+// SURF dataset "TPE-values" - new V3.0
+typedef struct {
+  float depthTpe;
+  float posTpe;
+  float minDetectionVolumeTpe;
+} SurfTpeValues;
 
 typedef SurfTpeValues SurfMultiBeamTpeValues;
-
 typedef SurfTpeValues SurfSingleBeamTpeValues;
 
-
-
-
-
-#endif /* ifndef _SURF */
+#endif  // SURF_SURF_H_
