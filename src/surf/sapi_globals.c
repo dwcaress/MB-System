@@ -22,79 +22,59 @@ extern SurfDataInfo *sapiToSurfData;
 extern SurfSoundingData *sapiToSdaBlock;
 
 long SAPI_getNrSoundings(void) {
-  long nrSoundings = 0;
-
-  if (sapiToSurfData != NULL) nrSoundings = sapiToSurfData->nrOfSoundings;
-  return nrSoundings;
+  return sapiToSurfData == NULL ? 0l : sapiToSurfData->nrOfSoundings;
 }
 
 long SAPI_getNrBeams(void) {
-  long nrBeams = 0;
-
-  if(sapiToSurfData != NULL) nrBeams = sapiToSurfData->nrBeams;
-  return nrBeams;
+  return sapiToSurfData == NULL ? 0l : sapiToSurfData->nrBeams;
 }
 
 long SAPI_posPresentationIsRad(void) {
-  if(sapiToSurfData != NULL) {
-    if(sapiToSurfData->toGlobalData->presentationOfPosition == EASTING_NORTHING)
-      return (long)1;
-  }
-
-  return (long)0;
+  return
+      sapiToSurfData != NULL &&
+      sapiToSurfData->toGlobalData->presentationOfPosition == EASTING_NORTHING
+      ? 1l : 0l;
 }
 
 char *SAPI_getTypeOfSounder(void) {
-  static char sounderType[2] = {"?"};
+  static char sounderType[2] = "?";
 
   if(sapiToSurfData != NULL) sounderType[0] = sapiToSurfData->toGlobalData->typeOfSounder;
   return sounderType;
 }
 
 char *SAPI_getNameOfSounder(void) {
-  static char nameOfSounder[20] = {"?"};
+  static char nameOfSounder[20] = "?";
 
   if (sapiToSurfData != NULL) {
-    strncpy(nameOfSounder,sapiToSurfData->toGlobalData->nameOfSounder,STRING_SIZE);
+    strncpy(nameOfSounder, sapiToSurfData->toGlobalData->nameOfSounder, STRING_SIZE);
   }
   return nameOfSounder;
 }
 
 char *SAPI_getNameOfShip(void) {
-  static char nameOfShip[20] = {"?"};
+  static char nameOfShip[20] = "?";
 
   if(sapiToSurfData != NULL) {
-    strncpy(nameOfShip,sapiToSurfData->toGlobalData->shipsName,STRING_SIZE);
+    strncpy(nameOfShip, sapiToSurfData->toGlobalData->shipsName, STRING_SIZE);
   }
   return nameOfShip;
 }
 
 long SAPI_getNrSoundvelocityProfiles(void) {
-  long nrCProfiles = 0;
-
-  if (sapiToSurfData != NULL) nrCProfiles = sapiToSurfData->nrCProfiles;
-  return nrCProfiles;
+  return sapiToSurfData == NULL ? 0l : sapiToSurfData->nrCProfiles;
 }
 
 long SAPI_getNrEvents(void) {
-  long nrEvents = 0;
-
-  if (sapiToSurfData != NULL) nrEvents = sapiToSurfData->nrEvents;
-  return nrEvents;
+  return sapiToSurfData == NULL ? 0l : sapiToSurfData->nrEvents;
 }
 
 long SAPI_getNrPolygonElements(void) {
-  long nrPolyElements = 0;
-
-  if (sapiToSurfData != NULL) nrPolyElements = sapiToSurfData->nrPolyElements;
-  return nrPolyElements;
+  return sapiToSurfData == NULL ? 0l : sapiToSurfData->nrPolyElements;
 }
 
 long SAPI_getNrPositionsensors(void) {
-  long nrPosiSensors = 0;
-
-  if (sapiToSurfData != NULL) nrPosiSensors = sapiToSurfData->nrPosiSensors;
-  return nrPosiSensors;
+  return sapiToSurfData == NULL ? 0l : sapiToSurfData->nrPosiSensors;
 }
 
 long SAPI_dataHaveHighFrequencyLayer(void) {
@@ -106,69 +86,60 @@ long SAPI_dataHaveHighFrequencyLayer(void) {
 }
 
 long SAPI_dataHaveMediumFrequencyLayer(void) {
-  long layer=0;
+  long layer = 0;
   if(sapiToSurfData != NULL) {
-    if(sapiToSurfData->toGlobalData->mediumFrequency > 0.0) layer=1;
+    if(sapiToSurfData->toGlobalData->mediumFrequency > 0.0) layer = 1;
   }
   return layer;
 }
 
 long SAPI_dataHaveLowFrequencyLayer(void)
 {
- long layer=0;
- if(sapiToSurfData != NULL)
- {
-  if(sapiToSurfData->toGlobalData->lowFrequency > 0.0) layer=1;
- }
- return layer;
+  long layer = 0;
+  if(sapiToSurfData != NULL) {
+    if(sapiToSurfData->toGlobalData->lowFrequency > 0.0) layer = 1;
+  }
+  return layer;
 }
 
 SurfGlobalData *SAPI_getGlobalData(void) {
-  if(sapiToSurfData == NULL) return NULL;
-  return sapiToSurfData->toGlobalData;
+  return sapiToSurfData == NULL ? NULL : sapiToSurfData->toGlobalData;
 }
 
 SurfStatistics *SAPI_getStatistics(void) {
-  if(sapiToSurfData == NULL) return NULL;
-  return sapiToSurfData->toStatistics;
+  return sapiToSurfData == NULL ? NULL : sapiToSurfData->toStatistics;
 }
 
 SurfPositionAnySensor *SAPI_getPositionSensor(long nrSensor) {
-  SurfPositionSensorArray *toSensor;
-  long maxNrPosSens = 0;
-
   if(sapiToSurfData == NULL) return NULL;
-  maxNrPosSens = SAPI_getNrPositionsensors();
-  if((nrSensor >= 0) && (nrSensor < maxNrPosSens)) {
-    toSensor = (SurfPositionSensorArray *)sapiToSurfData->toPosiSensors[nrSensor].label;
+  const long maxNrPosSens = SAPI_getNrPositionsensors();
+  if (nrSensor >= 0 && nrSensor < maxNrPosSens) {
+    SurfPositionSensorArray *toSensor =
+        (SurfPositionSensorArray *)sapiToSurfData->toPosiSensors[nrSensor].label;
     return (SurfPositionAnySensor *)toSensor;
   }
 
-  // TODO(schwehr): Return NULL
-  return 0;
+  return NULL;
 }
 
 SurfEventValues *SAPI_getEvent(long nrEvent) {
-  long maxNrEvents = 0;
-
   if(sapiToSurfData == NULL) return NULL;
-  maxNrEvents = SAPI_getNrEvents();
-  if((nrEvent >= 0) && (nrEvent < maxNrEvents)) {
+  long maxNrEvents = SAPI_getNrEvents();
+  if (nrEvent >= 0 && nrEvent < maxNrEvents) {
     return &(sapiToSurfData->toEvents->values[nrEvent]);
   }
   return NULL;
 }
 
 SurfPolygons *SAPI_getPolygons(void) {
-  if(sapiToSurfData == NULL) return NULL;
-  return(sapiToSurfData->toPolygons);
+  return sapiToSurfData == NULL ? NULL : sapiToSurfData->toPolygons;
 }
 
 double SAPI_getAbsoluteStartTimeOfProfile(void) {
-  if(sapiToSurfData == NULL) return(0.0);
+  if(sapiToSurfData == NULL) return 0.0;
 
   SurfTm sTm;
-  surf_timeSizetoSurfTm(sapiToSurfData->toGlobalData->startTimeOfProfile,&sTm);
+  surf_timeSizetoSurfTm(sapiToSurfData->toGlobalData->startTimeOfProfile, &sTm);
   return surf_timeAbsoluteFromSurfTm(&sTm);
 }
 
