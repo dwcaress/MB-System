@@ -1,18 +1,14 @@
-/*
-/  See README file for copying and redistribution conditions.
-*/
+//  See README file for copying and redistribution conditions.
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef _WIN32
 #include <string.h>
+#ifdef _WIN32
 #include "types_win32.h"
 #else
-#include <string.h>
 #include <unistd.h>
 #endif
-#include <math.h>
-
 
 #include "xdr_surf.h"
 #include "mem_surf.h"
@@ -21,12 +17,8 @@
 #define  __SAPI__
 #include "mb_sapi.h"
 
-
-
 extern SurfDataInfo*      sapiToSurfData;
 extern SurfSoundingData*  sapiToSdaBlock;
-
-
 
 long SAPI_getXYZfromMultibeamSounding(long beam,long depthOverChartZero,
                                       double* north,double* east,double* depth)
@@ -80,9 +72,6 @@ long SAPI_getXYZfromMultibeamSounding(long beam,long depthOverChartZero,
  return(-1);
 }
 
-
-
-
 static long SAPI_getXYZfromSinglebeamSounding(char layer,long depthOverChartZero,
                                               double* north,double* east,double* depth)
 {
@@ -133,7 +122,6 @@ static long SAPI_getXYZfromSinglebeamSounding(char layer,long depthOverChartZero
  return(0);
 }
 
-
 long SAPI_getXYZfromSinglebeamSoundingHF(long depthOverChartZero,
                                          double* north,double* east,double* depth)
 {
@@ -145,7 +133,6 @@ long SAPI_getXYZfromSinglebeamSoundingHF(long depthOverChartZero,
  return(SAPI_getXYZfromSinglebeamSounding('H',depthOverChartZero,north,east,depth));
 }
 
-
 long SAPI_getXYZfromSinglebeamSoundingMF(long depthOverChartZero,
                                          double* north,double* east,double* depth)
 {
@@ -156,7 +143,6 @@ long SAPI_getXYZfromSinglebeamSoundingMF(long depthOverChartZero,
  if(SAPI_dataHaveMediumFrequencyLayer()==0) return(-1);
  return(SAPI_getXYZfromSinglebeamSounding('M',depthOverChartZero,north,east,depth));
 }
-
 
 long SAPI_getXYZfromSinglebeamSoundingLF(long depthOverChartZero,
                                          double* north,double* east,double* depth)
