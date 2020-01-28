@@ -62,12 +62,12 @@ static void freeControlData(void) {
 
 long SAPI_openIntoMemory(char* surfDir, char* surfFile, long errorprint) {
   loadIntoMemory = True;
-  return(SAPI_openFile(surfDir, surfFile, errorprint));
+  return SAPI_openFile(surfDir, surfFile, errorprint);
 }
 
 long SAPI_open(char* surfDir,char* surfFile,long errorprint) {
   loadIntoMemory = False;
-  return(SAPI_openFile(surfDir, surfFile, errorprint));
+  return SAPI_openFile(surfDir, surfFile, errorprint);
 }
 
 long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
@@ -80,7 +80,7 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
   if(access(surfDir, 0) != 0) {
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't access path: '%s' !\n", surfDir);
-    return((long)-1);
+    return (long)-1;
   }
 
   freeControlData();
@@ -89,7 +89,7 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
   if (sapiToSurfData == NULL) {
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't allocate sufficient memory' !\n");
-    return((long)-1);
+    return (long)-1;
   }
 
   strncpy(filesix, surfDir, 250);
@@ -106,13 +106,13 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
     freeControlData();
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't access file: '%s' !\n", filesix);
-    return(-1);
+    return -1;
   }
   if(access(filesda, 4) !=0) {
     freeControlData();
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't access file: '%s' !\n", filesda);
-    return(-1);
+    return -1;
   }
 
   ret = mem_ReadSixStructure(filesix, sapiToSurfData);
@@ -121,7 +121,7 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
     freeControlData();
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't read file: '%s' !\n", filesix);
-    return((long)-1);
+    return (long)-1;
   }
 
   // Special mode for rewrite read the whole surfFile into memory
@@ -133,10 +133,10 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
       freeControlData();
       if(errorprint != 0)
         fprintf(stderr, "SAPI-Error: Can't read file: '%s' !\n", filesda);
-      return((long)-1);
+      return (long)-1;
     }
     surf_moveInSdaThread(sapiToSurfData, ABS_POSITION, 0);
-    return((long)0);
+    return (long)0;
   }
 
   // Allocate the necessary memory for a SDA-structure and read
@@ -146,7 +146,7 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
     freeControlData();
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: nr of soundings = %d!\n", (int)(sapiToSurfData->nrOfSoundings));
-    return((long)-1);
+    return (long)-1;
   }
 
   // Allocate structure for xdr-conversion and SdaInfo and Sda-Thread
@@ -160,7 +160,7 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
     freeControlData();
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't allocate sufficient memory' !\n");
-    return((long)-1);
+    return (long)-1;
   }
 
   sizeOfSdaBlock = initializeSdaInfo(sapiToSurfData, sapiToSdaInfo);
@@ -170,7 +170,7 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
     freeControlData();
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't allocate sufficient memory' !\n");
-    return((long)-1);
+    return (long)-1;
   }
 
   setPointersInSdaInfo(sapiToSdaBlock, sapiToSdaInfo);
@@ -182,7 +182,7 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
     freeControlData();
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't open file: '%s' !\n", filesda);
-    return((long)-1);
+    return (long)-1;
   }
 
   ret = mem_convertOneSdaBlock2(sapiToSurfData->xdrs, sapiToSdaInfo, sapiToSurfData->sourceVersionLess2);
@@ -190,10 +190,10 @@ long SAPI_openFile(char* surfDir, char* surfFile, long errorprint) {
     freeControlData();
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't read file: '%s' !\n", filesda);
-    return((long)-1);
+    return (long)-1;
   }
 
-  return((long)0);
+  return (long)0;
 }
 
 long SAPI_nextSounding(long errorprint) {
@@ -204,7 +204,7 @@ long SAPI_nextSounding(long errorprint) {
   if((sapiToSurfData == NULL) || (sapiToSdaInfo == NULL)) {
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: No SURF-data open !\n");
-    return((long)-1);
+    return (long)-1;
   }
 
   // Special mode for rewrite read the whole surfFile into memory
@@ -213,18 +213,18 @@ long SAPI_nextSounding(long errorprint) {
     if(surf_moveInSdaThread(sapiToSurfData, FORE_ONE_STEP, 0) == END_OF_THREAD) {
       if(errorprint != 0)
         fprintf(stderr, "SAPI-Error: End of file !\n");
-      return((long)-1);
+      return (long)-1;
     }
-    return((long)0);
+    return (long)0;
   }
 
   ret = mem_convertOneSdaBlock2(sapiToSurfData->xdrs, sapiToSdaInfo, sapiToSurfData->sourceVersionLess2);
   if(ret != SURF_SUCCESS) {
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't read file or EOF !\n");
-    return((long)-1);
+    return (long)-1;
   }
-  return((long)0);
+  return (long)0;
 }
 
 long SAPI_rewind(long errorprint) {
@@ -235,19 +235,19 @@ long SAPI_rewind(long errorprint) {
   // Special mode for rewrite read the whole surfFile into memory
   if(loadIntoMemory==True) {
     if((sapiToSurfData == NULL) || (sapiToSdaInfo == NULL)) {
-      return((long)-1);
+      return (long)-1;
     }
     surf_moveInSdaThread(sapiToSurfData, TO_START, 0);
-    return((long)0);
+    return (long)0;
   }
 
   if((sapiToSurfData == NULL) || (sapiToSurfData->xdrs == NULL)
      || (sapiToSdaInfo == NULL) || (sapiToSurfData->fp == NULL)) {
-    return((long)-1);
+    return (long)-1;
   }
 
   rewind(sapiToSurfData->fp);
-  return(SAPI_nextSounding(errorprint));
+  return SAPI_nextSounding(errorprint);
 }
 
 void SAPI_close(void) {
@@ -540,20 +540,20 @@ long SAPI_writeBackFromMemory(char* surfDir, char* surfFile, long errorprint) {
     if(errorprint != 0)
       fprintf(stderr,
               "SAPI-Error: There is no open SURF-file for writing back !\n");
-    return((long)-1);
+    return (long)-1;
   }
 
   if(loadIntoMemory==False) {
     if(errorprint != 0)
       fprintf(stderr,
               "SAPI-Error: For writing back you have to open\n     the file with SAPI_openIntoMemory(..)!\n");
-    return((long)-1);
+    return (long)-1;
   }
 
   if(access(surfDir, 0) != 0) {
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't access path: '%s' !\n", surfDir);
-    return((long)-1);
+    return (long)-1;
   }
 
   recalculateData();
@@ -584,13 +584,13 @@ long SAPI_writeBackFromMemory(char* surfDir, char* surfFile, long errorprint) {
     if(ret != SURF_SUCCESS) {
       if(errorprint != 0)
         fprintf(stderr, "SAPI-Error: Can't write back file: '%s' !\n", filesix);
-      return(-1);
+      return -1;
     }
   } else {
     if(errorprint != 0)
       fprintf(stderr, "SAPI-Error: Can't write back file: '%s' !\n", filesda);
-    return(-1);
+    return -1;
   }
 
-  return((long)0);
+  return (long)0;
 }
