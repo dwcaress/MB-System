@@ -476,18 +476,18 @@ typedef struct {
 
 // FILE handling functions
 
-void  SAPI_printAPIandSURFversion(void);
+// void  SAPI_printAPIandSURFversion(void);
 
 long  SAPI_open(char* surfDir,char* surfFile,long errorprint);
 long  SAPI_nextSounding(long errorprint);
 long  SAPI_rewind(long errorprint);
 void  SAPI_close(void);
 
-long SAPI_openIntoMemory(char* surfDir,char* surfFile,long errorprint);
-long SAPI_writeBackFromMemory(char* surfDir,char* surfFile,long errorprint);
+// long SAPI_openIntoMemory(char* surfDir,char* surfFile, long errorprint);
+// long SAPI_writeBackFromMemory(char* surfDir,char* surfFile, long errorprint);
 
-long SAPI_createSurfBody(long nrSoundings,long nrBeams,
-                         long maxNrSidescanSamplesPerSounding,long errorprint);
+// long SAPI_createSurfBody(long nrSoundings,long nrBeams,
+//                          long maxNrSidescanSamplesPerSounding, long errorprint);
 
 
 // Data from SIX(Index) File
