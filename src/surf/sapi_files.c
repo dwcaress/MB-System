@@ -34,9 +34,9 @@ SurfDataInfo *sapiToSurfData;
 SurfSoundingData *sapiToSdaBlock;
 bool loadIntoMemory = false;
 
-void SAPI_printAPIandSURFversion(void) {
-  fprintf(stderr, "Version: %s\n         %s\n", SAPI_VERSION, SURF_VERSION);
-}
+// void SAPI_printAPIandSURFversion(void) {
+//   fprintf(stderr, "Version: %s\n         %s\n", SAPI_VERSION, SURF_VERSION);
+// }
 
 static void freeControlData(void) {
   SdaInfo* sapiToSdaInfo = NULL;
@@ -59,10 +59,10 @@ static void freeControlData(void) {
   sapiToSdaBlock = NULL;
 }
 
-long SAPI_openIntoMemory(char* surfDir, char* surfFile, long errorprint) {
-  loadIntoMemory = true;
-  return SAPI_openFile(surfDir, surfFile, errorprint);
-}
+// long SAPI_openIntoMemory(char* surfDir, char* surfFile, long errorprint) {
+//   loadIntoMemory = true;
+//   return SAPI_openFile(surfDir, surfFile, errorprint);
+// }
 
 long SAPI_open(char* surfDir,char* surfFile,long errorprint) {
   loadIntoMemory = false;
@@ -531,6 +531,7 @@ void recalculateData(void) {
   toGlobalData->originalStartStopTime = relTime;
 }
 
+#if 0
 long SAPI_writeBackFromMemory(char* surfDir, char* surfFile, long errorprint) {
   if (sapiToSurfData == NULL) {
     if (errorprint != 0)
@@ -592,3 +593,4 @@ long SAPI_writeBackFromMemory(char* surfDir, char* surfFile, long errorprint) {
 
   return 0l;
 }
+#endif // #if 0 SAPI_writeBackFromMemory
