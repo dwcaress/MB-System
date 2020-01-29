@@ -54,7 +54,7 @@ long SAPI_getXYZfromMultibeamSounding(
     const double sinHeading = sin(heading);
     double xM = (posAhead*sinHeading) + (posAstar * cosHeading);
     double yM = (posAhead*cosHeading) - (posAstar * sinHeading);
-    // rad presentation 
+    // rad presentation
     if (SAPI_posPresentationIsRad() != 0) {
       yM = M_TO_RAD_Y(yM);
       xM = M_TO_RAD_X(xM, posY);

@@ -276,7 +276,7 @@ void recalculateData(void) {
     isPitchcompensated = false;
   if (strncmp(toGlobalData->nameOfSounder, "FS", 2) == 0)
     isPitchcompensated = false;
-  
+
   double minBeamPositionStar;
   double maxBeamPositionStar;
   double minBeamPositionAhead;
@@ -421,7 +421,7 @@ void recalculateData(void) {
               fanParam.heaveRx = 0.0;
             fanParam.travelTime =
                 (double)sapiToSurfData->toSdaInfo->toMultiBeamTT[beam].travelTimeOfRay;
-            
+
             if (depthFromTT(&fanParam, isPitchcompensated)) {
               const double depth = fanParam.depth - tide;
               sapiToSurfData->toSdaInfo->toMultiBeamDepth[beam].depth = (float)depth;
