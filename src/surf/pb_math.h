@@ -7,13 +7,12 @@
 #ifndef SURF_PB_MATH_H_
 #define SURF_PB_MATH_H_
 
+#include <math.h>
+#include <stdbool.h>
+
 #ifndef PI
 #define PI 3.14159265359
 #endif
-
-typedef  int   Boolean;
-#define  True  1
-#define  False 0
 
 typedef struct {
                  double    x;
@@ -46,30 +45,30 @@ typedef struct {
 #define RAD_TO_METER_Y(LAT)      ((double)(LAT*M_PER_RAD_LAT))
 #define RAD_TO_METER_X(LON,LAT)  ((double)(LON*(M_PER_RAD_LON(LAT))))
 
-double pbAtan2(double y,double x);
+double pbAtan2(double y, double x);
 
 double setToPlusMinusPI(double angle);
-void rotateCoordinates(double rotAngle,XY_Coords* origCoords,
-                                     XY_Coords* targetCoords);
-void xyToRhoPhi(double x0,double y0,double pointX,double pointY,
-                                      double* rho,double* phi);
-void lambdaPhiToRhoPhi(double x0,double y0,double pointX,double pointY,
-                                      double* rho,double* phi);
-Boolean signf(double value);
-Boolean signsh(short value);
+void rotateCoordinates(
+    double rotAngle, XY_Coords *origCoords, XY_Coords *targetCoords);
+void xyToRhoPhi(double x0, double y0, double pointX, double pointY,
+                double *rho, double *phi);
+void lambdaPhiToRhoPhi(double x0, double y0, double pointX, double pointY,
+                       double *rho, double *phi);
+// bool signf(double value);
+// bool signsh(short value);
 
-Boolean depthFromTT(FanParam* fanParam,Boolean isPitchcompensated);
-Boolean TTfromDepth(FanParam* fanParam,Boolean isPitchcompensated);
-Boolean draughtFromDepth(FanParam* fanParam);
-Boolean heaveFromDepth(FanParam* fanParam);
+bool depthFromTT(FanParam *fanParam, bool isPitchcompensated);
+bool TTfromDepth(FanParam *fanParam, bool isPitchcompensated);
+bool draughtFromDepth(FanParam *fanParam);
+bool heaveFromDepth(FanParam *fanParam);
 
-double cMeanToTemperature(double salinity,double cMean);
-double temperatureToCMeanDelGrosso(double salinity,double temperature);
-double temperatureToCMeanMedwin(double salinity,double temperature);
-double temperatureToCMean(double salinity,double temperature);
+double cMeanToTemperature(double salinity, double cMean);
+double temperatureToCMeanDelGrosso(double salinity, double temperature);
+double temperatureToCMeanMedwin(double salinity, double temperature);
+double temperatureToCMean(double salinity, double temperature);
 
 SurfTime surfTimeOfDayFromAbsTime (SurfTime absTime);
-void timeFromRelTime (SurfTime relTime,char*buffer);
-Boolean relTimeFromTime (char*buffer,SurfTime* relTime);
+void timeFromRelTime (SurfTime relTime, char *buffer);
+bool relTimeFromTime (char *buffer, SurfTime *relTime);
 
 #endif  // SURF_PB_MATH_H_
