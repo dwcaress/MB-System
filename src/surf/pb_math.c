@@ -5,6 +5,7 @@
 // See README file for copying and redistribution conditions.
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -70,25 +71,20 @@ void lambdaPhiToRhoPhi(
     *phi = angle;
 }
 
-Boolean signf(double value) {
-  return value >= 0.0;
-}
-
-Boolean signsh(short value) {
-  return value >= 0;
-}
+// bool signf(double value) { return value >= 0.0; }
+// bool signsh(short value) { return value >= 0; }
 
 // Berechnung von Tiefe und Ablagen aus Traveltime
-Boolean depthFromTT(FanParam* fanParam, Boolean isPitchcompensated) {
+bool depthFromTT(FanParam* fanParam, bool isPitchcompensated) {
   // aktuellen Winkel Aufgrund cmean rechnen
   if(fanParam->cmean == 0.0 || fanParam->ckeel == 0.0 ||
      fanParam->travelTime == 0.0)
-    return False;
+    return false;
 
   const double arg = (fanParam->cmean / fanParam->ckeel) * sin(fanParam->angle);
 
   if (arg >= 1.0 || arg <= -1.0)
-     return False;
+     return false;
 
   const double alpha = asin(arg);
 
@@ -128,20 +124,20 @@ Boolean depthFromTT(FanParam* fanParam, Boolean isPitchcompensated) {
                   - fanParam->heaveRx  // absolute Hubkompensation
                   + fanParam->draught; // Tiefgang
 
-  return True;
+  return true;
 }
 
 // Berechnung von Traveltime und Ablagen aus Depth
-Boolean TTfromDepth(FanParam *fanParam, Boolean isPitchcompensated) {
+bool TTfromDepth(FanParam *fanParam, bool isPitchcompensated) {
   /* aktuellen Winkel Aufgrund cmean rechnen */
 
   if(fanParam->cmean == 0.0 || fanParam->ckeel == 0.0 ||
      fanParam->travelTime == 0.0)
-    return False;
+    return false;
 
   const double arg = (fanParam->cmean / fanParam->ckeel) * sin(fanParam->angle);
   if (arg >= 1.0 || arg <= -1.0)
-     return False;
+     return false;
 
   const double alpha = asin(arg);
 
@@ -181,20 +177,20 @@ Boolean TTfromDepth(FanParam *fanParam, Boolean isPitchcompensated) {
   fanParam->posAhead = (depth * tanP)  + fanParam->transducerOffsetAhead;
   fanParam->posStar  = (depth * tanAl) + fanParam->transducerOffsetStar;
 
-  return True;
+  return true;
 }
 
 
 // Berechnung von Draught aus Ablage und Depth
 
-Boolean draughtFromDepth(FanParam *fanParam) {
+bool draughtFromDepth(FanParam *fanParam) {
   // aktuellen Winkel aufgrund cmean rechnen */
-  if(fanParam->cmean == 0.0 || fanParam->ckeel == 0.0) return False;
+  if(fanParam->cmean == 0.0 || fanParam->ckeel == 0.0) return false;
 
   const double arg = (fanParam->cmean / fanParam->ckeel) * sin(fanParam->angle);
 
   if(arg >= 1.0 || arg <= -1.0)
-    return False;
+    return false;
 
   const double alpha = asin(arg);
 
@@ -203,17 +199,17 @@ Boolean draughtFromDepth(FanParam *fanParam) {
    fabs(fanParam->posStar - fanParam->transducerOffsetStar)/tan(fabs(alpha));
 
   fanParam->draught = fanParam->depth - fanDepth;
-  return True;
+  return true;
 }
 
 // Berechnung von Heave aus Ablage,Tiefgang und Depth
-Boolean heaveFromDepth(FanParam *fanParam) {
+bool heaveFromDepth(FanParam *fanParam) {
   // aktuellen Winkel aufgrund cmean rechnen
-  if(fanParam->cmean == 0.0 || fanParam->ckeel == 0.0) return False;
+  if(fanParam->cmean == 0.0 || fanParam->ckeel == 0.0) return false;
 
   const double arg = (fanParam->cmean / fanParam->ckeel) * sin(fanParam->angle);
   if(arg >= 1.0 || arg <= -1.0)
-    return False;
+    return false;
 
   const double alpha = asin(arg);
 
@@ -222,7 +218,7 @@ Boolean heaveFromDepth(FanParam *fanParam) {
   fanParam->heaveTx = - (fanParam->depth - fanDepth - fanParam->draught);
   fanParam->heaveRx = fanParam->heaveTx;
 
-  return True;
+  return true;
 }
 
 // nach Del Grosso: ...
@@ -327,19 +323,19 @@ void timeFromRelTime(SurfTime relTime, char *buffer) {
 }
 
 
-Boolean relTimeFromTime(char *buffer, SurfTime *relTime) {
+bool relTimeFromTime(char *buffer, SurfTime *relTime) {
   if (strlen(buffer) > 8) buffer[8] = 0;
-  if (strlen(buffer) != 8) return False;
-  if (buffer[2] != ':' || buffer[5] != ':') return False;
+  if (strlen(buffer) != 8) return false;
+  if (buffer[2] != ':' || buffer[5] != ':') return false;
 
   int hour;
   int min;
   int sec;
   const int nr = sscanf(buffer, "%2d:%2d:%2d", &hour, &min, &sec);
-  if (nr != 3) return False;
+  if (nr != 3) return false;
 
   *relTime = hour * 3600.0 + min * 60.0 + sec;
-  return True;
+  return true;
 }
 
 
