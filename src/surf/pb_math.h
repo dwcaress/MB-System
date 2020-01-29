@@ -15,25 +15,25 @@
 #endif
 
 typedef struct {
-                 double    x;
-                 double    y;
-               } XY_Coords;
+  double x;
+  double y;
+} XY_Coords;
 
 typedef struct {
-                 double    angle;
-                 double    cmean;
-                 double    ckeel;
-                 double    travelTime;
-                 double    draught;
-                 double    heaveTx;
-                 double    heaveRx;
-                 double    pitchTx;
-                 double    transducerOffsetStar;
-                 double    transducerOffsetAhead;
-                 double    depth;
-                 double    posStar;
-                 double    posAhead;
-               } FanParam;
+  double angle;
+  double cmean;
+  double ckeel;
+  double travelTime;
+  double draught;
+  double heaveTx;
+  double heaveRx;
+  double pitchTx;
+  double transducerOffsetStar;
+  double transducerOffsetAhead;
+  double depth;
+  double posStar;
+  double posAhead;
+} FanParam;
 
 /* Plattkarten-Projektion */
 
@@ -45,30 +45,30 @@ typedef struct {
 #define RAD_TO_METER_Y(LAT)      ((double)(LAT*M_PER_RAD_LAT))
 #define RAD_TO_METER_X(LON,LAT)  ((double)(LON*(M_PER_RAD_LON(LAT))))
 
-double pbAtan2(double y, double x);
+// double pbAtan2(double y, double x);
 
 double setToPlusMinusPI(double angle);
-void rotateCoordinates(
-    double rotAngle, XY_Coords *origCoords, XY_Coords *targetCoords);
-void xyToRhoPhi(double x0, double y0, double pointX, double pointY,
-                double *rho, double *phi);
-void lambdaPhiToRhoPhi(double x0, double y0, double pointX, double pointY,
-                       double *rho, double *phi);
+// void rotateCoordinates(
+//    double rotAngle, XY_Coords *origCoords, XY_Coords *targetCoords);
+// void xyToRhoPhi(double x0, double y0, double pointX, double pointY,
+//                 double *rho, double *phi);
+// void lambdaPhiToRhoPhi(double x0, double y0, double pointX, double pointY,
+//                        double *rho, double *phi);
 // bool signf(double value);
 // bool signsh(short value);
 
 bool depthFromTT(FanParam *fanParam, bool isPitchcompensated);
-bool TTfromDepth(FanParam *fanParam, bool isPitchcompensated);
-bool draughtFromDepth(FanParam *fanParam);
-bool heaveFromDepth(FanParam *fanParam);
+// bool TTfromDepth(FanParam *fanParam, bool isPitchcompensated);
+// bool draughtFromDepth(FanParam *fanParam);
+// bool heaveFromDepth(FanParam *fanParam);
 
-double cMeanToTemperature(double salinity, double cMean);
-double temperatureToCMeanDelGrosso(double salinity, double temperature);
-double temperatureToCMeanMedwin(double salinity, double temperature);
-double temperatureToCMean(double salinity, double temperature);
+// double cMeanToTemperature(double salinity, double cMean);
+// double temperatureToCMeanDelGrosso(double salinity, double temperature);
+// double temperatureToCMeanMedwin(double salinity, double temperature);
+// double temperatureToCMean(double salinity, double temperature);
 
-SurfTime surfTimeOfDayFromAbsTime (SurfTime absTime);
-void timeFromRelTime (SurfTime relTime, char *buffer);
-bool relTimeFromTime (char *buffer, SurfTime *relTime);
+// SurfTime surfTimeOfDayFromAbsTime (SurfTime absTime);
+// void timeFromRelTime (SurfTime relTime, char *buffer);
+// bool relTimeFromTime (char *buffer, SurfTime *relTime);
 
 #endif  // SURF_PB_MATH_H_
