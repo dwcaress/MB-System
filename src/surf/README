@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	README	6/1/2002
- *    $Id$
  *
  *    Copyright (c) 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -19,8 +18,6 @@ code was developed by ATLAS Hydrographics and has been
 released by ATLAS Hydrographics for open source distribution
 under the GNU Public License (GPL).
 
-The code in this directory is unchanged from ATLAS distribution,
-but is now embedded in the MB-System distribution structure.
 The original ATLAS Hydrographics distribution also included
 data samples and example programs that use the SURF API or
 sapi library. This original distribution is available
@@ -32,12 +29,9 @@ separate SAPI distribution.
 
 /*--------------------------------------------------------------------*/
 
-
 SURF Application Programming Interface (SURF API)
 -------------------------------------------------
 Version: 3.1.4
-
-
 
 1. GENERAL
 ----------------------------------------
@@ -86,8 +80,6 @@ Over the years, the SURF Format has been extended twice:
 The current SURF API is able to read all types of SURF files (SURF 1, 
 SURF 2 and SURF 3) and writes SURF 3 files.   
 
-
-
 2. HOW TO USE THE SURF API
 -----------------------------------------
 
@@ -128,8 +120,6 @@ example/win_sapitest4
 libsrc/libsapi
 
 
-
-
 3. COPYRIGHT AND LICENSING
 -----------------------------------------
 
@@ -150,5 +140,3 @@ source code is also distributed. (see: http://www.gnu.org/copyleft/gpl.html)
 This SURF API does not come with any warranties, nor is it
 guaranteed to work on your computer or to do anything useful.  
 The user assumes full responsibility for the use of this library.
-
-
