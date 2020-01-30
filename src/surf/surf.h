@@ -7,20 +7,13 @@
 #ifndef SURF_SURF_H_
 #define SURF_SURF_H_
 
-#ifndef SURF20
-#define SURF20
-#endif
-
-#ifndef SURF30
-#define SURF30
-#endif
-
 #ifdef _WIN32
 #include "xdr_win32.h"
 #else
 #include <rpc/types.h>
 #include <rpc/xdr.h>
 #endif
+
 /*
    time/date-sets are presented in ASCII-Characters
       DDMMYYHHMMSS.NN<0x0>
