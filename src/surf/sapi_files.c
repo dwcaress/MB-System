@@ -34,10 +34,6 @@ SurfDataInfo *sapiToSurfData;
 SurfSoundingData *sapiToSdaBlock;
 bool loadIntoMemory = false;
 
-// void SAPI_printAPIandSURFversion(void) {
-//   fprintf(stderr, "Version: %s\n         %s\n", SAPI_VERSION, SURF_VERSION);
-// }
-
 static void freeControlData(void) {
   SdaInfo* sapiToSdaInfo = NULL;
 
@@ -58,11 +54,6 @@ static void freeControlData(void) {
   sapiToSdaInfo = NULL;
   sapiToSdaBlock = NULL;
 }
-
-// long SAPI_openIntoMemory(char* surfDir, char* surfFile, long errorprint) {
-//   loadIntoMemory = true;
-//   return SAPI_openFile(surfDir, surfFile, errorprint);
-// }
 
 long SAPI_open(char* surfDir,char* surfFile,long errorprint) {
   loadIntoMemory = false;
