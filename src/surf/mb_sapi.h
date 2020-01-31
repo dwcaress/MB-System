@@ -5,8 +5,8 @@
 // BESCHREIBUNG:       Definitions describing the "SURF-Format" 3
 //                                               & SURF-API-lib V3.1.4
 
-#ifndef _SAPI
-#define _SAPI
+#ifndef SURF_MB_SAPI_H_
+#define SURF_MB_SAPI_H_
 
 #ifndef __SAPI__
 
@@ -88,13 +88,13 @@ typedef struct {
   char numberOfProfile[STRING_SIZE];
   float chartZero;  // rel. NN
   float tideZero;  // rel. NN
-  SAPI_U_LONG  numberOfMeasuredSoundings;
-  SAPI_U_LONG  actualNumberOfSoundingSets;
+  SAPI_U_LONG numberOfMeasuredSoundings;
+  SAPI_U_LONG actualNumberOfSoundingSets;
   char timeDateOfTideModification[TIME_SIZE];
   char timeDateOfDepthModification[TIME_SIZE];
   char timeDateOfPosiModification[TIME_SIZE];
   char timeDateOfParaModification[TIME_SIZE];
-  SAPI_U_LONG  correctedParameterFlags;
+  SAPI_U_LONG correctedParameterFlags;
   float offsetHeave;
   float offsetRollPort;
   float offsetRollStar;
@@ -554,4 +554,4 @@ extern long SAPI_getXYZfromSinglebeamSoundingMF(long depthOverChartZero,
 extern long SAPI_getXYZfromSinglebeamSoundingLF(long depthOverChartZero,
                                              double* north,double* east,double* depth);
 
-#endif /* ifndef _SAPI */
+#endif  // SURF_MB_SAPI_H_
