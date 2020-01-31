@@ -1247,7 +1247,6 @@ XdrSurf cleanUpSixWrite(SurfDataInfo *toSurfDataInfo,
 // Writes a SIX structure back to the file according to SurfDataInfo
 XdrSurf mem_WriteSixStructure(
     char *filename,  SurfDataInfo *toSurfDataInfo) {
-  XdrSurf ret;
   SurfDescriptor *surfDescriptor;
   SurfGlobalData *surfGlobalData;
   SurfStatistics *surfStatistics;
@@ -1271,363 +1270,294 @@ XdrSurf mem_WriteSixStructure(
 
   /* allocate structure for xdr-conversion */
   XDR *xdrs = (XDR*)calloc(1, sizeof(XDR));
-  if (xdrs == NULL)
-  {
-   return SURF_CANT_GET_MEMORY;
+  if (xdrs == NULL) {
+    return SURF_CANT_GET_MEMORY;
   }
   toSurfDataInfo->xdrs = xdrs;
   surfDescriptor = toSurfDataInfo->toDescriptor;
-  FILE *fp = NULL;
-  if (surfDescriptor == NULL)
-  {
-   return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
+  if (surfDescriptor == NULL) {
+    FILE *fp = NULL;
+    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
   }
 
   /* open conversion and file Write */
-  fp = xdrSurfOpenWrite(xdrs, (const char*)filename);
+  FILE *fp = xdrSurfOpenWrite(xdrs, (const char*)filename);
   toSurfDataInfo->fp = fp;
-  if (fp == NULL)
-  {
-   return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CANT_OPEN_FILE);
+  if (fp == NULL) {
+    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CANT_OPEN_FILE);
   }
 
-  /* write SurfDescriptor */
-  ret = checkAndUpdateSurfDescriptor(surfDescriptor, toSurfDataInfo);
-  if (ret != SURF_SUCCESS)
-  {
+  // Write SurfDescriptor
+  XdrSurf ret = checkAndUpdateSurfDescriptor(surfDescriptor, toSurfDataInfo);
+  if (ret != SURF_SUCCESS) {
     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
   }
 
   ret = xdr_SurfDescriptor(xdrs, surfDescriptor, &newVersion, &oldVersion);
-  if (ret != SURF_SUCCESS)
-  {
-   return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
-  }
-
-  /* write Global Data */
-  surfGlobalData = toSurfDataInfo->toGlobalData;
-  if (surfGlobalData == NULL)
-  {
-   return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
-  }
-  ret = xdr_SurfGlobalData(xdrs, surfGlobalData);
-  if (ret != SURF_SUCCESS)
-  {
+  if (ret != SURF_SUCCESS) {
     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
   }
 
-  /* write Statistics  */
+  // write Global Data
+  surfGlobalData = toSurfDataInfo->toGlobalData;
+  if (surfGlobalData == NULL) {
+    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
+  }
+  ret = xdr_SurfGlobalData(xdrs, surfGlobalData);
+  if (ret != SURF_SUCCESS) {
+    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+  }
+
+  // write Statistics
   if (toSurfDataInfo->nrStatistics != 0)
   {
    surfStatistics = toSurfDataInfo->toStatistics;
-   if (surfStatistics == NULL)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
+   if (surfStatistics == NULL) {
+     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
    }
    ret = xdr_SurfStatistics(xdrs, surfStatistics);
-   if (ret != SURF_SUCCESS)
-   {
+   if (ret != SURF_SUCCESS) {
      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
    }
   }
 
-  /* write Position Sensors  */
+  // write Position Sensors
   ii = toSurfDataInfo->nrPosiSensors;
-  if (ii == 0)
-  {
-   return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
-  }
-  else
-  {
-   surfPositionSensorArray = toSurfDataInfo->toPosiSensors;
-   if (surfPositionSensorArray == NULL)
-   {
+  if (ii == 0) {
     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
-   }
-   for (u_long nn = 0;nn<ii;nn++)
-   {
+  } else {
+    surfPositionSensorArray = toSurfDataInfo->toPosiSensors;
+    if (surfPositionSensorArray == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
+    }
+    for (u_long nn = 0; nn < ii; nn++) {
     ret = xdr_PositionSensorArray(xdrs, surfPositionSensorArray, newVersion);
-    if (ret != SURF_SUCCESS)
-    {
-     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+    if (ret != SURF_SUCCESS) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
     }
     surfPositionSensorArray++;
-   }
-  }
-
-  /* write transducer data of singlebeamsounders  */
-  ii = toSurfDataInfo->nrTransducers;
-  if (ii != 0)
-  {
-   surfTransducerParameterTable = toSurfDataInfo->toTransducers;
-   if (surfTransducerParameterTable == NULL)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
-   }
-   for (u_long nn = 0;nn<ii;nn++)
-   {
-    ret = xdr_SurfTransducerParameterTable(xdrs, surfTransducerParameterTable);
-    if (ret != SURF_SUCCESS)
-    {
-     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
     }
-    surfTransducerParameterTable++;
-   }
   }
 
-  /* write beam-angle tables of multibeamsounders  */
+  // write transducer data of singlebeamsounders
+  ii = toSurfDataInfo->nrTransducers;
+  if (ii != 0) {
+    surfTransducerParameterTable = toSurfDataInfo->toTransducers;
+    if (surfTransducerParameterTable == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
+    }
+    for (u_long nn = 0; nn < ii; nn++) {
+      ret = xdr_SurfTransducerParameterTable(xdrs, surfTransducerParameterTable);
+      if (ret != SURF_SUCCESS) {
+        return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+      }
+      surfTransducerParameterTable++;
+    }
+  }
+
+  // write beam-angle tables of multibeamsounders
   ii = toSurfDataInfo->nrAngleTables;
   jj = toSurfDataInfo->nrBeams;
-  if ((ii != 0) && (jj != 0))
-  {
-   surfMultiBeamAngleTable = toSurfDataInfo->toAngleTables;
-   if (surfMultiBeamAngleTable == NULL)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
-   }
-   for (u_long nn = 0;nn<ii;nn++)
-   {
-    surfMultiBeamAngleTable = getSurfAngleTable(
-                            toSurfDataInfo->toAngleTables, (short)jj, (long)nn);
-    ret = xdr_SurfMultiBeamAngleTable(xdrs, surfMultiBeamAngleTable, (u_short)jj);
-    if (ret != SURF_SUCCESS)
-    {
-     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+  if (ii != 0 && jj != 0) {
+    surfMultiBeamAngleTable = toSurfDataInfo->toAngleTables;
+    if (surfMultiBeamAngleTable == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
     }
-   }
+    for (u_long nn = 0; nn < ii; nn++) {
+      surfMultiBeamAngleTable = getSurfAngleTable(
+          toSurfDataInfo->toAngleTables, (short)jj, (long)nn);
+      ret = xdr_SurfMultiBeamAngleTable(xdrs, surfMultiBeamAngleTable, (u_short)jj);
+      if (ret != SURF_SUCCESS) {
+        return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+      }
+    }
   }
 
-  /* write C-profile tables */
+  // write C-profile tables
   ii = toSurfDataInfo->nrCProfiles;
   jj = toSurfDataInfo->nrCPElements;
-  if ((ii != 0) && (jj != 0))
-  {
-   surfCProfileTable = toSurfDataInfo->toCProfiles;
-   if (surfCProfileTable == NULL)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
-   }
-   for (u_long nn = 0;nn<ii;nn++)
-   {
-    surfCProfileTable =  getSurfCProfileTable(toSurfDataInfo->toCProfiles,
-                                                       (short)jj, (long)nn);
-    ret = xdr_SurfCProfileTable(xdrs, surfCProfileTable, (u_short)jj);
-    if (ret != SURF_SUCCESS)
-    {
-     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+  if (ii != 0 && jj != 0) {
+    surfCProfileTable = toSurfDataInfo->toCProfiles;
+    if (surfCProfileTable == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
     }
-   }
+    for (u_long nn = 0; nn < ii; nn++) {
+      surfCProfileTable =  getSurfCProfileTable(toSurfDataInfo->toCProfiles,
+                                                (short)jj, (long)nn);
+      ret = xdr_SurfCProfileTable(xdrs, surfCProfileTable, (u_short)jj);
+      if (ret != SURF_SUCCESS) {
+        return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+      }
+    }
   }
 
-  /* write C-profile TPE-values */
-  if (toSurfDataInfo->nrCprofTpes > 0)
-  {
-   ii = toSurfDataInfo->nrCProfiles;
-   jj = toSurfDataInfo->nrCPElements;
-   if ((ii != 0) && (jj != 0))
-   {
-    surfCProfileTpeTable = toSurfDataInfo->toCProfileTpes;
-    if (surfCProfileTpeTable == NULL)
-    {
-     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
+  // write C-profile TPE-values
+  if (toSurfDataInfo->nrCprofTpes > 0) {
+    ii = toSurfDataInfo->nrCProfiles;
+    jj = toSurfDataInfo->nrCPElements;
+    if (ii != 0 && jj != 0) {
+      surfCProfileTpeTable = toSurfDataInfo->toCProfileTpes;
+      if (surfCProfileTpeTable == NULL) {
+        return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
+      }
+      for (u_long nn = 0; nn < ii; nn++) {
+        surfCProfileTpeTable =  getSurfCProfileTpeTable(toSurfDataInfo->toCProfileTpes,
+                                                        (short)jj, (long)nn);
+        ret = xdr_SurfCProfileTableTpes(xdrs, surfCProfileTpeTable, (u_short)jj);
+        if (ret != SURF_SUCCESS) {
+          return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+        }
+      }
     }
-    for (u_long nn = 0;nn<ii;nn++)
-    {
-     surfCProfileTpeTable =  getSurfCProfileTpeTable(toSurfDataInfo->toCProfileTpes,
-                                                                (short)jj, (long)nn);
-     ret = xdr_SurfCProfileTableTpes(xdrs, surfCProfileTpeTable, (u_short)jj);
-     if (ret != SURF_SUCCESS)
-     {
-      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
-     }
-    }
-   }
   }
 
-  /* write areapolygon */
+  // write areapolygon
   jj = toSurfDataInfo->nrPolyElements;
-  if (jj != 0)
-  {
-   surfPolygons = toSurfDataInfo->toPolygons;
-   if (surfPolygons == NULL)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
-   }
-   ret = xdr_SurfPolygons(xdrs, surfPolygons, (u_short)jj);
-   if (ret != SURF_SUCCESS)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
-   }
+  if (jj != 0) {
+    surfPolygons = toSurfDataInfo->toPolygons;
+    if (surfPolygons == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
+    }
+    ret = xdr_SurfPolygons(xdrs, surfPolygons, (u_short)jj);
+    if (ret != SURF_SUCCESS) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+    }
   }
 
-  /* write event blocks*/
+  // write event blocks
   jj = toSurfDataInfo->nrEvents;
-  if (jj != 0)
-  {
-   surfEvents = toSurfDataInfo->toEvents;
-   if (surfEvents == NULL)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
-   }
-   ret = xdr_SurfEvents(xdrs, surfEvents, (u_short)jj);
-   if (ret != SURF_SUCCESS)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
-   }
+  if (jj != 0) {
+    surfEvents = toSurfDataInfo->toEvents;
+    if (surfEvents == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
+    }
+    ret = xdr_SurfEvents(xdrs, surfEvents, (u_short)jj);
+    if (ret != SURF_SUCCESS) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+    }
   }
 
-  /* write free text blocks*/
+  // write free text blocks
   jj = toSurfDataInfo->nrFreeTextUnits;
-  if (jj != 0)
-  {
-   surfFreeText = toSurfDataInfo->toFreeText;
-   if (surfFreeText == NULL)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
-   }
-   ret = xdr_SurfFreeText(xdrs, surfFreeText, (u_short)jj);
-   if (ret != SURF_SUCCESS)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
-   }
-  }
-
-  /* write additional Statistics  */
-  if (toSurfDataInfo->nrAddStatistics != 0)
-  {
-   surfAddStatistics = toSurfDataInfo->toAddStatistics;
-   if (surfAddStatistics == NULL)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
-   }
-   ret = xdr_SurfAddStatistics(xdrs, surfAddStatistics);
-   if (ret != SURF_SUCCESS)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
-   }
-  }
-
-  /* write TPE Static Data  */
-  if (toSurfDataInfo->nrTpeStatics != 0)
-  {
-   surfTpeStatics = toSurfDataInfo->toTpeStatics;
-   if (surfTpeStatics == NULL)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
-   }
-   ret = xdr_SurfTpeStatics(xdrs, surfTpeStatics);
-   if (ret != SURF_SUCCESS)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
-   }
-  }
-
-  /* write Free Six Data Descriptor */
-  jj = toSurfDataInfo->nrOfSixAttachedData;
-  if (jj > 0)
-  {
-   surfFreeSixDataDescr = toSurfDataInfo->toFreeSixDataDescr;
-   if (surfFreeSixDataDescr == NULL)
-   {
-     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
-   }
-   for (ii = 0; ii < jj; ii++)
-   {
-    surfFreeSixDataDescr = &(toSurfDataInfo->toFreeSixDataDescr[ii]);
-    ret = xdr_SurfFreeSixDataDescr(xdrs, surfFreeSixDataDescr);
-    if (ret != SURF_SUCCESS)
-    {
-     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+  if (jj != 0) {
+    surfFreeText = toSurfDataInfo->toFreeText;
+    if (surfFreeText == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
     }
-   }
+    ret = xdr_SurfFreeText(xdrs, surfFreeText, (u_short)jj);
+    if (ret != SURF_SUCCESS) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+    }
   }
 
-  /* write Free Sounding Data Descriptor */
+  // write additional Statistics
+  if (toSurfDataInfo->nrAddStatistics != 0) {
+    surfAddStatistics = toSurfDataInfo->toAddStatistics;
+    if (surfAddStatistics == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
+    }
+    ret = xdr_SurfAddStatistics(xdrs, surfAddStatistics);
+    if (ret != SURF_SUCCESS) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+    }
+  }
+
+  // write TPE Static Data
+  if (toSurfDataInfo->nrTpeStatics != 0) {
+    surfTpeStatics = toSurfDataInfo->toTpeStatics;
+    if (surfTpeStatics == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
+    }
+    ret = xdr_SurfTpeStatics(xdrs, surfTpeStatics);
+    if (ret != SURF_SUCCESS) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+    }
+  }
+
+  // write Free Six Data Descriptor
+  jj = toSurfDataInfo->nrOfSixAttachedData;
+  if (jj > 0) {
+    surfFreeSixDataDescr = toSurfDataInfo->toFreeSixDataDescr;
+    if (surfFreeSixDataDescr == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
+    }
+    for (ii = 0; ii < jj; ii++) {
+      surfFreeSixDataDescr = &(toSurfDataInfo->toFreeSixDataDescr[ii]);
+      ret = xdr_SurfFreeSixDataDescr(xdrs, surfFreeSixDataDescr);
+      if (ret != SURF_SUCCESS) {
+        return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+      }
+    }
+  }
+
+  // write Free Sounding Data Descriptor
   jj = toSurfDataInfo->nrOfSndgAttachedData;
-  if (jj > 0)
-  {
-   surfFreeSndgDataDescr = toSurfDataInfo->toFreeSndgDataDescr;
-   if (surfFreeSndgDataDescr == NULL)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
-   }
-   for (ii = 0; ii < jj; ii++)
-   {
-    surfFreeSndgDataDescr = &(toSurfDataInfo->toFreeSndgDataDescr[ii]);
-    ret = xdr_SurfFreeSndgDataDescr(xdrs, surfFreeSndgDataDescr);
-    if (ret != SURF_SUCCESS)
-    {
-     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+  if (jj > 0) {
+    surfFreeSndgDataDescr = toSurfDataInfo->toFreeSndgDataDescr;
+    if (surfFreeSndgDataDescr == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
     }
-   }
+    for (ii = 0; ii < jj; ii++) {
+      surfFreeSndgDataDescr = &(toSurfDataInfo->toFreeSndgDataDescr[ii]);
+      ret = xdr_SurfFreeSndgDataDescr(xdrs, surfFreeSndgDataDescr);
+      if (ret != SURF_SUCCESS) {
+        return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+      }
+    }
   }
 
-  /* write Free Beam Data Descriptor */
+  // write Free Beam Data Descriptor
   jj = toSurfDataInfo->nrOfBeamAttachedData;
-  if (jj > 0)
-  {
-   surfFreeBeamDataDescr = toSurfDataInfo->toFreeBeamDataDescr;
-   if (surfFreeBeamDataDescr == NULL)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
-   }
-   for (ii = 0; ii < jj; ii++)
-   {
-    surfFreeBeamDataDescr = &(toSurfDataInfo->toFreeBeamDataDescr[ii]);
-    ret = xdr_SurfFreeBeamDataDescr(xdrs, surfFreeBeamDataDescr);
-    if (ret != SURF_SUCCESS)
-    {
-     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+  if (jj > 0) {
+    surfFreeBeamDataDescr = toSurfDataInfo->toFreeBeamDataDescr;
+    if (surfFreeBeamDataDescr == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
     }
-   }
+    for (ii = 0; ii < jj; ii++) {
+      surfFreeBeamDataDescr = &(toSurfDataInfo->toFreeBeamDataDescr[ii]);
+      ret = xdr_SurfFreeBeamDataDescr(xdrs, surfFreeBeamDataDescr);
+      if (ret != SURF_SUCCESS) {
+        return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+      }
+    }
   }
 
-  /* write Free Six Data */
+  // write Free Six Data
   jj = toSurfDataInfo->nrOfSixAttachedData;
-  if (jj > 0)
-  {
-   surfFreeSixAttachedData = toSurfDataInfo->toFreeSixData;
-   if (surfFreeSixAttachedData == NULL)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
-   }
-   for (ii = 0; ii < jj; ii++)
-   {
-    surfFreeSixAttachedData = &(toSurfDataInfo->toFreeSixData[ii]);
-    ret = xdr_SurfFreeSixAttachedData(xdrs, surfFreeSixAttachedData);
-    if (ret != SURF_SUCCESS)
-    {
-     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+  if (jj > 0) {
+    surfFreeSixAttachedData = toSurfDataInfo->toFreeSixData;
+    if (surfFreeSixAttachedData == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
     }
-   }
+    for (ii = 0; ii < jj; ii++) {
+      surfFreeSixAttachedData = &(toSurfDataInfo->toFreeSixData[ii]);
+      ret = xdr_SurfFreeSixAttachedData(xdrs, surfFreeSixAttachedData);
+      if (ret != SURF_SUCCESS) {
+        return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+      }
+    }
   }
 
-  /* write Vendor Text  */
-  if (toSurfDataInfo->nrOfVendorText != 0)
-  {
-   surfVendorText = toSurfDataInfo->toVendorText;
-   if (surfVendorText == NULL)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
-   }
-   ret = xdr_SurfVendorText(xdrs, surfVendorText);
-   if (ret != SURF_SUCCESS)
-   {
-    return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
-   }
+  // write Vendor Text
+  if (toSurfDataInfo->nrOfVendorText != 0) {
+    surfVendorText = toSurfDataInfo->toVendorText;
+    if (surfVendorText == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+    }
+    ret = xdr_SurfVendorText(xdrs, surfVendorText);
+    if (ret != SURF_SUCCESS) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+    }
   }
 
   return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_SUCCESS);
 }
 
-/***************************************/
-/* Write SDA-Data into a file          */
-/***************************************/
+// Write SDA data into a file
 
-/* writes a whole SDA-File from memory */
+// Writes a whole SDA-File from memory
 XdrSurf mem_WriteSdaStructure(char *filename,
                               SurfDataInfo *toSurfDataInfo) {
-
   const u_long nrSoundings = toSurfDataInfo->nrOfSoundings;
   // const u_long nrPositions = toSurfDataInfo->nrOfCenterPositions;
   // const u_long nrBeams     = toSurfDataInfo->nrOfMultiBeamDepth;
