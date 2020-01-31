@@ -89,15 +89,18 @@ void insertDefaultNrOfDescriptor(short typ, SurfNrofDescriptor *gp) {
 }
 
 XdrSurf xdr_SurfSixDescriptor(XDR *xdrs, SurfSixDescriptor *gp) {
-  return xdr_short(xdrs, &gp->typ) && xdr_u_long(xdrs, &gp->nr);
+  // TODO(schwehr): Danger! nr is unsigned int.
+  return xdr_short(xdrs, &gp->typ) && xdr_u_long(xdrs, (u_long *)&gp->nr);
 }
 
 XdrSurf xdr_SurfSdaDescriptor(XDR *xdrs, SurfSdaDescriptor *gp) {
-  return xdr_short(xdrs, &gp->typ) && xdr_u_long(xdrs, &gp->nr);
+  // TODO(schwehr): Danger! nr is unsigned int.
+  return xdr_short(xdrs, &gp->typ) && xdr_u_long(xdrs, (u_long *)&gp->nr);
 }
 
 XdrSurf xdr_SurfNrofDescriptor(XDR *xdrs, SurfNrofDescriptor *gp) {
-  return xdr_short(xdrs, &gp->typ) && xdr_u_long(xdrs, &gp->nr);
+  // TODO(schwehr): Danger! nr is unsigned int.
+  return xdr_short(xdrs, &gp->typ) && xdr_u_long(xdrs, (u_long *)&gp->nr);
 }
 
 XdrSurf xdr_SurfDescriptor(XDR *xdrs, SurfDescriptor *gp,
@@ -228,6 +231,9 @@ XdrSurf xdr_SurfGlobalData(XDR *xdrs, SurfGlobalData *gp) {
     return SURF_CORRUPTED_DATASET;
   }
 
+  // TODO(schwehr): Danger! numberOfMeasuredSoundings is unsigned int.
+  // TODO(schwehr): Danger! actualNumberOfSoundingSets is unsigned int.
+  // TODO(schwehr): Danger! correctedParameterFlags is unsigned int.
   return
       xdr_SurfString(xdrs, (char*)&gp->shipsName)                 &&
       xdr_SurfTime(xdrs, (char*)&gp->startTimeOfProfile)          &&
@@ -235,13 +241,13 @@ XdrSurf xdr_SurfGlobalData(XDR *xdrs, SurfGlobalData *gp) {
       xdr_SurfString(xdrs, (char*)&gp->numberOfProfile)           &&
       xdr_float(xdrs, &gp->chartZero)                             &&
       xdr_float(xdrs, &gp->tideZero)                              &&
-      xdr_u_long(xdrs, &gp->numberOfMeasuredSoundings)            &&
-      xdr_u_long(xdrs, &gp->actualNumberOfSoundingSets)           &&
+      xdr_u_long(xdrs, (u_long *)&gp->numberOfMeasuredSoundings)  &&
+      xdr_u_long(xdrs, (u_long *)&gp->actualNumberOfSoundingSets) &&
       xdr_SurfTime(xdrs, (char*)&gp->timeDateOfTideModification)  &&
       xdr_SurfTime(xdrs, (char*)&gp->timeDateOfDepthModification) &&
       xdr_SurfTime(xdrs, (char*)&gp->timeDateOfPosiModification)  &&
       xdr_SurfTime(xdrs, (char*)&gp->timeDateOfParaModification)  &&
-      xdr_u_long(xdrs, &gp->correctedParameterFlags)              &&
+      xdr_u_long(xdrs, (u_long *)&gp->correctedParameterFlags)    &&
       xdr_float(xdrs, &gp->offsetHeave)                           &&
       xdr_float(xdrs, &gp->offsetRollPort)                        &&
       xdr_float(xdrs, &gp->offsetRollStar)                        &&
@@ -633,8 +639,9 @@ XdrSurf xdr_SurfTpeStatics(XDR *xdrs, SurfTpeStatics *gp) {
     return SURF_CORRUPTED_DATASET;
   }
 
+  // TODO(schwehr): Danger! tpeFlag is unsigned int.
   return
-      xdr_u_long(xdrs, &gp->tpeFlag) &&
+      xdr_u_long(xdrs, (u_long *)&gp->tpeFlag) &&
       xdr_SurfTime(xdrs, (char*)&gp->timeDateOfLastTpeCalculation) &&
       xdr_double(xdrs, &gp->ltncyHprMb)  &&
       xdr_double(xdrs, &gp->ltncyNavHss) &&
@@ -739,33 +746,37 @@ XdrSurf xdr_SurfAddStatistics(XDR *xdrs, SurfAddStatistics *gp) {
   }
 
   char *toText = (char *)gp->serverReduction;
-  u_int sizeT = TEXT_SIZE ;
+  u_int sizeT = TEXT_SIZE;
+  // TODO(schwehr): Danger! flag is unsigned int.
+  // TODO(schwehr): Danger! nrNotDeletedDepth is unsigned int.
+  // TODO(schwehr): Danger! nrNotReducedDepth is unsigned int.
+  // TODO(schwehr): Danger! nrNotDeletedSoundings is unsigned int.
   return
-    xdr_u_long(xdrs, &gp->flag)                         &&
-    xdr_u_long(xdrs, &gp->nrNotDeletedDepth)            &&
-    xdr_u_long(xdrs, &gp->nrNotReducedDepth)            &&
-    xdr_u_long(xdrs, &gp->nrNotDeletedSoundings)        &&
-    xdr_SurfReductionParameters(xdrs, &gp->redParm)     &&
-    xdr_SurfLastFilterParameters(xdrs, &gp->filterParm) &&
-    xdr_bytes(xdrs, &toText, &sizeT, sizeT) &&
-    xdr_double(xdrs, &(gp->dFuture[0]))  &&
-    xdr_double(xdrs, &(gp->dFuture[1]))  &&
-    xdr_double(xdrs, &(gp->dFuture[2]))  &&
-    xdr_double(xdrs, &(gp->dFuture[3]))  &&
-    xdr_double(xdrs, &(gp->dFuture[4]))  &&
-    xdr_double(xdrs, &(gp->dFuture[5]))  &&
-    xdr_double(xdrs, &(gp->dFuture[6]))  &&
-    xdr_double(xdrs, &(gp->dFuture[7]))  &&
-    xdr_double(xdrs, &(gp->dFuture[8]))  &&
-    xdr_double(xdrs, &(gp->dFuture[9]))  &&
-    xdr_u_short(xdrs, &(gp->iFuture[0])) &&
-    xdr_u_short(xdrs, &(gp->iFuture[1])) &&
-    xdr_u_short(xdrs, &(gp->iFuture[2])) &&
-    xdr_u_short(xdrs, &(gp->iFuture[3])) &&
-    xdr_u_short(xdrs, &(gp->iFuture[4])) &&
-    xdr_u_short(xdrs, &(gp->iFuture[5])) &&
-    xdr_u_short(xdrs, &(gp->iFuture[6])) &&
-    xdr_u_short(xdrs, &(gp->iFuture[7]));
+      xdr_u_long(xdrs, (u_long *)&gp->flag) &&
+      xdr_u_long(xdrs, (u_long *)&gp->nrNotDeletedDepth) &&
+      xdr_u_long(xdrs, (u_long *)&gp->nrNotReducedDepth) &&
+      xdr_u_long(xdrs, (u_long *)&gp->nrNotDeletedSoundings) &&
+      xdr_SurfReductionParameters(xdrs, &gp->redParm)     &&
+      xdr_SurfLastFilterParameters(xdrs, &gp->filterParm) &&
+      xdr_bytes(xdrs, &toText, &sizeT, sizeT) &&
+      xdr_double(xdrs, &(gp->dFuture[0])) &&
+      xdr_double(xdrs, &(gp->dFuture[1])) &&
+      xdr_double(xdrs, &(gp->dFuture[2])) &&
+      xdr_double(xdrs, &(gp->dFuture[3])) &&
+      xdr_double(xdrs, &(gp->dFuture[4])) &&
+      xdr_double(xdrs, &(gp->dFuture[5])) &&
+      xdr_double(xdrs, &(gp->dFuture[6])) &&
+      xdr_double(xdrs, &(gp->dFuture[7])) &&
+      xdr_double(xdrs, &(gp->dFuture[8])) &&
+      xdr_double(xdrs, &(gp->dFuture[9])) &&
+      xdr_u_short(xdrs, &(gp->iFuture[0])) &&
+      xdr_u_short(xdrs, &(gp->iFuture[1])) &&
+      xdr_u_short(xdrs, &(gp->iFuture[2])) &&
+      xdr_u_short(xdrs, &(gp->iFuture[3])) &&
+      xdr_u_short(xdrs, &(gp->iFuture[4])) &&
+      xdr_u_short(xdrs, &(gp->iFuture[5])) &&
+      xdr_u_short(xdrs, &(gp->iFuture[6])) &&
+      xdr_u_short(xdrs, &(gp->iFuture[7]));
 }
 
 XdrSurf xdr_SurfVendorText(XDR *xdrs, SurfVendorText *gp) {
@@ -911,8 +922,9 @@ XdrSurf xdr_SurfSignalParameter(XDR *xdrs, SurfSignalParameter *gp, short nrSets
 XdrSurf xdr_SurfTxParameter(XDR *xdrs, SurfTxParameter *gp, short nrSets) {
   XdrSurf ret = SURF_SUCCESS;
   for (short ii = 0; ii < nrSets; ii++) {
+    // TODO(schwehr): Danger! txBeamIndex is unsigned int.
     ret &=
-        xdr_u_long(xdrs, &gp->txSets[ii].txBeamIndex)   &&
+        xdr_u_long(xdrs, (u_long *)&gp->txSets[ii].txBeamIndex)   &&
         xdr_float(xdrs, &gp->txSets[ii].txLevel)        &&
         xdr_float(xdrs, &gp->txSets[ii].txBeamAngle)    &&
         xdr_float(xdrs, &gp->txSets[ii].pulseLength);
@@ -944,7 +956,8 @@ XdrSurf xdr_SurfSidescanData(XDR *xdrs, SurfSidescanData *gp,
     char *toSsData = (char *)gp->ssData;
     u_int sizeA = nrSsData;
 
-    if (xdr_u_long(xdrs, &gp->sidescanFlag)          != SURF_SUCCESS ||
+    // TODO(schwehr): Danger! sidescanFlag is unsigned int.
+    if (xdr_u_long(xdrs, (u_long *)&gp->sidescanFlag) != SURF_SUCCESS ||
         xdr_u_short(xdrs, &gp->actualNrOfSsDataPort) != SURF_SUCCESS ||
         xdr_u_short(xdrs, &gp->actualNrOfSsDataStb)  != SURF_SUCCESS ||
         xdr_float(xdrs, &gp->minSsPosPort)           != SURF_SUCCESS ||
