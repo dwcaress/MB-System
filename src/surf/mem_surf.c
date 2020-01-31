@@ -22,7 +22,7 @@
 /* specific configuration              */
 /***************************************/
 
-/* free a given six-structure */
+// Free a given six-structure
 XdrSurf freeSixBlocks(SurfDataInfo *toSurfDataInfo, XdrSurf returnvalue ) {
   if (toSurfDataInfo->fp != NULL) {
     fclose(toSurfDataInfo->fp);
@@ -202,7 +202,7 @@ XdrSurf mem_ReadSixStructure(char *filename,
   toSurfDataInfo->toFreeSixData      = NULL;
   toSurfDataInfo->toVendorText       = NULL;
 
-  /* allocate structure for xdr-conversion and SurfDescriptor */
+  // Allocate structure for xdr-conversion and SurfDescriptor
   XDR *xdrs = (XDR*)calloc(1, sizeof(XDR));
   toSurfDataInfo->xdrs = xdrs;
   SurfDescriptor *surfDescriptor = (SurfDescriptor*)calloc(1, sizeof(SurfDescriptor));
@@ -240,12 +240,11 @@ XdrSurf mem_ReadSixStructure(char *filename,
     return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
   }
   ret = xdr_SurfGlobalData(xdrs, surfGlobalData);
-  if (ret != SURF_SUCCESS)
-  {
+  if (ret != SURF_SUCCESS) {
    return freeSixBlocks(toSurfDataInfo, ret);
   }
 
-  SurfStatistics *surfStatistics;
+  SurfStatistics *surfStatistics = NULL;
   if (toSurfDataInfo->nrStatistics != 0) {
     surfStatistics = (SurfStatistics*)calloc(1, sizeof(SurfStatistics));
     toSurfDataInfo->toStatistics = surfStatistics;
@@ -258,10 +257,10 @@ XdrSurf mem_ReadSixStructure(char *filename,
     }
   }
 
-  /* read Position Sensors  */
+  // Read Position Sensors
   u_long ii = toSurfDataInfo->nrPosiSensors;
   if (ii == 0) {
-   return freeSixBlocks(toSurfDataInfo, SURF_CORRUPTED_DATASET);
+    return freeSixBlocks(toSurfDataInfo, SURF_CORRUPTED_DATASET);
   }
 
   SurfPositionSensorArray *surfPositionSensorArray =
@@ -278,56 +277,54 @@ XdrSurf mem_ReadSixStructure(char *filename,
     surfPositionSensorArray++;
   }
 
-  /* read transducer data of singlebeamsounders  */
-  SurfTransducerParameterTable *surfTransducerParameterTable;
+  // Read transducer data of singlebeamsounders
   ii = toSurfDataInfo->nrTransducers;
   if (ii != 0) {
-   surfTransducerParameterTable = (SurfTransducerParameterTable*)calloc((u_int)ii,
-                                  sizeof(SurfTransducerParameterTable));
-   toSurfDataInfo->toTransducers = surfTransducerParameterTable;
-   if (surfTransducerParameterTable == NULL) {
-    return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
-   }
-   for (u_long nn = 0; nn < ii; nn++) {
-    ret = xdr_SurfTransducerParameterTable(xdrs, surfTransducerParameterTable);
-    if (ret != SURF_SUCCESS) {
-      return freeSixBlocks(toSurfDataInfo, ret);
+    SurfTransducerParameterTable *surfTransducerParameterTable =
+        (SurfTransducerParameterTable*)calloc(
+            (u_int)ii, sizeof(SurfTransducerParameterTable));
+    toSurfDataInfo->toTransducers = surfTransducerParameterTable;
+    if (surfTransducerParameterTable == NULL) {
+      return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
     }
-    surfTransducerParameterTable++;
-   }
+    for (u_long nn = 0; nn < ii; nn++) {
+      ret = xdr_SurfTransducerParameterTable(xdrs, surfTransducerParameterTable);
+      if (ret != SURF_SUCCESS) {
+        return freeSixBlocks(toSurfDataInfo, ret);
+      }
+      surfTransducerParameterTable++;
+    }
   }
 
-  /* read beam-angle tables of multibeamsounders  */
-  SurfMultiBeamAngleTable *surfMultiBeamAngleTable;
+  // Read beam-angle tables of multibeamsounders
   ii = toSurfDataInfo->nrAngleTables;
   u_long jj = toSurfDataInfo->nrBeams;
   if (ii != 0 && jj != 0) {
-    surfMultiBeamAngleTable =
+    SurfMultiBeamAngleTable *surfMultiBeamAngleTable =
         (SurfMultiBeamAngleTable*)
         calloc((u_int)ii, (size_t)SIZE_OF_SURF_MULTIBEAM_ANGLE_TAB((u_int)jj));
-   toSurfDataInfo->toAngleTables = surfMultiBeamAngleTable;
-   if (surfMultiBeamAngleTable == NULL) {
-     return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
-   }
-   for (u_long nn = 0; nn < ii; nn++) {
-    ret = xdr_SurfMultiBeamAngleTable(xdrs, surfMultiBeamAngleTable, (u_short)jj);
-    if (ret != SURF_SUCCESS)
-    {
-     return freeSixBlocks(toSurfDataInfo, ret);
+    toSurfDataInfo->toAngleTables = surfMultiBeamAngleTable;
+    if (surfMultiBeamAngleTable == NULL) {
+      return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
     }
-    surfMultiBeamAngleTable = (SurfMultiBeamAngleTable*)
-                             ((char*)(surfMultiBeamAngleTable)
-                             +(size_t)(SIZE_OF_SURF_MULTIBEAM_ANGLE_TAB(jj)));
-   }
+    for (u_long nn = 0; nn < ii; nn++) {
+      ret = xdr_SurfMultiBeamAngleTable(xdrs, surfMultiBeamAngleTable, (u_short)jj);
+      if (ret != SURF_SUCCESS) {
+        return freeSixBlocks(toSurfDataInfo, ret);
+      }
+      surfMultiBeamAngleTable = (SurfMultiBeamAngleTable*)
+                                ((char*)(surfMultiBeamAngleTable)
+                                 +(size_t)(SIZE_OF_SURF_MULTIBEAM_ANGLE_TAB(jj)));
+    }
   }
 
-  /* read C-profile tables */
-  SurfCProfileTable *surfCProfileTable;
+  // read C-profile tables
   ii = toSurfDataInfo->nrCProfiles;
   jj = toSurfDataInfo->nrCPElements;
-  if ((ii != 0) && (jj != 0)) {
-    surfCProfileTable = (SurfCProfileTable*)
-                        calloc((u_int)ii, (size_t)SIZE_OF_SURF_C_PROFILE_TAB((u_int)jj));
+  if (ii != 0 && jj != 0) {
+    SurfCProfileTable *surfCProfileTable =
+        (SurfCProfileTable*)
+        calloc((u_int)ii, (size_t)SIZE_OF_SURF_C_PROFILE_TAB((u_int)jj));
     toSurfDataInfo->toCProfiles = surfCProfileTable;
     if (surfCProfileTable == NULL) {
       return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
@@ -342,14 +339,14 @@ XdrSurf mem_ReadSixStructure(char *filename,
     }
   }
 
-  /* read C-profile TPE-values */
-  SurfCProfileTpeTable *surfCProfileTpeTable;
+  // read C-profile TPE-values
   if (toSurfDataInfo->nrCprofTpes > 0) {
     ii = toSurfDataInfo->nrCProfiles;
     jj = toSurfDataInfo->nrCPElements;
-    if ((ii != 0) && (jj != 0)) {
-      surfCProfileTpeTable = (SurfCProfileTpeTable*)
-                             calloc((u_int)ii, (size_t)SIZE_OF_SURF_C_PROFILE_TPE_TAB((u_int)jj));
+    if (ii != 0 && jj != 0) {
+      SurfCProfileTpeTable *surfCProfileTpeTable =
+          (SurfCProfileTpeTable*)
+          calloc((u_int)ii, (size_t)SIZE_OF_SURF_C_PROFILE_TPE_TAB((u_int)jj));
       toSurfDataInfo->toCProfileTpes = surfCProfileTpeTable;
       if (surfCProfileTpeTable == NULL) {
         return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
@@ -365,11 +362,11 @@ XdrSurf mem_ReadSixStructure(char *filename,
     }
   }
 
-  /* read areapolygon */
-  SurfPolygons *surfPolygons;
+  // Read areapolygon
   jj = toSurfDataInfo->nrPolyElements;
   if (jj != 0) {
-    surfPolygons = (SurfPolygons*)calloc(1, (size_t)SIZE_OF_SURF_POLYGON_ARRAY((u_int)jj));
+    SurfPolygons *surfPolygons =
+        (SurfPolygons*)calloc(1, (size_t)SIZE_OF_SURF_POLYGON_ARRAY((u_int)jj));
     toSurfDataInfo->toPolygons = surfPolygons;
     if (surfPolygons == NULL) {
       return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
@@ -380,11 +377,11 @@ XdrSurf mem_ReadSixStructure(char *filename,
     }
   }
 
-  /* read event blocks*/
-  SurfEvents *surfEvents;
+  // Read event blocks
   jj = toSurfDataInfo->nrEvents;
   if (jj != 0) {
-    surfEvents = (SurfEvents*)calloc(1, (size_t)SIZE_OF_SURF_EVENT_ARRAY((u_int)jj));
+    SurfEvents *surfEvents =
+        (SurfEvents*)calloc(1, (size_t)SIZE_OF_SURF_EVENT_ARRAY((u_int)jj));
     toSurfDataInfo->toEvents = surfEvents;
     if (surfEvents == NULL) {
       return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
@@ -396,10 +393,10 @@ XdrSurf mem_ReadSixStructure(char *filename,
   }
 
   // Read free text block
-  SurfFreeText *surfFreeText;
   jj = toSurfDataInfo->nrFreeTextUnits;
   if (jj != 0) {
-    surfFreeText = (SurfFreeText*)calloc(1, (size_t)SIZE_OF_FREE_TEXT_ARRAY((u_int)jj));
+    SurfFreeText *surfFreeText =
+        (SurfFreeText*)calloc(1, (size_t)SIZE_OF_FREE_TEXT_ARRAY((u_int)jj));
     toSurfDataInfo->toFreeText = surfFreeText;
     if (surfFreeText == NULL) {
       return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
@@ -410,118 +407,118 @@ XdrSurf mem_ReadSixStructure(char *filename,
     }
   }
 
-  /* read additional Statistics  */
-  SurfAddStatistics *surfAddStatistics;
+  // read additional Statistics
   if (toSurfDataInfo->nrAddStatistics != 0) {
-   surfAddStatistics = (SurfAddStatistics*)calloc(1, sizeof(SurfAddStatistics));
-   toSurfDataInfo->toAddStatistics = surfAddStatistics;
-   if (surfStatistics == NULL) {
-    return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
-   }
-   ret = xdr_SurfAddStatistics(xdrs, surfAddStatistics);
-   if (ret != SURF_SUCCESS) {
-    return freeSixBlocks(toSurfDataInfo, ret);
-   }
-  }
-
-  /* read TPE Static Data  */
-  SurfTpeStatics *surfTpeStatics;
-  if (toSurfDataInfo->nrTpeStatics != 0) {
-   surfTpeStatics = (SurfTpeStatics*)calloc(1, sizeof(SurfTpeStatics));
-   toSurfDataInfo->toTpeStatics = surfTpeStatics;
-   if (surfTpeStatics == NULL) {
-    return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
-   }
-   ret = xdr_SurfTpeStatics(xdrs, surfTpeStatics);
-   if (ret != SURF_SUCCESS) {
-    return freeSixBlocks(toSurfDataInfo, ret);
-   }
-  }
-
-  /* read Free Six Data Descriptor */
-  SurfFreeSixDataDescr *surfFreeSixDataDescr;
-  jj = toSurfDataInfo->nrOfSixAttachedData;
-  if (jj > 0) {
-   surfFreeSixDataDescr = (SurfFreeSixDataDescr*)calloc((u_int)jj, sizeof(SurfFreeSixDataDescr));
-   toSurfDataInfo->toFreeSixDataDescr = surfFreeSixDataDescr;
-   if (surfFreeSixDataDescr == NULL) {
-     return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
-   }
-   for (ii = 0; ii < jj; ii++) {
-    surfFreeSixDataDescr = &(toSurfDataInfo->toFreeSixDataDescr[ii]);
-    ret = xdr_SurfFreeSixDataDescr(xdrs, surfFreeSixDataDescr);
+    SurfAddStatistics *surfAddStatistics =
+        (SurfAddStatistics*)calloc(1, sizeof(SurfAddStatistics));
+    toSurfDataInfo->toAddStatistics = surfAddStatistics;
+    if (surfStatistics == NULL) {
+      return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
+    }
+    ret = xdr_SurfAddStatistics(xdrs, surfAddStatistics);
     if (ret != SURF_SUCCESS) {
       return freeSixBlocks(toSurfDataInfo, ret);
     }
-   }
   }
 
-  /* read Free Sounding Data Descriptor */
-  SurfFreeSndgDataDescr *surfFreeSndgDataDescr;
+  // read TPE Static Data
+  if (toSurfDataInfo->nrTpeStatics != 0) {
+    SurfTpeStatics *surfTpeStatics =
+        (SurfTpeStatics*)calloc(1, sizeof(SurfTpeStatics));
+    toSurfDataInfo->toTpeStatics = surfTpeStatics;
+    if (surfTpeStatics == NULL) {
+      return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
+    }
+    ret = xdr_SurfTpeStatics(xdrs, surfTpeStatics);
+    if (ret != SURF_SUCCESS) {
+      return freeSixBlocks(toSurfDataInfo, ret);
+    }
+  }
+
+  // read Free Six Data Descriptor
+  jj = toSurfDataInfo->nrOfSixAttachedData;
+  if (jj > 0) {
+    SurfFreeSixDataDescr *surfFreeSixDataDescr =
+        (SurfFreeSixDataDescr*)calloc((u_int)jj, sizeof(SurfFreeSixDataDescr));
+    toSurfDataInfo->toFreeSixDataDescr = surfFreeSixDataDescr;
+    if (surfFreeSixDataDescr == NULL) {
+      return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
+    }
+    for (ii = 0; ii < jj; ii++) {
+      surfFreeSixDataDescr = &(toSurfDataInfo->toFreeSixDataDescr[ii]);
+      ret = xdr_SurfFreeSixDataDescr(xdrs, surfFreeSixDataDescr);
+      if (ret != SURF_SUCCESS) {
+        return freeSixBlocks(toSurfDataInfo, ret);
+      }
+    }
+  }
+
+  // read Free Sounding Data Descriptor
   jj = toSurfDataInfo->nrOfSndgAttachedData;
   if (jj > 0) {
-   surfFreeSndgDataDescr = (SurfFreeSndgDataDescr*)calloc((u_int)jj, sizeof(SurfFreeSndgDataDescr));
-   toSurfDataInfo->toFreeSndgDataDescr = surfFreeSndgDataDescr;
-   if (surfFreeSndgDataDescr == NULL) {
-    return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
-   }
-   for (ii = 0; ii < jj; ii++) {
-    surfFreeSndgDataDescr = &(toSurfDataInfo->toFreeSndgDataDescr[ii]);
-    ret = xdr_SurfFreeSndgDataDescr(xdrs, surfFreeSndgDataDescr);
-    if (ret != SURF_SUCCESS) {
-     return freeSixBlocks(toSurfDataInfo, ret);
+    SurfFreeSndgDataDescr *surfFreeSndgDataDescr =
+        (SurfFreeSndgDataDescr*)calloc((u_int)jj, sizeof(SurfFreeSndgDataDescr));
+    toSurfDataInfo->toFreeSndgDataDescr = surfFreeSndgDataDescr;
+    if (surfFreeSndgDataDescr == NULL) {
+      return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
     }
-   }
+    for (ii = 0; ii < jj; ii++) {
+      surfFreeSndgDataDescr = &(toSurfDataInfo->toFreeSndgDataDescr[ii]);
+      ret = xdr_SurfFreeSndgDataDescr(xdrs, surfFreeSndgDataDescr);
+      if (ret != SURF_SUCCESS) {
+        return freeSixBlocks(toSurfDataInfo, ret);
+      }
+    }
   }
 
-  /* read Free Beam Data Descriptor */
-  SurfFreeBeamDataDescr *  surfFreeBeamDataDescr;
+  // read Free Beam Data Descriptor
   jj = toSurfDataInfo->nrOfBeamAttachedData;
   if (jj > 0) {
-   surfFreeBeamDataDescr = (SurfFreeBeamDataDescr*)calloc((u_int)jj, sizeof(SurfFreeBeamDataDescr));
-   toSurfDataInfo->toFreeBeamDataDescr = surfFreeBeamDataDescr;
-   if (surfFreeBeamDataDescr == NULL) {
-    return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
-   }
-   for (ii = 0; ii < jj; ii++) {
-    surfFreeBeamDataDescr = &(toSurfDataInfo->toFreeBeamDataDescr[ii]);
-    ret = xdr_SurfFreeBeamDataDescr(xdrs, surfFreeBeamDataDescr);
-    if (ret != SURF_SUCCESS) {
-     return freeSixBlocks(toSurfDataInfo, ret);
+    SurfFreeBeamDataDescr *surfFreeBeamDataDescr =
+        (SurfFreeBeamDataDescr*)calloc((u_int)jj, sizeof(SurfFreeBeamDataDescr));
+    toSurfDataInfo->toFreeBeamDataDescr = surfFreeBeamDataDescr;
+    if (surfFreeBeamDataDescr == NULL) {
+      return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
     }
-   }
+    for (ii = 0; ii < jj; ii++) {
+      surfFreeBeamDataDescr = &(toSurfDataInfo->toFreeBeamDataDescr[ii]);
+      ret = xdr_SurfFreeBeamDataDescr(xdrs, surfFreeBeamDataDescr);
+      if (ret != SURF_SUCCESS) {
+        return freeSixBlocks(toSurfDataInfo, ret);
+      }
+    }
   }
 
-  /* read Free Six Data */
-  SurfFreeSixAttachedData *surfFreeSixAttachedData;
+  // read Free Six Data
   jj = toSurfDataInfo->nrOfSixAttachedData;
   if (jj > 0) {
-    surfFreeSixAttachedData = (SurfFreeSixAttachedData*)calloc((u_int)jj, sizeof(SurfFreeSixAttachedData));
+    SurfFreeSixAttachedData *surfFreeSixAttachedData =
+        (SurfFreeSixAttachedData*)calloc((u_int)jj, sizeof(SurfFreeSixAttachedData));
     toSurfDataInfo->toFreeSixData = surfFreeSixAttachedData;
     if (surfFreeSixAttachedData == NULL) {
-    return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
-   }
-   for (ii = 0; ii < jj; ii++) {
-    surfFreeSixAttachedData = &(toSurfDataInfo->toFreeSixData[ii]);
-    ret = xdr_SurfFreeSixAttachedData(xdrs, surfFreeSixAttachedData);
+      return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
+    }
+    for (ii = 0; ii < jj; ii++) {
+      surfFreeSixAttachedData = &(toSurfDataInfo->toFreeSixData[ii]);
+      ret = xdr_SurfFreeSixAttachedData(xdrs, surfFreeSixAttachedData);
+      if (ret != SURF_SUCCESS) {
+        return freeSixBlocks(toSurfDataInfo, ret);
+      }
+    }
+  }
+
+  // read Vendor Text
+  if (toSurfDataInfo->nrOfVendorText != 0) {
+    SurfVendorText *surfVendorText =
+        (SurfVendorText*)calloc(1, sizeof(SurfVendorText));
+    toSurfDataInfo->toVendorText = surfVendorText;
+    if (surfVendorText == NULL) {
+      return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
+    }
+    ret = xdr_SurfVendorText(xdrs, surfVendorText);
     if (ret != SURF_SUCCESS) {
       return freeSixBlocks(toSurfDataInfo, ret);
     }
-   }
-  }
-
-  /* read Vendor Text  */
-  SurfVendorText *surfVendorText;
-  if (toSurfDataInfo->nrOfVendorText != 0) {
-   surfVendorText = (SurfVendorText*)calloc(1, sizeof(SurfVendorText));
-   toSurfDataInfo->toVendorText = surfVendorText;
-   if (surfVendorText == NULL) {
-    return freeSixBlocks(toSurfDataInfo, SURF_CANT_GET_MEMORY);
-   }
-   ret = xdr_SurfVendorText(xdrs, surfVendorText);
-   if (ret != SURF_SUCCESS) {
-    return freeSixBlocks(toSurfDataInfo, ret);
-   }
   }
 
   if (toSurfDataInfo->fp != NULL) fclose(fp);
@@ -535,10 +532,10 @@ XdrSurf mem_ReadSixStructure(char *filename,
 /***************************************/
 static size_t align64(size_t size) {
   // TODO(schwehr): simplify
-  return (size_t) (((int)((size + 7) / 8)) * 8);
+  return (size_t)(((int)((size + 7) / 8)) * 8);
 }
 
-/* calculate the sizes within a SDA-Block */
+// calculate the sizes within a SDA-Block
 size_t initializeSdaInfo(SurfDataInfo *toSurfDataInfo, SdaInfo *toSdaInfo) {
   toSdaInfo->indexCenterPosition = 0;
   toSdaInfo->indexMultiBeam      = 0;
@@ -647,7 +644,7 @@ size_t initializeSdaInfo(SurfDataInfo *toSurfDataInfo, SdaInfo *toSdaInfo) {
   return sum;
 }
 
-/* sets the sda pointers in SdaInfo         */
+// sets the sda pointers in SdaInfo
 void setPointersInSdaInfo(void *toSdaBlock, SdaInfo *toSdaInfo) {
   char *bp = (char*)toSdaBlock;
 
@@ -785,14 +782,12 @@ void setPointersInSdaInfo(void *toSdaBlock, SdaInfo *toSdaInfo) {
 
 // converts one SDA-Block memory->file or file->memory
 XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo *sdaInfo, short versLess2) {
-  char *bp;
-
   XdrSurf ret = xdr_SurfSoundingData(xdrs, sdaInfo->toSoundings, versLess2);
   if (ret != SURF_SUCCESS) return ret;
 
   if (sdaInfo->toFreeSoundingAttachedData != NULL) {
     for (u_long ii = 0; ii < sdaInfo->nrOfSndgAttachedData; ii++) {
-      bp = (char*)(sdaInfo->toFreeSoundingAttachedData)+(ii * sdaInfo->sndgAttDataS);
+      char *bp = (char*)(sdaInfo->toFreeSoundingAttachedData)+(ii * sdaInfo->sndgAttDataS);
       ret = xdr_SurfFreeSoundingAttachedData(xdrs, (SurfFreeSoundingAttachedData*)bp);
       if (ret != SURF_SUCCESS) {
         return ret;
@@ -801,7 +796,7 @@ XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo *sdaInfo, short versLess2) {
   }
 
   for (u_long ii = 0; ii < sdaInfo->nrCenterPosition; ii++) {
-    bp = (char*)(sdaInfo->toCenterPositions)+(ii * sdaInfo->centerPS);
+    char *bp = (char*)(sdaInfo->toCenterPositions)+(ii * sdaInfo->centerPS);
     ret = xdr_SurfCenterPosition(xdrs, (SurfCenterPosition*)bp);
     if (ret != SURF_SUCCESS) {
       return ret;
@@ -810,7 +805,7 @@ XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo *sdaInfo, short versLess2) {
 
   if (sdaInfo->toPositionCepData != NULL) {
     for (u_long ii = 0; ii < sdaInfo->nrCenterPosition; ii++) {
-      bp = (char*)(sdaInfo->toPositionCepData)+(ii * sdaInfo->positionCepDataS);
+      char *bp = (char*)(sdaInfo->toPositionCepData)+(ii * sdaInfo->positionCepDataS);
       ret = xdr_SurfPositionCepData(xdrs, (SurfPositionCepData*)bp);
       if (ret != SURF_SUCCESS) {
         return ret;
@@ -834,7 +829,7 @@ XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo *sdaInfo, short versLess2) {
 
   if (sdaInfo->toMultiBeamDepth != NULL) {
     for (u_long ii = 0; ii < sdaInfo->nrBeam; ii++) {
-      bp = (char*)(sdaInfo->toMultiBeamDepth)+(ii * sdaInfo->multiBDS);
+      char *bp = (char*)(sdaInfo->toMultiBeamDepth)+(ii * sdaInfo->multiBDS);
       ret = xdr_SurfMultiBeamDepth(xdrs, (SurfMultiBeamDepth*)bp);
       if (ret != SURF_SUCCESS) {
         return ret;
@@ -844,7 +839,7 @@ XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo *sdaInfo, short versLess2) {
 
   if (sdaInfo->toMultiBeamTT != NULL) {
     for (u_long ii = 0; ii < sdaInfo->nrBeam; ii++) {
-      bp = (char*)(sdaInfo->toMultiBeamTT)+(ii * sdaInfo->multiBTTS);
+      char *bp = (char*)(sdaInfo->toMultiBeamTT)+(ii * sdaInfo->multiBTTS);
       ret = xdr_SurfMultiBeamTT(xdrs, (SurfMultiBeamTT*)bp);
       if (ret != SURF_SUCCESS) {
         return ret;
@@ -854,7 +849,7 @@ XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo *sdaInfo, short versLess2) {
 
   if (sdaInfo->toMultiBeamRec != NULL) {
     for (u_long ii = 0; ii < sdaInfo->nrBeam; ii++) {
-      bp = (char*)(sdaInfo->toMultiBeamRec)+(ii * sdaInfo->multiBRS);
+      char *bp = (char*)(sdaInfo->toMultiBeamRec)+(ii * sdaInfo->multiBRS);
       ret = xdr_SurfMultiBeamReceive(xdrs, (SurfMultiBeamReceive*)bp);
       if (ret != SURF_SUCCESS) {
         return ret;
@@ -864,7 +859,7 @@ XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo *sdaInfo, short versLess2) {
 
   if (sdaInfo->toMultiBeamTpeValues != NULL) {
     for (u_long ii = 0; ii < sdaInfo->nrBeam; ii++) {
-      bp = (char*)(sdaInfo->toMultiBeamTpeValues)+(ii * sizeof(SurfTpeValues));
+      char *bp = (char*)(sdaInfo->toMultiBeamTpeValues)+(ii * sizeof(SurfTpeValues));
       ret = xdr_SurfTpeValues(xdrs, (SurfTpeValues*)bp);
       if (ret != SURF_SUCCESS) {
         return ret;
@@ -875,7 +870,7 @@ XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo *sdaInfo, short versLess2) {
   if (sdaInfo->toFreeBeamAttachedData != NULL) {
     for (u_long ii = 0; ii < sdaInfo->nrBeam; ii++) {
       for (u_long jj = 0; jj < sdaInfo->nrOfBeamAttachedData; jj++) {
-        bp = (char*)(sdaInfo->toFreeBeamAttachedData)
+        char *bp = (char*)(sdaInfo->toFreeBeamAttachedData)
              +((size_t)((ii * sdaInfo->nrOfBeamAttachedData) + jj)
                * sizeof(SurfFreeBeamAttachedData));
         ret = xdr_SurfFreeBeamAttachedData(xdrs, (SurfFreeBeamAttachedData*)bp);
@@ -888,7 +883,7 @@ XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo *sdaInfo, short versLess2) {
 
   if (sdaInfo->toAmplitudes != NULL) {
     for (u_long ii = 0; ii < sdaInfo->nrBeam; ii++) {
-      bp = (char*)(sdaInfo->toAmplitudes)+(ii * sdaInfo->amplS);
+      char *bp = (char*)(sdaInfo->toAmplitudes)+(ii * sdaInfo->amplS);
       ret = xdr_SurfAmplitudes(xdrs, (SurfAmplitudes*)bp);
       if (ret != SURF_SUCCESS) {
         return ret;
@@ -898,7 +893,7 @@ XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo *sdaInfo, short versLess2) {
 
   if (sdaInfo->toExtendedAmpl != NULL) {
     for (u_long ii = 0; ii < sdaInfo->nrBeam; ii++) {
-      bp = (char*)(sdaInfo->toExtendedAmpl)+(ii * sdaInfo->extAmplS);
+      char *bp = (char*)(sdaInfo->toExtendedAmpl)+(ii * sdaInfo->extAmplS);
       ret = xdr_SurfExtendedAmplitudes(xdrs, (SurfExtendedAmplitudes*)bp);
       if (ret != SURF_SUCCESS) {
         return ret;
@@ -922,7 +917,7 @@ XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo *sdaInfo, short versLess2) {
   }
 
   if (sdaInfo->toSignalAmplitudes != NULL) {
-    bp = (char*)(sdaInfo->toSignalAmplitudes);
+    char *bp = (char*)(sdaInfo->toSignalAmplitudes);
     ret = xdr_SurfSignalAmplitudes(xdrs, (SurfSignalAmplitudes*)bp,
                                    (u_short)sdaInfo->nrAmplitudes);
     return ret;
@@ -930,7 +925,7 @@ XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo *sdaInfo, short versLess2) {
 
 
   if (sdaInfo->toSsData != NULL) {
-    bp = (char*)(sdaInfo->toSsData);
+    char *bp = (char*)(sdaInfo->toSsData);
     ret = xdr_SurfSidescanData(xdrs, (SurfSidescanData*)bp,
                                (u_short)sdaInfo->nrSsData);
     return ret;
@@ -939,11 +934,9 @@ XdrSurf mem_convertOneSdaBlock2(XDR *xdrs, SdaInfo *sdaInfo, short versLess2) {
   return SURF_SUCCESS;
 }
 
-
 XdrSurf mem_convertOneSdaBlock(XDR *xdrs, SdaInfo *sdaInfo) {
   return mem_convertOneSdaBlock2(xdrs, sdaInfo, 0);
 }
-
 
 void free_SdaMemory(SurfDataInfo *toSurfDataInfo) {
   if (toSurfDataInfo->xdrs != NULL) {
@@ -971,8 +964,6 @@ void free_SdaMemory(SurfDataInfo *toSurfDataInfo) {
     toSurfDataInfo->fp = NULL;
   }
 }
-
-
 
 // Reads a whole SDA-File into memory
 
@@ -1045,7 +1036,6 @@ XdrSurf mem_ReadSdaStructure(char *filename,
   return SURF_SUCCESS;
 }
 
-
 // For external use: converters, etc.
 
 XdrSurf mem_buildSurfSdaStructure(SurfDataInfo *toSurfDataInfo) {
@@ -1092,8 +1082,6 @@ XdrSurf mem_buildSurfSdaStructure(SurfDataInfo *toSurfDataInfo) {
 
   return SURF_SUCCESS;
 }
-
-
 
 // Write a SIX File in memory back to the file
 //
@@ -1205,7 +1193,6 @@ XdrSurf checkAndUpdateSurfDescriptor(SurfDescriptor *toSurfDescriptor,
     toSurfDescriptor->vendorText.nr = 1;
   }
 
-
   // sda data
   toSurfDescriptor->soundings.nr       = toSurfDataInfo->nrOfSoundings;
   toSurfDescriptor->centerPositions.nr = toSurfDataInfo->nrPosiSensors;
@@ -1247,40 +1234,19 @@ XdrSurf cleanUpSixWrite(SurfDataInfo *toSurfDataInfo,
 // Writes a SIX structure back to the file according to SurfDataInfo
 XdrSurf mem_WriteSixStructure(
     char *filename,  SurfDataInfo *toSurfDataInfo) {
-  SurfDescriptor *surfDescriptor;
-  SurfGlobalData *surfGlobalData;
-  SurfStatistics *surfStatistics;
-  SurfPositionSensorArray *surfPositionSensorArray;
-  SurfMultiBeamAngleTable *surfMultiBeamAngleTable;
-  SurfTransducerParameterTable *surfTransducerParameterTable;
-  SurfCProfileTable *surfCProfileTable;
-  SurfCProfileTpeTable *surfCProfileTpeTable;
-  SurfPolygons *surfPolygons;
-  SurfEvents *surfEvents;
-  SurfFreeText *surfFreeText;
-  SurfAddStatistics *surfAddStatistics;
-  SurfTpeStatics *surfTpeStatics;
-  SurfFreeSixDataDescr *surfFreeSixDataDescr;
-  SurfFreeSndgDataDescr *surfFreeSndgDataDescr;
-  SurfFreeBeamDataDescr *surfFreeBeamDataDescr;
-  SurfFreeSixAttachedData *surfFreeSixAttachedData;
-  SurfVendorText *surfVendorText;
-  u_long ii, jj;
-  short newVersion, oldVersion;
-
-  /* allocate structure for xdr-conversion */
+  // allocate structure for xdr conversion
   XDR *xdrs = (XDR*)calloc(1, sizeof(XDR));
   if (xdrs == NULL) {
     return SURF_CANT_GET_MEMORY;
   }
   toSurfDataInfo->xdrs = xdrs;
-  surfDescriptor = toSurfDataInfo->toDescriptor;
+  SurfDescriptor *surfDescriptor = toSurfDataInfo->toDescriptor;
   if (surfDescriptor == NULL) {
     FILE *fp = NULL;
     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
   }
 
-  /* open conversion and file Write */
+  // Open conversion and file Write
   FILE *fp = xdrSurfOpenWrite(xdrs, (const char*)filename);
   toSurfDataInfo->fp = fp;
   if (fp == NULL) {
@@ -1293,13 +1259,15 @@ XdrSurf mem_WriteSixStructure(
     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
   }
 
+  short newVersion;
+  short oldVersion;
   ret = xdr_SurfDescriptor(xdrs, surfDescriptor, &newVersion, &oldVersion);
   if (ret != SURF_SUCCESS) {
     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
   }
 
   // write Global Data
-  surfGlobalData = toSurfDataInfo->toGlobalData;
+  SurfGlobalData *surfGlobalData = toSurfDataInfo->toGlobalData;
   if (surfGlobalData == NULL) {
     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
   }
@@ -1311,22 +1279,22 @@ XdrSurf mem_WriteSixStructure(
   // write Statistics
   if (toSurfDataInfo->nrStatistics != 0)
   {
-   surfStatistics = toSurfDataInfo->toStatistics;
-   if (surfStatistics == NULL) {
-     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
-   }
-   ret = xdr_SurfStatistics(xdrs, surfStatistics);
-   if (ret != SURF_SUCCESS) {
-     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
-   }
+    SurfStatistics *surfStatistics = toSurfDataInfo->toStatistics;
+    if (surfStatistics == NULL) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
+    }
+    ret = xdr_SurfStatistics(xdrs, surfStatistics);
+    if (ret != SURF_SUCCESS) {
+      return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
+    }
   }
 
   // write Position Sensors
-  ii = toSurfDataInfo->nrPosiSensors;
+  u_long ii = toSurfDataInfo->nrPosiSensors;
   if (ii == 0) {
     return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
   } else {
-    surfPositionSensorArray = toSurfDataInfo->toPosiSensors;
+    SurfPositionSensorArray *surfPositionSensorArray = toSurfDataInfo->toPosiSensors;
     if (surfPositionSensorArray == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
     }
@@ -1342,7 +1310,8 @@ XdrSurf mem_WriteSixStructure(
   // write transducer data of singlebeamsounders
   ii = toSurfDataInfo->nrTransducers;
   if (ii != 0) {
-    surfTransducerParameterTable = toSurfDataInfo->toTransducers;
+    SurfTransducerParameterTable *surfTransducerParameterTable =
+        toSurfDataInfo->toTransducers;
     if (surfTransducerParameterTable == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
     }
@@ -1357,9 +1326,10 @@ XdrSurf mem_WriteSixStructure(
 
   // write beam-angle tables of multibeamsounders
   ii = toSurfDataInfo->nrAngleTables;
-  jj = toSurfDataInfo->nrBeams;
+  u_long jj = toSurfDataInfo->nrBeams;
   if (ii != 0 && jj != 0) {
-    surfMultiBeamAngleTable = toSurfDataInfo->toAngleTables;
+    SurfMultiBeamAngleTable *surfMultiBeamAngleTable =
+        toSurfDataInfo->toAngleTables;
     if (surfMultiBeamAngleTable == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
     }
@@ -1377,7 +1347,7 @@ XdrSurf mem_WriteSixStructure(
   ii = toSurfDataInfo->nrCProfiles;
   jj = toSurfDataInfo->nrCPElements;
   if (ii != 0 && jj != 0) {
-    surfCProfileTable = toSurfDataInfo->toCProfiles;
+    SurfCProfileTable *surfCProfileTable = toSurfDataInfo->toCProfiles;
     if (surfCProfileTable == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
     }
@@ -1396,7 +1366,8 @@ XdrSurf mem_WriteSixStructure(
     ii = toSurfDataInfo->nrCProfiles;
     jj = toSurfDataInfo->nrCPElements;
     if (ii != 0 && jj != 0) {
-      surfCProfileTpeTable = toSurfDataInfo->toCProfileTpes;
+      SurfCProfileTpeTable *surfCProfileTpeTable =
+          toSurfDataInfo->toCProfileTpes;
       if (surfCProfileTpeTable == NULL) {
         return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
       }
@@ -1414,7 +1385,7 @@ XdrSurf mem_WriteSixStructure(
   // write areapolygon
   jj = toSurfDataInfo->nrPolyElements;
   if (jj != 0) {
-    surfPolygons = toSurfDataInfo->toPolygons;
+    SurfPolygons *surfPolygons = toSurfDataInfo->toPolygons;
     if (surfPolygons == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
     }
@@ -1427,7 +1398,7 @@ XdrSurf mem_WriteSixStructure(
   // write event blocks
   jj = toSurfDataInfo->nrEvents;
   if (jj != 0) {
-    surfEvents = toSurfDataInfo->toEvents;
+    SurfEvents *surfEvents = toSurfDataInfo->toEvents;
     if (surfEvents == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
     }
@@ -1440,7 +1411,7 @@ XdrSurf mem_WriteSixStructure(
   // write free text blocks
   jj = toSurfDataInfo->nrFreeTextUnits;
   if (jj != 0) {
-    surfFreeText = toSurfDataInfo->toFreeText;
+    SurfFreeText *surfFreeText = toSurfDataInfo->toFreeText;
     if (surfFreeText == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
     }
@@ -1452,7 +1423,7 @@ XdrSurf mem_WriteSixStructure(
 
   // write additional Statistics
   if (toSurfDataInfo->nrAddStatistics != 0) {
-    surfAddStatistics = toSurfDataInfo->toAddStatistics;
+    SurfAddStatistics *surfAddStatistics = toSurfDataInfo->toAddStatistics;
     if (surfAddStatistics == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
     }
@@ -1464,7 +1435,7 @@ XdrSurf mem_WriteSixStructure(
 
   // write TPE Static Data
   if (toSurfDataInfo->nrTpeStatics != 0) {
-    surfTpeStatics = toSurfDataInfo->toTpeStatics;
+    SurfTpeStatics *surfTpeStatics = toSurfDataInfo->toTpeStatics;
     if (surfTpeStatics == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
     }
@@ -1477,7 +1448,7 @@ XdrSurf mem_WriteSixStructure(
   // write Free Six Data Descriptor
   jj = toSurfDataInfo->nrOfSixAttachedData;
   if (jj > 0) {
-    surfFreeSixDataDescr = toSurfDataInfo->toFreeSixDataDescr;
+    SurfFreeSixDataDescr *surfFreeSixDataDescr = toSurfDataInfo->toFreeSixDataDescr;
     if (surfFreeSixDataDescr == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, SURF_CORRUPTED_DATASET);
     }
@@ -1493,7 +1464,8 @@ XdrSurf mem_WriteSixStructure(
   // write Free Sounding Data Descriptor
   jj = toSurfDataInfo->nrOfSndgAttachedData;
   if (jj > 0) {
-    surfFreeSndgDataDescr = toSurfDataInfo->toFreeSndgDataDescr;
+    SurfFreeSndgDataDescr *surfFreeSndgDataDescr =
+        toSurfDataInfo->toFreeSndgDataDescr;
     if (surfFreeSndgDataDescr == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
     }
@@ -1509,7 +1481,8 @@ XdrSurf mem_WriteSixStructure(
   // write Free Beam Data Descriptor
   jj = toSurfDataInfo->nrOfBeamAttachedData;
   if (jj > 0) {
-    surfFreeBeamDataDescr = toSurfDataInfo->toFreeBeamDataDescr;
+    SurfFreeBeamDataDescr *surfFreeBeamDataDescr =
+        toSurfDataInfo->toFreeBeamDataDescr;
     if (surfFreeBeamDataDescr == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
     }
@@ -1525,7 +1498,8 @@ XdrSurf mem_WriteSixStructure(
   // write Free Six Data
   jj = toSurfDataInfo->nrOfSixAttachedData;
   if (jj > 0) {
-    surfFreeSixAttachedData = toSurfDataInfo->toFreeSixData;
+    SurfFreeSixAttachedData *surfFreeSixAttachedData =
+        toSurfDataInfo->toFreeSixData;
     if (surfFreeSixAttachedData == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
     }
@@ -1540,7 +1514,7 @@ XdrSurf mem_WriteSixStructure(
 
   // write Vendor Text
   if (toSurfDataInfo->nrOfVendorText != 0) {
-    surfVendorText = toSurfDataInfo->toVendorText;
+    SurfVendorText *surfVendorText = toSurfDataInfo->toVendorText;
     if (surfVendorText == NULL) {
       return cleanUpSixWrite(toSurfDataInfo, xdrs, fp, ret);
     }
@@ -1563,7 +1537,7 @@ XdrSurf mem_WriteSdaStructure(char *filename,
   // const u_long nrBeams     = toSurfDataInfo->nrOfMultiBeamDepth;
   // const u_long nrAmplitudes = toSurfDataInfo->nrOfSignalAmplitudes;
 
-  /* allocate structure for xdr-conversion and SdaInfo and Sda-Thread */
+  // Allocate structure for xdr-conversion and SdaInfo and Sda-Thread
   XDR *xdrs = (XDR *)calloc(1, sizeof(XDR));
   toSurfDataInfo->xdrs = xdrs;
   if (xdrs == NULL) {
