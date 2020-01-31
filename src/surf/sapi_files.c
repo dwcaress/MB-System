@@ -246,6 +246,7 @@ void SAPI_close(void) {
 #endif
 }
 
+#if 0
 void recalculateData(void) {
   if (sapiToSurfData == NULL) {
     return;
@@ -521,6 +522,7 @@ void recalculateData(void) {
   toGlobalData->originalStartStopDistance = (float)(relWay);
   toGlobalData->originalStartStopTime = relTime;
 }
+#endif
 
 #if 0
 long SAPI_writeBackFromMemory(char* surfDir, char* surfFile, long errorprint) {
