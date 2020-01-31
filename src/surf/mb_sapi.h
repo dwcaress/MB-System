@@ -476,38 +476,29 @@ typedef struct {
 
 // FILE handling functions
 
-// void  SAPI_printAPIandSURFversion(void);
-
-long  SAPI_open(char* surfDir,char* surfFile,long errorprint);
-long  SAPI_nextSounding(long errorprint);
-long  SAPI_rewind(long errorprint);
-void  SAPI_close(void);
-
-// long SAPI_openIntoMemory(char* surfDir,char* surfFile, long errorprint);
-// long SAPI_writeBackFromMemory(char* surfDir,char* surfFile, long errorprint);
-
-// long SAPI_createSurfBody(long nrSoundings,long nrBeams,
-//                          long maxNrSidescanSamplesPerSounding, long errorprint);
-
+long SAPI_open(char* surfDir,char* surfFile,long errorprint);
+long SAPI_nextSounding(long errorprint);
+long SAPI_rewind(long errorprint);
+void SAPI_close(void);
 
 // Data from SIX(Index) File
 
 char* SAPI_getNameOfShip(void);
 char* SAPI_getTypeOfSounder(void);
 char* SAPI_getNameOfSounder(void);
-long  SAPI_getNrSoundings(void);
-long  SAPI_getNrBeams(void);
-long  SAPI_posPresentationIsRad(void);
-long  SAPI_getNrPositionsensors(void);
-long  SAPI_getNrSoundvelocityProfiles(void);
-long  SAPI_getNrEvents(void);
-long  SAPI_getNrPolygonElements(void);
+long SAPI_getNrSoundings(void);
+long SAPI_getNrBeams(void);
+long SAPI_posPresentationIsRad(void);
+long SAPI_getNrPositionsensors(void);
+long SAPI_getNrSoundvelocityProfiles(void);
+long SAPI_getNrEvents(void);
+long SAPI_getNrPolygonElements(void);
 
 double SAPI_getAbsoluteStartTimeOfProfile(void);
 
-long  SAPI_dataHaveHighFrequencyLayer(void);
-long  SAPI_dataHaveMediumFrequencyLayer(void);
-long  SAPI_dataHaveLowFrequencyLayer(void);
+long SAPI_dataHaveHighFrequencyLayer(void);
+long SAPI_dataHaveMediumFrequencyLayer(void);
+long SAPI_dataHaveLowFrequencyLayer(void);
 
 SurfGlobalData*               SAPI_getGlobalData(void);
 SurfStatistics*               SAPI_getStatistics(void);
