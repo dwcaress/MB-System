@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -117,14 +118,14 @@ static int modp_borders[4];
 #define FILE_MODE_REFERENCE 4
 size_t file_mode = FILE_MODE_NONE;
 int format = 0;
-int expose_plot_ok = True;
 int selected = 0; /* indicates an input file is selected */
 
 /* button parameters */
-static int button1down = false;
-static int button2down = false;
-static int button3down = false;
-static int loc_x, loc_y;
+static bool button1down = false;
+static bool button2down = false;
+static bool button3down = false;
+static int loc_x;
+static int loc_y;
 
 int status;
 char string[STRING_MAX];
@@ -192,7 +193,7 @@ void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
 
 #define CHUNK 512
 
-	Boolean first = True;
+	bool first = true;
 	String rscs = XtNewString((String)client);
 	String *valueList = (String *)XtCalloc(CHUNK, sizeof(String));
 	int count = 0;
@@ -201,7 +202,7 @@ void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
 	for (; rscs && *rscs; rscs = strtok(NULL, "\n")) {
 		if (first) {
 			rscs = strtok(rscs, "\n");
-			first = False;
+			first = false;
 		}
 		valueList[count] = XtNewString(rscs);
 		count++;
@@ -2611,7 +2612,7 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 int do_check_crossing_listok(int icrossing) {
-	int use_status = false;
+	bool use_status = false;
 
 	/* get crossing */
 	struct mbna_crossing *crossing = &(project.crossings[icrossing]);
@@ -2684,7 +2685,7 @@ int do_check_globaltie_listok(int ifile, int isection) {
 	struct mbna_section *section = &(file->sections[isection]);
 
 	/* if there is a global time check for view mode */
-	int use_status = false;
+	bool use_status = false;
 	if (section->global_tie_status != MBNA_TIE_NONE) {
 		if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
 		    (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
@@ -4516,9 +4517,9 @@ void do_action_z(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_action_tie_xyz(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-	acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbnavadjust_set_tie_xyz();
 	do_update_status();

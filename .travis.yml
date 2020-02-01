@@ -1,20 +1,210 @@
 language: cpp
-sudo: required
-services: docker
+
 env:
-  - IMAGE=ubuntu IMAGE_TAG=disco
+  global:
+    # Docker hub username
+    - secure: "rc9td900One/QgwPFyr+FXv+W2vX0PVlXJAug0mOBdYRFbjWNGDXWQTNC4X7RDvUMTFhwC3EUjUQVc4vLut54aWYSFyrC5/gOF8/C5PyGhAzIKGAoQlgZj+xXAWbxRbQGkOxjQGpaERU8HDiZxlYYQrVPYVfExfC9xWowpJEs7IFlNhUD0spaX/YqKqHKXpsztqb06hOs3s+Q7Tb7Q3w+ghrASbkKFkJyb1wgFhn+ejmGeg9OEipDcclq12gGnXU73edFgSmqw0z49qhxKa7eScNDQJF1RuQYm6drVs37Qs3S3x7G1TDEvnVhEXAb5brldFVHyLRnL6PGmJZQnqLcl3hRkRiv6mRHI7h+rfWF8QMT0arn7arej5PnKCYRCsyGnT8LGKa5dAj0GDb6ozIftBwdrE/VRvEoFpKYXOU7btrQvuVe2Ct7h0vAIV91UhFtj1QMzkqe19kYCWYoQqITv6rhnsznJc7+5cYybsexsFJssazXZ0m+HxCUECQG0mL8eMumSNUC8idKT2nEGdfi+AEJm2KC101NJu5hysOgtxwWTHl7xv7i+aozxGomMqE/r3v/1Tk4M0X3Nqn/Cn2525m0gMmIOxtmDF0coRUETfcbcCqK1rbWPL9O6sVLsCc/6rTW3sT/q28iSLEufaC2ZoiNcirt6BnFkB3r9e3RnI="
+    # Docker hub password
+    - secure: "Mc+Sj4/RerBfn9maE45yIfKOO5Er3RCyOEby6yT5D1ieCnkXPoTrr35tZUj15bZiwSp2UzLxeHF6nRWsuKPSotlqY18niIImNr8hwJ/oDEJNXESSoEo5qX4U1EJsAP+VhWjDUWK49ySqulFvv8vVtjL7/dq1rsDENdWKeOBBTqeXDMN5ei74TsO+F6MFIkgBDYr3PoclnemfdyQPwCsLeXpcNnNrxgRt89tF0HXjKc0H5HaXkT8MPAVkQgRPMj5ZY8Q0AUxa4bVyVUhbQDBLK9Ygr82G4re2UKjHOEOiqLv3Sgr3RLYap1UHrVYJQ7EeLagW9l6KJ9bJBFGS5h79f1dhSq0Ry7ASklzPwM8QWerAhuBvAChEy6ekZQEIl0ptKFKRyvvPfy4YuHi/W2eUh4OXc+DKqVllKq8DznrKAW1eIKU6dvornnVG0CYMChGner9uERmX6PDviYAb7xSLgLNWdnBYyGPIALEAoL5XPiEwyQmJBtD8xdekpDm8Y6NoX0hmWnPjsKVUtYN5dO4UZoP7ePCPxRQDHhiiUHPCd6C+vsXBJYiHwAyoptuOWwCkEHSuVap3Eh61PvNfY8odyCZUg5TRnhY8qrNiEfREYq1j07jgGsL/gdP8m4nWPSrdqPlWKgxS8XdiBRHGpJKqlgyDSYBytgmwwJFcQQ+616k="
 
-before_install:
-  - export CONTAINER=${IMAGE}-${IMAGE_TAG}
-  - docker run -d --name $CONTAINER -e LC_ALL="en_US.UTF-8" -e LANG="en_US.UTF-8" -v $(pwd):/travis -w /travis $IMAGE:$IMAGE_TAG tail -f /dev/null
-  - docker ps
+matrix:
+  fast_finish: true
+  include:
 
-install:
-  - docker exec -e CC=$CC -e CXX=$CXX -t $CONTAINER bash travis/install-$IMAGE.sh
-  - docker exec -e CC=$CC -e CXX=$CXX -t $CONTAINER bash travis/install-post.sh
+#
+#
+#  MB-System build-dependencies docker image builds.  Only on cron
+#
+#
 
-script:
-  - docker exec -e CC=$CC -e CXX=$CXX -t $CONTAINER bash travis/script.sh
+  - os: linux
+    name: Ubuntu Focal (20.04) Build-Deps Docker Image
+    if: type = cron
+    services: docker
+    env:
+      - TRAVIS_CONFIG=docker_dep_image
+      - OS=ubuntu
+      - OS_TAG=focal
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-focal
 
-after_failure:
-  - if [ -e test/utilities/test-suite.log ]; then cat test/utilities/test-suite.log; fi
+
+  - os: linux
+    if: type = cron
+    name: Ubuntu Focal (20.04) GMT 6.0.0 PROJ 6.3 Build-Deps Docker Image
+    services: docker
+    env:
+      - TRAVIS_CONFIG=docker_dep_image
+      - OS=ubuntu
+      - OS_TAG=focal
+      - PROJ_SOURCE_TAG=6.3
+      - GMT_SOURCE_TAG=6.0.0
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-focal-proj6.3-gmt6.0.0
+
+  - os: linux
+    if: type = cron
+    name: Ubuntu Bionic (18.04) Build-Deps Docker Image
+    services: docker
+    env:
+      - TRAVIS_CONFIG=docker_dep_image
+      - OS=ubuntu
+      - OS_TAG=bionic
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-bionic
+
+  - os: linux
+    if: type = cron
+    name: Ubuntu Disco (19.04) Build-Deps Docker Image
+    services: docker
+    env:
+      - TRAVIS_CONFIG=docker_dep_image
+      - OS=ubuntu
+      - OS_TAG=disco
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-disco
+
+  - os: linux
+    if: type = cron
+    name: Ubuntu Xenial (16.04) Build-Deps Docker Image
+    services: docker
+    env:
+      - TRAVIS_CONFIG=docker_dep_image
+      - OS=ubuntu
+      - OS_TAG=xenial
+      - GMT_SOURCE_TAG=6.0.0
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-xenial
+
+  - os: linux
+    if: type = cron
+    name: CentOS 7 Build-Deps Docker Image
+    services: docker
+    env:
+      - TRAVIS_CONFIG=docker_dep_image
+      - OS=centos
+      - OS_TAG=7
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:centos-7
+#
+#
+#  MB-System builds and tests on stock distributions
+#
+#
+  - os: linux
+    name: MB-System build on Ubuntu Focal
+    services: docker
+    env:
+      - TRAVIS_CONFIG=build_linux
+      - BUILD_CONTAINER_NAME=mbsystem-build
+      - OS=ubuntu
+      - OS_TAG=disco
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-focal
+
+  - os: linux
+    name: MB-System build on Ubuntu Disco
+    services: docker
+    env:
+      - TRAVIS_CONFIG=build_linux
+      - BUILD_CONTAINER_NAME=mbsystem-build
+      - OS=ubuntu
+      - OS_TAG=disco
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-disco
+
+  - os: linux
+    name: MB-System build on Ubuntu Bionic
+    services: docker
+    env:
+      - TRAVIS_CONFIG=build_linux
+      - BUILD_CONTAINER_NAME=mbsystem-build
+      - OS=ubuntu
+      - OS_TAG=bionic
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-bionic
+
+  - os: linux
+    name: MB-System build on Ubuntu Xenial
+    services: docker
+    env:
+      - TRAVIS_CONFIG=build_linux
+      - BUILD_CONTAINER_NAME=mbsystem-build
+      - OS=ubuntu
+      - OS_TAG=xenial
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-xenial
+
+  - os: linux
+    name: MB-System build on CentoOS 7
+    services: docker
+    env:
+      - TRAVIS_CONFIG=build_linux
+      - BUILD_CONTAINER_NAME=mbsystem-build
+      - OS=centos
+      - OS_TAG=7
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:centos-7
+
+  - os: osx
+    name: MB-System build on Mac OSX
+    env:
+      - TRAVIS_CONFIG=build_osx
+      - CFLAGS="-I/opt/X11/include -L/opt/X11/lib" 
+    addons:
+      homebrew:
+        packages:
+          - proj
+          - gdal
+          - netcdf
+          - fftw
+          - gmt
+          - openmotif
+#
+#
+#  MB-System builds and tests for development configs
+#
+#
+  - os: linux
+    name: MB-System build on Ubuntu Focal w/ PROJ 6.3 and GMT 6.0.0
+    services: docker
+    env:
+      - TRAVIS_CONFIG=build_linux
+      - BUILD_CONTAINER_NAME=mbsystem-build
+      - OS=ubuntu
+      - OS_TAG=bionic
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-focal-proj6.3-gmt6.0.0
+
+  - os: linux
+    name: MB-System build on Ubuntu Focal w/ clang
+    services: docker
+    compiler: clang
+    env:
+      - TRAVIS_CONFIG=build_linux
+      - BUILD_CONTAINER_NAME=mbsystem-build
+      - OS=ubuntu
+      - OS_TAG=bionic
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-focal
+
+  - os: linux
+    name: MB-System debug build on Ubuntu Focal w/ gsf and trn
+    services: docker
+    env:
+      - TRAVIS_CONFIG=build_linux
+      - BUILD_CONTAINER_NAME=mbsystem-build
+      - OS=ubuntu
+      - OS_TAG=bionic
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-focal
+      - MBSYSTEM_CONFIGURE_ARGS="--enable-mbtrn --enable-mbtnav --enable-gsf --enable-tests"
+      - CFLAGS="-g -Og"
+
+  - os: linux
+    name: MB-System optimized release build on Ubuntu Focal w/o gsf and trn
+    services: docker
+    env:
+      - TRAVIS_CONFIG=build_linux
+      - BUILD_CONTAINER_NAME=mbsystem-build
+      - OS=ubuntu
+      - OS_TAG=bionic
+      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-focal
+      - MBSYSTEM_CONFIGURE_ARGS="--disable-gsf --enable-tests"
+      - CFLAGS="-g0 -O3 -DNDEBUG"
+
+before_install: ./ci/travis/${TRAVIS_CONFIG}/before_install.sh
+
+install: ./ci/travis/${TRAVIS_CONFIG}/install.sh
+
+before_script: ./ci/travis/${TRAVIS_CONFIG}/before_script.sh
+
+script: ./ci/travis/${TRAVIS_CONFIG}/script.sh
+
+after_failure: ./ci/travis/${TRAVIS_CONFIG}/after_failure.sh
