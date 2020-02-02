@@ -1190,7 +1190,6 @@ int mbsys_3ddwissl_extract
     /* get the bathymetry */
     for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++) {
       struct mbsys_3ddwissl_pulse_struct *pulse = &store->pulses[ipulse];
-        {
       for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++) {
         const int ibath = store->soundings_per_pulse * ipulse + isounding;
         struct mbsys_3ddwissl_sounding_struct *sounding = &pulse->soundings[isounding];
