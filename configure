@@ -3766,7 +3766,7 @@ $as_echo "#define HAVE_CXX11 1" >>confdefs.h
 
 
 
-$as_echo "#define VERSION_DATE \"20 January 2020\"" >>confdefs.h
+$as_echo "#define VERSION_DATE \"2 February 2020\"" >>confdefs.h
 
 
 ac_aux_dir=
@@ -3877,7 +3877,7 @@ $as_echo "----------------------------------------------------------------------
 $as_echo "    The MB-system:    configure    12/7/2011"
 $as_echo "    $Id$"
 $as_echo " "
-$as_echo "    Copyright (c) 2011-2019 by"
+$as_echo "    Copyright (c) 2011-2020 by"
 $as_echo "    D. W. Caress (caress@lamont.ldgo.columbia.edu)"
 $as_echo "    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"
 $as_echo "    Lamont-Doherty Earth Observatory"

@@ -135,9 +135,9 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libmbsapi_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
-am_libmbsapi_la_OBJECTS = mem_surf.lo pb_math.lo \
-	sapi_data.lo sapi_files.lo sapi_globals.lo sapi_simple.lo \
-	util_surf.lo xdr_surf.lo
+am_libmbsapi_la_OBJECTS = mem_surf.lo pb_math.lo sapi_data.lo \
+	sapi_files.lo sapi_globals.lo sapi_simple.lo util_surf.lo \
+	xdr_surf.lo
 libmbsapi_la_OBJECTS = $(am_libmbsapi_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -162,10 +162,9 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/mem_surf.Plo ./$(DEPDIR)/pb_math.Plo \
-	./$(DEPDIR)/sapi_data.Plo \
-	./$(DEPDIR)/sapi_files.Plo ./$(DEPDIR)/sapi_globals.Plo \
-	./$(DEPDIR)/sapi_simple.Plo ./$(DEPDIR)/util_surf.Plo \
-	./$(DEPDIR)/xdr_surf.Plo
+	./$(DEPDIR)/sapi_data.Plo ./$(DEPDIR)/sapi_files.Plo \
+	./$(DEPDIR)/sapi_globals.Plo ./$(DEPDIR)/sapi_simple.Plo \
+	./$(DEPDIR)/util_surf.Plo ./$(DEPDIR)/xdr_surf.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)

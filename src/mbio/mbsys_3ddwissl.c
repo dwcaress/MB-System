@@ -818,8 +818,8 @@ int mbsys_3ddwissl_preprocess
   if (platform_ptr != NULL)
     {
 
-    /* calculate sonar position position */
-    status =mb_platform_position(verbose,
+    /* calculate sonar position */
+    status = mb_platform_position(verbose,
       platform_ptr,
       pars->target_sensor,
       0,
@@ -1188,11 +1188,10 @@ int mbsys_3ddwissl_extract
     mb_io_ptr->beamwidth_ltrack = 0.02;
 
     /* get the bathymetry */
-    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
-      {
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++) {
       struct mbsys_3ddwissl_pulse_struct *pulse = &store->pulses[ipulse];
-      for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++)
         {
+      for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++) {
         const int ibath = store->soundings_per_pulse * ipulse + isounding;
         struct mbsys_3ddwissl_sounding_struct *sounding = &pulse->soundings[isounding];
         beamflag[ibath] = sounding->beamflag;
@@ -1200,8 +1199,8 @@ int mbsys_3ddwissl_extract
         amp[ibath] = (double) sounding->amplitude;
         bathacrosstrack[ibath] = sounding->acrosstrack;
         bathalongtrack[ibath] = sounding->alongtrack;
-        }
       }
+    }
 
     /* always successful */
     *error = MB_ERROR_NO_ERROR;

@@ -74,7 +74,7 @@
 #define MBSYSTEM_INSTALL_PREFIX "/usr/local"
 
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
-#define MBSYSTEM_OTPS_LOCATION "/usr/local/src/OTPS2"
+#define MBSYSTEM_OTPS_LOCATION "/usr/local/opt/otps"
 
 /* Build libmbtnav */
 #define MBTNAV_ENABLED 1
@@ -119,7 +119,7 @@
 #define VERSION "5.7.6beta26"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "20 January 2020"
+#define VERSION_DATE "2 February 2020"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

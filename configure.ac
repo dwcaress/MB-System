@@ -28,7 +28,7 @@ AC_LANG(C)
 dnl Require c++11
 AX_CXX_COMPILE_STDCXX(11)
 
-AC_DEFINE(VERSION_DATE, "20 January 2020", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "2 February 2020", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -39,7 +39,7 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO(["    The MB-system:    configure    12/7/2011"])
 AS_ECHO(["    $Id$"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2019 by"])
+AS_ECHO(["    Copyright (c) 2011-2020 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])
