@@ -56,7 +56,6 @@
  * Date:  April 5,  2018
  */
 
-/* standard include files */
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,16 +64,15 @@
 #include <time.h>
 #include <unistd.h>
 
-/* MBIO include files */
 #include "mb_define.h"
-#include "mb_status.h"
 #include "mb_format.h"
 #include "mb_process.h"
+#include "mb_status.h"
+#include "mb_status.h"
 
 /* OTPS installation location include */
 #include "otps.h"
 
-/* local defines */
 #define MBOTPS_MODE_POSITION            0x00
 #define MBOTPS_MODE_NAVIGATION          0x01
 #define MBOTPS_MODE_TIDESTATION         0x02
@@ -191,7 +189,6 @@ int main(int argc, char **argv) {
   /* time parameters */
   time_t right_now;
   char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-  int pid;
 
   struct stat file_status;
   int fstat;
@@ -206,7 +203,6 @@ int main(int argc, char **argv) {
   mb_path modeldatafile = "";
   int read_data;
   int ntime;
-  int nread;
   int nline;
   int nget;
   int output;
@@ -219,7 +215,6 @@ int main(int argc, char **argv) {
   double tide;
   double depth;
   char *result;
-  int i;
 
   /* set default input to datalist.mb-1 */
   strcpy(read_file, "datalist.mb-1");
@@ -695,7 +690,7 @@ int main(int argc, char **argv) {
       exit(MB_FAILURE);
       }
     else {
-      for (i = 0; i < ntidestation; i++) {
+      for (int i = 0; i < ntidestation; i++) {
         mb_get_date(verbose, tidestation_time_d[i], time_i);
         fprintf(tfp, "%.6f %.6f %4.4d %2.2d %2.2d %2.2d %2.2d %2.2d\n",
           tidestation_lat, tidestation_lon,
@@ -773,7 +768,7 @@ int main(int argc, char **argv) {
     tidestation_m_max = 0.0;
     tidestation_c_min = 0.0;
     tidestation_c_max = 0.0;
-    for (i = 0; i < ntidestation; i++) {
+    for (int i = 0; i < ntidestation; i++) {
       if (i == 0) {
         tidestation_d_min = tidestation_tide[i];
         tidestation_d_max = tidestation_tide[i];
@@ -865,7 +860,7 @@ int main(int argc, char **argv) {
     mb_get_time(verbose, btime_i, &btime_d);
     mb_get_time(verbose, etime_i, &etime_d);
     ntime = 1 + (int)floor((etime_d - btime_d) / interval);
-    for (i = 0; i < ntime; i++)
+    for (int i = 0; i < ntime; i++)
       {
       time_d = btime_d + i * interval;
       mb_get_date(verbose, time_d, time_i);
