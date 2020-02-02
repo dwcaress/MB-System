@@ -191,7 +191,6 @@ int main(int argc, char **argv) {
   /* time parameters */
   time_t right_now;
   char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-  int pid;
 
   struct stat file_status;
   int fstat;
@@ -206,7 +205,6 @@ int main(int argc, char **argv) {
   mb_path modeldatafile = "";
   int read_data;
   int ntime;
-  int nread;
   int nline;
   int nget;
   int output;
