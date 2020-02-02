@@ -1493,8 +1493,9 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double heading, double roll,
-                      double pitch, double *lever_x, double *lever_y, double *lever_z, int *error) {
+int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset,
+                      double heading, double roll, double pitch,
+                      double *lever_x, double *lever_y, double *lever_z, int *error) {
   /* reset error */
   *error = MB_ERROR_NO_ERROR;
 
@@ -1549,10 +1550,13 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
       *lever_z = 0.0;
 
       /* Convenient calculations for later coordinate operations */
-      const double croll = cos(DTR * proll);
-      const double sroll = sin(DTR * proll);
-      const double cpitch = cos(DTR * ppitch);
-      const double spitch = sin(DTR * ppitch);
+      // 1/31/2020 DW Caress
+      // Change sign of roll and pitch used for lever arm, and subtract rather
+      // than add lever_z in  mb_platform_position()
+      const double croll = cos(-DTR * proll);
+      const double sroll = sin(-DTR * proll);
+      const double cpitch = cos(-DTR * ppitch);
+      const double spitch = sin(-DTR * ppitch);
       const double cheading = cos(DTR * pheading);
       const double sheading = sin(DTR * pheading);
 
@@ -1664,7 +1668,7 @@ int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int 
         - note that z is positive up but sensordepth is positive down */
     *targetlon = navlon + lever_x * mtodeglon;
     *targetlat = navlat + lever_y * mtodeglat;
-    *targetdepth = sensordepth + lever_z;
+    *targetdepth = sensordepth - lever_z;
   }
 
   /* null platform pointer is an error */

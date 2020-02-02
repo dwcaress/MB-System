@@ -21,6 +21,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta26    February 2, 2020
 - Version 5.7.6beta25    January 20, 2020
 - Version 5.7.6beta24    January 16, 2020
 - Version 5.7.6beta23    January 11, 2020
@@ -337,6 +338,27 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+#### 5.7.6beta26 (February 2, 2020)
+
+Format 181 (MBF_SAMESURF): Fixed compiler warnings, including warnings from a
+mismatch of 32 bit and 64 bit integer pointers due to the early 1990's vintage
+of this contributed library.
+
+mbpreprocess: Fixed error in calculating lever arms that resulted in incorrect
+static offsets to bathymetry calculated at the preprocess stage using platform models.
+Fixes are in src/mbio/mb_platform.c.
+
+mbotps: The tidal correction program has been recast to use the current global
+atlas tidal model from the Oregon State University Tide Group. This model is
+called tpxo9_atlas - the model files must be obtained from OSU now as they are
+no longer available for anonymous download. When the MB-System documentation is
+updated to include the steps required to obtain and install the tidal model,
+we will output a formal 5.7.6.
+
+Code style: Kurt Schwehr is systematically altering the code to conform to best
+practices and adding build tests. The improvements included in this beta release
+include cleaning up the SURF format library, work on mbedit, mbnavadjust, and
+the GMT modules mbswath, mbcontour, and mbgrdtiff.
 
 #### 5.7.6beta25 (January 20, 2020)
 

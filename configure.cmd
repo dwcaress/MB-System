@@ -387,12 +387,13 @@ CFLAGS="-g -I/opt/X11/include" \
     --with-fftw-lib=/usr/local/lib \
     --with-motif-include=/usr/local/include \
     --with-motif-lib=/usr/local/lib \
-    --with-otps-dir=/usr/local/src/OTPS2 \
+    --with-otps-dir=/usr/local/opt/otps \
     --enable-hardening \
     --enable-mbtrn \
     --enable-mbtnav \
     --enable-test
     #--enable-pcltools
+    #--with-otps-dir=/usr/local/src/OTPS2 \
 
 make
 make check

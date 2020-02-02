@@ -1,4 +1,4 @@
-.TH mblist 1 "1 September 2019" "MB-System 5.0" "MB-System 5.0"
+.TH mblist 1 "1 February 2020" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP \- List data in swath data files.
 
@@ -299,8 +299,14 @@ will be output for all sidescan pixels.
 Determines the form of the output. \fIOutput_format\fP is a string composed
 of one or more of the following characters:
 .IP
+\fB%fnv\fP
+Special tag: this is a shortcut for generating "fast navigation" or *.fnv files.
+If the output format is "%fnv" or "%FNV" then the output format
+will be set to the string that is used to generate *.fnv files, which is:
+"tMXYHScRPr=X=Y+X+Y".
+.IP
 \fB/\fP
-special character: this causes the value
+Special character: this causes the value
 indicated by the next character to be inverted. This applies only to simple
 numeric values such as depth and
 heading and not to values like time
@@ -308,7 +314,7 @@ strings or positions with hemisphere
 characters.
 .IP
 \fB\-\fP
-special character: this causes the value
+Special character: this causes the value
 indicated by the next character to be
 multiplied by \-1. This applies only
 to simple numeric values such as
@@ -317,7 +323,7 @@ like time strings or positions with
 hemisphere characters.
 .IP
 \fB\_\fP
-special character: this causes the position
+Special character: this causes the position
 indicated by the next 'X', 'x', 'Y', or 'y'
 character to be that of the sensor rather
 than the associated seafloor
@@ -325,7 +331,7 @@ depth or backscatter value. This applies only
 to position values.
 .IP
 \fB@\fP
-special character: this causes the position
+Special character: this causes the position
 or depth of the associated beam or pixel
 indicated by the next 'X', 'Y', 'Z', or 'z' character to be
 reported as the value relative
@@ -333,7 +339,7 @@ to the location of the sensor. This applies only
 to position and depth values.
 .IP
 \fB^\fP
-special character: this causes the position
+Special character: this causes the position
 value indicated by the next 'X', or 'Y'
 character to be expressed as an easting or
 northing in the projected coordinate system
@@ -345,7 +351,7 @@ longitude of the first data point. This
 applies only to position values.
 .IP
 \fB=\fP
-special character: this causes the value
+Special character: this causes the value
 indicated by the next character to
 derive from the port-most non-null
 beam or pixel. This applies only
@@ -354,7 +360,7 @@ beams or pixels such as depth, longitude,
 or latitude.
 .IP
 \fB+\fP
-special character: this causes the value
+Special character: this causes the value
 indicated by the next character to
 derive from the starboard-most non-null
 beam or pixel. This applies only

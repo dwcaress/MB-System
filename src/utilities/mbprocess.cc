@@ -5914,7 +5914,7 @@ int main(int argc, char **argv) {
                             "%15.10f\t%15.10f\t%7.3f\t%6.3f\t%.4f\t%6.3f\t%6.3f\t%7.4f\t"
                             "%15.10f\t%15.10f\t%15.10f\t%15.10f\n",
                       time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], seconds,
-                      time_d, navlon, navlat, heading, speed, sonardepth, roll, pitch, heave,
+                      time_d, navlon, navlat, heading, speed, draft, roll, pitch, heave,
                       portlon, portlat, stbdlon, stbdlat);
             }
 

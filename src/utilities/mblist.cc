@@ -20,11 +20,12 @@
  * Author:  D. W. Caress
  * Date:  February 1, 1993
  *
- * Note:  This program is based on the program mblist created
- *    by A. Malinverno (currently at Schlumberger, formerly
- *    at L-DEO) in August 1991.  It also includes elements
- *    derived from the program mbdump created by D. Caress
- *    in 1990.
+ * Note:  This program was originally based on the identically named program
+ *    mblist created by Alberto Malinverno (then at L-DEO, later at Schlumberger,
+ *    even later returned to L-DEO) in August 1991.  It also included elements
+ *    derived from the program mbdump created by D. Caress in 1990.
+ *    Gordon Keith of CSIRO (since retired) greatly augmented the mblist output
+ *    capabilities during the early 2000's.
  *
  */
 
@@ -904,7 +905,9 @@ int main(int argc, char **argv) {
         break;
       case 'O':
       case 'o':
-        if (strlen(optarg) > 0) {
+        if (strcmp(optarg, "%fnv") == 0 || strcmp(optarg, "%FNV") == 0) {
+          strncpy(list, "tMXYHScRPr=X=Y+X+Y", sizeof(list));
+        } else if (strlen(optarg) > 0) {
           n_list = MIN(strlen(optarg), MAX_OPTIONS);
           for (int j = 0; j < n_list; j++){
             if (j < MAX_OPTIONS) {
