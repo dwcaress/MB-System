@@ -41,7 +41,7 @@ TRN_RESONHOST=${TRN_RESONHOST:-134.89.32.107}
 TRN_OUTHOST=${TRN_OUTHOST:-134.89.32.107}
 TRN_MBTRNDIR=${TRN_MBTRNDIR:-/usr/local/bin}
 TRN_MAPFILES=${TRN_MAPFILES:-/cygdrive/d/cygwin64/maps}
-TRN_DATAFILES=${TRN_DATAFILES:-/cygdrive/d/cygwin64/config}
+TRN_DATAFILES=${TRN_DATAFILES:-/cygdrive/d/cygwin64/G2TerrainNav/config}
 TRN_LOGFILES=${TRN_LOGFILES:-/cygdrive/d/cygwin64/logs/mbtrnpp}
 
 #################################
