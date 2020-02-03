@@ -39,20 +39,20 @@
 
 /*--------------------------------------------------------------------*/
 double mbsys_get_depth(SurfMultiBeamDepth *MultiBeamDepth, SurfTransducerParameterTable TransducerTable, float heave, int n) {
-	double x, y, z, a, b, c, d, depth;
-	int N;
-
-	a = b = c = d = 0.0;
-	N = 0;
+	double a = 0.0;
+	double b = 0.0;
+	double c = 0.0;
+	double d = 0.0;
+	int N = 0;
 	/* include all beams with a lateral distance within ~15 % of the depth
 	   and calculate the depth @ centre assuming a linear slope.
 	 */
 	for (int i = 0; i < n; i++)
 		if ((MultiBeamDepth[i].depthFlag & (SB_DELETED | SB_DEPTH_SUPPRESSED | SB_REDUCED_FAN)) == 0) {
-			x = MultiBeamDepth[i].beamPositionAhead - TransducerTable.transducerPositionAhead;
-			y = MultiBeamDepth[i].beamPositionStar - TransducerTable.transducerPositionStar;
-			z = MultiBeamDepth[i].depth + heave - TransducerTable.transducerDepth;
-			if ((x * x + y * y) <= (z * z / 50.)) {
+			const double x = MultiBeamDepth[i].beamPositionAhead - TransducerTable.transducerPositionAhead;
+			const double y = MultiBeamDepth[i].beamPositionStar - TransducerTable.transducerPositionStar;
+			const double z = MultiBeamDepth[i].depth + heave - TransducerTable.transducerDepth;
+			if (x * x + y * y <= z * z / 50.0) {
 				a += y;
 				b += y * y;
 				c += z;
@@ -61,10 +61,10 @@ double mbsys_get_depth(SurfMultiBeamDepth *MultiBeamDepth, SurfTransducerParamet
 			}
 		}
 
-	if (N > 0)
-		depth = (b * c - a * d) / (N * b - a * a) - heave + TransducerTable.transducerDepth;
-	else
-		depth = 0.0;
+	const double depth =
+            N <= 0
+            ? 0.0
+            : (b * c - a * d) / (N * b - a * a) - heave + TransducerTable.transducerDepth;
 
 	return (depth);
 }
