@@ -1550,13 +1550,10 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
       *lever_z = 0.0;
 
       /* Convenient calculations for later coordinate operations */
-      // 1/31/2020 DW Caress
-      // Change sign of roll and pitch used for lever arm, and subtract rather
-      // than add lever_z in  mb_platform_position()
-      const double croll = cos(-DTR * proll);
-      const double sroll = sin(-DTR * proll);
-      const double cpitch = cos(-DTR * ppitch);
-      const double spitch = sin(-DTR * ppitch);
+      const double croll = cos(DTR * proll);
+      const double sroll = sin(DTR * proll);
+      const double cpitch = cos(DTR * ppitch);
+      const double spitch = sin(DTR * ppitch);
       const double cheading = cos(DTR * pheading);
       const double sheading = sin(DTR * pheading);
 
@@ -1576,7 +1573,7 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
         zz -= sensor_depth->offsets[0].position_offset_z;
       }
 
-      *lever_z = cpitch * sroll * xx - spitch * yy + cpitch * croll * zz;
+      *lever_z = spitch * yy - cpitch * sroll * xx + cpitch * croll * zz;   // Note: Z up
 
       /* apply change in x and y due to offset between the position sensor and the target sensor
       using roll, pitch and heading corrected for the attitude sensor offset and the target sensor */
@@ -1593,11 +1590,13 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
         yy -= sensor_position->offsets[0].position_offset_y;
         zz -= sensor_position->offsets[0].position_offset_z;
       }
-      *lever_x = (cheading * croll + sheading * spitch * sroll) * xx + cpitch * sheading * yy +
-                 (croll * sheading * spitch - cheading * sroll) * zz;
+      *lever_x =  cpitch * sheading * yy +
+                 (cheading * croll + sheading * spitch * sroll) * xx -
+                 (croll * sheading * spitch - cheading * sroll) * zz; // Note: X Starboard
 
-      *lever_y = (cheading * spitch * sroll - croll * sheading) * xx + cheading * cpitch * yy +
-                 (sheading * sroll + cheading * croll * spitch) * zz;
+      *lever_y =  cheading * cpitch * yy +
+                 (cheading * spitch * sroll - croll * sheading) * xx -
+                 (sheading * sroll + cheading * croll * spitch) * zz; // Note: Y Forward
     }
   }
 

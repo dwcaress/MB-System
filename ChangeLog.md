@@ -21,6 +21,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta27    February 3, 2020
 - Version 5.7.6beta26    February 2, 2020
 - Version 5.7.6beta25    January 20, 2020
 - Version 5.7.6beta24    January 16, 2020
@@ -338,6 +339,11 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+#### 5.7.6beta27 (February 3, 2020)
+
+mbpreprocess: Corrected prior fix to error in calculating lever arms, which
+didn't include all of the sign changes needed in mb_platform.c.
+
 #### 5.7.6beta26 (February 2, 2020)
 
 Format 181 (MBF_SAMESURF): Fixed compiler warnings, including warnings from a
