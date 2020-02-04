@@ -344,6 +344,8 @@ announced releases. The source distributions associated with all releases, major
 mbpreprocess: Corrected prior fix to error in calculating lever arms, which
 didn't include all of the sign changes needed in mb_platform.c.
 
+mbgrid: Fixed flaw in min or max weighted mean algorithm that produced array overflows in mbgrid.
+
 #### 5.7.6beta26 (February 2, 2020)
 
 Format 181 (MBF_SAMESURF): Fixed compiler warnings, including warnings from a
