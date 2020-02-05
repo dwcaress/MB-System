@@ -24,19 +24,10 @@
 #include <Xm/Xm.h>
 #include <Xm/RowColumn.h>
 
-#define LOCAL_STRCASECMP
-#define SUPPORTS_WCHARS
-
 // Handy definition used in SET_BACKGROUND_COLOR
 #define UNSET (-1)
 
-// Set up strcasecmp function
-#if defined(LOCAL_STRCASECMP)
-#define STRCASECMP StrCasecmp
-static int StrCasecmp(char *, char *);
-#else
 #define STRCASECMP strcasecmp
-#endif
 
 /*
  * Define XTPOINTER so it works with all releases of
@@ -84,9 +75,6 @@ enum {
 	NUM_COMMON_WCHARS
 };
 
-#ifndef SUPPORTS_WCHARS
-static int mblen(char *, size_t);
-#endif
 static int strlenWc(wchar_t *);
 static size_t doMbstowcs(wchar_t *, char *, size_t);
 static size_t doWcstombs(char *, wchar_t *, size_t);
@@ -98,55 +86,6 @@ static char *getNextCStrDelim(char *);
 static int getCStrCount(char *);
 static wchar_t *CStrCommonWideCharsGet();
 
-#if defined(LOCAL_STRCASECMP)
-
-/*
- * Function:
- *      cmp = StrCasecmp(s1, s2);
- * Description:
- *      Compare two strings ignoring case
- * Input:
- *      s1 - char * : string 1 to compare
- *      s2 - char * : string 2 to compare
- * Output:
- *      int :  0; s1 == s2
- *             1; s1 != s2
- */
-static int StrCasecmp(char *s1, char *s2) {
-	int c1, c2;
-
-	while (*s1 && *s2) {
-		c1 = isupper(*s1) ? tolower(*s1) : *s1;
-		c2 = isupper(*s2) ? tolower(*s2) : *s2;
-		if (c1 != c2) {
-			return (1);
-		}
-		s1++;
-		s2++;
-	}
-	if (*s1 || *s2) {
-		return (1);
-	}
-	return (0);
-}
-#endif
-
-/*
- * Function:
- *      len = mblen(s, n);
- * Description:
- *      The mblen function for platforms that don't have one. This
- * 	function simply returns a length of 1 since no wide character
- *	support exists for this platform.
- * Input:
- *      s - char * : the character string to get the length from
- *	n - size_t : the size of the string
- * Output:
- *      int : always 1
- */
-#ifndef SUPPORTS_WCHARS
-static int mblen(char *s, size_t n) { return (1); }
-#endif
 
 /*
  * Function:
@@ -184,17 +123,7 @@ static int strlenWc(wchar_t *ptr) {
  *      bytesConv - size_t : number of bytes converted
  */
 static size_t doMbstowcs(wchar_t *wcs, char *mbs, size_t n) {
-#ifndef SUPPORTS_WCHARS
-	int i;
-
-	for (i = 0; i < n && mbs[i] != 0; ++i) {
-		wcs[i] = mbs[i];
-	}
-	wcs[i++] = 0;
-	return (i);
-#else
 	return (mbstowcs(wcs, mbs, n));
-#endif
 }
 
 /*
@@ -210,15 +139,6 @@ static size_t doMbstowcs(wchar_t *wcs, char *mbs, size_t n) {
  *      bytesConv - size_t : number of bytes converted
  */
 static size_t doWcstombs(char *mbs, wchar_t *wcs, size_t n) {
-#ifndef SUPPORTS_WCHARS
-	int i;
-
-	for (i = 0; i < n && wcs[i] != 0; ++i) {
-		mbs[i] = wcs[i];
-	}
-	mbs[i] = 0;
-	return (i);
-#else
 	size_t retval;
 
 	retval = wcstombs(mbs, wcs, (n * sizeof(wchar_t)));
@@ -226,7 +146,6 @@ static size_t doWcstombs(char *mbs, wchar_t *wcs, size_t n) {
 		return (0);
 	else
 		return (retval);
-#endif
 }
 
 /*
@@ -341,21 +260,7 @@ static void copyWcsToMbs(char *mbs, wchar_t *wcs, int len, Boolean process_it) {
 static int dombtowc(wchar_t *wide, char *multi, size_t size) {
 	int retVal = 0;
 
-#ifndef SUPPORTS_WCHARS
-	if ((multi == NULL) || (*multi == '\000')) {
-		if (wide)
-			wide[0] = '\0';
-		return (0);
-	}
-
-	for (retVal = 0; retVal < size && multi[retVal] != '\000'; retVal++) {
-		if (wide != NULL) {
-			wide[retVal] = multi[retVal];
-		}
-	}
-#else
 	retVal = mbtowc(wide, multi, size);
-#endif
 	return (retVal);
 }
 
