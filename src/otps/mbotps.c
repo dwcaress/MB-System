@@ -141,9 +141,9 @@ int main(int argc, char **argv) {
   double tidestation_lat = 0.0;
 
   /* process argument list */
-  int flag = 0;
   bool help = false;
   {
+    // int flag = 0;
     bool errflg = false;
     int c;
     while ((c =
@@ -175,7 +175,7 @@ int main(int argc, char **argv) {
         &btime_i[4],
         &btime_i[5]);
       btime_i[6] = 0;
-      flag++;
+      // flag++;
       break;
     case 'C':
     case 'c':
@@ -198,18 +198,18 @@ int main(int argc, char **argv) {
         &etime_i[4],
         &etime_i[5]);
       etime_i[6] = 0;
-      flag++;
+      // flag++;
       break;
     case 'F':
     case 'f':
       sscanf(optarg, "%d", &format);
-      flag++;
+      // flag++;
       break;
     case 'I':
     case 'i':
       sscanf(optarg, "%s", read_file);
       mbotps_mode = mbotps_mode | MBOTPS_MODE_NAVIGATION;
-      flag++;
+      // flag++;
       break;
     case 'M':
     case 'm':
@@ -394,71 +394,24 @@ int main(int argc, char **argv) {
   }
 
   int error = MB_ERROR_NO_ERROR;
-
-  bool read_datalist = false;
-  void *datalist;
-  int look_processed = MB_DATALIST_LOOK_UNSET;
-  double file_weight;
-  mb_path swath_file;
-  mb_path file;
-  mb_path dfile;
-  int beams_bath;
-  int beams_amp;
-  int pixels_ss;
-
-  void *mbio_ptr = NULL;
-  void *store_ptr = NULL;
-  int kind;
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double speed;
-  double heading;
-  double distance;
-  double altitude;
-  double sonardepth;
-  char *beamflag = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
-  char comment[MB_COMMENT_MAXLINE];
-
-  /* mbotps control parameters */
-  double btime_d;
-  double etime_d;
-  int ngood;
-
-  /* tide station data */
   int ntidestation = 0;
+  char *result;  // TODO(schwehr): Localize
+  mb_path line = "";  // TODO(schwehr): Localize
   double *tidestation_time_d = NULL;
   double *tidestation_tide = NULL;
   double *tidestation_model = NULL;
   double *tidestation_correction = NULL;
+  int time_i[7];
   int time_j[5];
-  int ihr, intstat, itime;
-  double sec, correction;
-
-  struct stat file_status;
-  bool proceed = true;
-  int input_size, input_modtime, output_size, output_modtime;
-  mb_path line = "";
+  double sec;
+  double time_d;
+  int ihr;
   mb_path predict_tide = "";
-  bool read_data;
-  bool output;
-  double savetime_d;
-  double lasttime_d;
-  double lastlon;
-  double lastlat;
+  int ngood;
   double lon;
   double lat;
-  double tide;
   double depth;
-  char *result;
+  double tide;
 
   /* -------------------------------------------------------------------------
    * if specified read in tide station data and calculate model values for the
@@ -740,8 +693,7 @@ int main(int argc, char **argv) {
     mb_get_date(verbose, tidestation_etime_d, tidestation_etime_i);
 
     /* output info on tide station data */
-    if (( verbose > 0) && mbotps_mode & MBOTPS_MODE_TIDESTATION)
-      {
+    if (verbose > 0 && mbotps_mode & MBOTPS_MODE_TIDESTATION) {
       fprintf(stderr, "\nTide station data file:             %s\n", tidestation_file);
       fprintf(stderr, "  Tide station longitude:           %f\n", tidestation_lon);
       fprintf(stderr, "  Tide station latitude:            %f\n", tidestation_lat);
@@ -749,33 +701,80 @@ int main(int argc, char **argv) {
       fprintf(stderr, "  Tide station data summary:\n");
       fprintf(stderr, "    Number of samples:              %d\n", ntidestation);
       fprintf(stderr,
-        "    Start time:                     %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-        tidestation_stime_i[0],
-        tidestation_stime_i[1],
-        tidestation_stime_i[2],
-        tidestation_stime_i[3],
-        tidestation_stime_i[4],
-        tidestation_stime_i[5],
-        tidestation_stime_i[6]);
+              "    Start time:                     %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+              tidestation_stime_i[0],
+              tidestation_stime_i[1],
+              tidestation_stime_i[2],
+              tidestation_stime_i[3],
+              tidestation_stime_i[4],
+              tidestation_stime_i[5],
+              tidestation_stime_i[6]);
       fprintf(stderr,
-        "    End time:                       %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-        tidestation_etime_i[0],
-        tidestation_etime_i[1],
-        tidestation_etime_i[2],
-        tidestation_etime_i[3],
-        tidestation_etime_i[4],
-        tidestation_etime_i[5],
-        tidestation_etime_i[6]);
+              "    End time:                       %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+              tidestation_etime_i[0],
+              tidestation_etime_i[1],
+              tidestation_etime_i[2],
+              tidestation_etime_i[3],
+              tidestation_etime_i[4],
+              tidestation_etime_i[5],
+              tidestation_etime_i[6]);
       fprintf(stderr, "    Minimum values:     %7.3f %7.3f %7.3f\n",
               tidestation_d_min, tidestation_m_min, tidestation_c_min);
       fprintf(stderr, "    Maximum values:     %7.3f %7.3f %7.3f\n",
               tidestation_d_max, tidestation_m_max, tidestation_c_max);
-      }
+    }
 
     /* remove the temporary files */
     unlink(lltfile);
     unlink(otpsfile);
-    }
+  }
+
+  double file_weight;
+  mb_path swath_file;
+  mb_path file;
+  mb_path dfile;
+  int beams_bath;
+  int beams_amp;
+  int pixels_ss;
+
+  void *mbio_ptr = NULL;
+  void *store_ptr = NULL;
+  int kind;
+  double navlon;
+  double navlat;
+  double speed;
+  double heading;
+  double distance;
+  double altitude;
+  double sonardepth;
+  char *beamflag = NULL;
+  double *bath = NULL;
+  double *bathacrosstrack = NULL;
+  double *bathalongtrack = NULL;
+  double *amp = NULL;
+  double *ss = NULL;
+  double *ssacrosstrack = NULL;
+  double *ssalongtrack = NULL;
+  char comment[MB_COMMENT_MAXLINE];
+
+  /* mbotps control parameters */
+  double btime_d;
+  double etime_d;
+
+  /* tide station data */
+  int intstat;
+  int itime;
+  double correction;
+
+  struct stat file_status;
+  bool proceed = true;
+  int input_size, input_modtime, output_size, output_modtime;
+  bool read_data;
+  bool output;
+  double savetime_d;
+  double lasttime_d;
+  double lastlon;
+  double lastlat;
 
   /* -------------------------------------------------------------------------
    * calculate tide model  for a single position and time range
@@ -998,21 +997,18 @@ int main(int argc, char **argv) {
       mb_get_format(verbose, read_file, NULL, &format, &error);
 
     /* determine whether to read one file or a list of files */
-    if (format < 0)
-      read_datalist = true;
+    const bool read_datalist = format < 0;
+    void *datalist;
 
     /* open file list */
-    if (read_datalist)
-      {
-      if ((status =
-        mb_datalist_open(verbose, &datalist, read_file, look_processed,
-          &error)) != MB_SUCCESS)
-        {
-        error = MB_ERROR_OPEN_FAIL;
+    if (read_datalist) {
+      const int look_processed = MB_DATALIST_LOOK_UNSET;
+      status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error);
+      if (status != MB_SUCCESS) {
         fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-        exit(error);
-        }
+        exit(MB_ERROR_OPEN_FAIL);
+      }
       if ((status =
         mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight,
           &error)) == MB_SUCCESS)
@@ -1471,13 +1467,14 @@ int main(int argc, char **argv) {
         }
       }
     } // end loop reading tide values output by predict_tide
+
     fclose(ofp);
     fclose(lfp);
     fclose(tfp);
 
-  /* remove the temporary files */
-  unlink(lltfile);
-  unlink(otpsfile);
+    /* remove the temporary files */
+    unlink(lltfile);
+    unlink(otpsfile);
   }
 
   /* check memory */
