@@ -69,9 +69,8 @@
 #include "mb_format.h"
 #include "mb_process.h"
 #include "mb_status.h"
-#include "mb_status.h"
 
-/* OTPS installation location include */
+// OTPS installation location include
 #include "otps.h"
 
 #define MBOTPS_MODE_POSITION            0x00
@@ -82,7 +81,8 @@
 
 static char program_name[] = "mbotps";
 static char help_message[] =
-    "MBotps predicts tides using methods and data derived from the OSU Tidal Prediction Software (OTPS) distributions.";
+    "MBotps predicts tides using methods and data derived from the "
+    "OSU Tidal Prediction Software (OTPS) distributions.";
 static char usage_message[] =
     "mbotps [-Atideformat -Byear/month/day/hour/minute/second -Ctidestationformat\n"
     "\t-Dinterval -Eyear/month/day/hour/minute/second -Fformat\n"
@@ -104,8 +104,6 @@ int main(int argc, char **argv) {
   int status = mb_defaults(
       verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i,
       &speedmin, &timegap);
-
-  int error = MB_ERROR_NO_ERROR;
 
   /* MBIO read control parameters */
   bool read_datalist = false;
@@ -143,15 +141,10 @@ int main(int argc, char **argv) {
   char comment[MB_COMMENT_MAXLINE];
 
   /* mbotps control parameters */
-  mb_path otps_location_use;
   int notpsmodels = 0;
   int mbotps_mode = MBOTPS_MODE_POSITION;
-  double tidelon;
-  double tidelat;
   double btime_d;
   double etime_d;
-  double interval = 300.0;
-  mb_path tide_file;
   bool mbprocess_update = false;
   bool skip_existing = false;
   int tideformat = 2;
@@ -180,8 +173,6 @@ int main(int argc, char **argv) {
   int input_size, input_modtime, output_size, output_modtime;
   mb_path line = "";
   mb_path predict_tide = "";
-  bool otps_model_set = false;
-  mb_path otps_model = "";
   mb_path modelname = "";
   mb_path modelfile = "";
   mb_path modeldatafile = "";
@@ -197,19 +188,20 @@ int main(int argc, char **argv) {
   double depth;
   char *result;
 
-  /* set default input to datalist.mb-1 */
   mb_path read_file = "datalist.mb-1";
 
   /* set default location of the OTPS package */
+  mb_path otps_location_use;
   strcpy(otps_location_use, otps_location);
 
   /* set defaults for the AUV survey we were running on Coaxial Segment, Juan de Fuca Ridge
       while I wrote this code */
-  sprintf(otps_model, MBOTPS_DEFAULT_MODEL);
-  sprintf(tide_file, "tide_model.txt");
-  tidelon = -129.588618;
-  tidelat = 46.50459;
-  interval = 60.0;
+  bool otps_model_set = false;
+  mb_path otps_model = MBOTPS_DEFAULT_MODEL;
+  mb_path tide_file = "tide_model.txt";
+  double tidelon = -129.588618;
+  double tidelat = 46.50459;
+  double interval = 60.0;  // TODO(schwehr): Why not the 300.0?
   btime_i[0] = 2009;
   btime_i[1] = 7;
   btime_i[2] = 31;
@@ -365,7 +357,7 @@ int main(int argc, char **argv) {
   {
     FILE *tfp = popen(command, "r");
     if (tfp != NULL) {
-      error = MB_ERROR_OPEN_FAIL;
+      // error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open ls using popen()\n");
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_FAILURE);
@@ -431,7 +423,7 @@ int main(int argc, char **argv) {
   }
 
   if (help)
-    exit(error);
+    exit(MB_ERROR_NO_ERROR);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
@@ -473,14 +465,14 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       read_file:            %s\n", read_file);
   }
 
+  int error = MB_ERROR_NO_ERROR;
+
   /* -------------------------------------------------------------------------
    * if specified read in tide station data and calculate model values for the
    * same location and times- the difference is applied as a correction to the
    * model values calculated at the desired locations and times
    * -----------------------------------------------------------------------*/
-  if (mbotps_mode & MBOTPS_MODE_TIDESTATION)
-    {
-
+  if (mbotps_mode & MBOTPS_MODE_TIDESTATION) {
     /* make sure longitude is positive */
     if (tidestation_lon < 0.0)
       tidestation_lon += 360.0;
