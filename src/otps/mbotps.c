@@ -104,104 +104,6 @@ int main(int argc, char **argv) {
   int status = mb_defaults(
       verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i,
       &speedmin, &timegap);
-
-  /* MBIO read control parameters */
-  bool read_datalist = false;
-  void *datalist;
-  int look_processed = MB_DATALIST_LOOK_UNSET;
-  double file_weight;
-  mb_path swath_file;
-  mb_path file;
-  mb_path dfile;
-  int beams_bath;
-  int beams_amp;
-  int pixels_ss;
-
-  /* MBIO read values */
-  void *mbio_ptr = NULL;
-  void *store_ptr = NULL;
-  int kind;
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double speed;
-  double heading;
-  double distance;
-  double altitude;
-  double sonardepth;
-  char *beamflag = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
-  char comment[MB_COMMENT_MAXLINE];
-
-  /* mbotps control parameters */
-  int notpsmodels = 0;
-  int mbotps_mode = MBOTPS_MODE_POSITION;
-  double btime_d;
-  double etime_d;
-  bool mbprocess_update = false;
-  bool skip_existing = false;
-  int tideformat = 2;
-  int ngood;
-
-  /* tide station data */
-  mb_path tidestation_file;
-  double tidestation_lon = 0.0;
-  double tidestation_lat = 0.0;
-  int tidestation_format = 2;
-  int ntidestation = 0;
-  double *tidestation_time_d = NULL;
-  double *tidestation_tide = NULL;
-  double *tidestation_model = NULL;
-  double *tidestation_correction = NULL;
-  int time_j[5];
-  int ihr, intstat, itime;
-  double sec, correction;
-
-  /* time parameters */
-  time_t right_now;
-  char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-
-  struct stat file_status;
-  bool proceed = true;
-  int input_size, input_modtime, output_size, output_modtime;
-  mb_path line = "";
-  mb_path predict_tide = "";
-  mb_path modelname = "";
-  mb_path modelfile = "";
-  mb_path modeldatafile = "";
-  bool read_data;
-  bool output;
-  double savetime_d;
-  double lasttime_d;
-  double lastlon;
-  double lastlat;
-  double lon;
-  double lat;
-  double tide;
-  double depth;
-  char *result;
-
-  mb_path read_file = "datalist.mb-1";
-
-  /* set default location of the OTPS package */
-  mb_path otps_location_use;
-  strcpy(otps_location_use, otps_location);
-
-  /* set defaults for the AUV survey we were running on Coaxial Segment, Juan de Fuca Ridge
-      while I wrote this code */
-  bool otps_model_set = false;
-  mb_path otps_model = MBOTPS_DEFAULT_MODEL;
-  mb_path tide_file = "tide_model.txt";
-  double tidelon = -129.588618;
-  double tidelat = 46.50459;
-  double interval = 60.0;  // TODO(schwehr): Why not the 300.0?
   btime_i[0] = 2009;
   btime_i[1] = 7;
   btime_i[2] = 31;
@@ -216,6 +118,27 @@ int main(int argc, char **argv) {
   etime_i[4] = 0;
   etime_i[5] = 0;
   etime_i[6] = 0;
+
+  /* set default location of the OTPS package */
+  mb_path otps_location_use;
+  strcpy(otps_location_use, otps_location);
+
+  // Set defaults for the AUV survey we were running on Coaxial Segment, Juan de Fuca Ridge
+  bool otps_model_set = false;
+  mb_path otps_model = MBOTPS_DEFAULT_MODEL;
+  mb_path tide_file = "tide_model.txt";
+  double tidelon = -129.588618;
+  double tidelat = 46.50459;
+  double interval = 60.0;  // TODO(schwehr): Why not the 300.0?
+  int tideformat = 2;
+  int tidestation_format = 2;
+  mb_path read_file = "datalist.mb-1";
+  int mbotps_mode = MBOTPS_MODE_POSITION;
+  bool mbprocess_update = false;
+  mb_path tidestation_file;
+  bool skip_existing = false;
+  double tidestation_lon = 0.0;
+  double tidestation_lat = 0.0;
 
   /* process argument list */
   int flag = 0;
@@ -349,6 +272,82 @@ int main(int argc, char **argv) {
     fprintf(stderr, "  OTPS location: %s\n  Default OTPS model name: %s\n  Possible OTPS tidal models:\n",
             otps_location_use, MBOTPS_DEFAULT_MODEL);
   }
+
+  /* MBIO read control parameters */
+  bool read_datalist = false;
+  void *datalist;
+  int look_processed = MB_DATALIST_LOOK_UNSET;
+  double file_weight;
+  mb_path swath_file;
+  mb_path file;
+  mb_path dfile;
+  int beams_bath;
+  int beams_amp;
+  int pixels_ss;
+
+  /* MBIO read values */
+  void *mbio_ptr = NULL;
+  void *store_ptr = NULL;
+  int kind;
+  int time_i[7];
+  double time_d;
+  double navlon;
+  double navlat;
+  double speed;
+  double heading;
+  double distance;
+  double altitude;
+  double sonardepth;
+  char *beamflag = NULL;
+  double *bath = NULL;
+  double *bathacrosstrack = NULL;
+  double *bathalongtrack = NULL;
+  double *amp = NULL;
+  double *ss = NULL;
+  double *ssacrosstrack = NULL;
+  double *ssalongtrack = NULL;
+  char comment[MB_COMMENT_MAXLINE];
+
+  /* mbotps control parameters */
+  int notpsmodels = 0;
+  double btime_d;
+  double etime_d;
+  int ngood;
+
+  /* tide station data */
+  int ntidestation = 0;
+  double *tidestation_time_d = NULL;
+  double *tidestation_tide = NULL;
+  double *tidestation_model = NULL;
+  double *tidestation_correction = NULL;
+  int time_j[5];
+  int ihr, intstat, itime;
+  double sec, correction;
+
+  /* time parameters */
+  time_t right_now;
+  char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+
+  struct stat file_status;
+  bool proceed = true;
+  int input_size, input_modtime, output_size, output_modtime;
+  mb_path line = "";
+  mb_path predict_tide = "";
+  mb_path modelname = "";
+  mb_path modelfile = "";
+  mb_path modeldatafile = "";
+  bool read_data;
+  bool output;
+  double savetime_d;
+  double lasttime_d;
+  double lastlon;
+  double lastlat;
+  double lon;
+  double lat;
+  double tide;
+  double depth;
+  char *result;
+
 
   notpsmodels = 0;
   mb_path command = "";
