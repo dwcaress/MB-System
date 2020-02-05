@@ -33,6 +33,7 @@
  */
 #ifdef __cplusplus
 #if XtSpecificationRelease < 5
+#error "Xt too old"
 #define XTPOINTER char *
 #else
 #define XTPOINTER XPointer
@@ -72,18 +73,6 @@ enum {
 	WideOne,
 	NUM_COMMON_WCHARS
 };
-
-static int strlenWc(wchar_t *);
-static size_t doMbstowcs(wchar_t *, char *, size_t);
-static size_t doWcstombs(char *, wchar_t *, size_t);
-static void copyWcsToMbs(char *, wchar_t *, int, Boolean);
-static int dombtowc(wchar_t *, char *, size_t);
-static Boolean extractSegment(wchar_t **, wchar_t **, int *, wchar_t **, int *, int *, Boolean *);
-static XmString StringToXmString(char *);
-static char *getNextCStrDelim(char *);
-static int getCStrCount(char *);
-static wchar_t *CStrCommonWideCharsGet();
-
 
 /*
  * Function:
@@ -144,6 +133,65 @@ static size_t doWcstombs(char *mbs, wchar_t *wcs, size_t n) {
 		return (0);
 	else
 		return (retval);
+}
+
+/*
+ * Function:
+ *      status = dombtowc(wide, multi, size);
+ * Description:
+ *      Convert a multibyte character to a wide character.
+ * Input:
+ *      wide	- wchar_t *	: where to put the wide character
+ *	multi	- char *	: the multibyte character to convert
+ *	size	- size_t	: the number of characters to convert
+ * Output:
+ *      0	- if multi is a NULL pointer or points to a NULL character
+ *	#bytes	- number of bytes in the multibyte character
+ *	-1	- multi is an invalid multibyte character.
+ *
+ *	NOTE:  if wide is NULL, then this returns the number of bytes in
+ *	       the multibyte character.
+ */
+static int dombtowc(wchar_t *wide, char *multi, size_t size) {
+	int retVal = 0;
+
+	retVal = mbtowc(wide, multi, size);
+	return (retVal);
+}
+
+/*
+ * Function:
+ *      cwc = CStrCommonWideCharsGet();
+ * Description:
+ *      Return the array of common wide characters.
+ * Input:
+ *      None.
+ * Output:
+ *     	cwc - wchar_t * : this array should never be written to or FREEd.
+ */
+static wchar_t *CStrCommonWideCharsGet() {
+	static wchar_t *CommonWideChars = NULL;
+	/*
+	 * If you add to this array, don't forget to change the enum in
+	 * the TYPEDEFS and DEFINES section above to correspond to this
+	 * array.
+	 */
+	static char *characters[] = {"\000", "\t", "\n", "\r", "\f", "\v", "\\", "\"", "#", ":", "f",
+	                             "l",    "n",  "r",  "t",  "v",  "F",  "L",  "R",  "T", "0", "1"};
+
+	if (CommonWideChars == NULL) {
+		int i;
+
+		/*
+		 * Allocate and create the array.
+		 */
+		CommonWideChars = (wchar_t *)XtMalloc(NUM_COMMON_WCHARS * sizeof(wchar_t));
+
+		for (i = 0; i < NUM_COMMON_WCHARS; i++) {
+			(void)dombtowc(&(CommonWideChars[i]), characters[i], 1);
+		}
+	}
+	return (CommonWideChars);
 }
 
 /*
@@ -236,30 +284,6 @@ static void copyWcsToMbs(char *mbs, wchar_t *wcs, int len, Boolean process_it) {
 	tbuf[lenToConvert] = tmp;
 
 	mbs[numCvt] = '\0';
-}
-
-/*
- * Function:
- *      status = dombtowc(wide, multi, size);
- * Description:
- *      Convert a multibyte character to a wide character.
- * Input:
- *      wide	- wchar_t *	: where to put the wide character
- *	multi	- char *	: the multibyte character to convert
- *	size	- size_t	: the number of characters to convert
- * Output:
- *      0	- if multi is a NULL pointer or points to a NULL character
- *	#bytes	- number of bytes in the multibyte character
- *	-1	- multi is an invalid multibyte character.
- *
- *	NOTE:  if wide is NULL, then this returns the number of bytes in
- *	       the multibyte character.
- */
-static int dombtowc(wchar_t *wide, char *multi, size_t size) {
-	int retVal = 0;
-
-	retVal = mbtowc(wide, multi, size);
-	return (retVal);
 }
 
 /*
@@ -682,41 +706,6 @@ static int getCStrCount(char *str) {
 		str = ++newStr;
 	}
 	return (x);
-}
-
-/*
- * Function:
- *      cwc = CStrCommonWideCharsGet();
- * Description:
- *      Return the array of common wide characters.
- * Input:
- *      None.
- * Output:
- *     	cwc - wchar_t * : this array should never be written to or FREEd.
- */
-static wchar_t *CStrCommonWideCharsGet() {
-	static wchar_t *CommonWideChars = NULL;
-	/*
-	 * If you add to this array, don't forget to change the enum in
-	 * the TYPEDEFS and DEFINES section above to correspond to this
-	 * array.
-	 */
-	static char *characters[] = {"\000", "\t", "\n", "\r", "\f", "\v", "\\", "\"", "#", ":", "f",
-	                             "l",    "n",  "r",  "t",  "v",  "F",  "L",  "R",  "T", "0", "1"};
-
-	if (CommonWideChars == NULL) {
-		int i;
-
-		/*
-		 * Allocate and create the array.
-		 */
-		CommonWideChars = (wchar_t *)XtMalloc(NUM_COMMON_WCHARS * sizeof(wchar_t));
-
-		for (i = 0; i < NUM_COMMON_WCHARS; i++) {
-			(void)dombtowc(&(CommonWideChars[i]), characters[i], 1);
-		}
-	}
-	return (CommonWideChars);
 }
 
 /*
