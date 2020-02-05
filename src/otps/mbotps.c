@@ -105,12 +105,6 @@ int main(int argc, char **argv) {
       verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i,
       &speedmin, &timegap);
 
-  extern char *optarg;
-  int errflg = 0;
-  int c;
-  int help = 0;
-  int flag = 0;
-
   int error = MB_ERROR_NO_ERROR;
 
   /* MBIO read control parameters */
@@ -232,13 +226,18 @@ int main(int argc, char **argv) {
   etime_i[6] = 0;
 
   /* process argument list */
-  while ((c =
-    getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:I:i:MmN:n:O:o:P:p:R:r:SST:t:U:u:VvHh")) != -1)
-    switch (c)
+  int flag = 0;
+  bool help = false;
+  {
+    bool errflg = false;
+    int c;
+    while ((c =
+            getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:I:i:MmN:n:O:o:P:p:R:r:SST:t:U:u:VvHh")) != -1)
+      switch (c)
       {
     case 'H':
     case 'h':
-      help++;
+      help = true;
       break;
     case 'V':
     case 'v':
@@ -332,23 +331,21 @@ int main(int argc, char **argv) {
       sscanf(optarg, "%lf/%lf", &tidestation_lon, &tidestation_lat);
       break;
     case '?':
-      errflg++;
+      errflg = true;
       }
 
-  /* if error flagged then print it and exit */
-  if (errflg) {
-    fprintf(stderr, "usage: %s\n", usage_message);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(MB_ERROR_BAD_USAGE);
+    if (errflg) {
+      fprintf(stderr, "usage: %s\n", usage_message);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_BAD_USAGE);
     }
+  }
 
-  /* print starting message */
-  if (( verbose == 1) || help) {
+  if (verbose == 1 || help) {
     fprintf(stderr, "\nProgram %s\n", program_name);
     fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
   }
 
-  /* if help desired then print it and exit */
   if (help) {
     fprintf(stderr, "\n%s\n", help_message);
     fprintf(stderr, "\nusage: %s\n", usage_message);
@@ -364,6 +361,7 @@ int main(int argc, char **argv) {
   notpsmodels = 0;
   mb_path command = "";
   sprintf(command, "/bin/ls -1 %s/DATA | grep Model_ | sed \"s/^Model_//\"", otps_location_use);
+
   {
     FILE *tfp = popen(command, "r");
     if (tfp != NULL) {
@@ -419,15 +417,23 @@ int main(int argc, char **argv) {
     /* close the process */
     pclose(tfp);
   }
-  if (help || ( verbose > 0) )
-    {
+  if (help || verbose > 0) {
     fprintf(stderr, "  Number of available OTPS tide models: %d\n", notpsmodels);
     fprintf(stderr, "Using OTPS tide model:                %s\n", otps_model);
-    }
+  }
 
-  /* print starting debug statements */
-  if (verbose >= 2)
-    {
+  /* exit if no valid OTPS models can be found */
+  if (notpsmodels <= 0) {
+    // error = MB_ERROR_OPEN_FAIL;
+    fprintf(stderr, "\nUnable to find a valid OTPS tidal model\n");
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(MB_FAILURE);
+  }
+
+  if (help)
+    exit(error);
+
+  if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
     fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
     fprintf(stderr, "dbg2  Control Parameters:\n");
@@ -465,20 +471,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       tideformat:           %d\n", tideformat);
     fprintf(stderr, "dbg2       format:               %d\n", format);
     fprintf(stderr, "dbg2       read_file:            %s\n", read_file);
-    }
-
-  /* exit if no valid OTPS models can be found */
-  if (notpsmodels <= 0)
-    {
-    error = MB_ERROR_OPEN_FAIL;
-    fprintf(stderr, "\nUnable to find a valid OTPS tidal model\n");
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(MB_FAILURE);
-    }
-
-  /* if help was all that was desired then exit */
-  if (help)
-    exit(error);
+  }
 
   /* -------------------------------------------------------------------------
    * if specified read in tide station data and calculate model values for the
