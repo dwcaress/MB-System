@@ -27,8 +27,6 @@
 // Handy definition used in SET_BACKGROUND_COLOR
 #define UNSET (-1)
 
-#define STRCASECMP strcasecmp
-
 /*
  * Define XTPOINTER so it works with all releases of
  * Xt and c++.
@@ -2011,7 +2009,7 @@ static int SetColor(
     Pixel *image_pixel, Pixel *mask_pixel, unsigned int *mask_pixel_index) {
 	XColor xcolor;
 
-	if (STRCASECMP(colorname, BX_TRANSPARENT_COLOR)) {
+	if (strcasecmp(colorname, BX_TRANSPARENT_COLOR)) {
 		if (!XParseColor(display, colormap, colorname, &xcolor) || (!XAllocColor(display, colormap, &xcolor)))
 			return (1);
 		*image_pixel = xcolor.pixel;
