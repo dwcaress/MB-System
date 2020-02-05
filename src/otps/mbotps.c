@@ -273,87 +273,12 @@ int main(int argc, char **argv) {
             otps_location_use, MBOTPS_DEFAULT_MODEL);
   }
 
-  /* MBIO read control parameters */
-  bool read_datalist = false;
-  void *datalist;
-  int look_processed = MB_DATALIST_LOOK_UNSET;
-  double file_weight;
-  mb_path swath_file;
-  mb_path file;
-  mb_path dfile;
-  int beams_bath;
-  int beams_amp;
-  int pixels_ss;
-
-  /* MBIO read values */
-  void *mbio_ptr = NULL;
-  void *store_ptr = NULL;
-  int kind;
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double speed;
-  double heading;
-  double distance;
-  double altitude;
-  double sonardepth;
-  char *beamflag = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
-  char comment[MB_COMMENT_MAXLINE];
-
-  /* mbotps control parameters */
   int notpsmodels = 0;
-  double btime_d;
-  double etime_d;
-  int ngood;
-
-  /* tide station data */
-  int ntidestation = 0;
-  double *tidestation_time_d = NULL;
-  double *tidestation_tide = NULL;
-  double *tidestation_model = NULL;
-  double *tidestation_correction = NULL;
-  int time_j[5];
-  int ihr, intstat, itime;
-  double sec, correction;
-
-  /* time parameters */
-  time_t right_now;
-  char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-
-  struct stat file_status;
-  bool proceed = true;
-  int input_size, input_modtime, output_size, output_modtime;
-  mb_path line = "";
-  mb_path predict_tide = "";
-  mb_path modelname = "";
-  mb_path modelfile = "";
-  mb_path modeldatafile = "";
-  bool read_data;
-  bool output;
-  double savetime_d;
-  double lasttime_d;
-  double lastlon;
-  double lastlat;
-  double lon;
-  double lat;
-  double tide;
-  double depth;
-  char *result;
-
-
-  notpsmodels = 0;
-  mb_path command = "";
-  sprintf(command, "/bin/ls -1 %s/DATA | grep Model_ | sed \"s/^Model_//\"", otps_location_use);
 
   {
+    mb_path command = "";
+    sprintf(command, "/bin/ls -1 %s/DATA | grep Model_ | sed \"s/^Model_//\"", otps_location_use);
+
     FILE *tfp = popen(command, "r");
     if (tfp != NULL) {
       // error = MB_ERROR_OPEN_FAIL;
@@ -363,8 +288,11 @@ int main(int argc, char **argv) {
     }
 
     /* send relevant input to predict_tide through its stdin stream */
+    mb_path line = "";
     while (fgets(line, sizeof(line), tfp)) {
+      mb_path modelname = "";
       sscanf(line, "%s", modelname);
+      mb_path modelfile = "";
       sprintf(modelfile, "%s/DATA/Model_%s", otps_location_use, modelname);
       fprintf(stderr, "    %s", modelname);
 
@@ -374,6 +302,7 @@ int main(int argc, char **argv) {
       if (mfp != NULL) {
         /* stat the file referenced in each line */
         while (fgets(line, sizeof(line), mfp) != NULL) {
+          mb_path modeldatafile = "";
           sscanf(line, "%s", modeldatafile);
           if (modeldatafile[0] != '/') {
             sprintf(line, "%s/%s", otps_location_use, modeldatafile);
@@ -465,6 +394,71 @@ int main(int argc, char **argv) {
   }
 
   int error = MB_ERROR_NO_ERROR;
+
+  bool read_datalist = false;
+  void *datalist;
+  int look_processed = MB_DATALIST_LOOK_UNSET;
+  double file_weight;
+  mb_path swath_file;
+  mb_path file;
+  mb_path dfile;
+  int beams_bath;
+  int beams_amp;
+  int pixels_ss;
+
+  void *mbio_ptr = NULL;
+  void *store_ptr = NULL;
+  int kind;
+  int time_i[7];
+  double time_d;
+  double navlon;
+  double navlat;
+  double speed;
+  double heading;
+  double distance;
+  double altitude;
+  double sonardepth;
+  char *beamflag = NULL;
+  double *bath = NULL;
+  double *bathacrosstrack = NULL;
+  double *bathalongtrack = NULL;
+  double *amp = NULL;
+  double *ss = NULL;
+  double *ssacrosstrack = NULL;
+  double *ssalongtrack = NULL;
+  char comment[MB_COMMENT_MAXLINE];
+
+  /* mbotps control parameters */
+  double btime_d;
+  double etime_d;
+  int ngood;
+
+  /* tide station data */
+  int ntidestation = 0;
+  double *tidestation_time_d = NULL;
+  double *tidestation_tide = NULL;
+  double *tidestation_model = NULL;
+  double *tidestation_correction = NULL;
+  int time_j[5];
+  int ihr, intstat, itime;
+  double sec, correction;
+
+  struct stat file_status;
+  bool proceed = true;
+  int input_size, input_modtime, output_size, output_modtime;
+  mb_path line = "";
+  mb_path predict_tide = "";
+  bool read_data;
+  bool output;
+  double savetime_d;
+  double lasttime_d;
+  double lastlon;
+  double lastlat;
+  double lon;
+  double lat;
+  double tide;
+  double depth;
+  char *result;
 
   /* -------------------------------------------------------------------------
    * if specified read in tide station data and calculate model values for the
@@ -880,28 +874,29 @@ int main(int argc, char **argv) {
     fprintf(ofp, "#\n");
     fprintf(ofp, "# OTPSnc tide model: \n");
     fprintf(ofp, "#      %s\n", otps_model);
-    if (tideformat == 2)
-      {
+    if (tideformat == 2) {
       fprintf(ofp, "# Output format:\n");
       fprintf(ofp, "#      year month day hour minute second tide\n");
       fprintf(ofp, "# where tide is in meters\n");
-      }
-    else
-      {
+    } else {
       fprintf(ofp, "# Output format:\n");
       fprintf(ofp, "#      time_d tide\n");
       fprintf(ofp, "# where time_d is in seconds since January 1, 1970\n");
       fprintf(ofp, "# and tide is in meters\n");
-      }
-    right_now = time((time_t *)0);
+    }
+    const time_t right_now = time((time_t *)0);
+    char date[32];
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
+    const char *user_ptr = getenv("USER");
+    if (user_ptr == NULL)
       user_ptr = getenv("LOGNAME");
+    char user[MB_PATH_MAXLINE];
     if (user_ptr != NULL)
       strcpy(user, user_ptr);
     else
       strcpy(user, "unknown");
+    char host[MB_PATH_MAXLINE];
     gethostname(host, MBP_FILENAMESIZE);
     fprintf(ofp, "# Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 
@@ -1427,15 +1422,19 @@ int main(int argc, char **argv) {
           fprintf(ofp, "# Tide model generated by program %s\n", program_name);
           fprintf(ofp, "# which in turn calls OTPS program predict_tide obtained from:\n");
           fprintf(ofp, "#     http://www.coas.oregonstate.edu/research/po/research/tide/\n");
-          right_now = time((time_t *)0);
+          const time_t right_now = time((time_t *)0);
+          char date[32];
           strcpy(date, ctime(&right_now));
           date[strlen(date) - 1] = '\0';
-          if ((user_ptr = getenv("USER")) == NULL)
+          const char *user_ptr = getenv("USER");
+          if (user_ptr == NULL)
             user_ptr = getenv("LOGNAME");
+          char user[MB_PATH_MAXLINE];
           if (user_ptr != NULL)
             strcpy(user, user_ptr);
           else
             strcpy(user, "unknown");
+          char host[MB_PATH_MAXLINE];
           gethostname(host, MBP_FILENAMESIZE);
           fprintf(ofp, "# Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
           fprintf(ofp, "#%s", tline2);
