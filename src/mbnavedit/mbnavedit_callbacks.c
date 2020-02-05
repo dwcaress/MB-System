@@ -19,15 +19,12 @@
  * Author:	D. W. Caress
  * Date:	June 24,  1995
  * Date:	August 28, 2000 (New version - no buffered i/o)
- *
- *
  */
 
-/*--------------------------------------------------------------------*/
-
-/* include files */
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1900)
@@ -50,22 +47,16 @@
 #include <Xm/List.h>
 
 #define MBNAVEDIT_DECLARE_GLOBALS
-#include "mb_status.h"
 #include "mb_define.h"
 #include "mb_io.h"
 #include "mb_process.h"
+#include "mb_status.h"
 #include "mb_xgraphics.h"
-#include "mbnavedit_extrawidgets.h"
 #include "mbnavedit.h"
+#include "mbnavedit_extrawidgets.h"
 
 #include "mbnavedit_creation.h"
 
-/*--------------------------------------------------------------------*/
-/*
- * Standard includes for builtins.
- */
-#include <string.h>
-#include <ctype.h>
 
 #ifndef FIXED
 #define FIXED "fixed"
