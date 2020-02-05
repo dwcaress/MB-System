@@ -86,11 +86,11 @@ enum {
  *      int : the number of characters found
  */
 static int strlenWc(wchar_t *ptr) {
-	wchar_t *p = ptr;
-	int x = 0;
-
 	if (!ptr)
 		return (0);
+
+	wchar_t *p = ptr;
+	int x = 0;
 
 	while (*p++)
 		x++;
@@ -126,9 +126,7 @@ static size_t doMbstowcs(wchar_t *wcs, char *mbs, size_t n) {
  *      bytesConv - size_t : number of bytes converted
  */
 static size_t doWcstombs(char *mbs, wchar_t *wcs, size_t n) {
-	size_t retval;
-
-	retval = wcstombs(mbs, wcs, (n * sizeof(wchar_t)));
+	const size_t retval = wcstombs(mbs, wcs, (n * sizeof(wchar_t)));
 	if (retval == (size_t)-1)
 		return (0);
 	else
@@ -153,10 +151,7 @@ static size_t doWcstombs(char *mbs, wchar_t *wcs, size_t n) {
  *	       the multibyte character.
  */
 static int dombtowc(wchar_t *wide, char *multi, size_t size) {
-	int retVal = 0;
-
-	retVal = mbtowc(wide, multi, size);
-	return (retVal);
+	return mbtowc(wide, multi, size);
 }
 
 /*
@@ -180,14 +175,10 @@ static wchar_t *CStrCommonWideCharsGet() {
 	                             "l",    "n",  "r",  "t",  "v",  "F",  "L",  "R",  "T", "0", "1"};
 
 	if (CommonWideChars == NULL) {
-		int i;
-
-		/*
-		 * Allocate and create the array.
-		 */
+		// Allocate and create the array.
 		CommonWideChars = (wchar_t *)XtMalloc(NUM_COMMON_WCHARS * sizeof(wchar_t));
 
-		for (i = 0; i < NUM_COMMON_WCHARS; i++) {
+		for (int i = 0; i < NUM_COMMON_WCHARS; i++) {
 			(void)dombtowc(&(CommonWideChars[i]), characters[i], 1);
 		}
 	}
