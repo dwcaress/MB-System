@@ -4,22 +4,6 @@
  *	the XPM pixmap utilities.
  */
 
-/*
- * BX supplies a string format for compound strings:
- *
- *		::[#tag][:t][:r]["str"]
- *
- * where:
- *	:: = indicates compound string.
- *	tag =  the font tag
- *	:t = separator (if not seen no separator added to segment)
- *	:r = right to left (if not seen left to right assumed)
- *	"str" = the text of the string.
- *
- * The components for the compound string can be repeated any number of
- * times.
- */
-
 #include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -851,6 +835,8 @@ static wchar_t *CStrCommonWideCharsGet() {
 static Boolean CvtStringToXmString(
     Display *d, XrmValue *args, Cardinal *num_args, XrmValue *fromVal,
     XrmValue *toVal, XtPointer data) {
+	(void)args;  // Unused parameter
+	(void)data;  // Unused parameter
 	static XmString resStr;
 	char *str;
 
@@ -917,6 +903,7 @@ static Boolean CvtStringToXmString(
 static Boolean CvtStringToXmStringTable(
     Display *d, XrmValue *args, Cardinal *num_args, XrmValue *fromVal,
     XrmValue *toVal, XtPointer data) {
+	(void)data;  // Unused parameter
 	static XmString *CStrTable;
 	XmString *tblPtr;
 	char *str;
@@ -1063,6 +1050,7 @@ void RegisterBxConverters(XtAppContext appContext) {
 #ifndef IGNORE_CONVERT
 XtPointer BX_CONVERT(
     Widget w, char *from_string, char *to_type, int to_size, Boolean *success) {
+	(void)to_size;  // Unused parameter
 	XrmValue fromVal, toVal; /* resource holders		*/
 	Boolean convResult;      /* return value			*/
 	XtPointer val;           /* Pointer size return value    */
@@ -1193,6 +1181,8 @@ XtPointer CONVERT(
 
 #ifndef IGNORE_MENU_POST
 void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
+	(void)p;  // Unused parameter
+	(void)dispatch;  // Unused parameter
 	Arg args[2];
 	int argcnt;
 	int button;
@@ -1297,6 +1287,8 @@ void BX_SET_BACKGROUND_COLOR(Widget w, ArgList args, Cardinal *argcnt, Pixel bg_
 			(*argcnt)++;
 		}
 	}
+#else
+	(void)w;  // Unused parameter
 #endif
 
 	XtSetArg(args[*argcnt], XmNbackground, bg_color);
