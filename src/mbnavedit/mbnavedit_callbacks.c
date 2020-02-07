@@ -160,16 +160,14 @@ void BxExitCB(Widget w, XtPointer client, XtPointer call) {
 
 void BxManageCB(Widget w, XtPointer client, XtPointer call) {
 	(void)call;  // Unused parameter
-	WidgetList widgets;
-	int i;
 
 	/*
 	 * This function returns a NULL terminated WidgetList.  The memory for
 	 * the list needs to be freed when it is no longer needed.
 	 */
-	widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
+	WidgetList widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
 
-	i = 0;
+	int i = 0;
 	while (widgets && widgets[i] != NULL) {
 		XtManageChild(widgets[i]);
 		i++;
@@ -195,16 +193,14 @@ void BxManageCB(Widget w, XtPointer client, XtPointer call) {
 
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
 	(void)call;  // Unused parameter
-	WidgetList widgets;
-	int i;
 
 	/*
 	 * This function returns a NULL terminated WidgetList.  The memory for
 	 * the list needs to be freed when it is no longer needed.
 	 */
-	widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
+	WidgetList widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
 
-	i = 0;
+	int i = 0;
 	while (widgets && widgets[i] != NULL) {
 		XtUnmanageChild(widgets[i]);
 		i++;
@@ -244,13 +240,9 @@ void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
 
 	bool first = true;
 	String rscs = XtNewString((String)client);
-	String *valueList = (String *)XtCalloc(CHUNK, sizeof(String));
 	char *start;
-	char *ptr, *cptr;
-	String name;
-	String rsc;
-	int i, count = 0;
-	Widget *current;
+	String *valueList = (String *)XtCalloc(CHUNK, sizeof(String));
+	int count = 0;
 
 	for (start = rscs; rscs && *rscs; rscs = strtok(NULL, "\n")) {
 		if (first) {
@@ -265,7 +257,11 @@ void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
 	}
 	XtFree((char *)start);
 
-	for (i = 0; i < count; i++) {
+	char *ptr, *cptr;
+	String name;
+	String rsc;
+	Widget *current;
+	for (int i = 0; i < count; i++) {
 		/*
 		 * First, extract the widget name and generate a string to
 		 * pass to BxWidgetIdsFromNames().
@@ -394,8 +390,6 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 /*--------------------------------------------------------------------*/
 
 void do_mbnavedit_init(int argc, char **argv) {
-	int i;
-
 	/* get additional widgets */
 	fileSelectionBox_list = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_LIST);
 	fileSelectionBox_text = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_TEXT);
@@ -468,7 +462,7 @@ void do_mbnavedit_init(int argc, char **argv) {
 	status = XLookupColor(display, colormap, "lightgrey", &db_color, &colors[8]);
 	if ((status = XAllocColor(display, colormap, &colors[8])) == 0)
 		fprintf(stderr, "Failure to allocate color: lightgrey\n");
-	for (i = 0; i < NCOLORS; i++) {
+	for (int i = 0; i < NCOLORS; i++) {
 		mpixel_values[i] = colors[i].pixel;
 	}
 
@@ -504,22 +498,11 @@ void do_mbnavedit_init(int argc, char **argv) {
 /*--------------------------------------------------------------------*/
 
 void do_parse_datalist(char *file, int form) {
-	void *datalist;
-	double weight;
-	int filestatus;
-	int fileformat;
-	char fileraw[MB_PATH_MAXLINE];
-	char fileprocessed[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	int datalist_status = MB_SUCCESS;
-	int error = MB_ERROR_NO_ERROR;
-	int format;
-	int verbose = 0;
-	// int i;
-
 	//fprintf(stderr, "Called do_parse_datalist:%s %d\n", file, form);
 	/* try to resolve format if necessary */
-	format = form;
+	int verbose = 0;
+	int format = form;
+	int error = MB_ERROR_NO_ERROR;
 	mb_get_format(verbose, file, NULL, &format, &error);
 
 	/* read in a single file */
@@ -533,8 +516,17 @@ void do_parse_datalist(char *file, int form) {
 
 	/* read in datalist if forma = -1 */
 	else if (format == -1) {
+		void *datalist;
+		int datalist_status = mb_datalist_open(verbose, &datalist, file, MB_DATALIST_LOOK_NO, &error);
 		error = MB_ERROR_NO_ERROR;
-		if ((datalist_status = mb_datalist_open(verbose, &datalist, file, MB_DATALIST_LOOK_NO, &error)) == MB_SUCCESS) {
+		if (datalist_status == MB_SUCCESS) {
+			double weight;
+			int filestatus;
+			int fileformat;
+			char fileraw[MB_PATH_MAXLINE];
+			char fileprocessed[MB_PATH_MAXLINE];
+			char dfile[MB_PATH_MAXLINE];
+
 			bool done = false;
 			while (!done) {
 				if ((datalist_status = mb_datalist_read2(verbose, datalist, &filestatus, fileraw, fileprocessed, dfile,
@@ -563,32 +555,29 @@ void do_editlistselection(Widget w, XtPointer client_data, XtPointer call_data) 
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac;
-	Arg args[256];
-	int *position_list = NULL;
-	int position_count = 0;
-	int quit;
-	int i;
-
 	/* turn off expose plots */
 	expose_plot_ok = false;
 
 	/* get the current selection, if any, from the list */
-	ac = 0;
+	Cardinal ac = 0;
+	Arg args[256];
+	int position_count = 0;
 	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
 	ac++;
+	int *position_list = NULL;
 	XtSetArg(args[ac], XmNselectedPositions, (XtPointer)&position_list);
 	ac++;
 	XtGetValues(list_filelist, args, ac);
 
 	fprintf(stderr, "position_count:%d\n", position_count);
-	for (i = 0; i < position_count; i++)
+	for (int i = 0; i < position_count; i++)
 		fprintf(stderr, "  %d %d\n", i, position_list[i]);
 
 	/* if the selected file is different than what's already loaded, unload the old file and load the new one */
 	if (position_count > 0 && currentfile != position_list[0] - 1) {
 		currentfile = position_list[0] - 1;
 
+		int quit;
 		status = mbnavedit_action_done(&quit);
 		if (status == 0)
 			XBell(display, 100);
@@ -2860,10 +2849,9 @@ void set_label_string(Widget w, String str) {
 /*--------------------------------------------------------------------*/
 
 void set_label_multiline_string(Widget w, String str) {
-	XmString xstr;
 	Boolean argok;
 
-	xstr = (XtPointer)BX_CONVERT(w, str, XmRXmString, 0, &argok);
+	XmString xstr = (XtPointer)BX_CONVERT(w, str, XmRXmString, 0, &argok);
 	if (xstr != NULL && argok)
 		XtVaSetValues(w, XmNlabelString, xstr, NULL);
 	else
@@ -2876,9 +2864,7 @@ void set_label_multiline_string(Widget w, String str) {
 /*--------------------------------------------------------------------*/
 
 void get_text_string(Widget w, String str) {
-	char *str_tmp;
-
-	str_tmp = (char *)XmTextGetString(w);
+	char *str_tmp = (char *)XmTextGetString(w);
 	strcpy(str, str_tmp);
 	XtFree(str_tmp);
 }
