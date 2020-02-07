@@ -883,10 +883,25 @@ void do_set_controls() {
 /*--------------------------------------------------------------------*/
 
 void do_build_filelist() {
-	int update_filelist;
-	Cardinal ac;
+	/* check for change in number of files */
+	Cardinal ac = 0;
 	Arg args[256];
 	int item_count;
+	XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
+	ac++;
+	XtGetValues(list_filelist, args, ac);
+
+	/* check to see if anything has changed */
+	bool update_filelist = false;
+	if (item_count != numfiles)
+		update_filelist = true;
+
+	/* check current file shown vs loaded */
+	if (currentfile != currentfile_shown) {
+		currentfile_shown = currentfile;
+		update_filelist = true;
+	}
+
 	int *position_list = NULL;
 	int position_count = 0;
 	int selection;
@@ -901,42 +916,18 @@ void do_build_filelist() {
 	char *nvenostr = "     ";
 	int verbose = 0;
 
-	/* swath file locking variables */
-	int lock_error = MB_ERROR_NO_ERROR;
-	int locked;
-	int lock_purpose;
-	mb_path lock_program;
-	mb_path lock_cpu;
-	mb_path lock_user;
-	char lock_date[25];
-
-	/* nve file checking variables */
-	int nve_exists;
-	struct stat file_status;
-	int fstat;
-	char save_file[MB_PATH_MAXLINE];
-
-	/* check to see if anything has changed */
-	update_filelist = false;
-
-	/* check for change in number of files */
-	ac = 0;
-	XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
-	ac++;
-	XtGetValues(list_filelist, args, ac);
-	if (item_count != numfiles)
-		update_filelist = true;
-
-	/* check current file shown vs loaded */
-	if (currentfile != currentfile_shown) {
-		currentfile_shown = currentfile;
-		update_filelist = true;
-	}
-
+	// TODO(schwehr): What is nve?
 	/* check for change in lock status or nve status */
 	for (int i = 0; i < numfiles; i++) {
 		/* check for locks */
 		/* int lock_status = */
+		char lock_date[25];
+		mb_path lock_cpu;
+		mb_path lock_program;
+		mb_path lock_user;
+		int lock_error = MB_ERROR_NO_ERROR;
+		int lock_purpose;
+		int locked;
 		mb_pr_lockinfo(verbose, filepaths[i], &locked, &lock_purpose, lock_program,
 			       lock_user, lock_cpu, lock_date, &lock_error);
 		if (locked != filelocks[i]) {
@@ -945,8 +936,11 @@ void do_build_filelist() {
 		}
 
 		/* check for edit save file */
+		char save_file[MB_PATH_MAXLINE];
 		sprintf(save_file, "%s.nve", filepaths[i]);
-		fstat = stat(save_file, &file_status);
+		struct stat file_status;
+		const int fstat = stat(save_file, &file_status);
+		bool nve_exists;
 		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
 			nve_exists = true;
 		else
@@ -958,7 +952,7 @@ void do_build_filelist() {
 	}
 
 	/* only rebuild the filelist if necessary */
-	if (update_filelist == true) {
+	if (update_filelist) {
 		/* get the current selection, if any, from the list */
 		ac = 0;
 		XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
