@@ -26,6 +26,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1900)
@@ -36,16 +38,15 @@
 #include <windows.h>
 #endif
 
-#include <X11/Intrinsic.h>
-#include <Xm/Xm.h>
 #include <X11/cursorfont.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <X11/Intrinsic.h>
+#include <X11/StringDefs.h>
 #include <Xm/FileSB.h>
+#include <Xm/List.h>
 #include <Xm/Text.h>
 #include <Xm/TextF.h>
 #include <Xm/ToggleB.h>
-#include <Xm/List.h>
+#include <Xm/Xm.h>
 
 #define MBNAVEDIT_DECLARE_GLOBALS
 #include "mb_define.h"
@@ -131,15 +132,13 @@ void BxExitCB(Widget w, XtPointer client, XtPointer call) {
 	(void)w;  // Unused parameter
 	(void)client;  // Unused parameter
 	(void)call;  // Unused parameter
-	int status;
-	long exitValue = EXIT_FAILURE;
 
 	/* finish with the current file */
-	status = mbnavedit_action_quit();
+	const int status = mbnavedit_action_quit();
 	if (status == 0)
 		mbnavedit_bell(100);
 
-	exit(exitValue);
+	exit(EXIT_FAILURE);
 }
 /*--------------------------------------------------------------------*/
 /*      Function Name: 	BxManageCB
@@ -232,7 +231,6 @@ void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
  *      Notes:        * This function expects that there is an application
  *                      shell from which all other widgets are descended.
  */
-#include <X11/StringDefs.h>
 
 void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
 	(void)call;  // Unused parameter
@@ -904,7 +902,6 @@ void do_build_filelist() {
 	int verbose = 0;
 
 	/* swath file locking variables */
-	int lock_status;
 	int lock_error = MB_ERROR_NO_ERROR;
 	int locked;
 	int lock_purpose;
@@ -939,8 +936,9 @@ void do_build_filelist() {
 	/* check for change in lock status or nve status */
 	for (int i = 0; i < numfiles; i++) {
 		/* check for locks */
-		lock_status = mb_pr_lockinfo(verbose, filepaths[i], &locked, &lock_purpose, lock_program, lock_user, lock_cpu, lock_date,
-		                             &lock_error);
+		/* int lock_status = */
+		mb_pr_lockinfo(verbose, filepaths[i], &locked, &lock_purpose, lock_program,
+			       lock_user, lock_cpu, lock_date, &lock_error);
 		if (locked != filelocks[i]) {
 			filelocks[i] = locked;
 			update_filelist = true;
@@ -1189,7 +1187,6 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 	unsigned int mask;
 	KeySym keysym;
 	char buffer[1];
-	int actual;
 	int win_x, win_y;
 	int repeat;
 	int status;
@@ -1203,7 +1200,8 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 		/* Deal with KeyPress events */
 		if (event->xany.type == KeyPress) {
 			/* Get key pressed - buffer[0] */
-			actual = XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+			/* int actual = */
+			XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
 
 			/* process events */
 			switch (buffer[0]) {
@@ -1261,7 +1259,8 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 		/* Deal with KeyRelease events */
 		if (event->xany.type == KeyRelease) {
 			/* Get key pressed - buffer[0] */
-			actual = XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+			/* const int actual = */
+			XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
 
 			/* process events */
 			switch (buffer[0]) {
