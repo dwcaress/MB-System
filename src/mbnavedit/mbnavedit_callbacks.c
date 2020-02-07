@@ -128,6 +128,9 @@ int selected = 0; /* indicates an input file is selected */
  */
 
 void BxExitCB(Widget w, XtPointer client, XtPointer call) {
+	(void)w;  // Unused parameter
+	(void)client;  // Unused parameter
+	(void)call;  // Unused parameter
 	int status;
 	long exitValue = EXIT_FAILURE;
 
@@ -156,6 +159,7 @@ void BxExitCB(Widget w, XtPointer client, XtPointer call) {
  */
 
 void BxManageCB(Widget w, XtPointer client, XtPointer call) {
+	(void)call;  // Unused parameter
 	WidgetList widgets;
 	int i;
 
@@ -190,6 +194,7 @@ void BxManageCB(Widget w, XtPointer client, XtPointer call) {
  */
 
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
+	(void)call;  // Unused parameter
 	WidgetList widgets;
 	int i;
 
@@ -234,6 +239,7 @@ void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
 #include <X11/StringDefs.h>
 
 void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
+	(void)call;  // Unused parameter
 #define CHUNK 512
 
 	Boolean first = True;
@@ -509,7 +515,7 @@ void do_parse_datalist(char *file, int form) {
 	int error = MB_ERROR_NO_ERROR;
 	int format;
 	int verbose = 0;
-	int i;
+	// int i;
 
 	//fprintf(stderr, "Called do_parse_datalist:%s %d\n", file, form);
 	/* try to resolve format if necessary */
@@ -553,6 +559,10 @@ void do_parse_datalist(char *file, int form) {
 /*--------------------------------------------------------------------*/
 
 void do_editlistselection(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+
 	Cardinal ac;
 	Arg args[256];
 	int *position_list = NULL;
@@ -600,6 +610,10 @@ void do_editlistselection(Widget w, XtPointer client_data, XtPointer call_data) 
 /*--------------------------------------------------------------------*/
 
 void do_filelist_remove(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+
 	Cardinal ac;
 	Arg args[256];
 	int *position_list = NULL;
@@ -1028,10 +1042,13 @@ void do_build_filelist() {
 /*--------------------------------------------------------------------*/
 
 void do_nextbuffer(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	int status;
 	int quit;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* turn off expose plots */
 	expose_plot_ok = False;
@@ -1056,7 +1073,7 @@ void do_done(Widget w, XtPointer client_data, XtPointer call_data) {
 	int quit;
 	int status;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* turn off expose plots */
 	expose_plot_ok = False;
@@ -1088,9 +1105,12 @@ void do_done(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_start(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	int status;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* step forward */
 	status = mbnavedit_action_start();
@@ -1101,9 +1121,12 @@ void do_start(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_reverse(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	int status;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* step back */
 	status = mbnavedit_action_step(-data_step_size);
@@ -1115,9 +1138,12 @@ void do_reverse(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_forward(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	int status;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* step forward */
 	status = mbnavedit_action_step(data_step_size);
@@ -1129,9 +1155,12 @@ void do_forward(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_end(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	int status;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* step back */
 	status = mbnavedit_action_end();
@@ -1143,7 +1172,10 @@ void do_end(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_timespan(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* get values */
 	XtVaGetValues(scale_timespan, XmNmaximum, &data_show_max, XmNvalue, &data_show_size, NULL);
@@ -1168,7 +1200,10 @@ void do_timespan(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_timestep(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* get values */
 	XtVaGetValues(scale_timestep, XmNmaximum, &data_step_max, XmNvalue, &data_step_size, NULL);
@@ -1190,7 +1225,10 @@ void do_timestep(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_expose(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* replot */
 	if (expose_plot_ok == True)
@@ -1200,6 +1238,9 @@ void do_expose(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	XmDrawingAreaCallbackStruct *cbs;
 	XEvent *event;
 	static Position x_loc, y_loc;
@@ -1211,7 +1252,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 	int repeat;
 	int status;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* get event */
 	cbs = (XmDrawingAreaCallbackStruct *)call_data;
@@ -1387,6 +1428,9 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unused) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)unused;  // Unused parameter
 	XConfigureEvent *cevent = (XConfigureEvent *)event;
 	Dimension width, height;
 
@@ -1402,9 +1446,12 @@ void do_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unused) 
 /*--------------------------------------------------------------------*/
 
 void do_toggle_time(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	int screen_height;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_tint = XmToggleButtonGetState(toggleButton_time);
 	if (plot_tint == true)
@@ -1446,9 +1493,12 @@ void do_toggle_time(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_lon(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	int screen_height;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_lon = XmToggleButtonGetState(toggleButton_lon);
 	if (plot_lon == true) {
@@ -1493,9 +1543,12 @@ void do_toggle_lon(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_lat(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	int screen_height;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_lat = XmToggleButtonGetState(toggleButton_lat);
 	if (plot_lat == true) {
@@ -1540,9 +1593,12 @@ void do_toggle_lat(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_heading(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	int screen_height;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_heading = XmToggleButtonGetState(toggleButton_heading);
 	if (plot_heading == true) {
@@ -1589,9 +1645,12 @@ void do_toggle_heading(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_speed(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	int screen_height;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_speed = XmToggleButtonGetState(toggleButton_speed);
 	if (plot_speed == true) {
@@ -1639,9 +1698,12 @@ void do_toggle_speed(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_sonardepth(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	int screen_height;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_draft = XmToggleButtonGetState(toggleButton_sonardepth);
 	if (plot_draft == true) {
@@ -1685,7 +1747,10 @@ void do_toggle_sonardepth(Widget w, XtPointer client_data, XtPointer call_data) 
 /*--------------------------------------------------------------------*/
 
 void do_toggle_org_time(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_tint_org = XmToggleButtonGetState(toggleButton_org_time);
 
@@ -1696,7 +1761,10 @@ void do_toggle_org_time(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_org_lon(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_lon_org = XmToggleButtonGetState(toggleButton_org_lon);
 
@@ -1707,7 +1775,10 @@ void do_toggle_org_lon(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_org_lat(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_lat_org = XmToggleButtonGetState(toggleButton_org_lat);
 
@@ -1718,7 +1789,10 @@ void do_toggle_org_lat(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_org_speed(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_speed_org = XmToggleButtonGetState(toggleButton_org_speed);
 
@@ -1728,7 +1802,10 @@ void do_toggle_org_speed(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_dr_lat(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_lat_dr = XmToggleButtonGetState(toggleButton_dr_lat);
 
@@ -1738,7 +1815,13 @@ void do_toggle_dr_lat(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_dr_lon(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_lon_dr = XmToggleButtonGetState(toggleButton_dr_lon);
 
@@ -1749,7 +1832,10 @@ void do_toggle_dr_lon(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_flag(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* interpolate time stamps */
 	mbnavedit_action_flag();
@@ -1764,7 +1850,10 @@ void do_flag(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_unflag(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* interpolate time stamps */
 	mbnavedit_action_unflag();
@@ -1779,8 +1868,11 @@ void do_unflag(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_modeling_apply(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	double dvalue;
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	get_text_string(textField_modeling_speed, string);
 	if (sscanf(string, "%lf", &dvalue) == 1)
@@ -1802,7 +1894,10 @@ void do_modeling_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_model_mode(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (XmToggleButtonGetState(toggleButton_modeling_off))
 		model_mode = MODEL_MODE_OFF;
@@ -1829,7 +1924,10 @@ void do_model_mode(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_timeinterpolation_apply(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* interpolate time stamps */
 	mbnavedit_action_fixtime();
@@ -1847,7 +1945,10 @@ void do_timeinterpolation_apply(Widget w, XtPointer client_data, XtPointer call_
 /*--------------------------------------------------------------------*/
 
 void do_deletebadtimetag_apply(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* interpolate time stamps */
 	mbnavedit_action_deletebadtime();
@@ -1865,7 +1966,10 @@ void do_deletebadtimetag_apply(Widget w, XtPointer client_data, XtPointer call_d
 /*--------------------------------------------------------------------*/
 
 void do_meantimewindow(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	XtVaGetValues(scale_meantimewindow, XmNvalue, &mean_time_window, NULL);
 
@@ -1879,7 +1983,10 @@ void do_meantimewindow(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_driftlon(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	XtVaGetValues(scale_driftlon, XmNvalue, &drift_lon, NULL);
 
@@ -1892,7 +1999,10 @@ void do_driftlon(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_driftlat(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	XtVaGetValues(scale_driftlat, XmNvalue, &drift_lat, NULL);
 
@@ -1905,9 +2015,13 @@ void do_driftlat(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_offset_apply(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+
 	char value_text[MB_PATH_MAXLINE];
 	double dvalue;
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* get values from widgets */
 	get_text_string(textField_lon_offset, string);
@@ -1933,7 +2047,10 @@ void do_offset_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_show_smg(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_smg = XmToggleButtonGetState(toggleButton_show_smg);
 
@@ -1944,7 +2061,10 @@ void do_toggle_show_smg(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_org_heading(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_heading_org = XmToggleButtonGetState(toggleButton_org_heading);
 
@@ -1954,7 +2074,10 @@ void do_toggle_org_heading(Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void do_toggle_org_sonardepth(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_draft_org = XmToggleButtonGetState(toggleButton_org_sonardepth);
 
@@ -1965,7 +2088,10 @@ void do_toggle_org_sonardepth(Widget w, XtPointer client_data, XtPointer call_da
 /*--------------------------------------------------------------------*/
 
 void do_toggle_show_cmg(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_cmg = XmToggleButtonGetState(toggleButton_show_cmg);
 
@@ -1976,7 +2102,10 @@ void do_toggle_show_cmg(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_button_use_dr(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* Use dr for selected lonlat values */
 	mbnavedit_action_use_dr();
@@ -1988,7 +2117,10 @@ void do_button_use_dr(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_button_use_smg(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* Use speed made good for selected speed values */
 	mbnavedit_action_use_smg();
@@ -2000,7 +2132,10 @@ void do_button_use_smg(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_button_use_cmg(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* Use course made good for selected heading values */
 	mbnavedit_action_use_cmg();
@@ -2011,7 +2146,10 @@ void do_button_use_cmg(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_output_on(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (XmToggleButtonGetState(toggleButton_output_on)) {
 		output_mode = OUTPUT_MODE_OUTPUT;
@@ -2028,7 +2166,10 @@ void do_toggle_output_on(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_output_off(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (XmToggleButtonGetState(toggleButton_output_on)) {
 		output_mode = OUTPUT_MODE_OUTPUT;
@@ -2045,7 +2186,10 @@ void do_toggle_output_off(Widget w, XtPointer client_data, XtPointer call_data) 
 /*--------------------------------------------------------------------*/
 
 void do_toggle_output_on_filelist(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (XmToggleButtonGetState(toggleButton_output_on_filelist)) {
 		output_mode = OUTPUT_MODE_OUTPUT;
@@ -2062,7 +2206,10 @@ void do_toggle_output_on_filelist(Widget w, XtPointer client_data, XtPointer cal
 /*--------------------------------------------------------------------*/
 
 void do_toggle_output_off_filelist(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (XmToggleButtonGetState(toggleButton_output_on_filelist)) {
 		output_mode = OUTPUT_MODE_OUTPUT;
@@ -2079,7 +2226,10 @@ void do_toggle_output_off_filelist(Widget w, XtPointer client_data, XtPointer ca
 /*--------------------------------------------------------------------*/
 
 void do_fileselection_cancel(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*--------------------------------------------------------------------*/
@@ -2127,6 +2277,9 @@ void do_filebutton_off() {
 /*--------------------------------------------------------------------*/
 
 void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+
 	XmFileSelectionBoxCallbackStruct *acs = (XmFileSelectionBoxCallbackStruct *)call_data;
 
 	char *input_file_ptr;
@@ -2177,14 +2330,20 @@ void do_checkuseprevious() { XtManageChild(bulletinBoard_useprevious); }
 
 /*--------------------------------------------------------------------*/
 void do_useprevious_yes(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	do_load(true);
 }
 
 /*--------------------------------------------------------------------*/
 void do_useprevious_no(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	do_load(false);
 }
@@ -2229,18 +2388,25 @@ void do_load(int useprevious) {
 /*--------------------------------------------------------------------*/
 
 void do_fileselection_filter(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+
 	char fileroot[MB_PATH_MAXLINE];
 	int format_error;
 	int form;
 	char value_text[10];
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* get selected text */
 	get_text_string(fileSelectionBox_text, string);
@@ -2263,12 +2429,18 @@ void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void do_fileselection_nomatch(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 /*--------------------------------------------------------------------*/
 
 void do_toggle_pick(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mode_pick = PICK_MODE_PICK;
 	do_unset_interval();
@@ -2277,7 +2449,10 @@ void do_toggle_pick(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_select(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mode_pick = PICK_MODE_SELECT;
 	do_unset_interval();
@@ -2286,7 +2461,10 @@ void do_toggle_select(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_deselect(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mode_pick = PICK_MODE_DESELECT;
 	do_unset_interval();
@@ -2295,7 +2473,10 @@ void do_toggle_deselect(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_selectall(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mode_pick = PICK_MODE_SELECTALL;
 	do_unset_interval();
@@ -2304,7 +2485,10 @@ void do_toggle_selectall(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_toggle_deselectall(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mode_pick = PICK_MODE_DESELECTALL;
 	do_unset_interval();
@@ -2313,14 +2497,17 @@ void do_toggle_deselectall(Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void do_quit(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	(void)BxExitCB(w, client_data, call_data);
 }
 /*--------------------------------------------------------------------*/
 
 void do_interpolation(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* Interpolate any current selected data */
 	mbnavedit_action_interpolate();
@@ -2333,7 +2520,10 @@ void do_interpolation(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_interpolationrepeats(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* Interpolate any current selected data */
 	mbnavedit_action_interpolaterepeats();
@@ -2345,8 +2535,11 @@ void do_interpolationrepeats(Widget w, XtPointer client_data, XtPointer call_dat
 /*--------------------------------------------------------------------*/
 
 void do_scroll(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*--------------------------------------------------------------------*/
@@ -2419,9 +2612,10 @@ int do_unset_interval() {
 void do_toggle_vru(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	int screen_height;
 
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	plot_roll = XmToggleButtonGetState(toggleButton_vru);
 	plot_pitch = XmToggleButtonGetState(toggleButton_vru);
