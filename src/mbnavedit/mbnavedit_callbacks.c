@@ -22,6 +22,7 @@
  */
 
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,7 +63,6 @@
 #define FIXED "fixed"
 #endif
 
-Widget BxFindTopShell(Widget);
 WidgetList BxWidgetIdsFromNames(Widget, char *, char *);
 
 /*--------------------------------------------------------------------*/
@@ -81,7 +81,7 @@ XGCValues xgcv;
 XFontStruct *fontStruct;
 
 /* file opening parameters */
-int expose_plot_ok = True;
+bool expose_plot_ok = true;
 
 void *can_xgid; /* XG graphics id */
 Cursor myCursor;
@@ -242,7 +242,7 @@ void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
 	(void)call;  // Unused parameter
 #define CHUNK 512
 
-	Boolean first = True;
+	bool first = true;
 	String rscs = XtNewString((String)client);
 	String *valueList = (String *)XtCalloc(CHUNK, sizeof(String));
 	char *start;
@@ -255,7 +255,7 @@ void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
 	for (start = rscs; rscs && *rscs; rscs = strtok(NULL, "\n")) {
 		if (first) {
 			rscs = strtok(rscs, "\n");
-			first = False;
+			first = false;
 		}
 		valueList[count] = XtNewString(rscs);
 		count++;
@@ -571,7 +571,7 @@ void do_editlistselection(Widget w, XtPointer client_data, XtPointer call_data) 
 	int i;
 
 	/* turn off expose plots */
-	expose_plot_ok = False;
+	expose_plot_ok = false;
 
 	/* get the current selection, if any, from the list */
 	ac = 0;
@@ -601,7 +601,7 @@ void do_editlistselection(Widget w, XtPointer client_data, XtPointer call_data) 
 	}
 
 	/* turn on expose plots */
-	expose_plot_ok = True;
+	expose_plot_ok = true;
 
 	/* update controls */
 	do_set_controls();
@@ -621,7 +621,7 @@ void do_filelist_remove(Widget w, XtPointer client_data, XtPointer call_data) {
 	int i;
 
 	/* turn off expose plots */
-	expose_plot_ok = False;
+	expose_plot_ok = false;
 
 	/* get the current selection, if any, from the list */
 	ac = 0;
@@ -645,7 +645,7 @@ void do_filelist_remove(Widget w, XtPointer client_data, XtPointer call_data) {
 	}
 
 	/* turn on expose plots */
-	expose_plot_ok = True;
+	expose_plot_ok = true;
 
 	/* update controls */
 	do_set_controls();
@@ -1051,7 +1051,7 @@ void do_nextbuffer(Widget w, XtPointer client_data, XtPointer call_data) {
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* turn off expose plots */
-	expose_plot_ok = False;
+	expose_plot_ok = false;
 
 	/* get next buffer */
 	status = mbnavedit_action_next_buffer(&quit);
@@ -1060,7 +1060,7 @@ void do_nextbuffer(Widget w, XtPointer client_data, XtPointer call_data) {
 	do_unset_interval();
 
 	/* turn on expose plots */
-	expose_plot_ok = True;
+	expose_plot_ok = true;
 
 	/* quit if in GUI mode */
 	if (quit)
@@ -1076,7 +1076,7 @@ void do_done(Widget w, XtPointer client_data, XtPointer call_data) {
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* turn off expose plots */
-	expose_plot_ok = False;
+	expose_plot_ok = false;
 
 	/* finish with the current file */
 	status = mbnavedit_action_done(&quit);
@@ -1095,7 +1095,7 @@ void do_done(Widget w, XtPointer client_data, XtPointer call_data) {
 	}
 
 	/* turn on expose plots */
-	expose_plot_ok = True;
+	expose_plot_ok = true;
 
 	/* quit if required */
 	if (quit)
@@ -1231,7 +1231,7 @@ void do_expose(Widget w, XtPointer client_data, XtPointer call_data) {
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* replot */
-	if (expose_plot_ok == True)
+	if (expose_plot_ok)
 		mbnavedit_plot_all();
 }
 
@@ -2294,7 +2294,7 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 	}
 	else {
 		/* turn off expose plots */
-		expose_plot_ok = False;
+		expose_plot_ok = false;
 
 		/* close out previously open file */
 		status = mbnavedit_action_done(&quit);
@@ -2321,7 +2321,7 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 		}
 
 		/* turn on expose plots */
-		expose_plot_ok = True;
+		expose_plot_ok = true;
 	}
 }
 
@@ -2355,7 +2355,7 @@ void do_load(int useprevious) {
 
 	//fprintf(stderr, "Called do_load:%d\n", useprevious);
 	/* turn off expose plots */
-	expose_plot_ok = False;
+	expose_plot_ok = false;
 
 	/* open the file */
 	strcpy(ifile, filepaths[currentfile]);
@@ -2380,7 +2380,7 @@ void do_load(int useprevious) {
 		mbnavedit_plot_all();
 
 	/* turn on expose plots */
-	expose_plot_ok = True;
+	expose_plot_ok = true;
 
 	do_set_controls();
 }
@@ -2771,7 +2771,7 @@ int do_mbnavedit_workfunction(XtPointer client_data) {
 	timer_function_set = false;
 
 	/* reset filelist */
-	if (numfiles > 0 && expose_plot_ok == True) {
+	if (numfiles > 0 && expose_plot_ok) {
 		do_build_filelist();
 	}
 
