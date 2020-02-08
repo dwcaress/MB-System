@@ -298,15 +298,6 @@ int mbnavedit_init_globals() {
 
 /*--------------------------------------------------------------------*/
 int mbnavedit_init(int argc, char **argv, int *startup_file) {
-	int fileflag = 0;
-
-	/* parsing variables */
-	extern char *optarg;
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 	status = mb_uselockfiles(verbose, &uselockfiles);
 	pings = 1;
@@ -332,6 +323,15 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 	strcpy(ifile, "");
+
+	int fileflag = 0;
+
+	/* parsing variables */
+	extern char *optarg;
+	int errflg = 0;
+	int c;
+	int help = 0;
+	int flag = 0;
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:NnPpXx")) != -1)
@@ -397,21 +397,17 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 			errflg++;
 		}
 
-	/* if error flagged then print it and exit */
 	if (errflg) {
 		fprintf(stderr, "usage: %s\n", usage_message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
+		exit(MB_ERROR_BAD_USAGE);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -437,10 +433,7 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 	}
 
 	/* if file specified then use it */
-	if (fileflag > 0)
-		*startup_file = true;
-	else
-		*startup_file = false;
+	*startup_file = (fileflag > 0);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -541,6 +534,14 @@ int mbnavedit_action_open(int useprevious) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_open_file(int useprevious) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       file:        %s\n", ifile);
+		fprintf(stderr, "dbg2       format:      %d\n", format);
+		fprintf(stderr, "dbg2       useprevious: %d\n", useprevious);
+	}
+
 	char ifile_use[MB_PATH_MAXLINE];
 	char command[MB_PATH_MAXLINE];
 	int format_use;
@@ -559,14 +560,6 @@ int mbnavedit_open_file(int useprevious) {
 	mb_path lock_cpu;
 	mb_path lock_user;
 	char lock_date[25];
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       file:        %s\n", ifile);
-		fprintf(stderr, "dbg2       format:      %d\n", format);
-		fprintf(stderr, "dbg2       useprevious: %d\n", useprevious);
-	}
 
 	/* reset message */
 	do_message_on("MBedit is opening a data file...");
@@ -778,8 +771,6 @@ int mbnavedit_open_file(int useprevious) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_close_file() {
-	char command[MB_PATH_MAXLINE];
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -813,6 +804,7 @@ int mbnavedit_close_file() {
 			do_message_on("Navigation edits being applied using mbprocess...");
 
 			/* run mbprocess */
+			char command[MB_PATH_MAXLINE];
 			if (strip_comments)
 				sprintf(command, "mbprocess -I %s -N\n", ifile);
 			else
