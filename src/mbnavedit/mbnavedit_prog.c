@@ -579,14 +579,12 @@ int mbnavedit_open_file(int useprevious) {
 	mb_path error3 = "";
 
 	/* swath file locking variables */
-	int lock_status;
 	int locked;
 	int lock_purpose;
 	mb_path lock_program;
 	mb_path lock_cpu;
 	mb_path lock_user;
 	char lock_date[25];
-	int shellstatus;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -616,7 +614,7 @@ int mbnavedit_open_file(int useprevious) {
 		status = mb_pr_lockswathfile(verbose, ifile, MBP_LOCK_EDITNAV, program_name, &error);
 	}
 	else {
-		lock_status =
+		// const int lock_status =
 		    mb_pr_lockinfo(verbose, ifile, &locked, &lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &error);
 
 		/* if locked get lock info */
@@ -674,7 +672,7 @@ int mbnavedit_open_file(int useprevious) {
 			/* copy old edit save file to tmp file */
 			sprintf(command, "cp %s %s\n", nfile, ifile_use);
 			format_use = MBF_MBPRONAV;
-			shellstatus = system(command);
+			/* const int shellstatus = */ system(command);
 			fstat = stat(ifile_use, &file_status);
 			if (fstat != 0 || (file_status.st_mode & S_IFMT) == S_IFDIR) {
 				do_error_dialog("Unable to copy previously edited", "navigation. You may not have read",
@@ -810,7 +808,6 @@ int mbnavedit_close_file() {
 	/* local variables */
 	int status = MB_SUCCESS;
 	char command[MB_PATH_MAXLINE];
-	int shellstatus;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -852,7 +849,7 @@ int mbnavedit_close_file() {
 				sprintf(command, "mbprocess -I %s\n", ifile);
 			if (verbose >= 1)
 				fprintf(stderr, "\nExecuting command:\n%s\n", command);
-			shellstatus = system(command);
+			/* const int shellstatus = */ system(command);
 
 			/* turn message off */
 			do_message_off();
@@ -4684,9 +4681,9 @@ int mbnavedit_plot_all() {
 int mbnavedit_plot_tint(int iplot) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	int ixmin, ixmax, iymin, iymax;
-	double xmin, xmax, ymin, ymax;
-	double xscale, yscale;
+	// int ixmin, ixmax, iymin, iymax;
+	// double xmin, xmax, ymin, ymax;
+	// double xscale, yscale;
 	int tint_x1, tint_y1, tint_x2, tint_y2;
 	int i;
 
@@ -4698,16 +4695,16 @@ int mbnavedit_plot_tint(int iplot) {
 	}
 
 	/* get scaling values */
-	ixmin = mbnavplot[iplot].ixmin;
-	ixmax = mbnavplot[iplot].ixmax;
-	iymin = mbnavplot[iplot].iymin;
-	iymax = mbnavplot[iplot].iymax;
-	xmin = mbnavplot[iplot].xmin;
-	xmax = mbnavplot[iplot].xmax;
-	ymin = mbnavplot[iplot].ymin;
-	ymax = mbnavplot[iplot].ymax;
-	xscale = mbnavplot[iplot].xscale;
-	yscale = mbnavplot[iplot].yscale;
+	const int ixmin = mbnavplot[iplot].ixmin;
+	// const int ixmax = mbnavplot[iplot].ixmax;
+	const int iymin = mbnavplot[iplot].iymin;
+	// const int iymax = mbnavplot[iplot].iymax;
+	const double xmin = mbnavplot[iplot].xmin;
+	// const double xmax = mbnavplot[iplot].xmax;
+	const double ymin = mbnavplot[iplot].ymin;
+	// const double ymax = mbnavplot[iplot].ymax;
+	const double xscale = mbnavplot[iplot].xscale;
+	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot original expected time data */
 	if (plot_tint_org) {
@@ -4750,9 +4747,9 @@ int mbnavedit_plot_tint(int iplot) {
 int mbnavedit_plot_lon(int iplot) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	int ixmin, ixmax, iymin, iymax;
-	double xmin, xmax, ymin, ymax;
-	double xscale, yscale;
+	// int ixmin, ixmax, iymin, iymax;
+	// double xmin, xmax, ymin, ymax;
+	// double xscale, yscale;
 	int lon_x1, lon_y1, lon_x2, lon_y2;
 	int i;
 
@@ -4764,16 +4761,16 @@ int mbnavedit_plot_lon(int iplot) {
 	}
 
 	/* get scaling values */
-	ixmin = mbnavplot[iplot].ixmin;
-	ixmax = mbnavplot[iplot].ixmax;
-	iymin = mbnavplot[iplot].iymin;
-	iymax = mbnavplot[iplot].iymax;
-	xmin = mbnavplot[iplot].xmin;
-	xmax = mbnavplot[iplot].xmax;
-	ymin = mbnavplot[iplot].ymin;
-	ymax = mbnavplot[iplot].ymax;
-	xscale = mbnavplot[iplot].xscale;
-	yscale = mbnavplot[iplot].yscale;
+	const int ixmin = mbnavplot[iplot].ixmin;
+	// const int ixmax = mbnavplot[iplot].ixmax;
+	const int iymin = mbnavplot[iplot].iymin;
+	// const int iymax = mbnavplot[iplot].iymax;
+	const double xmin = mbnavplot[iplot].xmin;
+	// const double xmax = mbnavplot[iplot].xmax;
+	const double ymin = mbnavplot[iplot].ymin;
+	// const double ymax = mbnavplot[iplot].ymax;
+	const double xscale = mbnavplot[iplot].xscale;
+	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot original longitude data */
 	if (plot_lon_org) {
@@ -4840,9 +4837,9 @@ int mbnavedit_plot_lon(int iplot) {
 int mbnavedit_plot_lat(int iplot) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	int ixmin, ixmax, iymin, iymax;
-	double xmin, xmax, ymin, ymax;
-	double xscale, yscale;
+	// int ixmin, ixmax, iymin, iymax;
+	// double xmin, xmax, ymin, ymax;
+	// double xscale, yscale;
 	int lat_x1, lat_y1, lat_x2, lat_y2;
 	int i;
 
@@ -4854,16 +4851,16 @@ int mbnavedit_plot_lat(int iplot) {
 	}
 
 	/* get scaling values */
-	ixmin = mbnavplot[iplot].ixmin;
-	ixmax = mbnavplot[iplot].ixmax;
-	iymin = mbnavplot[iplot].iymin;
-	iymax = mbnavplot[iplot].iymax;
-	xmin = mbnavplot[iplot].xmin;
-	xmax = mbnavplot[iplot].xmax;
-	ymin = mbnavplot[iplot].ymin;
-	ymax = mbnavplot[iplot].ymax;
-	xscale = mbnavplot[iplot].xscale;
-	yscale = mbnavplot[iplot].yscale;
+	const int ixmin = mbnavplot[iplot].ixmin;
+	// const int ixmax = mbnavplot[iplot].ixmax;
+	const int iymin = mbnavplot[iplot].iymin;
+	// const int iymax = mbnavplot[iplot].iymax;
+	const double xmin = mbnavplot[iplot].xmin;
+	// const double xmax = mbnavplot[iplot].xmax;
+	const double ymin = mbnavplot[iplot].ymin;
+	// const double ymax = mbnavplot[iplot].ymax;
+	const double xscale = mbnavplot[iplot].xscale;
+	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot original latitude data */
 	if (plot_lat_org) {
@@ -4930,9 +4927,9 @@ int mbnavedit_plot_lat(int iplot) {
 int mbnavedit_plot_speed(int iplot) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	int ixmin, ixmax, iymin, iymax;
-	double xmin, xmax, ymin, ymax;
-	double xscale, yscale;
+	// int ixmin, ixmax, iymin, iymax;
+	// double xmin, xmax, ymin, ymax;
+	// double xscale, yscale;
 	int speed_x1, speed_y1, speed_x2, speed_y2;
 	int i;
 
@@ -4944,16 +4941,16 @@ int mbnavedit_plot_speed(int iplot) {
 	}
 
 	/* get scaling values */
-	ixmin = mbnavplot[iplot].ixmin;
-	ixmax = mbnavplot[iplot].ixmax;
-	iymin = mbnavplot[iplot].iymin;
-	iymax = mbnavplot[iplot].iymax;
-	xmin = mbnavplot[iplot].xmin;
-	xmax = mbnavplot[iplot].xmax;
-	ymin = mbnavplot[iplot].ymin;
-	ymax = mbnavplot[iplot].ymax;
-	xscale = mbnavplot[iplot].xscale;
-	yscale = mbnavplot[iplot].yscale;
+	const int ixmin = mbnavplot[iplot].ixmin;
+	// const int ixmax = mbnavplot[iplot].ixmax;
+	const int iymin = mbnavplot[iplot].iymin;
+	// const int iymax = mbnavplot[iplot].iymax;
+	const double xmin = mbnavplot[iplot].xmin;
+	// const double xmax = mbnavplot[iplot].xmax;
+	const double ymin = mbnavplot[iplot].ymin;
+	// const double ymax = mbnavplot[iplot].ymax;
+	const double xscale = mbnavplot[iplot].xscale;
+	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot original speed data */
 	if (plot_speed_org) {
@@ -5009,9 +5006,9 @@ int mbnavedit_plot_speed(int iplot) {
 int mbnavedit_plot_heading(int iplot) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	int ixmin, ixmax, iymin, iymax;
-	double xmin, xmax, ymin, ymax;
-	double xscale, yscale;
+	// int ixmin, ixmax, iymin, iymax;
+	// double xmin, xmax, ymin, ymax;
+	// double xscale, yscale;
 	int heading_x1, heading_y1, heading_x2, heading_y2;
 	int i;
 
@@ -5023,16 +5020,16 @@ int mbnavedit_plot_heading(int iplot) {
 	}
 
 	/* get scaling values */
-	ixmin = mbnavplot[iplot].ixmin;
-	ixmax = mbnavplot[iplot].ixmax;
-	iymin = mbnavplot[iplot].iymin;
-	iymax = mbnavplot[iplot].iymax;
-	xmin = mbnavplot[iplot].xmin;
-	xmax = mbnavplot[iplot].xmax;
-	ymin = mbnavplot[iplot].ymin;
-	ymax = mbnavplot[iplot].ymax;
-	xscale = mbnavplot[iplot].xscale;
-	yscale = mbnavplot[iplot].yscale;
+	const int ixmin = mbnavplot[iplot].ixmin;
+	// const int ixmax = mbnavplot[iplot].ixmax;
+	const int iymin = mbnavplot[iplot].iymin;
+	// const int iymax = mbnavplot[iplot].iymax;
+	const double xmin = mbnavplot[iplot].xmin;
+	// const double xmax = mbnavplot[iplot].xmax;
+	const double ymin = mbnavplot[iplot].ymin;
+	// const double ymax = mbnavplot[iplot].ymax;
+	const double xscale = mbnavplot[iplot].xscale;
+	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot original heading data */
 	if (plot_heading_org) {
@@ -5090,9 +5087,9 @@ int mbnavedit_plot_heading(int iplot) {
 int mbnavedit_plot_draft(int iplot) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	int ixmin, ixmax, iymin, iymax;
-	double xmin, xmax, ymin, ymax;
-	double xscale, yscale;
+	// int ixmin, ixmax, iymin, iymax;
+	// double xmin, xmax, ymin, ymax;
+	// double xscale, yscale;
 	int draft_x1, draft_y1, draft_x2, draft_y2;
 	int i;
 
@@ -5104,16 +5101,16 @@ int mbnavedit_plot_draft(int iplot) {
 	}
 
 	/* get scaling values */
-	ixmin = mbnavplot[iplot].ixmin;
-	ixmax = mbnavplot[iplot].ixmax;
-	iymin = mbnavplot[iplot].iymin;
-	iymax = mbnavplot[iplot].iymax;
-	xmin = mbnavplot[iplot].xmin;
-	xmax = mbnavplot[iplot].xmax;
-	ymin = mbnavplot[iplot].ymin;
-	ymax = mbnavplot[iplot].ymax;
-	xscale = mbnavplot[iplot].xscale;
-	yscale = mbnavplot[iplot].yscale;
+	const int ixmin = mbnavplot[iplot].ixmin;
+	// const int ixmax = mbnavplot[iplot].ixmax;
+	const int iymin = mbnavplot[iplot].iymin;
+	// const int iymax = mbnavplot[iplot].iymax;
+	const double xmin = mbnavplot[iplot].xmin;
+	// const double xmax = mbnavplot[iplot].xmax;
+	const double ymin = mbnavplot[iplot].ymin;
+	// const double ymax = mbnavplot[iplot].ymax;
+	const double xscale = mbnavplot[iplot].xscale;
+	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot original draft data */
 	if (plot_draft_org) {
@@ -5156,9 +5153,9 @@ int mbnavedit_plot_draft(int iplot) {
 int mbnavedit_plot_roll(int iplot) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	int ixmin, ixmax, iymin, iymax;
-	double xmin, xmax, ymin, ymax;
-	double xscale, yscale;
+	// int ixmin, ixmax, iymin, iymax;
+	// double xmin, xmax, ymin, ymax;
+	// double xscale, yscale;
 	int roll_x1, roll_y1, roll_x2, roll_y2;
 	int i;
 
@@ -5170,16 +5167,16 @@ int mbnavedit_plot_roll(int iplot) {
 	}
 
 	/* get scaling values */
-	ixmin = mbnavplot[iplot].ixmin;
-	ixmax = mbnavplot[iplot].ixmax;
-	iymin = mbnavplot[iplot].iymin;
-	iymax = mbnavplot[iplot].iymax;
-	xmin = mbnavplot[iplot].xmin;
-	xmax = mbnavplot[iplot].xmax;
-	ymin = mbnavplot[iplot].ymin;
-	ymax = mbnavplot[iplot].ymax;
-	xscale = mbnavplot[iplot].xscale;
-	yscale = mbnavplot[iplot].yscale;
+	const int ixmin = mbnavplot[iplot].ixmin;
+	// const int ixmax = mbnavplot[iplot].ixmax;
+	const int iymin = mbnavplot[iplot].iymin;
+	// const int iymax = mbnavplot[iplot].iymax;
+	const double xmin = mbnavplot[iplot].xmin;
+	// const double xmax = mbnavplot[iplot].xmax;
+	const double ymin = mbnavplot[iplot].ymin;
+	// const double ymax = mbnavplot[iplot].ymax;
+	const double xscale = mbnavplot[iplot].xscale;
+	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot roll data */
 	if (plot_roll) {
@@ -5210,9 +5207,9 @@ int mbnavedit_plot_roll(int iplot) {
 int mbnavedit_plot_pitch(int iplot) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	int ixmin, ixmax, iymin, iymax;
-	double xmin, xmax, ymin, ymax;
-	double xscale, yscale;
+	// int ixmin, ixmax, iymin, iymax;
+	// double xmin, xmax, ymin, ymax;
+	// double xscale, yscale;
 	int pitch_x1, pitch_y1, pitch_x2, pitch_y2;
 	int i;
 
@@ -5224,16 +5221,16 @@ int mbnavedit_plot_pitch(int iplot) {
 	}
 
 	/* get scaling values */
-	ixmin = mbnavplot[iplot].ixmin;
-	ixmax = mbnavplot[iplot].ixmax;
-	iymin = mbnavplot[iplot].iymin;
-	iymax = mbnavplot[iplot].iymax;
-	xmin = mbnavplot[iplot].xmin;
-	xmax = mbnavplot[iplot].xmax;
-	ymin = mbnavplot[iplot].ymin;
-	ymax = mbnavplot[iplot].ymax;
-	xscale = mbnavplot[iplot].xscale;
-	yscale = mbnavplot[iplot].yscale;
+	const int ixmin = mbnavplot[iplot].ixmin;
+	// const int ixmax = mbnavplot[iplot].ixmax;
+	const int iymin = mbnavplot[iplot].iymin;
+	// const int iymax = mbnavplot[iplot].iymax;
+	const double xmin = mbnavplot[iplot].xmin;
+	// const double xmax = mbnavplot[iplot].xmax;
+	const double ymin = mbnavplot[iplot].ymin;
+	// const double ymax = mbnavplot[iplot].ymax;
+	const double xscale = mbnavplot[iplot].xscale;
+	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot pitch data */
 	if (plot_pitch) {
@@ -5264,9 +5261,9 @@ int mbnavedit_plot_pitch(int iplot) {
 int mbnavedit_plot_heave(int iplot) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	int ixmin, ixmax, iymin, iymax;
-	double xmin, xmax, ymin, ymax;
-	double xscale, yscale;
+	// int ixmin, ixmax, iymin, iymax;
+	// double xmin, xmax, ymin, ymax;
+	// double xscale, yscale;
 	int heave_x1, heave_y1, heave_x2, heave_y2;
 	int i;
 
@@ -5278,16 +5275,16 @@ int mbnavedit_plot_heave(int iplot) {
 	}
 
 	/* get scaling values */
-	ixmin = mbnavplot[iplot].ixmin;
-	ixmax = mbnavplot[iplot].ixmax;
-	iymin = mbnavplot[iplot].iymin;
-	iymax = mbnavplot[iplot].iymax;
-	xmin = mbnavplot[iplot].xmin;
-	xmax = mbnavplot[iplot].xmax;
-	ymin = mbnavplot[iplot].ymin;
-	ymax = mbnavplot[iplot].ymax;
-	xscale = mbnavplot[iplot].xscale;
-	yscale = mbnavplot[iplot].yscale;
+	const int ixmin = mbnavplot[iplot].ixmin;
+	// const int ixmax = mbnavplot[iplot].ixmax;
+	const int iymin = mbnavplot[iplot].iymin;
+	// const int iymax = mbnavplot[iplot].iymax;
+	const double xmin = mbnavplot[iplot].xmin;
+	// const double xmax = mbnavplot[iplot].xmax;
+	const double ymin = mbnavplot[iplot].ymin;
+	// const double ymax = mbnavplot[iplot].ymax;
+	const double xscale = mbnavplot[iplot].xscale;
+	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot heave data */
 	if (plot_heave) {
