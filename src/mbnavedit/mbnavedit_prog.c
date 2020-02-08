@@ -48,12 +48,12 @@
 
 #include <X11/Intrinsic.h>
 
-#include "mb_format.h"
-#include "mb_status.h"
+#include "mb_aux.h"
 #include "mb_define.h"
+#include "mb_format.h"
 #include "mb_io.h"
 #include "mb_process.h"
-#include "mb_aux.h"
+#include "mb_status.h"
 #include "mb_xgraphics.h"
 
 #include "mbnavedit.h"
@@ -633,7 +633,7 @@ int mbnavedit_open_file(int useprevious) {
 
 		/* if locked get lock info */
 		if (error == MB_ERROR_FILE_LOCKED) {
-			lock_status =
+			// const int lock_status =
 			    mb_pr_lockinfo(verbose, ifile, &locked, &lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &error);
 
 			sprintf(error1, "Unable to open input file:");
