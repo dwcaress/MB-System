@@ -4499,30 +4499,21 @@ int mbnavedit_plot_tint(int iplot) {
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
 
-	// int ixmin, ixmax, iymin, iymax;
-	// double xmin, xmax, ymin, ymax;
-	// double xscale, yscale;
-	int tint_x1, tint_y1, tint_x2, tint_y2;
-
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
-	// const int ixmax = mbnavplot[iplot].ixmax;
 	const int iymin = mbnavplot[iplot].iymin;
-	// const int iymax = mbnavplot[iplot].iymax;
 	const double xmin = mbnavplot[iplot].xmin;
-	// const double xmax = mbnavplot[iplot].xmax;
 	const double ymin = mbnavplot[iplot].ymin;
-	// const double ymax = mbnavplot[iplot].ymax;
 	const double xscale = mbnavplot[iplot].xscale;
 	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot original expected time data */
 	if (plot_tint_org) {
-		tint_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
-		tint_y1 = iymin + yscale * (ping[current_id].tint_org - ymin);
+		int tint_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
+		int tint_y1 = iymin + yscale * (ping[current_id].tint_org - ymin);
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
-			tint_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-			tint_y2 = iymin + yscale * (ping[i].tint_org - ymin);
+			const int tint_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
+			const int tint_y2 = iymin + yscale * (ping[i].tint_org - ymin);
 			xg_drawline(mbnavedit_xgid, tint_x1, tint_y1, tint_x2, tint_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			tint_x1 = tint_x2;
 			tint_y1 = tint_y2;
@@ -4561,30 +4552,21 @@ int mbnavedit_plot_lon(int iplot) {
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
 
-	// int ixmin, ixmax, iymin, iymax;
-	// double xmin, xmax, ymin, ymax;
-	// double xscale, yscale;
-	int lon_x1, lon_y1, lon_x2, lon_y2;
-
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
-	// const int ixmax = mbnavplot[iplot].ixmax;
 	const int iymin = mbnavplot[iplot].iymin;
-	// const int iymax = mbnavplot[iplot].iymax;
 	const double xmin = mbnavplot[iplot].xmin;
-	// const double xmax = mbnavplot[iplot].xmax;
 	const double ymin = mbnavplot[iplot].ymin;
-	// const double ymax = mbnavplot[iplot].ymax;
 	const double xscale = mbnavplot[iplot].xscale;
 	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot original longitude data */
 	if (plot_lon_org) {
-		lon_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
-		lon_y1 = iymin + yscale * (ping[current_id].lon_org - ymin);
+		int lon_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
+		int lon_y1 = iymin + yscale * (ping[current_id].lon_org - ymin);
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
-			lon_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-			lon_y2 = iymin + yscale * (ping[i].lon_org - ymin);
+			const int lon_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
+			const int lon_y2 = iymin + yscale * (ping[i].lon_org - ymin);
 			xg_drawline(mbnavedit_xgid, lon_x1, lon_y1, lon_x2, lon_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			lon_x1 = lon_x2;
 			lon_y1 = lon_y2;
@@ -4593,11 +4575,11 @@ int mbnavedit_plot_lon(int iplot) {
 
 	/* plot dr longitude data */
 	if (model_mode != MODEL_MODE_OFF && plot_lon_dr) {
-		lon_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
-		lon_y1 = iymin + yscale * (ping[current_id].lon_dr - ymin);
+		int lon_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
+		int lon_y1 = iymin + yscale * (ping[current_id].lon_dr - ymin);
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
-			lon_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-			lon_y2 = iymin + yscale * (ping[i].lon_dr - ymin);
+			const int lon_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
+			const int lon_y2 = iymin + yscale * (ping[i].lon_dr - ymin);
 			xg_drawline(mbnavedit_xgid, lon_x1, lon_y1, lon_x2, lon_y2, pixel_values[BLUE], XG_SOLIDLINE);
 			lon_x1 = lon_x2;
 			lon_y1 = lon_y2;
@@ -4647,30 +4629,21 @@ int mbnavedit_plot_lat(int iplot) {
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
 
-	// int ixmin, ixmax, iymin, iymax;
-	// double xmin, xmax, ymin, ymax;
-	// double xscale, yscale;
-	int lat_x1, lat_y1, lat_x2, lat_y2;
-
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
-	// const int ixmax = mbnavplot[iplot].ixmax;
 	const int iymin = mbnavplot[iplot].iymin;
-	// const int iymax = mbnavplot[iplot].iymax;
 	const double xmin = mbnavplot[iplot].xmin;
-	// const double xmax = mbnavplot[iplot].xmax;
 	const double ymin = mbnavplot[iplot].ymin;
-	// const double ymax = mbnavplot[iplot].ymax;
 	const double xscale = mbnavplot[iplot].xscale;
 	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot original latitude data */
 	if (plot_lat_org) {
-		lat_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
-		lat_y1 = iymin + yscale * (ping[current_id].lat_org - ymin);
+		int lat_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
+		int lat_y1 = iymin + yscale * (ping[current_id].lat_org - ymin);
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
-			lat_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-			lat_y2 = iymin + yscale * (ping[i].lat_org - ymin);
+			const int lat_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
+			const int lat_y2 = iymin + yscale * (ping[i].lat_org - ymin);
 			xg_drawline(mbnavedit_xgid, lat_x1, lat_y1, lat_x2, lat_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			lat_x1 = lat_x2;
 			lat_y1 = lat_y2;
@@ -4679,11 +4652,11 @@ int mbnavedit_plot_lat(int iplot) {
 
 	/* plot dr latitude data */
 	if (model_mode != MODEL_MODE_OFF && plot_lat_dr) {
-		lat_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
-		lat_y1 = iymin + yscale * (ping[current_id].lat_dr - ymin);
+		int lat_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
+		int lat_y1 = iymin + yscale * (ping[current_id].lat_dr - ymin);
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
-			lat_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-			lat_y2 = iymin + yscale * (ping[i].lat_dr - ymin);
+			const int lat_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
+			const int lat_y2 = iymin + yscale * (ping[i].lat_dr - ymin);
 			xg_drawline(mbnavedit_xgid, lat_x1, lat_y1, lat_x2, lat_y2, pixel_values[BLUE], XG_SOLIDLINE);
 			lat_x1 = lat_x2;
 			lat_y1 = lat_y2;
@@ -4733,30 +4706,21 @@ int mbnavedit_plot_speed(int iplot) {
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
 
-	// int ixmin, ixmax, iymin, iymax;
-	// double xmin, xmax, ymin, ymax;
-	// double xscale, yscale;
-	int speed_x1, speed_y1, speed_x2, speed_y2;
-
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
-	// const int ixmax = mbnavplot[iplot].ixmax;
 	const int iymin = mbnavplot[iplot].iymin;
-	// const int iymax = mbnavplot[iplot].iymax;
 	const double xmin = mbnavplot[iplot].xmin;
-	// const double xmax = mbnavplot[iplot].xmax;
 	const double ymin = mbnavplot[iplot].ymin;
-	// const double ymax = mbnavplot[iplot].ymax;
 	const double xscale = mbnavplot[iplot].xscale;
 	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot original speed data */
 	if (plot_speed_org) {
-		speed_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
-		speed_y1 = iymin + yscale * (ping[current_id].speed - ymin);
+		int speed_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
+		int speed_y1 = iymin + yscale * (ping[current_id].speed - ymin);
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
-			speed_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-			speed_y2 = iymin + yscale * (ping[i].speed_org - ymin);
+			const int speed_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
+			const int speed_y2 = iymin + yscale * (ping[i].speed_org - ymin);
 			xg_drawline(mbnavedit_xgid, speed_x1, speed_y1, speed_x2, speed_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			speed_x1 = speed_x2;
 			speed_y1 = speed_y2;
@@ -4765,11 +4729,11 @@ int mbnavedit_plot_speed(int iplot) {
 
 	/* plot speed made good data */
 	if (plot_smg) {
-		speed_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
-		speed_y1 = iymin + yscale * (ping[current_id].speed_made_good - ymin);
+		int speed_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
+		int speed_y1 = iymin + yscale * (ping[current_id].speed_made_good - ymin);
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
-			speed_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-			speed_y2 = iymin + yscale * (ping[i].speed_made_good - ymin);
+			const int speed_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
+			const int speed_y2 = iymin + yscale * (ping[i].speed_made_good - ymin);
 			xg_drawline(mbnavedit_xgid, speed_x1, speed_y1, speed_x2, speed_y2, pixel_values[BLUE], XG_SOLIDLINE);
 			speed_x1 = speed_x2;
 			speed_y1 = speed_y2;
@@ -4802,11 +4766,6 @@ int mbnavedit_plot_speed(int iplot) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_heading(int iplot) {
-	// int ixmin, ixmax, iymin, iymax;
-	// double xmin, xmax, ymin, ymax;
-	// double xscale, yscale;
-	int heading_x1, heading_y1, heading_x2, heading_y2;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4815,23 +4774,19 @@ int mbnavedit_plot_heading(int iplot) {
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
-	// const int ixmax = mbnavplot[iplot].ixmax;
 	const int iymin = mbnavplot[iplot].iymin;
-	// const int iymax = mbnavplot[iplot].iymax;
 	const double xmin = mbnavplot[iplot].xmin;
-	// const double xmax = mbnavplot[iplot].xmax;
 	const double ymin = mbnavplot[iplot].ymin;
-	// const double ymax = mbnavplot[iplot].ymax;
 	const double xscale = mbnavplot[iplot].xscale;
 	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot original heading data */
 	if (plot_heading_org) {
-		heading_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
-		heading_y1 = iymin + yscale * (ping[current_id].heading - ymin);
+		int heading_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
+		int heading_y1 = iymin + yscale * (ping[current_id].heading - ymin);
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
-			heading_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-			heading_y2 = iymin + yscale * (ping[i].heading_org - ymin);
+			const int heading_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
+			const int heading_y2 = iymin + yscale * (ping[i].heading_org - ymin);
 			xg_drawline(mbnavedit_xgid, heading_x1, heading_y1, heading_x2, heading_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			heading_x1 = heading_x2;
 			heading_y1 = heading_y2;
@@ -4840,11 +4795,11 @@ int mbnavedit_plot_heading(int iplot) {
 
 	/* plot course made good data */
 	if (plot_cmg) {
-		heading_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
-		heading_y1 = iymin + yscale * (ping[current_id].course_made_good - ymin);
+		int heading_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
+		int heading_y1 = iymin + yscale * (ping[current_id].course_made_good - ymin);
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
-			heading_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-			heading_y2 = iymin + yscale * (ping[i].course_made_good - ymin);
+			const int heading_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
+			const int heading_y2 = iymin + yscale * (ping[i].course_made_good - ymin);
 			xg_drawline(mbnavedit_xgid, heading_x1, heading_y1, heading_x2, heading_y2, pixel_values[BLUE], XG_SOLIDLINE);
 			heading_x1 = heading_x2;
 			heading_y1 = heading_y2;
@@ -4885,27 +4840,21 @@ int mbnavedit_plot_draft(int iplot) {
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
 
-	int draft_x1, draft_y1, draft_x2, draft_y2;
-
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
-	// const int ixmax = mbnavplot[iplot].ixmax;
 	const int iymin = mbnavplot[iplot].iymin;
-	// const int iymax = mbnavplot[iplot].iymax;
 	const double xmin = mbnavplot[iplot].xmin;
-	// const double xmax = mbnavplot[iplot].xmax;
 	const double ymin = mbnavplot[iplot].ymin;
-	// const double ymax = mbnavplot[iplot].ymax;
 	const double xscale = mbnavplot[iplot].xscale;
 	const double yscale = mbnavplot[iplot].yscale;
 
 	/* plot original draft data */
 	if (plot_draft_org) {
-		draft_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
-		draft_y1 = iymin + yscale * (ping[current_id].draft - ymin);
+		int draft_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
+		int draft_y1 = iymin + yscale * (ping[current_id].draft - ymin);
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
-			draft_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-			draft_y2 = iymin + yscale * (ping[i].draft_org - ymin);
+			const int draft_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
+			const int draft_y2 = iymin + yscale * (ping[i].draft_org - ymin);
 			xg_drawline(mbnavedit_xgid, draft_x1, draft_y1, draft_x2, draft_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			draft_x1 = draft_x2;
 			draft_y1 = draft_y2;
@@ -4944,27 +4893,21 @@ int mbnavedit_plot_roll(int iplot) {
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
 
-	int roll_x1, roll_y1, roll_x2, roll_y2;
-
-	/* get scaling values */
-	const int ixmin = mbnavplot[iplot].ixmin;
-	// const int ixmax = mbnavplot[iplot].ixmax;
-	const int iymin = mbnavplot[iplot].iymin;
-	// const int iymax = mbnavplot[iplot].iymax;
-	const double xmin = mbnavplot[iplot].xmin;
-	// const double xmax = mbnavplot[iplot].xmax;
-	const double ymin = mbnavplot[iplot].ymin;
-	// const double ymax = mbnavplot[iplot].ymax;
-	const double xscale = mbnavplot[iplot].xscale;
-	const double yscale = mbnavplot[iplot].yscale;
-
 	/* plot roll data */
 	if (plot_roll) {
-		roll_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
-		roll_y1 = iymin + yscale * (ping[current_id].roll - ymin);
+		/* get scaling values */
+		const int ixmin = mbnavplot[iplot].ixmin;
+		const int iymin = mbnavplot[iplot].iymin;
+		const double xmin = mbnavplot[iplot].xmin;
+		const double ymin = mbnavplot[iplot].ymin;
+		const double xscale = mbnavplot[iplot].xscale;
+		const double yscale = mbnavplot[iplot].yscale;
+
+		int roll_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
+		int roll_y1 = iymin + yscale * (ping[current_id].roll - ymin);
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
-			roll_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-			roll_y2 = iymin + yscale * (ping[i].roll - ymin);
+			const int roll_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
+			const int roll_y2 = iymin + yscale * (ping[i].roll - ymin);
 			xg_drawline(mbnavedit_xgid, roll_x1, roll_y1, roll_x2, roll_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			roll_x1 = roll_x2;
 			roll_y1 = roll_y2;
@@ -4991,27 +4934,21 @@ int mbnavedit_plot_pitch(int iplot) {
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
 
-	int pitch_x1, pitch_y1, pitch_x2, pitch_y2;
-
-	/* get scaling values */
-	const int ixmin = mbnavplot[iplot].ixmin;
-	// const int ixmax = mbnavplot[iplot].ixmax;
-	const int iymin = mbnavplot[iplot].iymin;
-	// const int iymax = mbnavplot[iplot].iymax;
-	const double xmin = mbnavplot[iplot].xmin;
-	// const double xmax = mbnavplot[iplot].xmax;
-	const double ymin = mbnavplot[iplot].ymin;
-	// const double ymax = mbnavplot[iplot].ymax;
-	const double xscale = mbnavplot[iplot].xscale;
-	const double yscale = mbnavplot[iplot].yscale;
-
 	/* plot pitch data */
 	if (plot_pitch) {
-		pitch_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
-		pitch_y1 = iymin + yscale * (ping[current_id].pitch - ymin);
+		/* get scaling values */
+		const int ixmin = mbnavplot[iplot].ixmin;
+		const int iymin = mbnavplot[iplot].iymin;
+		const double xmin = mbnavplot[iplot].xmin;
+		const double ymin = mbnavplot[iplot].ymin;
+		const double xscale = mbnavplot[iplot].xscale;
+		const double yscale = mbnavplot[iplot].yscale;
+
+		int pitch_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
+		int pitch_y1 = iymin + yscale * (ping[current_id].pitch - ymin);
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
-			pitch_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-			pitch_y2 = iymin + yscale * (ping[i].pitch - ymin);
+			const int pitch_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
+			const int pitch_y2 = iymin + yscale * (ping[i].pitch - ymin);
 			xg_drawline(mbnavedit_xgid, pitch_x1, pitch_y1, pitch_x2, pitch_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			pitch_x1 = pitch_x2;
 			pitch_y1 = pitch_y2;
@@ -5038,27 +4975,21 @@ int mbnavedit_plot_heave(int iplot) {
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
 
-	int heave_x1, heave_y1, heave_x2, heave_y2;
-
-	/* get scaling values */
-	const int ixmin = mbnavplot[iplot].ixmin;
-	// const int ixmax = mbnavplot[iplot].ixmax;
-	const int iymin = mbnavplot[iplot].iymin;
-	// const int iymax = mbnavplot[iplot].iymax;
-	const double xmin = mbnavplot[iplot].xmin;
-	// const double xmax = mbnavplot[iplot].xmax;
-	const double ymin = mbnavplot[iplot].ymin;
-	// const double ymax = mbnavplot[iplot].ymax;
-	const double xscale = mbnavplot[iplot].xscale;
-	const double yscale = mbnavplot[iplot].yscale;
-
 	/* plot heave data */
 	if (plot_heave) {
-		heave_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
-		heave_y1 = iymin + yscale * (ping[current_id].heave - ymin);
+		/* get scaling values */
+		const int ixmin = mbnavplot[iplot].ixmin;
+		const int iymin = mbnavplot[iplot].iymin;
+		const double xmin = mbnavplot[iplot].xmin;
+		const double ymin = mbnavplot[iplot].ymin;
+		const double xscale = mbnavplot[iplot].xscale;
+		const double yscale = mbnavplot[iplot].yscale;
+
+		int heave_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
+		int heave_y1 = iymin + yscale * (ping[current_id].heave - ymin);
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
-			heave_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
-			heave_y2 = iymin + yscale * (ping[i].heave - ymin);
+			const int heave_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
+			const int heave_y2 = iymin + yscale * (ping[i].heave - ymin);
 			xg_drawline(mbnavedit_xgid, heave_x1, heave_y1, heave_x2, heave_y2, pixel_values[GREEN], XG_SOLIDLINE);
 			heave_x1 = heave_x2;
 			heave_y1 = heave_y2;
