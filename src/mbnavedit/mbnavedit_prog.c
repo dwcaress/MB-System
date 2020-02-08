@@ -21,8 +21,6 @@
  * Author:	D. W. Caress
  * Date:	June 23,  1995
  * Date:	August 28, 2000 (New version - no buffered i/o)
- *
- *
  */
 
 // TODO(schwehr): useprevious int boolean -> bool
@@ -301,7 +299,6 @@ int mbnavedit_init_globals() {
 /*--------------------------------------------------------------------*/
 int mbnavedit_init(int argc, char **argv, int *startup_file) {
 	int fileflag = 0;
-	int i;
 
 	/* parsing variables */
 	extern char *optarg;
@@ -435,7 +432,7 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       argc:      %d\n", argc);
-		for (i = 0; i < argc; i++)
+		for (int i = 0; i < argc; i++)
 			fprintf(stderr, "dbg2       argv[%d]:    %s\n", i, argv[i]);
 	}
 
@@ -458,14 +455,12 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 
 /*--------------------------------------------------------------------*/
 int mbnavedit_set_graphics(void *xgid, int ncol, unsigned int *pixels) {
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       xgid:         %p\n", xgid);
 		fprintf(stderr, "dbg2       ncolors:      %d\n", ncol);
-		for (i = 0; i < ncol; i++)
+		for (int i = 0; i < ncol; i++)
 			fprintf(stderr, "dbg2       pixel[%d]:     %d\n", i, pixels[i]);
 	}
 
@@ -474,7 +469,7 @@ int mbnavedit_set_graphics(void *xgid, int ncol, unsigned int *pixels) {
 
 	/* set colors */
 	ncolors = ncol;
-	for (i = 0; i < ncolors; i++)
+	for (int i = 0; i < ncolors; i++)
 		pixel_values[i] = pixels[i];
 
 	const int status = MB_SUCCESS;
@@ -941,7 +936,6 @@ int mbnavedit_dump_data(int hold) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_load_data() {
-	int i;
 	char string[MB_PATH_MAXLINE];
 
 	if (verbose >= 2) {
@@ -1049,7 +1043,7 @@ int mbnavedit_load_data() {
 
 	/* check for time stamp repeats */
 	timestamp_problem = false;
-	for (i = 0; i < nbuff - 1; i++) {
+	for (int i = 0; i < nbuff - 1; i++) {
 		if (ping[i + 1].time_d <= ping[i].time_d) {
 			timestamp_problem = true;
 		}
@@ -1057,7 +1051,7 @@ int mbnavedit_load_data() {
 
 	/* calculate expected time */
 	if (nbuff > 1) {
-		for (i = 1; i < nbuff; i++) {
+		for (int i = 1; i < nbuff; i++) {
 			ping[i].tint = ping[i].time_d - ping[i - 1].time_d;
 			ping[i].tint_org = ping[i].tint;
 			ping[i].time_d_org = ping[i].time_d;
@@ -1084,7 +1078,7 @@ int mbnavedit_load_data() {
 	}
 
 	/* calculate speed-made-good and course-made-good */
-	for (i = 0; i < nbuff; i++)
+	for (int i = 0; i < nbuff; i++)
 		mbnavedit_get_smgcmg(i);
 
 	/* calculate model */
@@ -1215,8 +1209,6 @@ int mbnavedit_action_next_buffer(int *quit) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_offset() {
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -1224,7 +1216,7 @@ int mbnavedit_action_offset() {
 	/* check if a file has been opened */
 	if (file_open) {
 		/* apply position offsets to the data */
-		for (i = 0; i < nbuff; i++) {
+		for (int i = 0; i < nbuff; i++) {
 			ping[i].lon += offset_lon - offset_lon_applied;
 			ping[i].lat += offset_lat - offset_lat_applied;
 		}
@@ -1378,7 +1370,6 @@ int mbnavedit_action_quit() {
 int mbnavedit_action_step(int step) {
 	int old_id, new_id;
 	int set;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1404,7 +1395,7 @@ int mbnavedit_action_step(int step) {
 		/* get current start of plotting data */
 		set = false;
 		old_id = current_id;
-		for (i = 0; i < nbuff; i++) {
+		for (int i = 0; i < nbuff; i++) {
 			if (set == false && ping[i].file_time_d >= plot_start_time) {
 				new_id = i;
 				set = true;
@@ -1463,7 +1454,6 @@ int mbnavedit_action_step(int step) {
 int mbnavedit_action_end() {
 	int old_id;
 	int set;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1480,7 +1470,7 @@ int mbnavedit_action_end() {
 		/* get current start of plotting data */
 		old_id = current_id;
 		set = false;
-		for (i = 0; i < nbuff && set == false; i++) {
+		for (int i = 0; i < nbuff && set == false; i++) {
 			if (ping[i].file_time_d >= plot_start_time) {
 				current_id = i;
 				set = true;
@@ -1588,7 +1578,6 @@ int mbnavedit_action_mouse_pick(int xx, int yy) {
 	int range, range_min;
 	int iping;
 	int ix, iy;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1636,7 +1625,7 @@ int mbnavedit_action_mouse_pick(int xx, int yy) {
 
 		/* figure out which data point is closest to cursor */
 		range_min = 100000;
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			if (mbnavplot[active_plot].type == PLOT_TINT) {
 				ix = xx - ping[i].tint_x;
 				iy = yy - ping[i].tint_y;
@@ -1736,7 +1725,6 @@ int mbnavedit_action_mouse_select(int xx, int yy) {
 	int active_plot;
 	int range;
 	int ix, iy;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1783,7 +1771,7 @@ int mbnavedit_action_mouse_select(int xx, int yy) {
 		status = MB_SUCCESS;
 
 		/* find all data points that are close enough */
-		for (i = current_id; i < current_id + nplot; i++) {
+		for (int i = current_id; i < current_id + nplot; i++) {
 			if (mbnavplot[active_plot].type == PLOT_TINT) {
 				ix = xx - ping[i].tint_x;
 				iy = yy - ping[i].tint_y;
@@ -1861,7 +1849,6 @@ int mbnavedit_action_mouse_deselect(int xx, int yy) {
 	int active_plot;
 	int range;
 	int ix, iy;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1908,7 +1895,7 @@ int mbnavedit_action_mouse_deselect(int xx, int yy) {
 		status = MB_SUCCESS;
 
 		/* find all data points that are close enough */
-		for (i = current_id; i < current_id + nplot; i++) {
+		for (int i = current_id; i < current_id + nplot; i++) {
 			if (mbnavplot[active_plot].type == PLOT_TINT) {
 				ix = xx - ping[i].tint_x;
 				iy = yy - ping[i].tint_y;
@@ -1983,7 +1970,6 @@ int mbnavedit_action_mouse_deselect(int xx, int yy) {
 int mbnavedit_action_mouse_selectall(int xx, int yy) {
 	int iplot;
 	int active_plot;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2017,7 +2003,7 @@ int mbnavedit_action_mouse_selectall(int xx, int yy) {
 		}
 
 		/* select all data points in active plot */
-		for (i = current_id; i < current_id + nplot; i++) {
+		for (int i = current_id; i < current_id + nplot; i++) {
 			if (mbnavplot[active_plot].type == PLOT_TINT)
 				ping[i].tint_select = true;
 			else if (mbnavplot[active_plot].type == PLOT_LONGITUDE)
@@ -2054,7 +2040,6 @@ int mbnavedit_action_mouse_selectall(int xx, int yy) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_mouse_deselectall(int xx, int yy) {
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2071,7 +2056,7 @@ int mbnavedit_action_mouse_deselectall(int xx, int yy) {
 		/* deselect all data points in all plots
 		    - this logic follows from deselecting all
 		    active plots plus all non-active plots */
-		for (i = current_id; i < current_id + nplot; i++) {
+		for (int i = current_id; i < current_id + nplot; i++) {
 			ping[i].tint_select = false;
 			ping[i].lon_select = false;
 			ping[i].lat_select = false;
@@ -2103,7 +2088,6 @@ int mbnavedit_action_mouse_deselectall(int xx, int yy) {
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_deselect_all(int type) {
 	int ndeselect;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2118,7 +2102,7 @@ int mbnavedit_action_deselect_all(int type) {
 
 		/* deselect all data points in specified data type */
 		ndeselect = 0;
-		for (i = 0; i < nbuff; i++) {
+		for (int i = 0; i < nbuff; i++) {
 			if (type == PLOT_TINT && ping[i].tint_select) {
 				ping[i].tint_select = false;
 				ndeselect++;
@@ -2174,7 +2158,6 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 	int itmp;
 	double dtmp;
 	int set;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2193,7 +2176,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 		if (which == 0) {
 			/* unplot old line on all plots */
 			if (interval_set1)
-				for (i = 0; i < number_plots; i++) {
+				for (int i = 0; i < number_plots; i++) {
 					xg_drawline(mbnavedit_xgid, interval_bound1, mbnavplot[i].iymin, interval_bound1, mbnavplot[i].iymax,
 					            pixel_values[WHITE], XG_DASHLINE);
 				}
@@ -2209,7 +2192,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 			interval_set1 = true;
 
 			/* plot line on all plots */
-			for (i = 0; i < number_plots; i++) {
+			for (int i = 0; i < number_plots; i++) {
 				xg_drawline(mbnavedit_xgid, interval_bound1, mbnavplot[i].iymin, interval_bound1, mbnavplot[i].iymax,
 				            pixel_values[RED], XG_DASHLINE);
 			}
@@ -2219,7 +2202,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 		else if (which == 1) {
 			/* unplot old line on all plots */
 			if (interval_set1)
-				for (i = 0; i < number_plots; i++) {
+				for (int i = 0; i < number_plots; i++) {
 					xg_drawline(mbnavedit_xgid, interval_bound2, mbnavplot[i].iymin, interval_bound2, mbnavplot[i].iymax,
 					            pixel_values[WHITE], XG_DASHLINE);
 				}
@@ -2235,7 +2218,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 			interval_set2 = true;
 
 			/* plot line on all plots */
-			for (i = 0; i < number_plots; i++) {
+			for (int i = 0; i < number_plots; i++) {
 				xg_drawline(mbnavedit_xgid, interval_bound2, mbnavplot[i].iymin, interval_bound2, mbnavplot[i].iymax,
 				            pixel_values[RED], XG_DASHLINE);
 			}
@@ -2265,7 +2248,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 
 			/* get current start of plotting data */
 			set = false;
-			for (i = 0; i < nbuff; i++) {
+			for (int i = 0; i < nbuff; i++) {
 				if (set == false && ping[i].file_time_d >= plot_start_time) {
 					current_id = i;
 					set = true;
@@ -2308,7 +2291,6 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 int mbnavedit_action_use_dr() {
 	int iplot;
 	int active_plot;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2330,7 +2312,7 @@ int mbnavedit_action_use_dr() {
 
 		/* set lonlat to dr lonlat for selected visible data */
 		if (active_plot > -1) {
-			for (i = current_id; i < current_id + nplot; i++) {
+			for (int i = current_id; i < current_id + nplot; i++) {
 				if (ping[i].lon_select || ping[i].lat_select) {
 					ping[i].lon = ping[i].lon_dr;
 					ping[i].lat = ping[i].lat_dr;
@@ -2338,7 +2320,7 @@ int mbnavedit_action_use_dr() {
 			}
 
 			/* calculate speed-made-good and course-made-good */
-			for (i = 0; i < nbuff; i++)
+			for (int i = 0; i < nbuff; i++)
 				mbnavedit_get_smgcmg(i);
 
 			/* clear the screen */
@@ -2370,7 +2352,6 @@ int mbnavedit_action_use_smg() {
 	int iplot;
 	int active_plot;
 	bool speedheading_change;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2391,7 +2372,7 @@ int mbnavedit_action_use_smg() {
 		/* set speed to speed made good for selected visible data */
 		if (active_plot > -1) {
 			speedheading_change = false;
-			for (i = current_id; i < current_id + nplot; i++) {
+			for (int i = current_id; i < current_id + nplot; i++) {
 				if (ping[i].speed_select) {
 					ping[i].speed = ping[i].speed_made_good;
 					speedheading_change = true;
@@ -2436,7 +2417,6 @@ int mbnavedit_action_use_cmg() {
 	int iplot;
 	int active_plot;
 	bool speedheading_change;
-	int i;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -2451,7 +2431,7 @@ int mbnavedit_action_use_cmg() {
 		/* set heading to course made good for selected visible data */
 		if (active_plot > -1) {
 			speedheading_change = false;
-			for (i = current_id; i < current_id + nplot; i++) {
+			for (int i = current_id; i < current_id + nplot; i++) {
 				if (ping[i].heading_select) {
 					ping[i].heading = ping[i].course_made_good;
 					speedheading_change = true;
@@ -2497,7 +2477,6 @@ int mbnavedit_action_interpolate() {
 	int ibefore, iafter;
 	bool timelonlat_change;
 	bool speedheading_change;
-	int i;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -2509,12 +2488,12 @@ int mbnavedit_action_interpolate() {
 		for (iping = 0; iping < nbuff; iping++) {
 			if (ping[iping].tint_select) {
 				ibefore = iping;
-				for (i = iping - 1; i >= 0; i--) {
+				for (int i = iping - 1; i >= 0; i--) {
 					if (ping[i].tint_select == false && ibefore == iping)
 						ibefore = i;
 				}
 				iafter = iping;
-				for (i = iping + 1; i < nbuff; i++) {
+				for (int i = iping + 1; i < nbuff; i++) {
 					if (ping[i].tint_select == false && iafter == iping)
 						iafter = i;
 				}
@@ -2562,12 +2541,12 @@ int mbnavedit_action_interpolate() {
 		for (iping = 0; iping < nbuff; iping++) {
 			if (ping[iping].lon_select) {
 				ibefore = iping;
-				for (i = iping - 1; i >= 0; i--) {
+				for (int i = iping - 1; i >= 0; i--) {
 					if (ping[i].lon_select == false && ibefore == iping)
 						ibefore = i;
 				}
 				iafter = iping;
-				for (i = iping + 1; i < nbuff; i++) {
+				for (int i = iping + 1; i < nbuff; i++) {
 					if (ping[i].lon_select == false && iafter == iping)
 						iafter = i;
 				}
@@ -2609,12 +2588,12 @@ int mbnavedit_action_interpolate() {
 		for (iping = 0; iping < nbuff; iping++) {
 			if (ping[iping].lat_select) {
 				ibefore = iping;
-				for (i = iping - 1; i >= 0; i--) {
+				for (int i = iping - 1; i >= 0; i--) {
 					if (ping[i].lat_select == false && ibefore == iping)
 						ibefore = i;
 				}
 				iafter = iping;
-				for (i = iping + 1; i < nbuff; i++) {
+				for (int i = iping + 1; i < nbuff; i++) {
 					if (ping[i].lat_select == false && iafter == iping)
 						iafter = i;
 				}
@@ -2656,12 +2635,12 @@ int mbnavedit_action_interpolate() {
 		for (iping = 0; iping < nbuff; iping++) {
 			if (ping[iping].speed_select) {
 				ibefore = iping;
-				for (i = iping - 1; i >= 0; i--) {
+				for (int i = iping - 1; i >= 0; i--) {
 					if (ping[i].speed_select == false && ibefore == iping)
 						ibefore = i;
 				}
 				iafter = iping;
-				for (i = iping + 1; i < nbuff; i++) {
+				for (int i = iping + 1; i < nbuff; i++) {
 					if (ping[i].speed_select == false && iafter == iping)
 						iafter = i;
 				}
@@ -2686,12 +2665,12 @@ int mbnavedit_action_interpolate() {
 		for (iping = 0; iping < nbuff; iping++) {
 			if (ping[iping].heading_select) {
 				ibefore = iping;
-				for (i = iping - 1; i >= 0; i--) {
+				for (int i = iping - 1; i >= 0; i--) {
 					if (ping[i].heading_select == false && ibefore == iping)
 						ibefore = i;
 				}
 				iafter = iping;
-				for (i = iping + 1; i < nbuff; i++)
+				for (int i = iping + 1; i < nbuff; i++)
 					if (ping[i].heading_select == false && iafter == iping)
 						iafter = i;
 				if (ibefore < iping && iafter > iping) {
@@ -2715,12 +2694,12 @@ int mbnavedit_action_interpolate() {
 		for (iping = 0; iping < nbuff; iping++) {
 			if (ping[iping].draft_select) {
 				ibefore = iping;
-				for (i = iping - 1; i >= 0; i--) {
+				for (int i = iping - 1; i >= 0; i--) {
 					if (ping[i].draft_select == false && ibefore == iping)
 						ibefore = i;
 				}
 				iafter = iping;
-				for (i = iping + 1; i < nbuff; i++)
+				for (int i = iping + 1; i < nbuff; i++)
 					if (ping[i].draft_select == false && iafter == iping)
 						iafter = i;
 				if (ibefore < iping && iafter > iping) {
@@ -2745,7 +2724,7 @@ int mbnavedit_action_interpolate() {
 
 		/* recalculate speed-made-good and course-made-good */
 		if (timelonlat_change)
-			for (i = 0; i < nbuff; i++)
+			for (int i = 0; i < nbuff; i++)
 				mbnavedit_get_smgcmg(i);
 
 		/* recalculate model */
@@ -2778,7 +2757,7 @@ int mbnavedit_action_interpolaterepeats() {
 	bool timelonlat_change;
 	bool speedheading_change;
 	int found;
-	int i, j;
+	int j;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -2925,7 +2904,7 @@ int mbnavedit_action_interpolaterepeats() {
 
 		/* recalculate speed-made-good and course-made-good */
 		if (timelonlat_change)
-			for (i = 0; i < nbuff; i++)
+			for (int i = 0; i < nbuff; i++)
 				mbnavedit_get_smgcmg(i);
 
 		/* recalculate model */
@@ -2956,7 +2935,6 @@ int mbnavedit_action_revert() {
 	int iplot;
 	bool timelonlat_change;
 	bool speedheading_change;
-	int i;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -2967,7 +2945,7 @@ int mbnavedit_action_revert() {
 
 		/* loop over each of the plots */
 		for (iplot = 0; iplot < number_plots; iplot++) {
-			for (i = current_id; i < current_id + nplot; i++) {
+			for (int i = current_id; i < current_id + nplot; i++) {
 				if (mbnavplot[iplot].type == PLOT_TINT) {
 					if (ping[i].tint_select) {
 						ping[i].time_d = ping[i].time_d_org;
@@ -3013,7 +2991,7 @@ int mbnavedit_action_revert() {
 
 		/* recalculate speed-made-good and course-made-good */
 		if (timelonlat_change)
-			for (i = 0; i < nbuff; i++)
+			for (int i = 0; i < nbuff; i++)
 				mbnavedit_get_smgcmg(i);
 
 		/* recalculate model */
@@ -3048,14 +3026,13 @@ int mbnavedit_action_flag() {
 
 	int status = MB_SUCCESS;
 	int iplot;
-	int i;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
 
 		/* loop over each of the plots */
 		for (iplot = 0; iplot < number_plots; iplot++) {
-			for (i = current_id; i < current_id + nplot; i++) {
+			for (int i = current_id; i < current_id + nplot; i++) {
 				if (mbnavplot[iplot].type == PLOT_LONGITUDE) {
 					if (ping[i].lon_select) {
 						ping[i].lonlat_flag = true;
@@ -3097,14 +3074,13 @@ int mbnavedit_action_unflag() {
 
 	int status = MB_SUCCESS;
 	int iplot;
-	int i;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
 
 		/* loop over each of the plots */
 		for (iplot = 0; iplot < number_plots; iplot++) {
-			for (i = current_id; i < current_id + nplot; i++) {
+			for (int i = current_id; i < current_id + nplot; i++) {
 				if (mbnavplot[iplot].type == PLOT_LONGITUDE) {
 					if (ping[i].lon_select) {
 						ping[i].lonlat_flag = false;
@@ -3146,10 +3122,10 @@ int mbnavedit_action_fixtime() {
 
 	int istart, iend;
 	double start_time_d, end_time_d;
-	int i, j;
+	int j;
 
 	/* loop over the data */
-	for (i = 0; i < nbuff; i++) {
+	for (int i = 0; i < nbuff; i++) {
 		if (i == 0) {
 			istart = i;
 			start_time_d = ping[i].time_d;
@@ -3190,11 +3166,11 @@ int mbnavedit_action_deletebadtime() {
 	}
 
 	double lastgood_time_d;
-	int i, j, nbuffnew;
+	int j, nbuffnew;
 
 	/* loop over the data looking for bad times */
 	lastgood_time_d = ping[0].time_d;
-	for (i = 1; i < nbuff; i++) {
+	for (int i = 1; i < nbuff; i++) {
 		if ((ping[i].time_d - lastgood_time_d) <= 0.0) {
 			ping[i].id = -1;
 		}
@@ -3216,7 +3192,7 @@ int mbnavedit_action_deletebadtime() {
 
 	/* loop over the data in reverse deleting data with bad times */
 	nbuffnew = nbuff;
-	for (i = nbuff - 1; i >= 0; i--) {
+	for (int i = nbuff - 1; i >= 0; i--) {
 		if (ping[i].id == -1) {
 			for (j = i; j < nbuffnew - 1; j++) {
 				ping[j] = ping[j + 1];
@@ -3385,13 +3361,13 @@ int mbnavedit_get_gaussianmean() {
 	double dt, a;
 	int jstart, nsum, npos, nneg;
 	int jbefore, jafter;
-	int i, j;
+	int j;
 
 	/* loop over navigation calculating gaussian mean positions */
 	timewindow = 0.1 * mean_time_window;
 	a = -4.0 / (timewindow * timewindow);
 	jstart = 0;
-	for (i = 0; i < nbuff; i++) {
+	for (int i = 0; i < nbuff; i++) {
 		dt = 0.0;
 		weight = 0.0;
 		sumlon = 0.0;
@@ -3429,7 +3405,7 @@ int mbnavedit_get_gaussianmean() {
 
 	/* loop over navigation performing linear interpolation to fill gaps */
 	jbefore = -1;
-	for (i = 0; i < nbuff; i++) {
+	for (int i = 0; i < nbuff; i++) {
 		/* only work on nav not smoothed in first past due to lack of nearby data */
 		if (ping[i].mean_ok == false) {
 			/* find valid points before and after */
@@ -3482,12 +3458,11 @@ int mbnavedit_get_dr() {
 	double mtodeglon, mtodeglat;
 	double del_time, dx, dy;
 	double driftlon, driftlat;
-	int i;
 
 	/* calculate dead reckoning */
 	driftlon = 0.00001 * drift_lon;
 	driftlat = 0.00001 * drift_lat;
-	for (i = 0; i < nbuff; i++) {
+	for (int i = 0; i < nbuff; i++) {
 		if (i == 0) {
 			ping[i].lon_dr = ping[i].lon;
 			ping[i].lat_dr = ping[i].lat;
@@ -3550,7 +3525,7 @@ int mbnavedit_get_inversion() {
 	double dtime_d, dtime_d_sq;
 	char string[MB_PATH_MAXLINE];
 	int first, last;
-	int i, ii, j, k;
+	int ii, j, k;
 
 	/* set maximum dimensions of the inverse problem */
 	nrows = nplot + (nplot - 1) + (nplot - 2);
@@ -3566,7 +3541,7 @@ int mbnavedit_get_inversion() {
 	nlat_avg = 0;
 	first = current_id;
 	last = current_id;
-	for (i = current_id; i < current_id + nplot; i++) {
+	for (int i = current_id; i < current_id + nplot; i++) {
 		/* constrain lon unless flagged by user */
 		if (ping[i].lonlat_flag == false) {
 			lon_avg += ping[i].lon;
@@ -3604,7 +3579,7 @@ int mbnavedit_get_inversion() {
 		do_message_on(string);
 
 		/* initialize arrays */
-		for (i = 0; i < nrows; i++) {
+		for (int i = 0; i < nrows; i++) {
 			nia[i] = 0;
 			d[i] = 0.0;
 			for (j = 0; j < nnz; j++) {
@@ -3613,12 +3588,12 @@ int mbnavedit_get_inversion() {
 				a[k] = 0.0;
 			}
 		}
-		for (i = 0; i < ncols; i++) {
+		for (int i = 0; i < ncols; i++) {
 			nx[i] = 0;
 			x[i] = 0;
 			dx[i] = 0.0;
 		}
-		for (i = 0; i < ncycle; i++) {
+		for (int i = 0; i < ncycle; i++) {
 			sigma[i] = 0;
 			work[i] = 0.0;
 		}
@@ -3627,7 +3602,7 @@ int mbnavedit_get_inversion() {
 		   original lon values, speed, acceleration */
 		nr = 0;
 		nc = nplot;
-		for (i = current_id; i < current_id + nplot; i++) {
+		for (int i = current_id; i < current_id + nplot; i++) {
 			ii = i - current_id;
 
 			/* constrain lon unless flagged by user */
@@ -3690,7 +3665,7 @@ int mbnavedit_get_inversion() {
 		if (verbose > 1)
 			fprintf(stderr, "Initial lspeig: %g %g %g %g\n", sup, smax, err, supt);
 		ncyc = 16;
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			lspeig(a, ia, nia, nnz, nc, nr, ncyc, &nsig, x, dx, sigma, work, &smax, &err, &sup);
 			supt = smax + err;
 			if (sup > supt)
@@ -3706,26 +3681,26 @@ int mbnavedit_get_inversion() {
 		if (verbose > 1)
 			fprintf(stderr, "Theoretical error: %f\n", errlsq);
 		if (verbose > 1)
-			for (i = 0; i < ncycle; i++)
+			for (int i = 0; i < ncycle; i++)
 				fprintf(stderr, "sigma[%d]: %f\n", i, sigma[i]);
 
 		/* solve the problem */
-		for (i = 0; i < nc; i++)
+		for (int i = 0; i < nc; i++)
 			x[i] = 0.0;
 		lsqup(a, ia, nia, nnz, nc, nr, x, dx, d, 0, NULL, NULL, ncycle, sigma);
 
 		/* generate solution */
-		for (i = current_id; i < current_id + nplot; i++) {
+		for (int i = current_id; i < current_id + nplot; i++) {
 			ii = i - current_id;
 			ping[i].lon_dr = lon_avg + mtodeglon * x[ii];
 		}
 
 		/* make flagged ends of data flat */
-		for (i = current_id; i < first; i++) {
+		for (int i = current_id; i < first; i++) {
 			ii = first - current_id;
 			ping[i].lon_dr = lon_avg + mtodeglon * x[ii];
 		}
-		for (i = last + 1; i < current_id + nplot; i++) {
+		for (int i = last + 1; i < current_id + nplot; i++) {
 			ii = last - current_id;
 			ping[i].lon_dr = lon_avg + mtodeglon * x[ii];
 		}
@@ -3735,7 +3710,7 @@ int mbnavedit_get_inversion() {
 		do_message_on(string);
 
 		/* initialize arrays */
-		for (i = 0; i < nrows; i++) {
+		for (int i = 0; i < nrows; i++) {
 			nia[i] = 0;
 			d[i] = 0.0;
 			for (j = 0; j < nnz; j++) {
@@ -3744,12 +3719,12 @@ int mbnavedit_get_inversion() {
 				a[k] = 0.0;
 			}
 		}
-		for (i = 0; i < ncols; i++) {
+		for (int i = 0; i < ncols; i++) {
 			nx[i] = 0;
 			x[i] = 0;
 			dx[i] = 0.0;
 		}
-		for (i = 0; i < ncycle; i++) {
+		for (int i = 0; i < ncycle; i++) {
 			sigma[i] = 0;
 			work[i] = 0.0;
 		}
@@ -3758,7 +3733,7 @@ int mbnavedit_get_inversion() {
 		   original lat values, speed, acceleration */
 		nr = 0;
 		nc = nplot;
-		for (i = current_id; i < current_id + nplot; i++) {
+		for (int i = current_id; i < current_id + nplot; i++) {
 			ii = i - current_id;
 
 			/* constrain lat unless flagged by user */
@@ -3821,7 +3796,7 @@ int mbnavedit_get_inversion() {
 		if (verbose > 1)
 			fprintf(stderr, "Initial lspeig: %g %g %g %g\n", sup, smax, err, supt);
 		ncyc = 16;
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			lspeig(a, ia, nia, nnz, nc, nr, ncyc, &nsig, x, dx, sigma, work, &smax, &err, &sup);
 			supt = smax + err;
 			if (sup > supt)
@@ -3837,26 +3812,26 @@ int mbnavedit_get_inversion() {
 		if (verbose > 1)
 			fprintf(stderr, "Theoretical error: %f\n", errlsq);
 		if (verbose > 1)
-			for (i = 0; i < ncycle; i++)
+			for (int i = 0; i < ncycle; i++)
 				fprintf(stderr, "sigma[%d]: %f\n", i, sigma[i]);
 
 		/* solve the problem */
-		for (i = 0; i < nc; i++)
+		for (int i = 0; i < nc; i++)
 			x[i] = 0.0;
 		lsqup(a, ia, nia, nnz, nc, nr, x, dx, d, 0, NULL, NULL, ncycle, sigma);
 
 		/* generate solution */
-		for (i = current_id; i < current_id + nplot; i++) {
+		for (int i = current_id; i < current_id + nplot; i++) {
 			ii = i - current_id;
 			ping[i].lat_dr = lat_avg + mtodeglat * x[ii];
 		}
 
 		/* make flagged ends of data flat */
-		for (i = current_id; i < first; i++) {
+		for (int i = current_id; i < first; i++) {
 			ii = first - current_id;
 			ping[i].lat_dr = lat_avg + mtodeglat * x[ii];
 		}
-		for (i = last + 1; i < current_id + nplot; i++) {
+		for (int i = last + 1; i < current_id + nplot; i++) {
 			ii = last - current_id;
 			ping[i].lat_dr = lat_avg + mtodeglat * x[ii];
 		}
@@ -3930,7 +3905,6 @@ int mbnavedit_plot_all() {
 	int ix;
 	int swidth, sascent, sdescent;
 	char yformat[10];
-	int i;
 	char string[MB_PATH_MAXLINE];
 	int fpx, fpdx, fpy, fpdy;
 
@@ -3939,7 +3913,7 @@ int mbnavedit_plot_all() {
 	if (data_show_size > 0 && nbuff > 0) {
 		plot_start_time = ping[current_id].file_time_d;
 		plot_end_time = plot_start_time + data_show_size;
-		for (i = current_id; i < nbuff; i++)
+		for (int i = current_id; i < nbuff; i++)
 			if (ping[i].file_time_d <= plot_end_time)
 				nplot++;
 	}
@@ -3953,7 +3927,7 @@ int mbnavedit_plot_all() {
 	}
 
 	/* deselect data outside plots */
-	for (i = 0; i < current_id; i++) {
+	for (int i = 0; i < current_id; i++) {
 		ping[i].tint_select = false;
 		ping[i].lon_select = false;
 		ping[i].lat_select = false;
@@ -3961,7 +3935,7 @@ int mbnavedit_plot_all() {
 		ping[i].heading_select = false;
 		ping[i].draft_select = false;
 	}
-	for (i = current_id + nplot; i < nbuff; i++) {
+	for (int i = current_id + nplot; i < nbuff; i++) {
 		ping[i].tint_select = false;
 		ping[i].lon_select = false;
 		ping[i].lat_select = false;
@@ -3994,7 +3968,7 @@ int mbnavedit_plot_all() {
 		pitch_max = ping[current_id].pitch;
 		heave_min = ping[current_id].heave;
 		heave_max = ping[current_id].heave;
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			tint_min = MIN(ping[i].tint, tint_min);
 			tint_max = MAX(ping[i].tint, tint_max);
 			if (plot_tint_org) {
@@ -4156,7 +4130,7 @@ int mbnavedit_plot_all() {
 		/* print out information */
 		if (verbose >= 2) {
 			fprintf(stderr, "\n%d data records set for plotting (%d desired)\n", nplot, data_show_size);
-			for (i = current_id; i < current_id + nplot; i++)
+			for (int i = current_id; i < current_id + nplot; i++)
 				fprintf(stderr,
 				        "dbg5       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %11.6f  %11.6f  %11.6f  %11.6f %11.6f %5.2f "
 				        "%5.1f %5.1f %5.1f %5.1f %5.1f\n",
@@ -4426,7 +4400,7 @@ int mbnavedit_plot_all() {
 
 			/* plot x axis time annotation */
 			dx = (plot_end_time - plot_start_time) / 5;
-			for (i = 0; i < 6; i++) {
+			for (int i = 0; i < 6; i++) {
 				/* get x position */
 				x = plot_start_time + i * dx;
 				ix = mbnavplot[iplot].ixmin + mbnavplot[iplot].xscale * (x - mbnavplot[iplot].xmin);
@@ -4532,7 +4506,6 @@ int mbnavedit_plot_tint(int iplot) {
 	// double xmin, xmax, ymin, ymax;
 	// double xscale, yscale;
 	int tint_x1, tint_y1, tint_x2, tint_y2;
-	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -4550,7 +4523,7 @@ int mbnavedit_plot_tint(int iplot) {
 	if (plot_tint_org) {
 		tint_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		tint_y1 = iymin + yscale * (ping[current_id].tint_org - ymin);
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			tint_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			tint_y2 = iymin + yscale * (ping[i].tint_org - ymin);
 			xg_drawline(mbnavedit_xgid, tint_x1, tint_y1, tint_x2, tint_y2, pixel_values[GREEN], XG_SOLIDLINE);
@@ -4560,7 +4533,7 @@ int mbnavedit_plot_tint(int iplot) {
 	}
 
 	/* plot basic expected time data */
-	for (i = current_id; i < current_id + nplot; i++) {
+	for (int i = current_id; i < current_id + nplot; i++) {
 		ping[i].tint_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].tint_y = iymin + yscale * (ping[i].tint - ymin);
 		if (ping[i].tint_select)
@@ -4595,7 +4568,6 @@ int mbnavedit_plot_lon(int iplot) {
 	// double xmin, xmax, ymin, ymax;
 	// double xscale, yscale;
 	int lon_x1, lon_y1, lon_x2, lon_y2;
-	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -4613,7 +4585,7 @@ int mbnavedit_plot_lon(int iplot) {
 	if (plot_lon_org) {
 		lon_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		lon_y1 = iymin + yscale * (ping[current_id].lon_org - ymin);
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			lon_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			lon_y2 = iymin + yscale * (ping[i].lon_org - ymin);
 			xg_drawline(mbnavedit_xgid, lon_x1, lon_y1, lon_x2, lon_y2, pixel_values[GREEN], XG_SOLIDLINE);
@@ -4626,7 +4598,7 @@ int mbnavedit_plot_lon(int iplot) {
 	if (model_mode != MODEL_MODE_OFF && plot_lon_dr) {
 		lon_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		lon_y1 = iymin + yscale * (ping[current_id].lon_dr - ymin);
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			lon_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			lon_y2 = iymin + yscale * (ping[i].lon_dr - ymin);
 			xg_drawline(mbnavedit_xgid, lon_x1, lon_y1, lon_x2, lon_y2, pixel_values[BLUE], XG_SOLIDLINE);
@@ -4636,7 +4608,7 @@ int mbnavedit_plot_lon(int iplot) {
 	}
 
 	/* plot flagged longitude data first so it is overlain by all else */
-	for (i = current_id; i < current_id + nplot; i++) {
+	for (int i = current_id; i < current_id + nplot; i++) {
 		ping[i].lon_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].lon_y = iymin + yscale * (ping[i].lon - ymin);
 		if (ping[i].lonlat_flag)
@@ -4644,7 +4616,7 @@ int mbnavedit_plot_lon(int iplot) {
 	}
 
 	/* plot basic longitude data */
-	for (i = current_id; i < current_id + nplot; i++) {
+	for (int i = current_id; i < current_id + nplot; i++) {
 		ping[i].lon_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].lon_y = iymin + yscale * (ping[i].lon - ymin);
 		if (ping[i].lon_select)
@@ -4682,7 +4654,6 @@ int mbnavedit_plot_lat(int iplot) {
 	// double xmin, xmax, ymin, ymax;
 	// double xscale, yscale;
 	int lat_x1, lat_y1, lat_x2, lat_y2;
-	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -4700,7 +4671,7 @@ int mbnavedit_plot_lat(int iplot) {
 	if (plot_lat_org) {
 		lat_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		lat_y1 = iymin + yscale * (ping[current_id].lat_org - ymin);
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			lat_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			lat_y2 = iymin + yscale * (ping[i].lat_org - ymin);
 			xg_drawline(mbnavedit_xgid, lat_x1, lat_y1, lat_x2, lat_y2, pixel_values[GREEN], XG_SOLIDLINE);
@@ -4713,7 +4684,7 @@ int mbnavedit_plot_lat(int iplot) {
 	if (model_mode != MODEL_MODE_OFF && plot_lat_dr) {
 		lat_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		lat_y1 = iymin + yscale * (ping[current_id].lat_dr - ymin);
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			lat_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			lat_y2 = iymin + yscale * (ping[i].lat_dr - ymin);
 			xg_drawline(mbnavedit_xgid, lat_x1, lat_y1, lat_x2, lat_y2, pixel_values[BLUE], XG_SOLIDLINE);
@@ -4723,7 +4694,7 @@ int mbnavedit_plot_lat(int iplot) {
 	}
 
 	/* plot flagged latitude data first so it is overlain by all else */
-	for (i = current_id; i < current_id + nplot; i++) {
+	for (int i = current_id; i < current_id + nplot; i++) {
 		ping[i].lat_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].lat_y = iymin + yscale * (ping[i].lat - ymin);
 		if (ping[i].lonlat_flag)
@@ -4731,7 +4702,7 @@ int mbnavedit_plot_lat(int iplot) {
 	}
 
 	/* plot basic latitude data */
-	for (i = current_id; i < current_id + nplot; i++) {
+	for (int i = current_id; i < current_id + nplot; i++) {
 		ping[i].lat_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].lat_y = iymin + yscale * (ping[i].lat - ymin);
 		if (ping[i].lat_select)
@@ -4769,7 +4740,6 @@ int mbnavedit_plot_speed(int iplot) {
 	// double xmin, xmax, ymin, ymax;
 	// double xscale, yscale;
 	int speed_x1, speed_y1, speed_x2, speed_y2;
-	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -4787,7 +4757,7 @@ int mbnavedit_plot_speed(int iplot) {
 	if (plot_speed_org) {
 		speed_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		speed_y1 = iymin + yscale * (ping[current_id].speed - ymin);
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			speed_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			speed_y2 = iymin + yscale * (ping[i].speed_org - ymin);
 			xg_drawline(mbnavedit_xgid, speed_x1, speed_y1, speed_x2, speed_y2, pixel_values[GREEN], XG_SOLIDLINE);
@@ -4800,7 +4770,7 @@ int mbnavedit_plot_speed(int iplot) {
 	if (plot_smg) {
 		speed_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		speed_y1 = iymin + yscale * (ping[current_id].speed_made_good - ymin);
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			speed_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			speed_y2 = iymin + yscale * (ping[i].speed_made_good - ymin);
 			xg_drawline(mbnavedit_xgid, speed_x1, speed_y1, speed_x2, speed_y2, pixel_values[BLUE], XG_SOLIDLINE);
@@ -4810,7 +4780,7 @@ int mbnavedit_plot_speed(int iplot) {
 	}
 
 	/* plot basic speed data */
-	for (i = current_id; i < current_id + nplot; i++) {
+	for (int i = current_id; i < current_id + nplot; i++) {
 		ping[i].speed_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].speed_y = iymin + yscale * (ping[i].speed - ymin);
 		if (ping[i].speed_select)
@@ -4839,7 +4809,6 @@ int mbnavedit_plot_heading(int iplot) {
 	// double xmin, xmax, ymin, ymax;
 	// double xscale, yscale;
 	int heading_x1, heading_y1, heading_x2, heading_y2;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4863,7 +4832,7 @@ int mbnavedit_plot_heading(int iplot) {
 	if (plot_heading_org) {
 		heading_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		heading_y1 = iymin + yscale * (ping[current_id].heading - ymin);
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			heading_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			heading_y2 = iymin + yscale * (ping[i].heading_org - ymin);
 			xg_drawline(mbnavedit_xgid, heading_x1, heading_y1, heading_x2, heading_y2, pixel_values[GREEN], XG_SOLIDLINE);
@@ -4876,7 +4845,7 @@ int mbnavedit_plot_heading(int iplot) {
 	if (plot_cmg) {
 		heading_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		heading_y1 = iymin + yscale * (ping[current_id].course_made_good - ymin);
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			heading_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			heading_y2 = iymin + yscale * (ping[i].course_made_good - ymin);
 			xg_drawline(mbnavedit_xgid, heading_x1, heading_y1, heading_x2, heading_y2, pixel_values[BLUE], XG_SOLIDLINE);
@@ -4886,7 +4855,7 @@ int mbnavedit_plot_heading(int iplot) {
 	}
 
 	/* plot basic heading data */
-	for (i = current_id; i < current_id + nplot; i++) {
+	for (int i = current_id; i < current_id + nplot; i++) {
 		ping[i].heading_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].heading_y = iymin + yscale * (ping[i].heading - ymin);
 		if (ping[i].heading_select)
@@ -4920,7 +4889,6 @@ int mbnavedit_plot_draft(int iplot) {
 	}
 
 	int draft_x1, draft_y1, draft_x2, draft_y2;
-	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -4938,7 +4906,7 @@ int mbnavedit_plot_draft(int iplot) {
 	if (plot_draft_org) {
 		draft_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		draft_y1 = iymin + yscale * (ping[current_id].draft - ymin);
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			draft_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			draft_y2 = iymin + yscale * (ping[i].draft_org - ymin);
 			xg_drawline(mbnavedit_xgid, draft_x1, draft_y1, draft_x2, draft_y2, pixel_values[GREEN], XG_SOLIDLINE);
@@ -4948,7 +4916,7 @@ int mbnavedit_plot_draft(int iplot) {
 	}
 
 	/* plot basic draft data */
-	for (i = current_id; i < current_id + nplot; i++) {
+	for (int i = current_id; i < current_id + nplot; i++) {
 		ping[i].draft_x = ixmin + xscale * (ping[i].file_time_d - xmin);
 		ping[i].draft_y = iymin + yscale * (ping[i].draft - ymin);
 		if (ping[i].draft_select)
@@ -4980,7 +4948,6 @@ int mbnavedit_plot_roll(int iplot) {
 	}
 
 	int roll_x1, roll_y1, roll_x2, roll_y2;
-	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -4998,7 +4965,7 @@ int mbnavedit_plot_roll(int iplot) {
 	if (plot_roll) {
 		roll_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		roll_y1 = iymin + yscale * (ping[current_id].roll - ymin);
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			roll_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			roll_y2 = iymin + yscale * (ping[i].roll - ymin);
 			xg_drawline(mbnavedit_xgid, roll_x1, roll_y1, roll_x2, roll_y2, pixel_values[GREEN], XG_SOLIDLINE);
@@ -5028,7 +4995,6 @@ int mbnavedit_plot_pitch(int iplot) {
 	}
 
 	int pitch_x1, pitch_y1, pitch_x2, pitch_y2;
-	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -5046,7 +5012,7 @@ int mbnavedit_plot_pitch(int iplot) {
 	if (plot_pitch) {
 		pitch_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		pitch_y1 = iymin + yscale * (ping[current_id].pitch - ymin);
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			pitch_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			pitch_y2 = iymin + yscale * (ping[i].pitch - ymin);
 			xg_drawline(mbnavedit_xgid, pitch_x1, pitch_y1, pitch_x2, pitch_y2, pixel_values[GREEN], XG_SOLIDLINE);
@@ -5076,7 +5042,6 @@ int mbnavedit_plot_heave(int iplot) {
 	}
 
 	int heave_x1, heave_y1, heave_x2, heave_y2;
-	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -5094,7 +5059,7 @@ int mbnavedit_plot_heave(int iplot) {
 	if (plot_heave) {
 		heave_x1 = ixmin + xscale * (ping[current_id].file_time_d - xmin);
 		heave_y1 = iymin + yscale * (ping[current_id].heave - ymin);
-		for (i = current_id + 1; i < current_id + nplot; i++) {
+		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			heave_x2 = ixmin + xscale * (ping[i].file_time_d - xmin);
 			heave_y2 = iymin + yscale * (ping[i].heave - ymin);
 			xg_drawline(mbnavedit_xgid, heave_x1, heave_y1, heave_x2, heave_y2, pixel_values[GREEN], XG_SOLIDLINE);
