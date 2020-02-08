@@ -38,8 +38,8 @@
 
 /* mbnavedit global control parameters */
 MBNAVEDIT_EXTERNAL int output_mode;
-MBNAVEDIT_EXTERNAL int run_mbprocess;
-MBNAVEDIT_EXTERNAL int gui_mode;
+MBNAVEDIT_EXTERNAL int run_mbprocess;  // TODO(schwehr): bool
+MBNAVEDIT_EXTERNAL int gui_mode;  // TODO(schwehr): bool
 MBNAVEDIT_EXTERNAL int data_show_max;
 MBNAVEDIT_EXTERNAL int data_show_size;
 MBNAVEDIT_EXTERNAL int data_step_max;
@@ -69,9 +69,9 @@ MBNAVEDIT_EXTERNAL int plot_heave;
 MBNAVEDIT_EXTERNAL int mean_time_window;
 MBNAVEDIT_EXTERNAL int drift_lon;
 MBNAVEDIT_EXTERNAL int drift_lat;
-MBNAVEDIT_EXTERNAL int timestamp_problem;
-MBNAVEDIT_EXTERNAL int use_ping_data;
-MBNAVEDIT_EXTERNAL int strip_comments;
+MBNAVEDIT_EXTERNAL int timestamp_problem;  // TODO(schwehr): bool
+MBNAVEDIT_EXTERNAL int use_ping_data;  // TODO(schwehr): bool
+MBNAVEDIT_EXTERNAL int strip_comments;  // TODO(schwehr): bool
 MBNAVEDIT_EXTERNAL int format;
 MBNAVEDIT_EXTERNAL char ifile[MB_PATH_MAXLINE];
 MBNAVEDIT_EXTERNAL char nfile[MB_PATH_MAXLINE];
