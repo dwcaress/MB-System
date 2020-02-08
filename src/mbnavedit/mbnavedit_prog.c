@@ -4913,18 +4913,14 @@ int mbnavedit_plot_heading(int iplot) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_draft(int iplot) {
-	int status = MB_SUCCESS;
-	// int ixmin, ixmax, iymin, iymax;
-	// double xmin, xmax, ymin, ymax;
-	// double xscale, yscale;
-	int draft_x1, draft_y1, draft_x2, draft_y2;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
+
+	int draft_x1, draft_y1, draft_x2, draft_y2;
+	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -4963,6 +4959,8 @@ int mbnavedit_plot_draft(int iplot) {
 			xg_fillrectangle(mbnavedit_xgid, ping[i].draft_x - 2, ping[i].draft_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4975,18 +4973,14 @@ int mbnavedit_plot_draft(int iplot) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_roll(int iplot) {
-	int status = MB_SUCCESS;
-	// int ixmin, ixmax, iymin, iymax;
-	// double xmin, xmax, ymin, ymax;
-	// double xscale, yscale;
-	int roll_x1, roll_y1, roll_x2, roll_y2;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
+
+	int roll_x1, roll_y1, roll_x2, roll_y2;
+	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -5013,6 +5007,8 @@ int mbnavedit_plot_roll(int iplot) {
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -5025,18 +5021,14 @@ int mbnavedit_plot_roll(int iplot) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_pitch(int iplot) {
-	int status = MB_SUCCESS;
-	// int ixmin, ixmax, iymin, iymax;
-	// double xmin, xmax, ymin, ymax;
-	// double xscale, yscale;
-	int pitch_x1, pitch_y1, pitch_x2, pitch_y2;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
+
+	int pitch_x1, pitch_y1, pitch_x2, pitch_y2;
+	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -5063,6 +5055,8 @@ int mbnavedit_plot_pitch(int iplot) {
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -5075,18 +5069,14 @@ int mbnavedit_plot_pitch(int iplot) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_heave(int iplot) {
-	int status = MB_SUCCESS;
-	// int ixmin, ixmax, iymin, iymax;
-	// double xmin, xmax, ymin, ymax;
-	// double xscale, yscale;
-	int heave_x1, heave_y1, heave_x2, heave_y2;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
+
+	int heave_x1, heave_y1, heave_x2, heave_y2;
+	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -5113,6 +5103,8 @@ int mbnavedit_plot_heave(int iplot) {
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -5125,8 +5117,6 @@ int mbnavedit_plot_heave(int iplot) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_tint_value(int iplot, int iping) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5147,6 +5137,8 @@ int mbnavedit_plot_tint_value(int iplot, int iping) {
 	else
 		xg_fillrectangle(mbnavedit_xgid, ping[iping].tint_x - 2, ping[iping].tint_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -5159,8 +5151,6 @@ int mbnavedit_plot_tint_value(int iplot, int iping) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_lon_value(int iplot, int iping) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5182,6 +5172,8 @@ int mbnavedit_plot_lon_value(int iplot, int iping) {
 	else
 		xg_fillrectangle(mbnavedit_xgid, ping[iping].lon_x - 2, ping[iping].lon_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -5194,8 +5186,6 @@ int mbnavedit_plot_lon_value(int iplot, int iping) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_lat_value(int iplot, int iping) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5217,6 +5207,8 @@ int mbnavedit_plot_lat_value(int iplot, int iping) {
 	else
 		xg_fillrectangle(mbnavedit_xgid, ping[iping].lat_x - 2, ping[iping].lat_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -5229,8 +5221,6 @@ int mbnavedit_plot_lat_value(int iplot, int iping) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_speed_value(int iplot, int iping) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5252,6 +5242,8 @@ int mbnavedit_plot_speed_value(int iplot, int iping) {
 		xg_fillrectangle(mbnavedit_xgid, ping[iping].speed_x - 2, ping[iping].speed_y - 2, 4, 4, pixel_values[BLACK],
 		                 XG_SOLIDLINE);
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -5264,8 +5256,6 @@ int mbnavedit_plot_speed_value(int iplot, int iping) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_heading_value(int iplot, int iping) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5290,6 +5280,8 @@ int mbnavedit_plot_heading_value(int iplot, int iping) {
 		xg_fillrectangle(mbnavedit_xgid, ping[iping].heading_x - 2, ping[iping].heading_y - 2, 4, 4, pixel_values[BLACK],
 		                 XG_SOLIDLINE);
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -5302,8 +5294,6 @@ int mbnavedit_plot_heading_value(int iplot, int iping) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_draft_value(int iplot, int iping) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5324,6 +5314,8 @@ int mbnavedit_plot_draft_value(int iplot, int iping) {
 	else
 		xg_fillrectangle(mbnavedit_xgid, ping[iping].draft_x - 2, ping[iping].draft_y - 2, 4, 4, pixel_values[BLACK],
 		                 XG_SOLIDLINE);
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
