@@ -224,8 +224,6 @@ static int pixel_values[256];
 
 /*--------------------------------------------------------------------*/
 int mbnavedit_init_globals() {
-	int status = MB_SUCCESS;
-
 	/* set default global control parameters */
 	output_mode = OUTPUT_MODE_OUTPUT;
 	run_mbprocess = false;
@@ -287,6 +285,8 @@ int mbnavedit_init_globals() {
 	offset_lon_applied = 0.0;
 	offset_lat_applied = 0.0;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -300,7 +300,6 @@ int mbnavedit_init_globals() {
 
 /*--------------------------------------------------------------------*/
 int mbnavedit_init(int argc, char **argv, int *startup_file) {
-	int status = MB_SUCCESS;
 	int fileflag = 0;
 	int i;
 
@@ -311,7 +310,7 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 	int help = 0;
 	int flag = 0;
 
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 	status = mb_uselockfiles(verbose, &uselockfiles);
 	pings = 1;
 	lonflip = 0;
@@ -459,7 +458,6 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 
 /*--------------------------------------------------------------------*/
 int mbnavedit_set_graphics(void *xgid, int ncol, unsigned int *pixels) {
-	int status = MB_SUCCESS;
 	int i;
 
 	if (verbose >= 2) {
@@ -479,6 +477,8 @@ int mbnavedit_set_graphics(void *xgid, int ncol, unsigned int *pixels) {
 	for (i = 0; i < ncolors; i++)
 		pixel_values[i] = pixels[i];
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -491,14 +491,12 @@ int mbnavedit_set_graphics(void *xgid, int ncol, unsigned int *pixels) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_open(int useprevious) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
 	/* clear the screen */
-	status = mbnavedit_clear_screen();
+	int status = mbnavedit_clear_screen();
 
 	/* open the file */
 	status = mbnavedit_open_file(useprevious);
@@ -526,7 +524,6 @@ int mbnavedit_action_open(int useprevious) {
 	/* reset data_save */
 	data_save = false;
 
-	/* print debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  File open attempted in MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Buffer values:\n");
@@ -549,7 +546,6 @@ int mbnavedit_action_open(int useprevious) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_open_file(int useprevious) {
-	int status = MB_SUCCESS;
 	char ifile_use[MB_PATH_MAXLINE];
 	char command[MB_PATH_MAXLINE];
 	int format_use;
@@ -590,6 +586,8 @@ int mbnavedit_open_file(int useprevious) {
 	/* get the output filename */
 	strcpy(nfile, ifile);
 	strcat(nfile, ".nve");
+
+	int status = MB_SUCCESS;
 
 	/* try to lock file */
 	if (output_mode == OUTPUT_MODE_OUTPUT && uselockfiles) {
@@ -785,7 +783,6 @@ int mbnavedit_open_file(int useprevious) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_close_file() {
-	int status = MB_SUCCESS;
 	char command[MB_PATH_MAXLINE];
 
 	if (verbose >= 2) {
@@ -796,7 +793,7 @@ int mbnavedit_close_file() {
 	do_message_on("MBedit is closing a data file...");
 
 	/* close the files */
-	status = mb_close(verbose, &imbio_ptr, &error);
+	int status = mb_close(verbose, &imbio_ptr, &error);
 	if (nfile_open) {
 		/* close navigation file */
 		fclose(nfp);
@@ -874,7 +871,6 @@ int mbnavedit_close_file() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_dump_data(int hold) {
-	int status = MB_SUCCESS;
 	int iping;
 
 	if (verbose >= 2) {
@@ -931,6 +927,8 @@ int mbnavedit_dump_data(int hold) {
 		fprintf(stderr, "%d data records remain in buffer\n", nbuff);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -943,7 +941,6 @@ int mbnavedit_dump_data(int hold) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_load_data() {
-	int status = MB_SUCCESS;
 	int i;
 	char string[MB_PATH_MAXLINE];
 
@@ -958,6 +955,7 @@ int mbnavedit_load_data() {
 	do_message_on(string);
 
 	/* load data */
+	int status = MB_SUCCESS;
 	if (status == MB_SUCCESS)
 		do {
 			status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, ping[nbuff].time_i, &ping[nbuff].time_d, &ping[nbuff].lon,
@@ -1124,14 +1122,14 @@ int mbnavedit_load_data() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_clear_screen() {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
 	/* clear screen */
 	xg_fillrectangle(mbnavedit_xgid, 0, 0, plot_width, NUMBER_PLOTS_MAX * plot_height, pixel_values[WHITE], XG_SOLIDLINE);
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -1145,7 +1143,6 @@ int mbnavedit_clear_screen() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_next_buffer(int *quit) {
-	int status = MB_SUCCESS;
 	int save_dumped = 0;
 
 	if (verbose >= 2) {
@@ -1153,7 +1150,7 @@ int mbnavedit_action_next_buffer(int *quit) {
 	}
 
 	/* clear the screen */
-	status = mbnavedit_clear_screen();
+	int status = mbnavedit_clear_screen();
 
 	/* set quit off */
 	*quit = false;
@@ -1218,7 +1215,6 @@ int mbnavedit_action_next_buffer(int *quit) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_offset() {
-	int status = MB_SUCCESS;
 	int i;
 
 	if (verbose >= 2) {
@@ -1236,6 +1232,8 @@ int mbnavedit_action_offset() {
 	offset_lon_applied = offset_lon;
 	offset_lat_applied = offset_lat;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1248,7 +1246,6 @@ int mbnavedit_action_offset() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_close() {
-	int status = MB_SUCCESS;
 	int save_nloaded = 0;
 	int save_ndumped = 0;
 
@@ -1257,7 +1254,7 @@ int mbnavedit_action_close() {
 	}
 
 	/* clear the screen */
-	status = mbnavedit_clear_screen();
+	int status = mbnavedit_clear_screen();
 
 	/* if file has been opened and browse mode
 	    just dump the current buffer and close the file */
@@ -1313,8 +1310,6 @@ int mbnavedit_action_close() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_done(int *quit) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -1331,6 +1326,7 @@ int mbnavedit_action_done(int *quit) {
 		fprintf(stderr, "\nShutting MBnavedit down without further ado...\n");
 
 	/* call routine to deal with saving the current file, if any */
+	int status = MB_SUCCESS;
 	if (file_open)
 		status = mbnavedit_action_close();
 
@@ -1351,8 +1347,6 @@ int mbnavedit_action_done(int *quit) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_quit() {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -1362,6 +1356,7 @@ int mbnavedit_action_quit() {
 		fprintf(stderr, "\nShutting MBnavedit down without further ado...\n");
 
 	/* call routine to deal with saving the current file, if any */
+	int status = MB_SUCCESS;
 	if (file_open)
 		status = mbnavedit_action_close();
 
@@ -1381,7 +1376,6 @@ int mbnavedit_action_quit() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_step(int step) {
-	int status = MB_SUCCESS;
 	int old_id, new_id;
 	int set;
 	int i;
@@ -1391,6 +1385,8 @@ int mbnavedit_action_step(int step) {
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       step:       %d\n", step);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check if a file has been opened */
 	if (file_open && nbuff > 0) {
@@ -1465,7 +1461,6 @@ int mbnavedit_action_step(int step) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_end() {
-	int status = MB_SUCCESS;
 	int old_id;
 	int set;
 	int i;
@@ -1473,6 +1468,8 @@ int mbnavedit_action_end() {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check if a file has been opened */
 	if (file_open && nbuff > 0) {
@@ -1529,12 +1526,13 @@ int mbnavedit_action_end() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_start() {
-	int status = MB_SUCCESS;
 	int old_id;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check if a file has been opened */
 	if (file_open && nbuff > 0) {
@@ -1584,7 +1582,6 @@ int mbnavedit_action_start() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_mouse_pick(int xx, int yy) {
-	int status = MB_SUCCESS;
 	int deselect;
 	int iplot;
 	int active_plot;
@@ -1611,6 +1608,8 @@ int mbnavedit_action_mouse_pick(int xx, int yy) {
 				active_plot = iplot;
 		}
 	}
+
+	int status = MB_SUCCESS;
 
 	/* don't try to do anything if no data or not in plot */
 	if (nplot > 0 && active_plot > -1) {
@@ -1732,7 +1731,6 @@ int mbnavedit_action_mouse_pick(int xx, int yy) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_mouse_select(int xx, int yy) {
-	int status = MB_SUCCESS;
 	int deselect;
 	int iplot;
 	int active_plot;
@@ -1758,6 +1756,8 @@ int mbnavedit_action_mouse_select(int xx, int yy) {
 				active_plot = iplot;
 		}
 	}
+
+	int status = MB_SUCCESS;
 
 	/* don't try to do anything if no data or not in plot */
 	if (nplot > 0 && active_plot > -1) {
@@ -1856,7 +1856,6 @@ int mbnavedit_action_mouse_select(int xx, int yy) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_mouse_deselect(int xx, int yy) {
-	int status = MB_SUCCESS;
 	int deselect;
 	int iplot;
 	int active_plot;
@@ -1882,6 +1881,8 @@ int mbnavedit_action_mouse_deselect(int xx, int yy) {
 				active_plot = iplot;
 		}
 	}
+
+	int status = MB_SUCCESS;
 
 	/* don't try to do anything if no data or not in plot */
 	if (nplot > 0 && active_plot > -1) {
@@ -1980,7 +1981,6 @@ int mbnavedit_action_mouse_deselect(int xx, int yy) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_mouse_selectall(int xx, int yy) {
-	int status = MB_SUCCESS;
 	int iplot;
 	int active_plot;
 	int i;
@@ -2003,6 +2003,8 @@ int mbnavedit_action_mouse_selectall(int xx, int yy) {
 				active_plot = iplot;
 		}
 	}
+
+	int status = MB_SUCCESS;
 
 	/* don't try to do anything if no data or not in plot */
 	if (nplot > 0 && active_plot > -1) {
@@ -2052,7 +2054,6 @@ int mbnavedit_action_mouse_selectall(int xx, int yy) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_mouse_deselectall(int xx, int yy) {
-	int status = MB_SUCCESS;
 	int i;
 
 	if (verbose >= 2) {
@@ -2061,6 +2062,8 @@ int mbnavedit_action_mouse_deselectall(int xx, int yy) {
 		fprintf(stderr, "dbg2       xx:         %d\n", xx);
 		fprintf(stderr, "dbg2       yy:         %d\n", yy);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -2099,7 +2102,6 @@ int mbnavedit_action_mouse_deselectall(int xx, int yy) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_deselect_all(int type) {
-	int status = MB_SUCCESS;
 	int ndeselect;
 	int i;
 
@@ -2108,6 +2110,8 @@ int mbnavedit_action_deselect_all(int type) {
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       type:       %d\n", type);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -2161,7 +2165,6 @@ int mbnavedit_action_deselect_all(int type) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_set_interval(int xx, int yy, int which) {
-	int status = MB_SUCCESS;
 	static int interval_bound1;
 	static int interval_bound2;
 	static double interval_time1;
@@ -2180,6 +2183,8 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 		fprintf(stderr, "dbg2       yy:         %d\n", yy);
 		fprintf(stderr, "dbg2       which:      %d\n", which);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0 && number_plots > 0) {
@@ -2301,7 +2306,6 @@ int mbnavedit_action_set_interval(int xx, int yy, int which) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_use_dr() {
-	int status = MB_SUCCESS;
 	int iplot;
 	int active_plot;
 	int i;
@@ -2309,6 +2313,8 @@ int mbnavedit_action_use_dr() {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -2361,7 +2367,6 @@ int mbnavedit_action_use_dr() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_use_smg() {
-	int status = MB_SUCCESS;
 	int iplot;
 	int active_plot;
 	bool speedheading_change;
@@ -2370,6 +2375,8 @@ int mbnavedit_action_use_smg() {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -2421,15 +2428,15 @@ int mbnavedit_action_use_smg() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_use_cmg() {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+	}
+
 	int status = MB_SUCCESS;
 	int iplot;
 	int active_plot;
 	bool speedheading_change;
 	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-	}
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -2481,16 +2488,16 @@ int mbnavedit_action_use_cmg() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_interpolate() {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+	}
+
 	int status = MB_SUCCESS;
 	int iping;
 	int ibefore, iafter;
 	bool timelonlat_change;
 	bool speedheading_change;
 	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-	}
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -2761,6 +2768,10 @@ int mbnavedit_action_interpolate() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_interpolaterepeats() {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+	}
+
 	int status = MB_SUCCESS;
 	int iping;
 	int ibefore, iafter;
@@ -2768,10 +2779,6 @@ int mbnavedit_action_interpolaterepeats() {
 	bool speedheading_change;
 	int found;
 	int i, j;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-	}
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -2941,15 +2948,15 @@ int mbnavedit_action_interpolaterepeats() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_revert() {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+	}
+
 	int status = MB_SUCCESS;
 	int iplot;
 	bool timelonlat_change;
 	bool speedheading_change;
 	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-	}
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -3035,13 +3042,13 @@ int mbnavedit_action_revert() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_flag() {
-	int status = MB_SUCCESS;
-	int iplot;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
+
+	int status = MB_SUCCESS;
+	int iplot;
+	int i;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -3084,13 +3091,13 @@ int mbnavedit_action_flag() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_unflag() {
-	int status = MB_SUCCESS;
-	int iplot;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
+
+	int status = MB_SUCCESS;
+	int iplot;
+	int i;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -3133,14 +3140,13 @@ int mbnavedit_action_unflag() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_fixtime() {
-	int status = MB_SUCCESS;
-	int istart, iend;
-	double start_time_d, end_time_d;
-	int i, j;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
+
+	int istart, iend;
+	double start_time_d, end_time_d;
+	int i, j;
 
 	/* loop over the data */
 	for (i = 0; i < nbuff; i++) {
@@ -3165,6 +3171,8 @@ int mbnavedit_action_fixtime() {
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3177,13 +3185,12 @@ int mbnavedit_action_fixtime() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_deletebadtime() {
-	int status = MB_SUCCESS;
-	double lastgood_time_d;
-	int i, j, nbuffnew;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
+
+	double lastgood_time_d;
+	int i, j, nbuffnew;
 
 	/* loop over the data looking for bad times */
 	lastgood_time_d = ping[0].time_d;
@@ -3226,6 +3233,8 @@ int mbnavedit_action_deletebadtime() {
 	fprintf(stderr, "Data deleted: nbuff:%d nbuffnew:%d\n", nbuff, nbuffnew);
 	nbuff = nbuffnew;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3238,8 +3247,6 @@ int mbnavedit_action_deletebadtime() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_action_showall() {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -3253,7 +3260,7 @@ int mbnavedit_action_showall() {
 	}
 
 	/* replot */
-	status = mbnavedit_plot_all();
+	const int status = mbnavedit_plot_all();
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -3267,17 +3274,17 @@ int mbnavedit_action_showall() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_get_smgcmg(int i) {
-	int status = MB_SUCCESS;
-	double time_d1, lon1, lat1;
-	double time_d2, lon2, lat2;
-	double mtodeglon, mtodeglat;
-	double del_time, dx, dy, dist;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       i:          %d\n", i);
 	}
+
+	int status = MB_SUCCESS;
+	double time_d1, lon1, lat1;
+	double time_d2, lon2, lat2;
+	double mtodeglon, mtodeglat;
+	double del_time, dx, dy, dist;
 
 	/* calculate speed made good and course made for ping i */
 	if (i < nbuff) {
@@ -3338,8 +3345,6 @@ int mbnavedit_get_smgcmg(int i) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_get_model() {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3356,6 +3361,8 @@ int mbnavedit_get_model() {
 			mbnavedit_get_inversion();
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3368,18 +3375,17 @@ int mbnavedit_get_model() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_get_gaussianmean() {
-	int status = MB_SUCCESS;
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+	}
+
 	double timewindow;
 	double sumlon, sumlat, w, weight;
 	double dt, a;
 	int jstart, nsum, npos, nneg;
 	int jbefore, jafter;
 	int i, j;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-	}
 
 	/* loop over navigation calculating gaussian mean positions */
 	timewindow = 0.1 * mean_time_window;
@@ -3454,6 +3460,8 @@ int mbnavedit_get_gaussianmean() {
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3466,16 +3474,15 @@ int mbnavedit_get_gaussianmean() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_get_dr() {
-	int status = MB_SUCCESS;
-	double mtodeglon, mtodeglat;
-	double del_time, dx, dy;
-	double driftlon, driftlat;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 	}
+
+	double mtodeglon, mtodeglat;
+	double del_time, dx, dy;
+	double driftlon, driftlat;
+	int i;
 
 	/* calculate dead reckoning */
 	driftlon = 0.00001 * drift_lon;
@@ -3501,6 +3508,8 @@ int mbnavedit_get_dr() {
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3513,7 +3522,11 @@ int mbnavedit_get_dr() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_get_inversion() {
-	int status = MB_SUCCESS;
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+	}
+
 	int nnz;
 	int nrows;
 	int ncols;
@@ -3538,11 +3551,6 @@ int mbnavedit_get_inversion() {
 	char string[MB_PATH_MAXLINE];
 	int first, last;
 	int i, ii, j, k;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-	}
 
 	/* set maximum dimensions of the inverse problem */
 	nrows = nplot + (nplot - 1) + (nplot - 2);
@@ -3579,7 +3587,7 @@ int mbnavedit_get_inversion() {
 	mb_coor_scale(verbose, lat_avg, &mtodeglon, &mtodeglat);
 
 	/* allocate space for the inverse problem */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, nnz * nrows * sizeof(double), (void **)&a, &error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, nnz * nrows * sizeof(double), (void **)&a, &error);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, nnz * nrows * sizeof(int), (void **)&ia, &error);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, nrows * sizeof(int), (void **)&nia, &error);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, nrows * sizeof(double), (void **)&d, &error);
@@ -3887,6 +3895,10 @@ int mbnavedit_get_inversion() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_all() {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+	}
+
 	int status = MB_SUCCESS;
 	double time_min;
 	double time_max;
@@ -3921,10 +3933,6 @@ int mbnavedit_plot_all() {
 	int i;
 	char string[MB_PATH_MAXLINE];
 	int fpx, fpdx, fpy, fpdy;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-	}
 
 	/* figure out which pings to plot */
 	nplot = 0;
@@ -4514,18 +4522,17 @@ int mbnavedit_plot_all() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_tint(int iplot) {
-	int status = MB_SUCCESS;
-	// int ixmin, ixmax, iymin, iymax;
-	// double xmin, xmax, ymin, ymax;
-	// double xscale, yscale;
-	int tint_x1, tint_y1, tint_x2, tint_y2;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
+
+	// int ixmin, ixmax, iymin, iymax;
+	// double xmin, xmax, ymin, ymax;
+	// double xscale, yscale;
+	int tint_x1, tint_y1, tint_x2, tint_y2;
+	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -4564,6 +4571,8 @@ int mbnavedit_plot_tint(int iplot) {
 			xg_fillrectangle(mbnavedit_xgid, ping[i].tint_x - 2, ping[i].tint_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4576,18 +4585,17 @@ int mbnavedit_plot_tint(int iplot) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_lon(int iplot) {
-	int status = MB_SUCCESS;
-	// int ixmin, ixmax, iymin, iymax;
-	// double xmin, xmax, ymin, ymax;
-	// double xscale, yscale;
-	int lon_x1, lon_y1, lon_x2, lon_y2;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
+
+	// int ixmin, ixmax, iymin, iymax;
+	// double xmin, xmax, ymin, ymax;
+	// double xscale, yscale;
+	int lon_x1, lon_y1, lon_x2, lon_y2;
+	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -4650,6 +4658,8 @@ int mbnavedit_plot_lon(int iplot) {
 			xg_fillrectangle(mbnavedit_xgid, ping[i].lon_x - 2, ping[i].lon_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4662,18 +4672,17 @@ int mbnavedit_plot_lon(int iplot) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_lat(int iplot) {
-	int status = MB_SUCCESS;
-	// int ixmin, ixmax, iymin, iymax;
-	// double xmin, xmax, ymin, ymax;
-	// double xscale, yscale;
-	int lat_x1, lat_y1, lat_x2, lat_y2;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
+
+	// int ixmin, ixmax, iymin, iymax;
+	// double xmin, xmax, ymin, ymax;
+	// double xscale, yscale;
+	int lat_x1, lat_y1, lat_x2, lat_y2;
+	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -4736,6 +4745,8 @@ int mbnavedit_plot_lat(int iplot) {
 			xg_fillrectangle(mbnavedit_xgid, ping[i].lat_x - 2, ping[i].lat_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4748,18 +4759,17 @@ int mbnavedit_plot_lat(int iplot) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_speed(int iplot) {
-	int status = MB_SUCCESS;
-	// int ixmin, ixmax, iymin, iymax;
-	// double xmin, xmax, ymin, ymax;
-	// double xscale, yscale;
-	int speed_x1, speed_y1, speed_x2, speed_y2;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iplot:       %d\n", iplot);
 	}
+
+	// int ixmin, ixmax, iymin, iymax;
+	// double xmin, xmax, ymin, ymax;
+	// double xscale, yscale;
+	int speed_x1, speed_y1, speed_x2, speed_y2;
+	int i;
 
 	/* get scaling values */
 	const int ixmin = mbnavplot[iplot].ixmin;
@@ -4811,6 +4821,8 @@ int mbnavedit_plot_speed(int iplot) {
 			xg_fillrectangle(mbnavedit_xgid, ping[i].speed_x - 2, ping[i].speed_y - 2, 4, 4, pixel_values[BLACK], XG_SOLIDLINE);
 	}
 
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4823,7 +4835,6 @@ int mbnavedit_plot_speed(int iplot) {
 }
 /*--------------------------------------------------------------------*/
 int mbnavedit_plot_heading(int iplot) {
-	int status = MB_SUCCESS;
 	// int ixmin, ixmax, iymin, iymax;
 	// double xmin, xmax, ymin, ymax;
 	// double xscale, yscale;
@@ -4887,6 +4898,8 @@ int mbnavedit_plot_heading(int iplot) {
 			xg_fillrectangle(mbnavedit_xgid, ping[i].heading_x - 2, ping[i].heading_y - 2, 4, 4, pixel_values[BLACK],
 			                 XG_SOLIDLINE);
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
