@@ -27,7 +27,15 @@
 
 // TODO(schwehr): useprevious int boolean -> bool
 
+#include <math.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1900)
@@ -38,17 +46,8 @@
 #include <windows.h>
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
-#include <string.h>
-#include <time.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <X11/Intrinsic.h>
 
-/* MBIO include files */
 #include "mb_format.h"
 #include "mb_status.h"
 #include "mb_define.h"
@@ -57,10 +56,8 @@
 #include "mb_aux.h"
 #include "mb_xgraphics.h"
 
-/* define global control parameters */
 #include "mbnavedit.h"
 
-/* ping structure definition */
 struct mbnavedit_ping_struct {
 	int id;
 	int record;
