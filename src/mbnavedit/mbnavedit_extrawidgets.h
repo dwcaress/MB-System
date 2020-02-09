@@ -19,27 +19,16 @@
  *
  * Author:	D. W. Caress
  * Date:	June 24,  1995
- *
- *
  */
 
-/*--------------------------------------------------------------------*/
+#ifndef MBNAVEDIT_MBNAVEDIT_EXTRAWIDGETS_H_
+#define MBNAVEDIT_MBNAVEDIT_EXTRAWIDGETS_H_
 
-#ifndef MB_YES
 #include "mb_status.h"
-#endif
 
-#ifdef MBNAVEDIT_DECLARE_GLOBALS
-#define MBNAVEDIT_EXTERNAL
-#else
-#define MBNAVEDIT_EXTERNAL extern
-#endif
+Widget fileSelectionBox_list;
+Widget fileSelectionBox_text;
+Widget scrolledWindow_hscrollbar;
+Widget scrolledWindow_vscrollbar;
 
-/* Global Widget Declarations Added By Hand */
-
-MBNAVEDIT_EXTERNAL Widget fileSelectionBox_list;
-MBNAVEDIT_EXTERNAL Widget fileSelectionBox_text;
-MBNAVEDIT_EXTERNAL Widget scrolledWindow_hscrollbar;
-MBNAVEDIT_EXTERNAL Widget scrolledWindow_vscrollbar;
-
-/*--------------------------------------------------------------------*/
+#endif  // MBNAVEDIT_MBNAVEDIT_EXTRAWIDGETS_H_
