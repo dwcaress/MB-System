@@ -20,77 +20,68 @@
  * Author:	D. W. Caress
  * Date:	June 24,  1995
  * Date:	August 28, 2000 (New version - no buffered i/o)
- *
- *
  */
 
-/*--------------------------------------------------------------------*/
+#ifndef MBNAVEDIT_MBNAVEDIT_H_
+#define MBNAVEDIT_MBNAVEDIT_H_
 
-#ifndef MB_YES
 #include "mb_status.h"
-#endif
-
-#ifdef MBNAVEDIT_DECLARE_GLOBALS
-#define MBNAVEDIT_EXTERNAL
-#else
-#define MBNAVEDIT_EXTERNAL extern
-#endif
 
 /* mbnavedit global control parameters */
-MBNAVEDIT_EXTERNAL int output_mode;
-MBNAVEDIT_EXTERNAL int run_mbprocess;  // TODO(schwehr): bool
-MBNAVEDIT_EXTERNAL int gui_mode;  // TODO(schwehr): bool
-MBNAVEDIT_EXTERNAL int data_show_max;
-MBNAVEDIT_EXTERNAL int data_show_size;
-MBNAVEDIT_EXTERNAL int data_step_max;
-MBNAVEDIT_EXTERNAL int data_step_size;
-MBNAVEDIT_EXTERNAL int mode_pick;
-MBNAVEDIT_EXTERNAL int mode_set_interval;
-MBNAVEDIT_EXTERNAL int plot_tint;
-MBNAVEDIT_EXTERNAL int plot_tint_org;
-MBNAVEDIT_EXTERNAL int plot_lon;
-MBNAVEDIT_EXTERNAL int plot_lon_org;
-MBNAVEDIT_EXTERNAL int plot_lon_dr;
-MBNAVEDIT_EXTERNAL int plot_lat;
-MBNAVEDIT_EXTERNAL int plot_lat_org;
-MBNAVEDIT_EXTERNAL int plot_lat_dr;
-MBNAVEDIT_EXTERNAL int plot_speed;
-MBNAVEDIT_EXTERNAL int plot_speed_org;
-MBNAVEDIT_EXTERNAL int plot_smg;
-MBNAVEDIT_EXTERNAL int plot_heading;
-MBNAVEDIT_EXTERNAL int plot_heading_org;
-MBNAVEDIT_EXTERNAL int plot_cmg;
-MBNAVEDIT_EXTERNAL int plot_draft;
-MBNAVEDIT_EXTERNAL int plot_draft_org;
-MBNAVEDIT_EXTERNAL int plot_draft_dr;
-MBNAVEDIT_EXTERNAL int plot_roll;
-MBNAVEDIT_EXTERNAL int plot_pitch;
-MBNAVEDIT_EXTERNAL int plot_heave;
-MBNAVEDIT_EXTERNAL int mean_time_window;
-MBNAVEDIT_EXTERNAL int drift_lon;
-MBNAVEDIT_EXTERNAL int drift_lat;
-MBNAVEDIT_EXTERNAL int timestamp_problem;  // TODO(schwehr): bool
-MBNAVEDIT_EXTERNAL int use_ping_data;  // TODO(schwehr): bool
-MBNAVEDIT_EXTERNAL int strip_comments;  // TODO(schwehr): bool
-MBNAVEDIT_EXTERNAL int format;
-MBNAVEDIT_EXTERNAL char ifile[MB_PATH_MAXLINE];
-MBNAVEDIT_EXTERNAL char nfile[MB_PATH_MAXLINE];
-MBNAVEDIT_EXTERNAL int nfile_defined;
-MBNAVEDIT_EXTERNAL int model_mode;
-MBNAVEDIT_EXTERNAL double weight_speed;
-MBNAVEDIT_EXTERNAL double weight_acceleration;
-MBNAVEDIT_EXTERNAL int scrollcount;
-MBNAVEDIT_EXTERNAL double offset_lon;
-MBNAVEDIT_EXTERNAL double offset_lat;
-MBNAVEDIT_EXTERNAL double offset_lon_applied;
-MBNAVEDIT_EXTERNAL double offset_lat_applied;
+int output_mode;
+int run_mbprocess;  // TODO(schwehr): bool
+int gui_mode;  // TODO(schwehr): bool
+int data_show_max;
+int data_show_size;
+int data_step_max;
+int data_step_size;
+int mode_pick;
+int mode_set_interval;
+int plot_tint;
+int plot_tint_org;
+int plot_lon;
+int plot_lon_org;
+int plot_lon_dr;
+int plot_lat;
+int plot_lat_org;
+int plot_lat_dr;
+int plot_speed;
+int plot_speed_org;
+int plot_smg;
+int plot_heading;
+int plot_heading_org;
+int plot_cmg;
+int plot_draft;
+int plot_draft_org;
+int plot_draft_dr;
+int plot_roll;
+int plot_pitch;
+int plot_heave;
+int mean_time_window;
+int drift_lon;
+int drift_lat;
+int timestamp_problem;  // TODO(schwehr): bool
+int use_ping_data;  // TODO(schwehr): bool
+int strip_comments;  // TODO(schwehr): bool
+int format;
+char ifile[MB_PATH_MAXLINE];
+char nfile[MB_PATH_MAXLINE];
+int nfile_defined;
+int model_mode;
+double weight_speed;
+double weight_acceleration;
+int scrollcount;
+double offset_lon;
+double offset_lat;
+double offset_lon_applied;
+double offset_lat_applied;
 
 /* mbnavedit plot size parameters */
-MBNAVEDIT_EXTERNAL int plot_width;
-MBNAVEDIT_EXTERNAL int plot_height;
-MBNAVEDIT_EXTERNAL int number_plots;
-MBNAVEDIT_EXTERNAL int window_width;
-MBNAVEDIT_EXTERNAL int window_height;
+int plot_width;
+int plot_height;
+int number_plots;
+int window_width;
+int window_height;
 
 /* Mode value defines */
 #define PICK_MODE_PICK 0
@@ -277,4 +268,4 @@ XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Bo
 void BxExitCB(Widget w, XtPointer client, XtPointer call);
 void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
 
-/*--------------------------------------------------------------------*/
+#endif  // MBNAVEDIT_MBNAVEDIT_H_
