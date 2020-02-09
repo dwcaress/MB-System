@@ -971,32 +971,23 @@ XtPointer CONVERT(
  *      None
  */
 
-#ifndef IGNORE_MENU_POST
 void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
 	(void)p;  // Unused parameter
 	(void)dispatch;  // Unused parameter
-	Arg args[2];
-	int argcnt;
-	int button;
-	Widget m = (Widget)mw;
-	XButtonEvent *e = (XButtonEvent *)ev;
 
-	argcnt = 0;
+	int argcnt = 0;
+	Arg args[2];
+	int button;
 	XtSetArg(args[argcnt], XmNwhichButton, &button);
 	argcnt++;
+	Widget m = (Widget)mw;
 	XtGetValues(m, args, argcnt);
+	XButtonEvent *e = (XButtonEvent *)ev;
 	if (e->button != button)
 		return;
 	XmMenuPosition(m, e);
 	XtManageChild(m);
 }
-
-#ifdef DEFINE_OLD_BXUTILS
-void MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
-	BX_MENU_POST(p, mw, ev, dispatch);
-}
-#endif /* DEFINE_OLD_BXUTILS */
-#endif /* !IGNORE_MENU_POST */
 
 /*
  * Function:
@@ -1020,6 +1011,7 @@ void MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
  */
 void BX_SET_BACKGROUND_COLOR(Widget w, ArgList args, Cardinal *argcnt, Pixel bg_color) {
 #if ((XmVERSION == 1) && (XmREVISION > 0))
+#error "Old Xm version"
 	/*
 	 * Walk through the arglist to see if the user set the top or
 	 * bottom shadow colors.
@@ -1087,12 +1079,6 @@ void BX_SET_BACKGROUND_COLOR(Widget w, ArgList args, Cardinal *argcnt, Pixel bg_
 	(*argcnt)++;
 }
 
-#ifdef DEFINE_OLD_BXUTILS
-void SET_BACKGROUND_COLOR(Widget w, ArgList args, Cardinal *argcnt, Pixel bg_color) {
-	BX_SET_BACKGROUND_COLOR(w, args, argcnt, bg_color);
-}
-#endif /* DEFINE_OLD_BXUTILS */
-
 /*
  * Function:
  *	w = BxFindTopShell(start);
@@ -1133,19 +1119,11 @@ Widget BxFindTopShell(Widget start) {
 #define _BX_WIDGETIDS_FROM_NAMES
 
 WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
-	WidgetList wgtIds = NULL;
-	int wgtCount = 0;
-	Widget inst;
-	Widget current;
-	String tmp;
-	String start;
-	String widget;
-	char *ptr;
-
 	/*
 	 * For backward compatibility, remove [ and ] from the list.
 	 */
-	tmp = start = XtNewString(stringList);
+	String start = XtNewString(stringList);
+	String tmp = start;
 	if ((start = strchr(start, '[')) != NULL)
 		start++;
 	else
@@ -1154,11 +1132,16 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 	while ((start && *start) && isspace(*start)) {
 		start++;
 	}
-	ptr = strrchr(start, ']');
+	char *ptr = strrchr(start, ']');
 	if (ptr) {
 		*ptr = '\0';
 	}
 
+	WidgetList wgtIds = NULL;
+	int wgtCount = 0;
+	Widget inst;
+	Widget current;
+	String widget;
 	ptr = start + strlen(start) - 1;
 	while (ptr && *ptr) {
 		if (isspace(*ptr)) {
