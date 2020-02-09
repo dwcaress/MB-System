@@ -5,6 +5,7 @@
  */
 
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,26 +22,13 @@
 #include <windows.h>
 #endif
 
-#include <Xm/Xm.h>
 #include <Xm/RowColumn.h>
+#include <Xm/Xm.h>
 
 // Handy definition used in SET_BACKGROUND_COLOR
 #define UNSET (-1)
 
-/*
- * Define XTPOINTER so it works with all releases of
- * Xt and c++.
- */
-#ifdef __cplusplus
-#if XtSpecificationRelease < 5
-#error "Xt too old"
-#define XTPOINTER char *
-#else
-#define XTPOINTER XPointer
-#endif
-#else
 #define XTPOINTER XtPointer
-#endif
 
 /*
  * The following enum is used to support wide character sets.
@@ -204,31 +192,21 @@ static void copyWcsToMbs(char *mbs, wchar_t *wcs, int len, Boolean process_it) {
 	static wchar_t *tbuf = NULL;
 	static int tbufSize = 0;
 
-	int numCvt;
-	int lenToConvert;
-	wchar_t *fromP = wcs;
-	wchar_t *x = &fromP[len];
-	wchar_t *toP;
-	wchar_t *commonWChars = CStrCommonWideCharsGet();
-	wchar_t tmp;
-
-	/*
-	 * Make sure there's room in the buffer
-	 */
+	// Make sure there's room in the buffer
 	if (tbufSize < len) {
 		tbuf = (wchar_t *)XtRealloc((char *)tbuf, (len + 1) * sizeof(wchar_t));
 		tbufSize = len;
 	}
 
-	/*
-	 * Now copy and process
-	 */
-	toP = tbuf;
-	lenToConvert = 0;
+	wchar_t *fromP = wcs;
+	wchar_t *x = &fromP[len];
+	wchar_t *commonWChars = CStrCommonWideCharsGet();
+
+	// Now copy and process
+	wchar_t *toP = tbuf;
+	int lenToConvert = 0;
 	while (fromP < x) {
-		/*
-		 * Check for quoted characters
-		 */
+		// Check for quoted characters
 		if ((*fromP == commonWChars[WBackSlash]) && process_it) {
 			fromP++;        /* Skip quote */
 			if (fromP == x) /* Hanging quote? */
@@ -237,7 +215,7 @@ static void copyWcsToMbs(char *mbs, wchar_t *wcs, int len, Boolean process_it) {
 				lenToConvert++;
 				break;
 			}
-			tmp = *fromP++;
+			const wchar_t tmp = *fromP++;
 			if (tmp == commonWChars[WideN]) {
 				*toP++ = commonWChars[WNewLine];
 			}
@@ -269,9 +247,9 @@ static void copyWcsToMbs(char *mbs, wchar_t *wcs, int len, Boolean process_it) {
 		lenToConvert++;
 	}
 
-	tmp = tbuf[lenToConvert];
+	wchar_t tmp = tbuf[lenToConvert];
 	tbuf[lenToConvert] = (wchar_t)0;
-	numCvt = doWcstombs(mbs, tbuf, lenToConvert);
+	const int numCvt = doWcstombs(mbs, tbuf, lenToConvert);
 	tbuf[lenToConvert] = tmp;
 
 	mbs[numCvt] = '\0';
@@ -335,42 +313,24 @@ static wchar_t *getNextSeparator(wchar_t *str) {
 static Boolean extractSegment(
     wchar_t **str, wchar_t **tagStart, int *tagLen, wchar_t **txtStart,
     int *txtLen, int *pDir, Boolean * pSep) {
-	wchar_t *start;
-	wchar_t *text;
-	int textL;
-	Boolean tagSeen;
-	wchar_t *tag;
-	int tagL;
-	Boolean modsSeen;
-	Boolean sep;
-	int dir;
-	Boolean done;
-	Boolean checkDir;
-	wchar_t *commonWChars;
+	// Guard against nulls
+	wchar_t *start = *str;
 	wchar_t emptyStrWcs[1];
-
-	/*
-	 * Initialize variables
-	 */
-	text = NULL;
-	textL = 0;
-	tagSeen = False;
-	tag = NULL;
-	tagL = 0;
-	modsSeen = False;
-	dir = XmSTRING_DIRECTION_L_TO_R;
-	sep = False;
-	done = False;
-	commonWChars = CStrCommonWideCharsGet();
-
-	/*
-	 * Guard against nulls
-	 */
-	if (!(start = *str)) {
+	wchar_t *commonWChars = CStrCommonWideCharsGet();
+	if (!start) {
 		start = emptyStrWcs;
 		emptyStrWcs[0] = commonWChars[WNull];
 	}
 
+	wchar_t *text = NULL;
+	int textL = 0;
+	bool tagSeen = False;
+	wchar_t *tag = NULL;
+	int tagL = 0;
+	bool modsSeen = False;
+	int dir = XmSTRING_DIRECTION_L_TO_R;
+	bool sep = False;
+	bool done = False;
 	/*
 	 * If the first character of the string isn't a # or a ", then we
 	 * just have a regular old simple string. Do the same the thing for
@@ -382,8 +342,7 @@ static Boolean extractSegment(
 			text = NULL;
 		}
 		start += textL;
-	}
-	else {
+	} else {
 		done = False;
 		while (!done) {
 			if (*start == commonWChars[WHash]) {
@@ -429,7 +388,7 @@ static Boolean extractSegment(
 				 * a separator.
 				 */
 				modsSeen = True;
-				checkDir = False;
+				bool checkDir = False;
 				start++;
 				if ((*start == commonWChars[WideT]) || (*start == commonWChars[WideUT]) || (*start == commonWChars[WideOne])) {
 					sep = True;
@@ -492,7 +451,7 @@ static Boolean extractSegment(
 	if (pSep)
 		*pSep = sep;
 
-	return ((*start == commonWChars[WNull]) ? False : True);
+	return *start != commonWChars[WNull];
 }
 
 /*
@@ -506,12 +465,27 @@ static Boolean extractSegment(
  *	xstr - XmString : the allocated return structure
  */
 static XmString StringToXmString(char * str) {
+	if (!str)
+		return (NULL);
+
 	static char *tagBuf = NULL;
 	static int tagBufLen = 0;
 	static char *textBuf = NULL;
 	static int textBufLen = 0;
 
-	wchar_t *ctx;
+	/*
+	 * For expediencies sake, we'll overallocate this buffer so that
+	 * the wcs is guaranteed to fit (1 wc per byte in original string).
+	 */
+	wchar_t *wcStr = (wchar_t *)XtMalloc((strlen(str) + 1) * sizeof(wchar_t));
+	doMbstowcs(wcStr, str, strlen(str) + 1);
+
+	/*
+	 * Create the beginning segment
+	 */
+	int curDir = XmSTRING_DIRECTION_L_TO_R;
+	XmString xmStr = XmStringDirectionCreate(curDir);
+
 	wchar_t *tag;
 	int tagLen;
 	wchar_t *text;
@@ -519,43 +493,16 @@ static XmString StringToXmString(char * str) {
 	Boolean sep;
 	int dir;
 
-	Boolean more;
-	wchar_t *wcStr;
-	int curDir;
-	XmString xmStr;
-	XmString s1;
-	XmString s2;
-
-	if (!str)
-		return (NULL);
-
-	/*
-	 * For expediencies sake, we'll overallocate this buffer so that
-	 * the wcs is guaranteed to fit (1 wc per byte in original string).
-	 */
-	wcStr = (wchar_t *)XtMalloc((strlen(str) + 1) * sizeof(wchar_t));
-	doMbstowcs(wcStr, str, strlen(str) + 1);
-
-	/*
-	 * Create the beginning segment
-	 */
-	curDir = XmSTRING_DIRECTION_L_TO_R;
-	xmStr = XmStringDirectionCreate(curDir);
-
-	/*
-	 * Convert the string.
-	 */
-	more = True;
-	ctx = wcStr;
+	// Convert the string.
+	bool more = True;
+	wchar_t *ctx = wcStr;
 	while (more) {
 		more = extractSegment(&ctx, &tag, &tagLen, &text, &textLen, &dir, &sep);
-		/*
-		 * Pick up a direction change
-		 */
+		// Pick up a direction change
 		if (dir != curDir) {
 			curDir = dir;
-			s1 = XmStringDirectionCreate(curDir);
-			s2 = xmStr;
+			XmString s1 = XmStringDirectionCreate(curDir);
+			XmString s2 = xmStr;
 			xmStr = XmStringConcat(s2, s1);
 			XmStringFree(s1);
 			XmStringFree(s2);
@@ -586,8 +533,8 @@ static XmString StringToXmString(char * str) {
 				strcpy(tagBuf, XmSTRING_DEFAULT_CHARSET);
 			}
 
-			s1 = XmStringCreate(textBuf, tagBuf);
-			s2 = xmStr;
+			XmString s1 = XmStringCreate(textBuf, tagBuf);
+			XmString s2 = xmStr;
 			xmStr = XmStringConcat(s2, s1);
 			XmStringFree(s1);
 			XmStringFree(s2);
@@ -597,17 +544,14 @@ static XmString StringToXmString(char * str) {
 		 * Add in the separators.
 		 */
 		if (sep) {
-			s1 = XmStringSeparatorCreate();
-			s2 = xmStr;
+			XmString s1 = XmStringSeparatorCreate();
+			XmString s2 = xmStr;
 			xmStr = XmStringConcat(s2, s1);
 			XmStringFree(s1);
 			XmStringFree(s2);
 		}
 	}
 
-	/*
-	 * Free up memory and return
-	 */
 	XtFree((char *)wcStr);
 	return (xmStr);
 }
@@ -624,20 +568,14 @@ static XmString StringToXmString(char * str) {
  *			delimiter found.
  */
 static char *getNextCStrDelim(char * str) {
-	char *comma = str;
-	Boolean inQuotes = False;
-	int len;
-
 	if (!str)
 		return (NULL);
 	if (!*str)
 		return (NULL); /* At end */
 
-#ifdef __CENTERLINE__
-	len = mblen(NULL, sizeof(wchar_t));
-#else
-	len = mblen(NULL, sizeof(wchar_t));
-#endif
+	bool inQuotes = false;
+	int len = mblen(NULL, sizeof(wchar_t));
+	char *comma = str;
 	while (*comma) {
 		if ((len = mblen(comma, sizeof(wchar_t))) > 1) {
 			comma += len;
@@ -650,26 +588,22 @@ static char *getNextCStrDelim(char * str) {
 			continue;
 		}
 
-		/*
-		 * See if we have a delimiter
-		 */
+		// See if we have a delimiter
 		if (!inQuotes) {
 			if ((*comma == ',') || (*comma == '\012')) {
 				return (comma);
 			}
 		}
 
-		/*
-		 * Deal with quotes
-		 */
+		// Deal with quotes
 		if (*comma == '\"') {
-			inQuotes = ~inQuotes;
+			inQuotes = !inQuotes;
 		}
 
 		comma++;
 	}
 
-	return (NULL); /* None found */
+	return (NULL);
 }
 
 /*
@@ -684,14 +618,13 @@ static char *getNextCStrDelim(char * str) {
  *      cnt - int : the number of XmStrings found
  */
 static int getCStrCount(char *str) {
-	int x = 1;
-	char *newStr;
-
 	if (!str)
 		return (0);
 	if (!*str)
 		return (0);
 
+	int x = 1;
+	char *newStr;
 	while ((newStr = getNextCStrDelim(str))) {
 		x++;
 		str = ++newStr;
@@ -720,34 +653,24 @@ static Boolean CvtStringToXmString(
     XrmValue *toVal, XtPointer data) {
 	(void)args;  // Unused parameter
 	(void)data;  // Unused parameter
-	static XmString resStr;
-	char *str;
 
-	/*
-	 * This converter takes no parameters
-	 */
+	// This converter takes no parameters
 	if (*num_args != 0) {
 		XtAppWarningMsg(XtDisplayToApplicationContext(d), "cvtStringToXmString", "wrongParameters", "XtToolkitError",
 		                "String to XmString converter needs no extra arguments", NULL, NULL);
 	}
 
-	/*
-	 * See if this is a simple string
-	 */
-	str = (char *)fromVal->addr;
+	// See if this is a simple string
+	char *str = (char *)fromVal->addr;
+	static XmString resStr;
 	if (strncmp(str, "::", 2)) {
 		resStr = XmStringCreateLtoR(fromVal->addr, XmSTRING_DEFAULT_CHARSET);
-	}
-	else {
-		/*
-		 * Convert into internal format
-		 */
+	} else {
+		// Convert into internal format
 		resStr = StringToXmString(fromVal->addr + 2); /* skip :: */
 	}
 
-	/*
-	 * Done, return result
-	 */
+	// Done, return result
 	if (toVal->addr == NULL) {
 		toVal->addr = (XTPOINTER)&resStr;
 		toVal->size = sizeof(XmString);
@@ -787,14 +710,6 @@ static Boolean CvtStringToXmStringTable(
     Display *d, XrmValue *args, Cardinal *num_args, XrmValue *fromVal,
     XrmValue *toVal, XtPointer data) {
 	(void)data;  // Unused parameter
-	static XmString *CStrTable;
-	XmString *tblPtr;
-	char *str;
-	char *tmpBuf;
-	char *nextDelim;
-	XrmValue fVal;
-	XrmValue tVal;
-
 	/*
 	 * This converter takes no parameters
 	 */
@@ -803,6 +718,7 @@ static Boolean CvtStringToXmStringTable(
 		                "String to XmStringTable converter needs no extra arguments", NULL, NULL);
 	}
 
+	char *str;
 	/*
 	 * Set str and make sure there's somethin' there
 	 */
@@ -810,37 +726,33 @@ static Boolean CvtStringToXmStringTable(
 		str = "";
 	}
 
-	/*
-	 * Allocate the XmStrings + 1 for NULL termination
-	 */
+	// Allocate the XmStrings + 1 for NULL termination
+	static XmString *CStrTable;  // TODO(schwehr): Leaky?
 	CStrTable = (XmString *)XtMalloc((getCStrCount(str) + 1) * sizeof(XmString *));
 
 	/*
 	 * Use the string converter for the strings
 	 */
-	tmpBuf = (char *)XtMalloc(strlen(str) + 1);
+	char *tmpBuf = (char *)XtMalloc(strlen(str) + 1);
 	strcpy(tmpBuf, str);
 	str = tmpBuf;
 
-	/*
-	 * Create strings
-	 */
-	tblPtr = CStrTable;
-	if (*str) {
-		while (str) {
-			nextDelim = getNextCStrDelim(str);
+	// Create strings
+	XmString *tblPtr = CStrTable;
 
-			/*
-			 * Overwrite nextDelim
-			 */
+	if (*str) {
+		XrmValue fVal;
+		XrmValue tVal;
+		while (str) {
+			char *nextDelim = getNextCStrDelim(str);
+
+			// Overwrite nextDelim
 			if (nextDelim) {
 				*nextDelim = '\0';
 				nextDelim++;
 			}
 
-			/*
-			 * Convert it
-			 */
+			// Convert it
 			fVal.size = strlen(str) + 1;
 			fVal.addr = str;
 			tVal.size = sizeof(XTPOINTER);
@@ -862,14 +774,10 @@ static Boolean CvtStringToXmStringTable(
 	}
 	XtFree(tmpBuf);
 
-	/*
-	 * Null terminate
-	 */
+	// Null terminate
 	*tblPtr = NULL;
 
-	/*
-	 * Done, return result
-	 */
+	// Done, return result
 	if (toVal->addr == NULL) {
 		toVal->addr = (XTPOINTER)&CStrTable;
 		toVal->size = sizeof(XmString);
@@ -934,8 +842,6 @@ void RegisterBxConverters(XtAppContext appContext) {
 XtPointer BX_CONVERT(
     Widget w, char *from_string, char *to_type, int to_size, Boolean *success) {
 	(void)to_size;  // Unused parameter
-	XrmValue fromVal, toVal; /* resource holders		*/
-	Boolean convResult;      /* return value			*/
 	XtPointer val;           /* Pointer size return value    */
 
 	/*
@@ -949,6 +855,7 @@ XtPointer BX_CONVERT(
 	 * set the fromVal structure up with the string information that
 	 * the caller passed in.
 	 */
+	XrmValue fromVal;
 	fromVal.size = strlen(from_string) + 1;
 	fromVal.addr = from_string;
 
@@ -957,6 +864,7 @@ XtPointer BX_CONVERT(
 	 * get back we will set this up so that the converter will point us
 	 * at a block of valid data.
 	 */
+	XrmValue toVal;
 	toVal.size = 0;
 	toVal.addr = NULL;
 
@@ -964,6 +872,7 @@ XtPointer BX_CONVERT(
 	 * Now lets try to convert this data by calling this handy-dandy Xt
 	 * routine.
 	 */
+	Boolean convResult;
 	convResult = XtConvertAndStore(w, XmRString, &fromVal, to_type, &toVal);
 
 	/*
