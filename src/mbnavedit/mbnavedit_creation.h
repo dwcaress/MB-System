@@ -1,5 +1,5 @@
-#ifndef mbnavedit_creation_H
-#define mbnavedit_creation_H
+#ifndef MBNAVEDIT_MBNAVEDIT_CREATION_H_
+#define MBNAVEDIT_MBNAVEDIT_CREATION_H_
 
 Widget toggleButton_output_on_filelist;
 Widget toggleButton_output_off_filelist;
@@ -85,4 +85,4 @@ Widget toggleButton_lon;
 Widget scrolledWindow;
 Widget drawingArea;
 
-#endif  // mbnavedit_creation_H
+#endif  // MBNAVEDIT_MBNAVEDIT_CREATION_H_
