@@ -3178,13 +3178,11 @@ int mbnavedit_get_smgcmg(int i) {
 	}
 
 	int status = MB_SUCCESS;
-	double time_d1, lon1, lat1;
-	double time_d2, lon2, lat2;
-	double mtodeglon, mtodeglat;
-	double del_time, dx, dy, dist;
 
 	/* calculate speed made good and course made for ping i */
 	if (i < nbuff) {
+		double time_d1, lon1, lat1;
+		double time_d2, lon2, lat2;
 		if (i == 0) {
 			time_d1 = ping[i].time_d;
 			lon1 = ping[i].lon;
@@ -3209,11 +3207,13 @@ int mbnavedit_get_smgcmg(int i) {
 			lon2 = ping[i].lon;
 			lat2 = ping[i].lat;
 		}
+		double mtodeglon;
+		double mtodeglat;
 		mb_coor_scale(verbose, lat1, &mtodeglon, &mtodeglat);
-		del_time = time_d2 - time_d1;
-		dx = (lon2 - lon1) / mtodeglon;
-		dy = (lat2 - lat1) / mtodeglat;
-		dist = sqrt(dx * dx + dy * dy);
+		const double del_time = time_d2 - time_d1;
+		const double dx = (lon2 - lon1) / mtodeglon;
+		const double dy = (lat2 - lat1) / mtodeglat;
+		const double dist = sqrt(dx * dx + dy * dy);
 		if (del_time > 0.0)
 			ping[i].speed_made_good = 3.6 * dist / del_time;
 		else
@@ -3277,28 +3277,22 @@ int mbnavedit_get_gaussianmean() {
 		fprintf(stderr, "dbg2  Input arguments:\n");
 	}
 
-	double timewindow;
-	double sumlon, sumlat, w, weight;
-	double dt, a;
-	int jstart, nsum, npos, nneg;
-	int jbefore, jafter;
-
 	/* loop over navigation calculating gaussian mean positions */
-	timewindow = 0.1 * mean_time_window;
-	a = -4.0 / (timewindow * timewindow);
-	jstart = 0;
+	const double timewindow = 0.1 * mean_time_window;
+	const double a = -4.0 / (timewindow * timewindow);
+	int jstart = 0;
 	for (int i = 0; i < nbuff; i++) {
-		dt = 0.0;
-		weight = 0.0;
-		sumlon = 0.0;
-		sumlat = 0.0;
-		nsum = 0;
-		npos = 0;
-		nneg = 0;
+		double dt = 0.0;
+		double weight = 0.0;
+		double sumlon = 0.0;
+		double sumlat = 0.0;
+		int nsum = 0;
+		int npos = 0;
+		int nneg = 0;
 		for (int j = jstart; j < nbuff && dt <= timewindow; j++) {
 			dt = ping[j].time_d - ping[i].time_d;
 			if (ping[j].lonlat_flag == false && fabs(dt) <= timewindow) {
-				w = exp(a * dt * dt);
+				const double w = exp(a * dt * dt);
 				nsum++;
 				if (dt < 0.0)
 					nneg++;
@@ -3324,12 +3318,12 @@ int mbnavedit_get_gaussianmean() {
 	}
 
 	/* loop over navigation performing linear interpolation to fill gaps */
-	jbefore = -1;
+	int jbefore = -1;
 	for (int i = 0; i < nbuff; i++) {
 		/* only work on nav not smoothed in first past due to lack of nearby data */
 		if (ping[i].mean_ok == false) {
 			/* find valid points before and after */
-			jafter = i;
+			int jafter = i;
 			for (int j = jbefore; j < nbuff && jafter == i; j++) {
 				if (j < i && ping[j].lonlat_flag == false)
 					jbefore = j;
@@ -3337,7 +3331,7 @@ int mbnavedit_get_gaussianmean() {
 					jafter = j;
 			}
 			if (jbefore >= 0 && jafter > i) {
-				dt = (ping[i].time_d - ping[jbefore].time_d) / (ping[jafter].time_d - ping[jbefore].time_d);
+				const double dt = (ping[i].time_d - ping[jbefore].time_d) / (ping[jafter].time_d - ping[jbefore].time_d);
 				ping[i].lon_dr = ping[jbefore].lon + dt * (ping[jafter].lon - ping[jbefore].lon);
 				ping[i].lat_dr = ping[jbefore].lat + dt * (ping[jafter].lat - ping[jbefore].lat);
 			}
@@ -3485,11 +3479,6 @@ int mbnavedit_get_inversion() {
 		sprintf(string, "Setting up inversion of %d longitude points", nplot);
 		do_message_on(string);
 
-		// TODO(schwehr): Localize
-		int ncyc, nsig;
-		double smax, sup, err, supt, slo, errlsq;
-		double dtime_d, dtime_d_sq;
-
 		/* initialize arrays */
 		for (int i = 0; i < nrows; i++) {
 			nia[i] = 0;
@@ -3509,6 +3498,9 @@ int mbnavedit_get_inversion() {
 			sigma[i] = 0;
 			work[i] = 0.0;
 		}
+
+		double dtime_d;
+		double dtime_d_sq;
 
 		/* loop over all nav points - add constraints for
 		   original lon values, speed, acceleration */
@@ -3568,10 +3560,13 @@ int mbnavedit_get_inversion() {
 		do_message_on(string);
 
 		/* compute upper bound on maximum eigenvalue */
-		ncyc = 0;
-		nsig = 0;
+		int ncyc = 0;
+		int nsig = 0;
+		double smax;
+		double sup;
+		double err;
 		lspeig(a, ia, nia, nnz, nc, nr, ncyc, &nsig, x, dx, sigma, work, &smax, &err, &sup);
-		supt = smax + err;
+		double supt = smax + err;
 		if (sup > supt)
 			supt = sup;
 		if (verbose > 1)
@@ -3587,9 +3582,9 @@ int mbnavedit_get_inversion() {
 		}
 
 		/* calculate chebyshev factors (errlsq is the theoretical error) */
-		slo = supt / bandwidth;
+		double slo = supt / bandwidth;
 		chebyu(sigma, ncycle, supt, slo, work);
-		errlsq = errlim(sigma, ncycle, supt, slo);
+		double errlsq = errlim(sigma, ncycle, supt, slo);
 		if (verbose > 1)
 			fprintf(stderr, "Theoretical error: %f\n", errlsq);
 		if (verbose > 1)
@@ -3786,39 +3781,6 @@ int mbnavedit_plot_all() {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
-	int status = MB_SUCCESS;
-	double time_min;
-	double time_max;
-	double tint_min;
-	double tint_max;
-	double lon_min;
-	double lon_max;
-	double lat_min;
-	double lat_max;
-	double speed_min;
-	double speed_max;
-	double heading_min;
-	double heading_max;
-	double draft_min;
-	double draft_max;
-	double roll_min;
-	double roll_max;
-	double pitch_min;
-	double pitch_max;
-	double heave_min;
-	double heave_max;
-	double center, range;
-	int margin_x, margin_y;
-	int iyzero;
-	int center_x, center_y;
-	double dx, x;
-	int xtime_i[7];
-	int ix;
-	int swidth, sascent, sdescent;
-	char yformat[10];
-	char string[MB_PATH_MAXLINE];
-	int fpx, fpdx, fpy, fpdy;
-
 	/* figure out which pings to plot */
 	nplot = 0;
 	if (data_show_size > 0 && nbuff > 0) {
@@ -3827,8 +3789,7 @@ int mbnavedit_plot_all() {
 		for (int i = current_id; i < nbuff; i++)
 			if (ping[i].file_time_d <= plot_end_time)
 				nplot++;
-	}
-	else if (nbuff > 0) {
+	} else if (nbuff > 0) {
 		plot_start_time = ping[0].file_time_d;
 		plot_end_time = ping[nbuff - 1].file_time_d;
 		data_show_size = plot_end_time - plot_start_time + 1;
@@ -3856,29 +3817,29 @@ int mbnavedit_plot_all() {
 	}
 
 	/* don't try to plot if no data */
+	int status = MB_SUCCESS;
 	if (nplot > 0) {
-
 		/* find min max values */
-		time_min = plot_start_time;
-		time_max = plot_end_time;
-		tint_min = ping[current_id].tint;
-		tint_max = ping[current_id].tint;
-		lon_min = ping[current_id].lon;
-		lon_max = ping[current_id].lon;
-		lat_min = ping[current_id].lat;
-		lat_max = ping[current_id].lat;
-		speed_min = 0.0;
-		speed_max = ping[current_id].speed;
-		heading_min = ping[current_id].heading;
-		heading_max = ping[current_id].heading;
-		draft_min = ping[current_id].draft;
-		draft_max = ping[current_id].draft;
-		roll_min = ping[current_id].roll;
-		roll_max = ping[current_id].roll;
-		pitch_min = ping[current_id].pitch;
-		pitch_max = ping[current_id].pitch;
-		heave_min = ping[current_id].heave;
-		heave_max = ping[current_id].heave;
+		double time_min = plot_start_time;
+		double time_max = plot_end_time;
+		double tint_min = ping[current_id].tint;
+		double tint_max = ping[current_id].tint;
+		double lon_min = ping[current_id].lon;
+		double lon_max = ping[current_id].lon;
+		double lat_min = ping[current_id].lat;
+		double lat_max = ping[current_id].lat;
+		double speed_min = 0.0;
+		double speed_max = ping[current_id].speed;
+		double heading_min = ping[current_id].heading;
+		double heading_max = ping[current_id].heading;
+		double draft_min = ping[current_id].draft;
+		double draft_max = ping[current_id].draft;
+		double roll_min = ping[current_id].roll;
+		double roll_max = ping[current_id].roll;
+		double pitch_min = ping[current_id].pitch;
+		double pitch_max = ping[current_id].pitch;
+		double heave_min = ping[current_id].heave;
+		double heave_max = ping[current_id].heave;
 		for (int i = current_id + 1; i < current_id + nplot; i++) {
 			tint_min = MIN(ping[i].tint, tint_min);
 			tint_max = MAX(ping[i].tint, tint_max);
@@ -3941,8 +3902,8 @@ int mbnavedit_plot_all() {
 		}
 
 		/* scale the min max a bit larger so all points fit on plots */
-		center = 0.5 * (time_min + time_max);
-		range = 0.51 * (time_max - time_min);
+		double center = 0.5 * (time_min + time_max);
+		double range = 0.51 * (time_max - time_min);
 		time_min = center - range;
 		time_max = center + range;
 		center = 0.5 * (tint_min + tint_max);
@@ -4052,10 +4013,11 @@ int mbnavedit_plot_all() {
 		}
 
 		/* get plot margins */
-		margin_x = plot_width / 10;
-		margin_y = plot_height / 6;
+		const int margin_x = plot_width / 10;
+		const int margin_y = plot_height / 6;
 
 		/* get date at start of file */
+		int xtime_i[7];
 		mb_get_date(verbose, file_start_time_d + plot_start_time, xtime_i);
 
 		/* figure out how many plots to make */
@@ -4265,20 +4227,24 @@ int mbnavedit_plot_all() {
 		/* do plots */
 		for (int iplot = 0; iplot < number_plots; iplot++) {
 			/* get center locations */
-			center_x = (mbnavplot[iplot].ixmin + mbnavplot[iplot].ixmax) / 2;
-			center_y = (mbnavplot[iplot].iymin + mbnavplot[iplot].iymax) / 2;
+			const int center_x = (mbnavplot[iplot].ixmin + mbnavplot[iplot].ixmax) / 2;
+			const int center_y = (mbnavplot[iplot].iymin + mbnavplot[iplot].iymax) / 2;
 
 			/* plot filename */
+			char string[MB_PATH_MAXLINE];
 			sprintf(string, "Data File: %s", ifile);
+			int swidth;
+			int sascent;
+			int sdescent;
 			xg_justify(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
 			xg_drawstring(mbnavedit_xgid, center_x - swidth / 2, mbnavplot[iplot].iymax - 5 * sascent / 2, string,
 			              pixel_values[BLACK], XG_SOLIDLINE);
 
 			/* get bounds for position bar */
-			fpx = center_x - 2 * margin_x + (4 * margin_x * current_id) / nbuff;
-			fpdx = MAX(((4 * margin_x * nplot) / nbuff), 5);
-			fpy = mbnavplot[iplot].iymax - 2 * sascent;
-			fpdy = sascent;
+			int fpx = center_x - 2 * margin_x + (4 * margin_x * current_id) / nbuff;
+			const int fpdx = MAX(((4 * margin_x * nplot) / nbuff), 5);
+			const int fpy = mbnavplot[iplot].iymax - 2 * sascent;
+			const int fpdy = sascent;
 			if (fpdx > 4 * margin_x)
 				fpx = center_x + 2 * margin_x - fpdx;
 
@@ -4310,11 +4276,11 @@ int mbnavedit_plot_all() {
 			              (int)(center_y + 2 * sascent), mbnavplot[iplot].ylabel2, pixel_values[BLACK], XG_SOLIDLINE);
 
 			/* plot x axis time annotation */
-			dx = (plot_end_time - plot_start_time) / 5;
+			const double dx = (plot_end_time - plot_start_time) / 5;
 			for (int i = 0; i < 6; i++) {
 				/* get x position */
-				x = plot_start_time + i * dx;
-				ix = mbnavplot[iplot].ixmin + mbnavplot[iplot].xscale * (x - mbnavplot[iplot].xmin);
+				double x = plot_start_time + i * dx;
+				const int ix = mbnavplot[iplot].ixmin + mbnavplot[iplot].xscale * (x - mbnavplot[iplot].xmin);
 				x += file_start_time_d;
 
 				/* draw tickmarks */
@@ -4330,6 +4296,7 @@ int mbnavedit_plot_all() {
 			}
 
 			/* plot y min max values */
+			char yformat[10];
 			if (mbnavplot[iplot].type == PLOT_LONGITUDE || mbnavplot[iplot].type == PLOT_LATITUDE)
 				strcpy(yformat, "%11.6f");
 			else
@@ -4352,7 +4319,7 @@ int mbnavedit_plot_all() {
 					strcpy(yformat, "%6.2f");
 				sprintf(string, yformat, 0.0);
 				xg_justify(mbnavedit_xgid, string, &swidth, &sascent, &sdescent);
-				iyzero = mbnavplot[iplot].iymin - mbnavplot[iplot].yscale * mbnavplot[iplot].ymin;
+				const int iyzero = mbnavplot[iplot].iymin - mbnavplot[iplot].yscale * mbnavplot[iplot].ymin;
 				xg_drawstring(mbnavedit_xgid, (int)(mbnavplot[iplot].ixmin - swidth - 0.03 * margin_x),
 				              (int)(iyzero + 0.5 * sascent), string, pixel_values[BLACK], XG_SOLIDLINE);
 				xg_drawline(mbnavedit_xgid, mbnavplot[iplot].ixmin, iyzero, mbnavplot[iplot].ixmax, iyzero, pixel_values[BLACK],
