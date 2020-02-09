@@ -5,6 +5,7 @@
  */
 
 #include <ctype.h>
+#include <memory.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -1115,9 +1116,6 @@ Widget BxFindTopShell(Widget start) {
  *	WidgetList : array of widget IDs.
  */
 
-#ifndef _BX_WIDGETIDS_FROM_NAMES
-#define _BX_WIDGETIDS_FROM_NAMES
-
 WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 	/*
 	 * For backward compatibility, remove [ and ] from the list.
@@ -1137,11 +1135,6 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 		*ptr = '\0';
 	}
 
-	WidgetList wgtIds = NULL;
-	int wgtCount = 0;
-	Widget inst;
-	Widget current;
-	String widget;
 	ptr = start + strlen(start) - 1;
 	while (ptr && *ptr) {
 		if (isspace(*ptr)) {
@@ -1161,6 +1154,10 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 	 * the list is now either empty, one, or more widget
 	 * instance names.
 	 */
+	WidgetList wgtIds = NULL;
+	int wgtCount = 0;
+	Widget inst;
+	Widget current;
 	start = strtok(start, ",");
 	while (start) {
 		while ((start && *start) && isspace(*start)) {
@@ -1183,7 +1180,7 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 		/*
 		 * Form a string to use with XtNameToWidget().
 		 */
-		widget = (char *)XtMalloc((strlen(start) + 2) * sizeof(char));
+		String widget = (char *)XtMalloc((strlen(start) + 2) * sizeof(char));
 		sprintf(widget, "*%s", start);
 
 		/*
@@ -1220,20 +1217,13 @@ Cannot find widget %s\n",
 	XtFree((char *)tmp);
 	return (wgtIds);
 }
-#endif /* _BX_WIDGETIDS_FROM_NAMES */
 
 XtPointer BX_SINGLE(float val) {
-	XtPointer pointer;
-
-	pointer = (XtPointer)XtMalloc(sizeof(float));
+	XtPointer pointer = (XtPointer)XtMalloc(sizeof(float));
 	if (pointer != NULL)
 		*((float *)pointer) = val;
 	return (pointer);
 }
-
-#ifdef DEFINE_OLD_BXUTILS
-XtPointer SINGLE(float val) { return (BX_SINGLE(val)); }
-#endif /* DEFINE_OLD_BXUTILS */
 
 XtPointer BX_DOUBLE(double val) {
 	XtPointer pointer;
@@ -1244,23 +1234,9 @@ XtPointer BX_DOUBLE(double val) {
 	return (pointer);
 }
 
-#ifdef DEFINE_OLD_BXUTILS
-XtPointer DOUBLE(double val) { return (BX_DOUBLE(val)); }
-#endif /* DEFINE_OLD_BXUTILS */
-
-/****************************************************************************
- *
- * Big chunk of code inserted from Bull (based on modified 3.3)
- *
- ****************************************************************************/
-
 #ifndef IGNORE_XPM_PIXMAP
 
 #ifndef USE_XPM_LIBRARY
-
-#ifdef SYSV
-#include <memory.h>
-#endif
 
 /*
  * Copyright 1990, 1991 GROUPE BULL
@@ -2562,8 +2538,6 @@ static void BxXpmFreeAttributes(BxXpmAttributes *attributes) {
  */
 
 static void xpmFreeInternAttrib(bxxpmInternAttrib *attrib) {
-	unsigned int a;
-
 	if (attrib->colorTable)
 		xpmFreeColorTable(attrib->colorTable, attrib->ncolors);
 	if (attrib->pixelindex)
@@ -2571,10 +2545,10 @@ static void xpmFreeInternAttrib(bxxpmInternAttrib *attrib) {
 	if (attrib->xcolors)
 		free((char *)attrib->xcolors);
 	if (attrib->colorStrings) {
-		for (a = 0; a < attrib->ncolors; a++)
+		for (unsigned int a = 0; a < attrib->ncolors; a++)
 			if (attrib->colorStrings[a])
 				free((char *)attrib->colorStrings[a]);
-		free((char *)attrib->colorStrings);
+		free(attrib->colorStrings);
 	}
 }
 
@@ -2602,9 +2576,7 @@ static void XpmDataClose(bxxpmData *mdata) {
  */
 static int xpmNextUI(bxxpmData *mdata, unsigned int *ui_return) {
 	char buf[BUFSIZ];
-	int l;
-
-	l = xpmNextWord(mdata, buf);
+	const int l = xpmNextWord(mdata, buf);
 	return atoui(buf, l, ui_return);
 }
 
@@ -2634,27 +2606,27 @@ static void xpmGetCmt(bxxpmData *mdata, char **cmt) {
  * skip to the end of the current string and the beginning of the next one
  */
 static void xpmNextString(bxxpmData *mdata) {
-	int c;
-
 	switch (mdata->type) {
 	case BXXPMARRAY:
 		mdata->cptr = (mdata->stream.data)[++mdata->line];
 		break;
 	case BXXPMFILE:
 	case BXXPMPIPE:
-		if (mdata->Eos)
+		if (mdata->Eos) {
+			int c;
 			while ((c = xpmGetC(mdata)) != mdata->Eos && c != EOF)
 				;
-		if (mdata->Bos) /* if not natural XPM2 */
+		}
+		if (mdata->Bos) { /* if not natural XPM2 */
+			int c;
 			while ((c = xpmGetC(mdata)) != mdata->Bos && c != EOF)
 				;
+		}
 		break;
 	}
 }
 
-/*
- * return the current character, skipping comments
- */
+// Return the current character, skipping comments
 static int xpmGetC(bxxpmData *mdata) {
 	int c;
 	unsigned int n = 0, a;
@@ -2745,11 +2717,11 @@ static int xpmUngetC(int c, bxxpmData *mdata) {
  */
 static unsigned int xpmNextWord(bxxpmData *mdata, char *buf) {
 	unsigned int n = 0;
-	int c;
 
 	switch (mdata->type) {
 	case BXXPMARRAY:
-		c = *mdata->cptr;
+	{
+		int c = *mdata->cptr;
 		while (isspace(c) && c != mdata->Eos) {
 			mdata->cptr++;
 			c = *mdata->cptr;
@@ -2761,9 +2733,11 @@ static unsigned int xpmNextWord(bxxpmData *mdata, char *buf) {
 		n--;
 		mdata->cptr--;
 		break;
+	}
 	case BXXPMFILE:
 	case BXXPMPIPE:
-		c = xpmGetC(mdata);
+	{
+		int c = xpmGetC(mdata);
 		while (isspace(c) && c != mdata->Eos)
 			c = xpmGetC(mdata);
 		while (!isspace(c) && c != mdata->Eos && c != EOF) {
@@ -2773,15 +2747,12 @@ static unsigned int xpmNextWord(bxxpmData *mdata, char *buf) {
 		xpmUngetC(c, mdata);
 		break;
 	}
+	}
 	return (n);
 }
 
 static int BxXpmVisualType(Visual *visual) {
-#if defined(__cplusplus) || defined(c_plusplus)
-	switch (visual->c_class)
-#else
 	switch (visual->class)
-#endif
 	{
 	case StaticGray:
 	case GrayScale:
@@ -2798,27 +2769,21 @@ static int BxXpmVisualType(Visual *visual) {
 	}
 }
 
-/*
- * Free the computed color table
- */
-
+// Free the computed color table
 static void xpmFreeColorTable(char ***colorTable, int ncolors) {
-	int a, b;
+	if (colorTable == NULL) return;
 
-	if (colorTable) {
-		for (a = 0; a < ncolors; a++)
-			if (colorTable[a]) {
-				for (b = 0; b < (BXNKEYS + 1); b++)
-					if (colorTable[a][b])
-						free(colorTable[a][b]);
-				free((char *)colorTable[a]);
-			}
-		free((char *)colorTable);
-	}
+	for (int a = 0; a < ncolors; a++)
+		if (colorTable[a]) {
+			for (int b = 0; b < BXNKEYS + 1; b++)
+				if (colorTable[a][b])
+					free(colorTable[a][b]);
+			free(colorTable[a]);
+		}
+	free(colorTable);
 }
 
 #else /* USE_XPM_LIBRARY */
-
 #include <xpm.h>
 
 #define BxXpmColorError XpmColorError
@@ -2898,17 +2863,13 @@ typedef struct _UIAppDefault {
 } UIAppDefault;
 
 void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
-	int i;
 	Display *dpy = XtDisplay(w); /* Retrieve the display pointer */
-	XrmDatabase rdb = NULL;      /* A resource data base */
-
 	/* Create an empty resource database */
-
-	rdb = XrmGetStringDatabase("");
+	XrmDatabase rdb = XrmGetStringDatabase("");
 
 	/* Add the Component resources, prepending the name of the component */
 
-	i = 0;
+	int i = 0;
 	while (resourceSpec[i] != NULL) {
 		char buf[1000];
 
@@ -2923,6 +2884,7 @@ void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
 		XrmDatabase db = XtDatabase(dpy);
 		XrmCombineDatabase(rdb, &db, FALSE);
 #else
+#error old
 		XrmMergeDatabases(dpy->db, &rdb);
 		dpy->db = rdb;
 #endif
@@ -2935,41 +2897,35 @@ void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
  * value exists.
  */
 void InitAppDefaults(Widget parent, UIAppDefault *defs) {
-	XrmQuark cQuark;
-	XrmQuark rsc[10];
-	XrmRepresentation rep;
-	XrmValue val;
-	XrmDatabase rdb;
-	int rscIdx;
-
 /* Get the database */
 
 #if (XlibSpecificationRelease >= 5)
-	if ((rdb = XrmGetDatabase(XtDisplay(parent))) == NULL) {
+	XrmDatabase rdb = XrmGetDatabase(XtDisplay(parent));
+#else
+#error old
+	Display *dpy = XtDisplay(parent);
+	XrmDatabase rdb = dpy->db;
+#endif
+	if (rdb == NULL) {
 		return; /*  Can't get the database */
 	}
-#else
-	Display *dpy = XtDisplay(parent);
-	if ((rdb = dpy->db) == NULL) {
-		return;
-	}
-#endif
+
+	XrmQuark rsc[10];
+	XrmRepresentation rep;
+	XrmValue val;
 
 	/* Look for each resource in the table */
-
 	while (defs->wName) {
-		rscIdx = 0;
+		int rscIdx = 0;
 
-		cQuark = XrmStringToQuark(defs->cName); /* class quark */
+		XrmQuark cQuark = XrmStringToQuark(defs->cName); /* class quark */
 		rsc[rscIdx++] = cQuark;
 		if (defs->wName[0] == '\0') {
 			rsc[rscIdx++] = cQuark;
-		}
-		else {
+		} else {
 			if (strchr(defs->wName, '.') == NULL) {
 				rsc[rscIdx++] = XrmStringToQuark(defs->wName);
-			}
-			else {
+			} else {
 				/*
 				 * If we found a '.' that means that this is not
 				 * a simple widget name, but a sub specification so
@@ -3006,32 +2962,23 @@ void InitAppDefaults(Widget parent, UIAppDefault *defs) {
  */
 void SetAppDefaults(
     Widget w, UIAppDefault *defs, char *inst_name, Boolean override_inst) {
-	Display *dpy = XtDisplay(w); /*  Retrieve the display */
-	XrmDatabase rdb = NULL;      /* A resource data base */
-	char lineage[1000];
-	char buf[1000];
-	Widget parent;
-
-	/* Protect ourselves */
-
 	if (inst_name == NULL)
 		return;
+	Display *dpy = XtDisplay(w); /*  Retrieve the display */
 
-	/*  Create an empty resource database */
+	// Create an empty resource database
+	XrmDatabase rdb = XrmGetStringDatabase("");
 
-	rdb = XrmGetStringDatabase("");
-
-	/* Start the lineage with our name and then get our parents */
-
-	lineage[0] = '\0';
-	parent = w;
-
+	// Start the lineage with our name and then get our parents
+	char lineage[1000] = "";
+	Widget parent = w;
 	while (parent) {
 		WidgetClass wclass = XtClass(parent);
 
 		if (wclass == applicationShellWidgetClass)
 			break;
 
+		char buf[1000];
 		strcpy(buf, lineage);
 		sprintf(lineage, "*%s%s", XtName(parent), buf);
 
@@ -3040,12 +2987,12 @@ void SetAppDefaults(
 
 	/*  Add the Component resources, prepending the name of the component */
 	while (defs->wName != NULL) {
-		int name_length;
 		/*
 		 * We don't deal with the resource if it isn't found in the
 		 * Xrm database at class initializtion time (in initAppDefaults).
 		 * Special handling of class instances.
 		 */
+		int name_length;
 		if (strchr(defs->wName, '.')) {
 			name_length = strlen(defs->wName) - strlen(strchr(defs->wName, '.'));
 		}
@@ -3058,6 +3005,7 @@ void SetAppDefaults(
 			continue;
 		}
 
+		char buf[1000];
 		/* Build up string after lineage */
 		if (defs->cInstName != NULL) {
 			/* Don't include class instance name if it is also the instance */
@@ -3087,6 +3035,7 @@ void SetAppDefaults(
 		XrmDatabase db = XtDatabase(dpy);
 		XrmCombineDatabase(rdb, &db, FALSE);
 #else
+#error old
 		XrmMergeDatabases(dpy->db, &rdb);
 		dpy->db = rdb;
 #endif
