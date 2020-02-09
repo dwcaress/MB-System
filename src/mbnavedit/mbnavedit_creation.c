@@ -1,7 +1,3 @@
-
-/* Begin user code block <abstract> */
-/* End user code block <abstract> */
-
 /**
  * README: Portions of this file are merged at file generation
  * time. Edits can be made *only* in between specified code blocks, look
@@ -15,8 +11,6 @@
  *
  */
 
-/* Begin user code block <file_comments> */
-
 #ifndef SANS
 #define SANS "helvetica"
 #endif
@@ -26,8 +20,6 @@
 #ifndef MONO
 #define MONO "courier"
 #endif
-
-/* End user code block <file_comments> */
 
 #include <Xm/Xm.h>
 #include <Xm/MainW.h>
@@ -73,96 +65,89 @@
  */
 #define DECLARE_BX_GLOBALS
 
-/**
- * Globally included information.
- */
-
-/**
- * Common constant and pixmap declarations.
- */
 #include "mbnavedit_creation.h"
 
 /**
  * Convenience functions from utilities file.
  */
-extern void RegisterBxConverters(XtAppContext);
-extern XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
-extern XtPointer BX_DOUBLE(double);
-extern XtPointer BX_SINGLE(float);
-extern void BX_MENU_POST(Widget, XtPointer, XEvent *, Boolean *);
-extern Pixmap XPM_PIXMAP(Widget, char **);
-extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
+void RegisterBxConverters(XtAppContext);
+XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
+XtPointer BX_DOUBLE(double);
+XtPointer BX_SINGLE(float);
+void BX_MENU_POST(Widget, XtPointer, XEvent *, Boolean *);
+Pixmap XPM_PIXMAP(Widget, char **);
+void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 
 /**
  * Declarations for callbacks and handlers.
  */
-extern void BxExitCB(Widget, XtPointer, XtPointer);
-extern void do_filelist_remove(Widget, XtPointer, XtPointer);
-extern void do_editlistselection(Widget, XtPointer, XtPointer);
-extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
-extern void do_toggle_output_on_filelist(Widget, XtPointer, XtPointer);
-extern void do_toggle_output_off_filelist(Widget, XtPointer, XtPointer);
-extern void do_offset_apply(Widget, XtPointer, XtPointer);
-extern void do_deletebadtimetag_apply(Widget, XtPointer, XtPointer);
-extern void do_timeinterpolation_apply(Widget, XtPointer, XtPointer);
-extern void do_useprevious_no(Widget, XtPointer, XtPointer);
-extern void do_useprevious_yes(Widget, XtPointer, XtPointer);
-extern void do_meantimewindow(Widget, XtPointer, XtPointer);
-extern void do_modeling_apply(Widget, XtPointer, XtPointer);
-extern void do_driftlat(Widget, XtPointer, XtPointer);
-extern void do_driftlon(Widget, XtPointer, XtPointer);
-extern void do_model_mode(Widget, XtPointer, XtPointer);
-extern void do_timestep(Widget, XtPointer, XtPointer);
-extern void do_timespan(Widget, XtPointer, XtPointer);
-extern void do_fileselection_ok(Widget, XtPointer, XtPointer);
-extern void do_fileselection_nomatch(Widget, XtPointer, XtPointer);
-extern void do_fileselection_cancel(Widget, XtPointer, XtPointer);
-extern void do_fileselection_filter(Widget, XtPointer, XtPointer);
-extern void do_toggle_output_on(Widget, XtPointer, XtPointer);
-extern void do_toggle_output_off(Widget, XtPointer, XtPointer);
-extern void do_end(Widget, XtPointer, XtPointer);
-extern void do_start(Widget, XtPointer, XtPointer);
-extern void do_interpolationrepeats(Widget, XtPointer, XtPointer);
-extern void do_unflag(Widget, XtPointer, XtPointer);
-extern void do_flag(Widget, XtPointer, XtPointer);
-extern void do_toggle_org_sonardepth(Widget, XtPointer, XtPointer);
-extern void do_toggle_sonardepth(Widget, XtPointer, XtPointer);
-extern void do_button_use_dr(Widget, XtPointer, XtPointer);
-extern void do_toggle_dr_lat(Widget, XtPointer, XtPointer);
-extern void do_toggle_dr_lon(Widget, XtPointer, XtPointer);
-extern void do_toggle_org_time(Widget, XtPointer, XtPointer);
-extern void do_toggle_time(Widget, XtPointer, XtPointer);
-extern void do_nextbuffer(Widget, XtPointer, XtPointer);
-extern void do_done(Widget, XtPointer, XtPointer);
-extern void do_forward(Widget, XtPointer, XtPointer);
-extern void do_reverse(Widget, XtPointer, XtPointer);
-extern void BxManageCB(Widget, XtPointer, XtPointer);
-extern void do_toggle_vru(Widget, XtPointer, XtPointer);
-extern void do_set_interval(Widget, XtPointer, XtPointer);
-extern void do_showall(Widget, XtPointer, XtPointer);
-extern void do_revert(Widget, XtPointer, XtPointer);
-extern void do_interpolation(Widget, XtPointer, XtPointer);
-extern void do_button_use_cmg(Widget, XtPointer, XtPointer);
-extern void do_toggle_show_cmg(Widget, XtPointer, XtPointer);
-extern void do_toggle_org_heading(Widget, XtPointer, XtPointer);
-extern void do_button_use_smg(Widget, XtPointer, XtPointer);
-extern void do_toggle_show_smg(Widget, XtPointer, XtPointer);
-extern void do_toggle_org_speed(Widget, XtPointer, XtPointer);
-extern void do_toggle_org_lat(Widget, XtPointer, XtPointer);
-extern void do_toggle_org_lon(Widget, XtPointer, XtPointer);
-extern void do_toggle_speed(Widget, XtPointer, XtPointer);
-extern void do_toggle_heading(Widget, XtPointer, XtPointer);
-extern void do_toggle_lat(Widget, XtPointer, XtPointer);
-extern void do_toggle_lon(Widget, XtPointer, XtPointer);
-extern void BxSetValuesCB(Widget, XtPointer, XtPointer);
-extern void do_toggle_pick(Widget, XtPointer, XtPointer);
-extern void do_toggle_select(Widget, XtPointer, XtPointer);
-extern void do_toggle_deselect(Widget, XtPointer, XtPointer);
-extern void do_toggle_selectall(Widget, XtPointer, XtPointer);
-extern void do_toggle_deselectall(Widget, XtPointer, XtPointer);
-extern void do_resize(Widget, XtPointer, XtPointer);
-extern void do_event(Widget, XtPointer, XtPointer);
-extern void do_expose(Widget, XtPointer, XtPointer);
+void BxExitCB(Widget, XtPointer, XtPointer);
+void do_filelist_remove(Widget, XtPointer, XtPointer);
+void do_editlistselection(Widget, XtPointer, XtPointer);
+void BxUnmanageCB(Widget, XtPointer, XtPointer);
+void do_toggle_output_on_filelist(Widget, XtPointer, XtPointer);
+void do_toggle_output_off_filelist(Widget, XtPointer, XtPointer);
+void do_offset_apply(Widget, XtPointer, XtPointer);
+void do_deletebadtimetag_apply(Widget, XtPointer, XtPointer);
+void do_timeinterpolation_apply(Widget, XtPointer, XtPointer);
+void do_useprevious_no(Widget, XtPointer, XtPointer);
+void do_useprevious_yes(Widget, XtPointer, XtPointer);
+void do_meantimewindow(Widget, XtPointer, XtPointer);
+void do_modeling_apply(Widget, XtPointer, XtPointer);
+void do_driftlat(Widget, XtPointer, XtPointer);
+void do_driftlon(Widget, XtPointer, XtPointer);
+void do_model_mode(Widget, XtPointer, XtPointer);
+void do_timestep(Widget, XtPointer, XtPointer);
+void do_timespan(Widget, XtPointer, XtPointer);
+void do_fileselection_ok(Widget, XtPointer, XtPointer);
+void do_fileselection_nomatch(Widget, XtPointer, XtPointer);
+void do_fileselection_cancel(Widget, XtPointer, XtPointer);
+void do_fileselection_filter(Widget, XtPointer, XtPointer);
+void do_toggle_output_on(Widget, XtPointer, XtPointer);
+void do_toggle_output_off(Widget, XtPointer, XtPointer);
+void do_end(Widget, XtPointer, XtPointer);
+void do_start(Widget, XtPointer, XtPointer);
+void do_interpolationrepeats(Widget, XtPointer, XtPointer);
+void do_unflag(Widget, XtPointer, XtPointer);
+void do_flag(Widget, XtPointer, XtPointer);
+void do_toggle_org_sonardepth(Widget, XtPointer, XtPointer);
+void do_toggle_sonardepth(Widget, XtPointer, XtPointer);
+void do_button_use_dr(Widget, XtPointer, XtPointer);
+void do_toggle_dr_lat(Widget, XtPointer, XtPointer);
+void do_toggle_dr_lon(Widget, XtPointer, XtPointer);
+void do_toggle_org_time(Widget, XtPointer, XtPointer);
+void do_toggle_time(Widget, XtPointer, XtPointer);
+void do_nextbuffer(Widget, XtPointer, XtPointer);
+void do_done(Widget, XtPointer, XtPointer);
+void do_forward(Widget, XtPointer, XtPointer);
+void do_reverse(Widget, XtPointer, XtPointer);
+void BxManageCB(Widget, XtPointer, XtPointer);
+void do_toggle_vru(Widget, XtPointer, XtPointer);
+void do_set_interval(Widget, XtPointer, XtPointer);
+void do_showall(Widget, XtPointer, XtPointer);
+void do_revert(Widget, XtPointer, XtPointer);
+void do_interpolation(Widget, XtPointer, XtPointer);
+void do_button_use_cmg(Widget, XtPointer, XtPointer);
+void do_toggle_show_cmg(Widget, XtPointer, XtPointer);
+void do_toggle_org_heading(Widget, XtPointer, XtPointer);
+void do_button_use_smg(Widget, XtPointer, XtPointer);
+void do_toggle_show_smg(Widget, XtPointer, XtPointer);
+void do_toggle_org_speed(Widget, XtPointer, XtPointer);
+void do_toggle_org_lat(Widget, XtPointer, XtPointer);
+void do_toggle_org_lon(Widget, XtPointer, XtPointer);
+void do_toggle_speed(Widget, XtPointer, XtPointer);
+void do_toggle_heading(Widget, XtPointer, XtPointer);
+void do_toggle_lat(Widget, XtPointer, XtPointer);
+void do_toggle_lon(Widget, XtPointer, XtPointer);
+void BxSetValuesCB(Widget, XtPointer, XtPointer);
+void do_toggle_pick(Widget, XtPointer, XtPointer);
+void do_toggle_select(Widget, XtPointer, XtPointer);
+void do_toggle_deselect(Widget, XtPointer, XtPointer);
+void do_toggle_selectall(Widget, XtPointer, XtPointer);
+void do_toggle_deselectall(Widget, XtPointer, XtPointer);
+void do_resize(Widget, XtPointer, XtPointer);
+void do_event(Widget, XtPointer, XtPointer);
+void do_expose(Widget, XtPointer, XtPointer);
 
 /**
  * Create the mainWindow hierarchy of widgets.
@@ -4792,7 +4777,5 @@ Widget CreatemainWindow(Widget parent) {
 	ac++;
 	XtSetValues(label_offset_lon, args, ac);
 
-	/* Begin user code block <end_CreatemainWindow> */
-	/* End user code block <end_CreatemainWindow> */
 	return (mainWindow);
 }
