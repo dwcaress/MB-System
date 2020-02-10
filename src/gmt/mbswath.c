@@ -109,11 +109,15 @@ EXTERN_MSC int GMT_mbswath(void *API, int mode, void *args);
 
 #define GMT_PROG_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "mb_define.h"
+#include "mb_format.h"
 #include "mb_io.h"
+#include "mb_status.h"
 
 /* MBSWATH MODE DEFINES */
 #define MBSWATH_BATH 1
