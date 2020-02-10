@@ -160,17 +160,19 @@ static wchar_t *CStrCommonWideCharsGet() {
 	 * the TYPEDEFS and DEFINES section above to correspond to this
 	 * array.
 	 */
-	static char *characters[] = {"\000", "\t", "\n", "\r", "\f", "\v", "\\", "\"", "#", ":", "f",
-	                             "l",    "n",  "r",  "t",  "v",  "F",  "L",  "R",  "T", "0", "1"};
-
-	if (CommonWideChars == NULL) {
-		// Allocate and create the array.
-		CommonWideChars = (wchar_t *)XtMalloc(NUM_COMMON_WCHARS * sizeof(wchar_t));
-
-		for (int i = 0; i < NUM_COMMON_WCHARS; i++) {
-			(void)dombtowc(&(CommonWideChars[i]), characters[i], 1);
-		}
+	if (CommonWideChars != NULL) {
+		return (CommonWideChars);
 	}
+
+	// Allocate and create the array.
+	CommonWideChars = (wchar_t *)XtMalloc(NUM_COMMON_WCHARS * sizeof(wchar_t));
+
+	for (int i = 0; i < NUM_COMMON_WCHARS; i++) {
+		static char *characters[] = {"\000", "\t", "\n", "\r", "\f", "\v", "\\", "\"", "#", ":", "f",
+			                     "l",    "n",  "r",  "t",  "v",  "F",  "L",  "R",  "T", "0", "1"};
+		dombtowc(&(CommonWideChars[i]), characters[i], 1);
+	}
+
 	return (CommonWideChars);
 }
 
@@ -331,7 +333,6 @@ static Boolean extractSegment(
 	bool modsSeen = False;
 	int dir = XmSTRING_DIRECTION_L_TO_R;
 	bool sep = False;
-	bool done = False;
 	/*
 	 * If the first character of the string isn't a # or a ", then we
 	 * just have a regular old simple string. Do the same the thing for
@@ -344,14 +345,13 @@ static Boolean extractSegment(
 		}
 		start += textL;
 	} else {
-		done = False;
+		bool done = false;
 		while (!done) {
 			if (*start == commonWChars[WHash]) {
 				if (tagSeen) {
-					done = True;
+					// done = true;
 					break;
-				}
-				else {
+				} else {
 					tagSeen = True;
 					tag = ++start;
 					start = getNextSeparator(tag);
@@ -376,11 +376,11 @@ static Boolean extractSegment(
 				if (*start == commonWChars[WQuote]) {
 					start++;
 				}
-				done = True;
+				done = true;
 			}
 			else if (*start == commonWChars[WColon]) {
 				if (modsSeen) {
-					done = True;
+					done = true;
 					break;
 				}
 
@@ -541,9 +541,7 @@ static XmString StringToXmString(char * str) {
 			XmStringFree(s2);
 		}
 
-		/*
-		 * Add in the separators.
-		 */
+		// Add in the separators.
 		if (sep) {
 			XmString s1 = XmStringSeparatorCreate();
 			XmString s2 = xmStr;
@@ -1225,15 +1223,6 @@ XtPointer BX_SINGLE(float val) {
 	return (pointer);
 }
 
-XtPointer BX_DOUBLE(double val) {
-	XtPointer pointer;
-
-	pointer = (XtPointer)XtMalloc(sizeof(double));
-	if (pointer != NULL)
-		*((double *)pointer) = val;
-	return (pointer);
-}
-
 #ifndef IGNORE_XPM_PIXMAP
 
 #ifndef USE_XPM_LIBRARY
@@ -1674,8 +1663,8 @@ static int xpmParseData(
     bxxpmData *data, bxxpmInternAttrib *attrib_return,
     BxXpmAttributes *attributes) {
 	/* variables to return */
-	unsigned int width, height;
-	unsigned int ncolors = 0;
+	unsigned int width;
+	unsigned int height;
 	unsigned int cpp;
 	unsigned int x_hotspot, y_hotspot, hotspot = 0;
 	char ***colorTable = NULL;
@@ -1700,9 +1689,8 @@ static int xpmParseData(
 	unsigned int lastwaskey; /* key read */
 	char curbuf[BUFSIZ];     /* current buffer */
 
-	/*
-	 * read hints: width, height, ncolors, chars_per_pixel
-	 */
+	// read hints: width, height, ncolors, chars_per_pixel
+	unsigned int ncolors = 0;
 	if (!(xpmNextUI(data, &width) && xpmNextUI(data, &height) && xpmNextUI(data, &rncolors) && xpmNextUI(data, &cpp)))
 		RETURN(BxXpmFileInvalid);
 
@@ -2552,9 +2540,7 @@ static void xpmFreeInternAttrib(bxxpmInternAttrib *attrib) {
 	}
 }
 
-/*
- * close the file related to the bxxpmData if any
- */
+// close the file related to the bxxpmData if any
 static void XpmDataClose(bxxpmData *mdata) {
 	switch (mdata->type) {
 	case BXXPMARRAY:
@@ -2877,17 +2863,10 @@ void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
 		XrmPutLineResource(&rdb, buf);
 	}
 
-	/* Merge them into the Xt database, with lowest precendence */
-
+	// Merge them into the Xt database, with lowest precendence
 	if (rdb) {
-#if (XlibSpecificationRelease >= 5)
 		XrmDatabase db = XtDatabase(dpy);
 		XrmCombineDatabase(rdb, &db, FALSE);
-#else
-#error old
-		XrmMergeDatabases(dpy->db, &rdb);
-		dpy->db = rdb;
-#endif
 	}
 }
 
@@ -2899,13 +2878,7 @@ void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
 void InitAppDefaults(Widget parent, UIAppDefault *defs) {
 /* Get the database */
 
-#if (XlibSpecificationRelease >= 5)
 	XrmDatabase rdb = XrmGetDatabase(XtDisplay(parent));
-#else
-#error old
-	Display *dpy = XtDisplay(parent);
-	XrmDatabase rdb = dpy->db;
-#endif
 	if (rdb == NULL) {
 		return; /*  Can't get the database */
 	}
@@ -3031,13 +3004,7 @@ void SetAppDefaults(
 
 	/* Merge them into the Xt database, with lowest precendence */
 	if (rdb) {
-#if (XlibSpecificationRelease >= 5)
 		XrmDatabase db = XtDatabase(dpy);
 		XrmCombineDatabase(rdb, &db, FALSE);
-#else
-#error old
-		XrmMergeDatabases(dpy->db, &rdb);
-		dpy->db = rdb;
-#endif
 	}
 }
