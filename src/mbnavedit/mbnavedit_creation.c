@@ -56,11 +56,6 @@
 
 void RegisterBxConverters(XtAppContext);
 XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
-XtPointer BX_DOUBLE(double);
-XtPointer BX_SINGLE(float);
-void BX_MENU_POST(Widget, XtPointer, XEvent *, Boolean *);
-Pixmap XPM_PIXMAP(Widget, char **);
-void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 
 void BxExitCB(Widget, XtPointer, XtPointer);
 void do_filelist_remove(Widget, XtPointer, XtPointer);
