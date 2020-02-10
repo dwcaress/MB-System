@@ -1262,7 +1262,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
   /* apply shift or "nudge" to grid bounds so that the GeoTiff location is shifted
       as desired - the nudge_x and nudge_y values are defined in meters and must
       be translated to the image bounds coordinates */
-  if (Ctrl->Nudge.active == true) {
+  if (Ctrl->Nudge.active) {
     /* geographic coordinates so convert Ctrl->Nudge.nudge_x and Ctrl->Nudge.nudge_y to degress lon and lat */
     if (modeltype == ModelTypeGeographic) {
 	double mtodeglon, mtodeglat;
