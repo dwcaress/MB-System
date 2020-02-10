@@ -507,7 +507,7 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
   if (status == MB_SUCCESS) {
     double NaN;
     MB_MAKE_FNAN(NaN);
-    /* int first = false; */
+    /* bool first = false; */
     /* double min = 0.0; */
     /* double max = 0.0; */
     for (int i = 0; i < n_columns; i++)
@@ -518,7 +518,7 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
           G->data[kk] = NaN;
         else {
           G->data[kk] = grid[k];
-          /* if (first == true) { */
+          /* if (first) { */
             /* min = grid[k]; */
             /* max = grid[k]; */
             /* first = false; */
