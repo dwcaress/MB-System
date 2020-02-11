@@ -408,7 +408,7 @@ void do_mbedit_init(int argc, char **argv) {
 	do_mbedit_settimer();
 
 	/* if startup indicated by num_files > 0 try to open first file */
-	if (startup_file == true && numfiles > 0) {
+	if (startup_file && numfiles > 0) {
 		do_load_specific_file(0);
 	}
 
