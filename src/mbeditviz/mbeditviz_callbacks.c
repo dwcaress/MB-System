@@ -467,7 +467,7 @@ void do_mbeditviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
   /* loop over all files to be sure all files are unloaded */
   for (ifile = 0; ifile < mbev_num_files; ifile++) {
     file = &(mbev_files[ifile]);
-    if (file->load_status == true) {
+    if (file->load_status) {
       mbeditviz_unload_file(ifile);
     }
   }
@@ -534,7 +534,7 @@ void do_mbeditviz_viewall(Widget w, XtPointer client_data, XtPointer call_data) 
     fprintf(stderr, "do_mbeditviz_viewall loading file %d\n", ifile);
 #endif
     file = &(mbev_files[ifile]);
-    if (file->load_status == false) {
+    if (!file->load_status) {
       sprintf(value_text, "Loading file %d of %d...", ifile + 1, mbev_num_files);
       do_mbeditviz_message_on(value_text);
 #ifdef MBEDITVIZ_GUI_DEBUG
@@ -581,7 +581,7 @@ void do_mbeditviz_viewselected(Widget w, XtPointer client_data, XtPointer call_d
   struct mbev_file_struct *file;
   int *position_list = NULL;
   int position_count = 0;
-  int selected;
+  bool selected;
   int ifile;
   int loadcount;
   int i;
@@ -641,16 +641,16 @@ void do_mbeditviz_viewselected(Widget w, XtPointer client_data, XtPointer call_d
 
     /* load unloaded selected files, unload loaded unselected files */
     file = &(mbev_files[ifile]);
-    if (selected == true && file->load_status == false) {
+    if (selected && !file->load_status) {
       loadcount++;
       sprintf(value_text, "Loading file %d of %d...", loadcount, position_count);
       do_mbeditviz_message_on(value_text);
       mbeditviz_load_file(ifile);
     }
-    else if (selected == true && file->load_status == true) {
+    else if (selected && file->load_status) {
       loadcount++;
     }
-    else if (selected == false && file->load_status == true) {
+    else if (!selected && file->load_status) {
       mbeditviz_unload_file(ifile);
     }
   }
@@ -717,7 +717,7 @@ void do_mbeditviz_regrid(Widget w, XtPointer client_data, XtPointer call_data) {
   loadcount = 0;
   for (ifile = 0; ifile < mbev_num_files; ifile++) {
     file = &(mbev_files[ifile]);
-    if (file->load_status == true)
+    if (file->load_status)
       loadcount++;
   }
 
@@ -770,7 +770,7 @@ void do_mbeditviz_updategrid(Widget w, XtPointer client_data, XtPointer call_dat
   loadcount = 0;
   for (ifile = 0; ifile < mbev_num_files; ifile++) {
     file = &(mbev_files[ifile]);
-    if (file->load_status == true)
+    if (file->load_status)
       loadcount++;
   }
 
@@ -1194,7 +1194,7 @@ void do_mbeditviz_viewgrid() {
     /* add navigation to view */
     for (ifile = 0; ifile < mbev_num_files; ifile++) {
       file = &(mbev_files[ifile]);
-      if (file->load_status == true && file->num_pings > 0) {
+      if (file->load_status && file->num_pings > 0) {
         /* set message */
         sprintf(value_text, "Loading nav %d of %d...", ifile + 1, mbev_num_files);
         do_mbeditviz_message_on(value_text);
@@ -1504,7 +1504,7 @@ void do_mbeditviz_update_gui() {
   mbev_num_soundings_loaded = 0;
   for (i = 0; i < mbev_num_files; i++) {
     file = &(mbev_files[i]);
-    if (file->load_status == true) {
+    if (file->load_status) {
       mbev_num_files_loaded++;
       mbev_num_pings_loaded += file->num_pings;
       for (j = 0; j < file->num_pings; j++) {
@@ -1562,7 +1562,7 @@ void do_mbeditviz_update_gui() {
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_update_filelist() {
   struct mbev_file_struct *file;
-  int update_filelist;
+  bool update_filelist;
 
   char string[MB_PATH_MAXLINE];
   Cardinal ac;
@@ -1652,7 +1652,7 @@ void do_mbeditviz_update_filelist() {
   }
 
   /* only update the filelist if necessary */
-  if (update_filelist == true) {
+  if (update_filelist) {
     /* get the current selection, if any, from the list */
     ac = 0;
     XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
@@ -1678,13 +1678,13 @@ void do_mbeditviz_update_filelist() {
         file = &(mbev_files[i]);
 
         /* set label strings */
-        if (file->load_status == true)
+        if (file->load_status)
           lockstrptr = loadedstr;
-        else if (file->locked == true)
+        else if (file->locked)
           lockstrptr = lockedstr;
         else
           lockstrptr = unlockedstr;
-        if (file->esf_exists == true)
+        if (file->esf_exists)
           esfstrptr = esfyesstr;
         else
           esfstrptr = esfnostr;
@@ -1953,7 +1953,7 @@ void do_mbeditviz_colorchange_notify(size_t instance) {
 #endif
 
   /* recolor any selected soundings and then replot */
-  if (mbev_selected.displayed == true && mbev_selected.num_soundings > 0) {
+  if (mbev_selected.displayed && mbev_selected.num_soundings > 0) {
   	for (int isounding = 0; isounding < mbev_selected.num_soundings; isounding++) {
   		struct mb3dsoundings_sounding_struct *sounding = &mbev_selected.soundings[isounding];
   		if (mb_beam_ok(sounding->beamflag)) {
@@ -2124,7 +2124,7 @@ int do_mbeditviz_settimer() {
   int id;
 
   /* set timer function if none set for this instance */
-  if (timer_function_set == false) {
+  if (!timer_function_set) {
     id = XtAppAddTimeOut(app, (unsigned long)timer_timeout_time, (XtTimerCallbackProc)do_mbeditviz_workfunction,
                          (XtPointer)-1);
     if (id > 0)
