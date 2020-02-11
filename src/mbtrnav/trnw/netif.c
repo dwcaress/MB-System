@@ -823,7 +823,7 @@ void netif_show(netif_t *self, bool verbose, int indent)
 // End function netif_show
 
 
-int netif_init_log(netif_t *self, char *log_name, char *log_dir)
+int netif_init_log(netif_t *self, char *log_name, char *log_dir, char *session_str)
 {
     int retval=-1;
     if(NULL!=self && NULL!=log_name){
@@ -850,6 +850,9 @@ int netif_init_log(netif_t *self, char *log_name, char *log_dir)
             self->log_dir=strdup(log_dir);
         }
 
+        if(NULL!=session_str){
+            sprintf(session_date,"%s",session_str);
+        }else{
         // make session time string to use
         // in log file names
         time(&rawtime);
@@ -860,7 +863,7 @@ int netif_init_log(netif_t *self, char *log_name, char *log_dir)
                 (gmt->tm_year+1900),gmt->tm_mon+1,gmt->tm_mday,
                 gmt->tm_hour,gmt->tm_min,gmt->tm_sec);
 
-
+        }
         self->mlog_path = (char *)malloc(NETIF_LOG_PATH_BYTES);
 
         sprintf(self->mlog_path,"%s//%s-%s%s",self->log_dir,log_name,session_date,NETIF_LOG_EXT);
@@ -880,7 +883,7 @@ int netif_start(netif_t *self, uint32_t delay_msec)
     int test=-1;
     if(NULL!=self && NULL!=self->host){
         if(self->mlog_id==MLOG_ID_INVALID){
-        	netif_init_log(self,NETIF_MLOG_NAME,NULL);
+        	netif_init_log(self,NETIF_MLOG_NAME,NULL,NULL);
         }
 
         mlog_tprintf(self->mlog_id,"*** netif session start ***\n");
@@ -1153,7 +1156,7 @@ int netif_test()
     netif_init_mmd();
     netif_set_reqres_res(netif,trn);
     // initialize message log
-    int il = netif_init_log(netif, NETIF_MLOG_NAME, NULL);
+    int il = netif_init_log(netif, NETIF_MLOG_NAME, NULL,NULL);
 
     mlog_tprintf(netif->mlog_id,"*** netif session start (TEST) ***\n");
     mlog_tprintf(netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());

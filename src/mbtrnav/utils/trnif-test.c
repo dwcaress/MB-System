@@ -541,7 +541,7 @@ static int s_app_main(app_cfg_t *cfg)
     netif_show(netif,true,5);
 
     // initialize message log
-    int il = netif_init_log(netif, NETIF_MLOG_NAME, ".");
+    int il = netif_init_log(netif, NETIF_MLOG_NAME, ".",NULL);
     mlog_tprintf(netif->mlog_id,"*** netif session start (TEST) ***\n");
     mlog_tprintf(netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
 
