@@ -28,18 +28,13 @@
 #include <windows.h>
 #endif
 
-#include <Xm/Xm.h>
-
-/*
- * Standard includes for builtins.
- */
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
+#include <unistd.h>
 #ifdef USE_UUID
 #include <uuid.h>
 #endif
@@ -50,6 +45,8 @@
 #include "mb_format.h"
 #include "mb_aux.h"
 #include "mbsys_singlebeam.h"
+
+#include <Xm/Xm.h>
 
 /* mbview include file */
 #include "mbview.h"
@@ -258,8 +255,7 @@ void BxExitCB(Widget w, XtPointer client, XtPointer call) {
   (void)w;  // Unused parameter
   (void)client;  // Unused parameter
   (void)call;  // Unused parameter
-  long exitValue = EXIT_FAILURE;
-  exit(exitValue);
+  exit(EXIT_FAILURE);
 }
 
 /*      Function Name:   BxManageCB
@@ -281,16 +277,14 @@ void BxExitCB(Widget w, XtPointer client, XtPointer call) {
 /* ARGSUSED */
 void BxManageCB(Widget w, XtPointer client, XtPointer call) {
   (void)call;  // Unused parameter
-  WidgetList widgets;
-  int i;
 
   /*
    * This function returns a NULL terminated WidgetList.  The memory for
    * the list needs to be freed when it is no longer needed.
    */
-  widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
+  WidgetList widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
 
-  i = 0;
+  int i = 0;
   while (widgets && widgets[i] != NULL) {
     XtManageChild(widgets[i]);
     i++;
@@ -317,16 +311,14 @@ void BxManageCB(Widget w, XtPointer client, XtPointer call) {
 /* ARGSUSED */
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
   (void)call;  // Unused parameter
-  WidgetList widgets;
-  int i;
 
   /*
    * This function returns a NULL terminated WidgetList.  The memory for
    * the list needs to be freed when it is no longer needed.
    */
-  widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
+  WidgetList widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
 
-  i = 0;
+  int i = 0;
   while (widgets && widgets[i] != NULL) {
     XtUnmanageChild(widgets[i]);
     i++;
@@ -357,16 +349,14 @@ void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
 /* ARGSUSED */
 void BxPopdownCB(Widget w, XtPointer client, XtPointer call) {
   (void)call;  // Unused parameter
-  WidgetList widgets;
-  int i;
 
   /*
    * This function returns a NULL terminated WidgetList.  The memory for
    * the list needs to be freed when it is no longer needed.
    */
-  widgets = BxWidgetIdsFromNames(w, "BxPopdownCB", (String)client);
+  WidgetList widgets = BxWidgetIdsFromNames(w, "BxPopdownCB", (String)client);
 
-  i = 0;
+  int i = 0;
   while (widgets && widgets[i] != NULL) {
     if (XtIsShell(widgets[i])) {
       XtPopdown(widgets[i]);
@@ -405,16 +395,14 @@ Object %s is not a Shell\n",
 /* ARGSUSED */
 void BxPopupCB(Widget w, XtPointer client, XtPointer call) {
   (void)call;  // Unused parameter
-  WidgetList widgets;
-  int i;
 
   /*
    * This function returns a NULL terminated WidgetList.  The memory for
    * the list needs to be freed when it is no longer needed.
    */
-  widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
+  WidgetList widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
 
-  i = 0;
+  int i = 0;
   while (widgets && widgets[i] != NULL) {
     if (XtIsShell(widgets[i])) {
       XtPopup(widgets[i], XtGrabNone);
@@ -431,18 +419,12 @@ Object %s is not a Shell\n",
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
-  Cardinal ac = 0;
-  Arg args[256];
-  char value_text[MB_PATH_MAXLINE];
-  XmStringTable str_list;
-  int i;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       argc:           %d\n", argc);
     fprintf(stderr, "dbg2       argv:\n");
-    for (i = 0; i < argc; i++)
+    for (int i = 0; i < argc; i++)
       fprintf(stderr, "dbg2       argv[%d]:    %s\n", i, argv[i]);
     fprintf(stderr, "dbg2       verbosity:   %d\n", verbosity);
   }
@@ -453,6 +435,7 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
   error = MB_ERROR_NO_ERROR;
 
   /* set about version label */
+  char value_text[MB_PATH_MAXLINE];
   sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION, MB_BUILD_DATE);
   set_mbview_label_multiline_string(label_about_version, value_text);
 
@@ -464,10 +447,11 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
   /* set up survey planning widgets */
 
   /* set up line control */
-  str_list = (XmStringTable)XtMalloc(2 * sizeof(XmString *));
+  XmStringTable str_list = (XmStringTable)XtMalloc(2 * sizeof(XmString *));
   str_list[0] = XmStringCreateLocalized("Uniform");
   str_list[1] = XmStringCreateLocalized("Variable by Swath Width");
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNnumValues, 2);
   ac++;
   XtSetArg(args[ac], XmNvalues, str_list);
@@ -565,7 +549,7 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
   XtFree((XtPointer)str_list);
 
   /* initialize mbview_id list */
-  for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+  for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
     mbview_id[i] = false;
   }
 
@@ -576,24 +560,16 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_sensitivity() {
-  int mbview_active;
-  int mbview_allactive;
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  int nsite, nroute;
-  int i;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
   /* fprintf(stderr,"do_mbgrdviz_sensitivity called\n");*/
   /* set file opening menu items only if an mbview instance is active */
-  mbview_active = false;
-  mbview_allactive = true;
-  instance = MBV_NO_WINDOW;
-  for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+  bool mbview_active = false;
+  bool mbview_allactive = true;
+  size_t instance = MBV_NO_WINDOW;
+  for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
     if (mbview_id[i] == true) {
       mbview_active = true;
       if (instance == MBV_NO_WINDOW)
@@ -602,6 +578,9 @@ void do_mbgrdviz_sensitivity() {
     else
       mbview_allactive = false;
   }
+
+  Cardinal ac = 0;
+  Arg args[256];
 
   /* set file opening menu item only if not all mbview instances are active */
   if (mbview_allactive != true) {
@@ -633,6 +612,7 @@ void do_mbgrdviz_sensitivity() {
   XtSetValues(pushButton_openswath, args, ac);
   XtSetValues(pushButton_openvector, args, ac);
 
+  int nsite;
   mbview_getsitecount(verbose, instance, &nsite, &error);
   if (mbview_active == true && nsite > 0) {
     ac = 0;
@@ -646,6 +626,7 @@ void do_mbgrdviz_sensitivity() {
   }
   XtSetValues(pushButton_savesite, args, ac);
 
+  int nroute;
   mbview_getroutecount(verbose, instance, &nroute, &error);
   if (mbview_active == true && nroute > 0) {
     ac = 0;
@@ -661,10 +642,6 @@ void do_mbgrdviz_sensitivity() {
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -680,7 +657,8 @@ void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer cal
   // const size_t instance = actionid - mode * MBV_MAX_WINDOWS;
 
   /* set title to open primary grid */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Open GMT Grid File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -688,7 +666,8 @@ void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer cal
 
   /* open primary grid */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.grd", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.grd", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
 
@@ -699,12 +678,6 @@ void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer cal
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -716,10 +689,11 @@ void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, X
   }
 
   /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Open Overlay GMT Grid File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -727,10 +701,11 @@ void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, X
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.grd", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.grd", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_OPENOVERLAY * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_OPENOVERLAY * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -738,12 +713,6 @@ void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, X
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -754,11 +723,11 @@ void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPo
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Open Site File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -766,10 +735,11 @@ void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPo
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.ste", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.ste", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_OPENSITE * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_OPENSITE * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -777,12 +747,6 @@ void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPo
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -793,11 +757,11 @@ void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtP
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Open Route File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -805,10 +769,11 @@ void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtP
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.rte", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.rte", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_OPENROUTE * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_OPENROUTE * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -816,12 +781,6 @@ void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtP
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -832,10 +791,11 @@ void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPoi
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
+  Cardinal ac = 0;
+  Arg args[256];
   ac = 0;
   XtSetArg(args[ac], XmNtitle, "Open Navigation Datalist File");
   ac++;
@@ -844,10 +804,11 @@ void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPoi
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.mb-1", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.mb-1", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_OPENNAV * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_OPENNAV * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -855,12 +816,6 @@ void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPoi
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -871,11 +826,11 @@ void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtP
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Open Swath Datalist File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -883,10 +838,11 @@ void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtP
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.mb-1", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.mb-1", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_OPENSWATH * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_OPENSWATH * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -894,12 +850,6 @@ void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtP
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_openvector(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -910,11 +860,11 @@ void do_mbgrdviz_fileSelectionBox_openvector(Widget w, XtPointer client_data, Xt
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Open Vector File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -922,10 +872,11 @@ void do_mbgrdviz_fileSelectionBox_openvector(Widget w, XtPointer client_data, Xt
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_OPENVECTOR * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_OPENVECTOR * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -933,12 +884,6 @@ void do_mbgrdviz_fileSelectionBox_openvector(Widget w, XtPointer client_data, Xt
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -949,11 +894,11 @@ void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPo
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Site File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -961,10 +906,11 @@ void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPo
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVESITE * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVESITE * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -972,12 +918,6 @@ void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPo
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savesitewpt(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -988,11 +928,11 @@ void do_mbgrdviz_fileSelectionBox_savesitewpt(Widget w, XtPointer client_data, X
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Sites as Winfrog WPT File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1000,10 +940,11 @@ void do_mbgrdviz_fileSelectionBox_savesitewpt(Widget w, XtPointer client_data, X
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVESITEWPT * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVESITEWPT * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1011,12 +952,6 @@ void do_mbgrdviz_fileSelectionBox_savesitewpt(Widget w, XtPointer client_data, X
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -1027,11 +962,11 @@ void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtP
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Route File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1039,10 +974,11 @@ void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtP
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVEROUTE * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVEROUTE * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1050,12 +986,6 @@ void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtP
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_saverisiscript(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -1066,11 +996,11 @@ void do_mbgrdviz_fileSelectionBox_saverisiscript(Widget w, XtPointer client_data
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Risi Script File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1078,10 +1008,11 @@ void do_mbgrdviz_fileSelectionBox_saverisiscript(Widget w, XtPointer client_data
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVERISISCRIPT * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVERISISCRIPT * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1089,12 +1020,6 @@ void do_mbgrdviz_fileSelectionBox_saverisiscript(Widget w, XtPointer client_data
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -1105,11 +1030,11 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Route as Winfrog PTS File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1117,10 +1042,11 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVEWINFROGPTS * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVEWINFROGPTS * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1128,12 +1054,6 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -1144,11 +1064,11 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Route as Winfrog WPT File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1156,10 +1076,11 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVEWINFROGWPT * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVEWINFROGWPT * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1167,12 +1088,6 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savedegdecmin(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -1183,11 +1098,11 @@ void do_mbgrdviz_fileSelectionBox_savedegdecmin(Widget w, XtPointer client_data,
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Route as Degrees + Decimal Minutes File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1195,10 +1110,11 @@ void do_mbgrdviz_fileSelectionBox_savedegdecmin(Widget w, XtPointer client_data,
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVEDEGDECMIN * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVEDEGDECMIN * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1206,12 +1122,6 @@ void do_mbgrdviz_fileSelectionBox_savedegdecmin(Widget w, XtPointer client_data,
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -1222,11 +1132,11 @@ void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPoi
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Route as Hypack LNW File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1234,10 +1144,11 @@ void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPoi
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVELNW * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVELNW * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1245,12 +1156,6 @@ void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPoi
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savegreenseayml(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -1261,11 +1166,11 @@ void do_mbgrdviz_fileSelectionBox_savegreenseayml(Widget w, XtPointer client_dat
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Route as Greensea YML File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1273,10 +1178,11 @@ void do_mbgrdviz_fileSelectionBox_savegreenseayml(Widget w, XtPointer client_dat
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVEGREENSEAYML * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVEGREENSEAYML * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1284,12 +1190,6 @@ void do_mbgrdviz_fileSelectionBox_savegreenseayml(Widget w, XtPointer client_dat
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -1300,11 +1200,11 @@ void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, X
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Profile File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1312,10 +1212,11 @@ void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, X
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVEPROFILE * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVEPROFILE * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1323,12 +1224,6 @@ void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, X
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_realtime(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (verbose >= 2) {
@@ -1339,11 +1234,11 @@ void do_mbgrdviz_fileSelectionBox_realtime(Widget w, XtPointer client_data, XtPo
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = 0;
+  const size_t instance = 0;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Set Realtime Navigation Source");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1351,10 +1246,11 @@ void do_mbgrdviz_fileSelectionBox_realtime(Widget w, XtPointer client_data, XtPo
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_REALTIME * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_REALTIME * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1394,10 +1290,7 @@ void do_mbgrdviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_dismiss_notify(size_t instance) {
-  int status = MB_SUCCESS;
-  int verbose = 0;
-  int i;
-
+  // int verbose = 0;
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1416,7 +1309,8 @@ int do_mbgrdviz_dismiss_notify(size_t instance) {
   }
 
   /* update widgets of remaining mbview windows */
-  for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+  int status = MB_SUCCESS;
+  for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
     if (mbview_id[i] == true)
       status = mbview_update(verbose, i, &error);
   }
@@ -1429,15 +1323,6 @@ int do_mbgrdviz_dismiss_notify(size_t instance) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) {
-  size_t actionid;
-  size_t mode;
-  size_t instance;
-  char *file_ptr = NULL;
-  Cardinal ac = 0;
-  Arg args[256];
-  XmFileSelectionBoxCallbackStruct *acs;
-  acs = (XmFileSelectionBoxCallbackStruct *)call_data;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1446,6 +1331,9 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
+  char *file_ptr = NULL;
+  XmFileSelectionBoxCallbackStruct *acs = (XmFileSelectionBoxCallbackStruct *)call_data;
+
   /* read the input file name */
   XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &file_ptr);
   if (strlen(file_ptr) <= 0 && file_ptr != NULL) {
@@ -1453,7 +1341,6 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
     file_ptr = NULL;
   }
 
-  /* print debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg4  Extracted input file name from call_data:\n");
     fprintf(stderr, "dbg4       call_data:           %p\n", call_data);
@@ -1464,19 +1351,20 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
   }
 
   /* figure out what kind of file is to be opened */
-
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
+  size_t actionid;
   XtSetArg(args[ac], XmNuserData, (XtPointer)&actionid);
   ac++;
   XtGetValues(fileSelectionBox, args, ac);
 
-  mode = actionid / MBV_MAX_WINDOWS;
+  size_t mode = actionid / MBV_MAX_WINDOWS;
+  size_t instance;
   if (mode > 0)
     instance = actionid - mode * MBV_MAX_WINDOWS;
   else
     instance = 0;
 
-  /* print debug statements */
   if (verbose >= 4) {
     fprintf(stderr, "\ndbg4  Extracted user data from widget fileSelectionBox:\n");
     fprintf(stderr, "dbg4       fileSelectionBox:    %p\n", fileSelectionBox);
