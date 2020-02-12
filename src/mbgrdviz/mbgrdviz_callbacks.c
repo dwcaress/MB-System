@@ -255,6 +255,9 @@ WidgetList BxWidgetIdsFromNames(Widget, char *, char *);
 
 /* ARGSUSED */
 void BxExitCB(Widget w, XtPointer client, XtPointer call) {
+  (void)w;  // Unused parameter
+  (void)client;  // Unused parameter
+  (void)call;  // Unused parameter
   long exitValue = EXIT_FAILURE;
   exit(exitValue);
 }
@@ -277,6 +280,7 @@ void BxExitCB(Widget w, XtPointer client, XtPointer call) {
 
 /* ARGSUSED */
 void BxManageCB(Widget w, XtPointer client, XtPointer call) {
+  (void)call;  // Unused parameter
   WidgetList widgets;
   int i;
 
@@ -312,6 +316,7 @@ void BxManageCB(Widget w, XtPointer client, XtPointer call) {
 
 /* ARGSUSED */
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
+  (void)call;  // Unused parameter
   WidgetList widgets;
   int i;
 
@@ -351,6 +356,7 @@ void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
 
 /* ARGSUSED */
 void BxPopdownCB(Widget w, XtPointer client, XtPointer call) {
+  (void)call;  // Unused parameter
   WidgetList widgets;
   int i;
 
@@ -398,6 +404,7 @@ Object %s is not a Shell\n",
 
 /* ARGSUSED */
 void BxPopupCB(Widget w, XtPointer client, XtPointer call) {
+  (void)call;  // Unused parameter
   WidgetList widgets;
   int i;
 
@@ -654,11 +661,8 @@ void do_mbgrdviz_sensitivity() {
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer call_data) {
-  size_t actionid;
-  size_t mode;
   Cardinal ac = 0;
   Arg args[256];
-  size_t instance;
   XmString tmp0;
   Boolean argok;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
@@ -671,9 +675,9 @@ void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer cal
   }
 
   /* figure out what kind of file is to be opened */
-  actionid = (size_t)client_data;
-  mode = actionid / MBV_MAX_WINDOWS;
-  instance = actionid - mode * MBV_MAX_WINDOWS;
+  const size_t actionid = (size_t)client_data;
+  // const size_t mode = actionid / MBV_MAX_WINDOWS;
+  // const size_t instance = actionid - mode * MBV_MAX_WINDOWS;
 
   /* set title to open primary grid */
   ac = 0;
@@ -1371,11 +1375,11 @@ void do_mbgrdviz_close(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
-  int status = MB_SUCCESS;
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   /* close any active mbview instances */
-  status = mbview_quit(verbose, &error);
+  // const int status =
+  mbview_quit(verbose, &error);
 
   XtUnmanageChild(XtParent(mainWindow));
 
@@ -1425,7 +1429,6 @@ int do_mbgrdviz_dismiss_notify(size_t instance) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) {
-  int status = MB_SUCCESS;
   size_t actionid;
   size_t mode;
   size_t instance;
@@ -1482,121 +1485,122 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
   }
 
   /* open primary grid */
+  // int status = MB_SUCCESS;
   if (mode <= MBGRDVIZ_OPENGRID) {
     /* read the grid and open mbview window */
-    status = do_mbgrdviz_openprimary(file_ptr);
+    /* status = */ do_mbgrdviz_openprimary(file_ptr);
   }
 
   /* else open overlay grid */
   else if (mode == MBGRDVIZ_OPENOVERLAY) {
     /* read the grid and update mbview window */
     do_mbview_message_on("Reading overlay grid...", instance);
-    status = do_mbgrdviz_openoverlay(instance, file_ptr);
+    /* status = */ do_mbgrdviz_openoverlay(instance, file_ptr);
   }
 
   /* else open site data */
   else if (mode == MBGRDVIZ_OPENSITE) {
     /* read site file and update mbview window */
     do_mbview_message_on("Reading site data...", instance);
-    status = do_mbgrdviz_opensite(instance, file_ptr);
+    /* status = */ do_mbgrdviz_opensite(instance, file_ptr);
   }
 
   /* else open route data */
   else if (mode == MBGRDVIZ_OPENROUTE) {
     /* read route file and update mbview window */
     do_mbview_message_on("Reading route data...", instance);
-    status = do_mbgrdviz_openroute(instance, file_ptr);
+    /* status = */ do_mbgrdviz_openroute(instance, file_ptr);
   }
 
   /* else open nav data */
   else if (mode == MBGRDVIZ_OPENNAV) {
     /* read nav file and update mbview window */
     do_mbview_message_on("Reading navigation data...", instance);
-    status = do_mbgrdviz_opennav(instance, false, file_ptr);
+    /* status = */ do_mbgrdviz_opennav(instance, false, file_ptr);
   }
 
   /* else open swath data */
   else if (mode == MBGRDVIZ_OPENSWATH) {
     /* read nav file and update mbview window */
     do_mbview_message_on("Reading swath data...", instance);
-    status = do_mbgrdviz_opennav(instance, true, file_ptr);
+    /* status = */ do_mbgrdviz_opennav(instance, true, file_ptr);
   }
 
   /* else open vector data */
   else if (mode == MBGRDVIZ_OPENVECTOR) {
     /* read vector file and update mbview window */
     do_mbview_message_on("Reading vector data...", instance);
-    status = do_mbgrdviz_openvector(instance, file_ptr);
+    /* status = */ do_mbgrdviz_openvector(instance, file_ptr);
   }
 
   /* else write site data */
   else if (mode == MBGRDVIZ_SAVESITE) {
     /* write site file */
     do_mbview_message_on("Saving site data...", instance);
-    status = do_mbgrdviz_savesite(instance, file_ptr);
+    /* status = */ do_mbgrdviz_savesite(instance, file_ptr);
   }
 
   /* else write site data */
   else if (mode == MBGRDVIZ_SAVESITEWPT) {
     /* write site file */
     do_mbview_message_on("Saving site data...", instance);
-    status = do_mbgrdviz_savesitewpt(instance, file_ptr);
+    /* status = */ do_mbgrdviz_savesitewpt(instance, file_ptr);
   }
 
   /* else write route data */
   else if (mode == MBGRDVIZ_SAVEROUTE) {
     /* write route file */
     do_mbview_message_on("Saving route data...", instance);
-    status = do_mbgrdviz_saveroute(instance, file_ptr);
+    /* status = */ do_mbgrdviz_saveroute(instance, file_ptr);
   }
 
   /* else write route data */
   else if (mode == MBGRDVIZ_SAVERISISCRIPT) {
     /* write route file */
     do_mbview_message_on("Saving route as Risi script...", instance);
-    status = do_mbgrdviz_saverisiscript(instance, file_ptr);
+    /* status = */ do_mbgrdviz_saverisiscript(instance, file_ptr);
   }
 
   /* else write route data as Winfrog pts file */
   else if (mode == MBGRDVIZ_SAVEWINFROGPTS) {
     /* write route file */
     do_mbview_message_on("Saving route as Winfrog PTS file...", instance);
-    status = do_mbgrdviz_savewinfrogpts(instance, file_ptr);
+    /* status = */ do_mbgrdviz_savewinfrogpts(instance, file_ptr);
   }
 
   /* else write route data as Winfrog wpt file */
   else if (mode == MBGRDVIZ_SAVEWINFROGWPT) {
     /* write route file */
     do_mbview_message_on("Saving route as Winfrog WPT file...", instance);
-    status = do_mbgrdviz_savewinfrogwpt(instance, file_ptr);
+    /* status = */ do_mbgrdviz_savewinfrogwpt(instance, file_ptr);
   }
 
   /* else write route data as degrees decimal minutes file */
   else if (mode == MBGRDVIZ_SAVEDEGDECMIN) {
     /* write route file */
     do_mbview_message_on("Saving route as degrees + decimal minutes file...", instance);
-    status = do_mbgrdviz_savedegdecmin(instance, file_ptr);
+    /* status = */ do_mbgrdviz_savedegdecmin(instance, file_ptr);
   }
 
     /* else write route data as Hypack lnw file */
     else if (mode == MBGRDVIZ_SAVELNW) {
       /* write route file */
       do_mbview_message_on("Saving route as Hypack LNW file...", instance);
-      status = do_mbgrdviz_savelnw(instance, file_ptr);
+      /* status = */ do_mbgrdviz_savelnw(instance, file_ptr);
     }
 
       /* else write route data as Hypack lnw file */
       else if (mode == MBGRDVIZ_SAVEGREENSEAYML) {
         /* write route file */
         do_mbview_message_on("Saving route as Greensea YML file...", instance);
-        status = do_mbgrdviz_savegreenseayml(instance, file_ptr);
+        /* status = */ do_mbgrdviz_savegreenseayml(instance, file_ptr);
       }
 
   /* else write route data */
   else if (mode == MBGRDVIZ_SAVEPROFILE) {
     /* write route file */
     do_mbview_message_on("Saving profile data...", instance);
-    status = do_mbgrdviz_saveprofile(instance, file_ptr);
+    /* status = */ do_mbgrdviz_saveprofile(instance, file_ptr);
   }
 
   /* else set realtime data source */
@@ -1660,8 +1664,6 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
   double mbv_slope_colortable_max;
   int mbv_secondary_colortable;
   int mbv_secondary_colortable_mode;
-  double mbv_secondary_colortable_min;
-  double mbv_secondary_colortable_max;
   double mbv_exageration;
   double mbv_modelelevation3d;
   double mbv_modelazimuth3d;
@@ -1779,8 +1781,8 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
       mbv_slope_colortable_max = 0.5;
       mbv_secondary_colortable = MBV_COLORTABLE_HAXBY;
       mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
-      mbv_secondary_colortable_min = 0.0;
-      mbv_secondary_colortable_max = 0.0;
+      // double mbv_secondary_colortable_min = 0.0;
+      // double mbv_secondary_colortable_max = 0.0;
       mbv_exageration = 1.0;
       mbv_modelelevation3d = 90.0;
       mbv_modelazimuth3d = 0.0;
@@ -3487,10 +3489,10 @@ int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr) {
   int routesize;
   mb_path routename;
   int selected;
-  char *error_message;
-  char projection_id[MB_PATH_MAXLINE];
-  void *pjptr = NULL;
-  int proj_status;
+  // char *error_message;
+  // char projection_id[MB_PATH_MAXLINE];
+  // void *pjptr = NULL;
+  // int proj_status;
   int nroutewrite = 0;
   int iroutewrite = 0;
   int iroute, j, n;
@@ -4787,7 +4789,6 @@ void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_dat
   mb_path mbedit_cmd;
   mb_path filearg;
   int nselected;
-  int shellstatus;
   int i;
 
   /* get source mbview instance */
@@ -4831,7 +4832,7 @@ void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_dat
   if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
     strncat(mbedit_cmd, " &", MB_PATH_MAXLINE);
     fprintf(stderr, "Calling mbedit: %s\n", mbedit_cmd);
-    shellstatus = system(mbedit_cmd);
+    /* const int shellstatus = */ system(mbedit_cmd);
   }
 
   /* update widgets of all mbview windows */
@@ -4855,7 +4856,6 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
   mb_path datalist_file;
   FILE *dfp;
   int nselected;
-  int shellstatus;
   int i;
 
   /* get source mbview instance */
@@ -4901,8 +4901,7 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
         fclose(dfp);
         sprintf(mbeditviz_cmd, "mbeditviz -I%s -R &", datalist_file);
         fprintf(stderr, "Calling mbeditviz: %s\n", mbeditviz_cmd);
-        shellstatus = system(mbeditviz_cmd);
-
+        /* const int shellstatus = */ system(mbeditviz_cmd);
       }
     }
   }
@@ -4927,7 +4926,6 @@ void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_
   mb_path mbnavedit_cmd;
   mb_path filearg;
   int nselected;
-  int shellstatus;
   int i;
 
   /* get source mbview instance */
@@ -4971,7 +4969,7 @@ void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_
   if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
     strncat(mbnavedit_cmd, " &", MB_PATH_MAXLINE);
     fprintf(stderr, "Calling mbnavedit: %s\n", mbnavedit_cmd);
-    shellstatus = system(mbnavedit_cmd);
+    /* const int shellstatus = */ system(mbnavedit_cmd);
   }
 
   /* update widgets of all mbview windows */
@@ -4994,7 +4992,6 @@ void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer 
   mb_path mbvelocitytool_cmd;
   mb_path filearg;
   int nselected;
-  int shellstatus;
   int i;
 
   /* get source mbview instance */
@@ -5038,7 +5035,7 @@ void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer 
   if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
     strncat(mbvelocitytool_cmd, " &", MB_PATH_MAXLINE);
     fprintf(stderr, "Calling mbvelocitytool: %s\n", mbvelocitytool_cmd);
-    shellstatus = system(mbvelocitytool_cmd);
+    /* const int shellstatus = */ system(mbvelocitytool_cmd);
   }
 
   /* update widgets of all mbview windows */
