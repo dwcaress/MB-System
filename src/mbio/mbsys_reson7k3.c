@@ -2820,16 +2820,16 @@ int mbsys_reson7k3_print_CalibratedSideScan(int verbose, s7k3_CalibratedSideScan
 }
 
 /*--------------------------------------------------------------------*/
-int mbsys_reson7k3_print_SnippetBackscatteringStrength(int verbose, s7k3_SnippetBackscatteringStrength *s7k3_SnippetBackscatteringStrength, int *error) {
+int mbsys_reson7k3_print_SnippetBackscatteringStrength(int verbose, s7k3_SnippetBackscatteringStrength *SnippetBackscatteringStrength, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
-    fprintf(stderr, "dbg2       s7k3_SnippetBackscatteringStrength:      %p\n", (void *)s7k3_SnippetBackscatteringStrength);
+    fprintf(stderr, "dbg2       SnippetBackscatteringStrength:      %p\n", (void *)SnippetBackscatteringStrength);
   }
 
   /* print Reson 7k data record header information */
-  mbsys_reson7k3_print_header(verbose, &s7k3_SnippetBackscatteringStrength->header, error);
+  mbsys_reson7k3_print_header(verbose, &SnippetBackscatteringStrength->header, error);
 
   /* print Reson 7k Snippet Backscattering Strength (Record 7058) */
   const char *first;
@@ -2840,27 +2840,29 @@ int mbsys_reson7k3_print_SnippetBackscatteringStrength(int verbose, s7k3_Snippet
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, s7k3_SnippetBackscatteringStrength->serial_number);
-  fprintf(stderr, "%s     ping_number:                %u\n", first, s7k3_SnippetBackscatteringStrength->ping_number);
-  fprintf(stderr, "%s     multi_ping:                 %u\n", first, s7k3_SnippetBackscatteringStrength->multi_ping);
-  fprintf(stderr, "%s     number_beams:               %u\n", first, s7k3_SnippetBackscatteringStrength->number_beams);
-  fprintf(stderr, "%s     error_flag:                 %u\n", first, s7k3_SnippetBackscatteringStrength->error_flag);
-  fprintf(stderr, "%s     control_flags:              %u\n", first, s7k3_SnippetBackscatteringStrength->control_flags);
-  fprintf(stderr, "%s     absorption:              %f\n", first, s7k3_SnippetBackscatteringStrength->absorption);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, SnippetBackscatteringStrength->serial_number);
+  fprintf(stderr, "%s     ping_number:                %u\n", first, SnippetBackscatteringStrength->ping_number);
+  fprintf(stderr, "%s     multi_ping:                 %u\n", first, SnippetBackscatteringStrength->multi_ping);
+  fprintf(stderr, "%s     number_beams:               %u\n", first, SnippetBackscatteringStrength->number_beams);
+  fprintf(stderr, "%s     error_flag:                 %u\n", first, SnippetBackscatteringStrength->error_flag);
+  fprintf(stderr, "%s     control_flags:              %u\n", first, SnippetBackscatteringStrength->control_flags);
+  fprintf(stderr, "%s     absorption:                 %f\n", first, SnippetBackscatteringStrength->absorption);
   for (int i = 0; i < 6; i++)
-    fprintf(stderr, "%s     reserved[%d]:                %u\n", first, i, s7k3_SnippetBackscatteringStrength->reserved[i]);
-  for (int i = 0; i < s7k3_SnippetBackscatteringStrength->number_beams; i++) {
+    fprintf(stderr, "%s     reserved[%d]:                %u\n", first, i, SnippetBackscatteringStrength->reserved[i]);
+  for (int i = 0; i < SnippetBackscatteringStrength->number_beams; i++) {
     s7k3_snippetbackscatteringstrengthdata *snippetbackscatteringstrengthdata =
-        &(s7k3_SnippetBackscatteringStrength->snippetbackscatteringstrengthdata[i]);
+        &(SnippetBackscatteringStrength->snippetbackscatteringstrengthdata[i]);
     fprintf(stderr, "%s     beam: %u begin:%u bottom:%u end:%u\n", first, snippetbackscatteringstrengthdata->beam_number,
             snippetbackscatteringstrengthdata->begin_sample, snippetbackscatteringstrengthdata->bottom_sample,
             snippetbackscatteringstrengthdata->end_sample);
     for (int j = 0; j < snippetbackscatteringstrengthdata->end_sample - snippetbackscatteringstrengthdata->begin_sample + 1; j++)
       fprintf(stderr, "%s     bs[%d]:%f\n", first, snippetbackscatteringstrengthdata->begin_sample + j,
               snippetbackscatteringstrengthdata->bs[j]);
-    for (int j = 0; j < snippetbackscatteringstrengthdata->end_sample - snippetbackscatteringstrengthdata->begin_sample + 1; j++)
-      fprintf(stderr, "%s     fooprints[%d]:%f\n", first, snippetbackscatteringstrengthdata->begin_sample + j,
-              snippetbackscatteringstrengthdata->footprints[j]);
+    if (SnippetBackscatteringStrength->control_flags & 0x40 && snippetbackscatteringstrengthdata->footprints != NULL) {
+      for (int j = 0; j < snippetbackscatteringstrengthdata->end_sample - snippetbackscatteringstrengthdata->begin_sample + 1; j++)
+        fprintf(stderr, "%s     footprints[%d]:%f\n", first, snippetbackscatteringstrengthdata->begin_sample + j,
+                snippetbackscatteringstrengthdata->footprints[j]);
+      }
   }
 
   const int status = MB_SUCCESS;
@@ -4789,12 +4791,34 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
       }
 
       /* get transducer angular offsets */
+      int tx_sign = 1.0;
+      int rx_sign = 1.0;
       if (platform != NULL) {
         status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 0,
                                                 &(tx_align.heading), &(tx_align.roll), &(tx_align.pitch), error);
 
+        // handle reverse mounting of transmit array */
+        if (tx_align.heading > 100.0 || tx_align.heading < -100.0) {
+          tx_align.heading -= 180.0;
+          if (tx_align.heading < 0.0)
+            tx_align.heading += 360.0;
+          //tx_align.heading *= -1;
+          //tx_align.roll *= -1;
+          //tx_align.pitch *= -1;
+          tx_sign = -1.0;
+        }
+
         status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 1,
                                                 &(rx_align.heading), &(rx_align.roll), &(rx_align.pitch), error);
+        if (rx_align.heading > 100.0 || rx_align.heading < -100.0) {
+          rx_align.heading -= 180.0;
+          if (rx_align.heading < 0.0)
+            rx_align.heading += 360.0;
+          //rx_align.heading *= -1;
+          //rx_align.roll *= -1;
+          //rx_align.pitch *= -1;
+          rx_sign = -1.0;
+        }
       }
 
       /* calculate bathymetry from RawDetection record */
@@ -4857,11 +4881,11 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
               3) flip the sign of the beam steering angle from that array
                   (reverse TX means flip sign of TX steer, reverse RX
                   means flip sign of RX steer) */
-          tx_steer = RTD * RawDetection->tx_angle;
+          tx_steer = RTD * tx_sign * RawDetection->tx_angle;
           tx_orientation.roll = roll;
           tx_orientation.pitch = pitch;
           tx_orientation.heading = heading;
-          rx_steer = -RTD * RawDetection->rawdetectiondata[i].rx_angle;
+          rx_steer = -RTD * rx_sign * RawDetection->rawdetectiondata[i].rx_angle;
           rx_orientation.roll = beamroll;
           rx_orientation.pitch = beampitch;
           rx_orientation.heading = beamheading;
@@ -4943,11 +4967,11 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
               3) flip the sign of the beam steering angle from that array
                   (reverse TX means flip sign of TX steer, reverse RX
                   means flip sign of RX steer) */
-          tx_steer = RTD * segmentedrawdetectiontxdata->tx_angle_along;
+          tx_steer = RTD * tx_sign * segmentedrawdetectiontxdata->tx_angle_along;
           tx_orientation.roll = roll;
           tx_orientation.pitch = pitch;
           tx_orientation.heading = heading;
-          rx_steer = -RTD * segmentedrawdetectionrxdata->rx_angle_cross;
+          rx_steer = -RTD * rx_sign * segmentedrawdetectionrxdata->rx_angle_cross;
           rx_orientation.roll = beamroll;
           rx_orientation.pitch = beampitch;
           rx_orientation.heading = beamheading;

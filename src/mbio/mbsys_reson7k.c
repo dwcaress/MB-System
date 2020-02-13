@@ -3830,7 +3830,8 @@ int mbsys_reson7k_print_calibratedsnippet(int verbose, s7kr_calibratedsnippet *c
   fprintf(stderr, "%s     number_beams:               %u\n", first, calibratedsnippet->number_beams);
   fprintf(stderr, "%s     error_flag:                 %u\n", first, calibratedsnippet->error_flag);
   fprintf(stderr, "%s     control_flags:              %u\n", first, calibratedsnippet->control_flags);
-  for (int i = 0; i < 28; i++)
+  fprintf(stderr, "%s     absorption:                 %f\n", first, calibratedsnippet->absorption);
+  for (int i = 0; i < 6; i++)
     fprintf(stderr, "%s     reserved[%d]:                %u\n", first, i, calibratedsnippet->reserved[i]);
   for (int i = 0; i < calibratedsnippet->number_beams; i++) {
     s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries =
@@ -3841,6 +3842,11 @@ int mbsys_reson7k_print_calibratedsnippet(int verbose, s7kr_calibratedsnippet *c
     for (int j = 0; j < calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1; j++)
       fprintf(stderr, "%s     snippet amplitude[%d]:%f\n", first, calibratedsnippettimeseries->begin_sample + j,
               calibratedsnippettimeseries->amplitude[j]);
+    if (calibratedsnippet->control_flags & 0x40 && calibratedsnippettimeseries->footprints != NULL) {
+      for (int j = 0; j < calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1; j++)
+        fprintf(stderr, "%s     footprints[%d]:%f\n", first, calibratedsnippettimeseries->begin_sample + j,
+                calibratedsnippettimeseries->footprints[j]);
+      }
   }
 
   const int status = MB_SUCCESS;

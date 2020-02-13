@@ -41,9 +41,9 @@
 #endif
 
 /* turn on debug statements here */
-//#define MBR_RESON7KR_DEBUG 1
+#define MBR_RESON7KR_DEBUG 1
 //#define MBR_RESON7KR_DEBUG2 1
-//#define MBR_RESON7KR_DEBUG3 1
+#define MBR_RESON7KR_DEBUG3 1
 
 /*--------------------------------------------------------------------*/
 int mbr_info_reson7kr(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
@@ -6594,7 +6594,7 @@ int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr
   int status = MB_SUCCESS;
   s7k_header *header;
   s7kr_calibratedsnippet *calibratedsnippet;
-  s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
+  s7kr_calibratedsnippettimeseries *snippettimeseries;
   int index;
   int time_j[5];
 
@@ -6629,49 +6629,66 @@ int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr
   index++;
   mb_get_binary_int(true, &buffer[index], &(calibratedsnippet->control_flags));
   index += 4;
-  for (int i = 0; i < 28; i++) {
-    calibratedsnippet->reserved[i] = buffer[index];
-    index++;
+  mb_get_binary_float(true, &buffer[index], &(calibratedsnippet->absorption));
+  index += 4;
+  for (int i = 0; i < 6; i++) {
+    mb_get_binary_int(true, &buffer[index], &(calibratedsnippet->reserved[i]));
+    index += 4;
   }
 
   /* loop over all beams to get snippet parameters */
   for (int i = 0; i < calibratedsnippet->number_beams; i++) {
-    calibratedsnippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
+    snippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
 
     /* extract snippettimeseries data */
-    mb_get_binary_short(true, &buffer[index], &(calibratedsnippettimeseries->beam_number));
+    mb_get_binary_short(true, &buffer[index], &(snippettimeseries->beam_number));
     index += 2;
-    mb_get_binary_int(true, &buffer[index], &(calibratedsnippettimeseries->begin_sample));
+    mb_get_binary_int(true, &buffer[index], &(snippettimeseries->begin_sample));
     index += 4;
-    mb_get_binary_int(true, &buffer[index], &(calibratedsnippettimeseries->detect_sample));
+    mb_get_binary_int(true, &buffer[index], &(snippettimeseries->detect_sample));
     index += 4;
-    mb_get_binary_int(true, &buffer[index], &(calibratedsnippettimeseries->end_sample));
+    mb_get_binary_int(true, &buffer[index], &(snippettimeseries->end_sample));
     index += 4;
 
     /* allocate memory for snippettimeseries if needed */
-    if (status == MB_SUCCESS &&
-        calibratedsnippettimeseries->nalloc <
-            sizeof(float) * (calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1)) {
-      calibratedsnippettimeseries->nalloc =
-          sizeof(float) * (calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1);
+    int nalloc = sizeof(float)
+                  * (snippettimeseries->end_sample
+                    - snippettimeseries->begin_sample + 1);
+    if (status == MB_SUCCESS && snippettimeseries->nalloc < nalloc) {
+      snippettimeseries->nalloc = nalloc;
       if (status == MB_SUCCESS)
-        status = mb_reallocd(verbose, __FILE__, __LINE__, calibratedsnippettimeseries->nalloc,
-                             (void **)&(calibratedsnippettimeseries->amplitude), error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, snippettimeseries->nalloc,
+                             (void **)&(snippettimeseries->amplitude), error);
+      if (status == MB_SUCCESS && calibratedsnippet->control_flags & 0x40)
+        status = mb_reallocd(verbose, __FILE__, __LINE__, snippettimeseries->nalloc,
+                             (void **)&(snippettimeseries->footprints), error);
       if (status != MB_SUCCESS) {
-        calibratedsnippettimeseries->nalloc = 0;
+        snippettimeseries->nalloc = 0;
       }
     }
   }
 
-  /* loop over all beams to get snippet data */
-  if (status == MB_SUCCESS)
+  /* loop over all beams to get snippet amplitude data */
+  if (status == MB_SUCCESS) {
     for (int i = 0; i < calibratedsnippet->number_beams; i++) {
-      calibratedsnippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
-      for (int j = 0; j < (calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1); j++) {
-        mb_get_binary_float(true, &buffer[index], &(calibratedsnippettimeseries->amplitude[j]));
+      snippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
+      for (int j = 0; j < (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1); j++) {
+        mb_get_binary_float(true, &buffer[index], &(snippettimeseries->amplitude[j]));
         index += 4;
       }
     }
+
+    /* loop over all beams to get snippet footprint data */
+    if (calibratedsnippet->control_flags & 0x40) {
+      for (int i = 0; i < calibratedsnippet->number_beams; i++) {
+        snippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
+        for (int j = 0; j < (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1); j++) {
+          mb_get_binary_float(true, &buffer[index], &(snippettimeseries->footprints[j]));
+          index += 4;
+        }
+      }
+    }
+  }
 
   /* set kind */
   if (status == MB_SUCCESS) {
@@ -15355,8 +15372,11 @@ int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **buff
   for (int i = 0; i < calibratedsnippet->number_beams; i++) {
     snippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
 
-    *size += R7KRDTSIZE_7kCalibratedSnippetTimeseries +
-             sizeof(float) * (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1);
+    *size += R7KRDTSIZE_7kCalibratedSnippetTimeseries;
+    *size += sizeof(float) * (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1);
+    if (calibratedsnippet->control_flags & 0x40) {
+      *size += sizeof(float) * (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1);
+    }
   }
   header->OffsetToOptionalData = 0;
   header->Size = *size;
@@ -15403,16 +15423,18 @@ int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **buff
     index++;
     mb_put_binary_int(true, calibratedsnippet->control_flags, &buffer[index]);
     index += 4;
-    for (int i = 0; i < 28; i++) {
-      buffer[index] = calibratedsnippet->reserved[i];
-      index++;
+    mb_put_binary_float(true, calibratedsnippet->absorption, &buffer[index]);
+    index += 4;
+    for (int i = 0; i < 6; i++) {
+      mb_put_binary_int(true, calibratedsnippet->reserved[i], &buffer[index]);
+      index += 4;
     }
 
     /* insert the snippet parameters */
     for (int i = 0; i < calibratedsnippet->number_beams; i++) {
       snippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
 
-      /* extract snippettimeseries data */
+      /* insert snippettimeseries data */
       mb_put_binary_short(true, snippettimeseries->beam_number, &buffer[index]);
       index += 2;
       mb_put_binary_int(true, snippettimeseries->begin_sample, &buffer[index]);
@@ -15423,12 +15445,23 @@ int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **buff
       index += 4;
     }
 
-    /* loop over all beams to insert snippet data */
+    /* loop over all beams to insert snippet amplitude data */
     for (int i = 0; i < calibratedsnippet->number_beams; i++) {
       snippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
       for (int j = 0; j < (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1); j++) {
         mb_put_binary_float(true, snippettimeseries->amplitude[j], &buffer[index]);
         index += 4;
+      }
+    }
+
+    /* loop over all beams to insert snippet footprint data */
+    if (calibratedsnippet->control_flags & 0x40) {
+      for (int i = 0; i < calibratedsnippet->number_beams; i++) {
+        snippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
+        for (int j = 0; j < (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1); j++) {
+          mb_put_binary_float(true, snippettimeseries->amplitude[j], &buffer[index]);
+          index += 4;
+        }
       }
     }
 
