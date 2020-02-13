@@ -961,7 +961,7 @@ int mbnavedit_load_data() {
 			}
 			if (status == MB_SUCCESS) {
 				/* get first time value if first record */
-				if (first_read == false) {
+				if (!first_read) {
 					file_start_time_d = ping[nbuff].time_d;
 					first_read = true;
 				}
@@ -2419,12 +2419,12 @@ int mbnavedit_action_interpolate() {
 			if (ping[iping].tint_select) {
 				int ibefore = iping;
 				for (int i = iping - 1; i >= 0; i--) {
-					if (ping[i].tint_select == false && ibefore == iping)
+					if (!ping[i].tint_select && ibefore == iping)
 						ibefore = i;
 				}
 				int iafter = iping;
 				for (int i = iping + 1; i < nbuff; i++) {
-					if (ping[i].tint_select == false && iafter == iping)
+					if (!ping[i].tint_select && iafter == iping)
 						iafter = i;
 				}
 				if (ibefore < iping && iafter > iping) {
@@ -2462,7 +2462,7 @@ int mbnavedit_action_interpolate() {
 				ping[iping].file_time_d = ping[iping].time_d - file_start_time_d;
 				status = mb_get_date(verbose, ping[iping].time_d, ping[iping].time_i);
 				if (iping < nbuff - 1)
-					if (ping[iping + 1].tint_select == false)
+					if (!ping[iping + 1].tint_select)
 						ping[iping + 1].tint = ping[iping + 1].time_d - ping[iping].time_d;
 			}
 		}
@@ -2472,12 +2472,12 @@ int mbnavedit_action_interpolate() {
 			if (ping[iping].lon_select) {
 				int ibefore = iping;
 				for (int i = iping - 1; i >= 0; i--) {
-					if (ping[i].lon_select == false && ibefore == iping)
+					if (!ping[i].lon_select && ibefore == iping)
 						ibefore = i;
 				}
 				int iafter = iping;
 				for (int i = iping + 1; i < nbuff; i++) {
-					if (ping[i].lon_select == false && iafter == iping)
+					if (!ping[i].lon_select && iafter == iping)
 						iafter = i;
 				}
 				if (ibefore < iping && iafter > iping) {
@@ -2519,12 +2519,12 @@ int mbnavedit_action_interpolate() {
 			if (ping[iping].lat_select) {
 				int ibefore = iping;
 				for (int i = iping - 1; i >= 0; i--) {
-					if (ping[i].lat_select == false && ibefore == iping)
+					if (!ping[i].lat_select && ibefore == iping)
 						ibefore = i;
 				}
 				int iafter = iping;
 				for (int i = iping + 1; i < nbuff; i++) {
-					if (ping[i].lat_select == false && iafter == iping)
+					if (!ping[i].lat_select && iafter == iping)
 						iafter = i;
 				}
 				if (ibefore < iping && iafter > iping) {
@@ -2566,12 +2566,12 @@ int mbnavedit_action_interpolate() {
 			if (ping[iping].speed_select) {
 				int ibefore = iping;
 				for (int i = iping - 1; i >= 0; i--) {
-					if (ping[i].speed_select == false && ibefore == iping)
+					if (!ping[i].speed_select && ibefore == iping)
 						ibefore = i;
 				}
 				int iafter = iping;
 				for (int i = iping + 1; i < nbuff; i++) {
-					if (ping[i].speed_select == false && iafter == iping)
+					if (!ping[i].speed_select && iafter == iping)
 						iafter = i;
 				}
 				if (ibefore < iping && iafter > iping) {
@@ -2596,12 +2596,12 @@ int mbnavedit_action_interpolate() {
 			if (ping[iping].heading_select) {
 				int ibefore = iping;
 				for (int i = iping - 1; i >= 0; i--) {
-					if (ping[i].heading_select == false && ibefore == iping)
+					if (!ping[i].heading_select && ibefore == iping)
 						ibefore = i;
 				}
 				int iafter = iping;
 				for (int i = iping + 1; i < nbuff; i++)
-					if (ping[i].heading_select == false && iafter == iping)
+					if (!ping[i].heading_select && iafter == iping)
 						iafter = i;
 				if (ibefore < iping && iafter > iping) {
 					ping[iping].heading = ping[ibefore].heading + (ping[iafter].heading - ping[ibefore].heading) *
@@ -2625,12 +2625,12 @@ int mbnavedit_action_interpolate() {
 			if (ping[iping].draft_select) {
 				int ibefore = iping;
 				for (int i = iping - 1; i >= 0; i--) {
-					if (ping[i].draft_select == false && ibefore == iping)
+					if (!ping[i].draft_select && ibefore == iping)
 						ibefore = i;
 				}
 				int iafter = iping;
 				for (int i = iping + 1; i < nbuff; i++)
-					if (ping[i].draft_select == false && iafter == iping)
+					if (!ping[i].draft_select && iafter == iping)
 						iafter = i;
 				if (ibefore < iping && iafter > iping) {
 					ping[iping].draft = ping[ibefore].draft + (ping[iafter].draft - ping[ibefore].draft) *
@@ -2698,7 +2698,7 @@ int mbnavedit_action_interpolaterepeats() {
 				/* find next changed value */
 				bool found = false;
 				int ibefore = iping - 1;
-				for (int j = iping + 1; j < nbuff && found == false; j++) {
+				for (int j = iping + 1; j < nbuff && !found; j++) {
 					if (ping[iping].time_d != ping[j].time_d) {
 						found = true;
 						iafter = j;
@@ -2720,7 +2720,7 @@ int mbnavedit_action_interpolaterepeats() {
 				/* find next changed value */
 				bool found = false;
 				int ibefore = iping - 1;
-				for (int j = iping + 1; j < nbuff && found == false; j++) {
+				for (int j = iping + 1; j < nbuff && !found; j++) {
 					if (ping[iping].lon != ping[j].lon) {
 						found = true;
 						iafter = j;
@@ -2743,7 +2743,7 @@ int mbnavedit_action_interpolaterepeats() {
 				/* find next changed value */
 				bool found = false;
 				int ibefore = iping - 1;
-				for (int j = iping + 1; j < nbuff && found == false; j++) {
+				for (int j = iping + 1; j < nbuff && !found; j++) {
 					if (ping[iping].lat != ping[j].lat) {
 						found = true;
 						iafter = j;
@@ -2766,7 +2766,7 @@ int mbnavedit_action_interpolaterepeats() {
 				/* find next changed value */
 				bool found = false;
 				int ibefore = iping - 1;
-				for (int j = iping + 1; j < nbuff && found == false; j++) {
+				for (int j = iping + 1; j < nbuff && !found; j++) {
 					if (ping[iping].speed != ping[j].speed) {
 						found = true;
 						iafter = j;
@@ -2789,7 +2789,7 @@ int mbnavedit_action_interpolaterepeats() {
 				/* find next changed value */
 				bool found = false;
 				int ibefore = iping - 1;
-				for (int j = iping + 1; j < nbuff && found == false; j++) {
+				for (int j = iping + 1; j < nbuff && !found; j++) {
 					if (ping[iping].heading != ping[j].heading) {
 						found = true;
 						iafter = j;
@@ -2812,7 +2812,7 @@ int mbnavedit_action_interpolaterepeats() {
 				/* find next changed value */
 				bool found = false;
 				int ibefore = iping - 1;
-				for (int j = iping + 1; j < nbuff && found == false; j++) {
+				for (int j = iping + 1; j < nbuff && !found; j++) {
 					if (ping[iping].draft != ping[j].draft) {
 						found = true;
 						iafter = j;
@@ -3291,7 +3291,7 @@ int mbnavedit_get_gaussianmean() {
 		int nneg = 0;
 		for (int j = jstart; j < nbuff && dt <= timewindow; j++) {
 			dt = ping[j].time_d - ping[i].time_d;
-			if (ping[j].lonlat_flag == false && fabs(dt) <= timewindow) {
+			if (!ping[j].lonlat_flag && fabs(dt) <= timewindow) {
 				const double w = exp(a * dt * dt);
 				nsum++;
 				if (dt < 0.0)
@@ -3321,13 +3321,13 @@ int mbnavedit_get_gaussianmean() {
 	int jbefore = -1;
 	for (int i = 0; i < nbuff; i++) {
 		/* only work on nav not smoothed in first past due to lack of nearby data */
-		if (ping[i].mean_ok == false) {
+		if (!ping[i].mean_ok) {
 			/* find valid points before and after */
 			int jafter = i;
 			for (int j = jbefore; j < nbuff && jafter == i; j++) {
-				if (j < i && ping[j].lonlat_flag == false)
+				if (j < i && !ping[j].lonlat_flag)
 					jbefore = j;
-				if (j > i && ping[j].lonlat_flag == false)
+				if (j > i && !ping[j].lonlat_flag)
 					jafter = j;
 			}
 			if (jbefore >= 0 && jafter > i) {
@@ -3432,7 +3432,7 @@ int mbnavedit_get_inversion() {
 	int last = current_id;
 	for (int i = current_id; i < current_id + nplot; i++) {
 		/* constrain lon unless flagged by user */
-		if (ping[i].lonlat_flag == false) {
+		if (!ping[i].lonlat_flag) {
 			lon_avg += ping[i].lon;
 			nlon_avg++;
 			lat_avg += ping[i].lat;
@@ -3510,7 +3510,7 @@ int mbnavedit_get_inversion() {
 			const int ii = i - current_id;
 
 			/* constrain lon unless flagged by user */
-			if (ping[i].lonlat_flag == false) {
+			if (!ping[i].lonlat_flag) {
 				const int k = nnz * nr;
 				d[nr] = (ping[i].lon_org - lon_avg) / mtodeglon;
 				nia[nr] = 1;
@@ -3644,7 +3644,7 @@ int mbnavedit_get_inversion() {
 			const int ii = i - current_id;
 
 			/* constrain lat unless flagged by user */
-			if (ping[i].lonlat_flag == false) {
+			if (!ping[i].lonlat_flag) {
 				const int k = nnz * nr;
 				d[nr] = (ping[i].lat_org - lat_avg) / mtodeglat;
 				nia[nr] = 1;
