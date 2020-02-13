@@ -249,8 +249,7 @@ int do_mbeditviz_init(Widget parentwidget, XtAppContext appcon) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbeditviz_mode_change(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmToggleButtonCallbackStruct *acs;
-  acs = (XmToggleButtonCallbackStruct *)call_data;
+  XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
 
   /* print input debug statements */
   if (mbev_verbose >= 2) {
@@ -295,8 +294,7 @@ void do_mbeditviz_mode_change(Widget w, XtPointer client_data, XtPointer call_da
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmFileSelectionBoxCallbackStruct *acs;
-  acs = (XmFileSelectionBoxCallbackStruct *)call_data;
+  XmFileSelectionBoxCallbackStruct *acs = (XmFileSelectionBoxCallbackStruct *)call_data;
   char *file_ptr;
   int format;
 
@@ -333,8 +331,7 @@ void do_mbeditviz_openfile(Widget w, XtPointer client_data, XtPointer call_data)
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   /* print input debug statements */
   if (mbev_verbose >= 2) {
@@ -372,10 +369,9 @@ void do_mbeditviz_fileselection_list(Widget w, XtPointer client_data, XtPointer 
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
   XmString tmp0;
   Boolean argok;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   /* print input debug statements */
   if (mbev_verbose >= 2) {
@@ -411,8 +407,7 @@ void do_mbeditviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, Xt
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   struct mbev_file_struct *file;
   int ifile;
 
@@ -463,8 +458,7 @@ void do_mbeditviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_viewall(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   struct mbev_file_struct *file;
   int ifile;
   int loadcount;
@@ -556,8 +550,7 @@ void do_mbeditviz_viewall(Widget w, XtPointer client_data, XtPointer call_data) 
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_viewselected(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   struct mbev_file_struct *file;
   int *position_list = NULL;
   int position_count = 0;
@@ -660,8 +653,7 @@ void do_mbeditviz_viewselected(Widget w, XtPointer client_data, XtPointer call_d
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_regrid(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   struct mbev_file_struct *file;
   int ifile;
   int loadcount;
@@ -726,8 +718,7 @@ void do_mbeditviz_regrid(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbeditviz_updategrid(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   struct mbev_file_struct *file;
   int loadcount;
   int ifile;
@@ -812,8 +803,7 @@ void do_mbeditviz_set_label_implied() {
 
 /*--------------------------------------------------------------------*/
 void do_mbeditviz_changecellsize(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   char string[MB_PATH_MAXLINE];
   int icellsize;
 
@@ -855,8 +845,7 @@ void do_mbeditviz_changecellsize(Widget w, XtPointer client_data, XtPointer call
 
 /*--------------------------------------------------------------------*/
 void do_mbeditviz_gridparameters(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   /* print input debug statements */
   if (mbev_verbose >= 2) {
@@ -922,8 +911,7 @@ void do_mbeditviz_gridparameters(Widget w, XtPointer client_data, XtPointer call
 /*--------------------------------------------------------------------*/
 
 extern void do_mbeditviz_gridalgorithm_change(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   /* print input debug statements */
   if (mbev_verbose >= 2) {
@@ -958,8 +946,7 @@ extern void do_mbeditviz_gridalgorithm_change(Widget w, XtPointer client_data, X
 /*--------------------------------------------------------------------*/
 
 extern void do_mbeditviz_gridinterpolation_change(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   /* print input debug statements */
   if (mbev_verbose >= 2) {
@@ -1351,8 +1338,7 @@ int do_mbeditviz_mbview_dismiss_notify(size_t instance) {
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_deleteselected(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   int *position_list = NULL;
   int position_count = 0;
   int i;
@@ -1392,8 +1378,7 @@ void do_mbeditviz_deleteselected(Widget w, XtPointer client_data, XtPointer call
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_changeoutputmode(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmToggleButtonCallbackStruct *acs;
-  acs = (XmToggleButtonCallbackStruct *)call_data;
+  XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
 
   /* print input debug statements */
   if (mbev_verbose >= 2) {
@@ -1884,8 +1869,7 @@ void do_mbeditviz_picknav_notify(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 void do_mbeditviz_regrid_notify(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   double rollbias;
   double pitchbias;
   double headingbias;
