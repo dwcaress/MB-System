@@ -984,7 +984,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   calibratedsnippet->number_beams = 0;
   calibratedsnippet->error_flag = 0;
   calibratedsnippet->control_flags = 0;
-  for (int i = 0; i < 28; i++)
+  for (int i = 0; i < 6; i++)
     calibratedsnippet->reserved[i] = 0;
   for (int i = 0; i < MBSYS_RESON7K_MAX_BEAMS; i++) {
     s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries =
