@@ -99,13 +99,11 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
     status = MB_FAILURE;
   }
 
-  char *result;
-
   /* try to create new project */
   if (status == MB_SUCCESS) {
     strcpy(project->name, nameptr);
     if (strlen(projectpath) == strlen(nameptr)) {
-      result = getcwd(project->path, MB_PATH_MAXLINE);
+      /* char *result = */ getcwd(project->path, MB_PATH_MAXLINE);
       strcat(project->path, "/");
     }
     else {
@@ -2176,14 +2174,14 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
   file = &project->files[crossing->file_id_2];
   struct mbna_section *section2 = &file->sections[crossing->section_2];
 
-  int overlap1[MBNA_MASK_DIM * MBNA_MASK_DIM];
-  int overlap2[MBNA_MASK_DIM * MBNA_MASK_DIM];
+  // int overlap1[MBNA_MASK_DIM * MBNA_MASK_DIM];
+  // int overlap2[MBNA_MASK_DIM * MBNA_MASK_DIM];
 
   /* initialize overlap arrays */
-  for (int i = 0; i < MBNA_MASK_DIM * MBNA_MASK_DIM; i++) {
-    overlap1[i] = 0;
-    overlap2[i] = 0;
-  }
+  // for (int i = 0; i < MBNA_MASK_DIM * MBNA_MASK_DIM; i++) {
+  //   overlap1[i] = 0;
+  //   overlap2[i] = 0;
+  // }
 
   /* get overlap region bounds and focus point */
   *lonmin = 0.0;
@@ -2214,8 +2212,8 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
               const double lat2min = section2->latmin + dy2 * jj2 + offset_y;
               const double lat2max = section2->latmin + dy2 * (jj2 + 1) + offset_y;
               if ((lon1min < lon2max) && (lon1max > lon2min) && (lat1min < lat2max) && (lat1max > lat2min)) {
-                overlap1[kk1] = 1;
-                overlap2[kk2] = 1;
+                // overlap1[kk1] = 1;
+                // overlap2[kk2] = 1;
                 if (first == false) {
                   *lonmin = MIN(*lonmin, MAX(lon1min, lon2min));
                   *lonmax = MAX(*lonmax, MIN(lon1max, lon2max));
@@ -2722,7 +2720,6 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
       }
     }
 
-    struct mb_io_struct *imb_io_ptr;
     struct mbna_swathraw *swathraw;
     struct mbna_pingraw *pingraw;
     struct swath *swath;
@@ -2731,7 +2728,7 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
     /* allocate memory for data arrays */
     if (status == MB_SUCCESS) {
      /* get mb_io_ptr */
-      imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+      // struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
 
       /* initialize data storage */
       status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbna_swathraw), (void **)swathraw_ptr, error);
@@ -3005,8 +3002,6 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
 
   /* read specified section, extracting sensordepth values for the snav points */
   if (project != NULL) {
-    struct mb_io_struct *imb_io_ptr;
-
     /* mbio read and write values */
     void *imbio_ptr = NULL;
     void *istore_ptr = NULL;
@@ -3094,7 +3089,7 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
 
                 /* now read the data */
                 if (status == MB_SUCCESS) {
-                    imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+		    // struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
                     bool done = false;
                     isnav = 0;
                     num_pings = 0;
