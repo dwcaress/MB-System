@@ -587,7 +587,7 @@ void do_velcenter(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_process_mb(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	fprintf(stderr, "\nAbout to process data\n");
 
@@ -625,7 +625,7 @@ void do_maxdepth(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_anglemode(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (XmToggleButtonGetState(toggleButton_mode_ok))
 		anglemode_gui = 0;
@@ -645,7 +645,7 @@ void do_anglemode(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_quit(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbvt_quit();
 
@@ -657,7 +657,7 @@ void do_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	static mb_path selection_text;
 	int form;
@@ -831,7 +831,7 @@ void do_open_commandline(char *wfile, char *sfile, char *file, int format) {
 /*--------------------------------------------------------------------*/
 
 void do_new_profile(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmListCallbackStruct *acs = (XmListCallbackStruct *)call_data;
+	// XmListCallbackStruct *acs = (XmListCallbackStruct *)call_data;
 
 	/* get new edit velocity profile */
 	mbvt_new_edit_profile();
@@ -961,7 +961,7 @@ void do_canvas_event(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_save_swath_svp(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (edit_gui == 1) {
 		/* save file */
@@ -1011,7 +1011,7 @@ void do_save_residuals(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_io_mode_mb(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	open_type = MBVT_IO_OPEN_MB;
 }
@@ -1019,7 +1019,7 @@ void do_io_mode_mb(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_io_mode_open_svp_display(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	open_type = MBVT_IO_OPEN_DISPLAY_SVP;
 }
@@ -1027,7 +1027,7 @@ void do_io_mode_open_svp_display(Widget w, XtPointer client_data, XtPointer call
 /*--------------------------------------------------------------------*/
 
 void do_io_mode_save_svp(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	open_type = MBVT_IO_SAVE_EDIT_SVP;
 }
@@ -1035,7 +1035,7 @@ void do_io_mode_save_svp(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_io_mode_open_svp_edit(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	open_type = MBVT_IO_OPEN_EDIT_SVP;
 }
@@ -1043,7 +1043,7 @@ void do_io_mode_open_svp_edit(Widget w, XtPointer client_data, XtPointer call_da
 /*--------------------------------------------------------------------*/
 
 void do_expose(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (expose_plot_ok == True)
 		mbvt_plot();
