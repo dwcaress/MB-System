@@ -106,6 +106,7 @@ WidgetList BxWidgetIdsFromNames(Widget, char *, char *);
 
 /* ARGSUSED */
 void BxManageCB(Widget w, XtPointer client, XtPointer call) {
+  (void)call;  // Unused parameter
   WidgetList widgets;
   int i;
 
@@ -142,6 +143,7 @@ void BxManageCB(Widget w, XtPointer client, XtPointer call) {
 
 /* ARGSUSED */
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
+  (void)call;  // Unused parameter
   WidgetList widgets;
   int i;
 
@@ -175,8 +177,10 @@ void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
 
 /* ARGSUSED */
 void BxExitCB(Widget w, XtPointer client, XtPointer call) {
-  long exitValue = EXIT_FAILURE;
-  exit(exitValue);
+  (void)w;  // Unused parameter
+  (void)client;  // Unused parameter
+  (void)call;  // Unused parameter
+  exit(EXIT_FAILURE);
 }
 
 /*---------------------------------------------------------------------------------------*/
@@ -2106,6 +2110,7 @@ int do_mbeditviz_settimer() {
 /*------------------------------------------------------------------------------*/
 
 int do_mbeditviz_workfunction(XtPointer client_data) {
+  (void)client_data;  // Unused parameter
   int status = MB_SUCCESS;
 
   timer_function_set = false;
