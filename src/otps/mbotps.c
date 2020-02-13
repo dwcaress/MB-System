@@ -264,9 +264,9 @@ int main(int argc, char **argv) {
     sprintf(command, "/bin/ls -1 %s/DATA | grep Model_ | sed \"s/^Model_//\"", otps_location_use);
 
     FILE *tfp = popen(command, "r");
-    if (tfp != NULL) {
+    if (tfp == NULL) {
       // error = MB_ERROR_OPEN_FAIL;
-      fprintf(stderr, "\nUnable to open ls using popen()\n");
+      fprintf(stderr, "\nUnable to open ls using popen():\n%s\n", command);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_FAILURE);
     }
@@ -561,8 +561,8 @@ int main(int argc, char **argv) {
     getcwd(wd, sizeof(wd));
     mb_path lltfile = "";
     mb_path otpsfile = "";
-    sprintf(lltfile, "%s/tmp_mbotps_llt_%d.txt", wd, pid);
-    sprintf(otpsfile, "%s/tmp_mbotps_llttd_%d.txt", wd, pid);
+    sprintf(lltfile, "%s/t%d.txt", wd, pid);
+    sprintf(otpsfile, "%s/u%d.txt", wd, pid);
     if ((tfp = fopen(lltfile, "w")) == NULL)
       {
       error = MB_ERROR_OPEN_FAIL;
@@ -763,8 +763,8 @@ int main(int argc, char **argv) {
     getcwd(wd, sizeof(wd));
     mb_path lltfile = "";
     mb_path otpsfile = "";
-    sprintf(lltfile, "%s/tmp_mbotps_llt_%d.txt", wd, pid);
-    sprintf(otpsfile, "%s/tmp_mbotps_llttd_%d.txt", wd, pid);
+    sprintf(lltfile, "%s/t%d.txt", wd, pid);
+    sprintf(otpsfile, "%s/u%d.txt", wd, pid);
     FILE *tfp = NULL;
     if ((tfp = fopen(lltfile, "w")) == NULL)
       {
@@ -1000,8 +1000,8 @@ int main(int argc, char **argv) {
     getcwd(wd, sizeof(wd));
     mb_path lltfile = "";
     mb_path otpsfile = "";
-    sprintf(lltfile, "%s/tmp_mbotps_llt_%d.txt", wd, pid);
-    sprintf(otpsfile, "%s/tmp_mbotps_llttd_%d.txt", wd, pid);
+    sprintf(lltfile, "%s/t%d.txt", wd, pid);
+    sprintf(otpsfile, "%s/u%d.txt", wd, pid);
     FILE *tfp = NULL;
     if ((tfp = fopen(lltfile, "w")) == NULL)
       {
@@ -1263,7 +1263,12 @@ int main(int argc, char **argv) {
     fclose(tfp);
 
     /* call predict_tide with popen */
-    fprintf(stderr, "\nCalling OTPS predict_tide:\n---------------------------------------");
+    fprintf(stderr, "\nCalling OTPS predict_tide:\n");
+    fprintf(stderr, "  %s/predict_tide\n", otps_location_use);
+    fprintf(stderr, "  %s/DATA/Model_%s\n", otps_location_use, otps_model);
+    fprintf(stderr, "  Input llt file:   %s\n", lltfile);
+    fprintf(stderr, "  Output otps file: %s\n", otpsfile);
+    fprintf(stderr, "---------------------------------------\n");
     sprintf(predict_tide, "cd %s; ./predict_tide", otps_location_use);
     tfp =  popen(predict_tide, "w");
     if (tfp == NULL) {
@@ -1342,6 +1347,10 @@ int main(int argc, char **argv) {
         ngood++;
       } else {
         output_ok = false;
+        if (strstr(line, "***** Site is out of model grid OR land *****") != NULL) {
+          fprintf(stderr, "Skipping data: position %f %f is outside the model grid or located on land\n",
+                  lon, lat);
+        }
       }
 
       /* if tide station data have been loaded, interpolate the
@@ -1361,7 +1370,7 @@ int main(int argc, char **argv) {
 
       /* get next entry from the llt file and check the associated swath_file
           if needed open new output tide file */
-      if (output_ok && (result = fgets(line, MB_PATH_MAXLINE, lfp)) == line) {
+      if ((result = fgets(line, MB_PATH_MAXLINE, lfp)) == line) {
         /* get the corresponding swath file */
         nget = sscanf(line, "%lf %lf %d %d %d %d %d %d %s",
                       &lat, &lon,

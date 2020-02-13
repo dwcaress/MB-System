@@ -537,7 +537,7 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
 	/* check if pointer is in list */
 	int iptr = -1;
 	for (int i = 0; i < n_mb_alloc; i++)
-		if (mb_alloc_ptr[i] == *ptr)
+		if (ptr != NULL && mb_alloc_ptr[i] == *ptr)
 			iptr = i;
 
 	/* if pointer is in list remove it from list

@@ -1880,11 +1880,16 @@ typedef struct s7kr_systemeventmessage_struct {
 /* Reson 7k calibrated snippet data (part of record 7058) */
 typedef struct s7kr_calibratedsnippettimeseries_struct {
 	unsigned short beam_number; /* Beam or element number */
-	unsigned int begin_sample;  /* First sample included in snippet */
-	unsigned int detect_sample; /* Detection point */
-	unsigned int end_sample;    /* Last sample included in snippet */
-	unsigned int nalloc;        /* Bytes allocated to hold amplitude time series */
-	float *amplitude;           /* Amplitude time series */
+	unsigned int begin_sample;  /* First sample number in beam from transmitter and outward */
+	unsigned int detect_sample; /* Bottom detection point in beam from transmitter and outward */
+	unsigned int end_sample;    /* Last sample number in beam from transmitter and outward */
+	unsigned int nalloc;        /* Bytes allocated to hold the time series */
+	float *amplitude;           /* Backscattering Strength (BS) for each sample. BS = 10 log10(sigma), */
+                              /*   where 'sigma' is the backscattering cross section. The snippet */
+                              /*   vector of each beam is ordered in samples of increasing range */
+                              /*   from the transmitter. */
+  float *footprints;          /* Footprint area series for each sample in square meters. Only */
+                              /*   available when control flag bit 6 is set */
 } s7kr_calibratedsnippettimeseries;
 
 /* Reson 7k calibrated snippet (record 7058) */
@@ -1911,15 +1916,21 @@ typedef struct s7kr_calibratedsnippet_struct {
 	                         8 = No gain (Gain is too low)
 	                         255 = System cannot be calibrated (c7k file missing)
 	                         Other = reserved */
-	unsigned int control_flags;  /* Control settings from RC 1113 command:
-	                   Bit 0: Brightness is required to pass
-	                   Bit 1: Colinearity is required to pass
-	                   Bit 2: Bottom detection results are used for snippet
-	                   Bit 3: Snippets display min requirements are used
-	                   Bit 4: Minimum window size is required
-	                   Bit 5: Maximum window size is required
-	                   6-31: reserved */
-	mb_u_char reserved[28];      /* Reserved for future use */
+  unsigned int control_flags;  // Control settings from RC 1113 command:
+                        //  Bit 0: Brightness is required to pass
+                        //  Bit 1: Colinearity is required to pass
+                        //  Bit 2: Bottom detection results are used for snippet
+                        //  Bit 3: Snippets display min requirements are used
+                        //  Bit 4: Minimum window size is required
+                        //  Bit 5: Maximum window size is required
+                        //  Bit 6: - Footprint areas are included
+                        //  Bit 7: - Generic compensation (not per unit)
+                        //  Bit 8: - Single absorption value used for the whole ping.
+                        //           Otherwise a CTD profile is used
+                        //  Bit 9-31: - Reserved
+  float absorption;     // Absorption value in dB/km. Only valid when
+                      //   control flag bit 8 is set
+  unsigned int reserved[6];  // Reserved for future use
 	s7kr_calibratedsnippettimeseries calibratedsnippettimeseries[MBSYS_RESON7K_MAX_BEAMS];
 	/* Snippet time series for each beam */
 } s7kr_calibratedsnippet;

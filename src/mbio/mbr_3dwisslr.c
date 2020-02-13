@@ -656,7 +656,13 @@ int mbr_3dwisslr_index_data
         time_i[4] = store->minutes;
         time_i[5] = store->seconds;
         time_i[6] = (int)(0.001 * store->nanoseconds);
-        mb_get_time(verbose, time_i, &time_d);
+        // handle glitch in early WISSL data where seconds could be 60
+        if (mb_get_time(verbose, time_i, &time_d) != MB_SUCCESS && time_i[5] == 60) {
+          time_i[5]--;
+          mb_get_time(verbose, time_i, &time_d);
+          time_d += 1.0;
+          mb_get_date(verbose, time_d, time_i);
+        }
 
         /* augment the index table */
         mb_io_ptr->indextable[mb_io_ptr->num_indextable].total_index_org =

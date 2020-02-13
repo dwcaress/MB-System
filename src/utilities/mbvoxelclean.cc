@@ -801,7 +801,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* close the swath file */
-			status &= mb_close(verbose, &mbio_ptr, &error);
+			status = mb_close(verbose, &mbio_ptr, &error);
 
 			// allocate arrays of voxel beam counts - use unsigned char so that beam
 			// counts are capped at 255 - ergo the maximum occupied count threshold
@@ -932,7 +932,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* close edit save file */
-			status &= mb_esf_close(verbose, &esf, &error);
+			status = mb_esf_close(verbose, &esf, &error);
 
 			/* update mbprocess parameter file */
 			if (esffile_open) {
@@ -980,7 +980,7 @@ int main(int argc, char **argv) {
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
-			if ((status &= mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
+			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 				read_data = true;
 			else
 				read_data = false;

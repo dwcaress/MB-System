@@ -339,6 +339,19 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+#### 5.7.6beta28 (February 13, 2020)
+
+Format 89 (MBF_RESON7K3): Added support for data record type 7058.
+
+Format 233 (MBF_WISSLR): Embedded fix for timing glitch in early WiSSL data.
+
+Mbotps: Discovered that the path length for the temporary files written by
+mbotps must be less than 100 characters or the OTPS program predict_tide will
+fail. Altered the filenames used for these temporary files to be as short as
+possible.
+
+mbvoxelclean: Fixed datalist reading logic.
+
 #### 5.7.6beta27 (February 3, 2020)
 
 mbpreprocess: Corrected prior fix to error in calculating lever arms, which

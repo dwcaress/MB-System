@@ -1179,7 +1179,7 @@ int main(int argc, char **argv) {
       exit(MB_ERROR_OPEN_FAIL);
     }
     else if (n_sensordepth < 1) {
-      fprintf(stderr, "\nNo soundspeed values read from: %s\n", sensordepth_file);
+      fprintf(stderr, "\nNo sensordepth values read from: %s\n", sensordepth_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_ERROR_OPEN_FAIL);
     }
