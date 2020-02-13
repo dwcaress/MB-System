@@ -24,9 +24,8 @@
  * Date:        June 6, 1993
  */
 
-/*--------------------------------------------------------------------*/
-
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -75,7 +74,7 @@ struct profile profile_edit;
 int *edit_x = NULL;
 int *edit_y = NULL;
 mb_path editfile;
-int edit = 0;
+bool edit = false;
 int ndisplay = 0;
 void *mbvt_xgid;
 int borders[4];
@@ -369,7 +368,7 @@ int mbvt_quit() {
 	mbvt_deallocate_swath();
 
 	/* clear out old velocity data */
-	if (edit == true) {
+	if (edit) {
 		edit = false;
 		profile->n = 0;
 		strcpy(profile->name, "");
@@ -560,7 +559,7 @@ int mbvt_open_edit_profile(char *file) {
 	profile = &profile_edit;
 
 	/* clear out old velocity data */
-	if (edit == true) {
+	if (edit) {
 		edit = false;
 		profile->n = 0;
 		strcpy(profile->name, "");
@@ -667,7 +666,7 @@ int mbvt_new_edit_profile() {
 	profile = &profile_edit;
 
 	/* clear out old velocity data */
-	if (edit == true) {
+	if (edit) {
 		edit = false;
 		profile->n = 0;
 		strcpy(profile->name, "");
@@ -1347,7 +1346,7 @@ int mbvt_plot() {
 	}
 
 	/* plot edit profile */
-	if (edit == true) {
+	if (edit) {
 		for (j = 0; j < profile_edit.n; j++) {
 			xx = xmin + (profile_edit.velocity[j] - xminimum) * xscale;
 			yy = ymin + (profile_edit.depth[j] - yminimum) * yscale;
@@ -1935,7 +1934,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	double altitude;
 	double sonardepth;
 	int variable_beams;
-	int traveltime;
+	int traveltime;  // TODO(schwehr): bool
 	int beam_flagging;
 	mb_path command;
 	mb_path string;
@@ -1965,7 +1964,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 		do_error_dialog("Data loading aborted.", "The specified swath data", "format is incorrect!");
 		return (status);
 	}
-	if (traveltime == false) {
+	if (!traveltime) {
 		fprintf(stderr, "\nProgram <%s> requires travel time data.\n", program_name);
 		fprintf(stderr, "Format %d is does not include travel time data.\n", format);
 		fprintf(stderr, "Travel times and angles are being estimated\n");
@@ -1974,7 +1973,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 		do_error_dialog("Data doesn't include travel times!", "Travel times and angles estimated",
 		                "assuming 1500 m/s sound speed.");
 	}
-	/* if (traveltime == false)
+	/* if (!traveltime)
 	    {
 	    fprintf(stderr,"\nProgram <%s> requires travel time data.\n",program_name);
 	    fprintf(stderr,"Format %d is unacceptable because it does not include travel time data.\n",format);
@@ -2119,7 +2118,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 				ping[nbuffer].bathacrosstrack[i] = bathacrosstrack[i];
 				ping[nbuffer].bathalongtrack[i] = bathalongtrack[i];
 			}
-			if (traveltime == true) {
+			if (traveltime) {
 				status = mb_ttimes(verbose, mbio_ptr, store_ptr, &kind, &nbeams, ping[nbuffer].ttimes, ping[nbuffer].angles,
 				                   ping[nbuffer].angles_forward, ping[nbuffer].angles_null, ping[nbuffer].heave,
 				                   ping[nbuffer].alongtrack_offset, &ping[nbuffer].sonardepth, &ping[nbuffer].ssv, &error);
@@ -2284,7 +2283,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	}
 
 	/* process the data */
-	if (status == MB_SUCCESS && edit == true)
+	if (status == MB_SUCCESS && edit)
 		status = mbvt_process_multibeam();
 
 	/* plot everything */
@@ -2393,7 +2392,7 @@ int mbvt_process_multibeam() {
 	double *vel;
 	int nvel;
 	void *rt_svp = NULL;
-	int first;
+	bool first;
 	double ttime;
 	int ray_stat;
 	double factor;
@@ -2402,7 +2401,7 @@ int mbvt_process_multibeam() {
 	int ns;
 	double depth_predict, res;
 	double sonardepth, sonardepthshift, heave_use;
-	int found;
+	bool found;
 	int i, j, k;
 
 	if (verbose >= 2) {
@@ -2469,7 +2468,7 @@ int mbvt_process_multibeam() {
 
 		/* find a good heave value */
 		found = false;
-		for (i = 0; i < ping[k].beams_bath && found == false; i++) {
+		for (i = 0; i < ping[k].beams_bath && !found; i++) {
 			if (mb_beam_ok(ping[k].beamflag[i])) {
 				heave_use = ping[k].heave[i];
 				found = true;
@@ -2478,7 +2477,7 @@ int mbvt_process_multibeam() {
 
 		sonardepth = heave_use + ping[k].sonardepth;
 		sonardepthshift = 0.0;
-		if (first == true)
+		if (first)
 			raydepthmin = MIN(raydepthmin, sonardepth);
 		if (sonardepth < 0.0) {
 			sonardepthshift = sonardepth;
@@ -2497,7 +2496,7 @@ int mbvt_process_multibeam() {
 				factor = cos(DTR * ping[k].angles_forward[i]);
 
 				/* trace rays */
-				if (first == false) {
+				if (!first) {
 					/* call raytracing without keeping
 					plotting list */
 					status =
@@ -2527,7 +2526,7 @@ int mbvt_process_multibeam() {
 					bath_min = depth[i];
 				if (depth[i] > bath_max)
 					bath_max = depth[i];
-				if (first == true) {
+				if (first) {
 					rayxmax = MAX(rayxmax, fabs(acrosstrack[i]));
 					raydepthmax = MAX(raydepthmax, depth[i]);
 				}
