@@ -967,7 +967,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 				tick[nlevel] = 0;
 				setcolors = false;
 			}
-			if (count < 6 || setcolors == false) {
+			if (count < 6 || !setcolors) {
 				red[nlevel] = 0;
 				green[nlevel] = 0;
 				blue[nlevel] = 0;
@@ -1017,7 +1017,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	//	mb_coor_scale(verbose, 0.5*(bounds[2] + bounds[3]), &mtodeglon, &mtodeglat);
 
 	/* set lonflip if possible */
-	if (lonflip_set == false) {
+	if (!lonflip_set) {
 		if (bounds[0] < -180.0)
 			lonflip = -1;
 		else if (bounds[1] > 180.0)
@@ -1202,7 +1202,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 			*npings = 0;
 			bool done = false;
 			bool plotted_name = false;
-			while (done == false) {
+			while (!done) {
 				mb_path comment;
 				int kind;
 				int pings_read;

@@ -109,11 +109,15 @@ EXTERN_MSC int GMT_mbswath(void *API, int mode, void *args);
 
 #define GMT_PROG_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "mb_define.h"
+#include "mb_format.h"
 #include "mb_io.h"
+#include "mb_status.h"
 
 /* MBSWATH MODE DEFINES */
 #define MBSWATH_BATH 1
@@ -765,7 +769,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 		}
 
 		/* do bathymetry */
-		if (dobath == true)
+		if (dobath)
 			for (int j = 1; j < pingcur->beams_bath - 1; j++)
 				if (mb_beam_ok(pingcur->beamflag[j])) {
 					x = pingcur->bathlon[j];
@@ -794,7 +798,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 					}
 
 					/* do it using fore-aft beam width */
-					if (setprint == true && Ctrl->A.mode == MBSWATH_FOOTPRINT_REAL) {
+					if (setprint && Ctrl->A.mode == MBSWATH_FOOTPRINT_REAL) {
 						print = &pingcur->bathfoot[j];
 						pingcur->bathflag[j] = true;
 						ddlonx = (pingcur->bathlon[j] - pingcur->navlon) / Ctrl->mtodeglon;
@@ -821,7 +825,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 					}
 
 					/* do it using ping nav separation */
-					else if (setprint == true) {
+					else if (setprint) {
 						print = &pingcur->bathfoot[j];
 						pingcur->bathflag[j] = true;
 						print->x[0] = x + dlon1 + pingcur->lonaft;
@@ -836,7 +840,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 				}
 
 		/* do sidescan */
-		if (doss == true)
+		if (doss)
 			for (int j = 1; j < pingcur->pixels_ss - 1; j++)
 				if (pingcur->ss[j] > MB_SIDESCAN_NULL) {
 					x = pingcur->sslon[j];
@@ -865,7 +869,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 					}
 
 					/* do it using fore-aft beam width */
-					if (setprint == true && Ctrl->A.mode == MBSWATH_FOOTPRINT_REAL) {
+					if (setprint && Ctrl->A.mode == MBSWATH_FOOTPRINT_REAL) {
 						print = &pingcur->ssfoot[j];
 						pingcur->ssflag[j] = true;
 						ddlonx = (pingcur->sslon[j] - pingcur->navlon) / Ctrl->mtodeglon;
@@ -892,7 +896,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 					}
 
 					/* do it using ping nav separation */
-					else if (setprint == true) {
+					else if (setprint) {
 						print = &pingcur->ssfoot[j];
 						pingcur->ssflag[j] = true;
 						print->x[0] = x + dlon1 + pingcur->lonaft;
@@ -919,7 +923,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 		}
 
 		/* do bathymetry with more than 2 soundings */
-		if (dobath == true && pingcur->beams_bath > 2) {
+		if (dobath && pingcur->beams_bath > 2) {
 			int j = 0;
 			if (mb_beam_ok(pingcur->beamflag[j]) && mb_beam_ok(pingcur->beamflag[j + 1])) {
 				x = pingcur->bathlon[j];
@@ -997,7 +1001,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 		}
 
 		/* do bathymetry with 1 sounding */
-		if (dobath == true && Ctrl->A.mode == MBSWATH_FOOTPRINT_REAL && pingcur->beams_bath == 1) {
+		if (dobath && Ctrl->A.mode == MBSWATH_FOOTPRINT_REAL && pingcur->beams_bath == 1) {
 			if (mb_beam_ok(pingcur->beamflag[0])) {
 				print = &pingcur->bathfoot[0];
 				pingcur->bathflag[0] = true;
@@ -1031,7 +1035,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 		}
 
 		/* do sidescan */
-		if (doss == true && pingcur->pixels_ss > 2) {
+		if (doss && pingcur->pixels_ss > 2) {
 			int j = 0;
 			if (pingcur->ss[j] > MB_SIDESCAN_NULL && pingcur->ss[j + 1] > MB_SIDESCAN_NULL) {
 				x = pingcur->sslon[j];
@@ -1117,7 +1121,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 		for (int i = 0; i < swath->npings; i++) {
 			fprintf(stderr, "dbg2\ndbg2       ping:           %d\n", i);
 			pingcur = &swath->data[i];
-			if (dobath == true)
+			if (dobath)
 				for (int j = 0; j < pingcur->beams_bath; j++) {
 					print = &pingcur->bathfoot[j];
 					fprintf(stderr, "dbg2       %d  %d %g %g   ", j, pingcur->bathflag[j], pingcur->bathlon[j],
@@ -1126,7 +1130,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 						fprintf(stderr, "  %g %g", print->x[k], print->y[k]);
 					fprintf(stderr, "\n");
 				}
-			if (doss == true)
+			if (doss)
 				for (int j = 0; j < pingcur->pixels_ss; j++) {
 					print = &pingcur->ssfoot[j];
 					fprintf(stderr, "dbg2       %d  %d %g %g   ", j, pingcur->ssflag[j], pingcur->sslon[j], pingcur->sslat[j]);
@@ -1536,7 +1540,7 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 		for (int i = first; i < first + nplot; i++) {
 			pingcur = &swath->data[i];
 			for (int j = 0; j < pingcur->beams_bath; j++)
-				if (pingcur->bathflag[j] == true) {
+				if (pingcur->bathflag[j]) {
 					print = &pingcur->bathfoot[j];
 					x = &(print->x[0]);
 					y = &(print->y[0]);
@@ -1559,7 +1563,7 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 		for (int i = first; i < first + nplot; i++) {
 			pingcur = &swath->data[i];
 			for (int j = 0; j < pingcur->beams_amp; j++)
-				if (pingcur->bathflag[j] == true) {
+				if (pingcur->bathflag[j]) {
 					print = &pingcur->bathfoot[j];
 					x = &(print->x[0]);
 					y = &(print->y[0]);
@@ -1575,7 +1579,7 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 		for (int i = first; i < first + nplot; i++) {
 			pingcur = &swath->data[i];
 			for (int j = 0; j < pingcur->pixels_ss; j++)
-				if (pingcur->ssflag[j] == true) {
+				if (pingcur->ssflag[j]) {
 					print = &pingcur->ssfoot[j];
 					x = &(print->x[0]);
 					y = &(print->y[0]);
@@ -1895,10 +1899,12 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 	double amplog;
 	int *npings;
 	int nping_read = 0;
-	int start, first, nplot;
-	int plot;
-	int flush;
-	int save_new;
+	bool start;
+	int first;
+	int nplot;
+	bool plot;
+	bool flush;
+	bool save_new;
 	int pings;
 
 	/*----------------------- Standard module initialization and parsing ----------------------*/
@@ -2009,7 +2015,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 		mb_get_format(verbose, Ctrl->I.inputfile, NULL, &Ctrl->F.format, &error);
 
 	/* turn on looking for filtered amp or sidescan if needed */
-	if (Ctrl->Z.usefiltered == true) {
+	if (Ctrl->Z.usefiltered) {
 		if (Ctrl->Z.mode == MBSWATH_BATH_AMP)
 			Ctrl->filtermode = MBSWATH_FILTER_AMP;
 		else if (Ctrl->Z.mode == MBSWATH_AMP)
@@ -2023,7 +2029,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 		Ctrl->read_datalist = true;
 
 	/* open file list */
-	if (Ctrl->read_datalist == true) {
+	if (Ctrl->read_datalist) {
 		if ((status = mb_datalist_open(verbose, &Ctrl->datalist, Ctrl->I.inputfile, MB_DATALIST_LOOK_UNSET, &error)) !=
 		    MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
@@ -2045,7 +2051,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 	/* loop over files in file list */
 	if (verbose == 1)
 		fprintf(stderr, "\n");
-	while (read_data == true) {
+	while (read_data) {
 		/* check for mbinfo file - get file bounds if possible */
 		status = mb_check_info(verbose, file, Ctrl->L.lonflip, Ctrl->bounds, &file_in_bounds, &error);
 		if (status == MB_FAILURE) {
@@ -2055,7 +2061,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 		}
 
 		/* read if data may be in bounds */
-		if (file_in_bounds == true) {
+		if (file_in_bounds) {
 			/* check for "fast bathymetry" or "fbt" file */
 			if (Ctrl->Z.mode == MBSWATH_BATH || Ctrl->Z.mode == MBSWATH_BATH_RELIEF) {
 				mb_get_fbt(verbose, file, &format, &error);
@@ -2253,7 +2259,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 				}
 
 				/* scale bathymetry from meters to feet if necessary */
-				if (error == MB_ERROR_NO_ERROR && Ctrl->W.active == true) {
+				if (error == MB_ERROR_NO_ERROR && Ctrl->W.active) {
 					for (int i = 0; i < pingcur->beams_bath; i++) {
 						pingcur->bath[i] = 3.2808399 * pingcur->bath[i];
 					}
@@ -2303,7 +2309,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 					done = true;
 
 				/* if enough pings read in, plot them */
-				if (plot == true) {
+				if (plot) {
 					/* get footprint locations */
 					if (Ctrl->A.mode != MBSWATH_FOOTPRINT_POINT)
 						status = mbswath_get_footprints(verbose, Ctrl, &error);
@@ -2313,7 +2319,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 						status = mbswath_get_shading(verbose, Ctrl, GMT, CPTshade, &error);
 
 					/* plot data */
-					if (start == true) {
+					if (start) {
 						first = 0;
 						start = false;
 					}
@@ -2330,12 +2336,12 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 						status = mbswath_plot_data_footprint(verbose, Ctrl, GMT, CPTcolor, PSL, first, nplot, &error);
 
 					/* reorganize data */
-					if (flush == true && save_new == true) {
+					if (flush && save_new) {
 						status = mbswath_ping_copy(verbose, 0, *npings, Ctrl->swath_plot, &error);
 						*npings = 1;
 						start = true;
 					}
-					else if (flush == true) {
+					else if (flush) {
 						*npings = 0;
 						start = true;
 					}
@@ -2353,7 +2359,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 		} /* end if file in bounds */
 
 		/* figure out whether and what to read next */
-		if (Ctrl->read_datalist == true) {
+		if (Ctrl->read_datalist) {
 			if ((status = mb_datalist_read(verbose, Ctrl->datalist, file, dfile, &format, &Ctrl->file_weight, &error)) ==
 			    MB_SUCCESS)
 				read_data = true;
@@ -2366,7 +2372,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 
 		/* end loop over files in list */
 	}
-	if (Ctrl->read_datalist == true)
+	if (Ctrl->read_datalist)
 		mb_datalist_close(verbose, &Ctrl->datalist, &error);
 
 	/* Generate grayscale 8-bit image */

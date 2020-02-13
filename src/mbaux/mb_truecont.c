@@ -585,7 +585,7 @@ int mb_triangulate(int verbose, struct swath *data, int *error) {
     fprintf(stderr, "dbg2       data->ncolor:            %d\n", data->ncolor);
     fprintf(stderr, "dbg2       data->nlevel:            %d\n", data->nlevel);
     fprintf(stderr, "dbg2       data->nlevelset:         %d\n", data->nlevelset);
-    if (data->nlevelset == true)
+    if (data->nlevelset)
       for (int i = 0; i < data->nlevel; i++) {
         fprintf(stderr, "dbg2          level[%3d]:  %f %d %d %d\n", i, data->level_list[i], data->label_list[i],
                 data->tick_list[i], data->color_list[i]);
@@ -857,7 +857,7 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
     fprintf(stderr, "dbg2       data->ncolor:            %d\n", data->ncolor);
     fprintf(stderr, "dbg2       data->nlevel:            %d\n", data->nlevel);
     fprintf(stderr, "dbg2       data->nlevelset:         %d\n", data->nlevelset);
-    if (data->nlevelset == true)
+    if (data->nlevelset)
       for (int i = 0; i < data->nlevel; i++) {
         fprintf(stderr, "dbg2          level[%3d]:  %f %d %d %d\n", i, data->level_list[i], data->label_list[i],
                 data->tick_list[i], data->color_list[i]);
@@ -904,7 +904,7 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
     return (status);
 
   /* get number of contour intervals */
-  if (data->nlevelset == false) {
+  if (data->nlevelset) {
     if (data->nlevel > 0) {
       mb_freed(verbose, __FILE__, __LINE__, (void **)&data->level_list, error);
       mb_freed(verbose, __FILE__, __LINE__, (void **)&data->color_list, error);
@@ -981,7 +981,7 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
   /* loop over all of the contour values */
   data->nsave = 0;
   data->nlabel = 0;
-  if (status == MB_SUCCESS && data->plot_contours == true)
+  if (status == MB_SUCCESS && data->plot_contours)
     for (int ival = 0; ival < data->nlevel; ival++) {
       const double value = data->level_list[ival];
       data->contour_newpen(data->color_list[ival]);
@@ -1031,7 +1031,7 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
         int isideend = iside2;
 
         /* set tick flag */
-        int tick_last = false;
+        bool tick_last = false;
 
         /* look for next segment */
         while (get_next_tri(data, &itri, &iside1, &iside2, &closed, &itristart, &isidestart)) {
@@ -1041,7 +1041,7 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
           get_pos_tri(data, eps, itri, iside2, value, &x, &y);
 
           /* deal with tick as needed */
-          if (tick && tick_last == false) {
+          if (tick && !tick_last) {
             int hand = 0;
             if (data->z[data->iv[iside1][itri]] > data->z[data->iv[iside2][itri]])
               hand = -1;
@@ -1380,7 +1380,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
     fprintf(stderr, "dbg2       data->ncolor:            %d\n", data->ncolor);
     fprintf(stderr, "dbg2       data->nlevel:            %d\n", data->nlevel);
     fprintf(stderr, "dbg2       data->nlevelset:         %d\n", data->nlevelset);
-    if (data->nlevelset == true)
+    if (data->nlevelset)
       for (int i = 0; i < data->nlevel; i++) {
         fprintf(stderr, "dbg2          level[%3d]:  %f %d %d %d\n", i, data->level_list[i], data->label_list[i],
                 data->tick_list[i], data->color_list[i]);
@@ -1433,11 +1433,11 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
   /* get min max of bathymetry */
   double bath_min;
   double bath_max;
-  int extreme_start = false;
+  bool extreme_start = false;
   for (int i = 0; i < data->npings; i++) {
     struct ping *ping = &data->pings[i];
     for (int j = 0; j < ping->beams_bath; j++) {
-      if (extreme_start == false && mb_beam_ok(ping->beamflag[j])) {
+      if (!extreme_start && mb_beam_ok(ping->beamflag[j])) {
         bath_min = ping->bath[j];
         bath_max = ping->bath[j];
         extreme_start = true;
@@ -1454,7 +1454,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
     return (status);
 
   /* get number of contour intervals */
-  if (data->nlevelset == false) {
+  if (!data->nlevelset) {
     if (data->nlevel > 0) {
       mb_freed(verbose, __FILE__, __LINE__, (void **)&data->level_list, error);
       mb_freed(verbose, __FILE__, __LINE__, (void **)&data->color_list, error);
@@ -1516,7 +1516,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
   /* loop over all of the contour values */
   data->nsave = 0;
   data->nlabel = 0;
-  if (status == MB_SUCCESS && data->plot_contours == true)
+  if (status == MB_SUCCESS && data->plot_contours)
     for (int ival = 0; ival < data->nlevel; ival++) {
       const double value = data->level_list[ival];
       data->contour_newpen(data->color_list[ival]);
@@ -1586,7 +1586,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
         const int dbeg = d;
 
         /* set tick flag */
-        int tick_last = false;
+        bool tick_last = false;
 
         /* look for next component */
         int hand;
@@ -1598,7 +1598,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
           /* get position */
           get_pos_old(data, eps, &x, &y, nk, ni, nj, value);
           get_hand_old(data, &hand, k, i, j, d);
-          if (tick && tick_last == false) {
+          if (tick && !tick_last) {
             data->xsave[data->nsave] = 0.5 * (x + data->xsave[data->nsave - 1]);
             data->ysave[data->nsave] = 0.5 * (y + data->ysave[data->nsave - 1]);
             const double magdis =

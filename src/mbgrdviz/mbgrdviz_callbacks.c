@@ -28,18 +28,13 @@
 #include <windows.h>
 #endif
 
-#include <Xm/Xm.h>
-
-/*
- * Standard includes for builtins.
- */
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
+#include <unistd.h>
 #ifdef USE_UUID
 #include <uuid.h>
 #endif
@@ -50,6 +45,8 @@
 #include "mb_format.h"
 #include "mb_aux.h"
 #include "mbsys_singlebeam.h"
+
+#include <Xm/Xm.h>
 
 /* mbview include file */
 #include "mbview.h"
@@ -117,7 +114,7 @@ static int survey_mode = MBGRDVIZ_SURVEY_MODE_UNIFORM;
 static int survey_platform = MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE;
 static int survey_interleaving = 1;
 static int survey_direction = MBGRDVIZ_SURVEY_DIRECTION_SW;
-static int survey_crosslines_last = false;
+static bool survey_crosslines_last = false;
 static int survey_crosslines = 0;
 static int survey_linespacing = 200;
 static int survey_swathwidth = 120;
@@ -136,7 +133,7 @@ static int pargc;
 static char **pargv;
 
 /* widgets */
-static int mbview_id[MBV_MAX_WINDOWS];
+static bool mbview_id[MBV_MAX_WINDOWS];
 extern Widget mainWindow;
 static Widget fileSelectionList;
 static Widget fileSelectionText;
@@ -255,8 +252,10 @@ WidgetList BxWidgetIdsFromNames(Widget, char *, char *);
 
 /* ARGSUSED */
 void BxExitCB(Widget w, XtPointer client, XtPointer call) {
-  long exitValue = EXIT_FAILURE;
-  exit(exitValue);
+  (void)w;  // Unused parameter
+  (void)client;  // Unused parameter
+  (void)call;  // Unused parameter
+  exit(EXIT_FAILURE);
 }
 
 /*      Function Name:   BxManageCB
@@ -277,16 +276,15 @@ void BxExitCB(Widget w, XtPointer client, XtPointer call) {
 
 /* ARGSUSED */
 void BxManageCB(Widget w, XtPointer client, XtPointer call) {
-  WidgetList widgets;
-  int i;
+  (void)call;  // Unused parameter
 
   /*
    * This function returns a NULL terminated WidgetList.  The memory for
    * the list needs to be freed when it is no longer needed.
    */
-  widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
+  WidgetList widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
 
-  i = 0;
+  int i = 0;
   while (widgets && widgets[i] != NULL) {
     XtManageChild(widgets[i]);
     i++;
@@ -312,16 +310,15 @@ void BxManageCB(Widget w, XtPointer client, XtPointer call) {
 
 /* ARGSUSED */
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
-  WidgetList widgets;
-  int i;
+  (void)call;  // Unused parameter
 
   /*
    * This function returns a NULL terminated WidgetList.  The memory for
    * the list needs to be freed when it is no longer needed.
    */
-  widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
+  WidgetList widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
 
-  i = 0;
+  int i = 0;
   while (widgets && widgets[i] != NULL) {
     XtUnmanageChild(widgets[i]);
     i++;
@@ -351,16 +348,15 @@ void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
 
 /* ARGSUSED */
 void BxPopdownCB(Widget w, XtPointer client, XtPointer call) {
-  WidgetList widgets;
-  int i;
+  (void)call;  // Unused parameter
 
   /*
    * This function returns a NULL terminated WidgetList.  The memory for
    * the list needs to be freed when it is no longer needed.
    */
-  widgets = BxWidgetIdsFromNames(w, "BxPopdownCB", (String)client);
+  WidgetList widgets = BxWidgetIdsFromNames(w, "BxPopdownCB", (String)client);
 
-  i = 0;
+  int i = 0;
   while (widgets && widgets[i] != NULL) {
     if (XtIsShell(widgets[i])) {
       XtPopdown(widgets[i]);
@@ -398,16 +394,15 @@ Object %s is not a Shell\n",
 
 /* ARGSUSED */
 void BxPopupCB(Widget w, XtPointer client, XtPointer call) {
-  WidgetList widgets;
-  int i;
+  (void)call;  // Unused parameter
 
   /*
    * This function returns a NULL terminated WidgetList.  The memory for
    * the list needs to be freed when it is no longer needed.
    */
-  widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
+  WidgetList widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
 
-  i = 0;
+  int i = 0;
   while (widgets && widgets[i] != NULL) {
     if (XtIsShell(widgets[i])) {
       XtPopup(widgets[i], XtGrabNone);
@@ -424,19 +419,12 @@ Object %s is not a Shell\n",
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
-  Cardinal ac = 0;
-  Arg args[256];
-  char value_text[MB_PATH_MAXLINE];
-  XmStringTable str_list;
-  int i;
-
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       argc:           %d\n", argc);
     fprintf(stderr, "dbg2       argv:\n");
-    for (i = 0; i < argc; i++)
+    for (int i = 0; i < argc; i++)
       fprintf(stderr, "dbg2       argv[%d]:    %s\n", i, argv[i]);
     fprintf(stderr, "dbg2       verbosity:   %d\n", verbosity);
   }
@@ -447,6 +435,7 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
   error = MB_ERROR_NO_ERROR;
 
   /* set about version label */
+  char value_text[MB_PATH_MAXLINE];
   sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION, MB_BUILD_DATE);
   set_mbview_label_multiline_string(label_about_version, value_text);
 
@@ -458,10 +447,11 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
   /* set up survey planning widgets */
 
   /* set up line control */
-  str_list = (XmStringTable)XtMalloc(2 * sizeof(XmString *));
+  XmStringTable str_list = (XmStringTable)XtMalloc(2 * sizeof(XmString *));
   str_list[0] = XmStringCreateLocalized("Uniform");
   str_list[1] = XmStringCreateLocalized("Variable by Swath Width");
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNnumValues, 2);
   ac++;
   XtSetArg(args[ac], XmNvalues, str_list);
@@ -559,7 +549,7 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
   XtFree((XtPointer)str_list);
 
   /* initialize mbview_id list */
-  for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+  for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
     mbview_id[i] = false;
   }
 
@@ -570,26 +560,17 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_sensitivity() {
-  int mbview_active;
-  int mbview_allactive;
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  int nsite, nroute;
-  int i;
-
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
   /* fprintf(stderr,"do_mbgrdviz_sensitivity called\n");*/
   /* set file opening menu items only if an mbview instance is active */
-  mbview_active = false;
-  mbview_allactive = true;
-  instance = MBV_NO_WINDOW;
-  for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-    if (mbview_id[i] == true) {
+  bool mbview_active = false;
+  bool mbview_allactive = true;
+  size_t instance = MBV_NO_WINDOW;
+  for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
+    if (mbview_id[i]) {
       mbview_active = true;
       if (instance == MBV_NO_WINDOW)
         instance = i;
@@ -597,6 +578,9 @@ void do_mbgrdviz_sensitivity() {
     else
       mbview_allactive = false;
   }
+
+  Cardinal ac = 0;
+  Arg args[256];
 
   /* set file opening menu item only if not all mbview instances are active */
   if (mbview_allactive != true) {
@@ -612,7 +596,7 @@ void do_mbgrdviz_sensitivity() {
   XtSetValues(pushButton_file_openprimary, args, ac);
 
   /* set other file opening menu items only if an mbview instance is active */
-  if (mbview_active == true) {
+  if (mbview_active) {
     ac = 0;
     XtSetArg(args[ac], XmNsensitive, True);
     ac++;
@@ -628,8 +612,9 @@ void do_mbgrdviz_sensitivity() {
   XtSetValues(pushButton_openswath, args, ac);
   XtSetValues(pushButton_openvector, args, ac);
 
+  int nsite;
   mbview_getsitecount(verbose, instance, &nsite, &error);
-  if (mbview_active == true && nsite > 0) {
+  if (mbview_active && nsite > 0) {
     ac = 0;
     XtSetArg(args[ac], XmNsensitive, True);
     ac++;
@@ -641,8 +626,9 @@ void do_mbgrdviz_sensitivity() {
   }
   XtSetValues(pushButton_savesite, args, ac);
 
+  int nroute;
   mbview_getroutecount(verbose, instance, &nroute, &error);
-  if (mbview_active == true && nroute > 0) {
+  if (mbview_active && nroute > 0) {
     ac = 0;
     XtSetArg(args[ac], XmNsensitive, True);
     ac++;
@@ -656,17 +642,7 @@ void do_mbgrdviz_sensitivity() {
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer call_data) {
-  size_t actionid;
-  size_t mode;
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
-
-  /* print input debug statements */
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -676,12 +652,13 @@ void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer cal
   }
 
   /* figure out what kind of file is to be opened */
-  actionid = (size_t)client_data;
-  mode = actionid / MBV_MAX_WINDOWS;
-  instance = actionid - mode * MBV_MAX_WINDOWS;
+  const size_t actionid = (size_t)client_data;
+  // const size_t mode = actionid / MBV_MAX_WINDOWS;
+  // const size_t instance = actionid - mode * MBV_MAX_WINDOWS;
 
   /* set title to open primary grid */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Open GMT Grid File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -689,7 +666,8 @@ void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer cal
 
   /* open primary grid */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.grd", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.grd", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
 
@@ -700,16 +678,8 @@ void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer cal
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -719,10 +689,11 @@ void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, X
   }
 
   /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Open Overlay GMT Grid File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -730,10 +701,11 @@ void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, X
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.grd", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.grd", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_OPENOVERLAY * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_OPENOVERLAY * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -741,16 +713,8 @@ void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, X
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -759,11 +723,11 @@ void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPo
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Open Site File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -771,10 +735,11 @@ void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPo
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.ste", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.ste", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_OPENSITE * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_OPENSITE * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -782,16 +747,8 @@ void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPo
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -800,11 +757,11 @@ void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtP
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Open Route File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -812,10 +769,11 @@ void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtP
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.rte", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.rte", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_OPENROUTE * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_OPENROUTE * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -823,16 +781,8 @@ void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtP
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -841,10 +791,11 @@ void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPoi
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
+  Cardinal ac = 0;
+  Arg args[256];
   ac = 0;
   XtSetArg(args[ac], XmNtitle, "Open Navigation Datalist File");
   ac++;
@@ -853,10 +804,11 @@ void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPoi
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.mb-1", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.mb-1", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_OPENNAV * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_OPENNAV * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -864,16 +816,8 @@ void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPoi
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -882,11 +826,11 @@ void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtP
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Open Swath Datalist File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -894,10 +838,11 @@ void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtP
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.mb-1", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.mb-1", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_OPENSWATH * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_OPENSWATH * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -905,16 +850,8 @@ void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtP
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_openvector(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -923,11 +860,11 @@ void do_mbgrdviz_fileSelectionBox_openvector(Widget w, XtPointer client_data, Xt
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Open Vector File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -935,10 +872,11 @@ void do_mbgrdviz_fileSelectionBox_openvector(Widget w, XtPointer client_data, Xt
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_OPENVECTOR * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_OPENVECTOR * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -946,16 +884,8 @@ void do_mbgrdviz_fileSelectionBox_openvector(Widget w, XtPointer client_data, Xt
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -964,11 +894,11 @@ void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPo
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Site File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -976,10 +906,11 @@ void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPo
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVESITE * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVESITE * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -987,16 +918,8 @@ void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPo
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savesitewpt(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1005,11 +928,11 @@ void do_mbgrdviz_fileSelectionBox_savesitewpt(Widget w, XtPointer client_data, X
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Sites as Winfrog WPT File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1017,10 +940,11 @@ void do_mbgrdviz_fileSelectionBox_savesitewpt(Widget w, XtPointer client_data, X
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVESITEWPT * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVESITEWPT * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1028,16 +952,8 @@ void do_mbgrdviz_fileSelectionBox_savesitewpt(Widget w, XtPointer client_data, X
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1046,11 +962,11 @@ void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtP
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Route File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1058,10 +974,11 @@ void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtP
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVEROUTE * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVEROUTE * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1069,16 +986,8 @@ void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtP
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_saverisiscript(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1087,11 +996,11 @@ void do_mbgrdviz_fileSelectionBox_saverisiscript(Widget w, XtPointer client_data
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Risi Script File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1099,10 +1008,11 @@ void do_mbgrdviz_fileSelectionBox_saverisiscript(Widget w, XtPointer client_data
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVERISISCRIPT * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVERISISCRIPT * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1110,16 +1020,8 @@ void do_mbgrdviz_fileSelectionBox_saverisiscript(Widget w, XtPointer client_data
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1128,11 +1030,11 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Route as Winfrog PTS File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1140,10 +1042,11 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVEWINFROGPTS * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVEWINFROGPTS * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1151,16 +1054,8 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1169,11 +1064,11 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Route as Winfrog WPT File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1181,10 +1076,11 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVEWINFROGWPT * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVEWINFROGWPT * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1192,16 +1088,8 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savedegdecmin(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1210,11 +1098,11 @@ void do_mbgrdviz_fileSelectionBox_savedegdecmin(Widget w, XtPointer client_data,
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Route as Degrees + Decimal Minutes File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1222,10 +1110,11 @@ void do_mbgrdviz_fileSelectionBox_savedegdecmin(Widget w, XtPointer client_data,
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVEDEGDECMIN * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVEDEGDECMIN * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1233,16 +1122,8 @@ void do_mbgrdviz_fileSelectionBox_savedegdecmin(Widget w, XtPointer client_data,
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1251,11 +1132,11 @@ void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPoi
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Route as Hypack LNW File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1263,10 +1144,11 @@ void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPoi
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVELNW * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVELNW * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1274,16 +1156,8 @@ void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPoi
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savegreenseayml(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1292,11 +1166,11 @@ void do_mbgrdviz_fileSelectionBox_savegreenseayml(Widget w, XtPointer client_dat
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Route as Greensea YML File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1304,10 +1178,11 @@ void do_mbgrdviz_fileSelectionBox_savegreenseayml(Widget w, XtPointer client_dat
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVEGREENSEAYML * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVEGREENSEAYML * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1315,16 +1190,8 @@ void do_mbgrdviz_fileSelectionBox_savegreenseayml(Widget w, XtPointer client_dat
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1333,11 +1200,11 @@ void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, X
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = (size_t)client_data;
+  const size_t instance = (size_t)client_data;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Save Profile File");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1345,10 +1212,11 @@ void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, X
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_SAVEPROFILE * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_SAVEPROFILE * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1356,16 +1224,8 @@ void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, X
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_realtime(Widget w, XtPointer client_data, XtPointer call_data) {
-  Cardinal ac = 0;
-  Arg args[256];
-  size_t instance;
-  size_t actionid;
-  XmString tmp0;
-  Boolean argok;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1374,11 +1234,11 @@ void do_mbgrdviz_fileSelectionBox_realtime(Widget w, XtPointer client_data, XtPo
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get instance */
-  instance = 0;
+  const size_t instance = 0;
 
   /* set title to open file dialog  */
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
   XtSetArg(args[ac], XmNtitle, "Set Realtime Navigation Source");
   ac++;
   XtSetValues(dialogShell_open, args, ac);
@@ -1386,10 +1246,11 @@ void do_mbgrdviz_fileSelectionBox_realtime(Widget w, XtPointer client_data, XtPo
 
   /* set fileSelectionBox parameters */
   ac = 0;
-  tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
   ac++;
-  actionid = MBGRDVIZ_REALTIME * MBV_MAX_WINDOWS + instance;
+  const size_t actionid = MBGRDVIZ_REALTIME * MBV_MAX_WINDOWS + instance;
   XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
   ac++;
   XtSetValues(fileSelectionBox, args, ac);
@@ -1397,10 +1258,8 @@ void do_mbgrdviz_fileSelectionBox_realtime(Widget w, XtPointer client_data, XtPo
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_close(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1412,16 +1271,14 @@ void do_mbgrdviz_close(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
-  int status = MB_SUCCESS;
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   /* close any active mbview instances */
-  status = mbview_quit(verbose, &error);
+  // const int status =
+  mbview_quit(verbose, &error);
 
   XtUnmanageChild(XtParent(mainWindow));
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1433,11 +1290,7 @@ void do_mbgrdviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_dismiss_notify(size_t instance) {
-  int status = MB_SUCCESS;
-  int verbose = 0;
-  int i;
-
-  /* print input debug statements */
+  // int verbose = 0;
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1445,7 +1298,7 @@ int do_mbgrdviz_dismiss_notify(size_t instance) {
   }
 
   /* set mbview window <id> to inactive */
-  if (instance != MBV_NO_WINDOW && instance < MBV_MAX_WINDOWS && mbview_id[instance] == true) {
+  if (instance != MBV_NO_WINDOW && instance < MBV_MAX_WINDOWS && mbview_id[instance]) {
     mbview_id[instance] = false;
     /* fprintf(stderr, "Freeing mbview window %d in local list...\n",
             instance); */
@@ -1456,8 +1309,9 @@ int do_mbgrdviz_dismiss_notify(size_t instance) {
   }
 
   /* update widgets of remaining mbview windows */
-  for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-    if (mbview_id[i] == true)
+  int status = MB_SUCCESS;
+  for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
+    if (mbview_id[i])
       status = mbview_update(verbose, i, &error);
   }
 
@@ -1469,17 +1323,6 @@ int do_mbgrdviz_dismiss_notify(size_t instance) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) {
-  int status = MB_SUCCESS;
-  size_t actionid;
-  size_t mode;
-  size_t instance;
-  char *file_ptr = NULL;
-  Cardinal ac = 0;
-  Arg args[256];
-  XmFileSelectionBoxCallbackStruct *acs;
-  acs = (XmFileSelectionBoxCallbackStruct *)call_data;
-
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1488,6 +1331,9 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
+  char *file_ptr = NULL;
+  XmFileSelectionBoxCallbackStruct *acs = (XmFileSelectionBoxCallbackStruct *)call_data;
+
   /* read the input file name */
   XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &file_ptr);
   if (strlen(file_ptr) <= 0 && file_ptr != NULL) {
@@ -1495,7 +1341,6 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
     file_ptr = NULL;
   }
 
-  /* print debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg4  Extracted input file name from call_data:\n");
     fprintf(stderr, "dbg4       call_data:           %p\n", call_data);
@@ -1506,19 +1351,20 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
   }
 
   /* figure out what kind of file is to be opened */
-
-  ac = 0;
+  Cardinal ac = 0;
+  Arg args[256];
+  size_t actionid;
   XtSetArg(args[ac], XmNuserData, (XtPointer)&actionid);
   ac++;
   XtGetValues(fileSelectionBox, args, ac);
 
-  mode = actionid / MBV_MAX_WINDOWS;
+  size_t mode = actionid / MBV_MAX_WINDOWS;
+  size_t instance;
   if (mode > 0)
     instance = actionid - mode * MBV_MAX_WINDOWS;
   else
     instance = 0;
 
-  /* print debug statements */
   if (verbose >= 4) {
     fprintf(stderr, "\ndbg4  Extracted user data from widget fileSelectionBox:\n");
     fprintf(stderr, "dbg4       fileSelectionBox:    %p\n", fileSelectionBox);
@@ -1527,121 +1373,122 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
   }
 
   /* open primary grid */
+  // int status = MB_SUCCESS;
   if (mode <= MBGRDVIZ_OPENGRID) {
     /* read the grid and open mbview window */
-    status = do_mbgrdviz_openprimary(file_ptr);
+    /* status = */ do_mbgrdviz_openprimary(file_ptr);
   }
 
   /* else open overlay grid */
   else if (mode == MBGRDVIZ_OPENOVERLAY) {
     /* read the grid and update mbview window */
     do_mbview_message_on("Reading overlay grid...", instance);
-    status = do_mbgrdviz_openoverlay(instance, file_ptr);
+    /* status = */ do_mbgrdviz_openoverlay(instance, file_ptr);
   }
 
   /* else open site data */
   else if (mode == MBGRDVIZ_OPENSITE) {
     /* read site file and update mbview window */
     do_mbview_message_on("Reading site data...", instance);
-    status = do_mbgrdviz_opensite(instance, file_ptr);
+    /* status = */ do_mbgrdviz_opensite(instance, file_ptr);
   }
 
   /* else open route data */
   else if (mode == MBGRDVIZ_OPENROUTE) {
     /* read route file and update mbview window */
     do_mbview_message_on("Reading route data...", instance);
-    status = do_mbgrdviz_openroute(instance, file_ptr);
+    /* status = */ do_mbgrdviz_openroute(instance, file_ptr);
   }
 
   /* else open nav data */
   else if (mode == MBGRDVIZ_OPENNAV) {
     /* read nav file and update mbview window */
     do_mbview_message_on("Reading navigation data...", instance);
-    status = do_mbgrdviz_opennav(instance, false, file_ptr);
+    /* status = */ do_mbgrdviz_opennav(instance, false, file_ptr);
   }
 
   /* else open swath data */
   else if (mode == MBGRDVIZ_OPENSWATH) {
     /* read nav file and update mbview window */
     do_mbview_message_on("Reading swath data...", instance);
-    status = do_mbgrdviz_opennav(instance, true, file_ptr);
+    /* status = */ do_mbgrdviz_opennav(instance, true, file_ptr);
   }
 
   /* else open vector data */
   else if (mode == MBGRDVIZ_OPENVECTOR) {
     /* read vector file and update mbview window */
     do_mbview_message_on("Reading vector data...", instance);
-    status = do_mbgrdviz_openvector(instance, file_ptr);
+    /* status = */ do_mbgrdviz_openvector(instance, file_ptr);
   }
 
   /* else write site data */
   else if (mode == MBGRDVIZ_SAVESITE) {
     /* write site file */
     do_mbview_message_on("Saving site data...", instance);
-    status = do_mbgrdviz_savesite(instance, file_ptr);
+    /* status = */ do_mbgrdviz_savesite(instance, file_ptr);
   }
 
   /* else write site data */
   else if (mode == MBGRDVIZ_SAVESITEWPT) {
     /* write site file */
     do_mbview_message_on("Saving site data...", instance);
-    status = do_mbgrdviz_savesitewpt(instance, file_ptr);
+    /* status = */ do_mbgrdviz_savesitewpt(instance, file_ptr);
   }
 
   /* else write route data */
   else if (mode == MBGRDVIZ_SAVEROUTE) {
     /* write route file */
     do_mbview_message_on("Saving route data...", instance);
-    status = do_mbgrdviz_saveroute(instance, file_ptr);
+    /* status = */ do_mbgrdviz_saveroute(instance, file_ptr);
   }
 
   /* else write route data */
   else if (mode == MBGRDVIZ_SAVERISISCRIPT) {
     /* write route file */
     do_mbview_message_on("Saving route as Risi script...", instance);
-    status = do_mbgrdviz_saverisiscript(instance, file_ptr);
+    /* status = */ do_mbgrdviz_saverisiscript(instance, file_ptr);
   }
 
   /* else write route data as Winfrog pts file */
   else if (mode == MBGRDVIZ_SAVEWINFROGPTS) {
     /* write route file */
     do_mbview_message_on("Saving route as Winfrog PTS file...", instance);
-    status = do_mbgrdviz_savewinfrogpts(instance, file_ptr);
+    /* status = */ do_mbgrdviz_savewinfrogpts(instance, file_ptr);
   }
 
   /* else write route data as Winfrog wpt file */
   else if (mode == MBGRDVIZ_SAVEWINFROGWPT) {
     /* write route file */
     do_mbview_message_on("Saving route as Winfrog WPT file...", instance);
-    status = do_mbgrdviz_savewinfrogwpt(instance, file_ptr);
+    /* status = */ do_mbgrdviz_savewinfrogwpt(instance, file_ptr);
   }
 
   /* else write route data as degrees decimal minutes file */
   else if (mode == MBGRDVIZ_SAVEDEGDECMIN) {
     /* write route file */
     do_mbview_message_on("Saving route as degrees + decimal minutes file...", instance);
-    status = do_mbgrdviz_savedegdecmin(instance, file_ptr);
+    /* status = */ do_mbgrdviz_savedegdecmin(instance, file_ptr);
   }
 
     /* else write route data as Hypack lnw file */
     else if (mode == MBGRDVIZ_SAVELNW) {
       /* write route file */
       do_mbview_message_on("Saving route as Hypack LNW file...", instance);
-      status = do_mbgrdviz_savelnw(instance, file_ptr);
+      /* status = */ do_mbgrdviz_savelnw(instance, file_ptr);
     }
 
       /* else write route data as Hypack lnw file */
       else if (mode == MBGRDVIZ_SAVEGREENSEAYML) {
         /* write route file */
         do_mbview_message_on("Saving route as Greensea YML file...", instance);
-        status = do_mbgrdviz_savegreenseayml(instance, file_ptr);
+        /* status = */ do_mbgrdviz_savegreenseayml(instance, file_ptr);
       }
 
   /* else write route data */
   else if (mode == MBGRDVIZ_SAVEPROFILE) {
     /* write route file */
     do_mbview_message_on("Saving profile data...", instance);
-    status = do_mbgrdviz_saveprofile(instance, file_ptr);
+    /* status = */ do_mbgrdviz_saveprofile(instance, file_ptr);
   }
 
   /* else set realtime data source */
@@ -1705,8 +1552,6 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
   double mbv_slope_colortable_max;
   int mbv_secondary_colortable;
   int mbv_secondary_colortable_mode;
-  double mbv_secondary_colortable_min;
-  double mbv_secondary_colortable_max;
   double mbv_exageration;
   double mbv_modelelevation3d;
   double mbv_modelazimuth3d;
@@ -1738,7 +1583,6 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
   double mbv_primary_dy;
   float *mbv_primary_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1825,8 +1669,8 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
       mbv_slope_colortable_max = 0.5;
       mbv_secondary_colortable = MBV_COLORTABLE_HAXBY;
       mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
-      mbv_secondary_colortable_min = 0.0;
-      mbv_secondary_colortable_max = 0.0;
+      // double mbv_secondary_colortable_min = 0.0;
+      // double mbv_secondary_colortable_max = 0.0;
       mbv_exageration = 1.0;
       mbv_modelelevation3d = 90.0;
       mbv_modelazimuth3d = 0.0;
@@ -2030,7 +1874,6 @@ int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr) {
   double mbv_overlay_shade_center;
   int mbv_overlay_shade_mode;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2107,10 +1950,9 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
   char *result;
   char *name;
   int nget;
-  int site_ok;
+  bool site_ok;
   double londeg, lonmin, latdeg, latmin;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2183,7 +2025,7 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
             } else if (sscanf(lonstring, "%lf", &sitelon[nsite]) == 1) {
                 site_ok = true;
             }
-            if (site_ok == true) {
+            if (site_ok) {
               if (strchr(latstring, ':') != NULL) {
                 if (sscanf(latstring, "%lf:%lf", &latdeg,&latmin) == 2) {
                   sitelat[nsite] = copysign((fabs(latdeg) + fabs(latmin) / 60.0), latdeg);
@@ -2195,7 +2037,7 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
             }
           }
         }
-        if (site_ok == true) {
+        if (site_ok) {
           if (nget < 6) {
             name = (char *)sitename[nsite];
             name[0] = '\0';
@@ -2209,18 +2051,18 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
         }
 
         /* output some debug values */
-        if (verbose > 0 && site_ok == true) {
+        if (verbose > 0 && site_ok) {
           fprintf(stderr, "\ndbg5  Site point read in program <%s>\n", program_name);
           fprintf(stderr, "dbg5       site[%d]: %f %f %f  %d %d  %s\n", nsite, sitelon[nsite], sitelat[nsite],
                   sitetopo[nsite], sitecolor[nsite], sitesize[nsite], sitename[nsite]);
         }
-        else if (verbose > 0 && site_ok == false) {
+        else if (verbose > 0 && !site_ok) {
           fprintf(stderr, "\ndbg5  Unintelligible line read from site file in program <%s>\n", program_name);
           fprintf(stderr, "dbg5       buffer:  %s\n", buffer);
         }
 
         strncpy(buffer, "", sizeof(buffer));
-        if (site_ok == true)
+        if (site_ok)
           nsite++;
       }
       fclose(sfp);
@@ -2266,7 +2108,6 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
   char date[32], *user_ptr, host[MB_PATH_MAXLINE];
   char *unknown = "Unknown";
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2377,7 +2218,6 @@ int do_mbgrdviz_savesitewpt(size_t instance, char *output_file_ptr) {
   char date[32], *user_ptr, host[MB_PATH_MAXLINE];
   char *unknown = "Unknown";
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2486,12 +2326,11 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
   mb_path routename;
   int iroute;
   int waypoint;
-  int rawroutefile = true;
+  bool rawroutefile = true;
   char *result;
   int nget;
-  int point_ok;
+  bool point_ok;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2523,7 +2362,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
       while ((result = fgets(buffer, MB_PATH_MAXLINE, sfp)) == buffer) {
         /* deal with comments */
         if (buffer[0] == '#') {
-          if (rawroutefile == true && strncmp(buffer, "## Route File Version", 21) == 0) {
+          if (rawroutefile && strncmp(buffer, "## Route File Version", 21) == 0) {
             rawroutefile = false;
           }
           else if (strncmp(buffer, "## ROUTENAME", 12) == 0) {
@@ -2558,14 +2397,14 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
         else {
           /* read the data from the buffer */
           nget = sscanf(buffer, "%lf %lf %lf %d", &lon, &lat, &topo, &waypoint);
-          if ((rawroutefile == true && nget >= 2) ||
-              (rawroutefile == false && nget >= 3 && waypoint > MBV_ROUTE_WAYPOINT_NONE))
+          if ((rawroutefile && nget >= 2) ||
+              (!rawroutefile && nget >= 3 && waypoint > MBV_ROUTE_WAYPOINT_NONE))
             point_ok = true;
           else
             point_ok = false;
 
           /* if good data check for need to allocate more space */
-          if (point_ok == true && npoint + 1 > npointalloc) {
+          if (point_ok && npoint + 1 > npointalloc) {
             npointalloc += MBV_ALLOC_NUM;
             status = mbview_allocroutearrays(verbose, npointalloc, &routelon, &routelat, &routewaypoint, NULL, NULL,
                                              NULL, NULL, NULL, &error);
@@ -2575,7 +2414,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
           }
 
           /* add good point to route */
-          if (point_ok == true && npointalloc > npoint) {
+          if (point_ok && npointalloc > npoint) {
             routelon[npoint] = lon;
             routelat[npoint] = lat;
             routewaypoint[npoint] = waypoint;
@@ -2633,7 +2472,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
   int routecolor;
   int routesize;
   mb_path routename;
-  int selected;
+  int selected;  // TODO(schwehr): bool
   int iroute, j;
 
   /* time, user, host variables */
@@ -2641,7 +2480,6 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
   char date[32], *user_ptr, host[MB_PATH_MAXLINE];
   char *unknown = "Unknown";
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2656,7 +2494,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
     status = mbview_getroutecount(verbose, instance, &nroute, &error);
     for (iroute = 0; iroute < nroute; iroute++) {
       mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
-      if (selected == true)
+      if (selected)
         nroutewrite++;
     }
     if (nroutewrite == 0)
@@ -2709,7 +2547,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
           mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
 
         /* output if selected */
-        if (selected == true) {
+        if (selected) {
           /* get point count for current route */
           status = mbview_getroutepointcount(verbose, instance, iroute, &npoint, &nintpoint, &error);
 
@@ -2820,7 +2658,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
   mb_path routename;
   int selected;
   int iroute, j;
-  int projection_initialized = false;
+  bool projection_initialized = false;
   double lon_origin, lat_origin;
   double mtodeglon, mtodeglat;
   int iscript;
@@ -2836,7 +2674,6 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
   char date[32], *user_ptr, host[MB_PATH_MAXLINE];
   char *unknown = "Unknown";
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2851,7 +2688,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
     status = mbview_getroutecount(verbose, instance, &nroute, &error);
     for (iroute = 0; iroute < nroute; iroute++) {
       mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
-      if (selected == true)
+      if (selected)
         nroutewrite++;
     }
     if (nroutewrite == 0)
@@ -2904,7 +2741,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
           mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
 
         /* output if selected */
-        if (selected == true) {
+        if (selected) {
           /* get point count for current route */
           status = mbview_getroutepointcount(verbose, instance, iroute, &npoint, &nintpoint, &error);
 
@@ -2949,7 +2786,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
                     fprintf(sfp, "ALT, %.3f, 0.1, 3\r\n", altitude);
                     fprintf(sfp, "HDG, %.3f, 1, 6, 3\r\n", heading);
           for (j = 0; j < npointtotal; j++) {
-            if (projection_initialized == false) {
+            if (!projection_initialized) {
               mb_coor_scale(verbose, routelat[j], &mtodeglon, &mtodeglat);
               lon_origin = routelon[j];
               lat_origin = routelat[j];
@@ -2973,7 +2810,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
           vvspeed = 0.2;
           settlingtime = 3.0;
           for (j = 0; j < npointtotal; j++) {
-            if (projection_initialized == false) {
+            if (!projection_initialized) {
               mb_coor_scale(verbose, routelat[j], &mtodeglon, &mtodeglat);
               lon_origin = routelon[j];
               lat_origin = routelat[j];
@@ -3030,7 +2867,6 @@ int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr) {
   mb_path routename;
   int iroute, j;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3139,7 +2975,6 @@ int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr) {
   mb_path routename;
   int iroute, j, n;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3251,7 +3086,6 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr) {
   double latMin, lonMin;
   int iroute, j, n;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3388,7 +3222,6 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr) {
   double easting, northing;
   int iroute, j, n;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3544,10 +3377,10 @@ int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr) {
   int routesize;
   mb_path routename;
   int selected;
-  char *error_message;
-  char projection_id[MB_PATH_MAXLINE];
-  void *pjptr = NULL;
-  int proj_status;
+  // char *error_message;
+  // char projection_id[MB_PATH_MAXLINE];
+  // void *pjptr = NULL;
+  // int proj_status;
   int nroutewrite = 0;
   int iroutewrite = 0;
   int iroute, j, n;
@@ -3556,7 +3389,6 @@ int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr) {
   #endif
   char uuid_str[37];
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3571,7 +3403,7 @@ int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr) {
     status = mbview_getroutecount(verbose, instance, &nroute, &error);
     for (iroute = 0; iroute < nroute; iroute++) {
       mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
-      if (selected == true) {
+      if (selected) {
         nroutewrite++;
         iroutewrite = iroute;
       }
@@ -3724,14 +3556,13 @@ int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr) {
   int vectorsize;
   double vectordatamin;
   double vectordatamax;
-  int minmax_set = false;
+  bool minmax_set = false;
   mb_path vectorname;
-  int rawvectorfile = true;
+  bool rawvectorfile = true;
   char *result;
   int nget;
   int point_ok;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3766,7 +3597,7 @@ int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr) {
       while ((result = fgets(buffer, MB_PATH_MAXLINE, sfp)) == buffer) {
         /* deal with comments */
         if (buffer[0] == '#') {
-          if (rawvectorfile == true && strncmp(buffer, "## Vector File Version", 21) == 0) {
+          if (rawvectorfile && strncmp(buffer, "## Vector File Version", 21) == 0) {
             rawvectorfile = false;
           }
           else if (strncmp(buffer, "## VECTORNAME", 12) == 0) {
@@ -3808,7 +3639,7 @@ int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr) {
             point_ok = false;
 
           /* if good data check for need to allocate more space */
-          if (point_ok == true && npoint + 1 > npointalloc) {
+          if (point_ok && npoint + 1 > npointalloc) {
             npointalloc += MBV_ALLOC_NUM;
             status =
                 mbview_allocvectorarrays(verbose, npointalloc, &vectorlon, &vectorlat, &vectorz, &vectordata, &error);
@@ -3818,14 +3649,14 @@ int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr) {
           }
 
           /* add good point to vector */
-          if (point_ok == true && npointalloc > npoint) {
+          if (point_ok && npointalloc > npoint) {
             vectorlon[npoint] = lon;
             vectorlat[npoint] = lat;
             vectorz[npoint] = z;
             vectordata[npoint] = data;
 
             /* get min max bounds if not set in file header */
-            if (minmax_set == false) {
+            if (!minmax_set) {
               if (npoint == 0) {
                 vectordatamin = data;
                 vectordatamax = data;
@@ -3890,7 +3721,6 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr) {
   double przmax;
   int j;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3997,7 +3827,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr) {
   return (status);
 }
 /*---------------------------------------------------------------------------------------*/
-
+// TODO(schwehr): bool swathbounds
 int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr) {
   int status = MB_SUCCESS;
   void *datalist;
@@ -4014,7 +3844,6 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr) 
   int nfiledatalist = 0;
   int nfileread = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4041,7 +3870,7 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr) 
               else
                 strcpy(swathfile, swathfileraw);
               formatorg = format;
-              if (swathbounds == false)
+              if (!swathbounds)
                 mb_get_fnv(verbose, swathfile, &format, &error);
 
               /* else check for available fbt file  */
@@ -4051,7 +3880,7 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr) 
               /* read the swath or nav data using mbio calls */
 
               /* update message */
-              if (swathbounds == false)
+              if (!swathbounds)
                 strcpy(messagestr, "Reading navigation: ");
               else
                 strcpy(messagestr, "Reading swath data: ");
@@ -4171,7 +4000,6 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
   char *lastslash;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4475,7 +4303,6 @@ int do_mbgrdviz_opentest(size_t instance, double factor1, double factor2, double
   float *usedata;
   int i, j, k;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4579,7 +4406,6 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
   instance_source = (size_t)client_data;
   /*fprintf(stderr,"Called do_mbgrdviz_open_region instance:%d\n", instance_source);*/
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4851,13 +4677,11 @@ void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_dat
   mb_path mbedit_cmd;
   mb_path filearg;
   int nselected;
-  int shellstatus;
   int i;
 
   /* get source mbview instance */
   instance = (size_t)client_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4896,13 +4720,13 @@ void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_dat
   if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
     strncat(mbedit_cmd, " &", MB_PATH_MAXLINE);
     fprintf(stderr, "Calling mbedit: %s\n", mbedit_cmd);
-    shellstatus = system(mbedit_cmd);
+    /* const int shellstatus = */ system(mbedit_cmd);
   }
 
   /* update widgets of all mbview windows */
   status = mbview_update(verbose, instance, &error);
   for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-    if (i != instance && mbview_id[i] == true)
+    if (i != instance && mbview_id[i])
       status = mbview_update(verbose, i, &error);
   }
 }
@@ -4920,13 +4744,11 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
   mb_path datalist_file;
   FILE *dfp;
   int nselected;
-  int shellstatus;
   int i;
 
   /* get source mbview instance */
   instance = (size_t)client_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4967,8 +4789,7 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
         fclose(dfp);
         sprintf(mbeditviz_cmd, "mbeditviz -I%s -R &", datalist_file);
         fprintf(stderr, "Calling mbeditviz: %s\n", mbeditviz_cmd);
-        shellstatus = system(mbeditviz_cmd);
-
+        /* const int shellstatus = */ system(mbeditviz_cmd);
       }
     }
   }
@@ -4976,7 +4797,7 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
   /* update widgets of all mbview windows */
   status = mbview_update(verbose, instance, &error);
   for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-    if (i != instance && mbview_id[i] == true)
+    if (i != instance && mbview_id[i])
       status = mbview_update(verbose, i, &error);
   }
 }
@@ -4993,13 +4814,11 @@ void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_
   mb_path mbnavedit_cmd;
   mb_path filearg;
   int nselected;
-  int shellstatus;
   int i;
 
   /* get source mbview instance */
   instance = (size_t)client_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5038,13 +4857,13 @@ void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_
   if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
     strncat(mbnavedit_cmd, " &", MB_PATH_MAXLINE);
     fprintf(stderr, "Calling mbnavedit: %s\n", mbnavedit_cmd);
-    shellstatus = system(mbnavedit_cmd);
+    /* const int shellstatus = */ system(mbnavedit_cmd);
   }
 
   /* update widgets of all mbview windows */
   status = mbview_update(verbose, instance, &error);
   for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-    if (i != instance && mbview_id[i] == true)
+    if (i != instance && mbview_id[i])
       status = mbview_update(verbose, i, &error);
   }
 }
@@ -5061,13 +4880,11 @@ void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer 
   mb_path mbvelocitytool_cmd;
   mb_path filearg;
   int nselected;
-  int shellstatus;
   int i;
 
   /* get source mbview instance */
   instance = (size_t)client_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5106,13 +4923,13 @@ void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer 
   if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
     strncat(mbvelocitytool_cmd, " &", MB_PATH_MAXLINE);
     fprintf(stderr, "Calling mbvelocitytool: %s\n", mbvelocitytool_cmd);
-    shellstatus = system(mbvelocitytool_cmd);
+    /* const int shellstatus = */ system(mbvelocitytool_cmd);
   }
 
   /* update widgets of all mbview windows */
   status = mbview_update(verbose, instance, &error);
   for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-    if (i != instance && mbview_id[i] == true)
+    if (i != instance && mbview_id[i])
       status = mbview_update(verbose, i, &error);
   }
 }
@@ -5130,7 +4947,6 @@ void do_mbgrdviz_make_survey(Widget w, XtPointer client_data, XtPointer call_dat
   /* get source mbview instance */
   instance = (size_t)client_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5283,7 +5099,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
   double xdisplay, ydisplay, zdisplay;
   double dsign;
   int waypoint;
-  int first;
+  bool first;
   double dsigna[4] = {1.0, -1.0, 1.0, -1.0};
   int jendpointa[4] = {0, 0, 1, 1};
 
@@ -5291,7 +5107,8 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
   double *xx = NULL;
   double dx, dy, r, dxuse, dyuse, dxd, dyd, dxextra, dyextra;
   double rrr[4], xxx, yyy;
-  int iline, jendpoint, ok;
+  int iline, jendpoint;
+  int ok;  // TODO(schwehr): bool
   int startcorner, endcorner, jstart, kend;
   int nlines_alloc = 0;
   int i, j, k;
@@ -5303,7 +5120,6 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
       to work so use survey_instance instead */
   instance = survey_instance;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5540,7 +5356,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
     }
 
     /* do crosslines if requested */
-    if (survey_crosslines > 0 && survey_crosslines_last == false && status == MB_SUCCESS) {
+    if (survey_crosslines > 0 && !survey_crosslines_last && status == MB_SUCCESS) {
       /* figure out which corner the main lines start at */
       dxuse = dx * xx[0];
       dyuse = dy * xx[0];
@@ -5630,10 +5446,10 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
         zdisplay = data->area.cornerpoints[j].zdisplay;
         mbview_projectinverse(instance, true, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
         mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
-        if (ok == false)
+        if (!ok)
           zdata = data->area.cornerpoints[jendpoint].zdata;
         mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
-        if (first == true) {
+        if (first) {
           mbview_addroute(verbose, instance, 1, &xlon, &ylat, &waypoint, color, 2, true, survey_name, &working_route,
                           &error);
           first = false;
@@ -5665,7 +5481,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
         zdisplay = data->area.cornerpoints[j].zdisplay;
         mbview_projectinverse(instance, true, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
         mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
-        if (ok == false)
+        if (!ok)
           zdata = data->area.cornerpoints[jendpoint].zdata;
         mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
         mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata, xdisplay,
@@ -5713,7 +5529,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
             zdisplay = data->area.endpoints[jendpoint].zdisplay;
             mbview_projectinverse(instance, true, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
             mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
-            if (ok == false)
+            if (!ok)
               zdata = data->area.endpoints[jendpoint].zdata;
             mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
             fprintf(stderr, "\nSurvey Line:%d Point:%d  Position: %f %f %f  %f %f   %f %f %f\n", iline, jendpoint,
@@ -5721,7 +5537,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
 
             /* add new route for first point, just add single point
                 after that */
-            if (first == true) {
+            if (first) {
               mbview_addroute(verbose, instance, 1, &xlon, &ylat, &waypoint, color, 2, true, survey_name,
                               &working_route, &error);
               first = false;
@@ -5752,7 +5568,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
             zdisplay = data->area.endpoints[jendpoint].zdisplay;
             mbview_projectinverse(instance, true, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
             mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
-            if (ok == false)
+            if (!ok)
               zdata = data->area.endpoints[jendpoint].zdata;
             mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
             fprintf(stderr, "Survey Line:%d Point:%d  Position: %f %f %f  %f %f   %f %f %f\n", iline, jendpoint, xlon,
@@ -5770,7 +5586,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
     }
 
     /* do crosslines if requested */
-    if (survey_crosslines > 0 && survey_crosslines_last == true && status == MB_SUCCESS) {
+    if (survey_crosslines > 0 && survey_crosslines_last && status == MB_SUCCESS) {
       /* figure out which corner the mail lines ended at */
       for (i = 0; i < 4; i++) {
         xxx = xdisplay - data->area.cornerpoints[i].xdisplay;
@@ -5832,7 +5648,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
         zdisplay = data->area.cornerpoints[j].zdisplay;
         mbview_projectinverse(instance, true, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
         mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
-        if (ok == false)
+        if (!ok)
           zdata = data->area.cornerpoints[jendpoint].zdata;
         mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
         mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata, xdisplay,
@@ -5860,7 +5676,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
         zdisplay = data->area.cornerpoints[j].zdisplay;
         mbview_projectinverse(instance, true, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
         mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
-        if (ok == false)
+        if (!ok)
           zdata = data->area.cornerpoints[jendpoint].zdata;
         mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
         mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata, xdisplay,
@@ -5881,17 +5697,15 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
 
   /* update widgets of remaining mbview windows */
   for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-    if (i != instance && mbview_id[i] == true)
+    if (i != instance && mbview_id[i])
       status = mbview_update(verbose, i, &error);
   }
 }
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_arearoute_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5905,8 +5719,7 @@ void do_mbgrdviz_arearoute_dismiss(Widget w, XtPointer client_data, XtPointer ca
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_arearoute_parameterchange(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   int status = MB_SUCCESS;
 
   /* mbview instance */
@@ -5919,7 +5732,6 @@ void do_mbgrdviz_arearoute_parameterchange(Widget w, XtPointer client_data, XtPo
   /* get source mbview instance */
   instance = (size_t)client_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6035,7 +5847,6 @@ void do_mbgrdviz_arearoute_recalc(size_t instance) {
   Arg args[256];
   struct mbview_struct *data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6157,7 +5968,6 @@ void do_mbgrdviz_arearoute_info(size_t instance) {
   double routedistancetopo;
   char info_text[MB_PATH_MAXLINE];
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6197,14 +6007,12 @@ void do_mbgrdviz_arearoute_info(size_t instance) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_arearoute_linespacing_increment(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   Cardinal ac = 0;
   Arg args[256];
   int linespacing;
   int increment;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6238,14 +6046,12 @@ void do_mbgrdviz_arearoute_linespacing_increment(Widget w, XtPointer client_data
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_arearoute_altitude_increment(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   Cardinal ac = 0;
   Arg args[256];
   int altitude;
   int increment;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6279,15 +6085,13 @@ void do_mbgrdviz_arearoute_altitude_increment(Widget w, XtPointer client_data, X
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_arearoute_depth_increment(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   int status = MB_SUCCESS;
   Cardinal ac = 0;
   Arg args[256];
   int depth;
   int increment;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6330,10 +6134,8 @@ void do_mbgrdviz_arearoute_depth_increment(Widget w, XtPointer client_data, XtPo
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_realtime_start(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6344,10 +6146,8 @@ void do_mbgrdviz_realtime_start(Widget w, XtPointer client_data, XtPointer call_
 }
 
 void do_mbgrdviz_realtimesetup_path_reset(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6358,10 +6158,8 @@ void do_mbgrdviz_realtimesetup_path_reset(Widget w, XtPointer client_data, XtPoi
 }
 
 void do_mbgrdviz_realtime_pause(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6372,10 +6170,8 @@ void do_mbgrdviz_realtime_pause(Widget w, XtPointer client_data, XtPointer call_
 }
 
 void do_mbgrdviz_realtime_stop(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6386,10 +6182,8 @@ void do_mbgrdviz_realtime_stop(Widget w, XtPointer client_data, XtPointer call_d
 }
 
 void do_mbgrdviz_realtime_resume(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6400,10 +6194,8 @@ void do_mbgrdviz_realtime_resume(Widget w, XtPointer client_data, XtPointer call
 }
 
 void do_mbgrdviz_realtimesetup_path_apply(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6414,10 +6206,8 @@ void do_mbgrdviz_realtimesetup_path_apply(Widget w, XtPointer client_data, XtPoi
 }
 
 void do_mbgrdviz_realtimesetup_icon(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6428,10 +6218,8 @@ void do_mbgrdviz_realtimesetup_icon(Widget w, XtPointer client_data, XtPointer c
 }
 
 void do_mbgrdviz_realtimesetup_path_browse(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6444,10 +6232,8 @@ void do_mbgrdviz_realtimesetup_path_browse(Widget w, XtPointer client_data, XtPo
 }
 
 void do_mbgrdviz_realtimesetup_updaterate(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6458,10 +6244,8 @@ void do_mbgrdviz_realtimesetup_updaterate(Widget w, XtPointer client_data, XtPoi
 }
 
 void do_mbgrdviz_realtimesetup_path_test(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6472,10 +6256,8 @@ void do_mbgrdviz_realtimesetup_path_test(Widget w, XtPointer client_data, XtPoin
 }
 
 void do_mbgrdviz_realtimesetup_pathmode(Widget w, XtPointer client_data, XtPointer call_data) {
-  XmAnyCallbackStruct *acs;
-  acs = (XmAnyCallbackStruct *)call_data;
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");

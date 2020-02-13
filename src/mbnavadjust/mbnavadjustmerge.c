@@ -182,18 +182,18 @@ int main(int argc, char **argv) {
   int verbose = 0;
   int error = MB_ERROR_NO_ERROR;
 
-  int project_inputbase_set = false;
+  bool project_inputbase_set = false;
   mb_path project_inputbase_path = "";
   int project_inputadd_set = false;
   mb_path project_inputadd_path = "";
-  int project_output_set = false;
+  bool project_output_set = false;
   mb_path project_output_path = "";
 
   int num_mods = 0;
   struct mbnavadjust_mod mods[NUMBER_MODS_MAX];
   memset(mods, 0, NUMBER_MODS_MAX * sizeof(struct mbnavadjust_mod));
 
-  int import_tie_list_set = false;
+  bool import_tie_list_set = false;
   mb_path import_tie_list_path;
   int export_tie_list_set = false;
   mb_path export_tie_list_path;
@@ -284,11 +284,11 @@ int main(int argc, char **argv) {
 
       /* input */
       else if (strcmp("input", options[option_index].name) == 0) {
-        if (project_inputbase_set == false) {
+        if (!project_inputbase_set) {
           strcpy(project_inputbase_path, optarg);
           project_inputbase_set = true;
         }
-        else if (project_inputadd_set == false) {
+        else if (!project_inputadd_set) {
           strcpy(project_inputadd_path, optarg);
           project_inputadd_set = true;
          }
@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
 
       /* output */
       else if (strcmp("output", options[option_index].name) == 0) {
-        if (project_output_set == false) {
+        if (!project_output_set) {
           strcpy(project_output_path, optarg);
           project_output_set = true;
         }
@@ -1300,19 +1300,19 @@ int main(int argc, char **argv) {
   }
 
   /* figure out mbnavadjust project merge mode */
-  if (project_inputbase_set == false) {
+  if (!project_inputbase_set) {
     fprintf(stderr, "No input base project has been set.\n");
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
     exit(MB_ERROR_BAD_USAGE);
   }
 
   int mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_NONE;
-  int update_datalist = false;
+  bool update_datalist = false;
 
-  if (project_inputbase_set == true && project_inputadd_set == false && project_output_set == false) {
+  if (project_inputbase_set && !project_inputadd_set && !project_output_set) {
     strcpy(project_output_path, project_inputbase_path);
-    int triangulate_only = false;
-    if (triangulate != TRIANGULATE_NONE && import_tie_list_set == false) {
+    bool triangulate_only = false;
+    if (triangulate != TRIANGULATE_NONE && !import_tie_list_set) {
       triangulate_only = true;
       for (int imod = 0; imod < num_mods; imod++) {
         if (mods[imod].mode != MOD_MODE_TRIANGULATE
@@ -1321,7 +1321,7 @@ int main(int argc, char **argv) {
         }
       }
     }
-    if (triangulate_only == false) {
+    if (!triangulate_only) {
       project_output_set = true;
       mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_MODIFY;
     }
@@ -1330,18 +1330,18 @@ int main(int argc, char **argv) {
     }
 
   }
-  else if (project_inputbase_set == true && project_inputadd_set == false && project_output_set == true) {
+  else if (project_inputbase_set && !project_inputadd_set && project_output_set) {
     project_output_set = true;
     mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_COPY;
     update_datalist = true;
   }
-  else if (project_inputbase_set == true && project_inputadd_set == true && project_output_set == false) {
+  else if (project_inputbase_set && project_inputadd_set && !project_output_set) {
     strcpy(project_output_path, project_inputbase_path);
     project_output_set = true;
     mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_ADD;
     update_datalist = true;
   }
-  else if (project_inputbase_set == true && project_inputadd_set == true && project_output_set == true &&
+  else if (project_inputbase_set && project_inputadd_set && project_output_set &&
     strcmp(project_output_path, project_inputadd_path) == 0) {
     fprintf(stderr, "The output project:\n\t%s\nis identical to the input add project:\n\t%s\n", project_output_path,
             project_inputadd_path);
@@ -1350,11 +1350,11 @@ int main(int argc, char **argv) {
     error = MB_ERROR_BAD_USAGE;
     exit(error);
   }
-  else if (project_inputbase_set == true && project_inputadd_set == true && project_output_set == true &&
+  else if (project_inputbase_set && project_inputadd_set && project_output_set &&
     strcmp(project_output_path, project_inputbase_path) == 0) {
     mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_ADD;
   }
-  else if (project_inputbase_set == true && project_inputadd_set == true && project_output_set == true) {
+  else if (project_inputbase_set && project_inputadd_set && project_output_set) {
     mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_MERGE;
   }
 
@@ -1933,7 +1933,7 @@ int main(int argc, char **argv) {
 
       /* check to see if this crossing already exists */
       found_crossing = false;
-      for (int icrossing = 0; icrossing < project_output.num_crossings && found_crossing == false; icrossing++) {
+      for (int icrossing = 0; icrossing < project_output.num_crossings && !found_crossing; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         if (crossing->file_id_2 == mods[imod].file1 && crossing->file_id_1 == mods[imod].file2 &&
             crossing->section_2 == mods[imod].section1 && crossing->section_1 == mods[imod].section2) {
@@ -1946,7 +1946,7 @@ int main(int argc, char **argv) {
       }
 
       /* if the crossing does not exist, create it */
-      if (found_crossing == false) {
+      if (!found_crossing) {
         /* allocate mbna_crossing array if needed */
         if (project_output.num_crossings_alloc <= project_output.num_crossings) {
           project_output.crossings = (struct mbna_crossing *)realloc(
@@ -1997,7 +1997,7 @@ int main(int argc, char **argv) {
 
       /* check to see if this crossing already exists */
       found_crossing = false;
-      for (int icrossing = 0; icrossing < project_output.num_crossings && found_crossing == false; icrossing++) {
+      for (int icrossing = 0; icrossing < project_output.num_crossings && !found_crossing; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         if (crossing->file_id_2 == mods[imod].file1 && crossing->file_id_1 == mods[imod].file2 &&
             crossing->section_2 == mods[imod].section1 && crossing->section_1 == mods[imod].section2) {
@@ -2014,7 +2014,7 @@ int main(int argc, char **argv) {
       }
 
       /* if the crossing does not exist, create it */
-      if (found_crossing == false) {
+      if (!found_crossing) {
         /* allocate mbna_crossing array if needed */
         if (project_output.num_crossings_alloc <= project_output.num_crossings) {
           project_output.crossings = (struct mbna_crossing *)realloc(
@@ -2065,7 +2065,7 @@ int main(int argc, char **argv) {
 
         if (crossing->status == MBNA_CROSSING_STATUS_NONE) {
           project_output.num_crossings_analyzed++;
-          if (crossing->truecrossing == true)
+          if (crossing->truecrossing)
             project_output.num_truecrossings_analyzed++;
         }
         crossing->status = MBNA_CROSSING_STATUS_SET;
@@ -2141,7 +2141,7 @@ int main(int argc, char **argv) {
 
       /* check to see if this crossing already exists */
       found_crossing = false;
-      for (int icrossing = 0; icrossing < project_output.num_crossings && found_crossing == false; icrossing++) {
+      for (int icrossing = 0; icrossing < project_output.num_crossings && !found_crossing; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
         file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
@@ -2160,7 +2160,7 @@ int main(int argc, char **argv) {
       }
 
       /* set the tie parameters */
-      if (found_crossing == true) {
+      if (found_crossing) {
         for (int itie = 0; itie < crossing->num_ties; itie++) {
           tie = &crossing->ties[itie];
           tie->status = MBNA_TIE_XYZ;
@@ -2181,7 +2181,7 @@ int main(int argc, char **argv) {
 
       /* check to see if this crossing already exists */
       found_crossing = false;
-      for (int icrossing = 0; icrossing < project_output.num_crossings && found_crossing == false; icrossing++) {
+      for (int icrossing = 0; icrossing < project_output.num_crossings && !found_crossing; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
         file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
@@ -2200,7 +2200,7 @@ int main(int argc, char **argv) {
       }
 
       /* set the tie parameters */
-      if (found_crossing == true) {
+      if (found_crossing) {
         for (int itie = 0; itie < crossing->num_ties; itie++) {
           tie = &crossing->ties[itie];
           tie->status = MBNA_TIE_XY;
@@ -2221,7 +2221,7 @@ int main(int argc, char **argv) {
 
       /* check to see if this crossing already exists */
       found_crossing = false;
-      for (int icrossing = 0; icrossing < project_output.num_crossings && found_crossing == false; icrossing++) {
+      for (int icrossing = 0; icrossing < project_output.num_crossings && !found_crossing; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
         file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
@@ -2240,7 +2240,7 @@ int main(int argc, char **argv) {
       }
 
       /* set the tie parameters */
-      if (found_crossing == true) {
+      if (found_crossing) {
         for (int itie = 0; itie < crossing->num_ties; itie++) {
           tie = &crossing->ties[itie];
           tie->status = MBNA_TIE_Z;
@@ -2689,7 +2689,7 @@ int main(int argc, char **argv) {
 
       /* check to see if this crossing already exists */
       found_crossing = false;
-      for (int icrossing = 0; icrossing < project_output.num_crossings && found_crossing == false; icrossing++) {
+      for (int icrossing = 0; icrossing < project_output.num_crossings && !found_crossing; icrossing++) {
         crossing = &(project_output.crossings[icrossing]);
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
         file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
@@ -2706,7 +2706,7 @@ int main(int argc, char **argv) {
       }
 
       /* unset the ties associated with this crossing */
-      if (found_crossing == true && crossing->num_ties > 0) {
+      if (found_crossing && crossing->num_ties > 0) {
         crossing->num_ties = 0;
 
         fprintf(stderr, "Unset tie:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
@@ -2879,7 +2879,7 @@ int main(int argc, char **argv) {
       if (mods[imod].file1 >= 0 && mods[imod].file1 < project_output.num_files) {
         file1 = &(project_output.files[mods[imod].file1]);
         section1 = &(file1->sections[mods[imod].section1]);
-        if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections && section1->continuity == true) {
+        if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections && section1->continuity) {
           section1->continuity = false;
           fprintf(stderr, "Set discontinuity before survey:file:section :   %2.2d:%4.4d:%4.4d\n", file1->block,
                   mods[imod].file1, mods[imod].section1);
@@ -3058,7 +3058,7 @@ int main(int argc, char **argv) {
   double tmp_double;
 
   /* if specified import ties from a tie list file */
-  if (import_tie_list_set == true) {
+  if (import_tie_list_set) {
     if ((tfp = fopen(import_tie_list_path, "r")) == NULL) {
       fprintf(stderr, "Unable to open tie list file %s for reading\n", import_tie_list_path);
       status = MB_FAILURE;
@@ -3115,7 +3115,7 @@ int main(int argc, char **argv) {
         /* figure out the file and section */
         found = false;
         strcpy(import_globaltie_file_name, (strrchr(import_globaltie_file_path, '/') + 1));
-        for (int ifile = 0; ifile < project_output.num_files && found == false; ifile++) {
+        for (int ifile = 0; ifile < project_output.num_files && !found; ifile++) {
           /* compare the file name rather than the path */
           file = &(project_output.files[ifile]);
           strcpy(filename, (strrchr(file->path, '/') + 1));
@@ -3145,12 +3145,12 @@ int main(int argc, char **argv) {
         }
 
         /* if not found ignore the global tie */
-        if (found == false) {
+        if (!found) {
           fprintf(stderr, "Failure!!\n");
         }
 
         /* apply the global tie */
-        else if (found == true) {
+        else if (found) {
           fprintf(stderr, "Success!!\nImport global tie from list: %4.4d:%4.4d:%2.2d %.3f/%.3f/%.3f  %.3f/%.3f/%.3f\n",
                   import_globaltie_file, import_globaltie_section_id, import_globaltie_snav,
                   import_globaltie_offset_x_m, import_globaltie_offset_y_m, import_globaltie_offset_z_m,
@@ -3228,7 +3228,7 @@ int main(int argc, char **argv) {
         }
 
         /* figure out the file and block ids for the second file */
-        if (found == true) {
+        if (found) {
           found = false;
           strcpy(import_tie_file_2_name, (strrchr(import_tie_file_2_path, '/') + 1));
           for (int ifile = 0; ifile < project_output.num_files; ifile++) {
@@ -3261,11 +3261,11 @@ int main(int argc, char **argv) {
           }
         }
 
-        if (found == false) {
+        if (!found) {
           fprintf(stderr, "Failure!!\n");
         }
 
-        else if (found == true) {
+        else if (found) {
           /* swap the order of the nav points if necessary */
           if (import_tie_file_1 > import_tie_file_2 ||
               (import_tie_file_1 == import_tie_file_2 && import_tie_section_1_id > import_tie_section_2_id)) {
@@ -3309,7 +3309,7 @@ int main(int argc, char **argv) {
 
           /* check to see if this crossing already exists */
           found = false;
-          for (int icrossing = 0; icrossing < project_output.num_crossings && found == false; icrossing++) {
+          for (int icrossing = 0; icrossing < project_output.num_crossings && !found; icrossing++) {
             crossing = &(project_output.crossings[icrossing]);
             if (crossing->file_id_2 == import_tie_file_1 && crossing->file_id_1 == import_tie_file_2 &&
                 crossing->section_2 == import_tie_section_1_id && crossing->section_1 == import_tie_section_2_id) {
@@ -3327,12 +3327,12 @@ int main(int argc, char **argv) {
           }
 
           /* if the crossing does not exist, create it */
-          if (found == true) {
+          if (found) {
             fprintf(stderr, "Found existing crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing,
                     file1->block, crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2,
                     crossing->section_2);
           }
-          else if (found == false) {
+          else if (!found) {
             /* allocate mbna_crossing array if needed */
             if (project_output.num_crossings_alloc <= project_output.num_crossings) {
               project_output.crossings = (struct mbna_crossing *)realloc(
@@ -3381,7 +3381,7 @@ int main(int argc, char **argv) {
           }
 
           /* if the tie exists change it */
-          if (found == true) {
+          if (found) {
             /* set nav points */
             tie = &crossing->ties[itie_set];
             tie->snav_1 = import_tie_snav_1;
@@ -3405,7 +3405,7 @@ int main(int argc, char **argv) {
 
             if (crossing->status == MBNA_CROSSING_STATUS_NONE) {
               project_output.num_crossings_analyzed++;
-              if (crossing->truecrossing == true)
+              if (crossing->truecrossing)
                 project_output.num_truecrossings_analyzed++;
             }
             crossing->status = MBNA_CROSSING_STATUS_SET;
@@ -3532,7 +3532,7 @@ int main(int argc, char **argv) {
   }
 
   /* if specified output ties to a tie list file */
-  if (export_tie_list_set == true) {
+  if (export_tie_list_set) {
     if ((tfp = fopen(export_tie_list_path, "w")) == NULL) {
       fprintf(stderr, "Unable to open tie list file %s for writing\n", export_tie_list_path);
       status = MB_FAILURE;
@@ -3576,7 +3576,7 @@ int main(int argc, char **argv) {
   }
 
   /* write out the new project file */
-  if (project_output_set == true) {
+  if (project_output_set) {
     status = mbnavadjust_write_project(verbose, &project_output, &error);
     if (status == MB_SUCCESS) {
       fprintf(stderr, "Output project written:\n\t%s\n", project_output_path);
@@ -3590,7 +3590,7 @@ int main(int argc, char **argv) {
       exit(error);
     }
 
-        if (update_datalist == true) {
+        if (update_datalist) {
             /* update datalist and ancillary files */
             sprintf(filename, "%s/%s.dir/datalist.mb-1", project_output.path, project_output.name);
             if ((tfp = fopen(filename, "w")) != NULL) {
