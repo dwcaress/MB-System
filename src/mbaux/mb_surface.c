@@ -103,7 +103,7 @@ static int factors[32]; /* Array of common factors */
 static int local_verbose = FALSE;
 static int local_error = MB_ERROR_NO_ERROR;
 static int status = MB_SUCCESS;
-static int n_empty;                                     /* No of unconstrained nodes at initialization  */
+// static int n_empty;                                     /* No of unconstrained nodes at initialization  */
 static int set_low = 0;                                 /* 0 unconstrained,1 = by min data value, 2 = by user value */
 static int set_high = 0;                                /* 0 unconstrained,1 = by max data value, 2 = by user value */
 static int constrained = FALSE;                         /* TRUE if set_low or set_high is TRUE */
@@ -1068,6 +1068,8 @@ int rescale_z_values() {
 }
 
 void load_constraints(char *low, char *high) {
+	(void)low;  // Unused parameter
+	(void)high;  // Unused parameter
 	int i, j, ij;
 	double yy;
 	/*	struct GRD_HEADER hdr;*/
@@ -1333,11 +1335,11 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, dou
 	/* New in v4.3:  Default to unconstrained:  */
 	set_low = set_high = 0;
 
-	int serror = FALSE;
-	if (xmin >= xmax || ymin >= ymax)
-		serror = TRUE;
-	if (xinc <= 0.0 || yinc <= 0.0)
-		serror = TRUE;
+	// bool serror = false;
+	// if (xmin >= xmax || ymin >= ymax)
+	// 	serror = true;
+	// if (xinc <= 0.0 || yinc <= 0.0)
+	// 	serror = true;
 
 	if (tension != 0.0) {
 		boundary_tension = tension;
