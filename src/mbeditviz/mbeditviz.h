@@ -71,7 +71,6 @@ typedef enum {
      MBEV_GRID_ALGORITHM_FOOTPRINT = 1,
      MBEV_GRID_ALGORITHM_SHOALBIAS = 2,
  } gridalgorithm_t;
-static char *mbev_grid_algorithm_label[] = {"Simple Mean", "Footprint", "Shoal Bias"};
 
 typedef enum {
      MBEV_OUTPUT_MODE_EDIT = 0,

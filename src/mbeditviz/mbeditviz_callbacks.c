@@ -87,6 +87,8 @@ static char value_text[MB_PATH_MAXLINE];
 Widget BxFindTopShell(Widget);
 WidgetList BxWidgetIdsFromNames(Widget, char *, char *);
 
+static char *mbev_grid_algorithm_label[] = {"Simple Mean", "Footprint", "Shoal Bias"};
+
 /*---------------------------------------------------------------------------------------*/
 /*      Function Name:   BxManageCB
  *
