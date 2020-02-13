@@ -170,6 +170,7 @@ void do_set_controls();
 
 /* ARGSUSED */
 void BxManageCB(Widget w, XtPointer client, XtPointer call) {
+	(void)call;  // Unused parameter
 	WidgetList widgets;
 	int i;
 
@@ -207,6 +208,7 @@ void BxManageCB(Widget w, XtPointer client, XtPointer call) {
 
 /* ARGSUSED */
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
+	(void)call;  // Unused parameter
 	WidgetList widgets;
 	int i;
 
@@ -245,6 +247,8 @@ void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
 
 /* ARGSUSED */
 void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
+	(void)client;  // Unused parameter
+	(void)call;  // Unused parameter
 #define CHUNK 512
 
 	Boolean first = True;
@@ -557,6 +561,8 @@ void do_set_controls() {
 /*--------------------------------------------------------------------*/
 
 void do_velrange(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
 	velrange_gui = (double)acs->value;
@@ -572,6 +578,8 @@ void do_velrange(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_velcenter(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
 	velcenter_gui = (double)acs->value;
@@ -587,6 +595,9 @@ void do_velcenter(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_process_mb(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	fprintf(stderr, "\nAbout to process data\n");
@@ -611,6 +622,8 @@ void do_process_mb(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_maxdepth(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
 	maxdepth_gui = (double)acs->value;
@@ -625,6 +638,9 @@ void do_maxdepth(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_anglemode(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (XmToggleButtonGetState(toggleButton_mode_ok))
@@ -645,6 +661,9 @@ void do_anglemode(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_quit(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	mbvt_quit();
@@ -657,6 +676,9 @@ void do_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	static mb_path selection_text;
@@ -680,6 +702,8 @@ void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void do_open(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
 	XmFileSelectionBoxCallbackStruct *acs = (XmFileSelectionBoxCallbackStruct *)call_data;
 
 	/* local definitions */
@@ -831,6 +855,9 @@ void do_open_commandline(char *wfile, char *sfile, char *file, int format) {
 /*--------------------------------------------------------------------*/
 
 void do_new_profile(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmListCallbackStruct *acs = (XmListCallbackStruct *)call_data;
 
 	/* get new edit velocity profile */
@@ -848,6 +875,8 @@ void do_new_profile(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_residual_range(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
 	resrange_gui = ((double)acs->value / 10.0);
@@ -863,6 +892,8 @@ void do_residual_range(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_canvas_event(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
 	XEvent *event;
 	XmDrawingAreaCallbackStruct *acs = (XmDrawingAreaCallbackStruct *)call_data;
 	event = acs->event;
@@ -961,6 +992,9 @@ void do_canvas_event(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_save_swath_svp(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (edit_gui == 1) {
@@ -986,7 +1020,10 @@ void do_save_swath_svp(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_save_residuals(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (edit_gui == 1 && nload > 0) {
 		/* save file */
@@ -1011,6 +1048,9 @@ void do_save_residuals(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_io_mode_mb(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	open_type = MBVT_IO_OPEN_MB;
@@ -1019,6 +1059,9 @@ void do_io_mode_mb(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_io_mode_open_svp_display(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	open_type = MBVT_IO_OPEN_DISPLAY_SVP;
@@ -1027,6 +1070,9 @@ void do_io_mode_open_svp_display(Widget w, XtPointer client_data, XtPointer call
 /*--------------------------------------------------------------------*/
 
 void do_io_mode_save_svp(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	open_type = MBVT_IO_SAVE_EDIT_SVP;
@@ -1035,6 +1081,9 @@ void do_io_mode_save_svp(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_io_mode_open_svp_edit(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	open_type = MBVT_IO_OPEN_EDIT_SVP;
@@ -1043,6 +1092,9 @@ void do_io_mode_open_svp_edit(Widget w, XtPointer client_data, XtPointer call_da
 /*--------------------------------------------------------------------*/
 
 void do_expose(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (expose_plot_ok == True)
