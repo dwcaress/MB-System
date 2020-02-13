@@ -788,7 +788,7 @@ void do_mbeditviz_set_label_implied() {
 #endif
 
   char string[MB_PATH_MAXLINE];
-  char string2[MB_PATH_MAXLINE];
+  // char string2[MB_PATH_MAXLINE];
   sprintf(string, ":::t\"Selected Grid Parameters:\""
                   ":t\"    Cell Size: %.2f m\""
                   ":t\"    Dimensions: %d %d\""
@@ -804,7 +804,7 @@ void do_mbeditviz_set_label_implied() {
 /*--------------------------------------------------------------------*/
 void do_mbeditviz_changecellsize(Widget w, XtPointer client_data, XtPointer call_data) {
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-  char string[MB_PATH_MAXLINE];
+  // char string[MB_PATH_MAXLINE];
   int icellsize;
 
   /* print input debug statements */
@@ -1550,7 +1550,6 @@ void do_mbeditviz_update_filelist() {
   int i;
 
   /* swath file locking variables */
-  int lock_status;
   int lock_error = MB_ERROR_NO_ERROR;
   int locked;
   int lock_purpose;
@@ -1596,8 +1595,9 @@ void do_mbeditviz_update_filelist() {
     }
 
     /* check for locks */
-    lock_status = mb_pr_lockinfo(mbev_verbose, mbev_files[i].path, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
-                                 lock_date, &lock_error);
+    // int lock_status =
+    mb_pr_lockinfo(mbev_verbose, mbev_files[i].path, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
+                   lock_date, &lock_error);
     if (locked != file->locked) {
       file->locked = locked;
       update_filelist = true;
