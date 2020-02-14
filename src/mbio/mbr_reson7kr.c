@@ -41,9 +41,9 @@
 #endif
 
 /* turn on debug statements here */
-#define MBR_RESON7KR_DEBUG 1
+//#define MBR_RESON7KR_DEBUG 1
 //#define MBR_RESON7KR_DEBUG2 1
-#define MBR_RESON7KR_DEBUG3 1
+//#define MBR_RESON7KR_DEBUG3 1
 
 /*--------------------------------------------------------------------*/
 int mbr_info_reson7kr(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
