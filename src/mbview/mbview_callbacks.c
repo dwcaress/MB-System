@@ -7300,8 +7300,6 @@ void do_mbview_2dparmspopup(Widget w, XtPointer client_data, XtPointer call_data
 void do_mbview_2dparmspopdown(Widget w, XtPointer client_data, XtPointer call_data) {
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -7313,8 +7311,8 @@ void do_mbview_2dparmspopdown(Widget w, XtPointer client_data, XtPointer call_da
 		fprintf(stderr, "do_mbview_2dparmspopdown: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_2dparms);
 }
@@ -8081,8 +8079,6 @@ void do_mbview_navlist_popdown(Widget w, XtPointer client_data, XtPointer call_d
 void do_mbview_full_render(Widget w, XtPointer client_data, XtPointer call_data) {
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -8091,8 +8087,8 @@ void do_mbview_full_render(Widget w, XtPointer client_data, XtPointer call_data)
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_full_render\n");
 
@@ -8304,8 +8300,6 @@ void do_mbview_profile_resize(Widget w, XtPointer client_data, XEvent *event, Bo
 	Dimension width;
 	Dimension height;
 	XConfigureEvent *cevent = (XConfigureEvent *)event;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	instance = (size_t)client_data;
@@ -8316,8 +8310,8 @@ void do_mbview_profile_resize(Widget w, XtPointer client_data, XEvent *event, Bo
 	/* do this only if a resize event happens */
 	if (cevent->type == ConfigureNotify) {
 		/* get view */
-		view = &(mbviews[instance]);
-		data = &(view->data);
+		struct mbview_world_struct *view = &(mbviews[instance]);
+		// struct mbview_struct *data = &(view->data);
 
 		/* get new shell size */
 		XtVaGetValues(view->mb3dview.mbview_scrolledWindow_profile, XmNwidth, &width, XmNheight, &height, NULL);
@@ -8433,12 +8427,9 @@ void do_mbview_profile_slope(Widget w, XtPointer client_data, XtPointer call_dat
 /*------------------------------------------------------------------------------*/
 
 int do_mbview_status(char *message, size_t instance) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	view->message_on = true;
 
@@ -8450,16 +8441,14 @@ int do_mbview_status(char *message, size_t instance) {
 /*------------------------------------------------------------------------------*/
 
 int do_mbview_message_on(char *message, size_t instance) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	Widget diashell, topshell;
 	Window diawindow, topwindow;
 	XWindowAttributes xwa;
 	XEvent event;
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	view->message_on = true;
 
@@ -8493,12 +8482,9 @@ int do_mbview_message_on(char *message, size_t instance) {
 /*------------------------------------------------------------------------------*/
 
 int do_mbview_message_off(size_t instance) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_message);
 	XSync(XtDisplay(view->mb3dview.mbview_bulletinBoard_message), 0);
@@ -8569,13 +8555,11 @@ void do_mbview_xevents() {
 
 int do_mbview_setbackgroundwork(size_t instance) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int id;
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* set work function if none set for this instance */
 	if (work_function_set == false) {
