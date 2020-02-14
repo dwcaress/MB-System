@@ -26,11 +26,14 @@
 #define MONO "courier"
 #endif
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <math.h>
+
+#include "mb_define.h"
+#include "mb_status.h"
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1800)
@@ -69,9 +72,6 @@
 #include <GL/glx.h>
 #endif
 #include "mb_glwdrawa.h"
-
-#include "mb_status.h"
-#include "mb_define.h"
 
 /* Set flag to define mbview global variables in this code block */
 #define MBVIEWGLOBAL
@@ -174,8 +174,6 @@ void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
  *			XtPointer	client:	the integer exit value.
  *			XtPointer	call:	the call data (unused).
  */
-
-#include <stdlib.h>
 
 void BxExitCB(Widget w, XtPointer client, XtPointer call) {
 	long exitValue = EXIT_FAILURE;
@@ -407,8 +405,6 @@ int mbview_reset_shared(int mode) {
 /*------------------------------------------------------------------------------*/
 int mbview_reset(size_t instance) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int dummy_format;
 	int dummy_pings;
 	double dummy_bounds[4];
@@ -425,8 +421,8 @@ int mbview_reset(size_t instance) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* initialize windows */
 	if (instance != MBV_NO_WINDOW && instance < MBV_MAX_WINDOWS) {
@@ -772,7 +768,6 @@ int mbview_reset(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_init(int verbose, size_t *instance, int *error) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
 	size_t i;
 
 	if (verbose >= 2) {
@@ -795,7 +790,7 @@ int mbview_init(int verbose, size_t *instance, int *error) {
 	}
 
 	/* get view */
-	view = &(mbviews[*instance]);
+	struct mbview_world_struct *view = &(mbviews[*instance]);
 
 	/* copy control structure */
 	view->mainWindow = parent_widget;
@@ -816,8 +811,6 @@ int mbview_init(int verbose, size_t *instance, int *error) {
 /*------------------------------------------------------------------------------*/
 int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datahandle, int *error) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i, j;
 
 	if (verbose >= 2) {
@@ -829,9 +822,9 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
+	struct mbview_world_struct *view = &(mbviews[instance]);
 	*datahandle = &(view->data);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -1339,8 +1332,6 @@ int mbview_setwindowparms(int verbose, size_t instance, int (*mbview_dismiss_not
 
 {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1361,8 +1352,8 @@ int mbview_setwindowparms(int verbose, size_t instance, int (*mbview_dismiss_not
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set values */
 	data->mbview_dismiss_notify = mbview_dismiss_notify;
@@ -1400,8 +1391,6 @@ int mbview_setviewcontrols(int verbose, size_t instance, int display_mode, int m
 
 {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1442,8 +1431,8 @@ int mbview_setviewcontrols(int verbose, size_t instance, int display_mode, int m
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set values */
 	data->display_mode = display_mode;
@@ -1506,13 +1495,11 @@ int mbview_open(int verbose, size_t instance, int *error) {
 	XColor XColorBlue;
 	XColor XColorCoral;
 	XColor exact;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i, j;
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2158,8 +2145,6 @@ int mbview_open(int verbose, size_t instance, int *error) {
 /*------------------------------------------------------------------------------*/
 int mbview_update(int verbose, size_t instance, int *error) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2170,8 +2155,8 @@ int mbview_update(int verbose, size_t instance, int *error) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* make sure some key parameters are set */
 	/*view->projected = false;*/
@@ -2226,8 +2211,6 @@ int mbview_update(int verbose, size_t instance, int *error) {
 /*------------------------------------------------------------------------------*/
 int mbview_update_sensitivity(int verbose, size_t instance, int *error) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2238,8 +2221,8 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set widget sensitivity */
 
@@ -2452,8 +2435,6 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error) {
 /*------------------------------------------------------------------------------*/
 int mbview_action_sensitivityall() {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	size_t instance;
 
 	if (mbv_verbose >= 2) {
@@ -2466,8 +2447,8 @@ int mbview_action_sensitivityall() {
 	/* set action sensitivity on all active instances */
 	for (instance = 0; instance < MBV_MAX_WINDOWS; instance++) {
 		/* get view */
-		view = &(mbviews[instance]);
-		data = &(view->data);
+		struct mbview_world_struct *view = &(mbviews[instance]);
+		struct mbview_struct *data = &(view->data);
 
 		/* if instance active reset action sensitivity */
 		if (data->active == true)
@@ -2486,8 +2467,6 @@ int mbview_action_sensitivityall() {
 /*------------------------------------------------------------------------------*/
 int mbview_action_sensitivity(size_t instance) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int mbview_allactive;
 	int i, j;
 
@@ -2507,8 +2486,8 @@ int mbview_action_sensitivity(size_t instance) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* now set action buttons according to current pick states */
 	for (i = 0; i < view->naction; i++) {
@@ -2579,8 +2558,6 @@ int mbview_action_sensitivity(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_set_widgets(int verbose, size_t instance, int *error) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2591,8 +2568,8 @@ int mbview_set_widgets(int verbose, size_t instance, int *error) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* check for spheroid projection */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID) {
@@ -2663,8 +2640,6 @@ int mbview_set_widgets(int verbose, size_t instance, int *error) {
 int mbview_addaction(int verbose, size_t instance, void(mbview_action_notify)(Widget, XtPointer, XtPointer), char *label,
                      int sensitive, int *error) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	Cardinal ac = 0;
 	Arg args[256];
 	Boolean argok = False;
@@ -2682,8 +2657,8 @@ int mbview_addaction(int verbose, size_t instance, void(mbview_action_notify)(Wi
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* add pushbutton to action menu */
 	ac = 0;
@@ -2723,8 +2698,6 @@ int mbview_addaction(int verbose, size_t instance, void(mbview_action_notify)(Wi
 /*------------------------------------------------------------------------------*/
 int mbview_addpicknotify(int verbose, size_t instance, int picktype, void(mbview_pick_notify)(size_t), int *error) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2737,8 +2710,8 @@ int mbview_addpicknotify(int verbose, size_t instance, int picktype, void(mbview
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set the pick notify function */
 	if (picktype == MBV_PICK_ONEPOINT) {
@@ -2777,8 +2750,6 @@ int mbview_addpicknotify(int verbose, size_t instance, int picktype, void(mbview
 /*------------------------------------------------------------------------------*/
 int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensitivity_notify)(), int *error) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2790,8 +2761,8 @@ int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensit
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set the pick notify function */
 	data->mbview_sensitivity_notify = mbview_sensitivity_notify;
@@ -2810,8 +2781,6 @@ int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensit
 /*------------------------------------------------------------------------------*/
 int mbview_setcolorchangenotify(int verbose, size_t instance, void(mbview_colorchange_notify)(size_t), int *error) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (verbose >= 0) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2823,8 +2792,8 @@ int mbview_setcolorchangenotify(int verbose, size_t instance, void(mbview_colorc
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set the pick notify function */
 	data->mbview_colorchange_notify = mbview_colorchange_notify;
@@ -2842,19 +2811,19 @@ int mbview_setcolorchangenotify(int verbose, size_t instance, void(mbview_colorc
 
 /*------------------------------------------------------------------------------*/
 void mbview_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unused) {
+	(void)w;  // Unused parameter
+	(void)unused;  // Unused parameter
 	size_t instance;
 	Dimension width;
 	Dimension height;
 	XConfigureEvent *cevent = (XConfigureEvent *)event;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* do this only if a resize event happens */
 	if (cevent->type == ConfigureNotify) {
 		/* get view */
 		instance = (size_t)client_data;
-		view = &(mbviews[instance]);
-		data = &(view->data);
+		struct mbview_world_struct *view = &(mbviews[instance]);
+		struct mbview_struct *data = &(view->data);
 
 		/* get new shell size */
 		XtVaGetValues(view->topLevelShell, XmNwidth, &width, XmNheight, &height, NULL);
@@ -2906,10 +2875,10 @@ void mbview_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unus
 }
 /*------------------------------------------------------------------------------*/
 void do_mbview_projection_popup(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -2920,8 +2889,8 @@ void do_mbview_projection_popup(Widget w, XtPointer client_data, XtPointer call_
 	fprintf(stderr, "do_mbview_projection_popup: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	XtManageChild(view->mb3dview.mbview_bulletinBoard_projection);
 
@@ -2957,14 +2926,12 @@ void do_mbview_projection_popup(Widget w, XtPointer client_data, XtPointer call_
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_set_projection_label(size_t instance) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int projectionid;
 	mb_path tmptext = "";
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set projection label */
 	sprintf(value_text, ":::t\"Primary Grid Projection:\"");
@@ -3134,10 +3101,10 @@ void do_mbview_set_projection_label(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_projection_popdown(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -3149,18 +3116,18 @@ void do_mbview_projection_popdown(Widget w, XtPointer client_data, XtPointer cal
 		fprintf(stderr, "do_mbview_projection_popdown: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_projection);
 }
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_display_spheroid(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -3171,8 +3138,8 @@ void do_mbview_display_spheroid(Widget w, XtPointer client_data, XtPointer call_
 	fprintf(stderr, "do_mbview_display_spheroid: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* reproject as spheroid if the togglebutton has been set */
 	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_spheroid)) {
@@ -3199,10 +3166,10 @@ void do_mbview_display_spheroid(Widget w, XtPointer client_data, XtPointer call_
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_display_geographic(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -3213,8 +3180,8 @@ void do_mbview_display_geographic(Widget w, XtPointer client_data, XtPointer cal
 	fprintf(stderr, "do_mbview_display_geographic: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* reproject as geographic if the togglebutton has been set */
 	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_geographic)) {
@@ -3241,10 +3208,10 @@ void do_mbview_display_geographic(Widget w, XtPointer client_data, XtPointer cal
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_display_utm(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int projectionid, utmzone;
 	double reference_lon;
 	double reference_lat;
@@ -3258,8 +3225,8 @@ void do_mbview_display_utm(Widget w, XtPointer client_data, XtPointer call_data)
 	fprintf(stderr, "do_mbview_display_utm: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* reproject as utm if the togglebutton has been set */
 	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_utm)) {
@@ -3297,10 +3264,10 @@ void do_mbview_display_utm(Widget w, XtPointer client_data, XtPointer call_data)
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_annotation_degreesminutes(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -3311,8 +3278,8 @@ void do_mbview_annotation_degreesminutes(Widget w, XtPointer client_data, XtPoin
 	fprintf(stderr, "do_mbview_annotation_degreesminutes: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* use degrees + minutes for pick annotation */
 	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_annotation_degreesminutes)) {
@@ -3323,10 +3290,10 @@ void do_mbview_annotation_degreesminutes(Widget w, XtPointer client_data, XtPoin
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_annotation_degreesdecimal(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -3337,8 +3304,8 @@ void do_mbview_annotation_degreesdecimal(Widget w, XtPointer client_data, XtPoin
 	fprintf(stderr, "do_mbview_annotation_degreesdecimal: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* use decimal degrees for pick annotation */
 	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_annotation_degreesdecimal)) {
@@ -3350,6 +3317,8 @@ void do_mbview_annotation_degreesdecimal(Widget w, XtPointer client_data, XtPoin
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_glwda_expose(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
 	size_t instance;
 
@@ -3366,6 +3335,8 @@ void do_mbview_glwda_expose(Widget w, XtPointer client_data, XtPointer call_data
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_glwda_resize(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
 	size_t instance;
 
@@ -3380,11 +3351,8 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 	mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
 	size_t instance;
 	XEvent *event;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	KeySym keysym;
 	char buffer[1];
-	int actual;
 	int shade_mode;
 	int replotall;
 	int replotprofile;
@@ -3398,8 +3366,8 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 	acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set replotall to false */
 	replotall = false;
@@ -4497,7 +4465,8 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 		if (event->xany.type == KeyPress) {
 			/* fprintf(stderr,"KeyPress event\n"); */
 			/* Get key pressed - buffer[0] */
-			actual = XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+			// int actual =
+			XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
 
 			/* process events */
 			switch (buffer[0]) {
@@ -4535,10 +4504,10 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int error = MB_ERROR_NO_ERROR;
 
 	/* get instance */
@@ -4551,8 +4520,8 @@ void do_mbview_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
 		fprintf(stderr, "do_mbview_dismiss: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* destroy the widgets for this instance  */
 	if (data->active == true)
@@ -4562,10 +4531,10 @@ void do_mbview_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_goaway(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int error = MB_ERROR_NO_ERROR;
 
 	/* get instance */
@@ -4575,8 +4544,8 @@ void do_mbview_goaway(Widget w, XtPointer client_data, XtPointer call_data) {
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* destroy the widgets for this instance  */
 	if (data->active == true)
@@ -4586,8 +4555,6 @@ void do_mbview_goaway(Widget w, XtPointer client_data, XtPointer call_data) {
 
 int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i, j;
 
 	if (mbv_verbose >= 2) {
@@ -4600,8 +4567,8 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* handle destruction if not already handled */
 	if (data->active == true) {
@@ -4855,10 +4822,10 @@ int mbview_quit(int verbose, int *error) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_display_2D(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -4867,8 +4834,8 @@ void do_mbview_display_2D(Widget w, XtPointer client_data, XtPointer call_data) 
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	data->display_mode = MBV_DISPLAY_2D;
@@ -4896,10 +4863,10 @@ void do_mbview_display_2D(Widget w, XtPointer client_data, XtPointer call_data) 
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_display_3D(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -4908,8 +4875,8 @@ void do_mbview_display_3D(Widget w, XtPointer client_data, XtPointer call_data) 
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	data->display_mode = MBV_DISPLAY_3D;
@@ -4937,10 +4904,10 @@ void do_mbview_display_3D(Widget w, XtPointer client_data, XtPointer call_data) 
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_data_primary(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -4949,8 +4916,8 @@ void do_mbview_data_primary(Widget w, XtPointer client_data, XtPointer call_data
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	data->grid_mode = MBV_GRID_VIEW_PRIMARY;
@@ -4983,10 +4950,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_data_primaryslope(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -4995,8 +4962,8 @@ void do_mbview_data_primaryslope(Widget w, XtPointer client_data, XtPointer call
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	data->grid_mode = MBV_GRID_VIEW_PRIMARYSLOPE;
@@ -5029,10 +4996,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_data_secondary(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5041,8 +5008,8 @@ void do_mbview_data_secondary(Widget w, XtPointer client_data, XtPointer call_da
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	data->grid_mode = MBV_GRID_VIEW_SECONDARY;
@@ -5075,11 +5042,11 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_histogram(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5089,8 +5056,8 @@ void do_mbview_histogram(Widget w, XtPointer client_data, XtPointer call_data) {
 	/*fprintf(stderr,"do_mbview_histogram instance:%zu\n", instance);*/
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get histogram value */
 	if (XmToggleButtonGetState(w))
@@ -5128,10 +5095,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_overlay_none(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5140,8 +5107,8 @@ void do_mbview_overlay_none(Widget w, XtPointer client_data, XtPointer call_data
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_overlay_none instance:%zu\n", instance);
@@ -5178,10 +5145,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_overlay_slope(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5190,8 +5157,8 @@ void do_mbview_overlay_slope(Widget w, XtPointer client_data, XtPointer call_dat
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_overlay_slope instance:%zu\n", instance);
@@ -5229,10 +5196,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_overlay_illumination(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5241,8 +5208,8 @@ void do_mbview_overlay_illumination(Widget w, XtPointer client_data, XtPointer c
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_overlay_illumination instance:%zu\n", instance);
@@ -5279,10 +5246,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_overlay_secondary(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5291,8 +5258,8 @@ void do_mbview_overlay_secondary(Widget w, XtPointer client_data, XtPointer call
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_overlay_secondary instance:%zu\n", instance);
@@ -5329,11 +5296,11 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_overlay_contour(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5342,8 +5309,8 @@ void do_mbview_overlay_contour(Widget w, XtPointer client_data, XtPointer call_d
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	value = XmToggleButtonGetState(w);
@@ -5361,13 +5328,12 @@ void do_mbview_overlay_contour(Widget w, XtPointer client_data, XtPointer call_d
 	mbview_plotlowhigh(instance);
 }
 /*------------------------------------------------------------------------------*/
-
 void do_mbview_site(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5376,8 +5342,8 @@ void do_mbview_site(Widget w, XtPointer client_data, XtPointer call_data) {
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	value = XmToggleButtonGetState(w);
@@ -5411,11 +5377,11 @@ void do_mbview_site(Widget w, XtPointer client_data, XtPointer call_data) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_route(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5424,8 +5390,8 @@ void do_mbview_route(Widget w, XtPointer client_data, XtPointer call_data) {
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	value = XmToggleButtonGetState(w);
@@ -5461,11 +5427,11 @@ void do_mbview_route(Widget w, XtPointer client_data, XtPointer call_data) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_nav(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5474,8 +5440,8 @@ void do_mbview_nav(Widget w, XtPointer client_data, XtPointer call_data) {
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	value = XmToggleButtonGetState(w);
@@ -5502,11 +5468,11 @@ void do_mbview_nav(Widget w, XtPointer client_data, XtPointer call_data) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_navdrape(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5515,8 +5481,8 @@ void do_mbview_navdrape(Widget w, XtPointer client_data, XtPointer call_data) {
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	value = XmToggleButtonGetState(w);
@@ -5541,11 +5507,11 @@ void do_mbview_navdrape(Widget w, XtPointer client_data, XtPointer call_data) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_vector(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5554,8 +5520,8 @@ void do_mbview_vector(Widget w, XtPointer client_data, XtPointer call_data) {
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	value = XmToggleButtonGetState(w);
@@ -5581,10 +5547,10 @@ void do_mbview_vector(Widget w, XtPointer client_data, XtPointer call_data) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_haxby(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5593,8 +5559,8 @@ void do_mbview_colortable_haxby(Widget w, XtPointer client_data, XtPointer call_
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
@@ -5634,10 +5600,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_bright(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5646,8 +5612,8 @@ void do_mbview_colortable_bright(Widget w, XtPointer client_data, XtPointer call
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
@@ -5687,10 +5653,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_muted(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5699,8 +5665,8 @@ void do_mbview_colortable_muted(Widget w, XtPointer client_data, XtPointer call_
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
@@ -5740,10 +5706,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_gray(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5752,8 +5718,8 @@ void do_mbview_colortable_gray(Widget w, XtPointer client_data, XtPointer call_d
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
@@ -5793,10 +5759,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_flat(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5805,8 +5771,8 @@ void do_mbview_colortable_flat(Widget w, XtPointer client_data, XtPointer call_d
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
@@ -5847,10 +5813,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_sealevel1(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5859,8 +5825,8 @@ void do_mbview_colortable_sealevel1(Widget w, XtPointer client_data, XtPointer c
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
@@ -5900,10 +5866,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_sealevel2(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -5912,8 +5878,8 @@ void do_mbview_colortable_sealevel2(Widget w, XtPointer client_data, XtPointer c
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get mode value */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
@@ -5953,19 +5919,20 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_mouse_rmode(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 	int replot = false;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_mouse_rmode: \n");
 
-	acs = (XmToggleButtonCallbackStruct *)call_data;
+	XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
 
 	/* do nothing unless calling widget is set */
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
 	if (acs->event != NULL && acs->set > 0) {
 		/* get instance */
 		ac = 0;
@@ -6061,17 +6028,18 @@ void do_mbview_mouse_rmode(Widget w, XtPointer client_data, XtPointer call_data)
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_mouse_mode(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 	int replot = false;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_mouse_mode: \n");
 
-
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
 	/* do nothing unless calling widget is set */
 	/*    if (acs->event != NULL && acs->set > 0)*/
 	{
@@ -6163,16 +6131,14 @@ void do_mbview_mouse_mode(Widget w, XtPointer client_data, XtPointer call_data) 
 
 /*------------------------------------------------------------------------------*/
 void set_mbview_mouse_mode(size_t instance, int mode) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_mouse_mode: instance:%zu mode:%d\n", instance, mode);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	mb3dviewptr = &(view->mb3dview);
 
@@ -6277,16 +6243,14 @@ void set_mbview_mouse_mode(size_t instance, int mode) {
 /*------------------------------------------------------------------------------*/
 void set_mbview_grid_mode(size_t instance, int mode) {
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "set_mbview_grid_mode: instance:%zu mode:%d\n", instance, mode);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	mb3dviewptr = &(view->mb3dview);
 
@@ -6312,16 +6276,14 @@ void set_mbview_grid_mode(size_t instance, int mode) {
 /*------------------------------------------------------------------------------*/
 void set_mbview_histogram_mode(size_t instance, int mode) {
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "set_mbview_histogram_mode: instance:%zu mode:%d\n", instance, mode);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	mb3dviewptr = &(view->mb3dview);
 	if (mode == true)
@@ -6334,16 +6296,14 @@ void set_mbview_histogram_mode(size_t instance, int mode) {
 /*------------------------------------------------------------------------------*/
 void set_mbview_shade_mode(size_t instance, int mode) {
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_shade_mode: instance:%zu mode:%d\n", instance, mode);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	mb3dviewptr = &(view->mb3dview);
 
@@ -6375,16 +6335,14 @@ void set_mbview_shade_mode(size_t instance, int mode) {
 /*------------------------------------------------------------------------------*/
 void set_mbview_contour_mode(size_t instance, int mode) {
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_contour_mode: instance:%zu mode:%d\n", instance, mode);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	mb3dviewptr = &(view->mb3dview);
 	if (mode == MBV_VIEW_ON)
@@ -6397,16 +6355,14 @@ void set_mbview_contour_mode(size_t instance, int mode) {
 /*------------------------------------------------------------------------------*/
 void set_mbview_site_view_mode(size_t instance, int mode) {
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_site_view_mode: instance:%zu mode:%d\n", instance, mode);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	mb3dviewptr = &(view->mb3dview);
 	if (mode == MBV_VIEW_ON)
@@ -6419,16 +6375,14 @@ void set_mbview_site_view_mode(size_t instance, int mode) {
 /*------------------------------------------------------------------------------*/
 void set_mbview_route_view_mode(size_t instance, int mode) {
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_route_view_mode: instance:%zu mode:%d\n", instance, mode);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	mb3dviewptr = &(view->mb3dview);
 	if (mode == MBV_VIEW_ON)
@@ -6441,16 +6395,14 @@ void set_mbview_route_view_mode(size_t instance, int mode) {
 /*------------------------------------------------------------------------------*/
 void set_mbview_nav_view_mode(size_t instance, int mode) {
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_nav_view_mode: instance:%zu mode:%d\n", instance, mode);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	mb3dviewptr = &(view->mb3dview);
 	if (mode == MBV_VIEW_ON)
@@ -6463,16 +6415,14 @@ void set_mbview_nav_view_mode(size_t instance, int mode) {
 /*------------------------------------------------------------------------------*/
 void set_mbview_navdrape_view_mode(size_t instance, int mode) {
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_nav_view_mode: instance:%zu mode:%d\n", instance, mode);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	mb3dviewptr = &(view->mb3dview);
 	if (mode == MBV_VIEW_ON)
@@ -6485,16 +6435,14 @@ void set_mbview_navdrape_view_mode(size_t instance, int mode) {
 /*------------------------------------------------------------------------------*/
 void set_mbview_vector_view_mode(size_t instance, int mode) {
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_vector_view_mode: instance:%zu mode:%d\n", instance, mode);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	mb3dviewptr = &(view->mb3dview);
 	if (mode == MBV_VIEW_ON)
@@ -6507,16 +6455,14 @@ void set_mbview_vector_view_mode(size_t instance, int mode) {
 /*------------------------------------------------------------------------------*/
 void set_mbview_display_mode(size_t instance, int mode) {
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "set_mbview_display_mode: instance:%zu mode:%d\n", instance, mode);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	mb3dviewptr = &(view->mb3dview);
 
@@ -6535,16 +6481,14 @@ void set_mbview_display_mode(size_t instance, int mode) {
 /*------------------------------------------------------------------------------*/
 void set_mbview_colortable(size_t instance, int mode) {
 	Boolean value;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	MB3DViewData *mb3dviewptr;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_colortable: instance:%zu mode:%d\n", instance, mode);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	mb3dviewptr = &(view->mb3dview);
 
@@ -6593,24 +6537,21 @@ void set_mbview_colortable(size_t instance, int mode) {
 
 /*------------------------------------------------------------------------------*/
 void set_mbview_colortable_mode(size_t instance, int mode) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_colortable_mode: instance:%zu mode:%d\n", instance, mode);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 }
 
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_aboutpopdown(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -6622,18 +6563,18 @@ void do_mbview_aboutpopdown(Widget w, XtPointer client_data, XtPointer call_data
 		fprintf(stderr, "do_mbview_aboutpopdown: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_about);
 }
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_aboutpopup(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -6645,8 +6586,8 @@ void do_mbview_aboutpopup(Widget w, XtPointer client_data, XtPointer call_data) 
 		fprintf(stderr, "do_mbview_aboutpopup: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	XtManageChild(view->mb3dview.mbview_bulletinBoard_about);
 }
@@ -6654,10 +6595,10 @@ void do_mbview_aboutpopup(Widget w, XtPointer client_data, XtPointer call_data) 
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colorboundspopup(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -6669,8 +6610,8 @@ void do_mbview_colorboundspopup(Widget w, XtPointer client_data, XtPointer call_
 		fprintf(stderr, "do_mbview_colorboundspopup: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	XtManageChild(view->mb3dview.mbview_bulletinBoard_colorbounds);
 
@@ -6711,10 +6652,10 @@ void do_mbview_colorboundspopup(Widget w, XtPointer client_data, XtPointer call_
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colorboundspopdown(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -6726,18 +6667,18 @@ void do_mbview_colorboundspopdown(Widget w, XtPointer client_data, XtPointer cal
 		fprintf(stderr, "do_mbview_colorboundspopdown: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_colorbounds);
 }
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int ivalue;
 	double dvalue;
 	int change;
@@ -6752,8 +6693,8 @@ void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_
 		fprintf(stderr, "do_mbview_colorboundsapply: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get values of widgets */
 
@@ -6863,10 +6804,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_shadeparmspopup(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -6878,8 +6819,8 @@ void do_mbview_shadeparmspopup(Widget w, XtPointer client_data, XtPointer call_d
 		fprintf(stderr, "do_mbview_shadeparmspopup: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	XtManageChild(view->mb3dview.mbview_bulletinBoard_shadeparms);
 
@@ -6906,10 +6847,10 @@ void do_mbview_shadeparmspopup(Widget w, XtPointer client_data, XtPointer call_d
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_shadeparmspopdown(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -6921,18 +6862,18 @@ void do_mbview_shadeparmspopdown(Widget w, XtPointer client_data, XtPointer call
 		fprintf(stderr, "do_mbview_shadeparmspopdown: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_shadeparms);
 }
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int ivalue;
 	double dvalue;
 	int change;
@@ -6948,8 +6889,8 @@ void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_d
 		fprintf(stderr, "do_mbview_shadeparmsapply: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* check current shading mode */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
@@ -7040,15 +6981,13 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 int do_mbview_3dparmstext(size_t instance) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_3dparmstext: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set values of widgets */
 	sprintf(value_text, "%g", data->modelazimuth3d);
@@ -7075,13 +7014,13 @@ int do_mbview_3dparmstext(size_t instance) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_3dparmspopup(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
+	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
 	XtGetValues(w, args, ac);
@@ -7090,8 +7029,8 @@ void do_mbview_3dparmspopup(Widget w, XtPointer client_data, XtPointer call_data
 		fprintf(stderr, "do_mbview_3dparmspopup: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	XtManageChild(view->mb3dview.mbview_bulletinBoard_3dparms);
 
@@ -7101,10 +7040,10 @@ void do_mbview_3dparmspopup(Widget w, XtPointer client_data, XtPointer call_data
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_3dparmspopdown(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -7116,18 +7055,18 @@ void do_mbview_3dparmspopdown(Widget w, XtPointer client_data, XtPointer call_da
 		fprintf(stderr, "do_mbview_3dparmspopdown: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_3dparms);
 }
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_3dparmsapply(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double dvalue;
 	int change;
 
@@ -7141,8 +7080,8 @@ void do_mbview_3dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 		fprintf(stderr, "do_mbview_3dparmsapply: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get values of widgets */
 
@@ -7249,15 +7188,13 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 int do_mbview_2dparmstext(size_t instance) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_2dparmstext: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* set values of widgets */
 	sprintf(value_text, "%g", view->offset2d_x);
@@ -7272,10 +7209,10 @@ int do_mbview_2dparmstext(size_t instance) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_2dparmspopup(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -7287,8 +7224,8 @@ void do_mbview_2dparmspopup(Widget w, XtPointer client_data, XtPointer call_data
 		fprintf(stderr, "do_mbview_2dparmspopup: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	XtManageChild(view->mb3dview.mbview_bulletinBoard_2dparms);
 
@@ -7298,6 +7235,8 @@ void do_mbview_2dparmspopup(Widget w, XtPointer client_data, XtPointer call_data
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_2dparmspopdown(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 
@@ -7312,17 +7251,17 @@ void do_mbview_2dparmspopdown(Widget w, XtPointer client_data, XtPointer call_da
 
 	/* get view */
 	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
+	// struct mbview_struct *data = &(view->data);
 
 	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_2dparms);
 }
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_2dparmsapply(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double dvalue;
 	int change;
 
@@ -7336,8 +7275,8 @@ void do_mbview_2dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 		fprintf(stderr, "do_mbview_2dparmsapply: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get values of widgets */
 
@@ -7388,10 +7327,10 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_resolutionpopup(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -7403,8 +7342,8 @@ void do_mbview_resolutionpopup(Widget w, XtPointer client_data, XtPointer call_d
 		fprintf(stderr, "do_mbview_resolutionpopup: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	XtManageChild(view->mb3dview.mbview_bulletinBoard_resolution);
 
@@ -7417,10 +7356,11 @@ void do_mbview_resolutionpopup(Widget w, XtPointer client_data, XtPointer call_d
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_resolutionpopdown(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -7432,17 +7372,17 @@ void do_mbview_resolutionpopdown(Widget w, XtPointer client_data, XtPointer call
 		fprintf(stderr, "do_mbview_resolutionpopdown: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_resolution);
 }
 /*------------------------------------------------------------------------------*/
 void do_mbview_resolutionchange(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int lorez_dimension;
 	int hirez_dimension;
 	int lorez_navdecimate;
@@ -7458,8 +7398,8 @@ void do_mbview_resolutionchange(Widget w, XtPointer client_data, XtPointer call_
 		fprintf(stderr, "do_mbview_resolutionchange: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get values of resolution sliders */
 	XtVaGetValues(view->mb3dview.mbview_scale_lowresolution, XmNvalue, &lorez_dimension, NULL);
@@ -7509,6 +7449,9 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_sitelistpopup(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbv_verbose >= 2)
@@ -7521,6 +7464,9 @@ void do_mbview_sitelistpopup(Widget w, XtPointer client_data, XtPointer call_dat
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_routelistpopup(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbv_verbose >= 2)
@@ -7533,6 +7479,9 @@ void do_mbview_routelistpopup(Widget w, XtPointer client_data, XtPointer call_da
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_navlistpopup(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbv_verbose >= 2)
@@ -7545,6 +7494,8 @@ void do_mbview_navlistpopup(Widget w, XtPointer client_data, XtPointer call_data
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_sitelistselect(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int *position_list = NULL;
 	int position_count = 0;
@@ -7610,6 +7561,9 @@ void do_mbview_sitelistselect(Widget w, XtPointer client_data, XtPointer call_da
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_routelistselect(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int *position_list = NULL;
 	int position_count = 0;
@@ -7710,6 +7664,9 @@ void do_mbview_routelistselect(Widget w, XtPointer client_data, XtPointer call_d
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int *position_list = NULL;
 	int position_count = 0;
@@ -7813,6 +7770,9 @@ void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_dat
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_sitelist_delete(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int *position_list = NULL;
 	int position_count = 0;
@@ -7874,6 +7834,9 @@ void do_mbview_sitelist_delete(Widget w, XtPointer client_data, XtPointer call_d
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int *position_list = NULL;
 	int position_count = 0;
@@ -7967,6 +7930,9 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 }
 /*------------------------------------------------------------------------------*/
 void do_mbview_navlist_delete(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int *position_list = NULL;
 	int position_count = 0;
@@ -8042,6 +8008,9 @@ void do_mbview_navlist_delete(Widget w, XtPointer client_data, XtPointer call_da
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_sitelist_popdown(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbv_verbose >= 0)
@@ -8054,6 +8023,9 @@ void do_mbview_sitelist_popdown(Widget w, XtPointer client_data, XtPointer call_
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_routelist_popdown(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbv_verbose >= 0)
@@ -8066,6 +8038,9 @@ void do_mbview_routelist_popdown(Widget w, XtPointer client_data, XtPointer call
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_navlist_popdown(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbv_verbose >= 0)
@@ -8077,6 +8052,8 @@ void do_mbview_navlist_popdown(Widget w, XtPointer client_data, XtPointer call_d
 }
 /*------------------------------------------------------------------------------*/
 void do_mbview_full_render(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 
@@ -8102,10 +8079,10 @@ void do_mbview_full_render(Widget w, XtPointer client_data, XtPointer call_data)
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_reset_view(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -8114,8 +8091,8 @@ void do_mbview_reset_view(Widget w, XtPointer client_data, XtPointer call_data) 
 	XtGetValues(w, args, ac);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_reset_view\n");
 
@@ -8169,6 +8146,8 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_clearpicks(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 
@@ -8187,10 +8166,10 @@ void do_mbview_clearpicks(Widget w, XtPointer client_data, XtPointer call_data) 
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_profile_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -8202,8 +8181,8 @@ void do_mbview_profile_dismiss(Widget w, XtPointer client_data, XtPointer call_d
 		fprintf(stderr, "do_mbview_profile_dismiss: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	if (data->profile_view_mode == MBV_VIEW_ON) {
 		/* destroy opengl context */
@@ -8229,10 +8208,10 @@ void do_mbview_profile_dismiss(Widget w, XtPointer client_data, XtPointer call_d
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_view_profile(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* get instance */
 	ac = 0;
@@ -8244,8 +8223,8 @@ void do_mbview_view_profile(Widget w, XtPointer client_data, XtPointer call_data
 		fprintf(stderr, "do_mbview_view_profile: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	if (data->profile_view_mode == MBV_VIEW_OFF) {
 
@@ -8296,6 +8275,8 @@ void do_mbview_view_profile(Widget w, XtPointer client_data, XtPointer call_data
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_profile_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unused) {
+	(void)w;  // Unused parameter
+	(void)unused;  // Unused parameter
 	size_t instance;
 	Dimension width;
 	Dimension height;
@@ -8327,10 +8308,9 @@ void do_mbview_profile_resize(Widget w, XtPointer client_data, XEvent *event, Bo
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_profile_exager(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int profile_exager;
 
 	acs = (XmScaleCallbackStruct *)call_data;
@@ -8345,8 +8325,8 @@ void do_mbview_profile_exager(Widget w, XtPointer client_data, XtPointer call_da
 		fprintf(stderr, "do_mbview_profile_exager: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	profile_exager = acs->value;
 	data->profile_exageration = 0.1 * ((double)profile_exager);
@@ -8360,10 +8340,9 @@ void do_mbview_profile_exager(Widget w, XtPointer client_data, XtPointer call_da
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_profile_width(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int profile_widthfactor;
 
 	acs = (XmScaleCallbackStruct *)call_data;
@@ -8378,8 +8357,8 @@ void do_mbview_profile_width(Widget w, XtPointer client_data, XtPointer call_dat
 		fprintf(stderr, "do_mbview_profile_width: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	profile_widthfactor = acs->value;
 	data->profile_widthfactor = profile_widthfactor;
@@ -8393,10 +8372,9 @@ void do_mbview_profile_width(Widget w, XtPointer client_data, XtPointer call_dat
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_profile_slope(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int profile_slopethreshold;
 
 	/* get instance */
@@ -8409,8 +8387,8 @@ void do_mbview_profile_slope(Widget w, XtPointer client_data, XtPointer call_dat
 		fprintf(stderr, "do_mbview_profile_slope: instance:%zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	acs = (XmScaleCallbackStruct *)call_data;
 	profile_slopethreshold = acs->value;
@@ -8606,8 +8584,6 @@ int do_mbview_settimer() {
 int do_mbview_workfunction(XtPointer client_data) {
 	int status = MB_SUCCESS;
 	size_t instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int plotting;
 	int found;
 	int mode;
@@ -8623,6 +8599,8 @@ int do_mbview_workfunction(XtPointer client_data) {
 	/*fprintf(stderr,"\ndo_mbview_workfunction called: instance:%zu timer_count:%d\n", instance, timer_count);*/
 
 	/* first make sure no plotting is active */
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
 	for (i = 0; i < MBV_MAX_WINDOWS && plotting == false; i++) {
 		/* get view */
 		view = &(mbviews[i]);
