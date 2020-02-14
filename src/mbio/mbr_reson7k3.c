@@ -17911,6 +17911,12 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   // as SystemEventMessage records. After the FileHeader record is written
   // any comments will be written when received.
   //
+  // It is unfortunately possible for 7k files to be found that do not have
+  // a fileheader record - Norbit multibeam data have been generated like this.
+  // Therefore the code should write a Fileheader record the first time
+  // any record other than a comment is passed for writing, even if that first
+  // record is not a Fileheader record.
+  //
   // The FileCatalog output data is stored in the FileCatalog_write
   // structure as the file is written. The FileCatalog record is written
   // when the file is closed, not when the input FileCatalog data are passed
@@ -17926,8 +17932,49 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   // and only a single record is written.
 
   // write FileHeader
-  if (store->type == R7KRECID_FileHeader) {
-    // ensure FileHeader has
+  if (store->type == R7KRECID_FileHeader
+      || (store->kind != MB_DATA_COMMENT && *fileheaders == 0)) {
+    // handle case of missing FileHeader - make sure version is correct
+    if (store->type != R7KRECID_FileHeader) {
+      store->FileHeader.header.Version = 5;
+      store->FileHeader.header.Offset = 60;
+      store->FileHeader.header.SyncPattern = 65535;
+      store->FileHeader.header.Size = 396;
+      store->FileHeader.header.OptionalDataOffset = 1;
+      store->FileHeader.header.OptionalDataIdentifier = 7300;
+      store->FileHeader.header.s7kTime.Year = 0;
+      store->FileHeader.header.s7kTime.Day = 0;
+      store->FileHeader.header.s7kTime.Seconds = 0.0;
+      store->FileHeader.header.s7kTime.Hours = 0;
+      store->FileHeader.header.s7kTime.Minutes = 0;
+      store->FileHeader.header.RecordVersion = 1;
+      store->FileHeader.header.RecordType = 7200;
+      store->FileHeader.header.DeviceId = 7000;
+      store->FileHeader.header.Reserved = 0;
+      store->FileHeader.header.SystemEnumerator = 0;
+      store->FileHeader.header.Reserved2 = 1;
+      store->FileHeader.header.Flags = 0;
+      store->FileHeader.header.Reserved3 = 0;
+      store->FileHeader.header.Reserved4 = 0;
+      store->FileHeader.header.FragmentedTotal = 0;
+      store->FileHeader.header.FragmentNumber = 0;
+      store->FileHeader.file_identifier[0] = 0;
+      store->FileHeader.file_identifier[1] = 0;
+      store->FileHeader.version = 1;
+      store->FileHeader.reserved = 0;
+      store->FileHeader.session_identifier[0] = 0;
+      store->FileHeader.session_identifier[1] = 0;
+      store->FileHeader.record_data_size = 0;
+      store->FileHeader.number_devices = 0;
+      memset(store->FileHeader.recording_name, 0 , sizeof(store->FileHeader.recording_name));
+      memset(store->FileHeader.recording_version, 0 , sizeof(store->FileHeader.recording_version));
+      memset(store->FileHeader.user_defined_name, 0 , sizeof(store->FileHeader.user_defined_name));
+      memset(store->FileHeader.notes, 0 , sizeof(store->FileHeader.notes));
+      store->FileHeader.optionaldata = 1;
+      store->FileHeader.file_catalog_size = 0;
+      store->FileHeader.file_catalog_offset = 0;
+    }
+
 #ifdef MBR_RESON7K3_DEBUG
     fprintf(stderr, "-->R7KRECID_FileHeader:                        %4.4X | %d\n", store->type, store->type);
 #endif

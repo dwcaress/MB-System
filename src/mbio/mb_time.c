@@ -66,9 +66,9 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
       || time_i[4] < 0 || time_i[4] > 59         // minute counted from 0
       || time_i[5] < 0 || time_i[5] > 59         // second counted from 0
       || time_i[6] < 0 || time_i[6] > 999999) {  // microsecond counted from 0
-    *time_d = 0.0;
-    status = MB_FAILURE;
-    if (verbose > 0) {
+    if (verbose > 0
+        && (time_i[0] != 0 || time_i[1] != 0 || time_i[2] != 0 || time_i[3] != 0
+            || time_i[4] != 0 || time_i[5] != 0 || time_i[6] != 0)) {
       fprintf(stderr, "\nWarning in MB-System function %s: invalid time values:\n", __func__);
       fprintf(stderr, "\tyear:         %d\n", time_i[0]);
       fprintf(stderr, "\tmonth:        %d\n", time_i[1]);
@@ -78,6 +78,8 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
       fprintf(stderr, "\tsecond:       %d\n", time_i[5]);
       fprintf(stderr, "\tmicrosecond:  %d\n", time_i[6]);
     }
+    *time_d = 0.0;
+    status = MB_FAILURE;
   }
 
   /* get time */
@@ -213,13 +215,9 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
       || time_i[4] < 0 || time_i[4] > 59         // minute counted from 0
       || time_i[5] < 0 || time_i[5] > 59         // second counted from 0
       || time_i[6] < 0 || time_i[6] > 999999) {  // microsecond counted from 0
-    time_j[0] = 0;
-    time_j[1] = 0;
-    time_j[2] = 0;
-    time_j[3] = 0;
-    time_j[4] = 0;
-    status = MB_FAILURE;
-    if (verbose > 0) {
+    if (verbose > 0
+        && (time_j[0] != 0 || time_j[1] != 0 || time_j[2] != 0 || time_j[3] != 0
+            || time_j[4] != 0 )) {
       fprintf(stderr, "\nWarning in MB-System function %s: invalid time values:\n", __func__);
       fprintf(stderr, "\tyear:         %d\n", time_i[0]);
       fprintf(stderr, "\tmonth:        %d\n", time_i[1]);
@@ -229,6 +227,12 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
       fprintf(stderr, "\tsecond:       %d\n", time_i[5]);
       fprintf(stderr, "\tmicrosecond:  %d\n", time_i[6]);
     }
+    time_j[0] = 0;
+    time_j[1] = 0;
+    time_j[2] = 0;
+    time_j[3] = 0;
+    time_j[4] = 0;
+    status = MB_FAILURE;
   }
 
   /* get time */
@@ -283,6 +287,16 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
       || time_j[2] < 0 || time_j[2] > 1439       // minute counted from 0
       || time_j[3] < 0 || time_j[3] > 59         // second counted from 0
       || time_j[4] < 0 || time_j[4] > 999999) {  // microsecond counted from 0
+    if (verbose > 0
+        && (time_j[0] != 0 || time_j[1] != 0 || time_j[2] != 0 || time_j[3] != 0
+            || time_j[4] != 0 )) {
+      fprintf(stderr, "\nWarning in MB-System function %s: invalid time values:\n", __func__);
+      fprintf(stderr, "\tyear:         %d\n", time_j[0]);
+      fprintf(stderr, "\tyearday:      %d\n", time_j[1]);
+      fprintf(stderr, "\tdayminute:    %d\n", time_j[2]);
+      fprintf(stderr, "\tsecond:       %d\n", time_j[3]);
+      fprintf(stderr, "\tmicrosecond:  %d\n", time_j[4]);
+    }
     time_i[0] = 0;
     time_i[1] = 0;
     time_i[2] = 0;
@@ -291,14 +305,6 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
     time_i[5] = 0;
     time_i[6] = 0;
     status = MB_FAILURE;
-    if (verbose > 0) {
-      fprintf(stderr, "\nWarning in MB-System function %s: invalid time values:\n", __func__);
-      fprintf(stderr, "\tyear:         %d\n", time_j[0]);
-      fprintf(stderr, "\tyearday:      %d\n", time_j[1]);
-      fprintf(stderr, "\tdayminute:    %d\n", time_j[2]);
-      fprintf(stderr, "\tsecond:       %d\n", time_j[3]);
-      fprintf(stderr, "\tmicrosecond:  %d\n", time_j[4]);
-    }
   }
 
   /* get time */
