@@ -135,7 +135,6 @@ int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *err
 	/* set error */
 	*error = mbs_error;
 
-	/* print output debug statements */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -144,7 +143,6 @@ int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *err
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*------------------------------------------------------------------------------*/
@@ -175,19 +173,15 @@ int mb3dsoundings_updatecursor() {
 		              mb3dsoundings.TargetBlueCursor);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_updategui() {
-	/* local variables */
-	struct mb3dsoundings_struct *soundingdata;
-	int ibiasmin, ibiasmax;
+	// struct mb3dsoundings_struct *soundingdata =
+	//	(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 
-	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
-
-	ibiasmin = 100 * (mb3dsoundings.irollbias / 100) - 100;
-	ibiasmax = 100 * (mb3dsoundings.irollbias / 100) + 100;
+	int ibiasmin = 100 * (mb3dsoundings.irollbias / 100) - 100;
+	int ibiasmax = 100 * (mb3dsoundings.irollbias / 100) + 100;
 	ac = 0;
 	XtSetArg(args[ac], XmNminimum, ibiasmin);
 	ac++;
@@ -307,7 +301,6 @@ int mb3dsoundings_updategui() {
 	/* set edit cursor */
 	mb3dsoundings_updatecursor();
 
-	/* return */
 	return (mbs_status);
 }
 /*------------------------------------------------------------------------------*/
@@ -382,12 +375,10 @@ int mb3dsoundings_updatemodetoggles() {
 	}
 	set_mbview_label_multiline_string(mb3dsoundings.mb3dsdg.label_mousemode, value_text);
 
-	/* return */
 	return (mbs_status);
 }
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_updatestatus() {
-	/* local variables */
 	struct mb3dsoundings_struct *soundingdata;
 	struct mb3dsoundings_sounding_struct *sounding;
 
@@ -426,7 +417,6 @@ int mb3dsoundings_updatestatus() {
 	/* put up the new status string */
 	set_mbview_label_string(mb3dsoundings.mb3dsdg.label_status, value_text);
 
-	/* return */
 	return (mbs_status);
 }
 /*------------------------------------------------------------------------------*/
@@ -475,7 +465,6 @@ int mb3dsoundings_updatelabelmousemode() {
 	}
 	set_mbview_label_multiline_string(mb3dsoundings.mb3dsdg.label_mousemode, value_text);
 
-	/* return */
 	return (mbs_status);
 }
 /*------------------------------------------------------------------------------*/
@@ -516,7 +505,6 @@ int mb3dsoundings_end(int verbose, int *error) {
 	/* set error */
 	*error = mbs_error;
 
-	/* print output debug statements */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -525,7 +513,6 @@ int mb3dsoundings_end(int verbose, int *error) {
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*------------------------------------------------------------------------------*/
@@ -544,7 +531,6 @@ int mb3dsoundings_set_dismiss_notify(int verbose, void(dismiss_notify)(), int *e
 	/* set error */
 	*error = mbs_error;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -553,7 +539,6 @@ int mb3dsoundings_set_dismiss_notify(int verbose, void(dismiss_notify)(), int *e
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 
@@ -575,7 +560,6 @@ int mb3dsoundings_set_edit_notify(int verbose, void(edit_notify)(int, int, int, 
 	/* set error */
 	*error = mbs_error;
 
-	/* print output debug statements */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -584,7 +568,6 @@ int mb3dsoundings_set_edit_notify(int verbose, void(edit_notify)(int, int, int, 
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 
@@ -606,7 +589,6 @@ int mb3dsoundings_set_info_notify(int verbose, void(info_notify)(int, int, int, 
 	/* set error */
 	*error = mbs_error;
 
-	/* print output debug statements */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -615,7 +597,6 @@ int mb3dsoundings_set_info_notify(int verbose, void(info_notify)(int, int, int, 
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 
@@ -637,7 +618,6 @@ int mb3dsoundings_set_bias_notify(int verbose, void(bias_notify)(double, double,
 	/* set error */
 	*error = mbs_error;
 
-	/* print output debug statements */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -646,7 +626,6 @@ int mb3dsoundings_set_bias_notify(int verbose, void(bias_notify)(double, double,
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 
@@ -665,7 +644,6 @@ int mb3dsoundings_set_biasapply_notify(int verbose, void(biasapply_notify)(doubl
 	/* set error */
 	*error = mbs_error;
 
-	/* print output debug statements */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -674,7 +652,6 @@ int mb3dsoundings_set_biasapply_notify(int verbose, void(biasapply_notify)(doubl
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 
@@ -693,7 +670,6 @@ int mb3dsoundings_set_flagsparsevoxels_notify(int verbose, void(flagsparsevoxels
 	/* set error */
 	*error = mbs_error;
 
-	/* print output debug statements */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -702,7 +678,6 @@ int mb3dsoundings_set_flagsparsevoxels_notify(int verbose, void(flagsparsevoxels
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 
@@ -721,7 +696,6 @@ int mb3dsoundings_set_colorsoundings_notify(int verbose, void(colorsoundings_not
 	/* set error */
 	*error = mbs_error;
 
-	/* print output debug statements */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -730,7 +704,6 @@ int mb3dsoundings_set_colorsoundings_notify(int verbose, void(colorsoundings_not
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 
@@ -751,7 +724,6 @@ int mb3dsoundings_set_optimizebiasvalues_notify(int verbose,
 	/* set error */
 	*error = mbs_error;
 
-	/* print output debug statements */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -760,13 +732,11 @@ int mb3dsoundings_set_optimizebiasvalues_notify(int verbose,
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_reset() {
-	/* local variables */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -853,20 +823,17 @@ int mb3dsoundings_reset() {
 	mb3dsoundings.last_sounding_defined = false;
 	mb3dsoundings.last_sounding_edited = 0;
 
-	/* print output debug statements */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 
 /*---------------------------------------------------------------------------------------*/
 int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, int *error) {
-	/* local variables */
 	XColor XColorBlack;
 	XColor XColorWhite;
 	XColor XColorRed;
@@ -1006,7 +973,6 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
 	/* set error */
 	*error = mbs_error;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1015,12 +981,10 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_reset_glx() {
-	/* local variables */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1100,21 +1064,22 @@ int mb3dsoundings_reset_glx() {
 	mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);
 #endif
 
-	/* print output debug statements */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 
 /*------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_resize(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	/* fprintf(stderr,"Called do_mb3dsdg_resize\n"); */
 
 	/* reset OpenGL */
@@ -1127,7 +1092,10 @@ void do_mb3dsdg_resize(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	/* fprintf(stderr,"Called do_mb3dsdg_dismiss\n"); */
 
 	XtPopdown(XtParent(mb3dsoundings.mainWindow));
@@ -1138,7 +1106,10 @@ void do_mb3dsdg_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_mouse_toggle(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	/* fprintf(stderr,"Called do_mb3dsdg_mouse_toggle\n"); */
 
 	mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
@@ -1156,7 +1127,10 @@ void do_mb3dsdg_mouse_toggle(Widget w, XtPointer client_data, XtPointer call_dat
 /*------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_mouse_pick(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	/* fprintf(stderr,"Called do_mb3dsdg_mouse_pick\n"); */
 
 	mb3dsoundings.edit_mode = MBS_EDIT_PICK;
@@ -1174,7 +1148,10 @@ void do_mb3dsdg_mouse_pick(Widget w, XtPointer client_data, XtPointer call_data)
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_mouse_erase(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	/* fprintf(stderr,"Called do_mb3dsdg_mouse_erase\n"); */
 
 	mb3dsoundings.edit_mode = MBS_EDIT_ERASE;
@@ -1192,7 +1169,10 @@ void do_mb3dsdg_mouse_erase(Widget w, XtPointer client_data, XtPointer call_data
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_mouse_restore(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	/* fprintf(stderr,"Called do_mb3dsdg_mouse_restore\n"); */
 
 	mb3dsoundings.edit_mode = MBS_EDIT_RESTORE;
@@ -1210,7 +1190,10 @@ void do_mb3dsdg_mouse_restore(Widget w, XtPointer client_data, XtPointer call_da
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_mouse_grab(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	/* fprintf(stderr,"Called do_mb3dsdg_mouse_grab\n"); */
 
 	mb3dsoundings.edit_mode = MBS_EDIT_GRAB;
@@ -1228,7 +1211,10 @@ void do_mb3dsdg_mouse_grab(Widget w, XtPointer client_data, XtPointer call_data)
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_mouse_info(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	/* fprintf(stderr,"Called do_mb3dsdg_mouse_info\n"); */
 
 	mb3dsoundings.edit_mode = MBS_EDIT_INFO;
@@ -1246,11 +1232,13 @@ void do_mb3dsdg_mouse_info(Widget w, XtPointer client_data, XtPointer call_data)
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_input(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-	XEvent *event;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* get event */
-	event = acs->event;
+	// XEvent *event = acs->event;
 
 	/* fprintf(stderr,"--------\nCalled do_mb3dsdg_input: reason:%d type:%d\n-------\n", acs->reason, event->xany.type); */
 }
@@ -1258,20 +1246,22 @@ void do_mb3dsdg_input(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_glwda_expose(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	/* fprintf(stderr,"Called do_mb3dsdg_glwda_expose\n"); */
 }
 
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
 	mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
 	XEvent *event;
 	KeySym keysym;
 	char buffer[1];
-	int actual;
-
-	acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
 
 	/* get event */
 	event = acs->event;
@@ -1553,7 +1543,8 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 		if (event->xany.type == KeyPress) {
 			fprintf(stderr,"KeyPress event\n");
 			/* Get key pressed - buffer[0] */
-			actual = XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+			// int actual =
+			XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
 
 			/* process events */
 			switch (buffer[0]) {
@@ -1678,7 +1669,8 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 		/* Deal with KeyRelease events */
 		if (event->xany.type == KeyRelease) {
 			/* Get key pressed - buffer[0] */
-			actual = XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+			// int actual =
+			XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
 
 			/* process events */
 			switch (buffer[0]) {
@@ -1721,13 +1713,18 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_glwda_resize(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	/* fprintf(stderr,"Called do_mb3dsdg_glwda_resize\n"); */
 }
 
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_scale(int verbose, int *error) {
+	(void)verbose;  // Unused parameter
+	(void)error;  // Unused parameter
 	struct mb3dsoundings_struct *soundingdata;
 	struct mb3dsoundings_sounding_struct *sounding;
 	int i;
@@ -1743,27 +1740,26 @@ int mb3dsoundings_scale(int verbose, int *error) {
 		sounding->glz = mb3dsoundings.exageration * soundingdata->zscale * (sounding->z - soundingdata->zorigin);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_scalez(int verbose, int *error) {
-	struct mb3dsoundings_struct *soundingdata;
+	(void)verbose;  // Unused parameter
+	(void)error;  // Unused parameter
 	struct mb3dsoundings_sounding_struct *sounding;
-	int i;
 
 	/* fprintf(stderr,"Called mb3dsoundings_scalez\n"); */
 
 	/* loop over all soundings */
-	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
-	for (i = 0; i < soundingdata->num_soundings; i++) {
+	struct mb3dsoundings_struct *soundingdata =
+		(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+	for (int i = 0; i < soundingdata->num_soundings; i++) {
 		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 		sounding->glz = mb3dsoundings.exageration * soundingdata->zscale * (sounding->z - soundingdata->zorigin);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -1846,7 +1842,6 @@ int mb3dsoundings_pick(int x, int y) {
 		                                          MB3DSDG_EDIT_FLUSH);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -1915,7 +1910,6 @@ int mb3dsoundings_eraserestore(int x, int y) {
 		(mb3dsoundings.mb3dsoundings_edit_notify)(0, 0, 0, MB_FLAG_NULL, MB3DSDG_EDIT_FLUSHPREVIOUS);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -1924,7 +1918,7 @@ int mb3dsoundings_grab(int x, int y, int grabmode) {
 	struct mb3dsoundings_struct *soundingdata;
 	struct mb3dsoundings_sounding_struct *sounding;
 	int xmin, xmax, ymin, ymax;
-	int editevent, neditevent;
+	int neditevent;
 	int i;
 
 	/* fprintf(stderr,"Called mb3dsoundings_grab mode:%d x:%d y:%d\n", grabmode, x, y); */
@@ -1966,13 +1960,13 @@ int mb3dsoundings_grab(int x, int y, int grabmode) {
 		soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 		for (i = 0; i < soundingdata->num_soundings; i++) {
 			sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-			editevent = false;
+			// bool editevent = false;
 			if (sounding->winx >= xmin && sounding->winx <= xmax && sounding->winy >= ymin && sounding->winy <= ymax) {
 				if (mb_beam_ok(sounding->beamflag)) {
 					sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 					soundingdata->num_soundings_unflagged--;
 					soundingdata->num_soundings_flagged++;
-					editevent = true;
+					// editevent = true;
 					neditevent++;
 
 					/* last sounding edited */
@@ -2002,7 +1996,6 @@ int mb3dsoundings_grab(int x, int y, int grabmode) {
 		}
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -2047,7 +2040,6 @@ int mb3dsoundings_unflag_view() {
 		(mb3dsoundings.mb3dsoundings_edit_notify)(0, 0, 0, MB_FLAG_NULL, MB3DSDG_EDIT_FLUSHPREVIOUS);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -2092,7 +2084,6 @@ int mb3dsoundings_flag_view() {
 		(mb3dsoundings.mb3dsoundings_edit_notify)(0, 0, 0, MB_FLAG_NULL, MB3DSDG_EDIT_FLUSHPREVIOUS);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -2134,7 +2125,6 @@ int mb3dsoundings_info(int x, int y) {
 		XBell(mb3dsoundings.dpy, 100);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -2185,7 +2175,6 @@ int mb3dsoundings_bad_ping() {
 		(mb3dsoundings.mb3dsoundings_edit_notify)(0, 0, 0, MB_FLAG_NULL, MB3DSDG_EDIT_FLUSHPREVIOUS);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -2237,7 +2226,6 @@ int mb3dsoundings_zero_ping() {
 		(mb3dsoundings.mb3dsoundings_edit_notify)(0, 0, 0, MB_FLAG_NULL, MB3DSDG_EDIT_FLUSHPREVIOUS);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -2288,7 +2276,6 @@ int mb3dsoundings_left_ping() {
 		XBell(mb3dsoundings.dpy, 100);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -2339,7 +2326,6 @@ int mb3dsoundings_right_ping() {
 		XBell(mb3dsoundings.dpy, 100);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -2390,12 +2376,13 @@ int mb3dsoundings_good_ping() {
 		(mb3dsoundings.mb3dsoundings_edit_notify)(0, 0, 0, MB_FLAG_NULL, MB3DSDG_EDIT_FLUSHPREVIOUS);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_setzscale(int verbose, int *error) {
+	(void)verbose;  // Unused parameter
+	(void)error;  // Unused parameter
 	struct mb3dsoundings_struct *soundingdata;
 
 	/* get sounding data structure */
@@ -2442,7 +2429,6 @@ int mb3dsoundings_setzscale(int verbose, int *error) {
                                       * (soundingdata->soundings[i].z - soundingdata->zorigin);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 
@@ -2764,7 +2750,6 @@ soundingdata->num_soundings); */
 	mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);
 #endif
 
-	/* print output debug statements */
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2773,14 +2758,15 @@ soundingdata->num_soundings); */
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
 
-	/* return */
 	return (mbs_status);
 }
 
 /*---------------------------------------------------------------------------------------*/
 int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias,
-								  double *headingbias, double *timelag, double *snell,
+				  double *headingbias, double *timelag, double *snell,
                                   int *error) {
+	(void)verbose;  // Unused parameter
+	(void)error;  // Unused parameter
 	/* fprintf(stderr,"Called mb3dsoundings_get_bias_values\n"); */
 
 	/* get bias parameters */
@@ -2790,17 +2776,16 @@ int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbi
 	*timelag = 0.01 * ((double)mb3dsoundings.itimelag);
 	*snell = 0.0001 * ((double)mb3dsoundings.isnell);
 
-	/* return */
 	return (mbs_status);
 }
 
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_rollbias(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmScaleCallbackStruct *acs;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 	int irollbiasmin, irollbiasmax;
-
-	acs = (XmScaleCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_rollbias: %d\n", acs->value); */
 
@@ -2845,6 +2830,9 @@ void do_mb3dsdg_rollbias(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_pitchbias(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 	int ipitchbiasmin, ipitchbiasmax;
 
@@ -2893,6 +2881,9 @@ void do_mb3dsdg_pitchbias(Widget w, XtPointer client_data, XtPointer call_data) 
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_headingbias(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 	int iheadingbiasmin, iheadingbiasmax;
 
@@ -2941,10 +2932,11 @@ void do_mb3dsdg_headingbias(Widget w, XtPointer client_data, XtPointer call_data
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_timelag(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmScaleCallbackStruct *acs;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 	int itimelagmin, itimelagmax;
-
-	acs = (XmScaleCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_timelag: %d\n", acs->value); */
 
@@ -2989,10 +2981,11 @@ void do_mb3dsdg_timelag(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_snell(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmScaleCallbackStruct *acs;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 	int isnellmin, isnellmax;
-
-	acs = (XmScaleCallbackStruct *)call_data;
 
 	//fprintf(stderr,"Called do_mb3dsdg_snell: %d\n", acs->value);
 
@@ -3037,7 +3030,10 @@ void do_mb3dsdg_snell(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_view_flagged(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_view_flagged\n"); */
 
@@ -3050,7 +3046,10 @@ void do_mb3dsdg_view_flagged(Widget w, XtPointer client_data, XtPointer call_dat
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_view_noprofile(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_view_noprofile\n"); */
 
@@ -3067,7 +3066,10 @@ void do_mb3dsdg_view_noprofile(Widget w, XtPointer client_data, XtPointer call_d
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_view_goodprofile(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_view_goodprofile\n"); */
 
@@ -3084,7 +3086,10 @@ void do_mb3dsdg_view_goodprofile(Widget w, XtPointer client_data, XtPointer call
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_view_allprofile(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_view_allprofile\n"); */
 
@@ -3101,7 +3106,10 @@ void do_mb3dsdg_view_allprofile(Widget w, XtPointer client_data, XtPointer call_
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_resetview(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_view_reset\n"); */
 
@@ -3121,7 +3129,10 @@ void do_mb3dsdg_resetview(Widget w, XtPointer client_data, XtPointer call_data) 
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_view_boundingbox(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_view_boundingbox\n"); */
 
@@ -3134,7 +3145,10 @@ void do_mb3dsdg_view_boundingbox(Widget w, XtPointer client_data, XtPointer call
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_view_scalewithflagged(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_view_scalewithflagged\n"); */
 
@@ -3147,7 +3161,10 @@ void do_mb3dsdg_view_scalewithflagged(Widget w, XtPointer client_data, XtPointer
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_view_colorbytopo(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	// fprintf(stderr,"Called do_mb3dsdg_view_colorbytopo\n");
 
@@ -3160,7 +3177,10 @@ void do_mb3dsdg_view_colorbytopo(Widget w, XtPointer client_data, XtPointer call
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_applybias(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_applybias\n"); */
 
@@ -3174,7 +3194,10 @@ void do_mb3dsdg_action_applybias(Widget w, XtPointer client_data, XtPointer call
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_flagsparsevoxels_A(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_A\n"); */
 
@@ -3188,7 +3211,10 @@ void do_mb3dsdg_action_flagsparsevoxels_A(Widget w, XtPointer client_data, XtPoi
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_flagsparsevoxels_B(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_B\n"); */
 
@@ -3202,7 +3228,10 @@ void do_mb3dsdg_action_flagsparsevoxels_B(Widget w, XtPointer client_data, XtPoi
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_flagsparsevoxels_C(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_C\n"); */
 
@@ -3216,7 +3245,10 @@ void do_mb3dsdg_action_flagsparsevoxels_C(Widget w, XtPointer client_data, XtPoi
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_flagsparsevoxels_D(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_D\n"); */
 
@@ -3230,7 +3262,10 @@ void do_mb3dsdg_action_flagsparsevoxels_D(Widget w, XtPointer client_data, XtPoi
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_flagsparsevoxels_E(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_E\n"); */
 
@@ -3244,7 +3279,10 @@ void do_mb3dsdg_action_flagsparsevoxels_E(Widget w, XtPointer client_data, XtPoi
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_flagsparsevoxels_F(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_F\n"); */
 
@@ -3258,7 +3296,10 @@ void do_mb3dsdg_action_flagsparsevoxels_F(Widget w, XtPointer client_data, XtPoi
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_colorsoundingsblack(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsblack\n"); */
 
@@ -3273,7 +3314,10 @@ void do_mb3dsdg_action_colorsoundingsblack(Widget w, XtPointer client_data, XtPo
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_colorsoundingsred(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsred\n"); */
 
@@ -3288,7 +3332,10 @@ void do_mb3dsdg_action_colorsoundingsred(Widget w, XtPointer client_data, XtPoin
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_colorsoundingsyellow(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsyellow\n"); */
 
@@ -3303,7 +3350,10 @@ void do_mb3dsdg_action_colorsoundingsyellow(Widget w, XtPointer client_data, XtP
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_colorsoundingsgreen(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsgreen\n"); */
 
@@ -3318,7 +3368,10 @@ void do_mb3dsdg_action_colorsoundingsgreen(Widget w, XtPointer client_data, XtPo
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_colorsoundingsbluegreen(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsbluegreen\n"); */
 
@@ -3333,7 +3386,10 @@ void do_mb3dsdg_action_colorsoundingsbluegreen(Widget w, XtPointer client_data, 
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_colorsoundingsblue(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsblue\n"); */
 
@@ -3348,7 +3404,10 @@ void do_mb3dsdg_action_colorsoundingsblue(Widget w, XtPointer client_data, XtPoi
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_colorsoundingspurple(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingspurple\n"); */
 
@@ -3363,7 +3422,10 @@ void do_mb3dsdg_action_colorsoundingspurple(Widget w, XtPointer client_data, XtP
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_optimizebiasvalues_r(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	double rollbias;
 	double pitchbias;
 	double headingbias;
@@ -3406,7 +3468,10 @@ void do_mb3dsdg_action_optimizebiasvalues_r(Widget w, XtPointer client_data, XtP
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_optimizebiasvalues_p(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	double rollbias;
 	double pitchbias;
 	double headingbias;
@@ -3449,7 +3514,10 @@ void do_mb3dsdg_action_optimizebiasvalues_p(Widget w, XtPointer client_data, XtP
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_optimizebiasvalues_h(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	double rollbias;
 	double pitchbias;
 	double headingbias;
@@ -3492,7 +3560,10 @@ void do_mb3dsdg_action_optimizebiasvalues_h(Widget w, XtPointer client_data, XtP
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_optimizebiasvalues_rp(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	double rollbias;
 	double pitchbias;
 	double headingbias;
@@ -3535,7 +3606,10 @@ void do_mb3dsdg_action_optimizebiasvalues_rp(Widget w, XtPointer client_data, Xt
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_optimizebiasvalues_rph(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	double rollbias;
 	double pitchbias;
 	double headingbias;
@@ -3577,7 +3651,10 @@ void do_mb3dsdg_action_optimizebiasvalues_rph(Widget w, XtPointer client_data, X
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_optimizebiasvalues_t(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	double rollbias;
 	double pitchbias;
 	double headingbias;
@@ -3620,7 +3697,10 @@ void do_mb3dsdg_action_optimizebiasvalues_t(Widget w, XtPointer client_data, XtP
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_action_optimizebiasvalues_s(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	double rollbias;
 	double pitchbias;
 	double headingbias;
@@ -3663,7 +3743,10 @@ void do_mb3dsdg_action_optimizebiasvalues_s(Widget w, XtPointer client_data, XtP
 /*---------------------------------------------------------------------------------------*/
 
 void do_mb3dsdg_mouse_panzoom(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_mouse_panzoom\n"); */
 
@@ -3675,12 +3758,14 @@ void do_mb3dsdg_mouse_panzoom(Widget w, XtPointer client_data, XtPointer call_da
 
 	/* set mouse mode label */
 	mb3dsoundings_updatelabelmousemode();
-
 }
 
 /*---------------------------------------------------------------------------------------*/
 void do_mb3dsdg_mouse_rotate(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+	(void)w;  // Unused parameter
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_mouse_rotate\n"); */
 
