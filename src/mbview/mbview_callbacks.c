@@ -88,7 +88,6 @@ static Cardinal ac;
 static Arg args[256];
 static char value_text[MB_PATH_MAXLINE];
 
-
 #ifndef MBVIEW_LIBRARY
 
 #include "creation-c.h"
@@ -113,16 +112,13 @@ WidgetList BxWidgetIdsFromNames(Widget, char *, char *);
  */
 
 void BxManageCB(Widget w, XtPointer client, XtPointer call) {
-	WidgetList widgets;
-	int i;
-
 	/*
 	 * This function returns a NULL terminated WidgetList.  The memory for
 	 * the list needs to be freed when it is no longer needed.
 	 */
-	widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
+	WidgetList widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
 
-	i = 0;
+	int i = 0;
 	while (widgets && widgets[i] != NULL) {
 		XtManageChild(widgets[i]);
 		i++;
@@ -147,16 +143,13 @@ void BxManageCB(Widget w, XtPointer client, XtPointer call) {
  */
 
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
-	WidgetList widgets;
-	int i;
-
 	/*
 	 * This function returns a NULL terminated WidgetList.  The memory for
 	 * the list needs to be freed when it is no longer needed.
 	 */
-	widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
+	WidgetList widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
 
-	i = 0;
+	int i = 0;
 	while (widgets && widgets[i] != NULL) {
 		XtUnmanageChild(widgets[i]);
 		i++;
@@ -176,8 +169,7 @@ void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
  */
 
 void BxExitCB(Widget w, XtPointer client, XtPointer call) {
-	long exitValue = EXIT_FAILURE;
-	exit(exitValue);
+	exit(EXIT_FAILURE);
 }
 
 #endif
@@ -190,7 +182,6 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error) {
 	int status = MB_SUCCESS;
 	XmString tmp0;
 	Boolean argok = False;
-	int i;
 
 	/* set local verbosity */
 	mbv_verbose = verbose;
@@ -222,7 +213,7 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error) {
 	mbview_reset_shared(true);
 
 	/* initialize windows */
-	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
 		mbview_reset(i);
 	}
 
@@ -299,7 +290,6 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error) {
 int mbview_reset_shared(int mode) {
 	int status = MB_SUCCESS;
 	size_t instance;
-	int i, j;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -352,7 +342,7 @@ int mbview_reset_shared(int mode) {
 	for (instance = 0; instance < MBV_MAX_WINDOWS; instance++) {
 		/* nav pick data */
 		shared.shareddata.navpick_type = MBV_PICK_NONE;
-		for (i = 0; i < 2; i++) {
+		for (int i = 0; i < 2; i++) {
 			shared.shareddata.navpick.endpoints[i].xgrid[instance] = 0.0;
 			shared.shareddata.navpick.endpoints[i].ygrid[instance] = 0.0;
 			shared.shareddata.navpick.endpoints[i].xlon = 0.0;
@@ -366,7 +356,7 @@ int mbview_reset_shared(int mode) {
 		shared.shareddata.navpick.segment.nls = 0;
 		shared.shareddata.navpick.segment.nls_alloc = 0;
 		shared.shareddata.navpick.segment.lspoints = NULL;
-		for (i = 0; i < 8; i++) {
+		for (int i = 0; i < 8; i++) {
 			shared.shareddata.navpick.xpoints[i].xgrid[instance] = 0.0;
 			shared.shareddata.navpick.xpoints[i].ygrid[instance] = 0.0;
 			shared.shareddata.navpick.xpoints[i].xlon = 0.0;
@@ -377,11 +367,11 @@ int mbview_reset_shared(int mode) {
 			shared.shareddata.navpick.xpoints[i].zdisplay[instance] = 0.0;
 		}
 	}
-	for (j = 0; j < 4; j++) {
+	for (int j = 0; j < 4; j++) {
 		shared.shareddata.navpick.xsegments[j].nls = 0;
 		shared.shareddata.navpick.xsegments[j].nls_alloc = 0;
 		shared.shareddata.navpick.xsegments[j].lspoints = NULL;
-		for (i = 0; i < 2; i++) {
+		for (int i = 0; i < 2; i++) {
 			shared.shareddata.navpick.xsegments[j].endpoints[i] = shared.shareddata.navpick.xpoints[2 * j + i];
 		}
 	}
@@ -411,7 +401,7 @@ int mbview_reset(size_t instance) {
 	int dummy_btime_i[7];
 	int dummy_etime_i[7];
 	double dummy_speedmin;
-	int i, j, ii;
+	int ii;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -554,7 +544,7 @@ int mbview_reset(size_t instance) {
 
 		/* point and line pick data */
 		data->pick_type = MBV_PICK_NONE;
-		for (i = 0; i < 2; i++) {
+		for (int i = 0; i < 2; i++) {
 			data->pick.endpoints[i].xgrid = 0.0;
 			data->pick.endpoints[i].ygrid = 0.0;
 			data->pick.endpoints[i].xlon = 0.0;
@@ -568,7 +558,7 @@ int mbview_reset(size_t instance) {
 		data->pick.segment.nls = 0;
 		data->pick.segment.nls_alloc = 0;
 		data->pick.segment.lspoints = NULL;
-		for (i = 0; i < 8; i++) {
+		for (int i = 0; i < 8; i++) {
 			data->pick.xpoints[i].xgrid = 0.0;
 			data->pick.xpoints[i].ygrid = 0.0;
 			data->pick.xpoints[i].xlon = 0.0;
@@ -578,11 +568,11 @@ int mbview_reset(size_t instance) {
 			data->pick.xpoints[i].ydisplay = 0.0;
 			data->pick.xpoints[i].zdisplay = 0.0;
 		}
-		for (j = 0; j < 4; j++) {
+		for (int j = 0; j < 4; j++) {
 			data->pick.xsegments[j].nls = 0;
 			data->pick.xsegments[j].nls_alloc = 0;
 			data->pick.xsegments[j].lspoints = NULL;
-			for (i = 0; i < 2; i++) {
+			for (int i = 0; i < 2; i++) {
 				data->pick.xsegments[j].endpoints[i] = data->pick.xpoints[2 * j + i];
 			}
 		}
@@ -591,7 +581,7 @@ int mbview_reset(size_t instance) {
 		data->region_type = MBV_REGION_NONE;
 		data->region.width = 0.0;
 		data->region.height = 0.0;
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			data->region.cornerpoints[i].xgrid = 0.0;
 			data->region.cornerpoints[i].ygrid = 0.0;
 			data->region.cornerpoints[i].xlon = 0.0;
@@ -601,7 +591,7 @@ int mbview_reset(size_t instance) {
 			data->region.cornerpoints[i].ydisplay = 0.0;
 			data->region.cornerpoints[i].zdisplay = 0.0;
 		}
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			if (i == 0)
 				ii = 1;
 			else if (i == 1)
@@ -622,7 +612,7 @@ int mbview_reset(size_t instance) {
 		data->area.width = 0.0;
 		data->area.length = 0.0;
 		data->area.bearing = 0.0;
-		for (i = 0; i < 2; i++) {
+		for (int i = 0; i < 2; i++) {
 			data->area.endpoints[i].xgrid = 0.0;
 			data->area.endpoints[i].ygrid = 0.0;
 			data->area.endpoints[i].xlon = 0.0;
@@ -636,7 +626,7 @@ int mbview_reset(size_t instance) {
 		data->area.segment.nls = 0;
 		data->area.segment.nls_alloc = 0;
 		data->area.segment.lspoints = NULL;
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			data->area.cornerpoints[i].xgrid = 0.0;
 			data->area.cornerpoints[i].ygrid = 0.0;
 			data->area.cornerpoints[i].xlon = 0.0;
@@ -646,7 +636,7 @@ int mbview_reset(size_t instance) {
 			data->area.cornerpoints[i].ydisplay = 0.0;
 			data->area.cornerpoints[i].zdisplay = 0.0;
 		}
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			ii = i + 1;
 			if (ii > 3)
 				ii = 0;
@@ -692,7 +682,7 @@ int mbview_reset(size_t instance) {
 		view->plot_done = false;
 		view->plot_interrupt_allowed = true;
 		view->naction = 0;
-		for (i = 0; i < MBV_NUM_ACTIONS; i++) {
+		for (int i = 0; i < MBV_NUM_ACTIONS; i++) {
 			view->actionsensitive[i] = 0;
 			view->pushButton_action[i] = NULL;
 		}
@@ -811,7 +801,6 @@ int mbview_init(int verbose, size_t *instance, int *error) {
 /*------------------------------------------------------------------------------*/
 int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datahandle, int *error) {
 	int status = MB_SUCCESS;
-	int i, j;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -939,7 +928,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr, "dbg2       nsite:                %d\n", shared.shareddata.nsite);
 		fprintf(stderr, "dbg2       nsite_alloc:          %d\n", shared.shareddata.nsite_alloc);
 		fprintf(stderr, "dbg2       site_selected:        %d\n", shared.shareddata.site_selected);
-		for (i = 0; i < shared.shareddata.nsite; i++) {
+		for (int i = 0; i < shared.shareddata.nsite; i++) {
 			fprintf(stderr, "dbg2       site %d xgrid:       %f\n", i, shared.shareddata.sites[i].point.xgrid[0]);
 			fprintf(stderr, "dbg2       site %d ygrid:       %f\n", i, shared.shareddata.sites[i].point.ygrid[0]);
 			fprintf(stderr, "dbg2       site %d xlon:        %f\n", i, shared.shareddata.sites[i].point.xlon);
@@ -960,11 +949,12 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr, "dbg2       nroute_alloc:         %d\n", shared.shareddata.nroute_alloc);
 		fprintf(stderr, "dbg2       route_selected:       %d\n", shared.shareddata.route_selected);
 		fprintf(stderr, "dbg2       route_point_selected: %d\n", shared.shareddata.route_point_selected);
-		for (i = 0; i < shared.shareddata.nroute; i++) {
+		for (int i = 0; i < shared.shareddata.nroute; i++) {
 			fprintf(stderr, "dbg2       route %d color:       %d\n", i, shared.shareddata.routes[i].color);
 			fprintf(stderr, "dbg2       route %d size:        %d\n", i, shared.shareddata.routes[i].size);
 			fprintf(stderr, "dbg2       route %d name:        %s\n", i, shared.shareddata.routes[i].name);
-			for (j = 0; j < shared.shareddata.routes[i].npoints; j++) {
+			int j = 0;
+			for (; j < shared.shareddata.routes[i].npoints; j++) {
 				fprintf(stderr, "dbg2       route %d %d xgrid:       %f\n", i, j, shared.shareddata.routes[i].points[j].xgrid[0]);
 				fprintf(stderr, "dbg2       route %d %d ygrid:       %f\n", i, j, shared.shareddata.routes[i].points[j].ygrid[0]);
 				fprintf(stderr, "dbg2       route %d %d xlon:        %f\n", i, j, shared.shareddata.routes[i].points[j].xlon);
@@ -993,7 +983,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr, "dbg2       nnav_alloc:                %d\n", shared.shareddata.nnav_alloc);
 		fprintf(stderr, "dbg2       nav_selected:              %p\n", shared.shareddata.nav_selected);
 		fprintf(stderr, "dbg2       nav_point_selected:        %p\n", shared.shareddata.nav_point_selected);
-		for (i = 0; i < shared.shareddata.nnav; i++) {
+		for (int i = 0; i < shared.shareddata.nnav; i++) {
 			fprintf(stderr, "dbg2       nav %d color:         %d\n", i, shared.shareddata.navs[i].color);
 			fprintf(stderr, "dbg2       nav %d size:          %d\n", i, shared.shareddata.navs[i].size);
 			fprintf(stderr, "dbg2       nav %d name:          %s\n", i, shared.shareddata.navs[i].name);
@@ -1003,7 +993,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 			fprintf(stderr, "dbg2       nav %d npoints:       %d\n", i, shared.shareddata.navs[i].npoints);
 			fprintf(stderr, "dbg2       nav %d npoints_alloc: %d\n", i, shared.shareddata.navs[i].npoints_alloc);
 			fprintf(stderr, "dbg2       nav %d nselected:     %d\n", i, shared.shareddata.navs[i].nselected);
-			for (j = 0; j < shared.shareddata.navs[i].npoints; j++) {
+			for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
 				fprintf(stderr, "dbg2       nav %d %d xgrid:    %f\n", i, j, shared.shareddata.navs[i].navpts[j].point.xgrid[0]);
 				fprintf(stderr, "dbg2       nav %d %d ygrid:    %f\n", i, j, shared.shareddata.navs[i].navpts[j].point.ygrid[0]);
 				fprintf(stderr, "dbg2       nav %d %d xlon:     %f\n", i, j, shared.shareddata.navs[i].navpts[j].point.xlon);
@@ -1073,7 +1063,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr, "dbg2       nvector_alloc:             %d\n", shared.shareddata.nvector_alloc);
 		fprintf(stderr, "dbg2       vector_selected:           %d\n", shared.shareddata.vector_selected);
 		fprintf(stderr, "dbg2       vector_point_selected:     %d\n", shared.shareddata.vector_point_selected);
-		for (i = 0; i < shared.shareddata.nvector; i++) {
+		for (int i = 0; i < shared.shareddata.nvector; i++) {
 			fprintf(stderr, "dbg2       vector %d color:         %d\n", i, shared.shareddata.vectors[i].color);
 			fprintf(stderr, "dbg2       vector %d size:          %d\n", i, shared.shareddata.vectors[i].size);
 			fprintf(stderr, "dbg2       vector %d name:          %s\n", i, shared.shareddata.vectors[i].name);
@@ -1081,7 +1071,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 			fprintf(stderr, "dbg2       vector %d npoints:       %d\n", i, shared.shareddata.vectors[i].npoints);
 			fprintf(stderr, "dbg2       vector %d npoints_alloc: %d\n", i, shared.shareddata.vectors[i].npoints_alloc);
 			fprintf(stderr, "dbg2       vector %d nselected:     %d\n", i, shared.shareddata.vectors[i].nselected);
-			for (j = 0; j < shared.shareddata.navs[i].npoints; j++) {
+			for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
 				fprintf(stderr, "dbg2       vector %d %d xgrid:    %f\n", i, j,
 				        shared.shareddata.vectors[i].vectorpts[j].point.xgrid[0]);
 				fprintf(stderr, "dbg2       vector %d %d ygrid:    %f\n", i, j,
@@ -1110,7 +1100,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr, "dbg2       zmax:                      %f\n", data->profile.zmax);
 		fprintf(stderr, "dbg2       npoints:                   %d\n", data->profile.npoints);
 		fprintf(stderr, "dbg2       npoints_alloc:             %d\n", data->profile.npoints_alloc);
-		for (i = 0; i < data->profile.npoints; i++) {
+		for (int i = 0; i < data->profile.npoints; i++) {
 			fprintf(stderr, "dbg2       profile %d boundary: %d\n", i, data->profile.points[i].boundary);
 			fprintf(stderr, "dbg2       profile %d xgrid:    %f\n", i, data->profile.points[i].xgrid);
 			fprintf(stderr, "dbg2       profile %d ygrid:    %f\n", i, data->profile.points[i].ygrid);
@@ -1133,7 +1123,6 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 /*------------------------------------------------------------------------------*/
 int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhandle, int *error) {
 	int status = MB_SUCCESS;
-	int i, j;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1155,7 +1144,7 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 		fprintf(stderr, "dbg2       nsite:                %d\n", shared.shareddata.nsite);
 		fprintf(stderr, "dbg2       nsite_alloc:          %d\n", shared.shareddata.nsite_alloc);
 		fprintf(stderr, "dbg2       site_selected:        %d\n", shared.shareddata.site_selected);
-		for (i = 0; i < shared.shareddata.nsite; i++) {
+		for (int i = 0; i < shared.shareddata.nsite; i++) {
 			fprintf(stderr, "dbg2       site %d xgrid:       %f\n", i, shared.shareddata.sites[i].point.xgrid[0]);
 			fprintf(stderr, "dbg2       site %d ygrid:       %f\n", i, shared.shareddata.sites[i].point.ygrid[0]);
 			fprintf(stderr, "dbg2       site %d xlon:        %f\n", i, shared.shareddata.sites[i].point.xlon);
@@ -1175,11 +1164,11 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 		fprintf(stderr, "dbg2       nroute_alloc:         %d\n", shared.shareddata.nroute_alloc);
 		fprintf(stderr, "dbg2       route_selected:       %d\n", shared.shareddata.route_selected);
 		fprintf(stderr, "dbg2       route_point_selected: %d\n", shared.shareddata.route_point_selected);
-		for (i = 0; i < shared.shareddata.nroute; i++) {
+		for (int i = 0; i < shared.shareddata.nroute; i++) {
 			fprintf(stderr, "dbg2       route %d color:       %d\n", i, shared.shareddata.routes[i].color);
 			fprintf(stderr, "dbg2       route %d size:        %d\n", i, shared.shareddata.routes[i].size);
 			fprintf(stderr, "dbg2       route %d name:        %s\n", i, shared.shareddata.routes[i].name);
-			for (j = 0; j < shared.shareddata.routes[i].npoints; j++) {
+			for (int j = 0; j < shared.shareddata.routes[i].npoints; j++) {
 				fprintf(stderr, "dbg2       route %d %d xgrid:       %f\n", i, j, shared.shareddata.routes[i].points[j].xgrid[0]);
 				fprintf(stderr, "dbg2       route %d %d ygrid:       %f\n", i, j, shared.shareddata.routes[i].points[j].ygrid[0]);
 				fprintf(stderr, "dbg2       route %d %d xlon:        %f\n", i, j, shared.shareddata.routes[i].points[j].xlon);
@@ -1202,7 +1191,7 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 		fprintf(stderr, "dbg2       nnav_alloc:                %d\n", shared.shareddata.nnav_alloc);
 		fprintf(stderr, "dbg2       nav_selected:              %p\n", shared.shareddata.nav_selected);
 		fprintf(stderr, "dbg2       nav_point_selected:        %p\n", shared.shareddata.nav_point_selected);
-		for (i = 0; i < shared.shareddata.nnav; i++) {
+		for (int i = 0; i < shared.shareddata.nnav; i++) {
 			fprintf(stderr, "dbg2       nav %d color:         %d\n", i, shared.shareddata.navs[i].color);
 			fprintf(stderr, "dbg2       nav %d size:          %d\n", i, shared.shareddata.navs[i].size);
 			fprintf(stderr, "dbg2       nav %d name:          %s\n", i, shared.shareddata.navs[i].name);
@@ -1212,7 +1201,7 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 			fprintf(stderr, "dbg2       nav %d npoints:       %d\n", i, shared.shareddata.navs[i].npoints);
 			fprintf(stderr, "dbg2       nav %d npoints_alloc: %d\n", i, shared.shareddata.navs[i].npoints_alloc);
 			fprintf(stderr, "dbg2       nav %d nselected:     %d\n", i, shared.shareddata.navs[i].nselected);
-			for (j = 0; j < shared.shareddata.navs[i].npoints; j++) {
+			for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
 				fprintf(stderr, "dbg2       nav %d %d draped:        %d\n", i, j, shared.shareddata.navs[i].navpts[j].draped);
 				fprintf(stderr, "dbg2       nav %d %d selected:      %d\n", i, j, shared.shareddata.navs[i].navpts[j].selected);
 				fprintf(stderr, "dbg2       nav %d %d time_d:        %f\n", i, j, shared.shareddata.navs[i].navpts[j].time_d);
@@ -1289,7 +1278,7 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 		fprintf(stderr, "dbg2       nvector_alloc:             %d\n", shared.shareddata.nvector_alloc);
 		fprintf(stderr, "dbg2       vector_selected:           %d\n", shared.shareddata.vector_selected);
 		fprintf(stderr, "dbg2       vector_point_selected:     %d\n", shared.shareddata.vector_point_selected);
-		for (i = 0; i < shared.shareddata.nvector; i++) {
+		for (int i = 0; i < shared.shareddata.nvector; i++) {
 			fprintf(stderr, "dbg2       vector %d color:         %d\n", i, shared.shareddata.vectors[i].color);
 			fprintf(stderr, "dbg2       vector %d size:          %d\n", i, shared.shareddata.vectors[i].size);
 			fprintf(stderr, "dbg2       vector %d name:          %s\n", i, shared.shareddata.vectors[i].name);
@@ -1297,7 +1286,7 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 			fprintf(stderr, "dbg2       vector %d npoints:       %d\n", i, shared.shareddata.vectors[i].npoints);
 			fprintf(stderr, "dbg2       vector %d npoints_alloc: %d\n", i, shared.shareddata.vectors[i].npoints_alloc);
 			fprintf(stderr, "dbg2       vector %d nselected:     %d\n", i, shared.shareddata.vectors[i].nselected);
-			for (j = 0; j < shared.shareddata.navs[i].npoints; j++) {
+			for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
 				fprintf(stderr, "dbg2       vector %d %d xgrid:    %f\n", i, j,
 				        shared.shareddata.vectors[i].vectorpts[j].point.xgrid[0]);
 				fprintf(stderr, "dbg2       vector %d %d ygrid:    %f\n", i, j,
@@ -1495,7 +1484,6 @@ int mbview_open(int verbose, size_t instance, int *error) {
 	XColor XColorBlue;
 	XColor XColorCoral;
 	XColor exact;
-	int i, j;
 
 	/* get view */
 	struct mbview_world_struct *view = &(mbviews[instance]);
@@ -1617,7 +1605,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		fprintf(stderr, "dbg2       nsite:                %d\n", shared.shareddata.nsite);
 		fprintf(stderr, "dbg2       nsite_alloc:          %d\n", shared.shareddata.nsite_alloc);
 		fprintf(stderr, "dbg2       site_selected:        %d\n", shared.shareddata.site_selected);
-		for (i = 0; i < shared.shareddata.nsite; i++) {
+		for (int i = 0; i < shared.shareddata.nsite; i++) {
 			fprintf(stderr, "dbg2       site %d xgrid:       %f\n", i, shared.shareddata.sites[i].point.xgrid[0]);
 			fprintf(stderr, "dbg2       site %d ygrid:       %f\n", i, shared.shareddata.sites[i].point.ygrid[0]);
 			fprintf(stderr, "dbg2       site %d xlon:        %f\n", i, shared.shareddata.sites[i].point.xlon);
@@ -1638,13 +1626,13 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		fprintf(stderr, "dbg2       nroute_alloc:         %d\n", shared.shareddata.nroute_alloc);
 		fprintf(stderr, "dbg2       route_selected:       %d\n", shared.shareddata.route_selected);
 		fprintf(stderr, "dbg2       route_point_selected: %d\n", shared.shareddata.route_point_selected);
-		for (i = 0; i < shared.shareddata.nroute; i++) {
+		for (int i = 0; i < shared.shareddata.nroute; i++) {
 			fprintf(stderr, "dbg2       route %d color:       %d\n", i, shared.shareddata.routes[i].color);
 			fprintf(stderr, "dbg2       route %d size:        %d\n", i, shared.shareddata.routes[i].size);
 			fprintf(stderr, "dbg2       route %d name:        %s\n", i, shared.shareddata.routes[i].name);
 			fprintf(stderr, "dbg2       route %d npoints:     %d\n", i, shared.shareddata.routes[i].npoints);
 			fprintf(stderr, "dbg2       route %d npoints_alloc: %d\n", i, shared.shareddata.routes[i].npoints_alloc);
-			for (j = 0; j < shared.shareddata.routes[i].npoints; j++) {
+			for (int j = 0; j < shared.shareddata.routes[i].npoints; j++) {
 				fprintf(stderr, "dbg2       route %d %d xgrid:       %f\n", i, j, shared.shareddata.routes[i].points[j].xgrid[0]);
 				fprintf(stderr, "dbg2       route %d %d ygrid:       %f\n", i, j, shared.shareddata.routes[i].points[j].ygrid[0]);
 				fprintf(stderr, "dbg2       route %d %d xlon:        %f\n", i, j, shared.shareddata.routes[i].points[j].xlon);
@@ -1670,7 +1658,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		fprintf(stderr, "dbg2       nnav_alloc:            %d\n", shared.shareddata.nnav_alloc);
 		fprintf(stderr, "dbg2       nav_selected:          %p\n", shared.shareddata.nav_selected);
 		fprintf(stderr, "dbg2       nav_point_selected:    %p\n", shared.shareddata.nav_point_selected);
-		for (i = 0; i < shared.shareddata.nnav; i++) {
+		for (int i = 0; i < shared.shareddata.nnav; i++) {
 			fprintf(stderr, "dbg2       nav %d color:         %d\n", i, shared.shareddata.navs[i].color);
 			fprintf(stderr, "dbg2       nav %d size:          %d\n", i, shared.shareddata.navs[i].size);
 			fprintf(stderr, "dbg2       nav %d name:          %s\n", i, shared.shareddata.navs[i].name);
@@ -1680,7 +1668,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 			fprintf(stderr, "dbg2       nav %d npoints:       %d\n", i, shared.shareddata.navs[i].npoints);
 			fprintf(stderr, "dbg2       nav %d npoints_alloc: %d\n", i, shared.shareddata.navs[i].npoints_alloc);
 			fprintf(stderr, "dbg2       nav %d nselected:     %d\n", i, shared.shareddata.navs[i].nselected);
-			for (j = 0; j < shared.shareddata.navs[i].npoints; j++) {
+			for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
 				fprintf(stderr, "dbg2       nav %d %d draped:   %d\n", i, j, shared.shareddata.navs[i].navpts[j].draped);
 				fprintf(stderr, "dbg2       nav %d %d selected: %d\n", i, j, shared.shareddata.navs[i].navpts[j].selected);
 				fprintf(stderr, "dbg2       nav %d %d time_d:   %f\n", i, j, shared.shareddata.navs[i].navpts[j].time_d);
@@ -1759,7 +1747,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		fprintf(stderr, "dbg2       zmax:                      %f\n", data->profile.zmax);
 		fprintf(stderr, "dbg2       npoints:                   %d\n", data->profile.npoints);
 		fprintf(stderr, "dbg2       npoints_alloc:             %d\n", data->profile.npoints_alloc);
-		for (i = 0; i < data->profile.npoints; i++) {
+		for (int i = 0; i < data->profile.npoints; i++) {
 			fprintf(stderr, "dbg2       profile %d boundary: %d\n", i, data->profile.points[i].boundary);
 			fprintf(stderr, "dbg2       profile %d xgrid:    %f\n", i, data->profile.points[i].xgrid);
 			fprintf(stderr, "dbg2       profile %d ygrid:    %f\n", i, data->profile.points[i].ygrid);
@@ -2468,7 +2456,6 @@ int mbview_action_sensitivityall() {
 int mbview_action_sensitivity(size_t instance) {
 	int status = MB_SUCCESS;
 	int mbview_allactive;
-	int i, j;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2480,7 +2467,7 @@ int mbview_action_sensitivity(size_t instance) {
 
 	/* check if all available instances are active */
 	mbview_allactive = true;
-	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (mbviews[i].data.active == false)
 			mbview_allactive = false;
 	}
@@ -2490,7 +2477,7 @@ int mbview_action_sensitivity(size_t instance) {
 	struct mbview_struct *data = &(view->data);
 
 	/* now set action buttons according to current pick states */
-	for (i = 0; i < view->naction; i++) {
+	for (int i = 0; i < view->naction; i++) {
 		if (view->pushButton_action[i] != NULL) {
 			ac = 0;
 			XtSetArg(args[ac], XmNsensitive, False);
@@ -2522,7 +2509,7 @@ int mbview_action_sensitivity(size_t instance) {
 				XtSetArg(args[ac], XmNsensitive, True);
 			}
 			else if (view->actionsensitive[i] & MBV_PICKMASK_NAVANY) {
-				for (j = 0; j < shared.shareddata.nnav; j++) {
+				for (int j = 0; j < shared.shareddata.nnav; j++) {
 					if (shared.shareddata.navs[j].nselected > 0)
 						XtSetArg(args[ac], XmNsensitive, True);
 				}
@@ -4555,7 +4542,6 @@ void do_mbview_goaway(Widget w, XtPointer client_data, XtPointer call_data) {
 
 int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error) {
 	int status = MB_SUCCESS;
-	int i, j;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4669,7 +4655,7 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->pick.segment.lspoints, error);
 			data->pick.segment.nls_alloc = 0;
 		}
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			if (status == MB_SUCCESS && data->pick.xsegments[i].nls_alloc != 0 && data->pick.xsegments[i].lspoints != NULL) {
 				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->pick.xsegments[i].lspoints, error);
 				data->pick.xsegments[i].nls_alloc = 0;
@@ -4679,13 +4665,13 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->area.segment.lspoints, error);
 			data->area.segment.nls_alloc = 0;
 		}
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			if (status == MB_SUCCESS && data->area.segments[i].nls_alloc != 0 && data->area.segments[i].lspoints != NULL) {
 				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->area.segments[i].lspoints, error);
 				data->area.segments[i].nls_alloc = 0;
 			}
 		}
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			if (status == MB_SUCCESS && data->region.segments[i].nls_alloc != 0 && data->region.segments[i].lspoints != NULL) {
 				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->region.segments[i].lspoints, error);
 				data->region.segments[i].nls_alloc = 0;
@@ -4715,7 +4701,7 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&shared.shareddata.navpick.segment.lspoints, error);
 				shared.shareddata.navpick.segment.nls_alloc = 0;
 			}
-			for (i = 0; i < 4; i++) {
+			for (int i = 0; i < 4; i++) {
 				if (status == MB_SUCCESS && shared.shareddata.navpick.xsegments[i].lspoints != 0 &&
 				    shared.shareddata.navpick.xsegments[i].lspoints != NULL)
 					status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&shared.shareddata.navpick.xsegments[i].lspoints,
@@ -4727,8 +4713,8 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 				shared.shareddata.sites = NULL;
 			}
 			if (status == MB_SUCCESS && shared.shareddata.nroute_alloc != 0 && shared.shareddata.routes != NULL) {
-				for (i = 0; i < shared.shareddata.nroute_alloc; i++) {
-					for (j = 0; j < shared.shareddata.routes[i].npoints_alloc; j++) {
+				for (int i = 0; i < shared.shareddata.nroute_alloc; i++) {
+					for (int j = 0; j < shared.shareddata.routes[i].npoints_alloc; j++) {
 						if (shared.shareddata.routes[i].segments[j].nls_alloc != 0 &&
 						    shared.shareddata.routes[i].segments[j].lspoints != NULL) {
 							status = mb_freed(mbv_verbose, __FILE__, __LINE__,
@@ -4788,7 +4774,6 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 
 int mbview_quit(int verbose, int *error) {
 	int status = MB_SUCCESS;
-	int i;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4803,7 +4788,7 @@ int mbview_quit(int verbose, int *error) {
 	XtUnmanageChild(shared.mb3d_navlist.MB3DNavList);
 
 	/* loope over all possible instances and dismiss anything that's up */
-	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (mbviews[i].init == true)
 			mbview_destroy(verbose, i, true, error);
 	}
@@ -7502,7 +7487,6 @@ void do_mbview_sitelistselect(Widget w, XtPointer client_data, XtPointer call_da
 	size_t instance;
 	int site_selected_old;
 	int isite;
-	size_t i;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_sitelistselect:\n");
@@ -7541,7 +7525,7 @@ void do_mbview_sitelistselect(Widget w, XtPointer client_data, XtPointer call_da
 
 	/* redraw valid instances */
 	instance = MBV_NO_WINDOW;
-	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+	for (size_t i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (mbviews[i].data.active == true) {
 			/* set instance to first good instance */
 			if (instance == MBV_NO_WINDOW)
@@ -7573,7 +7557,6 @@ void do_mbview_routelistselect(Widget w, XtPointer client_data, XtPointer call_d
 	int route_selected_old;
 	int route_point_selected_old;
 	int iwaypoint;
-	size_t i;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_routelistselect:\n");
@@ -7643,7 +7626,7 @@ void do_mbview_routelistselect(Widget w, XtPointer client_data, XtPointer call_d
 
 	/* redraw valid instances */
 	instance = MBV_NO_WINDOW;
-	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+	for (size_t i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (mbviews[i].data.active == true) {
 			/* set instance to first good instance */
 			if (instance == MBV_NO_WINDOW)
@@ -7672,8 +7655,6 @@ void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_dat
 	int position_count = 0;
 	int inav, jpt;
 	size_t instance;
-	size_t i;
-	int j;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_navlistselect:\n");
@@ -7700,7 +7681,7 @@ void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_dat
 	}
 
 	/* now select all nav points in selected files */
-	for (j = 0; j < position_count; j++) {
+	for (int j = 0; j < position_count; j++) {
 		inav = position_list[j] - 1;
 		if (shared.shareddata.navs[inav].npoints > 0) {
 
@@ -7736,7 +7717,7 @@ void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_dat
 
 	/* redraw valid instances */
 	instance = MBV_NO_WINDOW;
-	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+	for (size_t i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (mbviews[i].data.active == true) {
 			/* set instance to first good instance */
 			if (instance == MBV_NO_WINDOW)
@@ -7778,7 +7759,6 @@ void do_mbview_sitelist_delete(Widget w, XtPointer client_data, XtPointer call_d
 	int position_count = 0;
 	int isite;
 	size_t instance;
-	int i;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_sitelist_delete:\n");
@@ -7796,20 +7776,20 @@ void do_mbview_sitelist_delete(Widget w, XtPointer client_data, XtPointer call_d
 
 	/* get first valid instance */
 	instance = MBV_NO_WINDOW;
-	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (instance == MBV_NO_WINDOW && mbviews[i].data.active == true)
 			instance = i;
 	}
 
 	/* delete selected site points in reverse order if any */
-	for (i = position_count - 1; i >= 0; i--) {
+	for (int i = position_count - 1; i >= 0; i--) {
 		isite = position_list[i] - 1;
 		mbview_site_delete(instance, isite);
 	}
 
 	/* reset pick annotation */
 	if (position_count > 0) {
-		for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+		for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
 			if (mbviews[i].data.active == true) {
 				/* set pick annotation */
 				if (mbviews[i].data.pickinfo_mode == MBV_PICK_SITE)
@@ -7843,7 +7823,6 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 	int iposition;
 	int iroute, jwaypoint;
 	size_t instance;
-	int i;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_routelist_delete:\n");
@@ -7861,7 +7840,7 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 
 	/* get first valid instance */
 	instance = MBV_NO_WINDOW;
-	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (instance == MBV_NO_WINDOW && mbviews[i].data.active == true)
 			instance = i;
 	}
@@ -7869,7 +7848,7 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 	/* figure out which routes and waypoints are selected,
 	    and flag them for deletion by settting waypoint
 	    values to MBV_ROUTE_WAYPOINT_DELETEFLAG */
-	for (i = 0; i < position_count; i++) {
+	for (int i = 0; i < position_count; i++) {
 		iposition = 0;
 		bool done = false;
 		for (iroute = 0; iroute < shared.shareddata.nroute && !done; iroute++) {
@@ -7906,7 +7885,7 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 
 	/* reset pick annotation */
 	if (position_count > 0) {
-		for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+		for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
 			if (mbviews[i].data.active == true) {
 				/* set pick annotation */
 				if (mbviews[i].data.pickinfo_mode == MBV_PICK_ROUTE)
@@ -7938,7 +7917,6 @@ void do_mbview_navlist_delete(Widget w, XtPointer client_data, XtPointer call_da
 	int position_count = 0;
 	int inav;
 	size_t instance;
-	int i;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_navlist_delete:\n");
@@ -7962,20 +7940,20 @@ void do_mbview_navlist_delete(Widget w, XtPointer client_data, XtPointer call_da
 
 	/* get first valid instance */
 	instance = MBV_NO_WINDOW;
-	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (instance == MBV_NO_WINDOW && mbviews[i].data.active == true)
 			instance = i;
 	}
 
 	/* delete selected nav points in reverse order if any */
-	for (i = position_count - 1; i >= 0; i--) {
+	for (int i = position_count - 1; i >= 0; i--) {
 		inav = position_list[i] - 1;
 		mbview_nav_delete(instance, inav);
 	}
 
 	/* reset pick annotation */
 	if (position_count > 0) {
-		for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+		for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
 			if (mbviews[i].data.active == true) {
 				/* set pick annotation */
 				if (mbviews[i].data.pickinfo_mode == MBV_PICK_NAV)
@@ -8601,7 +8579,7 @@ int do_mbview_workfunction(XtPointer client_data) {
 	/* first make sure no plotting is active */
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	for (i = 0; i < MBV_MAX_WINDOWS && plotting == false; i++) {
+	for (int i = 0; i < MBV_MAX_WINDOWS && plotting == false; i++) {
 		/* get view */
 		view = &(mbviews[i]);
 		data = &(view->data);
@@ -8643,7 +8621,7 @@ int do_mbview_workfunction(XtPointer client_data) {
 
 	/* if not found check all possible instances */
 	if (plotting == false && found == false) {
-		for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+		for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
 			/* get view */
 			view = &(mbviews[i]);
 			data = &(view->data);
