@@ -2906,8 +2906,7 @@ void mbview_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unus
 }
 /*------------------------------------------------------------------------------*/
 void do_mbview_projection_popup(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3135,8 +3134,7 @@ void do_mbview_set_projection_label(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_projection_popdown(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3159,8 +3157,7 @@ void do_mbview_projection_popdown(Widget w, XtPointer client_data, XtPointer cal
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_display_spheroid(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3202,8 +3199,7 @@ void do_mbview_display_spheroid(Widget w, XtPointer client_data, XtPointer call_
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_display_geographic(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3245,8 +3241,7 @@ void do_mbview_display_geographic(Widget w, XtPointer client_data, XtPointer cal
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_display_utm(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3302,8 +3297,7 @@ void do_mbview_display_utm(Widget w, XtPointer client_data, XtPointer call_data)
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_annotation_degreesminutes(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3329,8 +3323,7 @@ void do_mbview_annotation_degreesminutes(Widget w, XtPointer client_data, XtPoin
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_annotation_degreesdecimal(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3357,8 +3350,7 @@ void do_mbview_annotation_degreesdecimal(Widget w, XtPointer client_data, XtPoin
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_glwda_expose(Widget w, XtPointer client_data, XtPointer call_data) {
-	mbGLwDrawingAreaCallbackStruct *acs;
-	acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
+	mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
 	size_t instance;
 
 	ac = 0;
@@ -3374,8 +3366,7 @@ void do_mbview_glwda_expose(Widget w, XtPointer client_data, XtPointer call_data
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_glwda_resize(Widget w, XtPointer client_data, XtPointer call_data) {
-	mbGLwDrawingAreaCallbackStruct *acs;
-	acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
+	mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
 	size_t instance;
 
 	ac = 0;
@@ -3386,8 +3377,7 @@ void do_mbview_glwda_resize(Widget w, XtPointer client_data, XtPointer call_data
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data) {
-	mbGLwDrawingAreaCallbackStruct *acs;
-	acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
+	mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
 	size_t instance;
 	XEvent *event;
 	struct mbview_world_struct *view;
@@ -4545,8 +4535,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -4573,8 +4562,7 @@ void do_mbview_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_goaway(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -4867,8 +4855,7 @@ int mbview_quit(int verbose, int *error) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_display_2D(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -4909,8 +4896,7 @@ void do_mbview_display_2D(Widget w, XtPointer client_data, XtPointer call_data) 
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_display_3D(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -4951,8 +4937,7 @@ void do_mbview_display_3D(Widget w, XtPointer client_data, XtPointer call_data) 
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_data_primary(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -4998,8 +4983,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_data_primaryslope(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -5045,8 +5029,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_data_secondary(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -5092,8 +5075,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_histogram(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
 	struct mbview_world_struct *view;
@@ -5146,8 +5128,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_overlay_none(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -5197,8 +5178,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_overlay_slope(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -5249,8 +5229,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_overlay_illumination(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -5300,8 +5279,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_overlay_secondary(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -5351,8 +5329,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_overlay_contour(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
 	struct mbview_world_struct *view;
@@ -5386,8 +5363,7 @@ void do_mbview_overlay_contour(Widget w, XtPointer client_data, XtPointer call_d
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_site(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
 	struct mbview_world_struct *view;
@@ -5435,8 +5411,7 @@ void do_mbview_site(Widget w, XtPointer client_data, XtPointer call_data) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_route(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
 	struct mbview_world_struct *view;
@@ -5486,8 +5461,7 @@ void do_mbview_route(Widget w, XtPointer client_data, XtPointer call_data) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_nav(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
 	struct mbview_world_struct *view;
@@ -5528,8 +5502,7 @@ void do_mbview_nav(Widget w, XtPointer client_data, XtPointer call_data) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_navdrape(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
 	struct mbview_world_struct *view;
@@ -5568,8 +5541,7 @@ void do_mbview_navdrape(Widget w, XtPointer client_data, XtPointer call_data) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_vector(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	Boolean value;
 	struct mbview_world_struct *view;
@@ -5609,8 +5581,7 @@ void do_mbview_vector(Widget w, XtPointer client_data, XtPointer call_data) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_haxby(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -5663,8 +5634,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_bright(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -5717,8 +5687,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_muted(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -5771,8 +5740,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_gray(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -5825,8 +5793,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_flat(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -5880,8 +5847,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_sealevel1(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -5934,8 +5900,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colortable_sealevel2(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -5988,8 +5953,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_mouse_rmode(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmToggleButtonCallbackStruct *acs;
-	acs = (XmToggleButtonCallbackStruct *)call_data;
+	XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -6097,8 +6061,7 @@ void do_mbview_mouse_rmode(Widget w, XtPointer client_data, XtPointer call_data)
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_mouse_mode(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmToggleButtonCallbackStruct *acs;
-	acs = (XmToggleButtonCallbackStruct *)call_data;
+	XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -6645,8 +6608,7 @@ void set_mbview_colortable_mode(size_t instance, int mode) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_aboutpopdown(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -6669,8 +6631,7 @@ void do_mbview_aboutpopdown(Widget w, XtPointer client_data, XtPointer call_data
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_aboutpopup(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -6694,8 +6655,7 @@ void do_mbview_aboutpopup(Widget w, XtPointer client_data, XtPointer call_data) 
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colorboundspopup(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -6752,8 +6712,7 @@ void do_mbview_colorboundspopup(Widget w, XtPointer client_data, XtPointer call_
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colorboundspopdown(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -6776,8 +6735,7 @@ void do_mbview_colorboundspopdown(Widget w, XtPointer client_data, XtPointer cal
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -6906,8 +6864,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_shadeparmspopup(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -6950,8 +6907,7 @@ void do_mbview_shadeparmspopup(Widget w, XtPointer client_data, XtPointer call_d
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_shadeparmspopdown(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -6974,8 +6930,7 @@ void do_mbview_shadeparmspopdown(Widget w, XtPointer client_data, XtPointer call
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7121,8 +7076,7 @@ int do_mbview_3dparmstext(size_t instance) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_3dparmspopup(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7148,8 +7102,7 @@ void do_mbview_3dparmspopup(Widget w, XtPointer client_data, XtPointer call_data
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_3dparmspopdown(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7172,8 +7125,7 @@ void do_mbview_3dparmspopdown(Widget w, XtPointer client_data, XtPointer call_da
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_3dparmsapply(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7321,8 +7273,7 @@ int do_mbview_2dparmstext(size_t instance) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_2dparmspopup(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7348,8 +7299,7 @@ void do_mbview_2dparmspopup(Widget w, XtPointer client_data, XtPointer call_data
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_2dparmspopdown(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7372,8 +7322,7 @@ void do_mbview_2dparmspopdown(Widget w, XtPointer client_data, XtPointer call_da
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_2dparmsapply(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7442,8 +7391,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_resolutionpopup(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7472,8 +7420,7 @@ void do_mbview_resolutionpopup(Widget w, XtPointer client_data, XtPointer call_d
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_resolutionpopdown(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7495,8 +7442,7 @@ void do_mbview_resolutionpopdown(Widget w, XtPointer client_data, XtPointer call
 }
 /*------------------------------------------------------------------------------*/
 void do_mbview_resolutionchange(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7566,8 +7512,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_sitelistpopup(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_sitelistpopup: \n");
@@ -7579,8 +7524,7 @@ void do_mbview_sitelistpopup(Widget w, XtPointer client_data, XtPointer call_dat
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_routelistpopup(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_routelistpopup:\n");
@@ -7592,8 +7536,7 @@ void do_mbview_routelistpopup(Widget w, XtPointer client_data, XtPointer call_da
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_navlistpopup(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_navlistpopup:\n");
@@ -7605,8 +7548,7 @@ void do_mbview_navlistpopup(Widget w, XtPointer client_data, XtPointer call_data
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_sitelistselect(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int *position_list = NULL;
 	int position_count = 0;
 	size_t instance;
@@ -7671,8 +7613,7 @@ void do_mbview_sitelistselect(Widget w, XtPointer client_data, XtPointer call_da
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_routelistselect(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int *position_list = NULL;
 	int position_count = 0;
 	int iroute, iposition;
@@ -7772,8 +7713,7 @@ void do_mbview_routelistselect(Widget w, XtPointer client_data, XtPointer call_d
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int *position_list = NULL;
 	int position_count = 0;
 	int inav, jpt;
@@ -7876,8 +7816,7 @@ void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_dat
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_sitelist_delete(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int *position_list = NULL;
 	int position_count = 0;
 	int isite;
@@ -7938,8 +7877,7 @@ void do_mbview_sitelist_delete(Widget w, XtPointer client_data, XtPointer call_d
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int *position_list = NULL;
 	int position_count = 0;
 	int iposition;
@@ -8032,8 +7970,7 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 }
 /*------------------------------------------------------------------------------*/
 void do_mbview_navlist_delete(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	int *position_list = NULL;
 	int position_count = 0;
 	int inav;
@@ -8108,8 +8045,7 @@ void do_mbview_navlist_delete(Widget w, XtPointer client_data, XtPointer call_da
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_sitelist_popdown(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbv_verbose >= 0)
 		fprintf(stderr, "do_mbview_sitelist_popdown:\n");
@@ -8121,8 +8057,7 @@ void do_mbview_sitelist_popdown(Widget w, XtPointer client_data, XtPointer call_
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_routelist_popdown(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbv_verbose >= 0)
 		fprintf(stderr, "do_mbview_routelist_popdown:\n");
@@ -8134,8 +8069,7 @@ void do_mbview_routelist_popdown(Widget w, XtPointer client_data, XtPointer call
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_navlist_popdown(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
 	if (mbv_verbose >= 0)
 		fprintf(stderr, "do_mbview_navlist_popdown:\n");
@@ -8146,8 +8080,7 @@ void do_mbview_navlist_popdown(Widget w, XtPointer client_data, XtPointer call_d
 }
 /*------------------------------------------------------------------------------*/
 void do_mbview_full_render(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -8174,8 +8107,7 @@ void do_mbview_full_render(Widget w, XtPointer client_data, XtPointer call_data)
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_reset_view(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -8242,8 +8174,7 @@ fprintf(stderr, "%s:%5.5d: %zu call mbview_colorchange_notify:%p\n",
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_clearpicks(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 
 	/* get instance */
@@ -8261,8 +8192,7 @@ void do_mbview_clearpicks(Widget w, XtPointer client_data, XtPointer call_data) 
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_profile_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -8304,8 +8234,7 @@ void do_mbview_profile_dismiss(Widget w, XtPointer client_data, XtPointer call_d
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_view_profile(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct *)call_data;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -8405,8 +8334,7 @@ void do_mbview_profile_resize(Widget w, XtPointer client_data, XEvent *event, Bo
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_profile_exager(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmScaleCallbackStruct *acs;
-	acs = (XmScaleCallbackStruct *)call_data;
+	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -8439,8 +8367,7 @@ void do_mbview_profile_exager(Widget w, XtPointer client_data, XtPointer call_da
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_profile_width(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmScaleCallbackStruct *acs;
-	acs = (XmScaleCallbackStruct *)call_data;
+	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -8473,8 +8400,7 @@ void do_mbview_profile_width(Widget w, XtPointer client_data, XtPointer call_dat
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_profile_slope(Widget w, XtPointer client_data, XtPointer call_data) {
-	XmScaleCallbackStruct *acs;
-	acs = (XmScaleCallbackStruct *)call_data;
+	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 	size_t instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
