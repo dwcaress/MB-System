@@ -2615,7 +2615,8 @@ static void xpmNextString(bxxpmData *mdata) {
 // Return the current character, skipping comments
 static int xpmGetC(bxxpmData *mdata) {
 	int c;
-	unsigned int n = 0, a;
+	unsigned int n = 0;
+	unsigned int a;
 	unsigned int notend;
 
 	switch (mdata->type) {
@@ -2801,14 +2802,9 @@ typedef XpmAttributes BxXpmAttributes;
 #endif /* USE_XPM_LIBRARY */
 
 Pixmap XPM_PIXMAP(Widget w, char **pixmapName) {
+	int argcnt = 0;
 	BxXpmAttributes attributes;
-	int argcnt;
 	Arg args[10];
-	Pixmap pixmap;
-	Pixmap shape;
-	int returnValue;
-
-	argcnt = 0;
 	XtSetArg(args[argcnt], XmNdepth, &(attributes.depth));
 	argcnt++;
 	XtSetArg(args[argcnt], XmNcolormap, &(attributes.colormap));
@@ -2818,7 +2814,9 @@ Pixmap XPM_PIXMAP(Widget w, char **pixmapName) {
 	attributes.visual = DefaultVisual(XtDisplay(w), DefaultScreen(XtDisplay(w)));
 	attributes.valuemask = (BxXpmDepth | BxXpmColormap | BxXpmVisual);
 
-	returnValue =
+	Pixmap pixmap;
+	Pixmap shape;
+	int returnValue =
 	    BxXpmCreatePixmapFromData(XtDisplay(w), DefaultRootWindow(XtDisplay(w)), pixmapName, &pixmap, &shape, &attributes);
 	if (shape) {
 		XFreePixmap(XtDisplay(w), shape);

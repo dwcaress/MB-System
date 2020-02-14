@@ -103,13 +103,13 @@ int status;
 char string[MB_PATH_MAXLINE];
 
 /* file opening parameters */
-int startup_file = 0;
+int startup_file = 0;  // TODO(schweh): bool
 int numfiles = 0;
 int currentfile = -1;
 int currentfile_shown = -1;
 int fileformats[NUM_FILES_MAX];
 mb_path filepaths[NUM_FILES_MAX];
-int filelocks[NUM_FILES_MAX];
+int filelocks[NUM_FILES_MAX];  // TODO(schwehr): bool, but also -1?
 int filenves[NUM_FILES_MAX];
 int timer_function_set = false;
 
@@ -489,7 +489,7 @@ void do_mbnavedit_init(int argc, char **argv) {
 	do_mbnavedit_settimer();
 
 	/* if startup indicated by num_files > 0 try to open first file */
-	if (startup_file == true && numfiles > 0) {
+	if (startup_file && numfiles > 0) {
 		do_load_specific_file(0);
 	}
 }
@@ -639,7 +639,7 @@ void do_filelist_remove(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 void do_load_specific_file(int i_file) {
-	const int save_mode = false;  // TODO(schwehr): How was this supposed to be set?
+	const bool save_mode = false;  // TODO(schwehr): How was this supposed to be set?
 
 	/* check the specified file is in the list */
 	if (numfiles > 0 && i_file >= 0 && i_file < numfiles) {
@@ -655,7 +655,7 @@ void do_load_specific_file(int i_file) {
 		/* if nve file exists deal with it */
 		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 			/* if save_mode set load data using nve */
-			if (save_mode == true)
+			if (save_mode)
 				do_load(true);
 
 			/* else bring up dialog asking
@@ -732,11 +732,11 @@ void do_set_controls() {
 	XmToggleButtonSetState(toggleButton_org_sonardepth, plot_draft_org, TRUE);
 
 	/* hide or display items according to toggle states */
-	if (plot_tint == true)
+	if (plot_tint)
 		XtManageChild(toggleButton_org_time);
 	else
 		XtUnmanageChild(toggleButton_org_time);
-	if (plot_lon == true) {
+	if (plot_lon) {
 		XtManageChild(toggleButton_org_lon);
 		if (model_mode == MODEL_MODE_OFF) {
 			XtUnmanageChild(toggleButton_dr_lon);
@@ -758,7 +758,7 @@ void do_set_controls() {
 		XtUnmanageChild(toggleButton_org_lon);
 		XtUnmanageChild(toggleButton_dr_lon);
 	}
-	if (plot_lat == true) {
+	if (plot_lat) {
 		XtManageChild(toggleButton_org_lat);
 		if (model_mode == MODEL_MODE_OFF) {
 			XtUnmanageChild(toggleButton_dr_lat);
@@ -780,7 +780,7 @@ void do_set_controls() {
 		XtUnmanageChild(toggleButton_org_lat);
 		XtUnmanageChild(toggleButton_dr_lat);
 	}
-	if (plot_speed == true) {
+	if (plot_speed) {
 		XtManageChild(toggleButton_org_speed);
 		XtManageChild(toggleButton_show_smg);
 		XtManageChild(pushButton_speed_smg);
@@ -790,7 +790,7 @@ void do_set_controls() {
 		XtUnmanageChild(toggleButton_show_smg);
 		XtUnmanageChild(pushButton_speed_smg);
 	}
-	if (plot_heading == true) {
+	if (plot_heading) {
 		XtManageChild(toggleButton_org_heading);
 		XtManageChild(toggleButton_show_cmg);
 		XtManageChild(pushButton_heading_cmg);
@@ -800,7 +800,7 @@ void do_set_controls() {
 		XtUnmanageChild(toggleButton_show_cmg);
 		XtUnmanageChild(pushButton_heading_cmg);
 	}
-	if (plot_draft == true) {
+	if (plot_draft) {
 		XtManageChild(toggleButton_org_sonardepth);
 	}
 	else {
@@ -809,23 +809,23 @@ void do_set_controls() {
 
 	/* get and set size of canvas */
 	number_plots = 0;
-	if (plot_tint == true)
+	if (plot_tint)
 		number_plots++;
-	if (plot_lon == true)
+	if (plot_lon)
 		number_plots++;
-	if (plot_lat == true)
+	if (plot_lat)
 		number_plots++;
-	if (plot_speed == true)
+	if (plot_speed)
 		number_plots++;
-	if (plot_heading == true)
+	if (plot_heading)
 		number_plots++;
-	if (plot_draft == true)
+	if (plot_draft)
 		number_plots++;
-	if (plot_roll == true)
+	if (plot_roll)
 		number_plots++;
-	if (plot_pitch == true)
+	if (plot_pitch)
 		number_plots++;
-	if (plot_heave == true)
+	if (plot_heave)
 		number_plots++;
 	XtVaSetValues(drawingArea, XmNwidth, plot_width, XmNheight, number_plots * plot_height, NULL);
 
@@ -863,7 +863,7 @@ void do_set_controls() {
 	XmTextFieldSetString(textField_modeling_acceleration, value_text);
 
 	/* enable or disable time interpolation */
-	if (timestamp_problem == true) {
+	if (timestamp_problem) {
 		XtVaSetValues(pushButton_controls_timeinterpolation, XmNsensitive, True, NULL);
 		XtVaSetValues(pushButton_controls_deletebadtimetag, XmNsensitive, True, NULL);
 	}
@@ -981,7 +981,7 @@ void do_build_filelist() {
 					lockstrptr = unlockedstr;
 
 				/* check for edit save file */
-				if (filenves[i] == true)
+				if (filenves[i])
 					nvestrptr = nveyesstr;
 				else
 					nvestrptr = nvenostr;
@@ -1182,7 +1182,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 	KeySym keysym;
 	char buffer[1];
 	int win_x, win_y;
-	int repeat;
+	bool repeat;
 	int status;
 
 	/* get event */
@@ -1273,7 +1273,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 				y_loc = event->xbutton.y;
 
 				do {
-					if (mode_set_interval == true) {
+					if (mode_set_interval) {
 						status = mbnavedit_action_set_interval(x_loc, y_loc, 0);
 						if (status == MB_FAILURE)
 							mbnavedit_bell(100);
@@ -1300,7 +1300,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 						repeat = true;
 					else
 						repeat = false;
-				} while (repeat == true);
+				} while (repeat);
 
 			} /* end of left button events */
 
@@ -1329,7 +1329,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			/* If right mouse button is pushed. */
 			if (event->xbutton.button == 3) {
 				/* apply interval bounds */
-				if (mode_set_interval == true) {
+				if (mode_set_interval) {
 					status = mbnavedit_action_set_interval(0, 0, 2);
 					if (status == MB_FAILURE)
 						mbnavedit_bell(100);
@@ -1384,7 +1384,7 @@ void do_toggle_time(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 	plot_tint = XmToggleButtonGetState(toggleButton_time);
-	if (plot_tint == true)
+	if (plot_tint)
 		XtManageChild(toggleButton_org_time);
 	else {
 		XtUnmanageChild(toggleButton_org_time);
@@ -1393,23 +1393,23 @@ void do_toggle_time(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	/* get and set size of canvas */
 	number_plots = 0;
-	if (plot_tint == true)
+	if (plot_tint)
 		number_plots++;
-	if (plot_lon == true)
+	if (plot_lon)
 		number_plots++;
-	if (plot_lat == true)
+	if (plot_lat)
 		number_plots++;
-	if (plot_speed == true)
+	if (plot_speed)
 		number_plots++;
-	if (plot_heading == true)
+	if (plot_heading)
 		number_plots++;
-	if (plot_draft == true)
+	if (plot_draft)
 		number_plots++;
-	if (plot_roll == true)
+	if (plot_roll)
 		number_plots++;
-	if (plot_pitch == true)
+	if (plot_pitch)
 		number_plots++;
-	if (plot_heave == true)
+	if (plot_heave)
 		number_plots++;
 	int screen_height = number_plots * plot_height;
 	if (screen_height <= 0)
@@ -1427,7 +1427,7 @@ void do_toggle_lon(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 	plot_lon = XmToggleButtonGetState(toggleButton_lon);
-	if (plot_lon == true) {
+	if (plot_lon) {
 		XtManageChild(toggleButton_org_lon);
 		XtManageChild(toggleButton_dr_lon);
 	}
@@ -1439,23 +1439,23 @@ void do_toggle_lon(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	/* get and set size of canvas */
 	number_plots = 0;
-	if (plot_tint == true)
+	if (plot_tint)
 		number_plots++;
-	if (plot_lon == true)
+	if (plot_lon)
 		number_plots++;
-	if (plot_lat == true)
+	if (plot_lat)
 		number_plots++;
-	if (plot_speed == true)
+	if (plot_speed)
 		number_plots++;
-	if (plot_heading == true)
+	if (plot_heading)
 		number_plots++;
-	if (plot_draft == true)
+	if (plot_draft)
 		number_plots++;
-	if (plot_roll == true)
+	if (plot_roll)
 		number_plots++;
-	if (plot_pitch == true)
+	if (plot_pitch)
 		number_plots++;
-	if (plot_heave == true)
+	if (plot_heave)
 		number_plots++;
 	int screen_height = number_plots * plot_height;
 	if (screen_height <= 0)
@@ -1473,7 +1473,7 @@ void do_toggle_lat(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 	plot_lat = XmToggleButtonGetState(toggleButton_lat);
-	if (plot_lat == true) {
+	if (plot_lat) {
 		XtManageChild(toggleButton_org_lat);
 		XtManageChild(toggleButton_dr_lat);
 	}
@@ -1485,23 +1485,23 @@ void do_toggle_lat(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	/* get and set size of canvas */
 	number_plots = 0;
-	if (plot_tint == true)
+	if (plot_tint)
 		number_plots++;
-	if (plot_lon == true)
+	if (plot_lon)
 		number_plots++;
-	if (plot_lat == true)
+	if (plot_lat)
 		number_plots++;
-	if (plot_speed == true)
+	if (plot_speed)
 		number_plots++;
-	if (plot_heading == true)
+	if (plot_heading)
 		number_plots++;
-	if (plot_draft == true)
+	if (plot_draft)
 		number_plots++;
-	if (plot_roll == true)
+	if (plot_roll)
 		number_plots++;
-	if (plot_pitch == true)
+	if (plot_pitch)
 		number_plots++;
-	if (plot_heave == true)
+	if (plot_heave)
 		number_plots++;
 	int screen_height = number_plots * plot_height;
 	if (screen_height <= 0)
@@ -1519,7 +1519,7 @@ void do_toggle_heading(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 	plot_heading = XmToggleButtonGetState(toggleButton_heading);
-	if (plot_heading == true) {
+	if (plot_heading) {
 		XtManageChild(toggleButton_org_heading);
 		XtManageChild(toggleButton_show_cmg);
 		XtManageChild(pushButton_heading_cmg);
@@ -1533,23 +1533,23 @@ void do_toggle_heading(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	/* get and set size of canvas */
 	number_plots = 0;
-	if (plot_tint == true)
+	if (plot_tint)
 		number_plots++;
-	if (plot_lon == true)
+	if (plot_lon)
 		number_plots++;
-	if (plot_lat == true)
+	if (plot_lat)
 		number_plots++;
-	if (plot_speed == true)
+	if (plot_speed)
 		number_plots++;
-	if (plot_heading == true)
+	if (plot_heading)
 		number_plots++;
-	if (plot_draft == true)
+	if (plot_draft)
 		number_plots++;
-	if (plot_roll == true)
+	if (plot_roll)
 		number_plots++;
-	if (plot_pitch == true)
+	if (plot_pitch)
 		number_plots++;
-	if (plot_heave == true)
+	if (plot_heave)
 		number_plots++;
 	int screen_height = number_plots * plot_height;
 	if (screen_height <= 0)
@@ -1568,7 +1568,7 @@ void do_toggle_speed(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)call_data;  // Unused parameter
 
 	plot_speed = XmToggleButtonGetState(toggleButton_speed);
-	if (plot_speed == true) {
+	if (plot_speed) {
 		XtManageChild(toggleButton_org_speed);
 		XtManageChild(toggleButton_show_smg);
 		XtManageChild(pushButton_speed_smg);
@@ -1583,23 +1583,23 @@ void do_toggle_speed(Widget w, XtPointer client_data, XtPointer call_data) {
 	/* get and set size of canvas */
 	number_plots = 0;
 	number_plots = 0;
-	if (plot_tint == true)
+	if (plot_tint)
 		number_plots++;
-	if (plot_lon == true)
+	if (plot_lon)
 		number_plots++;
-	if (plot_lat == true)
+	if (plot_lat)
 		number_plots++;
-	if (plot_speed == true)
+	if (plot_speed)
 		number_plots++;
-	if (plot_heading == true)
+	if (plot_heading)
 		number_plots++;
-	if (plot_draft == true)
+	if (plot_draft)
 		number_plots++;
-	if (plot_roll == true)
+	if (plot_roll)
 		number_plots++;
-	if (plot_pitch == true)
+	if (plot_pitch)
 		number_plots++;
-	if (plot_heave == true)
+	if (plot_heave)
 		number_plots++;
 	int screen_height = number_plots * plot_height;
 	if (screen_height <= 0)
@@ -1617,7 +1617,7 @@ void do_toggle_sonardepth(Widget w, XtPointer client_data, XtPointer call_data) 
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 	plot_draft = XmToggleButtonGetState(toggleButton_sonardepth);
-	if (plot_draft == true) {
+	if (plot_draft) {
 		XtManageChild(toggleButton_org_sonardepth);
 	}
 	else {
@@ -1628,23 +1628,23 @@ void do_toggle_sonardepth(Widget w, XtPointer client_data, XtPointer call_data) 
 	/* get and set size of canvas */
 	number_plots = 0;
 	number_plots = 0;
-	if (plot_tint == true)
+	if (plot_tint)
 		number_plots++;
-	if (plot_lon == true)
+	if (plot_lon)
 		number_plots++;
-	if (plot_lat == true)
+	if (plot_lat)
 		number_plots++;
-	if (plot_speed == true)
+	if (plot_speed)
 		number_plots++;
-	if (plot_heading == true)
+	if (plot_heading)
 		number_plots++;
-	if (plot_draft == true)
+	if (plot_draft)
 		number_plots++;
-	if (plot_roll == true)
+	if (plot_roll)
 		number_plots++;
-	if (plot_pitch == true)
+	if (plot_pitch)
 		number_plots++;
-	if (plot_heave == true)
+	if (plot_heave)
 		number_plots++;
 	int screen_height = number_plots * plot_height;
 	if (screen_height <= 0)
@@ -2406,7 +2406,7 @@ void do_set_interval(Widget w, XtPointer client_data, XtPointer call_data) {
 int do_unset_interval() {
 	/* turn off set interval mode */
 	mbnavedit_action_set_interval(0, 0, 3);
-	if (mode_set_interval == true) {
+	if (mode_set_interval) {
 		mode_set_interval = false;
 		if (mode_pick == PICK_MODE_PICK)
 			mbnavedit_pickcursor();
@@ -2434,23 +2434,23 @@ void do_toggle_vru(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	/* get and set size of canvas */
 	number_plots = 0;
-	if (plot_tint == true)
+	if (plot_tint)
 		number_plots++;
-	if (plot_lon == true)
+	if (plot_lon)
 		number_plots++;
-	if (plot_lat == true)
+	if (plot_lat)
 		number_plots++;
-	if (plot_speed == true)
+	if (plot_speed)
 		number_plots++;
-	if (plot_heading == true)
+	if (plot_heading)
 		number_plots++;
-	if (plot_draft == true)
+	if (plot_draft)
 		number_plots++;
-	if (plot_roll == true)
+	if (plot_roll)
 		number_plots++;
-	if (plot_pitch == true)
+	if (plot_pitch)
 		number_plots++;
-	if (plot_heave == true)
+	if (plot_heave)
 		number_plots++;
 	int screen_height = number_plots * plot_height;
 	if (screen_height <= 0)
