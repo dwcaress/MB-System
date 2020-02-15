@@ -379,14 +379,13 @@ int mb3dsoundings_updatemodetoggles() {
 }
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_updatestatus() {
-	struct mb3dsoundings_struct *soundingdata;
-	struct mb3dsoundings_sounding_struct *sounding;
-
-	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+	struct mb3dsoundings_struct *soundingdata =
+		(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 
 	/* if in info mode and sounding picked print info as status */
 	if (mb3dsoundings.edit_mode == MBS_EDIT_INFO && mb3dsoundings.last_sounding_defined == true) {
-		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
+		struct mb3dsoundings_sounding_struct *sounding =
+			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
 		(mb3dsoundings.mb3dsoundings_info_notify)(sounding->ifile, sounding->iping, sounding->ibeam, value_text);
 		fprintf(stderr, "\n%s\n", value_text);
 		fprintf(stderr, "xyz bounds:%f %f %f %f %f %f  bearing:%f scale:%f zscale:%f zorigin:%f\n",
@@ -421,7 +420,6 @@ int mb3dsoundings_updatestatus() {
 }
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_updatelabelmousemode() {
-
 	/* set mouse mode label */
 	if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM) {
 		if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
@@ -834,14 +832,6 @@ int mb3dsoundings_reset() {
 
 /*---------------------------------------------------------------------------------------*/
 int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, int *error) {
-	XColor XColorBlack;
-	XColor XColorWhite;
-	XColor XColorRed;
-	XColor XColorGreen;
-	XColor XColorBlue;
-	XColor XColorCoral;
-	XColor exact;
-
 	/* fprintf(stderr,"Called mb3dsoundings_open\n"); */
 
 	if (verbose >= 2) {
@@ -911,6 +901,14 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
 		/* get display and xid */
 		mb3dsoundings.dpy = (Display *)XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg);
 		mb3dsoundings.xid = XtWindow(mb3dsoundings.mb3dsdg.drawingArea);
+
+		XColor XColorBlack;
+		XColor XColorWhite;
+		XColor XColorRed;
+		XColor XColorGreen;
+		XColor XColorBlue;
+		XColor XColorCoral;
+		XColor exact;
 
 		/* generate cursors for later use */
 		XAllocNamedColor(mb3dsoundings.dpy, DefaultColormap(mb3dsoundings.dpy, XDefaultScreen(mb3dsoundings.dpy)), "red",
@@ -1770,7 +1768,6 @@ int mb3dsoundings_pick(int x, int y) {
 	int irmin;
 	double dx, dy, r, rmin;
 	int editevent;
-	int i;
 
 	/* fprintf(stderr,"Called mb3dsoundings_pick\n"); */
 
@@ -1779,7 +1776,7 @@ int mb3dsoundings_pick(int x, int y) {
 	rmin = 10000.0;
 	irmin = 0;
 	editevent = false;
-	for (i = 0; i < soundingdata->num_soundings; i++) {
+	for (int i = 0; i < soundingdata->num_soundings; i++) {
 		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 		dx = (double)(x - sounding->winx);
 		dy = (double)(y - sounding->winy);
@@ -1847,18 +1844,17 @@ int mb3dsoundings_pick(int x, int y) {
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_eraserestore(int x, int y) {
-	struct mb3dsoundings_struct *soundingdata;
 	struct mb3dsoundings_sounding_struct *sounding;
 	double dx, dy, r;
-	int editevent, neditevent;
-	int i;
+	int editevent;
 
 	/* fprintf(stderr,"\nCalled mb3dsoundings_eraserestore\n"); */
 
 	/* loop over all soundings */
-	neditevent = 0;
-	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
-	for (i = 0; i < soundingdata->num_soundings; i++) {
+	int neditevent = 0;
+	struct mb3dsoundings_struct *soundingdata =
+		(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+	for (int i = 0; i < soundingdata->num_soundings; i++) {
 		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 		editevent = false;
 		dx = (double)(x - sounding->winx);
