@@ -1844,10 +1844,6 @@ int mb3dsoundings_pick(int x, int y) {
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_eraserestore(int x, int y) {
-	struct mb3dsoundings_sounding_struct *sounding;
-	double dx, dy, r;
-	int editevent;
-
 	/* fprintf(stderr,"\nCalled mb3dsoundings_eraserestore\n"); */
 
 	/* loop over all soundings */
@@ -1855,11 +1851,12 @@ int mb3dsoundings_eraserestore(int x, int y) {
 	struct mb3dsoundings_struct *soundingdata =
 		(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 	for (int i = 0; i < soundingdata->num_soundings; i++) {
-		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-		editevent = false;
-		dx = (double)(x - sounding->winx);
-		dy = (double)(y - sounding->winy);
-		r = sqrt(dx * dx + dy * dy);
+		struct mb3dsoundings_sounding_struct *sounding =
+			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+		bool editevent = false;
+		const double dx = x - sounding->winx;
+		const double dy = y - sounding->winy;
+		const double r = sqrt(dx * dx + dy * dy);
 		if (r < MBS_ERASE_THRESHOLD) {
 			if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE && mb_beam_ok(sounding->beamflag)) {
 				sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
@@ -1911,12 +1908,6 @@ int mb3dsoundings_eraserestore(int x, int y) {
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_grab(int x, int y, int grabmode) {
-	struct mb3dsoundings_struct *soundingdata;
-	struct mb3dsoundings_sounding_struct *sounding;
-	int xmin, xmax, ymin, ymax;
-	int neditevent;
-	int i;
-
 	/* fprintf(stderr,"Called mb3dsoundings_grab mode:%d x:%d y:%d\n", grabmode, x, y); */
 
 	/* save grab start point */
@@ -1947,15 +1938,17 @@ int mb3dsoundings_grab(int x, int y, int grabmode) {
 	/* apply grab */
 	else if (grabmode == MBS_EDIT_GRAB_END) {
 		/* loop over all soundings */
-		neditevent = 0;
-		xmin = MIN(mb3dsoundings.grab_start_x, mb3dsoundings.grab_end_x);
-		xmax = MAX(mb3dsoundings.grab_start_x, mb3dsoundings.grab_end_x);
-		ymin = MIN(mb3dsoundings.grab_start_y, mb3dsoundings.grab_end_y);
-		ymax = MAX(mb3dsoundings.grab_start_y, mb3dsoundings.grab_end_y);
+		int neditevent = 0;
+		const int xmin = MIN(mb3dsoundings.grab_start_x, mb3dsoundings.grab_end_x);
+		const int xmax = MAX(mb3dsoundings.grab_start_x, mb3dsoundings.grab_end_x);
+		const int ymin = MIN(mb3dsoundings.grab_start_y, mb3dsoundings.grab_end_y);
+		const int ymax = MAX(mb3dsoundings.grab_start_y, mb3dsoundings.grab_end_y);
 		/* fprintf(stderr, "Grab bounds: %d %d %d %d\n", xmin, xmax, ymin, ymax); */
-		soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
-		for (i = 0; i < soundingdata->num_soundings; i++) {
-			sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+		struct mb3dsoundings_struct *soundingdata =
+			(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+		for (int i = 0; i < soundingdata->num_soundings; i++) {
+			struct mb3dsoundings_sounding_struct *sounding =
+				(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 			// bool editevent = false;
 			if (sounding->winx >= xmin && sounding->winx <= xmax && sounding->winy >= ymin && sounding->winy <= ymax) {
 				if (mb_beam_ok(sounding->beamflag)) {
@@ -1997,18 +1990,15 @@ int mb3dsoundings_grab(int x, int y, int grabmode) {
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_unflag_view() {
-	struct mb3dsoundings_struct *soundingdata;
-	struct mb3dsoundings_sounding_struct *sounding;
-	int neditevent;
-	int i;
-
 	/* fprintf(stderr,"Called mb3dsoundings_unflag_view\n"); */
 
 	/* loop over all soundings */
-	neditevent = 0;
-	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
-	for (i = 0; i < soundingdata->num_soundings; i++) {
-		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+	int neditevent = 0;
+	struct mb3dsoundings_struct *soundingdata =
+		(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+	for (int i = 0; i < soundingdata->num_soundings; i++) {
+		struct mb3dsoundings_sounding_struct *sounding =
+			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 		if (!mb_beam_ok(sounding->beamflag)) {
 			sounding->beamflag = MB_FLAG_NONE;
 			soundingdata->num_soundings_unflagged++;
@@ -2041,18 +2031,15 @@ int mb3dsoundings_unflag_view() {
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_flag_view() {
-	struct mb3dsoundings_struct *soundingdata;
-	struct mb3dsoundings_sounding_struct *sounding;
-	int neditevent;
-	int i;
-
 	/* fprintf(stderr,"Called mb3dsoundings_flag_view\n"); */
 
 	/* loop over all soundings */
-	neditevent = 0;
-	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
-	for (i = 0; i < soundingdata->num_soundings; i++) {
-		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+	int neditevent = 0;
+	struct mb3dsoundings_struct *soundingdata =
+		(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+	for (int i = 0; i < soundingdata->num_soundings; i++) {
+		struct mb3dsoundings_sounding_struct *sounding =
+			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 		if (mb_beam_ok(sounding->beamflag)) {
 			sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 			soundingdata->num_soundings_unflagged--;
@@ -2085,23 +2072,19 @@ int mb3dsoundings_flag_view() {
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_info(int x, int y) {
-	struct mb3dsoundings_struct *soundingdata;
-	struct mb3dsoundings_sounding_struct *sounding;
-	int irmin;
-	double dx, dy, r, rmin;
-	int i;
-
 	/* fprintf(stderr,"Called mb3dsoundings_info\n"); */
 
 	/* loop over all soundings */
+	struct mb3dsoundings_struct *soundingdata;
 	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
-	rmin = 10000.0;
-	irmin = 0;
-	for (i = 0; i < soundingdata->num_soundings; i++) {
-		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-		dx = (double)(x - sounding->winx);
-		dy = (double)(y - sounding->winy);
-		r = sqrt(dx * dx + dy * dy);
+	double rmin = 10000.0;
+	int irmin = 0;
+	for (int i = 0; i < soundingdata->num_soundings; i++) {
+		struct mb3dsoundings_sounding_struct *sounding =
+			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+		const double dx = (double)(x - sounding->winx);
+		const double dy = (double)(y - sounding->winy);
+		const double r = sqrt(dx * dx + dy * dy);
 		if (r < rmin && (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE || mb_beam_ok(sounding->beamflag))) {
 			irmin = i;
 			rmin = r;
@@ -2126,23 +2109,20 @@ int mb3dsoundings_info(int x, int y) {
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_bad_ping() {
-	struct mb3dsoundings_struct *soundingdata;
-	struct mb3dsoundings_sounding_struct *sounding;
-	struct mb3dsoundings_sounding_struct *lastsounding;
-	int neditevent;
-	int i;
-
 	/* fprintf(stderr,"Called mb3dsoundings_bad_ping last sounding: %d %d\n",
 	mb3dsoundings.last_sounding_defined, mb3dsoundings.last_sounding_edited); */
 
 	/* only check if last sounding defined */
-	neditevent = 0;
-	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+	int neditevent = 0;
+	struct mb3dsoundings_struct *soundingdata =
+		(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 	if (mb3dsoundings.last_sounding_defined == true && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
 		/* loop over all soundings */
-		lastsounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
-		for (i = 0; i < soundingdata->num_soundings; i++) {
-			sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+		struct mb3dsoundings_sounding_struct *lastsounding =
+			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
+		for (int i = 0; i < soundingdata->num_soundings; i++) {
+			struct mb3dsoundings_sounding_struct *sounding =
+				(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 			if (sounding->ifile == lastsounding->ifile && sounding->iping == lastsounding->iping &&
 			    mb_beam_ok(sounding->beamflag)) {
 				sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
@@ -2156,8 +2136,7 @@ int mb3dsoundings_bad_ping() {
 					                                          sounding->beamflag, MB3DSDG_EDIT_NOFLUSH);
 			}
 		}
-	}
-	else {
+	} else {
 		XBell(mb3dsoundings.dpy, 100);
 	}
 
@@ -2176,23 +2155,20 @@ int mb3dsoundings_bad_ping() {
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_zero_ping() {
-	struct mb3dsoundings_struct *soundingdata;
-	struct mb3dsoundings_sounding_struct *sounding;
-	struct mb3dsoundings_sounding_struct *lastsounding;
-	int neditevent;
-	int i;
-
 	/* fprintf(stderr,"Called mb3dsoundings_bad_ping last sounding: %d %d\n",
 	mb3dsoundings.last_sounding_defined, mb3dsoundings.last_sounding_edited); */
 
 	/* only check if last sounding defined */
-	neditevent = 0;
-	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+	int neditevent = 0;
+	struct mb3dsoundings_struct *soundingdata =
+		(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 	if (mb3dsoundings.last_sounding_defined == true && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
 		/* loop over all soundings */
-		lastsounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
-		for (i = 0; i < soundingdata->num_soundings; i++) {
-			sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+		struct mb3dsoundings_sounding_struct *lastsounding =
+			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
+		for (int i = 0; i < soundingdata->num_soundings; i++) {
+			struct mb3dsoundings_sounding_struct *sounding =
+				(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 			if (sounding->ifile == lastsounding->ifile && sounding->iping == lastsounding->iping) {
 				if (mb_beam_ok(sounding->beamflag))
 					soundingdata->num_soundings_unflagged--;
@@ -2227,23 +2203,21 @@ int mb3dsoundings_zero_ping() {
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_left_ping() {
-	struct mb3dsoundings_struct *soundingdata;
-	struct mb3dsoundings_sounding_struct *sounding;
-	struct mb3dsoundings_sounding_struct *lastsounding;
-	int neditevent;
-	int i;
 
 	/* fprintf(stderr,"Called mb3dsoundings_left_ping last sounding: %d %d\n",
 	mb3dsoundings.last_sounding_defined, mb3dsoundings.last_sounding_edited); */
 
 	/* only check if last sounding defined */
-	neditevent = 0;
-	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+	int neditevent = 0;
+	struct mb3dsoundings_struct *soundingdata =
+		(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 	if (mb3dsoundings.last_sounding_defined == true && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
 		/* loop over all soundings */
-		lastsounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
-		for (i = 0; i < soundingdata->num_soundings; i++) {
-			sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+		struct mb3dsoundings_sounding_struct *lastsounding =
+			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
+		for (int i = 0; i < soundingdata->num_soundings; i++) {
+			struct mb3dsoundings_sounding_struct *sounding =
+				(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 			if (sounding->ifile == lastsounding->ifile && sounding->iping == lastsounding->iping &&
 			    sounding->ibeam <= lastsounding->ibeam && mb_beam_ok(sounding->beamflag)) {
 				sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
@@ -2267,8 +2241,7 @@ int mb3dsoundings_left_ping() {
 
 		/* flush the edit events in the calling application */
 		(mb3dsoundings.mb3dsoundings_edit_notify)(0, 0, 0, MB_FLAG_NULL, MB3DSDG_EDIT_FLUSHPREVIOUS);
-	}
-	else {
+	} else {
 		XBell(mb3dsoundings.dpy, 100);
 	}
 
@@ -2277,23 +2250,20 @@ int mb3dsoundings_left_ping() {
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_right_ping() {
-	struct mb3dsoundings_struct *soundingdata;
-	struct mb3dsoundings_sounding_struct *sounding;
-	struct mb3dsoundings_sounding_struct *lastsounding;
-	int neditevent;
-	int i;
-
 	/* fprintf(stderr,"Called mb3dsoundings_right_ping last sounding: %d %d\n",
 	mb3dsoundings.last_sounding_defined, mb3dsoundings.last_sounding_edited); */
 
 	/* only check if last sounding defined */
-	neditevent = 0;
-	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+	int neditevent = 0;
+	struct mb3dsoundings_struct *soundingdata =
+		(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 	if (mb3dsoundings.last_sounding_defined == true && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
 		/* loop over all soundings */
-		lastsounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
-		for (i = 0; i < soundingdata->num_soundings; i++) {
-			sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+		struct mb3dsoundings_sounding_struct *lastsounding =
+			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
+		for (int i = 0; i < soundingdata->num_soundings; i++) {
+			struct mb3dsoundings_sounding_struct *sounding =
+				(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 			if (sounding->ifile == lastsounding->ifile && sounding->iping == lastsounding->iping &&
 			    sounding->ibeam >= lastsounding->ibeam && mb_beam_ok(sounding->beamflag)) {
 				sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
@@ -2317,8 +2287,7 @@ int mb3dsoundings_right_ping() {
 
 		/* flush the edit events in the calling application */
 		(mb3dsoundings.mb3dsoundings_edit_notify)(0, 0, 0, MB_FLAG_NULL, MB3DSDG_EDIT_FLUSHPREVIOUS);
-	}
-	else {
+	} else {
 		XBell(mb3dsoundings.dpy, 100);
 	}
 
@@ -2327,23 +2296,20 @@ int mb3dsoundings_right_ping() {
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_good_ping() {
-	struct mb3dsoundings_struct *soundingdata;
-	struct mb3dsoundings_sounding_struct *sounding;
-	struct mb3dsoundings_sounding_struct *lastsounding;
-	int neditevent;
-	int i;
-
 	/* fprintf(stderr,"Called mb3dsoundings_good_ping last sounding: %d %d\n",
 	mb3dsoundings.last_sounding_defined, mb3dsoundings.last_sounding_edited); */
 
 	/* only check if last sounding defined */
-	neditevent = 0;
-	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+	int neditevent = 0;
+	struct mb3dsoundings_struct *soundingdata =
+		(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 	if (mb3dsoundings.last_sounding_defined == true && mb3dsoundings.last_sounding_edited < soundingdata->num_soundings) {
 		/* loop over all soundings */
-		lastsounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
-		for (i = 0; i < soundingdata->num_soundings; i++) {
-			sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+		struct mb3dsoundings_sounding_struct *lastsounding =
+			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
+		for (int i = 0; i < soundingdata->num_soundings; i++) {
+			struct mb3dsoundings_sounding_struct *sounding =
+				(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 			if (sounding->ifile == lastsounding->ifile && sounding->iping == lastsounding->iping &&
 			    !mb_beam_ok(sounding->beamflag)) {
 				sounding->beamflag = MB_FLAG_NONE;
@@ -2379,10 +2345,10 @@ int mb3dsoundings_good_ping() {
 int mb3dsoundings_setzscale(int verbose, int *error) {
 	(void)verbose;  // Unused parameter
 	(void)error;  // Unused parameter
-	struct mb3dsoundings_struct *soundingdata;
 
 	/* get sounding data structure */
-	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+	struct mb3dsoundings_struct *soundingdata =
+		(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 	/* fprintf(stderr,"Called mb3dsoundings_setzscale: %d soundings\n",soundingdata->num_soundings); */
 
 	/* initialize zmin and zmax */
@@ -2431,17 +2397,6 @@ int mb3dsoundings_setzscale(int verbose, int *error) {
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_plot(int verbose, int *error) {
-	struct mb3dsoundings_struct *soundingdata;
-	struct mb3dsoundings_sounding_struct *sounding;
-	struct mb3dsoundings_sounding_struct *sounding2;
-	GLdouble model_matrix[16];
-	GLdouble projection_matrix[16];
-	GLint viewport[4];
-	int grabxmin, grabxmax, grabymin, grabymax;
-	float glxmin, glymin, glzmin, glxmax, glymax, glzmax;
-	double xx, yy, zz;
-	int i;
-
 	if (mbs_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2450,7 +2405,8 @@ int mb3dsoundings_plot(int verbose, int *error) {
 	}
 
 	/* get sounding data structure */
-	soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+	struct mb3dsoundings_struct *soundingdata =
+		(struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
 /* fprintf(stderr,"Called mb3dsoundings_plot: %d soundings\n",
 soundingdata->num_soundings); */
 
@@ -2464,6 +2420,13 @@ soundingdata->num_soundings); */
 #ifdef MBV_GET_GLX_ERRORS
 	mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);
 #endif
+
+	GLdouble model_matrix[16];
+	GLdouble projection_matrix[16];
+	GLint viewport[4];
+	int grabxmin, grabxmax, grabymin, grabymax;
+	float glxmin, glymin, glzmin, glxmax, glymax, glzmax;
+	double xx, yy, zz;
 
 	/* set background color */
 	glClearColor(1.0, 1.0, 1.0, 0.0);
@@ -2614,9 +2577,9 @@ soundingdata->num_soundings); */
 	if (mb3dsoundings.view_profiles != MBS_VIEW_PROFILES_NONE) {
 		glLineWidth(1.0);
 		glBegin(GL_LINES);
-		for (i = 0; i < soundingdata->num_soundings - 1; i++) {
-			sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-			sounding2 = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i + 1]);
+		for (int i = 0; i < soundingdata->num_soundings - 1; i++) {
+			struct mb3dsoundings_sounding_struct *sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+			struct mb3dsoundings_sounding_struct *sounding2 = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i + 1]);
 
 			/* plot segment only if soundings are from the same ping */
 			if (sounding2->ifile == sounding->ifile && sounding->iping == sounding2->iping) {
@@ -2642,8 +2605,9 @@ soundingdata->num_soundings); */
 	if (mb3dsoundings.view_flagged == true) {
 		glColor3f(1.0, 0.0, 0.0);
 		glBegin(GL_POINTS);
-		for (i = 0; i < soundingdata->num_soundings; i++) {
-			sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+		for (int i = 0; i < soundingdata->num_soundings; i++) {
+			struct mb3dsoundings_sounding_struct *sounding =
+				(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 			if (!mb_beam_ok(sounding->beamflag))
 				glVertex3f(sounding->glx, sounding->gly, sounding->glz);
 			/*fprintf(stderr,"%f %f %f\n", sounding->glx, sounding->gly, sounding->glz);*/
@@ -2656,8 +2620,9 @@ soundingdata->num_soundings); */
 	glColor3f(0.0, 0.0, 0.0);
 	glBegin(GL_POINTS);
   if (mb3dsoundings.view_colorbytopo) {
-  	for (i = 0; i < soundingdata->num_soundings; i++) {
-  		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+  	for (int i = 0; i < soundingdata->num_soundings; i++) {
+		struct mb3dsoundings_sounding_struct *sounding =
+			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
   		/*fprintf(stderr,"%d %f %f %f  %f %f %f %d", i,
   		sounding->x, sounding->y, sounding->z,
   		sounding->glx, sounding->gly, sounding->glz, sounding->beamflag);*/
@@ -2669,8 +2634,9 @@ soundingdata->num_soundings); */
   		/*fprintf(stderr,"\n");*/
   	}
   } else {
-  	for (i = 0; i < soundingdata->num_soundings; i++) {
-  		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+  	for (int i = 0; i < soundingdata->num_soundings; i++) {
+		struct mb3dsoundings_sounding_struct *sounding =
+  			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
   		/*fprintf(stderr,"%d %f %f %f  %f %f %f %d", i,
   		sounding->x, sounding->y, sounding->z,
   		sounding->glx, sounding->gly, sounding->glz, sounding->beamflag);*/
@@ -2689,14 +2655,16 @@ soundingdata->num_soundings); */
 	if (mb3dsoundings.edit_mode == MBS_EDIT_INFO && mb3dsoundings.last_sounding_defined == true) {
 		glColor3f(0.0, 1.0, 1.0);
 		glBegin(GL_POINTS);
-		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
+		struct mb3dsoundings_sounding_struct *sounding =
+			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
 		glVertex3f(sounding->glx, sounding->gly, sounding->glz);
 		glEnd();
 	}
 
 	/* save the screen positions of the soundings to facilitate picking */
-	for (i = 0; i < soundingdata->num_soundings; i++) {
-		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+	for (int i = 0; i < soundingdata->num_soundings; i++) {
+		struct mb3dsoundings_sounding_struct *sounding =
+			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 		if (mb_beam_ok(sounding->beamflag)) {
 			glVertex3f(sounding->glx, sounding->gly, sounding->glz);
 			/* fprintf(stderr," PLOTTED");*/
@@ -2781,15 +2749,16 @@ void do_mb3dsdg_rollbias(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
-	int irollbiasmin, irollbiasmax;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_rollbias: %d\n", acs->value); */
 
 	mb3dsoundings.irollbias = acs->value;
 
 	ac = 0;
+	int irollbiasmin;
 	XtSetArg(args[ac], XmNminimum, &irollbiasmin);
 	ac++;
+	int irollbiasmax;
 	XtSetArg(args[ac], XmNmaximum, &irollbiasmax);
 	ac++;
 	XtSetArg(args[ac], XmNvalue, &(mb3dsoundings.irollbias));
@@ -2830,17 +2799,16 @@ void do_mb3dsdg_pitchbias(Widget w, XtPointer client_data, XtPointer call_data) 
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
-	int ipitchbiasmin, ipitchbiasmax;
-
-	acs = (XmScaleCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_pitchbias: %d\n", acs->value); */
 
 	mb3dsoundings.ipitchbias = acs->value;
 
 	ac = 0;
+	int ipitchbiasmin;
 	XtSetArg(args[ac], XmNminimum, &ipitchbiasmin);
 	ac++;
+	int ipitchbiasmax;
 	XtSetArg(args[ac], XmNmaximum, &ipitchbiasmax);
 	ac++;
 	XtSetArg(args[ac], XmNvalue, &(mb3dsoundings.ipitchbias));
@@ -2881,17 +2849,16 @@ void do_mb3dsdg_headingbias(Widget w, XtPointer client_data, XtPointer call_data
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
-	int iheadingbiasmin, iheadingbiasmax;
-
-	acs = (XmScaleCallbackStruct *)call_data;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_headingbias: %d\n", acs->value); */
 
 	mb3dsoundings.iheadingbias = acs->value;
 
 	ac = 0;
+	int iheadingbiasmin;
 	XtSetArg(args[ac], XmNminimum, &iheadingbiasmin);
 	ac++;
+	int iheadingbiasmax;
 	XtSetArg(args[ac], XmNmaximum, &iheadingbiasmax);
 	ac++;
 	XtSetArg(args[ac], XmNvalue, &(mb3dsoundings.iheadingbias));
@@ -2932,15 +2899,16 @@ void do_mb3dsdg_timelag(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
-	int itimelagmin, itimelagmax;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_timelag: %d\n", acs->value); */
 
 	mb3dsoundings.itimelag = acs->value;
 
 	ac = 0;
+	int itimelagmin;
 	XtSetArg(args[ac], XmNminimum, &itimelagmin);
 	ac++;
+	int itimelagmax;
 	XtSetArg(args[ac], XmNmaximum, &itimelagmax);
 	ac++;
 	XtSetArg(args[ac], XmNvalue, &(mb3dsoundings.itimelag));
@@ -2981,15 +2949,16 @@ void do_mb3dsdg_snell(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
-	int isnellmin, isnellmax;
 
 	//fprintf(stderr,"Called do_mb3dsdg_snell: %d\n", acs->value);
 
 	mb3dsoundings.isnell = acs->value;
 
 	ac = 0;
+	int isnellmin;
 	XtSetArg(args[ac], XmNminimum, &isnellmin);
 	ac++;
+	int isnellmax;
 	XtSetArg(args[ac], XmNmaximum, &isnellmax);
 	ac++;
 	XtSetArg(args[ac], XmNvalue, &(mb3dsoundings.isnell));
@@ -3422,22 +3391,17 @@ void do_mb3dsdg_action_optimizebiasvalues_r(Widget w, XtPointer client_data, XtP
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-	double rollbias;
-	double pitchbias;
-	double headingbias;
-	double timelag;
-	double snell;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_r\n"); */
 
 	/* notify calling program to color current selected unflagged soundings */
 	if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL) {
 		/* get bias parameters */
-		rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
-		pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
-		headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
-		timelag = 0.01 * ((double)mb3dsoundings.itimelag);
-		snell = 0.0001 * ((double)mb3dsoundings.isnell);
+		double rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+		double pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+		double headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+		double timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+		double snell = 0.0001 * ((double)mb3dsoundings.isnell);
 
 		(mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_R, &rollbias, &pitchbias, &headingbias,
 		                                                        &timelag, &snell);
@@ -3514,22 +3478,17 @@ void do_mb3dsdg_action_optimizebiasvalues_h(Widget w, XtPointer client_data, XtP
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-	double rollbias;
-	double pitchbias;
-	double headingbias;
-	double timelag;
-	double snell;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_h\n"); */
 
 	/* notify calling program to color current selected unflagged soundings */
 	if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL) {
 		/* get bias parameters */
-		rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
-		pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
-		headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
-		timelag = 0.01 * ((double)mb3dsoundings.itimelag);
-		snell = 0.0001 * ((double)mb3dsoundings.isnell);
+		double rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+		double pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+		double headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+		double timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+		double snell = 0.0001 * ((double)mb3dsoundings.isnell);
 
 		(mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_H, &rollbias, &pitchbias, &headingbias,
 		                                                        &timelag, &snell);
@@ -3651,22 +3610,16 @@ void do_mb3dsdg_action_optimizebiasvalues_t(Widget w, XtPointer client_data, XtP
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-	double rollbias;
-	double pitchbias;
-	double headingbias;
-	double timelag;
-	double snell;
-
 	/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_rph\n"); */
 
 	/* notify calling program to color current selected unflagged soundings */
 	if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL) {
 		/* get bias parameters */
-		rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
-		pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
-		headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
-		timelag = 0.01 * ((double)mb3dsoundings.itimelag);
-		snell = 0.0001 * ((double)mb3dsoundings.isnell);
+		double rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+		double pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+		double headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+		double timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+		double snell = 0.0001 * ((double)mb3dsoundings.isnell);
 
 		(mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_T, &rollbias, &pitchbias, &headingbias,
 		                                                        &timelag, &snell);
@@ -3697,22 +3650,17 @@ void do_mb3dsdg_action_optimizebiasvalues_s(Widget w, XtPointer client_data, XtP
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-	double rollbias;
-	double pitchbias;
-	double headingbias;
-	double timelag;
-	double snell;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_rph\n"); */
 
 	/* notify calling program to color current selected unflagged soundings */
 	if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL) {
 		/* get bias parameters */
-		rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
-		pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
-		headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
-		timelag = 0.01 * ((double)mb3dsoundings.itimelag);
-		snell = 0.0001 * ((double)mb3dsoundings.isnell);
+		double rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+		double pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+		double headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+		double timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+		double snell = 0.0001 * ((double)mb3dsoundings.isnell);
 
 		(mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_S, &rollbias, &pitchbias, &headingbias,
 		                                                        &timelag, &snell);
