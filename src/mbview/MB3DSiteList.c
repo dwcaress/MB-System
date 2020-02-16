@@ -90,6 +90,8 @@ extern void SetAppDefaults(Widget, UIAppDefault *, char *, Boolean);
 
 MB3DSiteListDataPtr MB3DSiteListCreate(MB3DSiteListDataPtr class_in, Widget parent, String name, ArgList args_in,
                                        Cardinal ac_in) {
+	(void)args_in;  // Unused parameter
+	(void)ac_in;  // Unused parameter
 	Cardinal ac = 0;
 	Arg args[256];
 	Boolean argok = False;
