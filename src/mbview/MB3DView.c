@@ -166,6 +166,9 @@ extern void InitAppDefaults(Widget, UIAppDefault *);
 extern void SetAppDefaults(Widget, UIAppDefault *, char *, Boolean);
 
 MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String name, ArgList args_in, Cardinal ac_in) {
+	(void)args_in;  // Unused parameter
+	(void)ac_in;  // Unused parameter
+
 	Cardinal ac = 0;
 	Arg args[256];
 	Boolean argok = False;
