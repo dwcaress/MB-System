@@ -904,7 +904,7 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
     return (status);
 
   /* get number of contour intervals */
-  if (data->nlevelset) {
+  if (!data->nlevelset) {
     if (data->nlevel > 0) {
       mb_freed(verbose, __FILE__, __LINE__, (void **)&data->level_list, error);
       mb_freed(verbose, __FILE__, __LINE__, (void **)&data->color_list, error);

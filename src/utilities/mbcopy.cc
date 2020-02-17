@@ -1781,7 +1781,7 @@ int main(int argc, char **argv) {
         double seconds;
         sscanf(optarg, "%d/%d/%d/%d/%d/%lf", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &seconds);
         etime_i[5] = (int)floor(seconds);
-        etime_i[6] = 1000000 * (seconds - btime_i[5]);
+        etime_i[6] = 1000000 * (seconds - etime_i[5]);
         break;
       }
       case 'F':
