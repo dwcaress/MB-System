@@ -497,7 +497,7 @@ int mbview_projectglobaldata(size_t instance) {
 
 	/* get view */
 	view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
+	// struct mbview_struct *data = &(view->data);
 
 	/* can only project if projections are set up */
 	if (view->projected == true) {
@@ -830,7 +830,7 @@ int mbview_updatepointw(size_t instance, struct mbview_pointw_struct *pointw) {
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
 		view = &(mbviews[i]);
 		if (i != instance && view->init != MBV_WINDOW_NULL) {
-			struct mbview_struct *data = &(view->data);
+                  // struct mbview_struct *data = &(view->data);
 
 			/* get positions in grid coordinates */
 			status = mbview_projectll2xygrid(i, pointw->xlon, pointw->ylat, &(pointw->xgrid[i]), &(pointw->ygrid[i]));
@@ -1630,7 +1630,7 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 
 	/* get view */
 	view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
+	// struct mbview_struct *data = &(view->data);
 
 	/* The initial spherical coordinate system is defined as:
 	        x = r * cos(longitude) * cos(latitude)
@@ -1744,7 +1744,7 @@ int mbview_sphere_forward(size_t instance, double xlon, double ylat, double *xx,
 
 	/* get view */
 	view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
+	// struct mbview_struct *data = &(view->data);
 
 	/* get position in initial cartesian coordinates */
 	sinlon = sin(DTR * xlon);
@@ -1801,7 +1801,7 @@ int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz, doub
 
 	/* get view */
 	view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
+	// struct mbview_struct *data = &(view->data);
 
 	/* get position in cartesian spheroid coordinates */
 	posr[0] = xx;
@@ -1958,7 +1958,6 @@ int mbview_sphere_rotate(double *eulermatrix, double *v, double *vr) {
 int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, double lon2, double lat2, double *bearing,
                                    double *distance) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
 	double rlon1, rlat1, rlon2, rlat2, rbearing;
 	double t1, t2, t3, dd;
 
@@ -1974,8 +1973,8 @@ int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, do
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* note: these equations derive in part from source code read at:
 	    http://simgear.org/doxygen/polar3d_8hxx-source.html
@@ -2036,7 +2035,6 @@ int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, do
 /*------------------------------------------------------------------------------*/
 int mbview_greatcircle_dist(size_t instance, double lon1, double lat1, double lon2, double lat2, double *distance) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
 	double rlon1, rlat1, rlon2, rlat2;
 	double t1, t2, dd;
 
@@ -2052,8 +2050,8 @@ int mbview_greatcircle_dist(size_t instance, double lon1, double lat1, double lo
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* note: these equations derive in part from source code read at:
 	    http://simgear.org/doxygen/polar3d_8hxx-source.html
@@ -2084,7 +2082,6 @@ int mbview_greatcircle_dist(size_t instance, double lon1, double lat1, double lo
 int mbview_greatcircle_endposition(size_t instance, double lon1, double lat1, double bearing, double distance, double *lon2,
                                    double *lat2) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
 	double rd, rbearing, rlon1, rlat1, rlat2;
 
 	if (mbv_verbose >= 2) {
@@ -2099,8 +2096,8 @@ int mbview_greatcircle_endposition(size_t instance, double lon1, double lat1, do
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* note: these equations derive in part from source code read at:
 	    http://simgear.org/doxygen/polar3d_8hxx-source.html
