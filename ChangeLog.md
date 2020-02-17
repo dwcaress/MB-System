@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta29    February 17, 2020
 - Version 5.7.6beta28    February 13, 2020
 - Version 5.7.6beta27    February 3, 2020
 - Version 5.7.6beta26    February 2, 2020
@@ -339,6 +340,17 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+#### 5.7.6beta29 (February 13, 2020)
+
+Mbnavadjust: Fixed bugs in mbnavadjust creating by modifying the handling of
+function status returns.
+
+Mbcopy: Fixed bug in parsing the end time values specified with the -E option.
+
+Code style: Kurt Schwehr is systematically altering the code to conform to best
+practices and adding build tests. The improvements included in this beta release
+include work on mbview and programs using mbview: mbgrdviz, mbeditviz, mbnavadjust.
+
 #### 5.7.6beta28 (February 13, 2020)
 
 Format 89 (MBF_RESON7K3): Added support for data record type 7058. Also added
