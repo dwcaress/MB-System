@@ -74,7 +74,6 @@ int mbview_projectdata(size_t instance) {
 	double xlonmin, xlonmax, ylatmin, ylatmax;
 	int i, j, k;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	char *message;
 
 	if (mbv_verbose >= 2) {
@@ -88,7 +87,7 @@ int mbview_projectdata(size_t instance) {
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* delete old projections if necessary */
 	if (view->primary_pj_init == true && view->primary_pjptr != NULL) {
@@ -369,7 +368,6 @@ int mbview_derivative(size_t instance, int i, int j) {
 	double dx, dy;
 	int k, k1, k2;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -384,7 +382,7 @@ int mbview_derivative(size_t instance, int i, int j) {
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* figure if x derivative can be calculated */
 	derivative_ok = false;
@@ -485,7 +483,6 @@ int mbview_derivative(size_t instance, int i, int j) {
 int mbview_projectglobaldata(size_t instance) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	struct mbview_pointw_struct *pointw;
 	int i, j, k;
 
@@ -500,7 +497,7 @@ int mbview_projectglobaldata(size_t instance) {
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* can only project if projections are set up */
 	if (view->projected == true) {
@@ -659,7 +656,6 @@ int mbview_projectglobaldata(size_t instance) {
 int mbview_zscalegridpoint(size_t instance, int k) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double xgrid, ygrid;
 	double xlon, ylat;
 	double xdisplay, ydisplay, zdisplay;
@@ -677,7 +673,7 @@ int mbview_zscalegridpoint(size_t instance, int k) {
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* scale z value */
 	if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
@@ -719,7 +715,6 @@ int mbview_zscalegridpoint(size_t instance, int k) {
 int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, struct mbview_point_struct *point) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -734,7 +729,7 @@ int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, st
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* scale z value */
 	if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
@@ -769,7 +764,6 @@ int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, st
 int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, struct mbview_pointw_struct *pointw) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -784,7 +778,7 @@ int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, s
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* scale z value */
 	if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
@@ -820,7 +814,6 @@ int mbview_updatepointw(size_t instance, struct mbview_pointw_struct *pointw) {
 	int status = MB_SUCCESS;
 	int i;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -837,7 +830,7 @@ int mbview_updatepointw(size_t instance, struct mbview_pointw_struct *pointw) {
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
 		view = &(mbviews[i]);
 		if (i != instance && view->init != MBV_WINDOW_NULL) {
-			data = &(view->data);
+			struct mbview_struct *data = &(view->data);
 
 			/* get positions in grid coordinates */
 			status = mbview_projectll2xygrid(i, pointw->xlon, pointw->ylat, &(pointw->xgrid[i]), &(pointw->ygrid[i]));
@@ -890,7 +883,6 @@ int mbview_zscale(size_t instance) {
 	int status = MB_SUCCESS;
 	int i, j, k;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int globalview;
 	double offset_factor;
 
@@ -905,7 +897,7 @@ int mbview_zscale(size_t instance) {
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
@@ -1082,7 +1074,6 @@ int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double 
 	int status = MB_SUCCESS;
 	double xx, yy, zz;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1097,7 +1088,7 @@ int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double 
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions into geographic coordinates if necessary */
 	if (needlonlat == true || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
@@ -1138,7 +1129,6 @@ int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, doub
 	int status = MB_SUCCESS;
 	double xx, yy;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1153,7 +1143,7 @@ int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, doub
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions in geographic coordinates */
 	if (needlonlat == true || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
@@ -1226,7 +1216,6 @@ int mbview_projectgrid2ll(size_t instance, double xgrid, double ygrid, double *x
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1239,7 +1228,7 @@ int mbview_projectgrid2ll(size_t instance, double xgrid, double ygrid, double *x
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions into geographic coordinates */
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
@@ -1268,7 +1257,6 @@ int mbview_projectll2xygrid(size_t instance, double xlon, double ylat, double *x
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1281,7 +1269,7 @@ int mbview_projectll2xygrid(size_t instance, double xlon, double ylat, double *x
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions into grid coordinates */
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
@@ -1316,7 +1304,6 @@ int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int nfound;
 	int i, j, k, ii, jj;
 
@@ -1332,7 +1319,7 @@ int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions into grid coordinates */
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
@@ -1393,7 +1380,6 @@ int mbview_projectll2display(size_t instance, double xlon, double ylat, double z
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double xx, yy, zz;
 	double effective_topography;
 
@@ -1409,7 +1395,7 @@ int mbview_projectll2display(size_t instance, double xlon, double ylat, double z
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions in the display projection */
 	if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
@@ -1464,7 +1450,6 @@ int mbview_projectdisplay2ll(size_t instance, double xdisplay, double ydisplay, 
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double xx, yy, zz;
 
 	if (mbv_verbose >= 2) {
@@ -1479,7 +1464,7 @@ int mbview_projectdisplay2ll(size_t instance, double xdisplay, double ydisplay, 
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions in display projection */
 	xx = xdisplay / view->scale + view->xorigin;
@@ -1519,7 +1504,6 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double xx1, yy1, zz1;
 	double xx2, yy2, zz2;
 	double dx, dy, dz;
@@ -1540,7 +1524,7 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions in display projection without scaling or exageration */
 	if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
@@ -1631,7 +1615,6 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
 int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double ylat) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double phi, theta, psi;
 	int j;
 
@@ -1647,7 +1630,7 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* The initial spherical coordinate system is defined as:
 	        x = r * cos(longitude) * cos(latitude)
@@ -1747,7 +1730,6 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 int mbview_sphere_forward(size_t instance, double xlon, double ylat, double *xx, double *yy, double *zz) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double sinlon, coslon, sinlat, coslat;
 	double posu[3], posr[3];
 
@@ -1762,7 +1744,7 @@ int mbview_sphere_forward(size_t instance, double xlon, double ylat, double *xx,
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* get position in initial cartesian coordinates */
 	sinlon = sin(DTR * xlon);
@@ -1805,7 +1787,6 @@ int mbview_sphere_forward(size_t instance, double xlon, double ylat, double *xx,
 int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz, double *xlon, double *ylat) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double posu[3], posr[3];
 
 	if (mbv_verbose >= 2) {
@@ -1820,7 +1801,7 @@ int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz, doub
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* get position in cartesian spheroid coordinates */
 	posr[0] = xx;
@@ -1978,7 +1959,6 @@ int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, do
                                    double *distance) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double rlon1, rlat1, rlon2, rlat2, rbearing;
 	double t1, t2, t3, dd;
 
@@ -1995,7 +1975,7 @@ int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, do
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* note: these equations derive in part from source code read at:
 	    http://simgear.org/doxygen/polar3d_8hxx-source.html
@@ -2057,7 +2037,6 @@ int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, do
 int mbview_greatcircle_dist(size_t instance, double lon1, double lat1, double lon2, double lat2, double *distance) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double rlon1, rlat1, rlon2, rlat2;
 	double t1, t2, dd;
 
@@ -2074,7 +2053,7 @@ int mbview_greatcircle_dist(size_t instance, double lon1, double lat1, double lo
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* note: these equations derive in part from source code read at:
 	    http://simgear.org/doxygen/polar3d_8hxx-source.html
@@ -2106,7 +2085,6 @@ int mbview_greatcircle_endposition(size_t instance, double lon1, double lat1, do
                                    double *lat2) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double rd, rbearing, rlon1, rlat1, rlat2;
 
 	if (mbv_verbose >= 2) {
@@ -2122,7 +2100,7 @@ int mbview_greatcircle_endposition(size_t instance, double lon1, double lat1, do
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* note: these equations derive in part from source code read at:
 	    http://simgear.org/doxygen/polar3d_8hxx-source.html
@@ -2162,7 +2140,6 @@ int mbview_greatcircle_endposition(size_t instance, double lon1, double lat1, do
 int mbview_colorclear(size_t instance) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2176,7 +2153,7 @@ int mbview_colorclear(size_t instance) {
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* set status bit arrays */
 	view->colordonecount = 0;
@@ -2196,7 +2173,6 @@ int mbview_colorclear(size_t instance) {
 int mbview_zscaleclear(size_t instance) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2210,7 +2186,7 @@ int mbview_zscaleclear(size_t instance) {
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* set status bit arrays */
 	view->zscaledonecount = 0;
@@ -2230,7 +2206,6 @@ int mbview_zscaleclear(size_t instance) {
 int mbview_setcolorparms(size_t instance) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2241,7 +2216,7 @@ int mbview_setcolorparms(size_t instance) {
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* get min max values for coloring */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
@@ -3180,7 +3155,6 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view, struct mbview_str
 int mbview_contour(size_t instance, int rez) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i, j, k, l, kk;
 	int stride;
 	int vertex[4];
@@ -3203,7 +3177,7 @@ int mbview_contour(size_t instance, int rez) {
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* set stride for looping over data */
 	if (rez == MBV_REZ_FULL)
@@ -3464,7 +3438,6 @@ int mbview_contour(size_t instance, int rez) {
 int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, double *zdata) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int nsum;
 	double zdatasum;
 	int i, j, k, l, m, n;
@@ -3480,7 +3453,7 @@ int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, dou
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* get location in grid */
 	i = (int)((xgrid - data->primary_xmin) / data->primary_dx);
