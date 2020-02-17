@@ -12,23 +12,21 @@
  *    See README file for copying and redistribution conditions.
  *------------------------------------------------------------------------------*/
 /*
- *
  * Author:	D. W. Caress
  * Date:	September 25, 2003
  *
  * Note:	This code was broken out of mbview_callbacks.c, which was
  *		begun on October 7, 2002
- *
- *
  */
-/*------------------------------------------------------------------------------*/
 
-/* Standard includes for builtins. */
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <math.h>
+
+#include "mb_define.h"
+#include "mb_status.h"
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1800)
@@ -39,7 +37,6 @@
 #include <windows.h>
 #endif
 
-/* Motif required Headers */
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <Xm/Xm.h>
@@ -58,7 +55,6 @@
 #include "MB3DNavList.h"
 
 /* OpenGL include files */
-
 #include <GL/gl.h>
 #include <GL/glu.h>
 #ifndef WIN32
@@ -66,21 +62,11 @@
 #endif
 #include "mb_glwdrawa.h"
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_define.h"
-
-/* mbview include */
 #include "mbview.h"
 #include "mbviewprivate.h"
 
 /*------------------------------------------------------------------------------*/
-
-/* local variables */
-
-/*------------------------------------------------------------------------------*/
 int mbview_projectdata(size_t instance) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	int proj_status = MB_SUCCESS;
@@ -91,7 +77,6 @@ int mbview_projectdata(size_t instance) {
 	struct mbview_struct *data;
 	char *message;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -369,19 +354,16 @@ int mbview_projectdata(size_t instance) {
 		view->projected = true;
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_derivative(size_t instance, int i, int j) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int derivative_ok;
 	double dx, dy;
@@ -389,7 +371,6 @@ int mbview_derivative(size_t instance, int i, int j) {
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -492,26 +473,22 @@ int mbview_derivative(size_t instance, int i, int j) {
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_projectglobaldata(size_t instance) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	struct mbview_pointw_struct *pointw;
 	int i, j, k;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -670,19 +647,16 @@ int mbview_projectglobaldata(size_t instance) {
 		view->globalprojected = true;
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_zscalegridpoint(size_t instance, int k) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -691,7 +665,6 @@ int mbview_zscalegridpoint(size_t instance, int k) {
 	double xdisplay, ydisplay, zdisplay;
 	int i, j;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -733,25 +706,21 @@ int mbview_zscalegridpoint(size_t instance, int k) {
 	/* set zscale status bit */
 	data->primary_stat_z[k / 8] = data->primary_stat_z[k / 8] | statmask[k % 8];
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, struct mbview_point_struct *point) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -787,25 +756,21 @@ int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, st
 		}
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, struct mbview_pointw_struct *pointw) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -842,25 +807,21 @@ int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, s
 		}
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_updatepointw(size_t instance, struct mbview_pointw_struct *pointw) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int i;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -887,23 +848,19 @@ int mbview_updatepointw(size_t instance, struct mbview_pointw_struct *pointw) {
 		}
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_updatesegmentw(size_t instance, struct mbview_linesegmentw_struct *segmentw) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int i;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -920,19 +877,16 @@ int mbview_updatesegmentw(size_t instance, struct mbview_linesegmentw_struct *se
 		mbview_updatepointw(instance, &(segmentw->lspoints[i]));
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_zscale(size_t instance) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int i, j, k;
 	struct mbview_world_struct *view;
@@ -940,7 +894,6 @@ int mbview_zscale(size_t instance) {
 	int globalview;
 	double offset_factor;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1114,27 +1067,23 @@ int mbview_zscale(size_t instance) {
 		view->contourfullrez = false;
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double ygrid, double zdata, double *xlon, double *ylat,
                           double *xdisplay, double *ydisplay, double *zdisplay) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	double xx, yy, zz;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1168,7 +1117,6 @@ int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double 
 		status = mbview_projectll2display(instance, *xlon, *ylat, zdata, xdisplay, ydisplay, zdisplay);
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1181,20 +1129,17 @@ int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double 
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, double ydisplay, double zdisplay, double *xlon,
                           double *ylat, double *xgrid, double *ygrid) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	double xx, yy;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1226,7 +1171,6 @@ int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, doub
 		status = mbview_projectll2xygrid(instance, *xlon, *ylat, xgrid, ygrid);
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1238,17 +1182,14 @@ int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, doub
 		fprintf(stderr, "dbg2       status:       %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectfromlonlat(size_t instance, double xlon, double ylat, double zdata, double *xgrid, double *ygrid,
                              double *xdisplay, double *ydisplay, double *zdisplay) {
-	/* local variables */
 	int status = MB_SUCCESS;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1265,7 +1206,6 @@ int mbview_projectfromlonlat(size_t instance, double xlon, double ylat, double z
 	/* get positions in the display projection */
 	status = mbview_projectll2display(instance, xlon, ylat, zdata, xdisplay, ydisplay, zdisplay);
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1278,19 +1218,16 @@ int mbview_projectfromlonlat(size_t instance, double xlon, double ylat, double z
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectgrid2ll(size_t instance, double xgrid, double ygrid, double *xlon, double *ylat) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1314,7 +1251,6 @@ int mbview_projectgrid2ll(size_t instance, double xgrid, double ygrid, double *x
 		*ylat = ygrid;
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1324,19 +1260,16 @@ int mbview_projectgrid2ll(size_t instance, double xgrid, double ygrid, double *x
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectll2xygrid(size_t instance, double xlon, double ylat, double *xgrid, double *ygrid) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1366,7 +1299,6 @@ int mbview_projectll2xygrid(size_t instance, double xlon, double ylat, double *x
 		*ygrid = ylat;
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1376,13 +1308,11 @@ int mbview_projectll2xygrid(size_t instance, double xlon, double ylat, double *x
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *xgrid, double *ygrid, double *zdata) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
@@ -1390,7 +1320,6 @@ int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *
 	int nfound;
 	int i, j, k, ii, jj;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1445,7 +1374,6 @@ int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1456,14 +1384,12 @@ int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectll2display(size_t instance, double xlon, double ylat, double zdata, double *xdisplay, double *ydisplay,
                              double *zdisplay) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
@@ -1471,7 +1397,6 @@ int mbview_projectll2display(size_t instance, double xlon, double ylat, double z
 	double xx, yy, zz;
 	double effective_topography;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1521,7 +1446,6 @@ int mbview_projectll2display(size_t instance, double xlon, double ylat, double z
 	/* fprintf(stderr,"   scale:%f   scaled: %f %f %f\n",
 	view->scale, *xdisplay, *ydisplay, *zdisplay); */
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1532,20 +1456,17 @@ int mbview_projectll2display(size_t instance, double xlon, double ylat, double z
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdisplay2ll(size_t instance, double xdisplay, double ydisplay, double zdisplay, double *xlon, double *ylat) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double xx, yy, zz;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1581,7 +1502,6 @@ int mbview_projectdisplay2ll(size_t instance, double xdisplay, double ydisplay, 
 		mbview_sphere_inverse(instance, xx, yy, zz, xlon, ylat);
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1591,13 +1511,11 @@ int mbview_projectdisplay2ll(size_t instance, double xdisplay, double ydisplay, 
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double zdata1, double xlon2, double ylat2, double zdata2,
                            double *distancelateral, double *distanceoverground, double *slope) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
@@ -1607,7 +1525,6 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
 	double dx, dy, dz;
 	double bearing;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1698,7 +1615,6 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
 			*slope = 0.0;
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1709,19 +1625,16 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double ylat) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double phi, theta, psi;
 	int j;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1806,7 +1719,6 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 		mbview_sphere_forward(instance, xlon, ylat, &view->sphere_refx, &view->sphere_refy, &view->sphere_refz);
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Internal results:\n");
@@ -1829,19 +1741,16 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_sphere_forward(size_t instance, double xlon, double ylat, double *xx, double *yy, double *zz) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double sinlon, coslon, sinlat, coslat;
 	double posu[3], posr[3];
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1873,7 +1782,6 @@ int mbview_sphere_forward(size_t instance, double xlon, double ylat, double *xx,
 	*yy = posr[1];
 	*zz = posr[2];
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1890,19 +1798,16 @@ int mbview_sphere_forward(size_t instance, double xlon, double ylat, double *xx,
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz, double *xlon, double *ylat) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double posu[3], posr[3];
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1929,7 +1834,6 @@ int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz, doub
 	*xlon = RTD * atan2(posu[1], posu[0]);
 	*ylat = 90.0 - RTD * (atan2(sqrt(posu[0] * posu[0] + posu[1] * posu[1]), posu[2]));
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1945,16 +1849,13 @@ int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz, doub
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_sphere_matrix(double phi, double theta, double psi, double *eulermatrix) {
-	/* local variables */
 	int status = MB_SUCCESS;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2023,7 +1924,6 @@ int mbview_sphere_matrix(double phi, double theta, double psi, double *eulermatr
 	eulermatrix[7] = -cos(phi) * sin(theta);
 	eulermatrix[8] = cos(theta);
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2034,17 +1934,14 @@ int mbview_sphere_matrix(double phi, double theta, double psi, double *eulermatr
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_sphere_rotate(double *eulermatrix, double *v, double *vr) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int i, j;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2065,7 +1962,6 @@ int mbview_sphere_rotate(double *eulermatrix, double *v, double *vr) {
 		}
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2074,21 +1970,18 @@ int mbview_sphere_rotate(double *eulermatrix, double *v, double *vr) {
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, double lon2, double lat2, double *bearing,
                                    double *distance) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double rlon1, rlat1, rlon2, rlat2, rbearing;
 	double t1, t2, t3, dd;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2148,7 +2041,6 @@ int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, do
 			*bearing += 360.0;
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2159,19 +2051,16 @@ int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, do
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_greatcircle_dist(size_t instance, double lon1, double lat1, double lon2, double lat2, double *distance) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double rlon1, rlat1, rlon2, rlat2;
 	double t1, t2, dd;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2202,7 +2091,6 @@ int mbview_greatcircle_dist(size_t instance, double lon1, double lat1, double lo
 	dd = 2.0 * asin(sqrt(t2 * t2 + cos(rlat1) * cos(rlat2) * t1 * t1));
 	*distance = MBV_SPHEROID_RADIUS * dd;
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2211,19 +2099,16 @@ int mbview_greatcircle_dist(size_t instance, double lon1, double lat1, double lo
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_greatcircle_endposition(size_t instance, double lon1, double lat1, double bearing, double distance, double *lon2,
                                    double *lat2) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double rd, rbearing, rlon1, rlat1, rlat2;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2262,7 +2147,6 @@ int mbview_greatcircle_endposition(size_t instance, double lon1, double lat1, do
 		*lon2 = RTD * (fmod(rlon1 - asin(sin(rbearing) * sin(rd) / cos(rlat2)) + M_PI, 2.0 * M_PI) - M_PI);
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2272,17 +2156,14 @@ int mbview_greatcircle_endposition(size_t instance, double lon1, double lat1, do
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_colorclear(size_t instance) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2302,25 +2183,21 @@ int mbview_colorclear(size_t instance) {
 	if (data->primary_stat_color != NULL)
 		memset(data->primary_stat_color, 0, (data->primary_nxy / 8) + 1);
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_zscaleclear(size_t instance) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2340,25 +2217,21 @@ int mbview_zscaleclear(size_t instance) {
 	if (data->primary_stat_z != NULL)
 		memset(data->primary_stat_z, 0, (data->primary_nxy / 8) + 1);
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_setcolorparms(size_t instance) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2457,19 +2330,16 @@ int mbview_setcolorparms(size_t instance) {
 		view->colortable_green = colortable_haxby_green;
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct *data, int which_data) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int binned_counts[MBV_RAW_HISTOGRAM_DIM];
 	int nbinned, nbinnedneg, nbinnedpos;
@@ -2480,7 +2350,6 @@ int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct
 	int binnedsum, target, jbinzero;
 	int i, jbin, khist;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2617,7 +2486,6 @@ int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct
 		}
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2634,17 +2502,14 @@ int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 
 /*------------------------------------------------------------------------------*/
 int mbview_colorvalue_instance(size_t instance, double value, float *r, float *g, float *b) {
-	/* local variables */
 	int status = MB_SUCCESS;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2672,7 +2537,6 @@ int mbview_colorvalue_instance(size_t instance, double value, float *r, float *g
   /* get color value using relevant data and histogram */
   status = mbview_colorvalue(view, data, histogram, value, r, g, b);
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2682,17 +2546,14 @@ int mbview_colorvalue_instance(size_t instance, double value, float *r, float *g
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_colorvalue(struct mbview_world_struct *view, struct mbview_struct *data,
                       float *histogram, double value, float *r, float *g, float *b) {
-	/* local variables */
 	int status = MB_SUCCESS;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2879,7 +2740,6 @@ int mbview_colorvalue(struct mbview_world_struct *view, struct mbview_struct *da
   	}
   }
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2889,19 +2749,16 @@ int mbview_colorvalue(struct mbview_world_struct *view, struct mbview_struct *da
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *data,
                                 float *histogram, int i, int j, int k) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	double value, svalue, dd;
 	double intensity;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2967,14 +2824,12 @@ int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *da
 	/* set color status bit */
 	data->primary_stat_color[k / 8] = data->primary_stat_color[k / 8] | statmask[k % 8];
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
@@ -2982,12 +2837,10 @@ int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *da
 int mbview_getcolor(double value, double min, double max, int colortablemode, float below_red, float below_green,
                     float below_blue, float above_red, float above_green, float above_blue, float *colortable_red,
                     float *colortable_green, float *colortable_blue, float *red, float *green, float *blue) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int i;
 	double ff, factor;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -3035,7 +2888,6 @@ int mbview_getcolor(double value, double min, double max, int colortablemode, fl
 		*blue = colortable_blue[i] + ff * (colortable_blue[i + 1] - colortable_blue[i]);
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3046,7 +2898,6 @@ int mbview_getcolor(double value, double min, double max, int colortablemode, fl
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
@@ -3055,13 +2906,11 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
                               float below_blue, float above_red, float above_green, float above_blue, float *colortable_red,
                               float *colortable_green, float *colortable_blue, float *histogram, float *red, float *green,
                               float *blue) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	double ff, factor;
 	int found;
 	int i, ii;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -3122,7 +2971,6 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
 		*blue = colortable_blue[ii] + ff * (colortable_blue[ii + 1] - colortable_blue[ii]);
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3133,7 +2981,6 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
@@ -3143,14 +2990,12 @@ int mbview_applyshade(double intensity, float *r, float *g, float *b) {
 	   Reference and Cookbook by Wessel and Smith - you can find it in
 	   Appendix I: Color Space - The final frontier */
 
-	/* local variables */
 	int status = MB_SUCCESS;
 	double h, s, v;
 	double vmax, vmin, dv, idv;
 	double rmod, gmod, bmod;
 	double f, p, q, t;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -3252,7 +3097,6 @@ int mbview_applyshade(double intensity, float *r, float *g, float *b) {
 		}
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3263,14 +3107,12 @@ int mbview_applyshade(double intensity, float *r, float *g, float *b) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsecondaryvalue(struct mbview_world_struct *view, struct mbview_struct *data, int i, int j,
                              double *secondary_value) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	double xlon, ylat;
@@ -3278,7 +3120,6 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view, struct mbview_str
 	double xsgrid, ysgrid;
 	int ii, jj, kk;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -3325,7 +3166,6 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view, struct mbview_str
 		*secondary_value = data->secondary_data[kk];
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3334,12 +3174,10 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view, struct mbview_str
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_contour(size_t instance, int rez) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3355,7 +3193,6 @@ int mbview_contour(size_t instance, int rez) {
 	int global;
 	double contour_offset_factor;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -3615,20 +3452,16 @@ int mbview_contour(size_t instance, int rez) {
 		}
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, double *zdata) {
-
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3636,7 +3469,6 @@ int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, dou
 	double zdatasum;
 	int i, j, k, l, m, n;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -3694,7 +3526,6 @@ int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, dou
 		}
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3703,7 +3534,6 @@ int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, dou
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
