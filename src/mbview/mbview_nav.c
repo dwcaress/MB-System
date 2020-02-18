@@ -12,20 +12,19 @@
  *    See README file for copying and redistribution conditions.
  *------------------------------------------------------------------------------*/
 /*
- *
  * Author:	D. W. Caress
  * Date:	October 28, 2003
- *
- *
  */
 /*------------------------------------------------------------------------------*/
 
-/* Standard includes for builtins. */
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <math.h>
+
+#include "mb_define.h"
+#include "mb_status.h"
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1800)
@@ -36,7 +35,6 @@
 #include <windows.h>
 #endif
 
-/* Motif required Headers */
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <Xm/Xm.h>
@@ -63,11 +61,6 @@
 #endif
 #include "mb_glwdrawa.h"
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_define.h"
-
-/* mbview include */
 #include "mbview.h"
 #include "mbviewprivate.h"
 
