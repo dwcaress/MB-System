@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #ifndef SANS
 #define SANS "helvetica"
 #endif
@@ -105,22 +107,22 @@ typedef struct _UIAppDefault {
 	char *value;     /* value read from app-defaults */
 } UIAppDefault;
 
-static Boolean doInitAppDefaults = True;
+static bool doInitAppDefaults = true;
 static UIAppDefault appDefaults[] = {{NULL, NULL, NULL, NULL, NULL}};
 /*
  * The functions to call in the apputils.c
  */
-extern void InitAppDefaults(Widget, UIAppDefault *);
-extern void SetAppDefaults(Widget, UIAppDefault *, char *, Boolean);
+void InitAppDefaults(Widget, UIAppDefault *);
+void SetAppDefaults(Widget, UIAppDefault *, char *, Boolean);
 
 MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name, ArgList args_in, Cardinal ac_in) {
+	(void)args_in;  // Unused parameter
+	(void)ac_in;  // Unused parameter
 	Cardinal ac = 0;
 	Arg args[256];
 	Boolean argok = False;
 
-	/**
-	 * Register the converters for the widgets.
-	 */
+	// Register the converters for the widgets.
 	RegisterBxConverters(XtWidgetToApplicationContext(parent));
 	XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
