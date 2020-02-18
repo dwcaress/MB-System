@@ -15,9 +15,6 @@
  *
  * Author:	D. W. Caress
  * Date:	May 22, 2007
- *
- *
- *
  */
 /*------------------------------------------------------------------------------*/
 /*
@@ -396,10 +393,11 @@ static void createVisualInfo(mbGLwDrawingAreaWidget w) {
  * This function is called by the callProc of the colormap resource entry.
  */
 static void createColormap(mbGLwDrawingAreaWidget w, int offset, XrmValue *value) {
+	(void)offset;  // Unused parameter
 	static struct cmapCache {
 		Visual *visual;
 		Colormap cmap;
-	} * cmapCache;
+	} *cmapCache;
 	static int cacheEntries = 0;
 	static int cacheMalloced = 0;
 	int i;
@@ -540,6 +538,7 @@ static void Realize(Widget w, Mask *valueMask, XSetWindowAttributes *attributes)
 }
 
 static void Redraw(mbGLwDrawingAreaWidget w, XEvent *event, Region region) {
+	(void)region;  // Unused parameter
 	mbGLwDrawingAreaCallbackStruct cb;
 	if (!XtIsRealized((Widget)w))
 		return;
@@ -612,6 +611,8 @@ static void Destroy(mbGLwDrawingAreaWidget mbglw) {
 
 /* Action routine for keyboard and mouse events */
 static void mbglwInput(mbGLwDrawingAreaWidget mbglw, XEvent *event, String *params, Cardinal *numParams) {
+	(void)params;  // Unused parameter
+	(void)numParams;  // Unused parameter
 	mbGLwDrawingAreaCallbackStruct cb;
 	cb.reason = mbGLwCR_INPUT;
 	cb.event = event;
