@@ -74,8 +74,6 @@ static char value_string[MB_PATH_MAXLINE];
 int mbview_getnavcount(int verbose, size_t instance, int *nnav, int *error) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
@@ -87,8 +85,8 @@ int mbview_getnavcount(int verbose, size_t instance, int *nnav, int *error) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* get number of navs */
 	*nnav = shared.shareddata.nnav;
@@ -111,8 +109,6 @@ int mbview_getnavcount(int verbose, size_t instance, int *nnav, int *error) {
 int mbview_getnavpointcount(int verbose, size_t instance, int nav, int *npoint, int *nintpoint, int *error) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i;
 
 	/* print starting debug statements */
@@ -126,8 +122,8 @@ int mbview_getnavpointcount(int verbose, size_t instance, int nav, int *npoint, 
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* get number of points in specified nav */
 	*npoint = 0;
@@ -1723,8 +1719,6 @@ int mbview_nav_delete(size_t instance, int inav) {
 	/* local variables */
 	int error = MB_ERROR_NO_ERROR;
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i;
 
 	/* print starting debug statements */
@@ -1737,8 +1731,8 @@ int mbview_nav_delete(size_t instance, int inav) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* delete nav if its the same as previously selected */
 	if (inav >= 0 && inav < shared.shareddata.nnav) {
@@ -1935,7 +1929,6 @@ int mbview_drawnavpick(size_t instance) {
 	int i;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	double xlength;
 	float zdisplay;
 	int inav, jpt;
 
@@ -1955,8 +1948,8 @@ int mbview_drawnavpick(size_t instance) {
 	if (shared.shareddata.navpick_type != MBV_PICK_NONE &&
 	    (data->nav_view_mode == MBV_VIEW_ON || data->navdrape_view_mode == MBV_VIEW_ON)) {
 		/* set size of X mark for 2D case */
-		if (data->display_mode == MBV_DISPLAY_2D)
-			xlength = 0.05 / view->size2d;
+		// if (data->display_mode == MBV_DISPLAY_2D)
+		// 	xlength = 0.05 / view->size2d;
 
 		/* set color and linewidth */
 		glColor3f(1.0, 0.0, 0.0);
@@ -2454,7 +2447,8 @@ int mbview_updatenavlist() {
 /*------------------------------------------------------------------------------*/
 
 int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error) {
-	/* local variables */
+	(void)verbose;  // Unused parameter
+	(void)error;  // Unused parameter
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
