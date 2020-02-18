@@ -71,7 +71,7 @@
 
 int mbv_verbose;
 Widget parent_widget;
-XtAppContext app_context;
+extern XtAppContext app_context;  // extern needed for Mac OSX
 struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
 char *mbsystem_library_name;
 
