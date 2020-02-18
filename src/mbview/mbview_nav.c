@@ -72,8 +72,6 @@ static char value_string[MB_PATH_MAXLINE];
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, size_t instance, int *nnav, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -89,6 +87,8 @@ int mbview_getnavcount(int verbose, size_t instance, int *nnav, int *error) {
 	/* get number of navs */
 	*nnav = shared.shareddata.nnav;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -103,7 +103,6 @@ int mbview_getnavcount(int verbose, size_t instance, int *nnav, int *error) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavpointcount(int verbose, size_t instance, int nav, int *npoint, int *nintpoint, int *error) {
-	int status = MB_SUCCESS;
 	int i;
 
 	if (verbose >= 2) {
@@ -130,6 +129,8 @@ int mbview_getnavpointcount(int verbose, size_t instance, int nav, int *npoint, 
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -147,7 +148,6 @@ int mbview_getnavpointcount(int verbose, size_t instance, int nav, int *npoint, 
 int mbview_allocnavarrays(int verbose, int npointtotal, double **time_d, double **navlon, double **navlat, double **navz,
                           double **heading, double **speed, double **navportlon, double **navportlat, double **navstbdlon,
                           double **navstbdlat, int **line, int **shot, int **cdp, int *error) {
-	int status = MB_SUCCESS;
 	fprintf(stderr, "mbview_allocnavarrays: %d points\n", npointtotal);
 
 	if (verbose >= 2) {
@@ -179,7 +179,7 @@ int mbview_allocnavarrays(int verbose, int npointtotal, double **time_d, double 
 	}
 
 	/* allocate the arrays using mb_reallocd */
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npointtotal * sizeof(double), (void **)time_d, error);
+	int status = mb_reallocd(verbose, __FILE__, __LINE__, npointtotal * sizeof(double), (void **)time_d, error);
 	if (status == MB_SUCCESS)
 		status = mb_reallocd(verbose, __FILE__, __LINE__, npointtotal * sizeof(double), (void **)navlon, error);
 	if (status == MB_SUCCESS)
@@ -240,8 +240,6 @@ int mbview_allocnavarrays(int verbose, int npointtotal, double **time_d, double 
 int mbview_freenavarrays(int verbose, double **time_d, double **navlon, double **navlat, double **navz, double **heading,
                          double **speed, double **navportlon, double **navportlat, double **navstbdlon, double **navstbdlat,
                          int **line, int **shot, int **cdp, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -270,7 +268,7 @@ int mbview_freenavarrays(int verbose, double **time_d, double **navlon, double *
 	}
 
 	/* free the arrays using mb_freed */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)time_d, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)time_d, error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)navlon, error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)navlat, error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)navz, error);
@@ -328,7 +326,6 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
                   int *line, int *shot, int *cdp, int navcolor, int navsize, mb_path navname, int navpathstatus,
                   mb_path navpathraw, mb_path navpathprocessed, int navformat, int navswathbounds, int navline, int navshot,
                   int navcdp, int decimation, int *error) {
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int inav;
@@ -390,6 +387,8 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 
 	/* set nav id so that new nav is created */
 	inav = shared.shareddata.nnav;
+
+	int status = MB_SUCCESS;
 
 	/* allocate memory for a new nav if required */
 	if (shared.shareddata.nnav_alloc < shared.shareddata.nnav + 1) {
@@ -710,9 +709,7 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 
 /*------------------------------------------------------------------------------*/
 int mbview_enableviewnavs(int verbose, size_t instance, int *error)
-
 {
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
@@ -738,6 +735,8 @@ int mbview_enableviewnavs(int verbose, size_t instance, int *error)
 			mbview_update_sensitivity(verbose, instance, error);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -751,9 +750,7 @@ int mbview_enableviewnavs(int verbose, size_t instance, int *error)
 
 /*------------------------------------------------------------------------------*/
 int mbview_enableadjustnavs(int verbose, size_t instance, int *error)
-
 {
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
@@ -779,6 +776,8 @@ int mbview_enableadjustnavs(int verbose, size_t instance, int *error)
 			mbview_update_sensitivity(verbose, instance, error);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -792,8 +791,6 @@ int mbview_enableadjustnavs(int verbose, size_t instance, int *error)
 
 /*------------------------------------------------------------------------------*/
 int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, int ypixel) {
-
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int found;
@@ -1493,6 +1490,8 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1503,8 +1502,6 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 }
 /*------------------------------------------------------------------------------*/
 int mbview_extract_nav_profile(size_t instance) {
-
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -1523,6 +1520,8 @@ int mbview_extract_nav_profile(size_t instance) {
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
+
+	int status = MB_SUCCESS;
 
 	/* if any nav exists, check if any are selected then extract the profile */
 	if (shared.shareddata.nnav > 0) {
@@ -1679,9 +1678,7 @@ int mbview_extract_nav_profile(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_nav_delete(size_t instance, int inav) {
-
 	int error = MB_ERROR_NO_ERROR;
-	int status = MB_SUCCESS;
 	int i;
 
 	if (mbv_verbose >= 2) {
@@ -1695,6 +1692,8 @@ int mbview_nav_delete(size_t instance, int inav) {
 	/* get view */
 	// struct mbview_world_struct *view = &(mbviews[instance]);
 	// struct mbview_struct *data = &(view->data);
+
+	int status = MB_SUCCESS;
 
 	/* delete nav if its the same as previously selected */
 	if (inav >= 0 && inav < shared.shareddata.nnav) {
@@ -1752,8 +1751,6 @@ int mbview_nav_delete(size_t instance, int inav) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_navpicksize(size_t instance) {
-
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double xlength;
@@ -1870,6 +1867,8 @@ int mbview_navpicksize(size_t instance) {
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1880,7 +1879,6 @@ int mbview_navpicksize(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_drawnavpick(size_t instance) {
-	int status = MB_SUCCESS;
 	int i;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -2030,6 +2028,8 @@ int mbview_drawnavpick(size_t instance) {
 	mbview_glerrorcheck(instance, 1, __func__);
 #endif
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2041,7 +2041,6 @@ int mbview_drawnavpick(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_drawnav(size_t instance, int rez) {
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -2100,6 +2099,8 @@ int mbview_drawnav(size_t instance, int rez) {
 			glEnd();
 		}
 	}
+
+	int status = MB_SUCCESS;
 
 	/* draw draped navigation */
 	if (shared.shareddata.nav_mode != MBV_NAV_OFF && data->navdrape_view_mode == MBV_VIEW_ON && shared.shareddata.nnav > 0) {
@@ -2314,7 +2315,6 @@ int mbview_drawnav(size_t instance, int rez) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_updatenavlist() {
-	int status = MB_SUCCESS;
 	XmString *xstr;
 	int inav;
 	int nitems;
@@ -2380,6 +2380,8 @@ int mbview_updatenavlist() {
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2393,7 +2395,6 @@ int mbview_updatenavlist() {
 int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error) {
 	(void)verbose;  // Unused parameter
 	(void)error;  // Unused parameter
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int found;
@@ -2574,6 +2575,8 @@ int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error) {
 			}
 		}
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
