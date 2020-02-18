@@ -118,9 +118,6 @@ void SetAppDefaults(Widget, UIAppDefault *, char *, Boolean);
 MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name, ArgList args_in, Cardinal ac_in) {
 	(void)args_in;  // Unused parameter
 	(void)ac_in;  // Unused parameter
-	Cardinal ac = 0;
-	Arg args[256];
-	Boolean argok = False;
 
 	// Register the converters for the widgets.
 	RegisterBxConverters(XtWidgetToApplicationContext(parent));
@@ -152,11 +149,11 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 	 */
 	SetAppDefaults(parent, appDefaults, name, False);
 
-	ac = 0;
+	Cardinal ac = 0;
+	Arg args[256];
+	Boolean argok = False;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(parent, (char *)"MBeditviz Swath View", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(parent, (char *)"MBeditviz Swath View", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNdialogTitle, tmp0);
 		if (argok)
 			ac++;
@@ -198,9 +195,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Flag View", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Flag View", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -246,9 +241,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_menuBar_view, (char *)"View", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_menuBar_view, (char *)"View", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -289,9 +282,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Waterfall View", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Waterfall View", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -315,9 +306,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Alongtrack View", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Alongtrack View", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -341,9 +330,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Acrosstrack View", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Acrosstrack View", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -372,9 +359,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 =
+		XmString tmp0 =
 		    (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Show Flagged Profile", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -401,9 +386,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Show Bottom Detect Algorithms", XmRXmString,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Show Bottom Detect Algorithms", XmRXmString,
 		                            0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -435,9 +418,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Wide Bathymetry Profiles", XmRXmString, 0,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Wide Bathymetry Profiles", XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -464,9 +445,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Print Time Stamps", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Print Time Stamps", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -491,9 +470,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Ping Interval", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Ping Interval", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -517,9 +494,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Longitude", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Longitude", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -542,9 +517,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Latitude", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Latitude", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -568,9 +541,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Heading", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Heading", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -595,9 +566,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Speed", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Speed", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -620,9 +589,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Center Beam Depth", XmRXmString, 0,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Center Beam Depth", XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -646,9 +613,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 =
+		XmString tmp0 =
 		    (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Sonar Altitude", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -673,9 +638,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Sonar Depth", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Sonar Depth", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -699,9 +662,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Roll", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Roll", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -724,9 +685,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Pitch", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Pitch", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -749,9 +708,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Heave", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_view, (char *)"Plot Heave", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -779,9 +736,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Unflag Forward", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Unflag Forward", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -812,9 +767,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Unflag View", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Unflag View", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -858,9 +811,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_menuBar_controls, (char *)"Controls", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_menuBar_controls, (char *)"Controls", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -901,9 +852,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"Go To Specified Time...", XmRXmString, 0,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"Go To Specified Time...", XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -928,9 +877,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"Buffer Controls...", XmRXmString, 0,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"Buffer Controls...", XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -955,9 +902,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"Annotation...", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"Annotation...", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -981,9 +926,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"Filters...", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"Filters...", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1012,9 +955,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"Reverse Right/Left Key Macros",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"Reverse Right/Left Key Macros",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1041,9 +982,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"Reverse Mouse Buttons", XmRXmString, 0,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_pulldownMenu_controls, (char *)"Reverse Mouse Buttons", XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1075,9 +1014,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Next File", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Next File", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1108,9 +1045,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Dismiss", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1141,9 +1076,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Forward", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Forward", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1174,9 +1107,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Reverse", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Reverse", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1207,9 +1138,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Acrosstrack Width (m):  1", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Acrosstrack Width (m):  1", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1273,9 +1202,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"20000", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"20000", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1306,9 +1233,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Vertical Exaggeration: 0.01", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Vertical Exaggeration: 0.01", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1374,9 +1299,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"20.00", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"20.00", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1407,9 +1330,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Pings shown:   1", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Pings shown:   1", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1473,9 +1394,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"20", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"20", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1506,9 +1425,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Pings to step:  1", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Pings to step:  1", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1572,9 +1489,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"20", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"20", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1605,9 +1520,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Mode:", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_controls, (char *)"Mode:", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1659,9 +1572,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"Toggle", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"Toggle", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1688,9 +1599,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"Pick", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"Pick", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1713,9 +1622,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"Erase", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"Erase", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1738,9 +1645,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"Restore", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"Restore", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1763,9 +1668,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"Grab", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"Grab", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1792,9 +1695,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"Info", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_setting_mode, (char *)"Info", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1870,9 +1771,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"Dismiss", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1901,9 +1800,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"1000", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"1000", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1969,9 +1866,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"Y Axis Tick Interval (m): 1", XmRXmString, 0,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"Y Axis Tick Interval (m): 1", XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -2001,9 +1896,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"5000", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"5000", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -2069,9 +1962,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"X Axis Tick Interval (m): 1", XmRXmString, 0,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_annotation, (char *)"X Axis Tick Interval (m): 1", XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -2172,9 +2063,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"Median Alongtrack Dimension",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"Median Alongtrack Dimension",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
@@ -2221,9 +2110,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"Median Acrosstrack Dimension",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"Median Acrosstrack Dimension",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
@@ -2281,9 +2168,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"End Flagging Angle (deg)",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"End Flagging Angle (deg)",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
@@ -2327,9 +2212,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"Start Flagging Angle (deg)",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"Start Flagging Angle (deg)",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
@@ -2373,9 +2256,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters,
 		                            (char *)":::t\"Flag by\":t\"Beam\"\"Angle\"", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -2420,9 +2301,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"End Flagging Distance (m)",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"End Flagging Distance (m)",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
@@ -2466,9 +2345,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"Start Flagging Distance (m)",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"Start Flagging Distance (m)",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
@@ -2512,9 +2389,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)":::t\"Flag by\"\"Distance\"",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)":::t\"Flag by\"\"Distance\"",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -2559,9 +2434,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"End Flagging Beam Number",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"End Flagging Beam Number",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
@@ -2601,9 +2474,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"Start Flagging Beam Number",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"Start Flagging Beam Number",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
@@ -2643,9 +2514,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters,
 		                            (char *)":::t\"Flag by\":t\"Beam\"\"Number\"", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -2690,9 +2559,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"Beams from Center Threshold",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"Beams from Center Threshold",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
@@ -2732,9 +2599,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)":::t\"Wrong\":t\"Side\"\"Filter\"",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)":::t\"Wrong\":t\"Side\"\"Filter\"",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -2766,9 +2631,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"% Median Depth Threshold ",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters, (char *)"% Median Depth Threshold ",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
@@ -2810,9 +2673,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_bulletinBoard_scrollfilters,
 		                            (char *)":::t\"Median\":t\"Spike\"\"Filter\"", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -2844,9 +2705,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_filters, (char *)"Reset", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_filters, (char *)"Reset", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -2877,9 +2736,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_filters, (char *)"Apply", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_filters, (char *)"Apply", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -2910,9 +2767,7 @@ MBpeditDataPtr MBpeditCreate(MBpeditDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_filters, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->mbpingedit_form_filters, (char *)"Dismiss", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
