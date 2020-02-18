@@ -80,11 +80,8 @@ static char value_string[MB_PATH_MAXLINE];
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, size_t instance, int *nsite, int *error)
-
 {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -95,8 +92,8 @@ int mbview_getsitecount(int verbose, size_t instance, int *nsite, int *error)
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* get number of sites */
 	*nsite = shared.shareddata.nsite;
@@ -340,8 +337,6 @@ int mbview_getsites(int verbose, size_t instance, int *nsite, double *sitelon, d
 
 {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i;
 
 	if (verbose >= 2) {
@@ -360,8 +355,8 @@ int mbview_getsites(int verbose, size_t instance, int *nsite, double *sitelon, d
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* check that the array pointers are not NULL */
 	if (sitelon == NULL || sitelat == NULL || sitetopo == NULL || sitecolor == NULL || sitesize == NULL || sitename == NULL) {
@@ -910,8 +905,6 @@ int mbview_pick_site_delete(size_t instance, int xpixel, int ypixel) {
 int mbview_site_delete(size_t instance, int isite) {
 
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i;
 
 	if (mbv_verbose >= 2) {
@@ -923,8 +916,8 @@ int mbview_site_delete(size_t instance, int isite) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* delete site if its the same as previously selected */
 	if (isite >= 0 && isite < shared.shareddata.nsite) {
@@ -956,7 +949,6 @@ int mbview_site_delete(size_t instance, int isite) {
 int mbview_drawsite(size_t instance, int rez) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	GLUquadricObj *globj;
 	double sitesizesmall, sitesizelarge;
 	double xx, yy;
@@ -974,7 +966,7 @@ int mbview_drawsite(size_t instance, int rez) {
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_struct *data = &(view->data);
 
 	/* Generate GL lists to be plotted */
 	if (shared.shareddata.site_mode != MBV_SITE_OFF && data->site_view_mode == MBV_VIEW_ON && shared.shareddata.nsite > 0) {
