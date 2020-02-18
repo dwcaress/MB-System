@@ -69,11 +69,12 @@
 
 /*------------------------------------------------------------------------------*/
 
-int mbv_verbose;
-Widget parent_widget;
-extern XtAppContext app_context;  // extern needed for Mac OSX
-struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
-char *mbsystem_library_name;
+// extern needed for Mac OSX
+extern int mbv_verbose;
+extern Widget parent_widget;
+extern XtAppContext app_context;
+extern struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
+extern char *mbsystem_library_name;
 
 static char value_string[MB_PATH_MAXLINE];
 
