@@ -363,7 +363,6 @@ int mbview_setsecondaryname(int verbose, size_t instance, char *name, int *error
 {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	XmString tmp0;
 	Cardinal ac = 0;
 	Arg args[256];
@@ -380,7 +379,7 @@ int mbview_setsecondaryname(int verbose, size_t instance, char *name, int *error
 
 	/* get view */
 	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_struct *data = &(view->data);
 
 	/* set secondary grid labels */
 	if (XtIsManaged(view->mb3dview.mbview_toggleButton_data_secondary)) {
