@@ -81,8 +81,6 @@ static char value_string[MB_PATH_MAXLINE];
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, size_t instance, int *nsite, int *error)
 {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -97,6 +95,8 @@ int mbview_getsitecount(int verbose, size_t instance, int *nsite, int *error)
 
 	/* get number of sites */
 	*nsite = shared.shareddata.nsite;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -113,10 +113,7 @@ int mbview_getsitecount(int verbose, size_t instance, int *nsite, int *error)
 /*------------------------------------------------------------------------------*/
 int mbview_allocsitearrays(int verbose, int nsite, double **sitelon, double **sitelat, double **sitetopo, int **sitecolor,
                            int **sitesize, mb_path **sitename, int *error)
-
 {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -132,7 +129,7 @@ int mbview_allocsitearrays(int verbose, int nsite, double **sitelon, double **si
 	}
 
 	/* allocate the arrays using mb_reallocd */
-	status = mb_reallocd(verbose, __FILE__, __LINE__, nsite * sizeof(double), (void **)sitelon, error);
+	int status = mb_reallocd(verbose, __FILE__, __LINE__, nsite * sizeof(double), (void **)sitelon, error);
 	if (status == MB_SUCCESS)
 		status = mb_reallocd(verbose, __FILE__, __LINE__, nsite * sizeof(double), (void **)sitelat, error);
 	if (status == MB_SUCCESS)
@@ -165,8 +162,6 @@ int mbview_allocsitearrays(int verbose, int nsite, double **sitelon, double **si
 int mbview_freesitearrays(int verbose, double **sitelon, double **sitelat, double **sitetopo, int **sitecolor, int **sitesize,
                           mb_path **sitename, int *error)
 {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -181,7 +176,7 @@ int mbview_freesitearrays(int verbose, double **sitelon, double **sitelat, doubl
 	}
 
 	/* free the arrays using mb_freed */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)sitelon, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)sitelon, error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)sitelat, error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)sitetopo, error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)sitecolor, error);
@@ -208,16 +203,7 @@ int mbview_freesitearrays(int verbose, double **sitelon, double **sitelat, doubl
 /*------------------------------------------------------------------------------*/
 int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, double *sitelat, double *sitetopo, int *sitecolor,
                     int *sitesize, mb_path *sitename, int *error)
-
 {
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	double xgrid, ygrid, zdata;
-	double xdisplay, ydisplay, zdisplay;
-	int nadded;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -231,18 +217,20 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 		fprintf(stderr, "dbg2       sitecolor:                 %p\n", sitecolor);
 		fprintf(stderr, "dbg2       sitesize:                  %p\n", sitesize);
 		fprintf(stderr, "dbg2       sitename:                  %p\n", sitename);
-		for (i = 0; i < nsite; i++) {
+		for (int i = 0; i < nsite; i++) {
 			fprintf(stderr, "dbg2       site:%d lon:%f lat:%f topo:%f color:%d size:%d name:%s\n", i, sitelon[i], sitelat[i],
 			        sitetopo[i], sitecolor[i], sitesize[i], sitename[i]);
 		}
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* make sure no site is selected */
 	shared.shareddata.site_selected = MBV_SELECT_NONE;
+
+	int status = MB_SUCCESS;
 
 	/* allocate memory if required */
 	if (shared.shareddata.nsite_alloc < shared.shareddata.nsite + nsite) {
@@ -255,7 +243,7 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 			shared.shareddata.nsite_alloc = 0;
 		}
 		else {
-			for (i = shared.shareddata.nsite; i < shared.shareddata.nsite_alloc; i++) {
+			for (int i = shared.shareddata.nsite; i < shared.shareddata.nsite_alloc; i++) {
 				shared.shareddata.sites[i].color = MBV_COLOR_GREEN;
 				shared.shareddata.sites[i].size = 1;
 				shared.shareddata.sites[i].name[0] = '\0';
@@ -264,9 +252,10 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 	}
 
 	/* loop over the sites */
-	nadded = 0;
-	for (i = 0; i < nsite; i++) {
+	int nadded = 0;
+	for (int i = 0; i < nsite; i++) {
 		/* get site positions in grid coordinates */
+		double xgrid, ygrid, zdata;
 		status = mbview_projectll2xyzgrid(instance, sitelon[i], sitelat[i], &xgrid, &ygrid, &zdata);
 
 		/* use provided topo */
@@ -275,6 +264,7 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 		}
 
 		/* get site positions in display coordinates */
+		double xdisplay, ydisplay, zdisplay;
 		status = mbview_projectll2display(instance, sitelon[i], sitelat[i], zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		/* check for reasonable coordinates */
@@ -334,11 +324,7 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 /*------------------------------------------------------------------------------*/
 int mbview_getsites(int verbose, size_t instance, int *nsite, double *sitelon, double *sitelat, double *sitetopo, int *sitecolor,
                     int *sitesize, mb_path *sitename, int *error)
-
 {
-	int status = MB_SUCCESS;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -359,6 +345,7 @@ int mbview_getsites(int verbose, size_t instance, int *nsite, double *sitelon, d
 	// struct mbview_struct *data = &(view->data);
 
 	/* check that the array pointers are not NULL */
+	int status = MB_SUCCESS;
 	if (sitelon == NULL || sitelat == NULL || sitetopo == NULL || sitecolor == NULL || sitesize == NULL || sitename == NULL) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_DATA_NOT_INSERTED;
@@ -368,7 +355,7 @@ int mbview_getsites(int verbose, size_t instance, int *nsite, double *sitelon, d
 	else {
 		/* loop over the sites */
 		*nsite = shared.shareddata.nsite;
-		for (i = 0; i < *nsite; i++) {
+		for (int i = 0; i < *nsite; i++) {
 			sitelon[i] = shared.shareddata.sites[i].point.xlon;
 			sitelat[i] = shared.shareddata.sites[i].point.ylat;
 			sitetopo[i] = shared.shareddata.sites[i].point.zdata;
@@ -382,7 +369,7 @@ int mbview_getsites(int verbose, size_t instance, int *nsite, double *sitelon, d
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nsite:                     %d\n", *nsite);
-		for (i = 0; i < *nsite; i++) {
+		for (int i = 0; i < *nsite; i++) {
 			fprintf(stderr, "dbg2       site:%d lon:%f lat:%f topo:%f color:%d size:%d name:%s\n", i, sitelon[i], sitelat[i],
 			        sitetopo[i], sitecolor[i], sitesize[i], sitename[i]);
 		}
@@ -396,12 +383,7 @@ int mbview_getsites(int verbose, size_t instance, int *nsite, double *sitelon, d
 
 /*--------------------------------------------------------------------*/
 int mbview_enableviewsites(int verbose, size_t instance, int *error)
-
 {
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -416,13 +398,15 @@ int mbview_enableviewsites(int verbose, size_t instance, int *error)
 	/* set widget sensitivity on all active instances */
 	for (instance = 0; instance < MBV_MAX_WINDOWS; instance++) {
 		/* get view */
-		view = &(mbviews[instance]);
-		data = &(view->data);
+		struct mbview_world_struct *view = &(mbviews[instance]);
+		struct mbview_struct *data = &(view->data);
 
 		/* if instance active reset action sensitivity */
 		if (data->active == true)
 			mbview_update_sensitivity(verbose, instance, error);
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -437,12 +421,7 @@ int mbview_enableviewsites(int verbose, size_t instance, int *error)
 
 /*--------------------------------------------------------------------*/
 int mbview_enableeditsites(int verbose, size_t instance, int *error)
-
 {
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -452,8 +431,8 @@ int mbview_enableeditsites(int verbose, size_t instance, int *error)
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set values */
 	shared.shareddata.site_mode = MBV_SITE_EDIT;
@@ -461,6 +440,8 @@ int mbview_enableeditsites(int verbose, size_t instance, int *error)
 	/* set widget sensitivity */
 	if (data->active == true)
 		mbview_update_sensitivity(mbv_verbose, instance, error);
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -475,17 +456,6 @@ int mbview_enableeditsites(int verbose, size_t instance, int *error)
 
 /*------------------------------------------------------------------------------*/
 int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) {
-
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int found;
-	double xgrid, ygrid;
-	double xlon, ylat, zdata;
-	double xdisplay, ydisplay, zdisplay;
-	double xx, yy, rr, rrmin;
-	int i;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -497,26 +467,30 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* only select sites if enabled and not in move mode */
 	if (shared.shareddata.site_mode != MBV_SITE_OFF && shared.shareddata.nsite > 0 &&
 	    (which == MBV_PICK_DOWN || shared.shareddata.site_selected == MBV_SELECT_NONE)) {
 		/* look for point */
+		int found;
+		double xgrid, ygrid;
+		double xlon, ylat, zdata;
+		double xdisplay, ydisplay, zdisplay;
 		mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		/* look for nearest site */
-		if (found == true) {
+		if (found) {
 			/* first deselect previously selected site */
 			shared.shareddata.site_selected = MBV_SELECT_NONE;
 
 			/* now figure out which site will be selected next */
-			rrmin = 1000000000.0;
-			for (i = 0; i < shared.shareddata.nsite; i++) {
-				xx = xgrid - shared.shareddata.sites[i].point.xgrid[instance];
-				yy = ygrid - shared.shareddata.sites[i].point.ygrid[instance];
-				rr = sqrt(xx * xx + yy * yy);
+			double rrmin = 1000000000.0;
+			for (int i = 0; i < shared.shareddata.nsite; i++) {
+				const double xx = xgrid - shared.shareddata.sites[i].point.xgrid[instance];
+				const double yy = ygrid - shared.shareddata.sites[i].point.ygrid[instance];
+				const double rr = sqrt(xx * xx + yy * yy);
 				if (rr < rrmin) {
 					rrmin = rr;
 					shared.shareddata.site_selected = i;
@@ -536,6 +510,10 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 	else if (shared.shareddata.site_mode != MBV_SITE_OFF && shared.shareddata.nsite > 0 &&
 	         (which == MBV_PICK_MOVE && shared.shareddata.site_selected != MBV_SELECT_NONE)) {
 		/* look for point */
+		int found;
+		double xgrid, ygrid;
+		double xlon, ylat, zdata;
+		double xdisplay, ydisplay, zdisplay;
 		mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		/* reset selected site position */
@@ -592,7 +570,7 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 		fprintf(stderr, "dbg2       nsite:               %d\n", shared.shareddata.nsite);
 		fprintf(stderr, "dbg2       nsite_alloc:         %d\n", shared.shareddata.nsite_alloc);
 		fprintf(stderr, "dbg2       site_selected:       %d\n", shared.shareddata.site_selected);
-		for (i = 0; i < shared.shareddata.nsite; i++) {
+		for (int i = 0; i < shared.shareddata.nsite; i++) {
 			fprintf(stderr, "dbg2       site %d xgrid:       %f\n", i, shared.shareddata.sites[i].point.xgrid[instance]);
 			fprintf(stderr, "dbg2       site %d ygrid:       %f\n", i, shared.shareddata.sites[i].point.ygrid[instance]);
 			fprintf(stderr, "dbg2       site %d xlon:        %f\n", i, shared.shareddata.sites[i].point.xlon);
@@ -607,6 +585,8 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -618,17 +598,6 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 
 /*------------------------------------------------------------------------------*/
 int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
-
-	int status = MB_SUCCESS;
-	int error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int found;
-	double xgrid, ygrid;
-	double xlon, ylat, zdata;
-	double xdisplay, ydisplay, zdisplay;
-	int i, inew;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -640,18 +609,27 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	int status = MB_SUCCESS;
+
+	int error = MB_ERROR_NO_ERROR;
 
 	/* only add sites if enabled and not in move mode */
 	if (shared.shareddata.site_mode == MBV_SITE_EDIT &&
 	    (which == MBV_PICK_DOWN || shared.shareddata.site_selected == MBV_SELECT_NONE)) {
 		/* look for point */
+		int found;
+		double xgrid, ygrid;
+		double xlon, ylat, zdata;
+		double xdisplay, ydisplay, zdisplay;
 		mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		/* add site */
 		if (found) {
 			/* add site after currently selected site if any */
+			int inew;
 			if (shared.shareddata.site_selected == MBV_SELECT_NONE)
 				inew = shared.shareddata.nsite;
 			else {
@@ -671,7 +649,7 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 					shared.shareddata.nsite_alloc = 0;
 				}
 				else {
-					for (i = shared.shareddata.nsite; i < shared.shareddata.nsite_alloc; i++) {
+					for (int i = shared.shareddata.nsite; i < shared.shareddata.nsite_alloc; i++) {
 						shared.shareddata.sites[i].color = MBV_COLOR_GREEN;
 						shared.shareddata.sites[i].size = 1;
 						shared.shareddata.sites[i].name[0] = '\0';
@@ -680,7 +658,7 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 			}
 
 			/* move old sites if necessary */
-			for (i = shared.shareddata.nsite; i > inew; i--) {
+			for (int i = shared.shareddata.nsite; i > inew; i--) {
 				shared.shareddata.sites[i] = shared.shareddata.sites[i - 1];
 			}
 
@@ -715,6 +693,10 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 	else if (shared.shareddata.site_mode != MBV_SITE_OFF && shared.shareddata.nsite > 0 &&
 	         (which == MBV_PICK_MOVE && shared.shareddata.site_selected != MBV_SELECT_NONE)) {
 		/* look for point */
+		int found;
+		double xgrid, ygrid;
+		double xlon, ylat, zdata;
+		double xdisplay, ydisplay, zdisplay;
 		mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		/* reset selected site position */
@@ -765,7 +747,7 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 		fprintf(stderr, "dbg2       nsite:               %d\n", shared.shareddata.nsite);
 		fprintf(stderr, "dbg2       nsite_alloc:         %d\n", shared.shareddata.nsite_alloc);
 		fprintf(stderr, "dbg2       site_selected:       %d\n", shared.shareddata.site_selected);
-		for (i = 0; i < shared.shareddata.nsite; i++) {
+		for (int i = 0; i < shared.shareddata.nsite; i++) {
 			fprintf(stderr, "dbg2       site %d xgrid:       %f\n", i, shared.shareddata.sites[i].point.xgrid[instance]);
 			fprintf(stderr, "dbg2       site %d ygrid:       %f\n", i, shared.shareddata.sites[i].point.ygrid[instance]);
 			fprintf(stderr, "dbg2       site %d xlon:        %f\n", i, shared.shareddata.sites[i].point.xlon);
@@ -791,17 +773,6 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_pick_site_delete(size_t instance, int xpixel, int ypixel) {
-
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int found;
-	double xgrid, ygrid;
-	double xlon, ylat, zdata;
-	double xdisplay, ydisplay, zdisplay;
-	double xx, yy, rr, rrmin;
-	int i, isite;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -812,22 +783,29 @@ int mbview_pick_site_delete(size_t instance, int xpixel, int ypixel) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	int status = MB_SUCCESS;
 
 	/* only delete a selected site if enabled */
 	if (shared.shareddata.site_mode == MBV_SITE_EDIT && shared.shareddata.site_selected != MBV_SELECT_NONE) {
 		/* look for point */
+		int found;
+		double xgrid, ygrid;
+		double xlon, ylat, zdata;
+		double xdisplay, ydisplay, zdisplay;
 		mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		/* find closest site to pick point */
+		int isite;
 		if (found) {
-			rrmin = 1000000000.0;
+			double rrmin = 1000000000.0;
 			isite = MBV_SELECT_NONE;
-			for (i = 0; i < shared.shareddata.nsite; i++) {
-				xx = xgrid - shared.shareddata.sites[i].point.xgrid[instance];
-				yy = ygrid - shared.shareddata.sites[i].point.ygrid[instance];
-				rr = sqrt(xx * xx + yy * yy);
+			for (int i = 0; i < shared.shareddata.nsite; i++) {
+				const double xx = xgrid - shared.shareddata.sites[i].point.xgrid[instance];
+				const double yy = ygrid - shared.shareddata.sites[i].point.ygrid[instance];
+				const double rr = sqrt(xx * xx + yy * yy);
 				if (rr < rrmin) {
 					rrmin = rr;
 					isite = i;
@@ -877,7 +855,7 @@ int mbview_pick_site_delete(size_t instance, int xpixel, int ypixel) {
 		fprintf(stderr, "dbg2       nsite:               %d\n", shared.shareddata.nsite);
 		fprintf(stderr, "dbg2       nsite_alloc:         %d\n", shared.shareddata.nsite_alloc);
 		fprintf(stderr, "dbg2       site_selected:       %d\n", shared.shareddata.site_selected);
-		for (i = 0; i < shared.shareddata.nsite; i++) {
+		for (int i = 0; i < shared.shareddata.nsite; i++) {
 			fprintf(stderr, "dbg2       site %d xgrid:       %f\n", i, shared.shareddata.sites[i].point.xgrid[instance]);
 			fprintf(stderr, "dbg2       site %d ygrid:       %f\n", i, shared.shareddata.sites[i].point.ygrid[instance]);
 			fprintf(stderr, "dbg2       site %d xlon:        %f\n", i, shared.shareddata.sites[i].point.xlon);
@@ -903,10 +881,6 @@ int mbview_pick_site_delete(size_t instance, int xpixel, int ypixel) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_site_delete(size_t instance, int isite) {
-
-	int status = MB_SUCCESS;
-	int i;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -920,9 +894,10 @@ int mbview_site_delete(size_t instance, int isite) {
 	// struct mbview_struct *data = &(view->data);
 
 	/* delete site if its the same as previously selected */
+	int status = MB_SUCCESS;
 	if (isite >= 0 && isite < shared.shareddata.nsite) {
 		/* move site data if necessary */
-		for (i = isite; i < shared.shareddata.nsite - 1; i++) {
+		for (int i = isite; i < shared.shareddata.nsite - 1; i++) {
 			shared.shareddata.sites[i] = shared.shareddata.sites[i + 1];
 		}
 
@@ -947,15 +922,6 @@ int mbview_site_delete(size_t instance, int isite) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_drawsite(size_t instance, int rez) {
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	GLUquadricObj *globj;
-	double sitesizesmall, sitesizelarge;
-	double xx, yy;
-	int isite;
-	int icolor;
-	int k0, k1;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -965,27 +931,27 @@ int mbview_drawsite(size_t instance, int rez) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
+	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
 	/* Generate GL lists to be plotted */
 	if (shared.shareddata.site_mode != MBV_SITE_OFF && data->site_view_mode == MBV_VIEW_ON && shared.shareddata.nsite > 0) {
 		/* get size according to viewbounds */
-		k0 = data->viewbounds[0] * data->primary_n_rows + data->viewbounds[2];
-		k1 = data->viewbounds[1] * data->primary_n_rows + data->viewbounds[3];
-		xx = data->primary_x[k1] - data->primary_x[k0];
-		yy = data->primary_y[k1] - data->primary_y[k0];
-		sitesizesmall = 0.004 * sqrt(xx * xx + yy * yy);
-		sitesizelarge = 1.4 * sitesizesmall;
+		const int k0 = data->viewbounds[0] * data->primary_n_rows + data->viewbounds[2];
+		const int k1 = data->viewbounds[1] * data->primary_n_rows + data->viewbounds[3];
+		const double xx = data->primary_x[k1] - data->primary_x[k0];
+		const double yy = data->primary_y[k1] - data->primary_y[k0];
+		const double sitesizesmall = 0.004 * sqrt(xx * xx + yy * yy);
+		const double sitesizelarge = 1.4 * sitesizesmall;
 
 		/* Use disks for 2D plotting */
 		if (data->display_mode == MBV_DISPLAY_2D) {
 			/* make list for small site */
 			glNewList((GLuint)MBV_GLLIST_SITESMALL, GL_COMPILE);
-			globj = gluNewQuadric();
+			GLUquadricObj *globj = gluNewQuadric();
 			gluDisk(globj, 0.0, sitesizesmall, 10, 1);
 			gluDeleteQuadric(globj);
-			icolor = MBV_COLOR_BLACK;
+			int icolor = MBV_COLOR_BLACK;
 			glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
 			globj = gluNewQuadric();
 			gluDisk(globj, 0.8 * sitesizesmall, sitesizesmall, 10, 1);
@@ -1009,7 +975,7 @@ int mbview_drawsite(size_t instance, int rez) {
 		else if (data->display_mode == MBV_DISPLAY_3D) {
 			/* make list for small site */
 			glNewList((GLuint)MBV_GLLIST_SITESMALL, GL_COMPILE);
-			globj = gluNewQuadric();
+			GLUquadricObj *globj = gluNewQuadric();
 			gluSphere(globj, sitesizesmall, 10, 10);
 			gluDeleteQuadric(globj);
 			glEndList();
@@ -1023,9 +989,10 @@ int mbview_drawsite(size_t instance, int rez) {
 		}
 
 		/* loop over the sites */
-		for (isite = 0; isite < shared.shareddata.nsite; isite++) {
+		for (int isite = 0; isite < shared.shareddata.nsite; isite++) {
 
 			/* set the color for this site */
+			int icolor;
 			if (isite == shared.shareddata.site_selected)
 				icolor = MBV_COLOR_RED;
 			else
@@ -1053,6 +1020,8 @@ int mbview_drawsite(size_t instance, int rez) {
 	mbview_glerrorcheck(instance, 1, __func__);
 #endif
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1064,12 +1033,6 @@ int mbview_drawsite(size_t instance, int rez) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_updatesitelist() {
-	int status = MB_SUCCESS;
-	XmString *xstr;
-	int isite;
-	char londstr0[24], lonmstr0[24];
-	char latdstr0[24], latmstr0[24];
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1081,13 +1044,16 @@ int mbview_updatesitelist() {
 		/* remove all existing items */
 		XmListDeleteAllItems(shared.mb3d_sitelist.mbview_list_sitelist);
 
+
 		if (shared.shareddata.nsite > 0) {
 			/* allocate array of label XmStrings */
-			xstr = (XmString *)malloc(shared.shareddata.nsite * sizeof(XmString));
+			XmString *xstr = (XmString *)malloc(shared.shareddata.nsite * sizeof(XmString));
 
 			/* loop over the sites */
-			for (isite = 0; isite < shared.shareddata.nsite; isite++) {
+			for (int isite = 0; isite < shared.shareddata.nsite; isite++) {
 				/* add list item for each site */
+				char londstr0[24], lonmstr0[24];
+				char latdstr0[24], latmstr0[24];
 				mbview_setlonlatstrings(shared.shareddata.sites[isite].point.xlon, shared.shareddata.sites[isite].point.ylat,
 				                        londstr0, latdstr0, lonmstr0, latmstr0);
 				if (shared.lonlatstyle == MBV_LONLAT_DEGREESDECIMAL)
@@ -1111,12 +1077,14 @@ int mbview_updatesitelist() {
 			}
 
 			/* deallocate memory no longer needed */
-			for (isite = 0; isite < shared.shareddata.nsite; isite++) {
+			for (int isite = 0; isite < shared.shareddata.nsite; isite++) {
 				XmStringFree(xstr[isite]);
 			}
 			free(xstr);
 		}
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
