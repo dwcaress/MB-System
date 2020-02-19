@@ -93,20 +93,13 @@ typedef struct _UIAppDefault {
 
 static Boolean doInitAppDefaults = True;
 static UIAppDefault appDefaults[] = {{NULL, NULL, NULL, NULL, NULL}};
-/*
- * The functions to call in the apputils.c
- */
+
+// The functions to call in the apputils.c
 void InitAppDefaults(Widget, UIAppDefault *);
 void SetAppDefaults(Widget, UIAppDefault *, char *, Boolean);
 
 Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList args_in, Cardinal ac_in) {
-	Cardinal ac = 0;
-	Arg args[256];
-	Boolean argok = False;
-
-	/**
-	 * Register the converters for the widgets.
-	 */
+	// Register the converters for the widgets.
 	RegisterBxConverters(XtWidgetToApplicationContext(parent));
 	XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
@@ -117,23 +110,20 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	XtInitializeWidgetClass((WidgetClass)xmCascadeButtonWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
-	/**
-	 * Setup app-defaults fallback table if not already done.
-	 */
+
+	// Setup app-defaults fallback table if not already done.
 	if (doInitAppDefaults) {
 		InitAppDefaults(parent, appDefaults);
 		doInitAppDefaults = False;
 	}
-	/**
-	 * Now set the app-defaults for this instance.
-	 */
+
 	SetAppDefaults(parent, appDefaults, name, False);
 
-	ac = 0;
+	Cardinal ac = 0;
+	Arg args[256];
+	Boolean argok = False;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(parent, (char *)"3D Soundings", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(parent, (char *)"3D Soundings", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNdialogTitle, tmp0);
 		if (argok)
 			ac++;
@@ -159,9 +149,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Reset View", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Reset View", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -191,9 +179,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Pan and Zoom", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Pan and Zoom", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -220,9 +206,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Rotate Soundings", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Rotate Soundings", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -251,9 +235,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(
+		XmString tmp0 = (XmString)BX_CONVERT(
 		    class_in->Mb3dsdg, (char *)":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Rotate Soundings\"\"R: Exageration\"",
 		    XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
@@ -292,9 +274,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Roll Bias (degrees)", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Roll Bias (degrees)", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
 			ac++;
@@ -336,9 +316,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Pitch Bias (degrees)", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Pitch Bias (degrees)", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
 			ac++;
@@ -380,9 +358,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Heading Bias (degrees)", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Heading Bias (degrees)", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
 			ac++;
@@ -424,9 +400,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Time Lag (seconds)", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Time Lag (seconds)", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
 			ac++;
@@ -468,9 +442,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Snell Correction", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Snell Correction", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNtitleString, tmp0);
 		if (argok)
 			ac++;
@@ -514,9 +486,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Azimuth: 0.00 | Elevation: 0.00 | Vert. Exager.: 1.00",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Azimuth: 0.00 | Elevation: 0.00 | Vert. Exager.: 1.00",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -566,9 +536,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->menuBar, (char *)"View", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->menuBar, (char *)"View", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -608,9 +576,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show Bounding Box", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show Bounding Box", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -637,9 +603,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show Flagged Soundings", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show Flagged Soundings", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -666,9 +630,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show No Profiles", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show No Profiles", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -691,9 +653,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show Good Profiles", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show Good Profiles", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -716,9 +676,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show All Profiles", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show All Profiles", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -745,9 +703,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Scale with Flagged Soundings", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Scale with Flagged Soundings", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -775,9 +731,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Color by Topography", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Color by Topography", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -806,9 +760,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->menuBar, (char *)"Mouse", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->menuBar, (char *)"Mouse", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -848,9 +800,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_mouse, (char *)"Rotate Soundings", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_mouse, (char *)"Rotate Soundings", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -873,9 +823,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_mouse, (char *)"Pan and Zoom", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_mouse, (char *)"Pan and Zoom", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -903,9 +851,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->menuBar, (char *)"Action", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->menuBar, (char *)"Action", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -945,9 +891,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Apply Bias Values to Grid", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Apply Bias Values to Grid", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -974,9 +918,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (1 X cell, n<10)",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (1 X cell, n<10)",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1001,9 +943,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (1 X cell, n<2)", XmRXmString,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (1 X cell, n<2)", XmRXmString,
 		                            0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1028,9 +968,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (4 X cell, n<10)",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (4 X cell, n<10)",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1055,9 +993,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (4 X cell, n<2)", XmRXmString,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (4 X cell, n<2)", XmRXmString,
 		                            0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1082,9 +1018,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (8 X cell, n<10)",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (8 X cell, n<10)",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1109,9 +1043,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (8 X cell, n<2)", XmRXmString,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Filter by sparse voxels (8 X cell, n<2)", XmRXmString,
 		                            0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1140,9 +1072,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Black", XmRXmString, 0,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Black", XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1167,9 +1097,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 =
+		XmString tmp0 =
 		    (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Red", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1194,9 +1122,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Yellow", XmRXmString, 0,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Yellow", XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1221,9 +1147,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Green", XmRXmString, 0,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Green", XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1248,9 +1172,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Bluegreen", XmRXmString, 0,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Bluegreen", XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1275,9 +1197,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 =
+		XmString tmp0 =
 		    (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Blue", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1302,9 +1222,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Purple", XmRXmString, 0,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Color Unflagged Soundings Purple", XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1333,9 +1251,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Bias Values (roll)", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Bias Values (roll)", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1359,9 +1275,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 =
+		XmString tmp0 =
 		    (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Bias Values (pitch)", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1386,9 +1300,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 =
+		XmString tmp0 =
 		    (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Bias Values (heading)", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1413,9 +1325,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Bias Values (roll-pitch)", XmRXmString, 0,
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Bias Values (roll-pitch)", XmRXmString, 0,
 		                            &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1440,9 +1350,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Bias Values (roll-pitch-heading)",
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Bias Values (roll-pitch-heading)",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -1467,9 +1375,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Time Lag Values", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Time Lag Values", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1493,9 +1399,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Snell Correction Values", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Snell Correction Values", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1524,9 +1428,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->menuBar, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->menuBar, (char *)"Dismiss", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1566,9 +1468,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_dismiss, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_dismiss, (char *)"Dismiss", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1632,9 +1532,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->radioBox_soundingsmode, (char *)"Toggle", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->radioBox_soundingsmode, (char *)"Toggle", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1661,9 +1559,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->radioBox_soundingsmode, (char *)"Pick", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->radioBox_soundingsmode, (char *)"Pick", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1690,9 +1586,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->radioBox_soundingsmode, (char *)"Erase", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->radioBox_soundingsmode, (char *)"Erase", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1719,9 +1613,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->radioBox_soundingsmode, (char *)"Restore", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->radioBox_soundingsmode, (char *)"Restore", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1748,9 +1640,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->radioBox_soundingsmode, (char *)"Grab", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->radioBox_soundingsmode, (char *)"Grab", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1777,9 +1667,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->radioBox_soundingsmode, (char *)"Info", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->radioBox_soundingsmode, (char *)"Info", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
