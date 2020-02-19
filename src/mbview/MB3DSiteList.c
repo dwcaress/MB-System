@@ -28,11 +28,6 @@
 
 void RegisterBxConverters(XtAppContext);
 XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
-XtPointer BX_DOUBLE(double);
-XtPointer BX_SINGLE(float);
-void BX_MENU_POST(Widget, XtPointer, XEvent *, Boolean *);
-Pixmap XPM_PIXMAP(Widget, char **);
-void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 
 /**
  * Declarations for callbacks and handlers.
@@ -68,32 +63,27 @@ MB3DSiteListDataPtr MB3DSiteListCreate(MB3DSiteListDataPtr class_in, Widget pare
                                        Cardinal ac_in) {
 	(void)args_in;  // Unused parameter
 	(void)ac_in;  // Unused parameter
-	Cardinal ac = 0;
-	Arg args[256];
-	Boolean argok = False;
 
-	/**
-	 * Register the converters for the widgets.
-	 */
+	// Register the converters for the widgets.
 	RegisterBxConverters(XtWidgetToApplicationContext(parent));
 	XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmScrolledWindowWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmListWidgetClass);
-	/**
-	 * Setup app-defaults fallback table if not already done.
-	 */
+
+	// Setup app-defaults fallback table if not already done.
 	if (doInitAppDefaults) {
 		InitAppDefaults(parent, appDefaults);
 		doInitAppDefaults = False;
 	}
-	/**
-	 * Now set the app-defaults for this instance.
-	 */
+
 	SetAppDefaults(parent, appDefaults, name, False);
 
-	ac = 0;
+	Cardinal ac = 0;
+	Arg args[256];
+	Boolean argok = False;
+
 	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
 	ac++;
 	XtSetArg(args[ac], XmNx, 87);
@@ -108,9 +98,7 @@ MB3DSiteListDataPtr MB3DSiteListCreate(MB3DSiteListDataPtr class_in, Widget pare
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->MB3DSiteList, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->MB3DSiteList, (char *)"Dismiss", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -141,9 +129,7 @@ MB3DSiteListDataPtr MB3DSiteListCreate(MB3DSiteListDataPtr class_in, Widget pare
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->MB3DSiteList, (char *)"Delete Selected Sites", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->MB3DSiteList, (char *)"Delete Selected Sites", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -174,9 +160,7 @@ MB3DSiteListDataPtr MB3DSiteListCreate(MB3DSiteListDataPtr class_in, Widget pare
 
 	ac = 0;
 	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->MB3DSiteList, (char *)"Site List:", XmRXmString, 0, &argok);
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->MB3DSiteList, (char *)"Site List:", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -298,13 +282,6 @@ MB3DSiteListDataPtr MB3DSiteListCreate(MB3DSiteListDataPtr class_in, Widget pare
 	XtSetArg(args[ac], XmNtopWidget, class_in->mbview_sitelist_label);
 	ac++;
 	XtSetValues(class_in->mbview_scrolledWindow_sitelist, args, ac);
-
-	/*
-	 * Assign functions to class record
-	 */
-
-	/* Begin user code block <end_MB3DSiteListCreate> */
-	/* End user code block <end_MB3DSiteListCreate> */
 
 	return (class_in);
 }
