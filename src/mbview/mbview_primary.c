@@ -12,22 +12,21 @@
  *    See README file for copying and redistribution conditions.
  *------------------------------------------------------------------------------*/
 /*
- *
  * Author:	D. W. Caress
  * Date:	September 25, 2003
  *
  * Note:	This code was broken out of mbview_callbacks.c, which was
  *		begun on October 7, 2002
- *
  */
-/*------------------------------------------------------------------------------*/
 
-/* Standard includes for builtins. */
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <math.h>
+
+#include "mb_define.h"
+#include "mb_status.h"
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1800)
@@ -38,7 +37,6 @@
 #include <windows.h>
 #endif
 
-/* Motif required Headers */
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <Xm/Xm.h>
@@ -56,7 +54,6 @@
 #include "MB3DRouteList.h"
 #include "MB3DNavList.h"
 
-/* OpenGL include files */
 #include <GL/gl.h>
 #include <GL/glu.h>
 #ifndef WIN32
@@ -64,31 +61,15 @@
 #endif
 #include "mb_glwdrawa.h"
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_define.h"
-
-/* mbview include */
 #include "mbview.h"
 #include "mbviewprivate.h"
-
-/*------------------------------------------------------------------------------*/
-
-/* local variables */
 
 /*------------------------------------------------------------------------------*/
 int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_projection_mode, char *primary_grid_projection_id,
                           float primary_nodatavalue, int primary_n_columns, int primary_n_rows, double primary_min, double primary_max,
                           double primary_xmin, double primary_xmax, double primary_ymin, double primary_ymax, double primary_dx,
                           double primary_dy, float *primary_data, int *error)
-
 {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -112,8 +93,8 @@ int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_project
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set values */
 	data->primary_grid_projection_mode = primary_grid_projection_mode;
@@ -136,7 +117,7 @@ int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_project
 	data->viewbounds[3] = data->primary_n_rows;
 
 	/* allocate required arrays */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->primary_nxy, (void **)&data->primary_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->primary_nxy, (void **)&data->primary_data, error);
 	if (status == MB_SUCCESS)
 		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->primary_nxy, (void **)&data->primary_x, error);
 	if (status == MB_SUCCESS)
@@ -178,7 +159,6 @@ int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_project
 	mbview_colorclear(instance);
 	mbview_zscaleclear(instance);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -187,22 +167,12 @@ int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_project
 		fprintf(stderr, "dbg2       status:                    %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_updateprimarygrid(int verbose, size_t instance, int primary_n_columns, int primary_n_rows, float *primary_data, int *error)
-
 {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int first;
-	int i, j, k;
-
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -215,15 +185,15 @@ int mbview_updateprimarygrid(int verbose, size_t instance, int primary_n_columns
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set value and calculate derivative */
 	if (primary_n_columns == data->primary_n_columns && primary_n_rows == data->primary_n_rows) {
-		first = true;
-		for (k = 0; k < data->primary_n_columns * data->primary_n_rows; k++) {
+		bool first = true;
+		for (int k = 0; k < data->primary_n_columns * data->primary_n_rows; k++) {
 			data->primary_data[k] = primary_data[k];
-			if (first == true && primary_data[k] != data->primary_nodatavalue) {
+			if (first && primary_data[k] != data->primary_nodatavalue) {
 				data->primary_min = data->primary_data[k];
 				data->primary_max = data->primary_data[k];
 				first = false;
@@ -233,8 +203,8 @@ int mbview_updateprimarygrid(int verbose, size_t instance, int primary_n_columns
 				data->primary_max = MAX(data->primary_max, data->primary_data[k]);
 			}
 		}
-		for (i = 0; i < data->primary_n_columns; i++) {
-			for (j = 0; j < data->primary_n_rows; j++) {
+		for (int i = 0; i < data->primary_n_columns; i++) {
+			for (int j = 0; j < data->primary_n_rows; j++) {
 				mbview_derivative(instance, i, j);
 			}
 		}
@@ -252,7 +222,8 @@ int mbview_updateprimarygrid(int verbose, size_t instance, int primary_n_columns
 	view->primary_histogram_set = false;
 	view->primaryslope_histogram_set = false;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -261,21 +232,12 @@ int mbview_updateprimarygrid(int verbose, size_t instance, int primary_n_columns
 		fprintf(stderr, "dbg2       status:                    %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_updateprimarygridcell(int verbose, size_t instance, int primary_ix, int primary_jy, float value, int *error)
-
 {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int k;
-
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -288,13 +250,13 @@ int mbview_updateprimarygridcell(int verbose, size_t instance, int primary_ix, i
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set value */
 	if (primary_ix >= 0 && primary_ix < data->primary_n_columns && primary_jy >= 0 && primary_jy < data->primary_n_rows) {
 		/* update the cell value */
-		k = primary_ix * data->primary_n_rows + primary_jy;
+		const int k = primary_ix * data->primary_n_rows + primary_jy;
 		data->primary_data[k] = value;
 		data->primary_stat_z[k / 8] = data->primary_stat_z[k / 8] & (255 - statmask[k % 8]);
 		data->primary_stat_color[k / 8] = data->primary_stat_color[k / 8] & (255 - statmask[k % 8]);
@@ -308,7 +270,8 @@ int mbview_updateprimarygridcell(int verbose, size_t instance, int primary_ix, i
 		view->contourfullrez = false;
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -317,21 +280,13 @@ int mbview_updateprimarygridcell(int verbose, size_t instance, int primary_ix, i
 		fprintf(stderr, "dbg2       status:                    %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_setprimarycolortable(int verbose, size_t instance, int primary_colortable, int primary_colortable_mode,
                                 double primary_colortable_min, double primary_colortable_max, int *error)
-
 {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -345,8 +300,8 @@ int mbview_setprimarycolortable(int verbose, size_t instance, int primary_colort
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set values */
 	data->primary_colortable = primary_colortable;
@@ -354,7 +309,8 @@ int mbview_setprimarycolortable(int verbose, size_t instance, int primary_colort
 	data->primary_colortable_min = primary_colortable_min;
 	data->primary_colortable_max = primary_colortable_max;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -363,21 +319,13 @@ int mbview_setprimarycolortable(int verbose, size_t instance, int primary_colort
 		fprintf(stderr, "dbg2       status:                    %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_setslopecolortable(int verbose, size_t instance, int slope_colortable, int slope_colortable_mode,
                               double slope_colortable_min, double slope_colortable_max, int *error)
-
 {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -391,8 +339,8 @@ int mbview_setslopecolortable(int verbose, size_t instance, int slope_colortable
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set values */
 	data->slope_colortable = slope_colortable;
@@ -400,7 +348,8 @@ int mbview_setslopecolortable(int verbose, size_t instance, int slope_colortable
 	data->slope_colortable_min = slope_colortable_min;
 	data->slope_colortable_max = slope_colortable_max;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -409,7 +358,6 @@ int mbview_setslopecolortable(int verbose, size_t instance, int slope_colortable
 		fprintf(stderr, "dbg2       status:                    %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
