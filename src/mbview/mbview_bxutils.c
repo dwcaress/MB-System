@@ -14,17 +14,6 @@
  */
 #define LOCAL_STRCASECMP
 
-#ifndef NeedFunctionPrototypes
-#define NeedFunctionPrototypes
-#endif
-
-/*
- * Define SUPPORTS_WCHARS if the system supports wide character sets
- * Note: the following line flags the VAXC compiler and not the
- * DECC compiler running VAXC emulation.
- */
-#define SUPPORTS_WCHARS
-
 /*
  * Handy definition used in SET_BACKGROUND_COLOR
  */
@@ -35,11 +24,7 @@
  */
 #if defined(LOCAL_STRCASECMP)
 #define STRCASECMP StrCasecmp
-#ifndef NeedFunctionPrototypes
-static int StrCasecmp();
-#else
 static int StrCasecmp(char *, char *);
-#endif
 #else
 #define STRCASECMP strcasecmp
 #endif
@@ -90,27 +75,6 @@ enum {
 	NUM_COMMON_WCHARS
 };
 
-#ifndef NeedFunctionPrototypes
-
-#ifndef SUPPORTS_WCHARS
-static int mblen();
-#endif
-static int strlenWc();
-static size_t doMbstowcs();
-static size_t doWcstombs();
-static void copyWcsToMbs();
-static int dombtowc();
-static Boolean extractSegment();
-static XmString StringToXmString();
-static char *getNextCStrDelim();
-static int getCStrCount();
-static wchar_t *CStrCommonWideCharsGet();
-
-#else
-
-#ifndef SUPPORTS_WCHARS
-static int mblen(char *, size_t);
-#endif
 static int strlenWc(wchar_t *);
 static size_t doMbstowcs(wchar_t *, char *, size_t);
 static size_t doWcstombs(char *, wchar_t *, size_t);
@@ -121,8 +85,6 @@ static XmString StringToXmString(char *);
 static char *getNextCStrDelim(char *);
 static int getCStrCount(char *);
 static wchar_t *CStrCommonWideCharsGet();
-
-#endif
 
 /*****************************************************************************
  *	STATIC CODE
@@ -163,23 +125,6 @@ static int StrCasecmp(char * s1, char *s2) {
 
 /*
  * Function:
- *      len = mblen(s, n);
- * Description:
- *      The mblen function for platforms that don't have one. This
- * 	function simply returns a length of 1 since no wide character
- *	support exists for this platform.
- * Input:
- *      s - char * : the character string to get the length from
- *	n - size_t : the size of the string
- * Output:
- *      int : always 1
- */
-#ifndef SUPPORTS_WCHARS
-static int mblen(char *s, size_t n) { return (1); }
-#endif
-
-/*
- * Function:
  *      len = strlenWc(ptr);
  * Description:
  *      Return the number of characters in a wide character string (not
@@ -214,17 +159,7 @@ static int strlenWc(wchar_t *ptr) {
  *      bytesConv - size_t : number of bytes converted
  */
 static size_t doMbstowcs(wchar_t *wcs, char *mbs, size_t n) {
-#ifndef SUPPORTS_WCHARS
-	int i;
-
-	for (i = 0; i < n && mbs[i] != 0; ++i) {
-		wcs[i] = mbs[i];
-	}
-	wcs[i++] = 0;
-	return (i);
-#else
 	return (mbstowcs(wcs, mbs, n));
-#endif
 }
 
 /*
@@ -240,15 +175,6 @@ static size_t doMbstowcs(wchar_t *wcs, char *mbs, size_t n) {
  *      bytesConv - size_t : number of bytes converted
  */
 static size_t doWcstombs(char *mbs, wchar_t *wcs, size_t n) {
-#ifndef SUPPORTS_WCHARS
-	int i;
-
-	for (i = 0; i < n && wcs[i] != 0; ++i) {
-		mbs[i] = wcs[i];
-	}
-	mbs[i] = 0;
-	return (i);
-#else
 	size_t retval;
 
 	retval = wcstombs(mbs, wcs, (n * sizeof(wchar_t)));
@@ -256,7 +182,6 @@ static size_t doWcstombs(char *mbs, wchar_t *wcs, size_t n) {
 		return (0);
 	else
 		return (retval);
-#endif
 }
 
 /*
@@ -371,21 +296,7 @@ static void copyWcsToMbs(char *mbs, wchar_t *wcs, int len, Boolean process_it) {
 static int dombtowc(wchar_t *wide, char *multi, size_t size) {
 	int retVal = 0;
 
-#ifndef SUPPORTS_WCHARS
-	if ((multi == NULL) || (*multi == '\000')) {
-		if (wide)
-			wide[0] = '\0';
-		return (0);
-	}
-
-	for (retVal = 0; retVal < size && multi[retVal] != '\000'; retVal++) {
-		if (wide != NULL) {
-			wide[retVal] = multi[retVal];
-		}
-	}
-#else
 	retVal = mbtowc(wide, multi, size);
-#endif
 	return (retVal);
 }
 
@@ -1695,11 +1606,7 @@ typedef struct {
 
 /* forward declaration of functions with prototypes */
 
-#ifdef NeedFunctionPrototypes
 #define LFUNC(f, t, p) static t f p
-#else
-#define LFUNC(f, t, p) static t f()
-#endif
 
 /*
  * functions declarations
