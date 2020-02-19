@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -21,6 +22,7 @@
  */
 #ifdef __cplusplus
 #if XtSpecificationRelease < 5
+#error too old
 #define XTPOINTER char *
 #else
 #define XTPOINTER XPointer
@@ -65,7 +67,7 @@ static int strlenWc(wchar_t *);
 static size_t doMbstowcs(wchar_t *, char *, size_t);
 static size_t doWcstombs(char *, wchar_t *, size_t);
 static void copyWcsToMbs(char *, wchar_t *, int, Boolean);
-static int dombtowc(wchar_t *, char *, size_t);
+// static int dombtowc(wchar_t *, char *, size_t);
 static Boolean extractSegment(wchar_t **, wchar_t **, int *, wchar_t **, int *, int *, Boolean *);
 static XmString StringToXmString(char *);
 static char *getNextCStrDelim(char *);
@@ -128,9 +130,7 @@ static size_t doMbstowcs(wchar_t *wcs, char *mbs, size_t n) {
  *      bytesConv - size_t : number of bytes converted
  */
 static size_t doWcstombs(char *mbs, wchar_t *wcs, size_t n) {
-	size_t retval;
-
-	retval = wcstombs(mbs, wcs, (n * sizeof(wchar_t)));
+	const size_t retval = wcstombs(mbs, wcs, (n * sizeof(wchar_t)));
 	if (retval == (size_t)-1)
 		return (0);
 	else
@@ -156,31 +156,21 @@ static void copyWcsToMbs(char *mbs, wchar_t *wcs, int len, Boolean process_it) {
 	static wchar_t *tbuf = NULL;
 	static int tbufSize = 0;
 
-	int numCvt;
-	int lenToConvert;
-	wchar_t *fromP = wcs;
-	wchar_t *x = &fromP[len];
-	wchar_t *toP;
-	wchar_t *commonWChars = CStrCommonWideCharsGet();
-	wchar_t tmp;
+	const wchar_t *commonWChars = CStrCommonWideCharsGet();
 
-	/*
-	 * Make sure there's room in the buffer
-	 */
+	// Make sure there's room in the buffer
 	if (tbufSize < len) {
 		tbuf = (wchar_t *)XtRealloc((char *)tbuf, (len + 1) * sizeof(wchar_t));
 		tbufSize = len;
 	}
 
-	/*
-	 * Now copy and process
-	 */
-	toP = tbuf;
-	lenToConvert = 0;
+	// Copy and process
+	wchar_t *toP = tbuf;
+	int lenToConvert = 0;
+	wchar_t *fromP = wcs;
+	const wchar_t *x = &fromP[len];
 	while (fromP < x) {
-		/*
-		 * Check for quoted characters
-		 */
+		// Check for quoted characters
 		if ((*fromP == commonWChars[WBackSlash]) && process_it) {
 			fromP++;        /* Skip quote */
 			if (fromP == x) /* Hanging quote? */
@@ -189,41 +179,32 @@ static void copyWcsToMbs(char *mbs, wchar_t *wcs, int len, Boolean process_it) {
 				lenToConvert++;
 				break;
 			}
-			tmp = *fromP++;
+			const wchar_t tmp = *fromP++;
 			if (tmp == commonWChars[WideN]) {
 				*toP++ = commonWChars[WNewLine];
-			}
-			else if (tmp == commonWChars[WideT]) {
+			} else if (tmp == commonWChars[WideT]) {
 				*toP++ = commonWChars[WTab];
-			}
-			else if (tmp == commonWChars[WideR]) {
+			} else if (tmp == commonWChars[WideR]) {
 				*toP++ = commonWChars[WCarriageReturn];
-			}
-			else if (tmp == commonWChars[WideF]) {
+			} else if (tmp == commonWChars[WideF]) {
 				*toP++ = commonWChars[WFormFeed];
-			}
-			else if (tmp == commonWChars[WideV]) {
+			} else if (tmp == commonWChars[WideV]) {
 				*toP++ = commonWChars[WVerticalTab];
-			}
-			else if (tmp == commonWChars[WBackSlash]) {
+			} else if (tmp == commonWChars[WBackSlash]) {
 				*toP++ = commonWChars[WBackSlash];
-			}
-			else {
-				/*
-				 * No special translation needed
-				 */
+			} else {
+				// No special translation needed
 				*toP++ = tmp;
 			}
-		}
-		else {
+		} else {
 			*toP++ = *fromP++;
 		}
 		lenToConvert++;
 	}
 
-	tmp = tbuf[lenToConvert];
+	const wchar_t tmp = tbuf[lenToConvert];
 	tbuf[lenToConvert] = (wchar_t)0;
-	numCvt = doWcstombs(mbs, tbuf, lenToConvert);
+	const int numCvt = doWcstombs(mbs, tbuf, lenToConvert);
 	tbuf[lenToConvert] = tmp;
 
 	mbs[numCvt] = '\0';
@@ -246,12 +227,11 @@ static void copyWcsToMbs(char *mbs, wchar_t *wcs, int len, Boolean process_it) {
  *	NOTE:  if wide is NULL, then this returns the number of bytes in
  *	       the multibyte character.
  */
-static int dombtowc(wchar_t *wide, char *multi, size_t size) {
-	int retVal = 0;
-
-	retVal = mbtowc(wide, multi, size);
-	return (retVal);
-}
+// TODO(schwehr): const multi
+// TODO(schwehr): drop dombtowc and just use mbtowc
+// static int dombtowc(wchar_t *wide, char *multi, size_t size) {
+//	return mbtowc(wide, multi, size);
+// }
 
 /*
  * Function:
@@ -266,22 +246,18 @@ static int dombtowc(wchar_t *wide, char *multi, size_t size) {
  *			of string otherwise ('\0').
  */
 static wchar_t *getNextSeparator(wchar_t *str) {
-	wchar_t *ptr = str;
-	wchar_t *commonWChars = CStrCommonWideCharsGet();
+	const wchar_t *commonWChars = CStrCommonWideCharsGet();
 
+	wchar_t *ptr = str;
 	while (*ptr) {
-		/*
-		 * Check for separator
-		 */
-		if ((*ptr == commonWChars[WHash]) || (*ptr == commonWChars[WQuote]) || (*ptr == commonWChars[WColon])) {
+		// Check for separator
+		if (*ptr == commonWChars[WHash] || *ptr == commonWChars[WQuote] || *ptr == commonWChars[WColon]) {
 			return (ptr);
-		}
-		else if (*ptr == commonWChars[WBackSlash]) {
+		} else if (*ptr == commonWChars[WBackSlash]) {
 			ptr++;
 			if (*ptr)
 				ptr++; /* Skip quoted character */
-		}
-		else {
+		} else {
 			ptr++;
 		}
 	}
@@ -311,72 +287,53 @@ static wchar_t *getNextSeparator(wchar_t *str) {
 static Boolean extractSegment(
     wchar_t **str, wchar_t **tagStart, int *tagLen, wchar_t **txtStart,
     int *txtLen, int *pDir, Boolean *pSep) {
-	wchar_t *start;
-	wchar_t *text;
-	int textL;
-	Boolean tagSeen;
-	wchar_t *tag;
-	int tagL;
-	Boolean modsSeen;
-	Boolean sep;
-	int dir;
-	Boolean done;
-	Boolean checkDir;
-	wchar_t *commonWChars;
+	const wchar_t *commonWChars = CStrCommonWideCharsGet();
+
+	// Guard against nulls
+	wchar_t *start = *str;
 	wchar_t emptyStrWcs[1];
-
-	/*
-	 * Initialize variables
-	 */
-	text = NULL;
-	textL = 0;
-	tagSeen = False;
-	tag = NULL;
-	tagL = 0;
-	modsSeen = False;
-	dir = XmSTRING_DIRECTION_L_TO_R;
-	sep = False;
-	done = False;
-	commonWChars = CStrCommonWideCharsGet();
-
-	/*
-	 * Guard against nulls
-	 */
-	if (!(start = *str)) {
+	if (!start) {
 		start = emptyStrWcs;
 		emptyStrWcs[0] = commonWChars[WNull];
 	}
 
-	/*
-	 * If the first character of the string isn't a # or a ", then we
-	 * just have a regular old simple string. Do the same the thing for
-	 * the empty string.
-	 */
-	if ((*start == '\0') || (start != getNextSeparator(start))) {
+	// Initialize variables
+	wchar_t *text = NULL;
+	int textL = 0;
+
+	wchar_t *tag = NULL;
+	int tagL = 0;
+	int dir = XmSTRING_DIRECTION_L_TO_R;
+	bool sep = False;
+
+	// If the first character of the string isn't a # or a ", then we
+	// just have a regular old simple string. Do the same the thing for
+	// the empty string.
+	if (*start == '\0' || start != getNextSeparator(start)) {
 		text = start;
-		if (!(textL = strlenWc(start))) {
+		textL = strlenWc(start);
+		if (!textL) {
 			text = NULL;
 		}
 		start += textL;
-	}
-	else {
-		done = False;
+	} else {
+		bool tagSeen = false;
+		bool modsSeen = false;
+		bool done = false;
 		while (!done) {
 			if (*start == commonWChars[WHash]) {
 				if (tagSeen) {
-					done = True;
+					done = true;
 					break;
-				}
-				else {
-					tagSeen = True;
+				} else {
+					tagSeen = true;
 					tag = ++start;
 					start = getNextSeparator(tag);
 					if ((tagL = start - tag) == 0) {
 						tag = NULL; /* Null tag specified */
 					}
 				}
-			}
-			else if (*start == commonWChars[WQuote]) {
+			} else if (*start == commonWChars[WQuote]) {
 				text = ++start;
 				start = getNextSeparator(start);
 				while (!((*start == commonWChars[WQuote]) || (*start == commonWChars[WNull]))) {
@@ -386,73 +343,55 @@ static Boolean extractSegment(
 				if ((textL = start - text) == 0) {
 					text = NULL; /* Null text specified  */
 				}
-				/*
-				 * if a quote, skip over it
-				 */
+				// if a quote, skip over it
 				if (*start == commonWChars[WQuote]) {
 					start++;
 				}
-				done = True;
-			}
-			else if (*start == commonWChars[WColon]) {
+				done = true;
+			} else if (*start == commonWChars[WColon]) {
 				if (modsSeen) {
-					done = True;
+					done = true;
 					break;
 				}
 
-				/*
-				 * If the next character is a t or f, the we've got
-				 * a separator.
-				 */
-				modsSeen = True;
-				checkDir = False;
+				// If the next character is a t or f, the we've got a separator.
+				modsSeen = true;
+				bool checkDir = false;
 				start++;
-				if ((*start == commonWChars[WideT]) || (*start == commonWChars[WideUT]) || (*start == commonWChars[WideOne])) {
-					sep = True;
+				if (*start == commonWChars[WideT] || *start == commonWChars[WideUT] || *start == commonWChars[WideOne]) {
+					sep = true;
 					start++;
-					checkDir = True;
-				}
-				else if ((*start == commonWChars[WideF]) || (*start == commonWChars[WideUF]) ||
-				         (*start == commonWChars[WideZero])) {
-					sep = False;
+					checkDir = true;
+				} else if (*start == commonWChars[WideF] || *start == commonWChars[WideUF] ||
+				         *start == commonWChars[WideZero]) {
+					sep = false;
 					start++;
-					checkDir = True;
-				}
-				else if ((*start == commonWChars[WideR]) || (*start == commonWChars[WideUR])) {
+					checkDir = true;
+				} else if (*start == commonWChars[WideR] || *start == commonWChars[WideUR]) {
 					start++;
 					dir = XmSTRING_DIRECTION_R_TO_L;
-				}
-				else if ((*start == commonWChars[WideL]) || (*start == commonWChars[WideUL])) {
+				} else if (*start == commonWChars[WideL] || *start == commonWChars[WideUL]) {
 					start++;
 					dir = XmSTRING_DIRECTION_L_TO_R;
 				}
-				/*
-				 * Look for direction if necessary. This requires a bit of
-				 * look ahead.
-				 */
-				if (checkDir && (*start == commonWChars[WColon])) {
-					if ((*(start + 1) == commonWChars[WideL]) || (*(start + 1) == commonWChars[WideUL])) {
+				// Look for direction if necessary. This requires a bit of look ahead.
+				if (checkDir && *start == commonWChars[WColon]) {
+					if (*(start + 1) == commonWChars[WideL] || *(start + 1) == commonWChars[WideUL]) {
 						dir = XmSTRING_DIRECTION_L_TO_R;
 						start += 2;
-					}
-					else if ((*(start + 1) == commonWChars[WideR]) || (*(start + 1) == commonWChars[WideUR])) {
+					} else if (*(start + 1) == commonWChars[WideR] || *(start + 1) == commonWChars[WideUR]) {
 						dir = XmSTRING_DIRECTION_R_TO_L;
 						start += 2;
 					}
 				}
-			}
-			else {
-				/*
-				 * A bad string format! We'll just skip the character.
-				 */
+			} else {
+				// A bad string format! We'll just skip the character.
 				start++;
 			}
 		}
 	}
 
-	/*
-	 * Now fill in return values
-	 */
+	// Now fill in return values
 	if (*str)
 		*str = start;
 	if (tagStart)
@@ -468,7 +407,7 @@ static Boolean extractSegment(
 	if (pSep)
 		*pSep = sep;
 
-	return ((*start == commonWChars[WNull]) ? False : True);
+	return *start != commonWChars[WNull];
 }
 
 /*
@@ -487,59 +426,40 @@ static XmString StringToXmString(char *str) {
 	static char *textBuf = NULL;
 	static int textBufLen = 0;
 
-	wchar_t *ctx;
-	wchar_t *tag;
-	int tagLen;
-	wchar_t *text;
-	int textLen;
-	Boolean sep;
-	int dir;
-
-	Boolean more;
-	wchar_t *wcStr;
-	int curDir;
-	XmString xmStr;
-	XmString s1;
-	XmString s2;
-
 	if (!str)
 		return (NULL);
 
-	/*
-	 * For expediencies sake, we'll overallocate this buffer so that
-	 * the wcs is guaranteed to fit (1 wc per byte in original string).
-	 */
-	wcStr = (wchar_t *)XtMalloc((strlen(str) + 1) * sizeof(wchar_t));
+	// For expediencies sake, we'll overallocate this buffer so that
+	// the wcs is guaranteed to fit (1 wc per byte in original string).
+	wchar_t *wcStr = (wchar_t *)XtMalloc((strlen(str) + 1) * sizeof(wchar_t));
 	doMbstowcs(wcStr, str, strlen(str) + 1);
 
-	/*
-	 * Create the beginning segment
-	 */
-	curDir = XmSTRING_DIRECTION_L_TO_R;
-	xmStr = XmStringDirectionCreate(curDir);
+	// Create the beginning segment
+	int curDir = XmSTRING_DIRECTION_L_TO_R;
+	XmString xmStr = XmStringDirectionCreate(curDir);
 
-	/*
-	 * Convert the string.
-	 */
-	more = True;
-	ctx = wcStr;
+	// Convert the string.
+	bool more = true;
+	wchar_t *ctx = wcStr;
 	while (more) {
+		wchar_t *tag;
+		int tagLen;
+		wchar_t *text;
+		int textLen;
+		Boolean sep;
+		int dir;
 		more = extractSegment(&ctx, &tag, &tagLen, &text, &textLen, &dir, &sep);
-		/*
-		 * Pick up a direction change
-		 */
+		// Pick up a direction change
 		if (dir != curDir) {
 			curDir = dir;
-			s1 = XmStringDirectionCreate(curDir);
-			s2 = xmStr;
+			XmString s1 = XmStringDirectionCreate(curDir);
+			XmString s2 = xmStr;
 			xmStr = XmStringConcat(s2, s1);
 			XmStringFree(s1);
 			XmStringFree(s2);
 		}
 
-		/*
-		 * Create the segment. Text and tag first.
-		 */
+		// Create the segment. Text and tag first.
 		if (textLen) {
 			if (textBufLen <= (textLen * sizeof(wchar_t))) {
 				textBufLen = (textLen + 1) * sizeof(wchar_t);
@@ -562,28 +482,23 @@ static XmString StringToXmString(char *str) {
 				strcpy(tagBuf, XmSTRING_DEFAULT_CHARSET);
 			}
 
-			s1 = XmStringCreate(textBuf, tagBuf);
-			s2 = xmStr;
+			XmString s1 = XmStringCreate(textBuf, tagBuf);
+			XmString s2 = xmStr;
 			xmStr = XmStringConcat(s2, s1);
 			XmStringFree(s1);
 			XmStringFree(s2);
 		}
 
-		/*
-		 * Add in the separators.
-		 */
+		// Add in the separators.
 		if (sep) {
-			s1 = XmStringSeparatorCreate();
-			s2 = xmStr;
+			XmString s1 = XmStringSeparatorCreate();
+			XmString s2 = xmStr;
 			xmStr = XmStringConcat(s2, s1);
 			XmStringFree(s1);
 			XmStringFree(s2);
 		}
 	}
 
-	/*
-	 * Free up memory and return
-	 */
 	XtFree((char *)wcStr);
 	return (xmStr);
 }
@@ -600,22 +515,18 @@ static XmString StringToXmString(char *str) {
  *			delimiter found.
  */
 static char *getNextCStrDelim(char *str) {
-	char *comma = str;
-	Boolean inQuotes = False;
-	int len;
-
 	if (!str)
 		return (NULL);
 	if (!*str)
 		return (NULL); /* At end */
 
-#ifdef __CENTERLINE__
-	len = mblen(NULL, sizeof(wchar_t));
-#else
-	len = mblen(NULL, sizeof(wchar_t));
-#endif
+	char *comma = str;
+	bool inQuotes = false;
+
+	// int len = mblen(NULL, sizeof(wchar_t));
 	while (*comma) {
-		if ((len = mblen(comma, sizeof(wchar_t))) > 1) {
+		const int len = mblen(comma, sizeof(wchar_t));
+		if (len > 1) {
 			comma += len;
 			continue;
 		}
@@ -626,20 +537,16 @@ static char *getNextCStrDelim(char *str) {
 			continue;
 		}
 
-		/*
-		 * See if we have a delimiter
-		 */
+		// See if we have a delimiter
 		if (!inQuotes) {
 			if ((*comma == ',') || (*comma == '\012')) {
 				return (comma);
 			}
 		}
 
-		/*
-		 * Deal with quotes
-		 */
+		// Deal with quotes
 		if (*comma == '\"') {
-			inQuotes = ~inQuotes;
+			inQuotes = !inQuotes;
 		}
 
 		comma++;
@@ -660,13 +567,13 @@ static char *getNextCStrDelim(char *str) {
  *      cnt - int : the number of XmStrings found
  */
 static int getCStrCount(char *str) {
-	int x = 1;
-	char *newStr;
-
 	if (!str)
 		return (0);
 	if (!*str)
 		return (0);
+
+	int x = 1;
+	char *newStr;
 
 	while ((newStr = getNextCStrDelim(str))) {
 		x++;
@@ -687,26 +594,19 @@ static int getCStrCount(char *str) {
  */
 static wchar_t *CStrCommonWideCharsGet() {
 	static wchar_t *CommonWideChars = NULL;
-	/*
-	 * If you add to this array, don't forget to change the enum in
-	 * the TYPEDEFS and DEFINES section above to correspond to this
-	 * array.
-	 */
-	static char *characters[] = {(char *)"\000", (char *)"\t", (char *)"\n", (char *)"\r", (char *)"\f", (char *)"\v",
+	// If you add to this array, don't forget to change the enum in
+	// the TYPEDEFS and DEFINES section above to correspond to this array.
+	// TODO(schwehr): const char *
+	static const char *characters[] = {(char *)"\000", (char *)"\t", (char *)"\n", (char *)"\r", (char *)"\f", (char *)"\v",
 	                             (char *)"\\",   (char *)"\"", (char *)"#",  (char *)":",  (char *)"f",  (char *)"l",
 	                             (char *)"n",    (char *)"r",  (char *)"t",  (char *)"v",  (char *)"F",  (char *)"L",
 	                             (char *)"R",    (char *)"T",  (char *)"0",  (char *)"1"};
 
 	if (CommonWideChars == NULL) {
-		int i;
-
-		/*
-		 * Allocate and create the array.
-		 */
 		CommonWideChars = (wchar_t *)XtMalloc(NUM_COMMON_WCHARS * sizeof(wchar_t));
 
-		for (i = 0; i < NUM_COMMON_WCHARS; i++) {
-			(void)dombtowc(&(CommonWideChars[i]), characters[i], 1);
+		for (int i = 0; i < NUM_COMMON_WCHARS; i++) {
+			(void)mbtowc(&(CommonWideChars[i]), characters[i], 1);
 		}
 	}
 	return (CommonWideChars);
@@ -766,9 +666,6 @@ static Boolean CvtStringToXmString(
 	(void)args;  // Unused parameter
 	(void)data;  // Unused parameter
 
-	static XmString resStr;
-	char *str;
-
 	/*
 	 * This converter takes no parameters
 	 */
@@ -780,7 +677,8 @@ static Boolean CvtStringToXmString(
 	/*
 	 * See if this is a simple string
 	 */
-	str = (char *)fromVal->addr;
+	char *str = (char *)fromVal->addr;
+	static XmString resStr;
 	if (strncmp(str, "::", 2)) {
 		resStr = XmStringCreateLtoR(fromVal->addr, XmSTRING_DEFAULT_CHARSET);
 	}
@@ -834,74 +732,55 @@ static Boolean CvtStringToXmStringTable(
     XrmValue *toVal, XtPointer data) {
 	(void)data;  // Unused parameter
 
-	static XmString *CStrTable;
-	XmString *tblPtr;
-	char *str;
-	char *tmpBuf;
-	char *nextDelim;
-	XrmValue fVal;
-	XrmValue tVal;
-
-	/*
-	 * This converter takes no parameters
-	 */
+	// This converter takes no parameters
 	if (*num_args != 0) {
 		XtAppWarningMsg(XtDisplayToApplicationContext(d), "cvtStringToXmStringTable", "wrongParameters", "XtToolkitError",
 		                "String to XmStringTable converter needs no extra arguments", NULL, NULL);
 	}
 
-	/*
-	 * Set str and make sure there's somethin' there
-	 */
-	if (!(str = (char *)fromVal->addr)) {
-		str = (char *)"";
+	// Set str and make sure there's somethin' there
+	char *str = (char *)fromVal->addr;
+	if (!str) {
+		str = (char *)"";  // TODO(schwehr): Danger.
 	}
 
-	/*
-	 * Allocate the XmStrings + 1 for NULL termination
-	 */
+	// Allocate the XmStrings + 1 for NULL termination
+	// TODO(schwehr): Why static?
+	static XmString *CStrTable;
 	CStrTable = (XmString *)XtMalloc((getCStrCount(str) + 1) * sizeof(XmString *));
 
-	/*
-	 * Use the string converter for the strings
-	 */
-	tmpBuf = (char *)XtMalloc(strlen(str) + 1);
+	// Use the string converter for the strings
+	char *tmpBuf = (char *)XtMalloc(strlen(str) + 1);
 	strcpy(tmpBuf, str);
 	str = tmpBuf;
 
-	/*
-	 * Create strings
-	 */
-	tblPtr = CStrTable;
+	// Create strings
+	XmString *tblPtr = CStrTable;
 	if (*str) {
 		while (str) {
-			nextDelim = getNextCStrDelim(str);
+			char *nextDelim = getNextCStrDelim(str);
 
-			/*
-			 * Overwrite nextDelim
-			 */
+			// Overwrite nextDelim
 			if (nextDelim) {
 				*nextDelim = '\0';
 				nextDelim++;
 			}
 
-			/*
-			 * Convert it
-			 */
+			// Convert it
+			XrmValue fVal;
 			fVal.size = strlen(str) + 1;
 			fVal.addr = str;
+			XrmValue tVal;
 			tVal.size = sizeof(XTPOINTER);
 			tVal.addr = (XTPOINTER)tblPtr;
 
-			/*
-			 * Call converter ourselves since this is used to create
-			 * the strings in the table we create. We need to do this
-			 * since we don't have a widget to send to the XtConvertAndStore
-			 * function. Side effects are that we can never get these
-			 * compound strings cached and that no destructor function is
-			 * called when the strings leave existence, but we nuke 'em
-			 * in the XmStringTable destuctor.
-			 */
+			// Call converter ourselves since this is used to create
+			// the strings in the table we create. We need to do this
+			// since we don't have a widget to send to the XtConvertAndStore
+			// function. Side effects are that we can never get these
+			// compound strings cached and that no destructor function is
+			// called when the strings leave existence, but we nuke 'em
+			// in the XmStringTable destuctor.
 			CvtStringToXmString(d, args, num_args, &fVal, &tVal, NULL);
 			tblPtr++;
 			str = nextDelim;
@@ -909,19 +788,14 @@ static Boolean CvtStringToXmStringTable(
 	}
 	XtFree(tmpBuf);
 
-	/*
-	 * Null terminate
-	 */
+	// Null terminate
 	*tblPtr = NULL;
 
-	/*
-	 * Done, return result
-	 */
+	// Done, return result
 	if (toVal->addr == NULL) {
 		toVal->addr = (XTPOINTER)&CStrTable;
 		toVal->size = sizeof(XmString);
-	}
-	else if (toVal->size < sizeof(XmString *)) {
+	} else if (toVal->size < sizeof(XmString *)) {
 		toVal->size = sizeof(XmString *);
 		XtDisplayStringConversionWarning(d, fromVal->addr, "XmStringTable");
 
@@ -931,8 +805,7 @@ static Boolean CvtStringToXmStringTable(
 		}
 		XtFree((char *)CStrTable);
 		return (False);
-	}
-	else {
+	} else {
 		*(XmString **)toVal->addr = CStrTable;
 		toVal->size = sizeof(XmString *);
 	}
@@ -1018,10 +891,6 @@ XtPointer BX_CONVERT(
     Widget w, char *from_string, char *to_type, int to_size, Boolean *success) {
 	(void)to_size;  // Unused parameter
 
-	XrmValue fromVal, toVal; /* resource holders		*/
-	Boolean convResult;      /* return value			*/
-	XtPointer val;           /* Pointer size return value    */
-
 	/*
 	 * We will assume that the conversion is going to fail and change this
 	 * value later if the conversion is a success.
@@ -1033,6 +902,7 @@ XtPointer BX_CONVERT(
 	 * set the fromVal structure up with the string information that
 	 * the caller passed in.
 	 */
+	XrmValue fromVal;
 	fromVal.size = strlen(from_string) + 1;
 	fromVal.addr = from_string;
 
@@ -1041,6 +911,7 @@ XtPointer BX_CONVERT(
 	 * get back we will set this up so that the converter will point us
 	 * at a block of valid data.
 	 */
+	XrmValue toVal;
 	toVal.size = 0;
 	toVal.addr = NULL;
 
@@ -1048,7 +919,7 @@ XtPointer BX_CONVERT(
 	 * Now lets try to convert this data by calling this handy-dandy Xt
 	 * routine.
 	 */
-	convResult = XtConvertAndStore(w, XmRString, &fromVal, to_type, &toVal);
+	const Boolean convResult = XtConvertAndStore(w, XmRString, &fromVal, to_type, &toVal);
 
 	/*
 	 * Now we have two conditions here.  One the conversion was a success
@@ -1067,6 +938,7 @@ XtPointer BX_CONVERT(
 	 * well.  Now we have to handle the special cases for type and
 	 * size constraints.
 	 */
+	XtPointer val;           /* Pointer size return value    */
 	if (!strcmp(to_type, "String")) {
 		/*
 		 * Since strings are handled different in Xt we have to deal with
@@ -1123,13 +995,6 @@ XtPointer BX_CONVERT(
 	/*SUPPRESS 80*/
 	return (val);
 }
-
-#ifdef DEFINE_OLD_BXUTILS
-XtPointer CONVERT(
-    Widget w, char *from_string, char *to_type, int to_size, Boolean *success) {
-	return (BX_CONVERT(w, from_string, to_type, to_size, success));
-}
-#endif /* DEFINE_OLD_BXUTILS */
 #endif /* !IGNORE_CONVERT */
 
 /*
@@ -1145,19 +1010,17 @@ XtPointer CONVERT(
  * Output:
  *      None
  */
-
 #ifndef IGNORE_MENU_POST
 void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
 	(void)p;  // Unused parameter
 	(void)dispatch;  // Unused parameter
 
-	Arg args[2];
-	int argcnt;
-	int button;
 	Widget m = (Widget)mw;
 	XButtonEvent *e = (XButtonEvent *)ev;
 
-	argcnt = 0;
+	int argcnt = 0;
+	int button;
+	Arg args[2];
 	XtSetArg(args[argcnt], XmNwhichButton, &button);
 	argcnt++;
 	XtGetValues(m, args, argcnt);
@@ -1166,13 +1029,6 @@ void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
 	XmMenuPosition(m, e);
 	XtManageChild(m);
 }
-
-#ifdef DEFINE_OLD_BXUTILS
-void MENU_POST(
-    Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
-	BX_MENU_POST(p, mw, ev, dispatch);
-}
-#endif /* DEFINE_OLD_BXUTILS */
 #endif /* !IGNORE_MENU_POST */
 
 /*
@@ -1263,17 +1119,13 @@ void BX_SET_BACKGROUND_COLOR(Widget w, ArgList args, Cardinal *argcnt, Pixel bg_
 			(*argcnt)++;
 		}
 	}
+#else
+#error Xm too old
 #endif
 
 	XtSetArg(args[*argcnt], XmNbackground, bg_color);
 	(*argcnt)++;
 }
-
-#ifdef DEFINE_OLD_BXUTILS
-void SET_BACKGROUND_COLOR(Widget w, ArgList args, Cardinal *argcnt, Pixel bg_color) {
-	BX_SET_BACKGROUND_COLOR(w, args, argcnt, bg_color);
-}
-#endif /* DEFINE_OLD_BXUTILS */
 
 /*
  * Function:
