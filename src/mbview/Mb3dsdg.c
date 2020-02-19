@@ -99,6 +99,9 @@ void InitAppDefaults(Widget, UIAppDefault *);
 void SetAppDefaults(Widget, UIAppDefault *, char *, Boolean);
 
 Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList args_in, Cardinal ac_in) {
+	(void)args_in;  // Unused parameter
+	(void)ac_in;  // Unused parameter
+
 	// Register the converters for the widgets.
 	RegisterBxConverters(XtWidgetToApplicationContext(parent));
 	XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
