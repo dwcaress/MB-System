@@ -6,9 +6,6 @@
 
 #include <mb_config.h>
 
-#if defined(__hpux)
-#define XLIB_ILLEGAL_ACCESS
-#endif
 #include <Xm/Xm.h>
 #include <Xm/RowColumn.h>
 
@@ -873,6 +870,11 @@ static wchar_t *CStrCommonWideCharsGet() {
 static void CvtXmStringDestructor(
     XtAppContext app, XrmValue *converted, XtPointer data, XrmValue *args,
     Cardinal *num_args) {
+	(void)app;  // Unused parameter
+	(void)data;  // Unused parameter
+	(void)args;  // Unused parameter
+	(void)num_args;  // Unused parameter
+
 	XmString freestr = (XmString)converted->addr;
 	if (freestr != NULL)
 		XmStringFree(freestr);
@@ -897,6 +899,9 @@ static void CvtXmStringDestructor(
 static Boolean CvtStringToXmString(
     Display *d, XrmValue *args, Cardinal *num_args, XrmValue *fromVal,
     XrmValue *toVal, XtPointer data) {
+	(void)args;  // Unused parameter
+	(void)data;  // Unused parameter
+
 	static XmString resStr;
 	char *str;
 
@@ -963,6 +968,8 @@ static Boolean CvtStringToXmString(
 static Boolean CvtStringToXmStringTable(
     Display *d, XrmValue *args, Cardinal *num_args, XrmValue *fromVal,
     XrmValue *toVal, XtPointer data) {
+	(void)data;  // Unused parameter
+
 	static XmString *CStrTable;
 	XmString *tblPtr;
 	char *str;
@@ -1090,6 +1097,11 @@ static Boolean CvtStringToXmStringTable(
 static void CvtXmStringTableDestructor(
     XtAppContext app, XrmValue *converted, XtPointer data, XrmValue *args,
     Cardinal *num_args) {
+	(void)app;  // Unused parameter
+	(void)data;  // Unused parameter
+	(void)args;  // Unused parameter
+	(void)num_args;  // Unused parameter
+
 	XmString *ptr = (XmString *)converted->addr;
 	while (*ptr != NULL) {
 		XmStringFree(*ptr);
@@ -1140,6 +1152,8 @@ void RegisterBxConverters(XtAppContext appContext) {
 #ifndef IGNORE_CONVERT
 XtPointer BX_CONVERT(
     Widget w, char *from_string, char *to_type, int to_size, Boolean *success) {
+	(void)to_size;  // Unused parameter
+
 	XrmValue fromVal, toVal; /* resource holders		*/
 	Boolean convResult;      /* return value			*/
 	XtPointer val;           /* Pointer size return value    */
@@ -1270,6 +1284,9 @@ XtPointer CONVERT(
 
 #ifndef IGNORE_MENU_POST
 void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
+	(void)p;  // Unused parameter
+	(void)dispatch;  // Unused parameter
+
 	Arg args[2];
 	int argcnt;
 	int button;
