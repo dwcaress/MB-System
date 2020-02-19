@@ -65,8 +65,6 @@
 /*------------------------------------------------------------------------------*/
 int mbview_getvectorcount(int verbose, size_t instance, int *nvector, int *error) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -76,8 +74,8 @@ int mbview_getvectorcount(int verbose, size_t instance, int *nvector, int *error
 		fprintf(stderr, "dbg2       instance:                  %zu\n", instance);
 	}
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* get number of vecs */
 	*nvector = shared.shareddata.nvector;
@@ -97,8 +95,6 @@ int mbview_getvectorcount(int verbose, size_t instance, int *nvector, int *error
 /*------------------------------------------------------------------------------*/
 int mbview_getvectorpointcount(int verbose, size_t instance, int vec, int *npoint, int *nintpoint, int *error) {
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i;
 
 	if (verbose >= 2) {
@@ -110,8 +106,8 @@ int mbview_getvectorpointcount(int verbose, size_t instance, int vec, int *npoin
 		fprintf(stderr, "dbg2       vec:                     %d\n", vec);
 	}
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* get number of points in specified vec */
 	*npoint = 0;
@@ -617,8 +613,6 @@ int mbview_vector_delete(size_t instance, int ivec) {
 
 	int error = MB_ERROR_NO_ERROR;
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i;
 
 	if (mbv_verbose >= 2) {
@@ -629,8 +623,8 @@ int mbview_vector_delete(size_t instance, int ivec) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* delete vec if its the same as previously selected */
 	if (ivec >= 0 && ivec < shared.shareddata.nvector) {
@@ -678,7 +672,6 @@ int mbview_drawvector(size_t instance, int rez) {
 	struct mbview_struct *data;
 	GLUquadricObj *globj;
 	int stride;
-	int icolor;
 	int ivec, jpoint;
 	float red, green, blue;
 	double xx, yy;
@@ -723,7 +716,7 @@ int mbview_drawvector(size_t instance, int rez) {
 
 		/* loop over the vecs plotting xyz vectors */
 		for (ivec = 0; ivec < shared.shareddata.nvector; ivec++) {
-			icolor = shared.shareddata.vectors[ivec].color;
+			// const int icolor = shared.shareddata.vectors[ivec].color;
 
 			/* plot lines */
 			/* glLineWidth((float)(shared.shareddata.vectors[ivec].size));
