@@ -310,7 +310,7 @@ int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
 	int uselockfiles = true;  // TODO(schwehr): mb_uselockfiles should use a bool
-	status &= mb_uselockfiles(verbose, &uselockfiles);
+	mb_uselockfiles(verbose, &uselockfiles);
 
 	/* get format if required */
 	if (format == 0)
@@ -691,7 +691,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* check for ping multiplicity */
-					status &= mb_get_store(verbose, mbio_ptr, &store_ptr, &error);
+					status = mb_get_store(verbose, mbio_ptr, &store_ptr, &error);
 					const int sensorhead_status = mb_sensorhead(verbose, mbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
 					if (sensorhead_status == MB_SUCCESS) {
 						pings[n_pings].multiplicity = sensorhead;
@@ -937,17 +937,17 @@ int main(int argc, char **argv) {
 			/* update mbprocess parameter file */
 			if (esffile_open) {
 				/* update mbprocess parameter file */
-				status &= mb_pr_update_format(verbose, swathfile, true, format, &error);
-				status &= mb_pr_update_edit(verbose, swathfile, MBP_EDIT_ON, esffile, &error);
+				status = mb_pr_update_format(verbose, swathfile, true, format, &error);
+				status = mb_pr_update_edit(verbose, swathfile, MBP_EDIT_ON, esffile, &error);
 			}
 
 			/* unlock the raw swath file */
 			if (uselockfiles)
-				status &= mb_pr_unlockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
+				status = mb_pr_unlockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
 
 			/* check memory */
 			if (verbose >= 4)
-				status &= mb_memory_list(verbose, &error);
+				status = mb_memory_list(verbose, &error);
 
 			/* increment the total counting variables */
 			n_files_tot++;
@@ -980,10 +980,7 @@ int main(int argc, char **argv) {
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
-			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = true;
-			else
-				read_data = false;
+			read_data = (mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error) == MB_SUCCESS);
 		}
 		else {
 			read_data = false;
@@ -1028,15 +1025,10 @@ int main(int argc, char **argv) {
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings, &error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&voxel_count, &error);
 
-	/* check memory */
-	if (verbose >= 4)
-		status &= mb_memory_list(verbose, &error);
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
-		fprintf(stderr, "dbg2  Ending status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
+  /* check memory */
+  if ((status = mb_memory_list(verbose, &error)) == MB_FAILURE) {
+    fprintf(stderr, "Program %s completed but failed to deallocate all allocated memory - the code has a memory leak somewhere!\n", program_name);
+  }
 
 	exit(error);
 }
