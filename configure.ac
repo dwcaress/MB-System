@@ -19,7 +19,7 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.6beta29],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.7.6beta30],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
@@ -28,7 +28,7 @@ AC_LANG(C)
 dnl Require c++11
 AX_CXX_COMPILE_STDCXX(11)
 
-AC_DEFINE(VERSION_DATE, "17 February 2020", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "20 February 2020", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST

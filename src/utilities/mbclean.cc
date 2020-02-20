@@ -187,7 +187,7 @@ int main(int argc, char **argv) {
   double timegap;
   status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
   int uselockfiles;  // TODO(schwehr): Make mb_uselockfiles take a bool.
-  status &= mb_uselockfiles(verbose, &uselockfiles);
+  mb_uselockfiles(verbose, &uselockfiles);
 
   /* reset all defaults but the format and lonflip */
   pings = 1;
@@ -950,10 +950,10 @@ int main(int argc, char **argv) {
           /* if requested set all edit timestamps within tolerance of
               ping[nrec].time_d to ping[nrec].time_d */
           if (fix_edit_timestamps)
-            status &= mb_esf_fixtimestamps(verbose, &esf, ping[nrec].time_d, tolerance, &error);
+            mb_esf_fixtimestamps(verbose, &esf, ping[nrec].time_d, tolerance, &error);
 
           /* apply saved edits */
-          status &= mb_esf_apply(verbose, &esf, ping[nrec].time_d, ping[nrec].multiplicity, ping[nrec].beams_bath,
+          mb_esf_apply(verbose, &esf, ping[nrec].time_d, ping[nrec].multiplicity, ping[nrec].beams_bath,
                                 ping[nrec].beamflag, &error);
 
           /* update counters */
@@ -1692,23 +1692,23 @@ int main(int argc, char **argv) {
         }
       }
 
-      status &= mb_close(verbose, &mbio_ptr, &error);
-      status &= mb_esf_close(verbose, &esf, &error);
+      status = mb_close(verbose, &mbio_ptr, &error);
+      status = mb_esf_close(verbose, &esf, &error);
 
       /* update mbprocess parameter file */
       if (esffile_open) {
         /* update mbprocess parameter file */
-        status &= mb_pr_update_format(verbose, swathfile, true, format, &error);
-        status &= mb_pr_update_edit(verbose, swathfile, MBP_EDIT_ON, esffile, &error);
+        status = mb_pr_update_format(verbose, swathfile, true, format, &error);
+        status = mb_pr_update_edit(verbose, swathfile, MBP_EDIT_ON, esffile, &error);
       }
 
       /* unlock the raw swath file */
       if (uselockfiles)
-        status &= mb_pr_unlockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
+        status = mb_pr_unlockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
 
       /* check memory */
       if (verbose >= 4)
-        status &= mb_memory_list(verbose, &error);
+        status = mb_memory_list(verbose, &error);
 
       /* increment the total counting variables */
       nfiletot++;
@@ -1768,10 +1768,7 @@ int main(int argc, char **argv) {
 
     /* figure out whether and what to read next */
     if (read_datalist) {
-      if (/* (status = */ mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error) == MB_SUCCESS)
-        read_data = true;
-      else
-        read_data = false;
+      read_data = (mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error) == MB_SUCCESS);
     }
     else {
       read_data = false;
@@ -1815,16 +1812,9 @@ int main(int argc, char **argv) {
     fprintf(stderr, "%d total beams unflagged\n", nunflagtot);
   }
 
-  // status = MB_SUCCESS;
-
   /* check memory */
-  if (verbose >= 4)
-    status = mb_memory_list(verbose, &error);
-
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
-    fprintf(stderr, "dbg2  Ending status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
+  if ((status = mb_memory_list(verbose, &error)) == MB_FAILURE) {
+    fprintf(stderr, "Program %s completed but failed to deallocate all allocated memory - the code has a memory leak somewhere!\n", program_name);
   }
 
   exit(error);

@@ -1784,7 +1784,7 @@ int main(int argc, char **argv) {
 
       /* figure out whether and what to read next */
       if (read_datalist) {
-        read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+        read_data = (mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS);
       } else {
         read_data = false;
       }
@@ -2455,13 +2455,9 @@ int main(int argc, char **argv) {
 
   status = MB_SUCCESS;
 
-  if (verbose >= 4)
-    status &= mb_memory_list(verbose, &error);
-
-  if (verbose >= 2) {
-    fprintf(stream, "\ndbg2  Program <%s> completed\n", program_name);
-    fprintf(stream, "dbg2  Ending status:\n");
-    fprintf(stream, "dbg2       status:  %d\n", status);
+  /* check memory */
+  if ((status = mb_memory_list(verbose, &error)) == MB_FAILURE) {
+    fprintf(stderr, "Program %s completed but failed to deallocate all allocated memory - the code has a memory leak somewhere!\n", program_name);
   }
 
   exit(error);

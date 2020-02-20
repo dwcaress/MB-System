@@ -996,8 +996,8 @@ int main(int argc, char **argv) {
 	while (read_data) {
 
 		/* check for format with amplitude or sidescan data */
-		status &= mb_format_system(verbose, &format, &system, &error);
-		status &= mb_format_dimensions(verbose, &format, &beams_bath, &beams_amp, &pixels_ss, &error);
+		/* status = */ mb_format_system(verbose, &format, &system, &error);
+		/* status = */ mb_format_dimensions(verbose, &format, &beams_bath, &beams_amp, &pixels_ss, &error);
 
 		/* initialize reading the input swath sonar file */
 		if (mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
@@ -1129,7 +1129,7 @@ int main(int argc, char **argv) {
 		/* write comments to beginning of output file */
 		kind = MB_DATA_COMMENT;
 		sprintf(comment, "Data filtered by program %s", program_name);
-		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
+		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 		sprintf(comment, "MB-system Version %s", MB_VERSION);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		const time_t right_now = time((time_t *)0);
@@ -1257,6 +1257,8 @@ int main(int argc, char **argv) {
 		int nread = 0;
 		int nwrite = 0;
 		bool done = false;
+    if (status != MB_SUCCESS)
+      done = true;
 		while (!done) {
 			/* load some data into the buffer */
 			error = MB_ERROR_NO_ERROR;
@@ -1568,8 +1570,11 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		status &= mb_close(verbose, &imbio_ptr, &error);
-		status &= mb_close(verbose, &ombio_ptr, &error);
+    status = MB_SUCCESS;
+    error = MB_ERROR_NO_ERROR;
+
+		status = mb_close(verbose, &imbio_ptr, &error);
+		status = mb_close(verbose, &ombio_ptr, &error);
 
 		/* give the statistics */
 		if (verbose >= 1) {
@@ -1579,7 +1584,7 @@ int main(int argc, char **argv) {
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
-			read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
+			read_data = (mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS);
 		}
 		else {
 			read_data = false;
@@ -1589,17 +1594,15 @@ int main(int argc, char **argv) {
 	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
-	if (verbose >= 4)
-		status &= mb_memory_list(verbose, &error);
-
 	if (verbose >= 1) {
 		fprintf(stderr, "%d total data records read\n", nreadtot);
 		fprintf(stderr, "%d total data records written\n", nwritetot);
 	}
 
-	if (status == MB_FAILURE) {
-		fprintf(stderr, "WARNING: status is MB_FAILURE\n");
-	}
+  /* check memory */
+  if ((status = mb_memory_list(verbose, &error)) == MB_FAILURE) {
+    fprintf(stderr, "Program %s completed but failed to deallocate all allocated memory - the code has a memory leak somewhere!\n", program_name);
+  }
 
 	exit(error);
 }

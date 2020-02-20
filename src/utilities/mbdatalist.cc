@@ -566,15 +566,10 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* check memory */
-	if (verbose >= 4)
-		status &= mb_memory_list(verbose, &error);
-
-	if (verbose >= 2) {
-		fprintf(output, "\ndbg2  Program <%s> completed\n", program_name);
-		fprintf(output, "dbg2  Ending status:\n");
-		fprintf(output, "dbg2       status:  %d\n", status);
-	}
+  /* check memory */
+  if ((status = mb_memory_list(verbose, &error)) == MB_FAILURE) {
+    fprintf(stderr, "Program %s completed but failed to deallocate all allocated memory - the code has a memory leak somewhere!\n", program_name);
+  }
 
 	exit(error);
 }
