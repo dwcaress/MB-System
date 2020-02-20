@@ -54,32 +54,15 @@
 /* Set flag to define mbpingedit global variables in this code block */
 #define MBPINGEDITGLOBAL
 
-/* mbpingedit include */
 #include "mbview.h"
 #include "mbpingeditprivate.h"
 
-/*------------------------------------------------------------------------------*/
-
-/* local variables */
-
-
-/* function prototypes */
-/*------------------------------------------------------------------------------*/
-
-Widget BxFindTopShell(Widget);
+// Widget BxFindTopShell(Widget);
 WidgetList BxWidgetIdsFromNames(Widget, char *, char *);
 
-/*------------------------------------------------------------------------------*/
-/* code below used for mbpingedit library                                       */
-/*------------------------------------------------------------------------------*/
-
 int mbpingedit_startup(int verbose, Widget parent, XtAppContext app, int *error) {
-	/* local variables */
-
-	/* set local verbosity */
 	mbp_verbose = verbose;
 
-	/* print starting debug statements */
 	if (mbp_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -101,7 +84,6 @@ int mbpingedit_startup(int verbose, Widget parent, XtAppContext app, int *error)
 	/* set error */
 	*error = mbp_error;
 
-	/* print output debug statements */
 	if (mbp_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -110,7 +92,6 @@ int mbpingedit_startup(int verbose, Widget parent, XtAppContext app, int *error)
 		fprintf(stderr, "dbg2       status:       %d\n", mbp_status);
 	}
 
-	/* return */
 	return (mbp_status);
 }
 
@@ -120,7 +101,6 @@ void do_mbpingedit_mode_toggle(Widget w, XtPointer client_data, XtPointer call_d
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -129,7 +109,6 @@ void do_mbpingedit_show_detects(Widget w, XtPointer client_data, XtPointer call_
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -138,7 +117,6 @@ void do_mbpingedit_dismiss(Widget w, XtPointer client_data, XtPointer call_data)
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -147,7 +125,6 @@ void do_mbpingedit_next_buffer(Widget w, XtPointer client_data, XtPointer call_d
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -156,7 +133,6 @@ void do_mbpingedit_scale_x(Widget w, XtPointer client_data, XtPointer call_data)
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -165,7 +141,6 @@ void do_mbpingedit_scale_y(Widget w, XtPointer client_data, XtPointer call_data)
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -174,7 +149,6 @@ void do_mbpingedit_check_median_ltrack(Widget w, XtPointer client_data, XtPointe
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -183,7 +157,6 @@ void do_mbpingedit_check_median_xtrack(Widget w, XtPointer client_data, XtPointe
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -192,7 +165,6 @@ void do_mbpingedit_mode_grab(Widget w, XtPointer client_data, XtPointer call_dat
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -201,7 +173,6 @@ void do_mbpingedit_mode_erase(Widget w, XtPointer client_data, XtPointer call_da
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -210,7 +181,6 @@ void do_mbpingedit_show_flagged(Widget w, XtPointer client_data, XtPointer call_
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -219,7 +189,6 @@ void do_mbpingedit_reverse(Widget w, XtPointer client_data, XtPointer call_data)
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -228,7 +197,6 @@ void do_mbpingedit_number_step(Widget w, XtPointer client_data, XtPointer call_d
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -237,7 +205,6 @@ void do_mbpingedit_set_filters(Widget w, XtPointer client_data, XtPointer call_d
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -246,7 +213,6 @@ void do_mbpingedit_view_mode(Widget w, XtPointer client_data, XtPointer call_dat
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -255,7 +221,6 @@ void do_mbpingedit_reset_filters(Widget w, XtPointer client_data, XtPointer call
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -264,7 +229,6 @@ void do_mbpingedit_x_interval(Widget w, XtPointer client_data, XtPointer call_da
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -273,7 +237,6 @@ void do_mbpingedit_y_interval(Widget w, XtPointer client_data, XtPointer call_da
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -282,7 +245,6 @@ void do_mbpingedit_mode_info(Widget w, XtPointer client_data, XtPointer call_dat
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -291,7 +253,6 @@ void do_mbpingedit_unflag_all(Widget w, XtPointer client_data, XtPointer call_da
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -300,7 +261,6 @@ void do_mbpingedit_flag_view(Widget w, XtPointer client_data, XtPointer call_dat
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*      Function Name: 	BxManageCB
@@ -318,10 +278,6 @@ void do_mbpingedit_flag_view(Widget w, XtPointer client_data, XtPointer call_dat
  *      Notes:        *	This function expects that there is an application
  *		       	shell from which all other widgets are descended.
  */
-
-/* ARGSUSED */
-/*------------------------------------------------------------------------------*/
-
 void BxManageCB(Widget w, XtPointer client, XtPointer call) {
 	(void)call;  // Unused parameter
 	/*
@@ -353,10 +309,6 @@ void BxManageCB(Widget w, XtPointer client, XtPointer call) {
  *      Notes:        *	This function expects that there is an application
  *		       	shell from which all other widgets are descended.
  */
-
-/* ARGSUSED */
-/*------------------------------------------------------------------------------*/
-
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
 	(void)call;  // Unused parameter
 	/*
@@ -379,7 +331,6 @@ void do_mbpingedit_reverse_keys(Widget w, XtPointer client_data, XtPointer call_
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -388,7 +339,6 @@ void do_mbpingedit_event(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -397,7 +347,6 @@ void do_mbpingedit_number_pings(Widget w, XtPointer client_data, XtPointer call_
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -406,7 +355,6 @@ void do_mbpingedit_forward(Widget w, XtPointer client_data, XtPointer call_data)
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -415,7 +363,6 @@ void do_mbpingedit_show_time(Widget w, XtPointer client_data, XtPointer call_dat
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -424,7 +371,6 @@ void do_mbpingedit_mode_restore(Widget w, XtPointer client_data, XtPointer call_
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -433,7 +379,6 @@ void do_mbpingedit_reverse_mouse(Widget w, XtPointer client_data, XtPointer call
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -442,7 +387,6 @@ void do_mbpingedit_mode_pick(Widget w, XtPointer client_data, XtPointer call_dat
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -451,7 +395,6 @@ void do_mbpingedit_expose(Widget w, XtPointer client_data, XtPointer call_data) 
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
@@ -460,7 +403,6 @@ void do_mbpingedit_unflag_view(Widget w, XtPointer client_data, XtPointer call_d
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 }
 
 /*------------------------------------------------------------------------------*/
