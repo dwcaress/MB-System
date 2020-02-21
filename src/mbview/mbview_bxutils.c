@@ -2604,21 +2604,18 @@ static void BxXpmFreeAttributes(BxXpmAttributes *attributes) {
 /*
  * Free the bxxpmInternAttrib pointers which have been allocated
  */
-
 static void xpmFreeInternAttrib(bxxpmInternAttrib *attrib) {
-	unsigned int a;
-
 	if (attrib->colorTable)
 		xpmFreeColorTable(attrib->colorTable, attrib->ncolors);
 	if (attrib->pixelindex)
-		free((char *)attrib->pixelindex);
+		free(attrib->pixelindex);
 	if (attrib->xcolors)
-		free((char *)attrib->xcolors);
+		free(attrib->xcolors);
 	if (attrib->colorStrings) {
-		for (a = 0; a < attrib->ncolors; a++)
+		for (unsigned int a = 0; a < attrib->ncolors; a++)
 			if (attrib->colorStrings[a])
-				free((char *)attrib->colorStrings[a]);
-		free((char *)attrib->colorStrings);
+				free(attrib->colorStrings[a]);
+		free(attrib->colorStrings);
 	}
 }
 
@@ -2646,9 +2643,7 @@ static void XpmDataClose(bxxpmData *mdata) {
  */
 static int xpmNextUI(bxxpmData *mdata, unsigned int *ui_return) {
 	char buf[BUFSIZ];
-	int l;
-
-	l = xpmNextWord(mdata, buf);
+	int l = xpmNextWord(mdata, buf);
 	return atoui(buf, l, ui_return);
 }
 
@@ -2678,20 +2673,22 @@ static void xpmGetCmt(bxxpmData *mdata, char **cmt) {
  * skip to the end of the current string and the beginning of the next one
  */
 static void xpmNextString(bxxpmData *mdata) {
-	int c;
-
 	switch (mdata->type) {
 	case BXXPMARRAY:
 		mdata->cptr = (mdata->stream.data)[++mdata->line];
 		break;
 	case BXXPMFILE:
 	case BXXPMPIPE:
-		if (mdata->Eos)
+		if (mdata->Eos) {
+			int c;
 			while ((c = xpmGetC(mdata)) != mdata->Eos && c != EOF)
 				;
-		if (mdata->Bos) /* if not natural XPM2 */
+		}
+		if (mdata->Bos) { /* if not natural XPM2 */
+			int c;
 			while ((c = xpmGetC(mdata)) != mdata->Bos && c != EOF)
 				;
+		}
 		break;
 	}
 }
@@ -2700,16 +2697,14 @@ static void xpmNextString(bxxpmData *mdata) {
  * return the current character, skipping comments
  */
 static int xpmGetC(bxxpmData *mdata) {
-	int c;
-	unsigned int n = 0, a;
-	unsigned int notend;
-
 	switch (mdata->type) {
 	case BXXPMARRAY:
 		return (*mdata->cptr++);
 	case BXXPMFILE:
 	case BXXPMPIPE:
-		c = getc(mdata->stream.file);
+	{
+		unsigned int notend;
+		int c = getc(mdata->stream.file);
 
 		if (mdata->Bos && mdata->Eos && (c == mdata->Bos || c == mdata->Eos)) {
 			/* if not natural XPM2 */
@@ -2719,9 +2714,8 @@ static int xpmGetC(bxxpmData *mdata) {
 		if (!mdata->InsideString && mdata->Bcmt && c == mdata->Bcmt[0]) {
 			mdata->Comment[0] = c;
 
-			/*
-			 * skip the string beginning comment
-			 */
+			// skip the string beginning comment
+			unsigned int n = 0;
 			do {
 				c = getc(mdata->stream.file);
 				mdata->Comment[++n] = c;
@@ -2730,14 +2724,12 @@ static int xpmGetC(bxxpmData *mdata) {
 			if (mdata->Bcmt[n] != '\0') {
 				/* this wasn't the beginning of a comment */
 				/* put characters back in the order that we got them */
-				for (a = n; a > 0; a--)
+				for (unsigned int a = n; a > 0; a--)
 					xpmUngetC(mdata->Comment[a], mdata);
 				return (mdata->Comment[0]);
 			}
 
-			/*
-			 * store comment
-			 */
+			// store comment
 			mdata->Comment[0] = mdata->Comment[n];
 			notend = 1;
 			n = 0;
@@ -2747,7 +2739,7 @@ static int xpmGetC(bxxpmData *mdata) {
 					mdata->Comment[++n] = c;
 				}
 				mdata->CommentLength = n;
-				a = 0;
+				unsigned int a = 0;
 				do {
 					c = getc(mdata->stream.file);
 					n++;
@@ -2764,12 +2756,11 @@ static int xpmGetC(bxxpmData *mdata) {
 		}
 		return (c);
 	}
+	}
 	return ('\0');
 }
 
-/*
- * push the given character back
- */
+// push the given character back
 static int xpmUngetC(int c, bxxpmData *mdata) {
 	switch (mdata->type) {
 	case BXXPMARRAY:
@@ -2784,16 +2775,14 @@ static int xpmUngetC(int c, bxxpmData *mdata) {
 	return ('\0');
 }
 
-/*
- * skip whitespace and return the following word
- */
+// skip whitespace and return the following word
 static unsigned int xpmNextWord(bxxpmData *mdata, char *buf) {
 	unsigned int n = 0;
-	int c;
 
 	switch (mdata->type) {
 	case BXXPMARRAY:
-		c = *mdata->cptr;
+	{
+		int c = *mdata->cptr;
 		while (isspace(c) && c != mdata->Eos) {
 			mdata->cptr++;
 			c = *mdata->cptr;
@@ -2805,9 +2794,11 @@ static unsigned int xpmNextWord(bxxpmData *mdata, char *buf) {
 		n--;
 		mdata->cptr--;
 		break;
+	}
 	case BXXPMFILE:
 	case BXXPMPIPE:
-		c = xpmGetC(mdata);
+	{
+		int c = xpmGetC(mdata);
 		while (isspace(c) && c != mdata->Eos)
 			c = xpmGetC(mdata);
 		while (!isspace(c) && c != mdata->Eos && c != EOF) {
@@ -2817,6 +2808,8 @@ static unsigned int xpmNextWord(bxxpmData *mdata, char *buf) {
 		xpmUngetC(c, mdata);
 		break;
 	}
+	}
+
 	return (n);
 }
 
@@ -2842,22 +2835,17 @@ static int BxXpmVisualType(Visual *visual) {
 	}
 }
 
-/*
- * Free the computed color table
- */
-
+// Free the computed color table
 static void xpmFreeColorTable(char ***colorTable, int ncolors) {
-	int a, b;
-
 	if (colorTable) {
-		for (a = 0; a < ncolors; a++)
+		for (int a = 0; a < ncolors; a++)
 			if (colorTable[a]) {
-				for (b = 0; b < (BXNKEYS + 1); b++)
+				for (int b = 0; b < (BXNKEYS + 1); b++)
 					if (colorTable[a][b])
 						free(colorTable[a][b]);
-				free((char *)colorTable[a]);
+				free(colorTable[a]);
 			}
-		free((char *)colorTable);
+		free(colorTable);
 	}
 }
 
@@ -2958,17 +2946,12 @@ typedef struct _UIAppDefault {
 } UIAppDefault;
 
 void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
-	int i;
 	Display *dpy = XtDisplay(w); /* Retrieve the display pointer */
-	XrmDatabase rdb = NULL;      /* A resource data base */
-
-	/* Create an empty resource database */
-
-	rdb = XrmGetStringDatabase((char *)"");
+	XrmDatabase rdb = XrmGetStringDatabase((char *)"");
 
 	/* Add the Component resources, prepending the name of the component */
 
-	i = 0;
+	int i = 0;
 	while (resourceSpec[i] != NULL) {
 		char buf[1000];
 
@@ -2983,6 +2966,7 @@ void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
 		XrmDatabase db = XtDatabase(dpy);
 		XrmCombineDatabase(rdb, &db, FALSE);
 #else
+#error XlibSpecificationRelease too old
 		XrmMergeDatabases(dpy->db, &rdb);
 		dpy->db = rdb;
 #endif
@@ -2995,21 +2979,15 @@ void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
  * value exists.
  */
 void InitAppDefaults(Widget parent, UIAppDefault *defs) {
-	XrmQuark cQuark;
-	XrmQuark rsc[10];
-	XrmRepresentation rep;
-	XrmValue val;
-	XrmDatabase rdb;
-	int rscIdx;
-
-/* Get the database */
-
 #if (XlibSpecificationRelease >= 5)
-	if ((rdb = XrmGetDatabase(XtDisplay(parent))) == NULL) {
+	XrmDatabase rdb = XrmGetDatabase(XtDisplay(parent));
+	if (rdb == NULL) {
 		return; /*  Can't get the database */
 	}
 #else
+#error XlibSpecificationRelease too old
 	Display *dpy = XtDisplay(parent);
+	XrmDatabase rdb;
 	if ((rdb = dpy->db) == NULL) {
 		return;
 	}
@@ -3017,27 +2995,24 @@ void InitAppDefaults(Widget parent, UIAppDefault *defs) {
 
 	/* Look for each resource in the table */
 
+	XrmQuark rsc[10];
 	while (defs->wName) {
-		rscIdx = 0;
+		int rscIdx = 0;
 
-		cQuark = XrmStringToQuark(defs->cName); /* class quark */
+		XrmQuark cQuark = XrmStringToQuark(defs->cName); /* class quark */
 		rsc[rscIdx++] = cQuark;
 		if (defs->wName[0] == '\0') {
 			rsc[rscIdx++] = cQuark;
-		}
-		else {
+		} else {
 			if (strchr(defs->wName, '.') == NULL) {
 				rsc[rscIdx++] = XrmStringToQuark(defs->wName);
-			}
-			else {
-				/*
-				 * If we found a '.' that means that this is not
-				 * a simple widget name, but a sub specification so
-				 * we need to split this into several quarks.
-				 */
-				char *copy = XtNewString(defs->wName), *ptr;
+			} else {
+				// If we found a '.' that means that this is not
+				// a simple widget name, but a sub specification so
+				// we need to split this into several quarks.
+				char *copy = XtNewString(defs->wName); 
 
-				for (ptr = strtok(copy, "."); ptr != NULL; ptr = strtok(NULL, ".")) {
+				for (char *ptr = strtok(copy, "."); ptr != NULL; ptr = strtok(NULL, ".")) {
 					rsc[rscIdx++] = XrmStringToQuark(ptr);
 				}
 				XtFree(copy);
@@ -3051,6 +3026,8 @@ void InitAppDefaults(Widget parent, UIAppDefault *defs) {
 		rsc[rscIdx++] = XrmStringToQuark(defs->wRsc);
 		rsc[rscIdx++] = NULLQUARK;
 
+		XrmRepresentation rep;
+		XrmValue val;
 		if (XrmQGetResource(rdb, rsc, rsc, &rep, &val)) {
 			defs->value = XtNewString((char *)val.addr);
 		}
@@ -3065,37 +3042,24 @@ void InitAppDefaults(Widget parent, UIAppDefault *defs) {
  * resource line (use .).
  */
 void SetAppDefaults(Widget w, UIAppDefault *defs, char *inst_name, Boolean override_inst) {
-	Display *dpy = XtDisplay(w); /*  Retrieve the display */
-	XrmDatabase rdb = NULL;      /* A resource data base */
-	char buf[1000];
-	char *appName, *appClass;
-
-	/*
-	 * Protect ourselves
-	 */
 	if (inst_name == NULL)
 		return;
 
-	/*
-	 * Create an empty resource database
-	 */
-	rdb = XrmGetStringDatabase((char *)"");
+	// Create an empty resource database
+	XrmDatabase rdb = XrmGetStringDatabase((char *)"");  // TODO(schwehr): Danger
+	char *appName;
+	char *appClass;
 	XtGetApplicationNameAndClass(XtDisplay(w), &appName, &appClass);
 
-	/*
-	 * Add the Component resources, prepending the name of the component
-	 */
+	// Add the Component resources, prepending the name of the component
 	while (defs->wName != NULL) {
+		// We don't deal with the resource if it isn't found in the
+		// Xrm database at class initializtion time (in initAppDefaults).
+		// Special handling of class instances.
 		int namelen;
-		/*
-		 * We don't deal with the resource if it isn't found in the
-		 * Xrm database at class initializtion time (in initAppDefaults).
-		 * Special handling of class instances.
-		 */
 		if (strchr(defs->wName, '.')) {
 			namelen = strlen(defs->wName) - strlen(strchr(defs->wName, '.'));
-		}
-		else {
+		} else {
 			int wnamelen = strlen(defs->wName);
 			int inamelen = strlen(inst_name);
 			namelen = (wnamelen > inamelen ? wnamelen : inamelen);
@@ -3106,9 +3070,8 @@ void SetAppDefaults(Widget w, UIAppDefault *defs, char *inst_name, Boolean overr
 			continue;
 		}
 
-		/*
-		 * Build up resource database string
-		 */
+		// Build up resource database string
+		char buf[1000];
 		if (defs->cInstName != NULL) {
 			/*
 			 * Don't include class instance name if it is also
@@ -3136,19 +3099,21 @@ void SetAppDefaults(Widget w, UIAppDefault *defs, char *inst_name, Boolean overr
 	 * Merge them into the Xt database, with lowest precendence
 	 */
 	if (rdb) {
-/*  DO NOT do an XrmDestroyDatabase(rdb) here.  This looks like a
- * program leak, but is really an X problem.
- *
- * XrmCombineDatabase() squirrels away a copy of the pointers in
- * rdb.  Either XrmCombineDatabase should save a duplicate, or else
- * XrmCombineDatabase needs to assume responsibility for destroying
- * rdb at the right time.  We do not know when the pointers are no
- * longer needed.
- */
+		Display *dpy = XtDisplay(w);
+
+		// DO NOT do an XrmDestroyDatabase(rdb) here.  This looks like a
+	 	// program leak, but is really an X problem.
+		//
+		// XrmCombineDatabase() squirrels away a copy of the pointers in
+		// rdb.  Either XrmCombineDatabase should save a duplicate, or else
+		// XrmCombineDatabase needs to assume responsibility for destroying
+		// rdb at the right time.  We do not know when the pointers are no
+		// longer needed.
 #if (XlibSpecificationRelease >= 5)
 		XrmDatabase db = XtDatabase(dpy);
 		XrmCombineDatabase(rdb, &db, FALSE);
 #else
+#error XlibSpecificationRelease too old
 		XrmMergeDatabases(dpy->db, &rdb);
 		dpy->db = rdb;
 #endif
