@@ -11,25 +11,10 @@
 #include <Xm/Xm.h>
 #include <Xm/RowColumn.h>
 
-/*
- * Handy definition used in SET_BACKGROUND_COLOR
- */
+// Handy definition used in SET_BACKGROUND_COLOR
 #define UNSET (-1)
 
-/*
- * Define XTPOINTER so it works with all releases of
- * Xt and c++.
- */
-#ifdef __cplusplus
-#if XtSpecificationRelease < 5
-#error too old
-#define XTPOINTER char *
-#else
-#define XTPOINTER XPointer
-#endif
-#else
 #define XTPOINTER XtPointer
-#endif
 
 /*
  * The following enum is used to support wide character sets.
@@ -62,21 +47,6 @@ enum {
 	WideOne,
 	NUM_COMMON_WCHARS
 };
-
-static int strlenWc(wchar_t *);
-static size_t doMbstowcs(wchar_t *, char *, size_t);
-static size_t doWcstombs(char *, wchar_t *, size_t);
-static void copyWcsToMbs(char *, wchar_t *, int, Boolean);
-// static int dombtowc(wchar_t *, char *, size_t);
-static Boolean extractSegment(wchar_t **, wchar_t **, int *, wchar_t **, int *, int *, Boolean *);
-static XmString StringToXmString(char *);
-static char *getNextCStrDelim(char *);
-static int getCStrCount(char *);
-static wchar_t *CStrCommonWideCharsGet();
-
-/*****************************************************************************
- *	STATIC CODE
- *****************************************************************************/
 
 /*
  * Function:
@@ -131,10 +101,37 @@ static size_t doMbstowcs(wchar_t *wcs, char *mbs, size_t n) {
  */
 static size_t doWcstombs(char *mbs, wchar_t *wcs, size_t n) {
 	const size_t retval = wcstombs(mbs, wcs, (n * sizeof(wchar_t)));
-	if (retval == (size_t)-1)
-		return (0);
-	else
-		return (retval);
+	return retval == (size_t)-1 ? 0 : retval;
+}
+
+/*
+ * Function:
+ *      cwc = CStrCommonWideCharsGet();
+ * Description:
+ *      Return the array of common wide characters.
+ * Input:
+ *      None.
+ * Output:
+ *     	cwc - wchar_t * : this array should never be written to or FREEd.
+ */
+static wchar_t *CStrCommonWideCharsGet() {
+	static wchar_t *CommonWideChars = NULL;
+	// If you add to this array, don't forget to change the enum in
+	// the TYPEDEFS and DEFINES section above to correspond to this array.
+	// TODO(schwehr): const char *
+	static const char *characters[] = {(char *)"\000", (char *)"\t", (char *)"\n", (char *)"\r", (char *)"\f", (char *)"\v",
+	                             (char *)"\\",   (char *)"\"", (char *)"#",  (char *)":",  (char *)"f",  (char *)"l",
+	                             (char *)"n",    (char *)"r",  (char *)"t",  (char *)"v",  (char *)"F",  (char *)"L",
+	                             (char *)"R",    (char *)"T",  (char *)"0",  (char *)"1"};
+
+	if (CommonWideChars == NULL) {
+		CommonWideChars = (wchar_t *)XtMalloc(NUM_COMMON_WCHARS * sizeof(wchar_t));
+
+		for (int i = 0; i < NUM_COMMON_WCHARS; i++) {
+			(void)mbtowc(&(CommonWideChars[i]), characters[i], 1);
+		}
+	}
+	return (CommonWideChars);
 }
 
 /*
@@ -209,29 +206,6 @@ static void copyWcsToMbs(char *mbs, wchar_t *wcs, int len, Boolean process_it) {
 
 	mbs[numCvt] = '\0';
 }
-
-/*
- * Function:
- *      status = dombtowc(wide, multi, size);
- * Description:
- *      Convert a multibyte character to a wide character.
- * Input:
- *      wide	- wchar_t *	: where to put the wide character
- *	multi	- char *	: the multibyte character to convert
- *	size	- size_t	: the number of characters to convert
- * Output:
- *      0	- if multi is a NULL pointer or points to a NULL character
- *	#bytes	- number of bytes in the multibyte character
- *	-1	- multi is an invalid multibyte character.
- *
- *	NOTE:  if wide is NULL, then this returns the number of bytes in
- *	       the multibyte character.
- */
-// TODO(schwehr): const multi
-// TODO(schwehr): drop dombtowc and just use mbtowc
-// static int dombtowc(wchar_t *wide, char *multi, size_t size) {
-//	return mbtowc(wide, multi, size);
-// }
 
 /*
  * Function:
@@ -580,36 +554,6 @@ static int getCStrCount(char *str) {
 		str = ++newStr;
 	}
 	return (x);
-}
-
-/*
- * Function:
- *      cwc = CStrCommonWideCharsGet();
- * Description:
- *      Return the array of common wide characters.
- * Input:
- *      None.
- * Output:
- *     	cwc - wchar_t * : this array should never be written to or FREEd.
- */
-static wchar_t *CStrCommonWideCharsGet() {
-	static wchar_t *CommonWideChars = NULL;
-	// If you add to this array, don't forget to change the enum in
-	// the TYPEDEFS and DEFINES section above to correspond to this array.
-	// TODO(schwehr): const char *
-	static const char *characters[] = {(char *)"\000", (char *)"\t", (char *)"\n", (char *)"\r", (char *)"\f", (char *)"\v",
-	                             (char *)"\\",   (char *)"\"", (char *)"#",  (char *)":",  (char *)"f",  (char *)"l",
-	                             (char *)"n",    (char *)"r",  (char *)"t",  (char *)"v",  (char *)"F",  (char *)"L",
-	                             (char *)"R",    (char *)"T",  (char *)"0",  (char *)"1"};
-
-	if (CommonWideChars == NULL) {
-		CommonWideChars = (wchar_t *)XtMalloc(NUM_COMMON_WCHARS * sizeof(wchar_t));
-
-		for (int i = 0; i < NUM_COMMON_WCHARS; i++) {
-			(void)mbtowc(&(CommonWideChars[i]), characters[i], 1);
-		}
-	}
-	return (CommonWideChars);
 }
 
 /*
@@ -1052,24 +996,17 @@ void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
  *          calculated at creation time.
  */
 void BX_SET_BACKGROUND_COLOR(Widget w, ArgList args, Cardinal *argcnt, Pixel bg_color) {
-	int i;
-	int topShadowLoc;
-	int bottomShadowLoc;
-	int selectLoc;
-	int fgLoc;
-
-#if (((XmVERSION == 1) && (XmREVISION > 0)) || (XmVERSION > 1))
-
-	/*
-	 * Walk through the arglist to see if the user set the top or
-	 * bottom shadow colors.
-	 */
-	selectLoc = topShadowLoc = bottomShadowLoc = UNSET;
-	for (i = 0; i < *argcnt; i++) {
-		if ((strcmp(args[i].name, XmNtopShadowColor) == 0) || (strcmp(args[i].name, XmNtopShadowPixmap) == 0)) {
+	// Walk through the arglist to see if the user set the top or
+	// bottom shadow colors.
+	int selectLoc = UNSET;
+	int topShadowLoc= UNSET;
+	int bottomShadowLoc = UNSET;
+	int fgLoc = UNSET;
+	for (int i = 0; i < *argcnt; i++) {
+		if (strcmp(args[i].name, XmNtopShadowColor) == 0 || strcmp(args[i].name, XmNtopShadowPixmap) == 0) {
 			topShadowLoc = i;
 		}
-		else if ((strcmp(args[i].name, XmNbottomShadowColor) == 0) || (strcmp(args[i].name, XmNbottomShadowPixmap) == 0)) {
+		else if (strcmp(args[i].name, XmNbottomShadowColor) == 0 || strcmp(args[i].name, XmNbottomShadowPixmap) == 0) {
 			bottomShadowLoc = i;
 		}
 		else if (strcmp(args[i].name, XmNarmColor) == 0) {
@@ -1080,23 +1017,20 @@ void BX_SET_BACKGROUND_COLOR(Widget w, ArgList args, Cardinal *argcnt, Pixel bg_
 		}
 	}
 
-	/*
-	 * If either the top or bottom shadow are not set then we
-	 * need to use XmGetColors to get the shadow colors from the backgound
-	 * color and add those that are not already in the arglist to the
-	 * arglist.
-	 *
-	 */
-	if ((bottomShadowLoc == UNSET) || (topShadowLoc == UNSET) || (selectLoc == UNSET) || (fgLoc == UNSET)) {
+	// If either the top or bottom shadow are not set then we
+	// need to use XmGetColors to get the shadow colors from the backgound
+	// color and add those that are not already in the arglist to the
+	// arglist.
+	if (bottomShadowLoc == UNSET || topShadowLoc == UNSET || selectLoc == UNSET || fgLoc == UNSET) {
 		Arg large[1];
 		Colormap cmap;
-		Pixel topShadow;
-		Pixel bottomShadow;
-		Pixel select;
-		Pixel fgColor;
 
 		XtSetArg(large[0], XmNcolormap, &cmap);
 		XtGetValues(w, large, 1);
+		Pixel fgColor;
+		Pixel topShadow;
+		Pixel bottomShadow;
+		Pixel select;
 		XmGetColors(XtScreen(w), cmap, bg_color, &fgColor, &topShadow, &bottomShadow, &select);
 
 		if (topShadowLoc == UNSET) {
@@ -1119,9 +1053,6 @@ void BX_SET_BACKGROUND_COLOR(Widget w, ArgList args, Cardinal *argcnt, Pixel bg_
 			(*argcnt)++;
 		}
 	}
-#else
-#error Xm too old
-#endif
 
 	XtSetArg(args[*argcnt], XmNbackground, bg_color);
 	(*argcnt)++;
@@ -1137,9 +1068,6 @@ void BX_SET_BACKGROUND_COLOR(Widget w, ArgList args, Cardinal *argcnt, Pixel bg_
  * Output:
  *	w - Widget : the shell widget.
  */
-#ifndef _BX_FIND_TOP_SHELL
-#define _BX_FIND_TOP_SHELL
-
 Widget BxFindTopShell(Widget start) {
 	Widget p;
 
@@ -1148,7 +1076,6 @@ Widget BxFindTopShell(Widget start) {
 	}
 	return (start);
 }
-#endif /* _BX_FIND_TOP_SHELL */
 
 /*
  * Function:
@@ -1162,24 +1089,11 @@ Widget BxFindTopShell(Widget start) {
  * Output:
  *	WidgetList : array of widget IDs.
  */
-
-#ifndef _BX_WIDGETIDS_FROM_NAMES
-#define _BX_WIDGETIDS_FROM_NAMES
-
 WidgetList BxWidgetIdsFromNames(
     Widget ref, char *cbName, char *stringList) {
-	WidgetList wgtIds = NULL;
-	int wgtCount = 0;
-	Widget inst;
-	Widget current;
+	// For backward compatibility, remove [ and ] from the list.
 	String tmp;
 	String start;
-	String widget;
-	char *ptr;
-
-	/*
-	 * For backward compatibility, remove [ and ] from the list.
-	 */
 	tmp = start = XtNewString(stringList);
 	if ((start = strchr(start, '[')) != NULL)
 		start++;
@@ -1189,10 +1103,16 @@ WidgetList BxWidgetIdsFromNames(
 	while ((start && *start) && isspace(*start)) {
 		start++;
 	}
-	ptr = strrchr(start, ']');
+	char *ptr = strrchr(start, ']');
 	if (ptr) {
 		*ptr = '\0';
 	}
+
+	WidgetList wgtIds = NULL;
+	int wgtCount = 0;
+	Widget inst;
+	Widget current;
+	String widget;
 
 	ptr = start + strlen(start) - 1;
 	while (ptr && *ptr) {
@@ -1262,42 +1182,27 @@ WidgetList BxWidgetIdsFromNames(
 		start = strtok(NULL, ",");
 	}
 
-	/*
-	 * NULL terminate the list.
-	 */
+	// NULL terminate the list.
 	wgtIds = (WidgetList)XtRealloc((char *)wgtIds, (wgtCount + 1) * sizeof(Widget));
 	wgtIds[wgtCount] = NULL;
 
 	XtFree((char *)tmp);
 	return (wgtIds);
 }
-#endif /* _BX_WIDGETIDS_FROM_NAMES */
 
 XtPointer BX_SINGLE(float val) {
-	XtPointer pointer;
-
-	pointer = (XtPointer)XtMalloc(sizeof(float));
+	XtPointer pointer = (XtPointer)XtMalloc(sizeof(float));
 	if (pointer != NULL)
 		*((float *)pointer) = val;
 	return (pointer);
 }
 
-#ifdef DEFINE_OLD_BXUTILS
-XtPointer SINGLE(float val) { return (BX_SINGLE(val)); }
-#endif /* DEFINE_OLD_BXUTILS */
-
 XtPointer BX_DOUBLE(double val) {
-	XtPointer pointer;
-
-	pointer = (XtPointer)XtMalloc(sizeof(double));
+	XtPointer pointer = (XtPointer)XtMalloc(sizeof(double));
 	if (pointer != NULL)
 		*((double *)pointer) = val;
 	return (pointer);
 }
-
-#ifdef DEFINE_OLD_BXUTILS
-XtPointer DOUBLE(double val) { return (BX_DOUBLE(val)); }
-#endif /* DEFINE_OLD_BXUTILS */
 
 /****************************************************************************
  *
