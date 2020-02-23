@@ -2298,8 +2298,8 @@ static void xpm_znormalizeimagebits(unsigned char *bp, XImage *img) {
 	}
 }
 
-static unsigned char const _lomask[0x09] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
-static unsigned char const _himask[0x09] = {0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80, 0x00};
+static const unsigned char _lomask[0x09] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
+static const unsigned char _himask[0x09] = {0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80, 0x00};
 
 static void _putbits(
     char *src, /* address of source bit string */
@@ -2309,13 +2309,12 @@ static void _putbits(
                                 * destination */
     char *dst)  /* address of destination bit string */
 {
-	unsigned char chlo, chhi;
-	int hibits;
+	unsigned char chhi;
 
 	dst = dst + (dstoffset >> 3);
 	dstoffset = dstoffset & 7;
-	hibits = 8 - dstoffset;
-	chlo = *dst & _lomask[dstoffset];
+	int hibits = 8 - dstoffset;
+	unsigned char chlo = *dst & _lomask[dstoffset];
 	for (;;) {
 		chhi = (*src << dstoffset) & _himask[dstoffset];
 		if (numbits <= hibits) {
@@ -2347,7 +2346,6 @@ static void _putbits(
  *	renormalize temp if needed
  *	copy the temp back into the destination image data
  */
-
 static void SetImagePixels(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
@@ -2356,24 +2354,22 @@ static void SetImagePixels(
 	char *src;
 	char *dst;
 	int nbytes;
-	unsigned int *iptr;
-	int x, y, i;
 
-	iptr = pixelindex;
+	unsigned int *iptr = pixelindex;
 	if (image->depth == 1) {
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++, iptr++) {
 				pixel = pixels[*iptr];
-				for (i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
+				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
 					((unsigned char *)&pixel)[i] = (unsigned char)px;
 				src = &image->data[BXXYINDEX(x, y, image)];
 				dst = (char *)&px;
 				px = 0;
 				nbytes = image->bitmap_unit >> 3;
-				for (i = nbytes; --i >= 0;)
+				for (int i = nbytes; --i >= 0;)
 					*dst++ = *src++;
 				BXXYNORMALIZE(&px, image);
-				i = ((x + image->xoffset) % image->bitmap_unit);
+				int i = ((x + image->xoffset) % image->bitmap_unit);
 				_putbits((char *)&pixel, i, 1, (char *)&px);
 				BXXYNORMALIZE(&px, image);
 				src = (char *)&px;
@@ -2381,229 +2377,201 @@ static void SetImagePixels(
 				for (i = nbytes; --i >= 0;)
 					*dst++ = *src++;
 			}
-	}
-	else {
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
+		}
+	} else {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++, iptr++) {
 				pixel = pixels[*iptr];
 				if (image->depth == 4)
 					pixel &= 0xf;
-				for (i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
+				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
 					((unsigned char *)&pixel)[i] = (unsigned char)px;
 				src = &image->data[BXZINDEX(x, y, image)];
 				dst = (char *)&px;
 				px = 0;
 				nbytes = (image->bits_per_pixel + 7) >> 3;
-				for (i = nbytes; --i >= 0;)
+				for (int i = nbytes; --i >= 0;)
 					*dst++ = *src++;
 				BXZNORMALIZE(&px, image);
 				_putbits((char *)&pixel, (x * image->bits_per_pixel) & 7, image->bits_per_pixel, (char *)&px);
 				BXZNORMALIZE(&px, image);
 				src = (char *)&px;
 				dst = &image->data[BXZINDEX(x, y, image)];
-				for (i = nbytes; --i >= 0;)
+				for (int i = nbytes; --i >= 0;)
 					*dst++ = *src++;
 			}
+		}
 	}
 }
 
-/*
- * write pixels into a 32-bits Z image data structure
- */
-
+// Write pixels into a 32-bits Z image data structure
 #ifndef WORD64
-static unsigned long byteorderpixel = MSBFirst << 24;
-
+static const unsigned long byteorderpixel = MSBFirst << 24;
 #endif
 
 static void SetImagePixels32(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
-	unsigned char *addr;
-	unsigned int *paddr;
-	unsigned int *iptr;
-	int x, y;
-
-	iptr = pixelindex;
+	unsigned int *iptr = pixelindex;
 #ifndef WORD64
 	if (*((char *)&byteorderpixel) == image->byte_order) {
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				paddr = (unsigned int *)(&(image->data[BXZINDEX32(x, y, image)]));
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++, iptr++) {
+				unsigned int *paddr = (unsigned int *)(&(image->data[BXZINDEX32(x, y, image)]));
 				*paddr = (unsigned int)pixels[*iptr];
 			}
-	}
-	else
+		}
+	} else
 #endif
 	    if (image->byte_order == MSBFirst)
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
+		for (int y = 0; y < height; y++)
+			for (int x = 0; x < width; x++, iptr++) {
+				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
 				addr[0] = (unsigned char)(pixels[*iptr] >> 24);
 				addr[1] = (unsigned char)(pixels[*iptr] >> 16);
 				addr[2] = (unsigned char)(pixels[*iptr] >> 8);
 				addr[3] = (unsigned char)(pixels[*iptr]);
 			}
 	else
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++, iptr++) {
+				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
 				addr[3] = (unsigned char)(pixels[*iptr] >> 24);
 				addr[2] = (unsigned char)(pixels[*iptr] >> 16);
 				addr[1] = (unsigned char)(pixels[*iptr] >> 8);
 				addr[0] = (unsigned char)(pixels[*iptr]);
 			}
+		}
 }
 
-/*
- * write pixels into a 16-bits Z image data structure
- */
-
+// write pixels into a 16-bits Z image data structure
 static void SetImagePixels16(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
-	unsigned char *addr;
-	unsigned int *iptr;
-	int x, y;
-
-	iptr = pixelindex;
-	if (image->byte_order == MSBFirst)
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
+	unsigned int *iptr = pixelindex;
+	if (image->byte_order == MSBFirst) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++, iptr++) {
+				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
 				addr[0] = (unsigned char)(pixels[*iptr] >> 8);
 				addr[1] = (unsigned char)(pixels[*iptr]);
 			}
-	else
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
+		}
+	} else {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++, iptr++) {
+				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
 				addr[1] = (unsigned char)(pixels[*iptr] >> 8);
 				addr[0] = (unsigned char)(pixels[*iptr]);
 			}
+		}
+	}
 }
 
-/*
- * write pixels into a 8-bits Z image data structure
- */
-
+// write pixels into a 8-bits Z image data structure
 static void SetImagePixels8(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
-	unsigned int *iptr;
-	int x, y;
-
-	iptr = pixelindex;
-	for (y = 0; y < height; y++)
-		for (x = 0; x < width; x++, iptr++)
+	unsigned int *iptr = pixelindex;
+	for (int y = 0; y < height; y++)
+		for (int x = 0; x < width; x++, iptr++)
 			image->data[BXZINDEX8(x, y, image)] = (char)pixels[*iptr];
 }
 
-/*
- * write pixels into a 1-bit depth image data structure and **offset null**
- */
-
+// write pixels into a 1-bit depth image data structure and **offset null**
 static void SetImagePixels1(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
-	unsigned char bit;
-	int xoff, yoff;
-	unsigned int *iptr;
-	int x, y;
-
-	if (image->byte_order != image->bitmap_bit_order)
+	if (image->byte_order != image->bitmap_bit_order) {
 		SetImagePixels(image, width, height, pixelindex, pixels);
-	else {
-		iptr = pixelindex;
-		if (image->bitmap_bit_order == MSBFirst)
-			for (y = 0; y < height; y++)
-				for (x = 0; x < width; x++, iptr++) {
-					yoff = BXZINDEX1(x, y, image);
-					xoff = x & 7;
-					bit = 0x80 >> xoff;
-					if (pixels[*iptr] & 1)
-						image->data[yoff] |= bit;
-					else
-						image->data[yoff] &= ~bit;
-				}
-		else
-			for (y = 0; y < height; y++)
-				for (x = 0; x < width; x++, iptr++) {
-					yoff = BXZINDEX1(x, y, image);
-					xoff = x & 7;
-					bit = 1 << xoff;
-					if (pixels[*iptr] & 1)
-						image->data[yoff] |= bit;
-					else
-						image->data[yoff] &= ~bit;
-				}
+		return;
+	}
+
+	unsigned int *iptr = pixelindex;
+	if (image->bitmap_bit_order == MSBFirst) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++, iptr++) {
+				const int yoff = BXZINDEX1(x, y, image);
+				const int xoff = x & 7;
+				unsigned char bit = 0x80 >> xoff;
+				if (pixels[*iptr] & 1)
+					image->data[yoff] |= bit;
+				else
+					image->data[yoff] &= ~bit;
+			}
+		}
+	} else {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++, iptr++) {
+				const int yoff = BXZINDEX1(x, y, image);
+				const int xoff = x & 7;
+				unsigned char bit = 1 << xoff;
+				if (pixels[*iptr] & 1)
+					image->data[yoff] |= bit;
+				else
+					image->data[yoff] &= ~bit;
+			}
+		}
 	}
 }
 
-/*
- * Store into the BxXpmAttributes structure the required informations stored in
- * the bxxpmInternAttrib structure.
- */
-
+// Store into the BxXpmAttributes structure the required informations stored in
+// the bxxpmInternAttrib structure.
 static void xpmSetAttributes(
     bxxpmInternAttrib *attrib, BxXpmAttributes *attributes) {
-	if (attributes) {
-		if (attributes->valuemask & BxXpmReturnInfos) {
-			attributes->cpp = attrib->cpp;
-			attributes->ncolors = attrib->ncolors;
-			attributes->colorTable = attrib->colorTable;
+	if (!attributes) return;
 
-			attrib->ncolors = 0;
-			attrib->colorTable = NULL;
-		}
-		attributes->width = attrib->width;
-		attributes->height = attrib->height;
-		attributes->valuemask |= BxXpmSize;
+	if (attributes->valuemask & BxXpmReturnInfos) {
+		attributes->cpp = attrib->cpp;
+		attributes->ncolors = attrib->ncolors;
+		attributes->colorTable = attrib->colorTable;
+
+		attrib->ncolors = 0;
+		attrib->colorTable = NULL;
 	}
+	attributes->width = attrib->width;
+	attributes->height = attrib->height;
+	attributes->valuemask |= BxXpmSize;
 }
 
-/*
- * Free the BxXpmAttributes structure members
- * but the structure itself
- */
-
+// Free the BxXpmAttributes structure members
+// but the structure itself
 static void BxXpmFreeAttributes(BxXpmAttributes *attributes) {
-	if (attributes) {
-		if (attributes->valuemask & BxXpmReturnPixels && attributes->pixels) {
+	if (!attributes) return;
+
+	if (attributes->valuemask & BxXpmReturnPixels && attributes->pixels) {
+		free((char *)attributes->pixels);
+		attributes->pixels = NULL;
+		attributes->npixels = 0;
+	}
+
+	if (attributes->valuemask & BxXpmInfos) {
+		if (attributes->colorTable) {
+			xpmFreeColorTable(attributes->colorTable, attributes->ncolors);
+			attributes->colorTable = NULL;
+			attributes->ncolors = 0;
+		}
+		if (attributes->hints_cmt) {
+			free(attributes->hints_cmt);
+			attributes->hints_cmt = NULL;
+		}
+		if (attributes->colors_cmt) {
+			free(attributes->colors_cmt);
+			attributes->colors_cmt = NULL;
+		}
+		if (attributes->pixels_cmt) {
+			free(attributes->pixels_cmt);
+			attributes->pixels_cmt = NULL;
+		}
+		if (attributes->pixels) {
 			free((char *)attributes->pixels);
 			attributes->pixels = NULL;
-			attributes->npixels = 0;
 		}
-		if (attributes->valuemask & BxXpmInfos) {
-			if (attributes->colorTable) {
-				xpmFreeColorTable(attributes->colorTable, attributes->ncolors);
-				attributes->colorTable = NULL;
-				attributes->ncolors = 0;
-			}
-			if (attributes->hints_cmt) {
-				free(attributes->hints_cmt);
-				attributes->hints_cmt = NULL;
-			}
-			if (attributes->colors_cmt) {
-				free(attributes->colors_cmt);
-				attributes->colors_cmt = NULL;
-			}
-			if (attributes->pixels_cmt) {
-				free(attributes->pixels_cmt);
-				attributes->pixels_cmt = NULL;
-			}
-			if (attributes->pixels) {
-				free((char *)attributes->pixels);
-				attributes->pixels = NULL;
-			}
-		}
-		attributes->valuemask = 0;
 	}
+	attributes->valuemask = 0;
 }
 
-/*
- * Free the bxxpmInternAttrib pointers which have been allocated
- */
+// Free the bxxpmInternAttrib pointers which have been allocated
 static void xpmFreeInternAttrib(bxxpmInternAttrib *attrib) {
 	if (attrib->colorTable)
 		xpmFreeColorTable(attrib->colorTable, attrib->ncolors);
