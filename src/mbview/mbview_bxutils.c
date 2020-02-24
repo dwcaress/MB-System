@@ -119,12 +119,13 @@ static wchar_t *CStrCommonWideCharsGet() {
 	// If you add to this array, don't forget to change the enum in
 	// the TYPEDEFS and DEFINES section above to correspond to this array.
 	// TODO(schwehr): const char *
-	static const char *characters[] = {(char *)"\000", (char *)"\t", (char *)"\n", (char *)"\r", (char *)"\f", (char *)"\v",
-	                             (char *)"\\",   (char *)"\"", (char *)"#",  (char *)":",  (char *)"f",  (char *)"l",
-	                             (char *)"n",    (char *)"r",  (char *)"t",  (char *)"v",  (char *)"F",  (char *)"L",
-	                             (char *)"R",    (char *)"T",  (char *)"0",  (char *)"1"};
-
 	if (CommonWideChars == NULL) {
+		static const char *characters[] = {
+			(char *)"\000", (char *)"\t", (char *)"\n", (char *)"\r", (char *)"\f", (char *)"\v",
+	                (char *)"\\",   (char *)"\"", (char *)"#",  (char *)":",  (char *)"f",  (char *)"l",
+	                (char *)"n",    (char *)"r",  (char *)"t",  (char *)"v",  (char *)"F",  (char *)"L",
+	                (char *)"R",    (char *)"T",  (char *)"0",  (char *)"1"};
+
 		CommonWideChars = (wchar_t *)XtMalloc(NUM_COMMON_WCHARS * sizeof(wchar_t));
 
 		for (int i = 0; i < NUM_COMMON_WCHARS; i++) {
@@ -298,7 +299,7 @@ static Boolean extractSegment(
 			if (*start == commonWChars[WHash]) {
 				if (tagSeen) {
 					done = true;
-					break;
+					continue;  // break;
 				} else {
 					tagSeen = true;
 					tag = ++start;
@@ -1502,38 +1503,31 @@ static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
 static int BxXpmCreatePixmapFromData(
     Display *display, Drawable d, char **data, Pixmap *pixmap_return,
     Pixmap *shapemask_return, BxXpmAttributes *attributes) {
-	XImage *image, **imageptr = NULL;
-	XImage *shapeimage, **shapeimageptr = NULL;
-	int ErrorStatus;
-	XGCValues gcv;
-	GC gc;
-
-	/*
-	 * initialize return values
-	 */
+	XImage *image;
+	XImage **imageptr = NULL;
 	if (pixmap_return) {
 		*pixmap_return = (Pixmap)NULL;
 		imageptr = &image;
 	}
+
+	XImage *shapeimage;
+	XImage **shapeimageptr = NULL;
 	if (shapemask_return) {
 		*shapemask_return = (Pixmap)NULL;
 		shapeimageptr = &shapeimage;
 	}
 
-	/*
-	 * create the images
-	 */
-	ErrorStatus = BxXpmCreateImageFromData(display, data, imageptr, shapeimageptr, attributes);
+	// create the images
+	int ErrorStatus = BxXpmCreateImageFromData(display, data, imageptr, shapeimageptr, attributes);
 	if (ErrorStatus < 0)
 		return (ErrorStatus);
 
-	/*
-	 * create the pixmaps
-	 */
+	// create the pixmaps
 	if (imageptr && image) {
 		*pixmap_return = XCreatePixmap(display, d, image->width, image->height, image->depth);
+		XGCValues gcv;
 		gcv.function = GXcopy;
-		gc = XCreateGC(display, *pixmap_return, GCFunction, &gcv);
+		GC gc = XCreateGC(display, *pixmap_return, GCFunction, &gcv);
 
 		XPutImage(display, *pixmap_return, gc, image, 0, 0, 0, 0, image->width, image->height);
 
@@ -1542,8 +1536,9 @@ static int BxXpmCreatePixmapFromData(
 	}
 	if (shapeimageptr && shapeimage) {
 		*shapemask_return = XCreatePixmap(display, d, shapeimage->width, shapeimage->height, shapeimage->depth);
+		XGCValues gcv;
 		gcv.function = GXcopy;
-		gc = XCreateGC(display, *shapemask_return, GCFunction, &gcv);
+		GC gc = XCreateGC(display, *shapemask_return, GCFunction, &gcv);
 
 		XPutImage(display, *shapemask_return, gc, shapeimage, 0, 0, 0, 0, shapeimage->width, shapeimage->height);
 
@@ -1556,24 +1551,23 @@ static int BxXpmCreatePixmapFromData(
 static int BxXpmCreateImageFromData(
     Display *display, char **data, XImage **image_return,
     XImage **shapeimage_return, BxXpmAttributes *attributes) {
-	bxxpmData mdata;
-	int ErrorStatus;
-	bxxpmInternAttrib attrib;
-
-	/*
-	 * initialize return values
-	 */
+	// Initialize return values
 	if (image_return)
 		*image_return = NULL;
 	if (shapeimage_return)
 		*shapeimage_return = NULL;
 
-	if ((ErrorStatus = xpmOpenArray(data, &mdata)) != BxXpmSuccess)
-		return (ErrorStatus);
+	bxxpmData mdata;
+	{
+		const int ErrorStatus = xpmOpenArray(data, &mdata);
+		if (ErrorStatus != BxXpmSuccess)
+			return (ErrorStatus);
+	}
 
+	bxxpmInternAttrib attrib;
 	xpmInitInternAttrib(&attrib);
 
-	ErrorStatus = xpmParseData(&mdata, &attrib, attributes);
+	int ErrorStatus = xpmParseData(&mdata, &attrib, attributes);
 
 	if (ErrorStatus == BxXpmSuccess)
 		ErrorStatus = xpmCreateImage(display, &attrib, image_return, shapeimage_return, attributes);
@@ -1589,9 +1583,7 @@ static int BxXpmCreateImageFromData(
 	return (ErrorStatus);
 }
 
-/*
- * open the given array to be read or written as an bxxpmData which is returned
- */
+// open the given array to be read or written as an bxxpmData which is returned
 static int xpmOpenArray(char **data, bxxpmData *mdata) {
 	mdata->type = BXXPMARRAY;
 	mdata->stream.data = data;
@@ -1604,10 +1596,8 @@ static int xpmOpenArray(char **data, bxxpmData *mdata) {
 	return (BxXpmSuccess);
 }
 
-/*
- * Intialize the bxxpmInternAttrib pointers to Null to know
- * which ones must be freed later on.
- */
+// Intialize the bxxpmInternAttrib pointers to Null to know
+// which ones must be freed later on.
 static void xpmInitInternAttrib(bxxpmInternAttrib *attrib) {
 	attrib->ncolors = 0;
 	attrib->colorTable = NULL;
@@ -1617,7 +1607,7 @@ static void xpmInitInternAttrib(bxxpmInternAttrib *attrib) {
 	attrib->mask_pixel = BX_UNDEF_PIXEL;
 }
 
-/* function call in case of error, frees only localy allocated variables */
+// function call in case of error, frees only localy allocated variables
 #undef RETURN
 #define RETURN(status) \
 	{ \
@@ -1636,18 +1626,13 @@ static void xpmInitInternAttrib(bxxpmInternAttrib *attrib) {
 		return (status);                                \
 	}
 
-/*
- * This function parses an Xpm file or data and store the found informations
- * in an an bxxpmInternAttrib structure which is returned.
- */
+// This function parses an Xpm file or data and store the found informations
+// in an an bxxpmInternAttrib structure which is returned.
 static int xpmParseData(
     bxxpmData * data, bxxpmInternAttrib *attrib_return,
     BxXpmAttributes *attributes) {
-	/* variables to return */
-	unsigned int width, height;
 	unsigned int ncolors = 0;
 	unsigned int cpp;
-	unsigned int x_hotspot, y_hotspot, hotspot = 0;
 	char ***colorTable = NULL;
 	unsigned int *pixelindex = NULL;
 	char *hints_cmt = NULL;
@@ -1664,24 +1649,22 @@ static int xpmParseData(
 	unsigned int key;          /* color key */
 	char *chars = NULL, buf[BUFSIZ];
 	unsigned int *iptr;
-	unsigned int a, b, x, y, l;
+	unsigned int b, x, y;
 
-	unsigned int curkey;     /* current color key */
-	unsigned int lastwaskey; /* key read */
-	char curbuf[BUFSIZ];     /* current buffer */
+	// char curbuf[BUFSIZ];     /* current buffer */
 
-	/*
-	 * read hints: width, height, ncolors, chars_per_pixel
-	 */
+	// read hints: width, height, ncolors, chars_per_pixel
+	unsigned int width;
+	unsigned int height;
 	if (!(xpmNextUI(data, &width) && xpmNextUI(data, &height) && xpmNextUI(data, &rncolors) && xpmNextUI(data, &cpp)))
 		RETURN(BxXpmFileInvalid);
 
 	ncolors = rncolors;
 
-	/*
-	 * read hotspot coordinates if any
-	 */
-	hotspot = xpmNextUI(data, &x_hotspot) && xpmNextUI(data, &y_hotspot);
+	// read hotspot coordinates if any
+	unsigned int x_hotspot;
+	unsigned int y_hotspot;
+	const unsigned int hotspot = xpmNextUI(data, &x_hotspot) && xpmNextUI(data, &y_hotspot);
 
 	/*
 	 * store the hints comment line
@@ -1696,26 +1679,25 @@ static int xpmParseData(
 	if (!colorTable)
 		RETURN(BxXpmNoMemory);
 
-	for (a = 0; a < ncolors; a++) {
+	for (unsigned int a = 0; a < ncolors; a++) {
 		xpmNextString(data); /* skip the line */
 		colorTable[a] = (char **)calloc((BXNKEYS + 1), sizeof(char *));
 		if (!colorTable[a])
 			RETURN(BxXpmNoMemory);
 
-		/*
-		 * read pixel value
-		 */
+		// read pixel value
 		colorTable[a][0] = (char *)malloc(cpp);
 		if (!colorTable[a][0])
 			RETURN(BxXpmNoMemory);
 		for (b = 0; b < cpp; b++)
 			colorTable[a][0][b] = xpmGetC(data);
 
-		/*
-		 * read color keys and values
-		 */
-		curkey = 0;
-		lastwaskey = 0;
+		// read color keys and values
+		unsigned int curkey = 0;  // current color key
+		unsigned int lastwaskey = 0;  // key read
+		unsigned int l;
+		char curbuf[BUFSIZ];     /* current buffer */
+
 		while ((l = xpmNextWord(data, buf))) {
 			if (!lastwaskey) {
 				for (key = 1; key < BXNKEYS + 1; key++)
@@ -1751,15 +1733,11 @@ static int xpmParseData(
 		strcpy(colorTable[a][curkey], curbuf);
 	}
 
-	/*
-	 * store the colors comment line
-	 */
+	// store the colors comment line
 	if (attributes && (attributes->valuemask & BxXpmReturnInfos))
 		xpmGetCmt(data, &colors_cmt);
 
-	/*
-	 * read pixels and index them on color number
-	 */
+	// read pixels and index them on color number
 	pixelindex = (unsigned int *)malloc(sizeof(unsigned int) * width * height);
 	if (!pixelindex)
 		RETURN(BxXpmNoMemory);
@@ -1773,8 +1751,9 @@ static int xpmParseData(
 	for (y = 0; y < height; y++) {
 		xpmNextString(data);
 		for (x = 0; x < width; x++, iptr++) {
-			for (a = 0; a < cpp; a++)
+			for (unsigned int a = 0; a < cpp; a++)
 				chars[a] = xpmGetC(data);
+			unsigned int a;
 			for (a = 0; a < ncolors; a++)
 				if (!strncmp(colorTable[a][0], chars, cpp))
 					break;
@@ -1784,17 +1763,13 @@ static int xpmParseData(
 		}
 	}
 
-	/*
-	 * store the pixels comment line
-	 */
+	// store the pixels comment line
 	if (attributes && (attributes->valuemask & BxXpmReturnInfos))
 		xpmGetCmt(data, &pixels_cmt);
 
 	free(chars);
 
-	/*
-	 * store found informations in the bxxpmInternAttrib structure
-	 */
+	// store found informations in the bxxpmInternAttrib structure
 	attrib_return->width = width;
 	attrib_return->height = height;
 	attrib_return->cpp = cpp;
@@ -1826,9 +1801,8 @@ static int SetColor(
     Display *display, Colormap colormap, char *colorname,
     unsigned int color_index, Pixel *image_pixel, Pixel *mask_pixel,
     unsigned int *mask_pixel_index) {
-	XColor xcolor;
-
 	if (strcasecmp(colorname, (char *)BX_TRANSPARENT_COLOR)) {
+		XColor xcolor;
 		if (!XParseColor(display, colormap, colorname, &xcolor) || (!XAllocColor(display, colormap, &xcolor)))
 			return (1);
 		*image_pixel = xcolor.pixel;
@@ -1871,25 +1845,23 @@ static int xpmCreateImage(
 	XImage *image = NULL;
 	XImage *shapeimage = NULL;
 	unsigned int mask_pixel;
-	unsigned int ErrorStatus, ErrorStatus2;
+	unsigned int ErrorStatus;
+	unsigned int ErrorStatus2;
 
 	/* calculation variables */
 	Pixel *image_pixels = NULL;
 	Pixel *mask_pixels = NULL;
-	char *colorname;
 	unsigned int a, b, l;
 	Boolean pixel_defined;
 	unsigned int key;
 
-	/*
-	 * retrieve information from the BxXpmAttributes
-	 */
+	// retrieve information from the BxXpmAttributes
 	if (attributes && attributes->valuemask & BxXpmColorSymbols) {
 		colorsymbols = attributes->colorsymbols;
 		numsymbols = attributes->numsymbols;
-	}
-	else
+	} else {
 		numsymbols = 0;
+	}
 
 	if (attributes && attributes->valuemask & BxXpmVisual)
 		visual = attributes->visual;
@@ -1927,7 +1899,7 @@ static int xpmCreateImage(
 	 * get pixel colors, store them in index tables
 	 */
 	for (a = 0; a < attrib->ncolors; a++) {
-		colorname = NULL;
+		char *colorname = NULL;
 		pixel_defined = False;
 
 		/*
@@ -1989,22 +1961,16 @@ static int xpmCreateImage(
 		}
 	}
 
-	/*
-	 * create the image
-	 */
+	// create the image
 	if (image_return) {
 		ErrorStatus2 = CreateXImage(display, visual, depth, attrib->width, attrib->height, &image);
 		if (ErrorStatus2 != BxXpmSuccess)
 			RETURN(ErrorStatus2);
 
-		/*
-		 * set the image data
-		 *
-		 * In case depth is 1 or bits_per_pixel is 4, 6, 8, 24 or 32 use
-		 * optimized functions, otherwise use slower but sure general one.
-		 *
-		 */
-
+		// set the image data
+		//
+		// In case depth is 1 or bits_per_pixel is 4, 6, 8, 24 or 32 use
+		// optimized functions, otherwise use slower but sure general one.
 		if (image->depth == 1)
 			SetImagePixels1(image, attrib->width, attrib->height, attrib->pixelindex, image_pixels);
 		else if (image->bits_per_pixel == 8)
@@ -2017,9 +1983,7 @@ static int xpmCreateImage(
 			SetImagePixels(image, attrib->width, attrib->height, attrib->pixelindex, image_pixels);
 	}
 
-	/*
-	 * create the shape mask image
-	 */
+	// create the shape mask image
 	if (mask_pixel != BX_UNDEF_PIXEL && shapeimage_return) {
 		ErrorStatus2 = CreateXImage(display, visual, 1, attrib->width, attrib->height, &shapeimage);
 		if (ErrorStatus2 != BxXpmSuccess)
@@ -2029,18 +1993,15 @@ static int xpmCreateImage(
 	}
 	free((char *)mask_pixels);
 
-	/*
-	 * if requested store allocated pixels in the BxXpmAttributes structure
-	 */
+	// if requested store allocated pixels in the BxXpmAttributes structure
 	if (attributes && (attributes->valuemask & BxXpmReturnInfos || attributes->valuemask & BxXpmReturnPixels)) {
 		if (mask_pixel != BX_UNDEF_PIXEL) {
-			Pixel *pixels, *p1, *p2;
 
 			attributes->npixels = attrib->ncolors - 1;
-			pixels = (Pixel *)malloc(sizeof(Pixel) * attributes->npixels);
+			Pixel *pixels = (Pixel *)malloc(sizeof(Pixel) * attributes->npixels);
 			if (pixels) {
-				p1 = image_pixels;
-				p2 = pixels;
+				Pixel *p1 = image_pixels;
+				Pixel *p2 = pixels;
 				for (a = 0; a < attrib->ncolors; a++, p1++)
 					if (a != mask_pixel)
 						*p2++ = *p1;
@@ -2076,15 +2037,12 @@ static int xpmCreateImage(
 	return (ErrorStatus);
 }
 
-/*
- * Create an XImage
- */
+// Create an XImage
 static int CreateXImage(
     Display *display, Visual *visual, unsigned int depth, unsigned int width,
     unsigned int height, XImage **image_return) {
-	int bitmap_pad;
-
 	/* first get bitmap_pad */
+	int bitmap_pad;
 	if (depth > 16)
 		bitmap_pad = 32;
 	else if (depth > 8)
@@ -2146,25 +2104,26 @@ static void _XReverse_Bytes(unsigned char *bpt, int nb) {
 }
 
 static void xpm_xynormalizeimagebits(unsigned char *bp, XImage *img) {
-	unsigned char c;
-
 	if (img->byte_order != img->bitmap_bit_order) {
 		switch (img->bitmap_unit) {
 
 		case 16:
-			c = *bp;
+		{
+			const unsigned char c = *bp;
 			*bp = *(bp + 1);
 			*(bp + 1) = c;
 			break;
-
+		}
 		case 32:
-			c = *(bp + 3);
+		{
+			unsigned char c = *(bp + 3);
 			*(bp + 3) = *bp;
 			*bp = c;
 			c = *(bp + 2);
 			*(bp + 2) = *(bp + 1);
 			*(bp + 1) = c;
 			break;
+		}
 		}
 	}
 	if (img->bitmap_bit_order == MSBFirst)
@@ -2214,14 +2173,12 @@ static void _putbits(
                                 * destination */
     char *dst)  /* address of destination bit string */
 {
-	unsigned char chhi;
-
 	dst = dst + (dstoffset >> 3);
 	dstoffset = dstoffset & 7;
 	int hibits = 8 - dstoffset;
 	unsigned char chlo = *dst & _lomask[dstoffset];
 	for (;;) {
-		chhi = (*src << dstoffset) & _himask[dstoffset];
+		unsigned char chhi = (*src << dstoffset) & _himask[dstoffset];
 		if (numbits <= hibits) {
 			chhi = chhi & _lomask[dstoffset + numbits];
 			*dst = (*dst & _himask[dstoffset + numbits]) | chlo | chhi;
@@ -2254,23 +2211,18 @@ static void _putbits(
 static void SetImagePixels(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
-	Pixel pixel;
-	unsigned long px;
-	char *src;
-	char *dst;
-	int nbytes;
-
 	unsigned int *iptr = pixelindex;
 	if (image->depth == 1) {
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++, iptr++) {
-				pixel = pixels[*iptr];
-				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
+				Pixel pixel = pixels[*iptr];
+				unsigned long px = pixel;
+				for (int i = 0; i < sizeof(unsigned long); i++, px >>= 8)
 					((unsigned char *)&pixel)[i] = (unsigned char)px;
-				src = &image->data[BXXYINDEX(x, y, image)];
-				dst = (char *)&px;
+				char *src = &image->data[BXXYINDEX(x, y, image)];
+				char *dst = (char *)&px;
 				px = 0;
-				nbytes = image->bitmap_unit >> 3;
+				const int nbytes = image->bitmap_unit >> 3;
 				for (int i = nbytes; --i >= 0;)
 					*dst++ = *src++;
 				BXXYNORMALIZE(&px, image);
@@ -2286,15 +2238,15 @@ static void SetImagePixels(
 	} else {
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++, iptr++) {
-				pixel = pixels[*iptr];
+				Pixel pixel = pixels[*iptr];
 				if (image->depth == 4)
 					pixel &= 0xf;
 				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
 					((unsigned char *)&pixel)[i] = (unsigned char)px;
-				src = &image->data[BXZINDEX(x, y, image)];
-				dst = (char *)&px;
-				px = 0;
-				nbytes = (image->bits_per_pixel + 7) >> 3;
+				char *src = &image->data[BXZINDEX(x, y, image)];
+				unsigned long px = 0;
+				char *dst = (char *)&px;
+				const int nbytes = (image->bits_per_pixel + 7) >> 3;
 				for (int i = nbytes; --i >= 0;)
 					*dst++ = *src++;
 				BXZNORMALIZE(&px, image);
@@ -2835,14 +2787,8 @@ void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
 	/* Merge them into the Xt database, with lowest precendence */
 
 	if (rdb) {
-#if (XlibSpecificationRelease >= 5)
 		XrmDatabase db = XtDatabase(dpy);
 		XrmCombineDatabase(rdb, &db, FALSE);
-#else
-#error XlibSpecificationRelease too old
-		XrmMergeDatabases(dpy->db, &rdb);
-		dpy->db = rdb;
-#endif
 	}
 }
 
@@ -2852,22 +2798,12 @@ void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
  * value exists.
  */
 void InitAppDefaults(Widget parent, UIAppDefault *defs) {
-#if (XlibSpecificationRelease >= 5)
 	XrmDatabase rdb = XrmGetDatabase(XtDisplay(parent));
 	if (rdb == NULL) {
-		return; /*  Can't get the database */
+		return;  // Can't get the database
 	}
-#else
-#error XlibSpecificationRelease too old
-	Display *dpy = XtDisplay(parent);
-	XrmDatabase rdb;
-	if ((rdb = dpy->db) == NULL) {
-		return;
-	}
-#endif
 
-	/* Look for each resource in the table */
-
+	// Look for each resource in the table
 	XrmQuark rsc[10];
 	while (defs->wName) {
 		int rscIdx = 0;
@@ -2968,12 +2904,9 @@ void SetAppDefaults(Widget w, UIAppDefault *defs, char *inst_name, Boolean overr
 		defs++;
 	}
 
-	/*
-	 * Merge them into the Xt database, with lowest precendence
-	 */
+	// Merge them into the Xt database, with lowest precendence
 	if (rdb) {
 		Display *dpy = XtDisplay(w);
-
 		// DO NOT do an XrmDestroyDatabase(rdb) here.  This looks like a
 	 	// program leak, but is really an X problem.
 		//
@@ -2982,13 +2915,7 @@ void SetAppDefaults(Widget w, UIAppDefault *defs, char *inst_name, Boolean overr
 		// XrmCombineDatabase needs to assume responsibility for destroying
 		// rdb at the right time.  We do not know when the pointers are no
 		// longer needed.
-#if (XlibSpecificationRelease >= 5)
 		XrmDatabase db = XtDatabase(dpy);
 		XrmCombineDatabase(rdb, &db, FALSE);
-#else
-#error XlibSpecificationRelease too old
-		XrmMergeDatabases(dpy->db, &rdb);
-		dpy->db = rdb;
-#endif
 	}
 }
