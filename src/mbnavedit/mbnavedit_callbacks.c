@@ -975,7 +975,7 @@ void do_build_filelist() {
 				/* check for locks */
 				if (currentfile == i)
 					lockstrptr = loadedstr;
-				else if (filelocks[i] == true)
+				else if (filelocks[i])
 					lockstrptr = lockedstr;
 				else
 					lockstrptr = unlockedstr;
@@ -1312,7 +1312,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 				y_loc = win_y;
 
 				/* set second interval bound */
-				if (mode_set_interval == true) {
+				if (mode_set_interval) {
 					status = mbnavedit_action_set_interval(x_loc, y_loc, 1);
 					if (status == MB_FAILURE)
 						mbnavedit_bell(100);
