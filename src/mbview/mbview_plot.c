@@ -18,17 +18,15 @@
  *
  * Note:	This code was broken out of mbview_callbacks.c, which was
  *		begun on October 7, 2002
- *
- *
  */
 /*------------------------------------------------------------------------------*/
 
-/* Standard includes for builtins. */
+#include <ctype.h>
+#include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <math.h>
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1800)
@@ -108,7 +106,7 @@ int mbview_reset_glx(size_t instance) {
 #endif
 
 	/* delete old glx_context if it exists */
-	if (view->glx_init == true) {
+	if (view->glx_init) {
 #ifdef MBV_DEBUG_GLX
 		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
@@ -179,7 +177,8 @@ int mbview_drawdata(size_t instance, int rez) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int on, flip;
+	bool on;
+	int flip;
 	int nxrange, nyrange;
 	int stride;
 	double secondary_value;
@@ -226,22 +225,22 @@ int mbview_drawdata(size_t instance, int rez) {
 	/* calculate histogram equalization if needed */
 	float *histogram = NULL;
 	bool make_histogram = false;
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY && data->primary_histogram == true) {
-		if (view->primary_histogram_set == false) {
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY && data->primary_histogram) {
+		if (!view->primary_histogram_set) {
 			make_histogram = true;
 			which_data = MBV_DATA_PRIMARY;
 		}
 		histogram = view->primary_histogram;
 	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && data->primaryslope_histogram == true) {
-		if (view->primaryslope_histogram_set == false) {
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && data->primaryslope_histogram) {
+		if (!view->primaryslope_histogram_set) {
 			make_histogram = true;
 			which_data = MBV_DATA_PRIMARYSLOPE;
 		}
 		histogram = view->primaryslope_histogram;
 	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY && data->secondary_histogram == true) {
-		if (view->secondary_histogram_set == false) {
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY && data->secondary_histogram) {
+		if (!view->secondary_histogram_set) {
 			make_histogram = true;
 			which_data = MBV_DATA_SECONDARY;
 		}
@@ -249,8 +248,8 @@ int mbview_drawdata(size_t instance, int rez) {
 	}
 	if (make_histogram)
 		mbview_make_histogram(view, data, which_data);
-	if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY && data->secondary_histogram == true &&
-	    view->secondary_histogram_set == false)
+	if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY && data->secondary_histogram &&
+	    !view->secondary_histogram_set)
 		mbview_make_histogram(view, data, MBV_DATA_SECONDARY);
 
 	/*fprintf(stderr,"mbview_drawdata: %d %d stride:%d\n", instance,rez,stride);*/
@@ -362,14 +361,14 @@ int mbview_drawdata(size_t instance, int rez) {
 
 	/* check for pending event */
 
-	/*if (view->plot_done == false
-	    && view->plot_interrupt_allowed == true
+	/*if (!view->plot_done
+	    && view->plot_interrupt_allowed
 	    && i % MBV_EVENTCHECKCOARSENESS == 0)
 	    do_mbview_xevents();*/
 
 	/* dump out of loop if plotting already done at a higher recursion */
 
-	/*if (view->plot_done == true)
+	/*if (view->plot_done)
 	    i = data->primary_n_columns;
 	}
 	glEnd();*/
@@ -382,20 +381,20 @@ int mbview_drawdata(size_t instance, int rez) {
 			for (j = data->viewbounds[2]; j < data->viewbounds[3]; j += stride) {
 				k = i * data->primary_n_rows + j;
 				l = (i + stride) * data->primary_n_rows + j;
-				if (flip == false) {
+				// TODO(schwehr): Flip sense of flip check so ! not needed.  Why use !flip?
+				if (!flip) {
 					ikk = i;
 					kk = k;
 					ill = i + stride;
 					ll = l;
-				}
-				else {
+				} else {
 					ikk = i + stride;
 					kk = l;
 					ill = i;
 					ll = k;
 				}
 				if (data->primary_data[kk] != data->primary_nodatavalue) {
-					if (on == false) {
+					if (!on) {
 						glBegin(GL_TRIANGLE_STRIP);
 						on = true;
 						if (kk == k)
@@ -415,7 +414,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					data->primary_x[kk],data->primary_y[kk],data->primary_z[kk]);*/
 				}
 				else {
-					if (on == true) {
+					if (on) {
 						glEnd();
 #ifdef MBV_GET_GLX_ERRORS
 						mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
@@ -425,7 +424,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					flip = false;
 				}
 				if (data->primary_data[ll] != data->primary_nodatavalue) {
-					if (on == false) {
+					if (!on) {
 						glBegin(GL_TRIANGLE_STRIP);
 						on = true;
 						if (ll == l)
@@ -442,7 +441,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					glVertex3f(data->primary_x[ll], data->primary_y[ll], data->primary_z[ll]);
 				}
 				else {
-					if (on == true) {
+					if (on) {
 						glEnd();
 #ifdef MBV_GET_GLX_ERRORS
 						mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
@@ -452,7 +451,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					flip = false;
 				}
 			}
-			if (on == true) {
+			if (on) {
 				glEnd();
 #ifdef MBV_GET_GLX_ERRORS
 				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
@@ -462,12 +461,12 @@ int mbview_drawdata(size_t instance, int rez) {
 			}
 
 			/* check for pending event */
-			if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0) {
+			if (!view->plot_done && view->plot_interrupt_allowed && i % MBV_EVENTCHECKCOARSENESS == 0) {
 				do_mbview_xevents();
 			}
 
 			/* dump out of loop if plotting already done at a higher recursion */
-			if (view->plot_done == true)
+			if (view->plot_done)
 				i = data->primary_n_columns;
 		}
 	}
@@ -479,7 +478,8 @@ int mbview_drawdata(size_t instance, int rez) {
 			for (j = data->viewbounds[2]; j < data->viewbounds[3]; j += stride) {
 				k = i * data->primary_n_rows + j;
 				l = (i + stride) * data->primary_n_rows + j;
-				if (flip == false) {
+				// TODO(schwehr): if(flip) {} else {}
+				if (!flip) {
 					ikk = i;
 					kk = k;
 					ill = i + stride;
@@ -497,7 +497,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					mbview_getsecondaryvalue(view, data, ikk, j, &secondary_value);
 				if (data->primary_data[kk] != data->primary_nodatavalue
 					&& secondary_value != data->secondary_nodatavalue) {
-					if (on == false) {
+					if (!on) {
 						glBegin(GL_TRIANGLE_STRIP);
 						on = true;
 						if (kk == k)
@@ -517,7 +517,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					data->primary_x[kk],data->primary_y[kk],data->primary_z[kk]);*/
 				}
 				else {
-					if (on == true) {
+					if (on) {
 						glEnd();
 #ifdef MBV_GET_GLX_ERRORS
 						mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
@@ -532,7 +532,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					mbview_getsecondaryvalue(view, data, ill, j, &secondary_value);
 				if (data->primary_data[ll] != data->primary_nodatavalue
 					&& secondary_value != data->secondary_nodatavalue) {
-					if (on == false) {
+					if (!on) {
 						glBegin(GL_TRIANGLE_STRIP);
 						on = true;
 						if (ll == l)
@@ -549,7 +549,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					glVertex3f(data->primary_x[ll], data->primary_y[ll], data->primary_z[ll]);
 				}
 				else {
-					if (on == true) {
+					if (on) {
 						glEnd();
 #ifdef MBV_GET_GLX_ERRORS
 						mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
@@ -559,7 +559,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					flip = false;
 				}
 			}
-			if (on == true) {
+			if (on) {
 				glEnd();
 #ifdef MBV_GET_GLX_ERRORS
 				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
@@ -569,12 +569,12 @@ int mbview_drawdata(size_t instance, int rez) {
 			}
 
 			/* check for pending event */
-			if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0) {
+			if (!view->plot_done && view->plot_interrupt_allowed && i % MBV_EVENTCHECKCOARSENESS == 0) {
 				do_mbview_xevents();
 			}
 
 			/* dump out of loop if plotting already done at a higher recursion */
-			if (view->plot_done == true)
+			if (view->plot_done)
 				i = data->primary_n_columns;
 		}
 	}
@@ -584,11 +584,11 @@ int mbview_drawdata(size_t instance, int rez) {
 
 	/* draw contours */
 	if (data->grid_contour_mode == MBV_VIEW_ON) {
-		if (rez == MBV_REZ_FULL && view->contourfullrez == true)
+		if (rez == MBV_REZ_FULL && view->contourfullrez)
 			glCallList((GLuint)(3 * instance + 3));
-		else if (rez == MBV_REZ_HIGH && view->contourhirez == true)
+		else if (rez == MBV_REZ_HIGH && view->contourhirez)
 			glCallList((GLuint)(3 * instance + 2));
-		else if (rez == MBV_REZ_LOW && view->contourlorez == true)
+		else if (rez == MBV_REZ_LOW && view->contourlorez)
 			glCallList((GLuint)(3 * instance + 1));
 	}
 
@@ -653,7 +653,7 @@ int mbview_plotlowall(size_t instance) {
 	/* replot all active instances except for instance
 	    which should already be replotted */
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (i != instance && mbviews[i].data.active == true)
+		if (i != instance && mbviews[i].data.active)
 			mbview_plotlow(i);
 	}
 
@@ -713,7 +713,7 @@ int mbview_plothighall(size_t instance) {
 	/* replot all active instances except for instance
 	    which should already be replotted */
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (i != instance && mbviews[i].data.active == true)
+		if (i != instance && mbviews[i].data.active)
 			mbview_plothigh(i);
 	}
 
@@ -748,7 +748,7 @@ int mbview_plotlow(size_t instance) {
 	data = &(view->data);
 
 	/* only plot if mbview active for this instance */
-	if (data->active == true) {
+	if (data->active) {
 		/* set plot_done to false and increment the plot recursion level */
 		view->plot_done = false;
 		view->plot_recursion++;
@@ -758,7 +758,7 @@ int mbview_plotlow(size_t instance) {
 		/* the plot_done flag will still be false if this
 		   is the highest recursion level to be reached - finish the plot
 		   only in this case */
-		if (view->plot_done == false) {
+		if (!view->plot_done) {
 			/* set plot_done to true */
 			view->plot_done = true;
 			if (mbv_verbose >= 2)
@@ -768,7 +768,7 @@ int mbview_plotlow(size_t instance) {
 		/* decrement the plot recursion level */
 		view->plot_recursion--;
 
-		if (view->message_on == true && view->plot_recursion == 0)
+		if (view->message_on && view->plot_recursion == 0)
 			do_mbview_status("Done.", instance);
 		if (mbv_verbose >= 2)
 			fprintf(stderr, "Done with mbview_plotlow %zd  recursion:%d\n\n", instance, view->plot_recursion);
@@ -805,7 +805,7 @@ int mbview_plotlowhigh(size_t instance) {
 	data = &(view->data);
 
 	/* only plot if mbview active for this instance */
-	if (data->active == true) {
+	if (data->active) {
 
 		/* set plot_done to false and increment the plot recursion level */
 		view->plot_done = false;
@@ -818,7 +818,7 @@ int mbview_plotlowhigh(size_t instance) {
 		/* the plot_done flag will still be false if this
 		   is the highest recursion level to be reached - finish the plot
 		   only in this case */
-		if (view->plot_done == false) {
+		if (!view->plot_done) {
 			/* set plot_done to true */
 			view->plot_done = true;
 			if (mbv_verbose >= 2)
@@ -828,7 +828,7 @@ int mbview_plotlowhigh(size_t instance) {
 		/* decrement the plot recursion level */
 		view->plot_recursion--;
 
-		if (view->message_on == true && view->plot_recursion == 0)
+		if (view->message_on && view->plot_recursion == 0)
 			do_mbview_status("Done.", instance);
 		if (mbv_verbose >= 2)
 			fprintf(stderr, "Done with mbview_plotlowhigh %zd  recursion:%d\n\n", instance, view->plot_recursion);
@@ -864,7 +864,7 @@ int mbview_plothigh(size_t instance) {
 	data = &(view->data);
 
 	/* only plot if mbview active for this instance */
-	if (data->active == true) {
+	if (data->active) {
 
 		/* set plot_done to false and increment the plot recursion level */
 		view->plot_done = false;
@@ -875,7 +875,7 @@ int mbview_plothigh(size_t instance) {
 		/* the plot_done flag will still be false if this
 		   is the highest recursion level to be reached - finish the plot
 		   only in this case */
-		if (view->plot_done == false) {
+		if (!view->plot_done) {
 			/* set plot_done to true */
 			view->plot_done = true;
 			if (mbv_verbose >= 2)
@@ -885,7 +885,7 @@ int mbview_plothigh(size_t instance) {
 		/* decrement the plot recursion level */
 		view->plot_recursion--;
 
-		if (view->message_on == true && view->plot_recursion == 0)
+		if (view->message_on && view->plot_recursion == 0)
 			do_mbview_status("Done.", instance);
 		if (mbv_verbose >= 2)
 			fprintf(stderr, "Done with mbview_plothigh %zd  recursion:%d\n\n", instance, view->plot_recursion);
@@ -921,7 +921,7 @@ int mbview_plotfull(size_t instance) {
 	data = &(view->data);
 
 	/* only plot if mbview active for this instance */
-	if (data->active == true) {
+	if (data->active) {
 
 		/* set plot_done to false and increment the plot recursion level */
 		view->plot_done = false;
@@ -932,7 +932,7 @@ int mbview_plotfull(size_t instance) {
 		/* the plot_done flag will still be false if this
 		   is the highest recursion level to be reached - finish the plot
 		   only in this case */
-		if (view->plot_done == false) {
+		if (!view->plot_done) {
 			/* set plot_done to true */
 			view->plot_done = true;
 			if (mbv_verbose >= 2)
@@ -942,7 +942,7 @@ int mbview_plotfull(size_t instance) {
 		/* decrement the plot recursion level */
 		view->plot_recursion--;
 
-		if (view->message_on == true && view->plot_recursion == 0)
+		if (view->message_on && view->plot_recursion == 0)
 			do_mbview_status("Done.", instance);
 		if (mbv_verbose >= 2)
 			fprintf(stderr, "Done with mbview_plotfull %zd  recursion:%d\n\n", instance, view->plot_recursion);
@@ -980,7 +980,7 @@ int mbview_plot(size_t instance, int rez) {
 	data = &(view->data);
 
 	/* only plot if this view is still active */
-	if (view->glx_init == true) {
+	if (view->glx_init) {
 
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
@@ -1003,21 +1003,21 @@ int mbview_plot(size_t instance, int rez) {
 		fprintf(stderr,"     data->pick_type:  %d\n",data->pick_type);*/
 
 		/* apply projection if needed */
-		if (view->plot_done == false && view->projected == false) {
+		if (!view->plot_done && !view->projected) {
 			do_mbview_status("Projecting data...", instance);
 			mbview_projectdata(instance);
 		}
 
 		/* apply projection to global data if needed */
-		if (view->plot_done == false && view->globalprojected == false) {
+		if (!view->plot_done && !view->globalprojected) {
 			do_mbview_status("Projecting global data...", instance);
 			mbview_projectglobaldata(instance);
 		}
 
 		/* contour if needed */
-		if (view->plot_done == false && (data->grid_contour_mode == MBV_VIEW_ON) &&
-		    ((rez == MBV_REZ_FULL && view->contourfullrez == false) || (rez == MBV_REZ_HIGH && view->contourhirez == false) ||
-		     (rez == MBV_REZ_LOW && view->contourlorez == false))) {
+		if (!view->plot_done && (data->grid_contour_mode == MBV_VIEW_ON) &&
+		    ((rez == MBV_REZ_FULL && !view->contourfullrez) || (rez == MBV_REZ_HIGH && !view->contourhirez) ||
+		     (rez == MBV_REZ_LOW && !view->contourlorez))) {
 			if (rez == MBV_REZ_FULL)
 				do_mbview_status("Contouring data...", instance);
 			mbview_contour(instance, rez);
@@ -1042,7 +1042,7 @@ int mbview_plot(size_t instance, int rez) {
 		}
 
 		/* do the actual openGL plotting */
-		if (view->plot_done == false) {
+		if (!view->plot_done) {
 			/* set projection to 2D or 3D */
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
@@ -1080,7 +1080,7 @@ int mbview_plot(size_t instance, int rez) {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			/* draw data */
-			if (view->plot_done == false) {
+			if (!view->plot_done) {
 				if (rez == MBV_REZ_FULL)
 					do_mbview_status("Drawing full rez...", instance);
 				else if (rez == MBV_REZ_HIGH)
@@ -1092,7 +1092,7 @@ int mbview_plot(size_t instance, int rez) {
 		/* the plot_done flag will still be false if this
 		   is the highest recursion level to be reached - finish the plot
 		   only in this case */
-		if (view->plot_done == false) {
+		if (!view->plot_done) {
 			/* flush opengl buffers */
 			glFlush();
 
@@ -1140,7 +1140,7 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 	struct mbview_struct *data;
 	int rez;
 	int ijbounds[4];
-	int foundsave;
+	bool foundsave;
 	double xgridsave, ygridsave;
 	double xlonsave, ylatsave, zdatasave;
 	double xdisplaysave, ydisplaysave, zdisplaysave;
@@ -1160,7 +1160,7 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 	data = &(view->data);
 
 	/* only plot if this view is still active */
-	if (view->glx_init == true) {
+	if (view->glx_init) {
 
 		/* look for point at low resolution */
 		*found = false;
@@ -1174,7 +1174,7 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 		                    zdisplay);
 		/*fprintf(stderr,"First findpointrez: rez:%d pixels:%d %d found:%d xlon:%f ylat:%f zdata:%f\n",
 		rez,xpixel,ypixel,found,xlon,ylat,zdata);*/
-		if (*found == true) {
+		if (*found) {
 			/* save last good results */
 			foundsave = *found;
 			xgridsave = *xgrid;
@@ -1191,7 +1191,7 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 		rez = MBV_REZ_HIGH;
 		mbview_findpointrez(instance, rez, xpixel, ypixel, ijbounds, found, xgrid, ygrid, xlon, ylat, zdata, xdisplay, ydisplay,
 		                    zdisplay);
-		if (*found == false && foundsave == true) {
+		if (!(*found) && foundsave) {
 			rez = MBV_REZ_LOW;
 			*found = foundsave;
 			*xgrid = xgridsave;
@@ -1204,7 +1204,7 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 		}
 
 		/* repeat until found at highest resolution possible */
-		while (*found == true && ijbounds[1] > ijbounds[0] && ijbounds[3] > ijbounds[2]) {
+		while (*found && ijbounds[1] > ijbounds[0] && ijbounds[3] > ijbounds[2]) {
 			/* save last good results */
 			foundsave = *found;
 			xgridsave = *xgrid;
@@ -1228,7 +1228,7 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 		}
 
 		/* if not found and 2D get position directly from pixels */
-		if (*found == false && data->display_mode == MBV_DISPLAY_2D) {
+		if (!(*found) && data->display_mode == MBV_DISPLAY_2D) {
 			*xdisplay =
 			    view->left - view->offset2d_x + 2.0 * MBV_OPENGL_WIDTH / view->size2d * ((double)xpixel) / ((double)data->width);
 			*ydisplay = view->bottom - view->offset2d_y +
@@ -1240,7 +1240,7 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 		}
 
 		/* if not found and 3D use the best pick location found */
-		if (*found == false && foundsave == true) {
+		if (!(*found) && foundsave) {
 			*found = foundsave;
 			*xgrid = xgridsave;
 			*ygrid = ygridsave;
@@ -1307,7 +1307,7 @@ int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ij
 	data = &(view->data);
 
 	/* only plot if this view is still active */
-	if (view->glx_init == true) {
+	if (view->glx_init) {
 
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
@@ -1323,7 +1323,7 @@ instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 #endif
 
 		/* apply projection if needed */
-		if (view->projected == false) {
+		if (!view->projected) {
 			do_mbview_status("Projecting data...", instance);
 			mbview_projectdata(instance);
 		}
@@ -1563,7 +1563,7 @@ int mbview_viewbounds(size_t instance) {
 	data = &(view->data);
 
 	/* only plot if this view is still active */
-	if (view->glx_init == true) {
+	if (view->glx_init) {
 
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
@@ -1577,7 +1577,7 @@ int mbview_viewbounds(size_t instance) {
 #endif
 
 		/* apply projection if needed */
-		if (view->projected == false) {
+		if (!view->projected) {
 			do_mbview_status("Projecting data...", instance);
 			mbview_projectdata(instance);
 		}
@@ -1621,14 +1621,13 @@ int mbview_viewbounds(size_t instance) {
 					k = i * data->primary_n_rows + j;
 					if (data->primary_data[k] != data->primary_nodatavalue && data->primary_x[k] >= left2d &&
 					    data->primary_x[k] <= right2d && data->primary_y[k] >= bottom2d && data->primary_y[k] <= top2d) {
-						if (found == false) {
+						if (!found) { // TODO(schwehr): if (found)
 							data->viewbounds[0] = i;
 							data->viewbounds[1] = i + stride;
 							data->viewbounds[2] = j;
 							data->viewbounds[3] = j + stride;
 							found = true;
-						}
-						else {
+						} else {
 							data->viewbounds[0] = MIN(i, data->viewbounds[0]);
 							data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
 							data->viewbounds[2] = MIN(j, data->viewbounds[2]);
@@ -1642,7 +1641,7 @@ int mbview_viewbounds(size_t instance) {
 					k = i * data->primary_n_rows + j;
 					if (data->primary_data[k] != data->primary_nodatavalue && data->primary_x[k] >= left2d &&
 					    data->primary_x[k] <= right2d && data->primary_y[k] >= bottom2d && data->primary_y[k] <= top2d) {
-						if (found == false) {
+						if (!found) {  // TODO(schwehr): if (found)
 							data->viewbounds[0] = i;
 							data->viewbounds[1] = i + stride;
 							data->viewbounds[2] = j;
@@ -1783,7 +1782,7 @@ int mbview_viewbounds(size_t instance) {
 					if (rgba[0] != 1.0 && rgba[1] != 1.0) {
 						i = ipickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
 						j = jpickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
-						if (found == false) {
+						if (!found) {  // TODO(schwehr): if (found)
 							data->viewbounds[0] = i;
 							data->viewbounds[1] = i + stride;
 							data->viewbounds[2] = j;
@@ -1822,7 +1821,7 @@ int mbview_viewbounds(size_t instance) {
 							ijbounds[1] = MIN(i + 2 * ipickstride - 1, data->primary_n_columns - 1);
 							ijbounds[3] = MIN(j + 2 * jpickstride - 1, data->primary_n_rows - 1);
 						}
-						if (found == false) {
+						if (!found) {  // TODO(schwehr): if (found)
 							data->viewbounds[0] = ijbounds[0];
 							data->viewbounds[1] = ijbounds[1];
 							data->viewbounds[2] = ijbounds[2];
@@ -1905,7 +1904,7 @@ int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg) 
 	data = &(view->data);
 
 	/* only plot if this view is still active */
-	if (view->glx_init == true) {
+	if (view->glx_init) {
 
 		/* if spheroid dipslay project on great circle arc */
 		if (data->display_projection_mode == MBV_PROJECTION_SPHEROID) {
@@ -1954,7 +1953,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int global;
+	bool global;
 	double offset_factor;
 	int nsegpoint;
 	double xlon1, ylat1, xlon2, ylat2;
@@ -2073,7 +2072,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 			if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
 				seg->lspoints[icnt].zdisplay += offset_factor;
 			}
-			else if (global == true) {
+			else if (global) {
 				seg->lspoints[icnt].xdisplay += seg->lspoints[icnt].xdisplay * offset_factor;
 				seg->lspoints[icnt].ydisplay += seg->lspoints[icnt].ydisplay * offset_factor;
 				seg->lspoints[icnt].zdisplay += seg->lspoints[icnt].zdisplay * offset_factor;
@@ -2123,7 +2122,8 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 	int istart, iend, iadd, jstart, jend, jadd;
 	int ni, nj;
 	double mm, bb;
-	int found, insert;
+	bool found;
+	int insert;
 	double xgrid, ygrid, zdata;
 	int global;
 	double offset_factor;
@@ -2275,7 +2275,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 				found = false;
 				done = false;
 				if (jadd > 0)
-					while (done == false) {
+					while (!done) {
 						if (ygrid > seg->lspoints[insert - 1].ygrid && ygrid < seg->lspoints[insert].ygrid) {
 							found = true;
 							done = true;
@@ -2294,7 +2294,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 						}
 					}
 				else if (jadd < 0)
-					while (done == false) {
+					while (!done) {
 						if (ygrid > seg->lspoints[insert].ygrid && ygrid < seg->lspoints[insert - 1].ygrid) {
 							found = true;
 							done = true;
@@ -2312,7 +2312,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 							done = true;
 						}
 					}
-				if (found == true) {
+				if (found) {
 					for (ii = seg->nls; ii > insert; ii--) {
 						seg->lspoints[ii].xgrid = seg->lspoints[ii - 1].xgrid;
 						seg->lspoints[ii].ygrid = seg->lspoints[ii - 1].ygrid;
@@ -2335,7 +2335,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 			if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
 				seg->lspoints[icnt].zdisplay += offset_factor;
 			}
-			else if (global == true) {
+			else if (global) {
 				seg->lspoints[icnt].xdisplay += seg->lspoints[icnt].xdisplay * offset_factor;
 				seg->lspoints[icnt].ydisplay += seg->lspoints[icnt].ydisplay * offset_factor;
 				seg->lspoints[icnt].zdisplay += seg->lspoints[icnt].zdisplay * offset_factor;
@@ -2561,7 +2561,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 			if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
 				seg->lspoints[icnt].zdisplay[instance] += offset_factor;
 			}
-			else if (global == true) {
+			else if (global) {
 				seg->lspoints[icnt].xdisplay[instance] += seg->lspoints[icnt].xdisplay[instance] * offset_factor;
 				seg->lspoints[icnt].ydisplay[instance] += seg->lspoints[icnt].ydisplay[instance] * offset_factor;
 				seg->lspoints[icnt].zdisplay[instance] += seg->lspoints[icnt].zdisplay[instance] * offset_factor;
@@ -2792,7 +2792,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 				found = false;
 				done = false;
 				if (jadd > 0)
-					while (done == false) {
+					while (!done) {
 						if (ygrid > seg->lspoints[insert - 1].ygrid[instance] && ygrid < seg->lspoints[insert].ygrid[instance]) {
 							found = true;
 							done = true;
@@ -2813,7 +2813,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 						/*fprintf(stderr,"jadd>0: insert:%d found:%d done:%d\n",insert,found,done);*/
 					}
 				else if (jadd < 0)
-					while (done == false) {
+					while (!done) {
 						if (ygrid > seg->lspoints[insert].ygrid[instance] && ygrid < seg->lspoints[insert - 1].ygrid[instance]) {
 							found = true;
 							done = true;
@@ -2837,7 +2837,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 					insert = 0;
 				else if (insert > seg->nls)
 					insert = seg->nls;
-				if (found == true) {
+				if (found) {
 					for (ii = seg->nls; ii > insert; ii--) {
 						seg->lspoints[ii].xgrid[instance] = seg->lspoints[ii - 1].xgrid[instance];
 						seg->lspoints[ii].ygrid[instance] = seg->lspoints[ii - 1].ygrid[instance];
@@ -2866,7 +2866,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 			if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
 				seg->lspoints[icnt].zdisplay[instance] += offset_factor;
 			}
-			else if (global == true) {
+			else if (global) {
 				seg->lspoints[icnt].xdisplay[instance] += seg->lspoints[icnt].xdisplay[instance] * offset_factor;
 				seg->lspoints[icnt].ydisplay[instance] += seg->lspoints[icnt].ydisplay[instance] * offset_factor;
 				seg->lspoints[icnt].zdisplay[instance] += seg->lspoints[icnt].zdisplay[instance] * offset_factor;
