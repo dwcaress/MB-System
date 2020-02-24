@@ -87,8 +87,6 @@ int mbview_clearpicks(size_t instance) {
 	/* local variables */
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
-	int replotinstance;
-	int replotall;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int inav, jpoint;
@@ -102,8 +100,8 @@ int mbview_clearpicks(size_t instance) {
 	}
 
 	/* clear local picks */
-	replotinstance = false;
-	replotall = false;
+	bool replotinstance = false;
+	bool replotall = false;
 
 	/* get view */
 	view = &(mbviews[instance]);
@@ -142,7 +140,7 @@ int mbview_clearpicks(size_t instance) {
 			shared.shareddata.navs[inav].nselected = 0;
 			for (jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints; jpoint++) {
 				/* set size and color */
-				if (shared.shareddata.navs[inav].navpts[jpoint].selected == true) {
+				if (shared.shareddata.navs[inav].navpts[jpoint].selected) {
 					shared.shareddata.navs[inav].navpts[jpoint].selected = false;
 					replotall = true;
 				}
@@ -160,7 +158,7 @@ int mbview_clearpicks(size_t instance) {
 	}
 
 	/* set widget sensitivity */
-	if (data->active == true)
+	if (data->active)
 		mbview_update_sensitivity(mbv_verbose, instance, &error);
 
 	/* set pick annotation */
@@ -172,14 +170,14 @@ int mbview_clearpicks(size_t instance) {
 	mbview_updateroutelist();
 
 	/* draw */
-	if (replotinstance == true || replotall == true) {
+	if (replotinstance || replotall) {
 		if (mbv_verbose >= 2)
 			fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_clearpicks\n");
 		mbview_plotlowhigh(instance);
 	}
 
 	/* if needed replot all active instances */
-	if (replotall == true) {
+	if (replotall) {
 		mbview_plothighall(instance);
 	}
 
@@ -239,7 +237,7 @@ int mbview_clearnavpicks(size_t instance) {
 			shared.shareddata.navs[inav].nselected = 0;
 			for (jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints; jpoint++) {
 				/* set size and color */
-				if (shared.shareddata.navs[inav].navpts[jpoint].selected == true) {
+				if (shared.shareddata.navs[inav].navpts[jpoint].selected) {
 					shared.shareddata.navs[inav].navpts[jpoint].selected = false;
 					replotall = true;
 				}
@@ -248,7 +246,7 @@ int mbview_clearnavpicks(size_t instance) {
 	}
 
 	/* set widget sensitivity */
-	if (data->active == true && (replotinstance == true || replotall == true)) {
+	if (data->active && (replotinstance || replotall)) {
 		mbview_update_sensitivity(mbv_verbose, instance, &error);
 
 		/* set pick annotation */
@@ -259,14 +257,14 @@ int mbview_clearnavpicks(size_t instance) {
 	}
 
 	/* draw */
-	if (replotinstance == true || replotall == true) {
+	if (replotinstance || replotall) {
 		if (mbv_verbose >= 2)
 			fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_clearpicks\n");
 		mbview_plotlowhigh(instance);
 	}
 
 	/* if needed replot all active instances */
-	if (replotall == true) {
+	if (replotall) {
 		mbview_plothighall(instance);
 	}
 
@@ -288,7 +286,7 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int found;
+	int found;  // TODO(schwehr): bool found
 	double xgrid, ygrid;
 	double xlon, ylat, zdata;
 	double xdisplay, ydisplay, zdisplay;
@@ -313,7 +311,7 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
 	mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 	/* use any good pick */
-	if (found == true) {
+	if (found) {
 		if ((which == MBV_PICK_DOWN) || (which == MBV_PICK_MOVE && data->pick_type == MBV_PICK_NONE)) {
 			/* set pick location */
 			data->pickinfo_mode = MBV_PICK_ONEPOINT;
@@ -523,7 +521,7 @@ int mbview_picksize(size_t instance) {
 	struct mbview_struct *data;
 	double scalefactor;
 	double xlength;
-	int found;
+	int found;  // TODO(schwehr): bool found
 	int i;
 
 	/* print starting debug statements */
@@ -564,7 +562,7 @@ int mbview_picksize(size_t instance) {
 			                      &data->pick.xpoints[i].xgrid, &data->pick.xpoints[i].ygrid);
 			mbview_getzdata(instance, data->pick.xpoints[i].xgrid, data->pick.xpoints[i].ygrid, &found,
 			                &data->pick.xpoints[i].zdata);
-			if (found == false)
+			if (!found)
 				data->pick.xpoints[i].zdata = data->pick.endpoints[0].zdata;
 			mbview_projectforward(instance, true, data->pick.xpoints[i].xgrid, data->pick.xpoints[i].ygrid,
 			                      data->pick.xpoints[i].zdata, &(data->pick.xpoints[i].xlon), &(data->pick.xpoints[i].ylat),
@@ -600,7 +598,7 @@ int mbview_picksize(size_t instance) {
 			                      &data->pick.xpoints[i + 4].ygrid);
 			mbview_getzdata(instance, data->pick.xpoints[i + 4].xgrid, data->pick.xpoints[i + 4].ygrid, &found,
 			                &data->pick.xpoints[i + 4].zdata);
-			if (found == false)
+			if (!found)
 				data->pick.xpoints[i + 4].zdata = data->pick.endpoints[1].zdata;
 			mbview_projectforward(instance, true, data->pick.xpoints[i + 4].xgrid, data->pick.xpoints[i + 4].ygrid,
 			                      data->pick.xpoints[i + 4].zdata, &(data->pick.xpoints[i + 4].xlon),
@@ -1038,15 +1036,14 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int found;
+	int found;  // TODO(schwehr): bool found
 	double xgrid, ygrid;
 	double xlon, ylat, zdata;
 	double xdisplay, ydisplay, zdisplay;
 	double dx, dy;
 	double dd;
-	int ok;
 	double bearing;
-	int match, match0, match1, match2, match3;
+	bool match;
 	int i, k;
 
 	/* print starting debug statements */
@@ -1064,6 +1061,11 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
+	bool match0;
+	bool match1;
+	bool match2;
+	bool match3;
+
 	/* check to see if pick is at existing corner points */
 	if (which == MBV_REGION_DOWN && data->region_type == MBV_REGION_QUAD) {
 		/* look for match to existing corner points in neighborhood of pick */
@@ -1079,7 +1081,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		dx = 0.10 * (data->region.cornerpoints[3].xdisplay - data->region.cornerpoints[0].xdisplay);
 		dy = 0.10 * (data->region.cornerpoints[3].ydisplay - data->region.cornerpoints[0].ydisplay);
 		dd = MAX(dx, dy);
-		if (found == true) {
+		if (found) {
 			if (fabs(xdisplay - data->region.cornerpoints[0].xdisplay) < dd &&
 			    fabs(ydisplay - data->region.cornerpoints[0].ydisplay) < dd) {
 				match = true;
@@ -1103,13 +1105,13 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* if no match then start new region */
-		if (match == false) {
+		if (!match) {
 			/* look for point */
 			mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay,
 			                 &zdisplay);
 
 			/* use any good point */
-			if (found == true) {
+			if (found) {
 				/* set the first endpoint */
 				data->region_type = MBV_REGION_ONEPOINT;
 				data->region_pickcorner = MBV_REGION_PICKCORNER3;
@@ -1127,13 +1129,13 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* else if match 0 then reset corner point 0 */
-		else if (match0 == true) {
+		else if (match0) {
 			/* look for point */
 			mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay,
 			                 &zdisplay);
 
 			/* use any good point */
-			if (found == true) {
+			if (found) {
 				/* set corner point 0 */
 				data->region_type = MBV_REGION_QUAD;
 				data->region_pickcorner = MBV_REGION_PICKCORNER0;
@@ -1151,13 +1153,13 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* else if match 1 then reset corner point 1 */
-		else if (match1 == true) {
+		else if (match1) {
 			/* look for point */
 			mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay,
 			                 &zdisplay);
 
 			/* use any good point */
-			if (found == true) {
+			if (found) {
 				/* set corner point 1 */
 				data->region_type = MBV_REGION_QUAD;
 				data->region_pickcorner = MBV_REGION_PICKCORNER1;
@@ -1175,13 +1177,13 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* else if match 2 then reset corner point 2 */
-		else if (match2 == true) {
+		else if (match2) {
 			/* look for point */
 			mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay,
 			                 &zdisplay);
 
 			/* use any good point */
-			if (found == true) {
+			if (found) {
 				/* set corner point 2 */
 				data->region_type = MBV_REGION_QUAD;
 				data->region_pickcorner = MBV_REGION_PICKCORNER2;
@@ -1199,13 +1201,13 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* else if match 3 then reset corner point 3 */
-		else if (match3 == true) {
+		else if (match3) {
 			/* look for point */
 			mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay,
 			                 &zdisplay);
 
 			/* use any good point */
-			if (found == true) {
+			if (found) {
 				/* set corner point 3 */
 				data->region_type = MBV_REGION_QUAD;
 				data->region_pickcorner = MBV_REGION_PICKCORNER3;
@@ -1231,7 +1233,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		xgrid,ygrid,xlon,ylat,zdata,xdisplay,ydisplay,zdisplay);*/
 
 		/* use any good point */
-		if (found == true) {
+		if (found) {
 			/* set the first endpoint */
 			data->region_type = MBV_REGION_ONEPOINT;
 			data->region_pickcorner = MBV_REGION_PICKCORNER3;
@@ -1254,13 +1256,13 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		xgrid,ygrid,xlon,ylat,zdata,xdisplay,ydisplay,zdisplay);*/
 
 		/* ignore an identical pair of points */
-		if (found == true && data->region.cornerpoints[3].xgrid == xgrid && data->region.cornerpoints[3].ygrid == ygrid) {
+		if (found && data->region.cornerpoints[3].xgrid == xgrid && data->region.cornerpoints[3].ygrid == ygrid) {
 			data->region_type = MBV_REGION_ONEPOINT;
 			XBell(view->dpy, 100);
 		}
 
 		/* use any good pair of points */
-		else if (found == true) {
+		else if (found) {
 			/* set the second endpoint */
 			data->region_type = MBV_REGION_QUAD;
 			data->region_pickcorner = MBV_REGION_PICKCORNER0;
@@ -1275,7 +1277,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* ignore a bad point */
-		else if (found == false) {
+		else if (!found) {
 			XBell(view->dpy, 100);
 		}
 	}
@@ -1288,13 +1290,13 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		xgrid,ygrid,xlon,ylat,zdata,xdisplay,ydisplay,zdisplay);*/
 
 		/* ignore an identical pair of points */
-		if (found == true && data->region.cornerpoints[2].xgrid == xgrid && data->region.cornerpoints[2].ygrid == ygrid) {
+		if (found && data->region.cornerpoints[2].xgrid == xgrid && data->region.cornerpoints[2].ygrid == ygrid) {
 			data->region_type = MBV_REGION_ONEPOINT;
 			XBell(view->dpy, 100);
 		}
 
 		/* use any good pair of points */
-		else if (found == true) {
+		else if (found) {
 			/* set the second endpoint */
 			data->region_type = MBV_REGION_QUAD;
 			data->region_pickcorner = MBV_REGION_PICKCORNER1;
@@ -1309,7 +1311,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* ignore a bad point */
-		else if (found == false) {
+		else if (!found) {
 			XBell(view->dpy, 100);
 		}
 	}
@@ -1322,13 +1324,13 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		xgrid,ygrid,xlon,ylat,zdata,xdisplay,ydisplay,zdisplay);*/
 
 		/* ignore an identical pair of points */
-		if (found == true && data->region.cornerpoints[1].xgrid == xgrid && data->region.cornerpoints[1].ygrid == ygrid) {
+		if (found && data->region.cornerpoints[1].xgrid == xgrid && data->region.cornerpoints[1].ygrid == ygrid) {
 			data->region_type = MBV_REGION_ONEPOINT;
 			XBell(view->dpy, 100);
 		}
 
 		/* use any good pair of points */
-		else if (found == true) {
+		else if (found) {
 			/* set the second endpoint */
 			data->region_type = MBV_REGION_QUAD;
 			data->region_pickcorner = MBV_REGION_PICKCORNER2;
@@ -1343,7 +1345,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* ignore a bad point */
-		else if (found == false) {
+		else if (!found) {
 			XBell(view->dpy, 100);
 		}
 	}
@@ -1356,13 +1358,13 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		xgrid,ygrid,xlon,ylat,zdata,xdisplay,ydisplay,zdisplay);*/
 
 		/* ignore an identical pair of points */
-		if (found == true && data->region.cornerpoints[0].xgrid == xgrid && data->region.cornerpoints[0].ygrid == ygrid) {
+		if (found && data->region.cornerpoints[0].xgrid == xgrid && data->region.cornerpoints[0].ygrid == ygrid) {
 			data->region_type = MBV_REGION_ONEPOINT;
 			XBell(view->dpy, 100);
 		}
 
 		/* use any good pair of points */
-		else if (found == true) {
+		else if (found) {
 			/* set corner point 3 */
 			data->region_type = MBV_REGION_QUAD;
 			data->region_pickcorner = MBV_REGION_PICKCORNER3;
@@ -1377,10 +1379,12 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* ignore a bad point */
-		else if (found == false) {
+		else if (!found) {
 			XBell(view->dpy, 100);
 		}
 	}
+
+	int ok;  // TODO(schwehr): bool ok
 
 	/* recalculate any good quad region */
 	if (data->region_type == MBV_REGION_QUAD && which != MBV_REGION_UP) {
@@ -1390,7 +1394,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 			data->region.cornerpoints[1].ygrid = data->region.cornerpoints[3].ygrid;
 			mbview_getzdata(instance, data->region.cornerpoints[1].xgrid, data->region.cornerpoints[1].ygrid, &ok,
 			                &(data->region.cornerpoints[1].zdata));
-			if (ok == false)
+			if (!ok)
 				data->region.cornerpoints[1].zdata =
 				    0.5 * (data->region.cornerpoints[0].zdata + data->region.cornerpoints[3].zdata);
 			mbview_projectforward(instance, true, data->region.cornerpoints[1].xgrid, data->region.cornerpoints[1].ygrid,
@@ -1402,7 +1406,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 			data->region.cornerpoints[2].ygrid = data->region.cornerpoints[0].ygrid;
 			mbview_getzdata(instance, data->region.cornerpoints[2].xgrid, data->region.cornerpoints[2].ygrid, &ok,
 			                &(data->region.cornerpoints[2].zdata));
-			if (ok == false)
+			if (!ok)
 				data->region.cornerpoints[2].zdata =
 				    0.5 * (data->region.cornerpoints[0].zdata + data->region.cornerpoints[3].zdata);
 			mbview_projectforward(instance, true, data->region.cornerpoints[2].xgrid, data->region.cornerpoints[2].ygrid,
@@ -1417,7 +1421,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 			data->region.cornerpoints[0].ygrid = data->region.cornerpoints[1].ygrid;
 			mbview_getzdata(instance, data->region.cornerpoints[0].xgrid, data->region.cornerpoints[0].ygrid, &ok,
 			                &(data->region.cornerpoints[0].zdata));
-			if (ok == false)
+			if (!ok)
 				data->region.cornerpoints[0].zdata =
 				    0.5 * (data->region.cornerpoints[1].zdata + data->region.cornerpoints[2].zdata);
 			mbview_projectforward(instance, true, data->region.cornerpoints[0].xgrid, data->region.cornerpoints[0].ygrid,
@@ -1429,7 +1433,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 			data->region.cornerpoints[3].ygrid = data->region.cornerpoints[2].ygrid;
 			mbview_getzdata(instance, data->region.cornerpoints[3].xgrid, data->region.cornerpoints[3].ygrid, &ok,
 			                &(data->region.cornerpoints[3].zdata));
-			if (ok == false)
+			if (!ok)
 				data->region.cornerpoints[3].zdata =
 				    0.5 * (data->region.cornerpoints[1].zdata + data->region.cornerpoints[2].zdata);
 			mbview_projectforward(instance, true, data->region.cornerpoints[3].xgrid, data->region.cornerpoints[3].ygrid,
@@ -1514,7 +1518,6 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 	double dx, dy, dxuse, dyuse, bearing;
 	double dd;
 	int ok;
-	int match, match0, match1;
 	int i, j, k;
 
 	/* print starting debug statements */
@@ -1532,6 +1535,10 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
+	bool match;
+        bool match0;
+	bool match1;
+
 	/* check to see if pick is at existing end points */
 	if (which == MBV_AREALENGTH_DOWN && data->area_type == MBV_AREA_QUAD) {
 		/* look for match to existing endpoints in neighborhood of pick */
@@ -1545,7 +1552,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		dx = 0.10 * (data->area.endpoints[1].xdisplay - data->area.endpoints[0].xdisplay);
 		dy = 0.10 * (data->area.endpoints[1].ydisplay - data->area.endpoints[0].ydisplay);
 		dd = MAX(dx, dy);
-		if (found == true) {
+		if (found) {
 			if (fabs(xdisplay - data->area.endpoints[0].xdisplay) < dd &&
 			    fabs(ydisplay - data->area.endpoints[0].ydisplay) < dd) {
 				match = true;
@@ -1559,13 +1566,13 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* if no match then start new area */
-		if (match == false) {
+		if (!match) {
 			/* look for point */
 			mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay,
 			                 &zdisplay);
 
 			/* use any good point */
-			if (found == true) {
+			if (found) {
 				/* set the first endpoint */
 				data->area_type = MBV_AREA_ONEPOINT;
 				data->area_pickendpoint = MBV_AREA_PICKENDPOINT1;
@@ -1581,13 +1588,13 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* else if match 0 then reset endpoint 0 */
-		else if (match0 == true) {
+		else if (match0) {
 			/* look for point */
 			mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay,
 			                 &zdisplay);
 
 			/* use any good point */
-			if (found == true) {
+			if (found) {
 				/* set the first endpoint */
 				data->area_type = MBV_AREA_QUAD;
 				data->area_pickendpoint = MBV_AREA_PICKENDPOINT0;
@@ -1603,13 +1610,13 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* else if match 1 then reset endpoint 1 */
-		else if (match1 == true) {
+		else if (match1) {
 			/* look for point */
 			mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay,
 			                 &zdisplay);
 
 			/* use any good point */
-			if (found == true) {
+			if (found) {
 				/* set the first endpoint */
 				data->area_type = MBV_AREA_QUAD;
 				data->area_pickendpoint = MBV_AREA_PICKENDPOINT1;
@@ -1631,7 +1638,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		/* use any good point */
-		if (found == true) {
+		if (found) {
 			/* set the first endpoint */
 			data->area_type = MBV_AREA_ONEPOINT;
 			data->area_pickendpoint = MBV_AREA_PICKENDPOINT1;
@@ -1652,14 +1659,14 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		/* ignore an identical pair of points */
-		if (found == true && data->area.endpoints[1].xgrid == xgrid && data->area.endpoints[1].ygrid == ygrid) {
+		if (found && data->area.endpoints[1].xgrid == xgrid && data->area.endpoints[1].ygrid == ygrid) {
 			data->area_type = MBV_AREA_ONEPOINT;
 			data->area_pickendpoint = MBV_AREA_PICKENDPOINT0;
 			XBell(view->dpy, 100);
 		}
 
 		/* use any good pair of points */
-		else if (found == true) {
+		else if (found) {
 			/* set the second endpoint */
 			data->area_type = MBV_AREA_QUAD;
 			data->area_pickendpoint = MBV_AREA_PICKENDPOINT0;
@@ -1674,7 +1681,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* ignore a bad point */
-		else if (found == false) {
+		else if (!found) {
 			XBell(view->dpy, 100);
 		}
 	}
@@ -1685,14 +1692,14 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		/* ignore an identical pair of points */
-		if (found == true && data->area.endpoints[0].xgrid == xgrid && data->area.endpoints[0].ygrid == ygrid) {
+		if (found && data->area.endpoints[0].xgrid == xgrid && data->area.endpoints[0].ygrid == ygrid) {
 			data->area_type = MBV_AREA_ONEPOINT;
 			data->area_pickendpoint = MBV_AREA_PICKENDPOINT1;
 			XBell(view->dpy, 100);
 		}
 
 		/* use any good pair of points */
-		else if (found == true) {
+		else if (found) {
 			/* set the second endpoint */
 			data->area_type = MBV_AREA_QUAD;
 			data->area_pickendpoint = MBV_AREA_PICKENDPOINT1;
@@ -1707,7 +1714,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		}
 
 		/* ignore a bad point */
-		else if (found == false) {
+		else if (!found) {
 			XBell(view->dpy, 100);
 		}
 	}
@@ -1765,9 +1772,9 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 					    &(data->area.segments[i].endpoints[j].xgrid), &(data->area.segments[i].endpoints[j].ygrid));
 					mbview_getzdata(instance, data->area.segments[i].endpoints[j].xgrid,
 					                data->area.segments[i].endpoints[j].ygrid, &ok, &(data->area.segments[i].endpoints[j].zdata));
-					if (ok == false && ((i == 0) || (i == 1 && j == 0) || (i == 3 && j == 1)))
+					if (!ok && ((i == 0) || (i == 1 && j == 0) || (i == 3 && j == 1)))
 						data->area.segments[i].endpoints[j].zdata = data->area.endpoints[0].zdata;
-					else if (ok == false)
+					else if (!ok)
 						data->area.segments[i].endpoints[j].zdata = data->area.endpoints[1].zdata;
 					mbview_projectll2display(
 					    instance, data->area.segments[i].endpoints[j].xlon, data->area.segments[i].endpoints[j].ylat,
@@ -1868,9 +1875,9 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 				for (j = 0; j < 2; j++) {
 					mbview_getzdata(instance, data->area.segments[i].endpoints[j].xgrid,
 					                data->area.segments[i].endpoints[j].ygrid, &ok, &(data->area.segments[i].endpoints[j].zdata));
-					if (ok == false && ((i == 0) || (i == 1 && j == 0) || (i == 3 && j == 1)))
+					if (!ok && ((i == 0) || (i == 1 && j == 0) || (i == 3 && j == 1)))
 						data->area.segments[i].endpoints[j].zdata = data->area.endpoints[0].zdata;
-					else if (ok == false)
+					else if (!ok)
 						data->area.segments[i].endpoints[j].zdata = data->area.endpoints[1].zdata;
 					mbview_projectll2display(
 					    instance, data->area.segments[i].endpoints[j].xlon, data->area.segments[i].endpoints[j].ylat,
