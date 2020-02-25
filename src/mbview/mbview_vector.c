@@ -301,7 +301,7 @@ int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, d
 			shared.shareddata.vectors[ivec].vectorpts[i].data = vecdata[i];
 
 			/* get min max of data if necessary */
-			if (recalculate_minmax == true) {
+			if (recalculate_minmax) {
 				if (i == 0) {
 					shared.shareddata.vectors[ivec].datamin = vecdata[i];
 					shared.shareddata.vectors[ivec].datamax = vecdata[i];
@@ -429,7 +429,7 @@ int mbview_enableviewvectors(int verbose, size_t instance, int *error)
 		struct mbview_struct *data = &(view->data);
 
 		/* if instance active reset action sensitivity */
-		if (data->active == true)
+		if (data->active)
 			mbview_update_sensitivity(verbose, instance, error);
 	}
 
@@ -706,9 +706,9 @@ int mbview_drawvector(size_t instance, int rez) {
 				                shared.shareddata.vectors[ivec].datamin, MBV_COLORTABLE_NORMAL, (float)0.0, (float)0.0,
 				                (float)1.0, (float)0.0, (float)0.0, (float)0.0, colortable_bright_red, colortable_bright_green,
 				                colortable_bright_blue, &red, &green, &blue);
-				if (shared.shareddata.vectors[ivec].vectorpts[jpoint].selected == true ||
+				if (shared.shareddata.vectors[ivec].vectorpts[jpoint].selected ||
 				    (jpoint < shared.shareddata.vectors[ivec].npoints - 1 &&
-				     shared.shareddata.vectors[ivec].vectorpts[jpoint + 1].selected == true)) {
+				     shared.shareddata.vectors[ivec].vectorpts[jpoint + 1].selected)) {
 					glColor3f(colortable_object_red[MBV_COLOR_RED], colortable_object_green[MBV_COLOR_RED],
 					          colortable_object_blue[MBV_COLOR_RED]);
 				}
