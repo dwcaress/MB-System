@@ -406,7 +406,7 @@ int mbview_reset_prglx(size_t instance) {
 	/* If profile view enabled update opengl plotting widget */
 	if (data->profile_view_mode == MBV_VIEW_ON) {
 		/* delete old glx_context if it exists */
-		if (view->prglx_init == true) {
+		if (view->prglx_init) {
 #ifdef MBV_DEBUG_GLX
 			fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, __func__, instance, view->dpy, view->prglx_context);
 #endif
@@ -501,7 +501,7 @@ int mbview_destroy_prglx(size_t instance) {
 	/* If profile view enabled update opengl plotting widget */
 	if (data->profile_view_mode == MBV_VIEW_ON) {
 		/* delete old glx_context if it exists */
-		if (view->prglx_init == true) {
+		if (view->prglx_init) {
 			glXDestroyContext(view->dpy, view->prglx_context);
 			view->prglx_init = false;
 		}
@@ -635,7 +635,7 @@ int mbview_plotprofile(size_t instance) {
 		glLineWidth(2.0);
 		glBegin(GL_LINES);
 		for (i = 0; i < data->profile.npoints; i++) {
-			if (data->profile.points[i].boundary == true) {
+			if (data->profile.points[i].boundary) {
 				x = scale * data->profile.points[i].distance;
 				glVertex3f(x, yzmin, MBV_OPENGL_ZPROFILE1);
 				glVertex3f(x, yzmax, MBV_OPENGL_ZPROFILE1);
