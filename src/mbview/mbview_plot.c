@@ -154,7 +154,6 @@ int mbview_reset_glx(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_drawdata(size_t instance, int rez) {
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	bool on;
@@ -605,6 +604,8 @@ int mbview_drawdata(size_t instance, int rez) {
 	/* set lastdrawrez flag */
 	view->lastdrawrez = rez;
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -615,7 +616,6 @@ int mbview_drawdata(size_t instance, int rez) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_plotlowall(size_t instance) {
-	int status = MB_SUCCESS;
 	int i;
 
 	if (mbv_verbose >= 2) {
@@ -632,6 +632,8 @@ int mbview_plotlowall(size_t instance) {
 			mbview_plotlow(i);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -642,8 +644,6 @@ int mbview_plotlowall(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_plotlowhighall(size_t instance) {
-	int status = MB_SUCCESS;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -656,6 +656,8 @@ int mbview_plotlowhighall(size_t instance) {
 	mbview_plotlowall(instance);
 	mbview_plothighall(instance);
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -667,7 +669,6 @@ int mbview_plotlowhighall(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_plothighall(size_t instance) {
-	int status = MB_SUCCESS;
 	int i;
 
 	if (mbv_verbose >= 2) {
@@ -684,6 +685,8 @@ int mbview_plothighall(size_t instance) {
 			mbview_plothigh(i);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -695,7 +698,6 @@ int mbview_plothighall(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_plotlow(size_t instance) {
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
@@ -709,6 +711,8 @@ int mbview_plotlow(size_t instance) {
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
+
+	int status = MB_SUCCESS;
 
 	/* only plot if mbview active for this instance */
 	if (data->active) {
@@ -748,7 +752,6 @@ int mbview_plotlow(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_plotlowhigh(size_t instance) {
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
@@ -762,6 +765,8 @@ int mbview_plotlowhigh(size_t instance) {
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
+
+	int status = MB_SUCCESS;
 
 	/* only plot if mbview active for this instance */
 	if (data->active) {
@@ -803,7 +808,6 @@ int mbview_plotlowhigh(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_plothigh(size_t instance) {
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
@@ -818,9 +822,10 @@ int mbview_plothigh(size_t instance) {
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
+	int status = MB_SUCCESS;
+
 	/* only plot if mbview active for this instance */
 	if (data->active) {
-
 		/* set plot_done to false and increment the plot recursion level */
 		view->plot_done = false;
 		view->plot_recursion++;
@@ -856,7 +861,6 @@ int mbview_plothigh(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_plotfull(size_t instance) {
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
@@ -870,6 +874,8 @@ int mbview_plotfull(size_t instance) {
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
+
+	int status = MB_SUCCESS;
 
 	/* only plot if mbview active for this instance */
 	if (data->active) {
@@ -909,7 +915,6 @@ int mbview_plotfull(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_plot(size_t instance, int rez) {
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	float viewdistance;
@@ -1066,6 +1071,8 @@ int mbview_plot(size_t instance, int rez) {
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1078,8 +1085,6 @@ int mbview_plot(size_t instance, int rez) {
 /*------------------------------------------------------------------------------*/
 int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double *xgrid, double *ygrid, double *xlon,
                      double *ylat, double *zdata, double *xdisplay, double *ydisplay, double *zdisplay) {
-
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int rez;
@@ -1196,6 +1201,8 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1215,8 +1222,6 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ijbounds[4], int *found, double *xgrid,
                         double *ygrid, double *xlon, double *ylat, double *zdata, double *xdisplay, double *ydisplay,
                         double *zdisplay) {
-
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	float viewdistance;
@@ -1449,6 +1454,8 @@ instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 #endif
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1470,8 +1477,6 @@ instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 
 /*------------------------------------------------------------------------------*/
 int mbview_viewbounds(size_t instance) {
-
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	float left2d, right2d, bottom2d, top2d;
@@ -1793,6 +1798,8 @@ data->viewbounds[0], data->viewbounds[1], data->viewbounds[2], data->viewbounds[
 #endif
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1807,8 +1814,6 @@ data->viewbounds[0], data->viewbounds[1], data->viewbounds[2], data->viewbounds[
 }
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg) {
-
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int i;
@@ -1833,6 +1838,8 @@ int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg) 
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
+
+	int status = MB_SUCCESS;
 
 	/* only plot if this view is still active */
 	if (view->glx_init) {
@@ -1876,8 +1883,6 @@ int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg) 
 
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *seg) {
-
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -1936,6 +1941,8 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 	mbview_greatcircle_distbearing(instance, seg->endpoints[0].xlon, seg->endpoints[0].ylat, seg->endpoints[1].xlon,
 	                               seg->endpoints[1].ylat, &segbearing, &segdist);
 	nsegpoint = MAX(((int)((segdist / dsegdist) + 1)), 2);
+
+	int status = MB_SUCCESS;
 
 	/* no need to fill in if the segment doesn't cross grid boundaries */
 	if (nsegpoint <= 2) {
@@ -2038,8 +2045,6 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *seg) {
-
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -2089,14 +2094,15 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 	jstart = (int)((seg->endpoints[0].ygrid - data->primary_ymin) / data->primary_dy);
 	jend = (int)((seg->endpoints[1].ygrid - data->primary_ymin) / data->primary_dy);
 
+	int status = MB_SUCCESS;
+
 	/* no need to fill in if the segment doesn't cross grid boundaries */
 	if (istart == iend && jstart == jend) {
 		done = true;
 		seg->nls = 0;
-	}
+	} else {
+		// else allocate space for the array of points
 
-	/* else allocate space for the array of points */
-	else {
 		/* allocate space for the array of points */
 		if (iend > istart) {
 			ni = iend - istart;
@@ -2288,8 +2294,6 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg) {
-
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int i;
@@ -2314,6 +2318,8 @@ int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
+
+	int status = MB_SUCCESS;
 
 	/* if spheroid dipslay project on great circle arc */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID) {
@@ -2354,8 +2360,6 @@ int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg
 
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *seg) {
-
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -2412,6 +2416,8 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	mbview_greatcircle_distbearing(instance, seg->endpoints[0].xlon, seg->endpoints[0].ylat, seg->endpoints[1].xlon,
 	                               seg->endpoints[1].ylat, &segbearing, &segdist);
 	nsegpoint = MAX(((int)((segdist / dsegdist) + 1)), 2);
+
+	int status = MB_SUCCESS;
 
 	bool done = false;
 	/* no need to fill in if the segment doesn't cross grid boundaries */
@@ -2516,7 +2522,6 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct *seg) {
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -2586,6 +2591,8 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	/* fprintf(stderr,"mbview_drapesegmentw_grid: xgridstart:%f xgridend:%f ygridstart:%f ygridend:%f\n",
 	xgridstart,xgridend,ygridstart,ygridend);
 	fprintf(stderr,"mbview_drapesegmentw_grid: istart:%d iend:%d jstart:%d jend:%d\n",istart,iend,jstart,jend);*/
+
+	int status = MB_SUCCESS;
 
 	/* no need to fill in if the segment doesn't cross grid boundaries */
 	bool done = false;
@@ -2807,9 +2814,6 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 
 /*------------------------------------------------------------------------------*/
 int mbview_glerrorcheck(size_t instance, char *sourcefile, int line, char *sourcefunction) {
-	GLenum gl_error;
-	GLubyte *gl_error_msg;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2821,8 +2825,8 @@ int mbview_glerrorcheck(size_t instance, char *sourcefile, int line, char *sourc
 	}
 
 	/* check for OpenGL error if MBV_GET_GLX_ERRORS set */
-	gl_error = (GLenum)glGetError();
-	gl_error_msg = (GLubyte *)gluErrorString(gl_error);
+	const GLenum gl_error = (GLenum)glGetError();
+	const GLubyte *gl_error_msg = (GLubyte *)gluErrorString(gl_error);
 	if (gl_error != GL_NO_ERROR)
 		fprintf(stderr, "GLerror: Instance:%zu %s:%d Function %s: OpenGL error: %s\n", instance, sourcefile, line, sourcefunction,
 		        gl_error_msg);
