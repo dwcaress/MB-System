@@ -65,7 +65,6 @@
 
 static char value_string[MB_PATH_MAXLINE];
 
-
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, size_t instance, int *nnav, int *error) {
 	if (verbose >= 2) {
@@ -75,10 +74,6 @@ int mbview_getnavcount(int verbose, size_t instance, int *nnav, int *error) {
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       instance:                  %zu\n", instance);
 	}
-
-	/* get view */
-	// struct mbview_world_struct *view = &(mbviews[instance]);
-	// struct mbview_struct *data = &(view->data);
 
 	/* get number of navs */
 	*nnav = shared.shareddata.nnav;
@@ -107,10 +102,6 @@ int mbview_getnavpointcount(int verbose, size_t instance, int nav, int *npoint, 
 		fprintf(stderr, "dbg2       instance:                  %zu\n", instance);
 		fprintf(stderr, "dbg2       nav:                     %d\n", nav);
 	}
-
-	/* get view */
-	// struct mbview_world_struct *view = &(mbviews[instance]);
-	// struct mbview_struct *data = &(view->data);
 
 	/* get number of points in specified nav */
 	*npoint = 0;
@@ -366,7 +357,6 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 		fprintf(stderr, "dbg2       decimation:                %d\n", decimation);
 	}
 
-	/* get view */
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
@@ -716,8 +706,7 @@ int mbview_enableviewnavs(int verbose, size_t instance, int *error)
 
 	/* set widget sensitivity on all active instances */
 	for (instance = 0; instance < MBV_MAX_WINDOWS; instance++) {
-		/* get view */
-		struct mbview_world_struct *view = &(mbviews[instance]);
+			struct mbview_world_struct *view = &(mbviews[instance]);
 		struct mbview_struct *data = &(view->data);
 
 		/* if instance active reset action sensitivity */
@@ -754,8 +743,7 @@ int mbview_enableadjustnavs(int verbose, size_t instance, int *error)
 
 	/* set widget sensitivity on all active instances */
 	for (instance = 0; instance < MBV_MAX_WINDOWS; instance++) {
-		/* get view */
-		struct mbview_world_struct *view = &(mbviews[instance]);
+			struct mbview_world_struct *view = &(mbviews[instance]);
 		struct mbview_struct *data = &(view->data);
 
 		/* if instance active reset action sensitivity */
@@ -789,7 +777,6 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 		fprintf(stderr, "dbg2       ypixel:           %d\n", ypixel);
 	}
 
-	/* get view */
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
@@ -1526,7 +1513,6 @@ int mbview_extract_nav_profile(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	/* get view */
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
@@ -1698,7 +1684,6 @@ int mbview_nav_delete(size_t instance, int inav) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	/* get view */
 	// struct mbview_world_struct *view = &(mbviews[instance]);
 	// struct mbview_struct *data = &(view->data);
 
@@ -1768,7 +1753,6 @@ int mbview_navpicksize(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	/* get view */
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
@@ -1893,7 +1877,6 @@ int mbview_drawnavpick(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	/* get view */
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
@@ -2051,7 +2034,6 @@ int mbview_drawnav(size_t instance, int rez) {
 		fprintf(stderr, "dbg2       rez:              %d\n", rez);
 	}
 
-	/* get view */
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
@@ -2068,8 +2050,6 @@ int mbview_drawnav(size_t instance, int rez) {
 	int error = MB_ERROR_NO_ERROR;
 	int icolor;
 	int inav;
-	bool swathbounds_on;
-	double timegapuse;
 	struct mbview_linesegmentw_struct segment;
 
 	/* draw navigation */
@@ -2157,14 +2137,14 @@ int mbview_drawnav(size_t instance, int rez) {
 
 		/* loop over the navs plotting swathbounds */
 		for (inav = 0; inav < shared.shareddata.nnav; inav++) {
-			timegapuse = 60.0 * shared.shareddata.navs[inav].decimation * view->timegap;
+			const double timegapuse = 60.0 * shared.shareddata.navs[inav].decimation * view->timegap;
 			if (shared.shareddata.navs[inav].swathbounds && shared.shareddata.navs[inav].nselected > 0) {
 				glColor3f(colortable_object_red[MBV_COLOR_YELLOW], colortable_object_green[MBV_COLOR_YELLOW],
 				          colortable_object_blue[MBV_COLOR_YELLOW]);
 				glLineWidth((float)(shared.shareddata.navs[inav].size));
 
 				/* draw port side of swath */
-				swathbounds_on = false;
+				bool swathbounds_on = false;
 				for (int jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints; jpoint++) {
 					/* draw from center at start of selected data */
 					if (!swathbounds_on && shared.shareddata.navs[inav].navpts[jpoint].selected) {
@@ -2398,7 +2378,6 @@ int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error) {
 		fprintf(stderr, "dbg2       name:             %s\n", name);
 	}
 
-	/* get view */
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
