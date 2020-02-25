@@ -403,7 +403,7 @@ int mbview_enableviewsites(int verbose, size_t instance, int *error)
 		struct mbview_struct *data = &(view->data);
 
 		/* if instance active reset action sensitivity */
-		if (data->active == true)
+		if (data->active)
 			mbview_update_sensitivity(verbose, instance, error);
 	}
 
@@ -439,7 +439,7 @@ int mbview_enableeditsites(int verbose, size_t instance, int *error)
 	shared.shareddata.site_mode = MBV_SITE_EDIT;
 
 	/* set widget sensitivity */
-	if (data->active == true)
+	if (data->active)
 		mbview_update_sensitivity(mbv_verbose, instance, error);
 
 	const int status = MB_SUCCESS;
