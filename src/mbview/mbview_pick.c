@@ -71,7 +71,6 @@ static char value_list[MB_PATH_MAXLINE];
 
 /*------------------------------------------------------------------------------*/
 int mbview_clearpicks(size_t instance) {
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -165,6 +164,8 @@ int mbview_clearpicks(size_t instance) {
 		mbview_plothighall(instance);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -176,8 +177,6 @@ int mbview_clearpicks(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_clearnavpicks(size_t instance) {
-
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	int replotinstance;
 	int replotall;
@@ -247,6 +246,8 @@ int mbview_clearnavpicks(size_t instance) {
 		mbview_plothighall(instance);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -258,7 +259,6 @@ int mbview_clearnavpicks(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int found;  // TODO(schwehr): bool found
@@ -365,6 +365,8 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
 		(data->mbview_picktwopoint_notify)(instance);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -376,7 +378,6 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_extract_pick_profile(size_t instance) {
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -393,6 +394,8 @@ int mbview_extract_pick_profile(size_t instance) {
 
 	view = &(mbviews[instance]);
 	data = &(view->data);
+
+	int status = MB_SUCCESS;
 
 	/* if a two point pick has been made and the profile display
 	    is on or the pick is final, insert the draped
@@ -479,8 +482,6 @@ int mbview_extract_pick_profile(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_picksize(size_t instance) {
-
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double scalefactor;
@@ -576,6 +577,8 @@ int mbview_picksize(size_t instance) {
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -586,8 +589,6 @@ int mbview_picksize(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_pick_text(size_t instance) {
-
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int time_i[7];
@@ -918,6 +919,8 @@ int mbview_pick_text(size_t instance) {
 	set_mbview_label_multiline_string(view->mb3dview.mbview_label_pickinfo, value_text);
 	fprintf(stderr, "%s", value_list);
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -929,7 +932,6 @@ int mbview_pick_text(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_setlonlatstrings(double lon, double lat, char *londstring, char *latdstring, char *lonmstring, char *latmstring) {
-	int status = MB_SUCCESS;
 	int degree;
 	double minute;
 
@@ -967,6 +969,8 @@ int mbview_setlonlatstrings(double lon, double lat, char *londstring, char *latd
 	else
 		sprintf(latmstring, "%3d %10.6f N", degree, minute);
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -982,8 +986,6 @@ int mbview_setlonlatstrings(double lon, double lat, char *londstring, char *latd
 
 /*------------------------------------------------------------------------------*/
 int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
-
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int found;  // TODO(schwehr): bool found
@@ -1442,6 +1444,8 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		(data->mbview_pickregion_notify)(instance);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1452,8 +1456,6 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
-
-	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int found;
@@ -1661,6 +1663,9 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 			XBell(view->dpy, 100);
 		}
 	}
+
+	int status = MB_SUCCESS;
+
 	/* recalculate any good quad area whether defined this time or previously
 	    this catches which == MBV_AREAASPECT_CHANGE calls */
 	if (data->area_type == MBV_AREA_QUAD && which != MBV_AREALENGTH_UP && which != MBV_AREAASPECT_UP) {
@@ -1862,7 +1867,6 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_drawpick(size_t instance) {
-	int status = MB_SUCCESS;
 	int i;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -1988,6 +1992,8 @@ int mbview_drawpick(size_t instance) {
 	mbview_glerrorcheck(instance, 1, __func__);
 #endif
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1999,7 +2005,6 @@ int mbview_drawpick(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_drawregion(size_t instance) {
-	int status = MB_SUCCESS;
 	int i, j;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -2048,6 +2053,8 @@ int mbview_drawregion(size_t instance) {
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2059,7 +2066,6 @@ int mbview_drawregion(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_drawarea(size_t instance) {
-	int status = MB_SUCCESS;
 	int i, j;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -2138,6 +2144,8 @@ int mbview_drawarea(size_t instance) {
 	mbview_glerrorcheck(instance, 1, __func__);
 #endif
 
+	int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2146,5 +2154,4 @@ int mbview_drawarea(size_t instance) {
 
 	return (status);
 }
-
 /*------------------------------------------------------------------------------*/
