@@ -155,14 +155,6 @@ int mbview_reset_glx(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_drawdata(size_t instance, int rez) {
-	bool on;
-	int flip;
-	int nxrange, nyrange;
-	int stride;
-	double secondary_value;
-	int which_data;
-	int i, j, k, l, ikk, ill, kk, ll;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -175,10 +167,11 @@ int mbview_drawdata(size_t instance, int rez) {
 	struct mbview_struct *data = &(view->data);
 
 	/* get size of grid in view */
-	nxrange = data->viewbounds[1] - data->viewbounds[0] + 1;
-	nyrange = data->viewbounds[3] - data->viewbounds[2] + 1;
+	const int nxrange = data->viewbounds[1] - data->viewbounds[0] + 1;
+	const int nyrange = data->viewbounds[3] - data->viewbounds[2] + 1;
 
 	/* set stride for looping over data */
+	int stride;
 	if (rez == MBV_REZ_FULL)
 		stride = 1;
 	else if (rez == MBV_REZ_HIGH)
@@ -201,6 +194,7 @@ int mbview_drawdata(size_t instance, int rez) {
 	/* calculate histogram equalization if needed */
 	float *histogram = NULL;
 	bool make_histogram = false;
+	int which_data;
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY && data->primary_histogram) {
 		if (!view->primary_histogram_set) {
 			make_histogram = true;
@@ -233,9 +227,9 @@ int mbview_drawdata(size_t instance, int rez) {
 	/* draw the triangle outlines */
 	/*
 	glColor3f(1.0, 0.0, 0.0);
-	for (i=0;i<data->primary_n_columns-1;i++)
+	for (int i = 0;i<data->primary_n_columns-1;i++)
 	{
-	for (j=0;j<data->primary_n_rows-1;j++)
+	for (int j = 0;j<data->primary_n_rows-1;j++)
 	    {
 	    k = i * data->primary_n_rows + j;
 	    l = (i + 1) * data->primary_n_rows + j;
@@ -279,9 +273,9 @@ int mbview_drawdata(size_t instance, int rez) {
 
 	/* draw the triangles */
 	/*glBegin(GL_TRIANGLES);
-	for (i=0;i<data->primary_n_columns-stride;i+=stride)
+	for (int i = 0;i<data->primary_n_columns-stride;i+=stride)
 	{
-	for (j=0;j<data->primary_n_rows-stride;j+=stride)
+	for (int j = 0;j<data->primary_n_rows-stride;j+=stride)
 	    {
 	    k = i * data->primary_n_rows + j;
 	    l = (i + stride) * data->primary_n_rows + j;
@@ -351,12 +345,16 @@ int mbview_drawdata(size_t instance, int rez) {
 
 	/* draw the data as triangle strips */
 	if (data->grid_mode != MBV_GRID_VIEW_SECONDARY) {
-		for (i = data->viewbounds[0]; i < data->viewbounds[1] - stride; i += stride) {
-			on = false;
-			flip = false;
-			for (j = data->viewbounds[2]; j < data->viewbounds[3]; j += stride) {
-				k = i * data->primary_n_rows + j;
-				l = (i + stride) * data->primary_n_rows + j;
+		for (int i = data->viewbounds[0]; i < data->viewbounds[1] - stride; i += stride) {
+			bool on = false;
+			bool flip = false;
+			for (int j = data->viewbounds[2]; j < data->viewbounds[3]; j += stride) {
+				const int k = i * data->primary_n_rows + j;
+				const int l = (i + stride) * data->primary_n_rows + j;
+				int ikk;
+				int kk;
+				int ill;
+				int ll;
 				// TODO(schwehr): Flip sense of flip check so ! not needed.  Why use !flip?
 				if (!flip) {
 					ikk = i;
@@ -448,13 +446,17 @@ int mbview_drawdata(size_t instance, int rez) {
 	}
 
 	else /* if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) */ {
-		for (i = data->viewbounds[0]; i < data->viewbounds[1] - stride; i += stride) {
-			on = false;
-			flip = false;
-			for (j = data->viewbounds[2]; j < data->viewbounds[3]; j += stride) {
-				k = i * data->primary_n_rows + j;
-				l = (i + stride) * data->primary_n_rows + j;
+		for (int i = data->viewbounds[0]; i < data->viewbounds[1] - stride; i += stride) {
+			bool on = false;
+			bool flip = false;
+			for (int j = data->viewbounds[2]; j < data->viewbounds[3]; j += stride) {
+				const int k = i * data->primary_n_rows + j;
+				const int l = (i + stride) * data->primary_n_rows + j;
 				// TODO(schwehr): if(flip) {} else {}
+				int ikk;
+				int kk;
+				int ill;
+				int ll;
 				if (!flip) {
 					ikk = i;
 					kk = k;
@@ -467,6 +469,7 @@ int mbview_drawdata(size_t instance, int rez) {
 					ill = i;
 					ll = k;
 				}
+				double secondary_value;
 				if (data->secondary_sameas_primary)
 					secondary_value = data->secondary_data[kk];
 				else
@@ -614,8 +617,6 @@ int mbview_drawdata(size_t instance, int rez) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_plotlowall(size_t instance) {
-	int i;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -625,7 +626,7 @@ int mbview_plotlowall(size_t instance) {
 
 	/* replot all active instances except for instance
 	    which should already be replotted */
-	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (i != instance && mbviews[i].data.active)
 			mbview_plotlow(i);
 	}
@@ -667,8 +668,6 @@ int mbview_plotlowhighall(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_plothighall(size_t instance) {
-	int i;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -678,7 +677,7 @@ int mbview_plothighall(size_t instance) {
 
 	/* replot all active instances except for instance
 	    which should already be replotted */
-	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (i != instance && mbviews[i].data.active)
 			mbview_plothigh(i);
 	}
@@ -897,8 +896,6 @@ int mbview_plotfull(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_plot(size_t instance, int rez) {
-	float viewdistance;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -995,7 +992,7 @@ int mbview_plot(size_t instance, int rez) {
 				glTranslated(view->offset2d_x, view->offset2d_y, MBV_OPENGL_ZMIN2D);
 			}
 			else if (data->display_mode == MBV_DISPLAY_3D) {
-				viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH / view->aspect_ratio;
+				const float viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH / view->aspect_ratio;
 				glTranslated(0.0, 0.0, -viewdistance + view->viewoffset3d_z);
 				glRotated((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0);
 				glRotated((float)(data->viewazimuth3d), 0.0, 1.0, 1.0);
@@ -1064,13 +1061,6 @@ int mbview_plot(size_t instance, int rez) {
 /*------------------------------------------------------------------------------*/
 int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double *xgrid, double *ygrid, double *xlon,
                      double *ylat, double *zdata, double *xdisplay, double *ydisplay, double *zdisplay) {
-	int rez;
-	int ijbounds[4];
-	bool foundsave;
-	double xgridsave, ygridsave;
-	double xlonsave, ylatsave, zdatasave;
-	double xdisplaysave, ydisplaysave, zdisplaysave;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1085,19 +1075,19 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 
 	/* only plot if this view is still active */
 	if (view->glx_init) {
-
 		/* look for point at low resolution */
 		*found = false;
-		foundsave = false;
-		ijbounds[0] = 0;
-		ijbounds[1] = data->primary_n_columns;
-		ijbounds[2] = 0;
-		ijbounds[3] = data->primary_n_rows;
-		rez = MBV_REZ_LOW;
+		bool foundsave = false;
+		int ijbounds[4] = {0, data->primary_n_columns, 0, data->primary_n_rows};
+		int rez = MBV_REZ_LOW;
 		mbview_findpointrez(instance, rez, xpixel, ypixel, ijbounds, found, xgrid, ygrid, xlon, ylat, zdata, xdisplay, ydisplay,
 		                    zdisplay);
 		/*fprintf(stderr,"First findpointrez: rez:%d pixels:%d %d found:%d xlon:%f ylat:%f zdata:%f\n",
 		rez,xpixel,ypixel,found,xlon,ylat,zdata);*/
+		double xgridsave, ygridsave;
+		double xlonsave, ylatsave, zdatasave;
+		double xdisplaysave, ydisplaysave, zdisplaysave;
+
 		if (*found) {
 			/* save last good results */
 			foundsave = *found;
@@ -1198,14 +1188,6 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ijbounds[4], int *found, double *xgrid,
                         double *ygrid, double *xlon, double *ylat, double *zdata, double *xdisplay, double *ydisplay,
                         double *zdisplay) {
-	float viewdistance;
-	int stride, ipickstride, jpickstride;
-	int i, j, k, l, m, n;
-	float rgba[4];
-	int ni, imin, imax, nj, jmin, jmax;
-	int npickx, npicky;
-	float rgb[3];
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1225,7 +1207,6 @@ int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ij
 
 	/* only plot if this view is still active */
 	if (view->glx_init) {
-
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
 		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
@@ -1266,7 +1247,7 @@ instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 			glTranslated(view->offset2d_x, view->offset2d_y, MBV_OPENGL_ZMIN2D);
 		}
 		else if (data->display_mode == MBV_DISPLAY_3D) {
-			viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH / view->aspect_ratio;
+			const float viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH / view->aspect_ratio;
 			glTranslated(0.0, 0.0, -viewdistance + view->viewoffset3d_z);
 			glRotated((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0);
 			glRotated((float)(data->viewazimuth3d), 0.0, 1.0, 1.0);
@@ -1286,14 +1267,15 @@ instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 			glEnable(GL_DEPTH_TEST);
 
 		/* get bounds of interest in grid */
-		imin = ijbounds[0];
-		imax = ijbounds[1];
-		ni = imax - imin + 1;
-		jmin = ijbounds[2];
-		jmax = ijbounds[3];
-		nj = jmax - jmin + 1;
+		const int imin = ijbounds[0];
+		const int imax = ijbounds[1];
+		const int ni = imax - imin + 1;
+		const int jmin = ijbounds[2];
+		const int jmax = ijbounds[3];
+		const int nj = jmax - jmin + 1;
 
 		/* set stride for looping over data */
+		int stride;
 		if (rez == MBV_REZ_FULL)
 			stride = 1;
 		else if (rez == MBV_REZ_HIGH)
@@ -1304,25 +1286,27 @@ instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 			             (int)ceil(((double)data->primary_n_rows) / ((double)data->lorez_dimension)));
 
 		/* get number of grid cells used in picking */
-		npickx = (ni / stride);
-		ipickstride = stride * (int)floor((npickx / MBV_PICK_DIVISION) + 1);
-		npicky = (nj / stride);
-		jpickstride = stride * (int)floor((npicky / MBV_PICK_DIVISION) + 1);
+		const int npickx = (ni / stride);
+		const int ipickstride = stride * (int)floor((npickx / MBV_PICK_DIVISION) + 1);
+		const int npicky = (nj / stride);
+		const int jpickstride = stride * (int)floor((npicky / MBV_PICK_DIVISION) + 1);
 
 		/*fprintf(stderr,"mbview_findpointrez: stride:%d npickx:%d npicky:%d ipickstride:%d jpickstride:%d\n",
 		stride, npickx, npicky, ipickstride, jpickstride);*/
 
 		/* draw the triangles */
 		glBegin(GL_TRIANGLES);
-		for (i = imin; i < imax - stride; i += stride) {
-			for (j = jmin; j < jmax - stride; j += stride) {
-				k = i * data->primary_n_rows + j;
-				l = (i + stride) * data->primary_n_rows + j;
-				m = i * data->primary_n_rows + j + stride;
-				n = (i + stride) * data->primary_n_rows + j + stride;
+		for (int i = imin; i < imax - stride; i += stride) {
+			for (int j = jmin; j < jmax - stride; j += stride) {
+				const int k = i * data->primary_n_rows + j;
+				const int l = (i + stride) * data->primary_n_rows + j;
+				const int m = i * data->primary_n_rows + j + stride;
+				const int n = (i + stride) * data->primary_n_rows + j + stride;
 
-				rgb[0] = (float)floor(((double)((i - imin) / ipickstride))) / (MBV_PICK_DIVISION + 1.0);
-				rgb[1] = (float)floor(((double)((j - jmin) / jpickstride))) / (MBV_PICK_DIVISION + 1.0);
+				float rgb[3] = {
+					(float)floor(((double)((i - imin) / ipickstride))) / (MBV_PICK_DIVISION + 1.0),
+					(float)floor(((double)((j - jmin) / jpickstride))) / (MBV_PICK_DIVISION + 1.0),
+					0.0f};
 				if (data->primary_data[k] != data->primary_nodatavalue && data->primary_data[l] != data->primary_nodatavalue &&
 				    data->primary_data[m] != data->primary_nodatavalue) {
 					if (!(data->primary_stat_z[k / 8] & statmask[k % 8]))
@@ -1331,7 +1315,7 @@ instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 						mbview_zscalegridpoint(instance, l);
 					if (!(data->primary_stat_z[m / 8] & statmask[m % 8]))
 						mbview_zscalegridpoint(instance, m);
-					rgb[2] = 0.25;
+					rgb[2] = 0.25f;
 					/*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
 					i,j, rgb[0], rgb[1], rgb[2]);*/
 					glColor3f(rgb[0], rgb[1], rgb[2]);
@@ -1349,7 +1333,7 @@ instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 						mbview_zscalegridpoint(instance, m);
 					if (!(data->primary_stat_z[n / 8] & statmask[n % 8]))
 						mbview_zscalegridpoint(instance, n);
-					rgb[2] = 0.75;
+					rgb[2] = 0.75f;
 					/*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
 					i,j, rgb[0], rgb[1], rgb[2]);*/
 					glColor3f(rgb[0], rgb[1], rgb[2]);
@@ -1371,6 +1355,7 @@ instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 
 		/* now read the color at the pick point */
 		glReadBuffer(GL_BACK);
+		float rgba[4];
 		glReadPixels(xpixel, ypixel, 1, 1, GL_RGBA, GL_FLOAT, rgba);
 		glReadBuffer(GL_FRONT);
 
@@ -1378,12 +1363,12 @@ instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 		if (rgba[0] != 1.0 && rgba[1] != 1.0 && (rgba[2] > 0.2 && rgba[2] < 0.8)) {
 			*found = true;
 
-			i = imin + ipickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
-			j = jmin + jpickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
-			k = i * data->primary_n_rows + j;
-			l = (i + stride) * data->primary_n_rows + j;
-			m = i * data->primary_n_rows + j + stride;
-			n = (i + stride) * data->primary_n_rows + j + stride;
+			const int i = imin + ipickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
+			const int j = jmin + jpickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
+			const int k = i * data->primary_n_rows + j;
+			const int l = (i + stride) * data->primary_n_rows + j;
+			const int m = i * data->primary_n_rows + j + stride;
+			const int n = (i + stride) * data->primary_n_rows + j + stride;
 			if (rint((MBV_PICK_DIVISION + 1.0) * rgba[2]) == (MBV_PICK_DIVISION + 1.0) / 4.0) {
 				*xgrid = data->primary_xmin + (3 * i + stride) * data->primary_dx / 3.0;
 				*ygrid = data->primary_ymin + (3 * j + stride) * data->primary_dy / 3.0;
@@ -1450,18 +1435,6 @@ instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 
 /*------------------------------------------------------------------------------*/
 int mbview_viewbounds(size_t instance) {
-	float left2d, right2d, bottom2d, top2d;
-	float viewdistance;
-	int stride, ipickstride, jpickstride;
-	int iscreenstride, jscreenstride;
-	int xpixel, ypixel;
-	int found;
-	float rgba[4];
-	int npickx, npicky;
-	float rgb[3];
-	int ijbounds[4];
-	int i, j, k, l, m, n;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1474,6 +1447,17 @@ int mbview_viewbounds(size_t instance) {
 
 	/* only plot if this view is still active */
 	if (view->glx_init) {
+		// TODO(schwehr): Localize
+		float left2d, right2d, bottom2d, top2d;
+		float viewdistance;
+		int stride, ipickstride, jpickstride;
+		int iscreenstride, jscreenstride;
+		int xpixel, ypixel;
+		int found;
+		float rgba[4];
+		int npickx, npicky;
+		float rgb[3];
+		int ijbounds[4];
 
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
@@ -1526,9 +1510,9 @@ int mbview_viewbounds(size_t instance) {
 			data->viewbounds[1] = data->primary_n_columns - 1;
 			data->viewbounds[2] = 0;
 			data->viewbounds[3] = data->primary_n_rows - 1;
-			for (i = 0; i < data->primary_n_columns; i += stride) {
-				for (j = 0; j < data->primary_n_rows; j += stride) {
-					k = i * data->primary_n_rows + j;
+			for (int i = 0; i < data->primary_n_columns; i += stride) {
+				for (int j = 0; j < data->primary_n_rows; j += stride) {
+					const int k = i * data->primary_n_rows + j;
 					if (data->primary_data[k] != data->primary_nodatavalue && data->primary_x[k] >= left2d &&
 					    data->primary_x[k] <= right2d && data->primary_y[k] >= bottom2d && data->primary_y[k] <= top2d) {
 						if (!found) { // TODO(schwehr): if (found)
@@ -1546,9 +1530,9 @@ int mbview_viewbounds(size_t instance) {
 					}
 				}
 			}
-			for (i = 0; i < data->primary_n_columns; i += data->primary_n_columns - 1) {
-				for (j = 0; j < data->primary_n_rows; j += data->primary_n_rows - 1) {
-					k = i * data->primary_n_rows + j;
+			for (int i = 0; i < data->primary_n_columns; i += data->primary_n_columns - 1) {
+				for (int j = 0; j < data->primary_n_rows; j += data->primary_n_rows - 1) {
+					const int k = i * data->primary_n_rows + j;
 					if (data->primary_data[k] != data->primary_nodatavalue && data->primary_x[k] >= left2d &&
 					    data->primary_x[k] <= right2d && data->primary_y[k] >= bottom2d && data->primary_y[k] <= top2d) {
 						if (!found) {  // TODO(schwehr): if (found)
@@ -1630,12 +1614,12 @@ int mbview_viewbounds(size_t instance) {
 
 			/* draw the triangles */
 			glBegin(GL_TRIANGLES);
-			for (i = 0; i < data->primary_n_columns - stride; i += stride) {
-				for (j = 0; j < data->primary_n_rows - stride; j += stride) {
-					k = i * data->primary_n_rows + j;
-					l = (i + stride) * data->primary_n_rows + j;
-					m = i * data->primary_n_rows + j + stride;
-					n = (i + stride) * data->primary_n_rows + j + stride;
+			for (int i = 0; i < data->primary_n_columns - stride; i += stride) {
+				for (int j = 0; j < data->primary_n_rows - stride; j += stride) {
+					const int k = i * data->primary_n_rows + j;
+					const int l = (i + stride) * data->primary_n_rows + j;
+					const int m = i * data->primary_n_rows + j + stride;
+					const int n = (i + stride) * data->primary_n_rows + j + stride;
 
 					rgb[0] = (float)floor(((double)(i / ipickstride))) / (MBV_PICK_DIVISION + 1.0);
 					rgb[1] = (float)floor(((double)(j / jpickstride))) / (MBV_PICK_DIVISION + 1.0);
@@ -1690,8 +1674,8 @@ int mbview_viewbounds(size_t instance) {
 					/*fprintf(stderr,"xpixel:%d ypixel:%d rgba: %f %f %f %f\n",
 					xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3]);*/
 					if (rgba[0] != 1.0 && rgba[1] != 1.0) {
-						i = ipickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
-						j = jpickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
+						const int i = ipickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
+						const int j = jpickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
 						if (!found) {  // TODO(schwehr): if (found)
 							data->viewbounds[0] = i;
 							data->viewbounds[1] = i + stride;
@@ -1719,8 +1703,8 @@ int mbview_viewbounds(size_t instance) {
 					/*fprintf(stderr,"xpixel:%d ypixel:%d rgba: %f %f %f %f\n",
 					    xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3]);*/
 					if (rgba[0] != 1.0 && rgba[1] != 1.0) {
-						i = ipickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
-						j = jpickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
+						const int i = ipickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
+						const int j = jpickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
 						ijbounds[0] = i;
 						ijbounds[2] = j;
 						if (ipickstride == 1) {
@@ -1784,8 +1768,6 @@ data->viewbounds[0], data->viewbounds[1], data->viewbounds[2], data->viewbounds[
 }
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg) {
-	int i;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1838,7 +1820,7 @@ int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg) 
 		fprintf(stderr, "dbg2       seg->nls:        %d\n", seg->nls);
 		fprintf(stderr, "dbg2       seg->nls_alloc:  %d\n", seg->nls_alloc);
 		fprintf(stderr, "dbg2       seg->lspoints:\n");
-		for (i = 0; i < seg->nls; i++) {
+		for (int i = 0; i < seg->nls; i++) {
 			fprintf(stderr, "dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n", i, seg->lspoints[i].xgrid,
 			        seg->lspoints[i].ygrid, seg->lspoints[i].zdata, seg->lspoints[i].xlon, seg->lspoints[i].ylat,
 			        seg->lspoints[i].xdisplay, seg->lspoints[i].ydisplay, seg->lspoints[i].zdisplay);
@@ -1856,7 +1838,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 	int nsegpoint;
 	double xlon1, ylat1, xlon2, ylat2;
 	double segbearing, dsegbearing, segdist, dsegdist;
-	int i, j, icnt;
+	int icnt;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1893,8 +1875,8 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 
 	/* get half characteristic distance between grid points
 	    from center of primary grid */
-	i = data->primary_n_columns / 2;
-	j = data->primary_n_rows / 2;
+	const int i = data->primary_n_columns / 2;
+	const int j = data->primary_n_rows / 2;
 	mbview_projectgrid2ll(instance, (double)(data->primary_xmin + i * data->primary_dx),
 	                      (double)(data->primary_ymin + j * data->primary_dy), &xlon1, &ylat1);
 	mbview_projectgrid2ll(instance, (double)(data->primary_xmin + (i + 1) * data->primary_dx),
@@ -1942,7 +1924,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 		seg->lspoints[seg->nls].ylat = seg->endpoints[0].ylat;
 		seg->nls++;
 
-		for (i = 1; i < nsegpoint - 1; i++) {
+		for (int i = 1; i < nsegpoint - 1; i++) {
 			mbview_greatcircle_endposition(instance, seg->lspoints[0].xlon, seg->lspoints[0].ylat, segbearing,
 			                               (double)(i * dsegdist), &(seg->lspoints[seg->nls].xlon),
 			                               &(seg->lspoints[seg->nls].ylat)),
@@ -1997,7 +1979,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 		fprintf(stderr, "dbg2       seg->nls:        %d\n", seg->nls);
 		fprintf(stderr, "dbg2       seg->nls_alloc:  %d\n", seg->nls_alloc);
 		fprintf(stderr, "dbg2       seg->lspoints:\n");
-		for (i = 0; i < seg->nls; i++) {
+		for (int i = 0; i < seg->nls; i++) {
 			fprintf(stderr, "dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n", i, seg->lspoints[i].xgrid,
 			        seg->lspoints[i].ygrid, seg->lspoints[i].zdata, seg->lspoints[i].xlon, seg->lspoints[i].ylat,
 			        seg->lspoints[i].xdisplay, seg->lspoints[i].ydisplay, seg->lspoints[i].zdisplay);
@@ -2018,7 +2000,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 	double xgrid, ygrid, zdata;
 	int global;
 	double offset_factor;
-	int i, j, k, l, ii, icnt, jcnt;
+	int ii, icnt, jcnt;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2114,12 +2096,12 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 		/* loop over xgrid */
 		insert = 1;
 		for (icnt = 0; icnt < ni; icnt++) {
-			i = istart + icnt * iadd;
+			const int i = istart + icnt * iadd;
 			xgrid = data->primary_xmin + i * data->primary_dx;
 			ygrid = mm * xgrid + bb;
-			j = (int)((ygrid - data->primary_ymin) / data->primary_dy);
-			k = i * data->primary_n_rows + j;
-			l = i * data->primary_n_rows + j + 1;
+			const int j = (int)((ygrid - data->primary_ymin) / data->primary_dy);
+			const int k = i * data->primary_n_rows + j;
+			const int l = i * data->primary_n_rows + j + 1;
 			if (i >= 0 && i < data->primary_n_columns - 1 && j >= 0 && j < data->primary_n_rows - 1 &&
 			    data->primary_data[k] != data->primary_nodatavalue && data->primary_data[l] != data->primary_nodatavalue) {
 				/* interpolate zdata */
@@ -2149,12 +2131,12 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 		/* loop over ygrid */
 		insert = 1;
 		for (jcnt = 0; jcnt < nj; jcnt++) {
-			j = jstart + jcnt * jadd;
+			const int j = jstart + jcnt * jadd;
 			ygrid = data->primary_ymin + j * data->primary_dy;
 			xgrid = mm * ygrid + bb;
-			i = (int)((xgrid - data->primary_xmin) / data->primary_dx);
-			k = i * data->primary_n_rows + j;
-			l = (i + 1) * data->primary_n_rows + j;
+			const int i = (int)((xgrid - data->primary_xmin) / data->primary_dx);
+			const int k = i * data->primary_n_rows + j;
+			const int l = (i + 1) * data->primary_n_rows + j;
 			if (i >= 0 && i < data->primary_n_columns - 1 && j >= 0 && j < data->primary_n_rows - 1 &&
 			    data->primary_data[k] != data->primary_nodatavalue && data->primary_data[l] != data->primary_nodatavalue) {
 				/* interpolate zdata */
@@ -2243,7 +2225,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 		fprintf(stderr, "dbg2       seg->nls:        %d\n", seg->nls);
 		fprintf(stderr, "dbg2       seg->nls_alloc:  %d\n", seg->nls_alloc);
 		fprintf(stderr, "dbg2       seg->lspoints:\n");
-		for (i = 0; i < seg->nls; i++) {
+		for (int i = 0; i < seg->nls; i++) {
 			fprintf(stderr, "dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n", i, seg->lspoints[i].xgrid,
 			        seg->lspoints[i].ygrid, seg->lspoints[i].zdata, seg->lspoints[i].xlon, seg->lspoints[i].ylat,
 			        seg->lspoints[i].xdisplay, seg->lspoints[i].ydisplay, seg->lspoints[i].zdisplay);
@@ -2255,8 +2237,6 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg) {
-	int i;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2305,7 +2285,7 @@ int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg
 		fprintf(stderr, "dbg2       seg->nls:        %d\n", seg->nls);
 		fprintf(stderr, "dbg2       seg->nls_alloc:  %d\n", seg->nls_alloc);
 		fprintf(stderr, "dbg2       seg->lspoints:\n");
-		for (i = 0; i < seg->nls; i++) {
+		for (int i = 0; i < seg->nls; i++) {
 			fprintf(stderr, "dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n", i, seg->lspoints[i].xgrid[instance],
 			        seg->lspoints[i].ygrid[instance], seg->lspoints[i].zdata, seg->lspoints[i].xlon, seg->lspoints[i].ylat,
 			        seg->lspoints[i].xdisplay[instance], seg->lspoints[i].ydisplay[instance],
@@ -2324,7 +2304,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	int nsegpoint;
 	double xlon1, ylat1, xlon2, ylat2;
 	double segbearing, dsegbearing, segdist, dsegdist;
-	int i, j, icnt;
+	int icnt;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2359,8 +2339,8 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 
 	/* get half characteristic distance between grid points
 	    from center of primary grid */
-	i = data->primary_n_columns / 2;
-	j = data->primary_n_rows / 2;
+	const int i = data->primary_n_columns / 2;
+	const int j = data->primary_n_rows / 2;
 	mbview_projectgrid2ll(instance, (double)(data->primary_xmin + i * data->primary_dx),
 	                      (double)(data->primary_ymin + j * data->primary_dy), &xlon1, &ylat1);
 	mbview_projectgrid2ll(instance, (double)(data->primary_xmin + (i + 1) * data->primary_dx),
@@ -2409,7 +2389,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 		seg->lspoints[seg->nls].ylat = seg->endpoints[0].ylat;
 		seg->nls++;
 
-		for (i = 1; i < nsegpoint - 1; i++) {
+		for (int i = 1; i < nsegpoint - 1; i++) {
 			mbview_greatcircle_endposition(instance, seg->lspoints[0].xlon, seg->lspoints[0].ylat, segbearing,
 			                               (double)(i * dsegdist), &(seg->lspoints[seg->nls].xlon),
 			                               &(seg->lspoints[seg->nls].ylat)),
@@ -2464,7 +2444,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 		fprintf(stderr, "dbg2       seg->nls:        %d\n", seg->nls);
 		fprintf(stderr, "dbg2       seg->nls_alloc:  %d\n", seg->nls_alloc);
 		fprintf(stderr, "dbg2       seg->lspoints:\n");
-		for (i = 0; i < seg->nls; i++) {
+		for (int i = 0; i < seg->nls; i++) {
 			fprintf(stderr, "dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n", i, seg->lspoints[i].xgrid[instance],
 			        seg->lspoints[i].ygrid[instance], seg->lspoints[i].zdata, seg->lspoints[i].xlon, seg->lspoints[i].ylat,
 			        seg->lspoints[i].xdisplay[instance], seg->lspoints[i].ydisplay[instance],
@@ -2486,7 +2466,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	double xgridstart, xgridend, ygridstart, ygridend;
 	int global;
 	double offset_factor;
-	int i, j, k, l, ii, icnt, jcnt;
+	int ii, icnt, jcnt;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2607,12 +2587,12 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 
 		/* loop over xgrid */
 		for (icnt = 0; icnt < ni; icnt++) {
-			i = istart + icnt * iadd;
+			const int i = istart + icnt * iadd;
 			xgrid = data->primary_xmin + i * data->primary_dx;
 			ygrid = mm * xgrid + bb;
-			j = (int)((ygrid - data->primary_ymin) / data->primary_dy);
-			k = i * data->primary_n_rows + j;
-			l = i * data->primary_n_rows + j + 1;
+			const int j = (int)((ygrid - data->primary_ymin) / data->primary_dy);
+			const int k = i * data->primary_n_rows + j;
+			const int l = i * data->primary_n_rows + j + 1;
 			if (i >= 0 && i < data->primary_n_columns - 1 && j >= 0 && j < data->primary_n_rows - 1 &&
 			    data->primary_data[k] != data->primary_nodatavalue && data->primary_data[l] != data->primary_nodatavalue) {
 				/* interpolate zdata */
@@ -2645,12 +2625,12 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 		/* loop over ygrid */
 		insert = 1;
 		for (jcnt = 0; jcnt < nj; jcnt++) {
-			j = jstart + jcnt * jadd;
+			const int j = jstart + jcnt * jadd;
 			ygrid = data->primary_ymin + j * data->primary_dy;
 			xgrid = mm * ygrid + bb;
-			i = (int)((xgrid - data->primary_xmin) / data->primary_dx);
-			k = i * data->primary_n_rows + j;
-			l = (i + 1) * data->primary_n_rows + j;
+			const int i = (int)((xgrid - data->primary_xmin) / data->primary_dx);
+			const int k = i * data->primary_n_rows + j;
+			const int l = (i + 1) * data->primary_n_rows + j;
 			if (i >= 0 && i < data->primary_n_columns - 1 && j >= 0 && j < data->primary_n_rows - 1 &&
 			    data->primary_data[k] != data->primary_nodatavalue && data->primary_data[l] != data->primary_nodatavalue) {
 				/* interpolate zdata */
@@ -2753,7 +2733,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 		fprintf(stderr, "dbg2       seg->nls:        %d\n", seg->nls);
 		fprintf(stderr, "dbg2       seg->nls_alloc:  %d\n", seg->nls_alloc);
 		fprintf(stderr, "dbg2       seg->lspoints:\n");
-		for (i = 0; i < seg->nls; i++) {
+		for (int i = 0; i < seg->nls; i++) {
 			fprintf(stderr, "dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n", i, seg->lspoints[i].xgrid[instance],
 			        seg->lspoints[i].ygrid[instance], seg->lspoints[i].zdata, seg->lspoints[i].xlon, seg->lspoints[i].ylat,
 			        seg->lspoints[i].xdisplay[instance], seg->lspoints[i].ydisplay[instance],
