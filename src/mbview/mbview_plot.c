@@ -64,6 +64,7 @@
 #include "mbview.h"
 #include "mbviewprivate.h"
 
+// TODO(schwehr): Can these be localized without the static?
 static Cardinal ac;
 static Arg args[256];
 
@@ -154,8 +155,6 @@ int mbview_reset_glx(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_drawdata(size_t instance, int rez) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	bool on;
 	int flip;
 	int nxrange, nyrange;
@@ -172,9 +171,8 @@ int mbview_drawdata(size_t instance, int rez) {
 		fprintf(stderr, "dbg2       rez:              %d\n", rez);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get size of grid in view */
 	nxrange = data->viewbounds[1] - data->viewbounds[0] + 1;
@@ -698,9 +696,6 @@ int mbview_plothighall(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_plotlow(size_t instance) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -708,9 +703,8 @@ int mbview_plotlow(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	int status = MB_SUCCESS;
 
@@ -752,9 +746,6 @@ int mbview_plotlow(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_plotlowhigh(size_t instance) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -762,9 +753,8 @@ int mbview_plotlowhigh(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	int status = MB_SUCCESS;
 
@@ -808,9 +798,6 @@ int mbview_plotlowhigh(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_plothigh(size_t instance) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -818,9 +805,8 @@ int mbview_plothigh(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	int status = MB_SUCCESS;
 
@@ -861,9 +847,6 @@ int mbview_plothigh(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_plotfull(size_t instance) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -871,9 +854,8 @@ int mbview_plotfull(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	int status = MB_SUCCESS;
 
@@ -915,8 +897,6 @@ int mbview_plotfull(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_plot(size_t instance, int rez) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	float viewdistance;
 
 	if (mbv_verbose >= 2) {
@@ -927,9 +907,8 @@ int mbview_plot(size_t instance, int rez) {
 		fprintf(stderr, "dbg2       rez:              %d\n", rez);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* only plot if this view is still active */
 	if (view->glx_init) {
@@ -1085,8 +1064,6 @@ int mbview_plot(size_t instance, int rez) {
 /*------------------------------------------------------------------------------*/
 int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double *xgrid, double *ygrid, double *xlon,
                      double *ylat, double *zdata, double *xdisplay, double *ydisplay, double *zdisplay) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int rez;
 	int ijbounds[4];
 	bool foundsave;
@@ -1103,9 +1080,8 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 		fprintf(stderr, "dbg2       ypixel:           %d\n", ypixel);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* only plot if this view is still active */
 	if (view->glx_init) {
@@ -1222,8 +1198,6 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ijbounds[4], int *found, double *xgrid,
                         double *ygrid, double *xlon, double *ylat, double *zdata, double *xdisplay, double *ydisplay,
                         double *zdisplay) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	float viewdistance;
 	int stride, ipickstride, jpickstride;
 	int i, j, k, l, m, n;
@@ -1246,9 +1220,8 @@ int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ij
 		fprintf(stderr, "dbg2       ijbounds[3]:     %d\n", ijbounds[3]);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* only plot if this view is still active */
 	if (view->glx_init) {
@@ -1477,8 +1450,6 @@ instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 
 /*------------------------------------------------------------------------------*/
 int mbview_viewbounds(size_t instance) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	float left2d, right2d, bottom2d, top2d;
 	float viewdistance;
 	int stride, ipickstride, jpickstride;
@@ -1498,9 +1469,8 @@ int mbview_viewbounds(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* only plot if this view is still active */
 	if (view->glx_init) {
@@ -1814,8 +1784,6 @@ data->viewbounds[0], data->viewbounds[1], data->viewbounds[2], data->viewbounds[
 }
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i;
 
 	if (mbv_verbose >= 2) {
@@ -1835,9 +1803,8 @@ int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg) 
 		fprintf(stderr, "dbg2            ylat[1]:     %f\n", seg->endpoints[1].ylat);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	int status = MB_SUCCESS;
 
@@ -1884,8 +1851,6 @@ int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg) 
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *seg) {
 	int error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	bool global;
 	double offset_factor;
 	int nsegpoint;
@@ -1910,9 +1875,8 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 		fprintf(stderr, "dbg2            ylat[1]:     %f\n", seg->endpoints[1].ylat);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	bool done = false;
 
@@ -2046,8 +2010,6 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *seg) {
 	int error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int istart, iend, iadd, jstart, jend, jadd;
 	int ni, nj;
 	double mm, bb;
@@ -2071,9 +2033,8 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 		fprintf(stderr, "dbg2            ygrid[1]:    %f\n", seg->endpoints[1].ygrid);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	bool done = false;
 
@@ -2294,8 +2255,6 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i;
 
 	if (mbv_verbose >= 2) {
@@ -2315,9 +2274,8 @@ int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg
 		fprintf(stderr, "dbg2            ylat[1]:     %f\n", seg->endpoints[1].ylat);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	int status = MB_SUCCESS;
 
@@ -2361,8 +2319,6 @@ int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *seg) {
 	int error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int global;
 	double offset_factor;
 	int nsegpoint;
@@ -2387,9 +2343,8 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 		fprintf(stderr, "dbg2            ylat[1]:     %f\n", seg->endpoints[1].ylat);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
@@ -2523,8 +2478,6 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct *seg) {
 	int error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int istart, iend, iadd, jstart, jend, jadd;
 	int ni, nj;
 	double mm, bb;
@@ -2548,9 +2501,8 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 		fprintf(stderr, "dbg2            ygrid[1]:    %f\n", seg->endpoints[1].ygrid[instance]);
 	}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
