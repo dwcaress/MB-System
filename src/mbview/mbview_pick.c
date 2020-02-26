@@ -72,8 +72,6 @@ static char value_list[MB_PATH_MAXLINE];
 /*------------------------------------------------------------------------------*/
 int mbview_clearpicks(size_t instance) {
 	int error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int inav, jpoint;
 
 	if (mbv_verbose >= 2) {
@@ -87,8 +85,8 @@ int mbview_clearpicks(size_t instance) {
 	bool replotinstance = false;
 	bool replotall = false;
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	if (data->pick_type != MBV_PICK_NONE) {
 		data->pick_type = MBV_PICK_NONE;
@@ -180,8 +178,6 @@ int mbview_clearnavpicks(size_t instance) {
 	int error = MB_ERROR_NO_ERROR;
 	int replotinstance;
 	int replotall;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int inav, jpoint;
 
 	if (mbv_verbose >= 2) {
@@ -195,8 +191,8 @@ int mbview_clearnavpicks(size_t instance) {
 	replotinstance = false;
 	replotall = false;
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	if (data->pick_type == MBV_PICK_NAV) {
 		data->pick_type = MBV_PICK_NONE;
@@ -259,8 +255,6 @@ int mbview_clearnavpicks(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int found;  // TODO(schwehr): bool found
 	double xgrid, ygrid;
 	double xlon, ylat, zdata;
@@ -277,8 +271,8 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
 		fprintf(stderr, "dbg2       ypixel:           %d\n", ypixel);
 	}
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* look for point */
 	mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
@@ -379,8 +373,6 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
 /*------------------------------------------------------------------------------*/
 int mbview_extract_pick_profile(size_t instance) {
 	int error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double dx, dy;
 	int npoints;
 	int i;
@@ -392,8 +384,8 @@ int mbview_extract_pick_profile(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	int status = MB_SUCCESS;
 
@@ -482,8 +474,6 @@ int mbview_extract_pick_profile(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_picksize(size_t instance) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double scalefactor;
 	double xlength;
 	int found;  // TODO(schwehr): bool found
@@ -496,8 +486,8 @@ int mbview_picksize(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* resize and redrape pick marks if required */
 	if (data->pickinfo_mode == MBV_PICK_ONEPOINT || data->pickinfo_mode == MBV_PICK_TWOPOINT) {
@@ -589,8 +579,6 @@ int mbview_picksize(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_pick_text(size_t instance) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int time_i[7];
 	char londstr0[24], londstr1[24], lonmstr0[24], lonmstr1[24];
 	char latdstr0[24], latdstr1[24], latmstr0[24], latmstr1[24];
@@ -606,8 +594,8 @@ int mbview_pick_text(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 	// fprintf(stderr,"mbview_pick_text: instance:%zu pickinfo_mode:%d\n",instance,data->pickinfo_mode);
 
 	/* update pick info */
@@ -986,8 +974,6 @@ int mbview_setlonlatstrings(double lon, double lat, char *londstring, char *latd
 
 /*------------------------------------------------------------------------------*/
 int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int found;  // TODO(schwehr): bool found
 	double xgrid, ygrid;
 	double xlon, ylat, zdata;
@@ -1008,8 +994,8 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		fprintf(stderr, "dbg2       ypixel:           %d\n", ypixel);
 	}
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	bool match0;
 	bool match1;
@@ -1456,8 +1442,6 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int found;
 	double xgrid, ygrid;
 	double xlon, ylat, zdata;
@@ -1477,8 +1461,8 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		fprintf(stderr, "dbg2       ypixel:           %d\n", ypixel);
 	}
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	bool match;
         bool match0;
@@ -1868,8 +1852,6 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 /*------------------------------------------------------------------------------*/
 int mbview_drawpick(size_t instance) {
 	int i;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double xlength;
 
 	if (mbv_verbose >= 2) {
@@ -1879,8 +1861,8 @@ int mbview_drawpick(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* draw current pick */
 	if (data->pick_type != MBV_PICK_NONE) {
@@ -2006,8 +1988,6 @@ int mbview_drawpick(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_drawregion(size_t instance) {
 	int i, j;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2016,8 +1996,8 @@ int mbview_drawregion(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* draw current area */
 	if (data->region_type == MBV_REGION_QUAD) {
@@ -2067,8 +2047,6 @@ int mbview_drawregion(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_drawarea(size_t instance) {
 	int i, j;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2077,8 +2055,8 @@ int mbview_drawarea(size_t instance) {
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
 	}
 
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* draw current area */
 	if (data->area_type == MBV_AREA_QUAD) {
