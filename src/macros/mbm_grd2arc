@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd2arc.perl	6/11/99
-#    $Id$
 #
 #    Copyright (c) 1999-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -35,8 +34,6 @@
 #   Moss Landing, CA 95039
 #   October 5, 1999
 #
-# Version:
-#   $Id$
 #
 #
 #
@@ -57,7 +54,6 @@ $verbose =  ($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id$\n";
 	print "\nMacro to convert a GMT grid file in the GMT NetCDF grid format \n";
 	print "to an ArcView ASCII grid. This allows users to import the grid\n";
 	print "into Arc/Info and ArcView. The grids must have the same grid \n";

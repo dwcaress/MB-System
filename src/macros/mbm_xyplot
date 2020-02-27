@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id$
 #
 #    Copyright (c) 1993-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -54,8 +53,6 @@
 #   Palisades, NY  10964
 #   August 9, 1995
 #
-# Version:
-#   $Id$
 #
 #
 $program_name = "mbm_xyplot";
@@ -174,7 +171,6 @@ $delete_temp_files = 	($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id$\n";
 	print "\nMacro to generate a shellscript of GMT commands which,  \n";
 	print "when executed, will generate a Postscript plot of xy data. \n";
 	print "Axes may be linear, log,  or any of several geographic  \n";
