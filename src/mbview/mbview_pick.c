@@ -472,8 +472,9 @@ int mbview_picksize(size_t instance) {
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
-	double xlength;
 	int found;  // TODO(schwehr): bool found
+
+	double xlength = 0.0;
 
 	/* resize and redrape pick marks if required */
 	if (data->pickinfo_mode == MBV_PICK_ONEPOINT || data->pickinfo_mode == MBV_PICK_TWOPOINT) {
@@ -905,9 +906,6 @@ int mbview_pick_text(size_t instance) {
 
 /*------------------------------------------------------------------------------*/
 int mbview_setlonlatstrings(double lon, double lat, char *londstring, char *latdstring, char *lonmstring, char *latmstring) {
-	int degree;
-	double minute;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -916,7 +914,6 @@ int mbview_setlonlatstrings(double lon, double lat, char *londstring, char *latd
 		fprintf(stderr, "dbg2       lat:              %f\n", lat);
 	}
 
-	/* set the strings */
 	if (lon > 180.0) {
 		lon -= 360.0;
 	}
@@ -928,15 +925,17 @@ int mbview_setlonlatstrings(double lon, double lat, char *londstring, char *latd
 	sprintf(londstring, "%.7f", lon);
 	sprintf(latdstring, "%.7f", lat);
 
+	// TODO(schwehr): Make a char char for W/E and S/N.
 	/* degress + minutes (style == MBV_LONLAT_DEGREESMINUTES) */
-	degree = (int)fabs(lon);
-	minute = 60.0 * (fabs(lon) - (double)degree);
+	const int lon_degree = (int)fabs(lon);
+	const double lon_minute = 60.0 * (fabs(lon) - lon_degree);
 	if (lon < 0.0)
-		sprintf(lonmstring, "%3d %10.6f W", degree, minute);
+		sprintf(lonmstring, "%3d %10.6f W", lon_degree, lon_minute);
 	else
-		sprintf(lonmstring, "%3d %10.6f E", degree, minute);
-	degree = (int)fabs(lat);
-	minute = 60.0 * (fabs(lat) - (double)degree);
+		sprintf(lonmstring, "%3d %10.6f E", lon_degree, lon_minute);
+
+	const int degree = (int)fabs(lat);
+	const double minute = 60.0 * (fabs(lat) - degree);
 	if (lat < 0.0)
 		sprintf(latmstring, "%3d %10.6f S", degree, minute);
 	else
@@ -1844,7 +1843,7 @@ int mbview_drawpick(size_t instance) {
 	/* draw current pick */
 	if (data->pick_type != MBV_PICK_NONE) {
 		/* set size of X mark for 2D case */
-	double xlength;
+		double xlength = 0.0;
 		if (data->display_mode == MBV_DISPLAY_2D)
 			xlength = 0.05 / view->size2d;
 
