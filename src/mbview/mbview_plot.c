@@ -1447,18 +1447,6 @@ int mbview_viewbounds(size_t instance) {
 
 	/* only plot if this view is still active */
 	if (view->glx_init) {
-		// TODO(schwehr): Localize
-		float left2d, right2d, bottom2d, top2d;
-		float viewdistance;
-		int stride, ipickstride, jpickstride;
-		int iscreenstride, jscreenstride;
-		int xpixel, ypixel;
-		int found;
-		float rgba[4];
-		int npickx, npicky;
-		float rgb[3];
-		int ijbounds[4];
-
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
 		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
@@ -1475,6 +1463,17 @@ int mbview_viewbounds(size_t instance) {
 			do_mbview_status("Projecting data...", instance);
 			mbview_projectdata(instance);
 		}
+
+		float left2d, right2d, bottom2d, top2d;
+		float viewdistance;
+		int ipickstride, jpickstride;
+		int iscreenstride, jscreenstride;
+		int xpixel, ypixel;
+		int found;
+		float rgba[4];
+		int npickx, npicky;
+		float rgb[3];
+		int ijbounds[4];
 
 		/* 2D case doesn't require plotting */
 		if (data->display_mode == MBV_DISPLAY_2D) {
@@ -1497,7 +1496,7 @@ int mbview_viewbounds(size_t instance) {
 			data->primary_x[k],data->primary_y[k]);*/
 
 			/* set stride for looping over data using rule for low rez plotting */
-			stride = MAX((int)ceil(((double)data->primary_n_columns) / ((double)data->lorez_dimension)),
+			const int stride = MAX((int)ceil(((double)data->primary_n_columns) / ((double)data->lorez_dimension)),
 			             (int)ceil(((double)data->primary_n_rows) / ((double)data->lorez_dimension)));
 
 			/* get 2D view bounds */
@@ -1600,7 +1599,7 @@ int mbview_viewbounds(size_t instance) {
 				glEnable(GL_DEPTH_TEST);
 
 			/* set stride for looping over data using rule for low rez plotting */
-			stride = MAX((int)ceil(((double)data->primary_n_columns) / ((double)data->lorez_dimension)),
+			const int stride = MAX((int)ceil(((double)data->primary_n_columns) / ((double)data->lorez_dimension)),
 			             (int)ceil(((double)data->primary_n_rows) / ((double)data->lorez_dimension)));
 
 			/* get number of grid cells used in picking */
@@ -1875,12 +1874,14 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 
 	/* get half characteristic distance between grid points
 	    from center of primary grid */
-	const int i = data->primary_n_columns / 2;
-	const int j = data->primary_n_rows / 2;
-	mbview_projectgrid2ll(instance, (double)(data->primary_xmin + i * data->primary_dx),
+	{
+		const int i = data->primary_n_columns / 2;
+		const int j = data->primary_n_rows / 2;
+		mbview_projectgrid2ll(instance, (double)(data->primary_xmin + i * data->primary_dx),
 	                      (double)(data->primary_ymin + j * data->primary_dy), &xlon1, &ylat1);
-	mbview_projectgrid2ll(instance, (double)(data->primary_xmin + (i + 1) * data->primary_dx),
+		mbview_projectgrid2ll(instance, (double)(data->primary_xmin + (i + 1) * data->primary_dx),
 	                      (double)(data->primary_ymin + (j + 1) * data->primary_dy), &xlon2, &ylat2);
+	}
 	mbview_greatcircle_distbearing(instance, xlon1, ylat1, xlon2, ylat2, &dsegbearing, &dsegdist);
 
 	/* get number of preliminary points along the segment */
@@ -2339,12 +2340,14 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 
 	/* get half characteristic distance between grid points
 	    from center of primary grid */
+	{
 	const int i = data->primary_n_columns / 2;
 	const int j = data->primary_n_rows / 2;
 	mbview_projectgrid2ll(instance, (double)(data->primary_xmin + i * data->primary_dx),
 	                      (double)(data->primary_ymin + j * data->primary_dy), &xlon1, &ylat1);
 	mbview_projectgrid2ll(instance, (double)(data->primary_xmin + (i + 1) * data->primary_dx),
 	                      (double)(data->primary_ymin + (j + 1) * data->primary_dy), &xlon2, &ylat2);
+        }
 	mbview_greatcircle_distbearing(instance, xlon1, ylat1, xlon2, ylat2, &dsegbearing, &dsegdist);
 
 	/* get number of preliminary points along the segment */
@@ -2457,17 +2460,6 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct *seg) {
-	int error = MB_ERROR_NO_ERROR;
-	int istart, iend, iadd, jstart, jend, jadd;
-	int ni, nj;
-	double mm, bb;
-	int found, insert;
-	double xgrid, ygrid, zdata;
-	double xgridstart, xgridend, ygridstart, ygridend;
-	int global;
-	double offset_factor;
-	int ii, icnt, jcnt;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2485,6 +2477,8 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	struct mbview_struct *data = &(view->data);
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
+	int global;
+	double offset_factor;
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
 	    view->sphere_refz == 0.0) {
 		global = true;
@@ -2496,14 +2490,14 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	}
 
 	/* figure out how many points to calculate along the segment */
-	xgridstart = seg->endpoints[0].xgrid[instance];
-	xgridend = seg->endpoints[1].xgrid[instance];
-	ygridstart = seg->endpoints[0].ygrid[instance];
-	ygridend = seg->endpoints[1].ygrid[instance];
-	istart = (int)((xgridstart - data->primary_xmin) / data->primary_dx);
-	iend = (int)((xgridend - data->primary_xmin) / data->primary_dx);
-	jstart = (int)((ygridstart - data->primary_ymin) / data->primary_dy);
-	jend = (int)((ygridend - data->primary_ymin) / data->primary_dy);
+	const double xgridstart = seg->endpoints[0].xgrid[instance];
+	const double xgridend = seg->endpoints[1].xgrid[instance];
+	const double ygridstart = seg->endpoints[0].ygrid[instance];
+	const double ygridend = seg->endpoints[1].ygrid[instance];
+	int istart = (int)((xgridstart - data->primary_xmin) / data->primary_dx);
+	int iend = (int)((xgridend - data->primary_xmin) / data->primary_dx);
+	int jstart = (int)((ygridstart - data->primary_ymin) / data->primary_dy);
+	int jend = (int)((ygridend - data->primary_ymin) / data->primary_dy);
 	if (istart < 0)
 		istart = 0;
 	if (istart >= data->primary_n_columns)
@@ -2524,6 +2518,15 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	xgridstart,xgridend,ygridstart,ygridend);
 	fprintf(stderr,"mbview_drapesegmentw_grid: istart:%d iend:%d jstart:%d jend:%d\n",istart,iend,jstart,jend);*/
 
+	int error = MB_ERROR_NO_ERROR;
+	int iadd;
+	int jadd;
+	int ni, nj;
+	double mm, bb;
+	int found, insert;
+	double xgrid, ygrid;
+	int icnt;
+	int jcnt;
 	int status = MB_SUCCESS;
 
 	/* no need to fill in if the segment doesn't cross grid boundaries */
@@ -2596,7 +2599,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 			if (i >= 0 && i < data->primary_n_columns - 1 && j >= 0 && j < data->primary_n_rows - 1 &&
 			    data->primary_data[k] != data->primary_nodatavalue && data->primary_data[l] != data->primary_nodatavalue) {
 				/* interpolate zdata */
-				zdata = data->primary_data[k] + (ygrid - data->primary_ymin - j * data->primary_dy) / data->primary_dy *
+				const double zdata = data->primary_data[k] + (ygrid - data->primary_ymin - j * data->primary_dy) / data->primary_dy *
 				                                    (data->primary_data[l] - data->primary_data[k]);
 
 				/* add point to list */
@@ -2634,7 +2637,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 			if (i >= 0 && i < data->primary_n_columns - 1 && j >= 0 && j < data->primary_n_rows - 1 &&
 			    data->primary_data[k] != data->primary_nodatavalue && data->primary_data[l] != data->primary_nodatavalue) {
 				/* interpolate zdata */
-				zdata = data->primary_data[k] + (xgrid - data->primary_xmin - i * data->primary_dx) / data->primary_dx *
+				const double zdata = data->primary_data[k] + (xgrid - data->primary_xmin - i * data->primary_dx) / data->primary_dx *
 				                                    (data->primary_data[l] - data->primary_data[k]);
 
 				/* insert point into list */
@@ -2687,7 +2690,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 				else if (insert > seg->nls)
 					insert = seg->nls;
 				if (found) {
-					for (ii = seg->nls; ii > insert; ii--) {
+					for (int ii = seg->nls; ii > insert; ii--) {
 						seg->lspoints[ii].xgrid[instance] = seg->lspoints[ii - 1].xgrid[instance];
 						seg->lspoints[ii].ygrid[instance] = seg->lspoints[ii - 1].ygrid[instance];
 						seg->lspoints[ii].zdata = seg->lspoints[ii - 1].zdata;
