@@ -1079,9 +1079,13 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 		*found = false;
 		bool foundsave = false;
 		int ijbounds[4] = {0, data->primary_n_columns, 0, data->primary_n_rows};
-		int rez = MBV_REZ_LOW;
-		mbview_findpointrez(instance, rez, xpixel, ypixel, ijbounds, found, xgrid, ygrid, xlon, ylat, zdata, xdisplay, ydisplay,
-		                    zdisplay);
+		{
+			const int rez = MBV_REZ_LOW;
+			mbview_findpointrez(
+				instance, rez, xpixel, ypixel, ijbounds, found,
+				xgrid, ygrid, xlon, ylat, zdata,
+				xdisplay, ydisplay, zdisplay);
+		}
 		/*fprintf(stderr,"First findpointrez: rez:%d pixels:%d %d found:%d xlon:%f ylat:%f zdata:%f\n",
 		rez,xpixel,ypixel,found,xlon,ylat,zdata);*/
 		double xgridsave, ygridsave;
@@ -1102,11 +1106,15 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 		}
 
 		/* now check high rez */
-		rez = MBV_REZ_HIGH;
-		mbview_findpointrez(instance, rez, xpixel, ypixel, ijbounds, found, xgrid, ygrid, xlon, ylat, zdata, xdisplay, ydisplay,
-		                    zdisplay);
+		{
+			const int rez = MBV_REZ_HIGH;
+			mbview_findpointrez(
+				instance, rez, xpixel, ypixel, ijbounds, found,
+				xgrid, ygrid, xlon, ylat, zdata,
+				xdisplay, ydisplay, zdisplay);
+		}
 		if (!(*found) && foundsave) {
-			rez = MBV_REZ_LOW;
+			// rez = MBV_REZ_LOW;
 			*found = foundsave;
 			*xgrid = xgridsave;
 			*ygrid = ygridsave;
@@ -1131,10 +1139,9 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 			zdisplaysave = *zdisplay;
 
 			/* choose resolution */
-			if ((ijbounds[1] - ijbounds[0]) > data->hirez_dimension || (ijbounds[3] - ijbounds[2]) > data->hirez_dimension)
-				rez = MBV_REZ_HIGH;
-			else
-				rez = MBV_REZ_FULL;
+			const int rez =
+				(ijbounds[1] - ijbounds[0]) > data->hirez_dimension || (ijbounds[3] - ijbounds[2]) > data->hirez_dimension
+				? MBV_REZ_HIGH : MBV_REZ_FULL;
 
 			/* try again */
 			mbview_findpointrez(instance, rez, xpixel, ypixel, ijbounds, found, xgrid, ygrid, xlon, ylat, zdata, xdisplay,
@@ -1464,15 +1471,10 @@ int mbview_viewbounds(size_t instance) {
 			mbview_projectdata(instance);
 		}
 
-		float left2d, right2d, bottom2d, top2d;
-		float viewdistance;
-		int ipickstride, jpickstride;
-		int iscreenstride, jscreenstride;
-		int xpixel, ypixel;
+		// float left2d, right2d;
+		// float bottom2d, top2d;
 		int found;
 		float rgba[4];
-		int npickx, npicky;
-		float rgb[3];
 		int ijbounds[4];
 
 		/* 2D case doesn't require plotting */
@@ -1500,10 +1502,10 @@ int mbview_viewbounds(size_t instance) {
 			             (int)ceil(((double)data->primary_n_rows) / ((double)data->lorez_dimension)));
 
 			/* get 2D view bounds */
-			left2d = view->left - view->offset2d_x;
-			right2d = view->right - view->offset2d_x;
-			bottom2d = view->bottom - view->offset2d_y;
-			top2d = view->top - view->offset2d_y;
+			const float left2d = view->left - view->offset2d_x;
+			const float right2d = view->right - view->offset2d_x;
+			const float bottom2d = view->bottom - view->offset2d_y;
+			const float top2d = view->top - view->offset2d_y;
 			found = false;
 			data->viewbounds[0] = 0;
 			data->viewbounds[1] = data->primary_n_columns - 1;
@@ -1579,7 +1581,7 @@ int mbview_viewbounds(size_t instance) {
 				glTranslated(view->offset2d_x, view->offset2d_y, MBV_OPENGL_ZMIN2D);
 			}
 			else if (data->display_mode == MBV_DISPLAY_3D) {
-				viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH / view->aspect_ratio;
+				const float viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH / view->aspect_ratio;
 				glTranslated(0.0, 0.0, -viewdistance + view->viewoffset3d_z);
 				glRotated((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0);
 				glRotated((float)(data->viewazimuth3d), 0.0, 1.0, 1.0);
@@ -1603,10 +1605,10 @@ int mbview_viewbounds(size_t instance) {
 			             (int)ceil(((double)data->primary_n_rows) / ((double)data->lorez_dimension)));
 
 			/* get number of grid cells used in picking */
-			npickx = (data->primary_n_columns / stride);
-			ipickstride = stride * (int)floor((npickx / MBV_PICK_DIVISION) + 1);
-			npicky = (data->primary_n_rows / stride);
-			jpickstride = stride * (int)floor((npicky / MBV_PICK_DIVISION) + 1);
+			const int npickx = (data->primary_n_columns / stride);
+			const int ipickstride = stride * (int)floor((npickx / MBV_PICK_DIVISION) + 1);
+			const int npicky = (data->primary_n_rows / stride);
+			const int jpickstride = stride * (int)floor((npicky / MBV_PICK_DIVISION) + 1);
 
 			/*fprintf(stderr,"mbview_viewbounds: stride:%d npickx:%d npicky:%d ipickstride:%d jpickstride:%d\n",
 			stride, npickx, npicky, ipickstride, jpickstride);*/
@@ -1620,6 +1622,7 @@ int mbview_viewbounds(size_t instance) {
 					const int m = i * data->primary_n_rows + j + stride;
 					const int n = (i + stride) * data->primary_n_rows + j + stride;
 
+					float rgb[3];
 					rgb[0] = (float)floor(((double)(i / ipickstride))) / (MBV_PICK_DIVISION + 1.0);
 					rgb[1] = (float)floor(((double)(j / jpickstride))) / (MBV_PICK_DIVISION + 1.0);
 					if (data->primary_data[k] != data->primary_nodatavalue &&
@@ -1665,10 +1668,10 @@ int mbview_viewbounds(size_t instance) {
 			data->viewbounds[1] = data->primary_n_columns - 1;
 			data->viewbounds[2] = 0;
 			data->viewbounds[3] = data->primary_n_rows - 1;
-			iscreenstride = data->width / 20;
-			jscreenstride = data->height / 20;
-			for (xpixel = 0; xpixel < data->width; xpixel += iscreenstride) {
-				for (ypixel = 0; ypixel < data->height; ypixel += jscreenstride) {
+			const int iscreenstride = data->width / 20;
+			const int jscreenstride = data->height / 20;
+			for (int xpixel = 0; xpixel < data->width; xpixel += iscreenstride) {
+				for (int ypixel = 0; ypixel < data->height; ypixel += jscreenstride) {
 					glReadPixels(xpixel, ypixel, 1, 1, GL_RGBA, GL_FLOAT, rgba);
 					/*fprintf(stderr,"xpixel:%d ypixel:%d rgba: %f %f %f %f\n",
 					xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3]);*/
@@ -1696,8 +1699,8 @@ int mbview_viewbounds(size_t instance) {
 					}
 				}
 			}
-			for (xpixel = 0; xpixel < data->width; xpixel += data->width - 1) {
-				for (ypixel = 0; ypixel < data->height; ypixel += data->height - 1) {
+			for (int xpixel = 0; xpixel < data->width; xpixel += data->width - 1) {
+				for (int ypixel = 0; ypixel < data->height; ypixel += data->height - 1) {
 					glReadPixels(xpixel, ypixel, 1, 1, GL_RGBA, GL_FLOAT, rgba);
 					/*fprintf(stderr,"xpixel:%d ypixel:%d rgba: %f %f %f %f\n",
 					    xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3]);*/
@@ -1831,14 +1834,6 @@ int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg) 
 
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *seg) {
-	int error = MB_ERROR_NO_ERROR;
-	bool global;
-	double offset_factor;
-	int nsegpoint;
-	double xlon1, ylat1, xlon2, ylat2;
-	double segbearing, dsegbearing, segdist, dsegdist;
-	int icnt;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1862,15 +1857,18 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 	bool done = false;
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
-	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
-	    view->sphere_refz == 0.0) {
-		global = true;
-		offset_factor = 10.0 * MBV_OPENGL_3D_CONTOUR_OFFSET / (view->scale * MBV_SPHEROID_RADIUS);
-	}
-	else {
-		global = false;
-		offset_factor = 10.0 * MBV_OPENGL_3D_CONTOUR_OFFSET;
-	}
+	const bool global =
+		data->display_projection_mode == MBV_PROJECTION_SPHEROID &&
+		view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
+		view->sphere_refz == 0.0;
+	const double offset_factor =
+		10.0 *
+		(global
+		 ? MBV_OPENGL_3D_CONTOUR_OFFSET / (view->scale * MBV_SPHEROID_RADIUS)
+		 : MBV_OPENGL_3D_CONTOUR_OFFSET);
+
+	double xlon1, ylat1;
+	double xlon2, ylat2;
 
 	/* get half characteristic distance between grid points
 	    from center of primary grid */
@@ -1882,12 +1880,16 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 		mbview_projectgrid2ll(instance, (double)(data->primary_xmin + (i + 1) * data->primary_dx),
 	                      (double)(data->primary_ymin + (j + 1) * data->primary_dy), &xlon2, &ylat2);
 	}
+	double dsegbearing;
+	double dsegdist;
 	mbview_greatcircle_distbearing(instance, xlon1, ylat1, xlon2, ylat2, &dsegbearing, &dsegdist);
 
 	/* get number of preliminary points along the segment */
+	double segbearing;
+	double segdist;
 	mbview_greatcircle_distbearing(instance, seg->endpoints[0].xlon, seg->endpoints[0].ylat, seg->endpoints[1].xlon,
 	                               seg->endpoints[1].ylat, &segbearing, &segdist);
-	nsegpoint = MAX(((int)((segdist / dsegdist) + 1)), 2);
+	const int nsegpoint = MAX(((int)((segdist / dsegdist) + 1)), 2);
 
 	int status = MB_SUCCESS;
 
@@ -1896,15 +1898,14 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 		done = true;
 		seg->nls = 0;
 		seg->nls_alloc = 0;
-	}
-
-	/* get the points along the great circle arc */
-	else {
+	} else {
+		/* get the points along the great circle arc */
 		/* get effective distance between points along great circle */
 		dsegdist = segdist / (nsegpoint - 1);
 
 		/* allocate segment points */
 		seg->nls_alloc = nsegpoint;
+		int error = MB_ERROR_NO_ERROR;
 		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, seg->nls_alloc * sizeof(struct mbview_point_struct),
 		                     (void **)&(seg->lspoints), &error);
 		if (status == MB_FAILURE) {
@@ -1946,7 +1947,7 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 		seg->nls++;
 
 		/* now calculate rest of point values */
-		for (icnt = 0; icnt < seg->nls; icnt++) {
+		for (int icnt = 0; icnt < seg->nls; icnt++) {
 			mbview_projectll2display(instance, seg->lspoints[icnt].xlon, seg->lspoints[icnt].ylat, seg->lspoints[icnt].zdata,
 			                         &(seg->lspoints[icnt].xdisplay), &(seg->lspoints[icnt].ydisplay),
 			                         &(seg->lspoints[icnt].zdisplay));
@@ -1992,17 +1993,6 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *seg) {
-	int error = MB_ERROR_NO_ERROR;
-	int istart, iend, iadd, jstart, jend, jadd;
-	int ni, nj;
-	double mm, bb;
-	bool found;
-	int insert;
-	double xgrid, ygrid, zdata;
-	int global;
-	double offset_factor;
-	int ii, icnt, jcnt;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2019,52 +2009,50 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
-	bool done = false;
-
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
-	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
-	    view->sphere_refz == 0.0) {
-		global = true;
-		offset_factor = 10.0 * MBV_OPENGL_3D_CONTOUR_OFFSET / (view->scale * MBV_SPHEROID_RADIUS);
-	}
-	else {
-		global = false;
-		offset_factor = 10.0 * MBV_OPENGL_3D_CONTOUR_OFFSET;
-	}
+	const bool global =
+		data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 &&
+		view->sphere_refy == 0.0 && view->sphere_refz == 0.0;
+	const double offset_factor =
+		10.0 *
+		(global
+		 ? MBV_OPENGL_3D_CONTOUR_OFFSET / (view->scale * MBV_SPHEROID_RADIUS)
+		 : MBV_OPENGL_3D_CONTOUR_OFFSET);
 
 	/* figure out how many points to calculate along the segment */
-	istart = (int)((seg->endpoints[0].xgrid - data->primary_xmin) / data->primary_dx);
-	iend = (int)((seg->endpoints[1].xgrid - data->primary_xmin) / data->primary_dx);
-	jstart = (int)((seg->endpoints[0].ygrid - data->primary_ymin) / data->primary_dy);
-	jend = (int)((seg->endpoints[1].ygrid - data->primary_ymin) / data->primary_dy);
+	int istart = (int)((seg->endpoints[0].xgrid - data->primary_xmin) / data->primary_dx);
+	int iend = (int)((seg->endpoints[1].xgrid - data->primary_xmin) / data->primary_dx);
+	int jstart = (int)((seg->endpoints[0].ygrid - data->primary_ymin) / data->primary_dy);
+	int jend = (int)((seg->endpoints[1].ygrid - data->primary_ymin) / data->primary_dy);
 
 	int status = MB_SUCCESS;
+	int error = MB_ERROR_NO_ERROR;
+	int ni, nj;
+	bool done = false;
+	int iadd, jadd;
 
 	/* no need to fill in if the segment doesn't cross grid boundaries */
 	if (istart == iend && jstart == jend) {
 		done = true;
 		seg->nls = 0;
 	} else {
-		// else allocate space for the array of points
-
-		/* allocate space for the array of points */
+		// allocate space for the array of points
 		if (iend > istart) {
 			ni = iend - istart;
 			iadd = 1;
 			istart++;
-			iend++;
-		}
-		else {
+			// iend++;
+		} else {
 			ni = istart - iend;
 			iadd = -1;
 		}
+
 		if (jend > jstart) {
 			nj = jend - jstart;
 			jadd = 1;
 			jstart++;
-			jend++;
-		}
-		else {
+			// jend++;
+		} else {
 			nj = jstart - jend;
 			jadd = -1;
 		}
@@ -2089,14 +2077,18 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 		seg->nls++;
 
 		/* get line equation */
+		double mm;
+		double bb;
 		if (ni > 0 && seg->endpoints[1].xgrid != seg->endpoints[0].xgrid) {
 			mm = (seg->endpoints[1].ygrid - seg->endpoints[0].ygrid) / (seg->endpoints[1].xgrid - seg->endpoints[0].xgrid);
 			bb = seg->endpoints[0].ygrid - mm * seg->endpoints[0].xgrid;
 		}
 
+		double xgrid, ygrid, zdata;
+
 		/* loop over xgrid */
-		insert = 1;
-		for (icnt = 0; icnt < ni; icnt++) {
+		int insert = 1;
+		for (int icnt = 0; icnt < ni; icnt++) {
 			const int i = istart + icnt * iadd;
 			xgrid = data->primary_xmin + i * data->primary_dx;
 			ygrid = mm * xgrid + bb;
@@ -2131,7 +2123,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 
 		/* loop over ygrid */
 		insert = 1;
-		for (jcnt = 0; jcnt < nj; jcnt++) {
+		for (int jcnt = 0; jcnt < nj; jcnt++) {
 			const int j = jstart + jcnt * jadd;
 			ygrid = data->primary_ymin + j * data->primary_dy;
 			xgrid = mm * ygrid + bb;
@@ -2145,7 +2137,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 				                                    (data->primary_data[l] - data->primary_data[k]);
 
 				/* insert point into list */
-				found = false;
+				double found = false;
 				done = false;
 				if (jadd > 0)
 					while (!done) {
@@ -2186,7 +2178,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 						}
 					}
 				if (found) {
-					for (ii = seg->nls; ii > insert; ii--) {
+					for (int ii = seg->nls; ii > insert; ii--) {
 						seg->lspoints[ii].xgrid = seg->lspoints[ii - 1].xgrid;
 						seg->lspoints[ii].ygrid = seg->lspoints[ii - 1].ygrid;
 						seg->lspoints[ii].zdata = seg->lspoints[ii - 1].zdata;
@@ -2199,8 +2191,8 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 			}
 		}
 
-		/* now calculate rest of point values */
-		for (icnt = 0; icnt < seg->nls; icnt++) {
+		// calculate rest of point values
+		for (int icnt = 0; icnt < seg->nls; icnt++) {
 			mbview_projectforward(instance, true, seg->lspoints[icnt].xgrid, seg->lspoints[icnt].ygrid,
 			                      seg->lspoints[icnt].zdata, &(seg->lspoints[icnt].xlon), &(seg->lspoints[icnt].ylat),
 			                      &(seg->lspoints[icnt].xdisplay), &(seg->lspoints[icnt].ydisplay),
@@ -2299,14 +2291,6 @@ int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg
 
 /*------------------------------------------------------------------------------*/
 int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *seg) {
-	int error = MB_ERROR_NO_ERROR;
-	int global;
-	double offset_factor;
-	int nsegpoint;
-	double xlon1, ylat1, xlon2, ylat2;
-	double segbearing, dsegbearing, segdist, dsegdist;
-	int icnt;
-
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2328,32 +2312,35 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	struct mbview_struct *data = &(view->data);
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
-	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
-	    view->sphere_refz == 0.0) {
-		global = true;
-		offset_factor = 10.0 * MBV_OPENGL_3D_CONTOUR_OFFSET / (view->scale * MBV_SPHEROID_RADIUS);
-	}
-	else {
-		global = false;
-		offset_factor = 10.0 * MBV_OPENGL_3D_CONTOUR_OFFSET;
-	}
+	const bool global =
+		data->display_projection_mode == MBV_PROJECTION_SPHEROID &&
+		view->sphere_refx == 0.0 && view->sphere_refy == 0.0 && view->sphere_refz == 0.0;
+	const double offset_factor =
+		10.0 *
+		(global
+		 ? MBV_OPENGL_3D_CONTOUR_OFFSET / (view->scale * MBV_SPHEROID_RADIUS)
+		 : MBV_OPENGL_3D_CONTOUR_OFFSET);
 
 	/* get half characteristic distance between grid points
 	    from center of primary grid */
+	double xlon1, ylat1, xlon2, ylat2;
 	{
-	const int i = data->primary_n_columns / 2;
-	const int j = data->primary_n_rows / 2;
-	mbview_projectgrid2ll(instance, (double)(data->primary_xmin + i * data->primary_dx),
+		const int i = data->primary_n_columns / 2;
+		const int j = data->primary_n_rows / 2;
+		mbview_projectgrid2ll(instance, (double)(data->primary_xmin + i * data->primary_dx),
 	                      (double)(data->primary_ymin + j * data->primary_dy), &xlon1, &ylat1);
-	mbview_projectgrid2ll(instance, (double)(data->primary_xmin + (i + 1) * data->primary_dx),
+		mbview_projectgrid2ll(instance, (double)(data->primary_xmin + (i + 1) * data->primary_dx),
 	                      (double)(data->primary_ymin + (j + 1) * data->primary_dy), &xlon2, &ylat2);
         }
+	double dsegbearing;
+	double dsegdist;
 	mbview_greatcircle_distbearing(instance, xlon1, ylat1, xlon2, ylat2, &dsegbearing, &dsegdist);
 
 	/* get number of preliminary points along the segment */
+	double segbearing, segdist;
 	mbview_greatcircle_distbearing(instance, seg->endpoints[0].xlon, seg->endpoints[0].ylat, seg->endpoints[1].xlon,
 	                               seg->endpoints[1].ylat, &segbearing, &segdist);
-	nsegpoint = MAX(((int)((segdist / dsegdist) + 1)), 2);
+	const int nsegpoint = MAX(((int)((segdist / dsegdist) + 1)), 2);
 
 	int status = MB_SUCCESS;
 
@@ -2363,15 +2350,15 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 		done = true;
 		seg->nls = 0;
 		seg->nls_alloc = 0;
-	}
+	} else {
+		/* get the points along the great circle arc */
 
-	/* get the points along the great circle arc */
-	else {
 		/* get effective distance between points along great circle */
 		dsegdist = segdist / (nsegpoint - 1);
 
 		/* allocate segment points */
 		seg->nls_alloc = nsegpoint;
+	int error = MB_ERROR_NO_ERROR;
 		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, seg->nls_alloc * sizeof(struct mbview_pointw_struct),
 		                     (void **)&(seg->lspoints), &error);
 		if (status == MB_FAILURE) {
@@ -2413,7 +2400,7 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 		seg->nls++;
 
 		/* now calculate rest of point values */
-		for (icnt = 0; icnt < seg->nls; icnt++) {
+		for (int icnt = 0; icnt < seg->nls; icnt++) {
 			mbview_projectll2display(instance, seg->lspoints[icnt].xlon, seg->lspoints[icnt].ylat, seg->lspoints[icnt].zdata,
 			                         &(seg->lspoints[icnt].xdisplay[instance]), &(seg->lspoints[icnt].ydisplay[instance]),
 			                         &(seg->lspoints[icnt].zdisplay[instance]));
@@ -2518,15 +2505,10 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	xgridstart,xgridend,ygridstart,ygridend);
 	fprintf(stderr,"mbview_drapesegmentw_grid: istart:%d iend:%d jstart:%d jend:%d\n",istart,iend,jstart,jend);*/
 
-	int error = MB_ERROR_NO_ERROR;
 	int iadd;
 	int jadd;
-	int ni, nj;
-	double mm, bb;
-	int found, insert;
-	double xgrid, ygrid;
-	int icnt;
-	int jcnt;
+	int ni;
+	int nj;
 	int status = MB_SUCCESS;
 
 	/* no need to fill in if the segment doesn't cross grid boundaries */
@@ -2534,33 +2516,30 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 	if (istart == iend && jstart == jend) {
 		done = true;
 		seg->nls = 0;
-	}
+	} else {
+		/* else allocate space for the array of points */
 
-	/* else allocate space for the array of points */
-	else {
 		/* allocate space for the array of points */
 		if (iend > istart) {
 			ni = iend - istart;
 			iadd = 1;
 			istart++;
-			iend++;
-		}
-		else {
+			// iend++;
+		} else {
 			ni = istart - iend;
 			iadd = -1;
-		}
-		if (jend > jstart) {
+		} if (jend > jstart) {
 			nj = jend - jstart;
 			jadd = 1;
 			jstart++;
-			jend++;
-		}
-		else {
+			// jend++;
+		} else {
 			nj = jstart - jend;
 			jadd = -1;
 		}
 		if ((ni + nj + 2) > seg->nls_alloc) {
 			seg->nls_alloc = (ni + nj + 2);
+			int error = MB_ERROR_NO_ERROR;
 			status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, seg->nls_alloc * sizeof(struct mbview_pointw_struct),
 			                     (void **)&(seg->lspoints), &error);
 			if (status == MB_FAILURE) {
@@ -2582,6 +2561,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 		seg->nls++;
 
 		/* get line equation */
+		double mm, bb;
 		if (ni > 0 && seg->endpoints[1].xgrid[instance] != seg->endpoints[0].xgrid[instance]) {
 			mm = (seg->endpoints[1].ygrid[instance] - seg->endpoints[0].ygrid[instance]) /
 			     (seg->endpoints[1].xgrid[instance] - seg->endpoints[0].xgrid[instance]);
@@ -2589,10 +2569,10 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 		}
 
 		/* loop over xgrid */
-		for (icnt = 0; icnt < ni; icnt++) {
+		for (int icnt = 0; icnt < ni; icnt++) {
 			const int i = istart + icnt * iadd;
-			xgrid = data->primary_xmin + i * data->primary_dx;
-			ygrid = mm * xgrid + bb;
+			const double xgrid = data->primary_xmin + i * data->primary_dx;
+			const double ygrid = mm * xgrid + bb;
 			const int j = (int)((ygrid - data->primary_ymin) / data->primary_dy);
 			const int k = i * data->primary_n_rows + j;
 			const int l = i * data->primary_n_rows + j + 1;
@@ -2626,11 +2606,11 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 		}
 
 		/* loop over ygrid */
-		insert = 1;
-		for (jcnt = 0; jcnt < nj; jcnt++) {
+		int insert = 1;
+		for (int jcnt = 0; jcnt < nj; jcnt++) {
 			const int j = jstart + jcnt * jadd;
-			ygrid = data->primary_ymin + j * data->primary_dy;
-			xgrid = mm * ygrid + bb;
+			const double ygrid = data->primary_ymin + j * data->primary_dy;
+			const double xgrid = mm * ygrid + bb;
 			const int i = (int)((xgrid - data->primary_xmin) / data->primary_dx);
 			const int k = i * data->primary_n_rows + j;
 			const int l = (i + 1) * data->primary_n_rows + j;
@@ -2641,7 +2621,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 				                                    (data->primary_data[l] - data->primary_data[k]);
 
 				/* insert point into list */
-				found = false;
+				bool found = false;
 				done = false;
 				if (jadd > 0)
 					while (!done) {
@@ -2710,7 +2690,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 		}
 
 		/* now calculate rest of point values */
-		for (icnt = 0; icnt < seg->nls; icnt++) {
+		for (int icnt = 0; icnt < seg->nls; icnt++) {
 			mbview_projectforward(instance, true, seg->lspoints[icnt].xgrid[instance], seg->lspoints[icnt].ygrid[instance],
 			                      seg->lspoints[icnt].zdata, &(seg->lspoints[icnt].xlon), &(seg->lspoints[icnt].ylat),
 			                      &(seg->lspoints[icnt].xdisplay[instance]), &(seg->lspoints[icnt].ydisplay[instance]),
