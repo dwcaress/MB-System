@@ -65,6 +65,7 @@
 #define MBEV_ALLOC_NUM 24
 #define MBEV_ALLOCK_NUM 1024
 #define MBEV_NODATA -10000000.0
+#define MBEV_NUM_ESF_OPEN_MAX 25
 
 typedef enum {
      MBEV_GRID_ALGORITHM_SIMPLEMEAN = 0,
@@ -208,6 +209,7 @@ MBVIEW_EXTERNAL int mbev_num_files;
 MBVIEW_EXTERNAL int mbev_num_files_alloc;
 MBVIEW_EXTERNAL int mbev_num_files_loaded;
 MBVIEW_EXTERNAL int mbev_num_pings_loaded;
+MBVIEW_EXTERNAL int mbev_num_esf_open;
 MBVIEW_EXTERNAL int mbev_num_soundings_loaded;
 MBVIEW_EXTERNAL double mbev_bounds[4];
 MBVIEW_EXTERNAL struct mbev_file_struct *mbev_files;

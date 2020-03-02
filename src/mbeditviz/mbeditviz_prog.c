@@ -100,6 +100,7 @@ int mbeditviz_init(int argc, char **argv) {
 	mbev_num_files_alloc = 0;
 	mbev_num_files_loaded = 0;
 	mbev_num_pings_loaded = 0;
+  mbev_num_esf_open = 0;
 	mbev_num_soundings_loaded = 0;
 	for (int i = 0; i < 4; i++) {
 		mbev_bounds[i] = 0.0;
@@ -1002,6 +1003,7 @@ int mbeditviz_load_file(int ifile) {
 										  &mbev_error);
 				if (mbev_status == MB_SUCCESS) {
 					file->esf_open = true;
+          mbev_num_esf_open++;
 					if (mbev_verbose > 0)
 						fprintf(stderr, "%d reverse edits read from %s...\n", file->esf.nedit, resffile);
 				}
@@ -1036,6 +1038,7 @@ int mbeditviz_load_file(int ifile) {
 					if (file->esf_open) {
 						mb_esf_close(mbev_verbose, &file->esf, &mbev_error);
 						file->esf_open = false;
+            mbev_num_esf_open--;
 					}
 				}
 			}
@@ -1045,6 +1048,7 @@ int mbeditviz_load_file(int ifile) {
 			                          &(file->esf), &mbev_error);
 			if (mbev_status == MB_SUCCESS) {
 				file->esf_open = true;
+        mbev_num_esf_open++;
 			}
 			else {
 				file->esf_open = false;
@@ -1091,6 +1095,7 @@ int mbeditviz_load_file(int ifile) {
 				if (file->esf_open) {
 					mb_esf_close(mbev_verbose, &file->esf, &mbev_error);
 					file->esf_open = false;
+          mbev_num_esf_open--;
 				}
 			}
 		}
@@ -3148,6 +3153,7 @@ int mbeditviz_destroy_grid() {
 			/* close the esf file */
 			mb_esf_close(mbev_verbose, &(file->esf), &mbev_error);
 			file->esf_open = false;
+      mbev_num_esf_open--;
 
 			/* update mbprocess parameter file */
 			mb_pr_writepar(mbev_verbose, file->path, &(file->process), &mbev_error);
@@ -3804,10 +3810,24 @@ void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag
 		if (mbev_mode_output == MBEV_OUTPUT_MODE_EDIT) {
 			/* open esf and ess files if not already open */
 			if (!file->esf_open) {
+        // if too many esf files are open, close as many as needed
+        if (mbev_num_esf_open >= MBEV_NUM_ESF_OPEN_MAX) {
+        	/* close the first open esf file found */
+      		for (int itfile = 0; itfile < mbev_num_files && mbev_num_esf_open >= MBEV_NUM_ESF_OPEN_MAX; itfile++) {
+      			struct mbev_file_struct *tfile = &mbev_files[itfile];
+      			if (tfile->load_status && tfile->esf_open) {
+        			mb_esf_close(mbev_verbose, &tfile->esf, &mbev_error);
+        			tfile->esf_open = false;
+              mbev_num_esf_open--;
+        		}
+          }
+        }
+
 				mbev_status = mb_esf_load(mbev_verbose, program_name, file->path, false, MBP_ESF_APPEND, file->esffile,
 				                          &(file->esf), &mbev_error);
 				if (mbev_status == MB_SUCCESS) {
 					file->esf_open = true;
+          mbev_num_esf_open++;
 				}
 				else {
 					file->esf_open = false;

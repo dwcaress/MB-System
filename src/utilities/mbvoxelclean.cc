@@ -108,7 +108,9 @@ constexpr char usage_message[] =
     "\t--unflag-occupied\n"
     "\t--ignore-occupied\n"
     "\t--range-minimum=value\n"
-    "\t--range-maximum=value]";
+    "\t--range-maximum=value]\n"
+    "\t--acrosstrack-minimum=value\n"
+    "\t--acrosstrack-maximum=value]";
 
 /*--------------------------------------------------------------------*/
 
@@ -160,6 +162,10 @@ int main(int argc, char **argv) {
 	double range_minimum = 0.0;
 	bool apply_range_maximum = false;
 	double range_maximum = 0.0;
+	bool apply_acrosstrack_minimum = false;
+	double acrosstrack_minimum = 0.0;
+	bool apply_acrosstrack_maximum = false;
+	double acrosstrack_maximum = 0.0;
 
 	/* output stream for basic stuff (stdout if verbose <= 1, stderr if verbose > 1) */
 	FILE *outfp;
@@ -179,6 +185,8 @@ int main(int argc, char **argv) {
 		    {"ignore-occupied", no_argument, nullptr, 0},
 		    {"range-minimum", required_argument, nullptr, 0},
 		    {"range-maximum", required_argument, nullptr, 0},
+		    {"acrosstrack-minimum", required_argument, nullptr, 0},
+		    {"acrosstrack-maximum", required_argument, nullptr, 0},
 		    {nullptr, 0, nullptr, 0}};
 		int option_index;
 		bool errflg = false;
@@ -239,6 +247,14 @@ int main(int argc, char **argv) {
 					apply_range_maximum = true;
 					sscanf(optarg, "%lf", &range_maximum);
 				}
+				else if (strcmp("acrosstrack-minimum", options[option_index].name) == 0) {
+					apply_acrosstrack_minimum = true;
+					sscanf(optarg, "%lf", &acrosstrack_minimum);
+				}
+				else if (strcmp("acrosstrack-maximum", options[option_index].name) == 0) {
+					apply_acrosstrack_maximum = true;
+					sscanf(optarg, "%lf", &acrosstrack_maximum);
+				}
 
 				break;
 
@@ -298,6 +314,10 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "dbg2       range_minimum:	 %f\n", range_minimum);
 			fprintf(outfp, "dbg2       apply_range_maximum:   %d\n", apply_range_maximum);
 			fprintf(outfp, "dbg2       range_maximum:	 %f\n", range_maximum);
+			fprintf(outfp, "dbg2       apply_acrosstrack_minimum:   %d\n", apply_acrosstrack_minimum);
+			fprintf(outfp, "dbg2       acrosstrack_minimum:	 %f\n", acrosstrack_minimum);
+			fprintf(outfp, "dbg2       apply_acrosstrack_maximum:   %d\n", apply_acrosstrack_maximum);
+			fprintf(outfp, "dbg2       acrosstrack_maximum:	 %f\n", acrosstrack_maximum);
 		}
 
 		if (help) {
@@ -385,11 +405,18 @@ int main(int argc, char **argv) {
 
 	int n_files_tot = 0;
 	int n_pings_tot = 0;
+  int n_beams_tot = 0;
 	int n_beamflag_null_tot = 0;
 	int n_beamflag_good_tot = 0;
 	int n_beamflag_flag_tot = 0;
+	int n_esf_flag_tot = 0;
+	int n_esf_unflag_tot = 0;
 	int n_density_flag_tot = 0;
 	int n_density_unflag_tot = 0;
+	int n_minrange_flag_tot = 0;
+	int n_maxrange_flag_tot = 0;
+	int n_minacrosstrack_flag_tot = 0;
+	int n_maxacrosstrack_flag_tot = 0;
 
 	bool esffile_open = false;
 	int locked = false;  // TODO(schwehr): Make mb_pr_lockinfo take a bool
@@ -561,7 +588,7 @@ int main(int argc, char **argv) {
 
 			/* initialize per-file counting variables */
 			int n_pings = 0;
-			// int n_beams = 0;
+			int n_beams = 0;
 			int n_beamflag_null = 0;
 			int n_beamflag_good = 0;
 			int n_beamflag_flag = 0;
@@ -569,6 +596,10 @@ int main(int argc, char **argv) {
 			int n_esf_unflag = 0;
 			int n_density_flag = 0;
 			int n_density_unflag = 0;
+			int n_minrange_flag = 0;
+			int n_maxrange_flag = 0;
+			int n_minacrosstrack_flag = 0;
+			int n_maxacrosstrack_flag = 0;
 
 			/* allocate memory for mb_get() data arrays */
 			if (error == MB_ERROR_NO_ERROR)
@@ -714,42 +745,66 @@ int main(int argc, char **argv) {
 					const double sensory = (navlat - mb_info.lat_start) / mtodeglat;
 					const double sensorz = -sensordepth;
 					for (int j = 0; j < beams_bath; j++) {
-					    pings[n_pings].beamflag[j] = beamflag[j];
-					    pings[n_pings].beamflagorg[j] = beamflag[j];
-					    if (!mb_beam_check_flag_null(beamflag[j])) {
-						pings[n_pings].bathx[j] = (navlon - mb_info.lon_start) / mtodeglon +
-							       headingy * bathacrosstrack[j] + headingx * bathalongtrack[j];
-						pings[n_pings].bathy[j] = (navlat - mb_info.lat_start) / mtodeglat -
-							       headingx * bathacrosstrack[j] + headingy * bathalongtrack[j];
-						pings[n_pings].bathz[j] = -bath[j];
-						pings[n_pings].bathr[j] = sqrt((pings[n_pings].bathx[j] - sensorx)
-									* (pings[n_pings].bathx[j] - sensorx)
-								       + (pings[n_pings].bathy[j] - sensory)
-									* (pings[n_pings].bathy[j] - sensory)
-								       + (pings[n_pings].bathz[j] - sensorz)
-									* (pings[n_pings].bathz[j] - sensorz));
-						if (first) {
-						    x_min = pings[n_pings].bathx[j];
-						    x_max = pings[n_pings].bathx[j];
-						    y_min = pings[n_pings].bathy[j];
-						    y_max = pings[n_pings].bathy[j];
-						    z_min = pings[n_pings].bathz[j];
-						    z_max = pings[n_pings].bathz[j];
-						    first = false;
-						} else {
-						    x_min = std::min(x_min, pings[n_pings].bathx[j]);
-						    x_max = std::max(x_max, pings[n_pings].bathx[j]);
-						    y_min = std::min(y_min, pings[n_pings].bathy[j]);
-						    y_max = std::max(y_max, pings[n_pings].bathy[j]);
-						    z_min = std::min(z_min, pings[n_pings].bathz[j]);
-						    z_max = std::max(z_max, pings[n_pings].bathz[j]);
-						}
-					    } else {
-						pings[n_pings].bathx[j] = 0.0;
-						pings[n_pings].bathy[j] = 0.0;
-						pings[n_pings].bathz[j] = 0.0;
-						pings[n_pings].bathr[j] = 0.0;
-					    }
+				    pings[n_pings].beamflag[j] = beamflag[j];
+				    pings[n_pings].beamflagorg[j] = beamflag[j];
+				    if (!mb_beam_check_flag_null(beamflag[j])) {
+  						pings[n_pings].bathx[j] = (navlon - mb_info.lon_start) / mtodeglon +
+  							       headingy * bathacrosstrack[j] + headingx * bathalongtrack[j];
+  						pings[n_pings].bathy[j] = (navlat - mb_info.lat_start) / mtodeglat -
+  							       headingx * bathacrosstrack[j] + headingy * bathalongtrack[j];
+  						pings[n_pings].bathz[j] = -bath[j];
+  						pings[n_pings].bathr[j] = sqrt((pings[n_pings].bathx[j] - sensorx)
+  									* (pings[n_pings].bathx[j] - sensorx)
+  								       + (pings[n_pings].bathy[j] - sensory)
+  									* (pings[n_pings].bathy[j] - sensory)
+  								       + (pings[n_pings].bathz[j] - sensorz)
+  									* (pings[n_pings].bathz[j] - sensorz));
+  						if (first) {
+  						    x_min = pings[n_pings].bathx[j];
+  						    x_max = pings[n_pings].bathx[j];
+  						    y_min = pings[n_pings].bathy[j];
+  						    y_max = pings[n_pings].bathy[j];
+  						    z_min = pings[n_pings].bathz[j];
+  						    z_max = pings[n_pings].bathz[j];
+  						    first = false;
+  						} else {
+  						    x_min = std::min(x_min, pings[n_pings].bathx[j]);
+  						    x_max = std::max(x_max, pings[n_pings].bathx[j]);
+  						    y_min = std::min(y_min, pings[n_pings].bathy[j]);
+  						    y_max = std::max(y_max, pings[n_pings].bathy[j]);
+  						    z_min = std::min(z_min, pings[n_pings].bathz[j]);
+  						    z_max = std::max(z_max, pings[n_pings].bathz[j]);
+  						}
+
+              // apply acrosstrack filter here where acrosstrack values are available
+              // = note that a density unflag setting could undo flags defined here
+              if (apply_acrosstrack_minimum || apply_acrosstrack_maximum) {
+                if (mb_beam_ok(pings[n_pings].beamflag[j])) {
+                  if (apply_acrosstrack_minimum && bathacrosstrack[j] < acrosstrack_minimum) {
+    								pings[n_pings].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+    								const int action = MBP_EDIT_FILTER;
+    								mb_esf_save(verbose, &esf, pings[n_pings].time_d,
+    								    j + pings[n_pings].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+    								    action, &error);
+    								n_minacrosstrack_flag++;
+                  }
+                  if (apply_acrosstrack_maximum && bathacrosstrack[j] > acrosstrack_maximum) {
+    								pings[n_pings].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+    								const int action = MBP_EDIT_FILTER;
+    								mb_esf_save(verbose, &esf, pings[n_pings].time_d,
+    								    j + pings[n_pings].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+    								    action, &error);
+    								n_maxacrosstrack_flag++;
+                  }
+                }
+              }
+
+				    } else {
+      				pings[n_pings].bathx[j] = 0.0;
+      				pings[n_pings].bathy[j] = 0.0;
+      				pings[n_pings].bathz[j] = 0.0;
+      				pings[n_pings].bathr[j] = 0.0;
+					  }
 					}
 					if (verbose >= 2) {
 						fprintf(stderr, "\ndbg2  beam locations (ping:beam xxx.xxx yyy.yyy zzz.zzz)\n");
@@ -791,7 +846,7 @@ int main(int argc, char **argv) {
 								n_esf_flag++;
 						}
 					}
-					// n_beams += pings[n_pings].beams_bath;
+					n_beams += pings[n_pings].beams_bath;
 					n_pings++;
 
 				}
@@ -915,7 +970,7 @@ int main(int argc, char **argv) {
 								mb_esf_save(verbose, &esf, pings[i].time_d,
 								    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 								    action, &error);
-								n_density_flag++;
+								n_minrange_flag++;
 							} else if (apply_range_maximum
 								&& mb_beam_ok(pings[i].beamflag[j])
 								&& pings[i].bathr[j] > range_maximum) {
@@ -924,7 +979,7 @@ int main(int argc, char **argv) {
 								mb_esf_save(verbose, &esf, pings[i].time_d,
 								    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 								    action, &error);
-								n_density_flag++;
+								n_maxrange_flag++;
 							}
 						}
 					}
@@ -952,29 +1007,36 @@ int main(int argc, char **argv) {
 			/* increment the total counting variables */
 			n_files_tot++;
 			n_pings_tot += n_pings;
-			// int n_beams_tot += n_beams;
+			n_beams_tot += n_beams;
 			n_beamflag_null_tot += n_beamflag_null;
 			n_beamflag_good_tot += n_beamflag_good;
 			n_beamflag_flag_tot += n_beamflag_flag;
+			n_esf_flag_tot += n_esf_flag;
+			n_esf_unflag_tot += n_esf_unflag;
 			n_density_flag_tot += n_density_flag;
 			n_density_unflag_tot += n_density_unflag;
+			n_minrange_flag_tot += n_minrange_flag;
+			n_maxrange_flag_tot += n_maxrange_flag;
+			n_minacrosstrack_flag_tot += n_minacrosstrack_flag;
+			n_maxacrosstrack_flag_tot += n_maxacrosstrack_flag;
 
 			/* give the statistics */
 			if (verbose >= 1) {
-				fprintf(stderr, "%d survey data records processed\n", n_pings);
-				fprintf(stderr, "%d beams good originally\n", n_beamflag_good);
-				fprintf(stderr, "%d beams flagged originally\n", n_beamflag_flag);
-				fprintf(stderr, "%d beams null originally\n", n_beamflag_null);
+				fprintf(stderr, "%7d survey data records processed\n", n_pings);
+				fprintf(stderr, "%7d soundings processed\n", n_beams);
+				fprintf(stderr, "%7d beams good originally\n", n_beamflag_good);
+				fprintf(stderr, "%7d beams flagged originally\n", n_beamflag_flag);
+				fprintf(stderr, "%7d beams null originally\n", n_beamflag_null);
 				if (esf.nedit > 0) {
-					fprintf(stderr, "%d beams flagged in old esf file\n", n_esf_flag);
-					fprintf(stderr, "%d beams unflagged in old esf file\n", n_esf_unflag);
+					fprintf(stderr, "%7d beams flagged in old esf file\n", n_esf_flag);
+					fprintf(stderr, "%7d beams unflagged in old esf file\n", n_esf_unflag);
 				}
-				fprintf(stderr, "%d beams flagged by density filter\n", n_density_flag);
-				fprintf(stderr, "%d beams unflagged by density filter\n", n_density_unflag);
-				// int n_minrange_flag = 0;
-				// fprintf(stderr, "%d beams flagged by minimum range filter\n", n_minrange_flag);
-				// int n_maxrange_flag = 0;
-				// fprintf(stderr, "%d beams unflagged by maximum range filter\n", n_maxrange_flag);
+				fprintf(stderr, "%7d beams flagged by density filter\n", n_density_flag);
+				fprintf(stderr, "%7d beams unflagged by density filter\n", n_density_unflag);
+				fprintf(stderr, "%7d beams flagged by minimum range filter\n", n_minrange_flag);
+				fprintf(stderr, "%7d beams flagged by maximum range filter\n", n_maxrange_flag);
+				fprintf(stderr, "%7d beams flagged by minimum acrosstrack filter\n", n_minacrosstrack_flag);
+				fprintf(stderr, "%7d beams flagged by maximum acrosstrack filter\n", n_maxacrosstrack_flag);
 			}
 		}
 
@@ -998,19 +1060,18 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "---------------------------------\n");
 		fprintf(stderr, "%d total swath data files processed\n", n_files_tot);
 		fprintf(stderr, "%d total survey data records processed\n", n_pings_tot);
+		fprintf(stderr, "%d total soundings processed\n", n_beams_tot);
 		fprintf(stderr, "%d total beams good originally\n", n_beamflag_good_tot);
 		fprintf(stderr, "%d total beams flagged originally\n", n_beamflag_flag_tot);
 		fprintf(stderr, "%d total beams null originally\n", n_beamflag_null_tot);
-		// int n_esf_flag_tot = 0;
-		// fprintf(stderr, "%d total beams flagged in old esf file\n", n_esf_flag_tot);
-		// int n_esf_unflag_tot = 0;
-		// fprintf(stderr, "%d total beams unflagged in old esf file\n", n_esf_unflag_tot);
+		fprintf(stderr, "%d total beams flagged in old esf file\n", n_esf_flag_tot);
+		fprintf(stderr, "%d total beams unflagged in old esf file\n", n_esf_unflag_tot);
 		fprintf(stderr, "%d total beams flagged by density filter\n", n_density_flag_tot);
 		fprintf(stderr, "%d total beams unflagged by density filter\n", n_density_unflag_tot);
-		// int n_minrange_flag_tot = 0;
-		// fprintf(stderr, "%d total beams flagged by minimum range filter\n", n_minrange_flag_tot);
-		// int n_maxrange_flag_tot = 0;
-		// fprintf(stderr, "%d total beams unflagged by maximum range filter\n", n_maxrange_flag_tot);
+		fprintf(stderr, "%d total beams flagged by minimum range filter\n", n_minrange_flag_tot);
+		fprintf(stderr, "%d total beams flagged by maximum range filter\n", n_maxrange_flag_tot);
+		fprintf(stderr, "%d total beams flagged by minimum acrosstrack filter\n", n_minrange_flag_tot);
+		fprintf(stderr, "%d total beams flagged by maximum acrosstrack filter\n", n_maxrange_flag_tot);
 	}
 
 	for (int i = 0; i<npings_alloc; i++) {
@@ -1019,7 +1080,7 @@ int main(int argc, char **argv) {
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathz, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathx, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathy, &error);
-		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathz, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathr, &error);
 		pings[i].beams_bath_alloc = 0;
 	}
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings, &error);
