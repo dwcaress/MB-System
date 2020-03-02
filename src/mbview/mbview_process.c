@@ -88,15 +88,15 @@ int mbview_projectdata(size_t instance) {
 	struct mbview_struct *data = &(view->data);
 
 	/* delete old projections if necessary */
-	if (view->primary_pj_init == true && view->primary_pjptr != NULL) {
+	if (view->primary_pj_init && view->primary_pjptr != NULL) {
 		mb_proj_free(mbv_verbose, &(view->primary_pjptr), &error);
 		view->primary_pj_init = false;
 	}
-	if (view->secondary_pj_init == true && view->secondary_pjptr != NULL) {
+	if (view->secondary_pj_init && view->secondary_pjptr != NULL) {
 		mb_proj_free(mbv_verbose, &(view->secondary_pjptr), &error);
 		view->secondary_pj_init = false;
 	}
-	if (view->display_pj_init == true && view->display_pjptr != NULL) {
+	if (view->display_pj_init && view->display_pjptr != NULL) {
 		mb_proj_free(mbv_verbose, &(view->display_pjptr), &error);
 		view->display_pj_init = false;
 	}
@@ -317,11 +317,11 @@ int mbview_projectdata(size_t instance) {
 		}
 
 		/* check for pending event */
-		if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0)
+		if (!view->plot_done && view->plot_interrupt_allowed && i % MBV_EVENTCHECKCOARSENESS == 0)
 			do_mbview_xevents();
 
 		/* dump out of loop if plotting already done at a higher recursion */
-		if (view->plot_done == true)
+		if (view->plot_done)
 			i = data->primary_n_columns;
 	}
 
@@ -332,11 +332,11 @@ int mbview_projectdata(size_t instance) {
 		}
 
 		/* check for pending event */
-		if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0)
+		if (!view->plot_done && view->plot_interrupt_allowed && i % MBV_EVENTCHECKCOARSENESS == 0)
 			do_mbview_xevents();
 
 		/* dump out of loop if plotting already done at a higher recursion */
-		if (view->plot_done == true)
+		if (view->plot_done)
 			i = data->primary_n_columns;
 	}
 
@@ -347,7 +347,7 @@ int mbview_projectdata(size_t instance) {
 	mbview_zscale(instance);
 
 	/* set projected flag only if plotting not done */
-	if (view->plot_done == false) {
+	if (!view->plot_done) {
 		view->projected = true;
 	}
 
@@ -363,7 +363,7 @@ int mbview_projectdata(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 int mbview_derivative(size_t instance, int i, int j) {
-	int derivative_ok;
+	bool derivative_ok;
 	double dx, dy;
 	int k, k1, k2;
 
@@ -413,7 +413,7 @@ int mbview_derivative(size_t instance, int i, int j) {
 	}
 
 	/* calculate x derivative */
-	if (derivative_ok == true) {
+	if (derivative_ok) {
 		dx = (data->primary_x[k2] - data->primary_x[k1]);
 		if (dx != 0.0)
 			data->primary_dzdx[k] = view->scale * (data->primary_data[k2] - data->primary_data[k1]) / dx;
@@ -454,7 +454,7 @@ int mbview_derivative(size_t instance, int i, int j) {
 	}
 
 	/* calculate y derivative */
-	if (derivative_ok == true) {
+	if (derivative_ok) {
 		dy = (data->primary_y[k2] - data->primary_y[k1]);
 		if (dy != 0.0)
 			data->primary_dzdy[k] =
@@ -500,7 +500,7 @@ int mbview_projectglobaldata(size_t instance) {
 	int status = MB_SUCCESS;
 
 	/* can only project if projections are set up */
-	if (view->projected == true) {
+	if (view->projected) {
 		/* handle navpicks */
 		if (shared.shareddata.navpick_type != MBV_PICK_NONE) {
 			pointw = &(shared.shareddata.navpick.endpoints[0]);
@@ -738,7 +738,7 @@ int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, st
 		mbview_projectforward(instance, false, point->xgrid, point->ygrid, point->zdata, &point->xlon, &point->ylat,
 		                      &point->xdisplay, &point->ydisplay, &point->zdisplay);
 
-		if (globalview == false) {
+		if (!globalview) {
 			point->zdisplay += offset_factor;
 		}
 		else {
@@ -787,7 +787,7 @@ int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, s
 		                      &(pointw->ylat), &(pointw->xdisplay[instance]), &(pointw->ydisplay[instance]),
 		                      &(pointw->zdisplay[instance]));
 
-		if (globalview == false) {
+		if (!globalview) {
 			pointw->zdisplay[instance] += offset_factor;
 		}
 		else {
@@ -1050,7 +1050,7 @@ int mbview_zscale(size_t instance) {
 	}
 
 	/* set rez flags only if plotting not done */
-	if (view->plot_done == false) {
+	if (!view->plot_done) {
 		view->contourlorez = false;
 		view->contourhirez = false;
 		view->contourfullrez = false;
@@ -1068,6 +1068,7 @@ int mbview_zscale(size_t instance) {
 }
 
 /*------------------------------------------------------------------------------*/
+// TODO(schwehr): bool needlonlat
 int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double ygrid, double zdata, double *xlon, double *ylat,
                           double *xdisplay, double *ydisplay, double *zdisplay) {
 	double xx, yy, zz;
@@ -1090,7 +1091,7 @@ int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double 
 	int status = MB_SUCCESS;
 
 	/* get positions into geographic coordinates if necessary */
-	if (needlonlat == true || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
+	if (needlonlat || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
 		status = mbview_projectgrid2ll(instance, xgrid, ygrid, xlon, ylat);
 	}
 
@@ -1145,7 +1146,7 @@ int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, doub
 	int status = MB_SUCCESS;
 
 	/* get positions in geographic coordinates */
-	if (needlonlat == true || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
+	if (needlonlat || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
 		status = mbview_projectdisplay2ll(instance, xdisplay, ydisplay, zdisplay, xlon, ylat);
 	}
 
@@ -1609,6 +1610,7 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
+// TODO(schwehr): bool earthcentered
 int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double ylat) {
 	double phi, theta, psi;
 	int j;
@@ -1693,7 +1695,7 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 	view->sphere_refx = 0.0;
 	view->sphere_refy = 0.0;
 	view->sphere_refz = 0.0;
-	if (earthcentered == false) {
+	if (!earthcentered) {
 		mbview_sphere_forward(instance, xlon, ylat, &view->sphere_refx, &view->sphere_refy, &view->sphere_refz);
 	}
 
@@ -2492,16 +2494,16 @@ int mbview_colorvalue_instance(size_t instance, double value, float *r, float *g
 	struct mbview_struct *data = &(view->data);
 
 	/* get histogram equalization if in use */
-  float *histogram = NULL;
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY && data->primary_histogram == true) {
+	float *histogram = NULL;
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY && data->primary_histogram) {
 		histogram = view->primary_histogram;
 	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && data->primaryslope_histogram == true) {
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && data->primaryslope_histogram) {
 		histogram = view->primaryslope_histogram;
 	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY && data->secondary_histogram == true) {
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY && data->secondary_histogram) {
 		histogram = view->secondary_histogram;
-  }
+	}
 
 	// get color value using relevant data and histogram
 	const int status = mbview_colorvalue(view, data, histogram, value, r, g, b);
@@ -2876,7 +2878,7 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
                               float *colortable_green, float *colortable_blue, float *histogram, float *red, float *green,
                               float *blue) {
 	double ff, factor;
-	int found;
+	bool found;
 	int i, ii;
 
 	if (mbv_verbose >= 2) {
@@ -2919,7 +2921,7 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
 	else {
 		/* find place in histogram */
 		found = false;
-		for (i = 0; i < MBV_NUM_COLORS - 1 && found == false; i++) {
+		for (i = 0; i < MBV_NUM_COLORS - 1 && !found; i++) {
 			if (value >= histogram[i] && value <= histogram[i + 1]) {
 				ii = i;
 				found = true;
@@ -3152,13 +3154,14 @@ int mbview_contour(size_t instance, int rez) {
 	int i, j, k, l, kk;
 	int stride;
 	int vertex[4];
-	int triangleA, triangleB;
+	bool triangleA;
+	bool triangleB;
 	int nlevel, level_min, level_max;
 	int nvertex, nside;
 	float level_value, datamin, datamax;
 	float factor;
 	float xx[2], yy[2], zz[2];
-	int global;
+	bool global;
 	double contour_offset_factor;
 
 	if (mbv_verbose >= 2) {
@@ -3234,7 +3237,7 @@ int mbview_contour(size_t instance, int rez) {
 				triangleB = true;
 
 			/* if at least one triangle is valid, contour it */
-			if (triangleA == true || triangleB == true) {
+			if (triangleA || triangleB) {
 				/* get min max values and number of contours */
 				nvertex = 0;
 				datamin = 0.0;
@@ -3267,7 +3270,7 @@ int mbview_contour(size_t instance, int rez) {
 						level_value = l * data->contour_interval;
 
 						/* deal with triangle A - vertexes 0, 1, and 2 */
-						if (triangleA == true) {
+						if (triangleA) {
 							nside = 0;
 							if ((data->primary_data[vertex[0]] > level_value && data->primary_data[vertex[1]] < level_value) ||
 							    (data->primary_data[vertex[0]] < level_value && data->primary_data[vertex[1]] > level_value)) {
@@ -3311,7 +3314,7 @@ int mbview_contour(size_t instance, int rez) {
 									zz[0] += contour_offset_factor;
 									zz[1] += contour_offset_factor;
 								}
-								else if (global == true) {
+								else if (global) {
 									xx[0] += xx[0] * contour_offset_factor;
 									yy[0] += yy[0] * contour_offset_factor;
 									zz[0] += zz[0] * contour_offset_factor;
@@ -3329,7 +3332,7 @@ int mbview_contour(size_t instance, int rez) {
 						}
 
 						/* deal with triangle B - vertexes 1, 3, and 2 */
-						if (triangleB == true) {
+						if (triangleB) {
 							nside = 0;
 							if ((data->primary_data[vertex[1]] > level_value && data->primary_data[vertex[3]] < level_value) ||
 							    (data->primary_data[vertex[1]] < level_value && data->primary_data[vertex[3]] > level_value)) {
@@ -3373,7 +3376,7 @@ int mbview_contour(size_t instance, int rez) {
 									zz[0] += contour_offset_factor;
 									zz[1] += contour_offset_factor;
 								}
-								else if (global == true) {
+								else if (global) {
 									xx[0] += xx[0] * contour_offset_factor;
 									yy[0] += yy[0] * contour_offset_factor;
 									zz[0] += zz[0] * contour_offset_factor;
@@ -3395,11 +3398,11 @@ int mbview_contour(size_t instance, int rez) {
 		}
 
 		/* check for pending event */
-		if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0)
+		if (!view->plot_done && view->plot_interrupt_allowed && i % MBV_EVENTCHECKCOARSENESS == 0)
 			do_mbview_xevents();
 
 		/* dump out of loop if plotting already done at a higher recursion */
-		if (view->plot_done == true)
+		if (view->plot_done)
 			i = data->primary_n_columns;
 	}
 
@@ -3408,7 +3411,7 @@ int mbview_contour(size_t instance, int rez) {
 	glEndList();
 
 	/* set rez flag only if plotting not done */
-	if (view->plot_done == false) {
+	if (!view->plot_done) {
 		if (rez == MBV_REZ_FULL) {
 			view->contourfullrez = true;
 		}

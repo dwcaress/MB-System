@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id$
 #
 #    Copyright (c) 1993-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -62,8 +61,6 @@
 #   Palisades, NY  10964
 #   August 8, 1994
 #
-# Version:
-#   $Id$
 #
 #
 $program_name = "mbm_grd3dplot";
@@ -251,7 +248,6 @@ $zbounds = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id$\n";
 	print "\nMacro to generate a shellscript of GMT commands which, when \n";
 	print "executed, will generate a 3D perspective Postscript plot of  \n";
 	print "gridded data.  Several styles of plots can be generated, \n";

@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_utm.perl	5/13/2002
-#    $Id$
 #
 #    Copyright (c) 2002-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -33,8 +32,6 @@
 #   Moss Landing, CA 95039
 #   May 13, 2002
 #
-# Version:
-#   $Id$
 #
 #
 #
@@ -57,7 +54,6 @@ $verbose = 		($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id$\n";
 	print "\nMB-System macro to perform forward and inverse UTM projections";
 	print "of ASCII data triples using the GMT program mapproject. ";
 	print "Forward projections translate from geographic data ";

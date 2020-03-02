@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id$
 #
 #    Copyright (c) 1993-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -72,8 +71,6 @@
 #   Palisades, NY  10964
 #   June 17, 1993
 #
-# Version:
-#   $Id$
 #
 #
 $program_name = "mbm_plot";
@@ -253,7 +250,6 @@ $zbounds = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id$\n";
 	print "\nMacro to generate a shellscript of MB-System and GMT commands \n";
 	print "which, when executed, will generate a Postscript plot of the \n";
 	print "specified swath sonar data. The plot may include bathymetry color \n";

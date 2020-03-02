@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_histplot.perl	3/20/2006
-#    $Id$
 #
 #    Copyright (c) 2006-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -48,8 +47,6 @@
 #   Moss Landing CA
 #   March 20, 2006
 #
-# Version:
-#   $Id$
 #
 #
 #
@@ -169,7 +166,6 @@ $execute = 		($opt_X || $opt_x);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id$\n";
 	print "\nMacro to generate a shellscript of GMT commands which, \n";
 	print "when executed, will generate a Postscript histogram plot\n";
 	print "of a set of data values.\n";

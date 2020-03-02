@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_rollover.perl	6/18/93
-#    $Id$
 #
 #    Copyright (c) 1993-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -32,8 +31,6 @@
 #   Palisades, NY  10964
 #   June 13, 1993
 #
-# Version:
-#   $Id$
 #
 #
 #

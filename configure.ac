@@ -1,6 +1,5 @@
 dnl--------------------------------------------------------------------
 dnl    The MB-system:    configure.ac    12/7/2011
-dnl    $Id$
 dnl
 dnl    Copyright (c) 2011-2019 by
 dnl    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,7 +36,6 @@ AC_DISABLE_OPTION_CHECKING
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["    The MB-system:    configure    12/7/2011"])
-AS_ECHO(["    $Id$"])
 AS_ECHO([" "])
 AS_ECHO(["    Copyright (c) 2011-2020 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])

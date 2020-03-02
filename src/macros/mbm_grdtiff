@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdtiff.perl	11/3/1999
-#    $Id$
 #
 #    Copyright (c) 1999-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -46,8 +45,6 @@
 #   Palisades, NY  10964
 #   October 19, 1994
 #
-# Version:
-#   $Id$
 #
 #
 #
@@ -152,7 +149,6 @@ $zbounds = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id$\n";
         print "\nMacro to generate a shellscript which, when executed, will \n";
         print "generate a geographically located TIFF image of gridded \n";
         print "data. The primary purpose of this macro is to allow the simple, \n";
