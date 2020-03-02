@@ -665,7 +665,6 @@ int mbsys_3ddwissl_preprocess
   int jheading = 0;
   /* int  jaltitude = 0; */
   int jattitude = 0;
-  double amplitude_threshold;
 
   /* always successful */
   int status = MB_SUCCESS;
@@ -680,8 +679,17 @@ int mbsys_3ddwissl_preprocess
   // struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
   struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
-  if (verbose >= 2)
-    {
+  /* get kluges */
+  bool kluge_beampatternsnell = false;
+  double kluge_beampatternsnellfactor = 1.0;
+  for (int i = 0; i < pars->n_kluge; i++) {
+    if (pars->kluge_id[i] == MB_PR_KLUGE_BEAMTWEAK) {
+      kluge_beampatternsnell = true;
+      kluge_beampatternsnellfactor = *((double *)&pars->kluge_pars[i * MB_PR_KLUGE_PAR_SIZE]);
+    }
+  }
+
+  if (verbose >= 2) {
     fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
     fprintf(stderr, "dbg2       timestamp_changed:          %d\n", pars->timestamp_changed);
     // fprintf(stderr, "dbg2       time_d:                     %f\n", pars->time_d);
@@ -706,10 +714,14 @@ int mbsys_3ddwissl_preprocess
     fprintf(stderr, "dbg2       attitude_pitch:             %p\n", pars->attitude_pitch);
     fprintf(stderr, "dbg2       attitude_heave:             %p\n", pars->attitude_heave);
     fprintf(stderr, "dbg2       n_kluge:                    %d\n", pars->n_kluge);
-    for (int i = 0; i < pars->n_kluge; i++)
-      fprintf(stderr, "dbg2       kluge_id[%d]:                    %d\n", i,
-        pars->kluge_id[i]);
+    for (int i = 0; i < pars->n_kluge; i++) {
+      fprintf(stderr, "dbg2       kluge_id[%d]:                    %d\n", i, pars->kluge_id[i]);
+      if (pars->kluge_id[i] == MB_PR_KLUGE_BEAMTWEAK) {
+        fprintf(stderr, "dbg2       kluge_beampatternsnell:        %d\n", kluge_beampatternsnell);
+        fprintf(stderr, "dbg2       kluge_beampatternsnellfactor:  %f\n", kluge_beampatternsnellfactor);
+      }
     }
+  }
 
   int time_i[7];
   int time_j[5];
@@ -990,15 +1002,20 @@ int mbsys_3ddwissl_preprocess
       pulse->roll_offset = (float)(roll - store->roll);
       pulse->pitch_offset = (float)(pitch - store->pitch);
       }
+
+      /* if requested apply kluge scaling of rx beam angles */
+      if (kluge_beampatternsnell) {
+        pulse->angle_az = RTD * asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor * sin(DTR * pulse->angle_az))));
+      }
     }
 
-  double target_altitude;
-
   /* calculate the bathymetry using the newly inserted values */
+  double amplitude_threshold;
   if (pars->sounding_amplitude_filter)
     amplitude_threshold = pars->sounding_amplitude_threshold;
   else
     amplitude_threshold = MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD;
+  double target_altitude;
   if (pars->sounding_altitude_filter)
     target_altitude = pars->sounding_target_altitude;
   else
@@ -1021,12 +1038,8 @@ int mbsys_3ddwissl_preprocess
     store->headb_offset_roll_deg = pars->head2_offsets_roll;
     store->headb_offset_pitch_deg = pars->head2_offsets_pitch;
     }
-  status = mbsys_3ddwissl_calculatebathymetry(verbose,
-    mbio_ptr,
-    store_ptr,
-    amplitude_threshold,
-    target_altitude,
-    error);
+  status = mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
+                amplitude_threshold, target_altitude, error);
 
   if (verbose >= 2)
     {
@@ -3485,8 +3498,7 @@ int mbsys_3ddwissl_print_store
       fprintf(stderr, "%s     angle_el:                      %f\n", first, pulse->angle_el);
       fprintf(stderr, "%s     offset_az:                     %f\n", first, pulse->offset_az);
       fprintf(stderr, "%s     offset_el:                     %f\n", first, pulse->offset_el);
-      fprintf(stderr, "%s     time_offset:                   %f\n", first,
-        pulse->time_offset);
+      fprintf(stderr, "%s     time_offset:                   %f\n", first, pulse->time_offset);
       fprintf(stderr, "%s     time_d:                        %f\n", first, pulse->time_d);
       fprintf(stderr,
         "%s     acrosstrack_offset:            %f\n",
@@ -3676,18 +3688,17 @@ int mbsys_3ddwissl_calculatebathymetry
         if (sounding->range > 0.001)
           {
           /* apply pitch and roll */
-          alpha = angle_el_sign * pulse->angle_el+ store->pitch+ head_offset_pitch_deg+
-            pulse->pitch_offset;
-          beta = 90.0 - (angle_az_sign * pulse->angle_az)+ store->roll+
-            head_offset_roll_deg+ pulse->roll_offset;
+          alpha = angle_el_sign * pulse->angle_el + store->pitch
+                  + head_offset_pitch_deg + pulse->pitch_offset;
+          beta = 90.0 - (angle_az_sign * pulse->angle_az) + store->roll
+                  + head_offset_roll_deg + pulse->roll_offset;
 
           /* calculate amplitude range factor */
           if (target_altitude > 0.0)
             {
-            target_range = target_altitude/
-              cos(DTR *
-              (angle_az_sign * pulse->angle_az- head_offset_roll_deg-
-              pulse->roll_offset));
+            target_range = target_altitude /
+                            cos(DTR * (angle_az_sign * pulse->angle_az
+                              - head_offset_roll_deg - pulse->roll_offset));
             scaled_range_diff = (sounding->range - target_range) / target_range;
             amplitude_factor = exp(-4.0 * scaled_range_diff * scaled_range_diff);
             }
@@ -3708,13 +3719,14 @@ int mbsys_3ddwissl_calculatebathymetry
 
           /* get lateral and vertical components of range */
           xx = sounding->range * sin(DTR * theta);
-          sounding->depth = sounding->range * cos(DTR * theta)+ head_offset_z_m+
-            pulse->sensordepth_offset;
-          sounding->acrosstrack = xx * cos(DTR * phi)+ head_offset_x_m+
-            pulse->acrosstrack_offset;
-          sounding->alongtrack = xx * sin(DTR * phi)+ head_offset_y_m+
-            pulse->alongtrack_offset;
-
+          sounding->depth = sounding->range * cos(DTR * theta)
+                            + head_offset_z_m + pulse->sensordepth_offset;
+          sounding->acrosstrack = xx * cos(DTR * phi) + head_offset_x_m
+                                  + angle_az_sign * pulse->offset_az
+                                  + pulse->acrosstrack_offset;
+          sounding->alongtrack = xx * sin(DTR * phi) + head_offset_y_m
+                                  + angle_el_sign * pulse->offset_el
+                                  + pulse->alongtrack_offset;
 
           /* check for largest amplitude */
           if (sounding->amplitude > amplitude_largest)

@@ -7282,7 +7282,7 @@ void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_dat
 
 			/* draw */
 			if (mbv_verbose >= 2)
-				fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_sitelistselect: instance:%zu\n", i);
+				fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_navlistselect: instance:%zu\n", i);
 			mbview_plotlowhigh(i);
 			mbview_plotlowhighall(i);
 
@@ -7293,6 +7293,13 @@ void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_dat
 			/* now replot profile */
 			mbview_plotprofile(i);
 		}
+	}
+
+	/* call picknav notify if defined */
+	if (instance != MBV_NO_WINDOW
+    && mbviews[instance].data.mbview_picknav_notify != NULL
+    && shared.shareddata.navpick_type != MBV_PICK_NONE) {
+		(mbviews[instance].data.mbview_picknav_notify)(instance);
 	}
 
 	/* set widget sensitivity */
@@ -7782,7 +7789,7 @@ void do_mbview_profile_resize(Widget w, XtPointer client_data, XEvent *event, Bo
 	/* do this only if a resize event happens */
 	if (cevent->type == ConfigureNotify) {
 			struct mbview_world_struct *view = &(mbviews[instance]);
-	
+
 		/* get new shell size */
 		Dimension width;
 		Dimension height;

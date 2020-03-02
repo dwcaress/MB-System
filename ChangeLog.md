@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta31    March 2, 2020
 - Version 5.7.6beta30    February 20, 2020
 - Version 5.7.6beta29    February 17, 2020
 - Version 5.7.6beta28    February 13, 2020
@@ -341,6 +342,32 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+#### 5.7.6beta31 (March 2, 2020)
+
+Mbvoxelclean: Fixed memory leak. Added --acrosstrack-minimum and --acrosstrack-maximum
+filters. Cleaned up shell informational output.
+
+Mbeditviz: The program now keeps only a limited number of esf (edit save file)
+files open for writing rather than opening esf files for all loaded swath files.
+The program was failing when the total number of open files exceeded the operating
+system maximum (1024 on MacOs and CentOs). The default maximum number of open
+esf files is now 25.
+
+Mbeditviz: Colorized flagged soundings the same as for mbedit (filtered == blue,
+manually edited == red).
+
+Format 233 (MBF_WISSLR): Corrected use of ev_offset and az_offset (across and
+alongtrack distance offsets at the optical head) in preprocessing. Also added
+a capability to apply Snell's law type tweak to the lidar pulse angles throuhg
+mbpreprocess (--kluge-beam-tweak=value).
+
+Code style: Kurt Schwehr is systematically altering the code to conform to best
+practices and adding build tests. The improvements included in this beta release
+include work on mbview and programs using mbview.
+
+Code style: Github user abnj contributed some code cleanup by removing $Id tags
+used when the code was in a Subversion repository.
+
 #### 5.7.6beta30 (February 20, 2020)
 
 Mbprocess, mbfilter, mbvoxelclean, mbclean, mbinfo, mbdatalist: Fixed bugs in

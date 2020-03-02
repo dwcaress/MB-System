@@ -1567,12 +1567,9 @@ int mbr_3dwisslr_rd_data
         pulse = &store->pulses[ipulse];
         mb_get_binary_float(true, (void *)&buffer[index], &(pulse->angle_az)); index += 4;
         mb_get_binary_float(true, (void *)&buffer[index], &(pulse->angle_el)); index += 4;
-        mb_get_binary_float(true, (void *)&buffer[index], &(pulse->offset_az));
-        index += 4;
-        mb_get_binary_float(true, (void *)&buffer[index], &(pulse->offset_el));
-        index += 4;
-        mb_get_binary_float(true, (void *)&buffer[index], &(pulse->time_offset));
-        index += 4;
+        mb_get_binary_float(true, (void *)&buffer[index], &(pulse->offset_az)); index += 4;
+        mb_get_binary_float(true, (void *)&buffer[index], &(pulse->offset_el)); index += 4;
+        mb_get_binary_float(true, (void *)&buffer[index], &(pulse->time_offset)); index += 4;
         pulse->time_d = 0.0;
         pulse->acrosstrack_offset = 0.0;
         pulse->alongtrack_offset = 0.0;

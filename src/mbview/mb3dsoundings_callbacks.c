@@ -2575,14 +2575,41 @@ soundingdata->num_soundings); */
 
 	/* Plot the flagged soundings if desired */
 	if (mb3dsoundings.view_flagged) {
+	  glPointSize(3.0);
+
 		glColor3f(1.0, 0.0, 0.0);
 		glBegin(GL_POINTS);
 		for (int i = 0; i < soundingdata->num_soundings; i++) {
 			struct mb3dsoundings_sounding_struct *sounding =
 				(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-			if (!mb_beam_ok(sounding->beamflag))
+			if (mb_beam_check_flag_manual(sounding->beamflag)) {
 				glVertex3f(sounding->glx, sounding->gly, sounding->glz);
 			/*fprintf(stderr,"%f %f %f\n", sounding->glx, sounding->gly, sounding->glz);*/
+      }
+		}
+		glEnd();
+
+		glColor3f(0.0, 0.0, 1.0);
+		glBegin(GL_POINTS);
+		for (int i = 0; i < soundingdata->num_soundings; i++) {
+			struct mb3dsoundings_sounding_struct *sounding =
+				(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+			if (mb_beam_check_flag_filter(sounding->beamflag) || mb_beam_check_flag_filter2(sounding->beamflag)) {
+				glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+			/*fprintf(stderr,"%f %f %f\n", sounding->glx, sounding->gly, sounding->glz);*/
+      }
+		}
+		glEnd();
+
+		glColor3f(0.0, 1.0, 0.0);
+		glBegin(GL_POINTS);
+		for (int i = 0; i < soundingdata->num_soundings; i++) {
+			struct mb3dsoundings_sounding_struct *sounding =
+				(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+			if (mb_beam_check_flag_sonar(sounding->beamflag)) {
+				glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+			/*fprintf(stderr,"%f %f %f\n", sounding->glx, sounding->gly, sounding->glz);*/
+      }
 		}
 		glEnd();
 	}
