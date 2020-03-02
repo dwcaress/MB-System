@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	10/5/2013
-#    $Id$
 #
 #    Copyright (c) 2013-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -33,8 +32,6 @@
 #   Palisades, NY  10964
 #   October 5, 2013
 #
-# Version:
-#   $Id$
 #
 #
 $program_name = "mbm_makesvp";
@@ -56,7 +53,6 @@ $verbose = 				($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "Version: $Id$\n";
 	print "Macro to extract sound speed and depth data from a datalist of swath files,\n";
 	print "and generate a sound velocity profile model from averages of the sound\n";
 	print "speed values in regular depth ranges. This macro is intended for use\n";

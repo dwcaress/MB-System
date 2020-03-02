@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_makedatalist.perl	27/1/2006
-#    $Id$
 #
 #    Copyright (c) 2006-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -32,8 +31,6 @@
 #   Moss Landing, CA 95039
 #   January 27, 2006
 #
-# Version:
-#   $Id$
 #
 #
 $program_name = "mbm_makedatalist";
@@ -54,7 +51,6 @@ $verbose = 			($opt_V || $opt_v);
 # print out help message if required
 if ($help) {
 	print "\n$program_name:\n";
-	print "\nVersion: $Id$\n";
 	print "Macro to generate an MB-System datalist file referencing all\n";
 	print "identifiable swath files in the specified directory. If no directory\n";
 	print "is specified with the -I option, then the current directory is used.\n";

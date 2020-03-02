@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/21/01
-#    $Id$
 #
 #    Copyright (c) 2001-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -34,14 +33,11 @@
 #   (at sea on the R/V Western Flyer about
 #    10 km off the windward side of Oahu)
 #
-# Version:
-#   $Id$
 #
 #
 #
 
 $program_name = "mbm_arc2grd";
-$version = "$Id$program_name";
 
 $zname = "Unknown [unknown]";
 $title = "Unknown";
@@ -80,7 +76,6 @@ if ($help)
 if ($verbose)
 	{
 	print "\n$program_name:\n";
-	print "Version: $version\n";
 	print "Input Arc ASCII grid file:                 $ifile\n";
 	print "Output GMT grd (netcdf COARDS) grid file:  $ofile\n";
 	print "No data value:      $nodata\n";
