@@ -12,11 +12,8 @@
  *    See notes below for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- *
  * Author:	D. W. Caress
  * Date:	May 22, 2007
- *
- *
  */
 /*------------------------------------------------------------------------------*/
 /*
@@ -56,8 +53,8 @@
  *
  * OpenGL(TM) is a trademark of Silicon Graphics, Inc.
  */
-#ifndef _mbGLwDrawAP_h
-#define _mbGLwDrawAP_h
+#ifndef MBVIEW_mbGLwDrawAP_h_
+#define MBVIEW_mbGLwDrawAP_h_
 
 #include "mb_glwdrawa.h"
 
@@ -116,4 +113,4 @@ typedef struct _mbGLwMDrawingAreaRec {
 	mbGLwDrawingAreaPart mbglwDrawingArea;
 } mbGLwMDrawingAreaRec;
 
-#endif
+#endif  // MBVIEW_mbGLwDrawAP_h_
