@@ -12,13 +12,14 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- *
  * Author:	D. W. Caress
  * Date:	November 11,  2007
- *
  */
 
-/*--------------------------------------------------------------------*/
+// TODO(schwehr): Fold into mbpingedit_callbacks.c
+
+#ifndef MBVIEW_MBPINGEDITPRIVATE_H_
+#define MBVIEW_MBPINGEDITPRIVATE_H_
 
 /* OpenGL Error checking */
 /* #define MBP_GETERRORS 1 */
@@ -257,4 +258,4 @@ XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Bo
 void BxExitCB(Widget w, XtPointer client, XtPointer call);
 void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
 
-/*------------------------------------------------------------------------------*/
+#endif  // MBVIEW_MBPINGEDITPRIVATE_H_
