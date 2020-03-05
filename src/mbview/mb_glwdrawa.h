@@ -12,10 +12,8 @@
  *    See notes below for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- *
  * Author:	D. W. Caress
  * Date:	May 22, 2007
- *
  */
 /*------------------------------------------------------------------------------*/
 /*
@@ -55,8 +53,8 @@
  *
  * OpenGL(TM) is a trademark of Silicon Graphics, Inc.
  */
-#ifndef _mbGLwDrawA_h
-#define _mbGLwDrawA_h
+#ifndef MBVIEW_mbGLwDrawA_h_
+#define MBVIEW_mbGLwDrawA_h_
 
 #ifndef _WIN32
 #include <GL/glx.h>
@@ -197,4 +195,4 @@ GLAPI Widget mbGLwCreateMDrawingArea(Widget parent, char *name, ArgList arglist,
 #endif
 #endif
 
-#endif
+#endif  // MBVIEW_mbGLwDrawA_h_
