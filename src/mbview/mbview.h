@@ -12,13 +12,12 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- *
  * Author:	D. W. Caress
  * Date:	October 10,  2002
- *
  */
 
-/*--------------------------------------------------------------------*/
+#ifndef MBVIEW_MBVIEW_H_
+#define MBVIEW_MBVIEW_H_
 
 #ifndef MB_STATUS_DEF
 #include "mb_status.h"
@@ -889,4 +888,5 @@ int mb3dsoundings_set_optimizebiasvalues_notify(int verbose,
 int mb3dsoundings_plot(int verbose, int *error);
 int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, double *headingbias, double *timelag,
                                   double *snell, int *error);
-/*--------------------------------------------------------------------*/
+
+#endif  // MBVIEW_MBVIEW_H_
