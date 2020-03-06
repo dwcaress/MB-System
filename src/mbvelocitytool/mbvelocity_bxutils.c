@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #include <Xm/Xm.h>
 #include <mb_config.h>
@@ -13,11 +14,6 @@
 /*****************************************************************************
  *       TYPDEFS AND DEFINES
  *****************************************************************************/
-
-/*
- * Undefine this if you want to use native strcasecmp.
- */
-#define LOCAL_STRCASECMP
 
 #ifdef _NO_PROTO
 #ifdef NeedFunctionPrototypes
@@ -38,20 +34,6 @@
  * Handy definition used in SET_BACKGROUND_COLOR
  */
 #define UNSET (-1)
-
-/*
- * Set up strcasecmp function
- */
-#if defined(LOCAL_STRCASECMP)
-#define STRCASECMP StrCasecmp
-#ifndef NeedFunctionPrototypes
-static int StrCasecmp();
-#else
-static int StrCasecmp(char *, char *);
-#endif
-#else
-#define STRCASECMP strcasecmp
-#endif
 
 /*
  * Define XTPOINTER so it works with all releases of
@@ -148,39 +130,6 @@ static wchar_t *CStrCommonWideCharsGet();
 /*****************************************************************************
  *	STATIC CODE
  *****************************************************************************/
-
-#if defined(LOCAL_STRCASECMP)
-
-/*
- * Function:
- *      cmp = StrCasecmp(s1, s2);
- * Description:
- *      Compare two strings ignoring case
- * Input:
- *      s1 - char * : string 1 to compare
- *      s2 - char * : string 2 to compare
- * Output:
- *      int :  0; s1 == s2
- *             1; s1 != s2
- */
-static int StrCasecmp(char *s1, char *s2) {
-	int c1, c2;
-
-	while (*s1 && *s2) {
-		c1 = isupper(*s1) ? tolower(*s1) : *s1;
-		c2 = isupper(*s2) ? tolower(*s2) : *s2;
-		if (c1 != c2) {
-			return (1);
-		}
-		s1++;
-		s2++;
-	}
-	if (*s1 || *s2) {
-		return (1);
-	}
-	return (0);
-}
-#endif
 
 #ifndef SUPPORTS_WCHARS
 /*
@@ -2159,7 +2108,7 @@ static int SetColor(
     unsigned int *mask_pixel_index) {
 	XColor xcolor;
 
-	if (STRCASECMP(colorname, BX_TRANSPARENT_COLOR)) {
+	if (strcasecmp(colorname, BX_TRANSPARENT_COLOR)) {
 		if (!XParseColor(display, colormap, colorname, &xcolor) || (!XAllocColor(display, colormap, &xcolor)))
 			return (1);
 		*image_pixel = xcolor.pixel;
