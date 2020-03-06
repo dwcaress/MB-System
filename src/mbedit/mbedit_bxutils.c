@@ -1192,10 +1192,7 @@ typedef struct {
 #define BxXpmReturnPixels (1L << 9)
 #define BxXpmReturnInfos BxXpmInfos
 
-static int BxXpmCreateImageFromData(
-   Display * display, char **data, XImage **image_return,
-   XImage **shapemask_return, BxXpmAttributes *attributes);
-static void BxXpmFreeAttributes(BxXpmAttributes * attributes);
+// static void BxXpmFreeAttributes(BxXpmAttributes * attributes);
 
 typedef struct {
 	unsigned int type;
@@ -1248,7 +1245,7 @@ typedef struct {
 
 #define BX_UNDEF_PIXEL 0x80000000
 
-char *BxXpmColorKeys[] = {
+const char *BxXpmColorKeys[] = {
     "s",  /* key #1: symbol */
     "m",  /* key #2: mono visual */
     "g4", /* key #3: 4 grays visual */
@@ -1256,56 +1253,95 @@ char *BxXpmColorKeys[] = {
     "c",  /* key #5: color visual */
 };
 
-/* XPM private routines */
+// XPM private routines
 
-static int xpmCreateImage(
-    Display * display, bxxpmInternAttrib *attrib, XImage **image_return,
-    XImage **shapeimage_return, BxXpmAttributes *attributes);
-static int xpmParseData(bxxpmData * data, bxxpmInternAttrib *attrib_return, BxXpmAttributes *attributes);
-static int BxXpmVisualType(Visual * visual);
-static void xpmFreeColorTable(char ***colorTable, int ncolors);
-static void xpmInitInternAttrib(bxxpmInternAttrib * xmpdata);
-static void xpmFreeInternAttrib(bxxpmInternAttrib * xmpdata);
-static void xpmSetAttributes(bxxpmInternAttrib * attrib, BxXpmAttributes *attributes);
+/*
+ * The functions below are written from X11R5 MIT's code (XImUtil.c)
+ *
+ * The idea is to have faster functions than the standard XPutPixel function
+ * to build the image data. Indeed we can speed up things by suppressing tests
+ * performed for each pixel. We do exactly the same tests but at the image
+ * level. Assuming that we use only ZPixmap images.
+ */
+static unsigned char const _reverse_byte[0x100] = {
+    0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0, 0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0, 0x08, 0x88, 0x48, 0xc8,
+    0x28, 0xa8, 0x68, 0xe8, 0x18, 0x98, 0x58, 0xd8, 0x38, 0xb8, 0x78, 0xf8, 0x04, 0x84, 0x44, 0xc4, 0x24, 0xa4, 0x64, 0xe4,
+    0x14, 0x94, 0x54, 0xd4, 0x34, 0xb4, 0x74, 0xf4, 0x0c, 0x8c, 0x4c, 0xcc, 0x2c, 0xac, 0x6c, 0xec, 0x1c, 0x9c, 0x5c, 0xdc,
+    0x3c, 0xbc, 0x7c, 0xfc, 0x02, 0x82, 0x42, 0xc2, 0x22, 0xa2, 0x62, 0xe2, 0x12, 0x92, 0x52, 0xd2, 0x32, 0xb2, 0x72, 0xf2,
+    0x0a, 0x8a, 0x4a, 0xca, 0x2a, 0xaa, 0x6a, 0xea, 0x1a, 0x9a, 0x5a, 0xda, 0x3a, 0xba, 0x7a, 0xfa, 0x06, 0x86, 0x46, 0xc6,
+    0x26, 0xa6, 0x66, 0xe6, 0x16, 0x96, 0x56, 0xd6, 0x36, 0xb6, 0x76, 0xf6, 0x0e, 0x8e, 0x4e, 0xce, 0x2e, 0xae, 0x6e, 0xee,
+    0x1e, 0x9e, 0x5e, 0xde, 0x3e, 0xbe, 0x7e, 0xfe, 0x01, 0x81, 0x41, 0xc1, 0x21, 0xa1, 0x61, 0xe1, 0x11, 0x91, 0x51, 0xd1,
+    0x31, 0xb1, 0x71, 0xf1, 0x09, 0x89, 0x49, 0xc9, 0x29, 0xa9, 0x69, 0xe9, 0x19, 0x99, 0x59, 0xd9, 0x39, 0xb9, 0x79, 0xf9,
+    0x05, 0x85, 0x45, 0xc5, 0x25, 0xa5, 0x65, 0xe5, 0x15, 0x95, 0x55, 0xd5, 0x35, 0xb5, 0x75, 0xf5, 0x0d, 0x8d, 0x4d, 0xcd,
+    0x2d, 0xad, 0x6d, 0xed, 0x1d, 0x9d, 0x5d, 0xdd, 0x3d, 0xbd, 0x7d, 0xfd, 0x03, 0x83, 0x43, 0xc3, 0x23, 0xa3, 0x63, 0xe3,
+    0x13, 0x93, 0x53, 0xd3, 0x33, 0xb3, 0x73, 0xf3, 0x0b, 0x8b, 0x4b, 0xcb, 0x2b, 0xab, 0x6b, 0xeb, 0x1b, 0x9b, 0x5b, 0xdb,
+    0x3b, 0xbb, 0x7b, 0xfb, 0x07, 0x87, 0x47, 0xc7, 0x27, 0xa7, 0x67, 0xe7, 0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7, 0x77, 0xf7,
+    0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef, 0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff};
 
-// I/O utility
-static void xpmNextString(bxxpmData * mdata);
-static int xpmNextUI(bxxpmData * mdata, unsigned int *ui_return);
-static int xpmGetC(bxxpmData * mdata);
-static int xpmUngetC(int c, bxxpmData *mdata);
-static unsigned int xpmNextWord(bxxpmData * mdata, char *buf);
-static void xpmGetCmt(bxxpmData * mdata, char **cmt);
-static int xpmOpenArray(char **data, bxxpmData *mdata);
-static void XpmDataClose(bxxpmData * mdata);
+static void _XReverse_Bytes(unsigned char *bpt, int nb) {
+	do {
+		*bpt = _reverse_byte[*bpt];
+		bpt++;
+	} while (--nb > 0);
+}
 
-// RGB utility
-static void xpm_xynormalizeimagebits(unsigned char *bp, XImage *img);
-static void xpm_znormalizeimagebits(unsigned char *bp, XImage *img);
+static void xpm_xynormalizeimagebits(unsigned char *bp, XImage *img) {
+	unsigned char c;
 
-// Image utility
-static int SetColor(
-    Display * display, Colormap colormap, char *colorname,
-    unsigned int color_index, Pixel *image_pixel, Pixel *mask_pixel,
-    unsigned int *mask_pixel_index);
-static int CreateXImage(
-    Display * display, Visual *visual, unsigned int depth, unsigned int width,
-    unsigned int height, XImage **image_return);
-static void SetImagePixels(
-    XImage * image, unsigned int width, unsigned int height,
-    unsigned int *pixelindex, Pixel *pixels);
-static void SetImagePixels32(
-    XImage * image, unsigned int width, unsigned int height,
-    unsigned int *pixelindex, Pixel *pixels);
-static void SetImagePixels16(
-    XImage * image, unsigned int width, unsigned int height,
-    unsigned int *pixelindex, Pixel *pixels);
-static void SetImagePixels8(
-    XImage * image, unsigned int width, unsigned int height,
-    unsigned int *pixelindex, Pixel *pixels);
-static void SetImagePixels1(
-    XImage * image, unsigned int width, unsigned int height,
-    unsigned int *pixelindex, Pixel *pixels);
-static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return);
+	if (img->byte_order != img->bitmap_bit_order) {
+		switch (img->bitmap_unit) {
+
+		case 16:
+			c = *bp;
+			*bp = *(bp + 1);
+			*(bp + 1) = c;
+			break;
+
+		case 32:
+			c = *(bp + 3);
+			*(bp + 3) = *bp;
+			*bp = c;
+			c = *(bp + 2);
+			*(bp + 2) = *(bp + 1);
+			*(bp + 1) = c;
+			break;
+		}
+	}
+	if (img->bitmap_bit_order == MSBFirst)
+		_XReverse_Bytes(bp, img->bitmap_unit >> 3);
+}
+
+static void xpm_znormalizeimagebits(unsigned char *bp, XImage *img) {
+	unsigned char c;
+
+	switch (img->bits_per_pixel) {
+
+	case 4:
+		*bp = ((*bp >> 4) & 0xF) | ((*bp << 4) & ~0xF);
+		break;
+
+	case 16:
+		c = *bp;
+		*bp = *(bp + 1);
+		*(bp + 1) = c;
+		break;
+
+	case 24:
+		c = *(bp + 2);
+		*(bp + 2) = *bp;
+		*bp = c;
+		break;
+
+	case 32:
+		c = *(bp + 3);
+		*(bp + 3) = *bp;
+		*bp = c;
+		c = *(bp + 2);
+		*(bp + 2) = *(bp + 1);
+		*(bp + 1) = c;
+		break;
+	}
+}
 
 /*
  * Macros
@@ -1359,325 +1395,82 @@ static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
 		return 0;
 }
 
-static int BxXpmCreatePixmapFromData(
-    Display * display, Drawable d, char **data, Pixmap *pixmap_return, Pixmap *shapemask_return,
-    BxXpmAttributes *attributes) {
-	XImage *image, **imageptr = NULL;
-	XImage *shapeimage, **shapeimageptr = NULL;
-	int ErrorStatus;
-	XGCValues gcv;
-	GC gc;
+// Free the computed color table
+static void xpmFreeColorTable(char ***colorTable, int ncolors) {
+	int a, b;
 
-	// initialize return values
-	if (pixmap_return) {
-		*pixmap_return = (Pixmap)NULL;
-		imageptr = &image;
+	if (colorTable) {
+		for (a = 0; a < ncolors; a++)
+			if (colorTable[a]) {
+				for (b = 0; b < (BXNKEYS + 1); b++)
+					if (colorTable[a][b])
+						free(colorTable[a][b]);
+				free((char *)colorTable[a]);
+			}
+		free((char *)colorTable);
 	}
-	if (shapemask_return) {
-		*shapemask_return = (Pixmap)NULL;
-		shapeimageptr = &shapeimage;
-	}
-
-	/*
-	 * create the images
-	 */
-	ErrorStatus = BxXpmCreateImageFromData(display, data, imageptr, shapeimageptr, attributes);
-	if (ErrorStatus < 0)
-		return (ErrorStatus);
-
-	/*
-	 * create the pixmaps
-	 */
-	if (imageptr && image) {
-		*pixmap_return = XCreatePixmap(display, d, image->width, image->height, image->depth);
-		gcv.function = GXcopy;
-		gc = XCreateGC(display, *pixmap_return, GCFunction, &gcv);
-
-		XPutImage(display, *pixmap_return, gc, image, 0, 0, 0, 0, image->width, image->height);
-
-		XDestroyImage(image);
-		XFreeGC(display, gc);
-	}
-	if (shapeimageptr && shapeimage) {
-		*shapemask_return = XCreatePixmap(display, d, shapeimage->width, shapeimage->height, shapeimage->depth);
-		gcv.function = GXcopy;
-		gc = XCreateGC(display, *shapemask_return, GCFunction, &gcv);
-
-		XPutImage(display, *shapemask_return, gc, shapeimage, 0, 0, 0, 0, shapeimage->width, shapeimage->height);
-
-		XDestroyImage(shapeimage);
-		XFreeGC(display, gc);
-	}
-	return (ErrorStatus);
-}
-
-static int BxXpmCreateImageFromData(
-    Display *display, char **data, XImage **image_return,
-    XImage **shapeimage_return, BxXpmAttributes *attributes) {
-	bxxpmData mdata;
-	int ErrorStatus;
-	bxxpmInternAttrib attrib;
-
-	// initialize return values
-	if (image_return)
-		*image_return = NULL;
-	if (shapeimage_return)
-		*shapeimage_return = NULL;
-
-	if ((ErrorStatus = xpmOpenArray(data, &mdata)) != BxXpmSuccess)
-		return (ErrorStatus);
-
-	xpmInitInternAttrib(&attrib);
-
-	ErrorStatus = xpmParseData(&mdata, &attrib, attributes);
-
-	if (ErrorStatus == BxXpmSuccess)
-		ErrorStatus = xpmCreateImage(display, &attrib, image_return, shapeimage_return, attributes);
-
-	if (ErrorStatus >= 0)
-		xpmSetAttributes(&attrib, attributes);
-	else if (attributes)
-		BxXpmFreeAttributes(attributes);
-
-	xpmFreeInternAttrib(&attrib);
-	XpmDataClose(&mdata);
-
-	return (ErrorStatus);
 }
 
 /*
- * open the given array to be read or written as an bxxpmData which is returned
+ * Free the BxXpmAttributes structure members
+ * but the structure itself
  */
-static int xpmOpenArray(char **data, bxxpmData *mdata) {
-	mdata->type = BXXPMARRAY;
-	mdata->stream.data = data;
-	mdata->cptr = *data;
-	mdata->line = 0;
-	mdata->CommentLength = 0;
-	mdata->Bcmt = mdata->Ecmt = NULL;
-	mdata->Bos = mdata->Eos = '\0';
-	mdata->InsideString = 0;
-	return (BxXpmSuccess);
-}
-
-/*
- * Intialize the bxxpmInternAttrib pointers to Null to know
- * which ones must be freed later on.
- */
-static void xpmInitInternAttrib(bxxpmInternAttrib *attrib) {
-	attrib->ncolors = 0;
-	attrib->colorTable = NULL;
-	attrib->pixelindex = NULL;
-	attrib->xcolors = NULL;
-	attrib->colorStrings = NULL;
-	attrib->mask_pixel = BX_UNDEF_PIXEL;
-}
-
-/* function call in case of error, frees only localy allocated variables */
-#undef RETURN
-#define RETURN(status)                                           \
-	{                                                        \
-		if (colorTable)                                  \
-			xpmFreeColorTable(colorTable, ncolors);  \
-		if (chars)                                       \
-			free(chars);                             \
-		if (pixelindex)                                  \
-			free((char *)pixelindex);                \
-		if (hints_cmt)                                   \
-			free((char *)hints_cmt);                 \
-		if (colors_cmt)                                  \
-			free((char *)colors_cmt);                \
-		if (pixels_cmt)                                  \
-			free((char *)pixels_cmt);                \
-		return (status);                                 \
-	}
-
-/*
- * This function parses an Xpm file or data and store the found informations
- * in an an bxxpmInternAttrib structure which is returned.
- */
-static int xpmParseData(
-    bxxpmData *data, bxxpmInternAttrib *attrib_return,
-    BxXpmAttributes *attributes) {
-	/* variables to return */
-	unsigned int width, height;
-	unsigned int ncolors = 0;
-	unsigned int cpp;
-	unsigned int x_hotspot, y_hotspot, hotspot = 0;
-	char ***colorTable = NULL;
-	unsigned int *pixelindex = NULL;
-	char *hints_cmt = NULL;
-	char *colors_cmt = NULL;
-	char *pixels_cmt = NULL;
-
-	/* calculation variables */
-	unsigned int rncolors = 0; /* read number of colors, it is
-	                            * different to ncolors to avoid
-	                            * problem when freeing the
-	                            * colorTable in case an error
-	                            * occurs while reading the hints
-	                            * line */
-	unsigned int key;          /* color key */
-	char *chars = NULL, buf[BUFSIZ];
-	unsigned int *iptr;
-	unsigned int a, b, x, y, l;
-
-	unsigned int curkey;     /* current color key */
-	unsigned int lastwaskey; /* key read */
-	char curbuf[BUFSIZ];     /* current buffer */
-
-	/*
-	 * read hints: width, height, ncolors, chars_per_pixel
-	 */
-	if (!(xpmNextUI(data, &width) && xpmNextUI(data, &height) && xpmNextUI(data, &rncolors) && xpmNextUI(data, &cpp)))
-		RETURN(BxXpmFileInvalid);
-
-	ncolors = rncolors;
-
-	/*
-	 * read hotspot coordinates if any
-	 */
-	hotspot = xpmNextUI(data, &x_hotspot) && xpmNextUI(data, &y_hotspot);
-
-	/*
-	 * store the hints comment line
-	 */
-	if (attributes && (attributes->valuemask & BxXpmReturnInfos))
-		xpmGetCmt(data, &hints_cmt);
-
-	/*
-	 * read colors
-	 */
-	colorTable = (char ***)calloc(ncolors, sizeof(char **));
-	if (!colorTable)
-		RETURN(BxXpmNoMemory);
-
-	for (a = 0; a < ncolors; a++) {
-		xpmNextString(data); /* skip the line */
-		colorTable[a] = (char **)calloc((BXNKEYS + 1), sizeof(char *));
-		if (!colorTable[a])
-			RETURN(BxXpmNoMemory);
-
-		/*
-		 * read pixel value
-		 */
-		colorTable[a][0] = (char *)malloc(cpp);
-		if (!colorTable[a][0])
-			RETURN(BxXpmNoMemory);
-		for (b = 0; b < cpp; b++)
-			colorTable[a][0][b] = xpmGetC(data);
-
-		/*
-		 * read color keys and values
-		 */
-		curkey = 0;
-		lastwaskey = 0;
-		while ((l = xpmNextWord(data, buf))) {
-			if (!lastwaskey) {
-				for (key = 1; key < BXNKEYS + 1; key++)
-					if ((strlen(BxXpmColorKeys[key - 1]) == l) && (!strncmp(BxXpmColorKeys[key - 1], buf, l)))
-						break;
-			}
-			if (!lastwaskey && key <= BXNKEYS) { /* open new key */
-				if (curkey) {                    /* flush string */
-					colorTable[a][curkey] = (char *)malloc(strlen(curbuf) + 1);
-					if (!colorTable[a][curkey])
-						RETURN(BxXpmNoMemory);
-					strcpy(colorTable[a][curkey], curbuf);
-				}
-				curkey = key;     /* set new key  */
-				curbuf[0] = '\0'; /* reset curbuf */
-				lastwaskey = 1;
-			}
-			else {
-				if (!curkey)
-					RETURN(BxXpmFileInvalid); /* key without value */
-				if (!lastwaskey)
-					strcat(curbuf, " "); /* append space */
-				buf[l] = '\0';
-				strcat(curbuf, buf); /* append buf */
-				lastwaskey = 0;
-			}
-		}
-		if (!curkey)
-			RETURN(BxXpmFileInvalid); /* key without value */
-		colorTable[a][curkey] = (char *)malloc(strlen(curbuf) + 1);
-		if (!colorTable[a][curkey])
-			RETURN(BxXpmNoMemory);
-		strcpy(colorTable[a][curkey], curbuf);
-	}
-
-	/*
-	 * store the colors comment line
-	 */
-	if (attributes && (attributes->valuemask & BxXpmReturnInfos))
-		xpmGetCmt(data, &colors_cmt);
-
-	/*
-	 * read pixels and index them on color number
-	 */
-	pixelindex = (unsigned int *)malloc(sizeof(unsigned int) * width * height);
-	if (!pixelindex)
-		RETURN(BxXpmNoMemory);
-
-	iptr = pixelindex;
-
-	chars = (char *)malloc(cpp);
-	if (!chars)
-		RETURN(BxXpmNoMemory);
-
-	for (y = 0; y < height; y++) {
-		xpmNextString(data);
-		for (x = 0; x < width; x++, iptr++) {
-			for (a = 0; a < cpp; a++)
-				chars[a] = xpmGetC(data);
-			for (a = 0; a < ncolors; a++)
-				if (!strncmp(colorTable[a][0], chars, cpp))
-					break;
-			if (a == ncolors)
-				RETURN(BxXpmFileInvalid); /* no color matches */
-			*iptr = a;
-		}
-	}
-
-	/*
-	 * store the pixels comment line
-	 */
-	if (attributes && (attributes->valuemask & BxXpmReturnInfos))
-		xpmGetCmt(data, &pixels_cmt);
-
-	free(chars);
-
-	/*
-	 * store found informations in the bxxpmInternAttrib structure
-	 */
-	attrib_return->width = width;
-	attrib_return->height = height;
-	attrib_return->cpp = cpp;
-	attrib_return->ncolors = ncolors;
-	attrib_return->colorTable = colorTable;
-	attrib_return->pixelindex = pixelindex;
-
+static void BxXpmFreeAttributes(BxXpmAttributes *attributes) {
 	if (attributes) {
-		if (attributes->valuemask & BxXpmReturnInfos) {
-			attributes->hints_cmt = hints_cmt;
-			attributes->colors_cmt = colors_cmt;
-			attributes->pixels_cmt = pixels_cmt;
+		if (attributes->valuemask & BxXpmReturnPixels && attributes->pixels) {
+			free((char *)attributes->pixels);
+			attributes->pixels = NULL;
+			attributes->npixels = 0;
 		}
-		if (hotspot) {
-			attributes->x_hotspot = x_hotspot;
-			attributes->y_hotspot = y_hotspot;
-			attributes->valuemask |= BxXpmHotspot;
+		if (attributes->valuemask & BxXpmInfos) {
+			if (attributes->colorTable) {
+				xpmFreeColorTable(attributes->colorTable, attributes->ncolors);
+				attributes->colorTable = NULL;
+				attributes->ncolors = 0;
+			}
+			if (attributes->hints_cmt) {
+				free(attributes->hints_cmt);
+				attributes->hints_cmt = NULL;
+			}
+			if (attributes->colors_cmt) {
+				free(attributes->colors_cmt);
+				attributes->colors_cmt = NULL;
+			}
+			if (attributes->pixels_cmt) {
+				free(attributes->pixels_cmt);
+				attributes->pixels_cmt = NULL;
+			}
+			if (attributes->pixels) {
+				free((char *)attributes->pixels);
+				attributes->pixels = NULL;
+			}
 		}
+		attributes->valuemask = 0;
 	}
-	return (BxXpmSuccess);
+}
+
+static int BxXpmVisualType(Visual *visual) {
+	switch (visual->class)
+	{
+	case StaticGray:
+	case GrayScale:
+		switch (visual->map_entries) {
+		case 2:
+			return (BXMONO);
+		case 4:
+			return (BXGRAY4);
+		default:
+			return (BXGRAY);
+		}
+	default:
+		return (BXCOLOR);
+	}
 }
 
 /*
  * set the color pixel related to the given colorname,
  * return 0 if success, 1 otherwise.
  */
-
 static int SetColor(
     Display *display, Colormap colormap, char * colorname, unsigned int color_index,
     Pixel *image_pixel, Pixel *mask_pixel, unsigned int *mask_pixel_index) {
@@ -1695,6 +1488,270 @@ static int SetColor(
 		*mask_pixel_index = color_index; /* store the color table index */
 	}
 	return (0);
+}
+
+/*
+ * Create an XImage
+ */
+static int CreateXImage
+    (Display *display, Visual *visual, unsigned int depth, unsigned int width, unsigned int height, XImage **image_return) {
+	int bitmap_pad;
+
+	/* first get bitmap_pad */
+	if (depth > 16)
+		bitmap_pad = 32;
+	else if (depth > 8)
+		bitmap_pad = 16;
+	else
+		bitmap_pad = 8;
+
+	/* then create the XImage with data = NULL and bytes_per_line = 0 */
+
+	*image_return = XCreateImage(display, visual, depth, ZPixmap, 0, 0, width, height, bitmap_pad, 0);
+	if (!*image_return)
+		return (BxXpmNoMemory);
+
+	/* now that bytes_per_line must have been set properly alloc data */
+
+	(*image_return)->data = (char *)malloc((*image_return)->bytes_per_line * height);
+
+	if (!(*image_return)->data) {
+		XDestroyImage(*image_return);
+		*image_return = NULL;
+		return (BxXpmNoMemory);
+	}
+	return (BxXpmSuccess);
+}
+
+static unsigned char const _lomask[0x09] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
+static unsigned char const _himask[0x09] = {0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80, 0x00};
+
+static void _putbits(
+    char * src,     // address of source bit string
+    int dstoffset,  // bit offset into destination; range is 0-31
+    int numbits,     // number of bits to copy to destination
+    char *dst)      // address of destination bit string
+{
+	unsigned char chhi;
+
+	dst = dst + (dstoffset >> 3);
+	dstoffset = dstoffset & 7;
+	const int hibits = 8 - dstoffset;
+	unsigned char chlo = *dst & _lomask[dstoffset];
+	for (;;) {
+		chhi = (*src << dstoffset) & _himask[dstoffset];
+		if (numbits <= hibits) {
+			chhi = chhi & _lomask[dstoffset + numbits];
+			*dst = (*dst & _himask[dstoffset + numbits]) | chlo | chhi;
+			break;
+		}
+		*dst = chhi | chlo;
+		dst++;
+		numbits = numbits - hibits;
+		chlo = (unsigned char)(*src & _himask[hibits]) >> hibits;
+		src++;
+		if (numbits <= dstoffset) {
+			chlo = chlo & _lomask[numbits];
+			*dst = (*dst & _himask[numbits]) | chlo;
+			break;
+		}
+		numbits = numbits - dstoffset;
+	}
+}
+
+/*
+ * Default method to write pixels into a Z image data structure.
+ * The algorithm used is:
+ *
+ *	copy the destination bitmap_unit or Zpixel to temp
+ *	normalize temp if needed
+ *	copy the pixel bits into the temp
+ *	renormalize temp if needed
+ *	copy the temp back into the destination image data
+ */
+static void SetImagePixels(
+    XImage *image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels) {
+	Pixel pixel;
+	unsigned long px;
+	char *src;
+	char *dst;
+	int nbytes;
+	int x, y;
+
+	unsigned int *iptr = pixelindex;
+	if (image->depth == 1) {
+		for (y = 0; y < height; y++)
+			for (x = 0; x < width; x++, iptr++) {
+				pixel = pixels[*iptr];
+				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
+					((unsigned char *)&pixel)[i] = (unsigned char)px;
+				src = &image->data[BXXYINDEX(x, y, image)];
+				dst = (char *)&px;
+				px = 0;
+				nbytes = image->bitmap_unit >> 3;
+				for (int i = nbytes; --i >= 0;)
+					*dst++ = *src++;
+				BXXYNORMALIZE(&px, image);
+				int i = ((x + image->xoffset) % image->bitmap_unit);
+				_putbits((char *)&pixel, i, 1, (char *)&px);
+				BXXYNORMALIZE(&px, image);
+				src = (char *)&px;
+				dst = &image->data[BXXYINDEX(x, y, image)];
+				for (i = nbytes; --i >= 0;)
+					*dst++ = *src++;
+			}
+	}
+	else {
+		for (y = 0; y < height; y++)
+			for (x = 0; x < width; x++, iptr++) {
+				pixel = pixels[*iptr];
+				if (image->depth == 4)
+					pixel &= 0xf;
+				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
+					((unsigned char *)&pixel)[i] = (unsigned char)px;
+				src = &image->data[BXZINDEX(x, y, image)];
+				dst = (char *)&px;
+				px = 0;
+				nbytes = (image->bits_per_pixel + 7) >> 3;
+				for (int i = nbytes; --i >= 0;)
+					*dst++ = *src++;
+				BXZNORMALIZE(&px, image);
+				_putbits((char *)&pixel, (x * image->bits_per_pixel) & 7, image->bits_per_pixel, (char *)&px);
+				BXZNORMALIZE(&px, image);
+				src = (char *)&px;
+				dst = &image->data[BXZINDEX(x, y, image)];
+				for (int i = nbytes; --i >= 0;)
+					*dst++ = *src++;
+			}
+	}
+}
+
+/*
+ * write pixels into a 32-bits Z image data structure
+ */
+
+#ifndef WORD64
+static unsigned long byteorderpixel = MSBFirst << 24;
+
+#endif
+
+static void SetImagePixels32(
+    XImage *image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels) {
+	unsigned char *addr;
+	unsigned int *paddr;
+	unsigned int *iptr;
+	int x, y;
+
+	iptr = pixelindex;
+#ifndef WORD64
+	if (*((char *)&byteorderpixel) == image->byte_order) {
+		for (y = 0; y < height; y++)
+			for (x = 0; x < width; x++, iptr++) {
+				paddr = (unsigned int *)(&(image->data[BXZINDEX32(x, y, image)]));
+				*paddr = (unsigned int)pixels[*iptr];
+			}
+	}
+	else
+#endif
+	    if (image->byte_order == MSBFirst)
+		for (y = 0; y < height; y++)
+			for (x = 0; x < width; x++, iptr++) {
+				addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
+				addr[0] = (unsigned char)(pixels[*iptr] >> 24);
+				addr[1] = (unsigned char)(pixels[*iptr] >> 16);
+				addr[2] = (unsigned char)(pixels[*iptr] >> 8);
+				addr[3] = (unsigned char)(pixels[*iptr]);
+			}
+	else
+		for (y = 0; y < height; y++)
+			for (x = 0; x < width; x++, iptr++) {
+				addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
+				addr[3] = (unsigned char)(pixels[*iptr] >> 24);
+				addr[2] = (unsigned char)(pixels[*iptr] >> 16);
+				addr[1] = (unsigned char)(pixels[*iptr] >> 8);
+				addr[0] = (unsigned char)(pixels[*iptr]);
+			}
+}
+
+/*
+ * write pixels into a 16-bits Z image data structure
+ */
+static void SetImagePixels16(
+    XImage *image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels) {
+	unsigned char *addr;
+	unsigned int *iptr;
+	int x, y;
+
+	iptr = pixelindex;
+	if (image->byte_order == MSBFirst)
+		for (y = 0; y < height; y++)
+			for (x = 0; x < width; x++, iptr++) {
+				addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
+				addr[0] = (unsigned char)(pixels[*iptr] >> 8);
+				addr[1] = (unsigned char)(pixels[*iptr]);
+			}
+	else
+		for (y = 0; y < height; y++)
+			for (x = 0; x < width; x++, iptr++) {
+				addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
+				addr[1] = (unsigned char)(pixels[*iptr] >> 8);
+				addr[0] = (unsigned char)(pixels[*iptr]);
+			}
+}
+
+/*
+ * write pixels into a 8-bits Z image data structure
+ */
+static void SetImagePixels8(
+    XImage *image, unsigned int width, unsigned int height, unsigned int *pixelindex, Pixel *pixels)
+{
+	unsigned int *iptr = pixelindex;
+	for (int y = 0; y < height; y++)
+		for (int x = 0; x < width; x++, iptr++)
+			image->data[BXZINDEX8(x, y, image)] = (char)pixels[*iptr];
+}
+
+/*
+ * write pixels into a 1-bit depth image data structure and **offset null**
+ */
+static void SetImagePixels1(
+    XImage *image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels) {
+	unsigned char bit;
+	int xoff, yoff;
+	unsigned int *iptr;
+	int x, y;
+
+	if (image->byte_order != image->bitmap_bit_order)
+		SetImagePixels(image, width, height, pixelindex, pixels);
+	else {
+		iptr = pixelindex;
+		if (image->bitmap_bit_order == MSBFirst)
+			for (y = 0; y < height; y++)
+				for (x = 0; x < width; x++, iptr++) {
+					yoff = BXZINDEX1(x, y, image);
+					xoff = x & 7;
+					bit = 0x80 >> xoff;
+					if (pixels[*iptr] & 1)
+						image->data[yoff] |= bit;
+					else
+						image->data[yoff] &= ~bit;
+				}
+		else
+			for (y = 0; y < height; y++)
+				for (x = 0; x < width; x++, iptr++) {
+					yoff = BXZINDEX1(x, y, image);
+					xoff = x & 7;
+					bit = 1 << xoff;
+					if (pixels[*iptr] & 1)
+						image->data[yoff] |= bit;
+					else
+						image->data[yoff] &= ~bit;
+				}
+	}
 }
 
 /* function call in case of error, frees only localy allocated variables */
@@ -1932,520 +1989,20 @@ static int xpmCreateImage(
 }
 
 /*
- * Create an XImage
+ * push the given character back
  */
-static int CreateXImage
-    (Display *display, Visual *visual, unsigned int depth, unsigned int width, unsigned int height, XImage **image_return) {
-	int bitmap_pad;
-
-	/* first get bitmap_pad */
-	if (depth > 16)
-		bitmap_pad = 32;
-	else if (depth > 8)
-		bitmap_pad = 16;
-	else
-		bitmap_pad = 8;
-
-	/* then create the XImage with data = NULL and bytes_per_line = 0 */
-
-	*image_return = XCreateImage(display, visual, depth, ZPixmap, 0, 0, width, height, bitmap_pad, 0);
-	if (!*image_return)
-		return (BxXpmNoMemory);
-
-	/* now that bytes_per_line must have been set properly alloc data */
-
-	(*image_return)->data = (char *)malloc((*image_return)->bytes_per_line * height);
-
-	if (!(*image_return)->data) {
-		XDestroyImage(*image_return);
-		*image_return = NULL;
-		return (BxXpmNoMemory);
-	}
-	return (BxXpmSuccess);
-}
-
-/*
- * The functions below are written from X11R5 MIT's code (XImUtil.c)
- *
- * The idea is to have faster functions than the standard XPutPixel function
- * to build the image data. Indeed we can speed up things by suppressing tests
- * performed for each pixel. We do exactly the same tests but at the image
- * level. Assuming that we use only ZPixmap images.
- */
-
-static void _putbits(char *src, int dstoffset, int numbits, char *dst);
-
-static void _XReverse_Bytes(unsigned char *bpt, int nb);
-
-static unsigned char const _reverse_byte[0x100] = {
-    0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0, 0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0, 0x08, 0x88, 0x48, 0xc8,
-    0x28, 0xa8, 0x68, 0xe8, 0x18, 0x98, 0x58, 0xd8, 0x38, 0xb8, 0x78, 0xf8, 0x04, 0x84, 0x44, 0xc4, 0x24, 0xa4, 0x64, 0xe4,
-    0x14, 0x94, 0x54, 0xd4, 0x34, 0xb4, 0x74, 0xf4, 0x0c, 0x8c, 0x4c, 0xcc, 0x2c, 0xac, 0x6c, 0xec, 0x1c, 0x9c, 0x5c, 0xdc,
-    0x3c, 0xbc, 0x7c, 0xfc, 0x02, 0x82, 0x42, 0xc2, 0x22, 0xa2, 0x62, 0xe2, 0x12, 0x92, 0x52, 0xd2, 0x32, 0xb2, 0x72, 0xf2,
-    0x0a, 0x8a, 0x4a, 0xca, 0x2a, 0xaa, 0x6a, 0xea, 0x1a, 0x9a, 0x5a, 0xda, 0x3a, 0xba, 0x7a, 0xfa, 0x06, 0x86, 0x46, 0xc6,
-    0x26, 0xa6, 0x66, 0xe6, 0x16, 0x96, 0x56, 0xd6, 0x36, 0xb6, 0x76, 0xf6, 0x0e, 0x8e, 0x4e, 0xce, 0x2e, 0xae, 0x6e, 0xee,
-    0x1e, 0x9e, 0x5e, 0xde, 0x3e, 0xbe, 0x7e, 0xfe, 0x01, 0x81, 0x41, 0xc1, 0x21, 0xa1, 0x61, 0xe1, 0x11, 0x91, 0x51, 0xd1,
-    0x31, 0xb1, 0x71, 0xf1, 0x09, 0x89, 0x49, 0xc9, 0x29, 0xa9, 0x69, 0xe9, 0x19, 0x99, 0x59, 0xd9, 0x39, 0xb9, 0x79, 0xf9,
-    0x05, 0x85, 0x45, 0xc5, 0x25, 0xa5, 0x65, 0xe5, 0x15, 0x95, 0x55, 0xd5, 0x35, 0xb5, 0x75, 0xf5, 0x0d, 0x8d, 0x4d, 0xcd,
-    0x2d, 0xad, 0x6d, 0xed, 0x1d, 0x9d, 0x5d, 0xdd, 0x3d, 0xbd, 0x7d, 0xfd, 0x03, 0x83, 0x43, 0xc3, 0x23, 0xa3, 0x63, 0xe3,
-    0x13, 0x93, 0x53, 0xd3, 0x33, 0xb3, 0x73, 0xf3, 0x0b, 0x8b, 0x4b, 0xcb, 0x2b, 0xab, 0x6b, 0xeb, 0x1b, 0x9b, 0x5b, 0xdb,
-    0x3b, 0xbb, 0x7b, 0xfb, 0x07, 0x87, 0x47, 0xc7, 0x27, 0xa7, 0x67, 0xe7, 0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7, 0x77, 0xf7,
-    0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef, 0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff};
-
-static void _XReverse_Bytes(unsigned char *bpt, int nb) {
-	do {
-		*bpt = _reverse_byte[*bpt];
-		bpt++;
-	} while (--nb > 0);
-}
-
-static void xpm_xynormalizeimagebits(unsigned char *bp, XImage *img) {
-	unsigned char c;
-
-	if (img->byte_order != img->bitmap_bit_order) {
-		switch (img->bitmap_unit) {
-
-		case 16:
-			c = *bp;
-			*bp = *(bp + 1);
-			*(bp + 1) = c;
-			break;
-
-		case 32:
-			c = *(bp + 3);
-			*(bp + 3) = *bp;
-			*bp = c;
-			c = *(bp + 2);
-			*(bp + 2) = *(bp + 1);
-			*(bp + 1) = c;
-			break;
-		}
-	}
-	if (img->bitmap_bit_order == MSBFirst)
-		_XReverse_Bytes(bp, img->bitmap_unit >> 3);
-}
-
-static void xpm_znormalizeimagebits(unsigned char *bp, XImage *img) {
-	unsigned char c;
-
-	switch (img->bits_per_pixel) {
-
-	case 4:
-		*bp = ((*bp >> 4) & 0xF) | ((*bp << 4) & ~0xF);
-		break;
-
-	case 16:
-		c = *bp;
-		*bp = *(bp + 1);
-		*(bp + 1) = c;
-		break;
-
-	case 24:
-		c = *(bp + 2);
-		*(bp + 2) = *bp;
-		*bp = c;
-		break;
-
-	case 32:
-		c = *(bp + 3);
-		*(bp + 3) = *bp;
-		*bp = c;
-		c = *(bp + 2);
-		*(bp + 2) = *(bp + 1);
-		*(bp + 1) = c;
-		break;
-	}
-}
-
-static unsigned char const _lomask[0x09] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
-static unsigned char const _himask[0x09] = {0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80, 0x00};
-
-static void _putbits(
-    char * src,     // address of source bit string
-    int dstoffset,  // bit offset into destination; range is 0-31
-    int numbits,     // number of bits to copy to destination
-    char *dst)      // address of destination bit string
-{
-	unsigned char chhi;
-
-	dst = dst + (dstoffset >> 3);
-	dstoffset = dstoffset & 7;
-	const int hibits = 8 - dstoffset;
-	unsigned char chlo = *dst & _lomask[dstoffset];
-	for (;;) {
-		chhi = (*src << dstoffset) & _himask[dstoffset];
-		if (numbits <= hibits) {
-			chhi = chhi & _lomask[dstoffset + numbits];
-			*dst = (*dst & _himask[dstoffset + numbits]) | chlo | chhi;
-			break;
-		}
-		*dst = chhi | chlo;
-		dst++;
-		numbits = numbits - hibits;
-		chlo = (unsigned char)(*src & _himask[hibits]) >> hibits;
-		src++;
-		if (numbits <= dstoffset) {
-			chlo = chlo & _lomask[numbits];
-			*dst = (*dst & _himask[numbits]) | chlo;
-			break;
-		}
-		numbits = numbits - dstoffset;
-	}
-}
-
-/*
- * Default method to write pixels into a Z image data structure.
- * The algorithm used is:
- *
- *	copy the destination bitmap_unit or Zpixel to temp
- *	normalize temp if needed
- *	copy the pixel bits into the temp
- *	renormalize temp if needed
- *	copy the temp back into the destination image data
- */
-
-static void SetImagePixels(
-    XImage *image, unsigned int width, unsigned int height,
-    unsigned int *pixelindex, Pixel *pixels) {
-	Pixel pixel;
-	unsigned long px;
-	char *src;
-	char *dst;
-	int nbytes;
-	int x, y;
-
-	unsigned int *iptr = pixelindex;
-	if (image->depth == 1) {
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				pixel = pixels[*iptr];
-				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
-					((unsigned char *)&pixel)[i] = (unsigned char)px;
-				src = &image->data[BXXYINDEX(x, y, image)];
-				dst = (char *)&px;
-				px = 0;
-				nbytes = image->bitmap_unit >> 3;
-				for (int i = nbytes; --i >= 0;)
-					*dst++ = *src++;
-				BXXYNORMALIZE(&px, image);
-				int i = ((x + image->xoffset) % image->bitmap_unit);
-				_putbits((char *)&pixel, i, 1, (char *)&px);
-				BXXYNORMALIZE(&px, image);
-				src = (char *)&px;
-				dst = &image->data[BXXYINDEX(x, y, image)];
-				for (i = nbytes; --i >= 0;)
-					*dst++ = *src++;
-			}
-	}
-	else {
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				pixel = pixels[*iptr];
-				if (image->depth == 4)
-					pixel &= 0xf;
-				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
-					((unsigned char *)&pixel)[i] = (unsigned char)px;
-				src = &image->data[BXZINDEX(x, y, image)];
-				dst = (char *)&px;
-				px = 0;
-				nbytes = (image->bits_per_pixel + 7) >> 3;
-				for (int i = nbytes; --i >= 0;)
-					*dst++ = *src++;
-				BXZNORMALIZE(&px, image);
-				_putbits((char *)&pixel, (x * image->bits_per_pixel) & 7, image->bits_per_pixel, (char *)&px);
-				BXZNORMALIZE(&px, image);
-				src = (char *)&px;
-				dst = &image->data[BXZINDEX(x, y, image)];
-				for (int i = nbytes; --i >= 0;)
-					*dst++ = *src++;
-			}
-	}
-}
-
-/*
- * write pixels into a 32-bits Z image data structure
- */
-
-#ifndef WORD64
-static unsigned long byteorderpixel = MSBFirst << 24;
-
-#endif
-
-static void SetImagePixels32(
-    XImage *image, unsigned int width, unsigned int height,
-    unsigned int *pixelindex, Pixel *pixels) {
-	unsigned char *addr;
-	unsigned int *paddr;
-	unsigned int *iptr;
-	int x, y;
-
-	iptr = pixelindex;
-#ifndef WORD64
-	if (*((char *)&byteorderpixel) == image->byte_order) {
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				paddr = (unsigned int *)(&(image->data[BXZINDEX32(x, y, image)]));
-				*paddr = (unsigned int)pixels[*iptr];
-			}
-	}
-	else
-#endif
-	    if (image->byte_order == MSBFirst)
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
-				addr[0] = (unsigned char)(pixels[*iptr] >> 24);
-				addr[1] = (unsigned char)(pixels[*iptr] >> 16);
-				addr[2] = (unsigned char)(pixels[*iptr] >> 8);
-				addr[3] = (unsigned char)(pixels[*iptr]);
-			}
-	else
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
-				addr[3] = (unsigned char)(pixels[*iptr] >> 24);
-				addr[2] = (unsigned char)(pixels[*iptr] >> 16);
-				addr[1] = (unsigned char)(pixels[*iptr] >> 8);
-				addr[0] = (unsigned char)(pixels[*iptr]);
-			}
-}
-
-/*
- * write pixels into a 16-bits Z image data structure
- */
-
-static void SetImagePixels16(
-    XImage *image, unsigned int width, unsigned int height,
-    unsigned int *pixelindex, Pixel *pixels) {
-	unsigned char *addr;
-	unsigned int *iptr;
-	int x, y;
-
-	iptr = pixelindex;
-	if (image->byte_order == MSBFirst)
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
-				addr[0] = (unsigned char)(pixels[*iptr] >> 8);
-				addr[1] = (unsigned char)(pixels[*iptr]);
-			}
-	else
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
-				addr[1] = (unsigned char)(pixels[*iptr] >> 8);
-				addr[0] = (unsigned char)(pixels[*iptr]);
-			}
-}
-
-/*
- * write pixels into a 8-bits Z image data structure
- */
-
-static void SetImagePixels8(
-    XImage *image, unsigned int width, unsigned int height, unsigned int *pixelindex, Pixel *pixels)
-{
-	unsigned int *iptr = pixelindex;
-	for (int y = 0; y < height; y++)
-		for (int x = 0; x < width; x++, iptr++)
-			image->data[BXZINDEX8(x, y, image)] = (char)pixels[*iptr];
-}
-
-/*
- * write pixels into a 1-bit depth image data structure and **offset null**
- */
-
-static void SetImagePixels1(
-    XImage *image, unsigned int width, unsigned int height,
-    unsigned int *pixelindex, Pixel *pixels) {
-	unsigned char bit;
-	int xoff, yoff;
-	unsigned int *iptr;
-	int x, y;
-
-	if (image->byte_order != image->bitmap_bit_order)
-		SetImagePixels(image, width, height, pixelindex, pixels);
-	else {
-		iptr = pixelindex;
-		if (image->bitmap_bit_order == MSBFirst)
-			for (y = 0; y < height; y++)
-				for (x = 0; x < width; x++, iptr++) {
-					yoff = BXZINDEX1(x, y, image);
-					xoff = x & 7;
-					bit = 0x80 >> xoff;
-					if (pixels[*iptr] & 1)
-						image->data[yoff] |= bit;
-					else
-						image->data[yoff] &= ~bit;
-				}
-		else
-			for (y = 0; y < height; y++)
-				for (x = 0; x < width; x++, iptr++) {
-					yoff = BXZINDEX1(x, y, image);
-					xoff = x & 7;
-					bit = 1 << xoff;
-					if (pixels[*iptr] & 1)
-						image->data[yoff] |= bit;
-					else
-						image->data[yoff] &= ~bit;
-				}
-	}
-}
-
-/*
- * Store into the BxXpmAttributes structure the required informations stored in
- * the bxxpmInternAttrib structure.
- */
-
-static void xpmSetAttributes(
-    bxxpmInternAttrib *attrib, BxXpmAttributes *attributes) {
-	if (attributes) {
-		if (attributes->valuemask & BxXpmReturnInfos) {
-			attributes->cpp = attrib->cpp;
-			attributes->ncolors = attrib->ncolors;
-			attributes->colorTable = attrib->colorTable;
-
-			attrib->ncolors = 0;
-			attrib->colorTable = NULL;
-		}
-		attributes->width = attrib->width;
-		attributes->height = attrib->height;
-		attributes->valuemask |= BxXpmSize;
-	}
-}
-
-/*
- * Free the BxXpmAttributes structure members
- * but the structure itself
- */
-
-static void BxXpmFreeAttributes(BxXpmAttributes *attributes) {
-	if (attributes) {
-		if (attributes->valuemask & BxXpmReturnPixels && attributes->pixels) {
-			free((char *)attributes->pixels);
-			attributes->pixels = NULL;
-			attributes->npixels = 0;
-		}
-		if (attributes->valuemask & BxXpmInfos) {
-			if (attributes->colorTable) {
-				xpmFreeColorTable(attributes->colorTable, attributes->ncolors);
-				attributes->colorTable = NULL;
-				attributes->ncolors = 0;
-			}
-			if (attributes->hints_cmt) {
-				free(attributes->hints_cmt);
-				attributes->hints_cmt = NULL;
-			}
-			if (attributes->colors_cmt) {
-				free(attributes->colors_cmt);
-				attributes->colors_cmt = NULL;
-			}
-			if (attributes->pixels_cmt) {
-				free(attributes->pixels_cmt);
-				attributes->pixels_cmt = NULL;
-			}
-			if (attributes->pixels) {
-				free((char *)attributes->pixels);
-				attributes->pixels = NULL;
-			}
-		}
-		attributes->valuemask = 0;
-	}
-}
-
-/*
- * Free the bxxpmInternAttrib pointers which have been allocated
- */
-
-static void xpmFreeInternAttrib(bxxpmInternAttrib *attrib) {
-	unsigned int a;
-
-	if (attrib->colorTable)
-		xpmFreeColorTable(attrib->colorTable, attrib->ncolors);
-	if (attrib->pixelindex)
-		free((char *)attrib->pixelindex);
-	if (attrib->xcolors)
-		free((char *)attrib->xcolors);
-	if (attrib->colorStrings) {
-		for (a = 0; a < attrib->ncolors; a++)
-			if (attrib->colorStrings[a])
-				free((char *)attrib->colorStrings[a]);
-		free((char *)attrib->colorStrings);
-	}
-}
-
-/*
- * close the file related to the bxxpmData if any
- */
-static void XpmDataClose(bxxpmData *mdata) {
+static int xpmUngetC(int c, bxxpmData *mdata) {
 	switch (mdata->type) {
 	case BXXPMARRAY:
-		break;
-	case BXXPMFILE:
-		if (mdata->stream.file != (stdout) && mdata->stream.file != (stdin))
-			fclose(mdata->stream.file);
-		break;
-#ifdef ZPIPE
-	case BXXPMPIPE:
-		pclose(mdata->stream.file);
-#endif
-	}
-}
-
-/*
- * skip whitespace and compute the following unsigned int,
- * returns 1 if one is found and 0 if not
- */
-static int xpmNextUI(bxxpmData *mdata, unsigned int *ui_return) {
-	char buf[BUFSIZ];
-	int l;
-
-	l = xpmNextWord(mdata, buf);
-	return atoui(buf, l, ui_return);
-}
-
-/*
- * get the current comment line
- */
-static void xpmGetCmt(bxxpmData *mdata, char **cmt) {
-	switch (mdata->type) {
-	case BXXPMARRAY:
-		*cmt = NULL;
-		break;
+		return (*--mdata->cptr = c);
 	case BXXPMFILE:
 	case BXXPMPIPE:
-		if (mdata->CommentLength) {
-			*cmt = (char *)malloc(mdata->CommentLength + 1);
-			strncpy(*cmt, mdata->Comment, mdata->CommentLength);
-			(*cmt)[mdata->CommentLength] = '\0';
-			mdata->CommentLength = 0;
-		}
-		else
-			*cmt = NULL;
-		break;
+		if (mdata->Bos && (c == mdata->Bos || c == mdata->Eos))
+			/* if not natural XPM2 */
+			mdata->InsideString = !mdata->InsideString;
+		return (ungetc(c, mdata->stream.file));
 	}
-}
-
-/*
- * skip to the end of the current string and the beginning of the next one
- */
-static void xpmNextString(bxxpmData *mdata) {
-	int c;
-
-	switch (mdata->type) {
-	case BXXPMARRAY:
-		mdata->cptr = (mdata->stream.data)[++mdata->line];
-		break;
-	case BXXPMFILE:
-	case BXXPMPIPE:
-		if (mdata->Eos)
-			while ((c = xpmGetC(mdata)) != mdata->Eos && c != EOF)
-				;
-		if (mdata->Bos) /* if not natural XPM2 */
-			while ((c = xpmGetC(mdata)) != mdata->Bos && c != EOF)
-				;
-		break;
-	}
+	return ('\0');
 }
 
 /*
@@ -2520,21 +2077,45 @@ static int xpmGetC(bxxpmData *mdata) {
 }
 
 /*
- * push the given character back
+ * skip to the end of the current string and the beginning of the next one
  */
-static int xpmUngetC(int c, bxxpmData *mdata) {
+static void xpmNextString(bxxpmData *mdata) {
+	int c;
+
 	switch (mdata->type) {
 	case BXXPMARRAY:
-		return (*--mdata->cptr = c);
+		mdata->cptr = (mdata->stream.data)[++mdata->line];
+		break;
 	case BXXPMFILE:
 	case BXXPMPIPE:
-		if (mdata->Bos && (c == mdata->Bos || c == mdata->Eos))
-			/* if not natural XPM2 */
-			mdata->InsideString = !mdata->InsideString;
-		return (ungetc(c, mdata->stream.file));
+		if (mdata->Eos)
+			while ((c = xpmGetC(mdata)) != mdata->Eos && c != EOF)
+				;
+		if (mdata->Bos) /* if not natural XPM2 */
+			while ((c = xpmGetC(mdata)) != mdata->Bos && c != EOF)
+				;
+		break;
 	}
-	return ('\0');
 }
+
+/* function call in case of error, frees only localy allocated variables */
+#undef RETURN
+#define RETURN(status)                                           \
+	{                                                        \
+		if (colorTable)                                  \
+			xpmFreeColorTable(colorTable, ncolors);  \
+		if (chars)                                       \
+			free(chars);                             \
+		if (pixelindex)                                  \
+			free((char *)pixelindex);                \
+		if (hints_cmt)                                   \
+			free((char *)hints_cmt);                 \
+		if (colors_cmt)                                  \
+			free((char *)colors_cmt);                \
+		if (pixels_cmt)                                  \
+			free((char *)pixels_cmt);                \
+		return (status);                                 \
+	}
 
 /*
  * skip whitespace and return the following word
@@ -2572,38 +2153,392 @@ static unsigned int xpmNextWord(bxxpmData *mdata, char *buf) {
 	return (n);
 }
 
-static int BxXpmVisualType(Visual *visual) {
-	switch (visual->class)
-	{
-	case StaticGray:
-	case GrayScale:
-		switch (visual->map_entries) {
-		case 2:
-			return (BXMONO);
-		case 4:
-			return (BXGRAY4);
-		default:
-			return (BXGRAY);
+/*
+ * skip whitespace and compute the following unsigned int,
+ * returns 1 if one is found and 0 if not
+ */
+static int xpmNextUI(bxxpmData *mdata, unsigned int *ui_return) {
+	char buf[BUFSIZ];
+	int l;
+
+	l = xpmNextWord(mdata, buf);
+	return atoui(buf, l, ui_return);
+}
+
+/*
+ * get the current comment line
+ */
+static void xpmGetCmt(bxxpmData *mdata, char **cmt) {
+	switch (mdata->type) {
+	case BXXPMARRAY:
+		*cmt = NULL;
+		break;
+	case BXXPMFILE:
+	case BXXPMPIPE:
+		if (mdata->CommentLength) {
+			*cmt = (char *)malloc(mdata->CommentLength + 1);
+			strncpy(*cmt, mdata->Comment, mdata->CommentLength);
+			(*cmt)[mdata->CommentLength] = '\0';
+			mdata->CommentLength = 0;
 		}
-	default:
-		return (BXCOLOR);
+		else
+			*cmt = NULL;
+		break;
 	}
 }
 
-// Free the computed color table
-static void xpmFreeColorTable(char ***colorTable, int ncolors) {
-	int a, b;
+/*
+ * This function parses an Xpm file or data and store the found informations
+ * in an an bxxpmInternAttrib structure which is returned.
+ */
+static int xpmParseData(
+    bxxpmData *data, bxxpmInternAttrib *attrib_return,
+    BxXpmAttributes *attributes) {
+	/* variables to return */
+	unsigned int width, height;
+	unsigned int ncolors = 0;
+	unsigned int cpp;
+	unsigned int x_hotspot, y_hotspot, hotspot = 0;
+	char ***colorTable = NULL;
+	unsigned int *pixelindex = NULL;
+	char *hints_cmt = NULL;
+	char *colors_cmt = NULL;
+	char *pixels_cmt = NULL;
 
-	if (colorTable) {
-		for (a = 0; a < ncolors; a++)
-			if (colorTable[a]) {
-				for (b = 0; b < (BXNKEYS + 1); b++)
-					if (colorTable[a][b])
-						free(colorTable[a][b]);
-				free((char *)colorTable[a]);
+	/* calculation variables */
+	unsigned int rncolors = 0; /* read number of colors, it is
+	                            * different to ncolors to avoid
+	                            * problem when freeing the
+	                            * colorTable in case an error
+	                            * occurs while reading the hints
+	                            * line */
+	unsigned int key;          /* color key */
+	char *chars = NULL, buf[BUFSIZ];
+	unsigned int *iptr;
+	unsigned int a, b, x, y, l;
+
+	unsigned int curkey;     /* current color key */
+	unsigned int lastwaskey; /* key read */
+	char curbuf[BUFSIZ];     /* current buffer */
+
+	/*
+	 * read hints: width, height, ncolors, chars_per_pixel
+	 */
+	if (!(xpmNextUI(data, &width) && xpmNextUI(data, &height) && xpmNextUI(data, &rncolors) && xpmNextUI(data, &cpp)))
+		RETURN(BxXpmFileInvalid);
+
+	ncolors = rncolors;
+
+	/*
+	 * read hotspot coordinates if any
+	 */
+	hotspot = xpmNextUI(data, &x_hotspot) && xpmNextUI(data, &y_hotspot);
+
+	/*
+	 * store the hints comment line
+	 */
+	if (attributes && (attributes->valuemask & BxXpmReturnInfos))
+		xpmGetCmt(data, &hints_cmt);
+
+	/*
+	 * read colors
+	 */
+	colorTable = (char ***)calloc(ncolors, sizeof(char **));
+	if (!colorTable)
+		RETURN(BxXpmNoMemory);
+
+	for (a = 0; a < ncolors; a++) {
+		xpmNextString(data); /* skip the line */
+		colorTable[a] = (char **)calloc((BXNKEYS + 1), sizeof(char *));
+		if (!colorTable[a])
+			RETURN(BxXpmNoMemory);
+
+		/*
+		 * read pixel value
+		 */
+		colorTable[a][0] = (char *)malloc(cpp);
+		if (!colorTable[a][0])
+			RETURN(BxXpmNoMemory);
+		for (b = 0; b < cpp; b++)
+			colorTable[a][0][b] = xpmGetC(data);
+
+		/*
+		 * read color keys and values
+		 */
+		curkey = 0;
+		lastwaskey = 0;
+		while ((l = xpmNextWord(data, buf))) {
+			if (!lastwaskey) {
+				for (key = 1; key < BXNKEYS + 1; key++)
+					if ((strlen(BxXpmColorKeys[key - 1]) == l) && (!strncmp(BxXpmColorKeys[key - 1], buf, l)))
+						break;
 			}
-		free((char *)colorTable);
+			if (!lastwaskey && key <= BXNKEYS) { /* open new key */
+				if (curkey) {                    /* flush string */
+					colorTable[a][curkey] = (char *)malloc(strlen(curbuf) + 1);
+					if (!colorTable[a][curkey])
+						RETURN(BxXpmNoMemory);
+					strcpy(colorTable[a][curkey], curbuf);
+				}
+				curkey = key;     /* set new key  */
+				curbuf[0] = '\0'; /* reset curbuf */
+				lastwaskey = 1;
+			}
+			else {
+				if (!curkey)
+					RETURN(BxXpmFileInvalid); /* key without value */
+				if (!lastwaskey)
+					strcat(curbuf, " "); /* append space */
+				buf[l] = '\0';
+				strcat(curbuf, buf); /* append buf */
+				lastwaskey = 0;
+			}
+		}
+		if (!curkey)
+			RETURN(BxXpmFileInvalid); /* key without value */
+		colorTable[a][curkey] = (char *)malloc(strlen(curbuf) + 1);
+		if (!colorTable[a][curkey])
+			RETURN(BxXpmNoMemory);
+		strcpy(colorTable[a][curkey], curbuf);
 	}
+
+	/*
+	 * store the colors comment line
+	 */
+	if (attributes && (attributes->valuemask & BxXpmReturnInfos))
+		xpmGetCmt(data, &colors_cmt);
+
+	/*
+	 * read pixels and index them on color number
+	 */
+	pixelindex = (unsigned int *)malloc(sizeof(unsigned int) * width * height);
+	if (!pixelindex)
+		RETURN(BxXpmNoMemory);
+
+	iptr = pixelindex;
+
+	chars = (char *)malloc(cpp);
+	if (!chars)
+		RETURN(BxXpmNoMemory);
+
+	for (y = 0; y < height; y++) {
+		xpmNextString(data);
+		for (x = 0; x < width; x++, iptr++) {
+			for (a = 0; a < cpp; a++)
+				chars[a] = xpmGetC(data);
+			for (a = 0; a < ncolors; a++)
+				if (!strncmp(colorTable[a][0], chars, cpp))
+					break;
+			if (a == ncolors)
+				RETURN(BxXpmFileInvalid); /* no color matches */
+			*iptr = a;
+		}
+	}
+
+	/*
+	 * store the pixels comment line
+	 */
+	if (attributes && (attributes->valuemask & BxXpmReturnInfos))
+		xpmGetCmt(data, &pixels_cmt);
+
+	free(chars);
+
+	/*
+	 * store found informations in the bxxpmInternAttrib structure
+	 */
+	attrib_return->width = width;
+	attrib_return->height = height;
+	attrib_return->cpp = cpp;
+	attrib_return->ncolors = ncolors;
+	attrib_return->colorTable = colorTable;
+	attrib_return->pixelindex = pixelindex;
+
+	if (attributes) {
+		if (attributes->valuemask & BxXpmReturnInfos) {
+			attributes->hints_cmt = hints_cmt;
+			attributes->colors_cmt = colors_cmt;
+			attributes->pixels_cmt = pixels_cmt;
+		}
+		if (hotspot) {
+			attributes->x_hotspot = x_hotspot;
+			attributes->y_hotspot = y_hotspot;
+			attributes->valuemask |= BxXpmHotspot;
+		}
+	}
+	return (BxXpmSuccess);
+}
+
+/*
+ * Intialize the bxxpmInternAttrib pointers to Null to know
+ * which ones must be freed later on.
+ */
+static void xpmInitInternAttrib(bxxpmInternAttrib *attrib) {
+	attrib->ncolors = 0;
+	attrib->colorTable = NULL;
+	attrib->pixelindex = NULL;
+	attrib->xcolors = NULL;
+	attrib->colorStrings = NULL;
+	attrib->mask_pixel = BX_UNDEF_PIXEL;
+}
+
+/*
+ * Free the bxxpmInternAttrib pointers which have been allocated
+ */
+static void xpmFreeInternAttrib(bxxpmInternAttrib *attrib) {
+	unsigned int a;
+
+	if (attrib->colorTable)
+		xpmFreeColorTable(attrib->colorTable, attrib->ncolors);
+	if (attrib->pixelindex)
+		free((char *)attrib->pixelindex);
+	if (attrib->xcolors)
+		free((char *)attrib->xcolors);
+	if (attrib->colorStrings) {
+		for (a = 0; a < attrib->ncolors; a++)
+			if (attrib->colorStrings[a])
+				free((char *)attrib->colorStrings[a]);
+		free((char *)attrib->colorStrings);
+	}
+}
+
+/*
+ * Store into the BxXpmAttributes structure the required informations stored in
+ * the bxxpmInternAttrib structure.
+ */
+static void xpmSetAttributes(
+    bxxpmInternAttrib *attrib, BxXpmAttributes *attributes) {
+	if (attributes) {
+		if (attributes->valuemask & BxXpmReturnInfos) {
+			attributes->cpp = attrib->cpp;
+			attributes->ncolors = attrib->ncolors;
+			attributes->colorTable = attrib->colorTable;
+
+			attrib->ncolors = 0;
+			attrib->colorTable = NULL;
+		}
+		attributes->width = attrib->width;
+		attributes->height = attrib->height;
+		attributes->valuemask |= BxXpmSize;
+	}
+}
+
+/*
+ * open the given array to be read or written as an bxxpmData which is returned
+ */
+static int xpmOpenArray(char **data, bxxpmData *mdata) {
+	mdata->type = BXXPMARRAY;
+	mdata->stream.data = data;
+	mdata->cptr = *data;
+	mdata->line = 0;
+	mdata->CommentLength = 0;
+	mdata->Bcmt = mdata->Ecmt = NULL;
+	mdata->Bos = mdata->Eos = '\0';
+	mdata->InsideString = 0;
+	return (BxXpmSuccess);
+}
+
+/*
+ * close the file related to the bxxpmData if any
+ */
+static void XpmDataClose(bxxpmData *mdata) {
+	switch (mdata->type) {
+	case BXXPMARRAY:
+		break;
+	case BXXPMFILE:
+		if (mdata->stream.file != (stdout) && mdata->stream.file != (stdin))
+			fclose(mdata->stream.file);
+		break;
+#ifdef ZPIPE
+	case BXXPMPIPE:
+		pclose(mdata->stream.file);
+#endif
+	}
+}
+
+static int BxXpmCreateImageFromData(
+    Display *display, char **data, XImage **image_return,
+    XImage **shapeimage_return, BxXpmAttributes *attributes) {
+	bxxpmData mdata;
+	int ErrorStatus;
+	bxxpmInternAttrib attrib;
+
+	// initialize return values
+	if (image_return)
+		*image_return = NULL;
+	if (shapeimage_return)
+		*shapeimage_return = NULL;
+
+	if ((ErrorStatus = xpmOpenArray(data, &mdata)) != BxXpmSuccess)
+		return (ErrorStatus);
+
+	xpmInitInternAttrib(&attrib);
+
+	ErrorStatus = xpmParseData(&mdata, &attrib, attributes);
+
+	if (ErrorStatus == BxXpmSuccess)
+		ErrorStatus = xpmCreateImage(display, &attrib, image_return, shapeimage_return, attributes);
+
+	if (ErrorStatus >= 0)
+		xpmSetAttributes(&attrib, attributes);
+	else if (attributes)
+		BxXpmFreeAttributes(attributes);
+
+	xpmFreeInternAttrib(&attrib);
+	XpmDataClose(&mdata);
+
+	return (ErrorStatus);
+}
+
+static int BxXpmCreatePixmapFromData(
+    Display * display, Drawable d, char **data, Pixmap *pixmap_return, Pixmap *shapemask_return,
+    BxXpmAttributes *attributes) {
+	XImage *image, **imageptr = NULL;
+	XImage *shapeimage, **shapeimageptr = NULL;
+	int ErrorStatus;
+	XGCValues gcv;
+	GC gc;
+
+	// initialize return values
+	if (pixmap_return) {
+		*pixmap_return = (Pixmap)NULL;
+		imageptr = &image;
+	}
+	if (shapemask_return) {
+		*shapemask_return = (Pixmap)NULL;
+		shapeimageptr = &shapeimage;
+	}
+
+	/*
+	 * create the images
+	 */
+	ErrorStatus = BxXpmCreateImageFromData(display, data, imageptr, shapeimageptr, attributes);
+	if (ErrorStatus < 0)
+		return (ErrorStatus);
+
+	/*
+	 * create the pixmaps
+	 */
+	if (imageptr && image) {
+		*pixmap_return = XCreatePixmap(display, d, image->width, image->height, image->depth);
+		gcv.function = GXcopy;
+		gc = XCreateGC(display, *pixmap_return, GCFunction, &gcv);
+
+		XPutImage(display, *pixmap_return, gc, image, 0, 0, 0, 0, image->width, image->height);
+
+		XDestroyImage(image);
+		XFreeGC(display, gc);
+	}
+	if (shapeimageptr && shapeimage) {
+		*shapemask_return = XCreatePixmap(display, d, shapeimage->width, shapeimage->height, shapeimage->depth);
+		gcv.function = GXcopy;
+		gc = XCreateGC(display, *shapemask_return, GCFunction, &gcv);
+
+		XPutImage(display, *shapemask_return, gc, shapeimage, 0, 0, 0, 0, shapeimage->width, shapeimage->height);
+
+		XDestroyImage(shapeimage);
+		XFreeGC(display, gc);
+	}
+	return (ErrorStatus);
 }
 
 #else /* USE_XPM_LIBRARY */
@@ -2688,7 +2623,7 @@ typedef struct _UIAppDefault {
 
 void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
 	int i;
-	Display *dpy = XtDisplay(w); /* Retrieve the display pointer */
+ 	Display *dpy = XtDisplay(w); /* Retrieve the display pointer */
 	XrmDatabase rdb = NULL;      /* A resource data base */
 
 	/* Create an empty resource database */
