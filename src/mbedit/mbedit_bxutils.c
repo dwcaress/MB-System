@@ -1192,18 +1192,10 @@ typedef struct {
 #define BxXpmReturnPixels (1L << 9)
 #define BxXpmReturnInfos BxXpmInfos
 
-#define LFUNC(f, t, p) static t f p
-
-/*
- * functions declarations
- */
-LFUNC(BxXpmCreatePixmapFromData, int,
-      (Display * display, Drawable d, char **data, Pixmap *pixmap_return, Pixmap *shapemask_return, BxXpmAttributes *attributes));
-
-LFUNC(BxXpmCreateImageFromData, int,
-      (Display * display, char **data, XImage **image_return, XImage **shapemask_return, BxXpmAttributes *attributes));
-
-LFUNC(BxXpmFreeAttributes, void, (BxXpmAttributes * attributes));
+static int BxXpmCreateImageFromData(
+   Display * display, char **data, XImage **image_return,
+   XImage **shapemask_return, BxXpmAttributes *attributes);
+static void BxXpmFreeAttributes(BxXpmAttributes * attributes);
 
 typedef struct {
 	unsigned int type;
@@ -1266,57 +1258,54 @@ char *BxXpmColorKeys[] = {
 
 /* XPM private routines */
 
-LFUNC(xpmCreateImage, int,
-      (Display * display, bxxpmInternAttrib *attrib, XImage **image_return, XImage **shapeimage_return,
-       BxXpmAttributes *attributes));
+static int xpmCreateImage(
+    Display * display, bxxpmInternAttrib *attrib, XImage **image_return,
+    XImage **shapeimage_return, BxXpmAttributes *attributes);
+static int xpmParseData(bxxpmData * data, bxxpmInternAttrib *attrib_return, BxXpmAttributes *attributes);
+static int BxXpmVisualType(Visual * visual);
+static void xpmFreeColorTable(char ***colorTable, int ncolors);
+static void xpmInitInternAttrib(bxxpmInternAttrib * xmpdata);
+static void xpmFreeInternAttrib(bxxpmInternAttrib * xmpdata);
+static void xpmSetAttributes(bxxpmInternAttrib * attrib, BxXpmAttributes *attributes);
 
-LFUNC(xpmParseData, int, (bxxpmData * data, bxxpmInternAttrib *attrib_return, BxXpmAttributes *attributes));
+// I/O utility
+static void xpmNextString(bxxpmData * mdata);
+static int xpmNextUI(bxxpmData * mdata, unsigned int *ui_return);
+static int xpmGetC(bxxpmData * mdata);
+static int xpmUngetC(int c, bxxpmData *mdata);
+static unsigned int xpmNextWord(bxxpmData * mdata, char *buf);
+static void xpmGetCmt(bxxpmData * mdata, char **cmt);
+static int xpmOpenArray(char **data, bxxpmData *mdata);
+static void XpmDataClose(bxxpmData * mdata);
 
-LFUNC(BxXpmVisualType, int, (Visual * visual));
-LFUNC(xpmFreeColorTable, void, (char ***colorTable, int ncolors));
+// RGB utility
+static void xpm_xynormalizeimagebits(unsigned char *bp, XImage *img);
+static void xpm_znormalizeimagebits(unsigned char *bp, XImage *img);
 
-LFUNC(xpmInitInternAttrib, void, (bxxpmInternAttrib * xmpdata));
-
-LFUNC(xpmFreeInternAttrib, void, (bxxpmInternAttrib * xmpdata));
-
-LFUNC(xpmSetAttributes, void, (bxxpmInternAttrib * attrib, BxXpmAttributes *attributes));
-
-/* I/O utility */
-
-LFUNC(xpmNextString, void, (bxxpmData * mdata));
-LFUNC(xpmNextUI, int, (bxxpmData * mdata, unsigned int *ui_return));
-LFUNC(xpmGetC, int, (bxxpmData * mdata));
-LFUNC(xpmUngetC, int, (int c, bxxpmData *mdata));
-LFUNC(xpmNextWord, unsigned int, (bxxpmData * mdata, char *buf));
-LFUNC(xpmGetCmt, void, (bxxpmData * mdata, char **cmt));
-LFUNC(xpmOpenArray, int, (char **data, bxxpmData *mdata));
-LFUNC(XpmDataClose, void, (bxxpmData * mdata));
-
-/* RGB utility */
-
-LFUNC(xpm_xynormalizeimagebits, void, (unsigned char *bp, XImage *img));
-LFUNC(xpm_znormalizeimagebits, void, (unsigned char *bp, XImage *img));
-
-/* Image utility */
-
-LFUNC(SetColor, int,
-      (Display * display, Colormap colormap, char *colorname, unsigned int color_index, Pixel *image_pixel, Pixel *mask_pixel,
-       unsigned int *mask_pixel_index));
-
-LFUNC(CreateXImage, int,
-      (Display * display, Visual *visual, unsigned int depth, unsigned int width, unsigned int height, XImage **image_return));
-
-LFUNC(SetImagePixels, void, (XImage * image, unsigned int width, unsigned int height, unsigned int *pixelindex, Pixel *pixels));
-
-LFUNC(SetImagePixels32, void, (XImage * image, unsigned int width, unsigned int height, unsigned int *pixelindex, Pixel *pixels));
-
-LFUNC(SetImagePixels16, void, (XImage * image, unsigned int width, unsigned int height, unsigned int *pixelindex, Pixel *pixels));
-
-LFUNC(SetImagePixels8, void, (XImage * image, unsigned int width, unsigned int height, unsigned int *pixelindex, Pixel *pixels));
-
-LFUNC(SetImagePixels1, void, (XImage * image, unsigned int width, unsigned int height, unsigned int *pixelindex, Pixel *pixels));
-
-LFUNC(atoui, unsigned int, (char *p, unsigned int l, unsigned int *ui_return));
+// Image utility
+static int SetColor(
+    Display * display, Colormap colormap, char *colorname,
+    unsigned int color_index, Pixel *image_pixel, Pixel *mask_pixel,
+    unsigned int *mask_pixel_index);
+static int CreateXImage(
+    Display * display, Visual *visual, unsigned int depth, unsigned int width,
+    unsigned int height, XImage **image_return);
+static void SetImagePixels(
+    XImage * image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels);
+static void SetImagePixels32(
+    XImage * image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels);
+static void SetImagePixels16(
+    XImage * image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels);
+static void SetImagePixels8(
+    XImage * image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels);
+static void SetImagePixels1(
+    XImage * image, unsigned int width, unsigned int height,
+    unsigned int *pixelindex, Pixel *pixels);
+static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return);
 
 /*
  * Macros
@@ -1984,9 +1973,9 @@ static int CreateXImage
  * level. Assuming that we use only ZPixmap images.
  */
 
-LFUNC(_putbits, void, (char *src, int dstoffset, int numbits, char *dst));
+static void _putbits(char *src, int dstoffset, int numbits, char *dst);
 
-LFUNC(_XReverse_Bytes, void, (unsigned char *bpt, int nb));
+static void _XReverse_Bytes(unsigned char *bpt, int nb);
 
 static unsigned char const _reverse_byte[0x100] = {
     0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0, 0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0, 0x08, 0x88, 0x48, 0xc8,
