@@ -818,7 +818,6 @@ void RegisterBxConverters(XtAppContext appContext) {
  * Output:
  *      None
  */
-#ifndef IGNORE_CONVERT
 XtPointer BX_CONVERT(
     Widget w, char * from_string, char *to_type, int to_size,
     Boolean *success) {
@@ -928,15 +927,6 @@ XtPointer BX_CONVERT(
 	/*SUPPRESS 80*/
 	return (val);
 }
-
-#ifdef DEFINE_OLD_BXUTILS
-XtPointer CONVERT(
-    Widget w, char *from_string, char *to_type, int to_size,
-    Boolean * success) {
-	return (BX_CONVERT(w, from_string, to_type, to_size, success));
-}
-#endif /* DEFINE_OLD_BXUTILS */
-#endif /* !IGNORE_CONVERT */
 
 /*
  * Function:
