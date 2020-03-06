@@ -941,8 +941,6 @@ XtPointer BX_CONVERT(
  * Output:
  *      None
  */
-
-#ifndef IGNORE_MENU_POST
 void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
 	(void)p;  // Unused param
 	(void)dispatch;  // Unused param
@@ -961,13 +959,6 @@ void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
 	XmMenuPosition(m, e);
 	XtManageChild(m);
 }
-
-#ifdef DEFINE_OLD_BXUTILS
-void MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean* dispatch) {
-	BX_MENU_POST(p, mw, ev, dispatch);
-}
-#endif /* DEFINE_OLD_BXUTILS */
-#endif /* !IGNORE_MENU_POST */
 
 /*
  * Function:
@@ -1060,13 +1051,6 @@ void BX_SET_BACKGROUND_COLOR(
 	(*argcnt)++;
 }
 
-#ifdef DEFINE_OLD_BXUTILS
-void SET_BACKGROUND_COLOR(
-    Widget w, ArgList args, Cardinal *argcnt, Pixel bg_color) {
-	BX_SET_BACKGROUND_COLOR(w, args, argcnt, bg_color);
-}
-#endif /* DEFINE_OLD_BXUTILS */
-
 /*
  * Function:
  *	w = BxFindTopShell(start);
@@ -1077,9 +1061,6 @@ void SET_BACKGROUND_COLOR(
  * Output:
  *	w - Widget : the shell widget.
  */
-#ifndef _BX_FIND_TOP_SHELL
-#define _BX_FIND_TOP_SHELL
-
 Widget BxFindTopShell(Widget start) {
 	Widget p;
 
@@ -1088,7 +1069,6 @@ Widget BxFindTopShell(Widget start) {
 	}
 	return (start);
 }
-#endif /* _BX_FIND_TOP_SHELL */
 
 /*
  * Function:
@@ -1102,10 +1082,6 @@ Widget BxFindTopShell(Widget start) {
  * Output:
  *	WidgetList : array of widget IDs.
  */
-
-#ifndef _BX_WIDGETIDS_FROM_NAMES
-#define _BX_WIDGETIDS_FROM_NAMES
-
 WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 	WidgetList wgtIds = NULL;
 	int wgtCount = 0;
@@ -1209,7 +1185,6 @@ Cannot find widget %s\n",
 	XtFree((char *)tmp);
 	return (wgtIds);
 }
-#endif /* _BX_WIDGETIDS_FROM_NAMES */
 
 XtPointer BX_SINGLE(float val) {
 	XtPointer pointer;
@@ -1220,10 +1195,6 @@ XtPointer BX_SINGLE(float val) {
 	return (pointer);
 }
 
-#ifdef DEFINE_OLD_BXUTILS
-XtPointer SINGLE(float val) { return (BX_SINGLE(val)); }
-#endif /* DEFINE_OLD_BXUTILS */
-
 XtPointer BX_DOUBLE(double val) {
 	XtPointer pointer;
 
@@ -1233,23 +1204,11 @@ XtPointer BX_DOUBLE(double val) {
 	return (pointer);
 }
 
-#ifdef DEFINE_OLD_BXUTILS
-XtPointer DOUBLE(double val) { return (BX_DOUBLE(val)); }
-#endif /* DEFINE_OLD_BXUTILS */
-
-/****************************************************************************
- *
- * Big chunk of code inserted from Bull (based on modified 3.3)
- *
- ****************************************************************************/
+// Big chunk of code inserted from Bull (based on modified 3.3)
 
 #ifndef IGNORE_XPM_PIXMAP
 
 #ifndef USE_XPM_LIBRARY
-
-#ifdef SYSV
-#include <memory.h>
-#endif
 
 /*
  * Copyright 1990, 1991 GROUPE BULL
@@ -1348,11 +1307,7 @@ typedef struct {
 
 /* forward declaration of functions with prototypes */
 
-#ifdef NeedFunctionPrototypes
 #define LFUNC(f, t, p) static t f p
-#else
-#define LFUNC(f, t, p) static t f()
-#endif
 
 /*
  * functions declarations
@@ -1498,31 +1453,22 @@ LFUNC(atoui, unsigned int, (char *p, unsigned int l, unsigned int *ui_return));
  *
  */
 
-#define BXXYNORMALIZE(bp, img)                                                                                                   \
-	if ((img->byte_order == MSBFirst) || (img->bitmap_bit_order == MSBFirst))                                                    \
+#define BXXYNORMALIZE(bp, img) \
+	if ((img->byte_order == MSBFirst) || (img->bitmap_bit_order == MSBFirst)) \
 	xpm_xynormalizeimagebits((unsigned char *)(bp), img)
 
-#define BXZNORMALIZE(bp, img)                                                                                                    \
-	if (img->byte_order == MSBFirst)                                                                                             \
+#define BXZNORMALIZE(bp, img) \
+	if (img->byte_order == MSBFirst) \
 	xpm_znormalizeimagebits((unsigned char *)(bp), img)
 
 #define BXXYINDEX(x, y, img) ((y)*img->bytes_per_line) + (((x) + img->xoffset) / img->bitmap_unit) * (img->bitmap_unit >> 3)
-
 #define BXZINDEX(x, y, img) ((y)*img->bytes_per_line) + (((x)*img->bits_per_pixel) >> 3)
-
 #define BXZINDEX32(x, y, img) ((y)*img->bytes_per_line) + ((x) << 2)
-
 #define BXZINDEX16(x, y, img) ((y)*img->bytes_per_line) + ((x) << 1)
-
 #define BXZINDEX8(x, y, img) ((y)*img->bytes_per_line) + (x)
-
 #define BXZINDEX1(x, y, img) ((y)*img->bytes_per_line) + ((x) >> 3)
 
-#if __STDC__
 #define Const const
-#else
-#define Const
-#endif
 
 static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
 	int n = 0;
@@ -2755,11 +2701,7 @@ static unsigned int xpmNextWord(bxxpmData *mdata, char *buf) {
 }
 
 static int BxXpmVisualType(Visual *visual) {
-#if defined(__cplusplus) || defined(c_plusplus)
-	switch (visual->c_class)
-#else
 	switch (visual->class)
-#endif
 	{
 	case StaticGray:
 	case GrayScale:
@@ -2776,10 +2718,7 @@ static int BxXpmVisualType(Visual *visual) {
 	}
 }
 
-/*
- * Free the computed color table
- */
-
+// Free the computed color table
 static void xpmFreeColorTable(char ***colorTable, int ncolors) {
 	int a, b;
 
@@ -2897,13 +2836,8 @@ void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
 	/* Merge them into the Xt database, with lowest precendence */
 
 	if (rdb) {
-#if (XlibSpecificationRelease >= 5)
 		XrmDatabase db = XtDatabase(dpy);
 		XrmCombineDatabase(rdb, &db, FALSE);
-#else
-		XrmMergeDatabases(dpy->db, &rdb);
-		dpy->db = rdb;
-#endif
 	}
 }
 
@@ -2922,16 +2856,9 @@ void InitAppDefaults(Widget parent, UIAppDefault *defs) {
 
 /* Get the database */
 
-#if (XlibSpecificationRelease >= 5)
 	if ((rdb = XrmGetDatabase(XtDisplay(parent))) == NULL) {
 		return; /*  Can't get the database */
 	}
-#else
-	Display *dpy = XtDisplay(parent);
-	if ((rdb = dpy->db) == NULL) {
-		return;
-	}
-#endif
 
 	/* Look for each resource in the table */
 
@@ -3061,12 +2988,7 @@ void SetAppDefaults(
 
 	/* Merge them into the Xt database, with lowest precendence */
 	if (rdb) {
-#if (XlibSpecificationRelease >= 5)
 		XrmDatabase db = XtDatabase(dpy);
 		XrmCombineDatabase(rdb, &db, FALSE);
-#else
-		XrmMergeDatabases(dpy->db, &rdb);
-		dpy->db = rdb;
-#endif
 	}
 }
