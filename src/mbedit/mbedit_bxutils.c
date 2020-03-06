@@ -50,33 +50,6 @@ enum {
 	NUM_COMMON_WCHARS
 };
 
-static int strlenWc(wchar_t *);
-static size_t doMbstowcs(wchar_t *, char *, size_t);
-static size_t doWcstombs(char *, wchar_t *, size_t);
-static void copyWcsToMbs(char *, wchar_t *, int, Boolean);
-static int dombtowc(wchar_t *, char *, size_t);
-static Boolean extractSegment(wchar_t **, wchar_t **, int *, wchar_t **, int *, int *, Boolean *);
-static XmString StringToXmString(char *);
-static char *getNextCStrDelim(char *);
-static int getCStrCount(char *);
-static wchar_t *CStrCommonWideCharsGet();
-
-/*
- * Function:
- *      len = mblen(s, n);
- * Description:
- *      The mblen function for platforms that don't have one. This
- * 	function simply returns a length of 1 since no wide character
- *	support exists for this platform.
- * Input:
- *      s - char * : the character string to get the length from
- *	n - size_t : the size of the string
- * Output:
- *      int : always 1
- */
-// See man mblen - In C99
-// static int mblen(char * s, size_t n) { return (1); }
-
 /*
  * Function:
  *      len = strlenWc(ptr);
@@ -136,6 +109,74 @@ static size_t doWcstombs(char *mbs, wchar_t * wcs, size_t n) {
 		return (0);
 	else
 		return (retval);
+}
+
+/*
+ * Function:
+ *      status = dombtowc(wide, multi, size);
+ * Description:
+ *      Convert a multibyte character to a wide character.
+ * Input:
+ *      wide	- wchar_t *	: where to put the wide character
+ *	multi	- char *	: the multibyte character to convert
+ *	size	- size_t	: the number of characters to convert
+ * Output:
+ *      0	- if multi is a NULL pointer or points to a NULL character
+ *	#bytes	- number of bytes in the multibyte character
+ *	-1	- multi is an invalid multibyte character.
+ *
+ *	NOTE:  if wide is NULL, then this returns the number of bytes in
+ *	       the multibyte character.
+ */
+static int dombtowc(wchar_t * wide, char * multi, size_t size) {
+#ifndef SUPPORTS_WCHARS
+	if ((multi == NULL) || (*multi == '\000')) {
+		if (wide)
+			wide[0] = '\0';
+		return (0);
+	}
+
+	int retVal = 0;
+	for (retVal = 0; retVal < size && multi[retVal] != '\000'; retVal++) {
+		if (wide != NULL) {
+			wide[retVal] = multi[retVal];
+		}
+	}
+	return (retVal);
+#else
+	return mbtowc(wide, multi, size);
+#endif
+}
+
+/*
+ * Function:
+ *      cwc = CStrCommonWideCharsGet();
+ * Description:
+ *      Return the array of common wide characters.
+ * Input:
+ *      None.
+ * Output:
+ *     	cwc - wchar_t * : this array should never be written to or FREEd.
+ */
+static wchar_t *CStrCommonWideCharsGet() {
+	static wchar_t *CommonWideChars = NULL;
+	/*
+	 * If you add to this array, don't forget to change the enum in
+	 * the TYPEDEFS and DEFINES section above to correspond to this
+	 * array.
+	 */
+	static char *characters[] = {"\000", "\t", "\n", "\r", "\f", "\v", "\\", "\"", "#", ":", "f",
+	                             "l",    "n",  "r",  "t",  "v",  "F",  "L",  "R",  "T", "0", "1"};
+
+	if (CommonWideChars == NULL) {
+		// Allocate and create the array.
+		CommonWideChars = (wchar_t *)XtMalloc(NUM_COMMON_WCHARS * sizeof(wchar_t));
+
+		for (int i = 0; i < NUM_COMMON_WCHARS; i++) {
+			(void)dombtowc(&(CommonWideChars[i]), characters[i], 1);
+		}
+	}
+	return (CommonWideChars);
 }
 
 /*
@@ -221,43 +262,6 @@ void copyWcsToMbs(char * mbs, wchar_t * wcs, int len, Boolean process_it) {
 	tbuf[lenToConvert] = tmp;
 
 	mbs[numCvt] = '\0';
-}
-
-/*
- * Function:
- *      status = dombtowc(wide, multi, size);
- * Description:
- *      Convert a multibyte character to a wide character.
- * Input:
- *      wide	- wchar_t *	: where to put the wide character
- *	multi	- char *	: the multibyte character to convert
- *	size	- size_t	: the number of characters to convert
- * Output:
- *      0	- if multi is a NULL pointer or points to a NULL character
- *	#bytes	- number of bytes in the multibyte character
- *	-1	- multi is an invalid multibyte character.
- *
- *	NOTE:  if wide is NULL, then this returns the number of bytes in
- *	       the multibyte character.
- */
-static int dombtowc(wchar_t * wide, char * multi, size_t size) {
-#ifndef SUPPORTS_WCHARS
-	if ((multi == NULL) || (*multi == '\000')) {
-		if (wide)
-			wide[0] = '\0';
-		return (0);
-	}
-
-	int retVal = 0;
-	for (retVal = 0; retVal < size && multi[retVal] != '\000'; retVal++) {
-		if (wide != NULL) {
-			wide[retVal] = multi[retVal];
-		}
-	}
-	return (retVal);
-#else
-	return mbtowc(wide, multi, size);
-#endif
 }
 
 /*
@@ -626,37 +630,6 @@ static int getCStrCount(char * str) {
 		str = ++newStr;
 	}
 	return (x);
-}
-
-/*
- * Function:
- *      cwc = CStrCommonWideCharsGet();
- * Description:
- *      Return the array of common wide characters.
- * Input:
- *      None.
- * Output:
- *     	cwc - wchar_t * : this array should never be written to or FREEd.
- */
-static wchar_t *CStrCommonWideCharsGet() {
-	static wchar_t *CommonWideChars = NULL;
-	/*
-	 * If you add to this array, don't forget to change the enum in
-	 * the TYPEDEFS and DEFINES section above to correspond to this
-	 * array.
-	 */
-	static char *characters[] = {"\000", "\t", "\n", "\r", "\f", "\v", "\\", "\"", "#", ":", "f",
-	                             "l",    "n",  "r",  "t",  "v",  "F",  "L",  "R",  "T", "0", "1"};
-
-	if (CommonWideChars == NULL) {
-		// Allocate and create the array.
-		CommonWideChars = (wchar_t *)XtMalloc(NUM_COMMON_WCHARS * sizeof(wchar_t));
-
-		for (int i = 0; i < NUM_COMMON_WCHARS; i++) {
-			(void)dombtowc(&(CommonWideChars[i]), characters[i], 1);
-		}
-	}
-	return (CommonWideChars);
 }
 
 /*
