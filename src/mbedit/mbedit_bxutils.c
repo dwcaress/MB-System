@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <wchar.h>
 
 #include <mb_config.h>
 #include <Xm/Xm.h>
@@ -46,30 +47,6 @@ enum {
 	WideOne,
 	NUM_COMMON_WCHARS
 };
-
-/*
- * Function:
- *      len = strlenWc(ptr);
- * Description:
- *      Return the number of characters in a wide character string (not
- *	the characters in the resultant mbs).
- * Input:
- *      ptr - wchar_t* : pointer to the wcs to count
- * Output:
- *      int : the number of characters found
- */
-// TODO(schwehr): Use wcslen
-static int strlenWc(wchar_t * ptr) {
-	wchar_t *p = ptr;
-
-	if (!ptr)
-		return (0);
-
-	int x = 0;
-	while (*p++)
-		x++;
-	return (x);
-}
 
 /*
  * Function:
@@ -323,7 +300,7 @@ static Boolean extractSegment(
 	 */
 	if ((*start == '\0') || (start != getNextSeparator(start))) {
 		text = start;
-		if (!(textL = strlenWc(start))) {
+		if (!(textL = wcslen(start))) {
 			text = NULL;
 		}
 		start += textL;
@@ -1468,8 +1445,6 @@ LFUNC(atoui, unsigned int, (char *p, unsigned int l, unsigned int *ui_return));
 #define BXZINDEX8(x, y, img) ((y)*img->bytes_per_line) + (x)
 #define BXZINDEX1(x, y, img) ((y)*img->bytes_per_line) + ((x) >> 3)
 
-#define Const const
-
 static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
 	int n = 0;
 	int i;
@@ -2105,7 +2080,7 @@ LFUNC(_putbits, void, (char *src, int dstoffset, int numbits, char *dst));
 
 LFUNC(_XReverse_Bytes, void, (unsigned char *bpt, int nb));
 
-static unsigned char Const _reverse_byte[0x100] = {
+static unsigned char const _reverse_byte[0x100] = {
     0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0, 0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0, 0x08, 0x88, 0x48, 0xc8,
     0x28, 0xa8, 0x68, 0xe8, 0x18, 0x98, 0x58, 0xd8, 0x38, 0xb8, 0x78, 0xf8, 0x04, 0x84, 0x44, 0xc4, 0x24, 0xa4, 0x64, 0xe4,
     0x14, 0x94, 0x54, 0xd4, 0x34, 0xb4, 0x74, 0xf4, 0x0c, 0x8c, 0x4c, 0xcc, 0x2c, 0xac, 0x6c, 0xec, 0x1c, 0x9c, 0x5c, 0xdc,
@@ -2185,8 +2160,8 @@ static void xpm_znormalizeimagebits(unsigned char *bp, XImage *img) {
 	}
 }
 
-static unsigned char Const _lomask[0x09] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
-static unsigned char Const _himask[0x09] = {0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80, 0x00};
+static unsigned char const _lomask[0x09] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
+static unsigned char const _himask[0x09] = {0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80, 0x00};
 
 static void _putbits(
     char * src,     // address of source bit string
