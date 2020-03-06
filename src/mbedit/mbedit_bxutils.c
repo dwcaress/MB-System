@@ -102,7 +102,7 @@ static size_t doWcstombs(char *mbs, wchar_t * wcs, size_t n) {
  *	NOTE:  if wide is NULL, then this returns the number of bytes in
  *	       the multibyte character.
  */
-static int dombtowc(wchar_t * wide, char * multi, size_t size) {
+static int dombtowc(wchar_t * wide, const char * multi, size_t size) {
 	return mbtowc(wide, multi, size);
 }
 
@@ -123,7 +123,7 @@ static wchar_t *CStrCommonWideCharsGet() {
 	 * the TYPEDEFS and DEFINES section above to correspond to this
 	 * array.
 	 */
-	static char *characters[] = {"\000", "\t", "\n", "\r", "\f", "\v", "\\", "\"", "#", ":", "f",
+	static const char *characters[] = {"\000", "\t", "\n", "\r", "\f", "\v", "\\", "\"", "#", ":", "f",
 	                             "l",    "n",  "r",  "t",  "v",  "F",  "L",  "R",  "T", "0", "1"};
 
 	if (CommonWideChars == NULL) {
@@ -800,62 +800,45 @@ XtPointer BX_CONVERT(
     Boolean *success) {
 	(void)to_size;  // Unused param
 
-	/*
-	 * We will assume that the conversion is going to fail and change this
-	 * value later if the conversion is a success.
-	 */
+	// Assume that the conversion is going to fail and change this
+	// value later if the conversion is a success.
 	*success = False;
-	/*
-	 * Since we are converting from a string to some type we need to
-	 * set the fromVal structure up with the string information that
-	 * the caller passed in.
-	 */
+
+	// Since we are converting from a string to some type we need to
+	// set the fromVal structure up with the string information that
+	// the caller passed in.
 	XrmValue fromVal;
 	fromVal.size = strlen(from_string) + 1;
 	fromVal.addr = from_string;
 
-	/*
-	 * Since we are not sure what type and size of data we are going to
-	 * get back we will set this up so that the converter will point us
-	 * at a block of valid data.
-	 */
+	// Since we are not sure what type and size of data we are going to
+	// get back we will set this up so that the converter will point us
+	// at a block of valid data.
 	XrmValue toVal;
 	toVal.size = 0;
 	toVal.addr = NULL;
 
-	/*
-	 * Now lets try to convert this data by calling this handy-dandy Xt
-	 * routine.
-	 */
+	// Try to convert this data by calling an Xt routine.
 	Boolean convResult = XtConvertAndStore(w, XmRString, &fromVal, to_type, &toVal);
 
-	/*
-	 * Now we have two conditions here.  One the conversion was a success
-	 * and two the conversion failed.
-	 */
+	// Now we have two conditions here.  One the conversion was a success
 	if (!convResult) {
-		/*
-		 * If this conversion failed that we can pretty much return right
-		 * here because there is nothing else we can do.
-		 */
-		return ((XtPointer)NULL);
+		// If this conversion failed that we can pretty much return right
+		// here because there is nothing else we can do.
+		return (NULL);
 	}
 
-	/*
-	 * If we get this far that means we did the conversion and all is
-	 * well.  Now we have to handle the special cases for type and
-	 * size constraints.
-	 */
+	// If we get this far that means we did the conversion and all is
+	// well.  Now we have to handle the special cases for type and
+	// size constraints.
 	XtPointer val;  /* Pointer size return value */
 
 	if (!strcmp(to_type, "String")) {
-		/*
-		 * Since strings are handled different in Xt we have to deal with
-		 * the conversion from a string to a string.  When this happens the
-		 * toVal.size will hold the strlen of the string so generic
-		 * conversion code can't handle it.  It is possible for a string to
-		 * string conversion to happen so we do have to watch for it.
-		 */
+		// Since strings are handled different in Xt we have to deal with
+		// the conversion from a string to a string.  When this happens the
+		// toVal.size will hold the strlen of the string so generic
+		// conversion code can't handle it.  It is possible for a string to
+		// string conversion to happen so we do have to watch for it.
 		val = (XTPOINTER)toVal.addr;
 	}
 	else if (!strcmp(to_type, "Double")) {
@@ -865,12 +848,10 @@ XtPointer BX_CONVERT(
 		val = (XTPOINTER)((float *)toVal.addr);
 	}
 	else {
-		/*
-		 * Here is the generic conversion return value handler.  This
-		 * just does some size specific casting so that value that we
-		 * return is in the correct bytes of the XtPointer that we
-		 * return.  Here we check all sizes from 1 to 8 bytes.
-		 */
+		// Here is the generic conversion return value handler.  This
+		// just does some size specific casting so that value that we
+		// return is in the correct bytes of the XtPointer that we
+		// return.  Here we check all sizes from 1 to 8 bytes.
 		switch (toVal.size) {
 		case 1:
 			val = (XTPOINTER)(long)(*(char *)toVal.addr);
@@ -892,15 +873,11 @@ XtPointer BX_CONVERT(
 		}
 	}
 
-	/*
-	 * Well everything is done and the conversion was a success so lets
-	 * set the success flag to True.
-	 */
+	// Well everything is done and the conversion was a success so lets
+	// set the success flag to True.
 	*success = convResult;
 
-	/*
-	 * Finally lets return the converted value.
-	 */
+	// Return the converted value.
 	/*SUPPRESS 80*/
 	return (val);
 }
@@ -921,18 +898,18 @@ XtPointer BX_CONVERT(
 void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
 	(void)p;  // Unused param
 	(void)dispatch;  // Unused param
-	Arg args[2];
-	int argcnt;
-	int button;
-	Widget m = (Widget)mw;
-	XButtonEvent *e = (XButtonEvent *)ev;
 
-	argcnt = 0;
+	Arg args[2];
+	int argcnt = 0;
+	int button;
 	XtSetArg(args[argcnt], XmNwhichButton, &button);
 	argcnt++;
+	Widget m = (Widget)mw;
 	XtGetValues(m, args, argcnt);
+	XButtonEvent *e = (XButtonEvent *)ev;
 	if (e->button != button)
 		return;
+
 	XmMenuPosition(m, e);
 	XtManageChild(m);
 }
@@ -961,67 +938,8 @@ void BX_SET_BACKGROUND_COLOR(
     Widget w, ArgList args, Cardinal *argcnt, Pixel bg_color) {
 	(void)w;  // Unused param
     // On Debian testing in 2020, XmVERSION is 2.
-#if ((XmVERSION == 1) && (XmREVISION > 0))
-
-	/*
-	 * Walk through the arglist to see if the user set the top or
-	 * bottom shadow colors.
-	 */
-	selectLoc = topShadowLoc = bottomShadowLoc = UNSET;
-	for (i = 0; i < *argcnt; i++) {
-		if ((strcmp(args[i].name, XmNtopShadowColor) == 0) || (strcmp(args[i].name, XmNtopShadowPixmap) == 0)) {
-			topShadowLoc = i;
-		}
-		else if ((strcmp(args[i].name, XmNbottomShadowColor) == 0) || (strcmp(args[i].name, XmNbottomShadowPixmap) == 0)) {
-			bottomShadowLoc = i;
-		}
-		else if (strcmp(args[i].name, XmNarmColor) == 0) {
-			selectLoc = i;
-		}
-		else if (strcmp(args[i].name, XmNforeground) == 0) {
-			fgLoc = i;
-		}
-	}
-
-	/*
-	 * If either the top or bottom shadow are not set then we
-	 * need to use XmGetColors to get the shadow colors from the backgound
-	 * color and add those that are not already in the arglist to the
-	 * arglist.
-	 *
-	 */
-	if ((bottomShadowLoc == UNSET) || (topShadowLoc == UNSET) || (selectLoc == UNSET) || (fgLoc == UNSET)) {
-		Arg large[1];
-		Colormap cmap;
-		Pixel topShadow;
-		Pixel bottomShadow;
-		Pixel select;
-		Pixel fgColor;
-
-		XtSetArg(large[0], XmNcolormap, &cmap);
-		XtGetValues(w, large, 1);
-		XmGetColors(XtScreen(w), cmap, bg_color, &fgColor, &topShadow, &bottomShadow, &select);
-
-		if (topShadowLoc == UNSET) {
-			XtSetArg(args[*argcnt], XmNtopShadowColor, topShadow);
-			(*argcnt)++;
-		}
-
-		if (bottomShadowLoc == UNSET) {
-			XtSetArg(args[*argcnt], XmNbottomShadowColor, bottomShadow);
-			(*argcnt)++;
-		}
-
-		if (selectLoc == UNSET) {
-			XtSetArg(args[*argcnt], XmNarmColor, select);
-			(*argcnt)++;
-		}
-
-		if (fgLoc == UNSET) {
-			XtSetArg(args[*argcnt], XmNforeground, fgColor);
-			(*argcnt)++;
-		}
-	}
+#if (XmVERSION == 1 && XmREVISION > 0)
+#error Motif version must be >= 2.0
 #endif
 
 	XtSetArg(args[*argcnt], XmNbackground, bg_color);
@@ -1060,17 +978,9 @@ Widget BxFindTopShell(Widget start) {
  *	WidgetList : array of widget IDs.
  */
 WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
-	WidgetList wgtIds = NULL;
-	int wgtCount = 0;
-	Widget inst;
-	Widget current;
-	String start;
-	String widget;
-
-	/*
-	 * For backward compatibility, remove [ and ] from the list.
-	 */
-	String tmp = start = XtNewString(stringList);
+	// For backward compatibility, remove [ and ] from the list.
+	String start = XtNewString(stringList);
+	String tmp = start;
 	if ((start = strchr(start, '[')) != NULL)
 		start++;
 	else
@@ -1079,6 +989,7 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 	while ((start && *start) && isspace(*start)) {
 		start++;
 	}
+
 	char *ptr = strrchr(start, ']');
 	if (ptr) {
 		*ptr = '\0';
@@ -1104,6 +1015,14 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 	 * instance names.
 	 */
 	start = strtok(start, ",");
+
+	// TODO(schwehr): Localize
+	WidgetList wgtIds = NULL;
+	int wgtCount = 0;
+	Widget inst;
+	Widget current;
+	String widget;
+
 	while (start) {
 		while ((start && *start) && isspace(*start)) {
 			start++;
@@ -1145,17 +1064,14 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 		}
 
 		if (current == NULL) {
-			printf("Callback Error (%s):\n\t\
-Cannot find widget %s\n",
+			printf("Callback Error (%s):\n\tCannot find widget %s\n",
 			       cbName, widget);
 		}
 		XtFree(widget);
 		start = strtok(NULL, ",");
 	}
 
-	/*
-	 * NULL terminate the list.
-	 */
+	// NULL terminate the list.
 	wgtIds = (WidgetList)XtRealloc((char *)wgtIds, (wgtCount + 1) * sizeof(Widget));
 	wgtIds[wgtCount] = NULL;
 
@@ -1184,9 +1100,7 @@ XtPointer BX_DOUBLE(double val) {
 // Big chunk of code inserted from Bull (based on modified 3.3)
 
 #ifndef IGNORE_XPM_PIXMAP
-
 #ifndef USE_XPM_LIBRARY
-
 /*
  * Copyright 1990, 1991 GROUPE BULL
  *
@@ -1277,12 +1191,6 @@ typedef struct {
 
 #define BxXpmReturnPixels (1L << 9)
 #define BxXpmReturnInfos BxXpmInfos
-
-/*
- * minimal portability layer between ansi and KR C
- */
-
-/* forward declaration of functions with prototypes */
 
 #define LFUNC(f, t, p) static t f p
 
