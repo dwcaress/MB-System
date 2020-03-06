@@ -10,9 +10,6 @@
 #include <Xm/Xm.h>
 #include <Xm/RowColumn.h>
 
-// Define SUPPORTS_WCHARS if the system supports wide character sets
-#define SUPPORTS_WCHARS
-
 // Handy definition used in SET_BACKGROUND_COLOR
 #define UNSET (-1)
 
@@ -129,23 +126,7 @@ static size_t doWcstombs(char *mbs, wchar_t * wcs, size_t n) {
  *	       the multibyte character.
  */
 static int dombtowc(wchar_t * wide, char * multi, size_t size) {
-#ifndef SUPPORTS_WCHARS
-	if ((multi == NULL) || (*multi == '\000')) {
-		if (wide)
-			wide[0] = '\0';
-		return (0);
-	}
-
-	int retVal = 0;
-	for (retVal = 0; retVal < size && multi[retVal] != '\000'; retVal++) {
-		if (wide != NULL) {
-			wide[retVal] = multi[retVal];
-		}
-	}
-	return (retVal);
-#else
 	return mbtowc(wide, multi, size);
-#endif
 }
 
 /*
