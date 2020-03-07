@@ -12,14 +12,12 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- *
  * Author:	D. W. Caress
  * Date:	September 24,  2003
- *
- *
  */
 
-/*--------------------------------------------------------------------*/
+#ifndef MBVIEW_MBVIEWPRIVATE_H_
+#define MBVIEW_MBVIEWPRIVATE_H_
 
 /* OpenGL Error checking */
 /* #define MBV_GET_GLX_ERRORS	1 */
@@ -726,4 +724,4 @@ XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Bo
 void BxExitCB(Widget w, XtPointer client, XtPointer call);
 void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
 
-/*--------------------------------------------------------------------*/
+#endif  // MBVIEW_MBVIEWPRIVATE_H_

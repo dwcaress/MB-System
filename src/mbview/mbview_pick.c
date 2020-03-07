@@ -328,8 +328,7 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
 			data->pick.segment.endpoints[1] = data->pick.endpoints[1];
 			mbview_drapesegment(instance, &(data->pick.segment));
 		}
-	}
-	else {
+	} else {
 		if (which == MBV_PICK_DOWN) {
 			data->pickinfo_mode = MBV_PICK_NONE;
 			data->pick_type = MBV_PICK_NONE;
@@ -1187,10 +1186,8 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 			data->region.cornerpoints[0].xdisplay = xdisplay;
 			data->region.cornerpoints[0].ydisplay = ydisplay;
 			data->region.cornerpoints[0].zdisplay = zdisplay;
-		}
-
-		/* ignore a bad point */
-		else if (!found) {
+		} else /* if (!found) */ {
+			/* ignore a bad point */
 			XBell(view->dpy, 100);
 		}
 	}
@@ -1221,10 +1218,8 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 			data->region.cornerpoints[1].xdisplay = xdisplay;
 			data->region.cornerpoints[1].ydisplay = ydisplay;
 			data->region.cornerpoints[1].zdisplay = zdisplay;
-		}
-
-		/* ignore a bad point */
-		else if (!found) {
+		} else /* if (!found) */ {
+			/* ignore a bad point */
 			XBell(view->dpy, 100);
 		}
 	}
@@ -1255,10 +1250,8 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 			data->region.cornerpoints[2].xdisplay = xdisplay;
 			data->region.cornerpoints[2].ydisplay = ydisplay;
 			data->region.cornerpoints[2].zdisplay = zdisplay;
-		}
-
-		/* ignore a bad point */
-		else if (!found) {
+		} else /* if (!found) */ {
+			/* ignore a bad point */
 			XBell(view->dpy, 100);
 		}
 	}
@@ -1289,10 +1282,8 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 			data->region.cornerpoints[3].xdisplay = xdisplay;
 			data->region.cornerpoints[3].ydisplay = ydisplay;
 			data->region.cornerpoints[3].zdisplay = zdisplay;
-		}
-
-		/* ignore a bad point */
-		else if (!found) {
+		} else /* if (!found) */ {
+			/* ignore a bad point */
 			XBell(view->dpy, 100);
 		}
 	}
@@ -1584,10 +1575,8 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 			data->area.endpoints[0].xdisplay = xdisplay;
 			data->area.endpoints[0].ydisplay = ydisplay;
 			data->area.endpoints[0].zdisplay = zdisplay;
-		}
-
-		/* ignore a bad point */
-		else if (!found) {
+		} else /* if (!found) */ {
+			/* ignore a bad point */
 			XBell(view->dpy, 100);
 		}
 	}
@@ -1617,10 +1606,8 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 			data->area.endpoints[1].xdisplay = xdisplay;
 			data->area.endpoints[1].ydisplay = ydisplay;
 			data->area.endpoints[1].zdisplay = zdisplay;
-		}
-
-		/* ignore a bad point */
-		else if (!found) {
+		} else /* if (!found) */ {
+			/* ignore a bad point */
 			XBell(view->dpy, 100);
 		}
 	}
