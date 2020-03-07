@@ -61,7 +61,7 @@ enum {
  *      bytesConv - size_t : number of bytes converted
  */
 // See man mbstowcs for C99
-static size_t doMbstowcs(wchar_t * wcs, char * mbs, size_t n) {
+static size_t doMbstowcs(wchar_t * wcs, const char * mbs, size_t n) {
 	return (mbstowcs(wcs, mbs, n));
 }
 
@@ -77,7 +77,7 @@ static size_t doMbstowcs(wchar_t * wcs, char * mbs, size_t n) {
  * Output:
  *      bytesConv - size_t : number of bytes converted
  */
-static size_t doWcstombs(char *mbs, wchar_t * wcs, size_t n) {
+static size_t doWcstombs(char *mbs, const wchar_t * wcs, size_t n) {
 	const size_t retval = wcstombs(mbs, wcs, (n * sizeof(wchar_t)));
 	if (retval == (size_t)-1)
 		return (0);
@@ -1019,9 +1019,6 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 	// TODO(schwehr): Localize
 	WidgetList wgtIds = NULL;
 	int wgtCount = 0;
-	Widget inst;
-	Widget current;
-	String widget;
 
 	while (start) {
 		while ((start && *start) && isspace(*start)) {
@@ -1044,16 +1041,16 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 		/*
 		 * Form a string to use with XtNameToWidget().
 		 */
-		widget = (char *)XtMalloc((strlen(start) + 2) * sizeof(char));
+		String widget = (char *)XtMalloc((strlen(start) + 2) * sizeof(char));
 		sprintf(widget, "*%s", start);
 
 		/*
 		 * Start at this level and continue up until the widget is found
 		 * or until the top of the hierarchy is reached.
 		 */
-		current = ref;
+		Widget current = ref;
 		while (current != NULL) {
-			inst = XtNameToWidget(current, widget);
+			Widget inst = XtNameToWidget(current, widget);
 			if (inst != NULL) {
 				wgtCount++;
 				wgtIds = (WidgetList)XtRealloc((char *)wgtIds, wgtCount * sizeof(Widget));
@@ -1080,18 +1077,14 @@ WidgetList BxWidgetIdsFromNames(Widget ref, char *cbName, char *stringList) {
 }
 
 XtPointer BX_SINGLE(float val) {
-	XtPointer pointer;
-
-	pointer = (XtPointer)XtMalloc(sizeof(float));
+	XtPointer pointer = (XtPointer)XtMalloc(sizeof(float));
 	if (pointer != NULL)
 		*((float *)pointer) = val;
 	return (pointer);
 }
 
 XtPointer BX_DOUBLE(double val) {
-	XtPointer pointer;
-
-	pointer = (XtPointer)XtMalloc(sizeof(double));
+	XtPointer pointer = (XtPointer)XtMalloc(sizeof(double));
 	if (pointer != NULL)
 		*((double *)pointer) = val;
 	return (pointer);
@@ -1192,8 +1185,6 @@ typedef struct {
 #define BxXpmReturnPixels (1L << 9)
 #define BxXpmReturnInfos BxXpmInfos
 
-// static void BxXpmFreeAttributes(BxXpmAttributes * attributes);
-
 typedef struct {
 	unsigned int type;
 	union {
@@ -1286,19 +1277,19 @@ static void _XReverse_Bytes(unsigned char *bpt, int nb) {
 }
 
 static void xpm_xynormalizeimagebits(unsigned char *bp, XImage *img) {
-	unsigned char c;
-
 	if (img->byte_order != img->bitmap_bit_order) {
 		switch (img->bitmap_unit) {
 
 		case 16:
-			c = *bp;
+		{
+			const unsigned char c = *bp;
 			*bp = *(bp + 1);
 			*(bp + 1) = c;
 			break;
-
+		}
 		case 32:
-			c = *(bp + 3);
+		{
+			unsigned char c = *(bp + 3);
 			*(bp + 3) = *bp;
 			*bp = c;
 			c = *(bp + 2);
@@ -1306,40 +1297,44 @@ static void xpm_xynormalizeimagebits(unsigned char *bp, XImage *img) {
 			*(bp + 1) = c;
 			break;
 		}
+		}
 	}
 	if (img->bitmap_bit_order == MSBFirst)
 		_XReverse_Bytes(bp, img->bitmap_unit >> 3);
 }
 
 static void xpm_znormalizeimagebits(unsigned char *bp, XImage *img) {
-	unsigned char c;
-
 	switch (img->bits_per_pixel) {
 
 	case 4:
+	{
 		*bp = ((*bp >> 4) & 0xF) | ((*bp << 4) & ~0xF);
 		break;
-
+	}
 	case 16:
-		c = *bp;
+	{
+		const unsigned char c = *bp;
 		*bp = *(bp + 1);
 		*(bp + 1) = c;
 		break;
-
+	}
 	case 24:
-		c = *(bp + 2);
+	{
+		const unsigned char c = *(bp + 2);
 		*(bp + 2) = *bp;
 		*bp = c;
 		break;
-
+	}
 	case 32:
-		c = *(bp + 3);
+	{
+		unsigned char c = *(bp + 3);
 		*(bp + 3) = *bp;
 		*bp = c;
 		c = *(bp + 2);
 		*(bp + 2) = *(bp + 1);
 		*(bp + 1) = c;
 		break;
+	}
 	}
 }
 
@@ -1380,8 +1375,8 @@ static void xpm_znormalizeimagebits(unsigned char *bp, XImage *img) {
 
 static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
 	int n = 0;
-	int i;
-	for (i = 0; i < l; i++)
+	int i = 0;
+	for (; i < l; i++)
 		if (*p >= '0' && *p <= '9')
 			n = n * 10 + *p++ - '0';
 		else
@@ -1391,23 +1386,21 @@ static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
 		*ui_return = n;
 		return 1;
 	}
-	else
-		return 0;
+
+	return 0;
 }
 
 // Free the computed color table
 static void xpmFreeColorTable(char ***colorTable, int ncolors) {
-	int a, b;
-
 	if (colorTable) {
-		for (a = 0; a < ncolors; a++)
+		for (int a = 0; a < ncolors; a++)
 			if (colorTable[a]) {
-				for (b = 0; b < (BXNKEYS + 1); b++)
+				for (int b = 0; b < (BXNKEYS + 1); b++)
 					if (colorTable[a][b])
 						free(colorTable[a][b]);
 				free((char *)colorTable[a]);
 			}
-		free((char *)colorTable);
+		free(colorTable);
 	}
 }
 
@@ -1449,7 +1442,7 @@ static void BxXpmFreeAttributes(BxXpmAttributes *attributes) {
 	}
 }
 
-static int BxXpmVisualType(Visual *visual) {
+static int BxXpmVisualType(const Visual *visual) {
 	switch (visual->class)
 	{
 	case StaticGray:
@@ -1467,22 +1460,18 @@ static int BxXpmVisualType(Visual *visual) {
 	}
 }
 
-/*
- * set the color pixel related to the given colorname,
- * return 0 if success, 1 otherwise.
- */
+// set the color pixel related to the given colorname,
+// return 0 if success, 1 otherwise.
 static int SetColor(
     Display *display, Colormap colormap, char * colorname, unsigned int color_index,
     Pixel *image_pixel, Pixel *mask_pixel, unsigned int *mask_pixel_index) {
-	XColor xcolor;
-
 	if (strcasecmp(colorname, BX_TRANSPARENT_COLOR)) {
+		XColor xcolor;
 		if (!XParseColor(display, colormap, colorname, &xcolor) || (!XAllocColor(display, colormap, &xcolor)))
 			return (1);
 		*image_pixel = xcolor.pixel;
 		*mask_pixel = 1;
-	}
-	else {
+	} else {
 		*image_pixel = 0;
 		*mask_pixel = 0;
 		*mask_pixel_index = color_index; /* store the color table index */
@@ -1490,14 +1479,12 @@ static int SetColor(
 	return (0);
 }
 
-/*
- * Create an XImage
- */
-static int CreateXImage
-    (Display *display, Visual *visual, unsigned int depth, unsigned int width, unsigned int height, XImage **image_return) {
-	int bitmap_pad;
+static int CreateXImage(
+    Display *display, Visual *visual, unsigned int depth, unsigned int width,
+    unsigned int height, XImage **image_return) {
 
 	/* first get bitmap_pad */
+	int bitmap_pad;
 	if (depth > 16)
 		bitmap_pad = 32;
 	else if (depth > 8)
@@ -1505,14 +1492,12 @@ static int CreateXImage
 	else
 		bitmap_pad = 8;
 
-	/* then create the XImage with data = NULL and bytes_per_line = 0 */
-
+	// create the XImage with data = NULL and bytes_per_line = 0
 	*image_return = XCreateImage(display, visual, depth, ZPixmap, 0, 0, width, height, bitmap_pad, 0);
 	if (!*image_return)
 		return (BxXpmNoMemory);
 
-	/* now that bytes_per_line must have been set properly alloc data */
-
+	// now that bytes_per_line must have been set properly alloc data
 	(*image_return)->data = (char *)malloc((*image_return)->bytes_per_line * height);
 
 	if (!(*image_return)->data) {
@@ -1532,14 +1517,12 @@ static void _putbits(
     int numbits,     // number of bits to copy to destination
     char *dst)      // address of destination bit string
 {
-	unsigned char chhi;
-
 	dst = dst + (dstoffset >> 3);
 	dstoffset = dstoffset & 7;
 	const int hibits = 8 - dstoffset;
 	unsigned char chlo = *dst & _lomask[dstoffset];
 	for (;;) {
-		chhi = (*src << dstoffset) & _himask[dstoffset];
+		unsigned char chhi = (*src << dstoffset) & _himask[dstoffset];
 		if (numbits <= hibits) {
 			chhi = chhi & _lomask[dstoffset + numbits];
 			*dst = (*dst & _himask[dstoffset + numbits]) | chlo | chhi;
@@ -1572,24 +1555,18 @@ static void _putbits(
 static void SetImagePixels(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
-	Pixel pixel;
-	unsigned long px;
-	char *src;
-	char *dst;
-	int nbytes;
-	int x, y;
-
 	unsigned int *iptr = pixelindex;
 	if (image->depth == 1) {
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				pixel = pixels[*iptr];
-				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++, iptr++) {
+				Pixel pixel = pixels[*iptr];
+				unsigned long px = pixel;
+				for (int i = 0; i < sizeof(unsigned long); i++, px >>= 8)
 					((unsigned char *)&pixel)[i] = (unsigned char)px;
-				src = &image->data[BXXYINDEX(x, y, image)];
-				dst = (char *)&px;
+				char *src = &image->data[BXXYINDEX(x, y, image)];
+				char *dst = (char *)&px;
 				px = 0;
-				nbytes = image->bitmap_unit >> 3;
+				const int nbytes = image->bitmap_unit >> 3;
 				for (int i = nbytes; --i >= 0;)
 					*dst++ = *src++;
 				BXXYNORMALIZE(&px, image);
@@ -1601,19 +1578,20 @@ static void SetImagePixels(
 				for (i = nbytes; --i >= 0;)
 					*dst++ = *src++;
 			}
-	}
-	else {
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				pixel = pixels[*iptr];
+		}
+	} else {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++, iptr++) {
+				Pixel pixel = pixels[*iptr];
 				if (image->depth == 4)
 					pixel &= 0xf;
 				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
 					((unsigned char *)&pixel)[i] = (unsigned char)px;
-				src = &image->data[BXZINDEX(x, y, image)];
-				dst = (char *)&px;
+				char *src = &image->data[BXZINDEX(x, y, image)];
+				unsigned long px;
+				char *dst = (char *)&px;
 				px = 0;
-				nbytes = (image->bits_per_pixel + 7) >> 3;
+				const int nbytes = (image->bits_per_pixel + 7) >> 3;
 				for (int i = nbytes; --i >= 0;)
 					*dst++ = *src++;
 				BXZNORMALIZE(&px, image);
@@ -1624,12 +1602,11 @@ static void SetImagePixels(
 				for (int i = nbytes; --i >= 0;)
 					*dst++ = *src++;
 			}
+		}
 	}
 }
 
-/*
- * write pixels into a 32-bits Z image data structure
- */
+// write pixels into a 32-bits Z image data structure
 
 #ifndef WORD64
 static unsigned long byteorderpixel = MSBFirst << 24;
@@ -1642,13 +1619,12 @@ static void SetImagePixels32(
 	unsigned char *addr;
 	unsigned int *paddr;
 	unsigned int *iptr;
-	int x, y;
 
 	iptr = pixelindex;
 #ifndef WORD64
 	if (*((char *)&byteorderpixel) == image->byte_order) {
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
+		for (int y = 0; y < height; y++)
+			for (int x = 0; x < width; x++, iptr++) {
 				paddr = (unsigned int *)(&(image->data[BXZINDEX32(x, y, image)]));
 				*paddr = (unsigned int)pixels[*iptr];
 			}
@@ -1656,8 +1632,8 @@ static void SetImagePixels32(
 	else
 #endif
 	    if (image->byte_order == MSBFirst)
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
+		for (int y = 0; y < height; y++)
+			for (int x = 0; x < width; x++, iptr++) {
 				addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
 				addr[0] = (unsigned char)(pixels[*iptr] >> 24);
 				addr[1] = (unsigned char)(pixels[*iptr] >> 16);
@@ -1665,8 +1641,8 @@ static void SetImagePixels32(
 				addr[3] = (unsigned char)(pixels[*iptr]);
 			}
 	else
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
+		for (int y = 0; y < height; y++)
+			for (int x = 0; x < width; x++, iptr++) {
 				addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
 				addr[3] = (unsigned char)(pixels[*iptr] >> 24);
 				addr[2] = (unsigned char)(pixels[*iptr] >> 16);
@@ -1675,36 +1651,28 @@ static void SetImagePixels32(
 			}
 }
 
-/*
- * write pixels into a 16-bits Z image data structure
- */
+// Write pixels into a 16-bits Z image data structure
 static void SetImagePixels16(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
-	unsigned char *addr;
-	unsigned int *iptr;
-	int x, y;
-
-	iptr = pixelindex;
+	unsigned int *iptr = pixelindex;
 	if (image->byte_order == MSBFirst)
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
+		for (int y = 0; y < height; y++)
+			for (int x = 0; x < width; x++, iptr++) {
+				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
 				addr[0] = (unsigned char)(pixels[*iptr] >> 8);
 				addr[1] = (unsigned char)(pixels[*iptr]);
 			}
 	else
-		for (y = 0; y < height; y++)
-			for (x = 0; x < width; x++, iptr++) {
-				addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
+		for (int y = 0; y < height; y++)
+			for (int x = 0; x < width; x++, iptr++) {
+				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
 				addr[1] = (unsigned char)(pixels[*iptr] >> 8);
 				addr[0] = (unsigned char)(pixels[*iptr]);
 			}
 }
 
-/*
- * write pixels into a 8-bits Z image data structure
- */
+// Write pixels into a 8-bits Z image data structure
 static void SetImagePixels8(
     XImage *image, unsigned int width, unsigned int height, unsigned int *pixelindex, Pixel *pixels)
 {
@@ -1714,24 +1682,21 @@ static void SetImagePixels8(
 			image->data[BXZINDEX8(x, y, image)] = (char)pixels[*iptr];
 }
 
-/*
- * write pixels into a 1-bit depth image data structure and **offset null**
- */
+// write pixels into a 1-bit depth image data structure and **offset null**
 static void SetImagePixels1(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
 	unsigned char bit;
 	int xoff, yoff;
 	unsigned int *iptr;
-	int x, y;
 
 	if (image->byte_order != image->bitmap_bit_order)
 		SetImagePixels(image, width, height, pixelindex, pixels);
 	else {
 		iptr = pixelindex;
 		if (image->bitmap_bit_order == MSBFirst)
-			for (y = 0; y < height; y++)
-				for (x = 0; x < width; x++, iptr++) {
+			for (int y = 0; y < height; y++)
+				for (int x = 0; x < width; x++, iptr++) {
 					yoff = BXZINDEX1(x, y, image);
 					xoff = x & 7;
 					bit = 0x80 >> xoff;
@@ -1741,8 +1706,8 @@ static void SetImagePixels1(
 						image->data[yoff] &= ~bit;
 				}
 		else
-			for (y = 0; y < height; y++)
-				for (x = 0; x < width; x++, iptr++) {
+			for (int y = 0; y < height; y++)
+				for (int x = 0; x < width; x++, iptr++) {
 					yoff = BXZINDEX1(x, y, image);
 					xoff = x & 7;
 					bit = 1 << xoff;
@@ -1772,60 +1737,45 @@ static void SetImagePixels1(
 static int xpmCreateImage(
     Display *display, bxxpmInternAttrib *attrib, XImage **image_return,
     XImage **shapeimage_return, BxXpmAttributes *attributes) {
-	/* variables stored in the BxXpmAttributes structure */
-	Visual *visual;
-	Colormap colormap;
-	unsigned int depth;
+	// retrieve information from the BxXpmAttributes
 	BxXpmColorSymbol *colorsymbols;
 	unsigned int numsymbols;
-
-	/* variables to return */
-	XImage *image = NULL;
-	XImage *shapeimage = NULL;
-	unsigned int mask_pixel;
-	unsigned int ErrorStatus, ErrorStatus2;
-
-	/* calculation variables */
-	Pixel *image_pixels = NULL;
-	Pixel *mask_pixels = NULL;
-	char *colorname;
-	unsigned int a, b, l;
-	Boolean pixel_defined;
-	unsigned int key;
-
-	/*
-	 * retrieve information from the BxXpmAttributes
-	 */
 	if (attributes && attributes->valuemask & BxXpmColorSymbols) {
 		colorsymbols = attributes->colorsymbols;
 		numsymbols = attributes->numsymbols;
-	}
-	else
+	} else {
 		numsymbols = 0;
+	}
 
+	Visual *visual;
 	if (attributes && attributes->valuemask & BxXpmVisual)
 		visual = attributes->visual;
 	else
 		visual = DefaultVisual(display, DefaultScreen(display));
 
+	Colormap colormap;
 	if (attributes && attributes->valuemask & BxXpmColormap)
 		colormap = attributes->colormap;
 	else
 		colormap = DefaultColormap(display, DefaultScreen(display));
 
+	unsigned int depth;
 	if (attributes && attributes->valuemask & BxXpmDepth)
 		depth = attributes->depth;
 	else
 		depth = DefaultDepth(display, DefaultScreen(display));
 
-	ErrorStatus = BxXpmSuccess;
+	unsigned int ErrorStatus = BxXpmSuccess;
 
-	/*
-	 * alloc pixels index tables
-	 */
+	// alloc pixels index tables
 
-	key = BxXpmVisualType(visual);
-	image_pixels = (Pixel *)malloc(sizeof(Pixel) * attrib->ncolors);
+	/* variables to return */
+	XImage *image = NULL;
+	XImage *shapeimage = NULL;
+
+	Pixel *mask_pixels = NULL;
+	const unsigned int key = BxXpmVisualType(visual);
+	Pixel *image_pixels = (Pixel *)malloc(sizeof(Pixel) * attrib->ncolors);
 	if (!image_pixels)
 		RETURN(BxXpmNoMemory);
 
@@ -1833,14 +1783,17 @@ static int xpmCreateImage(
 	if (!mask_pixels)
 		RETURN(BxXpmNoMemory);
 
-	mask_pixel = BX_UNDEF_PIXEL;
+	unsigned int mask_pixel = BX_UNDEF_PIXEL;
 
-	/*
-	 * get pixel colors, store them in index tables
-	 */
-	for (a = 0; a < attrib->ncolors; a++) {
-		colorname = NULL;
-		pixel_defined = False;
+	unsigned int ErrorStatus2;
+
+	unsigned int b;
+	unsigned int l;
+
+	// get pixel colors, store them in index tables
+	for (unsigned int a = 0; a < attrib->ncolors; a++) {
+		char *colorname = NULL;
+		bool pixel_defined = false;
 
 		/*
 		 * look for a defined symbol
@@ -1853,14 +1806,14 @@ static int xpmCreateImage(
 				if (colorsymbols[l].value)
 					colorname = colorsymbols[l].value;
 				else
-					pixel_defined = True;
+					pixel_defined = true;
 			}
 		}
 		if (!pixel_defined) { /* pixel not given as symbol value */
 
 			if (colorname) { /* colorname given as symbol value */
 				if (!SetColor(display, colormap, colorname, a, &image_pixels[a], &mask_pixels[a], &mask_pixel))
-					pixel_defined = True;
+					pixel_defined = true;
 				else
 					ErrorStatus = BxXpmColorError;
 			}
@@ -1869,7 +1822,7 @@ static int xpmCreateImage(
 				if (attrib->colorTable[a][b]) {
 					if (!SetColor(display, colormap, attrib->colorTable[a][b], a, &image_pixels[a], &mask_pixels[a],
 					              &mask_pixel)) {
-						pixel_defined = True;
+						pixel_defined = true;
 						break;
 					}
 					else
@@ -1883,7 +1836,7 @@ static int xpmCreateImage(
 				if (attrib->colorTable[a][b]) {
 					if (!SetColor(display, colormap, attrib->colorTable[a][b], a, &image_pixels[a], &mask_pixels[a],
 					              &mask_pixel)) {
-						pixel_defined = True;
+						pixel_defined = true;
 						break;
 					}
 					else
@@ -1953,7 +1906,7 @@ static int xpmCreateImage(
 			if (pixels) {
 				p1 = image_pixels;
 				p2 = pixels;
-				for (a = 0; a < attrib->ncolors; a++, p1++)
+				for (unsigned int a = 0; a < attrib->ncolors; a++, p1++)
 					if (a != mask_pixel)
 						*p2++ = *p1;
 				attributes->pixels = pixels;
@@ -2159,9 +2112,7 @@ static unsigned int xpmNextWord(bxxpmData *mdata, char *buf) {
  */
 static int xpmNextUI(bxxpmData *mdata, unsigned int *ui_return) {
 	char buf[BUFSIZ];
-	int l;
-
-	l = xpmNextWord(mdata, buf);
+	int l = xpmNextWord(mdata, buf);
 	return atoui(buf, l, ui_return);
 }
 
@@ -2458,15 +2409,15 @@ static void XpmDataClose(bxxpmData *mdata) {
 static int BxXpmCreateImageFromData(
     Display *display, char **data, XImage **image_return,
     XImage **shapeimage_return, BxXpmAttributes *attributes) {
-	bxxpmData mdata;
-	int ErrorStatus;
-	bxxpmInternAttrib attrib;
-
 	// initialize return values
 	if (image_return)
 		*image_return = NULL;
 	if (shapeimage_return)
 		*shapeimage_return = NULL;
+
+	bxxpmData mdata;
+	int ErrorStatus;
+	bxxpmInternAttrib attrib;
 
 	if ((ErrorStatus = xpmOpenArray(data, &mdata)) != BxXpmSuccess)
 		return (ErrorStatus);
@@ -2492,17 +2443,15 @@ static int BxXpmCreateImageFromData(
 static int BxXpmCreatePixmapFromData(
     Display * display, Drawable d, char **data, Pixmap *pixmap_return, Pixmap *shapemask_return,
     BxXpmAttributes *attributes) {
-	XImage *image, **imageptr = NULL;
-	XImage *shapeimage, **shapeimageptr = NULL;
-	int ErrorStatus;
-	XGCValues gcv;
-	GC gc;
-
 	// initialize return values
+	XImage **imageptr = NULL;
+	XImage *image;
 	if (pixmap_return) {
 		*pixmap_return = (Pixmap)NULL;
 		imageptr = &image;
 	}
+	XImage *shapeimage;
+	XImage **shapeimageptr = NULL;
 	if (shapemask_return) {
 		*shapemask_return = (Pixmap)NULL;
 		shapeimageptr = &shapeimage;
@@ -2511,17 +2460,19 @@ static int BxXpmCreatePixmapFromData(
 	/*
 	 * create the images
 	 */
-	ErrorStatus = BxXpmCreateImageFromData(display, data, imageptr, shapeimageptr, attributes);
+	int ErrorStatus = BxXpmCreateImageFromData(display, data, imageptr, shapeimageptr, attributes);
 	if (ErrorStatus < 0)
 		return (ErrorStatus);
+
 
 	/*
 	 * create the pixmaps
 	 */
 	if (imageptr && image) {
 		*pixmap_return = XCreatePixmap(display, d, image->width, image->height, image->depth);
+		XGCValues gcv;
 		gcv.function = GXcopy;
-		gc = XCreateGC(display, *pixmap_return, GCFunction, &gcv);
+		GC gc = XCreateGC(display, *pixmap_return, GCFunction, &gcv);
 
 		XPutImage(display, *pixmap_return, gc, image, 0, 0, 0, 0, image->width, image->height);
 
@@ -2530,8 +2481,9 @@ static int BxXpmCreatePixmapFromData(
 	}
 	if (shapeimageptr && shapeimage) {
 		*shapemask_return = XCreatePixmap(display, d, shapeimage->width, shapeimage->height, shapeimage->depth);
+		XGCValues gcv;
 		gcv.function = GXcopy;
-		gc = XCreateGC(display, *shapemask_return, GCFunction, &gcv);
+		GC gc = XCreateGC(display, *shapemask_return, GCFunction, &gcv);
 
 		XPutImage(display, *shapemask_return, gc, shapeimage, 0, 0, 0, 0, shapeimage->width, shapeimage->height);
 
