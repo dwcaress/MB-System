@@ -1616,25 +1616,21 @@ static unsigned long byteorderpixel = MSBFirst << 24;
 static void SetImagePixels32(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
-	unsigned char *addr;
-	unsigned int *paddr;
-	unsigned int *iptr;
+	unsigned int *iptr = pixelindex;
 
-	iptr = pixelindex;
 #ifndef WORD64
 	if (*((char *)&byteorderpixel) == image->byte_order) {
 		for (int y = 0; y < height; y++)
 			for (int x = 0; x < width; x++, iptr++) {
-				paddr = (unsigned int *)(&(image->data[BXZINDEX32(x, y, image)]));
+				unsigned int *paddr = (unsigned int *)(&(image->data[BXZINDEX32(x, y, image)]));
 				*paddr = (unsigned int)pixels[*iptr];
 			}
-	}
-	else
+	} else
 #endif
 	    if (image->byte_order == MSBFirst)
 		for (int y = 0; y < height; y++)
 			for (int x = 0; x < width; x++, iptr++) {
-				addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
+				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
 				addr[0] = (unsigned char)(pixels[*iptr] >> 24);
 				addr[1] = (unsigned char)(pixels[*iptr] >> 16);
 				addr[2] = (unsigned char)(pixels[*iptr] >> 8);
@@ -1643,7 +1639,7 @@ static void SetImagePixels32(
 	else
 		for (int y = 0; y < height; y++)
 			for (int x = 0; x < width; x++, iptr++) {
-				addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
+				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
 				addr[3] = (unsigned char)(pixels[*iptr] >> 24);
 				addr[2] = (unsigned char)(pixels[*iptr] >> 16);
 				addr[1] = (unsigned char)(pixels[*iptr] >> 8);
@@ -1686,20 +1682,16 @@ static void SetImagePixels8(
 static void SetImagePixels1(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
-	unsigned char bit;
-	int xoff, yoff;
-	unsigned int *iptr;
-
-	if (image->byte_order != image->bitmap_bit_order)
+	if (image->byte_order != image->bitmap_bit_order) {
 		SetImagePixels(image, width, height, pixelindex, pixels);
-	else {
-		iptr = pixelindex;
+	} else {
+		unsigned int *iptr = pixelindex;
 		if (image->bitmap_bit_order == MSBFirst)
 			for (int y = 0; y < height; y++)
 				for (int x = 0; x < width; x++, iptr++) {
-					yoff = BXZINDEX1(x, y, image);
-					xoff = x & 7;
-					bit = 0x80 >> xoff;
+					const int yoff = BXZINDEX1(x, y, image);
+					const int xoff = x & 7;
+					const unsigned char bit = 0x80 >> xoff;
 					if (pixels[*iptr] & 1)
 						image->data[yoff] |= bit;
 					else
@@ -1708,9 +1700,9 @@ static void SetImagePixels1(
 		else
 			for (int y = 0; y < height; y++)
 				for (int x = 0; x < width; x++, iptr++) {
-					yoff = BXZINDEX1(x, y, image);
-					xoff = x & 7;
-					bit = 1 << xoff;
+					const int yoff = BXZINDEX1(x, y, image);
+					const int xoff = x & 7;
+					const unsigned char bit = 1 << xoff;
 					if (pixels[*iptr] & 1)
 						image->data[yoff] |= bit;
 					else
@@ -1838,38 +1830,31 @@ static int xpmCreateImage(
 					              &mask_pixel)) {
 						pixel_defined = true;
 						break;
-					}
-					else
+					} else {
 						ErrorStatus = BxXpmColorError;
+					}
 				}
 				b++;
 			}
 
 			if (!pixel_defined)
 				RETURN(BxXpmColorFailed);
-		}
-		else {
+		} else {
 			image_pixels[a] = colorsymbols[l].pixel;
 			mask_pixels[a] = 1;
 		}
 	}
 
-	/*
-	 * create the image
-	 */
+	// create the image
 	if (image_return) {
 		ErrorStatus2 = CreateXImage(display, visual, depth, attrib->width, attrib->height, &image);
 		if (ErrorStatus2 != BxXpmSuccess)
 			RETURN(ErrorStatus2);
 
-		/*
-		 * set the image data
-		 *
-		 * In case depth is 1 or bits_per_pixel is 4, 6, 8, 24 or 32 use
-		 * optimized functions, otherwise use slower but sure general one.
-		 *
-		 */
+		// set the image data
 
+		// In case depth is 1 or bits_per_pixel is 4, 6, 8, 24 or 32 use
+		// optimized functions, otherwise use slower but sure general one.
 		if (image->depth == 1)
 			SetImagePixels1(image, attrib->width, attrib->height, attrib->pixelindex, image_pixels);
 		else if (image->bits_per_pixel == 8)
@@ -1882,9 +1867,7 @@ static int xpmCreateImage(
 			SetImagePixels(image, attrib->width, attrib->height, attrib->pixelindex, image_pixels);
 	}
 
-	/*
-	 * create the shape mask image
-	 */
+	// create the shape mask image
 	if (mask_pixel != BX_UNDEF_PIXEL && shapeimage_return) {
 		ErrorStatus2 = CreateXImage(display, visual, 1, attrib->width, attrib->height, &shapeimage);
 		if (ErrorStatus2 != BxXpmSuccess)
@@ -1892,46 +1875,38 @@ static int xpmCreateImage(
 
 		SetImagePixels1(shapeimage, attrib->width, attrib->height, attrib->pixelindex, mask_pixels);
 	}
-	free((char *)mask_pixels);
+	free(mask_pixels);
 
-	/*
-	 * if requested store allocated pixels in the BxXpmAttributes structure
-	 */
+	// if requested store allocated pixels in the BxXpmAttributes structure
 	if (attributes && (attributes->valuemask & BxXpmReturnInfos || attributes->valuemask & BxXpmReturnPixels)) {
 		if (mask_pixel != BX_UNDEF_PIXEL) {
-			Pixel *pixels, *p1, *p2;
-
 			attributes->npixels = attrib->ncolors - 1;
-			pixels = (Pixel *)malloc(sizeof(Pixel) * attributes->npixels);
+			Pixel *pixels = (Pixel *)malloc(sizeof(Pixel) * attributes->npixels);
 			if (pixels) {
-				p1 = image_pixels;
-				p2 = pixels;
+				Pixel *p1 = image_pixels;
+				Pixel *p2 = pixels;
 				for (unsigned int a = 0; a < attrib->ncolors; a++, p1++)
 					if (a != mask_pixel)
 						*p2++ = *p1;
 				attributes->pixels = pixels;
-			}
-			else {
+			} else {
 				/* if error just say we can't return requested data */
 				attributes->valuemask &= ~BxXpmReturnPixels;
 				attributes->valuemask &= ~BxXpmReturnInfos;
 				attributes->pixels = NULL;
 				attributes->npixels = 0;
 			}
-			free((char *)image_pixels);
-		}
-		else {
+			free(image_pixels);
+		} else {
 			attributes->pixels = image_pixels;
 			attributes->npixels = attrib->ncolors;
 		}
 		attributes->mask_pixel = mask_pixel;
+	} else {
+		free(image_pixels);
 	}
-	else
-		free((char *)image_pixels);
 
-	/*
-	 * return created images
-	 */
+	// return created images
 	if (image_return)
 		*image_return = image;
 
@@ -1963,8 +1938,6 @@ static int xpmUngetC(int c, bxxpmData *mdata) {
  */
 static int xpmGetC(bxxpmData *mdata) {
 	int c;
-	unsigned int n = 0, a;
-	unsigned int notend;
 
 	switch (mdata->type) {
 	case BXXPMARRAY:
@@ -1980,28 +1953,25 @@ static int xpmGetC(bxxpmData *mdata) {
 		}
 		if (!mdata->InsideString && mdata->Bcmt && c == mdata->Bcmt[0]) {
 			mdata->Comment[0] = c;
+			unsigned int n = 0;
 
-			/*
-			 * skip the string beginning comment
-			 */
+			// skip the string beginning comment
 			do {
 				c = getc(mdata->stream.file);
 				mdata->Comment[++n] = c;
 			} while (c == mdata->Bcmt[n] && mdata->Bcmt[n] != '\0' && c != EOF);
 
 			if (mdata->Bcmt[n] != '\0') {
-				/* this wasn't the beginning of a comment */
-				/* put characters back in the order that we got them */
-				for (a = n; a > 0; a--)
+				// this wasn't the beginning of a comment
+				// put characters back in the order that we got them
+				for (unsigned int a = n; a > 0; a--)
 					xpmUngetC(mdata->Comment[a], mdata);
 				return (mdata->Comment[0]);
 			}
 
-			/*
-			 * store comment
-			 */
+			// store comment
 			mdata->Comment[0] = mdata->Comment[n];
-			notend = 1;
+			unsigned int notend = 1;
 			n = 0;
 			while (notend) {
 				while (mdata->Comment[n] != mdata->Ecmt[0] && c != EOF) {
@@ -2009,7 +1979,7 @@ static int xpmGetC(bxxpmData *mdata) {
 					mdata->Comment[++n] = c;
 				}
 				mdata->CommentLength = n;
-				a = 0;
+				unsigned int a = 0;
 				do {
 					c = getc(mdata->stream.file);
 					n++;
@@ -2017,7 +1987,7 @@ static int xpmGetC(bxxpmData *mdata) {
 					mdata->Comment[n] = c;
 				} while (c == mdata->Ecmt[a] && mdata->Ecmt[a] != '\0' && c != EOF);
 				if (mdata->Ecmt[a] == '\0') {
-					/* this is the end of the comment */
+					// this is the end of the comment
 					notend = 0;
 					xpmUngetC(mdata->Comment[n], mdata);
 				}
@@ -2527,13 +2497,12 @@ typedef XpmAttributes BxXpmAttributes;
 
 Pixmap XPM_PIXMAP(Widget w, char **pixmapName) {
 	BxXpmAttributes attributes;
-	int argcnt;
 	Arg args[10];
 	Pixmap pixmap;
 	Pixmap shape;
 	int returnValue;
 
-	argcnt = 0;
+	int argcnt = 0;
 	XtSetArg(args[argcnt], XmNdepth, &(attributes.depth));
 	argcnt++;
 	XtSetArg(args[argcnt], XmNcolormap, &(attributes.colormap));
@@ -2574,17 +2543,14 @@ typedef struct _UIAppDefault {
 } UIAppDefault;
 
 void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
-	int i;
  	Display *dpy = XtDisplay(w); /* Retrieve the display pointer */
-	XrmDatabase rdb = NULL;      /* A resource data base */
 
 	/* Create an empty resource database */
-
-	rdb = XrmGetStringDatabase("");
+	XrmDatabase rdb = XrmGetStringDatabase("");
 
 	/* Add the Component resources, prepending the name of the component */
 
-	i = 0;
+	int i = 0;
 	while (resourceSpec[i] != NULL) {
 		char buf[1000];
 
@@ -2593,52 +2559,38 @@ void setDefaultResources(char *_name, Widget w, String *resourceSpec) {
 	}
 
 	/* Merge them into the Xt database, with lowest precendence */
-
 	if (rdb) {
 		XrmDatabase db = XtDatabase(dpy);
 		XrmCombineDatabase(rdb, &db, FALSE);
 	}
 }
 
-/*
- * This method gets all the resources from the app-defaults file
- * (resource databse) and fills in the table (defs) if the app default
- * value exists.
- */
+// This method gets all the resources from the app-defaults file
+// (resource databse) and fills in the table (defs) if the app default
+// value exists.
 void InitAppDefaults(Widget parent, UIAppDefault *defs) {
-	XrmQuark cQuark;
-	XrmQuark rsc[10];
-	XrmRepresentation rep;
-	XrmValue val;
-	XrmDatabase rdb;
-	int rscIdx;
-
-/* Get the database */
-
-	if ((rdb = XrmGetDatabase(XtDisplay(parent))) == NULL) {
+	XrmDatabase rdb = XrmGetDatabase(XtDisplay(parent));
+	if (rdb == NULL) {
 		return; /*  Can't get the database */
 	}
 
+	XrmQuark rsc[10];
+
 	/* Look for each resource in the table */
-
 	while (defs->wName) {
-		rscIdx = 0;
+		int rscIdx = 0;
 
-		cQuark = XrmStringToQuark(defs->cName); /* class quark */
+		XrmQuark cQuark = XrmStringToQuark(defs->cName); /* class quark */
 		rsc[rscIdx++] = cQuark;
 		if (defs->wName[0] == '\0') {
 			rsc[rscIdx++] = cQuark;
-		}
-		else {
+		} else {
 			if (strchr(defs->wName, '.') == NULL) {
 				rsc[rscIdx++] = XrmStringToQuark(defs->wName);
-			}
-			else {
-				/*
-				 * If we found a '.' that means that this is not
-				 * a simple widget name, but a sub specification so
-				 * we need to split this into several quarks.
-				 */
+			} else {
+				// If we found a '.' that means that this is not
+				// a simple widget name, but a sub specification so
+				// we need to split this into several quarks.
 				char *copy = XtNewString(defs->wName), *ptr;
 
 				for (ptr = strtok(copy, "."); ptr != NULL; ptr = strtok(NULL, ".")) {
@@ -2655,6 +2607,8 @@ void InitAppDefaults(Widget parent, UIAppDefault *defs) {
 		rsc[rscIdx++] = XrmStringToQuark(defs->wRsc);
 		rsc[rscIdx++] = NULLQUARK;
 
+		XrmRepresentation rep;
+		XrmValue val;
 		if (XrmQGetResource(rdb, rsc, rsc, &rep, &val)) {
 			defs->value = XtNewString((char *)val.addr);
 		}
@@ -2662,33 +2616,23 @@ void InitAppDefaults(Widget parent, UIAppDefault *defs) {
 	}
 }
 
-/*
- * This method applies the app defaults for the class to a specific
- * instance. All the widgets in the path are loosly coupled (use *).
- * To override a specific instance, use a tightly coupled app defaults
- * resource line (use .).
- */
+// This method applies the app defaults for the class to a specific
+// instance. All the widgets in the path are loosly coupled (use *).
+// To override a specific instance, use a tightly coupled app defaults
+// resource line (use .).
 void SetAppDefaults(
     Widget w, UIAppDefault *defs, char *inst_name, Boolean override_inst) {
-	Display *dpy = XtDisplay(w); /*  Retrieve the display */
-	XrmDatabase rdb = NULL;      /* A resource data base */
-	char lineage[1000];
-	char buf[1000];
-	Widget parent;
-
-	/* Protect ourselves */
-
 	if (inst_name == NULL)
 		return;
 
-	/*  Create an empty resource database */
+	Display *dpy = XtDisplay(w); /*  Retrieve the display */
 
-	rdb = XrmGetStringDatabase("");
+	/*  Create an empty resource database */
+	XrmDatabase rdb = XrmGetStringDatabase("");
 
 	/* Start the lineage with our name and then get our parents */
-
-	lineage[0] = '\0';
-	parent = w;
+	char lineage[1000] = "";
+	Widget parent = w;
 
 	while (parent) {
 		WidgetClass wclass = XtClass(parent);
@@ -2696,24 +2640,22 @@ void SetAppDefaults(
 		if (wclass == applicationShellWidgetClass)
 			break;
 
+		char buf[1000];
 		strcpy(buf, lineage);
 		sprintf(lineage, "*%s%s", XtName(parent), buf);
 
 		parent = XtParent(parent);
 	}
 
-	/*  Add the Component resources, prepending the name of the component */
+	// Add the Component resources, prepending the name of the component
 	while (defs->wName != NULL) {
+		// We don't deal with the resource if it isn't found in the
+		// Xrm database at class initializtion time (in initAppDefaults).
+		// Special handling of class instances.
 		int name_length;
-		/*
-		 * We don't deal with the resource if it isn't found in the
-		 * Xrm database at class initializtion time (in initAppDefaults).
-		 * Special handling of class instances.
-		 */
 		if (strchr(defs->wName, '.')) {
 			name_length = strlen(defs->wName) - strlen(strchr(defs->wName, '.'));
-		}
-		else {
+		} else {
 			name_length = strlen(defs->wName) > strlen(inst_name) ? strlen(defs->wName) : strlen(inst_name);
 		}
 		if (defs->value == NULL || (override_inst && strncmp(inst_name, defs->wName, name_length)) ||
@@ -2723,21 +2665,17 @@ void SetAppDefaults(
 		}
 
 		/* Build up string after lineage */
+		char buf[1000];
 		if (defs->cInstName != NULL) {
-			/* Don't include class instance name if it is also the instance */
-			/* being affected.  */
-
+			// Don't include class instance name if it is also the instance being affected.
 			if (*defs->cInstName != '\0') {
 				sprintf(buf, "%s*%s*%s.%s: %s", lineage, defs->wName, defs->cInstName, defs->wRsc, defs->value);
-			}
-			else {
+			} else {
 				sprintf(buf, "%s*%s.%s: %s", lineage, defs->wName, defs->wRsc, defs->value);
 			}
-		}
-		else if (*defs->wName != '\0') {
+		} else if (*defs->wName != '\0') {
 			sprintf(buf, "%s*%s*%s.%s: %s", lineage, inst_name, defs->wName, defs->wRsc, defs->value);
-		}
-		else {
+		} else {
 			sprintf(buf, "%s*%s.%s: %s", lineage, inst_name, defs->wRsc, defs->value);
 		}
 
