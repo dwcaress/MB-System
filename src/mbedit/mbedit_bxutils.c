@@ -118,19 +118,17 @@ static int dombtowc(wchar_t * wide, const char * multi, size_t size) {
  */
 static wchar_t *CStrCommonWideCharsGet() {
 	static wchar_t *CommonWideChars = NULL;
-	/*
-	 * If you add to this array, don't forget to change the enum in
-	 * the TYPEDEFS and DEFINES section above to correspond to this
-	 * array.
-	 */
-	static const char *characters[] = {"\000", "\t", "\n", "\r", "\f", "\v", "\\", "\"", "#", ":", "f",
-	                             "l",    "n",  "r",  "t",  "v",  "F",  "L",  "R",  "T", "0", "1"};
 
 	if (CommonWideChars == NULL) {
 		// Allocate and create the array.
 		CommonWideChars = (wchar_t *)XtMalloc(NUM_COMMON_WCHARS * sizeof(wchar_t));
 
 		for (int i = 0; i < NUM_COMMON_WCHARS; i++) {
+			// * If you add to this array, don't forget to change the enum in
+			// * the TYPEDEFS and DEFINES section above to correspond to this array.
+			static const char *characters[] = {
+				"\000", "\t", "\n", "\r", "\f", "\v", "\\", "\"", "#", ":", "f",
+				"l",    "n",  "r",  "t",  "v",  "F",  "L",  "R",  "T", "0", "1"};
 			(void)dombtowc(&(CommonWideChars[i]), characters[i], 1);
 		}
 	}
@@ -274,8 +272,8 @@ static wchar_t *getNextSeparator(wchar_t * str) {
  *			False means done.
  */
 static Boolean extractSegment(
-    wchar_t ** str, wchar_t ** tagStart, int * tagLen,
-    wchar_t ** txtStart, int * txtLen, int * pDir, Boolean * pSep) {
+    wchar_t **str, wchar_t **tagStart, int *tagLen,
+    wchar_t **txtStart, int *txtLen, int *pDir, Boolean *pSep) {
 	wchar_t *commonWChars = CStrCommonWideCharsGet();
 	wchar_t emptyStrWcs[1];
 
@@ -283,7 +281,7 @@ static Boolean extractSegment(
 	wchar_t *start = *str;
 	if (!start) {
 		start = emptyStrWcs;
-		emptyStrWcs[0] = commonWChars[WNull];
+		start[0] = commonWChars[WNull];
 	}
 
 	wchar_t *text = NULL;
@@ -293,11 +291,9 @@ static Boolean extractSegment(
 	int dir = XmSTRING_DIRECTION_L_TO_R;
 	bool sep = false;
 
-	/*
-	 * If the first character of the string isn't a # or a ", then we
-	 * just have a regular old simple string. Do the same the thing for
-	 * the empty string.
-	 */
+	// If the first character of the string isn't a # or a ", then we
+	// just have a regular old simple string. Do the same the thing for
+	// the empty string.
 	if ((*start == '\0') || (start != getNextSeparator(start))) {
 		text = start;
 		if (!(textL = wcslen(start))) {
@@ -311,7 +307,7 @@ static Boolean extractSegment(
 		while (!done) {
 			if (*start == commonWChars[WHash]) {
 				if (tagSeen) {
-					done = true;
+					// done = true;
 					break;
 				}
 				else {
@@ -532,9 +528,10 @@ static char *getNextCStrDelim(char * str) {
 	char *comma = str;
 	Boolean inQuotes = False;
 
-	int len = mblen(NULL, sizeof(wchar_t));
+	// int len = mblen(NULL, sizeof(wchar_t));
 	while (*comma) {
-		if ((len = mblen(comma, sizeof(wchar_t))) > 1) {
+		const int len = mblen(comma, sizeof(wchar_t));
+		if (len > 1) {
 			comma += len;
 			continue;
 		}
@@ -607,8 +604,8 @@ static int getCStrCount(char * str) {
  *	Standard.
  */
 static Boolean CvtStringToXmString(
-    Display * d, XrmValue *args, Cardinal *num_args,
-    XrmValue * fromVal, XrmValue * toVal, XtPointer data) {
+    Display *d, XrmValue *args, Cardinal *num_args,
+    XrmValue *fromVal, XrmValue *toVal, XtPointer data) {
 	(void)args;  // Unused param
 	(void)data;  // Unused param
 
@@ -663,10 +660,9 @@ static Boolean CvtStringToXmString(
  *	Standard.
  */
 static Boolean CvtStringToXmStringTable(
-    Display * d, XrmValue * args, Cardinal *num_args,
-    XrmValue * fromVal, XrmValue *toVal, XtPointer data) {
+    Display *d, XrmValue *args, Cardinal *num_args,
+    XrmValue *fromVal, XrmValue *toVal, XtPointer data) {
 	(void)data;  // Unused param
-
 
 	// This converter takes no parameters
 	if (*num_args != 0) {
@@ -1404,10 +1400,7 @@ static void xpmFreeColorTable(char ***colorTable, int ncolors) {
 	}
 }
 
-/*
- * Free the BxXpmAttributes structure members
- * but the structure itself
- */
+// Free the BxXpmAttributes structure members but the structure itself
 static void BxXpmFreeAttributes(BxXpmAttributes *attributes) {
 	if (attributes) {
 		if (attributes->valuemask & BxXpmReturnPixels && attributes->pixels) {
@@ -1482,8 +1475,7 @@ static int SetColor(
 static int CreateXImage(
     Display *display, Visual *visual, unsigned int depth, unsigned int width,
     unsigned int height, XImage **image_return) {
-
-	/* first get bitmap_pad */
+	// first get bitmap_pad
 	int bitmap_pad;
 	if (depth > 16)
 		bitmap_pad = 32;
@@ -1514,7 +1506,7 @@ static unsigned char const _himask[0x09] = {0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 
 static void _putbits(
     char * src,     // address of source bit string
     int dstoffset,  // bit offset into destination; range is 0-31
-    int numbits,     // number of bits to copy to destination
+    int numbits,    // number of bits to copy to destination
     char *dst)      // address of destination bit string
 {
 	dst = dst + (dstoffset >> 3);
@@ -1999,25 +1991,27 @@ static int xpmGetC(bxxpmData *mdata) {
 	return ('\0');
 }
 
-/*
- * skip to the end of the current string and the beginning of the next one
- */
+// skip to the end of the current string and the beginning of the next one
 static void xpmNextString(bxxpmData *mdata) {
-	int c;
-
 	switch (mdata->type) {
 	case BXXPMARRAY:
 		mdata->cptr = (mdata->stream.data)[++mdata->line];
 		break;
 	case BXXPMFILE:
 	case BXXPMPIPE:
-		if (mdata->Eos)
+	{
+		if (mdata->Eos) {
+			int c;
 			while ((c = xpmGetC(mdata)) != mdata->Eos && c != EOF)
 				;
-		if (mdata->Bos) /* if not natural XPM2 */
+		}
+		if (mdata->Bos) { /* if not natural XPM2 */
+			int c;
 			while ((c = xpmGetC(mdata)) != mdata->Bos && c != EOF)
 				;
+		}
 		break;
+	}
 	}
 }
 
@@ -2136,15 +2130,11 @@ static int xpmParseData(
 	unsigned int key;          /* color key */
 	char *chars = NULL, buf[BUFSIZ];
 	unsigned int *iptr;
-	unsigned int a, b, x, y, l;
+	unsigned int a, b, x, y;
 
-	unsigned int curkey;     /* current color key */
-	unsigned int lastwaskey; /* key read */
 	char curbuf[BUFSIZ];     /* current buffer */
 
-	/*
-	 * read hints: width, height, ncolors, chars_per_pixel
-	 */
+	// read hints: width, height, ncolors, chars_per_pixel
 	if (!(xpmNextUI(data, &width) && xpmNextUI(data, &height) && xpmNextUI(data, &rncolors) && xpmNextUI(data, &cpp)))
 		RETURN(BxXpmFileInvalid);
 
@@ -2186,8 +2176,9 @@ static int xpmParseData(
 		/*
 		 * read color keys and values
 		 */
-		curkey = 0;
-		lastwaskey = 0;
+		unsigned int curkey = 0;  // current color key
+		unsigned int lastwaskey = 0; // key read
+		unsigned int l;
 		while ((l = xpmNextWord(data, buf))) {
 			if (!lastwaskey) {
 				for (key = 1; key < BXNKEYS + 1; key++)
@@ -2302,23 +2293,19 @@ static void xpmInitInternAttrib(bxxpmInternAttrib *attrib) {
 	attrib->mask_pixel = BX_UNDEF_PIXEL;
 }
 
-/*
- * Free the bxxpmInternAttrib pointers which have been allocated
- */
+// Free the bxxpmInternAttrib pointers which have been allocated
 static void xpmFreeInternAttrib(bxxpmInternAttrib *attrib) {
-	unsigned int a;
-
 	if (attrib->colorTable)
 		xpmFreeColorTable(attrib->colorTable, attrib->ncolors);
 	if (attrib->pixelindex)
-		free((char *)attrib->pixelindex);
+		free(attrib->pixelindex);
 	if (attrib->xcolors)
-		free((char *)attrib->xcolors);
+		free(attrib->xcolors);
 	if (attrib->colorStrings) {
-		for (a = 0; a < attrib->ncolors; a++)
+		for (unsigned int a = 0; a < attrib->ncolors; a++)
 			if (attrib->colorStrings[a])
-				free((char *)attrib->colorStrings[a]);
-		free((char *)attrib->colorStrings);
+				free(attrib->colorStrings[a]);
+		free(attrib->colorStrings);
 	}
 }
 
