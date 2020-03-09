@@ -1,5 +1,5 @@
-#ifndef mbeditviz_creation_H
-#define mbeditviz_creation_H
+#ifndef MBEDITVIZ_MBEDITVIZ_CREATION_H_
+#define MBEDITVIZ_MBEDITVIZ_CREATION_H_
 
 #ifdef DECLARE_BX_GLOBALS
 #define EXTERNAL
@@ -42,4 +42,4 @@ EXTERNAL Widget pushButton_viewselected;
 EXTERNAL Widget pushButton_viewall;
 EXTERNAL Widget list_filelist;
 
-#endif
+#endif  // MBEDITVIZ_MBEDITVIZ_CREATION_H_
