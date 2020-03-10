@@ -63,9 +63,6 @@ static char usage_message[] = "mbeditviz [-H -T -V]";
 /* status variables */
 char *error_message;
 char message[MB_PATH_MAXLINE] = "";
-char error1[MB_PATH_MAXLINE] = "";
-char error2[MB_PATH_MAXLINE] = "";
-char error3[MB_PATH_MAXLINE] = "";
 
 /* data file parameters */
 void *datalist;
@@ -85,11 +82,6 @@ int mbdef_uselockfiles;  // TODO(schwehr): Make a bool
 
 /*--------------------------------------------------------------------*/
 int mbeditviz_init(int argc, char **argv) {
-	bool input_file_set = false;
-	bool delete_input_file = false;
-	mb_path ifile;
-	mb_path shell_command;
-
 	mbev_status = MB_SUCCESS;
 	mbev_error = MB_ERROR_NO_ERROR;
 	mbev_verbose = 0;
@@ -100,7 +92,7 @@ int mbeditviz_init(int argc, char **argv) {
 	mbev_num_files_alloc = 0;
 	mbev_num_files_loaded = 0;
 	mbev_num_pings_loaded = 0;
-  mbev_num_esf_open = 0;
+	mbev_num_esf_open = 0;
 	mbev_num_soundings_loaded = 0;
 	for (int i = 0; i < 4; i++) {
 		mbev_bounds[i] = 0.0;
@@ -185,6 +177,10 @@ int mbeditviz_init(int argc, char **argv) {
 	mbdef_etime_i[6] = 0;
 	mbdef_speedmin = 0.0;
 	mbdef_timegap = 1000000000.0;
+
+	bool input_file_set = false;
+	bool delete_input_file = false;
+	mb_path ifile;
 
 	{
 	int errflg = 0;
@@ -273,6 +269,7 @@ int mbeditviz_init(int argc, char **argv) {
 	if (input_file_set) {
 		mbev_status = mbeditviz_open_data(ifile, mbdef_format);
 		if (delete_input_file) {
+			mb_path shell_command;
 			sprintf(shell_command, "rm %s &", ifile);
 			/* const int shellstatus = */ system(shell_command);
 		}
@@ -379,11 +376,6 @@ int mbeditviz_import_file(char *path, int format) {
 		fprintf(stderr, "dbg2       format:      %d\n", format);
 	}
 
-	struct mbev_file_struct *file;
-	struct stat file_status;
-	int fstatus;
-	void *nptr;
-
 	/* turn on message */
 	char *root = (char *)strrchr(path, '/');
 	if (root == NULL)
@@ -396,12 +388,11 @@ int mbeditviz_import_file(char *path, int format) {
 	/* allocate mbpr_file_struct array if needed */
 	mbev_status = MB_SUCCESS;
 	if (mbev_num_files_alloc <= mbev_num_files) {
-		nptr = realloc(mbev_files, sizeof(struct mbev_file_struct) * (mbev_num_files_alloc + MBEV_ALLOC_NUM));
+		void *nptr = realloc(mbev_files, sizeof(struct mbev_file_struct) * (mbev_num_files_alloc + MBEV_ALLOC_NUM));
 		if (nptr != NULL) {
 			mbev_files = (struct mbev_file_struct *)nptr;
 			mbev_num_files_alloc += MBEV_ALLOC_NUM;
-		}
-		else {
+		} else {
 			free(mbev_files);
 			mbev_files = NULL;
 			mbev_status = MB_FAILURE;
@@ -411,7 +402,7 @@ int mbeditviz_import_file(char *path, int format) {
 
 	/* set new file structure */
 	if (mbev_status == MB_SUCCESS) {
-		file = &(mbev_files[mbev_num_files]);
+		struct mbev_file_struct *file = &(mbev_files[mbev_num_files]);
 		file->load_status = false;
 		file->load_status_shown = false;
 		file->locked = false;
@@ -454,7 +445,9 @@ int mbeditviz_import_file(char *path, int format) {
 
 		/* load processed file info */
 		if (mbev_status == MB_SUCCESS) {
-			if ((fstatus = stat(file->process.mbp_ofile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+			struct stat file_status;
+			const int fstatus = stat(file->process.mbp_ofile, &file_status);
+			if (fstatus == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 				mbev_status =
 				    mb_get_info(mbev_verbose, file->process.mbp_ofile, &(file->processed_info), mbdef_lonflip, &mbev_error);
 				if (mbev_status == MB_SUCCESS)
@@ -482,68 +475,6 @@ int mbeditviz_load_file(int ifile) {
 	}
 
 	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
-	mb_path swathfile = "";
-	struct stat file_status;
-	int fstatus;
-	FILE *afp;
-	mb_path asyncfile = "";
-	mb_path resffile = "";
-	char buffer[MBP_FILENAMESIZE] = "";
-	char *result = NULL;
-	char command[MBP_FILENAMESIZE] = "";
-	int nread;
-	int n_unused;
-
-	mb_path error1 = "";
-	mb_path error2 = "";
-	mb_path error3 = "";
-
-	/* swath file locking variables */
-	int locked;
-	int lock_purpose;
-	mb_path lock_program = "";
-	mb_path lock_cpu = "";
-	mb_path lock_user = "";
-	char lock_date[25] = "";
-
-	/* mbio read and write values */
-	int format;
-	void *imbio_ptr = NULL;
-	struct mb_io_struct *imb_io_ptr = NULL;
-	void *istore_ptr = NULL;
-	int kind;
-	double draft;
-	int beams_bath;
-	int nbeams;
-	int beams_amp;
-	int pixels_ss;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-
-	int rawmodtime = 0;
-	int resfmodtime = 0;
-
-	int sensorhead = 0;
-	int sensorhead_status = MB_SUCCESS;
-	int sensorhead_error = MB_ERROR_NO_ERROR;
-	int time_i[7];
-	double mtodeglon, mtodeglat;
-	double heading, sonardepth;
-	double rolldelta, pitchdelta;
-	int icenter, iport, istbd;
-	double centerdistance, portdistance, stbddistance;
-	int iping, ibeam, iedit;
-	float value_float;
-	int read_size;
-	int index;
 
 	/* lock the file if it needs loading */
 	mbev_status = MB_SUCCESS;
@@ -555,8 +486,13 @@ int mbeditviz_load_file(int ifile) {
 		/* try to lock file */
 		if (mbdef_uselockfiles) {
 			mbev_status = mb_pr_lockswathfile(mbev_verbose, file->path, MBP_LOCK_EDITBATHY, program_name, &mbev_error);
-		}
-		else {
+		} else {
+			int locked;
+			int lock_purpose;
+			mb_path lock_program = "";
+			mb_path lock_user = "";
+			mb_path lock_cpu = "";
+			char lock_date[25] = "";
 			mbev_status = mb_pr_lockinfo(mbev_verbose, file->path, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
 			                             lock_date, &mbev_error);
 
@@ -575,9 +511,19 @@ int mbeditviz_load_file(int ifile) {
 			/* turn off message */
 			do_mbeditviz_message_off();
 
+			mb_path error1 = "";
+			mb_path error2 = "";
+			mb_path error3 = "";
+
 			/* if locked get lock info */
 			if (mbev_error == MB_ERROR_FILE_LOCKED) {
 				// const int lock_status =
+				int locked;
+				int lock_purpose;
+				mb_path lock_program = "";
+				mb_path lock_user = "";
+				mb_path lock_cpu = "";
+				char lock_date[25] = "";
 				 mb_pr_lockinfo(mbev_verbose, file->path, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
 				                             lock_date, &mbev_error);
 
@@ -627,6 +573,13 @@ int mbeditviz_load_file(int ifile) {
 			}
 		}
 
+		mb_path swathfile = "";
+		int format;
+		void *imbio_ptr = NULL;
+		int beams_bath;
+		int beams_amp;
+		int pixels_ss;
+
 		/* open the file for reading */
 		if (mbev_status == MB_SUCCESS) {
 			/* read processed file if available, raw otherwise (fbt if possible) */
@@ -652,6 +605,15 @@ int mbeditviz_load_file(int ifile) {
 				fprintf(stderr, "\nSwath sonar File <%s> not initialized for reading\n", file->path);
 			}
 		}
+
+		char *beamflag = NULL;
+		double *bath = NULL;
+		double *bathacrosstrack = NULL;
+		double *bathalongtrack = NULL;
+		double *amp = NULL;
+		double *ss = NULL;
+		double *ssacrosstrack = NULL;
+		double *ssalongtrack = NULL;
 
 		/* allocate memory for data arrays */
 		if (mbev_status == MB_SUCCESS) {
@@ -696,10 +658,45 @@ int mbeditviz_load_file(int ifile) {
 		}
 
 		/* set the topo_type and beamwidths */
-		imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+		struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
 		file->beamwidth_xtrack = imb_io_ptr->beamwidth_xtrack;
 		file->beamwidth_ltrack = imb_io_ptr->beamwidth_ltrack;
 		mbev_status = mb_sonartype(mbev_verbose, imbio_ptr, imb_io_ptr->store_data, &file->topo_type, &mbev_error);
+
+		struct mbev_ping_struct *ping;
+		struct stat file_status;
+		FILE *afp;
+		mb_path asyncfile = "";
+		mb_path resffile = "";
+		char buffer[MBP_FILENAMESIZE] = "";
+		char *result = NULL;
+		char command[MBP_FILENAMESIZE] = "";
+		int nread;
+		int n_unused;
+
+		/* mbio read and write values */
+		void *istore_ptr = NULL;
+		int kind;
+		double draft;
+		int nbeams;
+		char comment[MB_COMMENT_MAXLINE];
+
+		int rawmodtime = 0;
+		int resfmodtime = 0;
+
+		int sensorhead = 0;
+		int sensorhead_status = MB_SUCCESS;
+		int sensorhead_error = MB_ERROR_NO_ERROR;
+		int time_i[7];
+		double mtodeglon, mtodeglat;
+		double heading, sonardepth;
+		double rolldelta, pitchdelta;
+		int icenter, iport, istbd;
+		double centerdistance, portdistance, stbddistance;
+		int iping, ibeam, iedit;
+		float value_float;
+		int read_size;
+		int index;
 
 		/* read the data */
 		if (mbev_status == MB_SUCCESS) {
@@ -982,12 +979,12 @@ int mbeditviz_load_file(int ifile) {
 			 * by reading in an *.resf (reverse edit save file) generated by mbprocess */
 			if (file->processed_info_loaded) {
 				/* check if reverse edit save file (*.resf) exists and is up to date */
-				if ((fstatus = stat(file->path, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
+				if (stat(file->path, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
 					rawmodtime = file_status.st_mtime;
 				else
 					rawmodtime = 0;
 				sprintf(resffile, "%s.resf", file->path);
-				if ((fstatus = stat(resffile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
+				if (stat(resffile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
 					resfmodtime = file_status.st_mtime;
 				else
 					resfmodtime = 0;
@@ -1095,7 +1092,7 @@ int mbeditviz_load_file(int ifile) {
 				if (file->esf_open) {
 					mb_esf_close(mbev_verbose, &file->esf, &mbev_error);
 					file->esf_open = false;
-          mbev_num_esf_open--;
+					mbev_num_esf_open--;
 				}
 			}
 		}
@@ -1105,7 +1102,7 @@ int mbeditviz_load_file(int ifile) {
 			/* try to load asynchronous heading data from .bah file */
 			strcpy(asyncfile, file->path);
 			strcat(asyncfile, ".bah");
-			if ((fstatus = stat(asyncfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
+			if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
 			    file_status.st_size > 0) {
 				/* allocate space for asynchronous heading */
 				file->n_async_heading = file_status.st_size / (sizeof(double) + sizeof(float));
@@ -1126,12 +1123,12 @@ int mbeditviz_load_file(int ifile) {
 				if ((afp = fopen(asyncfile, "r")) != NULL) {
 					read_size = sizeof(double) + sizeof(float);
 					for (int i = 0; i < file->n_async_heading; i++) {
-						nread = fread(buffer, read_size, 1, afp);
+						fread(buffer, read_size, 1, afp);
 						index = 0;
 						mb_get_binary_double(true, &buffer[index], &file->async_heading_time_d[i]);
 						index += 8;
 						mb_get_binary_float(true, &buffer[index], &value_float);
-						index += 4;
+						// index += 4;
 						file->async_heading_heading[i] = value_float;
 					}
 					fclose(afp);
@@ -1144,7 +1141,7 @@ int mbeditviz_load_file(int ifile) {
 			if (file->n_async_heading <= 0) {
 				strcpy(asyncfile, file->path);
 				strcat(asyncfile, ".ath");
-				if ((fstatus = stat(asyncfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					/* count the asynchronous heading data */
 					file->n_async_heading = 0;
 					file->n_async_heading_alloc = 0;
@@ -1213,7 +1210,7 @@ int mbeditviz_load_file(int ifile) {
 			/* try to load asynchronous sonardepth data from .bas file */
 			strcpy(asyncfile, file->path);
 			strcat(asyncfile, ".bas");
-			if ((fstatus = stat(asyncfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
+			if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
 			    file_status.st_size > 0) {
 				/* allocate space for asynchronous sonardepth */
 				file->n_async_sonardepth = file_status.st_size / (sizeof(double) + sizeof(float));
@@ -1235,12 +1232,12 @@ int mbeditviz_load_file(int ifile) {
 				if ((afp = fopen(asyncfile, "rb")) != NULL) {
 					read_size = sizeof(double) + sizeof(float);
 					for (int i = 0; i < file->n_async_sonardepth; i++) {
-						nread = fread(buffer, read_size, 1, afp);
+						fread(buffer, read_size, 1, afp);
 						index = 0;
 						mb_get_binary_double(true, &buffer[index], &file->async_sonardepth_time_d[i]);
 						index += 8;
 						mb_get_binary_float(true, &buffer[index], &value_float);
-						index += 4;
+						// index += 4;
 						file->async_sonardepth_sonardepth[i] = value_float;
 					}
 					fclose(afp);
@@ -1253,7 +1250,7 @@ int mbeditviz_load_file(int ifile) {
 			if (file->n_async_heading <= 0) {
 				strcpy(asyncfile, file->path);
 				strcat(asyncfile, ".ats");
-				if ((fstatus = stat(asyncfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					/* count the asynchronous sonardepth data */
 					file->n_async_sonardepth = 0;
 					file->n_async_sonardepth_alloc = 0;
@@ -1324,7 +1321,7 @@ int mbeditviz_load_file(int ifile) {
 			/* try to load asynchronous attitude data from .baa file */
 			strcpy(asyncfile, file->path);
 			strcat(asyncfile, ".baa");
-			if ((fstatus = stat(asyncfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
+			if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
 			    file_status.st_size > 0) {
 				/* allocate space for asynchronous attitude */
 				file->n_async_attitude = file_status.st_size / (sizeof(double) + 2 * sizeof(float));
@@ -1352,7 +1349,7 @@ int mbeditviz_load_file(int ifile) {
 				if ((afp = fopen(asyncfile, "rb")) != NULL) {
 					read_size = sizeof(double) + 2 * sizeof(float);
 					for (int i = 0; i < file->n_async_attitude; i++) {
-						if ((nread = fread(buffer, read_size, 1, afp)) == 1) {
+						if (fread(buffer, read_size, 1, afp) == 1) {
 							index = 0;
 							mb_get_binary_double(true, &buffer[index], &file->async_attitude_time_d[i]);
 							index += 8;
@@ -1360,7 +1357,7 @@ int mbeditviz_load_file(int ifile) {
 							index += 4;
 							file->async_attitude_roll[i] = value_float;
 							mb_get_binary_float(true, &buffer[index], &value_float);
-							index += 4;
+							// index += 4;
 							file->async_attitude_pitch[i] = value_float;
 						}
 						// fprintf(stderr,"Attitude: %d  %.6f %.3f
@@ -1376,7 +1373,7 @@ int mbeditviz_load_file(int ifile) {
 			if (file->n_async_attitude <= 0) {
 				strcpy(asyncfile, file->path);
 				strcat(asyncfile, ".ata");
-				if ((fstatus = stat(asyncfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					/* count the asynchronous attitude data */
 					file->n_async_attitude = 0;
 					file->n_async_attitude_alloc = 0;
@@ -1472,7 +1469,7 @@ int mbeditviz_load_file(int ifile) {
 			/* try to load synchronous attitude data from .bsa file */
 			strcpy(asyncfile, file->path);
 			strcat(asyncfile, ".bsa");
-			if ((fstatus = stat(asyncfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
+			if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
 			    file_status.st_size > 0) {
 				/* allocate space for synchronous attitude */
 				file->n_sync_attitude = file_status.st_size / (sizeof(double) + 2 * sizeof(float));
@@ -1500,7 +1497,7 @@ int mbeditviz_load_file(int ifile) {
 				if ((afp = fopen(asyncfile, "rb")) != NULL) {
 					read_size = sizeof(double) + 2 * sizeof(float);
 					for (int i = 0; i < file->n_sync_attitude; i++) {
-						if ((nread = fread(buffer, read_size, 1, afp)) == 1) {
+						if (fread(buffer, read_size, 1, afp) == 1) {
 							index = 0;
 							mb_get_binary_double(true, &buffer[index], &file->sync_attitude_time_d[i]);
 							index += 8;
@@ -1508,7 +1505,7 @@ int mbeditviz_load_file(int ifile) {
 							index += 4;
 							file->sync_attitude_roll[i] = value_float;
 							mb_get_binary_float(true, &buffer[index], &value_float);
-							index += 4;
+							// index += 4;
 							file->sync_attitude_pitch[i] = value_float;
 						}
 					}
@@ -1522,7 +1519,7 @@ int mbeditviz_load_file(int ifile) {
 			if (file->n_sync_attitude <= 0) {
 				strcpy(asyncfile, file->path);
 				strcat(asyncfile, ".sta");
-				if ((fstatus = stat(asyncfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					/* count the synchronous attitude data */
 					file->n_sync_attitude = 0;
 					file->n_sync_attitude_alloc = 0;
@@ -4166,14 +4163,14 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 	// fprintf(stderr,"Array pointers after: %p %p %p\n",ncoarsevoxels,ncoarsevoxels_alloc,coarsevoxels);
 
 	// TODO(schwehr): Localize variables.
-	int nvoxels_alloc;
+	// int nvoxels_alloc;
 	int *voxels = NULL;
 	int *voxel;
 	int nvoxels;
 	bool occupied_voxel;
 	int ncoarsevoxelstot;
 	int nvoxelstot;
-	bool found;
+	// bool found;
 	int ivoxel;
 	int ivoxeluse;
 	int nsoundingsinvoxel;
@@ -4211,10 +4208,10 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 
 							/* look for voxel already set in the appropriate coarse voxel */
 							nvoxels = ncoarsevoxels[ll];
-							nvoxels_alloc = ncoarsevoxels_alloc[ll];
+							int nvoxels_alloc = ncoarsevoxels_alloc[ll];
 							voxels = coarsevoxels[ll];
 
-							found = false;
+							bool found = false;
 							if (nvoxels > 0 && voxels != NULL) {
 								for (ivoxel = 0; ivoxel < nvoxels && !found; ivoxel++) {
 									voxel = &voxels[ivoxel * voxel_size];
@@ -4489,8 +4486,11 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 	double rollbias_start, rollbias_end, drollbias;
 	double pitchbias_start, pitchbias_end, dpitchbias;
 	double headingbias_start, headingbias_end, dheadingbias;
-	double timelag_start, timelag_end, dtimelag;
-	double snell_start, snell_end, dsnell;
+	// double timelag_start;
+	// double timelag_end;
+	// double dtimelag;
+	// double snell_start, snell_end;
+	// double dsnell;
 	// int niterate;
 	char *marker1 = "       ";
 	char *marker2 = " ******";
@@ -4800,9 +4800,9 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		pitchbias = *pitchbias_best;
 		headingbias = *headingbias_best;
 		int niterate = 21;
-		timelag_start = *timelag_best - 1.0;
-		timelag_end = *timelag_best + 1.0;
-		dtimelag = (timelag_end - timelag_start) / (niterate - 1);
+	        double timelag_start = *timelag_best - 1.0;
+		double timelag_end = *timelag_best + 1.0;
+		double dtimelag = (timelag_end - timelag_start) / (niterate - 1);
 		timelag = *timelag_best;
 		snell = *snell_best;
 		for (int i = 0; i < niterate; i++) {
@@ -4868,9 +4868,9 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		headingbias = *headingbias_best;
 		timelag = *timelag_best;
 		int niterate = 21;
-		snell_start = *snell_best - 0.1;
-		snell_end = *snell_best + 0.1;
-		dsnell = (snell_end - snell_start) / (niterate - 1);
+		double snell_start = *snell_best - 0.1;
+		double snell_end = *snell_best + 0.1;
+		double dsnell = (snell_end - snell_start) / (niterate - 1);
 		snell = *snell_best;
 		for (int i = 0; i < niterate; i++) {
 			snell = snell_start + i * dsnell;
