@@ -1,1 +1,1 @@
-macros/ - Perl programs - termed macros in MB-System jargon
+man/ - Old style troff man pages
