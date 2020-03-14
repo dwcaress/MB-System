@@ -30,6 +30,7 @@
 
 #include <ctype.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,11 +55,7 @@
 #include <Xm/FileSB.h>
 #include <Xm/ToggleB.h>
 #include <Xm/List.h>
-#if (XmVersion >= 1002)
 #include <Xm/RepType.h>
-#else
-#error TODO(schwehr): Too old
-#endif
 #include <Xm/MwmUtil.h>
 #include "mbeditviz_creation.h"
 
@@ -106,14 +103,11 @@ static char *mbev_grid_algorithm_label[] = {"Simple Mean", "Footprint", "Shoal B
  *             shell from which all other widgets are descended.
  */
 
-/* ARGSUSED */
 void BxManageCB(Widget w, XtPointer client, XtPointer call) {
   (void)call;  // Unused parameter
 
-  /*
-   * This function returns a NULL terminated WidgetList.  The memory for
-   * the list needs to be freed when it is no longer needed.
-   */
+  // This function returns a NULL terminated WidgetList.  The memory for
+  // the list needs to be freed when it is no longer needed.
   WidgetList widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
 
   int i = 0;
@@ -140,15 +134,11 @@ void BxManageCB(Widget w, XtPointer client, XtPointer call) {
  *      Notes:        *  This function expects that there is an application
  *             shell from which all other widgets are descended.
  */
-
-/* ARGSUSED */
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
   (void)call;  // Unused parameter
 
-  /*
-   * This function returns a NULL terminated WidgetList.  The memory for
-   * the list needs to be freed when it is no longer needed.
-   */
+  // This function returns a NULL terminated WidgetList.  The memory for
+  // the list needs to be freed when it is no longer needed.
   WidgetList widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
 
   int i = 0;
@@ -170,10 +160,6 @@ void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
  *      XtPointer  client:  the integer exit value.
  *      XtPointer  call:  the call data (unused).
  */
-
-#include <stdlib.h>
-
-/* ARGSUSED */
 void BxExitCB(Widget w, XtPointer client, XtPointer call) {
   (void)w;  // Unused parameter
   (void)client;  // Unused parameter
@@ -200,11 +186,11 @@ int do_mbeditviz_init(Widget parentwidget, XtAppContext appcon) {
   fprintf(stderr, "do_mbeditviz_init\n");
 #endif
 
-  /* set about version label */
+  // set about version label
   sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION, MB_BUILD_DATE);
   set_mbview_label_multiline_string(label_about_version, value_text);
 
-  /* set file selection widgets */
+  // set file selection widgets
   fileSelectionList = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_LIST);
   fileSelectionText = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_TEXT);
   XtAddCallback(fileSelectionList, XmNbrowseSelectionCallback, do_mbeditviz_fileselection_list, NULL);
@@ -328,8 +314,6 @@ void do_mbeditviz_openfile(Widget w, XtPointer client_data, XtPointer call_data)
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data) {
-  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -364,8 +348,6 @@ void do_mbeditviz_fileselection_list(Widget w, XtPointer client_data, XtPointer 
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtPointer call_data) {
-  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -400,8 +382,6 @@ void do_mbeditviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, Xt
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
-  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -448,8 +428,6 @@ void do_mbeditviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_viewall(Widget w, XtPointer client_data, XtPointer call_data) {
-  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -537,8 +515,6 @@ void do_mbeditviz_viewall(Widget w, XtPointer client_data, XtPointer call_data) 
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_viewselected(Widget w, XtPointer client_data, XtPointer call_data) {
-  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -635,8 +611,6 @@ void do_mbeditviz_viewselected(Widget w, XtPointer client_data, XtPointer call_d
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_regrid(Widget w, XtPointer client_data, XtPointer call_data) {
-  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -696,8 +670,6 @@ void do_mbeditviz_regrid(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbeditviz_updategrid(Widget w, XtPointer client_data, XtPointer call_data) {
-  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -816,8 +788,6 @@ void do_mbeditviz_changecellsize(Widget w, XtPointer client_data, XtPointer call
 
 /*--------------------------------------------------------------------*/
 void do_mbeditviz_gridparameters(Widget w, XtPointer client_data, XtPointer call_data) {
-  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -881,8 +851,6 @@ void do_mbeditviz_gridparameters(Widget w, XtPointer client_data, XtPointer call
 /*--------------------------------------------------------------------*/
 
 extern void do_mbeditviz_gridalgorithm_change(Widget w, XtPointer client_data, XtPointer call_data) {
-  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -913,10 +881,7 @@ extern void do_mbeditviz_gridalgorithm_change(Widget w, XtPointer client_data, X
 }
 
 /*--------------------------------------------------------------------*/
-
 extern void do_mbeditviz_gridinterpolation_change(Widget w, XtPointer client_data, XtPointer call_data) {
-  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1303,8 +1268,6 @@ int do_mbeditviz_mbview_dismiss_notify(size_t instance) {
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_deleteselected(Widget w, XtPointer client_data, XtPointer call_data) {
-  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1493,12 +1456,8 @@ void do_mbeditviz_update_filelist() {
 #endif
 
   struct mbev_file_struct *file;
-  bool update_filelist;
 
   char string[MB_PATH_MAXLINE];
-  Cardinal ac;
-  Arg args[256];
-  int item_count;
   int *position_list = NULL;
   int position_list_save[MB_PATH_MAXLINE];
   int position_count = 0;
@@ -1510,10 +1469,8 @@ void do_mbeditviz_update_filelist() {
   char *lockedstr = "<Locked>";
   char *unlockedstr = "        ";
   char *loadedstr = "<loaded>";
-  char *esfstrptr;
   char *esfyesstr = "<esf>";
   char *esfnostr = "     ";
-  int i;
 
   /* swath file locking variables */
   int lock_error = MB_ERROR_NO_ERROR;
@@ -1527,14 +1484,15 @@ void do_mbeditviz_update_filelist() {
   /* esf file checking variables */
   int esf_exists;
   struct stat file_status;
-  int fstat;
   char save_file[MB_PATH_MAXLINE];
 
   /* check to see if anything has changed */
-  update_filelist = false;
+  bool update_filelist = false;
 
   /* check for change in number of files */
-  ac = 0;
+  Cardinal ac = 0;
+  int item_count;
+  Arg args[256];
   XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
   ac++;
   XtGetValues(list_filelist, args, ac);
@@ -1542,7 +1500,7 @@ void do_mbeditviz_update_filelist() {
     update_filelist = true;
 
   /* check for change in load status, lock status, or esf status */
-  for (i = 0; i < mbev_num_files; i++) {
+  for (int i = 0; i < mbev_num_files; i++) {
     file = &(mbev_files[i]);
 
     /* check load status */
@@ -1562,7 +1520,7 @@ void do_mbeditviz_update_filelist() {
 
     /* check for edit save file */
     sprintf(save_file, "%s.esf", mbev_files[i].path);
-    fstat = stat(save_file, &file_status);
+    const int fstat = stat(save_file, &file_status);
     if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
       esf_exists = true;
     else
@@ -1586,7 +1544,7 @@ void do_mbeditviz_update_filelist() {
     XtGetValues(list_filelist, args, ac);
     if (position_count > MB_PATH_MAXLINE)
       position_count = MB_PATH_MAXLINE;
-    for (i = 0; i < position_count; i++) {
+    for (int i = 0; i < position_count; i++) {
       position_list_save[i] = position_list[i];
     }
 
@@ -1596,7 +1554,8 @@ void do_mbeditviz_update_filelist() {
     /* build available file list */
     if (mbev_num_files > 0) {
       xstr = (XmString *)malloc(mbev_num_files * sizeof(XmString));
-      for (i = 0; i < mbev_num_files; i++) {
+      char *esfstrptr;
+      for (int i = 0; i < mbev_num_files; i++) {
         file = &(mbev_files[i]);
 
         /* set label strings */
@@ -1627,7 +1586,7 @@ void do_mbeditviz_update_filelist() {
         xstr[i] = XmStringCreateLocalized(string);
       }
       XmListAddItems(list_filelist, xstr, mbev_num_files, 0);
-      for (i = 0; i < mbev_num_files; i++) {
+      for (int i = 0; i < mbev_num_files; i++) {
         XmStringFree(xstr[i]);
       }
       free(xstr);
@@ -1800,8 +1759,6 @@ void do_mbeditviz_picknav_notify(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 void do_mbeditviz_regrid_notify(Widget w, XtPointer client_data, XtPointer call_data) {
-  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
-
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1871,7 +1828,6 @@ int do_mbeditviz_message_on(char *message) {
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       message:   %s\n", message);
   }
-
 
   mbev_message_on = true;
 
