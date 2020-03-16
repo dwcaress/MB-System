@@ -4492,7 +4492,7 @@ int mb_pr_lockswathfile(int verbose, const char *file, int purpose, const char *
 }
 /*--------------------------------------------------------------------*/
 
-int mb_pr_lockinfo(int verbose, const char *file, int *locked, int *purpose,
+int mb_pr_lockinfo(int verbose, const char *file, bool *locked, int *purpose,
                    char *program, char *user, char *cpu, char *date,
                    int *error) {
 	if (verbose >= 2) {
@@ -4504,7 +4504,7 @@ int mb_pr_lockinfo(int verbose, const char *file, int *locked, int *purpose,
 
 	/* initialize return parameters */
 	*locked = false;
-	*purpose = 0;
+	*purpose = MBP_LOCK_NONE;
 	program[0] = '\0';
 	user[0] = '\0';
 	cpu[0] = '\0';
@@ -4590,7 +4590,7 @@ int mb_pr_unlockswathfile(int verbose, const char *file, int purpose, const char
 	struct stat file_status;
 	int fstat = stat(lockfile, &file_status);
 	if (fstat == 0) {
-		int locked;
+		bool locked;
 		int lock_purpose;
 		mb_path lock_program;
 		mb_path lock_user;

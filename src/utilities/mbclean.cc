@@ -594,8 +594,8 @@ int main(int argc, char **argv) {
   double etime_d;
 
   /* swath file locking variables */
-  int locked;
-  int lock_purpose;
+  bool locked = false;
+  int lock_purpose = MBP_LOCK_NONE;
   mb_path lock_program;
   mb_path lock_cpu;
   mb_path lock_user;

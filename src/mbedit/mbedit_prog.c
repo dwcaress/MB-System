@@ -3602,8 +3602,8 @@ int mbedit_open_file(char *file, int form, int savemode) {
 	mb_path error3 = "";
 
 	/* swath file locking variables */
-	int locked;
-	int lock_purpose;
+	bool locked = false;
+	int lock_purpose = MBP_LOCK_NONE;
 	mb_path lock_program = "";
 	mb_path lock_cpu = "";
 	mb_path lock_user = "";

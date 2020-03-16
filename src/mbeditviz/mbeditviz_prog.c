@@ -412,6 +412,7 @@ int mbeditviz_import_file(char *path, int format) {
 		file->format = format;
 		file->raw_info_loaded = false;
 		file->esf_open = false;
+    file->esf_changed = false;
 		file->n_async_heading = 0;
 		file->n_async_heading_alloc = 0;
 		file->async_heading_time_d = NULL;
@@ -487,7 +488,7 @@ int mbeditviz_load_file(int ifile) {
 		if (mbdef_uselockfiles) {
 			mbev_status = mb_pr_lockswathfile(mbev_verbose, file->path, MBP_LOCK_EDITBATHY, program_name, &mbev_error);
 		} else {
-			int locked;
+			bool locked;
 			int lock_purpose;
 			mb_path lock_program = "";
 			mb_path lock_user = "";
@@ -518,7 +519,7 @@ int mbeditviz_load_file(int ifile) {
 			/* if locked get lock info */
 			if (mbev_error == MB_ERROR_FILE_LOCKED) {
 				// const int lock_status =
-				int locked;
+				bool locked;
 				int lock_purpose;
 				mb_path lock_program = "";
 				mb_path lock_user = "";
@@ -589,6 +590,7 @@ int mbeditviz_load_file(int ifile) {
 				strcpy(swathfile, file->path);
 			format = file->format;
 			file->esf_open = false;
+      file->esf_changed = false;
 			mb_get_shortest_path(mbev_verbose, swathfile, &mbev_error);
 
 			/* use fbt file if possible */
@@ -3117,7 +3119,8 @@ int mbeditviz_destroy_grid() {
 	for (ifile = 0; ifile < mbev_num_files; ifile++) {
 		file = &mbev_files[ifile];
 		if (mbev_verbose > 0)
-			fprintf(stderr, "ifile:%d load_status:%d esf_open:%d\n", ifile, file->load_status, file->esf_open);
+			fprintf(stderr, "ifile:%d load_status:%d esf_open:%d esf_changed:%d\n",
+              ifile, file->load_status, file->esf_open, file->esf_changed);
 		if (file->load_status && file->esf_open) {
 			for (iping = 0; iping < file->num_pings; iping++) {
 				ping = &(file->pings[iping]);
@@ -3796,6 +3799,9 @@ void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag
 	if (flush != MB3DSDG_EDIT_FLUSHPREVIOUS) {
 		struct mbev_file_struct *file = &mbev_files[ifile];
 		struct mbev_ping_struct *ping = &(file->pings[iping]);
+
+    /* set esf change flag for file */
+    file->esf_changed = true;
 
 		/* check for real flag state change */
 		if (mb_beam_ok(ping->beamflag[ibeam]) != mb_beam_ok(beamflag)) {

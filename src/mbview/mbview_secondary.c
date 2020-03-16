@@ -93,8 +93,8 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 		fprintf(stderr, "dbg2       secondary_xmax:              %f\n", secondary_xmax);
 		fprintf(stderr, "dbg2       secondary_ymin:              %f\n", secondary_ymin);
 		fprintf(stderr, "dbg2       secondary_ymax:              %f\n", secondary_ymax);
-		fprintf(stderr, "dbg2       secondary_dx:                %f\n", secondary_dx);
-		fprintf(stderr, "dbg2       secondary_dy:                %f\n", secondary_dy);
+		fprintf(stderr, "dbg2       secondary_dx:                %g\n", secondary_dx);
+		fprintf(stderr, "dbg2       secondary_dy:                %g\n", secondary_dy);
 		fprintf(stderr, "dbg2       secondary_data:              %p\n", secondary_data);
 	}
 
@@ -143,11 +143,11 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 	/* set projection for secondary grid if needed */
 	if (data->secondary_nxy > 0 && data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED) {
 		/* set projection for getting lon lat */
-		const int proj_status = mb_proj_init(mbv_verbose, data->secondary_grid_projection_id, &(view->secondary_pjptr), error);
+		const int proj_status = mb_proj_init(5, data->secondary_grid_projection_id, &(view->secondary_pjptr), error);
 		if (proj_status == MB_SUCCESS)
 			view->secondary_pj_init = true;
-		/*fprintf(stderr,"SECONDARY GRID PROJECTION:%d %p %s\n",
-		view->secondary_pj_init,view->secondary_pjptr,data->secondary_grid_projection_id);*/
+		fprintf(stderr,"SECONDARY GRID PROJECTION:%d %p %s\n",
+		view->secondary_pj_init,view->secondary_pjptr,data->secondary_grid_projection_id);
 
 		/* quit if projection fails */
 		if (proj_status != MB_SUCCESS) {

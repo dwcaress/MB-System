@@ -796,8 +796,8 @@ void do_build_filelist() {
 
 	/* swath file locking variables */
 	int lock_error = MB_ERROR_NO_ERROR;
-	int locked;
-	int lock_purpose;
+	bool locked = false;
+	int lock_purpose = MBP_LOCK_NONE;
 	mb_path lock_program;
 	mb_path lock_cpu;
 	mb_path lock_user;

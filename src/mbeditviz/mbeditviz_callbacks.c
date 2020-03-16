@@ -1474,7 +1474,7 @@ void do_mbeditviz_update_filelist() {
 
   /* swath file locking variables */
   int lock_error = MB_ERROR_NO_ERROR;
-  int locked;
+  bool locked = false;
   int lock_purpose;
   mb_path lock_program;
   mb_path lock_cpu;
@@ -1482,7 +1482,7 @@ void do_mbeditviz_update_filelist() {
   char lock_date[25];
 
   /* esf file checking variables */
-  int esf_exists;
+  bool esf_exists = false;
   struct stat file_status;
   char save_file[MB_PATH_MAXLINE];
 
