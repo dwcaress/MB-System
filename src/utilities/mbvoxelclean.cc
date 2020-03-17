@@ -419,7 +419,7 @@ int main(int argc, char **argv) {
 	int n_maxacrosstrack_flag_tot = 0;
 
 	bool esffile_open = false;
-	int locked = false;  // TODO(schwehr): Make mb_pr_lockinfo take a bool
+	bool locked = false;
 	int n_voxel_alloc = 0;
 	int npings_alloc = 0;
 
@@ -455,7 +455,7 @@ int main(int argc, char **argv) {
 			status = mb_pr_lockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
 		} else {
 			/* lock_status = */
-			int lock_purpose = 0;
+			int lock_purpose = MBP_LOCK_NONE;
 			mb_path lock_program = "";
 			mb_path lock_user = "";
 			mb_path lock_cpu = "";
@@ -474,7 +474,7 @@ int main(int argc, char **argv) {
 		if (status == MB_FAILURE) {
 			/* if locked get lock info */
 			if (error == MB_ERROR_FILE_LOCKED) {
-				int lock_purpose = 0;
+				int lock_purpose = MBP_LOCK_NONE;
 				mb_path lock_program = "";
 				mb_path lock_user = "";
 				mb_path lock_cpu = "";

@@ -2749,10 +2749,12 @@ int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *da
 		value = sqrt(data->primary_dzdx[k] * data->primary_dzdx[k] + data->primary_dzdy[k] * data->primary_dzdy[k]);
 	}
 	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		if (data->secondary_sameas_primary)
+		if (data->secondary_sameas_primary) {
 			value = data->secondary_data[k];
-		else
+    }
+		else {
 			mbview_getsecondaryvalue(view, data, i, j, &value);
+    }
 	}
 
 	/* get color for value using current color mode, color table, and histogram */

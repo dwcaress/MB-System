@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta32    March 18, 2020
 - Version 5.7.6beta31    March 2, 2020
 - Version 5.7.6beta30    February 20, 2020
 - Version 5.7.6beta29    February 17, 2020
@@ -342,6 +343,17 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+#### 5.7.6beta32 (March 17, 2020)
+
+Mbeditviz: Fixed problem with preserving changes to edits that are recorded in
+*.esf files.
+
+Code style: Kurt Schwehr is systematically altering the code to conform to best
+practices and adding build tests. The improvements included in this beta release
+include work on mbview and programs using mbview.
+
+Code style: Tom O'Reilly and David Caress added README.md files in each of the subdirectories under src/.
+
 #### 5.7.6beta31 (March 2, 2020)
 
 Mbvoxelclean: Fixed memory leak. Added --acrosstrack-minimum and --acrosstrack-maximum

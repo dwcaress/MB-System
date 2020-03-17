@@ -926,8 +926,8 @@ void do_build_filelist() {
 		mb_path lock_program;
 		mb_path lock_user;
 		int lock_error = MB_ERROR_NO_ERROR;
-		int lock_purpose;
-		int locked;
+		int lock_purpose = MBP_LOCK_NONE;
+		bool locked = false;
 		mb_pr_lockinfo(verbose, filepaths[i], &locked, &lock_purpose, lock_program,
 			       lock_user, lock_cpu, lock_date, &lock_error);
 		if (locked != filelocks[i]) {

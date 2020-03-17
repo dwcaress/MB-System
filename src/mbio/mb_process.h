@@ -1083,7 +1083,7 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error);
 
 int mb_pr_lockswathfile(int verbose, const char *file, int purpose, const char *program_name, int *error);
 int mb_pr_unlockswathfile(int verbose, const char *file, int purpose, const char *program_name, int *error);
-int mb_pr_lockinfo(int verbose, const char *file, int *locked, int *purpose,
+int mb_pr_lockinfo(int verbose, const char *file, bool *locked, int *purpose,
                    char *program, char *user, char *cpu, char *date, int *error);
 
 #ifdef __cplusplus

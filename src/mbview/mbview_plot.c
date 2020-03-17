@@ -355,17 +355,16 @@ int mbview_drawdata(size_t instance, int rez) {
 				int kk;
 				int ill;
 				int ll;
-				// TODO(schwehr): Flip sense of flip check so ! not needed.  Why use !flip?
-				if (!flip) {
-					ikk = i;
-					kk = k;
-					ill = i + stride;
-					ll = l;
-				} else {
+				if (flip) {
 					ikk = i + stride;
 					kk = l;
 					ill = i;
 					ll = k;
+				} else {
+					ikk = i;
+					kk = k;
+					ill = i + stride;
+					ll = l;
 				}
 				if (data->primary_data[kk] != data->primary_nodatavalue) {
 					if (!on) {
@@ -452,22 +451,21 @@ int mbview_drawdata(size_t instance, int rez) {
 			for (int j = data->viewbounds[2]; j < data->viewbounds[3]; j += stride) {
 				const int k = i * data->primary_n_rows + j;
 				const int l = (i + stride) * data->primary_n_rows + j;
-				// TODO(schwehr): if(flip) {} else {}
 				int ikk;
 				int kk;
 				int ill;
 				int ll;
-				if (!flip) {
-					ikk = i;
-					kk = k;
-					ill = i + stride;
-					ll = l;
-				}
-				else {
+				if (flip) {
 					ikk = i + stride;
 					kk = l;
 					ill = i;
 					ll = k;
+				}
+				else {
+					ikk = i;
+					kk = k;
+					ill = i + stride;
+					ll = l;
 				}
 				double secondary_value;
 				if (data->secondary_sameas_primary)
@@ -484,9 +482,15 @@ int mbview_drawdata(size_t instance, int rez) {
 						else
 							flip = true;
 					}
-					if (!(data->primary_stat_z[kk / 8] & statmask[kk % 8]))
+          // TODO: 8 March 2020 D W Caress
+          // The addition of "stride == 1" below forces the code to recolor all
+          // vertices when plotting at full resolution. If not, sometimes the
+          // secondary data are partly mislocated - this bug is not understood
+          // - somehow the color grids are being written or overwritten incorrectly
+          // before.
+					if (stride == 1 || !(data->primary_stat_z[kk / 8] & statmask[kk % 8]))
 						mbview_zscalegridpoint(instance, kk);
-					if (!(data->primary_stat_color[kk / 8] & statmask[kk % 8])) {
+					if (stride == 1 || !(data->primary_stat_color[kk / 8] & statmask[kk % 8])) {
 						mbview_colorpoint(view, data, histogram, ikk, j, kk);
 					}
 					glColor3f(data->primary_r[kk], data->primary_g[kk], data->primary_b[kk]);
@@ -519,9 +523,15 @@ int mbview_drawdata(size_t instance, int rez) {
 						else
 							flip = true;
 					}
-					if (!(data->primary_stat_z[ll / 8] & statmask[ll % 8]))
+          // TODO: 8 March 2020 D W Caress
+          // The addition of "stride == 1" below forces the code to recolor all
+          // vertices when plotting at full resolution. If not, sometimes the
+          // secondary data are partly mislocated - this bug is not understood
+          // - somehow the color grids are being written or overwritten incorrectly
+          // before.
+					if (stride == 1 || !(data->primary_stat_z[ll / 8] & statmask[ll % 8]))
 						mbview_zscalegridpoint(instance, ll);
-					if (!(data->primary_stat_color[ll / 8] & statmask[ll % 8])) {
+					if (stride == 1 || !(data->primary_stat_color[ll / 8] & statmask[ll % 8])) {
 						mbview_colorpoint(view, data, histogram, ill, j, ll);
 					}
 					glColor3f(data->primary_r[ll], data->primary_g[ll], data->primary_b[ll]);

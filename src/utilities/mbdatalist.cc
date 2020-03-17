@@ -324,14 +324,14 @@ int main(int argc, char **argv) {
 
 	int prstatus = MB_PR_FILE_UP_TO_DATE;
 	int lock_error = MB_ERROR_NO_ERROR;
-	int lock_purpose = 0;
+	int lock_purpose = MBP_LOCK_NONE;
 	mb_path lock_program = "";
 	mb_path lock_cpu = "";
 	mb_path lock_user = "";
 	char lock_date[25] = "";
 	mb_path lockfile = "";
 	int file_in_bounds = false;  // TODO(schwehr): Convert mb_check_info to bool.
-	int locked = false;  // TODO(schwehr): Convert mb_pr_lockinfo to bool.
+	bool locked = false;
 
 	/* if not a datalist just output filename format and weight */
 	if (format > 0) {
