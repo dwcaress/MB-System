@@ -86,7 +86,7 @@ Two additional system libraries must be linked to your application:
 - the math-lib 'libm.a'
 - the library with the xdr-routines
 
-In order to build the library and the example programms on a specific
+In order to build the library and the example programs on a specific
 Unix system, please adapt the Makefiles in the directory 'libsrc' and
 in the directory 'examples' first:
 uncomment the compile and link options for the used Unix system and use
