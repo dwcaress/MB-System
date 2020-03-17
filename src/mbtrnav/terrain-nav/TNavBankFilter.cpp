@@ -872,10 +872,7 @@ measUpdate(measT& currMeas) {
 
 				/* END cross beam comparison edits*/
 
-
-
-
-				//Here we trigger betweeen using the modified weighting scheme concocted by Shandor
+                //Here we trigger betweeen using the modified weighting scheme concocted by Shandor
 				//and the standard TRN weighting
 
 				//TODO: Figure out if we are going to do any different correlation for octree vs dem

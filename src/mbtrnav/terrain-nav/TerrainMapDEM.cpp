@@ -225,8 +225,6 @@ setRefMap(const char* mapName){
 	strtok(mapPrefix, ".");
 	sprintf(mapVarName, "%s%s", mapPrefix, "_sd.grd");
 
-
-
 	//set variance map source if provided
 	this->refMap->varSrc = mapsrc_init();
 
@@ -862,7 +860,6 @@ interpolateDepthAndGradient(double xi, double yi, double& zi, double& var, Matri
 }
 */
 
-
 //used by interpolate gradient
 void
 TerrainMapDEM::
@@ -924,7 +921,6 @@ computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi,
 			}
 		}
 
-
 		//Compute Y gradient
 		//If we are at the lower bound, use a forward difference
 		if(yIndices[0] == 0) {
@@ -942,6 +938,4 @@ computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi,
 			}
 		}
 	}
-
-
 }
